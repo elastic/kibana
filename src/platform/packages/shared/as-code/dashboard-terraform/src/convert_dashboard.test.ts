@@ -75,6 +75,14 @@ describe('createDashboardConverter', () => {
     expect(skippedPanels).toEqual([]);
   });
 
+  it('keeps a by-reference panel by reference, with its library ID as written', () => {
+    const { body, references } = convert(fixture('vis_by_reference'));
+
+    expect(keysAt(body, 'panels', 0, 'vis_config')).toEqual(['by_reference']);
+    expect(at(body, 'panels', 0, 'vis_config', 'by_reference', 'ref_id')).toBe('lensRef');
+    expect(references).toEqual([]);
+  });
+
   it('moves sections out of panels into sections, keeping their own panels', () => {
     const { body, droppedFields } = convert(fixture('oas_sections_and_controls'));
 

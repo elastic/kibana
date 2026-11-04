@@ -71,6 +71,16 @@ export const exportedDataViewSchema = z
   .strict()
   .meta({ description: 'A data view a resource is written for.' });
 
+export const libraryItemSchema = z
+  .union([
+    asCodeRelatedItemSchema.extend({ title: z.string().optional() }).strict(),
+    asCodeRelatedItemSchema.extend({ reason: z.enum(['not_found', 'unreadable']) }).strict(),
+  ])
+  .meta({
+    description:
+      'A library item a by-reference panel points at: the panel keeps its ID, so the item must exist with that ID where Terraform applies the module. A reason says it no longer exists in the space or cannot be read.',
+  });
+
 export const terraformResponseBodySchema = z
   .object({
     resource_type: z
@@ -104,6 +114,9 @@ export const terraformResponseBodySchema = z
     literal_data_views: z
       .array(literalDataViewSchema)
       .meta({ description: 'The dashboard’s data views that stay literal IDs, with no resource.' }),
+    library_items: z.array(libraryItemSchema).meta({
+      description: 'The library items the dashboard’s by-reference panels point at, once each.',
+    }),
     related_items: z.array(asCodeRelatedItemSchema).meta({
       description: 'Every saved object the dashboard refers to, once each and not truncated.',
     }),

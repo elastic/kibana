@@ -39,6 +39,7 @@
     "@kbn/config-schema",
     "@kbn/zod",
     "@kbn/utility-types",
+    "@kbn/repo-info",
     "@kbn/es-query",
     "@kbn/i18n",
     "@kbn/data-view-editor-plugin",

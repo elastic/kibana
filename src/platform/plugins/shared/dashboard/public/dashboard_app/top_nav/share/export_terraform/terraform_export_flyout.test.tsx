@@ -43,6 +43,7 @@ const conversion: DashboardTerraformResponseBody = {
   data_view_resource: { type: 'elasticstack_kibana_data_view' },
   data_views: [],
   literal_data_views: [],
+  library_items: [],
   related_items: [],
   dropped_fields: [],
   skipped_panels: [],
@@ -330,6 +331,35 @@ describe('TerraformExportFlyout', () => {
     expect(await screen.findByText('1 problem.')).toBeInTheDocument();
     await userEvent.click(screen.getByRole('button', { name: /dismiss/i }));
     expect(screen.queryByTestId('dashboardTerraformExportProblems')).not.toBeInTheDocument();
+  });
+
+  it('names each library item a by-reference panel points at, and counts only the rest as not exported', async () => {
+    respondWith(async () => ({
+      ...conversion,
+      library_items: [
+        { type: 'lens', type_label: 'Visualization', id: 'v1', title: 'Requests' },
+        { type: 'search', type_label: 'Discover session', id: 's1' },
+        { type: 'map', type_label: 'Map', id: 'm1', reason: 'not_found' },
+        { type: 'lens', type_label: 'Visualization', id: 'v2', reason: 'unreadable' },
+      ],
+      related_items: [
+        { type: 'lens', type_label: 'Visualization', id: 'v1' },
+        { type: 'search', type_label: 'Discover session', id: 's1' },
+        { type: 'map', type_label: 'Map', id: 'm1' },
+        { type: 'lens', type_label: 'Visualization', id: 'v2' },
+        { type: 'lens', type_label: 'Visualization', id: 'v3' },
+      ],
+    }));
+    renderFlyout('Web logs', { dashboardId: 'abc-123' });
+
+    expect(await screen.findByText('4 problems and 1 note.')).toBeInTheDocument();
+    expect(await problemDetails()).toEqual([
+      'Visualization “Requests” (v1) stays a library reference: it must exist with this ID where Terraform applies the module.',
+      'Discover session s1 stays a library reference: it must exist with this ID where Terraform applies the module.',
+      'Map m1 stays a library reference, but it no longer exists in this space: it must exist with this ID where Terraform applies the module.',
+      'Visualization v2 stays a library reference, but it cannot be read here: it must exist with this ID where Terraform applies the module.',
+      'The dashboard refers to 1 object that is not exported. They must exist where Terraform runs.Visualization: 1',
+    ]);
   });
 
   it('writes template sequences in an adopted ID literally', async () => {

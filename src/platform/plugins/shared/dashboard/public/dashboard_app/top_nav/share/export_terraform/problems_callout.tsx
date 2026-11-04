@@ -26,6 +26,7 @@ import type { PanelSummary } from '@kbn/as-code-dashboard-terraform';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type {
   DashboardTerraformResponseBody,
+  LibraryItem,
   LiteralDataView,
   LiteralTag,
 } from '../../../../../server';
@@ -138,6 +139,36 @@ const literalDataViewDescription = (dataView: LiteralDataView): string => {
   }
 };
 
+const libraryItemDescription = (item: LibraryItem): string => {
+  const { type_label: kind, id } = item;
+  if ('reason' in item) {
+    return item.reason === 'not_found'
+      ? i18n.translate('dashboard.exportTerraform.problems.notFoundLibraryItemDescription', {
+          defaultMessage:
+            '{kind} {id} stays a library reference, but it no longer exists in this space: it must exist with this ID where Terraform applies the module.',
+          values: { kind, id },
+        })
+      : i18n.translate('dashboard.exportTerraform.problems.unreadableLibraryItemDescription', {
+          defaultMessage:
+            '{kind} {id} stays a library reference, but it cannot be read here: it must exist with this ID where Terraform applies the module.',
+          values: { kind, id },
+        });
+  }
+  return item.title === undefined
+    ? i18n.translate('dashboard.exportTerraform.problems.untitledLibraryItemDescription', {
+        defaultMessage:
+          '{kind} {id} stays a library reference: it must exist with this ID where Terraform applies the module.',
+        values: { kind, id },
+      })
+    : i18n.translate('dashboard.exportTerraform.problems.libraryItemDescription', {
+        defaultMessage:
+          '{kind} “{title}” ({id}) stays a library reference: it must exist with this ID where Terraform applies the module.',
+        values: { kind, title: item.title, id },
+      });
+};
+
+const itemKey = ({ type, id }: Pick<AsCodeRelatedItem, 'type' | 'id'>): string => `${type}:${id}`;
+
 /** What did not export cleanly, most severe first; empty when everything is exported. */
 export const listProblems = ({
   conversion,
@@ -154,6 +185,7 @@ export const listProblems = ({
     tag_resource: tagResource,
     literal_tags: literalTags,
     literal_data_views: literalDataViews,
+    library_items: libraryItems,
     related_items: allRelatedItems,
   } = conversion;
   const { warnings = [] } = sanitized;
@@ -164,13 +196,16 @@ export const listProblems = ({
     const details = conversion.data_views.find((dataView) => dataView.id === id);
     return details ? [{ ...details, label }] : [];
   });
-  // Exported tags and data views, and the ones named below, are not counted among the objects the module only
+  // Exported tags and data views, and the objects named below, are not counted among the objects the module only
   // refers to. The total and the counts by kind are taken from the same, untruncated list.
-  const namedIds: Record<string, ReadonlySet<string>> = {
-    tag: new Set([...tags, ...literalTags].map(({ id }) => id)),
-    [DATA_VIEW_SAVED_OBJECT_TYPE]: new Set([...dataViews, ...literalDataViews].map(({ id }) => id)),
-  };
-  const relatedItems = allRelatedItems.filter(({ type, id }) => !namedIds[type]?.has(id));
+  const namedItems = new Set([
+    ...[...tags, ...literalTags].map(({ id }) => itemKey({ type: 'tag', id })),
+    ...[...dataViews, ...literalDataViews].map(({ id }) =>
+      itemKey({ type: DATA_VIEW_SAVED_OBJECT_TYPE, id })
+    ),
+    ...libraryItems.map(itemKey),
+  ]);
+  const relatedItems = allRelatedItems.filter((item) => !namedItems.has(itemKey(item)));
   const droppedInPanels = new Set(partialPanels.flatMap((panel) => panel.dropped_fields));
 
   // The sanitize step leaves out panels the Dashboards API has no schema for, before conversion.
@@ -259,6 +294,11 @@ export const listProblems = ({
       key: `literal-data-view:${dataView.id}`,
       severity: 'warning' as const,
       content: literalDataViewDescription(dataView),
+    })),
+    ...libraryItems.map((item) => ({
+      key: `library-item:${itemKey(item)}`,
+      severity: 'warning' as const,
+      content: libraryItemDescription(item),
     })),
     ...(mode.kind === 'copy' && tags.length
       ? [

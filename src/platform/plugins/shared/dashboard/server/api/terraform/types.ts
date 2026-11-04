@@ -10,6 +10,7 @@
 import type { z } from '@kbn/zod';
 import type {
   exportedDataViewSchema,
+  libraryItemSchema,
   literalDataViewSchema,
   literalTagSchema,
   terraformResponseBodySchema,
@@ -20,6 +21,8 @@ export type LiteralTag = z.output<typeof literalTagSchema>;
 export type LiteralDataView = z.output<typeof literalDataViewSchema>;
 
 export type ExportedDataView = z.output<typeof exportedDataViewSchema>;
+
+export type LibraryItem = z.output<typeof libraryItemSchema>;
 
 /** The response body of the route converting a dashboard to Terraform. */
 export type DashboardTerraformResponseBody = z.output<typeof terraformResponseBodySchema>;

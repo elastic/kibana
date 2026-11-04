@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { readFileSync } from 'fs';
+import { join } from 'path';
 import supertest from 'supertest';
+import { REPO_ROOT } from '@kbn/repo-info';
+import type { JsonObject } from '@kbn/utility-types';
 import type { SetupServerReturn } from '@kbn/core-test-helpers-test-utils';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -32,11 +36,13 @@ jest.mock('@kbn/as-code-dashboard-terraform', () => {
   };
 });
 
-// The route lists related items with the dashboard's own transforms; no panel type registers any here. It parses data
-// views with the real data views service, whose `savedObjectToSpec` uses none of its dependencies.
+// The route lists related items with the dashboard's own transforms; a panel type registers none unless a test gives
+// it some. It parses data views with the real data views service, whose `savedObjectToSpec` uses none of its
+// dependencies.
+const mockGetTransforms = jest.fn();
 const mockDataViewsServiceFactory = jest.fn();
 jest.mock('../../kibana_services', () => ({
-  embeddableService: { getTransforms: () => undefined },
+  embeddableService: { getTransforms: (type: string) => mockGetTransforms(type) },
   dataViewsService: {
     dataViewsServiceFactory: (...args: unknown[]) => mockDataViewsServiceFactory(...args),
   },
@@ -86,6 +92,7 @@ describe('POST /internal/dashboards/_terraform', () => {
 
   afterEach(async () => {
     jest.clearAllMocks();
+    mockGetTransforms.mockReset();
     await server.stop();
   });
 
@@ -566,6 +573,93 @@ describe('POST /internal/dashboards/_terraform', () => {
     expect(result.status).toBe(200);
     expect(handlerContext.savedObjects.client.bulkGet).not.toHaveBeenCalled();
     expect(result.body.resources).toEqual([]);
+    expect(result.body.library_items).toEqual([]);
+  });
+
+  describe('library items', () => {
+    // Every library panel type stores its library item as the panel reference named `savedObjectRef`.
+    const byReferenceTransforms = (libraryType: string) => ({
+      transformIn: ({ ref_id: refId, ...state }: { ref_id: string }) => ({
+        state,
+        references: [{ name: 'savedObjectRef', type: libraryType, id: refId }],
+      }),
+    });
+    const visByReference: JsonObject = JSON.parse(
+      readFileSync(
+        join(
+          REPO_ROOT,
+          'src/platform/packages/shared/as-code/dashboard-terraform/src/__fixtures__/vis_by_reference.json'
+        ),
+        'utf8'
+      )
+    );
+
+    it('names the library item of a by-reference panel and keeps the panel by reference', async () => {
+      await convertForReal();
+      mockGetTransforms.mockImplementation((type: string) =>
+        type === 'vis' ? byReferenceTransforms('lens') : undefined
+      );
+      const bulkGet = handlerContext.savedObjects.client.bulkGet as jest.Mock;
+      bulkGet.mockResolvedValueOnce({
+        saved_objects: [
+          { id: 'lensRef', type: 'lens', attributes: { title: 'Requests' }, references: [] },
+        ],
+      });
+
+      const result = await post({ dashboard: visByReference });
+
+      expect(result.status).toBe(200);
+      expect(bulkGet).toHaveBeenCalledWith([{ type: 'lens', id: 'lensRef', fields: ['title'] }]);
+      expect(result.body.library_items).toEqual([
+        { type: 'lens', type_label: 'lens', id: 'lensRef', title: 'Requests' },
+      ]);
+      expect(result.body.body.panels[0].vis_config.by_reference.ref_id).toBe('lensRef');
+    });
+
+    it('says when a library item no longer exists or the user cannot read it', async () => {
+      await convertForReal();
+      mockGetTransforms.mockImplementation((type: string) =>
+        type === 'markdown' ? byReferenceTransforms('markdown') : undefined
+      );
+      (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockResolvedValueOnce({
+        saved_objects: [
+          { id: 'gone', type: 'markdown', error: { statusCode: 404, error: 'Not Found' } },
+          { id: 'secret', type: 'markdown', error: { statusCode: 403, error: 'Forbidden' } },
+        ],
+      });
+      const panel = (refId: string, y: number) => ({
+        type: 'markdown',
+        grid: { x: 0, y, w: 24, h: 10 },
+        config: { ref_id: refId },
+      });
+
+      const result = await post({
+        dashboard: { title: 'Notes', panels: [panel('gone', 0), panel('secret', 10)] },
+      });
+
+      expect(result.status).toBe(200);
+      expect(result.body.library_items).toEqual([
+        { type: 'markdown', type_label: 'markdown', id: 'gone', reason: 'not_found' },
+        { type: 'markdown', type_label: 'markdown', id: 'secret', reason: 'unreadable' },
+      ]);
+    });
+
+    it('reports every library item unreadable when the user may not read their type at all', async () => {
+      await convertForReal();
+      mockGetTransforms.mockImplementation((type: string) =>
+        type === 'vis' ? byReferenceTransforms('lens') : undefined
+      );
+      (handlerContext.savedObjects.client.bulkGet as jest.Mock).mockRejectedValueOnce(
+        SavedObjectsErrorHelpers.decorateForbiddenError(new Error('Unable to bulk_get lens'))
+      );
+
+      const result = await post({ dashboard: visByReference });
+
+      expect(result.status).toBe(200);
+      expect(result.body.library_items).toEqual([
+        { type: 'lens', type_label: 'lens', id: 'lensRef', reason: 'unreadable' },
+      ]);
+    });
   });
 
   it('rejects a body larger than the bound without converting it', async () => {

@@ -8,7 +8,12 @@
  */
 
 import type { VersionedRouter } from '@kbn/core-http-server';
-import type { Logger, RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  Logger,
+  RequestHandlerContext,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { AuthzDisabled } from '@kbn/core-security-server';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
@@ -39,6 +44,8 @@ import type {
 } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { logRequest } from '@kbn/as-code-utils';
+import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
+import { SAVED_OBJECT_REF_NAME } from '@kbn/presentation-publishing';
 import {
   DASHBOARD_INTERNAL_API_PATH,
   DASHBOARD_TERRAFORM_EXPORT_FLAG,
@@ -50,6 +57,7 @@ import { terraformRequestBodySchema, terraformResponseBodySchema } from './schem
 import type {
   DashboardTerraformResponseBody,
   ExportedDataView,
+  LibraryItem,
   LiteralDataView,
   LiteralTag,
 } from './types';
@@ -206,6 +214,38 @@ const readDataViews = async (
   }
 };
 
+// Every by-reference panel stores the library item it points at as the panel reference `<panel id>:savedObjectRef`.
+const isLibraryReference = ({ name }: SavedObjectReference): boolean =>
+  name.endsWith(`:${SAVED_OBJECT_REF_NAME}`);
+
+// Reads only the titles, with the user's client: an item that is gone from the space, or that cannot be read (no
+// privilege, or a type Kibana does not know here), is reported with that reason.
+const readLibraryItems = async (
+  client: SavedObjectsClientContract,
+  items: readonly AsCodeRelatedItem[]
+): Promise<LibraryItem[]> => {
+  if (!items.length) return [];
+  try {
+    const { saved_objects: savedObjects } = await client.bulkGet<{ title?: string }>(
+      items.map(({ type, id }) => ({ type, id, fields: ['title'] }))
+    );
+    return items.map((item, index): LibraryItem => {
+      const savedObject = savedObjects[index];
+      if (isSavedObjectErrorResult(savedObject)) {
+        const reason = savedObject.error.statusCode === 404 ? 'not_found' : 'unreadable';
+        return { ...item, reason };
+      }
+      const { title } = savedObject.attributes;
+      return typeof title === 'string' ? { ...item, title } : item;
+    });
+  } catch (e) {
+    if (SavedObjectsErrorHelpers.isForbiddenError(e)) {
+      return items.map((item) => ({ ...item, reason: 'unreadable' }));
+    }
+    throw e;
+  }
+};
+
 const idsOf = (references: readonly Reference[], resourceType: string): string[] => [
   ...new Set(references.filter((r) => r.resourceType === resourceType).map(({ id }) => id)),
 ];
@@ -243,28 +283,39 @@ export function registerTerraformRoute(
           const { droppedFields, skippedPanels, partialPanels, jsonPanels, references } =
             conversion;
           const unlinkableIds = new Set(conversion.unlinkableIds);
-          const [{ tags, literalTags }, { dataViews, exportedDataViews, literalDataViews }] =
-            await Promise.all([
-              readTags(
-                savedObjects.client,
-                idsOf(references, TAG_RESOURCE.type),
-                unlinkableIds,
-                TAG_RESOURCE.type
-              ),
-              readDataViews(
-                savedObjects.client,
-                idsOf(references, DATA_VIEW_RESOURCE_TYPE),
-                unlinkableIds,
-                DATA_VIEW_RESOURCE_TYPE,
-                () =>
-                  dataViewsService.dataViewsServiceFactory(
-                    savedObjects.client,
-                    elasticsearch.client.asCurrentUser,
-                    req
-                  ),
-                toDataViewResource
-              ),
-            ]);
+          const { references: savedObjectReferences } = transformDashboardIn(
+            dashboard as Partial<DashboardState>
+          );
+          const typeDisplayName = getTypeDisplayName(savedObjects.typeRegistry);
+          const [
+            { tags, literalTags },
+            { dataViews, exportedDataViews, literalDataViews },
+            libraryItems,
+          ] = await Promise.all([
+            readTags(
+              savedObjects.client,
+              idsOf(references, TAG_RESOURCE.type),
+              unlinkableIds,
+              TAG_RESOURCE.type
+            ),
+            readDataViews(
+              savedObjects.client,
+              idsOf(references, DATA_VIEW_RESOURCE_TYPE),
+              unlinkableIds,
+              DATA_VIEW_RESOURCE_TYPE,
+              () =>
+                dataViewsService.dataViewsServiceFactory(
+                  savedObjects.client,
+                  elasticsearch.client.asCurrentUser,
+                  req
+                ),
+              toDataViewResource
+            ),
+            readLibraryItems(
+              savedObjects.client,
+              toRelatedItems(savedObjectReferences.filter(isLibraryReference), typeDisplayName)
+            ),
+          ]);
           const { body, resources } = linkReferences(conversion, [...tags, ...dataViews]);
           const responseBody: DashboardTerraformResponseBody = {
             resource_type: DASHBOARD_RESOURCE_TYPE,
@@ -279,11 +330,9 @@ export function registerTerraformRoute(
             data_view_resource: { type: DATA_VIEW_RESOURCE_TYPE },
             data_views: exportedDataViews,
             literal_data_views: literalDataViews,
+            library_items: libraryItems,
             // Not truncated like the sanitize step's list, so the total and the counts by kind agree.
-            related_items: toRelatedItems(
-              transformDashboardIn(dashboard as Partial<DashboardState>).references,
-              getTypeDisplayName(savedObjects.typeRegistry)
-            ),
+            related_items: toRelatedItems(savedObjectReferences, typeDisplayName),
             dropped_fields: droppedFields,
             skipped_panels: skippedPanels,
             partial_panels: partialPanels.map(({ droppedFields: dropped, ...panel }) => ({
