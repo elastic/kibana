@@ -67,7 +67,7 @@ export const InspectOverlay = ({
   setIsInspecting,
 }: Props) => {
   const { euiTheme } = useEuiTheme();
-  const [highlightPosition, setHighlightPosition] = useState<CSSProperties>({});
+  const [highlightPosition, setHighlightPosition] = useState<CSSProperties | null>(null);
   const [sourceComponent, setSourceComponent] = useState<SourceComponent | null>(null);
   const [target, setTarget] = useState<ElementFiber | null>(null);
   const [grabStatus, setGrabStatus] = useState<GrabStatus>('idle');
@@ -119,17 +119,17 @@ export const InspectOverlay = ({
   const handlePointerMove = useCallback(
     (event: PointerEvent) => {
       const hoveredElement = getElementFromPoint(event);
+      const elementFiber = hoveredElement ? findFiberWithDebugSource(hoveredElement) : null;
 
-      if (!hoveredElement) {
+      /** Nothing to inspect, e.g. the developer toolbar, so no highlight may linger over it. */
+      if (!hoveredElement || !elementFiber) {
+        setTarget(null);
+        setSourceComponent(null);
+        setHighlightPosition(null);
         return;
       }
 
       const { top, left, width, height } = hoveredElement.getBoundingClientRect();
-      const elementFiber = findFiberWithDebugSource(hoveredElement);
-
-      if (!elementFiber) {
-        return;
-      }
 
       setTarget(elementFiber);
 
@@ -303,11 +303,13 @@ export const InspectOverlay = ({
         >
           <EuiWindowEvent event="keydown" handler={handleKeydown} />
           <EuiWindowEvent event="pointermove" handler={handlePointerMove} />
-          <InspectHighlight
-            currentPosition={highlightPosition}
-            onDragStart={isGrabMode ? handleDragStart : undefined}
-            {...highlightProps}
-          />
+          {highlightPosition && (
+            <InspectHighlight
+              currentPosition={highlightPosition}
+              onDragStart={isGrabMode ? handleDragStart : undefined}
+              {...highlightProps}
+            />
+          )}
         </div>
       </React.Fragment>
     ),

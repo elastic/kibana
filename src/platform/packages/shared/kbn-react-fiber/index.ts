@@ -28,6 +28,7 @@ export {
   isSourceComponent,
 } from './src/predicates';
 
+export { isRenderedWithin } from './src/is_rendered_within';
 export { findFiberWithDebugSource } from './src/find_fiber_with_debug_source';
 export { findSourceComponentName } from './src/find_source_component_name';
 export { findEuiComponentName } from './src/find_eui_component_name';

@@ -24,7 +24,12 @@ import {
   isGrabKeyboardShortcut,
   isKeyboardShortcut,
 } from '../../lib/keyboard_shortcut/keyboard_shortcut';
-import { activeMode$, toggleActiveMode, useActiveMode } from '../../lib/active_mode';
+import {
+  activeMode$,
+  deactivateMode,
+  toggleActiveMode,
+  useActiveMode,
+} from '../../lib/active_mode';
 import type { InspectMode } from '../../lib/types';
 import { InspectOverlay } from './overlay/inspect_overlay';
 
@@ -91,8 +96,9 @@ export const InspectButton = ({
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
   const { ariaLabel, tooltipContent, iconType, testSubj, isShortcut } = MODE_CONFIG[mode];
 
+  /** An inspect click finishing after the user switched modes must not turn the new mode off. */
   const setIsInspecting = useCallback(
-    (value: boolean) => activeMode$.next(value ? mode : null),
+    (value: boolean) => (value ? activeMode$.next(mode) : deactivateMode(mode)),
     [mode]
   );
 

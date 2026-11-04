@@ -67,6 +67,7 @@ describe('getElementFromPoint', () => {
     mockToolbar.id = DEVELOPER_TOOLBAR_ID;
     const mockToolbarButton = document.createElement('button');
     mockToolbar.appendChild(mockToolbarButton);
+    document.body.appendChild(mockToolbar);
     const mockCoveredElement = document.createElement('div');
 
     document.elementsFromPoint = jest.fn().mockReturnValue([mockToolbarButton, mockCoveredElement]);
@@ -74,6 +75,7 @@ describe('getElementFromPoint', () => {
     const result = getElementFromPoint(mockEvent);
 
     expect(result).toBeNull();
+    mockToolbar.remove();
   });
 
   it('skips SVG path elements', () => {

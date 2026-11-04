@@ -169,6 +169,16 @@ describe('InspectOverlay', () => {
       expect(screen.queryByTestId('inspectHighlightBadge')).not.toBeInTheDocument();
     });
 
+    it('should remove the highlight when the pointer moves over the developer toolbar', () => {
+      hoverTarget();
+      expect(screen.getByTestId('inspectHighlightBox')).toBeInTheDocument();
+
+      (getElementFromPoint as jest.Mock).mockReturnValue(null);
+      hoverTarget();
+
+      expect(screen.queryByTestId('inspectHighlightBox')).not.toBeInTheDocument();
+    });
+
     it('should copy the hovered element context on click, show feedback and stay in grab mode', async () => {
       hoverTarget();
       fireEvent.click(document, { target: fakeTarget });

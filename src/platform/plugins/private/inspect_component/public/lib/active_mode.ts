@@ -22,5 +22,12 @@ export const toggleActiveMode = (mode: InspectMode): void => {
   activeMode$.next(activeMode$.getValue() === mode ? null : mode);
 };
 
+/** Turns the mode off, unless another mode has taken over in the meantime. */
+export const deactivateMode = (mode: InspectMode): void => {
+  if (activeMode$.getValue() === mode) {
+    activeMode$.next(null);
+  }
+};
+
 export const useActiveMode = (): InspectMode | null =>
   useObservable(activeMode$, activeMode$.getValue());

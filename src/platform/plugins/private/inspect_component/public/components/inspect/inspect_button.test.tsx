@@ -8,15 +8,17 @@
  */
 
 import React from 'react';
-import { screen, fireEvent } from '@testing-library/react';
+import { act, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { InspectButton } from './inspect_button';
 import { coreMock } from '@kbn/core/public/mocks';
 import {
+  isEscapeKey,
   isGrabKeyboardShortcut,
   isKeyboardShortcut,
 } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import { getInspectedElementData } from '../../lib/get_inspected_element_data';
 import { activeMode$ } from '../../lib/active_mode';
 import { mockBranch } from '../../__mocks__/mocks';
 
@@ -27,8 +29,13 @@ jest.mock('../../lib/keyboard_shortcut/keyboard_shortcut', () => ({
   isEscapeKey: jest.fn(),
 }));
 
+jest.mock('../../lib/get_inspected_element_data', () => ({
+  getInspectedElementData: jest.fn(),
+}));
+
 const mockedIsKeyboardShortcut = jest.mocked(isKeyboardShortcut);
 const mockedIsGrabKeyboardShortcut = jest.mocked(isGrabKeyboardShortcut);
+const mockedGetInspectedElementData = jest.mocked(getInspectedElementData);
 
 describe('InspectButton', () => {
   const mockCoreStart = coreMock.createStart();
@@ -125,6 +132,35 @@ describe('InspectButton', () => {
     expect(screen.getAllByTestId('inspectOverlayContainer')).toHaveLength(1);
   });
 
+  it('should keep the mode that took over while an inspect click was still pending', async () => {
+    let resolveComponentData: (data: null) => void = () => {};
+    mockedGetInspectedElementData.mockReturnValue(
+      new Promise((resolve) => {
+        resolveComponentData = resolve;
+      })
+    );
+    renderWithI18n(
+      <>
+        <InspectButton core={mockCoreStart} branch={mockBranch} />
+        <InspectButton core={mockCoreStart} branch={mockBranch} mode="grab" />
+      </>
+    );
+    const grabButton = screen.getByTestId('grabComponentButton');
+
+    await userEvent.click(screen.getByTestId('inspectComponentButton'));
+    fireEvent.click(document.body);
+    mockedIsKeyboardShortcut.mockReturnValue(false);
+    mockedIsGrabKeyboardShortcut.mockReturnValue(true);
+    fireEvent.keyDown(window, { code: 'Quote', ctrlKey: true, shiftKey: true });
+
+    expect(grabButton).toHaveAttribute('aria-pressed', 'true');
+
+    await act(async () => resolveComponentData(null));
+
+    expect(grabButton).toHaveAttribute('aria-pressed', 'true');
+    expect(screen.getAllByTestId('inspectOverlayContainer')).toHaveLength(1);
+  });
+
   it('should prevent target from losing focus on mouse down', async () => {
     renderWithI18n(<InspectButton core={mockCoreStart} branch={mockBranch} />);
 
@@ -151,6 +187,7 @@ describe('InspectButton', () => {
 
     expect(overlay).toBeInTheDocument();
 
+    jest.mocked(isEscapeKey).mockReturnValue(true);
     fireEvent.keyDown(window, { key: 'Esc' });
 
     expect(overlay).not.toBeInTheDocument();

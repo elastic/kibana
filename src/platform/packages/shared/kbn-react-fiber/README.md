@@ -15,6 +15,7 @@ Thin wrappers around the fiber data structure.
 
 Built on top of the basic ones; these answer the questions developer tools usually ask.
 
+- `isRenderedWithin(element, container)` – whether React rendered an element within a container's subtree, including content portalled elsewhere in the DOM such as modals and popovers.
 - `findFiberWithDebugSource(element)` – the closest fiber with source information for a DOM element, together with the element that owns that fiber. Searches the element's own owner chain first, then its DOM ancestors.
 - `findSourceComponentName(fiber)` – the closest application component (not a host element, EUI component or wrapper) responsible for a fiber.
 - `findEuiComponentName(fiber, isCandidate?)` – the closest EUI component responsible for a fiber, optionally filtered.

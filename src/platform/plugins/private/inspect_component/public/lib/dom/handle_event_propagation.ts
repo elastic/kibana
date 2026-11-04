@@ -33,8 +33,13 @@ export const handleEventPropagation = ({
   event,
   callback,
 }: HandleEventPropagationOptions): void => {
-  /** The developer toolbar keeps working, so its buttons can switch the mode on and off. */
-  if (isInsideDeveloperToolbar(event.target)) {
+  const isOverlayTarget = isInsideOverlay(event.target);
+
+  /**
+   * The developer toolbar keeps working, so its buttons and dialogs can be used in any mode.
+   * The overlay is rendered by one of its items, hence it is told apart first.
+   */
+  if (!isOverlayTarget && isInsideDeveloperToolbar(event.target)) {
     return;
   }
 
@@ -43,7 +48,7 @@ export const handleEventPropagation = ({
    * detectors (popovers, focus traps) don't close what is being inspected, but not cancelled,
    * as a cancelled 'pointerdown' suppresses native drag and drop.
    */
-  if (event.type !== 'click' && isInsideOverlay(event.target)) {
+  if (isOverlayTarget && event.type !== 'click') {
     event.stopPropagation();
     return;
   }

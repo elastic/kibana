@@ -7,8 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isRenderedWithin } from '@kbn/react-fiber';
 import { DEVELOPER_TOOLBAR_ID } from '../constants';
 
-/** Checks whether the target is the developer toolbar or one of its descendants, e.g. a mode button. */
-export const isInsideDeveloperToolbar = (target: EventTarget | null): boolean =>
-  target instanceof Element && target.closest(`#${DEVELOPER_TOOLBAR_ID}`) !== null;
+/**
+ * Checks whether the target belongs to the developer toolbar: the toolbar itself, a descendant such
+ * as a mode button, or a control it renders through a portal such as the settings modal.
+ */
+export const isInsideDeveloperToolbar = (target: EventTarget | null): boolean => {
+  const toolbar = document.getElementById(DEVELOPER_TOOLBAR_ID);
+
+  return target instanceof Element && toolbar !== null && isRenderedWithin(target, toolbar);
+};

@@ -48,6 +48,8 @@ export interface ReactFiberNode {
   return?: ReactFiberNode | null;
   child?: ReactFiberNode | null;
   sibling?: ReactFiberNode | null;
+  /** The DOM node of a host fiber, the instance of a class component or the root otherwise. */
+  stateNode?: object | null;
   /** {@link DebugSource} */
   _debugSource?: DebugSource | null;
   /** The fiber whose render created this one. */
