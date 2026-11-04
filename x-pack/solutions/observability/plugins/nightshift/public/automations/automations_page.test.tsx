@@ -475,6 +475,15 @@ describe('AutomationsPage', () => {
       expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
     });
 
+    it('clears the search when filtering rate limited automations from the banner', () => {
+      renderPage();
+
+      fireEvent.change(screen.getByTestId('automationsSearch'), { target: { value: 'Daily' } });
+      fireEvent.click(screen.getByTestId('automationsShowRateLimited'));
+
+      expect(screen.getByText('Triage incoming alerts')).toBeInTheDocument();
+    });
+
     it('shows only the global callout when automations are also rate limited', () => {
       mockUseRunQuotas.mockReturnValue({
         data: { enabled: true, limits: { investigation: 3 }, counts: { investigation: 3 } },
