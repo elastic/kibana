@@ -35,7 +35,10 @@ export const CLEAR_FILTERS_LABEL = i18n.translate(
 
 export const INVALID_OPTION_TOOLTIP = i18n.translate(
   'xpack.entityInventoryApp.filters.invalidOptionTooltip',
-  { defaultMessage: 'No entities match this value with the current filters' }
+  {
+    defaultMessage:
+      'No entities match this value with the current filters. It is removed from the list when you unselect it.',
+  }
 );
 
 export const VALUES_ERROR_MESSAGE = i18n.translate(

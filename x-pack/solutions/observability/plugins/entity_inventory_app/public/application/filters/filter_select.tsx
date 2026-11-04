@@ -17,8 +17,10 @@ import {
 } from '@elastic/eui';
 import type { EuiSelectableProps } from '@elastic/eui';
 import type { FilterOption } from './get_filter_controls';
-import { ALL_OPTION_KEY, getSelectableOptions } from './get_selectable_options';
+import { ALL_OPTION_KEY, getOptionLabel, getSelectableOptions } from './get_selectable_options';
 import { EMPTY_MESSAGE, SEARCH_PLACEHOLDER } from './translations';
+
+const NO_EMPTY_MESSAGE = <></>;
 
 interface FilterSelectProps {
   label: string;
@@ -76,7 +78,12 @@ export function FilterSelect({
     _event,
     changedOption
   ) => {
-    const nextSelection = getNextSelection(changedOption.key!, changedOption.checked === 'on');
+    const { key, checked } = changedOption;
+    if (!key) {
+      return;
+    }
+
+    const nextSelection = getNextSelection(key, checked === 'on');
 
     if (!isEqual(nextSelection, selected)) {
       onChange(nextSelection);
@@ -86,8 +93,9 @@ export function FilterSelect({
     }
   };
 
-  const selectedLabel = options.find(({ name }) => name === selected[0])?.label ?? selected[0];
+  const selectedLabel = selected[0] && getOptionLabel(options, selected[0]);
   const buttonLabel = singleSelection ? selectedLabel || allLabel || label : label;
+  const isMultiSelect = !singleSelection;
 
   return (
     <EuiFilterGroup>
@@ -100,8 +108,8 @@ export function FilterSelect({
             isDisabled={isDisabled}
             isSelected={isOpen}
             hasActiveFilters={selected.length > 0}
-            numFilters={singleSelection || isLoading ? undefined : options.length}
-            numActiveFilters={singleSelection ? undefined : selected.length}
+            numFilters={isMultiSelect && !isLoading ? options.length : undefined}
+            numActiveFilters={isMultiSelect ? selected.length : undefined}
             onClick={() => setIsOpen((current) => !current)}
             data-test-subj={dataTestSubj}
           >
@@ -119,7 +127,7 @@ export function FilterSelect({
           isLoading={isLoading}
           options={selectableOptions}
           onChange={onSelectionChange}
-          emptyMessage={hasError ? <></> : EMPTY_MESSAGE}
+          emptyMessage={hasError ? NO_EMPTY_MESSAGE : EMPTY_MESSAGE}
           searchProps={{ placeholder: SEARCH_PLACEHOLDER }}
         >
           {(list, search) => (

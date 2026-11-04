@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_OPTION_KEY, getSelectableOptions } from './get_selectable_options';
+import { ALL_OPTION_KEY, getOptionLabel, getSelectableOptions } from './get_selectable_options';
 
 const toOptions = (names: string[]) => names.map((name) => ({ name, label: name.toUpperCase() }));
 
@@ -79,5 +79,15 @@ describe('getSelectableOptions', () => {
     }).map(({ key }) => key);
 
     expect(keys).toEqual(['aws', 'gcp']);
+  });
+});
+
+describe('getOptionLabel', () => {
+  it('returns the label of the option', () => {
+    expect(getOptionLabel(toOptions(['aws']), 'aws')).toBe('AWS');
+  });
+
+  it('falls back to the name when the option is not listed', () => {
+    expect(getOptionLabel(toOptions(['aws']), 'gcp')).toBe('gcp');
   });
 });

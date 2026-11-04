@@ -14,6 +14,9 @@ import { INVALID_OPTION_TOOLTIP } from './translations';
 
 export const ALL_OPTION_KEY = '__all__';
 
+export const getOptionLabel = (options: FilterOption[], name: string): string =>
+  options.find((option) => option.name === name)?.label ?? name;
+
 interface GetSelectableOptionsParams {
   options: FilterOption[];
   invalidOptions: string[];
@@ -31,9 +34,6 @@ export const getSelectableOptions = ({
   isLoading,
   hasError,
 }: GetSelectableOptionsParams): EuiSelectableOption[] => {
-  const getOptionLabel = (name: string) =>
-    options.find((option) => option.name === name)?.label ?? name;
-
   const allOptions = allLabel
     ? [
         {
@@ -44,11 +44,11 @@ export const getSelectableOptions = ({
       ]
     : [];
 
-  const selectedOptions = selected
+  const pinnedSelectedOptions = selected
     .filter((option) => isLoading || hasError || invalidOptions.includes(option))
     .map((option) => ({
       key: option,
-      label: getOptionLabel(option),
+      label: getOptionLabel(options, option),
       checked: 'on' as const,
       ...(invalidOptions.includes(option) && {
         prepend: <EuiIcon type="warning" color="warning" aria-hidden="true" />,
@@ -62,5 +62,7 @@ export const getSelectableOptions = ({
     checked: selected.includes(name) ? ('on' as const) : undefined,
   }));
 
-  return uniqBy([...allOptions, ...selectedOptions, ...validOptions], 'key');
+  const orderedOptions = [...allOptions, ...pinnedSelectedOptions, ...validOptions];
+
+  return uniqBy(orderedOptions, 'key');
 };

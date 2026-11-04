@@ -6,7 +6,7 @@
  */
 
 import { typesFixture as types } from './__fixtures__/types';
-import { normalizeSelection } from './selection';
+import { EMPTY_SELECTION, isSelectionEmpty, normalizeSelection } from './selection';
 
 describe('normalizeSelection', () => {
   it('clears the type when it does not belong to the category', () => {
@@ -73,5 +73,19 @@ describe('normalizeSelection', () => {
         selection: { category: 'kubernetes', type: 'host', attributes: { 'os.type': ['linux'] } },
       })
     ).toEqual({ category: undefined, type: 'host', attributes: { 'os.type': ['linux'] } });
+  });
+});
+
+describe('isSelectionEmpty', () => {
+  it('is empty for the empty selection', () => {
+    expect(isSelectionEmpty(EMPTY_SELECTION)).toBe(true);
+  });
+
+  it.each([
+    ['a category', { category: 'hosts', attributes: {} }],
+    ['a type', { type: 'host', attributes: {} }],
+    ['an attribute value', { attributes: { 'os.type': ['linux'] } }],
+  ])('is not empty with %s', (_label, selection) => {
+    expect(isSelectionEmpty(selection)).toBe(false);
   });
 });

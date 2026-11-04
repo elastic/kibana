@@ -14,6 +14,7 @@ import { DEFAULT_TIME_RANGE, ENTITY_INVENTORY_MAX_TIME_RANGE_DAYS } from '../con
 import { useKibana } from '../../hooks/use_kibana';
 import { INVALID_QUERY_TOAST_TITLE, TIME_RANGE_CLAMPED_TOAST_TITLE } from '../translations';
 import { clampTimeRange } from '../utils/clamp_time_range';
+import { EMPTY_SELECTION } from '../filters/selection';
 import type { FilterControlsSelection } from '../filters/selection';
 
 export interface EntityInventorySearchSubmitPayload {
@@ -34,7 +35,6 @@ export interface EntityInventorySearchContextValue {
 }
 
 const DEFAULT_QUERY: Query = { language: 'kuery', query: '' };
-const DEFAULT_FILTER_SELECTION: FilterControlsSelection = { attributes: {} };
 
 const EntityInventorySearchContext = createContext<EntityInventorySearchContextValue | null>(null);
 
@@ -54,10 +54,10 @@ export const EntityInventorySearchProvider = ({
   const [dateRange, setDateRange] = useState<TimeRange>(DEFAULT_TIME_RANGE);
   const [selectionState, setSelectionState] = useState({
     entityCategory,
-    selection: DEFAULT_FILTER_SELECTION,
+    selection: EMPTY_SELECTION,
   });
   if (selectionState.entityCategory !== entityCategory) {
-    setSelectionState({ entityCategory, selection: DEFAULT_FILTER_SELECTION });
+    setSelectionState({ entityCategory, selection: EMPTY_SELECTION });
   }
   const filterSelection = selectionState.selection;
   const setFilterSelection = useCallback(

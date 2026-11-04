@@ -71,6 +71,9 @@ const narrowToType = (
 export const getTypesInScope = (params: FilterControlsParams): EntityInventoryTypeDefinition[] =>
   narrowToType(getTypesOfCategory(params.types, getActiveCategory(params)), params.selectedType);
 
+export const getAttributeNamesInScope = (params: FilterControlsParams): string[] =>
+  getDimensionNamesInScope(getTypesInScope(params));
+
 export const getFilterControls = (params: FilterControlsParams): FilterControls => {
   const { types, pageCategory, selectedType } = params;
   const typesOfCategory = getTypesOfCategory(types, getActiveCategory(params));

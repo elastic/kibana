@@ -15,7 +15,7 @@ import type {
 import { AttributeFilter } from './attribute_filter';
 import { FilterSelect } from './filter_select';
 import { getFilterControls, getTypesInScope } from './get_filter_controls';
-import { normalizeSelection } from './selection';
+import { EMPTY_SELECTION, isSelectionEmpty, normalizeSelection } from './selection';
 import type { FilterControlsSelection } from './selection';
 import type { FilterOption } from './get_filter_controls';
 import {
@@ -72,14 +72,14 @@ export function EntityInventoryFilterControls({
     return <EuiCallOut announceOnMount size="s" color="danger" title={TYPES_ERROR_MESSAGE} />;
   }
 
-  const params = {
+  const scope = {
     types: typeDefinitions,
     pageCategory,
     selectedCategory: selection.category,
     selectedType: selection.type,
   };
-  const { categories, types, attributes } = getFilterControls(params);
-  const typeIds = getTypesInScope(params).map(({ type }) => type);
+  const { categories, types, attributes } = getFilterControls(scope);
+  const typeIds = getTypesInScope(scope).map(({ type }) => type);
 
   const updateSelection = (changes: Partial<FilterControlsSelection>) =>
     onSelectionChange(
@@ -97,8 +97,7 @@ export function EntityInventoryFilterControls({
     });
   };
 
-  const hasSelection =
-    Boolean(selection.category || selection.type) || Object.keys(selection.attributes).length > 0;
+  const hasSelection = !isSelectionEmpty(selection);
 
   return (
     <EuiFlexGroup
@@ -164,7 +163,7 @@ export function EntityInventoryFilterControls({
               <EuiButtonEmpty
                 size="s"
                 iconType="cross"
-                onClick={() => onSelectionChange({ attributes: {} })}
+                onClick={() => onSelectionChange(EMPTY_SELECTION)}
                 data-test-subj="entityInventoryClearFilters"
               >
                 {CLEAR_FILTERS_LABEL}

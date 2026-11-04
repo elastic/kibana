@@ -10,24 +10,21 @@ import { useEntityInventorySearch } from '../context/search_context';
 import { EntityInventoryFilterControls } from './entity_inventory_filter_controls';
 import { useEntityInventoryTypes } from './use_entity_inventory_types';
 
-export const EntityInventoryPageFilterControls = () => {
+export function EntityInventoryPageFilterControls() {
   const { entityCategory, dateRange, filterSelection, setFilterSelection } =
     useEntityInventorySearch();
   const { types, isLoading, error } = useEntityInventoryTypes();
+  const pageCategory = entityCategory === 'all' ? undefined : entityCategory;
 
   return (
     <EntityInventoryFilterControls
       typeDefinitions={types}
       isLoading={isLoading}
       error={error}
-      pageCategory={entityCategory === 'all' ? undefined : entityCategory}
+      pageCategory={pageCategory}
       timeRange={dateRange}
       selection={filterSelection}
-      onSelectionChange={(selection) => {
-        // eslint-disable-next-line no-console
-        console.log('Entity inventory filters', selection);
-        setFilterSelection(selection);
-      }}
+      onSelectionChange={setFilterSelection}
     />
   );
-};
+}
