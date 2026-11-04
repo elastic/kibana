@@ -28,7 +28,7 @@ import {
 /** Long content is cut, since its start is enough to judge the height it needs. */
 const MAX_CONTENT_LENGTH = 2000;
 
-type Widgets = DashboardAttachmentData['panels'];
+export type Widgets = DashboardAttachmentData['panels'];
 
 const getContent = ({ type, config }: AttachmentPanel): string | undefined => {
   if (type === MARKDOWN_EMBEDDABLE_TYPE && typeof config.content === 'string') {
@@ -54,9 +54,9 @@ const createAliases = (widgets: Widgets): Map<string, string> => {
 };
 
 /** The container of every panel: the id of its section, or `null` for the top level. */
-type Placement = ReadonlyMap<string, string | null>;
+export type Placement = ReadonlyMap<string, string | null>;
 
-const getPlacement = (widgets: Widgets): Placement =>
+export const getPlacement = (widgets: Widgets): Placement =>
   new Map(
     widgets.flatMap(
       (widget): Array<[string, string | null]> =>
@@ -64,7 +64,7 @@ const getPlacement = (widgets: Widgets): Placement =>
     )
   );
 
-const getSectionIds = (widgets: Widgets): Set<string> =>
+export const getSectionIds = (widgets: Widgets): Set<string> =>
   new Set(widgets.filter(isSection).map(({ id }) => id));
 
 /** Whether a panel or section was added or removed, or a panel moved to another container. */
@@ -81,12 +81,12 @@ const hasContainerChanges = (widgets: Widgets, originalWidgets: Widgets): boolea
   );
 };
 
-const getKind = ({ type, config }: AttachmentPanel): LayoutPanelKind => ({
+export const getKind = ({ type, config }: AttachmentPanel): LayoutPanelKind => ({
   type,
   ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
 });
 
-const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
+export const getPanelsById = (widgets: Widgets): Map<string, AttachmentPanel> =>
   new Map(
     widgets
       .flatMap((widget) => (isSection(widget) ? widget.panels : [widget]))
@@ -227,39 +227,40 @@ const toLayoutRequest = (
   };
 };
 
-interface ArrangeLayoutParams {
+interface LayoutAttemptParams {
   /** Panels and sections before this call; empty for a new dashboard. */
   originalPanels: Widgets;
   dashboardData: DashboardAttachmentData;
   /** Where panels and sections go, from the user or the authoring agent. */
   instructions?: string;
   arrangeLayout: ArrangeDashboardLayout;
+}
+
+interface ArrangeLayoutParams extends LayoutAttemptParams {
   logger: Logger;
 }
 
-interface ArrangeLayoutResult {
+export interface ArrangeLayoutResult {
   dashboardData: DashboardAttachmentData;
   /** Set when a layout was asked for but not applied. */
   failure?: DashboardFailure;
 }
 
-/**
- * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
- * user or the agent asked for a layout, a panel or section is new to its container, a panel was
- * removed, or a panel changed its kind or markdown text and may need another size. The call gets the
- * dashboard as it is, without the placeholder grids of new panels. When
- * the call fails, the dashboard keeps its current layout, and a failure is returned if a layout was
- * asked for.
- */
-export const arrangeDashboardLayout = async ({
+/** Whether the layout call ran, and the arranged dashboard or why it was not applied. */
+export type LayoutAttempt =
+  | { status: 'unchanged' }
+  | { status: 'arranged'; dashboardData: DashboardAttachmentData }
+  | { status: 'failed'; error: string };
+
+/** Runs the layout call when anything needs placing, without logging or reporting failures. */
+export const attemptDashboardLayout = async ({
   originalPanels,
   dashboardData,
   instructions,
   arrangeLayout,
-  logger,
-}: ArrangeLayoutParams): Promise<ArrangeLayoutResult> => {
+}: LayoutAttemptParams): Promise<LayoutAttempt> => {
   if (dashboardData.panels.length === 0) {
-    return { dashboardData };
+    return { status: 'unchanged' };
   }
 
   const aliasById = createAliases(dashboardData.panels);
@@ -271,7 +272,7 @@ export const arrangeDashboardLayout = async ({
     changedTextIds.size === 0 &&
     !hasContainerChanges(dashboardData.panels, originalPanels)
   ) {
-    return { dashboardData };
+    return { status: 'unchanged' };
   }
   const request = toLayoutRequest(
     dashboardData.panels,
@@ -286,24 +287,49 @@ export const arrangeDashboardLayout = async ({
   const toId = (alias: string): string => idByAlias.get(alias) ?? alias;
   try {
     const arrangement = await requestArrangement(arrangeLayout, request, toId);
-    return { dashboardData: applyArrangement(dashboardData, arrangement, toId) };
-  } catch (error) {
-    const message = getErrorMessage(error);
-    logger.warn(`Dashboard layout kept the current layout: ${message}`);
-    // The grids in the result do not show that a layout request was ignored, so report it.
-    if (instructions === undefined) {
-      return { dashboardData };
-    }
     return {
-      dashboardData,
-      failure: {
-        type: DASHBOARD_FAILURE_TYPES.layout,
-        kind: 'dashboard',
-        identifier: 'layout',
-        error: `The layout request was not applied, so panel positions and sizes are unchanged: ${message}`,
-      },
+      status: 'arranged',
+      dashboardData: applyArrangement(dashboardData, arrangement, toId),
     };
+  } catch (error) {
+    return { status: 'failed', error: getErrorMessage(error) };
   }
+};
+
+/**
+ * Sets the grid of every panel and section with the injected `arrangeLayout` model call, when the
+ * user or the agent asked for a layout, a panel or section is new to its container, a panel was
+ * removed, or a panel changed its kind or markdown text and may need another size. The call gets the
+ * dashboard as it is, without the placeholder grids of new panels. When
+ * the call fails, the dashboard keeps its current layout, and a failure is returned if a layout was
+ * asked for.
+ */
+export const arrangeDashboardLayout = async ({
+  logger,
+  ...params
+}: ArrangeLayoutParams): Promise<ArrangeLayoutResult> => {
+  const { dashboardData, instructions } = params;
+  const attempt = await attemptDashboardLayout(params);
+  if (attempt.status === 'unchanged') {
+    return { dashboardData };
+  }
+  if (attempt.status === 'arranged') {
+    return { dashboardData: attempt.dashboardData };
+  }
+  logger.warn(`Dashboard layout kept the current layout: ${attempt.error}`);
+  // The grids in the result do not show that a layout request was ignored, so report it.
+  if (instructions === undefined) {
+    return { dashboardData };
+  }
+  return {
+    dashboardData,
+    failure: {
+      type: DASHBOARD_FAILURE_TYPES.layout,
+      kind: 'dashboard',
+      identifier: 'layout',
+      error: `The layout request was not applied, so panel positions and sizes are unchanged: ${attempt.error}`,
+    },
+  };
 };
 
 /** Returns the checked arrangement, still with aliases, or throws why it cannot be applied. */
