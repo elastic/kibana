@@ -83,6 +83,9 @@ export const fetchClassicAlertsHistogram = async ({
       return [{ bucketStart: start, count: agg.doc_count }];
     }
     if (!breakdown) {
+      if (agg.doc_count === 0) {
+        return [];
+      }
       return [
         {
           bucketStart: start,

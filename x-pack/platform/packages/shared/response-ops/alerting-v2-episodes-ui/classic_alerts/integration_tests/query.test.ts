@@ -306,7 +306,7 @@ describe('classic alerts query builders', () => {
       },
     ];
 
-    /** Mirrors how classic alerts were reshaped for client-side overlap counting. */
+    /** Maps a classic alert to the row shape `computeOverlapCounts` takes, used as the expected-value oracle. */
     const toHistogramRow = (
       alert: Record<string, string | undefined>,
       breakdownField?: string

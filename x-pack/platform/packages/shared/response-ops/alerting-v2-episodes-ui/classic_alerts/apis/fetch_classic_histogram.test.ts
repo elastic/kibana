@@ -138,16 +138,16 @@ describe('fetchClassicAlertsHistogram', () => {
     ]);
   });
 
-  it('counts breakdowns without a classic equivalent as unknown', async () => {
+  it('counts breakdowns without a classic equivalent as unknown and skips empty buckets', async () => {
     mockHttp.post.mockResolvedValue({
       hits: { hits: [] },
-      aggregations: { bucket_0: { doc_count: 6 } },
+      aggregations: { bucket_0: { doc_count: 6 }, bucket_1: { doc_count: 0 } },
     });
 
     const result = await fetchClassicAlertsHistogram({
       ruleTypeIds: TEST_RULE_TYPE_IDS,
       services: { http: mockHttp },
-      buckets: [buckets[0]],
+      buckets,
       nowMs: NOW,
       breakdownField: 'last_assignee_uid',
     });
