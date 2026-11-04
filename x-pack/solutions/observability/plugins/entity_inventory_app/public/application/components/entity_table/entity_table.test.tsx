@@ -96,15 +96,12 @@ describe('EntityTable', () => {
     expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('web-001.internal');
   });
 
-  it('renders a placeholder for an empty cell and joins multi-value cells', () => {
-    renderTable(
-      smallList([
-        hostRow({ 'host.name': 'web-001', 'host.ip': ['10.0.0.1', 'fe80::1'], 'os.name': null }),
-      ])
-    );
+  it('renders a placeholder for an empty cell', () => {
+    renderTable(smallList([hostRow({ 'host.name': 'web-001', 'cloud.account.id': null })]));
 
-    expect(getCell(0, 'host.ip')).toHaveTextContent('10.0.0.1, fe80::1');
-    expect(within(getCell(0, 'os.name') as HTMLElement).getByText(NO_VALUE_LABEL)).toBeTruthy();
+    expect(
+      within(getCell(0, 'cloud.account.id') as HTMLElement).getByText(NO_VALUE_LABEL)
+    ).toBeTruthy();
   });
 
   it('sorts the held rows when a column sort is picked', async () => {
@@ -234,17 +231,19 @@ describe('EntityTable', () => {
   });
 
   it('keeps cells of other columns as plain text', () => {
-    renderTable(smallList([hostRow({ 'host.name': 'web-001', 'os.name': 'Ubuntu' })]));
+    renderTable(smallList([hostRow({ 'host.name': 'web-001', 'cloud.account.id': 'account-1' })]));
 
     expect(
-      within(getCell(0, 'os.name') as HTMLElement).queryByTestId('entityInventoryCellBadge')
+      within(getCell(0, 'cloud.account.id') as HTMLElement).queryByTestId(
+        'entityInventoryCellBadge'
+      )
     ).not.toBeInTheDocument();
   });
 
   it('restores the default columns on reset', async () => {
     renderTable(getFixture('normal'));
 
-    const hideColumn = within(openColumnActions('host.ip'))
+    const hideColumn = within(openColumnActions('cloud.account.id'))
       .getAllByRole('button')
       .find((button) => button.textContent === 'Hide column');
     if (!hideColumn) {
@@ -252,11 +251,11 @@ describe('EntityTable', () => {
     }
     fireEvent.click(hideColumn);
     await waitFor(() =>
-      expect(screen.queryByTestId('dataGridHeaderCell-host.ip')).not.toBeInTheDocument()
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
     );
 
     fireEvent.click(screen.getByRole('button', { name: RESET_TO_DEFAULT_LABEL }));
 
-    expect(await screen.findByTestId('dataGridHeaderCell-host.ip')).toBeInTheDocument();
+    expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
   });
 });

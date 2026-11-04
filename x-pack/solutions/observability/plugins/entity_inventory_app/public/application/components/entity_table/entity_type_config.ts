@@ -50,17 +50,9 @@ const ENTITY_TYPE_DISPLAY_CONFIG: Readonly<Record<string, Partial<EntityTypeDisp
   host: {
     iconType: 'compute',
     nameFields: ['host.name', 'host.hostname', 'host.id', 'entity.id'],
-    defaultVisibleColumns: [
-      NAME_COLUMN_ID,
-      'host.ip',
-      'os.name',
-      'os.version',
-      'host.arch',
-      'cloud.provider',
-      'cloud.region',
-      'k8s.cluster.name',
-      'last_seen',
-    ],
+    // Last seen stands in for Up time until the metrics exist. The spec's host Type has no
+    // attribute in the host definition yet (see the decision log).
+    defaultVisibleColumns: [NAME_COLUMN_ID, 'cloud.account.id', 'last_seen'],
   },
   'k8s.deployment': {
     iconType: 'logoKubernetes',

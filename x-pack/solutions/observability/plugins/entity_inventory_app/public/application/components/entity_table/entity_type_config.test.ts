@@ -31,23 +31,25 @@ describe('entity type config', () => {
     expect(ENTITY_TYPE_BY_CATEGORY.all).toBeUndefined();
   });
 
-  it('shows the host default columns that the response has, Name first', () => {
+  it('shows the host default columns in the spec order, Name first', () => {
+    const columns = toListColumns(HOST_TYPE_FIXTURE.columns.map(({ name }) => name));
+
+    // Last seen stands in for Up time until the metrics exist.
+    expect(getDefaultVisibleColumns('host', columns)).toEqual([
+      NAME_COLUMN_ID,
+      'cloud.account.id',
+      'last_seen',
+    ]);
+  });
+
+  it('leaves out a host default column that the response does not have', () => {
     const columns = toListColumns(
       HOST_TYPE_FIXTURE.columns
         .map(({ name }) => name)
-        .filter((name) => name !== 'k8s.cluster.name')
+        .filter((name) => name !== 'cloud.account.id')
     );
 
-    expect(getDefaultVisibleColumns('host', columns)).toEqual([
-      NAME_COLUMN_ID,
-      'host.ip',
-      'os.name',
-      'os.version',
-      'host.arch',
-      'cloud.provider',
-      'cloud.region',
-      'last_seen',
-    ]);
+    expect(getDefaultVisibleColumns('host', columns)).toEqual([NAME_COLUMN_ID, 'last_seen']);
   });
 
   it('shows Name, the attributes and last seen for a type without display config', () => {
