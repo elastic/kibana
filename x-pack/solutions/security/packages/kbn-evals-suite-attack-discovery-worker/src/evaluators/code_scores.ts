@@ -161,9 +161,33 @@ export const scoreDiscoveriesPersisted: CodeScorer = (expected, artifacts) => {
     : fail('gold expects at least one discovery and none was persisted');
 };
 
+// The matcher stores attack ids cut to this length (`attack_discovery_id.slice(0, 512)`).
+const MATCHER_ID_LENGTH = 512;
+
 /**
- * Fingerprint matching ran, none of the attacks matched or attached to an existing fingerprint, and
- * every attack it handed back was dispatched for review (zero of zero is not a pass). A match
+ * Every persisted attack must be covered: a review of its own, or a same-run sibling attachment
+ * that a review declared. The persisted ids are cut to the matcher's length before comparing, so
+ * an over-long id cannot read as missing.
+ */
+const coverageGap = (artifacts: WorkerArtifacts): string | undefined => {
+  const covered = new Set([
+    ...(artifacts.fingerprintReviewedAttackIds ?? []),
+    ...(artifacts.fingerprintSiblingAttackIds ?? []),
+  ]);
+  const persisted = new Set(
+    artifacts.persistedAttackIds.map((id) => id.slice(0, MATCHER_ID_LENGTH))
+  );
+  const notCovered = [...persisted].filter((id) => !covered.has(id)).length;
+  const notPersisted = [...covered].filter((id) => !persisted.has(id)).length;
+  return notCovered === 0 && notPersisted === 0
+    ? undefined
+    : `${notCovered} persisted attacks were in neither a review nor a declared sibling attachment, and ${notPersisted} reviewed or attached ids were not persisted`;
+};
+
+/**
+ * Fingerprint matching ran, none of the attacks matched or attached to an existing fingerprint,
+ * every persisted attack is covered (reviewed, or a same-run sibling of a reviewed group), and every
+ * attack it handed back was dispatched for review (zero of zero is not a pass). A match
  * step that failed closed hides the matcher, so it fails here even though reviews still run.
  */
 export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) => {
@@ -181,9 +205,9 @@ export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) =>
       `${artifacts.fingerprintMatchedCount} attacks matched an existing fingerprint in a space that started empty`
     );
   }
-  if ((artifacts.fingerprintAttachCount ?? 0) > 0) {
+  if ((artifacts.fingerprintExistingAttachCount ?? 0) > 0) {
     return fail(
-      `${artifacts.fingerprintAttachCount} attacks were attached to an existing fingerprint in a space that started empty, so they were never reviewed`
+      `${artifacts.fingerprintExistingAttachCount} attacks were attached to an existing fingerprint in a space that started empty, so they were never reviewed`
     );
   }
   if (
@@ -194,6 +218,11 @@ export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) =>
       `${artifacts.persistedAttackIds.length} attacks were persisted but none was dispatched for review`
     );
   }
+  if (artifacts.fingerprintReviewedAttackIds === undefined) {
+    return missing('match_fingerprints output carried no attachments list to check coverage with');
+  }
+  const uncovered = coverageGap(artifacts);
+  if (uncovered) return fail(uncovered);
   return artifacts.dispatchedReviewExecutionIds.length === artifacts.fingerprintReviewCount
     ? pass(
         `${artifacts.dispatchedReviewExecutionIds.length} of ${artifacts.fingerprintReviewCount} reviews dispatched`

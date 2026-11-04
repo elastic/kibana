@@ -14,7 +14,7 @@ workflows until they park, and scores what happened.
 | The runner completed, ran steps, and did not time out | code  |
 | Exactly the seeded alerts were open and analyzed, none unseeded cited | code |
 | Discoveries were persisted (audit evaluators)     | code      |
-| Fingerprints were matched and dispatched; none matched or attached to an existing fingerprint | code |
+| Fingerprints were matched and dispatched; none matched or attached to an existing fingerprint (same-run siblings of a reviewed group are covered by its review); every persisted attack is in a review or declared sibling attachment, with no extra ids | code |
 | Every review ended or parked within the wait      | code      |
 | Exactly one review per unmatched attack           | code      |
 | An Investigation was opened                       | code      |
@@ -33,6 +33,18 @@ evaluators and the judges report the same label instead of scoring an empty row.
 has resolved, `createEvaluateDataset` throws one error (an `AggregateError` when there are several)
 listing the row failures, an executor-level rejection, every dirty space and the failed code scores.
 
+An evaluator that throws (typically the LLM judge: `Missing scores for …` or an inference error)
+does not reject the experiment either. Every evaluator, including `evaluatorOverrides`, is wrapped:
+a throw becomes a `null` score labelled `EVALUATOR_FAILED` and a row error
+`<space>: <scenario> evaluator <name> failed: <message>` reported with the rest. For a CODE evaluator
+that null is a miss; for a judge it is excluded from the mean (never a pass) and the row error is
+what fails the run. A row with no input scores as `unknown row`.
+
+Fingerprint coverage: in a reviewed group the first attack is the review and the others are attached
+to the same new Investigation, listed in the review's `sibling_attack_discovery_ids`. Those siblings
+count as covered; any other attachment went to an existing fingerprint and fails. Review ids plus
+sibling ids must equal the persisted attack ids, compared at the matcher's 512-character id length.
+
 Code scores gate through `assertCodeScoresPass`: a `null` score is never a pass, and `N/A` and
 `MISSING` are distinct outcomes. A code check passes at a score of 1, except the graded ones listed
 in `CODE_PASS_THRESHOLDS` (`run_summary.ts`): `PositiveControlRecall` passes at a recall of 0.6 or
@@ -45,8 +57,10 @@ after a transport failure. What is guaranteed depends on whether the seed bulk s
 
 - The bulk returned (some items rejected), or the read of the open alerts failed after it returned:
   nothing of this seed is in flight. One delete by id and one read-back (`mget`); ids still present
-  are an error.
-- The bulk call itself rejected (socket hang up, client timeout): Elasticsearch may still be running
+  are an error. A 4xx that Elasticsearch returned on the first attempt (`meta.meta.attempts === 0`)
+  also counts as settled: the request was refused.
+- The bulk call itself rejected (socket hang up, client timeout, a 5xx, or a 4xx that followed a
+  transport retry, since an earlier attempt may have been accepted): Elasticsearch may still be running
   it, so a missing document proves nothing yet. The delete and the read-back repeat for 8 rounds
   with a 500ms pause between them (7 pauses, 3.5s), and the seed counts as removed only if the
   read-back of the last round finds no id. Anything that landed earlier in the window was deleted

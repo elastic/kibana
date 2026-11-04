@@ -465,6 +465,46 @@ export const countIndexedAttacks = async ({
   }
 };
 
+/** What `match_fingerprints` did with the attacks, read from its output. */
+export interface FingerprintMatchSplit {
+  /** `attack_discovery_id` of every review the matcher handed back. */
+  reviewedAttackIds: string[];
+  /** Attachments that are same-run siblings of a reviewed group (declared by a review). */
+  siblingAttackIds: string[];
+  /** Attachments to an Investigation that already existed. */
+  existingAttachCount: number;
+  attachCount: number;
+}
+
+/**
+ * Splits the matcher's attachments. In a reviewed group the first attack is the review and the
+ * rest are attached to the same new Investigation; the review lists them in
+ * `sibling_attack_discovery_ids`. Any other attachment went to an existing fingerprint.
+ */
+export const splitFingerprintMatch = (
+  matchOutput: Record<string, unknown> | undefined
+): FingerprintMatchSplit | undefined => {
+  const reviews = matchOutput?.reviews;
+  const attachments = matchOutput?.attachments;
+  if (!Array.isArray(reviews) || !Array.isArray(attachments)) return undefined;
+  const reviewRecords = reviews.map(asRecord);
+  const declaredSiblings = new Set(
+    reviewRecords.flatMap((review) => strings(review?.sibling_attack_discovery_ids))
+  );
+  const attachedIds = attachments.map((item) => asString(asRecord(item)?.attack_discovery_id));
+  const siblingAttackIds = attachedIds.filter(
+    (id): id is string => id !== undefined && declaredSiblings.has(id)
+  );
+  return {
+    reviewedAttackIds: reviewRecords.flatMap(
+      (review) => asString(review?.attack_discovery_id) ?? []
+    ),
+    siblingAttackIds,
+    existingAttachCount: attachments.length - siblingAttackIds.length,
+    attachCount: attachments.length,
+  };
+};
+
 /**
  * Collects what one runner execution produced: the persisted discoveries, the fingerprint
  * match result, every review it dispatched (polled until it ends or parks at the analyst gate)
@@ -499,6 +539,7 @@ export const collectWorkerArtifacts = async ({
 
   const match = firstStep(run, MATCH_FINGERPRINTS_STEP_ID);
   const matchOutput = outputOf(match);
+  const fingerprintSplit = splitFingerprintMatch(matchOutput);
   const matchFailed = match !== undefined && (match.status === 'failed' || match.error != null);
 
   const dispatches = REVIEW_DISPATCH_STEP_IDS.flatMap((stepId) => stepsOf(run, stepId)).flatMap(
@@ -557,9 +598,10 @@ export const collectWorkerArtifacts = async ({
     fingerprintReviewCount: Array.isArray(matchOutput?.reviews)
       ? matchOutput.reviews.length
       : undefined,
-    fingerprintAttachCount: Array.isArray(matchOutput?.attachments)
-      ? matchOutput.attachments.length
-      : undefined,
+    fingerprintAttachCount: fingerprintSplit?.attachCount,
+    fingerprintExistingAttachCount: fingerprintSplit?.existingAttachCount,
+    fingerprintSiblingAttackIds: fingerprintSplit?.siblingAttackIds,
+    fingerprintReviewedAttackIds: fingerprintSplit?.reviewedAttackIds,
     fingerprintMatchedCount: Array.isArray(matchOutput?.reviews)
       ? matchOutput.reviews.filter(
           (item) => asString(asRecord(item)?.related_investigation_id) !== undefined

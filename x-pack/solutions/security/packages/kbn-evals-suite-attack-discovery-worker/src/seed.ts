@@ -514,14 +514,18 @@ const idsStillPresent = async ({
   }
 };
 
-/** The status of an Elasticsearch client error, which carries it under `meta` (or on the error). */
-const isClientErrorStatus = (error: unknown): boolean => {
-  const { meta, statusCode } = (error ?? {}) as {
-    meta?: { statusCode?: number };
-    statusCode?: number;
+/**
+ * True only when Elasticsearch refused the request on its FIRST attempt: a 4xx status and
+ * `meta.meta.attempts === 0` (the transport's count of retries). The transport retries connection
+ * errors, timeouts and 502/503/504, so attempt 1 may have been accepted before attempt 2 got a 429
+ * or 413; any retry, or no attempts information, leaves the bulk possibly running.
+ */
+const isRefusedOnFirstAttempt = (error: unknown): boolean => {
+  const { meta } = (error ?? {}) as {
+    meta?: { statusCode?: number; meta?: { attempts?: number } };
   };
-  const status = meta?.statusCode ?? statusCode;
-  return typeof status === 'number' && status >= 400 && status < 500;
+  const status = meta?.statusCode;
+  return typeof status === 'number' && status >= 400 && status < 500 && meta?.meta?.attempts === 0;
 };
 
 /**
@@ -532,8 +536,8 @@ const isClientErrorStatus = (error: unknown): boolean => {
  *
  * - `bulkSettled`: the seed bulk returned (with rejected items) or failed after it returned, so
  *   nothing of this seed is still in flight. One delete and one read-back; ids that remain throw.
- * - not settled: the bulk itself rejected (a transport failure or a 5xx; a 4xx counts as settled,
- *   Elasticsearch refused the request) and may still be running in Elasticsearch. A first empty
+ * - not settled: the bulk itself rejected (a transport failure, a 5xx, or a 4xx that followed a
+ *   transport retry; only a 4xx on the first attempt counts as settled) and may still be running in Elasticsearch. A first empty
  *   read-back proves nothing, so the delete and read-back repeat for the whole
  *   `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if the read-back of
  *   the LAST round finds no id (a write that landed earlier was deleted by a later round). Ids
@@ -635,16 +639,16 @@ export const seedScenario = async ({
   // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed, by id because a
   // transport failure can leave them unsearchable: the workflow has not started, so there are no
   // fingerprints or discoveries of this row to delete. `bulkSettled` is false only when the bulk
-  // call itself rejected without a 4xx status, the one case where it may still be running in
-  // Elasticsearch.
+  // call itself rejected and was not refused on its first attempt (a retry may have been accepted
+  // before the 4xx), the case where it may still be running in Elasticsearch.
   let bulkSettled = false;
   try {
     let response: Awaited<ReturnType<Client['bulk']>>;
     try {
       response = await esClient.bulk({ refresh: 'wait_for', operations });
     } catch (bulkError) {
-      // A 4xx is Elasticsearch refusing the request before it ran anything.
-      bulkSettled = isClientErrorStatus(bulkError);
+      // A 4xx on the first attempt is Elasticsearch refusing the request before it ran anything.
+      bulkSettled = isRefusedOnFirstAttempt(bulkError);
       throw bulkError;
     }
     bulkSettled = true;

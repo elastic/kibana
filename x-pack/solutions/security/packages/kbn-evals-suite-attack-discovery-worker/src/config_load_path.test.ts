@@ -22,8 +22,10 @@ jest.mock('@kbn/evals', () => ({
 
 // The extensions the Jest preset transforms without swc (`kbn-jest/jest-preset.js` `transform`):
 // raw text (`.txt`, `.html`, `.yaml`, `.yml`), `.peggy` and `.text`. The preset's patterns end in
-// `peggy?` and `text?`, so `.pegg` and `.tex` are transformed too. The Playwright loader parses none.
-const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy?|text?)$/;
+// `peggy?` and `text?`, so `.pegg` and `.tex` are transformed too, and the first is
+// `(txt|html|yaml|yml)?`, so a path ending in a bare `.` matches as well (`|\.$`). The Playwright
+// loader parses none.
+const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy?|text?)$|\.$/;
 
 /** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
 const loadedBy = (entry: string): string[] => {
@@ -35,10 +37,18 @@ const loadedBy = (entry: string): string[] => {
 const rawTextIn = (paths: string[]): string[] => paths.filter((path) => RAW_TEXT_MODULE.test(path));
 
 describe('Playwright config load path', () => {
-  it('loads no raw-text module (.yaml, .txt, .html, .peggy, .text) at config time', () => {
+  it('loads no raw-text module (.yaml, .yml, .txt, .html, .peggy, .pegg, .text, .tex) at config time', () => {
     const loaded = loadedBy('../playwright.config');
 
     expect(rawTextIn(loaded)).toEqual([]);
+  });
+
+  it('matches every extension the preset transforms, including a bare trailing dot', () => {
+    const extensions = ['yaml', 'yml', 'txt', 'html', 'peggy', 'pegg', 'text', 'tex', ''];
+    expect(extensions.map((ext) => RAW_TEXT_MODULE.test(`/x/module.${ext}`))).toEqual(
+      extensions.map(() => true)
+    );
+    expect(RAW_TEXT_MODULE.test('/x/module.ts')).toBe(false);
   });
 
   it('walks the whole chain the config loads', () => {

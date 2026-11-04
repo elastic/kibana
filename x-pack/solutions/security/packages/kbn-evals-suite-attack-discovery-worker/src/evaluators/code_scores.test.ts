@@ -166,17 +166,21 @@ describe('scoreAlertsRetrieved', () => {
 
 describe('scoreFingerprintsDispatched', () => {
   const attacks = { persistedAttackIds: ['x'] };
+  const reviewed = (overrides: Partial<WorkerArtifacts> = {}) =>
+    artifacts({
+      ...attacks,
+      fingerprintReviewCount: 1,
+      fingerprintMatchedCount: 0,
+      fingerprintAttachCount: 0,
+      fingerprintExistingAttachCount: 0,
+      fingerprintSiblingAttackIds: [],
+      fingerprintReviewedAttackIds: ['x'],
+      dispatchedReviewExecutionIds: ['r'],
+      ...overrides,
+    });
 
   it('fails when an attack matched an existing fingerprint', () => {
-    const result = scoreFingerprintsDispatched(
-      expected,
-      artifacts({
-        ...attacks,
-        fingerprintReviewCount: 1,
-        fingerprintMatchedCount: 1,
-        dispatchedReviewExecutionIds: ['r'],
-      })
-    );
+    const result = scoreFingerprintsDispatched(expected, reviewed({ fingerprintMatchedCount: 1 }));
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('existing fingerprint');
   });
@@ -184,16 +188,58 @@ describe('scoreFingerprintsDispatched', () => {
   it('fails when an attack was attached to an existing fingerprint, even if every review was dispatched', () => {
     const result = scoreFingerprintsDispatched(
       expected,
-      artifacts({
-        ...attacks,
-        fingerprintReviewCount: 1,
-        fingerprintMatchedCount: 0,
-        fingerprintAttachCount: 1,
-        dispatchedReviewExecutionIds: ['r'],
-      })
+      reviewed({ fingerprintAttachCount: 1, fingerprintExistingAttachCount: 1 })
     );
     expect(result.score).toBe(0);
     expect(result.explanation).toContain('attached to an existing fingerprint');
+  });
+
+  it('passes same-run siblings of a reviewed group in an empty space', () => {
+    const result = scoreFingerprintsDispatched(
+      expected,
+      reviewed({
+        persistedAttackIds: ['x', 'y'],
+        fingerprintAttachCount: 1,
+        fingerprintExistingAttachCount: 0,
+        fingerprintSiblingAttackIds: ['y'],
+      })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('fails a persisted attack that is in neither a review nor a sibling attachment', () => {
+    const result = scoreFingerprintsDispatched(
+      expected,
+      reviewed({ persistedAttackIds: ['x', 'lost'] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('1 persisted attacks were in neither');
+  });
+
+  it('fails a reviewed or attached id that was not persisted', () => {
+    const result = scoreFingerprintsDispatched(
+      expected,
+      reviewed({ fingerprintSiblingAttackIds: ['ghost'] })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('1 reviewed or attached ids were not persisted');
+  });
+
+  it('compares ids at the matcher length, so an over-long persisted id is not missing', () => {
+    const long = 'a'.repeat(600);
+    const result = scoreFingerprintsDispatched(
+      expected,
+      reviewed({ persistedAttackIds: [long], fingerprintReviewedAttackIds: [long.slice(0, 512)] })
+    );
+    expect(result.score).toBe(1);
+  });
+
+  it('is MISSING when the matcher output carried no attachments list', () => {
+    const result = scoreFingerprintsDispatched(
+      expected,
+      reviewed({ fingerprintReviewedAttackIds: undefined })
+    );
+    expect(result.label).toBe('MISSING');
   });
 
   it('does not pass a 0/0 review count for persisted attacks', () => {
@@ -204,17 +250,7 @@ describe('scoreFingerprintsDispatched', () => {
   });
 
   it('passes when every attack was dispatched and none matched', () => {
-    expect(
-      scoreFingerprintsDispatched(
-        expected,
-        artifacts({
-          ...attacks,
-          fingerprintReviewCount: 1,
-          fingerprintMatchedCount: 0,
-          dispatchedReviewExecutionIds: ['r'],
-        })
-      ).score
-    ).toBe(1);
+    expect(scoreFingerprintsDispatched(expected, reviewed()).score).toBe(1);
   });
 });
 

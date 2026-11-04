@@ -41,6 +41,7 @@ import {
 import {
   assertCodeScoresPass,
   createRunCollector,
+  describeRow,
   logRunSummary,
   withScoreCollection,
 } from './run_summary';
@@ -363,7 +364,8 @@ export const createEvaluateDataset =
       let artifacts: WorkerArtifacts | undefined;
       let seeded: Awaited<ReturnType<typeof seedScenario>> | undefined;
       try {
-        // A failed seed has already removed its own partial writes.
+        // A failed seed removes its own partial writes; if that removal failed too, the error says
+        // so and the final clean-space check reports what is left.
         seeded = await seedScenario({ esClient, log, scenario, spaceId });
         const { execution: run, timedOutAfterMs } = await client.run({
           spaceId,
@@ -402,6 +404,13 @@ export const createEvaluateDataset =
         }
       }
       if (errors.length === 0 && artifacts) return artifacts;
+      if (artifacts) {
+        // Collect worked but cancel or cleanup did not: the row still fails, and these are the
+        // real artifacts it discards.
+        log.warning(
+          `${row.spaceId}: ${row.scenarioId} discarded collected artifacts (runner ${artifacts.runnerExecutionId} ${artifacts.runnerStatus}, ${artifacts.reviews.length} reviews) because cleanup failed`
+        );
+      }
       errors.forEach((error) => recordRowError(row, error));
       return failedRowArtifacts(errors.map((error) => errorMessage(error)).join('; '));
     };
@@ -420,9 +429,24 @@ export const createEvaluateDataset =
           },
           task: async ({ input }) => runRow(input),
         },
-        withScoreCollection(all, collector, log)
+        // Includes `evaluatorOverrides`: a throw from any evaluator is recorded as a row error, not
+        // thrown into the executor. Overrides are opaque test doubles, so they are not given the
+        // `rowError` placeholder check the built-in evaluators have; a failed row is reported by
+        // `rowErrors` either way.
+        withScoreCollection(all, collector, log, (input, evaluatorName, error) =>
+          rowErrors.push(
+            new Error(
+              `${describeRow(input)} evaluator ${evaluatorName} failed: ${errorMessage(error)}`,
+              {
+                cause: error,
+              }
+            )
+          )
+        )
       );
     } catch (error) {
+      // Backstop: the wrapper above catches evaluator throws, so only an executor-level failure
+      // (not one of ours) should land here.
       problems.push(error);
     }
 

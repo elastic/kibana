@@ -14,6 +14,7 @@ import {
   generationUsageOf,
   isParkedAtGate,
   isReviewSettled,
+  splitFingerprintMatch,
   toInsights,
 } from './collect';
 import { attackDiscoveryIndexForSpace } from './constants';
@@ -328,5 +329,28 @@ describe('countIndexedAttacks', () => {
         log,
       })
     ).resolves.toBeUndefined();
+  });
+});
+
+describe('splitFingerprintMatch', () => {
+  const attach = (id: string) => ({ attack_discovery_id: id });
+
+  it('counts an attachment a review declared as a sibling, and any other as an existing attach', () => {
+    expect(
+      splitFingerprintMatch({
+        reviews: [{ attack_discovery_id: 'a', sibling_attack_discovery_ids: ['b'] }],
+        attachments: [attach('b'), attach('c')],
+      })
+    ).toEqual({
+      reviewedAttackIds: ['a'],
+      siblingAttackIds: ['b'],
+      existingAttachCount: 1,
+      attachCount: 2,
+    });
+  });
+
+  it('is undefined when the output carries no reviews or attachments list', () => {
+    expect(splitFingerprintMatch(undefined)).toBeUndefined();
+    expect(splitFingerprintMatch({ reviews: [] })).toBeUndefined();
   });
 });

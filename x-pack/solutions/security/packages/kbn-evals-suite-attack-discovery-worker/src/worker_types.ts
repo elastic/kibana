@@ -119,7 +119,8 @@ export interface WorkerOutcomeEvent {
 
 export interface WorkerArtifacts {
   /**
-   * Set only on the placeholder a failed row returns (seed, run, collect or cleanup threw). Every
+   * Set only on the placeholder a failed row returns (seed, run, collect, cancel or cleanup threw,
+   * or the row's scenario is unknown). Every
    * evaluator checks it first and reports `ROW_FAILED` instead of scoring the empty artifacts.
    */
   rowError?: string;
@@ -150,7 +151,14 @@ export interface WorkerArtifacts {
   indexedAttackCount?: number;
   /** Attacks `match_fingerprints` handed back for review; undefined when it did not run. */
   fingerprintReviewCount?: number;
+  /** All attachments `match_fingerprints` reported: same-run siblings plus existing attaches. */
   fingerprintAttachCount?: number;
+  /** Attachments to an Investigation that already existed; the space starts empty, so none expected. */
+  fingerprintExistingAttachCount?: number;
+  /** Attacks attached as same-run siblings of a reviewed group (listed by that group's review). */
+  fingerprintSiblingAttackIds?: string[];
+  /** `attack_discovery_id` of every review the matcher handed back. */
+  fingerprintReviewedAttackIds?: string[];
   /** Reviews the matcher handed back that already point at an existing Investigation. */
   fingerprintMatchedCount?: number;
   fingerprintMatchFailed: boolean;

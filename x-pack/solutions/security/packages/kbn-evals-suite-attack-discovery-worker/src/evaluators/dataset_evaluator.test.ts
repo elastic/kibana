@@ -117,6 +117,10 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
     persistedAttackIds: ['attack-1'],
     indexedAttackCount: 1,
     fingerprintReviewCount: 1,
+    fingerprintAttachCount: 0,
+    fingerprintExistingAttachCount: 0,
+    fingerprintSiblingAttackIds: [],
+    fingerprintReviewedAttackIds: ['attack-1'],
     dispatchedReviewExecutionIds: ['review-1'],
     reviews: [
       {
@@ -191,15 +195,17 @@ const realStyleExecutor = (): EvalsExecutorClient =>
       const jobs = datasets.flatMap(({ examples }) =>
         examples.map((example) =>
           limited(async () => {
-            const output = await task(example);
-            for (const evaluator of evaluators) {
-              await evaluator.evaluate({
-                input: example.input,
-                output,
-                expected: example.output,
-                metadata: example.metadata,
-              });
-            }
+            const taskOutput = await task(example);
+            await Promise.all(
+              evaluators.map((evaluator) =>
+                evaluator.evaluate({
+                  input: example.input,
+                  output: { ...taskOutput, traceId: 'trace-1' } as WorkerArtifacts,
+                  expected: example.output,
+                  metadata: example.metadata,
+                })
+              )
+            );
           })
         )
       );
@@ -244,6 +250,23 @@ const evaluateRow = (scenarioId: string) =>
     dataset: { name: 'seam', description: 'positive control', examples: [rowFor(scenarioId)] },
   });
 
+const evaluateExamples = (
+  examples: WorkerExample[],
+  evaluatorOverrides?: Array<Evaluator<WorkerExample, WorkerArtifacts>>
+) =>
+  createEvaluateDataset({
+    client,
+    evaluators,
+    executorClient: realStyleExecutor(),
+    esClient: {} as Client,
+    fetch: jest.fn() as unknown as HttpHandler,
+    log,
+    routing,
+  })({
+    dataset: { name: 'seam', description: 'real-style', examples },
+    evaluatorOverrides,
+  });
+
 const evaluateRows = (scenarioIds: string[]) =>
   createEvaluateDataset({
     client,
@@ -271,6 +294,7 @@ describe('createEvaluateDataset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     assertClean.mockReset();
+    collect.mockReset();
     seed.mockResolvedValue({
       runMarker: 'marker',
       spaceId: 'space',
@@ -437,6 +461,77 @@ describe('createEvaluateDataset', () => {
       // Row 2 was scored: its own scores are in the summary and pass, so only row 1 is a miss.
       expect(error.message).toMatch(/CODE evaluator miss/);
       expect(error.message).not.toMatch(new RegExp(`\\[[^\\]]*${LAST}\\]`));
+    });
+
+    it('turns a judge that throws on row 1 into a reported error, and still runs row 2', async () => {
+      collect.mockResolvedValueOnce(attackArtifacts()).mockResolvedValueOnce(quietArtifacts());
+      assertClean.mockImplementation(async ({ when }) => {
+        if (when === 'after the last row') throw new Error('late write left alerts behind');
+      });
+      const flakyJudge: Evaluator<WorkerExample, WorkerArtifacts> = {
+        name: 'FlakyJudge',
+        kind: 'LLM',
+        evaluate: async ({ input }: { input?: { scenarioId?: string } }) => {
+          if (input?.scenarioId === LAST) throw new Error('Missing scores for criterion 2');
+          return { score: 1 };
+        },
+      } as unknown as Evaluator<WorkerExample, WorkerArtifacts>;
+      const error = await rejectionOf(
+        evaluateExamples([rowFor(LAST), rowFor(FIRST)], [flakyJudge])
+      );
+      // Row 2's collect ran before the evaluation settled: nothing was left detached.
+      expect(collect).toHaveBeenCalledTimes(2);
+      expect(seed).toHaveBeenCalledTimes(2);
+      expect(error.message).toMatch(
+        new RegExp(`: ${LAST} evaluator FlakyJudge failed: Missing scores for criterion 2`)
+      );
+      expect(error.message).toMatch(/late write left alerts behind/);
+    });
+
+    it('reports a throwing built-in judge with its space, scenario and evaluator name', async () => {
+      collect.mockResolvedValueOnce(attackArtifacts()).mockResolvedValueOnce(quietArtifacts());
+      const throwingJudge = () =>
+        ({
+          name: 'criteria',
+          kind: 'LLM',
+          evaluate: async () => {
+            throw new Error('inference connector unavailable');
+          },
+        } as unknown as Evaluator);
+      const error = await rejectionOf(
+        createEvaluateDataset({
+          client,
+          evaluators: {
+            criteria: throwingJudge,
+            correctnessAnalysis: throwingJudge,
+            groundednessAnalysis: throwingJudge,
+          } as unknown as DefaultEvaluators,
+          executorClient: realStyleExecutor(),
+          esClient: {} as Client,
+          fetch: jest.fn() as unknown as HttpHandler,
+          log,
+          routing,
+        })({
+          dataset: {
+            name: 'seam',
+            description: 'real-style',
+            examples: [rowFor(LAST), rowFor(FIRST)],
+          },
+        })
+      );
+      expect(collect).toHaveBeenCalledTimes(2);
+      expect(error.message).toMatch(
+        /: positive-chain-with-noise evaluator (DiscoveryNarrativeRubric|VerdictRationaleRubric) failed: inference connector unavailable/
+      );
+    });
+
+    it('does not throw from a CODE evaluator on a row whose input is undefined', async () => {
+      const noInput = { ...rowFor(FIRST), input: undefined } as unknown as WorkerExample;
+      const error = await rejectionOf(evaluateExamples([noInput]));
+      expect(error).not.toBeInstanceOf(TypeError);
+      expect(error.message).toMatch(/unknown row evaluator|Unknown scenario "unknown"/);
+      expect(error.message).toMatch(/CODE evaluator miss/);
+      expect(error.message).toMatch(/unknown row/);
     });
 
     it('reports a collect error and a cleanup error from the same row', async () => {

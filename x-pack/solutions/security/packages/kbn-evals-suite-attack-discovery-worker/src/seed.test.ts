@@ -290,8 +290,16 @@ describe('seedScenario partial failure', () => {
     });
 
     it.each([
-      ['meta.statusCode', Object.assign(new Error('bad request'), { meta: { statusCode: 400 } })],
-      ['statusCode', Object.assign(new Error('too large'), { statusCode: 413 })],
+      [
+        '400 on the first attempt',
+        Object.assign(new Error('bad request'), {
+          meta: { statusCode: 400, meta: { attempts: 0 } },
+        }),
+      ],
+      [
+        '413 on the first attempt',
+        Object.assign(new Error('too large'), { meta: { statusCode: 413, meta: { attempts: 0 } } }),
+      ],
     ])(
       'treats a 4xx rejection of the seed bulk (%s) as settled: one pass, no pause',
       async (_where, rejection) => {
@@ -307,6 +315,20 @@ describe('seedScenario partial failure', () => {
     it.each([
       ['a 5xx', Object.assign(new Error('unavailable'), { meta: { statusCode: 503 } })],
       ['a transport error without a status', new Error('connection reset')],
+      [
+        'a 429 after a transport retry (attempt 1 may have been accepted)',
+        Object.assign(new Error('unavailable (429)'), {
+          meta: { statusCode: 429, meta: { attempts: 1 } },
+        }),
+      ],
+      [
+        'a 4xx with no attempts information',
+        Object.assign(new Error('unavailable (4xx)'), { meta: { statusCode: 400 } }),
+      ],
+      [
+        'a top-level statusCode with no attempts information',
+        Object.assign(new Error('unavailable (413)'), { statusCode: 413 }),
+      ],
     ])('keeps %s on the seed bulk unsettled: the whole window', async (_what, rejection) => {
       const bulk = jest.fn().mockRejectedValueOnce(rejection).mockResolvedValue(cleaned);
       const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));

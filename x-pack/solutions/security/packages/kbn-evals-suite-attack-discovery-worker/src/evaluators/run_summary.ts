@@ -54,23 +54,49 @@ export interface RunCollector {
 
 export const createRunCollector = (): RunCollector => ({ scores: new Map(), codeFailures: [] });
 
-const describeRow = (input: { scenarioId: string; spaceId: string }): string =>
-  `${input.spaceId}: ${input.scenarioId}`;
+/** `<space>: <scenario>`, tolerating a row whose input is missing or partial. */
+export const describeRow = (
+  input: { scenarioId?: string; spaceId?: string } | null | undefined
+): string =>
+  input?.scenarioId === undefined && input?.spaceId === undefined
+    ? 'unknown row'
+    : `${input.spaceId ?? '?'}: ${input.scenarioId ?? '?'}`;
+
+export const EVALUATOR_FAILED_LABEL = 'EVALUATOR_FAILED';
 
 /**
  * Wraps each evaluator so every observed score is recorded, keyed by evaluator name, and every
- * CODE miss is kept with its row. The wrapper is transparent: same inputs, same outputs, same
- * N/A semantics. It only observes.
+ * CODE miss is kept with its row. Scores pass through unchanged, with one exception: an evaluator
+ * that throws never escapes. The executor runs evaluators inside the row's job with no catch, so a
+ * throw would reject the whole experiment and leave later rows running detached. It becomes a
+ * `null` score labelled `EVALUATOR_FAILED` (a miss for CODE evaluators; a judge's null is
+ * excluded from its mean, never counted as a pass) and is handed to `onEvaluatorError`, which is
+ * what makes the run fail.
  */
 export const withScoreCollection = (
   evaluators: WorkerEvaluator[],
   collector: RunCollector,
-  log?: ToolingLog
+  log?: ToolingLog,
+  onEvaluatorError?: (
+    input: { scenarioId?: string; spaceId?: string } | undefined,
+    evaluatorName: string,
+    error: unknown
+  ) => void
 ): WorkerEvaluator[] =>
   evaluators.map((evaluator) => ({
     ...evaluator,
     evaluate: async (args: Parameters<WorkerEvaluator['evaluate']>[0]) => {
-      const result = await evaluator.evaluate(args);
+      let result: Awaited<ReturnType<WorkerEvaluator['evaluate']>>;
+      try {
+        result = await evaluator.evaluate(args);
+      } catch (error) {
+        onEvaluatorError?.(args.input, evaluator.name, error);
+        result = {
+          score: null,
+          label: EVALUATOR_FAILED_LABEL,
+          explanation: error instanceof Error ? error.message : String(error),
+        };
+      }
       const bucket = collector.scores.get(evaluator.name) ?? [];
       bucket.push(result.score ?? null);
       collector.scores.set(evaluator.name, bucket);
@@ -82,7 +108,7 @@ export const withScoreCollection = (
       if (miss && evaluator.kind === 'CODE') {
         collector.codeFailures.push({
           evaluator: evaluator.name,
-          row: describeRow(args.input as { scenarioId: string; spaceId: string }),
+          row: describeRow(args.input),
           score: result.score ?? null,
           label: result.label,
           explanation: result.explanation,
