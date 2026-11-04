@@ -32,7 +32,10 @@ import { huntCoordinator } from '../../services/watches/hunt/hunt_coordinator';
 import type { HuntCoordinatorResult } from '../../services/watches/hunt/hunt_coordinator';
 import { emptyHuntForThreatResult } from '../../services/watches/hunt/tier1/hunt_for_threat';
 
-jest.mock('./lib/scoped_model', () => ({ resolveScopedModel: jest.fn() }));
+jest.mock('./lib/scoped_model', () => ({
+  resolveScopedModel: jest.fn(),
+  resolveConfiguredScopedModel: jest.fn().mockResolvedValue(undefined),
+}));
 jest.mock('../../services/watches/hunt/hunt_coordinator', () => ({ huntCoordinator: jest.fn() }));
 
 const resolveScopedModelMock = resolveScopedModel as jest.MockedFunction<typeof resolveScopedModel>;
@@ -102,7 +105,11 @@ const makeDeps = ({
   const asInternalUser = { search: jest.fn() };
   const uiSettingsGet = jest.fn().mockResolvedValue(indexPatterns);
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
       uiSettings: { client: { get: uiSettingsGet } },

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen, waitFor } from '@testing-library/react';
+import { act, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 import type { Datatable } from '@kbn/expressions-plugin/common';
@@ -22,6 +22,21 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { InvertedRawValueMap, LayerFieldFormats } from '../helpers';
 import type { RawValue } from '@kbn/data-plugin/common';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
+
+// Captures the `closePopover` handed to the real EuiPopover, which EUI calls on Escape or outside click.
+// jsdom never activates the popover's focus trap, so those dismissals can't be triggered directly.
+let mockClosePopover: (() => void) | undefined;
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const { createElement } = jest.requireActual('react');
+  return {
+    ...actual,
+    EuiPopover: (props: { closePopover: () => void }) => {
+      mockClosePopover = props.closePopover;
+      return createElement(actual.EuiPopover, props);
+    },
+  };
+});
 
 const legendCellValueActions: LegendCellValueActions = [
   { id: 'action_1', displayName: 'Action 1', iconType: 'testIcon1', execute: () => {} },
@@ -267,6 +282,44 @@ describe('getLegendAction', () => {
     renderWithKibanaRenderContext(<Component {...makeSeriesProps("Women's Accessories")} />);
     expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
     expect(screen.getByTestId("legend-Women's Accessories - Label B")).toBeInTheDocument();
+  });
+
+  it('mounts the popover only when opened, and unmounts it when closed', async () => {
+    const Component = buildComponent(sampleLayer);
+    renderWithKibanaRenderContext(<Component {...makeSeriesProps("Women's Accessories")} />);
+    expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument();
+
+    const user = userEvent.setup();
+    await user.click(screen.getByRole('button', { name: /legend actions/i }));
+    expect(await screen.findByText('Action 1')).toBeInTheDocument();
+    expect(screen.getByTitle(/filter options/)).toBeInTheDocument();
+
+    await user.click(screen.getByRole('button', { name: /legend actions/i }));
+    await waitFor(() => expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument());
+    expect(screen.getByRole('button', { name: /legend actions/i })).toBeInTheDocument();
+  });
+
+  it('closes on Escape or outside click and returns focus to the trigger', async () => {
+    const Component = buildComponent(sampleLayer);
+    await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));
+    expect(await screen.findByText('Action 1')).toBeInTheDocument();
+
+    act(() => mockClosePopover?.());
+    await waitFor(() => expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /legend actions/i })).toHaveFocus()
+    );
+  });
+
+  it('closes when an action is selected and returns focus to the trigger', async () => {
+    const Component = buildComponent(sampleLayer);
+    const { user } = await renderAndOpen(Component, makeSeriesProps("Women's Accessories"));
+
+    await user.click(await screen.findByText('Action 1'));
+    await waitFor(() => expect(screen.queryByTitle(/filter options/)).not.toBeInTheDocument());
+    await waitFor(() =>
+      expect(screen.getByRole('button', { name: /legend actions/i })).toHaveFocus()
+    );
   });
 
   it('shows cell value actions in the popover', async () => {

@@ -538,7 +538,9 @@ describe('DiscoverSessionSaveModalContainer', () => {
         await modalProps?.onSave(getOnSaveProps());
       });
 
-      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession);
+      expect(transferSpy).toHaveBeenCalledWith(TransferAction.SaveSession, {
+        state: { controlGroupState: undefined },
+      });
     });
 
     it('should navigate to new session on Save As from embedded editor', async () => {
@@ -667,6 +669,36 @@ describe('DiscoverSessionSaveModalContainer', () => {
           id: toolkit.getCurrentTab().id,
         },
       });
+    });
+
+    it('should close the modal only after navigating to a new Discover session', async () => {
+      const services = createDiscoverServicesMock();
+      let finishNavigation: () => void = () => {};
+      jest.spyOn(services.locator, 'navigate').mockImplementation(
+        () =>
+          new Promise<void>((resolve) => {
+            finishNavigation = resolve;
+          })
+      );
+      const { modalProps, onClose } = await setup({
+        persistedDiscoverSession: false,
+        services,
+      });
+
+      let savePromise: Promise<void> | undefined;
+      await act(async () => {
+        savePromise = modalProps?.onSave(getOnSaveProps());
+      });
+
+      expect(services.locator.navigate).toHaveBeenCalled();
+      expect(onClose).not.toHaveBeenCalled();
+
+      await act(async () => {
+        finishNavigation();
+        await savePromise;
+      });
+
+      expect(onClose).toHaveBeenCalled();
     });
 
     it('should include the resolved profile state when navigating to a newly saved session', async () => {

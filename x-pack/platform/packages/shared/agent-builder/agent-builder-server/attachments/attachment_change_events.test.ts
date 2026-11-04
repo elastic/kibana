@@ -36,6 +36,7 @@ describe('attachmentChangesToEvents', () => {
       current_version: 1,
       render_inline: false,
       source: 'http_api',
+      format: 2,
     });
     expect(events[1].data).toEqual({
       attachment_id: 'a2',
@@ -44,12 +45,14 @@ describe('attachmentChangesToEvents', () => {
       current_version: 2,
       render_inline: false,
       source: 'http_api',
+      format: 2,
     });
     expect(events[2].data).toEqual({
       attachment_id: 'a3',
       attachment_type: 'text',
       hard_delete: true,
       source: 'http_api',
+      format: 2,
     });
   });
 
@@ -95,5 +98,38 @@ describe('attachmentChangesToEvents', () => {
 
   it('returns an empty array for no changes', () => {
     expect(attachmentChangesToEvents([], { source: 'http_api', actor })).toEqual([]);
+  });
+
+  it('copies tool_call_id, hidden and description, sets trigger_event_id, and maps restored', () => {
+    const events = attachmentChangesToEvents(
+      [
+        {
+          kind: 'added',
+          attachment_id: 'a1',
+          attachment_type: 'text',
+          current_version: 1,
+          tool_call_id: 'call-1',
+          hidden: true,
+          description: 'Notes',
+        },
+        { kind: 'restored', attachment_id: 'a2', attachment_type: 'text', current_version: 3 },
+      ],
+      {
+        source: 'execution',
+        actor,
+        execution_id: 'r1::execution',
+        trigger_event_id: 'r1::user_message',
+      }
+    );
+    expect(events[0]).toMatchObject({
+      execution_id: 'r1::execution',
+      trigger_event_id: 'r1::user_message',
+      data: { tool_call_id: 'call-1', hidden: true, description: 'Notes', format: 2 },
+    });
+    expect(events[1]).toMatchObject({
+      type: TimelineEventType.attachmentRestored,
+      data: { attachment_id: 'a2', current_version: 3, source: 'execution', format: 2 },
+    });
+    expect(events[1].data).not.toHaveProperty('render_inline');
   });
 });

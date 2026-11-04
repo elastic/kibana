@@ -8,6 +8,7 @@
  */
 
 import { createAsyncThunk } from 'redux-toolkit-v1';
+import { isHttpFetchError } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import { isTerminalStatus } from '@kbn/workflows';
@@ -29,6 +30,11 @@ export interface LoadExecutionParams {
   loadMore?: boolean;
 }
 
+export interface LoadExecutionRejection {
+  message: string;
+  isNotFound: boolean;
+}
+
 export interface LoadExecutionResponse {
   execution: WorkflowExecutionDto;
   stepExecutionPages: WorkflowStepExecutionDto[][];
@@ -40,7 +46,7 @@ export interface LoadExecutionResponse {
 export const loadExecutionThunk = createAsyncThunk<
   LoadExecutionResponse,
   LoadExecutionParams,
-  { state: RootState; extra: { services: WorkflowsServices }; rejectValue: string }
+  { state: RootState; extra: { services: WorkflowsServices }; rejectValue: LoadExecutionRejection }
 >(
   'detail/loadExecutionThunk',
   async (
@@ -54,6 +60,7 @@ export const loadExecutionThunk = createAsyncThunk<
       stepExecutionPages: loadedPages,
       stepExecutionsTotal: previousTotal,
       computedExecution,
+      executionError: previousError,
     } = getState().detail;
 
     try {
@@ -70,7 +77,7 @@ export const loadExecutionThunk = createAsyncThunk<
       const isCurrentRequest = () =>
         !signal.aborted && getState().detail.executionRequest?.requestId === requestId;
       if (!isCurrentRequest()) {
-        return rejectWithValue('Execution load was superseded');
+        return rejectWithValue({ message: 'Execution load was superseded', isNotFound: false });
       }
 
       const pages = keepLoadedPages ? [...loadedPages] : [];
@@ -96,7 +103,7 @@ export const loadExecutionThunk = createAsyncThunk<
       // Bound concurrency even when the user has manually loaded beyond the automatic budget.
       for (let offset = pages.length; offset < pageCount; offset += PAGE_REQUEST_CONCURRENCY) {
         if (!isCurrentRequest()) {
-          return rejectWithValue('Execution load was superseded');
+          return rejectWithValue({ message: 'Execution load was superseded', isNotFound: false });
         }
         const batch = await Promise.all(
           Array.from(
@@ -120,8 +127,19 @@ export const loadExecutionThunk = createAsyncThunk<
           computedExecution ?? performComputation(execution.yaml, execution.workflowDefinition),
       };
     } catch (error) {
-      const errorMessage = error.body?.message || error.message || 'Failed to load execution';
-      if (getState().detail.executionRequest?.requestId === requestId && !signal.aborted) {
+      const isNotFound = isHttpFetchError(error) && error.response?.status === 404;
+      const errorMessage = isNotFound
+        ? i18n.translate('workflows.detail.loadExecution.notFound', {
+            defaultMessage: "This execution doesn't exist or has been deleted.",
+          })
+        : error.body?.message || error.message || 'Failed to load execution';
+      // Toast once per failure streak: polling retries must not stack the same error.
+      const isInFailureStreak = !loadMore && previousError?.id === id;
+      if (
+        !isInFailureStreak &&
+        getState().detail.executionRequest?.requestId === requestId &&
+        !signal.aborted
+      ) {
         notifications.toasts.addError(errorMessage, {
           title: loadMore
             ? i18n.translate('workflows.detail.loadMoreStepExecutions.error', {
@@ -132,7 +150,7 @@ export const loadExecutionThunk = createAsyncThunk<
               }),
         });
       }
-      return rejectWithValue(errorMessage);
+      return rejectWithValue({ message: errorMessage, isNotFound });
     }
   },
   {
