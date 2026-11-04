@@ -45,7 +45,7 @@ apiTest.describe(
         const { summary, members, ...definition } = getRes.body as Record<string, unknown>;
         const { members: _createdMembers, ...createdDefinition } = created;
         expect(definition).toMatchObject(createdDefinition);
-        expect(Array.isArray(members)).toBe(true);
+        expect(members).toStrictEqual([]);
         expect(summary).toStrictEqual({
           sliValue: -1,
           status: 'NO_DATA',
@@ -58,7 +58,7 @@ apiTest.describe(
     );
 
     apiTest(
-      'computes a summary for the maximum number of members with mixed instanceIds',
+      'returns a NO_DATA summary for the maximum number of unresolved members with mixed instanceIds',
       async ({ apiClient }) => {
         const members = Array.from({ length: 25 }, (_, i) => ({
           sloId: `max-member-slo-${i % 5}`,
@@ -71,15 +71,31 @@ apiTest.describe(
           responseType: 'json',
         });
         expect(createRes).toHaveStatusCode(200);
+        const { id } = createRes.body as { id: string };
 
-        const getRes = await apiClient.get(
-          `api/observability/slo_composites/${(createRes.body as { id: string }).id}`,
+        const getRes = await apiClient.get(`api/observability/slo_composites/${id}`, {
+          headers,
+          responseType: 'json',
+        });
+        expect(getRes).toHaveStatusCode(200);
+        expect(getRes.body).toMatchObject({
+          members: [],
+          summary: {
+            sliValue: -1,
+            status: 'NO_DATA',
+            fiveMinuteBurnRate: 0,
+            oneHourBurnRate: 0,
+            oneDayBurnRate: 0,
+            errorBudget: { initial: 0, consumed: 0 },
+          },
+        });
+
+        const definitionRes = await apiClient.get(
+          `api/observability/slo_composites/_definitions/${id}`,
           { headers, responseType: 'json' }
         );
-        expect(getRes).toHaveStatusCode(200);
-        const summary = (getRes.body as { summary: Record<string, unknown> }).summary;
-        expect(typeof summary.sliValue).toBe('number');
-        expect(['NO_DATA', 'HEALTHY', 'DEGRADING', 'VIOLATED']).toContain(summary.status);
+        expect(definitionRes).toHaveStatusCode(200);
+        expect((definitionRes.body as { members: unknown[] }).members).toStrictEqual(members);
       }
     );
 

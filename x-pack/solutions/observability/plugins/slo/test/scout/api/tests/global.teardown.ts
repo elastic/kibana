@@ -17,7 +17,7 @@ globalTeardownHook(
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   async ({ apiServices, esClient, kbnClient, log }) => {
     await apiServices.core.settings({
-      'feature_flags.overrides': { [SLO_COMPOSITE_ENABLED]: false },
+      'feature_flags.overrides': { [SLO_COMPOSITE_ENABLED]: null },
     });
     await removeSloScoutHostsDataForge(esClient, log);
     await removeSloScoutStackData(esClient, log);
