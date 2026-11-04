@@ -8,7 +8,7 @@
 import { css } from '@emotion/react';
 import React, { useMemo, useState } from 'react';
 import { EuiPanel, EuiProvider } from '@elastic/eui';
-import { PerformanceContext } from '@kbn/ebt-tools';
+import { PerformanceContext } from '@kbn/ebt-tools/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';

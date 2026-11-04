@@ -24,7 +24,7 @@ import type { Streams } from '@kbn/streams-schema';
 import { isDraftStream } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import React, { useCallback, useEffect, useState } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { getStreamTypeFromDefinition } from '../../../../util/get_stream_type_from_definition';
 import { useKbnUrlStateStorageFromRouterContext } from '../../../../util/kbn_url_state_context';
 import { StreamsAppContextProvider } from '../../../streams_app_context_provider';

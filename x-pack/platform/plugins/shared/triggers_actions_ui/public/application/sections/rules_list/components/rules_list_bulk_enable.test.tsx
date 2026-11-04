@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { IToasts } from '@kbn/core/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import {
@@ -111,7 +111,7 @@ jest.mock('@kbn/kibana-utils-plugin/public', () => {
   };
 });
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn(() => [null, () => null]));
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 jest.mock('@kbn/cps-utils', () => ({
   ...jest.requireActual('@kbn/cps-utils'),
   useRouteBasedCpsPickerAccess: jest.fn(),

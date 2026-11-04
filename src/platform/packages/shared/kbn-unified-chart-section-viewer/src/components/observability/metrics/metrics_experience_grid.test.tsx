@@ -43,7 +43,7 @@ import { createFeatureFlagsMock } from '../../../test_utils/create_feature_flags
 import { EventBasedTelemetryProvider } from '../../../context/ebt_telemetry_context';
 
 jest.mock('./context/metrics_experience_state_provider');
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
   usePerformanceContext: () => ({
     onPageReady: jest.fn(),

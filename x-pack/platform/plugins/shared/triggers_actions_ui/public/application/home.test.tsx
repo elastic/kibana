@@ -32,7 +32,7 @@ jest.mock('./components/health_check', () => ({
 jest.mock('./context/health_context', () => ({
   HealthContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
-jest.mock('@kbn/ebt-tools', () => ({
+jest.mock('@kbn/ebt-tools/react', () => ({
   PerformanceContextProvider: ({ children }: { children: React.ReactNode }) => <>{children}</>,
 }));
 

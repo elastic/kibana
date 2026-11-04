@@ -6,7 +6,7 @@
  */
 
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import * as useUiSettingHook from '@kbn/kibana-react-plugin/public/ui_settings/use_ui_setting';
 import { observabilityAIAssistantPluginMock } from '@kbn/observability-ai-assistant-plugin/public/mock';
@@ -213,7 +213,7 @@ jest.mock('../../hooks/use_fetch_rule', () => {
   };
 });
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const usePerformanceContextMock = usePerformanceContext as jest.Mock;
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;

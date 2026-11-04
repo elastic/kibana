@@ -6,7 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import React, { useEffect } from 'react';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';

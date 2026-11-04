@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import React, { useEffect, useState, useRef } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPageSection, useEuiTheme } from '@elastic/eui';
 import { useTrackPageview } from '@kbn/observability-shared-plugin/public';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { AppHeader } from '@kbn/app-header';
 import { css } from '@emotion/react';

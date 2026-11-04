@@ -7,7 +7,7 @@
 
 import { fetchPipelineStructureTree } from './fetch_pipeline_structure_tree';
 import type { PipelineTreeNode } from '@kbn/ingest-pipelines-shared';
-import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared';
+import { MAX_TREE_LEVEL } from '@kbn/ingest-pipelines-shared/constants';
 import type { estypes } from '@elastic/elasticsearch';
 
 describe('fetchPipelineStructureTree', () => {

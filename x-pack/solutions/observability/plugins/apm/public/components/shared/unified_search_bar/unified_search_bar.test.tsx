@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { act, render, waitFor } from '@testing-library/react';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import type { Query } from '@kbn/es-query';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';

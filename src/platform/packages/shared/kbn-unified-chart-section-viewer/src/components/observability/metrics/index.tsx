@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { PerformanceContextProvider } from '@kbn/ebt-tools';
+import { PerformanceContextProvider } from '@kbn/ebt-tools/react';
 import { MetricsExperienceGrid } from './metrics_experience_grid';
 import { withRestorableState } from '../../../restorable_state';
 import { MetricsExperienceStateProvider } from './context/metrics_experience_state_provider';

@@ -23,7 +23,7 @@ jest.mock('../../hooks/use_fetch_alert_detail');
 
 jest.mock('./hooks/use_find_proximal_alerts');
 jest.mock('@kbn/observability-shared-plugin/public');
-jest.mock('@kbn/ebt-tools');
+jest.mock('@kbn/ebt-tools/react');
 
 const useFetchAlertDetailMock = useFetchAlertDetail as jest.Mock;
 const useFindProximalAlertsMock = useFindProximalAlerts as jest.Mock;

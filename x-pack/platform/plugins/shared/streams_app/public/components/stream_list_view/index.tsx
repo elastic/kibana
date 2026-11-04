@@ -7,7 +7,7 @@
 
 import { EuiEmptyPrompt, EuiLoadingElastic } from '@elastic/eui';
 import type { AppHeaderMenu } from '@kbn/app-header';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { Streams } from '@kbn/streams-schema';
 import type { WiredStreamsStatus } from '@kbn/streams-plugin/public';

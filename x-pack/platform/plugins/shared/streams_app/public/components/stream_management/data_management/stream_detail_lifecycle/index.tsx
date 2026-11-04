@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiFlexGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { Streams } from '@kbn/streams-schema';
-import { usePerformanceContext } from '@kbn/ebt-tools';
+import { usePerformanceContext } from '@kbn/ebt-tools/react';
 import { getTimeDifferenceInSeconds } from '@kbn/timerange';
 import { StreamDetailFailureStore } from './failure_store';
 import { StreamDetailGeneralData } from './general_data';

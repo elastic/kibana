@@ -8,7 +8,7 @@
 import { EuiPageSection, EuiSpacer } from '@elastic/eui';
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { IBasePath } from '@kbn/core-http-browser';
-import { usePageReady } from '@kbn/ebt-tools';
+import { usePageReady } from '@kbn/ebt-tools/react';
 import { i18n } from '@kbn/i18n';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { useIsMutating } from '@kbn/react-query';
