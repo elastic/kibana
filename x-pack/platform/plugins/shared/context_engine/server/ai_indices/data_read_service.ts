@@ -14,7 +14,7 @@ import type {
   QueryAiIndicesResponse,
 } from '../../common/http_api/ai_indices';
 import { AiIndexAuditAction, aiIndexAuditEvent } from '../audit/audit_events';
-import { describeAiIndex } from './describe';
+import { describeAiIndex, type MemoryRecallMode } from './describe';
 import { AiIndexNotReadableError } from './errors';
 import { filterReadableAiIndices, probeAiIndices } from './filter_readable_ai_indices';
 import { queryAiIndices } from './query';
@@ -24,7 +24,10 @@ import type { AiIndexService } from './service';
 export interface AiIndexDataReadServiceApi {
   query(request: QueryAiIndicesRequest): Promise<QueryAiIndicesResponse>;
   /** Throws `AiIndexNotFoundError` for an unknown id, `AiIndexNotReadableError` when the caller cannot read the backing index. */
-  describe(id: string): Promise<DescribeAiIndexResponse>;
+  describe(
+    id: string,
+    options?: { memoryRecall?: MemoryRecallMode }
+  ): Promise<DescribeAiIndexResponse>;
   /**
    * The AI Indices registered in this space whose backing index the caller can read. An empty
    * backing index still counts. Left out when the caller cannot read it, or when the check itself
@@ -71,7 +74,10 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
     throw new Error(`AI index '${aiIndex.id}' is not available: ${failure.reason}`);
   }
 
-  async describe(id: string): Promise<DescribeAiIndexResponse> {
+  async describe(
+    id: string,
+    { memoryRecall }: { memoryRecall?: MemoryRecallMode } = {}
+  ): Promise<DescribeAiIndexResponse> {
     const { esClient, spaceId, auditLogger, aiIndexService, isMemoryEnabled } = this.deps;
     try {
       const [aiIndex, includeMemory] = await Promise.all([
@@ -79,7 +85,13 @@ export class AiIndexDataReadService implements AiIndexDataReadServiceApi {
         isMemoryEnabled(),
       ]);
       await this.assertReadable(aiIndex);
-      const response = await describeAiIndex({ esClient, aiIndex, spaceId, includeMemory });
+      const response = await describeAiIndex({
+        esClient,
+        aiIndex,
+        spaceId,
+        includeMemory,
+        memoryRecall,
+      });
       auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DESCRIBE, id }));
       return { response };
     } catch (error) {

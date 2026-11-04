@@ -218,6 +218,21 @@ describe('describeAiIndex', () => {
     expect(response.endsWith(memoryAwareExampleQueriesBlock)).toBe(true);
   });
 
+  it('points to the recall tool when memory is stored outside the index', async () => {
+    describeAiIndexAggregationsMock.mockResolvedValueOnce({ kiTypeCounts: [], tagCounts: [] });
+
+    const response = await describeAiIndex({
+      ...params,
+      aiIndex: { ...aiIndex, memory_enabled: true },
+      includeMemory: true,
+      memoryRecall: 'tool',
+    });
+
+    expect(response).toContain('Use platform.context_engine.remember to write memory.');
+    expect(response).toContain('Use platform.context_engine.recall to search memory.');
+    expect(response).not.toContain('For cross-session recall');
+  });
+
   it('omits memory capability when memory writes are disabled', async () => {
     const response = await describeAiIndex(params);
 

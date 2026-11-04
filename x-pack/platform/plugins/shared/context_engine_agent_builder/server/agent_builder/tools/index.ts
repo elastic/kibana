@@ -18,7 +18,9 @@ import { createDescribeAiIndexTool } from './describe_ai_index/tool';
 import { createQueryAiIndicesTool } from './query_ai_indices/tool';
 import { createForgetTool } from './forget/tool';
 import { createRememberTool } from './remember/tool';
-import type { CreateMemoryStore } from './memory_store';
+import { createRecallTool } from './recall/tool';
+import type { AiIndexToolDeps } from './ai_index_read_service';
+import type { MemoryBackend } from './memory_store';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -28,14 +30,14 @@ export const registerAgentBuilderTools = ({
   getCoreStart,
   getSecurityStart,
   getWorkflowsManagement,
-  createMemoryStore,
+  memoryBackend,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getContextEngineStart: () => Promise<ContextEnginePluginStart>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
-  createMemoryStore: CreateMemoryStore;
+  memoryBackend: MemoryBackend;
 }): void => {
   agentBuilder.tools.register(
     createSaveAutomationTool({
@@ -63,7 +65,11 @@ export const registerAgentBuilderTools = ({
     })
   );
 
-  const aiIndexToolDeps = { getContextEngineStart, getSecurityStart };
+  const aiIndexToolDeps: AiIndexToolDeps = {
+    getContextEngineStart,
+    getSecurityStart,
+    memoryRecall: memoryBackend.createSearch ? 'tool' : 'esql',
+  };
   agentBuilder.tools.register(createListAiIndicesTool(aiIndexToolDeps));
   agentBuilder.tools.register(createDescribeAiIndexTool(aiIndexToolDeps));
   agentBuilder.tools.register(createQueryAiIndicesTool(aiIndexToolDeps));
@@ -72,7 +78,7 @@ export const registerAgentBuilderTools = ({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
       getCoreStart,
       getSecurityStart,
-      createMemoryStore,
+      createMemoryStore: memoryBackend.createStore,
     })
   );
   agentBuilder.tools.register(
@@ -80,7 +86,15 @@ export const registerAgentBuilderTools = ({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
       getCoreStart,
       getSecurityStart,
-      createMemoryStore,
+      createMemoryStore: memoryBackend.createStore,
+    })
+  );
+  agentBuilder.tools.register(
+    createRecallTool({
+      getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
+      getCoreStart,
+      getSecurityStart,
+      createMemorySearch: memoryBackend.createSearch,
     })
   );
 };

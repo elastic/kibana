@@ -16,11 +16,15 @@ import type { AiIndexField, AiIndexTagCount } from './types';
 
 const MEMORY_KI_TYPE_SET: ReadonlySet<string> = new Set(MEMORY_KI_TYPES);
 
+/** How agents recall memory: ES|QL over the backing index, or the recall tool for an external store. */
+export type MemoryRecallMode = 'esql' | 'tool';
+
 export interface DescribeAiIndexParams {
   esClient: ElasticsearchClient;
   aiIndex: AiIndexHttpItem;
   spaceId: string;
   includeMemory: boolean;
+  memoryRecall?: MemoryRecallMode;
 }
 
 const fieldLine = ({ path, type, searchable, aggregatable }: AiIndexField): string =>
@@ -69,15 +73,14 @@ const tagCountsSection = (counts: AiIndexTagCount[]): string[] =>
 
 const memorySection = (
   { memory_enabled: memoryEnabled }: AiIndexHttpItem,
-  target: string
+  target: string,
+  memoryRecall: MemoryRecallMode
 ): string[] => {
   if (!memoryEnabled) {
     return [];
   }
 
-  const { crossSession } = buildMemoryExampleQueries(target);
-
-  return [
+  const header = [
     'Memory',
     'Memory writes are enabled for this AI-index registry entry.',
     'Available memory types',
@@ -85,6 +88,20 @@ const memorySection = (
     'memory.session_fact',
     'Use platform.context_engine.remember to write memory.',
     'Use platform.context_engine.forget with a memory id to tombstone memory.',
+  ];
+
+  if (memoryRecall === 'tool') {
+    return [
+      ...header,
+      'Memory is stored outside this index, so ES|QL queries do not return it.',
+      'Use platform.context_engine.recall to search memory.',
+    ];
+  }
+
+  const { crossSession } = buildMemoryExampleQueries(target);
+
+  return [
+    ...header,
     'Unless the task specifically calls for memory, exclude memory types from ordinary KI retrieval:',
     EXCLUDE_MEMORY_KI_TYPES_FILTER,
     'For cross-session recall, search granular facts with hybrid retrieval:',
@@ -115,6 +132,7 @@ export const describeAiIndex = async ({
   aiIndex,
   spaceId,
   includeMemory,
+  memoryRecall = 'esql',
 }: DescribeAiIndexParams): Promise<string> => {
   const target = aiIndex.dest.value;
   const { fields, allFields, semanticFields, omittedFieldCount } = await describeAiIndexFields({
@@ -134,7 +152,7 @@ export const describeAiIndex = async ({
     semanticFieldsSection(semanticFields),
     kiTypeCountsSection(kiTypeCounts),
     tagCountsSection(tagCounts),
-    includeMemory ? memorySection(aiIndex, target) : [],
+    includeMemory ? memorySection(aiIndex, target, memoryRecall) : [],
     exampleQueriesSection(aiIndex.dest, includeMemory),
   ]);
 };

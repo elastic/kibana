@@ -39,3 +39,19 @@ export interface MemoryStoreScope {
 }
 
 export type CreateMemoryStore = (scope: MemoryStoreScope) => MemoryStore;
+
+/** A memory returned by {@link MemorySearch}, identified by the KI id that remember returned. */
+export interface RecalledMemory {
+  id: string;
+  type?: string;
+  title?: string;
+  text: string;
+  similarity: number;
+}
+
+/** Searches active, unexpired memories by meaning. */
+export interface MemorySearch {
+  search(params: { query: string; limit: number }): Promise<RecalledMemory[]>;
+}
+
+export type CreateMemorySearch = (scope: MemoryStoreScope) => MemorySearch;

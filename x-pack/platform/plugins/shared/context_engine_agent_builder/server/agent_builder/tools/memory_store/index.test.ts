@@ -6,17 +6,19 @@
  */
 
 import { configSchema } from '../../../config';
-import { createElasticsearchMemoryStore, getMemoryStoreFactory } from '.';
+import { createElasticsearchMemoryStore, getMemoryBackend } from '.';
 
-describe('getMemoryStoreFactory', () => {
-  it('defaults to the Elasticsearch store', () => {
+describe('getMemoryBackend', () => {
+  it('defaults to the Elasticsearch store, recalled through AI index queries', () => {
     const { memory } = configSchema.validate({});
 
     expect(memory.store).toEqual({ type: 'elasticsearch' });
-    expect(getMemoryStoreFactory(memory.store)).toBe(createElasticsearchMemoryStore);
+    expect(getMemoryBackend(memory.store)).toEqual({
+      createStore: createElasticsearchMemoryStore,
+    });
   });
 
-  it('returns a Supermemory store factory when configured', () => {
+  it('returns a Supermemory store with search when configured', () => {
     const { memory } = configSchema.validate({
       memory: { store: { type: 'supermemory', apiKey: 'sm_test' } },
     });
@@ -27,7 +29,9 @@ describe('getMemoryStoreFactory', () => {
       url: 'https://api.supermemory.ai',
       namespacePrefix: 'kibana',
     });
-    expect(getMemoryStoreFactory(memory.store)).not.toBe(createElasticsearchMemoryStore);
+    const { createStore, createSearch } = getMemoryBackend(memory.store);
+    expect(createStore).not.toBe(createElasticsearchMemoryStore);
+    expect(createSearch).toBe(createStore);
   });
 
   it('requires an API key for the Supermemory store', () => {

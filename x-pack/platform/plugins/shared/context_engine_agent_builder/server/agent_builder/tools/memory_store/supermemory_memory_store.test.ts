@@ -77,11 +77,13 @@ describe('createSupermemoryMemoryStore', () => {
       content: `${memory.title}\n\n${memory.description}\n\n${memory.content}`,
       metadata: {
         ki_source: JSON.stringify(memory),
+        id: 'memory-1',
         type: 'memory.session_fact',
         title: 'Duration mapping',
         expires_at: '2026-12-23T12:00:00.000Z',
         updated_at: '2026-09-24T12:00:00.000Z',
         tags: ['logs'],
+        expires_at_ms: Date.parse('2026-12-23T12:00:00.000Z'),
         lifecycle_status: 'active',
       },
     });
@@ -162,6 +164,75 @@ describe('createSupermemoryMemoryStore', () => {
     );
     expect(deleteInit.method).toBe('DELETE');
     expect(JSON.parse(deleteInit.body)).toEqual({ ids: ['mem_1', 'mem_2'] });
+  });
+
+  it('gives non-expiring memories a far-future expiry so the recall filter keeps them', async () => {
+    fetchMock.mockResolvedValue(jsonResponse({ id: 'memory-1', status: 'queued' }));
+    const { expires_at: _, ...nonExpiring } = memory;
+
+    await store.put({ kiId: 'memory-1', document: nonExpiring });
+
+    expect(lastCall().body.metadata.expires_at_ms).toBe(Number.MAX_SAFE_INTEGER);
+  });
+
+  it('searches active, unexpired memories and maps results to memory ids', async () => {
+    jest.useFakeTimers().setSystemTime(new Date('2026-10-01T00:00:00.000Z'));
+    fetchMock.mockResolvedValue(
+      jsonResponse({
+        results: [
+          {
+            id: 'mem_1',
+            memory: 'duration_ms must be cast with TO_DOUBLE',
+            similarity: 0.9,
+            metadata: { id: 'memory-1', type: 'memory.session_fact', title: 'Duration mapping' },
+          },
+          {
+            id: 'chunk_1',
+            chunk: 'Use TO_DOUBLE(duration_ms) before numeric comparisons.',
+            similarity: 0.7,
+            metadata: { id: 'memory-1' },
+          },
+          { id: 'orphan', memory: 'no KI id', similarity: 0.5, metadata: {} },
+        ],
+      })
+    );
+
+    const memories = await store.search({ query: 'how do I compare durations?', limit: 5 });
+
+    const { url, method, body } = lastCall();
+    expect(url).toBe('https://supermemory.test/ns/kibana%3Adefault%3Asupport/search');
+    expect(method).toBe('POST');
+    expect(body).toEqual({
+      query: 'how do I compare durations?',
+      limit: 5,
+      searchMode: 'hybrid',
+      filter: {
+        operator: 'and',
+        operands: [
+          { field: 'lifecycle_status', operator: 'eq', value: 'active' },
+          {
+            field: 'expires_at_ms',
+            operator: 'gt',
+            value: Date.parse('2026-10-01T00:00:00.000Z'),
+          },
+        ],
+      },
+    });
+    expect(memories).toEqual([
+      {
+        id: 'memory-1',
+        type: 'memory.session_fact',
+        title: 'Duration mapping',
+        text: 'duration_ms must be cast with TO_DOUBLE',
+        similarity: 0.9,
+      },
+      {
+        id: 'memory-1',
+        text: 'Use TO_DOUBLE(duration_ms) before numeric comparisons.',
+        similarity: 0.7,
+      },
+    ]);
+    jest.useRealTimers();
   });
 
   it('surfaces API errors with the status and response details', async () => {

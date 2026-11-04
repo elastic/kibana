@@ -19,5 +19,5 @@ export const describeAiIndexHandler = async ({
   context: Pick<ToolHandlerContext, 'esClient' | 'request'>;
 }): Promise<DescribeAiIndexResponse> => {
   const readService = await getAiIndexDataReadServiceForUser({ deps, esClient, request });
-  return readService.describe(aiIndexId);
+  return readService.describe(aiIndexId, { memoryRecall: deps.memoryRecall });
 };

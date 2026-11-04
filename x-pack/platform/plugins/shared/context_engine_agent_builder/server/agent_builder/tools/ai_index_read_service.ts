@@ -9,6 +9,7 @@ import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
+import type { MemoryRecallMode } from '@kbn/context-engine-plugin/server/ai_indices/describe';
 import { hasContextEngineReadPrivilege } from '../has_context_engine_read_privilege';
 
 export type AiIndexDataReadServiceApi = ReturnType<
@@ -18,6 +19,7 @@ export type AiIndexDataReadServiceApi = ReturnType<
 export interface AiIndexToolDeps {
   getContextEngineStart: () => Promise<ContextEnginePluginStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  memoryRecall?: MemoryRecallMode;
 }
 
 export const CONTEXT_ENGINE_READ_DENIED_MESSAGE =

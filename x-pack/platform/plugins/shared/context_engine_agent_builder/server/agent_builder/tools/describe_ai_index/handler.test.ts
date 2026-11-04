@@ -24,7 +24,20 @@ describe('describeAiIndexHandler', () => {
     await expect(describeAiIndexHandler({ deps, aiIndexId: 'runbooks', context })).resolves.toEqual(
       { response: '# AI index: runbooks' }
     );
-    expect(readService.describe).toHaveBeenCalledWith('runbooks');
+    expect(readService.describe).toHaveBeenCalledWith('runbooks', { memoryRecall: undefined });
+  });
+
+  it('passes the memory recall mode to the read service', async () => {
+    const { deps, readService } = createAiIndexToolDepsMock();
+    readService.describe.mockResolvedValue({ response: '# AI index: runbooks' });
+
+    await describeAiIndexHandler({
+      deps: { ...deps, memoryRecall: 'tool' },
+      aiIndexId: 'runbooks',
+      context,
+    });
+
+    expect(readService.describe).toHaveBeenCalledWith('runbooks', { memoryRecall: 'tool' });
   });
 
   it('propagates a not-found error from the service', async () => {

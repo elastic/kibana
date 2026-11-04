@@ -8,13 +8,30 @@
 import type { MemoryStoreConfig } from '../../../config';
 import { createElasticsearchMemoryStore } from './elasticsearch_memory_store';
 import { createSupermemoryMemoryStore } from './supermemory_memory_store';
-import type { CreateMemoryStore } from './types';
+import type { CreateMemorySearch, CreateMemoryStore } from './types';
 
-export type { CreateMemoryStore, MemoryRevision, MemoryStore, MemoryStoreScope } from './types';
+export type {
+  CreateMemorySearch,
+  CreateMemoryStore,
+  MemoryRevision,
+  MemorySearch,
+  MemoryStore,
+  MemoryStoreScope,
+  RecalledMemory,
+} from './types';
 export { createElasticsearchMemoryStore } from './elasticsearch_memory_store';
 
-/** Returns the memory store factory selected by `xpack.contextEngineAgentBuilder.memory.store`. */
-export const getMemoryStoreFactory = (config: MemoryStoreConfig): CreateMemoryStore =>
-  config.type === 'supermemory'
-    ? createSupermemoryMemoryStore(config)
-    : createElasticsearchMemoryStore;
+export interface MemoryBackend {
+  createStore: CreateMemoryStore;
+  /** Absent when memories are recalled with `query_ai_indices` instead of the recall tool. */
+  createSearch?: CreateMemorySearch;
+}
+
+/** Returns the memory backend selected by `xpack.contextEngineAgentBuilder.memory.store`. */
+export const getMemoryBackend = (config: MemoryStoreConfig): MemoryBackend => {
+  if (config.type === 'supermemory') {
+    const createStore = createSupermemoryMemoryStore(config);
+    return { createStore, createSearch: createStore };
+  }
+  return { createStore: createElasticsearchMemoryStore };
+};

@@ -10,11 +10,19 @@ import {
   mergeKiDoc,
   type StoredKi,
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
-import type { MemoryRevision, MemoryStore, MemoryStoreScope } from './types';
+import type {
+  MemoryRevision,
+  MemorySearch,
+  MemoryStore,
+  MemoryStoreScope,
+  RecalledMemory,
+} from './types';
 
 const REQUEST_TIMEOUT_MS = 30_000;
 const MAX_NAMESPACE_LENGTH = 100;
 const SOURCE_METADATA_KEY = 'ki_source';
+// Supermemory range filters only accept numbers, so non-expiring memories get a far-future expiry.
+const NEVER_EXPIRES_MS = Number.MAX_SAFE_INTEGER;
 
 export interface SupermemoryStoreOptions {
   url: string;
@@ -31,7 +39,14 @@ interface SupermemoryRevision extends MemoryRevision {
   memoryIds: string[];
 }
 
-type Metadata = Record<string, string | string[]>;
+interface SupermemorySearchResult {
+  memory?: string;
+  chunk?: string;
+  similarity: number;
+  metadata?: Record<string, unknown>;
+}
+
+type Metadata = Record<string, string | number | string[]>;
 
 /** Builds a namespace matching Supermemory's `^[a-zA-Z0-9_:-]+$`, one per space and AI index. */
 export const toSupermemoryNamespace = (
@@ -52,7 +67,7 @@ const toContent = (document: StoredKi): string =>
 // Flat fields support Supermemory metadata filters; `ki_source` keeps the full KI for reads.
 const toMetadata = (document: StoredKi): Metadata => {
   const metadata: Metadata = { [SOURCE_METADATA_KEY]: JSON.stringify(document) };
-  for (const key of ['type', 'title', 'expires_at', 'updated_at'] as const) {
+  for (const key of ['id', 'type', 'title', 'expires_at', 'updated_at'] as const) {
     const value = document[key];
     if (typeof value === 'string') {
       metadata[key] = value;
@@ -61,6 +76,8 @@ const toMetadata = (document: StoredKi): Metadata => {
   if (Array.isArray(document.tags)) {
     metadata.tags = document.tags.filter((tag): tag is string => typeof tag === 'string');
   }
+  metadata.expires_at_ms =
+    typeof document.expires_at === 'string' ? Date.parse(document.expires_at) : NEVER_EXPIRES_MS;
   metadata.lifecycle_status = document.governance?.lifecycle?.status ?? 'active';
   return metadata;
 };
@@ -70,10 +87,30 @@ const parseSource = (metadata: Record<string, unknown> | undefined): StoredKi =>
   return typeof raw === 'string' ? (JSON.parse(raw) as StoredKi) : {};
 };
 
-/** Stores memories as Supermemory documents, one namespace per space and AI index. */
+const toRecalledMemory = ({
+  memory,
+  chunk,
+  similarity,
+  metadata,
+}: SupermemorySearchResult): RecalledMemory | undefined => {
+  const id = metadata?.id;
+  const text = memory ?? chunk;
+  if (typeof id !== 'string' || text === undefined) {
+    return undefined;
+  }
+  return {
+    id,
+    ...(typeof metadata?.type === 'string' && { type: metadata.type }),
+    ...(typeof metadata?.title === 'string' && { title: metadata.title }),
+    text,
+    similarity,
+  };
+};
+
+/** Stores and searches memories as Supermemory documents, one namespace per space and AI index. */
 export const createSupermemoryMemoryStore =
   ({ url, apiKey, namespacePrefix }: SupermemoryStoreOptions) =>
-  ({ aiIndexId, spaceId }: MemoryStoreScope): MemoryStore => {
+  ({ aiIndexId, spaceId }: MemoryStoreScope): MemoryStore & MemorySearch => {
     const namespacePath = `/ns/${encodeURIComponent(
       toSupermemoryNamespace(namespacePrefix, spaceId, aiIndexId)
     )}`;
@@ -141,6 +178,27 @@ export const createSupermemoryMemoryStore =
         if (memoryIds.length > 0) {
           await request('DELETE', `${namespacePath}/memories`, { body: { ids: memoryIds } });
         }
+      },
+
+      search: async ({ query, limit }) => {
+        const response = await request('POST', `${namespacePath}/search`, {
+          body: {
+            query,
+            limit,
+            searchMode: 'hybrid',
+            filter: {
+              operator: 'and',
+              operands: [
+                { field: 'lifecycle_status', operator: 'eq', value: 'active' },
+                { field: 'expires_at_ms', operator: 'gt', value: Date.now() },
+              ],
+            },
+          },
+        });
+        const { results } = (await response.json()) as { results: SupermemorySearchResult[] };
+        return results
+          .map(toRecalledMemory)
+          .filter((memory): memory is RecalledMemory => memory !== undefined);
       },
     };
   };
