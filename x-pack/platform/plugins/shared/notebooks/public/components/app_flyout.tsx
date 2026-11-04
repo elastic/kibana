@@ -17,7 +17,6 @@ import {
   EuiFlyoutHeader,
   EuiInlineEditTitle,
   EuiMarkdownFormat,
-  EuiPanel,
   EuiSelect,
   EuiText,
   EuiToolTip,
@@ -91,53 +90,58 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition
   }
 };
 
+const REMOVE_BUTTON_CLASS = 'notebookAppPanelRemove';
+
 const AppGridPanel = ({ app, panel }: { app: NotebookApp; panel: AppPanel }) => {
   const { store } = useNotebook();
+  const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const cell = cells[panel.cellId];
   if (!cell) return null;
 
   return (
-    <EuiPanel
-      hasBorder
-      paddingSize="s"
+    <div
       css={css`
+        position: relative;
         grid-column: ${panel.x + 1} / span ${panel.width};
         grid-row: ${panel.y + 1} / span ${panel.height};
-        display: flex;
-        flex-direction: column;
         min-width: 0;
         min-height: 0;
+        overflow: auto;
+        &:hover > .${REMOVE_BUTTON_CLASS}, &:focus-within > .${REMOVE_BUTTON_CLASS} {
+          opacity: 1;
+        }
       `}
       data-test-subj={`notebookAppPanel-${cell.name}`}
     >
-      <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-        <EuiFlexItem css={{ minWidth: 0 }}>
-          <EuiText size="xs" className="eui-textTruncate">
-            <strong>{cell.name}</strong>
-          </EuiText>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
-            <EuiButtonIcon
-              iconType="cross"
-              size="xs"
-              color="text"
-              aria-label={REMOVE_PANEL_LABEL}
-              onClick={() =>
-                store.updateApp(app.id, (current) => ({
-                  ...current,
-                  panels: current.panels.filter(({ id }) => id !== panel.id),
-                }))
-              }
-            />
-          </EuiToolTip>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <div css={{ flex: 1, minHeight: 0, overflow: 'auto' }}>
-        <PanelContent panelId={panel.id} cell={cell} />
+      <PanelContent panelId={panel.id} cell={cell} />
+      <div
+        className={REMOVE_BUTTON_CLASS}
+        css={css`
+          position: absolute;
+          top: 0;
+          right: 0;
+          opacity: 0;
+          transition: opacity ${euiTheme.animation.fast};
+        `}
+      >
+        <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="cross"
+            size="xs"
+            color="text"
+            display="base"
+            aria-label={REMOVE_PANEL_LABEL}
+            onClick={() =>
+              store.updateApp(app.id, (current) => ({
+                ...current,
+                panels: current.panels.filter(({ id }) => id !== panel.id),
+              }))
+            }
+          />
+        </EuiToolTip>
       </div>
-    </EuiPanel>
+    </div>
   );
 };
 
