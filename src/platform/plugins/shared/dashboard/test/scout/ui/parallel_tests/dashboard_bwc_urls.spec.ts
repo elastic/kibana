@@ -34,51 +34,45 @@ spaceTest.describe('Dashboard bwc urls', { tag: tags.stateful.classic }, () => {
     await scoutSpace.savedObjects.cleanStandardList();
   });
 
-  spaceTest.describe('legacy urls', () => {
+  spaceTest(
+    'should forward legacy dashboard urls',
+    async ({ page, kbnUrl, scoutSpace, pageObjects }) => {
+      await page.goto(
+        kbnUrl.get(`/s/${scoutSpace.id}/app/kibana#/dashboard/${LEGACY_DASHBOARD_ID}`)
+      );
+      await pageObjects.dashboard.waitForRenderComplete();
+      await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(12);
+    }
+  );
+
+  const shortUrls = [
+    // 8.14 before the Embeddable refactor
+    { version: '8.14', id: 'url_to_8_14_dashboard' },
+    // 8.18 after the embeddable refactor and before Serialized state only
+    { version: '8.18', id: 'url_to_8_18_dashboard' },
+    // 8.19 after the embeddable refactor and after Serialized state only
+    { version: '8.19', id: 'url_to_8_19_dashboard' },
+  ];
+
+  for (const { version, id } of shortUrls) {
     spaceTest(
-      'should forward legacy dashboard urls',
+      `should load dashboard with ${version} short url state`,
       async ({ page, kbnUrl, scoutSpace, pageObjects }) => {
-        await page.goto(
-          kbnUrl.get(`/s/${scoutSpace.id}/app/kibana#/dashboard/${LEGACY_DASHBOARD_ID}`)
-        );
-        await pageObjects.dashboard.waitForRenderComplete();
-        await expect.poll(() => pageObjects.dashboard.getPanelCount()).toBe(12);
+        const { controls, dashboard } = pageObjects;
+        const shortUrlId = findImportedSavedObjectId(importedShortUrls, 'url', `/goto/${id}`);
+
+        await page.goto(kbnUrl.get(`/s/${scoutSpace.id}/goto/${shortUrlId}`));
+        await dashboard.waitForRenderComplete();
+
+        await expect(controls.frames).toHaveCount(1);
+        const controlId = await controls.getOnlyControlId();
+        await expect.poll(() => controls.optionsList.getSelectionsString(controlId)).toBe('win 7');
+
+        await expect.poll(() => dashboard.getPanelCount()).toBe(1);
+        expect(await dashboard.getPanelTitles()).toStrictEqual(['Custom map']);
+
+        await expect.poll(() => pageObjects.maps.getNumberOfLayers()).toBe(4);
       }
     );
-  });
-
-  spaceTest.describe('short urls', () => {
-    const shortUrls = [
-      // 8.14 before the Embeddable refactor
-      { version: '8.14', id: 'url_to_8_14_dashboard' },
-      // 8.18 after the embeddable refactor and before Serialized state only
-      { version: '8.18', id: 'url_to_8_18_dashboard' },
-      // 8.19 after the embeddable refactor and after Serialized state only
-      { version: '8.19', id: 'url_to_8_19_dashboard' },
-    ];
-
-    for (const { version, id } of shortUrls) {
-      spaceTest(
-        `should load dashboard with ${version} state`,
-        async ({ page, kbnUrl, scoutSpace, pageObjects }) => {
-          const { controls, dashboard } = pageObjects;
-          const shortUrlId = findImportedSavedObjectId(importedShortUrls, 'url', `/goto/${id}`);
-
-          await page.goto(kbnUrl.get(`/s/${scoutSpace.id}/goto/${shortUrlId}`));
-          await dashboard.waitForRenderComplete();
-
-          await expect(controls.frames).toHaveCount(1);
-          const controlId = await controls.getOnlyControlId();
-          await expect
-            .poll(() => controls.optionsList.getSelectionsString(controlId))
-            .toBe('win 7');
-
-          await expect.poll(() => dashboard.getPanelCount()).toBe(1);
-          expect(await dashboard.getPanelTitles()).toStrictEqual(['Custom map']);
-
-          await expect.poll(() => pageObjects.maps.getNumberOfLayers()).toBe(4);
-        }
-      );
-    }
-  });
+  }
 });
