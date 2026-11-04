@@ -385,6 +385,20 @@ describe('AWS CloudWatch connector', () => {
       });
     });
 
+    it.each([
+      ['has no MetricWidgetImage', '{"foo":"bar"}'],
+      ['has a non-string MetricWidgetImage', '{"MetricWidgetImage":123}'],
+      ['is malformed', '{"MetricWidgetImage":"AA'],
+    ])('throws a readable error when a JSON response %s', async (_description, responseBody) => {
+      mockPost.mockResolvedValue({ data: Buffer.from(responseBody) });
+
+      await expect(
+        AwsCloudwatch.actions.getMetricWidgetImage.handler(mockContext, {
+          metricWidget: '{"metrics":[["AWS/EC2","CPUUtilization"]]}',
+        })
+      ).rejects.toThrow('AWS CloudWatch returned a response with no MetricWidgetImage');
+    });
+
     it('throws a readable error when CloudWatch returns an empty image body', async () => {
       mockPost.mockResolvedValue({ data: new ArrayBuffer(0) });
 
