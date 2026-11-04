@@ -87,17 +87,6 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
               draggingPosition.right - draggingPosition.left,
               runtimeSettings.columnPixelWidth
             )}px`;
-            // ref.style.height = `${Math.max(
-            //   draggingPosition.bottom - draggingPosition.top,
-            //   runtimeSettings.rowHeight
-            // )}px`;
-            // // undo any "lock to grid" styles **except** for the top left corner, which stays locked
-            // ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-            // ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${
-            //   currentPanel.row + 1
-            // }`;
-            // ref.style.gridColumnEnd = `auto`;
-            // ref.style.gridRowEnd = `auto`;
           } else {
             // if the current panel is being dragged, render it with a fixed position + size
             ref.style.position = 'fixed';
@@ -108,20 +97,14 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
           }
         } else {
+          console.log({ activePanel, currentPanel });
           ref.classList.remove('kbnGridPanel--active');
-          // ref.style.zIndex = `auto`;
-          // // if the panel is not being dragged and/or resized, undo any fixed position styles
-          // ref.style.position = '';
-          // ref.style.left = ``;
-          // ref.style.top = ``;
-          // ref.style.width = ``;
-          // // setting the height is necessary for mobile mode
-          // ref.style.height = `calc(1px * (${currentPanel.height} * (var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) - var(--kbnGridGutterSize)))`;
-          // // and render the panel locked to the grid
-          // ref.style.gridColumnStart = `${currentPanel.column + 1}`;
-          // ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
-          // ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
-          // ref.style.gridRowEnd = `span ${currentPanel.height}`;
+          ref.style.zIndex = `auto`;
+          // if the panel is not being dragged and/or resized, undo any fixed position styles
+          ref.style.position = '';
+          ref.style.left = ``;
+          ref.style.top = ``;
+          ref.style.width = `${currentPanel.width}px`;
         }
       });
 
@@ -158,5 +141,6 @@ GridPanel.displayName = 'KbnGridLayoutPanel';
 const styles = {
   panel: css({
     height: 'calc(var(--kbnGridRowHeight) * 1px)',
+    outline: '1px solid red;',
   }),
 };

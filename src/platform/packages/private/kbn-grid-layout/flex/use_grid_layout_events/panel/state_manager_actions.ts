@@ -88,24 +88,31 @@ export const moveAction = (
 
   // calculate the requested grid position
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
-  const targetColumn = (() => {
-    const targetedGridLeft = gridLayoutRect?.left ?? 0;
-    const localXCoordinate = isResize
-      ? previewRect.right - targetedGridLeft
-      : previewRect.left - targetedGridLeft;
-    const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
-    return Math.min(
-      Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
-      maxColumn
-    );
-  })();
+  // const targetWidth = (() => {
+  //   const targetedGridLeft = gridLayoutRect?.left ?? 0;
+  //   const localXCoordinate = isResize
+  //     ? previewRect.right - targetedGridLeft
+  //     : previewRect.left - targetedGridLeft;
+  //   return localXCoordinate;
+  //   // const maxColumn = isResize ? columnCount : columnCount - currentPanelData.width;
+  //   // return Math.min(
+  //   //   Math.max(Math.round(localXCoordinate / (columnPixelWidth + gutterSize)), 0),
+  //   //   maxColumn
+  //   // );
+  // })();
+
+  // console.log({ targetColumn: targetWidth });
 
   const requestedPanelData = { ...currentPanelData };
   if (isResize) {
-    requestedPanelData.width = Math.max(targetColumn - requestedPanelData.column, 1);
+    const targetedGridLeft = gridLayoutRect?.left ?? 0;
+    const targetWidth = previewRect.right - targetedGridLeft;
+    requestedPanelData.width = Math.max(targetWidth, 1);
   } else {
-    requestedPanelData.order = targetColumn;
+    // TODO: Determine order
+    // requestedPanelData.order = targetWidth;
   }
+  console.log({ requestedPanelData, tessxt: lastRequestedPanelPosition.current });
 
   // resolve the new grid layout
   if (!isEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
@@ -115,18 +122,11 @@ export const moveAction = (
 
     // remove the panel from where it started so that we can apply the drag request
     delete nextLayout[activePanel.id];
+    nextLayout[requestedPanelData.id] = requestedPanelData;
 
-    // // resolve destination grid
-    // const destinationGrid = nextLayout[targetSectionId];
-    // const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, requestedPanelData);
+    // resolve grid
+    // const resolvedDestinationGrid = resolveLayout(nextLayout.panels, requestedPanelData);
     // nextLayout[targetSectionId].panels = resolvedDestinationGrid;
-
-    // // resolve origin grid
-    // if (hasChangedGridSection) {
-    //   const originGrid = nextLayout[lastSectionId];
-    //   const resolvedOriginGrid = resolveGridSection(originGrid.panels);
-    //   nextLayout[lastSectionId].panels = resolvedOriginGrid;
-    // }
 
     // // resolve sections to remove empty main sections + ensure orders are valid
     // nextLayout = resolveSections(nextLayout);
@@ -137,7 +137,8 @@ export const moveAction = (
     // }
 
     // if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
-    //   gridLayout$.next(nextLayout);
+    console.log('!!!!!!!!!!!!!!!!!', { nextLayout });
+    gridLayout$.next(nextLayout);
     // }
   }
 
@@ -149,14 +150,17 @@ export const moveAction = (
   });
 };
 
-export const commitAction = ({
-  activePanelEvent$: activePanelEvent$,
-  panelRefs,
-}: FlexLayoutStateManager) => {
+const resolveLayout = (
+  originalLayout: FlexLayoutData,
+  dragRequest: FlexPanelData
+): FlexLayoutData => {};
+
+export const commitAction = ({ activePanelEvent$, panelRefs }: FlexLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
   activePanelEvent$.next(undefined);
 
   if (!event) return;
+  console.log('!!!!!!!', { event });
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
     block: 'nearest',
@@ -164,7 +168,7 @@ export const commitAction = ({
 };
 
 export const cancelAction = ({
-  activePanelEvent$: activePanelEvent$,
+  activePanelEvent$,
   gridLayout$,
   panelRefs,
 }: FlexLayoutStateManager) => {

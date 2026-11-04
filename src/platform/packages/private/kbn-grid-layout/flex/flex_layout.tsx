@@ -153,9 +153,10 @@ export const FlexLayout = ({
 const styles = {
   layout: css({
     display: 'flex',
+    flexWrap: 'wrap',
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
-    // height: 'calc(var(--kbnGridRowHeight) * 1px)',
+    minHeight: 'calc(var(--kbnGridRowHeight) * 1px)',
     // gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
     // gridTemplateColumns: `repeat(
     //       var(--kbnGridColumnCount),

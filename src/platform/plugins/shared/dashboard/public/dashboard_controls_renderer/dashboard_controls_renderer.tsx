@@ -37,7 +37,7 @@ export const DashboardPinnedPanelsRenderer = () => {
       const panelProps = {
         isSharedItem: false,
         showBadges: false,
-        showBorder: false,
+        showBorder: true,
         showShadow: false,
       };
 
