@@ -40,7 +40,7 @@ import { insufficientScopeChallenge } from '../openapi/validate_security';
 import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
 import type { AwsJsonRejection, AwsJsonService } from '../smithy/aws_json';
-import { createAwsJsonService, isAwsJsonModel } from '../smithy/aws_json';
+import { createAwsJsonService, isAwsJsonDocument } from '../smithy/aws_json';
 import { serializeXmlBody } from '../xml/serialize_xml_body';
 
 /** One request the mock received, for assertions in tests. */
@@ -164,29 +164,29 @@ const loadSpec = (document: OpenApiDocument, source?: string): ContractOperation
 };
 
 // Converted once per model, so that mocks created from it share the loaded operations too.
-const smithyServices = new WeakMap<SmithyModel, OpenApiDocument | AwsJsonService>();
+const smithyDocuments = new WeakMap<SmithyModel, OpenApiDocument>();
 
-const toSmithyService = (model: SmithyModel): OpenApiDocument | AwsJsonService => {
-  const service =
-    smithyServices.get(model) ??
-    (isAwsJsonModel(model) ? createAwsJsonService(model) : convertSmithy(model));
-  smithyServices.set(model, service);
-  return service;
+const toSmithyDocument = (model: SmithyModel): OpenApiDocument => {
+  const document = smithyDocuments.get(model) ?? convertSmithy(model);
+  smithyDocuments.set(model, document);
+  return document;
 };
 
-const isAwsJsonService = (service: OpenApiDocument | AwsJsonService): service is AwsJsonService =>
-  typeof service.route === 'function';
+// Created once per document, which converted models and awsJson snapshots both are.
+const awsJsonServiceByDocument = new WeakMap<OpenApiDocument, AwsJsonService>();
+
+const toAwsJsonService = (document: OpenApiDocument): AwsJsonService => {
+  const service = awsJsonServiceByDocument.get(document) ?? createAwsJsonService(document);
+  awsJsonServiceByDocument.set(document, service);
+  return service;
+};
 
 /** The OpenAPI document a spec is served from, if it isn't served by a protocol of its own. */
 const toDocument = (spec: EmulatorSpec): OpenApiDocument | undefined => {
   if (isGraphQLSpec(spec) || isMcpSpec(spec)) {
     return undefined;
   }
-  if (!isSmithyModel(spec)) {
-    return spec;
-  }
-  const service = toSmithyService(spec);
-  return isAwsJsonService(service) ? service.document : service;
+  return isSmithyModel(spec) ? toSmithyDocument(spec) : spec;
 };
 
 const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
@@ -195,10 +195,11 @@ const loadSpecs = (specs: EmulatorOptions['specs']): ContractOperation[] =>
     return document ? loadSpec(document, source) : [];
   });
 
+// AWS JSON RPC services, from Smithy models or from the documents converted from them.
 const loadAwsJsonServices = (specs: EmulatorOptions['specs']): AwsJsonService[] =>
   toNamedSpecs(specs).flatMap(([, spec]) => {
-    const service = isSmithyModel(spec) ? toSmithyService(spec) : undefined;
-    return service && isAwsJsonService(service) ? [service] : [];
+    const document = toDocument(spec);
+    return document && isAwsJsonDocument(document) ? [toAwsJsonService(document)] : [];
   });
 
 interface LoadedProtocol {
