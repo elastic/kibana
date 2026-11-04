@@ -18,7 +18,6 @@ export type {
   AttachmentValidateContext,
   SurfaceComposition,
   AttachmentSurfaceCompositionContext,
-  MarkdownNode,
 } from './type_definition';
 export type {
   AttachmentBoundedTool,

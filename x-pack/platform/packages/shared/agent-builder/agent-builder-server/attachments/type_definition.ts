@@ -6,7 +6,7 @@
  */
 
 import type { Composition } from '@elastic/isomer-sdk';
-import type { ComponentsNode, MarkdownNode } from '@kbn/isomer-components';
+import type { ComponentsNode } from '@kbn/isomer-components';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
@@ -154,8 +154,6 @@ export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
  * `toSurfaceComposition` returns, and what a response message becomes.
  */
 export type SurfaceComposition = Composition<ComponentsNode>;
-
-export type { MarkdownNode };
 
 /**
  * Return type for attachment's validation handlers.
