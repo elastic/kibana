@@ -80,7 +80,17 @@ export interface BuildPolicyBodyOpts {
   /** When set, use this cloud_connector on the policy instead of preserving the existing one.
    *  Pass null to explicitly clear the connector (e.g. when switching to static keys). */
   overrideCloudConnector?: string | null;
+  /** The onboarding deployment of this session. See {@link toOnboardingDeploymentQuery}. */
+  onboardingDeploymentId?: string;
 }
+
+/**
+ * Fleet only lets the onboarding flow change or delete the package policies an onboarding
+ * deployment manages when it passes the id of that deployment. Policies deployed before the
+ * deployment existed are not managed by it, so no id is fine for them.
+ */
+export const toOnboardingDeploymentQuery = (onboardingDeploymentId: string | undefined) =>
+  onboardingDeploymentId ? { onboarding_deployment_id: onboardingDeploymentId } : undefined;
 
 /** Build surviving members list and package name from surviving instance IDs. Returns null if no valid members. */
 export function resolveSurvivingMembers(

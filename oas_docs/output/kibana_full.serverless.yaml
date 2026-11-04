@@ -495,7 +495,7 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
-  - name: Fleet cloud onboarding deployments
+  - name: Fleet cloud onboarding instances
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -43352,6 +43352,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -43596,6 +43604,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -50031,7 +50047,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List cloud onboarding instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments
       parameters:
         - description: Only list deployment instances that cover this package.
@@ -50076,7 +50092,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsExample:
-                  description: Page of cloud onboarding deployment instances that cover the aws package
+                  description: Page of cloud onboarding instances that cover the aws package
                   value:
                     items:
                       - agentCount: 1
@@ -50445,9 +50461,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployment instances
+      summary: Get cloud onboarding instances
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -50460,7 +50476,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new Fleet cloud onboarding deployment.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Create a new Fleet cloud onboarding instance.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: post-fleet-cloud-onboarding-deployments
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -50475,7 +50491,7 @@ paths:
           application/json:
             examples:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
-                description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
+                description: Create a new cloud onboarding instance for AWS using an Elastic Agent (agent-based)
                 value:
                   authMethod: assume_role
                   mechanisms:
@@ -50489,7 +50505,7 @@ paths:
                       regions:
                         - us-east-1
               postCloudOnboardingDeploymentEcfRequestExample:
-                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
+                description: Create a new cloud onboarding instance for AWS using Elastic Cloud Forwarder (ECF)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -50503,7 +50519,7 @@ paths:
                         - us-east-1
                       s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
               postCloudOnboardingDeploymentRequestExample:
-                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
+                description: Create a new cloud onboarding instance for AWS using identity federation (managed integration)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -51001,9 +51017,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Create cloud onboarding deployment
+      summary: Create cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -51017,7 +51033,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Delete a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: delete-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51027,7 +51043,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51040,7 +51056,7 @@ paths:
             application/json:
               examples:
                 deleteCloudOnboardingDeploymentExample:
-                  description: The cloud onboarding deployment was successfully deleted
+                  description: The cloud onboarding instance was successfully deleted
                   value:
                     id: onboarding-deployment-id-1
               schema:
@@ -51086,7 +51102,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -51100,9 +51116,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Delete cloud onboarding deployment
+      summary: Delete cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -51115,10 +51131,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        Get a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-id
       parameters:
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51131,7 +51147,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentExample:
-                  description: A cloud onboarding deployment that has succeeded
+                  description: A cloud onboarding instance that has succeeded
                   value:
                     item:
                       agentPolicyIds:
@@ -51441,7 +51457,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -51455,9 +51471,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Get cloud onboarding deployment
+      summary: Get cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -51470,7 +51486,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Update a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: put-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -51480,7 +51496,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -51492,7 +51508,7 @@ paths:
           application/json:
             examples:
               putCloudOnboardingDeploymentRequestExample:
-                description: Update a cloud onboarding deployment after the CFN stack has been submitted
+                description: Update a cloud onboarding instance after the CFN stack has been submitted
                 value:
                   deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
                   deploymentName: elastic-aws-onboarding
@@ -51725,7 +51741,7 @@ paths:
             application/json:
               examples:
                 putCloudOnboardingDeploymentExample:
-                  description: The updated cloud onboarding deployment
+                  description: The updated cloud onboarding instance
                   value:
                     item:
                       agentPolicyIds:
@@ -52025,7 +52041,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -52039,9 +52055,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Update cloud onboarding deployment
+      summary: Update cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -52055,7 +52071,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all cloud onboarding deployments for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List all cloud onboarding instances for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-connector-connectorid
       parameters:
         - description: The fleet-cloud-connector ID to list deployments for.
@@ -52072,7 +52088,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsByConnectorIdExample:
-                  description: List of cloud onboarding deployments for a connector
+                  description: List of cloud onboarding instances for a connector
                   value:
                     items:
                       - agentPolicyIds:
@@ -52384,9 +52400,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployments by connector ID
+      summary: Get cloud onboarding instances by connector ID
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -58736,6 +58752,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -58980,6 +59004,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -60492,6 +60524,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -60685,6 +60725,14 @@ paths:
               - simplified
               - legacy
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -60819,6 +60867,14 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -161305,6 +161361,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -161739,6 +161801,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -171569,6 +171637,11 @@ components:
           description: Policy namespace. Defaults to the agent policy namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
+          maxLength: 256
+          type: string
+          x-state: Experimental
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration_package'
         updated_at:
@@ -179053,6 +179126,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string

@@ -389,6 +389,50 @@ describe('edit package policy page', () => {
     });
   });
 
+  const renderOnboardingManagedPolicy = ({ onboardingEnabled }: { onboardingEnabled: boolean }) => {
+    (sendGetOnePackagePolicy as MockFn).mockResolvedValue({
+      data: { item: { ...mockPackagePolicy, onboarding_deployment_id: 'deploy-1' } },
+    });
+    testRenderer.startServices.application.getUrlForApp.mockImplementation(
+      (appId, { path = '' } = {}) => `/app/${appId}${path}`
+    );
+    testRenderer.startServices.featureFlags.useBooleanValue.mockImplementation(
+      (flag: string, fallback: boolean) =>
+        flag === 'ingestHub.onboardingEnabled' ? onboardingEnabled : fallback
+    );
+    render();
+  };
+
+  it('explains without linking to the onboarding flow while it is turned off', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: false });
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toHaveTextContent('AWS onboarding is turned off');
+    });
+    expect(
+      renderResult.queryByTestId('editPackagePolicyManageInOnboardingButton')
+    ).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
+  it('shows a callout instead of the form for a policy managed by a cloud onboarding instance', async () => {
+    renderOnboardingManagedPolicy({ onboardingEnabled: true });
+
+    await waitFor(() => {
+      expect(
+        renderResult.getByTestId('editPackagePolicyManagedByOnboardingCallout')
+      ).toBeInTheDocument();
+    });
+    expect(renderResult.getByTestId('editPackagePolicyManageInOnboardingButton')).toHaveAttribute(
+      'href',
+      '/app/onboarding/aws?deploymentId=deploy-1'
+    );
+    expect(renderResult.queryByText('Collect logs from Nginx instances')).not.toBeInTheDocument();
+    expect(renderResult.queryByText('Save integration')).not.toBeInTheDocument();
+  });
+
   it('shows edit copy from Installed integrations', async () => {
     testRenderer.history.push('?from=installed-integrations');
     render();
