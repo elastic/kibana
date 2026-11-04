@@ -18,15 +18,20 @@ import {
 import type { CoreOlsService } from '@kbn/core-security-server';
 
 /**
+ * Where the fail-closed default reads access policies: the Saved Objects type registry.
+ */
+export interface AccessPolicyRegistry {
+  getAccessPolicy(type: string): AccessPolicy | undefined;
+}
+
+/**
  * Object-level security used when no security delegate is registered. It knows no principal and no
  * recovery authority, so only general access applies: restricted objects stay hidden and nobody can
  * restrict an object. A missing delegate must never be read as deliberately disabled enforcement.
  */
-export const createFailClosedOls = (
-  getAccessPolicy: (type: string) => AccessPolicy | undefined
-): CoreOlsService => {
+export const createFailClosedOls = (typeRegistry: AccessPolicyRegistry): CoreOlsService => {
   const requirePolicy = (type: string) => {
-    const policy = getAccessPolicy(type);
+    const policy = typeRegistry.getAccessPolicy(type);
     if (!policy) {
       throw new Error(`Type ${type} has no access policy`);
     }
@@ -38,7 +43,7 @@ export const createFailClosedOls = (
       getPrincipal: async () => undefined,
       evaluate: async ({ type, acl }) => evaluateAcl({ policy: requirePolicy(type), acl }),
       authorize: async ({ type, operation, objects }) => {
-        const policy = getAccessPolicy(type);
+        const policy = typeRegistry.getAccessPolicy(type);
         return new Map(
           objects.map(({ id, acl }) => [
             id,
@@ -49,13 +54,13 @@ export const createFailClosedOls = (
         );
       },
       filterVisible: async ({ type, objects }) => {
-        const policy = getAccessPolicy(type);
+        const policy = typeRegistry.getAccessPolicy(type);
         return policy
           ? objects.filter(({ acl }) => evaluateAcl({ policy, acl }).operations.has('view'))
           : objects;
       },
       getReadFilter: async ({ type, spaceIds }) => {
-        const policy = getAccessPolicy(type);
+        const policy = typeRegistry.getAccessPolicy(type);
         return policy
           ? buildAclReadFilter({
               policy,
@@ -77,7 +82,6 @@ export const createFailClosedOls = (
           throw Boom.badRequest(error.message);
         }
       },
-      primeRecovery: () => {},
     }),
   };
 };

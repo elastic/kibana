@@ -8,6 +8,7 @@
  */
 
 export { SecurityService } from './src/security_service';
+export type { SecurityServiceStartDeps } from './src/security_service';
 export { CoreSecurityRouteHandlerContext } from './src/security_route_handler_context';
 export type {
   InternalCoreServiceAccountsSetup,

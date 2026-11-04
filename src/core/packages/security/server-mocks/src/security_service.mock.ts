@@ -78,7 +78,6 @@ const createScopedOlsMock = (): jest.Mocked<CoreScopedOlsService> => ({
   filterVisible: jest.fn().mockImplementation(async ({ objects }) => objects),
   getReadFilter: jest.fn().mockResolvedValue(undefined),
   validateInitialAcl: jest.fn().mockResolvedValue(undefined),
-  primeRecovery: jest.fn(),
 });
 
 const createOlsMock = (): jest.MockedObjectDeep<CoreOlsService> => ({
@@ -152,7 +151,6 @@ const createServiceMock = () => {
   const mock = lazyObject({
     setup: jest.fn().mockReturnValue(createSetupMock()),
     start: jest.fn().mockReturnValue(createStartMock()),
-    setAccessPolicyProvider: jest.fn(),
     stop: jest.fn(),
   });
 

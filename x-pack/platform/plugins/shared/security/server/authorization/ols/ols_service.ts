@@ -16,6 +16,7 @@ import type { UserProfileServiceStart } from '@kbn/core-user-profile-server';
 import type { Principal } from '@kbn/ols';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
+import { getRecoveryAction, getSavedObjectActionPrefix } from './recovery';
 import { type RequestState, ScopedOlsService } from './scoped_ols_service';
 import type { AuthorizationServiceSetupInternal } from '..';
 
@@ -42,6 +43,7 @@ export interface OlsServiceStartParams {
  */
 export class OlsService {
   private readonly requestStates = new WeakMap<KibanaRequest, RequestState>();
+  private policyTypesByActionPrefix?: Map<string, string>;
 
   constructor(private readonly params: OlsServiceStartParams) {}
 
@@ -70,5 +72,35 @@ export class OlsService {
     }
 
     return new ScopedOlsService(this.params, request, state);
+  }
+
+  /**
+   * Returns the recovery actions that a privilege check of the given Kibana privileges should answer
+   * on the side, mapped to their type: one for each type with an access policy that the check already
+   * asks a Saved Objects privilege about. Empty while OLS is disabled.
+   */
+  public getRecoveryActions(kibanaPrivileges: readonly string[]): Map<string, string> {
+    const recoveryActions = new Map<string, string>();
+    if (!this.params.enabled) {
+      return recoveryActions;
+    }
+
+    for (const [prefix, type] of this.getPolicyTypesByActionPrefix()) {
+      if (kibanaPrivileges.some((privilege) => privilege.startsWith(prefix))) {
+        recoveryActions.set(getRecoveryAction(this.params.authz.actions, type), type);
+      }
+    }
+    return recoveryActions;
+  }
+
+  private getPolicyTypesByActionPrefix() {
+    // Types cannot be registered after Kibana starts, so the lookup is built once.
+    this.policyTypesByActionPrefix ??= new Map(
+      this.params.typeRegistry
+        .getAllTypes()
+        .filter(({ name }) => this.params.typeRegistry.getAccessPolicy(name))
+        .map(({ name }) => [getSavedObjectActionPrefix(this.params.authz.actions, name), name])
+    );
+    return this.policyTypesByActionPrefix;
   }
 }

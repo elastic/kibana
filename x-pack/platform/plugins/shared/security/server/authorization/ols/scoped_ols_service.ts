@@ -40,17 +40,7 @@ import {
 } from './audit';
 import type { OlsServiceStartParams } from './ols_service';
 import { resolvePrincipal } from './principal';
-
-/**
- * Privilege action that grants recovery authority over objects of a type in a space. No feature
- * privilege includes it: only wildcard application privileges, such as those of `superuser`, do.
- */
-const RECOVERY_OPERATION = 'manage_access_control';
-
-/**
- * Space ID that a search across all spaces passes. Recovery for it is checked globally.
- */
-const ALL_SPACES_ID = '*';
+import { ALL_SPACES_ID, getRecoveryAction } from './recovery';
 
 /**
  * State shared by every scoped service created for one request, so that the principal is resolved
@@ -101,6 +91,10 @@ export class ScopedOlsService implements CoreScopedOlsService {
     return await this.state.principal;
   }
 
+  /**
+   * Stores a recovery answer that a privilege check already has, so that no second privilege request
+   * is needed. Every request-scoped privilege check primes it, see `createPrivilegeCheckRecovery`.
+   */
   public primeRecovery(type: string, spaceIds: string[], granted: boolean) {
     for (const spaceId of spaceIds) {
       this.state.recovery.set(getRecoveryKey(type, spaceId), Promise.resolve(granted));
@@ -121,7 +115,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
     acl?: StoredAcl;
   }): Promise<AclDecision> {
     const policy = this.requirePolicy(type);
-    const recoveryAction = this.getRecoveryAction(type);
+    const recoveryAction = getRecoveryAction(this.params.authz.actions, type);
     const operationActions = new Map(
       Object.entries(policy.operations).map(([name, operation]) => [
         name,
@@ -493,7 +487,7 @@ export class ScopedOlsService implements CoreScopedOlsService {
     let recovery = this.state.recovery.get(key);
     if (!recovery) {
       const checkPrivileges = this.params.authz.checkPrivilegesWithRequest(this.request);
-      const payload = { kibana: [this.getRecoveryAction(type)] };
+      const payload = { kibana: [getRecoveryAction(this.params.authz.actions, type)] };
       recovery = (
         spaceId === ALL_SPACES_ID
           ? checkPrivileges.globally(payload)
@@ -502,10 +496,6 @@ export class ScopedOlsService implements CoreScopedOlsService {
       this.state.recovery.set(key, recovery);
     }
     return await recovery;
-  }
-
-  private getRecoveryAction(type: string) {
-    return this.params.authz.actions.savedObject.get(type, RECOVERY_OPERATION);
   }
 
   private getPrivilegeActions({ privileges }: AccessOperation) {

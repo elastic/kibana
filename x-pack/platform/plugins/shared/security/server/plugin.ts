@@ -49,6 +49,7 @@ import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
 import { OlsService } from './authorization/ols/ols_service';
+import { createPrivilegeCheckRecovery } from './authorization/ols/recovery';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -385,6 +386,8 @@ export class SecurityPlugin
       features,
       getCurrentUser,
       customBranding: core.customBranding,
+      // The OLS service exists only after start. Checks made before it skip recovery.
+      privilegeCheckRecovery: createPrivilegeCheckRecovery(() => this.olsService),
     });
 
     this.userProfileService.setup({ authz: this.authorizationSetup, license });

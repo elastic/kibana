@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AccessPolicy } from '@kbn/ols';
 import type { CoreSecurityDelegateContract } from '@kbn/core-security-server';
-import { createFailClosedOls } from './fail_closed_ols';
+import { createFailClosedOls, type AccessPolicyRegistry } from './fail_closed_ols';
 
 const API_KEYS_DISABLED_ERROR = new Error('API keys are disabled');
 const REJECT_WHEN_API_KEYS_DISABLED = () => Promise.reject(API_KEYS_DISABLED_ERROR);
@@ -18,7 +17,7 @@ const SERVICE_ACCOUNTS_DISABLED_ERROR = new Error('Service accounts are disabled
 const REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED = () => Promise.reject(SERVICE_ACCOUNTS_DISABLED_ERROR);
 
 export const getDefaultSecurityImplementation = (
-  getAccessPolicy: (type: string) => AccessPolicy | undefined
+  typeRegistry: AccessPolicyRegistry
 ): CoreSecurityDelegateContract => {
   return {
     authc: {
@@ -58,7 +57,7 @@ export const getDefaultSecurityImplementation = (
       getWorkloadServiceAccountSummary: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
       withScopedRequestForWorkload: REJECT_WHEN_SERVICE_ACCOUNTS_DISABLED,
     },
-    authz: { ols: createFailClosedOls(getAccessPolicy) },
+    authz: { ols: createFailClosedOls(typeRegistry) },
     // No security delegate registered, so there are no user profiles to bind.
     fakeRequestEnricher: () => undefined,
   };

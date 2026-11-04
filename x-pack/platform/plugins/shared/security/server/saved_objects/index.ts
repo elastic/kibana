@@ -69,10 +69,6 @@ export function setupSavedObjects({
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
           typeRegistry,
-          primeRecovery: olsEnabled
-            ? (type, spaceIds, granted) =>
-                getOlsService().asScoped(request).primeRecovery(type, spaceIds, granted)
-            : undefined,
         })
       : undefined;
   });

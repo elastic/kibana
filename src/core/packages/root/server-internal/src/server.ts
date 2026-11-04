@@ -566,7 +566,6 @@ export class Server {
   async #start(startTransaction: apm.Transaction) {
     const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
-    const securityStart = this.security.start();
     const userProfileStart = this.userProfile.start();
     this.userSettingsService.start({ userProfile: userProfileStart });
     const executionContextStart = this.executionContext.start();
@@ -612,8 +611,11 @@ export class Server {
       }
     );
 
-    const typeRegistry = savedObjectsStart.getTypeRegistry();
-    this.security.setAccessPolicyProvider((type) => typeRegistry.getAccessPolicy(type));
+    // Security starts after Saved Objects, so that its default object-level security (OLS) reads a
+    // type registry that already holds every access policy.
+    const securityStart = this.security.start({
+      typeRegistry: savedObjectsStart.getTypeRegistry(),
+    });
 
     const userActivityStart = this.userActivity.start({
       typeRegistry: savedObjectsStart.getTypeRegistry(),
