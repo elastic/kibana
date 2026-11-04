@@ -124,7 +124,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
       docLinks: docLinksServiceMock.createStartContract(),
       node: nodeServiceMock.createInternalStartContract(),
-      tenants: { getEncryptionCrypto: jest.fn() },
+      tenants: { getEncryptionCrypto: jest.fn(), getSessionCrypto: jest.fn() },
     };
   };
 

@@ -17,10 +17,22 @@ const hosts = schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
 });
 
 const encryptionKey = schema.maybe(schema.string({ minLength: 32 }));
+const securityEncryptionKey = schema.maybe(schema.string({ minLength: 32 }));
 
 const tenantSchema = schema.oneOf([
-  schema.object({ hosts, username: schema.string(), password: schema.string(), encryptionKey }),
-  schema.object({ hosts, serviceAccountToken: schema.string(), encryptionKey }),
+  schema.object({
+    hosts,
+    username: schema.string(),
+    password: schema.string(),
+    encryptionKey,
+    securityEncryptionKey,
+  }),
+  schema.object({
+    hosts,
+    serviceAccountToken: schema.string(),
+    encryptionKey,
+    securityEncryptionKey,
+  }),
 ]);
 
 const tenantsFileSchema = schema.recordOf(schema.string(), tenantSchema);

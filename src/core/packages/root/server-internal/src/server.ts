@@ -570,7 +570,10 @@ export class Server {
   async #start(startTransaction: apm.Transaction) {
     const injectionStart = this.injection.start();
     const analyticsStart = this.analytics.start();
-    const securityStart = this.security.start();
+    const tenantsStart = this.tenants.start();
+    const securityStart = this.security.start({
+      getTenantSessionCrypto: tenantsStart.getSessionCrypto,
+    });
     const userProfileStart = this.userProfile.start();
     this.userSettingsService.start({ userProfile: userProfileStart });
     const executionContextStart = this.executionContext.start();
@@ -586,7 +589,6 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
-    const tenantsStart = this.tenants.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',

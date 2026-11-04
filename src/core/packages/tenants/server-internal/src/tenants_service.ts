@@ -46,11 +46,17 @@ export interface InternalTenantsServiceStart {
    * Throws for fake requests that target a tenant, so a tenant's key only serves requests received over HTTP.
    */
   getEncryptionCrypto(request: KibanaRequest): Crypto | undefined;
+  /**
+   * Returns the crypto for the session encryption key of the request's tenant, if the tenant has a key.
+   * Throws for fake requests that target a tenant, so a tenant's key only serves requests received over HTTP.
+   */
+  getSessionCrypto(request: KibanaRequest): Crypto | undefined;
 }
 
 interface Tenant {
   clientConfig: TenantClientConfig;
   crypto?: Crypto;
+  sessionCrypto?: Crypto;
 }
 
 /** @internal */
@@ -69,10 +75,15 @@ export class TenantsService
     if (file) {
       this.enabled = true;
       const tenants = await readTenantsFile(file);
-      for (const [id, { encryptionKey, ...clientConfig }] of Object.entries(tenants)) {
+      for (const [id, { encryptionKey, securityEncryptionKey, ...clientConfig }] of Object.entries(
+        tenants
+      )) {
         this.tenants.set(id, {
           clientConfig,
           crypto: encryptionKey ? nodeCrypto({ encryptionKey }) : undefined,
+          sessionCrypto: securityEncryptionKey
+            ? nodeCrypto({ encryptionKey: securityEncryptionKey })
+            : undefined,
         });
       }
     }
@@ -86,22 +97,25 @@ export class TenantsService
 
   public start(): InternalTenantsServiceStart {
     return {
-      getEncryptionCrypto: (request) => {
-        const tenantId = request.tenantId ?? this.getTenantId(request.headers);
-        if (tenantId === undefined) {
-          return undefined;
-        }
-        if (request.isFakeRequest) {
-          throw new Error(
-            `The encryption key of tenant [${tenantId}] is only available to requests received over HTTP`
-          );
-        }
-        return this.getTenant(tenantId).crypto;
-      },
+      getEncryptionCrypto: (request) => this.getRequestTenant(request)?.crypto,
+      getSessionCrypto: (request) => this.getRequestTenant(request)?.sessionCrypto,
     };
   }
 
   public stop() {}
+
+  private getRequestTenant(request: KibanaRequest) {
+    const tenantId = request.tenantId ?? this.getTenantId(request.headers);
+    if (tenantId === undefined) {
+      return undefined;
+    }
+    if (request.isFakeRequest) {
+      throw new Error(
+        `The encryption key of tenant [${tenantId}] is only available to requests received over HTTP`
+      );
+    }
+    return this.getTenant(tenantId);
+  }
 
   private getTenantId = (headers: Headers): TenantId | undefined => {
     const value = headers[TENANT_ID_HEADER];

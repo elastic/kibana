@@ -101,6 +101,22 @@ describe('TokenAuthenticationProvider', () => {
 
       expect(request.headers).not.toHaveProperty('authorization');
     });
+
+    it("gets tokens from the request's tenant", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const tenantClient = elasticsearchServiceMock.createElasticsearchClient();
+      tenantClient.security.getToken.mockResponse(
+        // @ts-expect-error not full interface
+        { access_token: 'foo', refresh_token: 'bar', authentication: mockAuthenticatedUser() }
+      );
+      mockOptions.getInternalClient.mockReturnValue(tenantClient);
+
+      await provider.login(request, { username: 'user', password: 'password' });
+
+      expect(mockOptions.getInternalClient).toHaveBeenCalledWith(request);
+      expect(tenantClient.security.getToken).toHaveBeenCalledTimes(1);
+      expect(mockOptions.client.asInternalUser.security.getToken).not.toHaveBeenCalled();
+    });
   });
 
   describe('`authenticate` method', () => {
@@ -220,6 +236,7 @@ describe('TokenAuthenticationProvider', () => {
         )
       );
 
+      expect(mockOptions.getTokens).toHaveBeenCalledWith(request);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledTimes(1);
       expect(mockOptions.tokens.refresh).toHaveBeenCalledWith(tokenPair.refreshToken);
 

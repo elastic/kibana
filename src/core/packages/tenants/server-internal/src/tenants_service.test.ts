@@ -39,6 +39,7 @@ describe('TenantsService', () => {
         username: 'kibana_system',
         password: 'changeme-b',
         encryptionKey: 'b'.repeat(32),
+        securityEncryptionKey: 'B'.repeat(32),
       },
       'project-c': { hosts: ['http://localhost:9202'], serviceAccountToken: 'token-c' },
     });
@@ -94,5 +95,23 @@ describe('TenantsService', () => {
     ).toThrow(
       'The encryption key of tenant [project-b] is only available to requests received over HTTP'
     );
+  });
+
+  it("returns the tenant's session crypto, separate from its saved objects crypto", async () => {
+    const { service } = await setupService('/tenants.yml');
+    const { getEncryptionCrypto, getSessionCrypto } = service.start();
+
+    const sessionCrypto = getSessionCrypto(tenantRequest(tenantB));
+    const encrypted = await sessionCrypto?.encrypt('session');
+    await expect(sessionCrypto?.decrypt(encrypted ?? '')).resolves.toBe('session');
+    await expect(
+      getEncryptionCrypto(tenantRequest(tenantB))?.decrypt(encrypted ?? '')
+    ).rejects.toThrow();
+
+    expect(getSessionCrypto(tenantRequest(tenantC))).toBeUndefined();
+    expect(getSessionCrypto(tenantRequest())).toBeUndefined();
+    expect(() =>
+      getSessionCrypto(kibanaRequestFactory({ headers: { 'x-elastic-tenant-id': 'project-b' } }))
+    ).toThrow('only available to requests received over HTTP');
   });
 });

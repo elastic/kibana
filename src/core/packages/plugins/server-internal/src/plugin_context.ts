@@ -433,6 +433,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       authc: deps.security.authc,
       audit: deps.security.audit,
       serviceAccounts: deps.security.serviceAccounts.asScopedToPlugin(plugin.name),
+      getTenantSessionCrypto: deps.security.getTenantSessionCrypto,
     },
     userProfile: deps.userProfile,
     injection: {

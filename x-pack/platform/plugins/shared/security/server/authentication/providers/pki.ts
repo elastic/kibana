@@ -170,7 +170,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
 
     if (session?.state) {
       try {
-        await this.options.tokens.invalidate({ accessToken: session.state.accessToken });
+        await this.options
+          .getTokens(request)
+          .invalidate({ accessToken: session.state.accessToken });
       } catch (err) {
         this.logger.debug(
           () => `Failed invalidating access token: ${getDetailedErrorMessage(err)}`
@@ -228,7 +230,9 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
       );
 
       try {
-        await this.options.tokens.invalidate({ accessToken: session.state.accessToken });
+        await this.options
+          .getTokens(request)
+          .invalidate({ accessToken: session.state.accessToken });
       } catch (err) {
         this.logger.error(`Failed to invalidate access token: ${getDetailedErrorMessage(err)}`);
         return AuthenticationResult.failed(err);
@@ -298,7 +302,7 @@ export class PKIAuthenticationProvider extends BaseAuthenticationProvider<Provid
     try {
       // We can replace generic `transport.request` with a dedicated API method call once
       // https://github.com/elastic/elasticsearch/issues/67189 is resolved.
-      result = (await this.options.client.asInternalUser.transport.request({
+      result = (await this.options.getInternalClient(request).transport.request({
         method: 'POST',
         path: '/_security/delegate_pki',
         body: { x509_certificate_chain: certificateChain },

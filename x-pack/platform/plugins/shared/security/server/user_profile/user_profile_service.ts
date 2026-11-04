@@ -59,8 +59,18 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
    * Updates user preferences by identifier.
    * @param uid User ID
    * @param data Application data to be written (merged with existing data).
+   * @param request Request the profile is updated for. Picks the request's tenant when multi-tenancy is enabled.
    */
-  update<D extends UserProfileData>(uid: string, data: D): Promise<void>;
+  update<D extends UserProfileData>(uid: string, data: D, request?: KibanaRequest): Promise<void>;
+
+  /**
+   * See {@link UserProfileServiceStart.bulkGet}.
+   * @param request Request the profiles are retrieved for. Picks the request's tenant when multi-tenancy is enabled.
+   */
+  bulkGet<D extends UserProfileData>(
+    params: UserProfileBulkGetParams,
+    request?: KibanaRequest
+  ): Promise<Array<UserProfile<D>>>;
 }
 
 export interface UserProfileServiceSetupParams {
@@ -590,12 +600,14 @@ export class UserProfileService {
    */
   private async bulkGet<D extends UserProfileData>(
     clusterClient: IClusterClient,
-    { uids, dataPath }: UserProfileBulkGetParams
+    { uids, dataPath }: UserProfileBulkGetParams,
+    request?: KibanaRequest
   ): Promise<Array<UserProfile<D>>> {
     if (uids.size === 0) {
       return [];
     }
 
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     const uidArray = [...uids];
 
     // Because the Bulk Get User Profile API is a GET there is a limit on how many UIDs we can pass in a single request.
@@ -609,7 +621,7 @@ export class UserProfileService {
       const limit = pLimit(BULK_GET_MAX_CONCURRENT_BATCH_REQUESTS);
       const batchPromises = batches.map((batchUids) => {
         return limit(async () => {
-          const body = await clusterClient.asInternalUser.security.getUserProfile({
+          const body = await asInternalUser.security.getUserProfile({
             uid: batchUids.join(','),
             data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
           });
@@ -631,10 +643,12 @@ export class UserProfileService {
   private async update<D extends UserProfileData>(
     clusterClient: IClusterClient,
     uid: string,
-    data: D
+    data: D,
+    request?: KibanaRequest
   ) {
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     try {
-      await clusterClient.asInternalUser.security.updateUserProfileData({
+      await asInternalUser.security.updateUserProfileData({
         uid,
         data: { [KIBANA_DATA_ROOT]: data },
       });

@@ -2191,6 +2191,11 @@ describe('Authenticator', () => {
           username: 'new-user',
           authentication_provider: provider,
         });
+        // Without multi-tenancy, a request's internal user is the cluster's internal user.
+        mockOptions.clusterClient.asScoped.mockReturnValue({
+          ...elasticsearchServiceMock.createScopedClusterClient(),
+          asInternalUser: mockOptions.clusterClient.asInternalUser,
+        });
         mockOptions.clusterClient.asInternalUser.security.invalidateToken.mockResponse({
           invalidated_tokens: 1,
           previously_invalidated_tokens: 0,
@@ -2216,6 +2221,7 @@ describe('Authenticator', () => {
           )
         );
 
+        expect(mockOptions.clusterClient.asScoped).toHaveBeenCalledWith(request);
         expect(
           mockOptions.clusterClient.asInternalUser.security.invalidateToken
         ).toHaveBeenCalledWith({ token: 'old-token' });
