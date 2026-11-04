@@ -19,6 +19,7 @@ import type {
 } from '../../../../utils/filters/filter_fields';
 import {
   getSyntheticsFilterDisplayValues,
+  normalizeScheduleFilterKeys,
   sortScheduleFilterValues,
 } from '../../../../utils/filters/filter_fields';
 import { useFilters } from './use_filters';
@@ -140,7 +141,9 @@ export const FilterGroup = ({
       label: SCHEDULE_LABEL,
       field: 'schedules',
       values: getSyntheticsFilterDisplayValues(
-        sortScheduleFilterValues(mixUrlValues(data?.schedules, urlParams.schedules)),
+        sortScheduleFilterValues(
+          mixUrlValues(data?.schedules, normalizeScheduleFilterKeys(urlParams.schedules))
+        ),
         'schedules',
         locations
       ),

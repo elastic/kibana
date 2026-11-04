@@ -8,6 +8,8 @@
 import {
   getSyntheticsFilterDisplayValues,
   getSyntheticsFilterKeyForLabel,
+  normalizeScheduleFilterKey,
+  normalizeScheduleFilterKeys,
   sortScheduleFilterValues,
 } from './filter_fields';
 
@@ -59,5 +61,29 @@ describe('schedule filter labels', () => {
     expect(getSyntheticsFilterKeyForLabel('10s', 'schedules')).toBe('10s');
     expect(getSyntheticsFilterKeyForLabel('10m', 'schedules')).toBe('10m');
     expect(getSyntheticsFilterKeyForLabel('10', 'schedules')).toBe('10m');
+  });
+
+  it('normalizes schedule keys to the bucket key the endpoint returns', () => {
+    expect(normalizeScheduleFilterKey('10')).toBe('10m');
+    expect(normalizeScheduleFilterKey('10m')).toBe('10m');
+    expect(normalizeScheduleFilterKey('10s')).toBe('10s');
+    expect(normalizeScheduleFilterKey('60s')).toBe('1m');
+    expect(normalizeScheduleFilterKey('90s')).toBe('90s');
+    expect(normalizeScheduleFilterKey('abc')).toBe('abc');
+  });
+
+  it('normalizes a string, an array or no value', () => {
+    expect(normalizeScheduleFilterKeys('10')).toBe('10m');
+    expect(normalizeScheduleFilterKeys(['10', '60s'])).toEqual(['10m', '1m']);
+    expect(normalizeScheduleFilterKeys(undefined)).toBeUndefined();
+  });
+
+  it('labels the same duration the same way whatever the URL spelling', () => {
+    const label = (key: string) =>
+      getSyntheticsFilterDisplayValues([{ label: key, count: 0 }], 'schedules', [])[0].label;
+
+    expect(label('10')).toBe(label('10m'));
+    expect(label('60s')).toBe(label('1m'));
+    expect(label('60s')).toBe('Every 1 minute');
   });
 });

@@ -115,6 +115,25 @@ const parseScheduleFilterKey = (
   };
 };
 
+/** The key the filters endpoint returns: whole minutes as Nm, otherwise Ns. */
+export const normalizeScheduleFilterKey = (value: string): string => {
+  const parsed = parseScheduleFilterKey(value);
+  if (!parsed) {
+    return value;
+  }
+  const seconds = scheduleToSeconds(parsed);
+  return seconds % 60 === 0 ? `${seconds / 60}m` : `${seconds}s`;
+};
+
+export const normalizeScheduleFilterKeys = (
+  value?: string | string[]
+): string | string[] | undefined => {
+  if (Array.isArray(value)) {
+    return value.map(normalizeScheduleFilterKey);
+  }
+  return value ? normalizeScheduleFilterKey(value) : value;
+};
+
 const scheduleFrequencyLabel = (count: number, unit: ScheduleUnit): string => {
   if (unit === ScheduleUnit.SECONDS) {
     return i18n.translate('xpack.synthetics.monitorFilters.frequencyInSecondsLabel', {
@@ -129,7 +148,7 @@ const scheduleFrequencyLabel = (count: number, unit: ScheduleUnit): string => {
 };
 
 const scheduleFrequencyDisplayLabel = (value: string): string => {
-  const parsed = parseScheduleFilterKey(value);
+  const parsed = parseScheduleFilterKey(normalizeScheduleFilterKey(value));
   return parsed ? scheduleFrequencyLabel(Number(parsed.number), parsed.unit) : value;
 };
 
