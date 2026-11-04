@@ -51,7 +51,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.inferSchemaDescription', {
                 defaultMessage:
-                  "Elastic infers any fields you don't map. All fields are available to query.",
+                  'Elastic infers fields from your files, but you can manually define fields to override them.',
               })}
             </EuiText>
 
@@ -74,7 +74,7 @@ export function InferSchemaToggle({ dynamicMode, onDynamicModeChange }: InferSch
           >
             <EuiText size="xs" color="subdued">
               {i18n.translate('xpack.dataFederation.createDatasetWizard.defineSchemaDescription', {
-                defaultMessage: 'Only fields you map are available to query.',
+                defaultMessage: 'Only fields you manually define are available to query.',
               })}
             </EuiText>
           </EuiCheckableCard>

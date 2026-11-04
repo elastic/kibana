@@ -12,12 +12,16 @@ export type InvestigationSeverityLevel = 'low' | 'medium' | 'high' | 'critical';
 
 /** Labels of the investigation template's `severity` values. */
 export const SEVERITY_LABELS: Readonly<Record<InvestigationSeverityLevel, string>> = Object.freeze({
-  low: i18n.translate('xpack.alertzero.detailsFlyout.severity.low', { defaultMessage: 'Low' }),
-  medium: i18n.translate('xpack.alertzero.detailsFlyout.severity.medium', {
+  low: i18n.translate('xpack.agenticInvestigations.detailsFlyout.severity.low', {
+    defaultMessage: 'Low',
+  }),
+  medium: i18n.translate('xpack.agenticInvestigations.detailsFlyout.severity.medium', {
     defaultMessage: 'Medium',
   }),
-  high: i18n.translate('xpack.alertzero.detailsFlyout.severity.high', { defaultMessage: 'High' }),
-  critical: i18n.translate('xpack.alertzero.detailsFlyout.severity.critical', {
+  high: i18n.translate('xpack.agenticInvestigations.detailsFlyout.severity.high', {
+    defaultMessage: 'High',
+  }),
+  critical: i18n.translate('xpack.agenticInvestigations.detailsFlyout.severity.critical', {
     defaultMessage: 'Critical',
   }),
 });

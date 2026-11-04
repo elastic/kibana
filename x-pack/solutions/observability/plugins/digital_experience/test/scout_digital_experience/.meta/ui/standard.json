@@ -1,5 +1,5 @@
 {
-  "sha1": "962c59b7d7984172c2316b8c3992ba720e4744bb",
+  "sha1": "327bb88933ad90f488104b4c935e1ed3672fefbb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,8 +80,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 22,
-        "column": 10
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "1d69dfa1eb90431-7dc05b6717354f5",
+      "title": "Digital Experience application overview keeps the EDOT Browser Overview headings in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -93,8 +106,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 27,
-        "column": 22
+        "line": 49,
+        "column": 17
       }
     },
     {
@@ -106,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 58,
+        "column": 14
       }
     },
     {
@@ -191,8 +204,8 @@
       }
     },
     {
-      "id": "ad8ceb6a0ebceff-708e74e148734ab",
-      "title": "Digital Experience sessions opens a session with its waterfall, then goes back to the same list",
+      "id": "ad8ceb6a0ebceff-155b7df5e6f48b6",
+      "title": "Digital Experience sessions opens a session with its waterfall and journey, then goes back to the same list",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",

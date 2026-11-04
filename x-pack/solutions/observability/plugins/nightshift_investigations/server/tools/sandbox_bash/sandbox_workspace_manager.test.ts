@@ -24,7 +24,7 @@ jest.mock('./elastic_manifest', () => ({
 }));
 
 import { writeConnectorManifest } from './connector_manifest';
-import { writeElasticManifest } from './elastic_manifest';
+import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
 const mockWriteElasticManifest = writeElasticManifest as jest.Mock;
@@ -303,7 +303,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(noneSession.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -360,7 +360,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -531,6 +531,34 @@ describe('createSandboxWorkspaceManager', () => {
       );
     });
 
+    it('writes elastic manifest for a saved telemetry connector', async () => {
+      actions.inMemoryConnectors = [];
+      actionsClient.get.mockResolvedValue({
+        id: 'elasticsearch-telemetry',
+        name: 'Telemetry',
+        actionTypeId: '.elasticsearch',
+        config: {},
+        isPreconfigured: false,
+        isDeprecated: false,
+        isSystemAction: false,
+        isConnectorTypeDeprecated: false,
+      });
+      const session = createSessionMock(true);
+
+      await managerWithTelemetry.ensureWorkspaceReady({
+        session,
+        callContext: createCallContext(['elasticsearch-telemetry']),
+      });
+
+      expect(mockWriteElasticManifest).toHaveBeenCalledWith(
+        expect.objectContaining({
+          credentials: { kind: 'connector', connectorId: 'elasticsearch-telemetry' },
+          session,
+        })
+      );
+      expect(session.writeFiles).not.toHaveBeenCalled();
+    });
+
     it('passes the configured readable indices to the telemetry manifest', async () => {
       const session = createSessionMock(false);
       const configuredManager = createSandboxWorkspaceManager({
@@ -589,7 +617,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -634,7 +662,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
@@ -654,7 +682,7 @@ describe('createSandboxWorkspaceManager', () => {
       expect(session.writeFiles).toHaveBeenCalledWith([
         {
           path: '/workspace/.connector-docs/elastic.md',
-          content: Buffer.from('No telemetry connector is available.\n'),
+          content: Buffer.from(renderElasticManifest()),
         },
       ]);
     });
