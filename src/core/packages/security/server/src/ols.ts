@@ -83,10 +83,4 @@ export interface CoreScopedOlsService {
     spaceId: string;
     requested?: AclInput;
   }): Promise<void>;
-
-  /**
-   * Stores a recovery answer the caller already has from its own privilege request, so that no
-   * second privilege request is needed.
-   */
-  primeRecovery(type: string, spaceIds: string[], granted: boolean): void;
 }

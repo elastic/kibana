@@ -76,11 +76,6 @@ interface Params {
   checkPrivileges: CheckSavedObjectsPrivileges;
   getCurrentUser: () => AuthenticatedUser | null;
   typeRegistry: ISavedObjectTypeRegistry;
-  /**
-   * Receives the recovery answers for types with an object-level access policy. When it is not set,
-   * object-level security is disabled and no recovery is checked.
-   */
-  primeRecovery?: (type: string, spaceIds: string[], granted: boolean) => void;
 }
 
 /**
@@ -320,7 +315,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
   >;
   private readonly typeRegistry: ISavedObjectTypeRegistry;
   public readonly accessControlService: AccessControlService;
-  private readonly primeRecovery?: Params['primeRecovery'];
 
   constructor({
     actions,
@@ -329,7 +323,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     checkPrivileges,
     getCurrentUser,
     typeRegistry,
-    primeRecovery,
   }: Params) {
     this.actions = actions;
     this.auditLogger = auditLogger;
@@ -338,7 +331,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     this.getCurrentUserFunc = getCurrentUser;
 
     this.typeRegistry = typeRegistry;
-    this.primeRecovery = primeRecovery;
     this.accessControlService = new AccessControlService({ typeRegistry });
     // This comment block is a quick reference for the action map, which maps authorization actions
     // and audit actions to a "security action" as used by the authorization methods.
@@ -499,27 +491,11 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
       }
     }
 
-    // Recovery authority for types with an object-level access policy rides on this request, so that
-    // object-level security never needs a second one. Its entries are removed before the result is
-    // computed: callers without recovery must stay fully authorized for what they asked.
-    const recoveryActions = new Map(
-      this.primeRecovery
-        ? typesArray
-            .filter((type) => this.typeRegistry.getAccessPolicy(type))
-            .map((type) => [this.actions.savedObject.get(type, MANAGE_ACCESS_CONTROL_ACTION), type])
-        : []
-    );
-
-    const privilegeActions = [
-      ...privilegeActionsMap.keys(),
-      ...recoveryActions.keys(),
-      this.actions.login, // Always check login action, we will need it later for redacting namespaces
-    ];
-    const checkResponse = await this.checkPrivileges(
+    const privilegeActions = [...privilegeActionsMap.keys(), this.actions.login]; // Always check login action, we will need it later for redacting namespaces
+    const { hasAllRequested, privileges } = await this.checkPrivileges(
       privilegeActions,
       getAuthorizableSpaces(spaces, allowGlobalResource)
     );
-    const { privileges, hasAllRequested } = this.extractRecovery(checkResponse, recoveryActions);
 
     const missingPrivileges = getMissingPrivileges(privileges);
 
@@ -586,34 +562,6 @@ export class SavedObjectsSecurityExtension implements ISavedObjectsSecurityExten
     }
 
     return { typeMap, status: 'unauthorized' };
-  }
-
-  /**
-   * Removes recovery entries from a privilege check response and passes them to object-level
-   * security. `hasAllRequested` is then computed from the remaining entries only.
-   */
-  private extractRecovery(
-    response: CheckPrivilegesResponse,
-    recoveryActions: Map<string, string>
-  ): Pick<CheckPrivilegesResponse, 'privileges' | 'hasAllRequested'> {
-    if (recoveryActions.size === 0 || !this.primeRecovery) {
-      return response;
-    }
-
-    const kibana: CheckPrivilegesResponse['privileges']['kibana'] = [];
-    for (const entry of response.privileges.kibana) {
-      const recoveryType = recoveryActions.get(entry.privilege);
-      if (recoveryType) {
-        this.primeRecovery(recoveryType, [entry.resource ?? ALL_SPACES_ID], entry.authorized);
-      } else {
-        kibana.push(entry);
-      }
-    }
-
-    return {
-      privileges: { ...response.privileges, kibana },
-      hasAllRequested: kibana.every(({ authorized }) => authorized),
-    };
   }
 
   private auditHelper(params: AuditHelperParams) {

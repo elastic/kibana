@@ -8,7 +8,6 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { nodeBuilder } from '@kbn/es-query';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
-import { securityServiceMock } from '@kbn/core/server/mocks';
 import { ActionsAuthorization } from './actions_authorization';
 import {
   ACTION_SAVED_OBJECT_TYPE,
@@ -345,82 +344,5 @@ describe('getFindAuthorizationFilter', () => {
     await expect(actionsAuthorization.getFindAuthorizationFilter({})).rejects.toThrow(
       'Unauthorized to get actions.'
     );
-  });
-});
-
-describe('ensureAuthorized with object-level security', () => {
-  const RECOVERY_ACTION = mockAuthorizationAction('action', 'manage_access_control');
-
-  const setup = (recoveryGranted: boolean, otherGranted = true, olsEnabled = true) => {
-    const { authorization } = mockSecurity();
-    const checkPrivileges: jest.MockedFunction<
-      ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
-    > = jest.fn();
-    authorization.checkPrivilegesDynamicallyWithRequest.mockReturnValue(checkPrivileges);
-    checkPrivileges.mockResolvedValue({
-      username: 'some-user',
-      hasAllRequested: recoveryGranted && otherGranted,
-      privileges: {
-        kibana: [
-          {
-            resource: 'space-1',
-            privilege: mockAuthorizationAction('action', 'get'),
-            authorized: otherGranted,
-          },
-          { resource: 'space-1', privilege: RECOVERY_ACTION, authorized: recoveryGranted },
-        ],
-        elasticsearch: { cluster: [], index: {} },
-      },
-    });
-
-    const ols = securityServiceMock.createOls();
-    const scoped = securityServiceMock.createScopedOls();
-    ols.asScoped.mockReturnValue(scoped);
-    const actionsAuthorization = new ActionsAuthorization({
-      request,
-      authorization,
-      ols: olsEnabled ? ols : null,
-    });
-    return { actionsAuthorization, checkPrivileges, scoped };
-  };
-
-  test('asks for recovery in the same privilege request and primes the answer', async () => {
-    const { actionsAuthorization, checkPrivileges, scoped } = setup(true);
-
-    await actionsAuthorization.ensureAuthorized({ operation: 'get' });
-
-    expect(checkPrivileges).toHaveBeenCalledTimes(1);
-    expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: [mockAuthorizationAction('action', 'get'), RECOVERY_ACTION],
-    });
-    expect(scoped.primeRecovery).toHaveBeenCalledWith('action', ['space-1'], true);
-  });
-
-  test('stays authorized when only recovery is missing', async () => {
-    const { actionsAuthorization, scoped } = setup(false);
-
-    await expect(actionsAuthorization.ensureAuthorized({ operation: 'get' })).resolves.toBe(
-      undefined
-    );
-    expect(scoped.primeRecovery).toHaveBeenCalledWith('action', ['space-1'], false);
-  });
-
-  test('still rejects a missing feature privilege', async () => {
-    const { actionsAuthorization } = setup(true, false);
-
-    await expect(actionsAuthorization.ensureAuthorized({ operation: 'get' })).rejects.toThrow(
-      'Unauthorized to get actions'
-    );
-  });
-
-  test('does not ask for recovery while object-level security is disabled', async () => {
-    const { actionsAuthorization, checkPrivileges, scoped } = setup(true, true, false);
-
-    await actionsAuthorization.ensureAuthorized({ operation: 'get' });
-
-    expect(checkPrivileges).toHaveBeenCalledWith({
-      kibana: [mockAuthorizationAction('action', 'get')],
-    });
-    expect(scoped.primeRecovery).not.toHaveBeenCalled();
   });
 });
