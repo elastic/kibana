@@ -53,6 +53,12 @@ export const DEFAULT_EXECUTION_PAGE_FILTERS: FilterControlConfig[] = [
     field_name: EXECUTED_BY_FILTER_FIELD,
   },
   {
+    title: i18n.translate('workflows.executionsPage.filterExecutionNameLabel', {
+      defaultMessage: 'Execution name',
+    }),
+    field_name: 'runName',
+  },
+  {
     title: i18n.translate('workflows.executionsPage.filterTrigger', {
       defaultMessage: 'Trigger',
     }),

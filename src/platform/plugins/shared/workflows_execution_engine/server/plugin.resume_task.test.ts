@@ -366,9 +366,10 @@ describe('workflow:resume task runner event fields', () => {
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
   });
 
-  it('retries a busy notification without entering workflow recovery or executing steps', async () => {
+  it('hands a busy notification to the retained wake task instead of re-arming itself', async () => {
     setupPlugin();
     taskManagerStart.runSoon.mockRejectedValueOnce(new TaskAlreadyRunningError('active'));
+    taskManagerStart.runSoon.mockResolvedValue({ id: 'wake', forced: false });
     const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
       taskManagerMock.createRunContext({
         taskInstance: {
@@ -379,11 +380,28 @@ describe('workflow:resume task runner event fields', () => {
         fakeRequest: {} as KibanaRequest,
       })
     );
-    expect(await runner.run()).toEqual({ runAt: expect.any(Date), state: {} });
+    expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(getWorkflowWakeTaskId('exec-notify'));
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
     expect(mockResolveInterruptedWorkflowResumeTask).not.toHaveBeenCalled();
-    taskManagerStart.runSoon.mockResolvedValue({ id: 'active', forced: false });
+  });
+
+  it('completes a busy notification when the retained wake task is already claimed', async () => {
+    setupPlugin();
+    taskManagerStart.runSoon
+      .mockRejectedValueOnce(new TaskAlreadyRunningError('active'))
+      .mockRejectedValueOnce(new TaskAlreadyRunningError('wake'));
+    const runner = taskDefinitions[WORKFLOW_RESUME_TASK_TYPE].createTaskRunner(
+      taskManagerMock.createRunContext({
+        taskInstance: {
+          ...taskManagerMock.createTask(),
+          params: { workflowRunId: 'exec-notify', spaceId: 'default' },
+        },
+        fakeRequest: {} as KibanaRequest,
+      })
+    );
     expect(await runner.run()).toBeUndefined();
+    expect(taskManagerStart.runSoon).toHaveBeenLastCalledWith(getWorkflowWakeTaskId('exec-notify'));
     expect(mockResumeWorkflow).not.toHaveBeenCalled();
   });
 

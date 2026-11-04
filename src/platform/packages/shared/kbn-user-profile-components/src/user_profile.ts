@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { VISUALIZATION_COLORS } from '@elastic/eui';
 import chroma from 'chroma-js';
 
 import type { UserProfileData, UserProfileUserInfo } from '@kbn/core-user-profile-common';
@@ -24,33 +23,11 @@ export const USER_AVATAR_MAX_INITIALS = 2;
  */
 export function isValidUserProfileAvatarColor(
   color?: NonNullable<UserProfileData['avatar']>['color']
-) {
+): color is string {
   if (!color || typeof color !== 'string') {
     return false;
   }
   return color != null && color !== '' && /^#/.test(color) && chroma.valid(color);
-}
-
-/**
- * Determines the color for the provided user profile.
- * If a color is present on the user profile itself, then that is used.
- * Otherwise, a color is provided from EUI's Visualization Colors based on the display name.
- *
- * @param {UserProfileUserInfo} user User info
- * @param {UserProfileAvatarData} avatar User avatar
- */
-export function getUserAvatarColor(
-  user: Pick<UserProfileUserInfo, 'username' | 'full_name'>,
-  avatar?: UserProfileAvatarData
-) {
-  const firstCodePoint = getUserDisplayName(user).codePointAt(0) || USER_AVATAR_FALLBACK_CODE_POINT;
-  const avatarColor = avatar?.color;
-  const isValidColor = isValidUserProfileAvatarColor(avatarColor);
-  if (isValidColor) {
-    return avatarColor;
-  }
-
-  return VISUALIZATION_COLORS[firstCodePoint % VISUALIZATION_COLORS.length];
 }
 
 /**

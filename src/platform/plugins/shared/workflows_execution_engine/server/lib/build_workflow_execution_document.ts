@@ -34,6 +34,7 @@ export interface BuildWorkflowExecutionDocumentParams {
   now: Date;
   maxEventChainDepth: number;
   getConcurrencyGroupKey: (workflowExecution: WorkflowExecutionForInputRendering) => string | null;
+  getRunName: (workflowExecution: WorkflowExecutionForInputRendering) => string | undefined;
 }
 
 const stampExecutionWorkflowVersion = (
@@ -59,6 +60,7 @@ export const buildWorkflowExecutionDocument = (
     now,
     maxEventChainDepth,
     getConcurrencyGroupKey,
+    getRunName,
   } = params;
   const triggeredBy = (context.triggeredBy as string | undefined) || defaultTriggeredBy;
   // Strip the context's space so property order cannot override the trusted execution space.
@@ -131,6 +133,7 @@ export const buildWorkflowExecutionDocument = (
   };
 
   stampExecutionWorkflowVersion(workflowExecution, workflow);
+  workflowExecution.runName = getRunName(workflowExecution);
 
   const concurrencyGroupKey = getConcurrencyGroupKey(workflowExecution);
   if (concurrencyGroupKey) {

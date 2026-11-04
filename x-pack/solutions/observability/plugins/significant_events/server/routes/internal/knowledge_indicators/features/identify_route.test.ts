@@ -82,6 +82,7 @@ const createInferredParams = (
       filtersCapped: false,
       hasFilteredDocuments: false,
     },
+    maxExcludedFeaturesInPrompt: 10,
   },
 });
 
@@ -262,6 +263,18 @@ describe('feature identification route schemas', () => {
     expect(
       prepareRoute.params.safeParse({
         ...prepareParams,
+        body: { ...prepareParams.body, entityFilteredRatio: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
+        body: { ...prepareParams.body, diverseRatio: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      prepareRoute.params.safeParse({
+        ...prepareParams,
         body: { ...prepareParams.body, sampleSize: 101 },
       }).success
     ).toBe(false);
@@ -287,6 +300,23 @@ describe('feature identification route schemas', () => {
       computedRoute.params.safeParse({
         path: { sourceId: 'logs.test' },
         body: { computedFeaturesTimeoutMs: 240_001 },
+      }).success
+    ).toBe(false);
+  });
+
+  it('requires maxExcludedFeaturesInPrompt on the inferred route', () => {
+    const params = createInferredParams([{ _id: '1', fields: { message: 'ok' } }]);
+    expect(inferredRoute.params.safeParse(params).success).toBe(true);
+    expect(
+      inferredRoute.params.safeParse({
+        ...params,
+        body: { ...params.body, maxExcludedFeaturesInPrompt: undefined },
+      }).success
+    ).toBe(false);
+    expect(
+      inferredRoute.params.safeParse({
+        ...params,
+        body: { ...params.body, maxExcludedFeaturesInPrompt: 51 },
       }).success
     ).toBe(false);
   });
@@ -403,7 +433,7 @@ describe('inferred feature identification route', () => {
         filtersCapped: false,
         hasFilteredDocuments: true,
         tuning: {
-          max_excluded_features_in_prompt: 5,
+          maxExcludedFeaturesInPrompt: 5,
           maxPreviouslyIdentifiedFeatures: 6,
         },
         trackFeaturesIdentified: expect.any(Function),
