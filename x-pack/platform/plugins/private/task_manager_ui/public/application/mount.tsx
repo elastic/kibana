@@ -10,9 +10,10 @@ import ReactDOM from 'react-dom';
 import type { CoreSetup } from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import { Router } from '@kbn/shared-ux-router';
 import { BACKGROUND_TASKS_TITLE } from '../constants';
 import { createTasksApi } from './api';
-import { BackgroundTasksPage } from './background_tasks_page';
+import { App } from './app';
 
 interface MountParams {
   core: CoreSetup;
@@ -21,17 +22,18 @@ interface MountParams {
 
 export const mountManagementSection = async ({
   core,
-  params: { element, setBreadcrumbs },
+  params: { element, setBreadcrumbs, history },
 }: MountParams) => {
   const [coreStart] = await core.getStartServices();
   coreStart.chrome.docTitle.change(BACKGROUND_TASKS_TITLE);
-  setBreadcrumbs([{ text: BACKGROUND_TASKS_TITLE }]);
 
   const api = createTasksApi(coreStart.http);
 
   ReactDOM.render(
     <KibanaRenderContextProvider {...coreStart}>
-      <BackgroundTasksPage api={api} />
+      <Router history={history}>
+        <App api={api} setBreadcrumbs={setBreadcrumbs} />
+      </Router>
     </KibanaRenderContextProvider>,
     element
   );

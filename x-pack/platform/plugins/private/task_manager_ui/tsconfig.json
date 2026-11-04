@@ -11,7 +11,8 @@
     "@kbn/react-kibana-context-render",
     "@kbn/app-header",
     "@kbn/ui-callout",
-    "@kbn/task-manager-plugin"
+    "@kbn/task-manager-plugin",
+    "@kbn/shared-ux-router"
   ],
   "exclude": ["target/**/*"]
 }

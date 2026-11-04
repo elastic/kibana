@@ -23,17 +23,18 @@ import {
   type EuiBasicTableColumn,
   type EuiComboBoxOptionOption,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { useHistory } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { AppHeader } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
+import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { TaskNode } from '@kbn/task-manager-plugin/common';
 import { BACKGROUND_TASKS_TITLE } from '../constants';
 import type { TasksApi } from './api';
+import { taskDetailsPath } from './app';
 import { RollupBadges, StatusBadge } from './status_badge';
-import { TaskFlyout } from './task_flyout';
 import type { TaskRow } from './task_tree';
-import { buildTaskRows, flattenTaskRows } from './task_tree';
+import { buildTaskRows } from './task_tree';
 
 const ALL_STATUSES = [
   'running',
@@ -70,10 +71,9 @@ const relativeTime = (iso: string | null): string => {
 const toOptions = (values: string[]): Array<EuiComboBoxOptionOption<string>> =>
   values.map((value) => ({ label: value, value }));
 
-const toggleChildrenLabel = i18n.translate(
-  'xpack.taskManagerUi.backgroundTasks.toggleChildrenAriaLabel',
-  { defaultMessage: 'Toggle sub-tasks' }
-);
+const viewDetailsLabel = i18n.translate('xpack.taskManagerUi.backgroundTasks.viewDetails', {
+  defaultMessage: 'View task details',
+});
 
 /** Relative time with the absolute timestamp as a native tooltip. */
 const TimeCell = ({ value }: { value: string | null }) =>
@@ -81,9 +81,11 @@ const TimeCell = ({ value }: { value: string | null }) =>
 
 interface BackgroundTasksPageProps {
   api: TasksApi;
+  setBreadcrumbs: ManagementAppMountParams['setBreadcrumbs'];
 }
 
-export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
+export const BackgroundTasksPage = ({ api, setBreadcrumbs }: BackgroundTasksPageProps) => {
+  const history = useHistory();
   const [statuses, setStatuses] = useState<string[]>(DEFAULT_STATUSES);
   const [taskType, setTaskType] = useState<string | undefined>();
   const [taskTypes, setTaskTypes] = useState<string[]>([]);
@@ -94,9 +96,11 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
   const [truncated, setTruncated] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [collapsed, setCollapsed] = useState<Set<string>>(new Set());
-  const [selectedTaskId, setSelectedTaskId] = useState<string | null>(null);
   const [lastRefreshed, setLastRefreshed] = useState<Date | null>(null);
+
+  useEffect(() => {
+    setBreadcrumbs([{ text: BACKGROUND_TASKS_TITLE }]);
+  }, [setBreadcrumbs]);
 
   useEffect(() => {
     api
@@ -147,18 +151,11 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
     };
   }, [load, autoRefresh]);
 
-  const rows = useMemo(() => flattenTaskRows(buildTaskRows(tasks), collapsed), [tasks, collapsed]);
+  // Only root tasks are listed; their sub-tasks are summarized in the "Sub-tasks" column and
+  // shown on the details page.
+  const rows = useMemo(() => buildTaskRows(tasks), [tasks]);
 
-  const toggleCollapsed = (id: string) =>
-    setCollapsed((prev) => {
-      const next = new Set(prev);
-      if (next.has(id)) {
-        next.delete(id);
-      } else {
-        next.add(id);
-      }
-      return next;
-    });
+  const openDetails = (id: string) => history.push(taskDetailsPath(id));
 
   const columns: Array<EuiBasicTableColumn<TaskRow>> = [
     {
@@ -167,40 +164,23 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
         defaultMessage: 'Task',
       }),
       width: '40%',
-      render: (_: unknown, row: TaskRow) => {
-        const { task, level, children } = row;
-        const label = task.child_key ?? task.id;
+      render: (_: unknown, { task }: TaskRow) => {
         return (
-          <EuiFlexGroup
-            gutterSize="xs"
-            alignItems="center"
-            responsive={false}
-            css={css`
-              padding-left: ${level * 20}px;
-            `}
-          >
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
             <EuiFlexItem grow={false}>
-              {children.length ? (
-                <EuiToolTip content={toggleChildrenLabel} disableScreenReaderOutput>
-                  <EuiButtonIcon
-                    iconType={collapsed.has(task.id) ? 'arrowRight' : 'arrowDown'}
-                    aria-label={toggleChildrenLabel}
-                    onClick={() => toggleCollapsed(task.id)}
-                    size="xs"
-                  />
-                </EuiToolTip>
-              ) : (
-                <span style={{ display: 'inline-block', width: 24 }} />
-              )}
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={task.id}>
-                <EuiLink onClick={() => setSelectedTaskId(task.id)}>
-                  <EuiText size="s" color={task.matched ? undefined : 'subdued'} component="span">
-                    {label}
-                  </EuiText>
-                </EuiLink>
-              </EuiToolTip>
+              <EuiLink
+                href={history.createHref({ pathname: taskDetailsPath(task.id) })}
+                onClick={(event: React.MouseEvent) => {
+                  if (!event.metaKey && !event.ctrlKey) {
+                    event.preventDefault();
+                    openDetails(task.id);
+                  }
+                }}
+              >
+                <EuiText size="s" color={task.matched ? undefined : 'subdued'} component="span">
+                  {task.id}
+                </EuiText>
+              </EuiLink>
             </EuiFlexItem>
             {task.recurring && (
               <EuiFlexItem grow={false}>
@@ -283,6 +263,23 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
       truncateText: true,
       render: (value: string | null) => (value ? value.replace(/^kibana:/, '') : '—'),
     },
+    {
+      name: i18n.translate('xpack.taskManagerUi.backgroundTasks.columns.actions', {
+        defaultMessage: 'Actions',
+      }),
+      width: '70px',
+      align: 'center',
+      render: ({ task }: TaskRow) => (
+        <EuiToolTip content={viewDetailsLabel} disableScreenReaderOutput>
+          <EuiButtonIcon
+            iconType="inspect"
+            aria-label={viewDetailsLabel}
+            onClick={() => openDetails(task.id)}
+            data-test-subj={`backgroundTaskDetails-${task.id}`}
+          />
+        </EuiToolTip>
+      ),
+    },
   ];
 
   return (
@@ -292,7 +289,7 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
         spacing="bleed"
         description={i18n.translate('xpack.taskManagerUi.backgroundTasks.description', {
           defaultMessage:
-            'Tasks in the Task Manager index, grouped into parent and sub-task trees. Read-only.',
+            'Top-level tasks in the Task Manager index. Open a task to see its sub-tasks. Read-only.',
         })}
       />
       <EuiPageSection paddingSize="l">
@@ -366,10 +363,10 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
         <EuiText size="xs" color="subdued">
           {i18n.translate('xpack.taskManagerUi.backgroundTasks.summary', {
             defaultMessage:
-              '{matched} matching {matched, plural, one {task} other {tasks}}, {total} shown with tree context{truncated, select, true { (truncated; narrow the filter)} other {}}. {refreshed}',
+              '{matched} matching {matched, plural, one {task} other {tasks}} in {total} top-level {total, plural, one {task} other {tasks}}{truncated, select, true { (truncated; narrow the filter)} other {}}. {refreshed}',
             values: {
               matched,
-              total: tasks.length,
+              total: rows.length,
               truncated: String(truncated),
               refreshed: lastRefreshed
                 ? i18n.translate('xpack.taskManagerUi.backgroundTasks.lastRefreshed', {
@@ -410,15 +407,6 @@ export const BackgroundTasksPage = ({ api }: BackgroundTasksPageProps) => {
           })}
         />
       </EuiPageSection>
-
-      {selectedTaskId && (
-        <TaskFlyout
-          api={api}
-          taskId={selectedTaskId}
-          onClose={() => setSelectedTaskId(null)}
-          onSelectTask={setSelectedTaskId}
-        />
-      )}
     </div>
   );
 };

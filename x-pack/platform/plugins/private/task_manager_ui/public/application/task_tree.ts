@@ -78,18 +78,3 @@ export const buildTaskRows = (tasks: TaskNode[]): TaskRow[] => {
 
   return roots.sort(byRunAtDesc).map((root) => toRow(root, 0));
 };
-
-/**
- * Flattens trees into the rows to render, skipping the children of collapsed parents.
- */
-export const flattenTaskRows = (rows: TaskRow[], collapsed: ReadonlySet<string>): TaskRow[] => {
-  const out: TaskRow[] = [];
-  const visit = (row: TaskRow) => {
-    out.push(row);
-    if (!collapsed.has(row.task.id)) {
-      row.children.forEach(visit);
-    }
-  };
-  rows.forEach(visit);
-  return out;
-};
