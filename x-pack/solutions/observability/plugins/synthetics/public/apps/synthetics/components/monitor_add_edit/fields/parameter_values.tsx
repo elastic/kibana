@@ -146,26 +146,38 @@ export const ParameterValuesEditor = ({
   const [visibleRows, setVisibleRows] = useState<Record<string, boolean>>({});
   const [editingId, setEditingId] = useState<string>();
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
-  const lastEmittedValue = useRef(value ?? '');
+  const knownValue = useRef(value ?? '');
+  // The form can hand values back late or batched, so values we emitted must not look external.
+  const emittedValues = useRef<string[]>([]);
   const canUsePairs = useMemo(() => canUseParameterPairs(value), [value]);
 
   useEffect(() => {
-    if ((value ?? '') === lastEmittedValue.current) {
+    const current = value ?? '';
+    const emittedIndex = emittedValues.current.indexOf(current);
+    if (emittedIndex !== -1) {
+      emittedValues.current = emittedValues.current.slice(emittedIndex + 1);
+      knownValue.current = current;
       return;
     }
-    lastEmittedValue.current = value ?? '';
+    if (current === knownValue.current) {
+      return;
+    }
+    emittedValues.current = [];
+    knownValue.current = current;
     setRows(createRows(value));
     setIsJsonMode(!canUseParameterPairs(value));
   }, [createRows, value]);
 
   const emit = useCallback(
     (next: string) => {
-      lastEmittedValue.current = next;
-      if (next !== (value ?? '')) {
-        onChange(next);
+      const latest = emittedValues.current[emittedValues.current.length - 1] ?? knownValue.current;
+      if (next === latest) {
+        return;
       }
+      emittedValues.current.push(next);
+      onChange(next);
     },
-    [onChange, value]
+    [onChange]
   );
 
   const updateRows = useCallback(

@@ -266,7 +266,58 @@ describe('ParameterValuesEditor', () => {
     expect(getByTestId('keyValuePairsKey0')).toHaveValue('retries');
     expect(getByTestId('keyValuePairsValue0')).toHaveValue('3');
   });
+
+  it('stays in JSON mode when the form delivers earlier values late', () => {
+    const { getByTestId, queryByTestId } = render(<LaggingParameterValuesEditor />);
+
+    // An editor can auto-close braces, so a transient `{}` fits key-value pairs.
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), { target: { value: '{}' } });
+    fireEvent.change(getByTestId('syntheticsParamsJSONEditor'), {
+      target: { value: '{"retries":4}' },
+    });
+
+    fireEvent.click(getByTestId('flushValue'));
+    expect(queryByTestId('keyValuePairsKey0')).not.toBeInTheDocument();
+    expect(getByTestId('syntheticsParamsJSONEditor')).toBeInTheDocument();
+
+    fireEvent.click(getByTestId('flushValue'));
+    expect(getByTestId('syntheticsParamsJSONEditor')).toHaveValue('{"retries":4}');
+  });
+
+  it('follows values that did not come from the editor', () => {
+    const { getByTestId, queryByTestId } = render(<LaggingParameterValuesEditor />);
+
+    fireEvent.click(getByTestId('resetValue'));
+
+    expect(queryByTestId('syntheticsParamsJSONEditor')).not.toBeInTheDocument();
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('token');
+  });
 });
+
+// Applies the editor's values to `value` one at a time, like a form that re-renders late.
+const LaggingParameterValuesEditor = () => {
+  const [value, setValue] = React.useState('{"retries":3}');
+  const pending = React.useRef<string[]>([]);
+
+  return (
+    <>
+      <ParameterValuesEditor onChange={(next) => pending.current.push(next)} value={value} />
+      <button
+        data-test-subj="flushValue"
+        onClick={() => {
+          const [next] = pending.current.splice(0, 1);
+          setValue(next);
+        }}
+        type="button"
+      />
+      <button
+        data-test-subj="resetValue"
+        onClick={() => setValue('{"token":"abc"}')}
+        type="button"
+      />
+    </>
+  );
+};
 
 const ParameterValuesEditorForm = ({
   defaultParams = '{"password":"changeme"}',
