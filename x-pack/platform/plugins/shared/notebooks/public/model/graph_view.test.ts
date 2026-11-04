@@ -115,4 +115,14 @@ describe('buildGraphView', () => {
     expect(y('bytes')).toBeLessThan(y('q'));
     expect(y('q')).toBeLessThan(y('c'));
   });
+
+  it('sizes each node to the width it measures', () => {
+    const { nodes } = buildGraphView(
+      Object.fromEntries(cells.map((cell) => [cell.id, cell])),
+      cells.map(({ id }) => id),
+      (content) => (content.kind === 'source' ? content.label.length : content.cellId.length) * 10
+    );
+    expect(nodeById(nodes, 'source:logs').width).toBe(40);
+    expect(nodeById(nodes, 'bytes').width).toBe(50);
+  });
 });

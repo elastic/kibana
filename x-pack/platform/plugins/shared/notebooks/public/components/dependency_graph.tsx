@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import {
   Background,
   BaseEdge,
@@ -47,24 +47,63 @@ import {
   CELL_NODE_SIZE,
   getDownstream,
   SOURCE_NODE_SIZE,
+  type GetNodeWidth,
 } from '../model/graph_view';
 import type { CellRuntime, ParamValue } from '../model/types';
 import { TYPE_ICONS, getStatusBorderColor, getTypeLabel } from './cell_display';
-import { CellStatusBadge } from './cell_status_badge';
 import { useNotebook } from './notebook_context';
 import { getResultSummary } from './result_preview';
 
 /** How a node relates to the selected node, if any. */
 type Highlight = 'selected' | 'downstream' | 'dimmed' | 'none';
 
-type CellFlowNode = Node<{ cellId: string; highlight: Highlight }, 'cell'>;
-type SourceFlowNode = Node<{ label: string; highlight: Highlight }, 'source'>;
+type CellFlowNode = Node<{ cellId: string; width: number; highlight: Highlight }, 'cell'>;
+type SourceFlowNode = Node<{ label: string; width: number; highlight: Highlight }, 'source'>;
 type FlowNode = CellFlowNode | SourceFlowNode;
 type DependencyFlowEdge = Edge<{ params: readonly string[]; isHovered: boolean }, 'dependency'>;
 
 const hiddenHandleCss = css`
   visibility: hidden;
 `;
+
+const NODE_MIN_WIDTH = 96;
+const NODE_MAX_WIDTH = 280;
+/** Horizontal padding, icon and gap around a node's text, plus slack for font rendering. */
+const NODE_CHROME_WIDTH = 48;
+
+let measureContext: CanvasRenderingContext2D | null | undefined;
+
+const measureText = (text: string, font: string): number => {
+  measureContext ??= document.createElement('canvas').getContext('2d');
+  if (!measureContext) return NODE_MAX_WIDTH;
+  measureContext.font = font;
+  return measureContext.measureText(text).width;
+};
+
+const fitWidth = (textWidth: number): number =>
+  Math.ceil(Math.min(NODE_MAX_WIDTH, Math.max(NODE_MIN_WIDTH, textWidth + NODE_CHROME_WIDTH)));
+
+const useGetNodeWidth = (cells: Readonly<Record<string, CellDefinition>>): GetNodeWidth => {
+  const { euiTheme } = useEuiTheme();
+  return useCallback<GetNodeWidth>(
+    (content) => {
+      const { base, font } = euiTheme;
+      const fontOf = (scale: number, weight: CSSProperties['fontWeight']) =>
+        `${weight ?? ''} ${base * scale}px ${font.family}`;
+      const small = fontOf(font.scale.xs, font.weight.regular);
+      if (content.kind === 'source') return fitWidth(measureText(content.label, small));
+      const cell = cells[content.cellId];
+      if (!cell) return NODE_MIN_WIDTH;
+      return fitWidth(
+        Math.max(
+          measureText(cell.name, fontOf(font.scale.s, font.weight.bold)),
+          measureText(getTypeLabel(cell), small)
+        )
+      );
+    },
+    [cells, euiTheme]
+  );
+};
 
 const DIMMED_OPACITY = 0.35;
 
@@ -91,7 +130,7 @@ const getNodeSummary = (cell: CellDefinition, { error, output, durationMs }: Cel
   return getTypeLabel(cell);
 };
 
-const CellNode = ({ data: { cellId, highlight } }: NodeProps<CellFlowNode>) => {
+const CellNode = ({ data: { cellId, width, highlight } }: NodeProps<CellFlowNode>) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
@@ -104,7 +143,7 @@ const CellNode = ({ data: { cellId, highlight } }: NodeProps<CellFlowNode>) => {
       css={[
         getHighlightCss(highlight, euiTheme),
         css`
-          width: ${CELL_NODE_SIZE.width}px;
+          width: ${width}px;
           height: ${CELL_NODE_SIZE.height}px;
           display: flex;
           align-items: center;
@@ -119,33 +158,30 @@ const CellNode = ({ data: { cellId, highlight } }: NodeProps<CellFlowNode>) => {
       data-test-subj={`notebookGraphNode-${cell.name}`}
     >
       <Handle type="target" position={Position.Top} isConnectable={false} css={hiddenHandleCss} />
-      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={{ minWidth: 0 }}>
-        <EuiFlexItem grow css={{ minWidth: 0 }}>
-          <EuiToolTip
-            content={<span css={{ whiteSpace: 'pre-line' }}>{getNodeSummary(cell, runtime)}</span>}
-            position="bottom"
-          >
-            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} tabIndex={0}>
-              <EuiFlexItem grow={false}>
-                <EuiIcon type={TYPE_ICONS[cell.type]} aria-hidden={true} />
-              </EuiFlexItem>
-              <EuiFlexItem css={{ minWidth: 0 }}>
-                <EuiText size="s" className="eui-textTruncate">
-                  <strong>{cell.name}</strong>
-                </EuiText>
-                <EuiText size="xs" color="subdued" className="eui-textTruncate">
-                  {getTypeLabel(cell)}
-                </EuiText>
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiToolTip>
-        </EuiFlexItem>
-        {cell.type !== 'markdown' && runtime.status !== 'done' && (
+      <EuiToolTip
+        content={<span css={{ whiteSpace: 'pre-line' }}>{getNodeSummary(cell, runtime)}</span>}
+        position="bottom"
+      >
+        <EuiFlexGroup
+          gutterSize="s"
+          alignItems="center"
+          responsive={false}
+          tabIndex={0}
+          css={{ minWidth: 0 }}
+        >
           <EuiFlexItem grow={false}>
-            <CellStatusBadge runtime={runtime} />
+            <EuiIcon type={TYPE_ICONS[cell.type]} aria-hidden={true} />
           </EuiFlexItem>
-        )}
-      </EuiFlexGroup>
+          <EuiFlexItem css={{ minWidth: 0 }}>
+            <EuiText size="s" className="eui-textTruncate">
+              <strong>{cell.name}</strong>
+            </EuiText>
+            <EuiText size="xs" color="subdued" className="eui-textTruncate">
+              {getTypeLabel(cell)}
+            </EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiToolTip>
       <Handle
         type="source"
         position={Position.Bottom}
@@ -156,14 +192,14 @@ const CellNode = ({ data: { cellId, highlight } }: NodeProps<CellFlowNode>) => {
   );
 };
 
-const SourceNode = ({ data: { label, highlight } }: NodeProps<SourceFlowNode>) => {
+const SourceNode = ({ data: { label, width, highlight } }: NodeProps<SourceFlowNode>) => {
   const { euiTheme } = useEuiTheme();
   return (
     <div
       css={[
         getHighlightCss(highlight, euiTheme),
         css`
-          width: ${SOURCE_NODE_SIZE.width}px;
+          width: ${width}px;
           height: ${SOURCE_NODE_SIZE.height}px;
           display: flex;
           align-items: center;
@@ -277,7 +313,11 @@ export const DependencyGraph = ({
     {}
   );
 
-  const view = useMemo(() => buildGraphView(cells, cellOrder), [cells, cellOrder]);
+  const getNodeWidth = useGetNodeWidth(cells);
+  const view = useMemo(
+    () => buildGraphView(cells, cellOrder, getNodeWidth),
+    [cells, cellOrder, getNodeWidth]
+  );
 
   const onNodesChange = (changes: NodeChange<FlowNode>[]) => {
     const moved = changes.flatMap((change) =>
@@ -304,15 +344,15 @@ export const DependencyGraph = ({
               id: node.id,
               type: 'cell',
               position,
-              measured: CELL_NODE_SIZE,
-              data: { cellId: node.cellId, highlight },
+              measured: { width: node.width, height: CELL_NODE_SIZE.height },
+              data: { cellId: node.cellId, width: node.width, highlight },
             }
           : {
               id: node.id,
               type: 'source',
               position,
-              measured: SOURCE_NODE_SIZE,
-              data: { label: node.label, highlight },
+              measured: { width: node.width, height: SOURCE_NODE_SIZE.height },
+              data: { label: node.label, width: node.width, highlight },
             };
       }),
       edges: view.edges.map(({ id, source, target, params }): DependencyFlowEdge => {

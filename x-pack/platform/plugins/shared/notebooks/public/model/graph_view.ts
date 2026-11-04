@@ -11,8 +11,8 @@ import type { CellDefinition } from '../../common/types';
 import { buildGraph } from './graph';
 import { getCellParamNames, getExposedParamNames } from './references';
 
-export const CELL_NODE_SIZE = { width: 220, height: 56 } as const;
-export const SOURCE_NODE_SIZE = { width: 180, height: 40 } as const;
+export const CELL_NODE_SIZE = { width: 180, height: 56 } as const;
+export const SOURCE_NODE_SIZE = { width: 140, height: 40 } as const;
 
 interface Position {
   x: number;
@@ -20,8 +20,16 @@ interface Position {
 }
 
 export type GraphViewNode =
-  | { kind: 'cell'; id: string; cellId: string; position: Position }
-  | { kind: 'source'; id: string; label: string; position: Position };
+  | { kind: 'cell'; id: string; cellId: string; position: Position; width: number }
+  | { kind: 'source'; id: string; label: string; position: Position; width: number };
+
+/** Measures how wide a node needs to be to fit its content. */
+export type GetNodeWidth = (
+  content: { kind: 'cell'; cellId: string } | { kind: 'source'; label: string }
+) => number;
+
+const getDefaultNodeWidth: GetNodeWidth = ({ kind }) =>
+  kind === 'cell' ? CELL_NODE_SIZE.width : SOURCE_NODE_SIZE.width;
 
 export interface GraphViewEdge {
   id: string;
@@ -70,7 +78,10 @@ const getEdgeParams = (parent: CellDefinition | undefined, child: CellDefinition
   return getExposedParamNames(parent).filter((param) => consumed.has(param));
 };
 
-const sizeOf = ({ kind }: GraphViewNode) => (kind === 'cell' ? CELL_NODE_SIZE : SOURCE_NODE_SIZE);
+const sizeOf = ({ kind, width }: GraphViewNode) => ({
+  width,
+  height: kind === 'cell' ? CELL_NODE_SIZE.height : SOURCE_NODE_SIZE.height,
+});
 
 /** Positions nodes top to bottom by dependency depth; positions are top-left corners. */
 const layoutNodes = (
@@ -115,7 +126,8 @@ export const getDownstream = (
 /** The cells, the data sources they read, and the dependencies between them, laid out for display. */
 export const buildGraphView = (
   cells: Readonly<Record<string, CellDefinition>>,
-  cellOrder: readonly string[]
+  cellOrder: readonly string[],
+  getNodeWidth: GetNodeWidth = getDefaultNodeWidth
 ): GraphView => {
   const { parents } = buildGraph(cells, cellOrder);
   const cellIds = cellOrder.filter((id) => cells[id] !== undefined);
@@ -132,15 +144,19 @@ export const buildGraphView = (
   });
 
   const nodes: GraphViewNode[] = [
-    ...[...sources.keys()].map(
-      (label): GraphViewNode => ({
-        kind: 'source',
+    ...[...sources.keys()].map((label): GraphViewNode => {
+      const content = { kind: 'source', label } as const;
+      return {
+        ...content,
         id: getSourceNodeId(label),
-        label,
         position: origin,
-      })
-    ),
-    ...cellIds.map((id): GraphViewNode => ({ kind: 'cell', id, cellId: id, position: origin })),
+        width: getNodeWidth(content),
+      };
+    }),
+    ...cellIds.map((id): GraphViewNode => {
+      const content = { kind: 'cell', cellId: id } as const;
+      return { ...content, id, position: origin, width: getNodeWidth(content) };
+    }),
   ];
 
   const edges: GraphViewEdge[] = [
