@@ -23,10 +23,7 @@ import {
 } from '@kbn/context-engine-plugin/common/step_types/ki';
 import type { AiIndexService } from '@kbn/context-engine-plugin/server/ai_indices/service';
 import {
-  getKiRevision,
   isKiDeleted,
-  putKiRevision,
-  type KiRevision,
   type KiWriter,
   type StoredKi,
 } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
@@ -44,6 +41,11 @@ import {
   type StoredMemoryDocument,
   updateMemoryProvenance,
 } from '../memory_document';
+import {
+  createElasticsearchMemoryStore,
+  type CreateMemoryStore,
+  type MemoryRevision,
+} from '../memory_store';
 
 const memoryTypeSchema = z.enum(MEMORY_KI_TYPES);
 const DEFAULT_MEMORY_EXPIRATION_MS = 90 * 24 * 60 * 60 * 1000;
@@ -99,6 +101,7 @@ export const createRememberTool = ({
   getAiIndexService,
   getCoreStart,
   getSecurityStart,
+  createMemoryStore = createElasticsearchMemoryStore,
   generateId = randomUUID,
   generateSessionId = randomUUID,
   getCurrentDate = () => new Date(),
@@ -106,6 +109,7 @@ export const createRememberTool = ({
   getAiIndexService: () => Promise<AiIndexService>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
+  createMemoryStore?: CreateMemoryStore;
   generateId?: () => string;
   generateSessionId?: () => string;
   getCurrentDate?: () => Date;
@@ -170,7 +174,12 @@ export const createRememberTool = ({
         getCoreStart,
       });
 
-      const currentUserClient = esClient.asCurrentUser;
+      const store = createMemoryStore({
+        aiIndexId: params.aiIndexId,
+        dest: aiIndex.dest,
+        spaceId,
+        esClient: esClient.asCurrentUser,
+      });
       const currentDate = getCurrentDate();
       const now = currentDate.toISOString();
       const defaultExpiresAt = new Date(
@@ -183,20 +192,10 @@ export const createRememberTool = ({
         agentId: agent?.agentId,
       });
       let existingDocument: StoredMemoryDocument | undefined;
-      let existingRevision:
-        | Pick<KiRevision, 'index' | 'documentId' | 'seqNo' | 'primaryTerm'>
-        | undefined;
+      let existingRevision: MemoryRevision | undefined;
 
       if (params.id) {
-        const abortSignal = new AbortController().signal;
-        const revision = await getKiRevision({
-          esClient: currentUserClient,
-          aiIndexId: params.aiIndexId,
-          dest: aiIndex.dest,
-          kiId: params.id,
-          abortSignal,
-          includeSource: true,
-        });
+        const revision = await store.get(params.id);
 
         if (!isMemoryDocument(revision.source)) {
           throw new Error(
@@ -213,12 +212,7 @@ export const createRememberTool = ({
         }
 
         existingDocument = revision.source;
-        existingRevision = {
-          index: revision.index,
-          documentId: revision.documentId,
-          seqNo: revision.seqNo,
-          primaryTerm: revision.primaryTerm,
-        };
+        existingRevision = revision;
       }
 
       let tags: string[] | undefined;
@@ -258,24 +252,7 @@ export const createRememberTool = ({
         ),
       };
 
-      if (
-        aiIndex.dest.type === 'index' &&
-        existingDocument &&
-        (existingRevision?.seqNo === undefined || existingRevision?.primaryTerm === undefined)
-      ) {
-        throw new Error(`Memory '${logicalId}' is missing concurrency metadata.`);
-      }
-
-      await putKiRevision({
-        esClient: currentUserClient,
-        aiIndexId: params.aiIndexId,
-        dest: aiIndex.dest,
-        kiId: logicalId,
-        document,
-        existing: aiIndex.dest.type === 'index' ? existingRevision : undefined,
-        failIfExists: !existingDocument,
-        refresh: true,
-      });
+      await store.put({ kiId: logicalId, document, existing: existingRevision });
 
       return {
         results: [

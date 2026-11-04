@@ -18,6 +18,7 @@ import { createDescribeAiIndexTool } from './describe_ai_index/tool';
 import { createQueryAiIndicesTool } from './query_ai_indices/tool';
 import { createForgetTool } from './forget/tool';
 import { createRememberTool } from './remember/tool';
+import type { CreateMemoryStore } from './memory_store';
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
 
@@ -27,12 +28,14 @@ export const registerAgentBuilderTools = ({
   getCoreStart,
   getSecurityStart,
   getWorkflowsManagement,
+  createMemoryStore,
 }: {
   agentBuilder: AgentBuilderPluginSetup;
   getContextEngineStart: () => Promise<ContextEnginePluginStart>;
   getCoreStart: () => Promise<CoreStart>;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
   getWorkflowsManagement: () => WorkflowsManagementApi;
+  createMemoryStore: CreateMemoryStore;
 }): void => {
   agentBuilder.tools.register(
     createSaveAutomationTool({
@@ -69,6 +72,7 @@ export const registerAgentBuilderTools = ({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
       getCoreStart,
       getSecurityStart,
+      createMemoryStore,
     })
   );
   agentBuilder.tools.register(
@@ -76,6 +80,7 @@ export const registerAgentBuilderTools = ({
       getAiIndexService: async () => (await getContextEngineStart()).getAiIndexService(),
       getCoreStart,
       getSecurityStart,
+      createMemoryStore,
     })
   );
 };

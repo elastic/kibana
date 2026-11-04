@@ -86,6 +86,7 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
       coreSetup,
       agentBuilder,
       workflowsManagement: {} as any,
+      memoryStoreConfig: { type: 'elasticsearch' },
     });
 
     if (!resolver) {

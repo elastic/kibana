@@ -6,12 +6,15 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/server';
+import type { ContextEngineAgentBuilderConfig } from './config';
 import type {
   ContextEngineAgentBuilderPluginSetup,
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderSetupDependencies,
   ContextEngineAgentBuilderStartDependencies,
 } from './types';
+
+export { config } from './config';
 
 export type {
   ContextEngineAgentBuilderPluginSetup,
@@ -23,7 +26,7 @@ export const plugin: PluginInitializer<
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderSetupDependencies,
   ContextEngineAgentBuilderStartDependencies
-> = async (pluginInitializerContext: PluginInitializerContext) => {
+> = async (pluginInitializerContext: PluginInitializerContext<ContextEngineAgentBuilderConfig>) => {
   const { ContextEngineAgentBuilderPlugin } = await import('./plugin');
   return new ContextEngineAgentBuilderPlugin(pluginInitializerContext);
 };
