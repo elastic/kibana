@@ -58,12 +58,17 @@ spaceTest.describe(
       await browserAuth.loginAsPlatformEngineer();
     });
 
-    spaceTest.afterAll(async ({ esClient, apiServices }) => {
+    spaceTest.afterAll(async ({ esClient, apiServices, scoutSpace }) => {
       if (watchlistId) {
         // Also deletes the linked entity source and invalidates its API key.
         await apiServices.entityAnalytics.deleteWatchlist(watchlistId);
       }
       await esClient.indices.delete({ index: indexName, ignore_unavailable: true });
+      // Per-space index shared by all watchlists in the space; the space delete does not remove it.
+      await esClient.indices.delete({
+        index: `.entity_analytics.watchlists.${scoutSpace.id}`,
+        ignore_unavailable: true,
+      });
     });
 
     spaceTest(
