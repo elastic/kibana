@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CanonicalAcl, Principal } from '@kbn/access-control';
+import type { StoredAcl, Principal } from '@kbn/ols';
 import {
   elasticsearchServiceMock,
   httpServerMock,
@@ -25,7 +25,7 @@ import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';
 import { ensureConnectorsUsable } from './ensure_connectors_usable';
 
-const ACL: CanonicalAcl = {
+const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
   general_access: ['none'],
@@ -35,9 +35,10 @@ const PRINCIPAL: Principal = { type: 'user', id: 'u_owner' };
 
 const createContext = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const securityService = securityServiceMock.createStart();
-  const scoped = securityServiceMock.createScopedAccessControl();
-  scoped.isEnabled.mockReturnValue(enabled);
-  securityService.accessControl.asScoped.mockReturnValue(scoped);
+  const scoped = securityServiceMock.createScopedOls();
+  const ols = securityServiceMock.createOls();
+  ols.asScoped.mockReturnValue(scoped);
+  securityService.authz.ols = enabled ? ols : null;
   const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
   const authorization = actionsAuthorizationMock.create();
   const actionTypeRegistry = {
@@ -66,7 +67,7 @@ const createContext = ({ enabled = true }: { enabled?: boolean } = {}) => {
     securityService,
   };
 
-  return { context, securityService, scoped, unsecuredSavedObjectsClient, authorization };
+  return { context, ols, scoped, unsecuredSavedObjectsClient, authorization };
 };
 
 const connector = (id: string, actionTypeId = '.webhook') => ({
@@ -124,16 +125,16 @@ describe('ensureConnectorsUsable', () => {
   });
 
   it('vouches for the principal before the credential reads any connector', async () => {
-    const { context, securityService, scoped, unsecuredSavedObjectsClient } = createContext();
+    const { context, ols, scoped, unsecuredSavedObjectsClient } = createContext();
     unsecuredSavedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [connector('c1')] });
     scoped.authorize.mockResolvedValue(new Map([['c1', { status: 'allowed' }]]));
 
     await ensureConnectorsUsable({ context, ids: ['c1'], principal: PRINCIPAL });
 
-    expect(securityService.accessControl.asScoped).toHaveBeenCalledWith(context.request, {
+    expect(ols.asScoped).toHaveBeenCalledWith(context.request, {
       principal: PRINCIPAL,
     });
-    expect(securityService.accessControl.asScoped.mock.invocationCallOrder[0]).toBeLessThan(
+    expect(ols.asScoped.mock.invocationCallOrder[0]).toBeLessThan(
       unsecuredSavedObjectsClient.bulkGet.mock.invocationCallOrder[0]
     );
   });

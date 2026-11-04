@@ -34,28 +34,28 @@ const mockPages = (
 describe('getHiddenConnectorIds', () => {
   const setup = ({ readFilter }: { readFilter?: object } = { readFilter: VISIBLE }) => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const accessControl = { getReadFilter: jest.fn().mockResolvedValue(readFilter) };
-    return { esClient, accessControl };
+    const ols = { getReadFilter: jest.fn().mockResolvedValue(readFilter) };
+    return { esClient, ols };
   };
 
   it('reads nothing when the caller can view every connector', async () => {
-    const { esClient, accessControl } = setup({});
+    const { esClient, ols } = setup({});
 
-    await expect(
-      getHiddenConnectorIds({ esClient, accessControl, spaceIds: ['default'] })
-    ).resolves.toEqual([]);
+    await expect(getHiddenConnectorIds({ esClient, ols, spaceIds: ['default'] })).resolves.toEqual(
+      []
+    );
     expect(esClient.openPointInTime).not.toHaveBeenCalled();
   });
 
   it('returns the IDs of connectors outside the read filter, page by page', async () => {
-    const { esClient, accessControl } = setup();
+    const { esClient, ols } = setup();
     const firstPage = Array.from({ length: 1000 }, (_, index) => `c${index}`);
     mockPages(esClient, [firstPage, ['last']]);
 
-    const ids = await getHiddenConnectorIds({ esClient, accessControl, spaceIds: ['a', 'b'] });
+    const ids = await getHiddenConnectorIds({ esClient, ols, spaceIds: ['a', 'b'] });
 
     expect(ids).toEqual([...firstPage, 'last']);
-    expect(accessControl.getReadFilter).toHaveBeenCalledWith({
+    expect(ols.getReadFilter).toHaveBeenCalledWith({
       type: 'action',
       spaceIds: ['a', 'b'],
     });
@@ -74,13 +74,13 @@ describe('getHiddenConnectorIds', () => {
   });
 
   it('throws when the lookup fails, and still closes the point in time', async () => {
-    const { esClient, accessControl } = setup();
+    const { esClient, ols } = setup();
     esClient.openPointInTime.mockResponse({ id: 'pit', _shards: {} as never });
     esClient.search.mockRejectedValueOnce(new Error('search failed'));
 
-    await expect(
-      getHiddenConnectorIds({ esClient, accessControl, spaceIds: ['default'] })
-    ).rejects.toThrow('search failed');
+    await expect(getHiddenConnectorIds({ esClient, ols, spaceIds: ['default'] })).rejects.toThrow(
+      'search failed'
+    );
     expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit' });
   });
 });
@@ -91,9 +91,10 @@ describe('excludeHiddenConnectors', () => {
   const setup = ({ enabled = true, hiddenIds = [] as string[] } = {}) => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
     const securityService = securityServiceMock.createStart();
-    const scoped = securityServiceMock.createScopedAccessControl();
-    securityService.accessControl.asScoped.mockReturnValue(scoped);
-    scoped.isEnabled.mockReturnValue(enabled);
+    const scoped = securityServiceMock.createScopedOls();
+    const ols = securityServiceMock.createOls();
+    ols.asScoped.mockReturnValue(scoped);
+    securityService.authz.ols = enabled ? ols : null;
     scoped.getReadFilter.mockResolvedValue(VISIBLE);
     mockPages(esClient, [hiddenIds]);
     const context = {

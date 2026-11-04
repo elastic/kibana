@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ACL_FIELD } from '@kbn/access-control';
+import { ACL_FIELD } from '@kbn/ols';
 import { set } from '@kbn/safer-lodash-set';
 import { get, cloneDeep } from 'lodash';
 import * as esKuery from '@kbn/es-query';

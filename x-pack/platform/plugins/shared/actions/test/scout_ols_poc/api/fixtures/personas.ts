@@ -52,16 +52,12 @@ export interface OlsApi {
     body?: unknown
   ) => Promise<ApiClientResponse>;
   /** Creates a `.server-log` connector and returns its ID. */
-  createConnector: (
-    persona: Persona,
-    accessControl?: AccessControl,
-    id?: string
-  ) => Promise<string>;
-  /** Replaces a connector's access through the access control API, as its owner. */
-  setAccess: (id: string, accessControl: AccessControl, persona?: Persona) => Promise<void>;
+  createConnector: (persona: Persona, acl?: AclInput, id?: string) => Promise<string>;
+  /** Replaces a connector's access through the OLS API, as its owner. */
+  setAccess: (id: string, acl: AclInput, persona?: Persona) => Promise<void>;
 }
 
-export interface AccessControl {
+export interface AclInput {
   general_access: 'none' | 'use' | 'edit';
   entries?: Array<Principal & { access: 'use' }>;
 }
@@ -183,7 +179,7 @@ export const createOlsTestContext = async ({
         ...(body !== undefined && { body }),
       });
 
-    const createConnector: OlsApi['createConnector'] = async (persona, accessControl, id) => {
+    const createConnector: OlsApi['createConnector'] = async (persona, acl, id) => {
       const response = await request(
         persona,
         'post',
@@ -193,7 +189,7 @@ export const createOlsTestContext = async ({
           connector_type_id: '.server-log',
           config: {},
           secrets: {},
-          ...(accessControl && { access_control: accessControl }),
+          ...(acl && { acl }),
         }
       );
       if (response.statusCode !== 200) {
@@ -202,13 +198,13 @@ export const createOlsTestContext = async ({
       return response.body.id;
     };
 
-    const setAccess: OlsApi['setAccess'] = async (id, accessControl, persona = 'owner') => {
-      const accessPath = `internal/security/access_control/action/${id}`;
+    const setAccess: OlsApi['setAccess'] = async (id, acl, persona = 'owner') => {
+      const accessPath = `internal/security/ols/action/${id}`;
       const { body: state } = await request(persona, 'get', accessPath);
       const response = await request(persona, 'put', accessPath, {
         version: state.version,
-        general_access: accessControl.general_access,
-        entries: accessControl.entries ?? [],
+        general_access: acl.general_access,
+        entries: acl.entries ?? [],
       });
       if (response.statusCode !== 200) {
         throw new Error(`Access change failed: ${JSON.stringify(response.body)}`);

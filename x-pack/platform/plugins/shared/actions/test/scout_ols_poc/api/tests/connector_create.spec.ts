@@ -21,24 +21,20 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
     await ctx.cleanup();
   });
 
-  const create = (api: OlsApi, accessControl: unknown) =>
+  const create = (api: OlsApi, acl: unknown) =>
     api.request('owner', 'post', 'api/actions/connector', {
       name: `ols create ${randomUUID().slice(0, 4)}`,
       connector_type_id: '.server-log',
       config: {},
       secrets: {},
-      access_control: accessControl,
+      acl,
     });
 
   apiTest('makes the creator the owner of every new connector', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
     const id = await api.createConnector('owner');
 
-    const { body } = await api.request(
-      'owner',
-      'get',
-      `internal/security/access_control/action/${id}`
-    );
+    const { body } = await api.request('owner', 'get', `internal/security/ols/action/${id}`);
     expect(body).toMatchObject({ state: 'valid', restricted: false, is_owner: true });
     expect(body.acl.general_access).toStrictEqual(['edit']);
   });
@@ -62,11 +58,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
         200
       );
 
-      const { body } = await api.request(
-        'owner',
-        'get',
-        `internal/security/access_control/action/${id}`
-      );
+      const { body } = await api.request('owner', 'get', `internal/security/ols/action/${id}`);
       expect(body.acl.entries).toHaveLength(1);
       expect(body.acl.entries[0].id).toStrictEqual([ctx.principal('grantee').id]);
     }
@@ -77,7 +69,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
     const grantee = { ...ctx.principal('grantee'), access: 'use' };
     const before = (await api.request('owner', 'get', 'api/actions/connectors')).body.length;
 
-    for (const accessControl of [
+    for (const acl of [
       { general_access: 'view' },
       { general_access: 'none', entries: [{ ...grantee, access: 'edit' }] },
       { general_access: 'none', entries: [grantee, grantee] },
@@ -94,10 +86,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
         })),
       },
     ]) {
-      expect(
-        await create(api, accessControl),
-        JSON.stringify(accessControl).slice(0, 80)
-      ).toHaveStatusCode(400);
+      expect(await create(api, acl), JSON.stringify(acl).slice(0, 80)).toHaveStatusCode(400);
     }
 
     expect((await api.request('owner', 'get', 'api/actions/connectors')).body).toHaveLength(before);
@@ -114,7 +103,7 @@ apiTest.describe('Connector creation with access', { tag: '@local-stateful-class
     const { body } = await api.request(
       'owner',
       'get',
-      `internal/security/access_control/action/${response.body.id}`
+      `internal/security/ols/action/${response.body.id}`
     );
     expect(body.acl.entries).toHaveLength(0);
   });

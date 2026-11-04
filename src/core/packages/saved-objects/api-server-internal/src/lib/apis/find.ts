@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ACL_FIELD } from '@kbn/access-control';
+import { ACL_FIELD } from '@kbn/ols';
 import Boom from '@hapi/boom';
 import type { estypes } from '@elastic/elasticsearch';
 import { isSupportedEsServer } from '@kbn/core-elasticsearch-server-internal';
@@ -59,7 +59,7 @@ export const performFind = async <T = unknown, A = unknown>(
     serializer: serializerHelper,
     migration: migrationHelper,
     encryption: encryptionHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
   let namespaces!: string[];
@@ -132,9 +132,7 @@ export const performFind = async <T = unknown, A = unknown>(
       ...(requestedSort ?? []).map(({ field }) => field),
     ].some(isAclField)
   ) {
-    throw SavedObjectsErrorHelpers.createBadRequestError(
-      'Access control fields cannot be searched or sorted'
-    );
+    throw SavedObjectsErrorHelpers.createBadRequestError('ACL fields cannot be searched or sorted');
   }
 
   let kueryNode;
@@ -209,7 +207,7 @@ export const performFind = async <T = unknown, A = unknown>(
   // objects the caller cannot view. System callers that disable extensions skip it.
   const aclFiltersByType = disableExtensions
     ? undefined
-    : await aclHelper.getReadFilters(
+    : await olsHelper.getReadFilters(
         new Map(
           typeToNamespacesMap
             ? [...typeToNamespacesMap]

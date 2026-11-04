@@ -177,7 +177,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     await openAccessTab(page);
 
     // Someone else changes access while the panel is open.
-    const accessPath = `internal/security/access_control/action/${connectorId}`;
+    const accessPath = `internal/security/ols/action/${connectorId}`;
     const state = await apiClient.get(accessPath, { headers: ownerHeaders, responseType: 'json' });
     const changed = await apiClient.put(accessPath, {
       headers: ownerHeaders,
@@ -238,7 +238,7 @@ test.describe.serial('Connector access', { tag: '@local-stateful-classic' }, () 
     kbnUrl,
     apiClient,
   }) => {
-    const accessPath = `internal/security/access_control/action/${connectorId}`;
+    const accessPath = `internal/security/ols/action/${connectorId}`;
     const state = await apiClient.get(accessPath, { headers: ownerHeaders, responseType: 'json' });
     await apiClient.put(accessPath, {
       headers: ownerHeaders,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclInput } from '@kbn/access-control';
+import type { AclInput } from '@kbn/ols';
 import type { SavedObjectsMigrationVersion } from '@kbn/core-saved-objects-common';
 import type { SavedObjectAccessControl, SavedObjectReference } from '../..';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclWarning, CanonicalAcl } from '@kbn/access-control';
+import type { AclWarning, StoredAcl } from '@kbn/ols';
 import type { MutatingOperationRefreshSetting, SavedObjectsBaseOptions } from './base';
 
 /**
@@ -35,7 +35,7 @@ export interface SavedObjectsChangeAclResponse {
   id: string;
   /** New version of the object. */
   version: string;
-  acl: CanonicalAcl;
+  acl: StoredAcl;
   /** Recipients whose grants are stored but limited by their current feature privileges. */
   warnings: AclWarning[];
 }

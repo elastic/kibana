@@ -351,7 +351,7 @@ describe('getFindAuthorizationFilter', () => {
 describe('ensureAuthorized with object-level security', () => {
   const RECOVERY_ACTION = mockAuthorizationAction('action', 'manage_access_control');
 
-  const setup = (recoveryGranted: boolean, otherGranted = true) => {
+  const setup = (recoveryGranted: boolean, otherGranted = true, olsEnabled = true) => {
     const { authorization } = mockSecurity();
     const checkPrivileges: jest.MockedFunction<
       ReturnType<typeof authorization.checkPrivilegesDynamicallyWithRequest>
@@ -373,16 +373,15 @@ describe('ensureAuthorized with object-level security', () => {
       },
     });
 
-    const accessControl = securityServiceMock.createStart().accessControl;
-    const scoped = securityServiceMock.createScopedAccessControl();
-    accessControl.isEnabled.mockReturnValue(true);
-    accessControl.asScoped.mockReturnValue(scoped);
+    const ols = securityServiceMock.createOls();
+    const scoped = securityServiceMock.createScopedOls();
+    ols.asScoped.mockReturnValue(scoped);
     const actionsAuthorization = new ActionsAuthorization({
       request,
       authorization,
-      accessControl,
+      ols: olsEnabled ? ols : null,
     });
-    return { actionsAuthorization, checkPrivileges, accessControl, scoped };
+    return { actionsAuthorization, checkPrivileges, scoped };
   };
 
   test('asks for recovery in the same privilege request and primes the answer', async () => {
@@ -415,8 +414,7 @@ describe('ensureAuthorized with object-level security', () => {
   });
 
   test('does not ask for recovery while object-level security is disabled', async () => {
-    const { actionsAuthorization, checkPrivileges, accessControl, scoped } = setup(true);
-    accessControl.isEnabled.mockReturnValue(false);
+    const { actionsAuthorization, checkPrivileges, scoped } = setup(true, true, false);
 
     await actionsAuthorization.ensureAuthorized({ operation: 'get' });
 

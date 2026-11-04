@@ -34,17 +34,16 @@ export const setupRuleKeyConnectorAccess = async <Params extends jest.Mocked<Con
   const actionsClient = (await rulesClientParams.getActionsClient()) as ActionsClientMock;
   actionsClient.getRestrictedConnectorIds.mockResolvedValue(restrictedConnectorIds);
 
-  const { accessControl } = securityServiceMock.createStart();
-  accessControl.isEnabled.mockReturnValue(true);
-  const scopedAccessControl = securityServiceMock.createScopedAccessControl();
-  scopedAccessControl.getPrincipal.mockResolvedValue(CALLER_PRINCIPAL);
-  accessControl.asScoped.mockReturnValue(scopedAccessControl);
+  const ols = securityServiceMock.createOls();
+  const scopedOls = securityServiceMock.createScopedOls();
+  scopedOls.getPrincipal.mockResolvedValue(CALLER_PRINCIPAL);
+  ols.asScoped.mockReturnValue(scopedOls);
 
   const keyActionsClient = actionsClientMock.create();
   const getActionsClientWithRequest = jest.fn().mockResolvedValue(keyActionsClient);
 
   return {
-    options: { ...rulesClientParams, accessControl, getActionsClientWithRequest },
+    options: { ...rulesClientParams, ols, getActionsClientWithRequest },
     actionsClient,
     keyActionsClient,
     getActionsClientWithRequest,

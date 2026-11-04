@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AccessPolicy } from '@kbn/access-control';
+import type { AccessPolicy } from '@kbn/ols';
 
 /**
  * Object-level access policy for connectors. Connectors are public by default; a connector can be

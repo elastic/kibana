@@ -13,7 +13,7 @@ import type {
   Plugin,
   CoreSetup,
   CoreStart,
-  CoreAccessControlService,
+  CoreOlsService,
   KibanaRequest,
   Logger,
   IContextProvider,
@@ -311,7 +311,7 @@ export class ActionsPlugin
   private actionExecutor?: ActionExecutor;
   private licenseState: ILicenseState | null = null;
   private security?: SecurityPluginSetup;
-  private accessControl?: CoreAccessControlService;
+  private ols?: CoreOlsService | null;
   private securityStart?: SecurityPluginStart;
   private spaces?: SpacesPluginSetup;
   private eventLogService?: IEventLogService;
@@ -625,7 +625,7 @@ export class ActionsPlugin
   }
 
   public start(core: CoreStart, plugins: ActionsPluginsStart): PluginStartContract {
-    this.accessControl = core.security.accessControl;
+    this.ols = core.security.authz.ols;
     this.securityStart = plugins.security;
     if (this.actionsConfig.relay?.uiam?.enabled && !plugins.security?.authc.systemIdentity) {
       this.logger.warn(
@@ -984,7 +984,7 @@ export class ActionsPlugin
     return new ActionsAuthorization({
       request,
       authorization: this.security?.authz,
-      accessControl: this.accessControl,
+      ols: this.ols,
     });
   };
 

@@ -1506,7 +1506,7 @@ describe('#generateRawLegacyUrlAliasId', () => {
 
 describe('access control lists', () => {
   const owner = { type: 'user', id: 'u_owner' };
-  const canonicalAcl = {
+  const storedAcl = {
     version: [1],
     owner: { type: ['user'], id: ['u_owner'] },
     general_access: ['none'],
@@ -1521,7 +1521,7 @@ describe('access control lists', () => {
       ['single-namespace', singleNamespaceSerializer],
       ['multi-namespace', multiNamespaceSerializer],
       ['legacy access control disabled', accessControlDisabledSerializer],
-    ])('returns a canonical ACL (%s)', (_name, serializer) => {
+    ])('returns a stored ACL (%s)', (_name, serializer) => {
       const actual = serializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -1537,10 +1537,10 @@ describe('access control lists', () => {
           },
         },
       });
-      expect(actual.acl).toEqual(canonicalAcl);
+      expect(actual.acl).toEqual(storedAcl);
     });
 
-    test('merges dotted root keys into the canonical ACL', () => {
+    test('merges dotted root keys into the stored ACL', () => {
       const actual = multiNamespaceSerializer.rawToSavedObject({
         _id: 'foo:bar',
         _source: {
@@ -1570,13 +1570,13 @@ describe('access control lists', () => {
   });
 
   describe('#savedObjectToRaw', () => {
-    test('writes a canonical ACL back as a source value that indexes to the same values', () => {
+    test('writes a stored ACL back as a source value that indexes to the same values', () => {
       const actual = multiNamespaceSerializer.savedObjectToRaw({
         type: 'foo',
         id: 'bar',
         attributes: {},
         references: [],
-        acl: { ...canonicalAcl, general_access: ['edit', 'none'] },
+        acl: { ...storedAcl, general_access: ['edit', 'none'] },
       });
       expect(actual._source.acl).toEqual({
         version: 1,

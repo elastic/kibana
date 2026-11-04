@@ -57,7 +57,7 @@ export interface IUnsecuredActionsClient {
   getAll: (spaceId: SpaceId) => Promise<ConnectorWithExtraFindData[]>;
   /**
    * Same as `getAll`, with the ACL of each stored connector. The caller must keep only the
-   * connectors its request can view, for example with `filterVisible` of Core's access control.
+   * connectors its request can view, for example with `filterVisible` of Core's OLS service.
    */
   getAllWithAcl: (spaceId: SpaceId) => Promise<ConnectorWithAcl[]>;
   execute: (opts: UnsecuredExecuteOptions) => Promise<ActionTypeExecutorResult<unknown>>;

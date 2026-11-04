@@ -14,7 +14,7 @@ export const OLS_POC_AUDIT_LOG_PATH = '/tmp/kibana-scout-ols-poc-audit.log';
  * object-level security suites read.
  */
 export const olsPocServerArgs = [
-  '--xpack.security.accessControl.enabled=true',
+  '--xpack.security.authz.ols.enabled=true',
   '--xpack.security.audit.enabled=true',
   '--xpack.security.audit.appender.type=file',
   `--xpack.security.audit.appender.fileName=${OLS_POC_AUDIT_LOG_PATH}`,

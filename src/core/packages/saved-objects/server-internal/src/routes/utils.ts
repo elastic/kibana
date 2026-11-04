@@ -190,7 +190,7 @@ export function logWarnOnExternalRequest(params: LogWarnOnExternalRequest) {
 
 /**
  * Removes access control lists from a Saved Objects HTTP response: a saved object, a bulk or find
- * result, or a resolve result. Only the access control API shows ACLs, and only to access managers.
+ * result, or a resolve result. Only the OLS API shows ACLs, and only to access managers.
  */
 export const stripAcl = <T>(result: T): T => {
   if (Array.isArray(result)) {

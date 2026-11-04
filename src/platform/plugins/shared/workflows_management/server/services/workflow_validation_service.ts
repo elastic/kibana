@@ -90,7 +90,7 @@ export class WorkflowValidationService {
     return getAvailableConnectors({
       getActionsClient: this.deps.getActionsClient,
       getActionsClientWithRequest: this.deps.getActionsClientWithRequest,
-      accessControl: this.deps.getCoreStart().security.accessControl,
+      ols: this.deps.getCoreStart().security.authz.ols,
       spaceId,
       request,
     });

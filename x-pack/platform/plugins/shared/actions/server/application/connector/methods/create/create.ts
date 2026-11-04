@@ -78,7 +78,7 @@ async function createConnector({
     config,
     secrets,
     isInboundEventsEnabled: requestedInboundEventsEnabled,
-    accessControl,
+    acl,
   },
   options,
 }: ConnectorCreateParams): Promise<Connector> {
@@ -160,14 +160,15 @@ async function createConnector({
   // Requested access is validated before any side effect, such as the pre-save hook, so that an invalid
   // request leaves nothing behind. The repository builds the stored ACL in the same write that creates
   // the connector: it is never created public and restricted later.
-  if (accessControl) {
-    if (!context.securityService) {
-      throw Boom.badRequest('Access control is not available.');
+  if (acl) {
+    const ols = context.securityService?.authz.ols;
+    if (!ols) {
+      throw Boom.badRequest('Object-level security (OLS) is disabled.');
     }
-    await context.securityService.accessControl.asScoped(context.request).validateInitialAcl({
+    await ols.asScoped(context.request).validateInitialAcl({
       type: ACTION_SAVED_OBJECT_TYPE,
       spaceId: getConnectorSpaceId(context),
-      requested: accessControl,
+      requested: acl,
     });
   }
 
@@ -244,7 +245,7 @@ async function createConnector({
           ...(identityAttributes ? toRawActionIdentityAttributes(identityAttributes) : {}),
           hasInboundEventIdentity: Boolean(identityAttributes),
         },
-        { id, ...(accessControl ? { initialAcl: accessControl } : {}) }
+        { id, ...(acl ? { initialAcl: acl } : {}) }
       )
   );
 

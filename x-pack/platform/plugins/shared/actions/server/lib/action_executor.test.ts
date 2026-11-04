@@ -3001,13 +3001,16 @@ describe('object-level security', () => {
       entries: [],
     },
   };
-  const accessControl = securityMockStart.accessControl;
-  const scopedAccessControl = securityServiceMock.createScopedAccessControl();
+  const ols = securityServiceMock.createOls();
+  const scopedOls = securityServiceMock.createScopedOls();
+
+  afterEach(() => {
+    securityMockStart.authz.ols = null;
+  });
 
   beforeEach(() => {
-    accessControl.isEnabled.mockReturnValue(true);
-    accessControl.asScoped.mockReturnValue(scopedAccessControl);
-    scopedAccessControl.isEnabled.mockReturnValue(true);
+    ols.asScoped.mockReturnValue(scopedOls);
+    securityMockStart.authz.ols = ols;
     connectorTypeRegistry.get.mockReturnValue(connectorType);
     connectorTypeRegistry.isActionExecutable.mockReturnValue(true);
   });
@@ -3019,15 +3022,13 @@ describe('object-level security', () => {
 
     await actionExecutor.execute(executeParams);
 
-    expect(scopedAccessControl.authorize).not.toHaveBeenCalled();
+    expect(scopedOls.authorize).not.toHaveBeenCalled();
     expect(connectorType.executor).toHaveBeenCalled();
   });
 
   test('runs a restricted connector the execution credential can use', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
-    scopedAccessControl.authorize.mockResolvedValue(
-      new Map([[CONNECTOR_ID, { status: 'allowed' }]])
-    );
+    scopedOls.authorize.mockResolvedValue(new Map([[CONNECTOR_ID, { status: 'allowed' }]]));
 
     await actionExecutor.execute(executeParams);
 
@@ -3036,8 +3037,8 @@ describe('object-level security', () => {
       operation: 'execute',
       actionTypeId: 'test',
     });
-    expect(accessControl.asScoped).toHaveBeenCalledWith(executeParams.request);
-    expect(scopedAccessControl.authorize).toHaveBeenCalledWith({
+    expect(ols.asScoped).toHaveBeenCalledWith(executeParams.request);
+    expect(scopedOls.authorize).toHaveBeenCalledWith({
       type: 'action',
       spaceId: 'some-namespace',
       operation: 'use',
@@ -3048,9 +3049,7 @@ describe('object-level security', () => {
 
   test('refuses a restricted connector the execution credential cannot use', async () => {
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
-    scopedAccessControl.authorize.mockResolvedValue(
-      new Map([[CONNECTOR_ID, { status: 'not_found' }]])
-    );
+    scopedOls.authorize.mockResolvedValue(new Map([[CONNECTOR_ID, { status: 'not_found' }]]));
 
     const result = await actionExecutor.execute(executeParams);
 
@@ -3070,13 +3069,12 @@ describe('object-level security', () => {
   });
 
   test('keeps restricted connectors usable while object-level security is disabled', async () => {
-    accessControl.isEnabled.mockReturnValue(false);
-    scopedAccessControl.isEnabled.mockReturnValue(false);
+    securityMockStart.authz.ols = null;
     encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(privateConnector);
 
     await actionExecutor.execute(executeParams);
 
-    expect(scopedAccessControl.authorize).not.toHaveBeenCalled();
+    expect(scopedOls.authorize).not.toHaveBeenCalled();
     expect(connectorType.executor).toHaveBeenCalled();
   });
 });

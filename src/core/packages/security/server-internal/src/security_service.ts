@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AccessPolicy } from '@kbn/access-control';
+import type { AccessPolicy } from '@kbn/ols';
 import type { Logger } from '@kbn/logging';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
 import type {

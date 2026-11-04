@@ -11,7 +11,7 @@ import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
   createOlsTestContext,
-  type AccessControl,
+  type AclInput,
   type OlsApi,
   type OlsTestContext,
 } from '../fixtures/personas';
@@ -70,13 +70,13 @@ apiTest.describe('Connectors run by service accounts', { tag: '@local-stateful-c
   /**
    * Creates an HTTP connector, one of the types Workflows can run, that calls the test cluster.
    */
-  const createConnector = async (api: OlsApi, accessControl: AccessControl) => {
+  const createConnector = async (api: OlsApi, acl: AclInput) => {
     const response = await api.request('owner', 'post', 'api/actions/connector', {
       name: `ols-sa-http-${randomUUID().slice(0, 8)}`,
       connector_type_id: '.http',
       config: { url: cluster.url, hasAuth: true, authType: 'webhook-authentication-basic' },
       secrets: { user: cluster.user, password: cluster.password },
-      access_control: accessControl,
+      acl,
     });
     expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);
     return response.body.id as string;

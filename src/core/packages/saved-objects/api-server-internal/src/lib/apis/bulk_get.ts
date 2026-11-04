@@ -36,7 +36,7 @@ import {
 import { includedFields } from '../utils';
 import { getSavedObjectFromSource, rawDocExistsInNamespaces } from './utils';
 import type { ApiExecutionContext } from './types';
-import type { AclHelperObject } from './helpers';
+import type { OlsHelperObject } from './helpers';
 
 export interface PerformBulkGetParams<T = unknown> {
   objects: SavedObjectsBulkGetObject[];
@@ -56,7 +56,7 @@ export const performBulkGet = async <T>(
     common: commonHelper,
     validation: validationHelper,
     migration: migrationHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension, spacesExtension } = extensions;
 
@@ -167,7 +167,7 @@ export const performBulkGet = async <T>(
   }
 
   const authObjects: AuthorizeBulkGetObject[] = [];
-  const aclObjects: AclHelperObject[] = [];
+  const aclObjects: OlsHelperObject[] = [];
   const documents = expectedBulkGetResults.map<SavedObjectBulkResult<T>>((expectedResult) => {
     if (isLeft(expectedResult)) {
       const { type, id } = expectedResult.value;
@@ -234,13 +234,13 @@ export const performBulkGet = async <T>(
 
   // Objects the caller cannot view are reported as missing, in the same order and format as any
   // other missing object.
-  const aclDecisions = await aclHelper.authorize('view', namespace, aclObjects);
+  const aclDecisions = await olsHelper.authorize('view', namespace, aclObjects);
 
   const results: Array<SavedObjectBulkResult<T>> = [];
   for (const doc of documents) {
     const aclError = isSavedObjectErrorResult(doc)
       ? undefined
-      : aclHelper.getError(aclDecisions, doc);
+      : olsHelper.getError(aclDecisions, doc);
     if (aclError) {
       results.push({ id: doc.id, type: doc.type, error: errorContent(aclError) });
       continue;

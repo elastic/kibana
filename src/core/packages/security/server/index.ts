@@ -21,7 +21,7 @@ export type {
   DeleteServiceAccountResult,
   ServiceAccountPlatformAssumer,
 } from './src/service_accounts';
-export type { CoreAccessControlService, CoreScopedAccessControl } from './src/access_control';
+export type { CoreOlsService, CoreScopedOlsService } from './src/ols';
 export type {
   CoreServiceAccountsSetup,
   ServiceAccountWorkloadDetails,
@@ -52,7 +52,7 @@ export type {
   CoreSecurityDelegateContract,
   AuthenticationServiceContract,
   AuditServiceContract,
-  AccessControlServiceContract,
+  AuthorizationServiceContract,
   ServiceAccountsServiceContract,
   CoreSecurityDelegateHandle,
   CoreSecurityDelegateServiceAccounts,
@@ -102,5 +102,6 @@ export {
   groupSecurityPrivileges,
   flattenSecurityPrivileges,
 } from './src/authz';
+export type { CoreAuthorizationService } from './src/authz';
 export { ApiPrivileges, ApiOperation } from './src/api_privileges';
 export type { UiamProjectType, UiamClientAuthenticationParams } from './src/uiam';

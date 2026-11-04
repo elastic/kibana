@@ -117,7 +117,7 @@ describe('validateRuleKeyConnectorAccess', () => {
 
     await validateRuleKeyConnectorAccess(options, { ...baseParams, createdInThisRequest: false });
 
-    expect(options.accessControl.asScoped).not.toHaveBeenCalled();
+    expect(options.ols.asScoped).not.toHaveBeenCalled();
     expect(keyActionsClient.ensureConnectorsUsable).toHaveBeenCalledWith(['restricted'], {
       principal: undefined,
     });
@@ -154,7 +154,7 @@ describe('validateRuleKeyConnectorAccess', () => {
 
     expect(actionsClient.getRestrictedConnectorIds).toHaveBeenCalledTimes(1);
     expect(getActionsClientWithRequest).not.toHaveBeenCalled();
-    expect(options.accessControl.asScoped).not.toHaveBeenCalled();
+    expect(options.ols.asScoped).not.toHaveBeenCalled();
   });
 
   it('makes no call for system and preconfigured connectors', async () => {
@@ -173,9 +173,8 @@ describe('validateRuleKeyConnectorAccess', () => {
     const { options, actionsClient } = await setupRuleKeyConnectorAccess(rulesClientParams, [
       'restricted',
     ]);
-    options.accessControl.isEnabled.mockReturnValue(false);
 
-    await validateRuleKeyConnectorAccess(options, baseParams);
+    await validateRuleKeyConnectorAccess({ ...options, ols: null }, baseParams);
 
     expect(actionsClient.getRestrictedConnectorIds).not.toHaveBeenCalled();
   });

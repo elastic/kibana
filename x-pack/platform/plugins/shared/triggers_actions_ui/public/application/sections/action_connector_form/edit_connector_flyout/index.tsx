@@ -31,7 +31,7 @@ import { none, some } from 'fp-ts/Option';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
 import { useActionTypeModel } from '@kbn/alerts-ui-shared/src/common/hooks/use_action_type_model';
 import { connectorTypeIsDual } from '@kbn/connector-specs';
-import { useAccessPolicy, useObjectAccess } from '@kbn/access-control-ui';
+import { useAccessPolicy, useObjectAccess } from '@kbn/ols-ui';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
@@ -263,17 +263,15 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
   // While it is disabled, the feature privileges checked above decide alone, as before.
   const isStoredConnector = !connector.isPreconfigured && !connector.isSystemAction;
   const accessPolicy = useAccessPolicy(http, 'action');
-  const isAccessControlEnabled = !!accessPolicy.data?.enabled && isStoredConnector;
+  const isOlsEnabled = !!accessPolicy.data?.enabled && isStoredConnector;
   const connectorAccess = useObjectAccess(http, 'action', connector.id, {
-    isEnabled: isAccessControlEnabled,
+    isEnabled: isOlsEnabled,
   });
   // Until the caller's access is known, the configuration cannot be saved.
   const isLoadingAccess =
-    accessPolicy.isLoading ||
-    (isAccessControlEnabled && !connectorAccess.data && !connectorAccess.error);
+    accessPolicy.isLoading || (isOlsEnabled && !connectorAccess.data && !connectorAccess.error);
   const canEditConnector =
-    !isLoadingAccess &&
-    (!isAccessControlEnabled || !!connectorAccess.data?.permissions.includes('edit'));
+    !isLoadingAccess && (!isOlsEnabled || !!connectorAccess.data?.permissions.includes('edit'));
 
   const {
     actionTypeModel,
@@ -695,7 +693,7 @@ export const EditConnectorFlyoutContent: React.FC<EditConnectorFlyoutContentProp
         subFeature={actionTypeModel?.subFeature}
         isTestable={isTestable}
         hideRulesTab={hideRulesTab}
-        showAccessTab={isAccessControlEnabled}
+        showAccessTab={isOlsEnabled}
         docsUrl={actionTypeModel?.docsUrl}
       />
       <EuiFlyoutBody>

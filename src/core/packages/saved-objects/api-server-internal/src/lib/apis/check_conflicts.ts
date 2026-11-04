@@ -8,7 +8,7 @@
  */
 
 import type { Payload } from '@hapi/boom';
-import { ACL_FIELD } from '@kbn/access-control';
+import { ACL_FIELD } from '@kbn/ols';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers, errorContent } from '@kbn/core-saved-objects-server';
@@ -25,7 +25,7 @@ import {
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { isMgetDoc, rawDocExistsInNamespace } from './utils';
 import type { ApiExecutionContext } from './types';
-import type { AclHelperObject } from './helpers';
+import type { OlsHelperObject } from './helpers';
 
 export interface PerformCheckConflictsParams<T = unknown> {
   objects: SavedObjectsCheckConflictsObject[];
@@ -36,7 +36,7 @@ export const performCheckConflicts = async <T>(
   { objects, options }: PerformCheckConflictsParams<T>,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObjectsCheckConflictsResponse> => {
-  const { common: commonHelper, acl: aclHelper } = helpers;
+  const { common: commonHelper, acl: olsHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -78,7 +78,7 @@ export const performCheckConflicts = async <T>(
     _id: serializer.generateRawId(namespace, type, id),
     _index: commonHelper.getIndexForType(type),
     _source: {
-      includes: ['type', 'namespaces', ...(aclHelper.isEnforced(type) ? [ACL_FIELD] : [])],
+      includes: ['type', 'namespaces', ...(olsHelper.isEnforced(type) ? [ACL_FIELD] : [])],
     },
   }));
   const bulkGetResponse = bulkGetDocs.length
@@ -100,7 +100,7 @@ export const performCheckConflicts = async <T>(
 
   // An object the caller cannot view is not a conflict: the create that follows reports it as
   // missing, the same as for an ID that is not used.
-  const aclObjects: AclHelperObject[] = [];
+  const aclObjects: OlsHelperObject[] = [];
   for (const { value } of validObjects) {
     const doc = bulkGetResponse?.body.docs[value.esRequestIndex];
     if (isMgetDoc(doc) && doc.found && doc._source) {
@@ -115,7 +115,7 @@ export const performCheckConflicts = async <T>(
       });
     }
   }
-  const aclDecisions = await aclHelper.authorize('view', namespace, aclObjects);
+  const aclDecisions = await olsHelper.authorize('view', namespace, aclObjects);
 
   const errors: SavedObjectsCheckConflictsResponse['errors'] = [];
   expectedBulkGetResults.forEach((expectedResult) => {
@@ -127,7 +127,7 @@ export const performCheckConflicts = async <T>(
 
     const { type, id, esRequestIndex } = expectedResult.value;
     const doc = bulkGetResponse?.body.docs[esRequestIndex];
-    if (isMgetDoc(doc) && doc.found && !aclHelper.getError(aclDecisions, { type, id })) {
+    if (isMgetDoc(doc) && doc.found && !olsHelper.getError(aclDecisions, { type, id })) {
       errors.push({
         id,
         type,

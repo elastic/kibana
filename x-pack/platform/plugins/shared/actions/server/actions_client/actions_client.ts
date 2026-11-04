@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CanonicalAcl, Principal } from '@kbn/access-control';
+import type { StoredAcl, Principal } from '@kbn/ols';
 import Boom from '@hapi/boom';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
@@ -74,7 +74,7 @@ import { connectorAuditEvent, ConnectorAuditAction } from '../lib/audit_events';
 import {
   ensureConnectorOperation,
   ensureConnectorsOperation,
-  getConnectorAccessControl,
+  getConnectorOls,
   operationForAuthMode,
 } from '../lib/connector_access';
 import { excludeHiddenConnectors } from '../lib/hidden_connectors';
@@ -535,7 +535,7 @@ export class ActionsClient {
       const tokenOpts = options as OAuthAuthorizationCodeParams;
       try {
         let authMode: AuthMode | undefined;
-        let acl: CanonicalAcl | undefined;
+        let acl: StoredAcl | undefined;
         const isInMemory = this.context.inMemoryConnectors.some(
           ({ id }) => id === tokenOpts.connectorId
         );
@@ -548,7 +548,7 @@ export class ActionsClient {
           acl = rawConnector.acl;
         } catch (err) {
           // With object-level security, a connector the caller cannot see never hands out a token.
-          if (!isInMemory && getConnectorAccessControl(this.context)) {
+          if (!isInMemory && getConnectorOls(this.context)) {
             throw err;
           }
           this.context.logger.debug(

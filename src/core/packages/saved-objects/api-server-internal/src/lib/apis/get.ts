@@ -25,7 +25,7 @@ export const performGet = async <T>(
   { type, id, options }: PerformGetParams,
   { registry, helpers, allowedTypes, client, serializer, extensions = {} }: ApiExecutionContext
 ): Promise<SavedObject<T>> => {
-  const { common: commonHelper, migration: migrationHelper, acl: aclHelper } = helpers;
+  const { common: commonHelper, migration: migrationHelper, acl: olsHelper } = helpers;
   const { securityExtension } = extensions;
 
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -72,7 +72,7 @@ export const performGet = async <T>(
 
   // Feature authorization above runs first. An object the caller cannot view is then reported as
   // missing.
-  await aclHelper.enforce('view', namespace, { type, id, source: body._source });
+  await olsHelper.enforce('view', namespace, { type, id, source: body._source });
 
   const document = getSavedObjectFromSource<T>(registry, type, id, body, {
     migrationVersionCompatibility,

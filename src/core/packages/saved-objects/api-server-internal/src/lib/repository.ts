@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { AclChange } from '@kbn/access-control';
+import type { AclChange } from '@kbn/ols';
 import type { Logger } from '@kbn/logging';
 import type { RequestTiming } from '@kbn/core-http-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';

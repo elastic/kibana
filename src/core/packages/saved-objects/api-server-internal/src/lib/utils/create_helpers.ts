@@ -25,7 +25,7 @@ import {
   SerializerHelper,
   MigrationHelper,
   UserHelper,
-  AclHelper,
+  OlsHelper,
 } from '../apis/helpers';
 import type { RepositoryEsClient } from '../repository_es_client';
 import type { CreatePointInTimeFinderFn } from '../point_in_time_finder';
@@ -87,9 +87,9 @@ export const createRepositoryHelpers = ({
     securityExtension: extensions?.securityExtension,
   });
 
-  const aclHelper = new AclHelper({
+  const olsHelper = new OlsHelper({
     registry: typeRegistry,
-    aclExtension: extensions?.aclExtension,
+    olsExtension: extensions?.olsExtension,
   });
 
   const helpers: RepositoryHelpers = {
@@ -100,7 +100,7 @@ export const createRepositoryHelpers = ({
     serializer: serializerHelper,
     migration: migrationHelper,
     user: userHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   };
 
   return helpers;

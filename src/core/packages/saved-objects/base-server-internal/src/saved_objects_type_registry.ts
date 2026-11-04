@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { validateAccessPolicy, type AccessPolicy } from '@kbn/access-control';
+import { validateAccessPolicy, type AccessPolicy } from '@kbn/ols';
 import { deepFreeze } from '@kbn/std';
 import type { SavedObjectsType, ISavedObjectTypeRegistry } from '@kbn/core-saved-objects-server';
 
@@ -24,13 +24,13 @@ export interface ISavedObjectTypeRegistryInternal extends ISavedObjectTypeRegist
    */
   registerType(type: SavedObjectsType): void;
   /**
-   * Sets whether access control is enabled
+   * Sets whether OLS is enabled
    *
    * @internal
    */
   setAccessControlEnabled(enabled: boolean): void;
   /**
-   * Gets whether access control is enabled
+   * Gets whether OLS is enabled
    *
    * @internal
    */

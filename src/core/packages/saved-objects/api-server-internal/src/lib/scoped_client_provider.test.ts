@@ -17,8 +17,8 @@ import {
   type SavedObjectsEncryptionExtensionFactory,
   type SavedObjectsSecurityExtensionFactory,
   type SavedObjectsSpacesExtensionFactory,
-  type SavedObjectsAclExtensionFactory,
-  ACL_EXTENSION_ID,
+  type SavedObjectsOlsExtensionFactory,
+  OLS_EXTENSION_ID,
   ENCRYPTION_EXTENSION_ID,
   SECURITY_EXTENSION_ID,
   SPACES_EXTENSION_ID,
@@ -35,7 +35,7 @@ interface Params {
   encryptionExtensionFactory: SavedObjectsEncryptionExtensionFactory;
   securityExtensionFactory: SavedObjectsSecurityExtensionFactory;
   spacesExtensionFactory: SavedObjectsSpacesExtensionFactory;
-  aclExtensionFactory: SavedObjectsAclExtensionFactory;
+  olsExtensionFactory: SavedObjectsOlsExtensionFactory;
 }
 
 function createClientProvider(
@@ -44,7 +44,7 @@ function createClientProvider(
     | 'encryptionExtensionFactory'
     | 'securityExtensionFactory'
     | 'spacesExtensionFactory'
-    | 'aclExtensionFactory'
+    | 'olsExtensionFactory'
   >
 ) {
   return new SavedObjectsClientProvider({
@@ -157,7 +157,7 @@ describe(`allows extensions to be excluded`, () => {
           encryptionExtension: undefined,
           securityExtension: undefined,
           spacesExtension: undefined,
-          aclExtension: expect.any(Object),
+          olsExtension: expect.any(Object),
         },
       })
     );
@@ -176,7 +176,7 @@ describe(`allows extensions to be excluded`, () => {
           encryptionExtension: undefined,
           securityExtension: mockSecurityExt,
           spacesExtension: undefined,
-          aclExtension: expect.any(Object),
+          olsExtension: expect.any(Object),
         },
       })
     );
@@ -195,7 +195,7 @@ describe(`allows extensions to be excluded`, () => {
           encryptionExtension: mockEncryptionExt,
           securityExtension: undefined,
           spacesExtension: mockSpacesExt,
-          aclExtension: expect.any(Object),
+          olsExtension: expect.any(Object),
         },
       })
     );
@@ -214,7 +214,7 @@ describe(`allows extensions to be excluded`, () => {
           encryptionExtension: mockEncryptionExt,
           securityExtension: mockSecurityExt,
           spacesExtension: mockSpacesExt,
-          aclExtension: expect.any(Object),
+          olsExtension: expect.any(Object),
         },
       })
     );
@@ -242,16 +242,16 @@ test(`allows hidden typed to be included`, () => {
   });
 });
 
-describe('ACL extension', () => {
+describe('OLS extension', () => {
   const typeRegistry = typeRegistryMock.create();
-  const mockAclExt = savedObjectsExtensionsMock.createAclExtension();
+  const mockOlsExt = savedObjectsExtensionsMock.createOlsExtension();
 
   test('stays attached when the security extension is excluded', () => {
     const defaultClientFactoryMock = jest.fn();
     const clientProvider = createClientProvider({
       defaultClientFactory: defaultClientFactoryMock,
       securityExtensionFactory: () => savedObjectsExtensionsMock.createSecurityExtension(),
-      aclExtensionFactory: () => mockAclExt,
+      olsExtensionFactory: () => mockOlsExt,
       typeRegistry,
     });
 
@@ -263,7 +263,7 @@ describe('ACL extension', () => {
       expect.objectContaining({
         extensions: expect.objectContaining({
           securityExtension: undefined,
-          aclExtension: mockAclExt,
+          olsExtension: mockOlsExt,
         }),
       })
     );
@@ -274,7 +274,7 @@ describe('ACL extension', () => {
 
     expect(() =>
       clientProvider.getClient(httpServerMock.createKibanaRequest(), {
-        excludedExtensions: [ACL_EXTENSION_ID],
+        excludedExtensions: [OLS_EXTENSION_ID],
       })
     ).toThrowErrorMatchingInlineSnapshot(
       `"The \\"acl\\" saved objects extension cannot be excluded"`
@@ -284,21 +284,21 @@ describe('ACL extension', () => {
   test.each([
     ['there is no factory', undefined],
     ['the factory returns nothing', () => undefined],
-  ])('fails closed when %s', async (_, aclExtensionFactory) => {
+  ])('fails closed when %s', async (_, olsExtensionFactory) => {
     const defaultClientFactoryMock = jest.fn();
     const clientProvider = createClientProvider({
       defaultClientFactory: defaultClientFactoryMock,
-      aclExtensionFactory,
+      olsExtensionFactory,
       typeRegistry,
     });
     clientProvider.getClient(httpServerMock.createKibanaRequest());
 
-    const { aclExtension } = defaultClientFactoryMock.mock.calls[0][0].extensions;
+    const { olsExtension } = defaultClientFactoryMock.mock.calls[0][0].extensions;
     await expect(
-      aclExtension.authorizeAclChange({
+      olsExtension.authorizeAclChange({
         object: { type: 'action', id: '1' },
         change: { kind: 'claim' },
       })
-    ).rejects.toThrow('Object-level access control is unavailable for this request');
+    ).rejects.toThrow('Object-level security (OLS) is unavailable for this request');
   });
 });

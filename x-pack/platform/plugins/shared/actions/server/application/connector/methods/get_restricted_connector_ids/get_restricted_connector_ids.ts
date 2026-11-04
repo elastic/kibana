@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { generalAccessPermits } from '@kbn/access-control';
+import { generalAccessPermits } from '@kbn/ols';
 import { SavedObjectsUtils, isSavedObjectErrorResult } from '@kbn/core/server';
 
 import { CONNECTOR_ACCESS_POLICY } from '../../../../../common/access_policy';
 import type { ActionsClientContext } from '../../../../actions_client';
 import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
-import { getConnectorAccessControl, getConnectorSpaceId } from '../../../../lib/connector_access';
+import { getConnectorOls, getConnectorSpaceId } from '../../../../lib/connector_access';
 import type { RawAction } from '../../../../types';
 
 export interface GetRestrictedConnectorIdsParams {
@@ -30,7 +30,7 @@ export const getRestrictedConnectorIds = async ({
   const storedIds = [...new Set(ids)].filter(
     (id) => !context.inMemoryConnectors.some((connector) => connector.id === id)
   );
-  if (storedIds.length === 0 || !getConnectorAccessControl(context)) {
+  if (storedIds.length === 0 || !getConnectorOls(context)) {
     return [];
   }
 

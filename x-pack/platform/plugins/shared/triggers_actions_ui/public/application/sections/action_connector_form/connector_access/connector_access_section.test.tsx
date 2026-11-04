@@ -9,7 +9,7 @@ import React from 'react';
 import { screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { AccessPolicyResponse } from '@kbn/access-control-ui';
+import type { AccessPolicyResponse } from '@kbn/ols-ui';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { ConnectorAccessSection } from './connector_access_section';
@@ -92,7 +92,7 @@ describe('ConnectorAccessSection', () => {
     });
     await waitFor(() =>
       expect(appMockRenderer.coreStart.http.post).toHaveBeenCalledWith(
-        '/internal/security/access_control/action/_suggest_principals',
+        '/internal/security/ols/action/_suggest_principals',
         expect.anything()
       )
     );

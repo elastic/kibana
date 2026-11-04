@@ -26,7 +26,7 @@ function generator({ imageFlavor }: TemplateContext) {
   monitoring.ui.container.elasticsearch.enabled: true
 
   # TEMPORARY (OLS PoC): enables object-level security in PR deployments for manual testing.
-  xpack.security.accessControl.enabled: true
+  xpack.security.authz.ols.enabled: true
   `);
 }
 

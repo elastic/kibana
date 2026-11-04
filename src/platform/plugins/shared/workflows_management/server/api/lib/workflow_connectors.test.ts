@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CanonicalAcl } from '@kbn/access-control';
 import type { ConnectorWithAcl } from '@kbn/actions-plugin/server/application/connector/types';
 import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
+import type { StoredAcl } from '@kbn/ols';
 import { getAvailableConnectors } from './workflow_connectors';
 
 const mockActionType = (overrides: Record<string, unknown> = {}) => ({
@@ -34,7 +34,7 @@ const mockConnector = (overrides: Record<string, unknown> = {}) => ({
 
 const mockGetAllWithAcl = (
   connectors: Array<ReturnType<typeof mockConnector>>,
-  acls: Record<string, CanonicalAcl> = {}
+  acls: Record<string, StoredAcl> = {}
 ) =>
   jest
     .fn()
@@ -44,10 +44,10 @@ const mockGetAllWithAcl = (
 
 describe('getAvailableConnectors', () => {
   const request = httpServerMock.createKibanaRequest();
-  let accessControl: ReturnType<typeof securityServiceMock.createStart>['accessControl'];
+  let ols: ReturnType<typeof securityServiceMock.createOls>;
 
   beforeEach(() => {
-    accessControl = securityServiceMock.createStart().accessControl;
+    ols = securityServiceMock.createOls();
   });
 
   it('groups connectors by type and returns the configured action-type metadata', async () => {
@@ -59,7 +59,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -82,7 +82,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -105,7 +105,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -131,7 +131,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -162,7 +162,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -193,7 +193,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -217,7 +217,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -244,7 +244,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -280,7 +280,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -300,7 +300,7 @@ describe('getAvailableConnectors', () => {
     const result = await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue(actionsClient),
       getActionsClientWithRequest: jest.fn().mockResolvedValue(actionsClientWithRequest),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -326,7 +326,7 @@ describe('getAvailableConnectors', () => {
     await getAvailableConnectors({
       getActionsClient: jest.fn().mockResolvedValue({ getAllWithAcl }),
       getActionsClientWithRequest: jest.fn().mockResolvedValue({ listTypes }),
-      accessControl,
+      ols,
       spaceId: 'default',
       request,
     });
@@ -337,7 +337,7 @@ describe('getAvailableConnectors', () => {
   });
 
   describe('object-level security', () => {
-    const PRIVATE_ACL: CanonicalAcl = {
+    const PRIVATE_ACL: StoredAcl = {
       version: [1],
       owner: { type: ['user'], id: ['u_owner'] },
       general_access: ['none'],
@@ -350,14 +350,14 @@ describe('getAvailableConnectors', () => {
     ];
 
     const listConnectors = (
-      filterVisible: (objects: Array<{ id: string; acl?: CanonicalAcl }>) => string[]
+      filterVisible: (objects: Array<{ id: string; acl?: StoredAcl }>) => string[]
     ) => {
-      const scoped = securityServiceMock.createScopedAccessControl();
+      const scoped = securityServiceMock.createScopedOls();
       scoped.filterVisible.mockImplementation(async ({ objects }) => {
         const visibleIds = filterVisible(objects);
         return objects.filter(({ id }) => visibleIds.includes(id));
       });
-      accessControl.asScoped.mockReturnValue(scoped);
+      ols.asScoped.mockReturnValue(scoped);
 
       const actionsClient = {
         getAllWithAcl: mockGetAllWithAcl(connectors, { private: PRIVATE_ACL }),
@@ -370,7 +370,7 @@ describe('getAvailableConnectors', () => {
           getActionsClientWithRequest: jest.fn().mockResolvedValue({
             listTypes: jest.fn().mockResolvedValue([mockActionType()]),
           }),
-          accessControl,
+          ols,
           spaceId: 'my-space',
           request,
         }),
@@ -391,6 +391,24 @@ describe('getAvailableConnectors', () => {
       expect(totalConnectors).toBe(3);
     });
 
+    it('keeps every connector while object-level security is disabled', async () => {
+      const actionsClient = {
+        getAllWithAcl: mockGetAllWithAcl(connectors, { private: PRIVATE_ACL }),
+      };
+
+      const { totalConnectors } = await getAvailableConnectors({
+        getActionsClient: jest.fn().mockResolvedValue(actionsClient),
+        getActionsClientWithRequest: jest.fn().mockResolvedValue({
+          listTypes: jest.fn().mockResolvedValue([mockActionType()]),
+        }),
+        ols: null,
+        spaceId: 'my-space',
+        request,
+      });
+
+      expect(totalConnectors).toBe(3);
+    });
+
     it('leaves out a restricted connector the request cannot view, and does not count it', async () => {
       const { result, scoped } = listConnectors((objects) =>
         objects.filter(({ acl }) => !acl).map(({ id }) => id)
@@ -398,7 +416,7 @@ describe('getAvailableConnectors', () => {
 
       const { connectorTypes, totalConnectors } = await result;
 
-      expect(accessControl.asScoped).toHaveBeenCalledWith(request);
+      expect(ols.asScoped).toHaveBeenCalledWith(request);
       expect(scoped.filterVisible).toHaveBeenCalledWith({
         type: 'action',
         spaceId: 'my-space',

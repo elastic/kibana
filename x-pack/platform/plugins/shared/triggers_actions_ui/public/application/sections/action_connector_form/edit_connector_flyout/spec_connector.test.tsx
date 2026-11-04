@@ -194,11 +194,9 @@ describe('spec connector edit flyout Test tab', () => {
       .fn()
       .mockRejectedValueOnce(new Error(errorMessage))
       .mockResolvedValueOnce(mockSpecResponse(true));
-    // The flyout also loads the connector access policy; an empty response leaves access control off.
+    // The flyout also loads the connector access policy; an empty response leaves OLS off.
     appMockRenderer.coreStart.http.get = jest.fn((path: string, options?: unknown) =>
-      path.startsWith('/internal/security/access_control/')
-        ? Promise.resolve({})
-        : getSpec(path, options)
+      path.startsWith('/internal/security/ols/') ? Promise.resolve({}) : getSpec(path, options)
     ) as unknown as typeof appMockRenderer.coreStart.http.get;
 
     appMockRenderer.render(
@@ -251,7 +249,7 @@ describe('stack connector edit flyout — embedder path (no connector-types fetc
       ...appMockRenderer.coreStart.application.capabilities,
       actions: { save: true, show: true, execute: true },
     };
-    // The flyout loads the connector access policy; an empty response leaves access control off.
+    // The flyout loads the connector access policy; an empty response leaves OLS off.
     appMockRenderer.coreStart.http.get = jest.fn().mockResolvedValue({});
     actionTypeRegistry.has.mockReturnValue(true);
     actionTypeRegistry.get.mockReturnValue(actionTypeModel);

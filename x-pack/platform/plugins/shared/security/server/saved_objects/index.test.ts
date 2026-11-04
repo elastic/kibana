@@ -9,60 +9,60 @@ import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { typeRegistryMock } from '@kbn/core-saved-objects-base-server-mocks';
 
 import { setupSavedObjects } from '.';
-import type { AclService } from '../access_control/acl_service';
-import { SavedObjectsAclExtension } from '../access_control/saved_objects_acl_extension';
-import { scopedAclServiceMock } from '../access_control/scoped_acl_service.mock';
+import { SavedObjectsOlsExtension } from './saved_objects_ols_extension';
 import { auditServiceMock } from '../audit/mocks';
 import { authorizationMock } from '../authorization/index.mock';
+import type { OlsService } from '../authorization/ols/ols_service';
+import { scopedOlsServiceMock } from '../authorization/ols/scoped_ols_service.mock';
 
 describe('setupSavedObjects', () => {
-  describe('ACL extension', () => {
+  describe('OLS extension', () => {
     const request = httpServerMock.createKibanaRequest();
     const typeRegistry = typeRegistryMock.create();
 
-    const setup = ({ accessControlEnabled }: { accessControlEnabled: boolean }) => {
+    const setup = ({ olsEnabled }: { olsEnabled: boolean }) => {
       const { savedObjects } = coreMock.createSetup();
       const authz = authorizationMock.create();
-      const aclService = { asScoped: jest.fn().mockReturnValue(scopedAclServiceMock.create()) };
+      const olsService = { asScoped: jest.fn().mockReturnValue(scopedOlsServiceMock.create()) };
 
       setupSavedObjects({
         audit: auditServiceMock.create(),
         authz,
         savedObjects,
         getCurrentUser: jest.fn(),
-        accessControlEnabled,
-        getAclService: () => aclService as unknown as AclService,
+        olsEnabled,
+        getOlsService: () => olsService as unknown as OlsService,
       });
 
-      const [[createAclExtension]] = savedObjects.setAclExtension.mock.calls;
-      return { authz, aclService, createAclExtension };
+      const [[createOlsExtension]] = savedObjects.setOlsExtension.mock.calls;
+      return { authz, olsService, createOlsExtension };
     };
 
-    it('is built on the request-scoped access control service', () => {
-      const { authz, aclService, createAclExtension } = setup({ accessControlEnabled: true });
+    it('is built on the request-scoped OLS service', () => {
+      const { authz, olsService, createOlsExtension } = setup({ olsEnabled: true });
       authz.mode.useRbacForRequest.mockReturnValue(true);
 
-      expect(createAclExtension({ request, typeRegistry })).toBeInstanceOf(
-        SavedObjectsAclExtension
+      expect(createOlsExtension({ request, typeRegistry })).toBeInstanceOf(
+        SavedObjectsOlsExtension
       );
-      expect(aclService.asScoped).toHaveBeenCalledWith(request);
+      expect(olsService.asScoped).toHaveBeenCalledWith(request);
     });
 
-    it('is not provided when access control is enabled but the request does not use RBAC', () => {
-      const { authz, aclService, createAclExtension } = setup({ accessControlEnabled: true });
+    it('is not provided when OLS is enabled but the request does not use RBAC', () => {
+      const { authz, olsService, createOlsExtension } = setup({ olsEnabled: true });
       authz.mode.useRbacForRequest.mockReturnValue(false);
 
       // Core then falls back to an extension that fails closed.
-      expect(createAclExtension({ request, typeRegistry })).toBeUndefined();
-      expect(aclService.asScoped).not.toHaveBeenCalled();
+      expect(createOlsExtension({ request, typeRegistry })).toBeUndefined();
+      expect(olsService.asScoped).not.toHaveBeenCalled();
     });
 
-    it('is provided while access control is disabled, even without RBAC', () => {
-      const { authz, createAclExtension } = setup({ accessControlEnabled: false });
+    it('is provided while OLS is disabled, even without RBAC', () => {
+      const { authz, createOlsExtension } = setup({ olsEnabled: false });
       authz.mode.useRbacForRequest.mockReturnValue(false);
 
-      expect(createAclExtension({ request, typeRegistry })).toBeInstanceOf(
-        SavedObjectsAclExtension
+      expect(createOlsExtension({ request, typeRegistry })).toBeInstanceOf(
+        SavedObjectsOlsExtension
       );
     });
   });

@@ -7,7 +7,7 @@
 
 import { httpServerMock, securityServiceMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import {
   ensureConnectorOperation,
   ensureConnectorsOperation,
@@ -15,7 +15,7 @@ import {
   operationForAuthMode,
 } from './connector_access';
 
-const ACL: CanonicalAcl = {
+const ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
   general_access: ['none'],
@@ -28,9 +28,10 @@ describe('ensureConnectorOperation', () => {
     spaceId,
   }: { enabled?: boolean; spaceId?: string } = {}) => {
     const securityService = securityServiceMock.createStart();
-    const scoped = securityServiceMock.createScopedAccessControl();
-    securityService.accessControl.asScoped.mockReturnValue(scoped);
-    scoped.isEnabled.mockReturnValue(enabled);
+    const scoped = securityServiceMock.createScopedOls();
+    const ols = securityServiceMock.createOls();
+    ols.asScoped.mockReturnValue(scoped);
+    securityService.authz.ols = enabled ? ols : null;
     return {
       context: {
         request: httpServerMock.createKibanaRequest(),

@@ -114,7 +114,7 @@ apiTest.describe(
           connector_type_id: '.webhook',
           config: { url: 'http://localhost:5620/api/status', method: 'post', hasAuth: false },
           secrets: {},
-          access_control: { general_access: generalAccess },
+          acl: { general_access: generalAccess },
         },
       });
       expect(response, JSON.stringify(response.body)).toHaveStatusCode(200);

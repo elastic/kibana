@@ -144,7 +144,7 @@ describe('createActionConnector', () => {
     `);
   });
 
-  test('should send the initial access control in the create request', async () => {
+  test('should send the initial ACL in the create request', async () => {
     http.post.mockResolvedValueOnce({
       connector_type_id: 'test',
       is_preconfigured: false,
@@ -154,7 +154,7 @@ describe('createActionConnector', () => {
       secrets: {},
       id: '123',
     });
-    const accessControl = {
+    const acl = {
       general_access: 'none' as const,
       entries: [{ type: 'user' as const, id: 'u_alice', access: 'use' as const }],
     };
@@ -162,7 +162,7 @@ describe('createActionConnector', () => {
     await createActionConnector({
       http,
       connector: { actionTypeId: 'test', name: 'My test', config: {}, secrets: {} },
-      accessControl,
+      acl,
     });
 
     expect(http.post).toHaveBeenCalledWith('/api/actions/connector', {
@@ -171,7 +171,7 @@ describe('createActionConnector', () => {
         config: {},
         secrets: {},
         connector_type_id: 'test',
-        access_control: accessControl,
+        acl,
       }),
     });
   });

@@ -27,7 +27,7 @@ import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-serve
 import { findLegacyUrlAliases } from './find_legacy_url_aliases';
 import { getRootFields } from '../../utils';
 import type { CreatePointInTimeFinderFn } from '../../point_in_time_finder';
-import type { IAclHelper } from '../helpers';
+import type { IOlsHelper } from '../helpers';
 import type { RepositoryEsClient } from '../../repository_es_client';
 import {
   findSharedOriginObjects,
@@ -62,7 +62,7 @@ export interface CollectMultiNamespaceReferencesParams {
   getIndexForType: (type: string) => string;
   createPointInTimeFinder: CreatePointInTimeFinderFn;
   securityExtension: ISavedObjectsSecurityExtension | undefined;
-  aclHelper: IAclHelper;
+  olsHelper: IOlsHelper;
   objects: SavedObjectsCollectMultiNamespaceReferencesObject[];
   options?: SavedObjectsCollectMultiNamespaceReferencesOptions;
 }
@@ -166,7 +166,7 @@ async function getObjectsAndReferences({
   client,
   serializer,
   getIndexForType,
-  aclHelper,
+  olsHelper,
   objects,
   options = {},
 }: CollectMultiNamespaceReferencesParams) {
@@ -214,7 +214,7 @@ async function getObjectsAndReferences({
     }
     // An object the caller cannot view counts as missing, and its references are not followed, so
     // hidden objects never appear as the source of a reference.
-    const aclDecisions = await aclHelper.authorize(
+    const aclDecisions = await olsHelper.authorize(
       'view',
       namespace,
       bulkGetObjects.flatMap(({ type, id }, index) => {
@@ -236,7 +236,7 @@ async function getObjectsAndReferences({
         !doc.found ||
         // @ts-expect-error MultiGetHit._source is optional
         !rawDocExistsInNamespace(registry, doc, namespace) ||
-        aclHelper.getError(aclDecisions, { type, id })
+        olsHelper.getError(aclDecisions, { type, id })
       ) {
         objectMap.set(objectKey, null);
         continue;

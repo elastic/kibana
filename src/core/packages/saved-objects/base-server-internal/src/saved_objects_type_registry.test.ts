@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsType } from '@kbn/core-saved-objects-server';
-import { FIXTURE_POLICY } from '@kbn/access-control';
+import { FIXTURE_POLICY } from '@kbn/ols';
 import { SavedObjectTypeRegistry } from './saved_objects_type_registry';
 
 const createType = (type: Partial<SavedObjectsType>): SavedObjectsType => ({
@@ -352,7 +352,7 @@ describe('SavedObjectTypeRegistry', () => {
         );
       });
 
-      it('validates the policy even when access control is disabled', () => {
+      it('validates the policy even when OLS is disabled', () => {
         registry.setAccessControlEnabled(false);
 
         expect(() =>
