@@ -20,8 +20,8 @@ Every `materialize` call runs one pipeline, as the requesting user:
 
 1. **Context.** Each data request runs in the caller's context merged with the request's own override: its fields replace the caller's, its filters add to the caller's, and `ignoreGlobalFilters` drops the caller's filters and query. Nested `materialize` requests (a dashboard's panels) pass the merged context down.
 2. **Execution.** `esql` requests run through the data plugin's scoped `search.esql`, the way Lens's `esql` expression does: the time range, filters, query and ES|QL control values go through its Kibana query context, and `dateFormat:tz` is the default time zone. Each request has a 30 second timeout and a cap of 1,000 rows, ES|QL's default result size; a request may set a lower `maxRows`. A capped table adds a `losses` entry to the node. `aggs` and `search` requests have no executor yet and return `unsupported`.
-3. **Mapping and provenance.** The materializer maps the results. Charts pack nodes get `source` provenance (Kibana version, saved object type and materializer version, saved object ID, time range, capture time) and the pipeline's losses.
-4. **Validation.** Every result is validated against the runtime's packs. A failing plan, query, mapping or validation returns `unsupported` with a reason, titled from the materializer's `describe` when it has one.
+3. **Mapping and provenance.** The context's time range is resolved to absolute times once, before planning, so the queries and the provenance agree. The materializer maps the results. Chart nodes (`metric`, `xyChart`) and `unsupported` nodes get `source` provenance (Kibana version, materializer and its version, space, saved object type and ID, time range, capture time), and chart nodes get the pipeline's losses.
+4. **Validation.** Every result is checked against the Isomer input budget, then against `@elastic/isomer-primitives-charts`' schemas for its nodes and the runtime's packs for the rest. A failing plan, query, mapping or validation returns `unsupported` with a reason, titled from the materializer's `describe` when it has one.
 
 Materialization is off unless the `isomer.materializeEnabled` feature flag is on. While it's off, the route returns `404` and `materialize` returns `unsupported`. To turn it on locally, add this to `kibana.dev.yml`:
 
@@ -30,4 +30,4 @@ feature_flags.overrides:
   isomer.materializeEnabled: true
 ```
 
-`server/materialize/nodes.ts` is the only module that names the node types materialization produces.
+`server/materialize/nodes.ts` is the only module that names the node types materialization produces: the charts pack's `metric`, `xyChart`, `grid` and `unsupported`, and the components pack's `markdown` and `link`.
