@@ -17,6 +17,9 @@ import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import type { Subscription } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common';
+import type { MaterializeEvent, RenderEvent } from './instrumentation/events';
+import { MATERIALIZE_EVENT, RENDER_EVENT } from './instrumentation/events';
+import { instrumentRuntime } from './instrumentation/instrument_runtime';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
 import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
@@ -61,6 +64,7 @@ export class IsomerPlugin
   private readonly logger: Logger;
   private readonly kibanaVersion: string;
   private data?: DataPluginStart;
+  private reportEvent?: CoreStart['analytics']['reportEvent'];
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private materializeEnabled = false;
@@ -72,6 +76,8 @@ export class IsomerPlugin
   }
 
   setup(core: CoreSetup): IsomerPluginSetup {
+    core.analytics.registerEventType(MATERIALIZE_EVENT);
+    core.analytics.registerEventType(RENDER_EVENT);
     registerMaterializeRoute({
       router: core.http.createRouter(),
       createClient: this.createClient,
@@ -83,6 +89,7 @@ export class IsomerPlugin
 
   start(core: CoreStart, { data }: IsomerPluginStartDependencies): IsomerPluginStart {
     this.data = data;
+    this.reportEvent = core.analytics.reportEvent;
     this.materializeEnabledSubscription = core.featureFlags
       .getBooleanValue$(MATERIALIZE_FEATURE_FLAG, false)
       .subscribe((enabled) => {
@@ -118,16 +125,27 @@ export class IsomerPlugin
       search: this.data.search.asScoped(scope.request),
       validate: this.validateNode,
       kibanaVersion: this.kibanaVersion,
+      report: this.reportMaterialize,
     });
   };
 
   private readonly validateNode = createNodeValidator(() => this.getRuntime());
 
+  private readonly reportMaterialize = (event: MaterializeEvent) => {
+    this.logger.get('instrumentation').debug(() => `Materialized: ${JSON.stringify(event)}`);
+    this.reportEvent?.(MATERIALIZE_EVENT.eventType, event);
+  };
+
+  private readonly reportRender = (event: RenderEvent) => {
+    this.logger.get('instrumentation').debug(() => `Rendered: ${JSON.stringify(event)}`);
+    this.reportEvent?.(RENDER_EVENT.eventType, event);
+  };
+
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(
       (runtime) => {
         this.logger.debug('Built the Isomer runtime with the components pack.');
-        return runtime;
+        return instrumentRuntime(runtime, this.reportRender);
       },
       (error) => {
         this.runtime = undefined;
