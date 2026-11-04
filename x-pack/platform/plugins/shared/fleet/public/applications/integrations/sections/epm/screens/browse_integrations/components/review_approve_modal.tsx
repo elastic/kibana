@@ -64,6 +64,10 @@ export interface ReviewIntegrationDetails {
 
 const MAX_VISIBLE_COLLECTION_METHODS = 1;
 
+/** Results only exist once a data stream's analysis has finished. */
+const hasDataStreamResults = (dataStream: ReviewDataStream): boolean =>
+  dataStream.status === 'completed' || dataStream.status === 'approved';
+
 const formatInputType = (value: string): string => {
   const withSpaces = value.replace(/[_-]/g, ' ');
   return withSpaces.replace(/\b\w/g, (match) => match.toUpperCase());
@@ -400,24 +404,35 @@ export const ReviewApproveModal: React.FC<{
     {
       name: '',
       width: '32px',
-      render: (item: ReviewTableRow) => (
-        <EuiToolTip
-          content={i18n.translate(
-            'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
-            { defaultMessage: 'Open data stream results flyout' }
-          )}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType="maximize"
-            aria-label={i18n.translate(
-              'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
-              { defaultMessage: 'Open data stream results flyout' }
-            )}
-            onClick={() => setSelectedDataStreamForFlyout(item.dataStream)}
-          />
-        </EuiToolTip>
-      ),
+      render: (item: ReviewTableRow) => {
+        const hasResults = hasDataStreamResults(item.dataStream);
+        return (
+          <EuiToolTip
+            content={
+              hasResults
+                ? i18n.translate(
+                    'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
+                    { defaultMessage: 'Open data stream results flyout' }
+                  )
+                : i18n.translate(
+                    'xpack.fleet.epmList.manageIntegrations.actions.reviewRowNoResultsHelp',
+                    { defaultMessage: 'Results are available once analysis has completed.' }
+                  )
+            }
+            disableScreenReaderOutput
+          >
+            <EuiButtonIcon
+              iconType="maximize"
+              aria-label={i18n.translate(
+                'xpack.fleet.epmList.manageIntegrations.actions.reviewRowOpenFlyoutAriaLabel',
+                { defaultMessage: 'Open data stream results flyout' }
+              )}
+              isDisabled={!hasResults}
+              onClick={() => setSelectedDataStreamForFlyout(item.dataStream)}
+            />
+          </EuiToolTip>
+        );
+      },
     },
     {
       name: (

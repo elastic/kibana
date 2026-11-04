@@ -143,9 +143,11 @@ export const ManageIntegrationActions: React.FC<{
     'xpack.fleet.epmList.manageIntegrations.actions.viewResults',
     { defaultMessage: 'View results' }
   );
-  const viewResultsDisabledTooltip = !isPackageReady
+  // Results exist per data stream, so viewing them only needs at least one data stream.
+  const hasDataStreams = integration.totalDataStreamCount > 0;
+  const viewResultsDisabledTooltip = !hasDataStreams
     ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.viewResultsDisabledHelp', {
-        defaultMessage: 'Results are available only when all data streams are successful.',
+        defaultMessage: 'Results are available once the integration has data streams.',
       })
     : undefined;
 
@@ -215,7 +217,7 @@ export const ManageIntegrationActions: React.FC<{
           iconType="inspect"
           iconSide="left"
           onClick={openResultsModal}
-          isDisabled={!isPackageReady}
+          isDisabled={!hasDataStreams}
           data-test-subj="manageIntegrationViewResultsInlineBtn"
         >
           {viewResultsLabel}
@@ -282,7 +284,7 @@ export const ManageIntegrationActions: React.FC<{
                 <EuiContextMenuItem
                   key="viewResults"
                   icon="inspect"
-                  disabled={!isPackageReady}
+                  disabled={!hasDataStreams}
                   toolTipContent={viewResultsDisabledTooltip}
                   onClick={openResultsModal}
                   data-test-subj="manageIntegrationViewResultsMenuItem"

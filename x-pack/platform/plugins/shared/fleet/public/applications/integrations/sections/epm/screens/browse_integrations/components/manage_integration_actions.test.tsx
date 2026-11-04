@@ -152,6 +152,31 @@ describe('ManageIntegrationActions privilege gating', () => {
       expect(screen.getByTestId('manageIntegrationViewResultsInlineBtn')).toBeInTheDocument();
     });
 
+    it('keeps View results enabled while some data streams are still processing', () => {
+      renderActions({
+        isPackageReady: false,
+        integration: {
+          ...integration,
+          status: 'processing',
+          totalDataStreamCount: 2,
+          successfulDataStreamCount: 1,
+        },
+      });
+      openMenu();
+
+      expect(screen.getByTestId('manageIntegrationViewResultsMenuItem')).toBeEnabled();
+    });
+
+    it('disables View results when the integration has no data streams', () => {
+      renderActions({
+        isPackageReady: false,
+        integration: { ...integration, totalDataStreamCount: 0, successfulDataStreamCount: 0 },
+      });
+      openMenu();
+
+      expect(screen.getByTestId('manageIntegrationViewResultsMenuItem')).toBeDisabled();
+    });
+
     it('hides the inline Edit Integration button', () => {
       renderActions({ inlineActionType: 'editIntegration', showMenuButton: false });
 

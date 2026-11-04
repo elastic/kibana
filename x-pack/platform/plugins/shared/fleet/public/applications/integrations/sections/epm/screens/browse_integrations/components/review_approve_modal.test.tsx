@@ -17,16 +17,26 @@ jest.mock('../../../../../hooks', () => ({
 import { ReviewApproveModal } from './review_approve_modal';
 import type { ReviewIntegrationDetails } from './review_approve_modal';
 
+type ReviewDataStream = ReviewIntegrationDetails['dataStreams'][number];
+
+const completedStream = {
+  dataStreamId: 'my_stream',
+  title: 'My stream',
+  status: 'completed',
+  inputTypes: [{ name: 'filestream' }],
+} as unknown as ReviewDataStream;
+
+const processingStream = {
+  dataStreamId: 'pending_stream',
+  title: 'Pending stream',
+  status: 'processing',
+  inputTypes: [],
+} as unknown as ReviewDataStream;
+
 const reviewDetails: ReviewIntegrationDetails = {
   title: 'My integration',
   version: '1.0.0',
-  dataStreams: [
-    {
-      dataStreamId: 'my_stream',
-      title: 'My stream',
-      inputTypes: [{ name: 'filestream' }],
-    } as unknown as ReviewIntegrationDetails['dataStreams'][number],
-  ],
+  dataStreams: [completedStream],
 };
 
 const DataStreamResultsFlyout = () => <div data-test-subj="dataStreamResultsFlyout" />;
@@ -74,6 +84,24 @@ describe('ReviewApproveModal read-only mode', () => {
     ).not.toBeInTheDocument();
     expect(screen.queryByLabelText('Version')).not.toBeInTheDocument();
     expect(screen.getByTestId('manageIntegrationReviewModalClose')).toBeInTheDocument();
+  });
+
+  it('only enables the results flyout for data streams that have results', async () => {
+    renderModal({
+      readOnly: true,
+      onFetchReviewDetails: jest
+        .fn()
+        .mockResolvedValue({ ...reviewDetails, dataStreams: [completedStream, processingStream] }),
+    });
+
+    await waitFor(() => {
+      expect(screen.getByText('Pending stream')).toBeInTheDocument();
+    });
+    const openButtons = screen.getAllByRole('button', { name: 'Open data stream results flyout' });
+
+    expect(openButtons).toHaveLength(2);
+    expect(openButtons[0]).toBeEnabled();
+    expect(openButtons[1]).toBeDisabled();
   });
 
   it('does not link data stream titles to the edit page', async () => {
