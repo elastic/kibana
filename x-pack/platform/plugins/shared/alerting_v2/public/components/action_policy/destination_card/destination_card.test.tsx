@@ -29,23 +29,36 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 const mockWorkflowData: Record<string, object> = {};
+const mockUseFetchWorkflow = jest.fn();
 
 jest.mock('../../../hooks/use_fetch_workflow', () => ({
-  useFetchWorkflow: (id: string) => ({
-    data: {
-      id,
-      name: `Workflow ${id}`,
-      definition: {
-        steps: [
-          { type: '.email', name: 'send email' },
-          { type: '.slack', name: 'send slack' },
-        ],
-      },
-      ...mockWorkflowData[id],
-    },
-    isLoading: false,
-  }),
+  useFetchWorkflow: (id: string, isEnabled?: boolean, options?: { notifyOnError?: boolean }) =>
+    mockUseFetchWorkflow(id, isEnabled, options),
 }));
+
+const successState = (id: string) => ({
+  data: {
+    id,
+    name: `Workflow ${id}`,
+    definition: {
+      steps: [
+        { type: '.email', name: 'send email' },
+        { type: '.slack', name: 'send slack' },
+      ],
+    },
+    ...mockWorkflowData[id],
+  },
+  isLoading: false,
+  isError: false,
+  error: null,
+});
+
+const errorState = (status: number) => ({
+  data: undefined,
+  isLoading: false,
+  isError: true,
+  error: Object.assign(new Error(`HTTP ${status}`), { response: { status } }),
+});
 
 const renderCard = (destination: ActionPolicyDestination) =>
   render(
@@ -55,6 +68,59 @@ const renderCard = (destination: ActionPolicyDestination) =>
   );
 
 describe('DestinationCard', () => {
+  beforeEach(() => {
+    mockUseFetchWorkflow.mockReset();
+    mockUseFetchWorkflow.mockImplementation(successState);
+  });
+
+  it('fetches the workflow without an error toast', () => {
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(mockUseFetchWorkflow).toHaveBeenCalledWith('wf-42', true, { notifyOnError: false });
+  });
+
+  it('renders a loading state while the workflow is fetched', () => {
+    mockUseFetchWorkflow.mockReturnValue({
+      data: undefined,
+      isLoading: true,
+      isError: false,
+      error: null,
+    });
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardLoading')).toBeInTheDocument();
+    expect(screen.queryByTestId('actionPolicyDestinationCardTitle')).toBeNull();
+    expect(screen.getByTestId('actionPolicyDestinationCardLink')).toHaveAttribute(
+      'href',
+      '/app/workflows/wf-42'
+    );
+  });
+
+  it('renders a not found message when the workflow does not exist', () => {
+    mockUseFetchWorkflow.mockReturnValue(errorState(404));
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardTitle')).toHaveTextContent('wf-42');
+    expect(screen.getByTestId('actionPolicyDestinationCardNotFound')).toHaveTextContent(
+      'Workflow not found. It may have been deleted.'
+    );
+    expect(screen.queryByTestId('actionPolicyDestinationCardError')).toBeNull();
+    expect(screen.getByTestId('actionPolicyDestinationCardLink')).toBeInTheDocument();
+  });
+
+  it('renders a load error message when the workflow fails to load', () => {
+    mockUseFetchWorkflow.mockReturnValue(errorState(500));
+    renderCard({ type: 'workflow', id: 'wf-42' });
+
+    expect(screen.getByTestId('actionPolicyDestinationCardTitle')).toHaveTextContent('wf-42');
+    expect(screen.getByTestId('actionPolicyDestinationCardError')).toHaveTextContent(
+      'Unable to load workflow details'
+    );
+    expect(screen.queryByTestId('actionPolicyDestinationCardNotFound')).toBeNull();
+    expect(screen.queryByTestId('actionPolicyDestinationConnectorIcons')).toBeNull();
+    expect(screen.getByTestId('actionPolicyDestinationCardLink')).toBeInTheDocument();
+  });
+
   it('renders a workflow card with the workflow name in bold', () => {
     renderCard({ type: 'workflow', id: 'wf-42' });
 
