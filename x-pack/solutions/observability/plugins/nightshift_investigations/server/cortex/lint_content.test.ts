@@ -35,6 +35,38 @@ describe('lintCortexContent', () => {
     expect(lintCortexContent(clean)).toEqual([]);
   });
 
+  it.each(['403 errors on registration', 'a burst of 503 errors', 'returns 429 error responses'])(
+    'does not read an HTTP status code as a count of errors: %s',
+    (text) => {
+      expect(lintCortexContent(text)).toEqual([]);
+    }
+  );
+
+  it.each(['5,944 errors', '1,403 errors', '250 errors', '23 restarts', '12 retries'])(
+    'still flags a count of events that merely contains digits like a status: %s',
+    (text) => {
+      expect(rulesOf(text)).toEqual(['counted_quantity']);
+    }
+  );
+
+  it.each(['32 pods', 'about 9 pods', '3 nodes', '6 replicas', '2 instances'])(
+    'reports how many instances run without blocking: %s',
+    (text) => {
+      expect(lintCortexContent(text)).toEqual([
+        expect.objectContaining({ rule: 'replica_count', blocking: false }),
+      ]);
+    }
+  );
+
+  it('marks every other rule as blocking', () => {
+    const violations = lintCortexContent(
+      'On 2026-08-18 at 07:20 UTC, 5,944 errors, run 45440287bd44aa9addfa424be71a4f0f, recently.'
+    );
+
+    expect(violations.length).toBeGreaterThan(0);
+    expect(violations.every(({ blocking }) => blocking)).toBe(true);
+  });
+
   it('does not treat a short word of hex letters as an id', () => {
     expect(lintCortexContent('Use the deadbeef marker only in tests.')).toEqual([]);
   });

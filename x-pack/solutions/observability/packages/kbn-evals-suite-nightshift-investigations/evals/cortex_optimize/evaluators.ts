@@ -187,8 +187,12 @@ export const nonTemporalEvaluator: CortexOptimizeEvaluator = {
     if (written.length === 0) {
       return notApplicable('The optimizer wrote no pages.');
     }
+    // Only blocking violations count: the optimizer keeps a page whose only issue is something like a
+    // replica count, so scoring it here would punish a page the real pipeline keeps.
     const dirty = written.flatMap((page) => {
-      const violations = lintCortexContent(`${page.slug}\n${page.title}\n${page.content}`);
+      const violations = lintCortexContent(`${page.slug}\n${page.title}\n${page.content}`).filter(
+        ({ blocking }) => blocking
+      );
       return violations.length === 0 ? [] : [{ page: page.slug, violations }];
     });
     return {

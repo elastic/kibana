@@ -765,6 +765,75 @@ describe('applyCortexEdits non-temporal check', () => {
     expect(warning).not.toContain('5,944');
   });
 
+  it('keeps a page whose only issue is how many replicas run, and says so', async () => {
+    const logger = loggerMock.create();
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger,
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'service',
+          slug: 'eis-gateway',
+          title: 'eis-gateway',
+          content:
+            '## Telemetry\nPods are named `eis-gateway-<zone>-<hash>`; 9 pods in one region.',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ slug: 'eis-gateway' }));
+    expect(logger.warn).not.toHaveBeenCalled();
+    expect(logger.info.mock.calls.flat().join('\n')).toContain('replica_count');
+  });
+
+  it('keeps a runbook whose title names an HTTP status code', async () => {
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'runbook',
+          slug: 'autoops-403-new-projects',
+          title: 'AutoOps 403 errors for newly created projects',
+          content: '## Trigger\nUsers get 403 errors opening AutoOps.',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledWith(
+      expect.objectContaining({ slug: 'autoops-403-new-projects' })
+    );
+  });
+
+  it('still skips a page that mixes a replica count with a count of events', async () => {
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'service',
+          slug: 'checkout-api',
+          title: 'checkout-api',
+          content: '## Failure modes\n9 pods restarted after 5,944 errors.',
+        },
+      ],
+    });
+
+    expect(store.upsert).not.toHaveBeenCalled();
+  });
+
   it('still corroborates and archives, which carry no new content', async () => {
     const store = createStore();
 
@@ -831,6 +900,14 @@ describe('createLlmProposeCortexEdits prompt', () => {
         expect(line).toContain(`## ${section}`);
       }
     }
+  });
+
+  it('says what the page check rejects and what is fine to write', async () => {
+    const { system } = await run({ transcript: '', catalog: [] });
+
+    expect(system).toContain('"5,944 errors"');
+    expect(system).toContain('number of pods, replicas, nodes or instances');
+    expect(system).toContain('HTTP status codes ("403 errors on registration")');
   });
 
   it('describes the ontology relation format and its kinds', async () => {

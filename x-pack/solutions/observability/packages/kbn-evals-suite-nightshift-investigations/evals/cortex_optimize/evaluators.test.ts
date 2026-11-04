@@ -201,6 +201,18 @@ describe('nonTemporalEvaluator', () => {
     expect(result.explanation).toContain('iso_timestamp');
   });
 
+  it('does not count a replica count against a page, since the optimizer keeps such a page', async () => {
+    const withReplicas = page({ content: '## Telemetry\nRuns as about 32 pods.' });
+
+    const result = await run(
+      nonTemporalEvaluator,
+      outputOf([{ before: [], after: [withReplicas] }]),
+      expectedOf()
+    );
+
+    expect(result.score).toBe(1);
+  });
+
   it('is not applicable when the optimizer wrote nothing', async () => {
     const result = await run(
       nonTemporalEvaluator,

@@ -271,6 +271,7 @@ ${ENTITY_TYPE_GUIDE_LINES}
 Durable knowledge only:
 - Write what stays true while the system stays the same: how components depend on each other, where their telemetry lives, which queries work and which fail, and what to check for a kind of symptom. A page never records the outcome of one incident.
 - Keep single-run details out of page content: timestamps, alert ids, counts, durations, and the cause of one incident stated as if it were a general rule. Distil them into reusable claims, such as "when X slows down, check Y".
+- A page with a date, a time, an id, or a count of events (such as "5,944 errors" or "23 restarts") is rejected, so write the pattern instead ("restarts repeatedly"). Do not give the number of pods, replicas, nodes or instances either: write "several" or "one per zone". HTTP status codes ("403 errors on registration"), component names and field names are fine.
 - Name components, streams, indices and fields exactly as the transcript shows them.
 
 What this round is:
@@ -422,18 +423,27 @@ export const applyCortexEdits = async ({
         continue;
       }
 
-      // A page that names a date, an id or a count describes one occurrence, which is stale once it
-      // ends. The other edits in the run still apply.
+      // A page that names a date, an id or a count of events describes one occurrence, which is stale
+      // once it ends. The other edits in the run still apply. Details that can only go stale when the
+      // system changes, such as how many replicas run, are reported but do not cost the page.
       const violations = lintCortexContent(
         [slug, edit.title, edit.description ?? '', edit.content ?? ''].join('\n')
       );
-      if (violations.length > 0) {
+      const blocking = violations.filter((violation) => violation.blocking);
+      if (blocking.length > 0) {
         logger.warn(
           `Skipped Cortex edit ${edit.entity_type}/${slug}: content is tied to one occurrence (${[
-            ...new Set(violations.map(({ rule }) => rule)),
+            ...new Set(blocking.map(({ rule }) => rule)),
           ].join(', ')})`
         );
         continue;
+      }
+      if (violations.length > 0) {
+        logger.info(
+          `Kept Cortex edit ${edit.entity_type}/${slug} with details that can go stale (${[
+            ...new Set(violations.map(({ rule }) => rule)),
+          ].join(', ')})`
+        );
       }
 
       const existing = await store.get(id);
