@@ -23,10 +23,6 @@ jest.mock('./version_check/clock_skew', () => ({
   pollEsNodesClockSkew: jest.fn(() => new Promise(() => {})),
 }));
 
-jest.mock('./multi_tenancy/tenants_file', () => ({
-  readTenantsFile: jest.fn(),
-}));
-
 import {
   MockClusterClient,
   isScriptingEnabledMock,
@@ -42,7 +38,9 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { analyticsServiceMock } from '@kbn/core-analytics-server-mocks';
 import { executionContextServiceMock } from '@kbn/core-execution-context-server-mocks';
-import { httpServiceMock, httpServerMock } from '@kbn/core-http-server-mocks';
+import { httpServiceMock } from '@kbn/core-http-server-mocks';
+import type { Headers } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { configSchema, ElasticsearchConfig } from './elasticsearch_config';
 import type { SetupDeps } from './elasticsearch_service';
@@ -52,7 +50,6 @@ import { isValidConnection } from './is_valid_connection';
 import { pollEsNodesVersion as pollEsNodesVersionMocked } from './version_check/nodes_version';
 import { pollEsNodesClockSkew } from './version_check/clock_skew';
 import type { NodesVersionCompatibility } from './version_check/nodes_version_compatibility';
-import { readTenantsFile } from './multi_tenancy/tenants_file';
 
 const { pollEsNodesVersion: pollEsNodesVersionActual } = jest.requireActual(
   './version_check/nodes_version'
@@ -91,6 +88,7 @@ beforeEach(() => {
     executionContext: executionContextServiceMock.createInternalSetupContract(),
     security: securityServiceMock.createInternalSetup(),
     loggingSystem: loggingSystemMock.create(),
+    tenants: { enabled: false, getTenantId: jest.fn(), getClientConfig: jest.fn() },
   };
 
   env = Env.createDefault(REPO_ROOT, getEnvOptions());
@@ -683,23 +681,21 @@ describe('CPS onRequestHandlerFactory', () => {
 });
 
 describe('multi-tenancy', () => {
-  const projectRequest = (projectId: string) => ({ headers: {}, projectId });
-  const projectKibanaRequest = (projectId: string) =>
-    httpServerMock.createKibanaRequest({
-      kibanaRequestState: { requestId: '123', requestUuid: '123', startTime: 0, projectId },
-    });
+  const tenantB = 'project-b' as TenantId;
   let tenantClient: ReturnType<typeof elasticsearchClientMock.createCustomClusterClient>;
 
   beforeEach(() => {
-    mockConfig$.next({ ...mockConfig$.getValue(), multiTenancy: { tenantsFile: '/tenants.yml' } });
-    jest.mocked(readTenantsFile).mockResolvedValue({
-      'project-b': {
+    setupDeps.tenants = {
+      enabled: true,
+      getTenantId: jest.fn(({ 'x-elastic-tenant-id': id }: Headers) =>
+        id === tenantB ? tenantB : undefined
+      ),
+      getClientConfig: jest.fn().mockReturnValue({
         hosts: ['http://localhost:9201'],
         username: 'kibana_system',
         password: 'changeme-b',
-        encryptionKey: 'b'.repeat(32),
-      },
-    });
+      }),
+    };
     tenantClient = elasticsearchClientMock.createCustomClusterClient();
     MockClusterClient.mockImplementation(({ type }) =>
       type === 'tenant-project-b' ? tenantClient : mockClusterClientInstance
@@ -707,26 +703,25 @@ describe('multi-tenancy', () => {
   });
 
   it('is off without a tenants file', async () => {
-    mockConfig$.next({ ...mockConfig$.getValue(), multiTenancy: undefined });
+    setupDeps.tenants = { ...setupDeps.tenants, enabled: false };
     await elasticsearchService.setup(setupDeps);
     const { client } = await elasticsearchService.start();
 
-    client.asScoped(projectRequest('project-b'));
+    client.asScoped({ headers: {}, tenantId: tenantB });
 
-    expect(readTenantsFile).not.toHaveBeenCalled();
-    expect(setupDeps.http.registerOnPreAuth).not.toHaveBeenCalled();
+    expect(tenantClient.asScoped).not.toHaveBeenCalled();
     expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
   });
 
-  it('scopes requests to the client of their project', async () => {
+  it('scopes requests to the client of their tenant', async () => {
     await elasticsearchService.setup(setupDeps);
     const { client } = await elasticsearchService.start();
 
-    const request = projectRequest('project-b');
+    const request = { headers: {}, tenantId: tenantB };
     client.asScoped(request);
     client.asScoped({ headers: {} });
 
-    expect(readTenantsFile).toHaveBeenCalledWith('/tenants.yml');
+    expect(setupDeps.tenants.getClientConfig).toHaveBeenCalledWith(tenantB);
     expect(tenantClient.asScoped).toHaveBeenCalledWith(request, undefined);
     expect(mockClusterClientInstance.asScoped).toHaveBeenCalledTimes(1);
     expect(MockClusterClient).toHaveBeenCalledWith(
@@ -741,48 +736,20 @@ describe('multi-tenancy', () => {
     );
   });
 
-  it("returns the project's encryption key without passing it to the project client", async () => {
-    await elasticsearchService.setup(setupDeps);
-    const { client, getProjectEncryptionKey } = await elasticsearchService.start();
-
-    client.asScoped(projectRequest('project-b'));
-
-    expect(getProjectEncryptionKey?.(projectRequest('project-b'))).toBe('b'.repeat(32));
-    expect(getProjectEncryptionKey?.({ headers: {} })).toBeUndefined();
-    const [[{ config }]] = MockClusterClient.mock.calls.filter(
-      ([{ type }]) => type === 'tenant-project-b'
-    );
-    expect(config).not.toHaveProperty('encryptionKey');
-  });
-
-  it('falls back to the project header for fake requests that only copy headers', async () => {
+  it('falls back to the tenant header for fake requests that only copy headers', async () => {
     await elasticsearchService.setup(setupDeps);
     const { client } = await elasticsearchService.start();
 
-    client.asScoped({ headers: { 'x-elastic-project-id': 'project-b' } });
+    client.asScoped({ headers: { 'x-elastic-tenant-id': 'project-b' } });
 
     expect(tenantClient.asScoped).toHaveBeenCalledTimes(1);
     expect(mockClusterClientInstance.asScoped).not.toHaveBeenCalled();
   });
 
-  it('rejects requests for an unknown project before authentication', async () => {
-    await elasticsearchService.setup(setupDeps);
-    const [handler] = jest.mocked(setupDeps.http.registerOnPreAuth).mock.lastCall!;
-    const response = httpServerMock.createLifecycleResponseFactory();
-    const toolkit = httpServerMock.createToolkit();
-
-    handler(projectKibanaRequest('project-z'), response, toolkit);
-    expect(response.badRequest).toHaveBeenCalledWith({ body: 'Unknown project [project-z]' });
-
-    handler(projectKibanaRequest('project-b'), response, toolkit);
-    handler(httpServerMock.createKibanaRequest(), response, toolkit);
-    expect(toolkit.next).toHaveBeenCalledTimes(2);
-  });
-
-  it('closes the project clients on stop', async () => {
+  it('closes the tenant clients on stop', async () => {
     await elasticsearchService.setup(setupDeps);
     const { client } = await elasticsearchService.start();
-    client.asScoped(projectRequest('project-b'));
+    client.asScoped({ headers: {}, tenantId: tenantB });
 
     await elasticsearchService.stop();
 

@@ -51,8 +51,9 @@ export interface UserProfileServiceStartInternal extends UserProfileServiceStart
   /**
    * Activates user profile using provided user profile grant.
    * @param grant User profile grant (username/password or access token).
+   * @param request Request the profile is activated for. Picks the request's tenant when multi-tenancy is enabled.
    */
-  activate(grant: UserProfileGrant): Promise<UserProfileWithSecurity>;
+  activate(grant: UserProfileGrant, request?: KibanaRequest): Promise<UserProfileWithSecurity>;
 
   /**
    * Updates user preferences by identifier.
@@ -156,7 +157,11 @@ export class UserProfileService {
   /**
    * See {@link UserProfileServiceStartInternal} for documentation.
    */
-  private async activate(clusterClient: IClusterClient, grant: UserProfileGrant) {
+  private async activate(
+    clusterClient: IClusterClient,
+    grant: UserProfileGrant,
+    request?: KibanaRequest
+  ) {
     this.logger.debug(`Activating user profile via ${grant.type} grant.`);
 
     const activateRequest: SecurityActivateUserProfileRequest =
@@ -176,10 +181,11 @@ export class UserProfileService {
     // request after some time. Most of the Kibana users won't be affected by this issue, but there are edge cases
     // when users can be hit by the conflicts during profile activation, e.g. for PKI or Kerberos authentication when
     // client certificate/ticket changes and multiple requests can trigger profile re-activation at the same time.
+    const { asInternalUser } = request ? clusterClient.asScoped(request) : clusterClient;
     let activationRetriesLeft = ACTIVATION_MAX_RETRIES;
     do {
       try {
-        const response = await clusterClient.asInternalUser.security.activateUserProfile({
+        const response = await asInternalUser.security.activateUserProfile({
           ...activateRequest,
         });
 
@@ -297,11 +303,11 @@ export class UserProfileService {
       throw new Error(`Malformed basic credentials in Authorization header.`);
     }
 
-    const activatedProfile = await this.activate(clusterClient, {
-      type: 'password',
-      username,
-      password,
-    });
+    const activatedProfile = await this.activate(
+      clusterClient,
+      { type: 'password', username, password },
+      request
+    );
 
     return activatedProfile;
   }
@@ -522,7 +528,7 @@ export class UserProfileService {
 
     let body;
     try {
-      body = await clusterClient.asInternalUser.security.getUserProfile({
+      body = await clusterClient.asScoped(request).asInternalUser.security.getUserProfile({
         uid: profileId,
         data: dataPath ? prefixCommaSeparatedValues(dataPath, KIBANA_DATA_ROOT) : undefined,
       });

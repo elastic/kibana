@@ -14,6 +14,7 @@ jest.mock('uuid', () => ({
 import type { RouteOptions } from '@hapi/hapi';
 import { hapiMocks } from '@kbn/hapi-mocks';
 import type { FakeRawRequest, RouteSecurity } from '@kbn/core-http-server';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { CoreKibanaRequest } from './request';
 import { schema } from '@kbn/config-schema';
 import {
@@ -573,15 +574,15 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('projectId property', () => {
-      it('uses the request.app.projectId property if present', () => {
-        const request = hapiMocks.createRequest({ app: { projectId: 'project-b' } });
-        expect(CoreKibanaRequest.from(request).projectId).toEqual('project-b');
+    describe('tenantId property', () => {
+      it('uses the request.app.tenantId property if present', () => {
+        const request = hapiMocks.createRequest({ app: { tenantId: 'project-b' as TenantId } });
+        expect(CoreKibanaRequest.from(request).tenantId).toEqual('project-b');
       });
 
-      it('is undefined if request.app.projectId is not present', () => {
+      it('is undefined if request.app.tenantId is not present', () => {
         const request = hapiMocks.createRequest({ app: {} });
-        expect(CoreKibanaRequest.from(request).projectId).toBeUndefined();
+        expect(CoreKibanaRequest.from(request).tenantId).toBeUndefined();
       });
     });
   });
@@ -597,10 +598,10 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
-    describe('projectId', () => {
-      it('uses the projectId of the fake request', () => {
-        const request: FakeRawRequest = { headers: {}, projectId: 'project-b' };
-        expect(CoreKibanaRequest.from(request).projectId).toEqual('project-b');
+    describe('tenantId', () => {
+      it('uses the tenantId of the fake request', () => {
+        const request: FakeRawRequest = { headers: {}, tenantId: 'project-b' as TenantId };
+        expect(CoreKibanaRequest.from(request).tenantId).toEqual('project-b');
       });
     });
 

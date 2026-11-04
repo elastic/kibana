@@ -61,6 +61,7 @@ import {
 import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { DeprecationRegistryProvider } from '@kbn/core-deprecations-server';
 import type { NodeInfo } from '@kbn/core-node-server';
+import type { InternalTenantsServiceStart } from '@kbn/core-tenants-server-internal';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsAccessControlTransforms } from '@kbn/core-saved-objects-server/src/contracts';
 import { registerRoutes } from './routes';
@@ -112,6 +113,7 @@ export interface SavedObjectsStartDeps {
   pluginsInitialized?: boolean;
   docLinks: DocLinksServiceStart;
   node: NodeInfo;
+  tenants: InternalTenantsServiceStart;
 }
 
 export class SavedObjectsService
@@ -253,6 +255,7 @@ export class SavedObjectsService
     pluginsInitialized = true,
     docLinks,
     node,
+    tenants,
   }: SavedObjectsStartDeps): Promise<InternalSavedObjectsServiceStart> {
     if (!this.setupDeps || !this.config) {
       throw new Error('#setup() needs to be run first');
@@ -447,6 +450,7 @@ export class SavedObjectsService
         return [...indices];
       },
       getAllIndices: () => [...allIndices],
+      getTenantCrypto: tenants.getEncryptionCrypto,
       metrics: {
         migrationDuration,
       },

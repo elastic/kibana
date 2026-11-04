@@ -14,6 +14,7 @@ import type { Observable } from 'rxjs';
 import type { Span } from 'elastic-apm-node';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import type { TenantId } from '@kbn/core-tenants-server';
 import type { HttpProtocol } from '../http_contract';
 import type { IKibanaSocket } from './socket';
 import type { RouteMethod, RouteConfigOptions, RouteSecurity, RouteDeprecationInfo } from './route';
@@ -58,8 +59,8 @@ export interface KibanaRequestState extends RequestApplicationState {
   traceId?: string;
   /** The resolved space ID for this request. Defaults to 'default'. */
   spaceId?: SpaceId;
-  /** The project ID from the `x-elastic-project-id` header, if any. */
-  projectId?: string;
+  /** The tenant from the `x-elastic-tenant-id` header, if any. */
+  tenantId?: TenantId;
   /** The top HTTP Otel Span for this request. */
   httpSpan?: OTelSpan;
   /** The OTel sub-span: used to group the pre-route handlers, the route handler, and the post-route handlers. */
@@ -228,10 +229,10 @@ export interface KibanaRequest<
   readonly spaceId: SpaceId;
 
   /**
-   * The project this request targets, from the `x-elastic-project-id` header.
-   * Only used to pick the project's Elasticsearch cluster when multi-tenancy is enabled.
+   * The tenant this request targets, from the `x-elastic-tenant-id` header.
+   * Only set when multi-tenancy is enabled, and the tenants service has checked that the tenant exists.
    */
-  readonly projectId?: string;
+  readonly tenantId?: TenantId;
 
   /**
    * The resolved Kibana base path for this request.

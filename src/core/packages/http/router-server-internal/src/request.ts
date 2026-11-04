@@ -37,6 +37,7 @@ import type {
   RequestTiming,
 } from '@kbn/core-http-server';
 import { type SpaceId, DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import type { TenantId } from '@kbn/core-tenants-server';
 import {
   ELASTIC_INTERNAL_ORIGIN_QUERY_PARAM,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
@@ -168,8 +169,8 @@ export class CoreKibanaRequest<
   public readonly authzResult?: Record<string, boolean>;
   /** {@inheritDoc KibanaRequest.spaceId} */
   public readonly spaceId: SpaceId;
-  /** {@inheritDoc KibanaRequest.projectId} */
-  public readonly projectId?: string;
+  /** {@inheritDoc KibanaRequest.tenantId} */
+  public readonly tenantId?: TenantId;
   /** {@inheritDoc KibanaRequest.basePath} */
   public readonly basePath: string;
   /** {@inheritDoc KibanaRequest.timing} */
@@ -203,7 +204,7 @@ export class CoreKibanaRequest<
     // Real Hapi requests carry spaceId on app state (set by Core's onRequest handler).
     // FakeRawRequests carry it as a top-level field.
     this.spaceId = (request as FakeRawRequest).spaceId ?? appState?.spaceId ?? DEFAULT_SPACE_ID;
-    this.projectId = (request as FakeRawRequest).projectId ?? appState?.projectId;
+    this.tenantId = (request as FakeRawRequest).tenantId ?? appState?.tenantId;
     this.basePath = appState?.basePath ?? '';
     this.rewrittenUrl = appState?.rewrittenUrl;
     this.authzResult = appState?.authzResult;

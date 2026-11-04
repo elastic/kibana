@@ -378,7 +378,6 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       client: deps.elasticsearch.client,
       createClient: deps.elasticsearch.createClient,
       getCapabilities: deps.elasticsearch.getCapabilities,
-      getProjectEncryptionKey: deps.elasticsearch.getProjectEncryptionKey,
     },
     executionContext: deps.executionContext,
     featureFlags: {
@@ -411,6 +410,7 @@ export function createPluginStartContext<TPlugin, TPluginDependencies>({
       getIndexForType: deps.savedObjects.getIndexForType,
       getIndicesForTypes: deps.savedObjects.getIndicesForTypes,
       getAllIndices: deps.savedObjects.getAllIndices,
+      getTenantCrypto: deps.savedObjects.getTenantCrypto,
     },
     metrics: {
       collectionInterval: deps.metrics.collectionInterval,

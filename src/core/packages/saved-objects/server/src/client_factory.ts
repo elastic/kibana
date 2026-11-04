@@ -111,7 +111,7 @@ export interface SavedObjectsRepositoryFactory {
    * @param includedHiddenTypes - A list of additional hidden types the repository should have access to.
    * @param extensions - Extensions that the repository should use (for encryption, security, and spaces).
    * @param request - Optional request the repository works for. Its credentials are not used: it picks the
-   * request's project when multi-tenancy is enabled, and provides server timing.
+   * request's tenant when multi-tenancy is enabled, and provides server timing.
    */
   createInternalRepository: (
     includedHiddenTypes?: string[],

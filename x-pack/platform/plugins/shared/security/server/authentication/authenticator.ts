@@ -928,7 +928,10 @@ export class Authenticator {
       const startTime = performance.now();
 
       userProfileId = (
-        await this.options.userProfileService.activate(authenticationResult.userProfileGrant)
+        await this.options.userProfileService.activate(
+          authenticationResult.userProfileGrant,
+          request
+        )
       ).uid;
 
       const duration = performance.now() - startTime;

@@ -124,6 +124,7 @@ describe('SavedObjectsService', () => {
       elasticsearch: elasticsearchServiceMock.createInternalStart(),
       docLinks: docLinksServiceMock.createStartContract(),
       node: nodeServiceMock.createInternalStartContract(),
+      tenants: { getEncryptionCrypto: jest.fn() },
     };
   };
 
@@ -760,7 +761,7 @@ describe('SavedObjectsService', () => {
           expect(includedHiddenTypes).toEqual(['someHiddenType']);
         });
 
-        it("uses the internal user of the request's project when a request is given", async () => {
+        it("uses the internal user of the request's tenant when a request is given", async () => {
           const coreContext = createCoreContext({ skipMigration: false });
           const soService = new SavedObjectsService(coreContext);
           await soService.setup(createSetupDeps());
@@ -927,7 +928,7 @@ describe('SavedObjectsService', () => {
           expect(lastCallIncludedHiddenTypes).toEqual(includedHiddenTypes);
         });
 
-        it("uses the internal user of the request's project when a request is given", async () => {
+        it("uses the internal user of the request's tenant when a request is given", async () => {
           const coreContext = createCoreContext();
           const soService = new SavedObjectsService(coreContext);
           await soService.setup(createSetupDeps());

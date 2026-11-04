@@ -37,8 +37,8 @@ export type { EncryptedSavedObjectsClient, EncryptedSavedObjectsClientOptions };
 
 interface SetupSavedObjectsParams {
   service: PublicMethodsOf<EncryptedSavedObjectsService>;
-  /** Returns the service holding the encryption key of the request's project, if it has its own key. */
-  getProjectService?: (
+  /** Returns the service holding the encryption key of the request's tenant, if it has its own key. */
+  getTenantService?: (
     request: KibanaRequest
   ) => PublicMethodsOf<EncryptedSavedObjectsService> | undefined;
   savedObjects: SavedObjectsServiceSetup;
@@ -60,13 +60,13 @@ export type ClientInstanciator = (
 
 export function setupSavedObjects({
   service: defaultService,
-  getProjectService,
+  getTenantService,
   savedObjects,
   getStartServices,
   logger,
 }: SetupSavedObjectsParams): ClientInstanciator {
   const getService = (request?: KibanaRequest) =>
-    (request && getProjectService?.(request)) || defaultService;
+    (request && getTenantService?.(request)) || defaultService;
 
   // Register custom saved object extension that will encrypt, decrypt and strip saved object
   // attributes where appropriate for any saved object repository request.

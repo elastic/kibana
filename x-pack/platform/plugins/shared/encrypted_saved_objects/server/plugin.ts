@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import nodeCrypto from '@elastic/node-crypto';
+import nodeCrypto, { type Crypto } from '@elastic/node-crypto';
 import { createHash } from 'crypto';
 
 import type {
@@ -65,30 +65,25 @@ export class EncryptedSavedObjectsPlugin
   private readonly logger: Logger;
   private savedObjectsSetup!: ClientInstanciator;
   #service?: Readonly<EncryptedSavedObjectsService>;
-  readonly #projectServices = new Map<string, EncryptedSavedObjectsService>();
-  #getProjectEncryptionKey?: CoreStart['elasticsearch']['getProjectEncryptionKey'];
+  readonly #tenantServices = new WeakMap<Crypto, EncryptedSavedObjectsService>();
+  #getTenantCrypto?: CoreStart['savedObjects']['getTenantCrypto'];
 
   constructor(private readonly initializerContext: PluginInitializerContext) {
     this.logger = this.initializerContext.logger.get();
   }
 
-  private getProjectService = (request: KibanaRequest) => {
-    const encryptionKey = this.#getProjectEncryptionKey?.(request);
-    if (!encryptionKey || !this.#service) {
+  private getTenantService = (request: KibanaRequest) => {
+    const crypto = this.#getTenantCrypto?.(request);
+    if (!crypto || !this.#service) {
       return undefined;
     }
 
-    let projectService = this.#projectServices.get(encryptionKey);
-    if (!projectService) {
-      projectService = this.#service.withPrimaryCrypto(nodeCrypto({ encryptionKey }));
-      this.#projectServices.set(encryptionKey, projectService);
-      this.logger.info(
-        `Hashed encryption key for project [${request.projectId}]: ${createHash('sha3-256')
-          .update(encryptionKey)
-          .digest('base64')}`
-      );
+    let tenantService = this.#tenantServices.get(crypto);
+    if (!tenantService) {
+      tenantService = this.#service.withPrimaryCrypto(crypto);
+      this.#tenantServices.set(crypto, tenantService);
     }
-    return projectService;
+    return tenantService;
   };
 
   public setup(core: CoreSetup): EncryptedSavedObjectsPluginSetup {
@@ -138,7 +133,7 @@ export class EncryptedSavedObjectsPlugin
 
     this.savedObjectsSetup = setupSavedObjects({
       service: this.#service,
-      getProjectService: this.getProjectService,
+      getTenantService: this.getTenantService,
       savedObjects: core.savedObjects,
       getStartServices: core.getStartServices,
       logger: this.logger,
@@ -207,7 +202,7 @@ export class EncryptedSavedObjectsPlugin
 
   public start(core: CoreStart) {
     this.logger.debug('Starting plugin');
-    this.#getProjectEncryptionKey = core.elasticsearch.getProjectEncryptionKey;
+    this.#getTenantCrypto = core.savedObjects.getTenantCrypto;
     return {
       isEncryptionError: (error: Error) => error instanceof EncryptionError,
       getClient: (options = {}) => this.savedObjectsSetup(options),

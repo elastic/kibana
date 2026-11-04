@@ -186,7 +186,7 @@ export abstract class BaseAuthenticationProvider<TState = unknown> {
         // the "fake" request with combined headers.
         .asScoped(
           authHeaders
-            ? { headers: { ...request.headers, ...authHeaders }, projectId: request.projectId }
+            ? { headers: { ...request.headers, ...authHeaders }, tenantId: request.tenantId }
             : request
         )
         .asCurrentUser.security.authenticate()

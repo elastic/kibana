@@ -84,16 +84,16 @@ describe('#setupSavedObjects', () => {
     });
   });
 
-  describe('per-project encryption keys', () => {
-    it("decrypts with the service of the request's project when it has its own key", async () => {
+  describe('per-tenant encryption keys', () => {
+    it("decrypts with the service of the request's tenant when it has its own key", async () => {
       const request = httpServerMock.createKibanaRequest();
-      const projectService = encryptedSavedObjectsServiceMock.createWithTypes([
+      const tenantService = encryptedSavedObjectsServiceMock.createWithTypes([
         { type: 'known-type', attributesToEncrypt: new Set(['attrSecret']) },
       ]);
-      const projectContract = setupSavedObjects({
+      const tenantContract = setupSavedObjects({
         service: mockEncryptedSavedObjectsService,
-        getProjectService: (projectRequest) =>
-          projectRequest === request ? projectService : undefined,
+        getTenantService: (tenantRequest) =>
+          tenantRequest === request ? tenantService : undefined,
         savedObjects: coreSetupMock.savedObjects,
         getStartServices: coreSetupMock.getStartServices,
         logger: mockLogger,
@@ -105,10 +105,10 @@ describe('#setupSavedObjects', () => {
         references: [],
       });
 
-      await projectContract({ request }).getDecryptedAsInternalUser('known-type', 'some-id');
-      await projectContract().getDecryptedAsInternalUser('known-type', 'some-id');
+      await tenantContract({ request }).getDecryptedAsInternalUser('known-type', 'some-id');
+      await tenantContract().getDecryptedAsInternalUser('known-type', 'some-id');
 
-      expect(projectService.decryptAttributes).toHaveBeenCalledTimes(1);
+      expect(tenantService.decryptAttributes).toHaveBeenCalledTimes(1);
       expect(mockEncryptedSavedObjectsService.decryptAttributes).toHaveBeenCalledTimes(1);
     });
   });

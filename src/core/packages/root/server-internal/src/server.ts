@@ -41,6 +41,7 @@ import { CustomBrandingService } from '@kbn/core-custom-branding-server-internal
 import { UserSettingsService } from '@kbn/core-user-settings-server-internal';
 import { DataStreamsService } from '@kbn/core-data-streams-server-internal';
 import { PubSubService } from '@kbn/core-pubsub-server-internal';
+import { TenantsService } from '@kbn/core-tenants-server-internal';
 import {
   CoreRouteHandlerContext,
   PrebootCoreRouteHandlerContext,
@@ -121,6 +122,7 @@ export class Server {
   private readonly dataStreams: DataStreamsService;
   private readonly pubsub: PubSubService;
   private readonly userStorage: UserStorageService;
+  private readonly tenants: TenantsService;
 
   private readonly savedObjectsStartPromise: Promise<SavedObjectsServiceStart>;
   private resolveSavedObjectsStartPromise?: (value: SavedObjectsServiceStart) => void;
@@ -189,6 +191,7 @@ export class Server {
     this.dataStreams = new DataStreamsService(core);
     this.pubsub = new PubSubService(core);
     this.userStorage = new UserStorageService(core);
+    this.tenants = new TenantsService(core);
 
     this.savedObjectsStartPromise = new Promise((resolve) => {
       this.resolveSavedObjectsStartPromise = resolve;
@@ -366,10 +369,13 @@ export class Server {
 
     const userActivitySetup = this.userActivity.setup({ logging: loggingSetup });
 
+    const tenantsSetup = await this.tenants.setup();
+
     const httpSetup = await this.http.setup({
       context: contextServiceSetup,
       executionContext: executionContextSetup,
       userActivity: userActivitySetup,
+      tenants: tenantsSetup,
     });
 
     // setup i18n prior to any other service, to have translations ready
@@ -383,6 +389,7 @@ export class Server {
       executionContext: executionContextSetup,
       security: securitySetup,
       loggingSystem: this.loggingSystem,
+      tenants: tenantsSetup,
     });
 
     const dataStreamsSetup = await this.dataStreams.setup();
@@ -579,6 +586,7 @@ export class Server {
     });
 
     const deprecationsStart = this.deprecations.start();
+    const tenantsStart = this.tenants.start();
     const soStartSpan = startTransaction.startSpan('saved_objects.migration', 'migration');
     const savedObjectsStart = await withActiveSpan(
       'saved_objects.migration',
@@ -594,6 +602,7 @@ export class Server {
             pluginsInitialized: this.#pluginsInitialized,
             docLinks: docLinkStart,
             node: await this.node.start(),
+            tenants: tenantsStart,
           });
           this.uptimePerStep.savedObjects = {
             migrationTime: _savedObjectsStart.metrics.migrationDuration,
@@ -732,6 +741,7 @@ export class Server {
     this.security.stop();
     this.userProfile.stop();
     this.userStorage.stop();
+    this.tenants.stop();
   }
 
   private async ensureValidConfiguration() {

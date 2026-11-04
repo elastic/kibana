@@ -9,46 +9,55 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { TenantId } from '@kbn/core-tenants-server';
 import { TenantClients } from './tenant_clients';
 
-const tenants = {
-  'project-b': {
+const tenantB = 'project-b' as TenantId;
+const tenantC = 'project-c' as TenantId;
+
+const clientConfigs: Record<string, { hosts: string[]; username: string; password: string }> = {
+  [tenantB]: {
     hosts: ['http://localhost:9201'],
     username: 'kibana_system',
     password: 'changeme-b',
   },
-  'project-c': {
+  [tenantC]: {
     hosts: ['http://localhost:9202'],
     username: 'kibana_system',
     password: 'changeme-c',
   },
 };
 
-const projectRequest = (projectId: string) => ({ headers: {}, projectId });
+const tenantRequest = (tenantId: TenantId) => ({ headers: {}, tenantId });
 
 const setup = () => {
+  const tenants = {
+    enabled: true,
+    getTenantId: jest.fn(),
+    getClientConfig: jest.fn((tenantId: TenantId) => clientConfigs[tenantId]),
+  };
   const createClient = jest.fn(() => elasticsearchClientMock.createCustomClusterClient());
   const log = loggingSystemMock.createLogger();
-  return { createClient, log, tenantClients: new TenantClients({ tenants, createClient, log }) };
+  return { createClient, tenantClients: new TenantClients({ tenants, createClient, log }) };
 };
 
 describe('TenantClients', () => {
-  it('creates one client per project across repeated resolves', () => {
+  it('creates one client per tenant across repeated resolves', () => {
     const { createClient, tenantClients } = setup();
 
-    const client = tenantClients.resolve(projectRequest('project-b'));
-    expect(tenantClients.resolve(projectRequest('project-b'))).toBe(client);
-    tenantClients.resolve(projectRequest('project-c'));
+    const client = tenantClients.resolve(tenantRequest(tenantB));
+    expect(tenantClients.resolve(tenantRequest(tenantB))).toBe(client);
+    tenantClients.resolve(tenantRequest(tenantC));
 
     expect(createClient).toHaveBeenCalledTimes(2);
-    expect(createClient).toHaveBeenCalledWith('project-b', tenants['project-b']);
-    expect(createClient).toHaveBeenCalledWith('project-c', tenants['project-c']);
+    expect(createClient).toHaveBeenCalledWith(tenantB, clientConfigs[tenantB]);
+    expect(createClient).toHaveBeenCalledWith(tenantC, clientConfigs[tenantC]);
   });
 
   it('closes every cached client', async () => {
     const { createClient, tenantClients } = setup();
-    tenantClients.resolve(projectRequest('project-b'));
-    tenantClients.resolve(projectRequest('project-c'));
+    tenantClients.resolve(tenantRequest(tenantB));
+    tenantClients.resolve(tenantRequest(tenantC));
 
     await tenantClients.close();
 

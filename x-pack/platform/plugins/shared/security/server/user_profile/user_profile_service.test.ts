@@ -52,6 +52,11 @@ describe('UserProfileService', () => {
       session: sessionMock.create(),
       getCurrentUser: jest.fn().mockReturnValue(null),
     };
+    // Without multi-tenancy, a request's internal user is the cluster's internal user.
+    mockStartParams.clusterClient.asScoped.mockReturnValue({
+      ...elasticsearchServiceMock.createScopedClusterClient(),
+      asInternalUser: mockStartParams.clusterClient.asInternalUser,
+    });
     mockAuthz = authorizationMock.create();
 
     userProfileService = new UserProfileService(logger);
@@ -270,6 +275,7 @@ describe('UserProfileService', () => {
         expect(mockStartParams.session.get).toHaveBeenCalledTimes(1);
         expect(mockStartParams.session.get).toHaveBeenCalledWith(mockRequest);
 
+        expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(mockRequest);
         expect(
           mockStartParams.clusterClient.asInternalUser.security.getUserProfile
         ).toHaveBeenCalledTimes(1);
@@ -1640,6 +1646,17 @@ describe('UserProfileService', () => {
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledTimes(1);
+      expect(
+        mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
+      ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
+    });
+
+    it("should activate user profile on the request's cluster when a request is given", async () => {
+      const request = httpServerMock.createKibanaRequest();
+      const startContract = userProfileService.start(mockStartParams);
+      await startContract.activate({ type: 'accessToken', accessToken: 'some-token' }, request);
+
+      expect(mockStartParams.clusterClient.asScoped).toHaveBeenCalledWith(request);
       expect(
         mockStartParams.clusterClient.asInternalUser.security.activateUserProfile
       ).toHaveBeenCalledWith({ grant_type: 'access_token', access_token: 'some-token' });
