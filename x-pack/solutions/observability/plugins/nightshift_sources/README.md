@@ -46,6 +46,11 @@ security extension authorizes each call against the Nightshift feature (`all` ca
 does not include the type. `create` and `update` parse the same wire schemas as HTTP, so a
 blank title still 400s.
 
+The saved-object grant does not enforce the manage and configure gate: `all` can write the type
+without configure. The routes enforce the gate, and so do the Agent Builder source tools. A caller
+that writes through `getSourcesClient` on behalf of a user has to check
+`NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES` itself.
+
 `setup.onSourceChange(listener)` subscribes an engine to every committed write: `created`,
 `updated` (with `previous`, which covers `_enable` and `_disable`) and `deleted`, each with the
 request that made it. The write awaits every listener before it returns, so an engine can
