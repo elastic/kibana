@@ -11,7 +11,8 @@ import {
   AttachmentType,
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
-import type { AttachmentTypeDefinition, SurfaceNode } from '@kbn/agent-builder-server/attachments';
+import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
 import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
@@ -123,7 +124,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
       const typeName = spec?.metadata.displayName ?? connectorType;
       const description = spec?.metadata.description;
 
-      const fields: SurfaceNode = {
+      const fields: ComponentsNode = {
         type: 'fields',
         items: [
           {

@@ -8,8 +8,8 @@
 import type {
   AttachmentTypeDefinition,
   SurfaceComposition,
-  SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import {
@@ -116,7 +116,7 @@ const toSkillSurfaceComposition = ({
     },
   ].filter((item): item is { label: string; value: string } => Boolean(item));
 
-  const body: SurfaceNode[] = [
+  const body: ComponentsNode[] = [
     ...(description ? [{ type: 'markdown' as const, text: description }] : []),
     ...(items.length > 0 ? [{ type: 'fields' as const, items }] : []),
     ...(content

@@ -443,7 +443,7 @@ skill that owns the relevant task. See [Inline rendering guidance in skills](#in
 
 #### `toSurfaceComposition` — rendering outside Kibana
 
-Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`SurfaceNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
+Response messages of rounds from external systems, such as Slack, are rendered in code from the message: its markdown, plus a node for each `<render_attachment>` tag. An attachment renders there only if its type defines `toSurfaceComposition`, which maps one attachment version to a surface composition: an [Isomer](https://github.com/elastic/isomer) composition built from the primitives of `@kbn/isomer-components` (`ComponentsNode`), rendered by the `isomer` plugin's runtime to every surface. Without it, the attachment is left out there.
 
 It gets the attachment at the rendered version and `{ request, spaceId }`, and may be async.
 

@@ -13,8 +13,8 @@ import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type {
   AttachmentTypeDefinition,
   SurfaceComposition,
-  SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
+import type { ComponentsNode } from '@kbn/isomer-components';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -46,7 +46,7 @@ export const createEsqlAttachmentType = ({
   EsqlAttachmentData
 > => {
   /** The query in Discover, as an app path, or nothing when it can't be resolved. */
-  const toDiscoverLink = async (query: string): Promise<SurfaceNode[]> => {
+  const toDiscoverLink = async (query: string): Promise<ComponentsNode[]> => {
     const locator = getDiscoverLocator?.();
     if (!locator) {
       return [];

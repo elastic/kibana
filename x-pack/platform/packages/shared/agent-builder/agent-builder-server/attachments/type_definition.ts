@@ -6,19 +6,7 @@
  */
 
 import type { Composition } from '@elastic/isomer-sdk';
-import type {
-  ActionsNode,
-  CodeNode,
-  ContextNode,
-  DividerNode,
-  FieldsNode,
-  HeaderNode,
-  LinkNode,
-  MarkdownNode,
-  QuoteNode,
-  SectionNode,
-  TableNode,
-} from '@kbn/isomer-components';
+import type { ComponentsNode, MarkdownNode } from '@kbn/isomer-components';
 import type { MaybePromise } from '@kbn/utility-types';
 import type {
   Attachment,
@@ -161,29 +149,11 @@ export interface AttachmentResolveContext extends AttachmentFormatContext {
 export type AttachmentSurfaceCompositionContext = AttachmentFormatContext;
 
 /**
- * The node types of a {@link SurfaceComposition}: the primitives of `@kbn/isomer-components`,
- * which the `isomer` plugin's runtime renders. A node the runtime can't validate leaves the whole
- * attachment out, so mappings keep to each primitive's limits.
- */
-export type SurfaceNode =
-  | MarkdownNode
-  | HeaderNode
-  | SectionNode
-  | ContextNode
-  | DividerNode
-  | QuoteNode
-  | ActionsNode
-  | LinkNode
-  | FieldsNode
-  | CodeNode
-  | TableNode;
-
-/**
  * An [Isomer](https://github.com/elastic/isomer) composition built from Agent Builder's node
  * types: the same document renders to every surface, such as Slack. What an attachment type's
  * `toSurfaceComposition` returns, and what a response message becomes.
  */
-export type SurfaceComposition = Composition<SurfaceNode>;
+export type SurfaceComposition = Composition<ComponentsNode>;
 
 export type { MarkdownNode };
 
