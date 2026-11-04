@@ -27,6 +27,7 @@ export {
   type CanAccessViewMode,
 } from './interfaces/can_access_view_mode';
 export { apiCanCancelRequests, type CanCancelRequests } from './interfaces/can_cancel_requests';
+export { RequestCancellationManager } from './interfaces/request_cancellation_manager';
 export {
   apiCanLockHoverActions,
   type CanLockHoverActions,

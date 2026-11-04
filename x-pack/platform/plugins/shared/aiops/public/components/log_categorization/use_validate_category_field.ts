@@ -16,9 +16,10 @@ import { AIOPS_API_ENDPOINT } from '@kbn/aiops-common/constants';
 
 import { createDefaultQuery } from '@kbn/aiops-common/create_default_query';
 
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import { useAiopsAppContext } from '../../hooks/use_aiops_app_context';
 
-export function useValidateFieldRequest() {
+export function useValidateFieldRequest(requestCancellationManager?: RequestCancellationManager) {
   const { http } = useAiopsAppContext();
   const abortController = useRef(new AbortController());
 
@@ -52,13 +53,15 @@ export function useValidateFieldRequest() {
           }),
           headers,
           version: '1',
-          signal: abortController.current.signal,
+          signal: requestCancellationManager
+            ? AbortSignal.any([abortController.current.signal, requestCancellationManager.signal])
+            : abortController.current.signal,
         }
       );
 
       return resp;
     },
-    [http]
+    [http, requestCancellationManager]
   );
 
   const cancelRequest = useCallback(() => {

@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, type FC } from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer, EuiPanel } from '@elastic/eui';
 
 import type { estypes } from '@elastic/elasticsearch';
+import type { RequestCancellationManager } from '@kbn/presentation-publishing';
 import type { BarStyleAccessor } from '@elastic/charts/dist/chart_types/xy_chart/utils/specs';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,6 +65,10 @@ export interface LogRateAnalysisContentProps {
   onAnalysisCompleted?: (d: LogRateAnalysisResultsData) => void;
   /** Optional callback that exposes current window parameters */
   onWindowParametersChange?: (wp?: WindowParameters, replace?: boolean) => void;
+  /** Optional manager used by dashboard panels to cancel in-flight and pending requests */
+  requestCancellationManager?: RequestCancellationManager;
+  /** Dashboard Refresh timestamp. Undefined outside the embeddable. */
+  lastReloadRequestTime?: number;
 
   parentApi?: unknown;
 }
@@ -74,6 +79,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
   barHighlightColorOverride,
   onAnalysisCompleted,
   onWindowParametersChange,
+  requestCancellationManager,
+  lastReloadRequestTime,
   parentApi,
 }) => {
   const { embeddingOrigin } = useAiopsAppContext();
@@ -237,6 +244,8 @@ export const LogRateAnalysisContent: FC<LogRateAnalysisContentProps> = ({
           searchQuery={searchQuery}
           barColorOverride={barColorOverride}
           barHighlightColorOverride={barHighlightColorOverride}
+          requestCancellationManager={requestCancellationManager}
+          lastReloadRequestTime={lastReloadRequestTime}
           parentApi={parentApi}
         />
       )}
