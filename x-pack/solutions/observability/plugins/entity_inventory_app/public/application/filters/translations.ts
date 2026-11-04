@@ -28,6 +28,11 @@ export const ALL_TYPES_LABEL = i18n.translate('xpack.entityInventoryApp.filters.
   defaultMessage: 'All types',
 });
 
+export const CLEAR_FILTERS_LABEL = i18n.translate(
+  'xpack.entityInventoryApp.filters.clearFiltersLabel',
+  { defaultMessage: 'Clear filters' }
+);
+
 export const INVALID_OPTION_TOOLTIP = i18n.translate(
   'xpack.entityInventoryApp.filters.invalidOptionTooltip',
   { defaultMessage: 'No entities match this value with the current filters' }

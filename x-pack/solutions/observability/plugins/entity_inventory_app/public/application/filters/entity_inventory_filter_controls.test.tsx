@@ -17,6 +17,7 @@ jest.mock('./use_attribute_values', () => ({
 
 const CATEGORY_FILTER = 'entityInventoryCategoryFilter';
 const TYPE_FILTER = 'entityInventoryTypeFilter';
+const CLEAR_FILTERS = 'entityInventoryClearFilters';
 const attributeFilter = (attribute: string) => `entityInventoryAttributeFilter-${attribute}`;
 
 const renderControls = (
@@ -126,6 +127,37 @@ describe('EntityInventoryFilterControls', () => {
       type: undefined,
       attributes: { 'os.type': ['two'] },
     });
+  });
+
+  it('shows a disabled loading filter instead of nothing while the types load', () => {
+    renderControls({ typeDefinitions: [], isLoading: true });
+
+    expect(screen.getByTestId('entityInventoryFilterControlsLoading')).toBeDisabled();
+    expect(screen.queryByTestId(CATEGORY_FILTER)).not.toBeInTheDocument();
+  });
+
+  it('shows the loading filter as the Type filter on a page with a category', () => {
+    renderControls({ typeDefinitions: [], isLoading: true, pageCategory: 'hosts' });
+
+    expect(screen.getByTestId('entityInventoryFilterControlsLoading')).toHaveTextContent(
+      'All types'
+    );
+  });
+
+  it('shows the clear filters action only when a filter is selected', () => {
+    renderControls();
+
+    expect(screen.queryByTestId(CLEAR_FILTERS)).not.toBeInTheDocument();
+  });
+
+  it('clears every selected filter', async () => {
+    const { onSelectionChange } = renderControls({
+      selection: { category: 'hosts', attributes: { 'os.type': ['linux'] } },
+    });
+
+    await userEvent.click(screen.getByTestId(CLEAR_FILTERS));
+
+    expect(onSelectionChange).toHaveBeenCalledWith({ attributes: {} });
   });
 
   it('shows an error instead of the filters when the types could not be loaded', () => {

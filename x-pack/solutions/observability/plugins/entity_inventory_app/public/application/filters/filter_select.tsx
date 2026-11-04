@@ -29,6 +29,7 @@ interface FilterSelectProps {
   onChange: (selected: string[]) => void;
   singleSelection?: boolean;
   isLoading?: boolean;
+  isDisabled?: boolean;
   errorMessage?: string;
   'data-test-subj': string;
 }
@@ -42,6 +43,7 @@ export function FilterSelect({
   onChange,
   singleSelection = false,
   isLoading = false,
+  isDisabled = false,
   errorMessage,
   'data-test-subj': dataTestSubj,
 }: FilterSelectProps) {
@@ -95,6 +97,7 @@ export function FilterSelect({
           <EuiFilterButton
             iconType="chevronSingleDown"
             isLoading={isLoading}
+            isDisabled={isDisabled}
             isSelected={isOpen}
             hasActiveFilters={selected.length > 0}
             numFilters={singleSelection || isLoading ? undefined : options.length}

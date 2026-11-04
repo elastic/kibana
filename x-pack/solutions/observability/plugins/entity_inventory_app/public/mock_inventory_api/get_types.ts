@@ -87,5 +87,9 @@ const MOCK_TYPES: EntityInventoryTypeDefinition[] = [
   { type: 'postgres', name: 'Postgres', category: 'databases', attributes: [] },
 ];
 
-export const getEntityInventoryTypes = async (): Promise<EntityInventoryTypeDefinition[]> =>
-  MOCK_TYPES;
+export const getEntityInventoryTypes = async (): Promise<EntityInventoryTypeDefinition[]> => {
+  // TEMPORARY: simulates a slow types route to look at the loading state. Remove before committing.
+  await new Promise((resolve) => setTimeout(resolve, 3000));
+
+  return MOCK_TYPES;
+};

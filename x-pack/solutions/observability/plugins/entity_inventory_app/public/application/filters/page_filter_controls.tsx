@@ -23,7 +23,11 @@ export const EntityInventoryPageFilterControls = () => {
       pageCategory={entityCategory === 'all' ? undefined : entityCategory}
       timeRange={dateRange}
       selection={filterSelection}
-      onSelectionChange={setFilterSelection}
+      onSelectionChange={(selection) => {
+        // eslint-disable-next-line no-console
+        console.log('Entity inventory filters', selection);
+        setFilterSelection(selection);
+      }}
     />
   );
 };
