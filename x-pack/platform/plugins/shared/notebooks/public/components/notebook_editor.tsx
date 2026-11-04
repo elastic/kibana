@@ -8,13 +8,14 @@
 import React, { Fragment, Suspense, useCallback, useEffect, useState } from 'react';
 import {
   EuiFlexGroup,
-  EuiFlexItem,
   EuiLoadingSpinner,
   EuiPageTemplate,
+  EuiResizableContainer,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import useLatest from 'react-use/lib/useLatest';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { BehaviorSubject } from 'rxjs';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition, NotebookAttributes } from '../../common/types';
@@ -31,6 +32,14 @@ import { MarkdownCell } from './markdown_cell';
 import { NotebookContext, useNotebook, type NotebookContextValue } from './notebook_context';
 import { NotebookHeader } from './notebook_header';
 import { getCellElementId } from './cell_display';
+
+const NOTEBOOK_PANEL_ID = 'notebook';
+const GRAPH_PANEL_ID = 'graph';
+const GRAPH_PANEL_SIZE_STORAGE_KEY = 'notebooks:graphPanelSize';
+/** Percentage of the width the graph takes until the user resizes it. */
+const DEFAULT_GRAPH_PANEL_SIZE = 40;
+/** Room right of the cells for their run buttons, which sit outside the cell frame. */
+const RUN_GUTTER_WIDTH = '72px';
 
 const LazyDependencyGraph = React.lazy(async () => {
   const { DependencyGraph } = await import('./dependency_graph');
@@ -88,6 +97,9 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isGraphOpen, setIsGraphOpen] = useState(false);
+  const [graphPanelSize = DEFAULT_GRAPH_PANEL_SIZE, setGraphPanelSize] = useLocalStorage<number>(
+    GRAPH_PANEL_SIZE_STORAGE_KEY
+  );
   const { euiTheme } = useEuiTheme();
 
   useEffect(() => {
@@ -126,24 +138,52 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
         </EuiPageTemplate.Section>
         <EuiPageTemplate.Section paddingSize="m">
           {isGraphOpen ? (
-            <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-              <EuiFlexItem grow={3} css={{ minWidth: 0 }}>
-                <CellList />
-              </EuiFlexItem>
-              <EuiFlexItem
-                grow={2}
-                css={css`
-                  position: sticky;
-                  top: calc(var(--euiFixedHeadersOffset, 0px) + ${euiTheme.size.m});
-                  height: calc(100vh - var(--euiFixedHeadersOffset, 0px) - ${euiTheme.size.xxl});
-                  min-width: 0;
-                `}
-              >
-                <Suspense fallback={<EuiLoadingSpinner />}>
-                  <LazyDependencyGraph onSelectCell={scrollToCell} />
-                </Suspense>
-              </EuiFlexItem>
-            </EuiFlexGroup>
+            <EuiResizableContainer
+              direction="horizontal"
+              onPanelWidthChange={({ [GRAPH_PANEL_ID]: size }) => {
+                if (size !== undefined) setGraphPanelSize(size);
+              }}
+            >
+              {(EuiResizablePanel, EuiResizableButton) => (
+                <>
+                  <EuiResizablePanel
+                    id={NOTEBOOK_PANEL_ID}
+                    size={100 - graphPanelSize}
+                    minSize="360px"
+                    scrollable={false}
+                    paddingSize="none"
+                    css={css`
+                      padding-right: ${RUN_GUTTER_WIDTH};
+                    `}
+                  >
+                    <CellList />
+                  </EuiResizablePanel>
+                  <EuiResizableButton indicator="border" />
+                  <EuiResizablePanel
+                    id={GRAPH_PANEL_ID}
+                    size={graphPanelSize}
+                    minSize="240px"
+                    scrollable={false}
+                    paddingSize="none"
+                  >
+                    <div
+                      css={css`
+                        position: sticky;
+                        top: calc(var(--euiFixedHeadersOffset, 0px) + ${euiTheme.size.m});
+                        height: calc(
+                          100vh - var(--euiFixedHeadersOffset, 0px) - ${euiTheme.size.xxl}
+                        );
+                        padding-left: ${euiTheme.size.s};
+                      `}
+                    >
+                      <Suspense fallback={<EuiLoadingSpinner />}>
+                        <LazyDependencyGraph onSelectCell={scrollToCell} />
+                      </Suspense>
+                    </div>
+                  </EuiResizablePanel>
+                </>
+              )}
+            </EuiResizableContainer>
           ) : (
             <CellList />
           )}
