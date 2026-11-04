@@ -73,7 +73,12 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     const scheduler = new NotebookScheduler(store, {
       runQuery: createRunQuery(plugins.data.search),
     });
-    return { store, scheduler, openFlyouts$: new BehaviorSubject(0) };
+    return {
+      store,
+      scheduler,
+      openFlyouts$: new BehaviorSubject(0),
+      focusedCell$: new BehaviorSubject<string | undefined>(undefined),
+    };
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isGraphOpen, setIsGraphOpen] = useState(false);
@@ -82,13 +87,22 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
     return () => notebook.scheduler.stop();
   }, [notebook]);
 
+  useEffect(() => {
+    if (!isGraphOpen) notebook.focusedCell$.next(undefined);
+  }, [notebook, isGraphOpen]);
+
   const toggleGraph = useCallback(() => setIsGraphOpen((isOpen) => !isOpen), []);
   const closeGraph = useCallback(() => setIsGraphOpen(false), []);
-  const scrollToCell = useCallback((cellId: string) => {
-    document
-      .getElementById(getCellElementId(cellId))
-      ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
-  }, []);
+  const focusCell = useCallback(
+    (cellId: string | undefined) => {
+      notebook.focusedCell$.next(cellId);
+      if (!cellId) return;
+      document
+        .getElementById(getCellElementId(cellId))
+        ?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    },
+    [notebook]
+  );
 
   const latestOnSave = useLatest(onSave);
   const save = useCallback(async () => {
@@ -103,7 +117,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
 
   return (
     <NotebookContext.Provider value={notebook}>
-      {isGraphOpen && <GraphFlyout onClose={closeGraph} onSelectCell={scrollToCell} />}
+      {isGraphOpen && <GraphFlyout onClose={closeGraph} onSelectCell={focusCell} />}
       <EuiPageTemplate restrictWidth={1200} paddingSize="m">
         <EuiPageTemplate.Section paddingSize="m" grow={false}>
           <NotebookHeader

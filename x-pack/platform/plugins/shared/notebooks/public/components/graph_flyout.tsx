@@ -21,7 +21,7 @@ export const GraphFlyout = ({
   onSelectCell,
 }: {
   onClose: () => void;
-  onSelectCell: (cellId: string) => void;
+  onSelectCell: (cellId: string | undefined) => void;
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'notebookGraph' });
   return (

@@ -189,7 +189,11 @@ const SourceNode = ({ data: { label, highlight } }: NodeProps<SourceFlowNode>) =
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
 /** The notebook's cells and data sources as a top-to-bottom dependency graph. */
-export const DependencyGraph = ({ onSelectCell }: { onSelectCell: (cellId: string) => void }) => {
+export const DependencyGraph = ({
+  onSelectCell,
+}: {
+  onSelectCell: (cellId: string | undefined) => void;
+}) => {
   const { store } = useNotebook();
   const { euiTheme, colorMode } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
@@ -272,9 +276,12 @@ export const DependencyGraph = ({ onSelectCell }: { onSelectCell: (cellId: strin
           elementsSelectable={false}
           onNodeClick={(_event, node) => {
             setSelectedId(node.id);
-            if (node.type === 'cell') onSelectCell(node.id);
+            onSelectCell(node.type === 'cell' ? node.id : undefined);
           }}
-          onPaneClick={() => setSelectedId(undefined)}
+          onPaneClick={() => {
+            setSelectedId(undefined);
+            onSelectCell(undefined);
+          }}
           fitView
           minZoom={0.2}
           proOptions={{ hideAttribution: true }}

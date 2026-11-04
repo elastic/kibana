@@ -15,6 +15,8 @@ export interface NotebookContextValue {
   scheduler: NotebookScheduler;
   /** Number of notebook flyouts currently open. */
   openFlyouts$: BehaviorSubject<number>;
+  /** The cell selected in the dependency graph, highlighted in the notebook. */
+  focusedCell$: BehaviorSubject<string | undefined>;
 }
 
 export const NotebookContext = createContext<NotebookContextValue | null>(null);

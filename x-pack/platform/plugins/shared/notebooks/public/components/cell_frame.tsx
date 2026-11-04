@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, type PropsWithChildren, type ReactNode } from 'react';
+import React, { useEffect, useRef, useState, type PropsWithChildren, type ReactNode } from 'react';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -56,10 +56,16 @@ export const CellFrame = ({
   outputs,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
-  const { store, openFlyouts$ } = useNotebook();
+  const { store, openFlyouts$, focusedCell$ } = useNotebook();
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
+  const isFocused = useStateFromPublishingSubject(focusedCell$) === cell.id;
   const { euiTheme } = useEuiTheme();
   const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
+  const frameRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isFocused) frameRef.current?.focus({ preventScroll: true });
+  }, [isFocused]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -117,8 +123,11 @@ export const CellFrame = ({
   return (
     <div
       id={getCellElementId(cell.id)}
+      ref={frameRef}
+      tabIndex={-1}
       css={css`
         position: relative;
+        outline: none;
         &:hover > .${RUN_GUTTER_CLASS}, &:focus-within > .${RUN_GUTTER_CLASS} {
           opacity: 1;
         }
@@ -129,7 +138,8 @@ export const CellFrame = ({
         hasShadow={false}
         paddingSize="s"
         css={css`
-          box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor};
+          box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}
+            ${isFocused ? `, 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.primary}` : ''};
         `}
         data-test-subj={`notebookCell-${cell.name}`}
       >
