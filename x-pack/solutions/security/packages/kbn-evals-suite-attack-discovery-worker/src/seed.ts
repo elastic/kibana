@@ -514,6 +514,16 @@ const idsStillPresent = async ({
   }
 };
 
+/** The status of an Elasticsearch client error, which carries it under `meta` (or on the error). */
+const isClientErrorStatus = (error: unknown): boolean => {
+  const { meta, statusCode } = (error ?? {}) as {
+    meta?: { statusCode?: number };
+    statusCode?: number;
+  };
+  const status = meta?.statusCode ?? statusCode;
+  return typeof status === 'number' && status >= 400 && status < 500;
+};
+
 /**
  * Deletes a partly written seed's alerts by exact document id, then reads the ids back. A delete
  * by query only matches documents that are already searchable, and after a transport-level failure
@@ -522,14 +532,16 @@ const idsStillPresent = async ({
  *
  * - `bulkSettled`: the seed bulk returned (with rejected items) or failed after it returned, so
  *   nothing of this seed is still in flight. One delete and one read-back; ids that remain throw.
- * - not settled: the bulk itself rejected and may still be running in Elasticsearch. A first empty
+ * - not settled: the bulk itself rejected (a transport failure or a 5xx; a 4xx counts as settled,
+ *   Elasticsearch refused the request) and may still be running in Elasticsearch. A first empty
  *   read-back proves nothing, so the delete and read-back repeat for the whole
  *   `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if the read-back of
  *   the LAST round finds no id (a write that landed earlier was deleted by a later round). Ids
  *   found then throw. One last pass per window instead of consecutive clean reads keeps the total
  *   fixed. A write that lands after the window is not removed here; the final clean-space check
- *   after the last row (`assertCleanSpace` in `createEvaluateDataset`) and the next row's own
- *   check report it.
+ *   after the last row (`assertCleanSpace` in `createEvaluateDataset`, which runs after every row
+ *   has finished because a row's failure is recorded, not thrown) and the next row's own check
+ *   report it.
  */
 const removeSeededAlertsById = async ({
   esClient,
@@ -623,10 +635,18 @@ export const seedScenario = async ({
   // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed, by id because a
   // transport failure can leave them unsearchable: the workflow has not started, so there are no
   // fingerprints or discoveries of this row to delete. `bulkSettled` is false only when the bulk
-  // call itself rejected, the one case where it may still be running in Elasticsearch.
+  // call itself rejected without a 4xx status, the one case where it may still be running in
+  // Elasticsearch.
   let bulkSettled = false;
   try {
-    const response = await esClient.bulk({ refresh: 'wait_for', operations });
+    let response: Awaited<ReturnType<Client['bulk']>>;
+    try {
+      response = await esClient.bulk({ refresh: 'wait_for', operations });
+    } catch (bulkError) {
+      // A 4xx is Elasticsearch refusing the request before it ran anything.
+      bulkSettled = isClientErrorStatus(bulkError);
+      throw bulkError;
+    }
     bulkSettled = true;
     if (response.errors) {
       const failed = response.items.find((item) => item.index?.error)?.index?.error;

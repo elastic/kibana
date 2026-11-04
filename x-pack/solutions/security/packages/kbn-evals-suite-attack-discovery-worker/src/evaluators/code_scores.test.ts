@@ -181,6 +181,21 @@ describe('scoreFingerprintsDispatched', () => {
     expect(result.explanation).toContain('existing fingerprint');
   });
 
+  it('fails when an attack was attached to an existing fingerprint, even if every review was dispatched', () => {
+    const result = scoreFingerprintsDispatched(
+      expected,
+      artifacts({
+        ...attacks,
+        fingerprintReviewCount: 1,
+        fingerprintMatchedCount: 0,
+        fingerprintAttachCount: 1,
+        dispatchedReviewExecutionIds: ['r'],
+      })
+    );
+    expect(result.score).toBe(0);
+    expect(result.explanation).toContain('attached to an existing fingerprint');
+  });
+
   it('does not pass a 0/0 review count for persisted attacks', () => {
     expect(
       scoreFingerprintsDispatched(expected, artifacts({ ...attacks, fingerprintReviewCount: 0 }))

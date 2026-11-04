@@ -177,15 +177,19 @@ describe('seedScenario partial failure', () => {
 
   beforeEach(() => wait.mockClear());
 
-  const expectDeletedExactlyTheSeededIds = (bulk: jest.Mock): void => {
-    expect(bulk).toHaveBeenCalledTimes(2);
-    const { operations, refresh } = bulkCall(bulk, 1);
-    expect(refresh).toBe(true);
-    expect(operations.every((op) => Object.keys(op).join() === 'delete')).toBe(true);
-    expect(operations.map((op) => op.delete)).toEqual(
-      seededIds(bulk).map((_id) => ({ _index: alertsIndexForSpace('s'), _id }))
-    );
-    expect(seededIds(bulk)).toHaveLength(scenario.alerts.length);
+  /** Every bulk call after the seed write deletes exactly the ids the seed wrote, and no others. */
+  const expectEveryCleanupDeletesTheSeededIds = (bulk: jest.Mock, cleanupCalls: number): void => {
+    expect(bulk).toHaveBeenCalledTimes(1 + cleanupCalls);
+    const ids = seededIds(bulk);
+    expect(ids).toHaveLength(scenario.alerts.length);
+    for (let call = 1; call <= cleanupCalls; call++) {
+      const { operations, refresh } = bulkCall(bulk, call);
+      expect(refresh).toBe(true);
+      expect(operations.every((op) => Object.keys(op).join() === 'delete')).toBe(true);
+      expect(operations.map((op) => op.delete)).toEqual(
+        ids.map((_id) => ({ _index: alertsIndexForSpace('s'), _id }))
+      );
+    }
   };
 
   it('deletes the seeded ids, and nothing else, after a transport failure of the seed bulk', async () => {
@@ -195,12 +199,7 @@ describe('seedScenario partial failure', () => {
       .mockRejectedValueOnce(new Error('socket hang up'))
       .mockResolvedValue({ errors: false, items: [notFound] });
     await expect(seed(esWith({ bulk, deleteByQuery }))).rejects.toThrow(/socket hang up/);
-    const { operations, refresh } = bulkCall(bulk, 1);
-    expect(refresh).toBe(true);
-    expect(operations.every((op) => Object.keys(op).join() === 'delete')).toBe(true);
-    expect(operations.map((op) => op.delete)).toEqual(
-      seededIds(bulk).map((_id) => ({ _index: alertsIndexForSpace('s'), _id }))
-    );
+    expectEveryCleanupDeletesTheSeededIds(bulk, 8);
     expect(deleteByQuery).not.toHaveBeenCalled();
   });
 
@@ -210,7 +209,7 @@ describe('seedScenario partial failure', () => {
       .mockResolvedValueOnce(rejectedItems)
       .mockResolvedValueOnce({ errors: false, items: [notFound] });
     await expect(seed(esWith({ bulk }))).rejects.toThrow(/Seeding ".*" failed/);
-    expectDeletedExactlyTheSeededIds(bulk);
+    expectEveryCleanupDeletesTheSeededIds(bulk, 1);
   });
 
   it('deletes the seeded ids when reading the open alerts back fails', async () => {
@@ -220,7 +219,7 @@ describe('seedScenario partial failure', () => {
       .mockResolvedValueOnce({ errors: false, items: [notFound] });
     const search = jest.fn().mockRejectedValue(new Error('search unavailable'));
     await expect(seed(esWith({ bulk, search }))).rejects.toThrow(/search unavailable/);
-    expectDeletedExactlyTheSeededIds(bulk);
+    expectEveryCleanupDeletesTheSeededIds(bulk, 1);
   });
 
   it('treats a missing document or index (404) as cleaned and rethrows the seed error', async () => {
@@ -250,7 +249,7 @@ describe('seedScenario partial failure', () => {
       const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
       expect(error).not.toBeInstanceOf(AggregateError);
       expect((error as Error).message).toMatch(/socket hang up/);
-      expect(bulk).toHaveBeenCalledTimes(1 + ROUNDS);
+      expectEveryCleanupDeletesTheSeededIds(bulk, ROUNDS);
       expect(mget).toHaveBeenCalledTimes(ROUNDS);
       expect(wait.mock.calls).toEqual(Array.from({ length: ROUNDS - 1 }, () => [PAUSE_MS]));
     });
@@ -265,7 +264,7 @@ describe('seedScenario partial failure', () => {
       const error = await seed(esWith({ bulk, mget })).catch((e: unknown) => e);
       expect(error).not.toBeInstanceOf(AggregateError);
       expect(mget).toHaveBeenCalledTimes(ROUNDS);
-      expect(bulk).toHaveBeenCalledTimes(1 + ROUNDS);
+      expectEveryCleanupDeletesTheSeededIds(bulk, ROUNDS);
       expect(wait).toHaveBeenCalledTimes(ROUNDS - 1);
     });
 
@@ -285,9 +284,35 @@ describe('seedScenario partial failure', () => {
       const bulk = jest.fn().mockResolvedValueOnce(rejectedItems).mockResolvedValue(cleaned);
       const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));
       await expect(seed(esWith({ bulk, mget }))).rejects.toThrow(/Seeding ".*" failed/);
-      expect(bulk).toHaveBeenCalledTimes(2);
+      expectEveryCleanupDeletesTheSeededIds(bulk, 1);
       expect(mget).toHaveBeenCalledTimes(1);
       expect(wait).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['meta.statusCode', Object.assign(new Error('bad request'), { meta: { statusCode: 400 } })],
+      ['statusCode', Object.assign(new Error('too large'), { statusCode: 413 })],
+    ])(
+      'treats a 4xx rejection of the seed bulk (%s) as settled: one pass, no pause',
+      async (_where, rejection) => {
+        const bulk = jest.fn().mockRejectedValueOnce(rejection).mockResolvedValue(cleaned);
+        const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));
+        await expect(seed(esWith({ bulk, mget }))).rejects.toThrow(/bad request|too large/);
+        expectEveryCleanupDeletesTheSeededIds(bulk, 1);
+        expect(mget).toHaveBeenCalledTimes(1);
+        expect(wait).not.toHaveBeenCalled();
+      }
+    );
+
+    it.each([
+      ['a 5xx', Object.assign(new Error('unavailable'), { meta: { statusCode: 503 } })],
+      ['a transport error without a status', new Error('connection reset')],
+    ])('keeps %s on the seed bulk unsettled: the whole window', async (_what, rejection) => {
+      const bulk = jest.fn().mockRejectedValueOnce(rejection).mockResolvedValue(cleaned);
+      const mget = jest.fn(async ({ ids }: { ids: string[] }) => gone(ids));
+      await expect(seed(esWith({ bulk, mget }))).rejects.toThrow(/unavailable|connection reset/);
+      expectEveryCleanupDeletesTheSeededIds(bulk, ROUNDS);
+      expect(wait).toHaveBeenCalledTimes(ROUNDS - 1);
     });
 
     it('does one pass when only the read of the open alerts failed after the bulk returned', async () => {
@@ -297,7 +322,7 @@ describe('seedScenario partial failure', () => {
         .mockResolvedValue(cleaned);
       const search = jest.fn().mockRejectedValue(new Error('search unavailable'));
       await expect(seed(esWith({ bulk, search }))).rejects.toThrow(/search unavailable/);
-      expect(bulk).toHaveBeenCalledTimes(2);
+      expectEveryCleanupDeletesTheSeededIds(bulk, 1);
       expect(wait).not.toHaveBeenCalled();
     });
 

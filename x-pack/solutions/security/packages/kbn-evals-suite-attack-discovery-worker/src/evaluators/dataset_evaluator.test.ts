@@ -164,6 +164,51 @@ const stubExecutor = (): EvalsExecutorClient =>
     getDatasetRunResults: async () => [],
   } as unknown as EvalsExecutorClient);
 
+/**
+ * Runs rows the way the real executor does (`kibana_evals_executor/client.ts`): one job per row on
+ * a concurrency-1 limiter that starts the next job once the previous one settles, `task` then the
+ * evaluators inside the job, no per-row catch, and `Promise.all` over the jobs. The first throw
+ * rejects `runExperiment` at once while later queued jobs keep running detached.
+ */
+const realStyleExecutor = (): EvalsExecutorClient =>
+  ({
+    runExperiment: async (
+      {
+        datasets,
+        task,
+      }: {
+        datasets: Array<{ examples: WorkerExample[] }>;
+        task: (example: WorkerExample) => Promise<WorkerArtifacts>;
+      },
+      evaluators: Array<Evaluator<WorkerExample, WorkerArtifacts>>
+    ) => {
+      let tail: Promise<unknown> = Promise.resolve();
+      const limited = <T>(job: () => Promise<T>): Promise<T> => {
+        const run = tail.then(job, job);
+        tail = run.catch(() => undefined);
+        return run;
+      };
+      const jobs = datasets.flatMap(({ examples }) =>
+        examples.map((example) =>
+          limited(async () => {
+            const output = await task(example);
+            for (const evaluator of evaluators) {
+              await evaluator.evaluate({
+                input: example.input,
+                output,
+                expected: example.output,
+                metadata: example.metadata,
+              });
+            }
+          })
+        )
+      );
+      await Promise.all(jobs);
+      return [];
+    },
+    getDatasetRunResults: async () => [],
+  } as unknown as EvalsExecutorClient);
+
 const judgeStub = (): Evaluator => ({
   name: 'criteria',
   kind: 'LLM',
@@ -199,9 +244,33 @@ const evaluateRow = (scenarioId: string) =>
     dataset: { name: 'seam', description: 'positive control', examples: [rowFor(scenarioId)] },
   });
 
+const evaluateRows = (scenarioIds: string[]) =>
+  createEvaluateDataset({
+    client,
+    evaluators,
+    executorClient: realStyleExecutor(),
+    esClient: {} as Client,
+    fetch: jest.fn() as unknown as HttpHandler,
+    log,
+    routing,
+  })({
+    dataset: { name: 'seam', description: 'real-style', examples: scenarioIds.map(rowFor) },
+  });
+
+/** The settled error of a rejected promise, or a failure when it resolved. */
+const rejectionOf = async (promise: Promise<unknown>): Promise<Error> => {
+  try {
+    await promise;
+  } catch (error) {
+    return error as Error;
+  }
+  throw new Error('expected the evaluation to reject');
+};
+
 describe('createEvaluateDataset', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    assertClean.mockReset();
     seed.mockResolvedValue({
       runMarker: 'marker',
       spaceId: 'space',
@@ -333,5 +402,65 @@ describe('createEvaluateDataset', () => {
     (client.cancelPending as jest.Mock).mockRejectedValueOnce(new Error('cancel failed'));
     await expect(evaluateRow('benign-batch')).rejects.toThrow(/cancel failed/);
     expect(cleanup).toHaveBeenCalledTimes(1);
+  });
+
+  describe('with an executor that rejects on the first thrown row, like the real one', () => {
+    const LAST = 'positive-chain-with-noise';
+    const FIRST = 'benign-batch';
+
+    it('reports a seed rejection on the last row together with a dirty space at the final check', async () => {
+      collect.mockResolvedValue(quietArtifacts());
+      seed
+        .mockResolvedValueOnce({
+          runMarker: 'm',
+          spaceId: 'space',
+          goldIdBySeededId: new Map(),
+          alertCount: 3,
+          openAlertIds: SEEDED_IDS,
+        })
+        .mockRejectedValueOnce(new Error('seed bulk socket hang up'));
+      assertClean.mockImplementation(async ({ when }) => {
+        if (when === 'after the last row') throw new Error('late write left alerts behind');
+      });
+      const error = await rejectionOf(evaluateRows([FIRST, LAST]));
+      expect(error.message).toMatch(new RegExp(`${LAST} failed: seed bulk socket hang up`));
+      expect(error.message).toMatch(/late write left alerts behind/);
+    });
+
+    it('lets row 2 run after a seed rejection on row 1 and reports both', async () => {
+      seed.mockRejectedValueOnce(new Error('row one seed failed'));
+      collect.mockResolvedValue(attackArtifacts());
+      const error = await rejectionOf(evaluateRows([FIRST, LAST]));
+      expect(collect).toHaveBeenCalledTimes(1);
+      expect(seed).toHaveBeenCalledTimes(2);
+      expect(error.message).toMatch(new RegExp(`${FIRST} failed: row one seed failed`));
+      // Row 2 was scored: its own scores are in the summary and pass, so only row 1 is a miss.
+      expect(error.message).toMatch(/CODE evaluator miss/);
+      expect(error.message).not.toMatch(new RegExp(`\\[[^\\]]*${LAST}\\]`));
+    });
+
+    it('reports a collect error and a cleanup error from the same row', async () => {
+      collect.mockRejectedValue(new Error('collect blew up'));
+      cleanup.mockRejectedValueOnce(new Error('cleanup blew up'));
+      const error = await rejectionOf(evaluateRows([FIRST]));
+      expect(error.message).toMatch(/collect blew up/);
+      expect(error.message).toMatch(/cleanup blew up/);
+    });
+
+    it('counts a failed row as code misses, never as passes or N/A', async () => {
+      seed.mockRejectedValueOnce(new Error('seed failed'));
+      const error = await rejectionOf(evaluateRows([FIRST]));
+      expect(error.message).toMatch(/CODE evaluator miss/);
+      expect(error.message).toMatch(/RunnerCompleted \[[^\]]*\]: ROW_FAILED/);
+      expect(error.message).toMatch(/NegativeControl \[[^\]]*\]: ROW_FAILED/);
+    });
+
+    it('runs the final clean-space check even though the executor would have rejected', async () => {
+      seed.mockRejectedValueOnce(new Error('seed failed'));
+      await rejectionOf(evaluateRows([FIRST]));
+      expect(assertClean).toHaveBeenCalledWith(
+        expect.objectContaining({ when: 'after the last row' })
+      );
+    });
   });
 });

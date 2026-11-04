@@ -162,8 +162,8 @@ export const scoreDiscoveriesPersisted: CodeScorer = (expected, artifacts) => {
 };
 
 /**
- * Fingerprint matching ran, none of the attacks matched an existing fingerprint, and every attack
- * it handed back was dispatched for review (zero of zero is not a pass). A match
+ * Fingerprint matching ran, none of the attacks matched or attached to an existing fingerprint, and
+ * every attack it handed back was dispatched for review (zero of zero is not a pass). A match
  * step that failed closed hides the matcher, so it fails here even though reviews still run.
  */
 export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) => {
@@ -179,6 +179,11 @@ export const scoreFingerprintsDispatched: CodeScorer = (_expected, artifacts) =>
   if ((artifacts.fingerprintMatchedCount ?? 0) > 0) {
     return fail(
       `${artifacts.fingerprintMatchedCount} attacks matched an existing fingerprint in a space that started empty`
+    );
+  }
+  if ((artifacts.fingerprintAttachCount ?? 0) > 0) {
+    return fail(
+      `${artifacts.fingerprintAttachCount} attacks were attached to an existing fingerprint in a space that started empty, so they were never reviewed`
     );
   }
   if (

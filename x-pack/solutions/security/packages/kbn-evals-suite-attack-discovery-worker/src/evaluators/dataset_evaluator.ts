@@ -54,6 +54,42 @@ export interface JudgeProvenance {
 
 const DIRECTION = 'maximize' as const;
 
+export const ROW_FAILED_LABEL = 'ROW_FAILED';
+
+/**
+ * What a row returns when it threw. The task never throws for a row: the real executor rejects the
+ * whole experiment on the first throw, which would skip the final clean-space check and the code
+ * score gate. The `null` score with this label is a miss for every CODE evaluator (`isCodeMiss`
+ * exempts only `N/A`), and the judges and audit evaluators report it too instead of scoring an
+ * empty row.
+ */
+export const failedRowArtifacts = (rowError: string): WorkerArtifacts => ({
+  rowError,
+  runnerExecutionId: '',
+  runnerStatus: 'not_run',
+  runnerStepCount: 0,
+  seededAlertCount: 0,
+  seededAlertIds: [],
+  openAlertIds: [],
+  insights: [],
+  generationUsage: {
+    discoveryCount: 0,
+    connectorIds: [],
+    models: [],
+    discoveriesWithoutConnector: 0,
+  },
+  persistedAttackIds: [],
+  fingerprintMatchFailed: false,
+  dispatchedReviewExecutionIds: [],
+  reviews: [],
+  outcomes: [],
+});
+
+const rowFailedResult = (output: WorkerArtifacts) =>
+  output.rowError === undefined
+    ? undefined
+    : { score: null, label: ROW_FAILED_LABEL, explanation: output.rowError };
+
 /** Stamps the stage and the cohort's models on a result, so every score doc carries them. */
 const withRoutingMetadata = (
   evaluator: WorkerEvaluator,
@@ -91,6 +127,8 @@ export const createCodeEvaluators = (routing: CohortRouting): WorkerEvaluator[] 
         kind: 'CODE',
         direction: DIRECTION,
         evaluate: async ({ output, expected }) => {
+          const failedRow = rowFailedResult(output);
+          if (failedRow) return failedRow;
           if (!expected) {
             return { score: null, label: 'MISSING', explanation: 'row has no expected block' };
           }
@@ -128,7 +166,8 @@ const adaptAuditEvaluator = (
       name: audit.name,
       kind: audit.kind,
       direction: audit.direction,
-      evaluate: ({ input, output }) =>
+      evaluate: async ({ input, output }) =>
+        rowFailedResult(output) ??
         audit.evaluate({
           input: { mode: 'bundledAlerts', anonymizedAlerts: [] },
           output: { insights: output.insights },
@@ -193,6 +232,8 @@ const createRubricEvaluator = ({
       kind: 'LLM',
       direction: DIRECTION,
       evaluate: async ({ input, output, expected }) => {
+        const failedRow = rowFailedResult(output);
+        if (failedRow) return failedRow;
         const criteria = expected ? criteriaOf(expected) : [];
         if (!expected || criteria.length === 0) {
           return { score: null, label: 'N/A', explanation: 'row has no rubric criteria' };
@@ -295,62 +336,102 @@ export const createEvaluateDataset =
       `Running Attack Discovery Worker evaluation: "${dataset.name}" (${dataset.examples.length} rows, cohort ${routing.cohort}, generation ${routing.generationModel}, review ${routing.reviewModel})`
     );
 
-    await executorClient.runExperiment(
-      {
-        name: dataset.name,
-        datasets: [dataset],
-        concurrency: 1,
-        metadata: {
-          cohort: routing.cohort,
-          generation_model: routing.generationModel,
-          review_model: routing.reviewModel,
+    // Row failures are recorded here, not thrown, so `runExperiment` resolves and every check below
+    // runs once all rows are done.
+    const rowErrors: Error[] = [];
+    const recordRowError = (row: { scenarioId: string; spaceId: string }, error: unknown) =>
+      rowErrors.push(
+        new Error(`${row.spaceId}: ${row.scenarioId} failed: ${errorMessage(error)}`, {
+          cause: error,
+        })
+      );
+
+    const runRow = async (
+      input: { scenarioId: string; spaceId: string } | undefined
+    ): Promise<WorkerArtifacts> => {
+      const row = { scenarioId: input?.scenarioId ?? 'unknown', spaceId: input?.spaceId ?? '' };
+      const scenario = AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
+      if (!input || !scenario) {
+        const error = new Error(
+          `Unknown scenario "${row.scenarioId}" in dataset "${dataset.name}"`
+        );
+        recordRowError(row, error);
+        return failedRowArtifacts(error.message);
+      }
+      const { spaceId } = input;
+      const errors: unknown[] = [];
+      let artifacts: WorkerArtifacts | undefined;
+      let seeded: Awaited<ReturnType<typeof seedScenario>> | undefined;
+      try {
+        // A failed seed has already removed its own partial writes.
+        seeded = await seedScenario({ esClient, log, scenario, spaceId });
+        const { execution: run, timedOutAfterMs } = await client.run({
+          spaceId,
+          inputs: {
+            schedule_interval: SCHEDULE_INTERVAL,
+            // Manual autonomy keeps true-positive and inconclusive verdicts at the gate.
+            autonomy: 'manual',
+            ...(routing.runnerConnectorId ? { connector_id: routing.runnerConnectorId } : {}),
+          },
+        });
+        artifacts = await collectWorkerArtifacts({
+          client,
+          esClient,
+          run,
+          runTimedOutAfterMs: timedOutAfterMs,
+          spaceId,
+          seeded,
+          fetch,
+          log,
+        });
+      } catch (error) {
+        errors.push(error);
+      }
+      if (seeded) {
+        // Parked reviews are done being read; cancel them so they do not outlive the row. The
+        // seed is removed whether or not that worked, and each failure is kept.
+        try {
+          await client.cancelPending();
+        } catch (error) {
+          errors.push(error);
+        }
+        try {
+          await cleanupSeed({ esClient, seeded });
+        } catch (error) {
+          errors.push(error);
+        }
+      }
+      if (errors.length === 0 && artifacts) return artifacts;
+      errors.forEach((error) => recordRowError(row, error));
+      return failedRowArtifacts(errors.map((error) => errorMessage(error)).join('; '));
+    };
+
+    const problems: unknown[] = [];
+    try {
+      await executorClient.runExperiment(
+        {
+          name: dataset.name,
+          datasets: [dataset],
+          concurrency: 1,
+          metadata: {
+            cohort: routing.cohort,
+            generation_model: routing.generationModel,
+            review_model: routing.reviewModel,
+          },
+          task: async ({ input }) => runRow(input),
         },
-        task: async ({ input }) => {
-          const scenario = AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
-          if (!input || !scenario) {
-            throw new Error(`Unknown scenario "${input?.scenarioId}" in dataset "${dataset.name}"`);
-          }
-          const { spaceId } = input;
-          const seeded = await seedScenario({ esClient, log, scenario, spaceId });
-          try {
-            const { execution: run, timedOutAfterMs } = await client.run({
-              spaceId,
-              inputs: {
-                schedule_interval: SCHEDULE_INTERVAL,
-                // Manual autonomy keeps true-positive and inconclusive verdicts at the gate.
-                autonomy: 'manual',
-                ...(routing.runnerConnectorId ? { connector_id: routing.runnerConnectorId } : {}),
-              },
-            });
-            return await collectWorkerArtifacts({
-              client,
-              esClient,
-              run,
-              runTimedOutAfterMs: timedOutAfterMs,
-              spaceId,
-              seeded,
-              fetch,
-              log,
-            });
-          } finally {
-            // Parked reviews are done being read; cancel them so they do not outlive the row.
-            try {
-              await client.cancelPending();
-            } finally {
-              await cleanupSeed({ esClient, seeded });
-            }
-          }
-        },
-      },
-      withScoreCollection(all, collector, log)
-    );
+        withScoreCollection(all, collector, log)
+      );
+    } catch (error) {
+      problems.push(error);
+    }
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
-    // The next row's `seedScenario` is what reports a late write after an earlier row; nothing
-    // follows the last one, so each space is checked once more here. A dirty space and failed
-    // code scores are both reported.
+    // Every row has settled, so each space is checked once more: nothing follows the last row to
+    // report a late write the way the next row's `seedScenario` does. Row failures, a dirty
+    // space, an executor failure and failed code scores are all reported together.
+    problems.unshift(...rowErrors);
     const spaceIds = [...new Set(dataset.examples.flatMap(({ input }) => input?.spaceId ?? []))];
-    const problems: unknown[] = [];
     for (const spaceId of spaceIds) {
       try {
         await assertCleanSpace({ esClient, spaceId, when: 'after the last row' });

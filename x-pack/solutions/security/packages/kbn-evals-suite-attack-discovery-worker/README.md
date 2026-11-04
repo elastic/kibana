@@ -14,7 +14,7 @@ workflows until they park, and scores what happened.
 | The runner completed, ran steps, and did not time out | code  |
 | Exactly the seeded alerts were open and analyzed, none unseeded cited | code |
 | Discoveries were persisted (audit evaluators)     | code      |
-| Fingerprints were matched and dispatched          | code      |
+| Fingerprints were matched and dispatched; none matched or attached to an existing fingerprint | code |
 | Every review ended or parked within the wait      | code      |
 | Exactly one review per unmatched attack           | code      |
 | An Investigation was opened                       | code      |
@@ -23,6 +23,15 @@ workflows until they park, and scores what happened.
 | The worker outcome was reported and its persisted count matches a separate count of the attack discovery index (scoped to the run's generation uuids) | code |
 | Each stage ran on the endpoint the cohort planned (`StageModelResolved`) | code |
 | Discovery and verdict quality                     | LLM judge (reported, never gates) |
+
+A row never throws out of the task, because the executor rejects the whole experiment on the first
+throw and that would skip the checks that follow. A seed, run, collect, cancel or cleanup failure
+(each one, when a row has several) is recorded with its space and scenario id, and the row returns an
+empty placeholder carrying `rowError`. Every CODE evaluator scores it `null` with the label
+`ROW_FAILED`, which `assertCodeScoresPass` counts as a miss (only `N/A` is exempt); the audit
+evaluators and the judges report the same label instead of scoring an empty row. Once the experiment
+has resolved, `createEvaluateDataset` throws one error (an `AggregateError` when there are several)
+listing the row failures, an executor-level rejection, every dirty space and the failed code scores.
 
 Code scores gate through `assertCodeScoresPass`: a `null` score is never a pass, and `N/A` and
 `MISSING` are distinct outcomes. A code check passes at a score of 1, except the graded ones listed
@@ -46,14 +55,14 @@ after a transport failure. What is guaranteed depends on whether the seed bulk s
 A missing document or index counts as gone. Ids that remain, or a delete item that fails for another
 reason, are reported together with the seed error. A late write is reported by the next row's
 clean-space check, and after the last row by `createEvaluateDataset`, which asserts each row space
-is clean once the experiment ends (reported together with any failed code scores). Fingerprints and
+is clean once the experiment ends. Fingerprints and
 discoveries are left alone on a failed seed: the workflow has not started, so there are none from
 it. After a row has run, `cleanupSeed` clears the alerts (matched exactly by its run marker), the
 space's fingerprints and its discoveries, and fails if a delete reports failures, version
 conflicts, a timeout, or fewer deletions than matches.
 
 `src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any module the Jest preset
-transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.text`) ends up loaded at
+transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`) ends up loaded at
 config time (the `@kbn/workflows/managed` barrel and deep imports of its definitions both do). Jest
 transforms those but the Playwright loader cannot parse them. The guard covers only the static load
 chain of `playwright.config.ts`, the modules loaded synchronously while the config evaluates. It

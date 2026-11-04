@@ -21,8 +21,9 @@ jest.mock('@kbn/evals', () => ({
 }));
 
 // The extensions the Jest preset transforms without swc (`kbn-jest/jest-preset.js` `transform`):
-// raw text (`.txt`, `.html`, `.yaml`, `.yml`), `.peggy` and `.text`. The Playwright loader parses none.
-const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy|text)$/;
+// raw text (`.txt`, `.html`, `.yaml`, `.yml`), `.peggy` and `.text`. The preset's patterns end in
+// `peggy?` and `text?`, so `.pegg` and `.tex` are transformed too. The Playwright loader parses none.
+const RAW_TEXT_MODULE = /\.(ya?ml|txt|html|peggy?|text?)$/;
 
 /** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
 const loadedBy = (entry: string): string[] => {
@@ -68,6 +69,14 @@ describe('Playwright config load path', () => {
         expect(found.map((path) => path.split('/').pop())).toEqual([fixture]);
       }
     );
+
+    it.each(['x.pegg', 'x.tex'])('matches %s, which the preset also transforms', (path) => {
+      expect(RAW_TEXT_MODULE.test(path)).toBe(true);
+    });
+
+    it.each(['x.peg', 'x.te', 'x.yamll'])('does not match %s', (path) => {
+      expect(RAW_TEXT_MODULE.test(path)).toBe(false);
+    });
 
     it('reports the managed barrel', () => {
       expect(rawTextIn(loadedBy('@kbn/workflows/managed')).length).toBeGreaterThan(0);
