@@ -39,18 +39,20 @@ import type { BuildConnectorFormData } from './types';
 export interface BuildConnectorFlyoutProps {
   onClose: () => void;
   onConnectorTypeCreated?: (connectorTypeId: string) => void;
+  initialDefinition?: CreateConnectorTypeRequest;
 }
 
 const BuildConnectorFlyoutComponent: React.FC<BuildConnectorFlyoutProps> = ({
   onClose,
   onConnectorTypeCreated,
+  initialDefinition,
 }) => {
   const titleId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutTitle' });
   const yamlAccordionId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutYaml' });
   const aiAccordionId = useGeneratedHtmlId({ prefix: 'buildConnectorFlyoutAi' });
   const methods = useForm<BuildConnectorFormData>({
     mode: 'onTouched',
-    defaultValues: getEmptyFormData(),
+    defaultValues: initialDefinition ? requestToFormData(initialDefinition) : getEmptyFormData(),
     resolver: buildConnectorFormResolver,
   });
   const {

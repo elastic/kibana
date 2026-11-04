@@ -15,6 +15,7 @@ import { createScreenContextAttachmentType } from './screen_context';
 import { createGraphAttachmentType } from './graph';
 import { createConnectorAttachmentType } from './connector';
 import { createConnectorSetupAttachmentType } from './connector_setup';
+import { createConnectorTypeDraftAttachmentType } from './connector_type_draft';
 import { createSkillAttachmentType } from './skill';
 import { createImageAttachmentType } from './image';
 import type {
@@ -60,6 +61,7 @@ export const registerAttachmentTypes = ({
       getActionsStart,
       logger: logger.get('connector-setup'),
     }),
+    createConnectorTypeDraftAttachmentType(),
     createSkillAttachmentType(),
     createImageAttachmentType({ getFilesPlugin }),
   ];

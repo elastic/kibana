@@ -25,3 +25,9 @@ export {
   type ConnectorSetupAttachment,
   type ConnectorSetupAttachmentData,
 } from './connector_setup';
+export {
+  CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE,
+  connectorTypeDraftAttachmentDataSchema,
+  type ConnectorTypeDraftAttachment,
+  type ConnectorTypeDraftAttachmentData,
+} from './connector_type_draft';

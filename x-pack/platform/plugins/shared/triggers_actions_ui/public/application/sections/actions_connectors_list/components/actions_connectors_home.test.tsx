@@ -19,6 +19,10 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import {
+  CONNECTOR_TYPE_DRAFT_QUERY_PARAM,
+  CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX,
+} from '../../../../common/connector_type_draft_handoff';
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -110,6 +114,7 @@ describe('ActionsConnectorsHome', () => {
     lastActionsConnectorsListProps = undefined;
     loadAllActions.mockResolvedValue([]);
     loadConnectorAuthStatus.mockResolvedValue({});
+    sessionStorage.clear();
   });
 
   it('renders Actions connectors list component', async () => {
@@ -200,6 +205,40 @@ describe('ActionsConnectorsHome', () => {
     await userEvent.click(buildConnectorButton);
 
     expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+  });
+
+  it('opens the builder with a draft handed off from chat', async () => {
+    const draft = {
+      id: 'jsonplaceholder',
+      displayName: 'JSONPlaceholder',
+      description: 'Read posts',
+      config: [],
+      auth: { type: 'none' },
+      actions: {
+        getPosts: {
+          description: 'Get posts',
+          scope: 'read',
+          input: [],
+          request: { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts' },
+        },
+      },
+    };
+    const draftKey = 'draft-1';
+    sessionStorage.setItem(
+      `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`,
+      JSON.stringify(draft)
+    );
+    const url = `/connectors?${CONNECTOR_TYPE_DRAFT_QUERY_PARAM}=${draftKey}`;
+    const props = connectorsTabProps();
+    props.history = createMemoryHistory({ initialEntries: [url] });
+    props.location = createLocation(url);
+
+    renderHome(props);
+
+    expect(await screen.findByRole('heading', { name: 'Build a connector' })).toBeInTheDocument();
+    expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('JSONPlaceholder');
+    expect(props.history.location.search).toBe('');
+    expect(sessionStorage.getItem(`${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`)).toBeNull();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {

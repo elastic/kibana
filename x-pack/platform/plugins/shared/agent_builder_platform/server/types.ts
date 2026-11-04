@@ -18,6 +18,7 @@ import type { CloudStart, CloudSetup } from '@kbn/cloud-plugin/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { FilesSetup, FilesStart } from '@kbn/files-plugin/server';
+import type { PluginStartContract as TriggersActionsUiStart } from '@kbn/triggers-actions-ui-plugin/server';
 
 export interface PluginSetupDependencies {
   agentBuilder: AgentBuilderPluginSetup;
@@ -35,6 +36,7 @@ export interface PluginStartDependencies {
   llmTasks?: LlmTasksPluginStart;
   spaces?: SpacesPluginStart;
   files: FilesStart;
+  triggersActionsUi: TriggersActionsUiStart;
 }
 
 export interface AgentBuilderPlatformTracingFeaturesStart {

@@ -19,8 +19,11 @@ import { getConnectorSpec } from '@kbn/connector-specs';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import { createListConnectorTypesTool } from './list_connector_types';
 import { createProposeConnectorTool } from './propose_connector';
+import { createDraftConnectorTypeTool } from './draft_connector_type';
 import { CONNECTOR_SETUP_ATTACHMENT_TYPE } from '../../../common/attachments';
+import { CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE } from '../../../common/attachments';
 import { createConnectorSetupAttachmentType } from '../../attachment_types/connector_setup';
+import { createConnectorTypeDraftAttachmentType } from '../../attachment_types/connector_type_draft';
 
 jest.mock('@kbn/connector-specs', () => ({
   connectorsSpecs: {},
@@ -89,10 +92,13 @@ const createTestContext = () => {
     getActionsStart: async () => ({} as ActionsPluginStart),
     logger: loggingSystemMock.createLogger(),
   });
+  const draftType = createConnectorTypeDraftAttachmentType();
   const attachments = createAttachmentStateManager([], {
     getTypeDefinition: (type) =>
       type === CONNECTOR_SETUP_ATTACHMENT_TYPE
         ? (setupType as unknown as AttachmentTypeDefinition)
+        : type === CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE
+        ? (draftType as unknown as AttachmentTypeDefinition)
         : undefined,
   });
   const context = { attachments } as unknown as ToolHandlerContext;
@@ -352,6 +358,61 @@ describe('connector-authoring inline tools', () => {
 
         expect(result.results[0].type).toBe(ToolResultType.error);
       }
+      expect(attachments.getActive()).toHaveLength(0);
+    });
+  });
+
+  describe('draft_connector_type', () => {
+    it('stores a validated generated draft in an attachment', async () => {
+      const draft = {
+        id: 'jsonplaceholder',
+        displayName: 'JSONPlaceholder',
+        description: 'Read posts',
+        config: [],
+        auth: { type: 'none' },
+        actions: {
+          getPosts: {
+            description: 'Get posts',
+            scope: 'read',
+            input: [],
+            request: { method: 'GET', url: 'https://jsonplaceholder.typicode.com/posts' },
+          },
+        },
+      };
+      const generateConnectorTypeDraft = jest.fn().mockResolvedValue(draft);
+      const tool = createDraftConnectorTypeTool({
+        getTriggersActionsUiStart: async () => ({ generateConnectorTypeDraft } as never),
+      });
+      const { context, attachments } = createTestContext();
+      const documentationUrl = 'https://jsonplaceholder.typicode.com/';
+
+      const result = (await tool.handler(
+        { documentation_url: documentationUrl },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(generateConnectorTypeDraft).toHaveBeenCalledWith(documentationUrl, context.request);
+      expect(result.results[0].type).toBe(ToolResultType.other);
+      const attachmentId = (result.results[0].data as { attachment_id: string }).attachment_id;
+      expect(attachments.get(attachmentId)?.data.data).toMatchObject({
+        draft,
+        documentation_url: documentationUrl,
+      });
+    });
+
+    it('does not create an attachment when draft generation is denied', async () => {
+      const generateConnectorTypeDraft = jest.fn().mockRejectedValue(new Error('Forbidden'));
+      const tool = createDraftConnectorTypeTool({
+        getTriggersActionsUiStart: async () => ({ generateConnectorTypeDraft } as never),
+      });
+      const { context, attachments } = createTestContext();
+
+      const result = (await tool.handler(
+        { documentation_url: 'https://jsonplaceholder.typicode.com/' },
+        context
+      )) as ToolHandlerStandardReturn;
+
+      expect(result.results[0].type).toBe(ToolResultType.error);
       expect(attachments.getActive()).toHaveLength(0);
     });
   });

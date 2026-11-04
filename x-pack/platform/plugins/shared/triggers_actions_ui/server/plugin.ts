@@ -11,7 +11,9 @@ import type {
   CoreSetup,
   PluginInitializerContext,
   CustomRequestHandlerContext,
+  KibanaRequest,
 } from '@kbn/core/server';
+import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetup,
@@ -19,10 +21,13 @@ import type {
 } from '@kbn/actions-plugin/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getService, register as registerDataService } from './data';
 import type { ConnectorBuilderInferenceEndpoints } from './register_inference_feature';
 import { registerConnectorBuilderInferenceFeature } from './register_inference_feature';
 import { createHealthRoute, createConfigRoute, createGenerateConnectorTypeRoute } from './routes';
+import { generateFromDocumentation } from './routes/generate_connector_type/generate_from_documentation';
+import { authorizeDraftGeneration } from './routes/generate_connector_type/authorize_draft_generation';
 
 type TriggersActionsUiRequestHandlerContext = CustomRequestHandlerContext<{
   actions: ActionsApiRequestHandlerContext;
@@ -32,6 +37,10 @@ const BASE_TRIGGERS_ACTIONS_UI_API_PATH = '/internal/triggers_actions_ui';
 
 export interface PluginStartContract {
   data: ReturnType<typeof getService>;
+  generateConnectorTypeDraft: (
+    url: string,
+    request: KibanaRequest
+  ) => Promise<CreateConnectorTypeRequest>;
 }
 
 interface PluginsSetup {
@@ -44,11 +53,13 @@ interface PluginsSetup {
 interface TriggersActionsPluginStart {
   alerting: AlertingServerStart;
   inference?: InferenceServerStart;
+  security: SecurityPluginStart;
 }
 
 export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> {
   private readonly logger: Logger;
   private readonly data: PluginStartContract['data'];
+  private generateConnectorTypeDraft?: PluginStartContract['generateConnectorTypeDraft'];
 
   constructor(ctx: PluginInitializerContext) {
     this.logger = ctx.logger.get();
@@ -94,11 +105,27 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
       getInference: async () => (await core.getStartServices())[1].inference,
     });
+    this.generateConnectorTypeDraft = async (url, request) => {
+      const [, { security }] = await core.getStartServices();
+      await authorizeDraftGeneration(security, request);
+      return generateFromDocumentation({
+        url,
+        request,
+        getInference: async () => (await core.getStartServices())[1].inference,
+        getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
+        logger: this.logger,
+      });
+    };
   }
 
   public start(): PluginStartContract {
+    const generateConnectorTypeDraft = this.generateConnectorTypeDraft;
+    if (!generateConnectorTypeDraft) {
+      throw new Error('Connector type draft generation is not ready.');
+    }
     return {
       data: this.data,
+      generateConnectorTypeDraft,
     };
   }
 }

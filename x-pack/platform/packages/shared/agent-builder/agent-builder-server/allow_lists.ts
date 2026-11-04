@@ -360,6 +360,7 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'graph',
   'connector',
   'connector_setup',
+  'connector_type_draft',
   'skill',
   'image',
 

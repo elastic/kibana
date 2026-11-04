@@ -11,9 +11,15 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { useLocation, matchPath } from 'react-router-dom';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { createConnectorTypeRequestSchema } from '@kbn/actions-plugin/common';
+import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import { EuiCallOut, EuiPageTemplate, EuiSpacer } from '@elastic/eui';
 import { AppHeader } from '@kbn/app-header';
 import type { AppHeaderMenu, AppHeaderTab } from '@kbn/app-header';
+import {
+  CONNECTOR_TYPE_DRAFT_QUERY_PARAM,
+  CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX,
+} from '../../../../common/connector_type_draft_handoff';
 import type { Section } from '../../../constants';
 import { routeToConnectorEdit, routeToConnectors, routeToLogs } from '../../../constants';
 import { getAlertingSectionBreadcrumb } from '../../../lib/breadcrumb';
@@ -68,6 +74,8 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const [addFlyoutVisible, setAddFlyoutVisibility] = useState<boolean>(false);
   const [buildFlyoutVisible, setBuildFlyoutVisibility] = useState<boolean>(false);
+  const [initialBuildDefinition, setInitialBuildDefinition] =
+    useState<CreateConnectorTypeRequest>();
   const [editConnectorProps, setEditConnectorProps] = useState<EditConnectorProps>({});
   const [actions, setActions] = useState<ActionConnector[]>([]);
   const [isLoadingActions, setIsLoadingActions] = useState<boolean>(true);
@@ -140,6 +148,44 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
 
   const canSave = hasSaveActionsCapability(capabilities);
 
+  useEffect(() => {
+    const params = new URLSearchParams(location.search);
+    const draftKey = params.get(CONNECTOR_TYPE_DRAFT_QUERY_PARAM);
+    if (!draftKey) return;
+
+    params.delete(CONNECTOR_TYPE_DRAFT_QUERY_PARAM);
+    history.replace({
+      pathname: location.pathname,
+      search: params.toString() ? `?${params.toString()}` : '',
+    });
+
+    const storageKey = `${CONNECTOR_TYPE_DRAFT_STORAGE_PREFIX}${draftKey}`;
+    let storedDraft: string | null;
+    try {
+      storedDraft = sessionStorage.getItem(storageKey);
+      sessionStorage.removeItem(storageKey);
+    } catch {
+      storedDraft = null;
+    }
+    let parsedDraft: unknown;
+    try {
+      parsedDraft = storedDraft ? JSON.parse(storedDraft) : undefined;
+    } catch {
+      parsedDraft = undefined;
+    }
+    const result = createConnectorTypeRequestSchema.safeParse(parsedDraft);
+    if (!result.success) {
+      toasts.addDanger({
+        title: i18n.translate('xpack.triggersActionsUI.connectors.home.invalidBuilderDraft', {
+          defaultMessage: 'The connector type draft could not be loaded. Generate it again.',
+        }),
+      });
+      return;
+    }
+    setInitialBuildDefinition(result.data);
+    setBuildFlyoutVisibility(true);
+  }, [history, location.pathname, location.search, toasts]);
+
   const tabs = useMemo<AppHeaderTab[]>(
     () => [
       {
@@ -180,7 +226,10 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
                 secondaryButtonIconType: 'wrench',
                 secondaryButtonAriaLabel: BUILD_CONNECTOR_LABEL,
                 secondaryButtonTooltipContent: BUILD_CONNECTOR_LABEL,
-                run: () => setBuildFlyoutVisibility(true),
+                run: () => {
+                  setInitialBuildDefinition(undefined);
+                  setBuildFlyoutVisibility(true);
+                },
               },
             }
           : undefined,
@@ -275,7 +324,13 @@ export const ActionsConnectorsHome: React.FunctionComponent<RouteComponentProps<
         />
       )}
       {buildFlyoutVisible && (
-        <BuildConnectorFlyout onClose={() => setBuildFlyoutVisibility(false)} />
+        <BuildConnectorFlyout
+          initialDefinition={initialBuildDefinition}
+          onClose={() => {
+            setBuildFlyoutVisibility(false);
+            setInitialBuildDefinition(undefined);
+          }}
+        />
       )}
       {editConnectorProps.initialConnector && (
         <EditConnectorFlyout

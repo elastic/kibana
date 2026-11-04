@@ -10,10 +10,8 @@ import { ReservedPrivilegesSet } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { lazySchema, z } from '@kbn/zod/v4';
-import { CONNECTOR_BUILDER_INFERENCE_FEATURE_ID } from '../../../common/connector_type_generation';
-import { fetchDocumentation } from './fetch_documentation';
-import { generateConnectorTypeSpec } from './generate_connector_type_spec';
-import { GenerateConnectorTypeError, isGenerateConnectorTypeError } from './types';
+import { generateFromDocumentation } from './generate_from_documentation';
+import { isGenerateConnectorTypeError } from './types';
 
 const generateConnectorTypeBodySchema = lazySchema(() =>
   z
@@ -61,26 +59,13 @@ export const createGenerateConnectorTypeRoute = ({
     },
     async (_context, request, response) => {
       try {
-        const inference = await getInference();
-        if (!inference) {
-          throw new GenerateConnectorTypeError(
-            'no_model',
-            'No AI model is available. Set a default AI connector or pick a model for Connector builder in Feature Settings.',
-            400
-          );
-        }
-
-        const document = await fetchDocumentation({
-          url: request.body.url,
-          configurationUtilities: getActionsConfigurationUtilities(),
-          logger,
-        });
         const { signal, unsubscribe } = abortSignalFrom(request.events.aborted$);
         try {
-          const connectorType = await generateConnectorTypeSpec({
-            inferenceClient: inference.getClient({ request }),
-            featureId: CONNECTOR_BUILDER_INFERENCE_FEATURE_ID,
-            document,
+          const connectorType = await generateFromDocumentation({
+            url: request.body.url,
+            request,
+            getInference,
+            getActionsConfigurationUtilities,
             logger,
             abortSignal: signal,
           });

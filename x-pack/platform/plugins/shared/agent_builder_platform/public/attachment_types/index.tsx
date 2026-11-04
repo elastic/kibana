@@ -17,6 +17,7 @@ import {
   GRAPH_ATTACHMENT_TYPE,
   SKILL_ATTACHMENT_TYPE,
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
+  CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE,
 } from '../../common/attachments';
 import { createEsqlAttachmentDefinition } from './esql_attachment';
 import { textAttachmentDefinition } from './text_attachment';
@@ -24,6 +25,7 @@ import { screenContextAttachmentDefinition } from './screen_context_attachment';
 import { graphAttachmentDefinition } from './graph_attachment/graph_attachment';
 import { createSkillAttachmentDefinition } from './skill_attachment/skill_attachment';
 import { createConnectorSetupAttachmentDefinition } from './connector_setup/connector_setup_attachment';
+import { createConnectorTypeDraftAttachmentDefinition } from './connector_type_draft/connector_type_draft_attachment';
 import { createImageAttachmentDefinition } from './image_attachment';
 
 export const registerAttachmentUiDefinitions = ({
@@ -60,6 +62,13 @@ export const registerAttachmentUiDefinitions = ({
     CONNECTOR_SETUP_ATTACHMENT_TYPE,
     createConnectorSetupAttachmentDefinition({
       triggersActionsUi,
+      application: core.application,
+      notifications: core.notifications,
+    })
+  );
+  attachments.addAttachmentType(
+    CONNECTOR_TYPE_DRAFT_ATTACHMENT_TYPE,
+    createConnectorTypeDraftAttachmentDefinition({
       application: core.application,
       notifications: core.notifications,
     })
