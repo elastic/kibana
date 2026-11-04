@@ -19,7 +19,7 @@ import { activateWorktree, getWorkspaceFromSourceRepo } from '@kbn/workspaces';
 // Activate (or create) an isolated worktree for a ref
 const worktreeWs = await activateWorktree({ log, ref: '<commit-or-branch>' });
 await worktreeWs.ensureCheckout(); // checkout if needed
-await worktreeWs.ensureBootstrap(); // yarn kbn bootstrap if needed
+await worktreeWs.ensureBootstrap(); // pnpm kbn bootstrap if needed
 await worktreeWs.ensureBuild(); // (placeholder)
 
 // Use the developer's existing source repo workspace, for instance when it

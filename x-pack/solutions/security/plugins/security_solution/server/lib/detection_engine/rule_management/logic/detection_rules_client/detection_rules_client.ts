@@ -147,9 +147,9 @@ export const createDetectionRulesClient = ({
       });
     },
 
-    async bulkDeleteRules({ ruleIds }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
+    async bulkDeleteRules({ rules }: BulkDeleteRulesArgs): Promise<BulkDeleteRulesReturn> {
       return withSecuritySpan('DetectionRulesClient.bulkDeleteRules', async () => {
-        return bulkDeleteRules({ rulesClient, ruleIds });
+        return bulkDeleteRules({ rulesClient, rules });
       });
     },
 

@@ -9,22 +9,20 @@
 
 import type { Rule, Scope, AST } from 'eslint';
 import type { Comment } from 'estree';
-import * as T from '@babel/types';
-import { TSESTree } from '@typescript-eslint/typescript-estree';
+import type * as T from '@babel/types';
+import type { TSESTree } from '@typescript-eslint/typescript-estree';
 
+import { isImportDeclaration } from '../helpers/ast';
 import { RUNNING_IN_EDITOR } from '../helpers/running_in_editor';
 
-type WithParent<T> = T & { parent?: WithParent<T> };
+type WithParent<TNode> = TNode & { parent?: WithParent<TNode> };
 type SomeNode = WithParent<T.Node> | TSESTree.Node;
 type SomeImportNode = NonNullable<ReturnType<typeof findImportParent>>;
 
 function findImportParent(def: Scope.Definition) {
   let cursor: SomeNode | undefined = def.node;
   while (cursor) {
-    if (
-      T.isImportDeclaration(cursor) ||
-      cursor.type === TSESTree.AST_NODE_TYPES.ImportDeclaration
-    ) {
+    if (isImportDeclaration(cursor)) {
       return cursor;
     }
     cursor = cursor.parent;

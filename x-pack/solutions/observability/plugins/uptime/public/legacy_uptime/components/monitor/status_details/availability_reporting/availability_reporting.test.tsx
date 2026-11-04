@@ -39,9 +39,9 @@ describe('AvailabilityReporting component', () => {
     ];
   });
 
-  it('renders correctly against snapshot', async () => {
-    const { findByText } = render(<AvailabilityReporting allLocations={allLocations} />);
+  it('renders correctly against snapshot', () => {
+    const { getByText } = render(<AvailabilityReporting allLocations={allLocations} />);
 
-    expect(await findByText('au-heartbeat')).toBeInTheDocument();
+    expect(getByText('au-heartbeat')).toBeInTheDocument();
   });
 });

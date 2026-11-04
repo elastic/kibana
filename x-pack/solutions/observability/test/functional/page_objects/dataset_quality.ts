@@ -679,9 +679,13 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
               });
             },
             getCellTexts: async (textContainerSelector?: string) => {
-              const cellContentContainerWrappers = textContainerSelector
-                ? await tableWrapper.findAllByCssSelector(`${tdSelector} ${textContainerSelector}`)
-                : cellContentWrappers;
+              // Re-query the cell wrappers on each read: the table re-renders when
+              // integration metadata resolves, invalidating handles cached at parse time.
+              const cellContentContainerWrappers = await tableWrapper.findAllByCssSelector(
+                textContainerSelector
+                  ? `${tdSelector} ${textContainerSelector}`
+                  : cellContentSelector
+              );
 
               const cellContentContainerWrapperTexts: string[] = [];
               for (let j = 0; j < cellContentContainerWrappers.length; j++) {

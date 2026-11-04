@@ -14,7 +14,7 @@ with lightweight stubs via aliases.
 
 ```bash
 # From the Kibana root
-yarn kbn bootstrap
+pnpm kbn bootstrap
 ./scripts/build_one_navigation.sh
 ```
 

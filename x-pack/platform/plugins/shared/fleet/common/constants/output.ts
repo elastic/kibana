@@ -9,6 +9,8 @@ import type { NewOutput, OutputType, ValueOf } from '../types';
 
 export const OUTPUT_SAVED_OBJECT_TYPE = 'ingest-outputs';
 
+export const MAX_HOSTS = 100;
+
 export const outputType = {
   Elasticsearch: 'elasticsearch',
   Logstash: 'logstash',

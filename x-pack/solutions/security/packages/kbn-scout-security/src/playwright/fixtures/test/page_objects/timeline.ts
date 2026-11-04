@@ -6,6 +6,7 @@
  */
 
 import type { ScoutPage, Locator } from '@kbn/scout';
+import { expect } from '../../../../../ui';
 
 const TIMELINES_URL = 'security/timelines';
 const TIMELINE_TEMPLATES_URL = 'security/timelines/template';
@@ -126,6 +127,11 @@ export class TimelinePage {
 
   async selectCustomTemplates() {
     await this.timelinesTable.waitFor({ timeout: 30_000 });
+    // Wait for the mount-time prepackaged-template install and its refetch to settle
+    // (the table leaves its "Loading..." state) before switching tabs. Otherwise that
+    // late refetch lands after the custom-tab refetch and repaints the table, detaching
+    // the row actions clicked next (flaky #258015).
+    await expect(this.timelinesTable).not.toContainText('Loading', { timeout: 30_000 });
     await this.customTemplatesTab.click();
   }
 
@@ -134,6 +140,7 @@ export class TimelinePage {
       .locator('tbody')
       .getByRole('row')
       .filter({ hasText: templateTitle });
+    await expect(templateRow).toBeVisible({ timeout: 30_000 });
     await templateRow.locator('[data-test-subj="euiCollapsedItemActionsButton"]').click();
     await this.createFromTemplateButton.click();
   }

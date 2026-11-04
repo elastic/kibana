@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -16,9 +16,11 @@ import { wrapMiddlewares } from '../../middleware';
 import { enterpriseLicenseMiddleware } from '../../middleware/enterprise_license';
 import { EntitiesNotFoundError, ResolutionSearchTruncatedError } from '../../../domain/errors';
 
-const querySchema = z.object({
-  entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),
-});
+const querySchema = lazySchema(() =>
+  z.object({
+    entity_id: z.string().describe('The entity identifier to look up the resolution group for.'),
+  })
+);
 
 export function registerResolutionGroup(router: EntityStorePluginRouter) {
   router.versioned

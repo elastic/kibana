@@ -49,6 +49,29 @@ import {
 } from './utils/access_control';
 import { hasRequiredDocumentFields } from './utils/helper';
 
+const workflowIdsEqual = (a: string[], b: string[]): boolean =>
+  a.length === b.length && a.every((id, index) => id === b[index]);
+
+/**
+ * Guards changes to an agent's pre-execution workflow IDs.
+ */
+const assertCanConfigureWorkflows = ({
+  nextWorkflowIds,
+  currentWorkflowIds,
+  isAdmin,
+}: {
+  nextWorkflowIds: string[] | undefined;
+  currentWorkflowIds: string[] | undefined;
+  isAdmin: boolean;
+}): void => {
+  if (isAdmin || nextWorkflowIds === undefined) {
+    return;
+  }
+  if (!workflowIdsEqual(nextWorkflowIds, currentWorkflowIds ?? [])) {
+    throw createBadRequestError('Only administrators can configure pre-execution workflows.');
+  }
+};
+
 export interface AgentClient {
   has(agentId: string): Promise<boolean>;
   get(agentId: string): Promise<PersistedAgentDefinition>;
@@ -250,6 +273,12 @@ class AgentClientImpl implements AgentClient {
       throw createBadRequestError(`Agent with id ${profile.id} already exists.`);
     }
 
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profile.configuration.workflow_ids,
+      currentWorkflowIds: [],
+      isAdmin: this.isAdmin,
+    });
+
     await this.validateAgentToolSelection(profile.configuration.tools);
 
     const attributes = createRequestToEs({
@@ -310,20 +339,29 @@ class AgentClientImpl implements AgentClient {
       throw createAgentNotFoundError({ agentId });
     }
 
+    // Only admins may change pre-execution workflows
+    const currentConfig = source.config ?? source.configuration;
+    assertCanConfigureWorkflows({
+      nextWorkflowIds: profileUpdate.configuration?.workflow_ids,
+      currentWorkflowIds: currentConfig?.workflow_ids,
+      isAdmin: this.isAdmin,
+    });
+
     if (profileUpdate.configuration?.tools) {
       await this.validateAgentToolSelection(profileUpdate.configuration.tools);
     }
 
-    const updatedConversation = updateRequestToEs({
+    const updatedAgent = updateRequestToEs({
       agentId,
       currentProps: document._source,
       update: profileUpdate,
       updateDate: new Date(),
+      user: this.user,
     });
 
     await this.storage.getClient().index({
       id: document._id,
-      document: updatedConversation,
+      document: updatedAgent,
     });
 
     return this.get(agentId);

@@ -18,6 +18,7 @@ import { getSubfieldChangesForTimestampOverride } from './timestamp_override';
 import { getSubfieldChangesForTimelineTemplate } from './timeline_template';
 import { getSubfieldChangesForBuildingBlock } from './building_block';
 import { getSubfieldChangesForThreshold } from './threshold';
+import { getSubfieldChangesForRequiredFields } from './required_fields';
 import type { SubfieldChanges } from '../types';
 
 /**
@@ -93,6 +94,11 @@ export const getSubfieldChanges = (
       return getSubfieldChangesForThreshold(
         oldFieldValue as DiffableAllFields['threshold'],
         newFieldValue as DiffableAllFields['threshold']
+      );
+    case 'required_fields':
+      return getSubfieldChangesForRequiredFields(
+        oldFieldValue as DiffableAllFields['required_fields'],
+        newFieldValue as DiffableAllFields['required_fields']
       );
     default:
       const oldFieldValueStringified = stringifyToSortedJson(oldFieldValue);

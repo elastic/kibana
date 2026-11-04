@@ -7,9 +7,41 @@
 
 import { Readable } from 'stream';
 import { z } from '@kbn/zod/v4';
-import type { ContentPack, ContentPackStream } from '@kbn/content-packs-schema';
-import { contentPackIncludedObjectsSchema } from '@kbn/content-packs-schema';
-import { Streams, emptyAssets, getInheritedFieldsFromAncestors } from '@kbn/streams-schema';
+import type {
+  ContentPack,
+  ContentPackStream,
+  ContentPackIncludedObjects,
+} from '@kbn/content-packs-schema';
+import {
+  MAX_STREAM_NAME_LENGTH,
+  Streams,
+  emptyAssets,
+  getInheritedFieldsFromAncestors,
+} from '@kbn/streams-schema';
+
+// Use z.lazy() so the OAS serializer sees a $ref (no static depth unrolling).
+// Bounds are enforced at runtime: destination string length and routing array count.
+const boundedIncludedObjectsSchema: z.Schema<ContentPackIncludedObjects> = z.lazy(() =>
+  z.union([
+    z.object({ objects: z.object({ all: z.strictObject({}) }) }),
+    z.object({
+      objects: z.strictObject({
+        mappings: z.boolean(),
+        // 9.4 adds queries alongside mappings and routing
+        queries: z
+          .array(z.object({ id: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) }))
+          .max(200),
+        routing: z
+          .array(
+            boundedIncludedObjectsSchema.and(
+              z.object({ destination: z.string().nonempty().max(MAX_STREAM_NAME_LENGTH) })
+            )
+          )
+          .max(200),
+      }),
+    }),
+  ])
+) as z.Schema<ContentPackIncludedObjects>;
 import { omit } from 'lodash';
 import { OBSERVABILITY_STREAMS_ENABLE_CONTENT_PACKS } from '@kbn/management-settings-ids';
 import type { RequestHandlerContext } from '@kbn/core/server';
@@ -43,13 +75,16 @@ const exportContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to export content from.'),
     }),
     body: z.object({
-      name: z.string(),
-      description: z.string(),
-      version: z.string(),
-      include: contentPackIncludedObjectsSchema,
+      name: z.string().max(256),
+      description: z.string().max(1000),
+      version: z.string().max(100),
+      include: boundedIncludedObjectsSchema,
     }),
   }),
   security: {
@@ -158,12 +193,16 @@ const importContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z
+        .string()
+        .max(MAX_STREAM_NAME_LENGTH)
+        .describe('The name of the stream to import content into.'),
     }),
     body: z.object({
       include: z
         .string()
-        .transform((value) => contentPackIncludedObjectsSchema.parse(JSON.parse(value))),
+        .max(MAX_CONTENT_PACK_SIZE_BYTES)
+        .transform((value) => boundedIncludedObjectsSchema.parse(JSON.parse(value))),
       content: z.instanceof(Readable),
     }),
   }),
@@ -233,7 +272,7 @@ const previewContentRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH),
     }),
     body: z.object({
       content: z.instanceof(Readable),

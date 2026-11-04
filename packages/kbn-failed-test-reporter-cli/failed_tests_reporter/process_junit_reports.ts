@@ -16,6 +16,15 @@ import { reportFailuresToFile } from './report_failures_to_file';
 import { getReportMessageIter } from './report_metadata';
 import { getRootMetadata, readTestReport } from './test_report';
 
+// FTR runs on this branch with mochaOpts.bail disabled, so a single XML report can contain
+// multiple distinct, independent failures. All test types — FTR, Jest, and Cypress — get one
+// GitHub issue per distinct new failure. Duplicate classname+name entries (e.g. retry artifacts)
+// are deduplicated for every test type.
+//
+// Failures the FTR marked as cascading are excluded from GitHub regardless of test type: they are
+// trailing hooks/tests that ran after Mocha was aborted. Only the failure that caused the abort
+// reaches GitHub; the rest are listed on its report.
+
 export async function processJUnitReports(
   reportPaths: string[],
   params: ProcessReportsParams
@@ -45,6 +54,9 @@ export async function processJUnitReports(
       await reportFailuresToEs(log, failures);
     }
 
+    const seenNewIssueKeys = new Set<string>();
+    let cascadingFailures = 0;
+
     for (const failure of failures) {
       const pushMessage = (msg: string) => {
         messages.push({
@@ -61,6 +73,24 @@ export async function processJUnitReports(
         );
         continue;
       }
+
+      if (failure.cascading) {
+        cascadingFailures += 1;
+        pushMessage(
+          'Failure is a consequence of an earlier Mocha abort, so an issue was not created or ' +
+            'updated. See the failure that caused the abort.'
+        );
+        failure.failureCount = 0;
+        continue;
+      }
+
+      // Deduplicate by classname+name: retry artifacts can emit the same test twice in one XML.
+      const key = `${failure.classname}\n${failure.name}`;
+      if (seenNewIssueKeys.has(key)) {
+        failure.failureCount = 0;
+        continue;
+      }
+      seenNewIssueKeys.add(key);
 
       const existingIssue = existingIssues.getForFailure(failure);
       if (existingIssue) {
@@ -98,6 +128,13 @@ export async function processJUnitReports(
         failure.githubIssue = newIssue.html_url;
       }
       failure.failureCount = updateGithub ? 1 : 0;
+    }
+
+    if (cascadingFailures > 0) {
+      log.info(
+        `Ignored ${cascadingFailures} failure(s) in ${reportPath} that cascaded from an earlier ` +
+          `Mocha abort. They are listed on the report of the failure that caused the abort.`
+      );
     }
 
     // mutates report to include messages and writes updated report to disk

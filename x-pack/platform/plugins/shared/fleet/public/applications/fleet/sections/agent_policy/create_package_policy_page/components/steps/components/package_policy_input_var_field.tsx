@@ -40,6 +40,9 @@ import { DatasetComponent } from './dataset_component';
 
 const FixedHeightDiv = styled.div`
   height: 300px;
+  border: ${(props) => props.theme.eui.euiBorderThin};
+  border-radius: ${(props) => props.theme.eui.euiBorderRadius};
+  overflow: hidden;
 `;
 
 const FormRow = styled(EuiFormRow)`
@@ -302,7 +305,7 @@ function getInputComponent({
       return (
         <EuiSwitch
           label={fieldLabel}
-          checked={value}
+          checked={Boolean(value)}
           showLabel={false}
           onChange={(e) => onChange(e.target.checked)}
           onBlur={() => setIsDirty(true)}

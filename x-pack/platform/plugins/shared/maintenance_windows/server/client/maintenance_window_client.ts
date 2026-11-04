@@ -40,18 +40,22 @@ export interface MaintenanceWindowClientConstructorOptions {
   readonly logger: Logger;
   readonly savedObjectsClient: SavedObjectsClientContract;
   readonly getUserName: () => Promise<string | null>;
+  /** Invoked after create/update/delete/archive/finish so registered Task Manager tasks can runSoon. */
+  readonly notifyChange?: () => void;
 }
 
 export class MaintenanceWindowClient {
   private readonly logger: Logger;
   private readonly savedObjectsClient: SavedObjectsClientContract;
   private readonly getUserName: () => Promise<string | null>;
+  private readonly notifyChange?: () => void;
   private readonly context: MaintenanceWindowClientContext;
 
   constructor(options: MaintenanceWindowClientConstructorOptions) {
     this.logger = options.logger;
     this.savedObjectsClient = options.savedObjectsClient;
     this.getUserName = options.getUserName;
+    this.notifyChange = options.notifyChange;
     this.context = {
       logger: this.logger,
       savedObjectsClient: this.savedObjectsClient,
@@ -72,20 +76,35 @@ export class MaintenanceWindowClient {
     };
   }
 
-  public create = (params: CreateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
-    createMaintenanceWindow(this.context, params);
+  public create = async (params: CreateMaintenanceWindowParams): Promise<MaintenanceWindow> => {
+    const result = await createMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
   public get = (params: GetMaintenanceWindowParams): Promise<MaintenanceWindow> =>
     getMaintenanceWindow(this.context, params);
-  public update = (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> =>
-    updateMaintenanceWindow(this.context, params);
+  public update = async (params: UpdateMaintenanceWindowParams): Promise<MaintenanceWindow> => {
+    const result = await updateMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
   public find = (params?: FindMaintenanceWindowsParams): Promise<FindMaintenanceWindowsResult> =>
     findMaintenanceWindows(this.context, params);
-  public delete = (params: DeleteMaintenanceWindowParams): Promise<{}> =>
-    deleteMaintenanceWindow(this.context, params);
-  public archive = (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> =>
-    archiveMaintenanceWindow(this.context, params);
-  public finish = (params: FinishMaintenanceWindowParams): Promise<MaintenanceWindow> =>
-    finishMaintenanceWindow(this.context, params);
+  public delete = async (params: DeleteMaintenanceWindowParams): Promise<{}> => {
+    const result = await deleteMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
+  public archive = async (params: ArchiveMaintenanceWindowParams): Promise<MaintenanceWindow> => {
+    const result = await archiveMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
+  public finish = async (params: FinishMaintenanceWindowParams): Promise<MaintenanceWindow> => {
+    const result = await finishMaintenanceWindow(this.context, params);
+    this.notifyChange?.();
+    return result;
+  };
   public bulkGet = (
     params: BulkGetMaintenanceWindowsParams
   ): Promise<BulkGetMaintenanceWindowsResult> => bulkGetMaintenanceWindows(this.context, params);

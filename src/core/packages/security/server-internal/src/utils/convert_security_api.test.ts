@@ -16,6 +16,7 @@ describe('convertSecurityApi', () => {
     const source: CoreSecurityDelegateContract = {
       authc: {
         getCurrentUser: jest.fn(),
+        getPrincipal: jest.fn(),
         getRedactedSessionId: jest.fn(),
         apiKeys: {
           areAPIKeysEnabled: jest.fn(),
@@ -40,6 +41,7 @@ describe('convertSecurityApi', () => {
     };
     const output = convertSecurityApi(source);
     expect(output.authc.getCurrentUser).toBe(source.authc.getCurrentUser);
+    expect(output.authc.getPrincipal).toBe(source.authc.getPrincipal);
     expect(output.authc.apiKeys).toBe(source.authc.apiKeys);
     expect(output.audit.asScoped).toBe(source.audit.asScoped);
     expect(output.audit.withoutRequest).toBe(source.audit.withoutRequest);

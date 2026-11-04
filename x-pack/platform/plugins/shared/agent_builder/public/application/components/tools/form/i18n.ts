@@ -225,6 +225,27 @@ export const i18nMessages = {
           }
         ),
       },
+      dataTiers: {
+        label: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.label',
+          {
+            defaultMessage: 'Data tiers',
+          }
+        ),
+        includeFrozenHelpText: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.includeFrozenHelpText',
+          {
+            defaultMessage:
+              'Frozen tier data is excluded by default. Searching it recovers data from object storage, which is slow and can cause the tool to time out.',
+          }
+        ),
+        includeFrozenCheckboxLabel: i18n.translate(
+          'xpack.agentBuilder.tools.newTool.configuration.form.dataTiers.includeFrozenCheckboxLabel',
+          {
+            defaultMessage: 'Include frozen tier data',
+          }
+        ),
+      },
       workflow: {
         workflowLabel: i18n.translate(
           'xpack.agentBuilder.tools.newTool.configuration.form.workflow.workflowLabel',

@@ -56,7 +56,9 @@ export async function getSplits<TRawResponse = unknown, TMeta extends BaseMeta =
   // a partially implemented Mock of Series and Panel in the process_bucket.test.ts
   const color = getValidColor(series.color, { shouldBeCompatibleWithColorJs: true }).hex();
   const metric = getLastMetric(series);
-  const buckets = get(resp, `aggregations.${series.id}.buckets`);
+  // Typed as unknown so Array.isArray / isPlainObject narrow correctly; tsgo can't
+  // narrow lodash's GetFieldType conditional type the way tsc does.
+  const buckets: unknown = get(resp, `aggregations.${series.id}.buckets`);
 
   const fieldsForSeries = meta?.dataViewId ? await extractFields({ id: meta.dataViewId }) : [];
   const splitByLabel = calculateLabel(metric, series.metrics, fieldsForSeries);

@@ -10,3 +10,21 @@
 export * from 'zod/v4';
 export { isZod } from './util';
 export { lazySchema, setLazySchemaDisabled } from './lazy_schema';
+export {
+  savedObjectId,
+  savedObjectType,
+  savedObjectVersion,
+  spaceId,
+  displayName,
+  description,
+  searchFilter,
+  aggregation,
+  querySortField,
+  unboundedString,
+} from './string_helpers';
+export type {
+  ZodStringOptions,
+  ZodStringWarnOptions,
+  ZodStringHelper,
+  UnboundedStringOptions,
+} from './string_helpers';

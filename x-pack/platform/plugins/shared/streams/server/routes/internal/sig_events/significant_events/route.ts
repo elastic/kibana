@@ -64,13 +64,14 @@ const significantEventsQueriesGenerationStatusRoute = createServerRoute({
     getScopedClients,
     server,
   }): Promise<SignificantEventsQueriesGenerationTaskResult> => {
-    const { licensing, uiSettingsClient, taskClient } = await getScopedClients({
+    const { licensing, uiSettingsClient, taskClient, streamsClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing, uiSettingsClient });
 
     const { name } = params.path;
+    await streamsClient.assertReadAccess(name);
 
     const result = await taskClient.getStatus<
       SignificantEventsQueriesGenerationTaskParams,

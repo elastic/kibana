@@ -11,14 +11,13 @@ jest.mock('#pipeline-utils', () => ({
   getAffectedProjectsMoon: jest.fn(),
 }));
 
-import type { ToolingLog } from '@kbn/tooling-log';
 import { getAffectedProjectsMoon } from '#pipeline-utils';
-import { computeMoonShadow } from './moon_shadow';
+import { computeMoonShadow } from './moon_shadow.ts';
+import type { ScoutLog } from './scout_log.ts';
 
 const mockGetAffectedProjectsMoon = getAffectedProjectsMoon as jest.Mock;
 
-const createMockLog = (): ToolingLog =>
-  ({ info: jest.fn(), warning: jest.fn() } as unknown as ToolingLog);
+const createMockLog = (): ScoutLog => ({ info: jest.fn(), warning: jest.fn() });
 
 afterEach(() => {
   jest.clearAllMocks();

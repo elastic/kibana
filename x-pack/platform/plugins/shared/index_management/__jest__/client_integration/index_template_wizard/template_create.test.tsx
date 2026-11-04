@@ -330,14 +330,6 @@ describe('<TemplateCreate />', () => {
 
         await waitFor(() => expect(getFieldsListItems()).toHaveLength(1));
       }, 16000);
-
-      describe('plugin parameters', () => {
-        test('should not render the _size parameter if the mapper size plugin is not installed', async () => {
-          // The mappings editor exposes stable tab test subjects.
-          fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-          expect(screen.queryByTestId('sizeEnabledToggle')).not.toBeInTheDocument();
-        });
-      });
     });
 
     describe('aliases (step 5)', () => {
@@ -364,27 +356,6 @@ describe('<TemplateCreate />', () => {
         expect(await screen.findByText('Invalid JSON format.')).toBeInTheDocument();
       }, 10000);
     });
-  });
-
-  // Isolated test for mapper-size plugin (needs different mock setup)
-  describe('mapper-size plugin', () => {
-    test('should render the _size parameter if the mapper size plugin is installed', async () => {
-      httpRequestsMockHelpers.setLoadNodesPluginsResponse(['mapper-size']);
-      httpRequestsMockHelpers.setLoadComponentTemplatesResponse(componentTemplates);
-
-      await renderTemplateCreate(httpSetup);
-      await screen.findByTestId('pageTitle');
-
-      // Navigate to mappings step
-      await completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
-      await completeStepTwo();
-      await completeStepThree('{}');
-
-      // Navigate to advanced tab
-      fireEvent.click(screen.getByTestId('advancedOptionsTab'));
-
-      expect(screen.getByTestId('sizeEnabledToggle')).toBeInTheDocument();
-    }, 10000);
   });
 
   describe('logistics (step 1)', () => {

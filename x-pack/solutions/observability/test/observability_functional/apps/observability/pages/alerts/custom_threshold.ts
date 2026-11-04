@@ -23,7 +23,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
 
   const closePopover = async () => {
     await retry.waitFor('popover to close', async () => {
-      const isOpen = await testSubjects.exists('o11yClosablePopoverTitleButton', { timeout: 100 });
+      const isOpen = await testSubjects.exists('o11yClosablePopoverTitleButton');
       if (isOpen) {
         await testSubjects.click('o11yClosablePopoverTitleButton');
       }

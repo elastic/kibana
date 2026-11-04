@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../../common';
 import { RESOLUTION_ENTITY_STORE_PERMISSIONS } from '../../constants';
@@ -23,14 +23,16 @@ import {
   SelfLinkError,
 } from '../../../domain/errors';
 
-const bodySchema = z.object({
-  target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),
-  entity_ids: z
-    .array(z.string())
-    .min(1)
-    .max(1000)
-    .describe('Entity identifiers to link to the target entity. Minimum 1, maximum 1000.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    target_id: z.string().describe('The entity identifier to resolve the linked entities to.'),
+    entity_ids: z
+      .array(z.string())
+      .min(1)
+      .max(1000)
+      .describe('Entity identifiers to link to the target entity. Minimum 1, maximum 1000.'),
+  })
+);
 
 export function registerResolutionLink(router: EntityStorePluginRouter) {
   router.versioned

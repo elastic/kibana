@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { ToolType, ToolResultType } from '@kbn/agent-builder-common';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { createErrorResult } from '@kbn/agent-builder-server';
@@ -15,13 +15,15 @@ import type { RetrieveDocumentationResultDoc } from '@kbn/llm-tasks-plugin/serve
 import type { SecuritySolutionPluginCoreSetupDependencies } from '../../plugin_contract';
 import { securityTool } from './constants';
 
-const securityLabsSearchSchema = z.object({
-  query: z
-    .string()
-    .describe(
-      'A natural language query expressing the search request for Security Labs articles. Use this to find Security Labs content about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names.'
-    ),
-});
+const securityLabsSearchSchema = lazySchema(() =>
+  z.object({
+    query: z
+      .string()
+      .describe(
+        'A natural language query expressing the search request for Security Labs articles. Use this to find Security Labs content about specific malware, attack techniques, MITRE ATT&CK techniques, or rule names.'
+      ),
+  })
+);
 
 export const SECURITY_LABS_SEARCH_TOOL_ID = securityTool('security_labs_search');
 

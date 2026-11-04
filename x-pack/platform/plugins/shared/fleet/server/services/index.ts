@@ -22,10 +22,14 @@ export interface AgentPolicyServiceInterface {
   delete: (typeof agentPolicyService)['delete'];
   getFullAgentPolicy: (typeof agentPolicyService)['getFullAgentPolicy'];
   getByIds: (typeof agentPolicyService)['getByIds'];
+  bumpRevision: (typeof agentPolicyService)['bumpRevision'];
   turnOffAgentTamperProtections: (typeof agentPolicyService)['turnOffAgentTamperProtections'];
   fetchAllAgentPolicyIds: (typeof agentPolicyService)['fetchAllAgentPolicyIds'];
   fetchAllAgentPolicies: (typeof agentPolicyService)['fetchAllAgentPolicies'];
   deployPolicy: (typeof agentPolicyService)['deployPolicy'];
+  getSpacesForPoliciesUsingOutput: (typeof agentPolicyService)['getSpacesForPoliciesUsingOutput'];
+  getSpacesForPoliciesUsingFleetServerHost: (typeof agentPolicyService)['getSpacesForPoliciesUsingFleetServerHost'];
+  getSpacesForPoliciesUsingDownloadSource: (typeof agentPolicyService)['getSpacesForPoliciesUsingDownloadSource'];
 }
 
 // Agent services

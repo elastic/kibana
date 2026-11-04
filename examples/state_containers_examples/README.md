@@ -5,4 +5,4 @@ This example app shows how to:
  - Integrate with browser history or hash history routing
  - Sync your state container with the URL
 
-To run this example, use the command `yarn start --run-examples`.
+To run this example, use the command `pnpm start --run-examples`.

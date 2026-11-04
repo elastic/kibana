@@ -24,13 +24,11 @@ export class GenAiSettingsPage {
    * Navigate to the GenAI Settings page in Stack Management
    */
   async navigateTo() {
-    await expect(async () => {
-      await this.page.gotoApp('management/ai/genAiSettings');
-      await this.page.testSubj.waitForSelector('genAiSettingsPage', {
-        state: 'visible',
-        timeout: 10_000,
-      });
-    }).toPass({ timeout: 70_000, intervals: [500, 1_000, 2_000] });
+    await this.page.gotoApp('management/ai/genAiSettings', {
+      readyWhen: this.page.testSubj.locator('genAiSettingsPage'),
+      // A cold Kibana bootstrap on Cloud regularly outlasts the default app-ready budget.
+      readyTimeout: 35_000,
+    });
   }
 
   /**

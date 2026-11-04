@@ -36,6 +36,7 @@ module.exports = {
     scout_no_cross_boundary_imports: require('./rules/scout_no_cross_boundary_imports'),
     scout_no_locators: require('./rules/scout_no_locators'),
     scout_no_promise_all_with_playwright_apis: require('./rules/scout_no_promise_all_with_playwright_apis'),
+    security_imports_restriction: require('./rules/security_imports_restriction'),
     require_kbn_fs: require('./rules/require_kbn_fs'),
     require_include_in_check_a11y: require('./rules/require_include_in_check_a11y'),
     no_wrapped_error_in_logger: require('./rules/no_wrapped_error_in_logger'),

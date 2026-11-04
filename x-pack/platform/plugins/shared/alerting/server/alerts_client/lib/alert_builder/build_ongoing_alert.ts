@@ -27,6 +27,7 @@ import {
   TAGS,
   TIMESTAMP,
   VERSION,
+  ALERT_TRACKED,
   ALERT_STATE_NAMESPACE,
 } from '@kbn/rule-data-utils';
 import type { DeepPartial } from '@kbn/utility-types';
@@ -135,6 +136,7 @@ export const buildOngoingAlert = <
     [ALERT_PENDING_RECOVERED_COUNT]: legacyAlert.getPendingRecoveredCount(),
     // Set muted state
     [ALERT_MUTED]: isMuted,
+    [ALERT_TRACKED]: true,
     // Set the time range
     ...(alertState.start
       ? {

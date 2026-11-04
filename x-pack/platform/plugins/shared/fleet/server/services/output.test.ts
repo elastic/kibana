@@ -22,6 +22,8 @@ import { packagePolicyService } from './package_policy';
 import { auditLoggingService } from './audit_logging';
 import { findAgentlessPolicies } from './outputs/helpers';
 import { outputSavedObjectToOutput } from './output';
+import { getAgentCountForAgentPolicies } from './agent_policies/agent_policy_agent_count';
+import { buildAgentStatusRuntimeField } from './agents/build_status_runtime_field';
 
 jest.mock('./app_context');
 jest.mock('./agent_policy');
@@ -29,6 +31,16 @@ jest.mock('./package_policy');
 jest.mock('./audit_logging');
 jest.mock('./secrets');
 jest.mock('./outputs/helpers');
+jest.mock('./agent_policies/agent_policy_agent_count');
+jest.mock('./agents/build_status_runtime_field');
+
+const mockedGetAgentCountForAgentPolicies = getAgentCountForAgentPolicies as jest.MockedFunction<
+  typeof getAgentCountForAgentPolicies
+>;
+
+const mockedBuildAgentStatusRuntimeField = buildAgentStatusRuntimeField as jest.MockedFunction<
+  typeof buildAgentStatusRuntimeField
+>;
 
 const mockedFindAgentlessPolicies = findAgentlessPolicies as jest.MockedFunction<
   typeof findAgentlessPolicies
@@ -1221,6 +1233,38 @@ describe('Output Service', () => {
           { id: 'output-1' }
         );
       });
+
+      it('should clear proxy_id when creating a kafka output that has proxy_id set', async () => {
+        const soClient = getMockedSoClient({
+          defaultOutputId: 'output-test',
+        });
+        mockedAppContextService.getEncryptedSavedObjectsSetup.mockReturnValue({
+          canEncrypt: true,
+        } as any);
+        mockedAgentPolicyService.list.mockResolvedValue(
+          mockedAgentPolicyWithFleetServerResolvedValue
+        );
+        mockedAgentPolicyService.hasFleetServerIntegration.mockReturnValue(true);
+
+        await outputService.create(
+          soClient,
+          esClientMock,
+          {
+            is_default: false,
+            is_default_monitoring: false,
+            name: 'Test',
+            type: 'kafka',
+            proxy_id: 'proxy-1',
+          },
+          { id: 'output-1' }
+        );
+
+        expect(soClient.create).toBeCalledWith(
+          expect.anything(),
+          expect.objectContaining({ proxy_id: null }),
+          expect.anything()
+        );
+      });
     });
 
     describe('remote elasticsearch output', () => {
@@ -1590,6 +1634,26 @@ describe('Output Service', () => {
         version: null,
         preset: 'balanced',
       });
+    });
+
+    it('should clear proxy_id when updating a kafka output that has proxy_id set', async () => {
+      const soClient = getMockedSoClient({});
+      mockedAgentPolicyService.list.mockResolvedValue({
+        items: [{}],
+      } as unknown as ReturnType<typeof mockedAgentPolicyService.list>);
+      mockedAgentPolicyService.hasAPMIntegration.mockReturnValue(false);
+      mockedPackagePolicyService.list.mockResolvedValue({ items: [] } as any);
+
+      await outputService.update(soClient, esClientMock, 'existing-kafka-output', {
+        proxy_id: 'proxy-1',
+        name: 'updated kafka',
+      });
+
+      expect(soClient.update).toBeCalledWith(
+        expect.anything(),
+        expect.anything(),
+        expect.objectContaining({ proxy_id: null })
+      );
     });
 
     // With logstash output
@@ -2050,6 +2114,7 @@ describe('Output Service', () => {
         timeout: 30,
         version: '1.0.0',
         write_to_logs_streams: null,
+        proxy_id: null,
       });
     });
 
@@ -2086,6 +2151,7 @@ describe('Output Service', () => {
         timeout: 30,
         type: 'kafka',
         version: '1.0.0',
+        proxy_id: null,
       });
     });
 
@@ -2125,6 +2191,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2179,6 +2246,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2223,6 +2291,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2275,6 +2344,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2320,6 +2390,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2373,6 +2444,7 @@ describe('Output Service', () => {
         version: '1.0.0',
         broker_timeout: 10,
         required_acks: 1,
+        proxy_id: null,
       });
       expect(mockedAgentPolicyService.update).toBeCalledWith(
         expect.anything(),
@@ -2607,6 +2679,160 @@ describe('Output Service', () => {
         savedObjectType: OUTPUT_SAVED_OBJECT_TYPE,
       });
       expect(soClient.delete).toBeCalled();
+    });
+
+    describe('cross-space authorization', () => {
+      const mockRequest = {} as any;
+      const mockAtSpaces = jest.fn();
+
+      function mockSecurity(hasAllRequested = true) {
+        mockAtSpaces.mockResolvedValue({ hasAllRequested });
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(true) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+      }
+
+      beforeEach(() => {
+        mockAtSpaces.mockReset();
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: false,
+        });
+        mockedPackagePolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set<string>(),
+          truncated: false,
+        });
+      });
+
+      it('skips authz check when request is not provided (preconfiguration path)', async () => {
+        mockSecurity(false); // would reject if called
+        getMockedSoClient();
+
+        await outputService.delete('output-test');
+
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+      });
+
+      it('skips space collection and authz check when RBAC is inactive', async () => {
+        mockedAppContextService.getSecurity.mockReturnValue({
+          authz: {
+            mode: { useRbacForRequest: jest.fn().mockReturnValue(false) },
+            actions: { api: { get: (name: string) => `api:${name}` } },
+            checkPrivilegesWithRequest: jest.fn().mockReturnValue({ atSpaces: mockAtSpaces }),
+          },
+        } as any);
+        getMockedSoClient();
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        expect(mockedAgentPolicyService.getSpacesForPoliciesUsingOutput).not.toHaveBeenCalled();
+        expect(mockAtSpaces).not.toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalled();
+      });
+
+      it('allows delete when caller holds required privileges in all affected spaces', async () => {
+        mockSecurity(true);
+        getMockedSoClient();
+
+        await expect(
+          outputService.delete('output-test', { request: mockRequest })
+        ).resolves.not.toThrow();
+        expect(mockAtSpaces).toHaveBeenCalled();
+        expect(mockedAgentPolicyService.removeOutputFromAll).toHaveBeenCalled();
+      });
+
+      it('blocks delete and does not call removeOutputFromAll when caller lacks privileges', async () => {
+        mockSecurity(false);
+        getMockedSoClient();
+
+        await expect(outputService.delete('output-test', { request: mockRequest })).rejects.toThrow(
+          'Insufficient privileges to delete output output-test'
+        );
+        expect(mockedAgentPolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+        expect(mockedPackagePolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+      });
+
+      it('throws when agent-policy list is truncated and does not mutate', async () => {
+        mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['default']),
+          truncated: true,
+        });
+        getMockedSoClient();
+
+        await expect(outputService.delete('output-test', { request: mockRequest })).rejects.toThrow(
+          /too many agent policies/
+        );
+        expect(mockedAgentPolicyService.removeOutputFromAll).not.toHaveBeenCalled();
+      });
+
+      it('checks integrations-all only on package-policy spaces, not on agent-only spaces', async () => {
+        mockSecurity(true);
+        mockedAgentPolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['space-a']),
+          truncated: false,
+        });
+        mockedPackagePolicyService.getSpacesForPoliciesUsingOutput.mockResolvedValue({
+          spaceIds: new Set(['space-b']),
+          truncated: false,
+        });
+        getMockedSoClient();
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        // First call: agent-policy spaces only — no integrations-all required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          1,
+          ['space-a'],
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
+          })
+        );
+        expect(mockAtSpaces).not.toHaveBeenNthCalledWith(
+          1,
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
+          })
+        );
+        // Second call: package-policy spaces — both privileges required
+        expect(mockAtSpaces).toHaveBeenNthCalledWith(
+          2,
+          ['space-b'],
+          expect.objectContaining({
+            kibana: expect.arrayContaining([
+              expect.stringContaining('integrations-all'),
+              expect.stringContaining('fleet-agent-policies-all'),
+            ]),
+          })
+        );
+      });
+
+      it('calls atSpaces only once (agent check) when no package policies are affected', async () => {
+        mockSecurity(true);
+        getMockedSoClient(); // packagePolicies spaceIds is empty by default in this block
+
+        await outputService.delete('output-test', { request: mockRequest });
+
+        // Only the agent-policy check fires; the package-policy check is a no-op (empty set)
+        expect(mockAtSpaces).toHaveBeenCalledTimes(1);
+        expect(mockAtSpaces).toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('fleet-agent-policies-all')]),
+          })
+        );
+        expect(mockAtSpaces).not.toHaveBeenCalledWith(
+          expect.any(Array),
+          expect.objectContaining({
+            kibana: expect.arrayContaining([expect.stringContaining('integrations-all')]),
+          })
+        );
+      });
     });
   });
 
@@ -2995,6 +3221,57 @@ describe('Output Service', () => {
     });
   });
 
+  describe('listPreconfigured', () => {
+    it('should return only preconfigured outputs with secret fields stripped', async () => {
+      const soClient = getMockedSoClient();
+      soClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 10000,
+        total: 3,
+        saved_objects: [
+          {
+            score: 0,
+            ...mockOutputSO('preconfigured-es', {
+              type: 'elasticsearch',
+              is_preconfigured: true,
+              ssl: 'encrypted-ciphertext',
+            }),
+          },
+          {
+            score: 0,
+            ...mockOutputSO('non-preconfigured-es', {
+              type: 'elasticsearch',
+              is_preconfigured: false,
+            }),
+          },
+          {
+            score: 0,
+            ...mockOutputSO('preconfigured-kafka', {
+              type: 'kafka',
+              is_preconfigured: true,
+              password: 'encrypted-ciphertext',
+              kibana_api_key: 'encrypted-ciphertext',
+            }),
+          },
+        ],
+      });
+
+      const result = await outputService.listPreconfigured();
+
+      expect(result.items).toHaveLength(2);
+      expect(result.items.map((o) => o.id)).toEqual(
+        expect.arrayContaining(['preconfigured-es', 'preconfigured-kafka'])
+      );
+      expect(result.items.find((o) => o.id === 'non-preconfigured-es')).toBeUndefined();
+
+      for (const item of result.items) {
+        expect(item).not.toHaveProperty('ssl');
+        expect(item).not.toHaveProperty('password');
+        expect(item).not.toHaveProperty('kibana_api_key');
+      }
+    });
+  });
+
   describe('outputSavedObjectToOutput', () => {
     it('should return output object with parsed SSL when SSL is a valid JSON string', () => {
       const so = mockOutputSO('output-test', {
@@ -3027,6 +3304,242 @@ describe('Output Service', () => {
       const output = outputSavedObjectToOutput(so);
 
       expect(output.ssl).toEqual(undefined);
+    });
+
+    it('should use canonical output_id even when attributes contain a poisoned id field', () => {
+      const so = mockOutputSO('output-test', {
+        type: 'elasticsearch',
+        id: '../../../malicious-id',
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.id).toBe('output-test');
+    });
+
+    it('should use so.id as fallback when output_id is absent, not attributes.id', () => {
+      const so = {
+        id: 'uuid-fallback',
+        type: 'ingest-outputs',
+        references: [],
+        attributes: {
+          name: 'Test',
+          type: 'elasticsearch',
+          id: 'poisoned-id',
+        },
+      };
+
+      const output = outputSavedObjectToOutput(so as any);
+
+      expect(output.id).toBe('uuid-fallback');
+    });
+
+    it('OTLP branch: canonical output_id wins over poisoned attributes.id', () => {
+      const so = mockOutputSO('otlp-output-test', {
+        type: 'otlp',
+        id: 'poisoned-otlp-id',
+        otlp_exporter: {
+          endpoint: 'https://otel.example.com:4317',
+          protocol: 'grpc',
+        },
+      });
+
+      const output = outputSavedObjectToOutput(so);
+
+      expect(output.id).toBe('otlp-output-test');
+    });
+
+    it('OTLP branch: uses so.id fallback when output_id absent and attributes.id is poisoned', () => {
+      const so = {
+        id: 'otlp-uuid-fallback',
+        type: 'ingest-outputs',
+        references: [],
+        attributes: {
+          name: 'Test OTLP',
+          type: 'otlp',
+          id: 'poisoned-otlp-id',
+          otlp_exporter: {
+            endpoint: 'https://otel.example.com:4317',
+            protocol: 'grpc',
+          },
+        },
+      };
+
+      const output = outputSavedObjectToOutput(so as any);
+
+      expect(output.id).toBe('otlp-uuid-fallback');
+    });
+  });
+
+  describe('getAgentAndPolicyCountForOutput', () => {
+    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+
+    async function* makeIdPages(...pages: string[][]): AsyncIterable<string[]> {
+      for (const page of pages) {
+        yield page;
+      }
+    }
+
+    async function* makePkgPages(
+      ...pages: Array<Array<{ policy_ids: string[] }>>
+    ): AsyncIterable<Array<{ policy_ids: string[] }>> {
+      for (const page of pages) {
+        yield page;
+      }
+    }
+
+    const MOCK_RUNTIME_MAPPINGS = { status: { type: 'keyword', script: { source: '...' } } };
+
+    beforeEach(() => {
+      getMockedSoClient();
+      mockedGetAgentCountForAgentPolicies.mockReset();
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({});
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockReset();
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages([]));
+      mockedPackagePolicyService.fetchAllItems.mockReset();
+      mockedPackagePolicyService.fetchAllItems.mockResolvedValue(makePkgPages([]) as any);
+      mockedBuildAgentStatusRuntimeField.mockReset();
+      mockedBuildAgentStatusRuntimeField.mockResolvedValue(MOCK_RUNTIME_MAPPINGS as any);
+    });
+
+    it('returns zero counts when no policies reference the output', async () => {
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(result).toEqual({ agentPolicyCount: 0, agentCount: 0 });
+      expect(mockedGetAgentCountForAgentPolicies).not.toHaveBeenCalled();
+    });
+
+    it('includes monitoring_output_id in kuery for non-default output', async () => {
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(
+        makeIdPages(['policy-monitoring-only'])
+      );
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'policy-monitoring-only': 4 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
+        ?.kuery as string;
+      expect(kuery).toContain('monitoring_output_id:"output-test"');
+      expect(kuery).toContain('data_output_id:"output-test"');
+      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+      expect(result).toEqual({ agentPolicyCount: 1, agentCount: 4 });
+    });
+
+    it('adds is_default fallback clause for default output', async () => {
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: true,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
+        ?.kuery as string;
+      expect(kuery).toContain('not fleet-agent-policies.data_output_id:*');
+    });
+
+    it('adds is_default_monitoring fallback clause for default monitoring output', async () => {
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+        is_default_monitoring: true,
+      } as any);
+
+      const kuery = mockedAgentPolicyService.fetchAllAgentPolicyIds.mock.calls[0][1]
+        ?.kuery as string;
+      expect(kuery).toContain('not fleet-agent-policies.monitoring_output_id:*');
+      expect(kuery).not.toContain('not fleet-agent-policies.data_output_id:*');
+    });
+
+    it('includes package-policy-derived policy IDs', async () => {
+      mockedPackagePolicyService.fetchAllItems.mockResolvedValue(
+        makePkgPages([{ policy_ids: ['policy-from-pkg'] }]) as any
+      );
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ 'policy-from-pkg': 2 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
+        esClient,
+        expect.arrayContaining(['policy-from-pkg']),
+        { runtimeMappings: MOCK_RUNTIME_MAPPINGS }
+      );
+      expect(result).toEqual({ agentPolicyCount: 1, agentCount: 2 });
+    });
+
+    it('deduplicates policy IDs present in both direct and package-policy results', async () => {
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(
+        makeIdPages(['shared-policy'])
+      );
+      mockedPackagePolicyService.fetchAllItems.mockResolvedValue(
+        makePkgPages([{ policy_ids: ['shared-policy', 'extra-policy'] }]) as any
+      );
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({
+        'shared-policy': 1,
+        'extra-policy': 3,
+      });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      const calledIds = mockedGetAgentCountForAgentPolicies.mock.calls[0][1] as string[];
+      expect(calledIds.filter((id) => id === 'shared-policy')).toHaveLength(1);
+      expect(result).toEqual({ agentPolicyCount: 2, agentCount: 4 });
+    });
+
+    it('sums agent counts across all policies and iterates multiple pages', async () => {
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(
+        makeIdPages(['p1'], ['p2'])
+      );
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ p1: 10, p2: 5 });
+
+      const result = await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(result).toEqual({ agentPolicyCount: 2, agentCount: 15 });
+    });
+
+    it('passes prebuilt runtimeMappings to each chunk to exclude stale-checkin agents', async () => {
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages(['p1']));
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({ p1: 5 });
+
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedBuildAgentStatusRuntimeField).toHaveBeenCalledTimes(1);
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledWith(
+        esClient,
+        expect.any(Array),
+        { runtimeMappings: MOCK_RUNTIME_MAPPINGS }
+      );
+    });
+
+    it('chunks IDs into batches of 1000 to avoid ES max_buckets limit', async () => {
+      const ids = Array.from({ length: 1500 }, (_, i) => `policy-${i}`);
+      mockedAgentPolicyService.fetchAllAgentPolicyIds.mockResolvedValue(makeIdPages(ids));
+      mockedGetAgentCountForAgentPolicies.mockResolvedValue({});
+
+      await outputService.getAgentAndPolicyCountForOutput(esClient, {
+        id: 'output-test',
+        is_default: false,
+      } as any);
+
+      expect(mockedGetAgentCountForAgentPolicies).toHaveBeenCalledTimes(2);
+      expect(mockedGetAgentCountForAgentPolicies.mock.calls[0][1]).toHaveLength(1000);
+      expect(mockedGetAgentCountForAgentPolicies.mock.calls[1][1]).toHaveLength(500);
     });
   });
 });

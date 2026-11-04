@@ -37,7 +37,7 @@ The {{kib}} directory must be named `kibana`, and your plugin directory should b
 You can leverage [@kbn/plugin-helpers](https://github.com/elastic/kibana/blob/master/packages/kbn-plugin-helpers) to build a distributable archive for your plugin. The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime. You don’t need to install the `plugin-helpers` dependency. If you created the plugin using `node scripts/generate_plugin` script, `package.json` is already pre-configured. To build your plugin run within your plugin folder:
 
 ```shell
-yarn build
+pnpm build
 ```
 
 It will output a`zip` archive in `kibana/plugins/my_plugin_name/build/` folder.
@@ -50,9 +50,9 @@ See [How to install a plugin](/reference/kibana-plugins.md#install-plugin).
 
 ## Run {{kib}} with your plugin in dev mode [_run_kib_with_your_plugin_in_dev_mode]
 
-If your plugin isn’t server only and contains `ui` in order for Kibana to pick the browser bundles you need to run `yarn dev --watch` in the plugin root folder at a dedicated terminal.
+If your plugin isn’t server only and contains `ui` in order for Kibana to pick the browser bundles you need to run `pnpm dev --watch` in the plugin root folder at a dedicated terminal.
 
-Then, in a second terminal, run `yarn start` at the {{kib}} root folder. Make sure {{kib}} found and bootstrapped your plugin by:
+Then, in a second terminal, run `pnpm start` at the {{kib}} root folder. Make sure {{kib}} found and bootstrapped your plugin by:
 
 ```shell
 [INFO ][plugins-system.standard] Setting up […] plugins: […, myPluginName, …]

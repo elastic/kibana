@@ -68,6 +68,10 @@ import type {
   GetAgentPoliciesResponseItem,
   PostDeletePackagePoliciesResponse,
 } from '@kbn/fleet-plugin/common';
+import {
+  LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+  PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+} from '@kbn/fleet-plugin/common';
 import { createMockPolicyData } from '../endpoint/services/feature_usage/mocks';
 import { ALL_ENDPOINT_ARTIFACT_LIST_IDS } from '../../common/endpoint/service/artifacts/constants';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
@@ -1589,6 +1593,69 @@ describe('Fleet integrations', () => {
       expect(
         endpointServicesMock.savedObjects.createInternalScopedSoClient().delete
       ).toBeCalledWith('policy-settings-protection-updates-note', 'id', { force: true });
+    });
+
+    it('searches for notes across all spaces and both package policy reference types', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 0,
+        saved_objects: [],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(soClientMock.find).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: 'policy-settings-protection-updates-note',
+          hasReference: [
+            { type: PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+            { type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE, id: policyId },
+          ],
+          hasReferenceOperator: 'OR',
+          namespaces: ['*'],
+        })
+      );
+    });
+
+    it('deletes a legacy note using a client scoped to the note namespace', async () => {
+      const soClientMock = endpointServicesMock.savedObjects.createInternalScopedSoClient();
+
+      (soClientMock.find as jest.Mock).mockResolvedValueOnce({
+        total: 1,
+        saved_objects: [
+          {
+            id: 'legacy-note-id',
+            type: 'type',
+            namespaces: ['legacy-space'],
+            references: [
+              {
+                id: 'id_package_policy',
+                name: 'package_policy',
+                type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+              },
+            ],
+            attributes: { note: 'legacy note' },
+            score: 1,
+          },
+        ],
+        page: 1,
+        per_page: 10,
+      });
+
+      await invokeDeleteCallback();
+
+      expect(endpointServicesMock.savedObjects.createInternalScopedSoClient).toBeCalledWith({
+        spaceId: 'legacy-space',
+        readonly: false,
+      });
+      expect(soClientMock.delete).toBeCalledWith(
+        'policy-settings-protection-updates-note',
+        'legacy-note-id',
+        { force: true }
+      );
     });
 
     describe('and with space awareness feature enabled', () => {

@@ -5,15 +5,17 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { HostsQueries } from '../model/factory_query_type';
 import { requestBasicOptionsSchema } from '../model/request_basic_options';
 import { timerange } from '../model/timerange';
 
-export const hostOverviewSchema = requestBasicOptionsSchema.extend({
-  factoryQueryType: z.literal(HostsQueries.overview),
-  timerange,
-});
+export const hostOverviewSchema = lazySchema(() =>
+  requestBasicOptionsSchema.extend({
+    factoryQueryType: z.literal(HostsQueries.overview),
+    timerange,
+  })
+);
 
 export type HostOverviewRequestOptionsInput = z.input<typeof hostOverviewSchema>;
 

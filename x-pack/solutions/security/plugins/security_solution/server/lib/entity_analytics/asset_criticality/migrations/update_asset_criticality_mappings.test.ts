@@ -14,7 +14,7 @@ const mockmigrateMappings = jest.fn();
 jest.mock('../asset_criticality_migration_client', () => ({
   AssetCriticalityMigrationClient: jest.fn().mockImplementation(() => ({
     isMappingsMigrationRequired: () => mockisMappingsMigrationRequired(),
-    migrateMappings: () => mockmigrateMappings(),
+    migrateMappings: (spaceId?: string) => mockmigrateMappings(spaceId),
   })),
 }));
 
@@ -56,5 +56,34 @@ describe('updateAssetCriticalityMappings', () => {
 
     expect(mockisMappingsMigrationRequired).toHaveBeenCalled();
     expect(mockLogger.info).not.toHaveBeenCalledWith('Migrating Asset Criticality mappings');
+  });
+
+  it('should pass spaceId to migrateMappings when defined', async () => {
+    mockisMappingsMigrationRequired.mockResolvedValue(true);
+
+    await updateAssetCriticalityMappings({
+      auditLogger: undefined,
+      logger: mockLogger,
+      getStartServices: mockGetStartServices,
+      kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
+      spaceId: 'my-space',
+    });
+
+    expect(mockmigrateMappings).toHaveBeenCalledWith('my-space');
+  });
+
+  it('should pass undefined to migrateMappings when spaceId is not defined', async () => {
+    mockisMappingsMigrationRequired.mockResolvedValue(true);
+
+    await updateAssetCriticalityMappings({
+      auditLogger: undefined,
+      logger: mockLogger,
+      getStartServices: mockGetStartServices,
+      kibanaVersion: '8.0.0',
+      hasEncryptionKey: true,
+    });
+
+    expect(mockmigrateMappings).toHaveBeenCalledWith(undefined);
   });
 });

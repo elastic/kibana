@@ -63,5 +63,6 @@ export default function ({ loadTestFile, getService }: FtrProviderContext) {
     loadTestFile(require.resolve('./rollback'));
     loadTestFile(require.resolve('./knowledge_base'));
     loadTestFile(require.resolve('./review_upgrade'));
+    loadTestFile(require.resolve('./delete_package_datastream_assets'));
   });
 }

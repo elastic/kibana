@@ -23,6 +23,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const deployment = getService('deployment');
   const find = getService('find');
+  const es = getService('es');
+  const retry = getService('retry');
 
   async function assertDashboardRendered() {
     await header.waitUntilLoadingHasFinished();
@@ -57,6 +59,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.importExport.load(
         'src/platform/test/functional/fixtures/kbn_archiver/dashboard/current/bwc_short_urls'
       );
+
+      // The options-list control's suggestions request 400s while the freshly installed
+      // sample-data index is not yet queryable, leaving the control errored so the first
+      // dashboard never finishes loading. Gate the first navigation on the same aggregation.
+      await retry.try(async () => {
+        await es.search({
+          index: 'kibana_sample_data_logs',
+          size: 0,
+          aggs: { os: { terms: { field: 'machine.os.keyword' } } },
+        });
+      });
 
       baseUrl = deployment.getHostPort();
     });

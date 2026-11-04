@@ -7,7 +7,7 @@
 
 import path from 'node:path';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { IKibanaResponse } from '@kbn/core-http-server';
 import { API_VERSIONS, ENTITY_STORE_ROUTES } from '../../../common';
 import { DEFAULT_ENTITY_STORE_PERMISSIONS } from '../constants';
@@ -16,13 +16,15 @@ import { wrapMiddlewares } from '../middleware';
 import { ALL_ENTITY_TYPES, EntityType } from '../../../common/domain/definitions/entity_schema';
 import { ENGINE_STATUS } from '../../domain/constants';
 
-const bodySchema = z.object({
-  entityTypes: z
-    .array(EntityType)
-    .optional()
-    .default(ALL_ENTITY_TYPES)
-    .describe('Entity types to start. Defaults to all installed types.'),
-});
+const bodySchema = lazySchema(() =>
+  z.object({
+    entityTypes: z
+      .array(EntityType)
+      .optional()
+      .default(ALL_ENTITY_TYPES)
+      .describe('Entity types to start. Defaults to all installed types.'),
+  })
+);
 
 export function registerStart(router: EntityStorePluginRouter) {
   router.versioned

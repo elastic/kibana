@@ -62,8 +62,8 @@ const upload = () => {
     );
     exec(`
       ${activateScript} gs://ci-artifacts.kibana.dev
-      gsutil -q -m cp -r -z html '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
-      gsutil -h "Cache-Control:no-cache, max-age=0, no-transform" cp -z html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
+      gcloud storage cp --recursive --gzip-local=html --no-user-output-enabled '*' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/${process.env.BUILDKITE_COMMIT}/'
+      gcloud storage cp --cache-control="no-cache, max-age=0, no-transform" --gzip-local=html 'index.html' 'gs://${WEBPACK_REPORTS_BUCKET}/${WEBPACK_REPORTS}/latest/'
     `);
 
     if (process.env.BUILDKITE_PULL_REQUEST && process.env.BUILDKITE_PULL_REQUEST !== 'false') {

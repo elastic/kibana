@@ -70,7 +70,7 @@ export function commentOnPR({
   }
 }
 
-if (require.main === module) {
+if (import.meta.main) {
   const args = parseArgs<
     CommentOnPRArgs & {
       'clear-previous'?: CommentOnPRArgs['clearPrevious'] | string;

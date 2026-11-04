@@ -319,6 +319,64 @@ describe('AttackDiscovery', () => {
     });
   });
 
+  describe('when multiple connectors are available', () => {
+    const multipleConnectors: unknown[] = [
+      { id: 'connector-1', name: 'Connector 1', actionTypeId: '.gen-ai' },
+      { id: 'connector-2', name: 'Connector 2', actionTypeId: '.gen-ai' },
+    ];
+
+    beforeEach(() => {
+      (useLoadConnectors as jest.Mock).mockReturnValue({
+        isFetched: true,
+        data: multipleConnectors,
+      });
+    });
+
+    it('defaults to the first (highest-priority) connector when none is selected', () => {
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.includes('attackDiscovery.connectorId')) {
+          return [undefined, jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      const lastCallArgs = (useAttackDiscovery as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCallArgs.connectorId).toBe('connector-1');
+    });
+
+    it('does not override an existing selected connectorId', () => {
+      (useLocalStorage as jest.Mock).mockImplementation((key: string) => {
+        if (key.includes('attackDiscovery.connectorId')) {
+          return ['connector-2', jest.fn()];
+        }
+        return ['test-id', jest.fn()];
+      });
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+
+      const lastCallArgs = (useAttackDiscovery as jest.Mock).mock.calls.at(-1)?.[0];
+      expect(lastCallArgs.connectorId).toBe('connector-2');
+    });
+  });
+
   describe('`enableAlertsAndAttacksAlignment` feature', () => {
     it('renders callout about new Attacks page when feature is enabled', () => {
       mockUseKibanaReturnValue.services.uiSettings.get.mockImplementation((key) => {

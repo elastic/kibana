@@ -804,6 +804,6 @@ vagrant destroy <hostname>
 - Open VMWare and go to Window > Virtual Machine Library. Unzip the virtual machine and drag the .vmx file into your Virtual Machine Library.
 - Right-click on the virtual machine you just added to your library and select "`Snapshots…`", and then click the "`Take`" button in the modal that opens. You can roll back to this snapshot when the VM expires in 90 days.
 - In System Preferences > Sharing, change your computer name to be something simple, e.g. "`computer`".
-- Run {{kib}} with `yarn start --host=computer.local` (substituting your computer name).
+- Run {{kib}} with `pnpm start --host=computer.local` (substituting your computer name).
 - Now you can run your VM, open the browser, and navigate to `http://computer.local:5601` to test {{kib}}.
 - Alternatively you can use browserstack

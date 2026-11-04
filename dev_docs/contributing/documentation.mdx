@@ -173,7 +173,7 @@ There are three great ways to debug issues with the API infrastructure.
 
 [api_doc_suite.test.ts](https://github.com/elastic/kibana/blob/main/packages/kbn-docs-utils/src/integration_tests/api_doc_suite.test.ts) is a pretty comprehensive test suite that builds the test docs inside the [**fixtures** folder](https://github.com/elastic/kibana/tree/main/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src).
 
-Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `yarn jest api_doc_suite`.
+Edit the code inside `__fixtures__` to replicate the bug, write a test to track what should happen, then run `pnpm exec jest api_doc_suite`.
 
 Once you've verified the bug is reproducible, use debug messages to narrow down the problem. This is much faster than running the entire suite to debug.
 
@@ -189,7 +189,7 @@ The code sandbox approach can be a lot faster to iterate compared to running it 
 
 ## Example plugins
 
-Running Kibana with `yarn start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
+Running Kibana with `pnpm start --run-examples` will include all [example plugins](https://github.com/elastic/kibana/tree/main/examples). These are tested examples of platform services in use. We strongly encourage anyone providing a platform level service or <DocLink id="kibBuildingBlocks" text="building block"/> to include a tutorial that links to a tested example plugin. This is better than relying on copied code snippets, which can quickly get out of date.
 
 You can also visit these [examples plugins hosted online](https://demo.kibana.dev/8.2/app/home). Note that because anonymous access is enabled, some
 of the demos are currently not working. 

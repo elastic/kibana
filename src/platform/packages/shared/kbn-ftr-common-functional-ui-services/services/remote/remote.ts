@@ -12,6 +12,7 @@ import type { FtrProviderContext } from '../ftr_provider_context';
 import type { BrowserConfig } from './webdriver';
 import { initWebDriver } from './webdriver';
 import { Browsers } from './browsers';
+import { dismissOpenDialog } from './dismiss_open_dialog';
 
 export async function RemoteProvider({ getService }: FtrProviderContext) {
   const lifecycle = getService('lifecycle');
@@ -96,6 +97,8 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   const windowSizeStack: Array<{ width: number; height: number }> = [];
   lifecycle.beforeTestSuite.add(async () => {
+    // a `beforeunload` dialog leaked by the previous suite blocks `getRect` below (#289092)
+    await dismissOpenDialog(driver, log);
     windowSizeStack.unshift(await driver.manage().window().getRect());
   });
 
@@ -105,6 +108,7 @@ export async function RemoteProvider({ getService }: FtrProviderContext) {
 
   lifecycle.afterTestSuite.add(async () => {
     await tryWebDriverCall(async () => {
+      await dismissOpenDialog(driver, log);
       // collect error message stashed in SessionStorage that indicate EuiProvider implementation error
       const euiProviderWarning = await getSessionStorageItem('dev.euiProviderWarning');
       if (euiProviderWarning != null) {

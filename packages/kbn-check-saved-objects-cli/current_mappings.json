@@ -3811,6 +3811,14 @@
       "createdBy": {
         "type": "keyword"
       },
+      "createdByApiKeyId": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
+      "createdById": {
+        "ignore_above": 1024,
+        "type": "keyword"
+      },
       "title": {
         "type": "text"
       }

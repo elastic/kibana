@@ -208,9 +208,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             for (const supportedOp of supportedOperations) {
               // now check if the provided function has no incompatibility tooltip
               expect(
-                testSubjects.exists(`lns-indexPatternDimension-${supportedOp.name} incompatible`, {
-                  timeout: 500,
-                })
+                await testSubjects.exists(
+                  `lns-indexPatternDimension-${supportedOp.name} incompatible`
+                )
               ).to.eql(supportedOp[fieldType]);
               // try to change to the provided function and check all is ok
               await lens.selectOperation(supportedOp.name);
@@ -248,11 +248,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             for (const unsupportedOp of unsupportedOperatons) {
               // now check if the provided function has the incompatibility tooltip
               expect(
-                testSubjects.exists(
-                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`,
-                  {
-                    timeout: 500,
-                  }
+                await testSubjects.exists(
+                  `lns-indexPatternDimension-${unsupportedOp.name} incompatible`
                 )
               ).to.eql(!unsupportedOp[fieldType]);
               // try to change to the provided function and check if it's in an incompatibility state
@@ -413,9 +410,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             });
 
             expect(
-              testSubjects.exists(`lns-indexPatternDimension-average incompatible`, {
-                timeout: 500,
-              })
+              await testSubjects.exists(`lns-indexPatternDimension-average incompatible`)
             ).to.eql(false);
             await lens.closeDimensionEditor();
           });

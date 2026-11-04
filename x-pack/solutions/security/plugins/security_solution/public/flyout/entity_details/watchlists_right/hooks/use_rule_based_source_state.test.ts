@@ -10,6 +10,14 @@ import { useRuleBasedSourceState } from './use_rule_based_source_state';
 import type { UseRuleBasedSourceStateParams } from './use_rule_based_source_state';
 import type { EntitySourceInput } from './rule_based_source_helpers';
 import { EMPTY_QUERY } from './rule_based_source_helpers';
+import { useValidateIndexPatternTimestamp } from './use_validate_index_pattern_timestamp';
+
+jest.mock('./use_validate_index_pattern_timestamp');
+const mockUseValidateIndexPatternTimestamp =
+  useValidateIndexPatternTimestamp as jest.MockedFunction<typeof useValidateIndexPatternTimestamp>;
+
+const mockTimestampResult = (hasTimestamp: boolean | undefined, isLoading = false) =>
+  mockUseValidateIndexPatternTimestamp.mockReturnValue({ hasTimestamp, isLoading });
 
 const baseParams: UseRuleBasedSourceStateParams = {
   watchlistName: 'Test Watchlist',
@@ -36,6 +44,8 @@ const indexSrc: EntitySourceInput = {
 describe('useRuleBasedSourceState', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    // Default: timestamp present, not loading
+    mockTimestampResult(true);
   });
 
   describe('initial state', () => {
@@ -322,6 +332,63 @@ describe('useRuleBasedSourceState', () => {
       });
 
       expect(result.current.filterQuery.query).toBe('entity.risk.calculated_level: "High"');
+    });
+  });
+
+  describe('isValid and timestamp validation', () => {
+    it('is valid when all fields are filled and @timestamp is present', () => {
+      mockTimestampResult(true);
+      const { result } = renderHook(() =>
+        useRuleBasedSourceState({ ...baseParams, initialEntitySources: [indexSrc] })
+      );
+
+      act(() => {
+        result.current.onQueryChange({ query: 'agent.type: "filebeat"', language: 'kuery' });
+      });
+
+      expect(result.current.isValid).toBe(true);
+      expect(result.current.indexPatternMissingTimestamp).toBe(false);
+    });
+
+    it('is invalid when @timestamp is missing from the index pattern', () => {
+      mockTimestampResult(false);
+      const { result } = renderHook(() =>
+        useRuleBasedSourceState({ ...baseParams, initialEntitySources: [indexSrc] })
+      );
+
+      expect(result.current.isValid).toBe(false);
+      expect(result.current.indexPatternMissingTimestamp).toBe(true);
+    });
+
+    it('does not fail validation while timestamp check is still loading (undefined)', () => {
+      mockTimestampResult(undefined, true);
+      const { result } = renderHook(() =>
+        useRuleBasedSourceState({ ...baseParams, initialEntitySources: [indexSrc] })
+      );
+
+      // hasTimestamp === undefined → indexPatternMissingTimestamp is false, so isValid is not blocked by it
+      expect(result.current.indexPatternMissingTimestamp).toBe(false);
+      expect(result.current.isValidatingTimestamp).toBe(true);
+    });
+
+    it('reflects isValidatingTimestamp from the timestamp hook', () => {
+      mockTimestampResult(true, true);
+      const { result } = renderHook(() => useRuleBasedSourceState(baseParams));
+
+      expect(result.current.isValidatingTimestamp).toBe(true);
+    });
+
+    it('is invalid when sync validation fails even if timestamp is present', () => {
+      mockTimestampResult(true);
+      // indexPattern toggle with no index patterns selected → sync validation fails
+      const { result } = renderHook(() => useRuleBasedSourceState(baseParams));
+
+      act(() => {
+        result.current.onToggleChange('indexPattern');
+      });
+
+      expect(result.current.isValid).toBe(false);
+      expect(result.current.indexPatternMissingTimestamp).toBe(false);
     });
   });
 });

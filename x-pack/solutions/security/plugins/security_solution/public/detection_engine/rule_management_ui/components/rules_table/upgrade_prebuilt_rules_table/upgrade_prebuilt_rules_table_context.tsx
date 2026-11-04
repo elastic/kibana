@@ -12,7 +12,10 @@ import type {
   PrebuiltRulesFilter,
   SortOrder,
 } from '../../../../../../common/api/detection_engine';
-import type { RuleUpgradeState } from '../../../../rule_management/model/prebuilt_rule_upgrade';
+import type {
+  RuleUpgradeCustomizationCounts,
+  RuleUpgradeState,
+} from '../../../../rule_management/model/prebuilt_rule_upgrade';
 import type { RuleSignatureId } from '../../../../../../common/api/detection_engine/model/rule_schema';
 import { invariant } from '../../../../../../common/utils/invariant';
 import { RULES_TABLE_INITIAL_PAGE_SIZE } from '../constants';
@@ -98,6 +101,15 @@ export interface UpgradePrebuiltRulesTableActions {
   reFetchRules: () => void;
   upgradeRules: (ruleIds: RuleSignatureId[]) => void;
   upgradeAllRules: () => void;
+  upgradeRulesToTarget: (ruleIds: RuleSignatureId[]) => void;
+  upgradeAllRulesToTarget: () => void;
+  getSelectedRulesCustomizationCounts: (
+    ruleIds: RuleSignatureId[]
+  ) => RuleUpgradeCustomizationCounts;
+  /**
+   * Re-fetches the upgrade review and returns up-to-date counts for the whole filtered set.
+   */
+  fetchAllRulesCustomizationCounts: () => Promise<RuleUpgradeCustomizationCounts | null>;
   setFilterOptions: Dispatch<SetStateAction<PrebuiltRulesFilter>>;
   setPagination: Dispatch<SetStateAction<{ page: number; perPage: number }>>;
   setSortingOptions: Dispatch<SetStateAction<UpgradePrebuiltRulesSortingOptions>>;
@@ -174,6 +186,10 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     reFetchRules,
     upgradeRules,
     upgradeAllRules,
+    upgradeRulesToTarget,
+    upgradeAllRulesToTarget,
+    getSelectedRulesCustomizationCounts,
+    fetchAllRulesCustomizationCounts,
   } = usePrebuiltRulesUpgrade({
     pagination,
     sort: {
@@ -188,12 +204,25 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
       reFetchRules,
       upgradeRules,
       upgradeAllRules,
+      upgradeRulesToTarget,
+      upgradeAllRulesToTarget,
+      getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
       setFilterOptions,
       openRulePreview,
       setPagination,
       setSortingOptions,
     }),
-    [reFetchRules, upgradeRules, upgradeAllRules, openRulePreview]
+    [
+      reFetchRules,
+      upgradeRules,
+      upgradeAllRules,
+      upgradeRulesToTarget,
+      upgradeAllRulesToTarget,
+      getSelectedRulesCustomizationCounts,
+      fetchAllRulesCustomizationCounts,
+      openRulePreview,
+    ]
   );
 
   const providerValue = useMemo<UpgradePrebuiltRulesContextType>(

@@ -8,7 +8,7 @@
 import { badData, badRequest } from '@hapi/boom';
 import { z } from '@kbn/zod/v4';
 import type { StreamQuery } from '@kbn/streams-schema';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import {
   WiredIngestUpsertRequest,
   type ClassicIngestUpsertRequest,
@@ -172,7 +172,9 @@ const readIngestRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
+    }),
   }),
   handler: async ({
     params,
@@ -224,7 +226,7 @@ const upsertIngestRoute = createServerRoute({
   },
   params: z.object({
     path: z.object({
-      name: z.string(),
+      name: z.string().max(MAX_STREAM_NAME_LENGTH).describe('The name of the stream.'),
     }),
     body: z.object({
       ingest: IngestUpsertRequest.right,

@@ -30,12 +30,9 @@ tags:
   - prod
   - group-search
   - private
-  - jest-unit-tests
 fileGroups:
   src:
     - src/**/*
     - index.ts
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

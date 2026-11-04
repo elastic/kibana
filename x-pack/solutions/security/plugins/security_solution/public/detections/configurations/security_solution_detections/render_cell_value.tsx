@@ -101,9 +101,11 @@ export const CellValue = memo(function RenderCellValue({
           field: field.field,
           value: Array.isArray(newValue) ? newValue : [newValue],
         };
-      } else {
-        return field;
       }
+      // Metadata fields such as `_score` are scalars and would break consumers that iterate `value`
+      return Array.isArray(field.value) || field.value == null
+        ? field
+        : { field: field.field, value: [field.value] as string[] };
     });
   }, [legacyAlert]);
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { NetworkQueries } from '../model/factory_query_type';
 import { requestOptionsPaginatedSchema } from '../model/request_paginated_options';
 import { sort } from '../model/sort';
@@ -19,13 +19,15 @@ export enum NetworkDnsFields {
   dnsBytesOut = 'dnsBytesOut',
 }
 
-export const networkDnsSchema = requestOptionsPaginatedSchema.extend({
-  isPtrIncluded: z.boolean().default(false),
-  stackByField: z.string().optional(),
-  sort,
-  timerange,
-  factoryQueryType: z.literal(NetworkQueries.dns),
-});
+export const networkDnsSchema = lazySchema(() =>
+  requestOptionsPaginatedSchema.extend({
+    isPtrIncluded: z.boolean().default(false),
+    stackByField: z.string().optional(),
+    sort,
+    timerange,
+    factoryQueryType: z.literal(NetworkQueries.dns),
+  })
+);
 
 export type NetworkDnsRequestOptionsInput = z.input<typeof networkDnsSchema>;
 

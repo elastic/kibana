@@ -9,13 +9,11 @@
 
 import Path from 'path';
 
-import { TSESTree } from '@typescript-eslint/typescript-estree';
-import * as Bt from '@babel/types';
 import type { Rule } from 'eslint';
 import type { Node } from 'estree';
 import type { ModuleType } from '@kbn/repo-source-classifier';
 
-import type { Importer } from '../helpers/visit_all_import_statements';
+import { isTypeOnlyImport } from '../helpers/ast';
 import { visitAllImportStatements } from '../helpers/visit_all_import_statements';
 import { getSourcePath } from '../helpers/source';
 import { getRepoSourceClassifier } from '../helpers/repo_source_classifier';
@@ -33,40 +31,6 @@ const IMPORTABLE_FROM: Record<ModuleType, ModuleType[] | typeof ANY> = {
   static: [],
   'tests or mocks': ANY,
   tooling: ANY,
-};
-
-const isTypeOnlyImport = (importer: Importer) => {
-  // handle babel nodes
-  if (Bt.isImportDeclaration(importer)) {
-    return (
-      importer.importKind === 'type' ||
-      importer.specifiers.some((s) => ('importKind' in s ? s.importKind === 'type' : false))
-    );
-  }
-
-  if (importer.type === TSESTree.AST_NODE_TYPES.ImportDeclaration) {
-    return (
-      importer.importKind === 'type' ||
-      importer.specifiers.some(
-        (s) => s.type === TSESTree.AST_NODE_TYPES.ImportSpecifier && s.importKind === 'type'
-      )
-    );
-  }
-
-  if (Bt.isExportNamedDeclaration(importer)) {
-    return (
-      importer.exportKind === 'type' ||
-      importer.specifiers.some((s) => (Bt.isExportSpecifier(s) ? s.exportKind === 'type' : false))
-    );
-  }
-
-  if (importer.type === TSESTree.AST_NODE_TYPES.ExportNamedDeclaration) {
-    return (
-      importer.exportKind === 'type' || importer.specifiers.some((s) => s.exportKind === 'type')
-    );
-  }
-
-  return false;
 };
 
 export const NoBoundaryCrossingRule: Rule.RuleModule = {

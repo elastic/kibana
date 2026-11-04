@@ -59,6 +59,7 @@ export const extractSnippetsBatch = async ({
   term,
   fields,
   config,
+  includeFrozen = false,
   esClient,
   logger,
 }: {
@@ -67,6 +68,7 @@ export const extractSnippetsBatch = async ({
   term: string;
   fields: MappingField[];
   config: TopSnippetsConfig;
+  includeFrozen?: boolean;
   esClient: ElasticsearchClient;
   logger: Logger;
 }): Promise<Map<string, string[]>> => {
@@ -92,7 +94,7 @@ export const extractSnippetsBatch = async ({
   logger.debug(`TOP_SNIPPETS ES|QL query:\n${query}`);
 
   try {
-    const response = await executeEsql({ query, esClient });
+    const response = await executeEsql({ query, includeFrozen, esClient });
 
     const idColIdx = response.columns.findIndex((col) => col.name === '_id');
     const snippetColIdx = response.columns.findIndex((col) => col.name === 'snippets');

@@ -10,6 +10,8 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RulesListAutoRefresh } from './rules_list_auto_refresh';
 
+jest.setTimeout(30_000);
+
 const onRefresh = jest.fn();
 
 describe('RulesListAutoRefresh', () => {

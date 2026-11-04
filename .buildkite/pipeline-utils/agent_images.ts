@@ -8,9 +8,9 @@
  */
 
 import { stringify } from 'yaml';
-import type { BuildkiteAgentTargetingRule } from './buildkite';
-import { BuildkiteClient } from './buildkite';
-import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels';
+import type { BuildkiteAgentTargetingRule } from './buildkite/index.ts';
+import { BuildkiteClient } from './buildkite/index.ts';
+import { FIPS_VERSION, prHasFIPSLabel } from './pr_labels.ts';
 
 export const ELASTIC_IMAGES_QA_PROJECT = 'elastic-images-qa';
 export const USE_QA_IMAGE_GH_LABEL = 'ci:use-qa-image';

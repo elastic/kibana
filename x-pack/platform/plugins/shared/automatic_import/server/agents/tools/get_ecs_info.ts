@@ -8,6 +8,7 @@
 import { DynamicStructuredTool } from '@langchain/core/tools';
 import { z } from '@kbn/zod/v4';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
+import { MAX_STRING_LENGTH } from '../../../common';
 
 /**
  * Creates a tool that looks up ECS field definitions using the fields_metadata client.
@@ -15,13 +16,13 @@ import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server';
 export function getEcsInfoTool(fieldsMetadataClient: IFieldsMetadataClient): DynamicStructuredTool {
   const schema = z.object({
     root_fields: z
-      .array(z.string())
+      .array(z.string().max(MAX_STRING_LENGTH.name))
       .optional()
       .describe(
         'Array of root ECS field names (e.g., ["source", "event", "host"]). Returns direct sub-fields for each root. Batch multiple roots in a single call to reduce round-trips.'
       ),
     field_paths: z
-      .array(z.string())
+      .array(z.string().max(MAX_STRING_LENGTH.ecs_field_path))
       .optional()
       .describe(
         'Array of full ECS field paths (e.g., ["source.ip", "event.category"]). Returns full field metadata including type, description, allowed_values.'

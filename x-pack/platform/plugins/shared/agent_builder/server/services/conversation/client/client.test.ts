@@ -32,6 +32,7 @@ jest.mock('./storage', () => ({
 describe('ConversationClient', () => {
   let client: ConversationClient;
 
+  /** Pass `userId: null` to build a legacy document that never stored a `user_id`. */
   const createConversationDocument = ({
     id = 'conversation-1',
     agentId = 'agent-1',
@@ -40,7 +41,7 @@ describe('ConversationClient', () => {
   }: {
     id?: string;
     agentId?: string;
-    userId?: string;
+    userId?: string | null;
     username?: string;
   } = {}): Document =>
     ({
@@ -49,7 +50,7 @@ describe('ConversationClient', () => {
       _primary_term: 1,
       _source: {
         agent_id: agentId,
-        user_id: userId,
+        ...(userId === null ? {} : { user_id: userId }),
         user_name: username,
         space: testSpace,
         title: 'Conversation 1',
@@ -161,6 +162,123 @@ describe('ConversationClient', () => {
           rounds: [],
         })
       ).rejects.toBe(error);
+    });
+  });
+
+  describe('ownership', () => {
+    const createClientForUser = (user: { id?: string; username: string }) =>
+      createClient({
+        space: testSpace,
+        logger: loggerMock.create(),
+        esClient: {} as never,
+        user,
+      });
+
+    it('grants access on a matching user_id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument()] },
+      });
+
+      await expect(client.get('conversation-1')).resolves.toEqual(
+        expect.objectContaining({ id: 'conversation-1' })
+      );
+    });
+
+    it('denies a same-username caller with no id when the conversation stored a user_id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ userId: 'owner-profile-uid' })] },
+      });
+
+      const sameUsernameOtherRealm = createClientForUser({ username: 'test-user' });
+
+      await expect(sameUsernameOtherRealm.get('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+
+    it('falls back to username when the conversation never stored a user_id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ userId: null })] },
+      });
+
+      const legacyOwner = createClientForUser({ username: 'test-user' });
+
+      await expect(legacyOwner.get('conversation-1')).resolves.toEqual(
+        expect.objectContaining({ id: 'conversation-1' })
+      );
+    });
+
+    it('denies a different username on a conversation without a user_id', async () => {
+      mockEsClient.search.mockResolvedValue({
+        hits: { hits: [createConversationDocument({ userId: null, username: 'other-user' })] },
+      });
+
+      const otherUser = createClientForUser({ username: 'test-user' });
+
+      await expect(otherUser.get('conversation-1')).rejects.toThrow(
+        'Conversation conversation-1 not found'
+      );
+    });
+
+    it('lists on user_id, and on username only for documents without a user_id', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await client.list();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      { term: { user_id: 'user-1' } },
+                      {
+                        bool: {
+                          must_not: { exists: { field: 'user_id' } },
+                          filter: { term: { user_name: 'test-user' } },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
+            }),
+          }),
+        })
+      );
+    });
+
+    it('omits the user_id clause when the caller has no resolvable id', async () => {
+      mockEsClient.search.mockResolvedValue({ hits: { hits: [] } });
+
+      await createClientForUser({ username: 'test-user' }).list();
+
+      expect(mockEsClient.search).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.objectContaining({
+            bool: expect.objectContaining({
+              filter: expect.arrayContaining([
+                {
+                  bool: {
+                    should: [
+                      {
+                        bool: {
+                          must_not: { exists: { field: 'user_id' } },
+                          filter: { term: { user_name: 'test-user' } },
+                        },
+                      },
+                    ],
+                    minimum_should_match: 1,
+                  },
+                },
+              ]),
+            }),
+          }),
+        })
+      );
     });
   });
 });

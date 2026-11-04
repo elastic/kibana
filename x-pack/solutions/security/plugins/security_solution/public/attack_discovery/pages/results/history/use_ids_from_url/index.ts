@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { useSearchParams } from 'react-router-dom-v5-compat';
 
 import { useCallback, useMemo } from 'react';
 
-const schema = z.object({
-  ids: z.string().array(),
-});
+const schema = lazySchema(() =>
+  z.object({
+    ids: z.string().array(),
+  })
+);
 
 export const useIdsFromUrl = (): { ids: string[]; setIdsUrl: (ids: string[]) => void } => {
   const [searchParams, setSearchParams] = useSearchParams();

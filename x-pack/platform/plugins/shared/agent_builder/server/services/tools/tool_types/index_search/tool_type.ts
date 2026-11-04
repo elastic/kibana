@@ -42,6 +42,7 @@ export const getIndexSearchToolType = (
               pattern,
               row_limit: rowLimit,
               custom_instructions: customInstructions,
+              include_frozen: includeFrozen = false,
             } = config;
 
             // Resolve top snippets config from UI settings
@@ -73,6 +74,7 @@ export const getIndexSearchToolType = (
               events,
               logger,
               topSnippetsConfig,
+              includeFrozen,
             });
             return { results };
           };

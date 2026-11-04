@@ -155,6 +155,8 @@
     "@kbn/shared-ux-column-presets",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/lens-common",
+    "@kbn/core-http-browser-mocks",
   ],
   "exclude": ["target/**/*"]
 }

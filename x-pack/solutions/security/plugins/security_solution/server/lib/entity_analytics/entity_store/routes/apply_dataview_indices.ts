@@ -11,6 +11,10 @@ import { transformError } from '@kbn/securitysolution-es-utils';
 import type { ApplyEntityEngineDataviewIndicesResponse } from '../../../../../common/api/entity_analytics/entity_store/engine/apply_dataview_indices.gen';
 import { API_VERSIONS, APP_ID } from '../../../../../common/constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
+import {
+  getAllMissingPrivileges,
+  getMissingPrivilegesErrorMessage,
+} from '../../../../../common/entity_analytics/privileges';
 import type { ITelemetryEventsSender } from '../../../telemetry/sender';
 import { ENTITY_STORE_API_CALL_EVENT } from '../../../telemetry/event_based/events';
 
@@ -46,9 +50,23 @@ export const applyDataViewIndicesEntityEngineRoute = (
 
         try {
           const secSol = await context.securitySolution;
-          const { errors, successes } = await secSol
-            .getEntityStoreDataClient()
-            .applyDataViewIndices();
+          const entityStoreClient = secSol.getEntityStoreDataClient();
+
+          // Applying data view indices reconfigures and regenerates the entity discovery
+          // resources (transforms, ingest pipelines) and mints an API key, so it requires the
+          // same Elasticsearch privileges as initializing the entity store. The Kibana feature
+          // privilege alone does not gate this, so enforce the init privileges explicitly.
+          const privileges = await entityStoreClient.getEntityStoreInitPrivileges([]);
+          if (!privileges.has_all_required) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: `User does not have the required privileges to apply data view indices to the entity store\n${getMissingPrivilegesErrorMessage(
+                getAllMissingPrivileges(privileges)
+              )}`,
+            });
+          }
+
+          const { errors, successes } = await entityStoreClient.applyDataViewIndices();
 
           const errorMessages = errors.map((e) => e.message);
 

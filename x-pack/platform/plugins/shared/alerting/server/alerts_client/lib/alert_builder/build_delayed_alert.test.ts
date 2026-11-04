@@ -23,6 +23,7 @@ import {
   ALERT_STATUS,
   ALERT_STATUS_DELAYED,
   ALERT_TIME_RANGE,
+  ALERT_TRACKED,
   ALERT_UUID,
   ALERT_WORKFLOW_STATUS,
   EVENT_KIND,
@@ -67,6 +68,7 @@ describe('buildDelayedAlert', () => {
       [ALERT_PENDING_RECOVERED_COUNT]: 0,
       [ALERT_MUTED]: false,
       [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+      [ALERT_TRACKED]: true,
       [ALERT_UUID]: legacyAlert.getUuid(),
       [ALERT_WORKFLOW_STATUS]: 'open',
       [SPACE_IDS]: ['default'],
@@ -92,6 +94,7 @@ describe('buildDelayedAlert', () => {
       [ALERT_START]: now,
       [ALERT_TIME_RANGE]: { gte: now },
       [ALERT_STATUS]: ALERT_STATUS_DELAYED,
+      [ALERT_TRACKED]: true,
     });
   });
 

@@ -25,7 +25,8 @@ export default function createGetTests({ getService }: FtrProviderContext) {
   const ALERT_ID = '0359d7fcc04da9878ee9aadbda38ba55';
   const ACTION_TASK_PARAMS_ID = '6e96ac5e648f57523879661ea72525b7';
 
-  describe('migrations', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/260160
+  describe.skip('migrations', () => {
     before(async () => {
       await esArchiver.load('x-pack/platform/test/fixtures/es_archives/task_manager_tasks');
     });

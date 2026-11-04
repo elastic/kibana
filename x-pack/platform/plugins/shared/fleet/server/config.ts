@@ -321,6 +321,10 @@ export const config: PluginConfigDescriptor = {
           })
         ),
         retrySetupOnBoot: schema.boolean({ defaultValue: true }),
+        // Test/development escape hatch: skips package upload validation (name/version checks,
+        // bundled-package guards) AND asset privilege authz. Do not set in production deployments —
+        // it disables the security checks that prevent unprivileged users from uploading gated assets.
+        skipUploadPackageValidation: schema.boolean({ defaultValue: false }),
         registry: schema.object(
           {
             kibanaVersionCheckEnabled: schema.boolean({ defaultValue: true }),

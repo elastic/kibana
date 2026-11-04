@@ -82,7 +82,6 @@ module.exports = (_, argv) => {
         'history',
         'fp-ts',
         'io-ts',
-        'jquery',
         'lodash',
         'lodash/fp',
         'moment-timezone/moment-timezone',
@@ -116,19 +115,6 @@ module.exports = (_, argv) => {
 
     module: {
       noParse: [MOMENT_SRC, WEBPACK_SRC],
-      rules: [
-        {
-          include: [require.resolve('jquery')],
-          use: [
-            {
-              loader: UiSharedDepsNpm.publicPathLoader,
-              options: {
-                key: 'kbn-ui-shared-deps-npm',
-              },
-            },
-          ],
-        },
-      ],
     },
 
     resolve: {

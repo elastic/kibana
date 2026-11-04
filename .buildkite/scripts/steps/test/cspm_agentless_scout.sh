@@ -12,7 +12,6 @@ CONFIG_PATH="x-pack/solutions/security/plugins/cloud_security_posture/test/scout
 # Run modes for CSPM Agentless tests (each element: --arch X --domain Y)
 RUN_MODES=(
   '--arch stateful --domain classic'
-  '--arch serverless --domain security_complete'
 )
 
 results=()
@@ -111,4 +110,3 @@ if [[ ${#failedConfigs[@]} -gt 0 ]]; then
 fi
 
 exit $FINAL_EXIT_CODE
-

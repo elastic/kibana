@@ -8,13 +8,25 @@
 import React from 'react';
 import { waitFor, act, renderHook, type RenderHookResult } from '@testing-library/react';
 import type { CoreStart } from '@kbn/core/public';
+import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { delay } from '../utils/test_helpers';
 import { useFetcher, isPending, FETCH_STATUS } from './use_fetcher';
 
+jest.mock('@kbn/react-kibana-mount', () => ({
+  toMountPoint: () => () => undefined,
+}));
+
+const addToast = jest.fn();
+const addDangerToast = jest.fn();
+
 // Wrap the hook with a provider so it can useKibana
 const KibanaReactContext = createKibanaReactContext({
-  notifications: { toasts: { add: () => {}, danger: () => {} } },
+  notifications: { toasts: { add: addToast, addDanger: addDangerToast } },
+  rendering: {},
+  uiSettings: {
+    get: (key: string) => (key === 'notifications:lifetime:warning' ? 10000 : undefined),
+  },
 } as unknown as Partial<CoreStart>);
 
 function wrapper({ children }: React.PropsWithChildren) {
@@ -22,6 +34,11 @@ function wrapper({ children }: React.PropsWithChildren) {
 }
 
 describe('useFetcher', () => {
+  beforeEach(() => {
+    addToast.mockClear();
+    addDangerToast.mockClear();
+  });
+
   describe('when resolving after 500ms', () => {
     let hook: RenderHookResult<ReturnType<typeof useFetcher>, Parameters<typeof useFetcher>>;
 
@@ -130,6 +147,75 @@ describe('useFetcher', () => {
         refetch: expect.any(Function),
         status: 'failure',
       });
+    });
+  });
+
+  describe('error toast routing', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    it('uses toasts.add for expected transport failures so RUM is not captured via addDanger', async () => {
+      async function failingFn(): Promise<string> {
+        await delay(500);
+        throw createHttpFetchError('Failed to fetch', 'TypeError');
+      }
+
+      const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => expect(hook.result.current.status).toBe('failure'));
+
+      expect(addToast).toHaveBeenCalledTimes(1);
+      expect(addToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          color: 'danger',
+          iconType: 'error',
+          toastLifeTimeMs: 10000,
+          title: 'Error while fetching resource',
+        })
+      );
+      expect(addDangerToast).not.toHaveBeenCalled();
+    });
+
+    it('uses toasts.addDanger for HTTP 500 application errors', async () => {
+      async function failingFn(): Promise<string> {
+        await delay(500);
+        throw createHttpFetchError(
+          'Internal Server Error',
+          'Error',
+          {} as Request,
+          {
+            status: 500,
+            statusText: 'Internal Server Error',
+            url: '/internal/apm/services',
+          } as Response,
+          { message: 'Internal Server Error' }
+        );
+      }
+
+      const hook = renderHook(() => useFetcher(failingFn, []), { wrapper });
+
+      act(() => {
+        jest.advanceTimersByTime(1000);
+      });
+
+      await waitFor(() => expect(hook.result.current.status).toBe('failure'));
+
+      expect(addDangerToast).toHaveBeenCalledTimes(1);
+      expect(addDangerToast).toHaveBeenCalledWith(
+        expect.objectContaining({
+          title: 'Error while fetching resource',
+        })
+      );
+      expect(addToast).not.toHaveBeenCalled();
     });
   });
 

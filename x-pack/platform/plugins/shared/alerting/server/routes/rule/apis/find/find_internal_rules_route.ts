@@ -65,6 +65,7 @@ export const findInternalRulesRoute = (
           options,
           excludeFromPublicApi: false,
           includeSnoozeData: true,
+          allowPartialResults: body.allow_partial_results ?? false,
         });
 
         const responseBody: FindRulesResponseV1<RuleParamsV1>['body'] =

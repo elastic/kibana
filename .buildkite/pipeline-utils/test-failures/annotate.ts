@@ -10,8 +10,8 @@
 import { execSync } from 'child_process';
 import { mkdirSync, readdirSync, readFileSync, statSync } from 'fs';
 import { join } from 'path';
-import { BuildkiteClient } from '..';
-import type { Artifact } from '../buildkite/types/artifact';
+import { BuildkiteClient } from '../index.ts';
+import type { Artifact } from '../buildkite/types/artifact.ts';
 
 const buildkite = new BuildkiteClient();
 

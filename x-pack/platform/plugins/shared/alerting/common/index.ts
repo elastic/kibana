@@ -123,8 +123,10 @@ export { getBuiltinActionGroups, RecoveredActionGroup } from './builtin_action_g
 export type {
   BulkEditSkipReason,
   BulkGapsFillingSkipReason,
+  BulkDeleteSkipReason,
   BulkEditActionSkipResult,
   BulkGapsFillingSkipResult,
+  BulkDeleteActionSkipResult,
   BulkActionSkipResult,
 } from './bulk_action';
 export {

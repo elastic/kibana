@@ -43,6 +43,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       );
       await kibanaServer.savedObjects.clean({ types: ['index-pattern'] });
       await common.navigateToApp('lens');
+      await header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('noDataViewsPromptCreateDataView');
 
       const dataViewToCreate = 'logstash';
       await dataViews.createFromPrompt({ name: dataViewToCreate });

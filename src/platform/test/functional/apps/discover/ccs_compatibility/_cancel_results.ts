@@ -11,6 +11,7 @@ import expect from '@kbn/expect';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
+  const es = getService('es');
   const filterBar = getService('filterBar');
   const kibanaServer = getService('kibanaServer');
   const retry = getService('retry');
@@ -62,9 +63,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           adHoc: true,
         });
 
-        // Add a stall time to the remote indices
-        await filterBar.addDslFilter(
-          `
+        // Retry the whole sequence — see https://github.com/elastic/kibana/issues/246775.
+        // Hit count must be inside the retry: the count query can produce the callout even
+        // when the documents query fails, so asserting both ensures a real retry on failure.
+        await retry.try(async () => {
+          // No-op on the first attempt, when there's no filter yet to remove.
+          await filterBar.removeAllFilters().catch(() => {});
+
+          await filterBar.addDslFilter(
+            `
       {
         "query": {
           "error_query": {
@@ -79,18 +86,22 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           }
         }
       }`,
-          false
-        );
+            false
+          );
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
-        await testSubjects.existOrFail('queryCancelButton');
-        await testSubjects.click('queryCancelButton');
-        await header.waitUntilLoadingHasFinished();
+          // Secondary button enabled = SearchSessionState.Loading after 500ms delay,
+          // which guarantees the async-search ID is set (see query_bar_top_row.tsx).
+          await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
+          await testSubjects.existOrFail('queryCancelButton');
+          await testSubjects.click('queryCancelButton');
+          await header.waitUntilLoadingHasFinished();
 
-        // Warning callout is shown
-        await testSubjects.existOrFail('searchResponseWarningsCallout');
+          // Short timeout so a failed attempt is detected quickly and retried.
+          await testSubjects.existOrFail('searchResponseWarningsCallout', { timeout: 15_000 });
+
+          const hitCount = await discover.getHitCount();
+          expect(hitCount).to.be('14,004');
+        });
 
         // No "timed out" error notification is shown
         await toasts.assertCount(0);
@@ -105,14 +116,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         }
 
         await testSubjects.click('inspectorRequestToggleClusterDetailsftr-remote');
+        await retry.waitFor(
+          'cluster details callout to render',
+          async () =>
+            (await testSubjects.getVisibleText('inspectorRequestClustersDetails')).length > 0
+        );
         const txt = await testSubjects.getVisibleText('inspectorRequestClustersDetails');
         expect(txt).to.contain('Results may be incomplete or empty.');
-
-        // Ensure documents are still returned for the successful shards
-        await retry.try(async function tryingForTime() {
-          const hitCount = await discover.getHitCount();
-          expect(hitCount).to.be('14,004');
-        });
       });
     });
 
@@ -120,15 +130,33 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should show warning and results', async () => {
         await common.navigateToApp('discover');
         await discover.selectTextBaseLang();
+        // DELAY(10ms) is evaluated per remote row (not per block), so total duration scales
+        // with row count — the state-based wait below is the timing anchor, not this value.
         await monacoEditor.setCodeEditorValue(`FROM logstash-*, ftr-remote:logstash-* METADATA _index
   | EVAL buckets = DATE_TRUNC(5 minute, @timestamp), delay = TO_STRING(CASE(STARTS_WITH(_index, "ftr-remote"), DELAY(10ms), false))
   | STATS count = COUNT(*) BY buckets, delay`);
         await timePicker.setDefaultAbsoluteRange();
 
-        // Wait for the async search to be established on ES so that cancellation can retrieve
-        // partial results via the async search ID
-        await new Promise((resolve) => setTimeout(resolve, 5000));
+        // Wait for the secondary button — records when the async-search ID is ready client-side.
+        await testSubjects.waitForEnabled('queryCancelButton-secondary-button');
         await testSubjects.existOrFail('queryCancelButton');
+        const buttonEnabledAt = Date.now();
+
+        // Poll until the ES|QL compute task is still running AND ≥500ms has elapsed since
+        // button-enabled (covers round-trip jitter for the first async response). Click fires
+        // immediately after — no sleep between the last check and the action.
+        // See https://github.com/elastic/kibana/issues/246775 for the full rationale.
+        await retry.waitFor(
+          'esql compute task still running and response buffer elapsed',
+          async () => {
+            if (Date.now() - buttonEnabledAt < 500) return false;
+            const { nodes } = await es.tasks.list({ actions: 'indices:data/read/esql/compute*' });
+            return Object.values(nodes ?? {}).some(
+              (node) => Object.keys(node.tasks ?? {}).length > 0
+            );
+          }
+        );
+
         await testSubjects.click('queryCancelButton');
         await header.waitUntilLoadingHasFinished();
 

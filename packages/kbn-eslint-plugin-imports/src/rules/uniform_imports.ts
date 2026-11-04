@@ -20,12 +20,24 @@ import { getImportResolver } from '../get_import_resolver';
 export const UniformImportsRule: Rule.RuleModule = {
   meta: {
     fixable: 'code',
+    schema: [
+      {
+        type: 'object',
+        properties: {
+          preserveFileExtensions: {
+            type: 'boolean',
+          },
+        },
+        additionalProperties: false,
+      },
+    ],
     docs: {
       url: 'https://github.com/elastic/kibana/blob/main/packages/kbn-eslint-plugin-imports/README.mdx#kbnimportsuniform_imports',
     },
   },
 
   create(context) {
+    const preserveFileExtensions = context.options[0]?.preserveFileExtensions === true;
     const resolver = getImportResolver(context);
     const sourcePath = getSourcePath(context);
     const sourceDirname = Path.dirname(sourcePath);
@@ -50,6 +62,7 @@ export const UniformImportsRule: Rule.RuleModule = {
           dirname: sourceDirname,
           sourcePath,
           type,
+          preserveFileExtensions,
         });
 
         if (req !== correct) {

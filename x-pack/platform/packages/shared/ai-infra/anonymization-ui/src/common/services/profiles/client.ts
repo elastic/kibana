@@ -12,6 +12,7 @@ import type {
   FindAnonymizationProfilesResponse,
   DeleteAnonymizationProfileResponse,
 } from '@kbn/anonymization-common';
+import { buildPath } from '@kbn/core-http-browser';
 import {
   toCreateProfilePayload,
   toFindProfilesQuery,
@@ -62,10 +63,13 @@ export const createAnonymizationProfilesClient = (
 
   async getProfile(id) {
     const response = await fetchWithApiErrorMapping(() =>
-      http.fetch<AnonymizationProfile>(`${ANONYMIZATION_PROFILES_API_BASE}/${id}`, {
-        method: 'GET',
-        version: ANONYMIZATION_API_VERSION,
-      })
+      http.fetch<AnonymizationProfile>(
+        buildPath(`${ANONYMIZATION_PROFILES_API_BASE}/{id}`, { id }),
+        {
+          method: 'GET',
+          version: ANONYMIZATION_API_VERSION,
+        }
+      )
     );
 
     return toProfile(response);
@@ -85,11 +89,14 @@ export const createAnonymizationProfilesClient = (
 
   async updateProfile(input) {
     const response = await fetchWithApiErrorMapping(() =>
-      http.fetch<AnonymizationProfile>(`${ANONYMIZATION_PROFILES_API_BASE}/${input.id}`, {
-        method: 'PUT',
-        version: ANONYMIZATION_API_VERSION,
-        body: JSON.stringify(toUpdateProfilePayload(input)),
-      })
+      http.fetch<AnonymizationProfile>(
+        buildPath(`${ANONYMIZATION_PROFILES_API_BASE}/{id}`, { id: input.id }),
+        {
+          method: 'PUT',
+          version: ANONYMIZATION_API_VERSION,
+          body: JSON.stringify(toUpdateProfilePayload(input)),
+        }
+      )
     );
 
     return toProfile(response);
@@ -97,10 +104,13 @@ export const createAnonymizationProfilesClient = (
 
   async deleteProfile(id) {
     return fetchWithApiErrorMapping(() =>
-      http.fetch<DeleteAnonymizationProfileResponse>(`${ANONYMIZATION_PROFILES_API_BASE}/${id}`, {
-        method: 'DELETE',
-        version: ANONYMIZATION_API_VERSION,
-      })
+      http.fetch<DeleteAnonymizationProfileResponse>(
+        buildPath(`${ANONYMIZATION_PROFILES_API_BASE}/{id}`, { id }),
+        {
+          method: 'DELETE',
+          version: ANONYMIZATION_API_VERSION,
+        }
+      )
     );
   },
 });

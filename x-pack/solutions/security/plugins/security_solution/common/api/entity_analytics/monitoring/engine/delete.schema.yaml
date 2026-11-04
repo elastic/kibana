@@ -9,7 +9,9 @@ paths:
       x-labels: [ess, serverless]
       x-codegen-enabled: true
       operationId: DeleteMonitoringEngine
+      deprecated: true
       summary: Delete the Privilege Monitoring Engine
+      description: '**Deprecated in 9.4.0.**'
       parameters:
         - in: query
           name: data
