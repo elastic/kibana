@@ -9,25 +9,124 @@ import React from 'react';
 import { EuiFilterGroup, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useAbortableAsync } from '@kbn/react-hooks';
+import { APPLICATION_SOURCE } from '../../../../common/application_source';
 import { NO_WEB_VITALS } from '../../../../common/core_web_vitals';
 import type { ApplicationOverview } from '../../../../common/types/overview';
+import type { ApplicationUsageResponse } from '../../../../common/types/usage';
 import { EnvironmentFilter } from '../../../components/environment_filter';
 import { LoadErrorPrompt } from '../../../components/load_error_prompt';
 import { TimeRangePicker } from '../../../components/time_range_picker';
-import { APPLICATION_OVERVIEW_EBT_ELEMENTS } from '../../../ebt_constants';
+import { APPLICATION_OVERVIEW_EBT_ELEMENTS, ERRORS_EBT_ELEMENTS } from '../../../ebt_constants';
 import { useApiClient } from '../../../hooks/use_api_client';
+import { useApplicationLinks } from '../../../hooks/use_application_links';
 import { useEnvironment } from '../../../hooks/use_environment';
 import { useTimeRange } from '../../../hooks/use_time_range';
 import type { TimeRangeSelect } from '../../../utils/brush_time_range';
 import { toTimeRangeQuery } from '../../../utils/time_range_query';
+import { JsErrorsPanel } from '../../errors/components/js_errors_panel';
+import { ERRORS_FETCH_ERROR_TITLE } from '../../errors/errors_tab';
+import type { ApplicationErrors } from '../../errors/hooks/use_application_errors';
+import { useApplicationErrors } from '../../errors/hooks/use_application_errors';
+import { BreakdownsPanel } from './components/breakdowns_panel';
 import { CoreWebVitalsPanel } from './components/core_web_vitals_panel';
 import { OverviewKpis } from './components/overview_kpis';
 import { OverviewTrends } from './components/overview_trends';
+import { TopClicksPanel } from './components/top_clicks_panel';
+import { TopPagesPanel } from './components/top_pages_panel';
 import { usePickerEnvironments } from './hooks/use_picker_environments';
 
 const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.overview.fetchErrorTitle', {
   defaultMessage: 'Could not load the Overview',
 });
+
+const USAGE_FETCH_ERROR_TITLE = i18n.translate(
+  'xpack.digitalExperience.overview.usageFetchErrorTitle',
+  { defaultMessage: 'Could not load the pages, browsers and clicks' }
+);
+
+const EMPTY_USAGE: ApplicationUsageResponse = {
+  topPages: [],
+  breakdowns: { browsers: [], operatingSystems: [], devices: [] },
+  topClicks: [],
+};
+
+/** The most frequent error groups on the Overview; the Errors tab lists the rest. */
+const TOP_ERRORS_ROWS = 5;
+
+/** The panels below the trends, where a failed request replaces only its own panels. */
+function UsageAndErrorsPanels({
+  serviceName,
+  usage,
+  isLoading,
+  usageError,
+  onUsageRetry,
+  topErrors,
+}: {
+  serviceName: string;
+  usage: ApplicationUsageResponse;
+  isLoading: boolean;
+  usageError: Error | undefined;
+  onUsageRetry: () => void;
+  topErrors: ApplicationErrors;
+}) {
+  const { errorsHref, sessionsHref } = useApplicationLinks(serviceName, APPLICATION_SOURCE.otel);
+
+  return (
+    <>
+      {usageError ? (
+        <LoadErrorPrompt
+          data-test-subj="digitalExperienceOverviewUsageError"
+          retryDataTestSubj="digitalExperienceOverviewUsageRetry"
+          retryEbtElement={APPLICATION_OVERVIEW_EBT_ELEMENTS.USAGE_RETRY}
+          title={USAGE_FETCH_ERROR_TITLE}
+          error={usageError}
+          onRetry={onUsageRetry}
+        />
+      ) : (
+        <EuiFlexGroup gutterSize="m" alignItems="stretch">
+          <EuiFlexItem grow={3}>
+            <TopPagesPanel pages={usage.topPages} isLoading={isLoading} />
+          </EuiFlexItem>
+          <EuiFlexItem grow={2}>
+            <BreakdownsPanel
+              breakdowns={usage.breakdowns}
+              isLoading={isLoading}
+              sessionsHref={sessionsHref}
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      )}
+      <EuiSpacer size="m" />
+      <EuiFlexGroup gutterSize="m" alignItems="stretch">
+        <EuiFlexItem grow={3}>
+          {topErrors.error ? (
+            <LoadErrorPrompt
+              data-test-subj="digitalExperienceOverviewTopErrorsError"
+              retryDataTestSubj="digitalExperienceOverviewTopErrorsRetry"
+              retryEbtElement={ERRORS_EBT_ELEMENTS.RETRY}
+              title={ERRORS_FETCH_ERROR_TITLE}
+              error={topErrors.error}
+              onRetry={topErrors.refresh}
+            />
+          ) : (
+            <JsErrorsPanel
+              errors={topErrors.response?.errors ?? []}
+              isLoading={topErrors.isLoading}
+              sessionsWithErrorsHref={sessionsHref({ hasErrors: true })}
+              maxRows={TOP_ERRORS_ROWS}
+              viewAllHref={errorsHref}
+            />
+          )}
+        </EuiFlexItem>
+        {!usageError && (
+          <EuiFlexItem grow={2}>
+            <TopClicksPanel clicks={usage.topClicks} isLoading={isLoading} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+    </>
+  );
+}
 
 /** Shown while loading: no metric is a measured zero. */
 const emptyOverview = (serviceName: string): ApplicationOverview => ({
@@ -98,6 +197,32 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
   );
   // Nothing has been fetched before the first request starts.
   const isLoading = loading || (!response && !error);
+
+  // Its own request, so the KPIs never wait on it and its failure only replaces its panels.
+  const {
+    value: usageResponse,
+    loading: usageLoading,
+    error: usageError,
+    refresh: refreshUsage,
+  } = useAbortableAsync(
+    async ({ signal }) => {
+      return apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/usage', {
+        signal,
+        params: { path: { serviceName }, query: toTimeRangeQuery(timeRange, environment) },
+      });
+    },
+    [apiClient, serviceName, timeRange, environment],
+    { clearValueOnNext: true, unsetValueOnError: true }
+  );
+  const isUsageLoading = usageLoading || (!usageResponse && !usageError);
+
+  const topErrors = useApplicationErrors(serviceName);
+
+  const refreshAll = () => {
+    refresh();
+    refreshUsage();
+    topErrors.refresh();
+  };
   // The picker swaps its list for a spinner while loading, so it only loads until it has a list.
   const environments = usePickerEnvironments(serviceName, response);
 
@@ -116,7 +241,7 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           </EuiFilterGroup>
         </EuiFlexItem>
         <EuiFlexItem>
-          <TimeRangePicker onRefresh={refresh} />
+          <TimeRangePicker onRefresh={refreshAll} />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="m" />
@@ -136,6 +261,15 @@ export function OtelOverview({ serviceName }: { serviceName: string }) {
           onTimeRangeSelect={setTimeRange}
         />
       )}
+      <EuiSpacer size="m" />
+      <UsageAndErrorsPanels
+        serviceName={serviceName}
+        usage={usageResponse ?? EMPTY_USAGE}
+        isLoading={isUsageLoading}
+        usageError={usageError}
+        onUsageRetry={refreshUsage}
+        topErrors={topErrors}
+      />
     </>
   );
 }

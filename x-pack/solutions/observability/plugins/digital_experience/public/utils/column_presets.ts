@@ -11,7 +11,7 @@ import type { ColumnPreset } from '@kbn/shared-ux-column-presets';
 // Every column has a fixed width and a single line, so filtering or longer values never resize
 // the table or its rows.
 
-/** A metric column of the Applications list, right-aligned like APM's lists. */
+/** A metric column, e.g. a count or a duration, right-aligned like APM's lists. */
 export const metricColumnPreset: ColumnPreset = () => ({
   width: '8.5em',
   minWidth: '8.5em',

@@ -15,6 +15,8 @@ import { useListQuery } from './use_list_query';
 
 export interface ApplicationLinks {
   overviewHref: string;
+  errorsHref: string;
+  networkHref: string;
   sessionsHref: (sessionsQuery?: SessionsListUrlQuery) => string;
   sessionHref: (sessionId: string, sessionsQuery?: SessionsListUrlQuery) => string;
 }
@@ -37,6 +39,8 @@ export const useApplicationLinks = (
     const query = { ...listQuery, source };
     return {
       overviewHref: toHref(router.link('/{serviceName}', { path: { serviceName }, query })),
+      errorsHref: toHref(router.link('/{serviceName}/errors', { path: { serviceName }, query })),
+      networkHref: toHref(router.link('/{serviceName}/network', { path: { serviceName }, query })),
       sessionsHref: (sessionsQuery = {}) =>
         toHref(
           router.link('/{serviceName}/sessions', {
