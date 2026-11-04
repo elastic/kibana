@@ -15,6 +15,11 @@ export interface GenAiTextBlock {
   content: string;
 }
 
+export interface GenAiReasoningBlock {
+  type: 'reasoning';
+  content: string;
+}
+
 export interface GenAiToolCallBlock {
   type: 'tool_call';
   id?: string;
@@ -35,6 +40,7 @@ export interface GenAiUnknownBlock {
 
 export type GenAiMessageBlock =
   | GenAiTextBlock
+  | GenAiReasoningBlock
   | GenAiToolCallBlock
   | GenAiToolResponseBlock
   | GenAiUnknownBlock;
@@ -48,6 +54,9 @@ const toPartBlock = (part: unknown): GenAiMessageBlock => {
   const { type } = part;
   if (type === 'text') {
     return { type: 'text', content: typeof part.content === 'string' ? part.content : '' };
+  }
+  if (type === 'reasoning' && typeof part.content === 'string') {
+    return { type: 'reasoning', content: part.content };
   }
   if (type === 'tool_call') {
     return {

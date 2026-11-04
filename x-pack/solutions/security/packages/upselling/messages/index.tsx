@@ -95,3 +95,12 @@ export const ENDPOINT_CUSTOM_YARA_SIGNATURES = (requiredProduct: string) =>
       requiredProduct,
     },
   });
+
+export const ENDPOINT_REGISTRY_CREDENTIAL_HARDENING = (requiredProduct: string) =>
+  i18n.translate('securitySolutionPackages.endpointRegistryCredentialHardening.upsell', {
+    defaultMessage:
+      'To enable registry credential hardening, you must add {requiredProduct} to your project.',
+    values: {
+      requiredProduct,
+    },
+  });

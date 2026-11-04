@@ -12,6 +12,9 @@ import { ExecutionStatus } from '@kbn/workflows';
 import { createNightshiftInvestigationsServerRoute } from '../create_server_route';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../../lib/automations/types';
+import { readAutomationUsage } from '../../lib/automations/automation_budget';
+
+const SKIP_REASONS = ['daily_limit', 'investigation_limit', 'no_open_investigation'] as const;
 
 const mapRunStatus = (status: ExecutionStatus): 'succeeded' | 'running' | 'failed' | 'skipped' => {
   if (status === ExecutionStatus.COMPLETED) return 'succeeded';
@@ -34,7 +37,8 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
   options: {
     access: 'internal',
     summary: 'List automation runs',
-    description: 'Returns run history for a nightshift automation.',
+    description:
+      'Returns run history and current UTC-day dispatch usage for a nightshift automation.',
   },
   security: {
     authz: { requiredPrivileges: ['read_nightshift'] },
@@ -62,8 +66,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       NIGHTSHIFT_AUTOMATION_SO_TYPE,
       params.path.id
     );
+    const usedToday = await readAutomationUsage(soClient, params.path.id);
     if (!so.attributes.workflowId) {
-      return { runs: [], total: 0, page: params.query.page, size: params.query.size };
+      return { runs: [], total: 0, usedToday, page: params.query.page, size: params.query.size };
     }
 
     const executions = await workflowsManagement.management.getWorkflowExecutions(
@@ -79,24 +84,45 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       spaceId
     );
 
-    const stepExecutions = await workflowsManagement.management.searchStepExecutions(
-      {
-        workflowId: so.attributes.workflowId,
-        stepId: 'trigger_investigation',
-        workflowExecutionIds: executions.results.map(({ id }) => id),
-        includeInput: true,
-        includeOutput: true,
-        page: 1,
-        size: Math.max(executions.results.length, 1),
-        sourceIncludes: ['workflowRunId', 'input', 'output'],
-        request,
-      },
-      spaceId
+    const { workflowId } = so.attributes;
+    const stepExecutions = await Promise.all(
+      [
+        'trigger_investigation',
+        'trigger_alert_investigation',
+        'trigger_investigation_alert',
+        'trigger_investigation_slack',
+        'follow_up_recovered_alert',
+      ].map((stepId) =>
+        workflowsManagement.management.searchStepExecutions(
+          {
+            workflowId,
+            stepId,
+            workflowExecutionIds: executions.results.map(({ id }) => id),
+            includeInput: true,
+            includeOutput: true,
+            page: 1,
+            size: Math.max(executions.results.length, 1),
+            sourceIncludes: ['workflowRunId', 'input', 'output'],
+            request,
+          },
+          spaceId
+        )
+      )
     );
-    const stepByRunId = new Map(stepExecutions.results.map((step) => [step.workflowRunId, step]));
+    const [defaultSteps, legacyAlertSteps, alertSteps, slackSteps, recoveredAlertSteps] =
+      stepExecutions.map(
+        ({ results }) => new Map(results.map((step) => [step.workflowRunId, step]))
+      );
 
     const runs = executions.results.map((exec) => {
-      const step = stepByRunId.get(exec.id);
+      const step =
+        (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
+          ? alertSteps.get(exec.id) ??
+            legacyAlertSteps.get(exec.id) ??
+            recoveredAlertSteps.get(exec.id)
+          : exec.triggeredBy === 'slack2.message'
+          ? slackSteps.get(exec.id)
+          : undefined) ?? defaultSteps.get(exec.id);
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -107,9 +133,11 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
           : {};
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
+      const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
+
       return {
         id: exec.id,
-        status: mapRunStatus(exec.status),
+        status: skipReason ? ('skipped' as const) : mapRunStatus(exec.status),
         startedAt: exec.startedAt,
         finishedAt: exec.finishedAt,
         duration: exec.duration,
@@ -117,14 +145,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         title: getString(input['title']),
         message: getString(input['message']),
         investigationId: getString(output['investigation_id']),
-        skipReason: null,
-        dailyLimit: so.attributes.runtime.dailyDispatchLimit,
+        skipReason: skipReason ?? null,
+        dailyLimit: typeof output['daily_limit'] === 'number' ? output['daily_limit'] : undefined,
       };
     });
 
     return {
       runs,
       total: executions.total,
+      usedToday,
       page: executions.page,
       size: executions.size,
     };

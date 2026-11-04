@@ -15,6 +15,8 @@ import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   deriveInternalCallerAttestation,
   HTTPAuthorizationHeader,
+  isExternalUiamCredential,
+  resolveUiamClientAuthentication,
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
 } from '@kbn/core-security-server';
 import type {
@@ -37,7 +39,10 @@ import {
   getUiamClientAuthentication,
   type UiamClientAuthentication,
 } from './get_client_authentication';
-import { getUiamCredentialsFromRequest } from './get_uiam_credentials';
+import {
+  getUiamAuthorizationHeaderFromRequest,
+  getUiamCredentialsFromRequest,
+} from './get_uiam_credentials';
 import { getProtectedResource } from './oauth_protected_resource';
 import type {
   ServiceAccountAssumableBy,
@@ -520,15 +525,28 @@ export class UiamService implements UiamServicePublic {
     };
   }
 
-  /**
-   * Builds the `Authorization` and client authentication headers for a UIAM call made on behalf of
-   * the given request: the request's own UIAM access token, plus the client authentication that
-   * rode in with it, or Kibana's own shared secret when none was supplied.
-   */
   #getRequestAuthenticationHeaders(request: KibanaRequest): Record<string, string> {
+    const credential = getUiamAuthorizationHeaderFromRequest(request);
+    const clientAuthentication = resolveUiamClientAuthentication(
+      this.#config.sharedSecret,
+      request.isFakeRequest
+        ? {
+            credentialSource: isExternalUiamCredential(request) ? 'external' : 'internal',
+            credential,
+          }
+        : {
+            credentialSource: 'inbound',
+            credential,
+            relayedClientAuthentication: request.headers[ES_CLIENT_AUTHENTICATION_HEADER],
+            requestHeaders: request.headers,
+          }
+    );
+
     return {
-      ...this.#getClientAuthenticationHeaders(getUiamClientAuthentication(request)),
-      Authorization: `Bearer ${getUiamCredentialsFromRequest(request)}`,
+      ...(typeof clientAuthentication === 'string'
+        ? { [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication }
+        : {}),
+      Authorization: credential.toString(),
     };
   }
 

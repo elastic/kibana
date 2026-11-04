@@ -40,8 +40,13 @@ describe('history checks', () => {
       const query = buildAnomaliesHistoryReachesBackQuery(range, ['job_a', 'job_b']);
       expect(query).toContain('FROM .ml-anomalies-shared*');
       expect(query).toContain('job_id IN ("job_a", "job_b")');
+      expect(query).toContain('result_type == "record" AND is_interim == false');
       expect(query).toContain('| STATS oldest = MIN(@timestamp)');
       expect(query).toContain(`| EVAL reaches_back = COALESCE(oldest <= ${start}, false)`);
+    });
+
+    it('does not apply the tile score threshold: old low-score records still show the history', () => {
+      expect(buildAnomaliesHistoryReachesBackQuery(range, ['job_a'])).not.toContain('record_score');
     });
 
     it('asks whether the oldest entity was first seen before that', () => {

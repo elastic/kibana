@@ -172,6 +172,23 @@ describe('getAlertRowActionGroups', () => {
     expect(groups[4]).toHaveLength(0); // chat — always empty for events
   });
 
+  it('places remove from case after add to case in both modes', () => {
+    const caseProps = {
+      ...emptyProps,
+      addToCaseItems: oneItem('add'),
+      removeFromCaseItems: oneItem('remove'),
+    };
+
+    expect(getAlertRowActionGroups({ ...caseProps, isAlert: true })[1]).toEqual([
+      ...oneItem('add'),
+      ...oneItem('remove'),
+    ]);
+    expect(getAlertRowActionGroups({ ...caseProps, isAlert: false })[1]).toEqual([
+      ...oneItem('add'),
+      ...oneItem('remove'),
+    ]);
+  });
+
   it('hasItems agrees with the menu rendering across gate permutations', () => {
     // All-empty → no items
     expect(getAlertRowActionGroups(emptyProps).some((g) => g.length > 0)).toBe(false);

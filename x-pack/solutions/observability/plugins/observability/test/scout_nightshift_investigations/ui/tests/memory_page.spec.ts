@@ -118,8 +118,7 @@ const KEYWORD_DOCS_WITH_BOTH = KEYWORD_DOCS.filter(
   (doc) => doc.tags.includes(INVOKE_AGENT_KEYWORD) && doc.tags.includes(CHECKOUT_KEYWORD)
 ).map((doc) => doc.key);
 
-// Failing: See https://github.com/elastic/kibana/issues/297192
-test.describe.skip(
+test.describe(
   'Semantic Memory page',
   {
     // Stateful classic only. Semantic Memory needs its own Kibana flag, which the
@@ -259,9 +258,9 @@ test.describe.skip(
     });
 
     test.beforeEach(async ({ browserAuth, page }) => {
-      // Significant Events refuses to render its tabs at all until the
-      // availability route says so, and that route needs the plugin's managed
-      // index. The alert spec in this suite stubs the same thing.
+      // The Nightshift shell renders nothing until the Significant Events
+      // availability route reports available, and that route needs the plugin's
+      // managed index. The alert spec in this suite stubs the same thing.
       await mockInvestigationApi(page);
       await browserAuth.loginWithCustomRole(MEMORY_CONFIGURE_ROLE);
     });
@@ -276,10 +275,10 @@ test.describe.skip(
      * Opens the Memory page by loading its route, the way a bookmark or a pasted
      * link does.
      *
-     * That used to bounce to Streams: the page builds its tab list from an
-     * availability query that is still pending on the first render, so `memory` was
-     * briefly not one of its tabs and an unknown tab is redirected to the first
-     * one. Loading the route directly and staying on it is the assertion.
+     * The Knowledge page redirects a tab its availability queries do not report as
+     * enabled to the first one that is, so mounting on the requested route is the
+     * assertion. The mounted tab is the signal; the URL is only read once it is up,
+     * because a client-side redirect lands after `goto` resolves.
      */
     const gotoMemory = async (
       page: ScoutPage,
@@ -287,24 +286,21 @@ test.describe.skip(
       spaceId: string = SUITE_SPACE_ID
     ) => {
       await page.goto(memoryUrl(kbnUrl, spaceId));
-      await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
+      expect(page.url()).toContain(memoryPath(spaceId));
     };
 
     /** Reload on the Memory route and require it to still be Memory afterwards. */
     const reloadMemory = async (page: ScoutPage, spaceId: string = SUITE_SPACE_ID) => {
       await page.reload();
-      await expect.poll(() => page.url(), { timeout: 30_000 }).toContain(memoryPath(spaceId));
       await expect(page.testSubj.locator('nightshiftMemoryTab')).toBeVisible();
+      expect(page.url()).toContain(memoryPath(spaceId));
     };
 
     test('E1 lists the seeded memories on a cold load of the route', async ({
       page,
       kbnUrl,
     }, testInfo) => {
-      // `gotoMemory` asserts the URL survived the load, which is the tab being
-      // mounted: the page redirects anything it does not recognise to its first tab,
-      // so landing on Memory at all means Memory was a tab.
       await gotoMemory(page, kbnUrl);
 
       await expect(page.testSubj.locator(`nightshiftMemoryLink-memory_${MAIN}`)).toBeVisible();

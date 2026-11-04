@@ -96,6 +96,47 @@ describe('extractDiscoveriesFromToolCall', () => {
     expect(extractDiscoveriesFromToolCall(steps)[0]).not.toHaveProperty('written');
   });
 
+  it('takes the status and severity the tool decided, since the agent sends neither', () => {
+    const steps: ConverseStep[] = [
+      {
+        type: 'tool_call',
+        tool_id: TOOL_ID_EVENTS_WRITE,
+        tool_call_id: 'ew-decided',
+        params: { items: [{ title: 'Breach' }, { title: 'Unchanged', event_id: 'event-2' }] },
+        results: [
+          {
+            data: {
+              results: [
+                {
+                  index: 0,
+                  event_id: 'event-1',
+                  written: true,
+                  status: 'active',
+                  severity: 'high',
+                },
+                {
+                  index: 1,
+                  event_id: 'event-2',
+                  written: false,
+                  reason: 'unchanged_outcome',
+                  status: 'recovering',
+                },
+              ],
+            },
+          },
+        ],
+      },
+    ];
+
+    expect(extractSignificantEventsFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', status: 'active', severity: 'high' }),
+    ]);
+    expect(extractDiscoveriesFromToolCall(steps)).toEqual([
+      expect.objectContaining({ event_id: 'event-1', status: 'active' }),
+      expect.objectContaining({ event_id: 'event-2', status: 'recovering' }),
+    ]);
+  });
+
   it('does not treat an unknown event id failure as a produced discovery', () => {
     const steps: ConverseStep[] = [
       {

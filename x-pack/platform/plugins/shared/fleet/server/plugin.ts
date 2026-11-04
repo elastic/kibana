@@ -801,6 +801,7 @@ export class FleetPlugin
       logFactory: this.initializerContext.logger,
       config: {
         taskInterval: config.versionSpecificPolicyAssignment?.taskInterval,
+        orphanSweepIntervalMs: config.versionSpecificPolicyAssignment?.orphanSweepIntervalMs,
       },
     });
     this.lockManagerService = new LockManagerService(core, this.initializerContext.logger.get());

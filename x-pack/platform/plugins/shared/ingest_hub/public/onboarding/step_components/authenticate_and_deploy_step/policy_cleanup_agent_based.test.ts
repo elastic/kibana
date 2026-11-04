@@ -184,6 +184,46 @@ describe('updateAgentBasedPolicy — payload shape', () => {
     expect(payload.policy_ids).toEqual(['agent-policy-1', 'agent-policy-2']);
   });
 
+  it('sends the namespace the instances now deploy into over the existing one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      instances: [instance],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'inst-b': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].namespace).toBe('prod');
+  });
+
+  it('prefers a duplicate’s own namespace over the global one', async () => {
+    mockGetPackageInfo.mockResolvedValue({
+      data: { item: { version: '2.5.0', vars: [], policy_templates: [] } },
+    });
+    const duplicate = { ...makeInstance('vpcflow__dup-1', 'vpcflow'), isDuplicate: true };
+    await cleanupAgentBasedPolicies({
+      ...BASE_OPTS,
+      globalNamespace: 'prod',
+      storedServiceVars: {
+        'vpcflow__dup-1': {
+          enabledDataStreams: ['vpcflow'],
+          varsByDataStream: {},
+          namespace: 'staging',
+        },
+      },
+      instances: [duplicate],
+      servicesMap: new Map([['vpcflow', vpcflow]]),
+      pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },
+      currentPolicyIdsByInstance: { 'vpcflow__dup-1': 'policy-1' },
+      selectedAgentPolicyIds: ['agent-policy-1'],
+    });
+    expect(mockUpdatePackagePolicy.mock.calls[0][1].namespace).toBe('staging');
+  });
+
   it('keeps the stored secret keys when the form kept them (empty values), and replaces them together', async () => {
     mockGetPackageInfo.mockResolvedValue({
       data: {

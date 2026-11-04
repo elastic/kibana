@@ -27,7 +27,7 @@ const connectSlackAppRoute = createServerRoute({
     access: 'internal',
     summary: 'Start the Elastic Slack App install',
     description:
-      'Mints a managed Agent Builder API key for the Nightshift Relay, starts the Slack OAuth install, and returns the Slack authorization URL.',
+      'Starts the Slack OAuth install and returns the authorization URL. Serverless with xpack.actions.relay.uiam.enabled sends a UIAM service-account id; otherwise it mints a managed API key.',
   },
   security: {
     authz: {
@@ -147,10 +147,12 @@ const bindingsSlackAppRoute = createServerRoute({
 
 function throwRelayError(error: RelayRequestError): never {
   const msg = error.relayMessage ?? error.message;
-  if (error.statusCode === 409) throw conflict(msg);
-  if (error.statusCode === 403) throw forbidden(msg);
-  if (error.statusCode === 404) throw notFound(msg);
-  throw badGateway(msg);
+  // Boom `data` becomes the response's `attributes.data`, where the UI reads `reason`.
+  const data = error.reason ? { reason: error.reason } : undefined;
+  if (error.statusCode === 409) throw conflict(msg, data ?? { reason: 'channel_taken' });
+  if (error.statusCode === 403) throw forbidden(msg, data);
+  if (error.statusCode === 404) throw notFound(msg, data);
+  throw badGateway(msg, data);
 }
 
 const bindChannelSlackAppRoute = createServerRoute({

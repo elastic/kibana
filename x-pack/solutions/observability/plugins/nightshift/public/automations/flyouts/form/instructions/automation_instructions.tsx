@@ -91,12 +91,14 @@ export const AutomationInstructions = ({
   onInstructionsChange,
   onModeChange,
   readOnly = false,
+  maxLength,
 }: {
   instructions: string;
   mode: InstructionMode;
   onInstructionsChange: (instructions: string) => void;
   onModeChange: (mode: InstructionMode) => void;
   readOnly?: boolean;
+  maxLength?: number;
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const { euiTheme } = useEuiTheme();
@@ -162,6 +164,7 @@ export const AutomationInstructions = ({
         <textarea
           ref={textareaRef}
           rows={3}
+          maxLength={maxLength}
           aria-label={labels.ariaLabel}
           placeholder={current.placeholder}
           value={instructions}

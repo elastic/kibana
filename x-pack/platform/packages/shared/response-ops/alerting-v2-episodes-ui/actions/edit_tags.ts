@@ -64,7 +64,9 @@ export const createEditTagsAction = (
           eps.map(
             (ep): BulkTagEpisodeActionItem => ({
               alert_id: ep['episode.id'],
-              tags,
+              // The API clears with `null` and rejects an empty array, so an
+              // emptied selection is sent as a clear.
+              tags: tags.length === 0 ? null : tags,
             })
           )
         ),

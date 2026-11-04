@@ -19,11 +19,6 @@ interface ActionsMenuPopoverProps extends ActionsMenuProps {
   closePopover: () => void;
 }
 
-const panelCss = css({
-  width: 'min(920px, calc(100vw - 48px))',
-  overflow: 'hidden',
-});
-
 export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   onActionSelected,
   commands,
@@ -34,6 +29,11 @@ export const ActionsMenuPopover = React.memo(function ActionsMenuPopover({
   isOpen,
 }: ActionsMenuPopoverProps) {
   if (!isOpen) return null;
+
+  const panelCss = css({
+    width: 'min(920px, calc(100vw - 48px))',
+    overflow: 'hidden',
+  });
 
   return (
     <EuiModal

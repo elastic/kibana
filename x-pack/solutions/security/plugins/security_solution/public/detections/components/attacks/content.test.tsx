@@ -107,6 +107,7 @@ describe('AttacksPageContent', () => {
     (useKibana as jest.Mock).mockReturnValue({
       services: {
         application: { capabilities: { advancedSettings: { save: true } } },
+        docLinks: { links: { siem: { attackDiscovery: 'https://example.com/docs' } } },
         http: { basePath: { prepend: (path: string) => path } },
         featureFlags: { useBooleanValue: jest.fn().mockReturnValue(false) },
         settings: {

@@ -24,7 +24,7 @@ import { defaultConfig } from '../../default/stateful/base.config';
  * investigation write path API tests start on this port; it never answers, so their runs stay in
  * progress. Keep both in sync with `NIGHTSHIFT_SCOUT_LLM_PORT` in those tests' fixtures.
  */
-const NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID = '.anthropic-claude-4.6-sonnet-chat_completion';
+const NIGHTSHIFT_INVESTIGATION_DEFAULT_MODEL_ID = '.anthropic-claude-5.5-sonnet-chat_completion';
 const NIGHTSHIFT_SCOUT_LLM_PORT = 8095;
 
 export const servers: ScoutServerConfig = {
@@ -35,6 +35,9 @@ export const servers: ScoutServerConfig = {
       ...defaultConfig.kbnTestServer.serverArgs,
       '--xpack.nightshift_investigations.enabled=true',
       '--xpack.nightshift_investigations.memory.enabled=true',
+      // Investigations only run as the Nightshift agent service account, through the entry point
+      // the suite's global setup installs in the space.
+      '--xpack.security.serviceAccounts.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--feature_flags.overrides.nightshift.enabled=true',

@@ -20,6 +20,7 @@ import type {
 } from '../types';
 import { formatFieldValueReact } from './format_value';
 import { getDataViewFieldFromDataSource } from './get_data_view_field_from_data_source';
+import { MAX_RENDERED_FIELD_VALUE_LENGTH } from './truncate_field_value';
 
 // We use a special type here allowing formattedValue to be undefined because
 // we want to avoid formatting values which will not be shown to users since
@@ -32,11 +33,17 @@ type PartialHitReactPair = [
 
 interface FormatHitReactOptions {
   skipNullishValues?: boolean;
+  isInteractive?: boolean;
 }
 
 const formattedHitCache = new WeakMap<
   EsHitRecord,
-  { formattedHit: FormattedHit; maxEntries: number; skipNullishValues: boolean }
+  {
+    formattedHit: FormattedHit;
+    maxEntries: number;
+    skipNullishValues: boolean;
+    isInteractive: boolean;
+  }
 >();
 
 /**
@@ -59,12 +66,14 @@ export function formatHitReact(
   options?: FormatHitReactOptions
 ): FormattedHit {
   const skipNullishValues = Boolean(options?.skipNullishValues);
+  const isInteractive = options?.isInteractive ?? true;
   const cached = formattedHitCache.get(hit.raw);
 
   if (
     cached &&
     cached.maxEntries === maxEntries &&
-    cached.skipNullishValues === skipNullishValues
+    cached.skipNullishValues === skipNullishValues &&
+    cached.isInteractive === isInteractive
   ) {
     return cached.formattedHit;
   }
@@ -127,6 +136,8 @@ export function formatHitReact(
       fieldFormats,
       dataView,
       field,
+      options: { isInteractive },
+      maxDisplayLength: MAX_RENDERED_FIELD_VALUE_LENGTH,
     });
   }
 
@@ -145,7 +156,7 @@ export function formatHitReact(
 
   const formattedHit = renderedPairs as FormattedHit;
 
-  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues });
+  formattedHitCache.set(hit.raw, { formattedHit, maxEntries, skipNullishValues, isInteractive });
 
   return formattedHit;
 }

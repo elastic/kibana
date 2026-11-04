@@ -107,7 +107,12 @@ if (window.__kbnStrictCsp__ && window.__kbnCspNotEnforced__) {
   // window.onload, this avoids blocking on font/favicon downloads before
   // starting bundle loads.
   (function () {
-    function failure() {
+    function failure(event) {
+      var failedTarget = event && event.target ? event.target : {};
+      if (window.console) {
+        window.console.error('Kibana bootstrap failed: could not load ' + (failedTarget.src || failedTarget.href || 'a required asset'));
+      }
+
       // make subsequent calls to failure() noop
       failure = function () {};
 

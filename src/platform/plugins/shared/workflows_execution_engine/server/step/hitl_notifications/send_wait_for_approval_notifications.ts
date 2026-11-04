@@ -21,13 +21,18 @@ import {
   assertConnectorSucceeded,
   buildServiceNowAddCommentInput,
   buildSlack2SendMessageInput,
+  buildTeamsSendChannelMessageInput,
   escapeServiceNowCommentText,
+  escapeTeamsHtml,
   executeHitlHttpChannel,
   fitHitlTextPreservingSuffix,
   renderServiceNowField,
+  renderTeamsField,
   SERVICENOW_COMMENT_MAX_LENGTH,
   serviceNowCommentLink,
   slackApiChannelTarget,
+  TEAMS_CONTENT_MAX_LENGTH,
+  teamsHtmlLink,
 } from './hitl_connector_helpers';
 import type { ConnectorExecutor } from '../../connector_executor';
 
@@ -83,6 +88,26 @@ function buildServiceNowApprovalComment({
       rejectUrl
     )}`,
     SERVICENOW_COMMENT_MAX_LENGTH
+  );
+}
+
+function buildTeamsApprovalMessage({
+  message,
+  approveLabel,
+  rejectLabel,
+  approveUrl,
+  rejectUrl,
+}: {
+  message: string;
+  approveLabel: string;
+  rejectLabel: string;
+  approveUrl: string;
+  rejectUrl: string;
+}): string {
+  return fitHitlTextPreservingSuffix(
+    escapeTeamsHtml(message),
+    `<br>${teamsHtmlLink(approveLabel, approveUrl)} ${teamsHtmlLink(rejectLabel, rejectUrl)}`,
+    TEAMS_CONTENT_MAX_LENGTH
   );
 }
 
@@ -284,6 +309,26 @@ export async function sendWaitForApprovalNotifications({
         table,
         sysId,
         buildServiceNowApprovalComment(linkParams)
+      ),
+      abortController,
+    });
+    assertConnectorSucceeded(result);
+  }
+
+  const teamsConfig = channels.teams;
+  const teamsConnectorId = teamsConfig?.['connector-id'];
+  const teamId = teamsConfig?.['team-id'];
+  const channelId = teamsConfig?.['channel-id'];
+  if (teamsConnectorId && teamId && channelId) {
+    const renderedTeamId = renderTeamsField(teamId, renderTemplate, 'team-id');
+    const renderedChannelId = renderTeamsField(channelId, renderTemplate, 'channel-id');
+    const result = await connectorExecutor.execute({
+      connectorType: 'microsoft-teams',
+      connectorNameOrId: teamsConnectorId,
+      input: buildTeamsSendChannelMessageInput(
+        renderedTeamId,
+        renderedChannelId,
+        buildTeamsApprovalMessage(linkParams)
       ),
       abortController,
     });

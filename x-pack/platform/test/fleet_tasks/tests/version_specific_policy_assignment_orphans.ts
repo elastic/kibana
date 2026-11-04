@@ -12,6 +12,7 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
 } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
+import { waitForPolicyBaseIdBackfill } from '../../fleet_api_integration/helpers';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 export default function (providerContext: FtrProviderContextWithServices) {
@@ -61,6 +62,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // Otherwise the setup backfill can set policy_base_id on the agents of the tests
+      await waitForPolicyBaseIdBackfill(providerContext);
       // Fail fast with a clear message instead of two opaque timeouts: a leftover policy with
       // version conditions makes Phase 1 run a wildcard query that fails with expensive queries off.
       const versionConditioned = await es.search({
@@ -124,6 +127,10 @@ export default function (providerContext: FtrProviderContextWithServices) {
       await createAgentDoc(providerContext, 'agent-no-base', variantId(), '9.4.0');
       // Not an orphan: plain (non-versioned) policy id without policy_base_id.
       await createAgentDoc(providerContext, 'agent-plain', parentId, '9.4.0');
+      // OpAMP collectors are not moved, and do not keep the variant doc from being deleted.
+      await createAgentDoc(providerContext, 'opamp-collector', variantId(), '9.4.0', true, {
+        type: 'OPAMP',
+      });
 
       await retry.tryForTime(TASK_TIMEOUT, async () => {
         const agent = await getAgent('agent-no-base');
@@ -132,6 +139,7 @@ export default function (providerContext: FtrProviderContextWithServices) {
         expect(docs.some((p: any) => p.policy_id === variantId())).to.be(false);
       });
       expect((await getAgent('agent-plain')).policy_id).to.be(parentId);
+      expect((await getAgent('opamp-collector')).policy_id).to.be(variantId());
     });
 
     it('reassigns an agent without policy_base_id when its variant doc is already gone', async () => {

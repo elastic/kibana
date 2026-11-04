@@ -63,4 +63,6 @@ export interface UpdateOperationOpts {
   errors: BulkOperationError[];
   username: string | null;
   profileUid: string | null;
+  /** The rule had legacy actions migrated in memory, so it must be saved even when the edit changes nothing */
+  hasMigratedLegacyActions?: boolean;
 }

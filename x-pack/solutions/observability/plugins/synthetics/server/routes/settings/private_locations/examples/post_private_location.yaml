@@ -32,3 +32,16 @@ responses:
               spaces: [default]
   400:
     description: If the `agentPolicyId` is already used by an existing private location or if the `label` already exists, the API returns a 400 Bad Request response with a corresponding error message.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X POST "${KIBANA_URL}/api/synthetics/private_locations" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"label":"Private Location 1","agentPolicyId":"abcd1234","tags":["private","testing"],"geo":{"lat":40.7128,"lon":-74.006},"spaces":["default"]}'
+  - lang: Console
+    source: |
+      POST kbn://api/synthetics/private_locations
+      {"label":"Private Location 1","agentPolicyId":"abcd1234","tags":["private","testing"],"geo":{"lat":40.7128,"lon":-74.006},"spaces":["default"]}

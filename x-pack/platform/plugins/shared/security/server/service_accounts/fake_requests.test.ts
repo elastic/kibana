@@ -12,6 +12,7 @@ import type { Logger } from '@kbn/logging';
 
 import type { ServiceAccountMintOptions } from './fake_requests';
 import {
+  isTerminalMintFailure,
   SERVICE_ACCOUNT_MINT_FAILURE_BACKOFF_MS,
   ServiceAccountFakeRequests,
 } from './fake_requests';
@@ -229,7 +230,9 @@ describe('ServiceAccountFakeRequests', () => {
     it('backs off after a failed mint, then allows a new attempt', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
       mintToken.mockClear();
-      const error = new ServiceAccountTokenExchangeError(new Error('exchange failed'), true);
+      const error = new ServiceAccountTokenExchangeError(new Error('exchange failed'), {
+        retryable: true,
+      });
       mintToken.mockRejectedValueOnce(error);
 
       jest.advanceTimersByTime(MAX_AGE_MS);
@@ -348,7 +351,7 @@ describe('ServiceAccountFakeRequests', () => {
     });
 
     it.each([
-      new ServiceAccountTokenExchangeError(new Error('revoked'), false),
+      new ServiceAccountTokenExchangeError(new Error('revoked'), { retryable: false }),
       new Error('unclassified failure'),
     ])('retains terminal failure and never returns a cached token: %s', async (error) => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
@@ -366,7 +369,10 @@ describe('ServiceAccountFakeRequests', () => {
 
     it('honors a longer retry delay without returning the cached token during backoff', async () => {
       const request = await fakeRequests.create({ serviceAccountId: 'sa-id' });
-      const error = new ServiceAccountTokenExchangeError(new Error('throttled'), true, 20_000);
+      const error = new ServiceAccountTokenExchangeError(new Error('throttled'), {
+        retryable: true,
+        retryAfterMs: 20_000,
+      });
       mintToken.mockRejectedValueOnce(error);
       await expect(fakeRequests.ensureFreshToken(request, 0)).rejects.toBe(error);
       jest.advanceTimersByTime(19_999);
@@ -611,5 +617,37 @@ describe('ServiceAccountFakeRequests', () => {
       // Nothing will ever ask this entry to refresh again, so there is no failure to report.
       expect(logger.warn).not.toHaveBeenCalled();
     });
+  });
+});
+
+describe('isTerminalMintFailure', () => {
+  it.each([
+    ['a client error', Boom.forbidden('re-bound'), true],
+    ['a missing binding', Boom.notFound('unbound'), true],
+    ['a rate limit', Boom.tooManyRequests('slow down'), false],
+    ['a server error', Boom.serverUnavailable('store unavailable'), false],
+    ['an unexpected exception', new Error('boom'), false],
+  ])('treats %s raised by the interceptor as terminal: %s', (_name, error, terminal) => {
+    expect(isTerminalMintFailure(error, { raisedByInterceptor: true })).toBe(terminal);
+  });
+
+  it('treats any failure not raised by the interceptor as terminal, unless the exchange says otherwise', () => {
+    expect(isTerminalMintFailure(new Error('boom'), { raisedByInterceptor: false })).toBe(true);
+    expect(
+      isTerminalMintFailure(
+        new ServiceAccountTokenExchangeError(new Error('503'), { retryable: true }),
+        {
+          raisedByInterceptor: false,
+        }
+      )
+    ).toBe(false);
+    expect(
+      isTerminalMintFailure(
+        new ServiceAccountTokenExchangeError(new Error('revoked'), { retryable: false }),
+        {
+          raisedByInterceptor: true,
+        }
+      )
+    ).toBe(true);
   });
 });

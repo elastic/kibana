@@ -7,13 +7,11 @@
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { useCallback, useMemo } from 'react';
+import { FIXED_OCCURRENCES_TIME_RANGE } from '../../common/constants';
 import { useFetchFeatures } from './use_fetch_features';
 import { useFetchDiscoveryQueries } from '../rules/use_fetch_discovery_queries';
 
 const QUERIES_MAX_PER_PAGE = 1000;
-
-// The KI page has no time picker, so its occurrence sparklines always cover the last day.
-const OCCURRENCES_TIME_RANGE = { from: 'now-24h', to: 'now' };
 
 export function useFetchKnowledgeIndicators() {
   const {
@@ -27,7 +25,7 @@ export function useFetchKnowledgeIndicators() {
     page: 1,
     perPage: QUERIES_MAX_PER_PAGE,
     status: ['active', 'draft'],
-    timeRange: OCCURRENCES_TIME_RANGE,
+    timeRange: FIXED_OCCURRENCES_TIME_RANGE,
   });
 
   const knowledgeIndicators = useMemo<KnowledgeIndicator[]>(() => {

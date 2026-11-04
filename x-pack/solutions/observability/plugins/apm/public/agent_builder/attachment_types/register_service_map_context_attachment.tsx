@@ -27,7 +27,7 @@ export function createServiceMapContextAttachmentDefinition() {
       i18n.translate('xpack.apm.agentBuilder.attachments.serviceMapContext.label', {
         defaultMessage: 'Service map context',
       }),
-    getIcon: () => 'graphApp' as const,
+    getIcon: () => 'cluster' as const,
     renderInlineContent: ({ attachment }: { attachment: ServiceMapContextAttachment }) => {
       const { environment, kuery, timeRange, serviceGroupId, highlightedServiceNames } =
         attachment.data ?? {};

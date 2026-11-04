@@ -7,29 +7,31 @@
 
 import React from 'react';
 
-import { waitFor } from '@testing-library/react';
-
-import { createFleetTestRendererMock } from '../../mock';
+import { screen } from '@testing-library/react';
+import { renderWithI18n } from '@kbn/test-jest-helpers';
 
 import { RootPrivilegesCallout } from './root_privileges_callout';
 
+jest.mock('../../hooks', () => ({
+  useStartServices: () => ({
+    docLinks: {
+      links: { fleet: { unprivilegedMode: 'https://elastic.co/docs/unprivileged-mode' } },
+    },
+  }),
+}));
+
 describe('RootPrivilegesCallout', () => {
   function render(rootIntegrations?: Array<{ name: string; title: string }>) {
-    const renderer = createFleetTestRendererMock();
-    const results = renderer.render(<RootPrivilegesCallout rootIntegrations={rootIntegrations} />);
-
-    return results;
+    return renderWithI18n(<RootPrivilegesCallout rootIntegrations={rootIntegrations} />);
   }
 
-  it('should render callout requiring root privileges', async () => {
-    const renderResult = render([{ name: 'auditd_manager', title: 'Auditd Manager' }]);
+  it('should render callout requiring root privileges', () => {
+    render([{ name: 'auditd_manager', title: 'Auditd Manager' }]);
 
-    await waitFor(() => {
-      expect(renderResult.getByText('Root privileges required')).toBeInTheDocument();
-      expect(renderResult.getByTestId('rootPrivilegesCallout').textContent).toContain(
-        'This agent policy contains the following integrations that require Elastic Agents to have root privileges. To ensure that all data required by the integrations can be collected, enroll the agents using an account with root privileges.'
-      );
-      expect(renderResult.getByText('Auditd Manager')).toBeInTheDocument();
-    });
+    expect(screen.getByText('Root privileges required')).toBeInTheDocument();
+    expect(screen.getByTestId('rootPrivilegesCallout').textContent).toContain(
+      'This agent policy contains the following integrations that require Elastic Agents to have root privileges. To ensure that all data required by the integrations can be collected, enroll the agents using an account with root privileges.'
+    );
+    expect(screen.getByText('Auditd Manager')).toBeInTheDocument();
   });
 });

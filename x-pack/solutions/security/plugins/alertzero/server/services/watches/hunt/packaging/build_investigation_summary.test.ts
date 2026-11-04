@@ -10,6 +10,7 @@ import {
   buildCleanInvestigationSummary,
   buildInvestigationSummary,
 } from './build_investigation_summary';
+import { dedupeCoverageGaps } from './dedupe_coverage_gaps';
 import type { CurrentRunState } from './types';
 
 const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
@@ -32,7 +33,15 @@ const state = (overrides: Partial<CurrentRunState> = {}): CurrentRunState => ({
   allEventsActionable: false,
   hasProcessBearingEvent: false,
   manualRemediation: [],
-  hosts: [{ name: 'WIN-ANALYST01', enrolled: true, agentId: 'a1', capabilities: [] }],
+  hosts: [
+    {
+      name: 'WIN-ANALYST01',
+      enrolled: true,
+      agentId: 'a1',
+      capabilities: [],
+      capabilitiesSource: 'reported',
+    },
+  ],
   processSelectors: [],
   evidence: { tier1HitCount: 0, tier2Confirmed: [{ techniqueId: 'T1078.004', rowCount: 2 }] },
   ...overrides,
@@ -67,6 +76,29 @@ describe('buildInvestigationSummary', () => {
   it('lists the full user names', () => {
     expect(buildInvestigationSummary({ state: state(), decided })).toContain(
       'Users: escalated-role, dev-user'
+    );
+  });
+
+  it('names the implicated identities and says criticality is left to the analyst', () => {
+    const summary = buildInvestigationSummary({
+      state: state({ services: ['svc-role'] }),
+      decided,
+    });
+    expect(summary).toContain('Services: svc-role');
+    expect(summary).toContain(
+      'Asset criticality: the identities above are involved in this attack. AlertZero does not change asset criticality. Review their ratings in Entity Analytics if they are out of date.'
+    );
+  });
+
+  it('adds no criticality note when nothing was confirmed', () => {
+    expect(
+      buildInvestigationSummary({ state: state({ hasConfirmedHit: false }), decided })
+    ).not.toContain('Asset criticality');
+  });
+
+  it('adds no criticality note when no user or service is implicated', () => {
+    expect(buildInvestigationSummary({ state: state({ users: [] }), decided })).not.toContain(
+      'Asset criticality'
     );
   });
 
@@ -307,5 +339,41 @@ describe('buildCleanInvestigationSummary', () => {
     expect(buildCleanInvestigationSummary({ inputs: {} })).toContain(
       'Packaging: dismissed, no proposals'
     );
+  });
+});
+
+describe('buildCleanInvestigationSummary for a retired run', () => {
+  const unsearched = dedupeCoverageGaps([
+    { reason: 'unknown_technique_id', detail: 'T9999', technique_id: 'T9999' },
+  ]);
+
+  it('says the report retired without a full search instead of that nothing matched', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but 1 gap left part of the report unsearched; the report is retired without a full search.'
+    );
+    expect(summary).toContain('Not searched: T9999 (unknown technique id)');
+    expect(summary).not.toContain('Nothing in this environment matched');
+  });
+
+  it('drops the count and the section when no gaps arrived', () => {
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true });
+    expect(summary).toContain(
+      'Outcome: no confirmed hits, but part of the report could not be searched; the report is retired without a full search.'
+    );
+    expect(summary).not.toContain('Not searched:');
+  });
+
+  it('keeps the whole summary inside the CE cap with 100 gaps', () => {
+    const many = dedupeCoverageGaps(
+      Array.from({ length: 100 }, (_, index) => ({
+        reason: 'unknown_technique_id',
+        detail: `T${9000 + index}`,
+        technique_id: `T${9000 + index}`,
+      }))
+    );
+    const summary = buildCleanInvestigationSummary({ inputs: {}, retired: true, unsearched: many });
+    expect(summary.length).toBeLessThanOrEqual(10_000);
+    expect(summary).toContain('at least 100 gaps');
   });
 });

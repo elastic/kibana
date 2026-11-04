@@ -1,6 +1,6 @@
 env:
   IGNORE_SHIP_CI_STATS_ERROR: 'true'
-  PACKAGE_REGISTRY_BASE_IMAGE: 'docker.elastic.co/package-registry/distribution:lite'
+  PACKAGE_REGISTRY_BASE_IMAGE: 'docker.elastic.co/package-registry/distribution:lite-slim'
   PACKAGE_REGISTRY_TEMP_IMAGE: 'docker.elastic.co/kibana-ci/package-registry-distribution:temp'
   PACKAGE_REGISTRY_TARGET_IMAGE: 'docker.elastic.co/kibana-ci/package-registry-distribution:lite'
 steps:
@@ -8,7 +8,7 @@ steps:
     label: Pre-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -63,6 +63,9 @@ steps:
       SCOUT_TEST_DISTRIBUTION_STRATEGY: 'lanes'
       SCOUT_TEST_LANES_GROUP_DEPS: 'build_scout_tests,build'
       SCOUT_TEST_CHANNELS: ci-on-commit
+      SCOUT_TEST_SERVER_START_TIMEOUT_SECONDS: 300
+      SCOUT_TEST_LANE_ESTIMATED_SETUP_MINUTES: 5
+      SCOUT_TEST_LANE_TARGET_RUNTIME_MINUTES: 30
     retry:
       automatic:
         - exit_status: '*'
@@ -77,7 +80,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
     timeout_in_minutes: 75
-    parallelism: 22
+    parallelism: 12
     key: defend-workflows-stateful
     depends_on: build
     retry:
@@ -94,7 +97,7 @@ steps:
       enableNestedVirtualization: true
       machineType: n2-highmem-4
     timeout_in_minutes: 75
-    parallelism: 14
+    parallelism: 9
     key: defend-workflows-serverless
     depends_on: build
     retry:
@@ -111,7 +114,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 3
     key: osquery-cypress-stateful
     depends_on: build
     retry:
@@ -128,7 +131,7 @@ steps:
       machineType: n2-highmem-4
       preemptible: true
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 3
     key: osquery-cypress-serverless
     depends_on: build
     retry:
@@ -142,7 +145,7 @@ steps:
     label: 'Promote EPR image to temp'
     key: promote-epr-to-temp
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -179,7 +182,7 @@ steps:
     label: 'Promote EPR image to final target'
     key: promote-epr-image
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2
@@ -198,7 +201,7 @@ steps:
     label: Post-Build
     timeout_in_minutes: 10
     agents:
-      image: family/kibana-ubuntu-2404
+      image: family/kibana-minimal-ubuntu-2604
       imageProject: elastic-images-prod
       provider: gcp
       machineType: n2-standard-2

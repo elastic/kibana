@@ -5,11 +5,29 @@
  * 2.0.
  */
 
-import { PassThrough } from 'stream';
+import { PassThrough, type Readable } from 'stream';
+import { text } from 'node:stream/consumers';
+import { catchError, last, lastValueFrom, of, toArray } from 'rxjs';
+import { errors } from '@elastic/elasticsearch';
+import {
+  ChatCompletionEventType,
+  isInferenceProviderError,
+  isOutputTokenLimitReachedError,
+} from '@kbn/inference-common';
+import { getRetryFilter } from '../../../common/utils/error_retry_filter';
+import { eventSourceStreamIntoObservable } from '../../util/event_source_stream_into_observable';
+import { processOpenAIStream } from '../adapters/openai';
 import {
   createInferenceEndpointExecutor,
   type InferenceEndpointExecutor,
 } from './inference_endpoint_executor';
+
+const readSseEvent = async (stream: Readable) =>
+  JSON.parse((await text(stream)).replace(/^data: /, ''));
+
+/** Runs the executor output through the same pipeline the inference endpoint adapter uses. */
+const processAsStream = (stream: Readable) =>
+  eventSourceStreamIntoObservable(stream).pipe(processOpenAIStream());
 
 describe('createInferenceEndpointExecutor', () => {
   let executor: InferenceEndpointExecutor;
@@ -276,5 +294,165 @@ describe('createInferenceEndpointExecutor', () => {
       }),
       expect.anything()
     );
+  });
+
+  describe('when stream is false', () => {
+    const completion = {
+      id: 'chatcmpl-1',
+      object: 'chat.completion',
+      model: 'gpt-4o',
+      choices: [
+        {
+          index: 0,
+          finish_reason: 'tool_calls',
+          message: {
+            role: 'assistant',
+            content: 'Hello',
+            tool_calls: [
+              { id: 'call-1', type: 'function', function: { name: 'f', arguments: '{}' } },
+            ],
+          },
+        },
+      ],
+      usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+    };
+
+    beforeEach(() => {
+      executor = createInferenceEndpointExecutor({
+        inferenceId,
+        esClient: { transport: { request: mockTransportRequest } } as any,
+        stream: false,
+      });
+    });
+
+    it('calls the endpoint without _stream and returns the completion as a single SSE chunk', async () => {
+      mockTransportRequest.mockResolvedValue(completion);
+      const signal = new AbortController().signal;
+
+      const result = await executor.invoke({ body: { messages: [] }, signal, timeout: 95_000 });
+
+      expect(mockTransportRequest).toHaveBeenCalledWith(
+        {
+          method: 'POST',
+          path: `/_inference/chat_completion/${inferenceId}`,
+          querystring: { timeout: '2m' },
+          body: { messages: [] },
+        },
+        {
+          requestTimeout: 95_000,
+          headers: { 'X-Elastic-Product-Use-Case': 'inference' },
+          signal,
+        }
+      );
+      expect(await readSseEvent(result)).toEqual({
+        id: 'chatcmpl-1',
+        object: 'chat.completion.chunk',
+        model: 'gpt-4o',
+        usage: { prompt_tokens: 1, completion_tokens: 2, total_tokens: 3 },
+        choices: [
+          {
+            index: 0,
+            finish_reason: 'tool_calls',
+            delta: {
+              role: 'assistant',
+              content: 'Hello',
+              tool_calls: [
+                {
+                  id: 'call-1',
+                  type: 'function',
+                  index: 0,
+                  function: { name: 'f', arguments: '{}' },
+                },
+              ],
+            },
+          },
+        ],
+      });
+    });
+
+    it('returns Elasticsearch error bodies as an SSE error event carrying the HTTP status', async () => {
+      const body = {
+        error: { code: 'bad_request', message: 'unsupported', type: 'status_exception' },
+      };
+      mockTransportRequest.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 400, body, warnings: null, meta: {} as never })
+      );
+
+      const result = await executor.invoke({ body: {} });
+
+      expect(await readSseEvent(result)).toEqual({ ...body, status: 400 });
+    });
+
+    it('produces a non-retryable provider error for a 4xx once processed as a stream', async () => {
+      mockTransportRequest.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 404,
+          body: { error: { type: 'resource_not_found_exception', reason: 'no such endpoint' } },
+          warnings: null,
+          meta: {} as never,
+        })
+      );
+
+      const error = await lastValueFrom(
+        processAsStream(await executor.invoke({ body: {} })).pipe(
+          catchError((e) => of(e)),
+          last()
+        )
+      );
+
+      expect(isInferenceProviderError(error)).toBe(true);
+      expect(error.status).toBe(404);
+      expect(error.message).toContain('no such endpoint');
+      expect(getRetryFilter()(error)).toBe(false);
+    });
+
+    it('emits the partial message and usage before failing when the token limit was hit', async () => {
+      mockTransportRequest.mockResolvedValue({
+        ...completion,
+        choices: [
+          {
+            index: 0,
+            finish_reason: 'length',
+            message: { role: 'assistant', content: 'partial answer' },
+          },
+        ],
+      });
+
+      const events = await lastValueFrom(
+        processAsStream(await executor.invoke({ body: {} })).pipe(
+          catchError((e) => of(e)),
+          toArray()
+        )
+      );
+
+      expect(events).toHaveLength(3);
+      expect(events[0]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionTokenCount,
+        tokens: { prompt: 1, completion: 2, total: 3 },
+      });
+      expect(events[1]).toMatchObject({
+        type: ChatCompletionEventType.ChatCompletionChunk,
+        content: 'partial answer',
+      });
+      expect(isOutputTokenLimitReachedError(events[2])).toBe(true);
+    });
+
+    it('rethrows response errors whose body is not an Elasticsearch error', async () => {
+      const proxyError = new errors.ResponseError({
+        statusCode: 404,
+        body: { ok: false, message: 'Unknown resource.' },
+        warnings: null,
+        meta: {} as never,
+      });
+      mockTransportRequest.mockRejectedValue(proxyError);
+
+      await expect(executor.invoke({ body: {} })).rejects.toBe(proxyError);
+    });
+
+    it('propagates other errors', async () => {
+      mockTransportRequest.mockRejectedValue(new Error('boom'));
+
+      await expect(executor.invoke({ body: {} })).rejects.toThrow('boom');
+    });
   });
 });

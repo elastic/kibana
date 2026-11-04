@@ -15,7 +15,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
@@ -136,7 +136,7 @@ export function KnowledgeIndicatorsTable(): React.ReactElement {
         }
         actions={
           <EuiButton
-            href={application.getUrlForApp(SIGNIFICANT_EVENTS_APP_ID, { path: '/sources' })}
+            href={application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/sources' })}
             data-test-subj="knowledgeIndicatorsEmptyStateSourcesLink"
           >
             {i18n.translate('xpack.nightshift.knowledge.knowledgeIndicators.goToSourcesButton', {

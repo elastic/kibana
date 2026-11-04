@@ -677,8 +677,8 @@ function getRuleOrError({ ruleId, rules, ruleTypeRegistry }: GetRuleOrErrorOpts)
     };
   }
 
-  // check that the API key is not null
-  if (!rule.apiKey) {
+  // check that the rule has a credential. A UIAM-only rule has no Elasticsearch key.
+  if (!rule.apiKey && !rule.uiamApiKey) {
     return {
       error: createBackfillError(`Rule ${ruleId} has no API key`, ruleId, rule.name),
     };

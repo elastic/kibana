@@ -18,6 +18,7 @@ import type { EisInferenceEndpoint } from '../../../common/types';
 import { useEisModels } from '../../hooks/use_eis_models';
 import type { EisPageState } from '../../hooks/use_eis_page_state';
 import { InferenceEndpoints } from '../../__mocks__/inference_endpoints';
+import { groupEndpointsByModel } from '../../utils/eis_utils';
 
 jest.mock('../../hooks/use_eis_models');
 jest.mock('../../hooks/use_kibana');
@@ -57,9 +58,47 @@ const mockUseEisModels = useEisModels as jest.Mock;
 const endpoints = InferenceEndpoints.filter((ep) => ep.service === 'elastic');
 
 const SEARCH_BOX = 'contentListToolbar-searchBox';
+const SORT_MENU_BUTTON = 'eisModelsSortMenuButton';
+const RESULTS_SUMMARY = 'eisModelsResultsSummary';
 
 const countCards = (container: HTMLElement) =>
   container.querySelectorAll('[data-test-subj^="eisModelCard-"]').length;
+
+const getFirstCardTestSubj = (container: HTMLElement) =>
+  container.querySelector('[data-test-subj^="eisModelCard-"]')?.getAttribute('data-test-subj') ??
+  '';
+
+const selectSortOption = async (
+  getByTestId: ReturnType<typeof render>['getByTestId'],
+  optionId: string
+) => {
+  fireEvent.click(getByTestId(SORT_MENU_BUTTON));
+  const option = await waitFor(() => getByTestId(`eisModelsSortOption-${optionId}`));
+  fireEvent.click(option);
+};
+
+const sortTestEndpoints: EisInferenceEndpoint[] = [
+  {
+    inference_id: 'alpha-model',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'alpha-model-id' },
+    metadata: {
+      heuristics: { status: 'ga', release_date: '2024-01-01' },
+      display: { name: 'Alpha Sort Model', model_creator: 'Elastic' },
+    },
+  },
+  {
+    inference_id: 'zeta-model',
+    task_type: 'chat_completion',
+    service: 'elastic',
+    service_settings: { model_id: 'zeta-model-id' },
+    metadata: {
+      heuristics: { status: 'ga', release_date: '2026-06-01' },
+      display: { name: 'Zeta Sort Model', model_creator: 'Elastic' },
+    },
+  },
+];
 
 // The page mounts under the app's `Router`, which is what enables the Content
 // List's URL sync — omitting it here hid a filtering regression from jest.
@@ -189,6 +228,82 @@ describe('ElasticInferenceServiceModelsPage', () => {
   it('renders model cards when data is loaded', async () => {
     const { container } = await renderPopulatedPage();
     expect(countCards(container)).toBeGreaterThan(0);
+  });
+
+  it('renders the sort menu with the default sort selected', async () => {
+    const { getByTestId } = await renderPopulatedPage();
+    expect(getByTestId(SORT_MENU_BUTTON)).toHaveTextContent('Sort by: A → Z');
+  });
+
+  it('shows the visible models out of the full catalog in the results summary', async () => {
+    const { container, getByTestId } = await renderPopulatedPage();
+    const total = groupEndpointsByModel(endpoints).length;
+    expect(countCards(container)).toBeLessThan(total);
+    expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent(
+      `Showing ${countCards(container)} of ${total}`
+    );
+  });
+
+  it('updates the results summary when search narrows models', async () => {
+    const { getByTestId } = await renderPopulatedPage();
+    const total = groupEndpointsByModel(endpoints).length;
+
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() =>
+      expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent(`Showing 1 of ${total}`)
+    );
+  });
+
+  it('reorders model cards when the sort option changes', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: sortTestEndpoints,
+      isLoading: false,
+      isError: false,
+    });
+    const { container, getByTestId } = renderPage();
+    await waitFor(() => expect(countCards(container)).toBe(2));
+    expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Alpha Sort Model');
+
+    await selectSortOption(getByTestId, 'nameDesc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Zeta Sort Model')
+    );
+
+    await selectSortOption(getByTestId, 'releasedDesc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Zeta Sort Model')
+    );
+    expect(getByTestId(SORT_MENU_BUTTON)).toHaveTextContent('Sort by: Newest');
+
+    await selectSortOption(getByTestId, 'releasedAsc');
+    await waitFor(() =>
+      expect(getFirstCardTestSubj(container)).toBe('eisModelCard-Alpha Sort Model')
+    );
+  });
+
+  it('keeps search filtering when the sort option changes', async () => {
+    mockUseEisModels.mockReturnValue({
+      data: sortTestEndpoints,
+      isLoading: false,
+      isError: false,
+    });
+    const { container, getByTestId, queryByTestId } = renderPage();
+    await waitFor(() => expect(countCards(container)).toBe(2));
+
+    const searchBox = getByTestId(SEARCH_BOX);
+    fireEvent.change(searchBox, { target: { value: 'Alpha' } });
+    fireEvent.keyUp(searchBox, { key: 'Enter', code: 'Enter' });
+
+    await waitFor(() => expect(countCards(container)).toBe(1));
+    expect(queryByTestId('eisModelCard-Zeta Sort Model')).not.toBeInTheDocument();
+
+    await selectSortOption(getByTestId, 'nameDesc');
+    await waitFor(() => expect(countCards(container)).toBe(1));
+    expect(getByTestId('eisModelCard-Alpha Sort Model')).toBeInTheDocument();
+    expect(getByTestId(RESULTS_SUMMARY)).toHaveTextContent('Showing 1 of 2');
   });
 
   it('renders empty state when no endpoints returned', async () => {
@@ -335,6 +450,8 @@ describe('ElasticInferenceServiceModelsPage', () => {
     expect(table).toHaveTextContent('End of Life');
     expect(queryByText('Supported tasks')).not.toBeInTheDocument();
     expect(getByTestId('contentListFooter-pagination')).toBeInTheDocument();
+    expect(queryByTestId(RESULTS_SUMMARY)).not.toBeInTheDocument();
+    expect(queryByTestId(SORT_MENU_BUTTON)).not.toBeInTheDocument();
 
     const searchBox = getByTestId(SEARCH_BOX);
     fireEvent.change(searchBox, { target: { value: 'Jina Reranker v2' } });

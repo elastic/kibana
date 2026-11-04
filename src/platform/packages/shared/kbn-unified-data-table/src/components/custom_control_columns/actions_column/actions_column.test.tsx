@@ -21,7 +21,6 @@ describe('getActionsColumn', () => {
     it('returns null', () => {
       const result = getActionsColumn({
         baseColumns: [],
-        externalControlColumns: undefined,
         rowAdditionalLeadingControls: undefined,
       });
       expect(result).toBeNull();
@@ -32,7 +31,6 @@ describe('getActionsColumn', () => {
     {
       baseColumns: [() => <div>Base column</div>],
       rowAdditionalLeadingControls: [],
-      externalControlColumns: [],
       expectedWidth: 24,
       expectedTexts: ['Base column'],
       description: '1 base column',
@@ -40,7 +38,6 @@ describe('getActionsColumn', () => {
     {
       baseColumns: [() => <div>Base column 1</div>, () => <div>Base column 2</div>],
       rowAdditionalLeadingControls: [],
-      externalControlColumns: [],
       expectedWidth: 48,
       expectedTexts: ['Base column 1', 'Base column 2'],
       description: '2 base columns',
@@ -53,7 +50,6 @@ describe('getActionsColumn', () => {
           render: () => <div>Row control column</div>,
         },
       ],
-      externalControlColumns: [],
       expectedWidth: 24,
       expectedTexts: ['Row control column'],
       description: '1 row additional leading control column',
@@ -70,46 +66,9 @@ describe('getActionsColumn', () => {
           render: () => <div>Row control column 2</div>,
         },
       ],
-      externalControlColumns: [],
       expectedWidth: 48,
       expectedTexts: ['Row control column 1', 'Row control column 2'],
       description: '2 row additional leading control columns',
-    },
-    {
-      baseColumns: [],
-      rowAdditionalLeadingControls: [],
-      externalControlColumns: [
-        {
-          id: 'external-1',
-          width: 80,
-          rowCellRender: () => <div>External control column</div>,
-          headerCellRender: () => <div>External control column</div>,
-        },
-      ],
-      expectedWidth: 80,
-      expectedTexts: ['External control column'],
-      description: '1 external control column',
-    },
-    {
-      baseColumns: [],
-      rowAdditionalLeadingControls: [],
-      externalControlColumns: [
-        {
-          id: 'external-1',
-          width: 80,
-          rowCellRender: () => <div>External control column 1</div>,
-          headerCellRender: () => <div>External control column 1</div>,
-        },
-        {
-          id: 'external-2',
-          width: 90,
-          rowCellRender: () => <div>External control column 2</div>,
-          headerCellRender: () => <div>External control column 2</div>,
-        },
-      ],
-      expectedWidth: 170,
-      expectedTexts: ['External control column 1', 'External control column 2'],
-      description: '2 external control columns',
     },
     {
       baseColumns: [() => <div>Base column 1</div>, () => <div>Base column 2</div>],
@@ -123,7 +82,6 @@ describe('getActionsColumn', () => {
           render: () => <div>Row control column 2</div>,
         },
       ],
-      externalControlColumns: [],
       expectedWidth: 96,
       expectedTexts: [
         'Base column 1',
@@ -132,104 +90,6 @@ describe('getActionsColumn', () => {
         'Row control column 2',
       ],
       description: '2 base columns and 2 row additional leading control columns',
-    },
-    {
-      baseColumns: [() => <div>Base column 1</div>, () => <div>Base column 2</div>],
-      rowAdditionalLeadingControls: [],
-      externalControlColumns: [
-        {
-          id: 'external-1',
-          width: 80,
-          rowCellRender: () => <div>External control column 1</div>,
-          headerCellRender: () => <div>External control column 1</div>,
-        },
-        {
-          id: 'external-2',
-          width: 90,
-          rowCellRender: () => <div>External control column 2</div>,
-          headerCellRender: () => <div>External control column 2</div>,
-        },
-      ],
-      expectedWidth: 222,
-      expectedTexts: [
-        'Base column 1',
-        'Base column 2',
-        'External control column 1',
-        'External control column 2',
-      ],
-      description: '2 base columns and 2 external control columns',
-    },
-    {
-      baseColumns: [],
-      rowAdditionalLeadingControls: [
-        {
-          id: 'row-control-column-1',
-          render: () => <div>Row control column 1</div>,
-        },
-        {
-          id: 'row-control-column-2',
-          render: () => <div>Row control column 2</div>,
-        },
-      ],
-      externalControlColumns: [
-        {
-          id: 'external-1',
-          width: 80,
-          rowCellRender: () => <div>External control column 1</div>,
-          headerCellRender: () => <div>External control column 1</div>,
-        },
-        {
-          id: 'external-2',
-          width: 90,
-          rowCellRender: () => <div>External control column 2</div>,
-          headerCellRender: () => <div>External control column 2</div>,
-        },
-      ],
-      expectedWidth: 218,
-      expectedTexts: [
-        'Row control column 1',
-        'Row control column 2',
-        'External control column 1',
-        'External control column 2',
-      ],
-      description: '2 row additional leading columns and 2 external control columns',
-    },
-    {
-      baseColumns: [() => <div>Base column 1</div>, () => <div>Base column 2</div>],
-      rowAdditionalLeadingControls: [
-        {
-          id: 'row-control-column-1',
-          render: () => <div>Row control column 1</div>,
-        },
-        {
-          id: 'row-control-column-2',
-          render: () => <div>Row control column 2</div>,
-        },
-      ],
-      externalControlColumns: [
-        {
-          id: 'external-1',
-          width: 80,
-          rowCellRender: () => <div>External control column 1</div>,
-          headerCellRender: () => <div>External control column 1</div>,
-        },
-        {
-          id: 'external-2',
-          width: 90,
-          rowCellRender: () => <div>External control column 2</div>,
-          headerCellRender: () => <div>External control column 2</div>,
-        },
-      ],
-      expectedWidth: 270,
-      expectedTexts: [
-        'Base column 1',
-        'Base column 2',
-        'Row control column 1',
-        'Row control column 2',
-        'External control column 1',
-        'External control column 2',
-      ],
-      description: '2 of each column type',
     },
     {
       description: 'additional leading column with custom width',
@@ -241,7 +101,6 @@ describe('getActionsColumn', () => {
           width: 80,
         },
       ],
-      externalControlColumns: [],
       expectedWidth: 80,
       expectedTexts: ['Row control column'],
     },
@@ -263,25 +122,17 @@ describe('getActionsColumn', () => {
           render: () => <div>Row control column 2</div>,
         },
       ],
-      externalControlColumns: [],
       expectedWidth: 104, // 80 from the first column + 24 from the menu column
       expectedTexts: ['Row control column'],
     },
   ])(
     'given $description',
-    ({
-      expectedWidth,
-      expectedTexts,
-      baseColumns,
-      rowAdditionalLeadingControls,
-      externalControlColumns,
-    }) => {
+    ({ expectedWidth, expectedTexts, baseColumns, rowAdditionalLeadingControls }) => {
       it('returns a column with the correct width', () => {
         const result = getActionsColumn({
           baseColumns,
           rowAdditionalLeadingControls:
             rowAdditionalLeadingControls as unknown as RowControlColumn[],
-          externalControlColumns,
         });
         expect(result).toEqual(
           expect.objectContaining({
@@ -299,7 +150,6 @@ describe('getActionsColumn', () => {
           baseColumns,
           rowAdditionalLeadingControls:
             rowAdditionalLeadingControls as unknown as RowControlColumn[],
-          externalControlColumns,
         });
         expect(result?.headerCellRender).toBeInstanceOf(Function);
 
@@ -318,7 +168,6 @@ describe('getActionsColumn', () => {
         const result = getActionsColumn({
           baseColumns,
           rowAdditionalLeadingControls,
-          externalControlColumns,
         });
         expect(result?.rowCellRender).toBeInstanceOf(Function);
 
@@ -371,7 +220,6 @@ describe('getActionsColumn', () => {
       const result = getActionsColumn({
         baseColumns: [],
         rowAdditionalLeadingControls,
-        externalControlColumns: [],
         visibleRowLeadingControls: 3,
       });
 
@@ -434,7 +282,6 @@ describe('getActionsColumn', () => {
       const result = getActionsColumn({
         baseColumns: [],
         rowAdditionalLeadingControls,
-        externalControlColumns: [],
       });
 
       render(

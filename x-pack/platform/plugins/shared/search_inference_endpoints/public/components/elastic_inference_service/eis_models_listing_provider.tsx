@@ -6,9 +6,17 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import useLatest from 'react-use/lib/useLatest';
+import useUpdateEffect from 'react-use/lib/useUpdateEffect';
 
 import { i18n } from '@kbn/i18n';
-import { ContentListProvider } from '@kbn/content-list-provider';
+import {
+  ContentListProvider,
+  contentListKeys,
+  contentListQueryClient,
+  type FindItemsParams,
+} from '@kbn/content-list-provider';
+import type { EisViewMode } from '../../types';
 import {
   DEFAULT_EIS_DISPLAY_OPTIONS,
   getProviderOptions,
@@ -24,11 +32,12 @@ import {
   EIS_RELEASED_SORT_FIELD,
   EIS_TYPE_SORT_FIELD,
 } from '../../utils/eis_content_list_utils';
-import { EisModelsListing, type EisViewMode } from './eis_models_listing';
+import { EisModelsListing } from './eis_models_listing';
 import { ModelFamilyOptionsProvider } from './eis_model_filters';
 import { RegionOptionsProvider } from './region_filter';
 
 interface EisModelsListingProviderProps {
+  /** Must be memoized: every new array reference refetches the listing. */
   models: GroupedModel[];
   /** Mirrors `useInferenceCapabilities().canManage`; the listing itself is read-only without it. */
   canManage: boolean;
@@ -88,9 +97,14 @@ export const EisModelsListingProvider = ({
 }: EisModelsListingProviderProps) => {
   const [displayOptions, setDisplayOptions] = useState(DEFAULT_EIS_DISPLAY_OPTIONS);
   const [viewMode, setViewMode] = useState<EisViewMode>('card');
+  // React Query refetches an invalidated query with its last queryFn, so findItems must read the latest models.
+  const latestModels = useLatest(models);
   const dataSource = useMemo(
-    () => ({ findItems: createEisFindItems(models, displayOptions, viewMode === 'table') }),
-    [models, displayOptions, viewMode]
+    () => ({
+      findItems: (params: FindItemsParams) =>
+        createEisFindItems(latestModels.current, displayOptions, viewMode === 'table')(params),
+    }),
+    [latestModels, displayOptions, viewMode]
   );
   const fields = useMemo(() => createEisFieldDefinitions(models), [models]);
   const modelFamilyOptions = useMemo(() => getProviderOptions(models), [models]);
@@ -101,6 +115,11 @@ export const EisModelsListingProvider = ({
   const queryKeyScope = `eis-models-listing-${viewMode}-${Number(
     displayOptions.showOutsideRegionPreferences
   )}-${Number(displayOptions.showEndOfLifeModels)}-${Number(displayOptions.showPreviewModels)}`;
+
+  useUpdateEffect(() => {
+    contentListQueryClient.invalidateQueries({ queryKey: contentListKeys.all(queryKeyScope) });
+  }, [models]);
+
   const hasBlockedModels = useMemo(
     () =>
       models.some((model) =>
@@ -108,7 +127,6 @@ export const EisModelsListingProvider = ({
       ),
     [models]
   );
-
   const features = useMemo(
     () => ({
       sorting: {
@@ -139,6 +157,7 @@ export const EisModelsListingProvider = ({
         <RegionOptionsProvider value={regionOptions}>
           <EisModelsListing
             {...{ onViewModelDetails, displayOptions, hasBlockedModels, viewMode }}
+            catalogTotal={models.length}
             onApplyDisplayOptions={setDisplayOptions}
             onViewModeChange={setViewMode}
           />

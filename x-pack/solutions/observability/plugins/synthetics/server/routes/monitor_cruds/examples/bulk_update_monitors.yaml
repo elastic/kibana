@@ -68,3 +68,16 @@ responses:
   400:
     description: >
       Bad request. Returned when `updates` is missing or empty, an `attributes` object is empty, or the same `id` appears more than once.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X PUT "${KIBANA_URL}/api/synthetics/monitors/_bulk_update" \
+        -H "Authorization: ApiKey ${API_KEY}" \
+        -H "kbn-xsrf: true" \
+        -H "Content-Type: application/json" \
+        -d '{"updates":[{"id":"monitor1-id","attributes":{"enabled":false}},{"id":"monitor2-id","attributes":{"tags":["bulk-patched"]}},{"id":"monitor3-id","attributes":{"schedule":{"number":"15","unit":"m"}}}]}'
+  - lang: Console
+    source: |
+      PUT kbn://api/synthetics/monitors/_bulk_update
+      {"updates":[{"id":"monitor1-id","attributes":{"enabled":false}},{"id":"monitor2-id","attributes":{"tags":["bulk-patched"]}},{"id":"monitor3-id","attributes":{"schedule":{"number":"15","unit":"m"}}}]}

@@ -38,6 +38,7 @@ export const serviceAccountsServiceMock = {
     },
     management: {
       listWorkloads: jest.fn().mockResolvedValue([]),
+      countBoundWorkloads: jest.fn().mockResolvedValue(new Map()),
       delete: jest.fn().mockResolvedValue({ deleted: true, warnings: [] }),
     },
     workloads: {

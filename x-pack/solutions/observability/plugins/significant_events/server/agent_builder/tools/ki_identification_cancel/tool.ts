@@ -17,7 +17,7 @@ import type { SignificantEventsServer } from '../../../types';
 import { classifyError } from '../../utils/error_utils';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   toSourceRef,
 } from '../../utils/resolve_source_slugs';
 import { cancelKiIdentificationToolHandler } from './handler';
@@ -59,7 +59,7 @@ export const createKiIdentificationCancelTool = ({
       await assertCanManageSignificantEvents({ request, server });
       const scopedClients = await getScopedClients({ request });
       const catalog = await loadSourceCatalog(scopedClients.sourcesClient);
-      const [source] = resolveSourcesBySlug(catalog, [slug]);
+      const [source] = resolveSourcesBySlugOrId(catalog, [slug]);
       const cancelled = await cancelKiIdentificationToolHandler({
         sourceId: source.id,
         sourceSlug: source.slug,

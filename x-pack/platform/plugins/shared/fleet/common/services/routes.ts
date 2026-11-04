@@ -264,6 +264,10 @@ export const agentPolicyRouteService = {
     return AGENT_POLICY_API_ROUTES.LIST_PATTERN;
   },
 
+  getPackagePoliciesSummaryPath: () => {
+    return AGENT_POLICY_API_ROUTES.PACKAGE_POLICIES_SUMMARY_PATTERN;
+  },
+
   getBulkGetPath: () => {
     return AGENT_POLICY_API_ROUTES.BULK_GET_PATTERN;
   },

@@ -14,7 +14,6 @@ import {
   MAX_ATTACK_MITRE_ATTACK_TACTIC_LENGTH,
   MAX_ATTACK_MITRE_ATTACK_TACTICS,
   MAX_ATTACK_OWNER_LENGTH,
-  MAX_ATTACK_RISK_SCORE,
   MAX_ATTACK_SUMMARY_MARKDOWN_LENGTH,
   MAX_ATTACK_TIMESTAMP_LENGTH,
 } from './attack';
@@ -94,22 +93,15 @@ describe('AttackAttachmentPayloadSchema', () => {
   });
 
   describe('bounded fields', () => {
-    it(`accepts a riskScore of ${MAX_ATTACK_RISK_SCORE}`, () => {
+    // An attack's risk score is the sum of its constituent alerts' scores, so it is unbounded
+    // above. Capping it at 100 rejected ordinary multi-alert attacks outright.
+    it("accepts a riskScore above any single alert's 0-100 range", () => {
       expect(
         AttackAttachmentPayloadSchema.safeParse({
           ...minimalPayload,
-          metadata: { ...minimalPayload.metadata, riskScore: MAX_ATTACK_RISK_SCORE },
+          metadata: { ...minimalPayload.metadata, riskScore: 141 },
         }).success
       ).toBe(true);
-    });
-
-    it(`rejects a riskScore above ${MAX_ATTACK_RISK_SCORE}`, () => {
-      expect(
-        AttackAttachmentPayloadSchema.safeParse({
-          ...minimalPayload,
-          metadata: { ...minimalPayload.metadata, riskScore: MAX_ATTACK_RISK_SCORE + 1 },
-        }).success
-      ).toBe(false);
     });
 
     it('rejects a negative riskScore', () => {

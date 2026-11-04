@@ -59,6 +59,14 @@ describe('send_wait_for_approval_notifications', () => {
       ).toBe(true);
     });
 
+    it('returns true when a Teams channel is configured', () => {
+      expect(
+        hasExternalHitlChannels({
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        })
+      ).toBe(true);
+    });
+
     it('returns true when a ServiceNow record is configured', () => {
       expect(
         hasExternalHitlChannels({
@@ -304,6 +312,86 @@ describe('send_wait_for_approval_notifications', () => {
         })
       );
       expect(execute.mock.calls[1][0].input.subActionParams.channel).toBe('C0456');
+    });
+
+    it('posts a Teams channel message with approve and decline links', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        message: 'Isolate host <MAMBA.HOST>?',
+        resumeLinks: {
+          approveUrl: 'https://kibana.example/approve?token=abc&approved=true',
+          rejectUrl: 'https://kibana.example/reject?token=abc&approved=false',
+        },
+        channels: {
+          teams: { 'connector-id': 'teams-1', 'team-id': 'team-1', 'channel-id': 'channel-1' },
+        },
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute).toHaveBeenCalledWith({
+        connectorType: 'microsoft-teams',
+        connectorNameOrId: 'teams-1',
+        input: {
+          subAction: 'sendChannelMessage',
+          subActionParams: {
+            teamId: 'team-1',
+            channelId: 'channel-1',
+            contentType: 'html',
+            content:
+              'Isolate host &lt;MAMBA.HOST&gt;?\n\n<br><a href="https://kibana.example/approve?token=abc&amp;approved=true">Approve</a> <a href="https://kibana.example/reject?token=abc&amp;approved=false">Decline</a>',
+          },
+        },
+        abortController: expect.any(AbortController),
+      });
+    });
+
+    it('renders Teams team-id and channel-id before posting', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await sendWaitForApprovalNotifications({
+        ...baseNotifyArgs,
+        channels: {
+          teams: {
+            'connector-id': 'teams-1',
+            'team-id': '{{ inputs.teamId }}',
+            'channel-id': '{{ inputs.channelId }}',
+          },
+        },
+        renderTemplate: (template) =>
+          template
+            .replace('{{ inputs.teamId }}', 'team-from-input')
+            .replace('{{ inputs.channelId }}', '19:channel-from-input@thread.tacv2'),
+        connectorExecutor: { execute } as never,
+      });
+
+      expect(execute.mock.calls[0][0].input.subActionParams).toEqual(
+        expect.objectContaining({
+          teamId: 'team-from-input',
+          channelId: '19:channel-from-input@thread.tacv2',
+        })
+      );
+    });
+
+    it('throws when a Teams field renders empty', async () => {
+      const execute = jest.fn().mockResolvedValue({ status: 'ok' });
+
+      await expect(
+        sendWaitForApprovalNotifications({
+          ...baseNotifyArgs,
+          channels: {
+            teams: {
+              'connector-id': 'teams-1',
+              'team-id': 'team-1',
+              'channel-id': '{{ inputs.channelId }}',
+            },
+          },
+          renderTemplate: (template) => (template === 'team-1' ? template : ' '),
+          connectorExecutor: { execute } as never,
+        })
+      ).rejects.toThrow('HITL Teams "channel-id" rendered empty');
+      expect(execute).not.toHaveBeenCalled();
     });
 
     it('adds a ServiceNow comment with approve and decline links', async () => {

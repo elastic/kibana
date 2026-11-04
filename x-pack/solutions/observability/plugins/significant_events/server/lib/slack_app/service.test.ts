@@ -34,9 +34,22 @@ interface HarnessOptions {
   featureFlagEnabled?: boolean;
   /** Whether `server.relayClient` (provided by the Actions plugin) exists. */
   hasRelayClient?: boolean;
+  /** `xpack.actions.relay.uiam.enabled`. Defaults to off, which keeps the API-key install. */
+  uiamEnabled?: boolean;
+  isServerless?: boolean;
+  serviceAccountsEnabled?: boolean;
+  /** Whether the Nightshift assistant agent is registered. */
+  assistantEnabled?: boolean;
 }
 
-function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: HarnessOptions = {}) {
+function createHarness({
+  featureFlagEnabled = true,
+  hasRelayClient = true,
+  uiamEnabled = false,
+  isServerless = false,
+  serviceAccountsEnabled = false,
+  assistantEnabled = false,
+}: HarnessOptions = {}) {
   const soClient = {
     get: jest
       .fn()
@@ -59,6 +72,9 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
   (logger.get as jest.Mock).mockReturnValue(logger);
 
   const getLicense = jest.fn().mockResolvedValue({ type: 'platinum' });
+  const createServiceAccount = jest.fn();
+  const deleteServiceAccount = jest.fn().mockResolvedValue({ deleted: true, warnings: [] });
+  const serviceAccountsIsEnabled = jest.fn().mockReturnValue(serviceAccountsEnabled);
 
   // Mutated in place like the actions plugin's own array, so `getRegisteredTenantKey` sees what the
   // service just did. The `isDynamic` handling mirrors the plugin: registration is refused for any
@@ -92,13 +108,22 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     logger,
     config: {},
     agentBuilder: { agents: { getRegistry } },
+    nightshiftInvestigations: { isAssistantEnabled: () => assistantEnabled },
     kibanaVersion: '9.2.0',
+    isServerless,
     actions: { registerDynamicConnector, unregisterDynamicConnector, inMemoryConnectors },
-    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind } : undefined,
+    relayClient: hasRelayClient ? { startInstall, fetchClaim, unbind, uiamEnabled } : undefined,
     core: {
       savedObjects: { getScopedClient: jest.fn().mockReturnValue(soClient) },
       featureFlags: { getBooleanValue$ },
       http: { basePath: { publicBaseUrl: 'https://kibana.test' }, getServerInfo: jest.fn() },
+      security: {
+        serviceAccounts: {
+          isEnabled: serviceAccountsIsEnabled,
+          create: createServiceAccount,
+          delete: deleteServiceAccount,
+        },
+      },
     },
     licensing: { getLicense },
     security: {
@@ -115,6 +140,8 @@ function createHarness({ featureFlagEnabled = true, hasRelayClient = true }: Har
     logger,
     grantAsInternalUser,
     invalidateAsInternalUser,
+    createServiceAccount,
+    deleteServiceAccount,
     getBooleanValue$,
     inMemoryConnectors,
     registerDynamicConnector,
@@ -162,8 +189,6 @@ describe('SlackAppService', () => {
         })
       );
 
-      // Read-only, least-privilege: direct ES read on observability signals only (queried as
-      // this key), everything else (Streams, Significant Events, connectors) via Kibana features.
       const { kibana_role_descriptors: descriptors } = grantAsInternalUser.mock.calls[0][1];
       expect(descriptors.nightshift_relay_agent_builder).toEqual({
         elasticsearch: {
@@ -173,6 +198,14 @@ describe('SlackAppService', () => {
               names: ['traces-*', 'logs-*', 'metrics-*', 'apm-*'],
               privileges: ['read', 'view_index_metadata'],
             },
+            {
+              names: [
+                'ai-index-idx-nightshift-cortex',
+                'ai-index-idx-nightshift-semantic-memory',
+                'ai-index-idx-nightshift-decision-trees',
+              ],
+              privileges: ['read', 'view_index_metadata', 'write', 'auto_configure'],
+            },
           ],
           run_as: [],
         },
@@ -181,8 +214,7 @@ describe('SlackAppService', () => {
             spaces: ['*'],
             feature: {
               nightshift: ['minimal_all'],
-              streams: ['read'],
-              agentBuilder: ['read'],
+              agentBuilder: ['minimal_all'],
               actions: ['read'],
               workflowsManagement: ['read'],
             },
@@ -214,8 +246,8 @@ describe('SlackAppService', () => {
     });
 
     describe('agent_id', () => {
-      const connectWithKey = async () => {
-        const harness = createHarness();
+      const connectWithKey = async ({ assistantEnabled = true } = {}) => {
+        const harness = createHarness({ assistantEnabled });
         harness.grantAsInternalUser.mockResolvedValue({
           id: 'key-1',
           name: 'k',
@@ -226,8 +258,8 @@ describe('SlackAppService', () => {
         return harness;
       };
 
-      it('declares nightshift.investigation when the minted key sees it available in the default space', async () => {
-        getAgent.mockResolvedValue({ id: 'nightshift.investigation' });
+      it('declares nightshift.assistant when the minted key sees it available in the default space', async () => {
+        getAgent.mockResolvedValue({ id: 'nightshift.assistant' });
 
         await connectWithKey();
 
@@ -242,13 +274,52 @@ describe('SlackAppService', () => {
             spaceId: 'default',
           },
         });
-        expect(getAgent).toHaveBeenCalledWith('nightshift.investigation');
+        expect(getAgent).toHaveBeenCalledTimes(1);
+        expect(getAgent).toHaveBeenCalledWith('nightshift.assistant');
+        expect(startInstall).toHaveBeenCalledWith(
+          expect.objectContaining({ agent_id: 'nightshift.assistant' })
+        );
+      });
+
+      it.each([
+        ['not installed', createAgentNotFoundError({ agentId: 'nightshift.assistant' })],
+        ['unavailable', createAgentUnavailableError({ agentId: 'nightshift.assistant' })],
+      ])(
+        'falls back to nightshift.investigation when the assistant is %s',
+        async (_reason, assistantError) => {
+          getAgent.mockImplementation(async (agentId: string) => {
+            if (agentId === 'nightshift.assistant') {
+              throw assistantError;
+            }
+            return { id: agentId };
+          });
+
+          const { logger } = await connectWithKey();
+
+          expect(getAgent.mock.calls).toEqual([
+            ['nightshift.assistant'],
+            ['nightshift.investigation'],
+          ]);
+          expect(startInstall).toHaveBeenCalledWith(
+            expect.objectContaining({ agent_id: 'nightshift.investigation' })
+          );
+          expect(logger.warn).not.toHaveBeenCalled();
+        }
+      );
+
+      // A persisted assistant has no availability gate once the sandbox is disabled.
+      it('skips nightshift.assistant when it is disabled, even if a persisted copy exists', async () => {
+        getAgent.mockImplementation(async (agentId: string) => ({ id: agentId }));
+
+        await connectWithKey({ assistantEnabled: false });
+
+        expect(getAgent.mock.calls).toEqual([['nightshift.investigation']]);
         expect(startInstall).toHaveBeenCalledWith(
           expect.objectContaining({ agent_id: 'nightshift.investigation' })
         );
       });
 
-      it('omits agent_id when the agent is not installed in the default space', async () => {
+      it('omits agent_id when no Nightshift agent is installed in the default space', async () => {
         const { logger } = await connectWithKey();
 
         expect(startInstall.mock.calls[0][0]).not.toHaveProperty('agent_id');
@@ -257,7 +328,7 @@ describe('SlackAppService', () => {
 
       // Runs through `get` would be rejected by the agent's availability gate (e.g. Nightshift
       // disabled or its inference endpoint missing), so Relay turns would fail the same way.
-      it('omits agent_id when the agent exists but is unavailable', async () => {
+      it('omits agent_id when the agents exist but are unavailable', async () => {
         getAgent.mockRejectedValue(
           createAgentUnavailableError({ agentId: 'nightshift.investigation' })
         );
@@ -339,6 +410,286 @@ describe('SlackAppService', () => {
       expect(invalidateAsInternalUser).not.toHaveBeenCalledWith({ ids: ['old-key'] });
       expect(soClient.create).not.toHaveBeenCalled();
     });
+
+    it('revokes a leftover service account after a successful API-key reconnect', async () => {
+      const {
+        server,
+        soClient,
+        invalidateAsInternalUser,
+        deleteServiceAccount,
+        grantAsInternalUser,
+      } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          serviceAccountId: 'sa-leftover',
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+        },
+      });
+      grantAsInternalUser.mockResolvedValue({ id: 'new-key', name: 'k', api_key: 'secret' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'claim-2' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['old-key'] });
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-leftover', { force: true });
+      expect(deleteServiceAccount.mock.invocationCallOrder[0]).toBeGreaterThan(
+        startInstall.mock.invocationCallOrder[0]
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          apiKeyId: 'new-key',
+          serviceAccountId: null,
+          claimId: 'claim-2',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
+    it('sends only the service-account id when Relay UIAM is enabled', async () => {
+      const { server, soClient, grantAsInternalUser, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      createServiceAccount.mockResolvedValue({
+        id: 'sa-1',
+        token: 'essu_raw-token-must-not-leak',
+      });
+      startInstall.mockResolvedValue({
+        authorize_url: 'https://slack/oauth',
+        claim_id: 'claim-1',
+      });
+
+      const result = await new SlackAppService(server).connect(request);
+
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(createServiceAccount).toHaveBeenCalledWith(request, {
+        name: expect.stringMatching(
+          /^nightshift-relay-agent-builder-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$/
+        ),
+        roles: ['_nightshift_agent'],
+        platformAssumers: ['relay'],
+      });
+      expect(startInstall).toHaveBeenCalledWith({
+        uiam_service_account_id: 'sa-1',
+        kibana_url: 'https://kibana.test',
+        kibana_version: '9.2.0',
+        license_info: 'platinum',
+        created_by_user_key: 'admin',
+        agent_id: 'nightshift.investigation',
+      });
+      expect(getRegistry).not.toHaveBeenCalled();
+      expect(JSON.stringify(startInstall.mock.calls)).not.toContain('essu_raw-token-must-not-leak');
+      expect(JSON.stringify(startInstall.mock.calls)).not.toContain('kibana_api_key');
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: null,
+          serviceAccountId: 'sa-1',
+          claimId: 'claim-1',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toEqual({ authorizeUrl: 'https://slack/oauth' });
+    });
+
+    it('declares nightshift.assistant with Relay UIAM when the assistant is enabled', async () => {
+      const { server, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+        assistantEnabled: true,
+      });
+      createServiceAccount.mockResolvedValue({ id: 'sa-1', token: 'essu_token' });
+      startInstall.mockResolvedValue({ authorize_url: 'https://slack/oauth', claim_id: 'c' });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ agent_id: 'nightshift.assistant' })
+      );
+      expect(getRegistry).not.toHaveBeenCalled();
+    });
+
+    it('creates a new service account and revokes the previous one after install succeeds', async () => {
+      const { server, soClient, createServiceAccount, deleteServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          serviceAccountId: 'sa-existing',
+          apiKeyId: null,
+          surface: 'slack',
+        },
+      });
+      createServiceAccount.mockResolvedValue({ id: 'sa-new' });
+      startInstall.mockResolvedValue({
+        authorize_url: 'https://slack/oauth',
+        claim_id: 'claim-2',
+      });
+
+      await new SlackAppService(server).connect(request);
+
+      expect(createServiceAccount).toHaveBeenCalledTimes(1);
+      expect(startInstall).toHaveBeenCalledWith(
+        expect.objectContaining({ uiam_service_account_id: 'sa-new' })
+      );
+      expect(deleteServiceAccount).toHaveBeenCalledTimes(1);
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-existing', { force: true });
+      expect(deleteServiceAccount.mock.invocationCallOrder[0]).toBeGreaterThan(
+        startInstall.mock.invocationCallOrder[0]
+      );
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({ serviceAccountId: 'sa-new' }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
+    it('fails closed on a non-serverless distribution when Relay UIAM is enabled', async () => {
+      const { server, grantAsInternalUser, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: false,
+        serviceAccountsEnabled: true,
+      });
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+        /not supported on this distribution/
+      );
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(createServiceAccount).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when Relay UIAM is enabled but service accounts are unavailable', async () => {
+      const { server, grantAsInternalUser, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: false,
+      });
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+        /requires UIAM service accounts/
+      );
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(createServiceAccount).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+    });
+
+    it('fails closed when UIAM service-account creation is unavailable', async () => {
+      const { server, grantAsInternalUser, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      createServiceAccount.mockRejectedValue(
+        new Error('Creating Elasticsearch service accounts is not yet implemented')
+      );
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(
+        /not yet implemented/
+      );
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+    });
+
+    it('revokes a new service account when Relay install fails and does not store it', async () => {
+      const {
+        server,
+        soClient,
+        logger,
+        grantAsInternalUser,
+        createServiceAccount,
+        deleteServiceAccount,
+        invalidateAsInternalUser,
+      } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      createServiceAccount.mockResolvedValue({
+        id: 'sa-1',
+        token: 'essu_raw-token-must-not-leak',
+      });
+      startInstall.mockRejectedValue(new Error('relay down'));
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
+
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(JSON.stringify((logger.error as jest.Mock).mock.calls)).not.toContain(
+        'essu_raw-token-must-not-leak'
+      );
+    });
+
+    it('does not register an account creation that was refused', async () => {
+      const { server, soClient, grantAsInternalUser, createServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          surface: 'slack',
+        },
+      });
+      createServiceAccount.mockRejectedValue(
+        new Error(
+          'The service account was created without the required platform assumer, so it was not registered.'
+        )
+      );
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow(/not registered/);
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(startInstall).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('leaves an existing connection untouched when creating the replacement account fails to install', async () => {
+      const {
+        server,
+        soClient,
+        grantAsInternalUser,
+        invalidateAsInternalUser,
+        createServiceAccount,
+        deleteServiceAccount,
+      } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: 'old-key',
+          serviceAccountId: 'sa-existing',
+          surface: 'slack',
+        },
+      });
+      createServiceAccount.mockResolvedValue({ id: 'sa-new' });
+      startInstall.mockRejectedValue(new Error('relay down'));
+
+      await expect(new SlackAppService(server).connect(request)).rejects.toThrow('relay down');
+
+      expect(createServiceAccount).toHaveBeenCalledTimes(1);
+      expect(grantAsInternalUser).not.toHaveBeenCalled();
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(deleteServiceAccount).toHaveBeenCalledTimes(1);
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-new', { force: true });
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
   });
 
   describe('getStatus', () => {
@@ -384,6 +735,27 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.connected,
         workspace: { tenantKey: 'tenant-A' },
+      });
+    });
+
+    it('returns who connected the workspace and when', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          tenantKey: 'tenant-A',
+          apiKeyId: 'key-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
+        },
+      });
+
+      await expect(new SlackAppService(server).getStatus(request)).resolves.toEqual({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.connected,
+        workspace: { tenantKey: 'tenant-A' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 
@@ -476,6 +848,45 @@ describe('SlackAppService', () => {
       });
     });
 
+    it('revokes the service account when an in-progress UIAM install fails terminally', async () => {
+      const { server, soClient, deleteServiceAccount, invalidateAsInternalUser } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
+          apiKeyId: null,
+          serviceAccountId: 'sa-1',
+          claimId: 'claim-1',
+        },
+      });
+      fetchClaim.mockRejectedValue(
+        new RelayRequestError('/v1/slack/install/claim', 400, 'claim expired')
+      );
+
+      const result = await new SlackAppService(server).getStatus(request);
+
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-1', { force: true });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          serviceAccountId: null,
+          error: 'claim expired',
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+      expect(result).toMatchObject({
+        available: true,
+        status: RELAY_APP_CONNECTION_STATUS.error,
+        error: 'claim expired',
+      });
+    });
+
     it('fails the install terminally on a 4xx claim response, invalidating the orphaned key', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
@@ -533,6 +944,8 @@ describe('SlackAppService', () => {
           status: RELAY_APP_CONNECTION_STATUS.oauthInProgress,
           apiKeyId: 'key-1',
           claimId: 'claim-1',
+          createdBy: 'alice',
+          createdAt: '2026-10-19T12:00:00.000Z',
         },
       });
       fetchClaim.mockResolvedValue({
@@ -560,6 +973,8 @@ describe('SlackAppService', () => {
         available: true,
         status: RELAY_APP_CONNECTION_STATUS.pendingConfirmation,
         workspace: { tenantKey: 'T0123ABC', name: 'Acme', url: 'https://acme.slack.com/' },
+        createdBy: 'alice',
+        createdAt: '2026-10-19T12:00:00.000Z',
       });
     });
 
@@ -711,9 +1126,15 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).toHaveBeenCalledWith('T0123ABC');
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ status: 'disconnected' });
     });
@@ -736,7 +1157,7 @@ describe('SlackAppService', () => {
       expect(soClient.delete).not.toHaveBeenCalled();
     });
 
-    it('invalidates the key, unbinds from the Relay by tenantKey, and deletes the binding', async () => {
+    it('invalidates the key, unbinds from the Relay by tenantKey, and writes a not-connected document', async () => {
       const { server, soClient, invalidateAsInternalUser } = createHarness();
       soClient.get.mockResolvedValue({
         attributes: {
@@ -752,9 +1173,15 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).toHaveBeenCalledWith('tenant-A');
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ status: 'disconnected' });
     });
@@ -775,9 +1202,15 @@ describe('SlackAppService', () => {
 
       expect(invalidateAsInternalUser).toHaveBeenCalledWith({ ids: ['key-1'] });
       expect(unbind).not.toHaveBeenCalled();
-      expect(soClient.delete).toHaveBeenCalledWith(
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
         RELAY_APP_CONNECTION_SO_TYPE,
-        RELAY_APP_CONNECTION_SO_ID
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
       expect(result).toEqual({ status: 'disconnected' });
     });
@@ -814,6 +1247,74 @@ describe('SlackAppService', () => {
         }),
         { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
       );
+    });
+
+    it('revokes the service account and clears its id', async () => {
+      const { server, soClient, invalidateAsInternalUser, deleteServiceAccount } = createHarness({
+        uiamEnabled: true,
+        isServerless: true,
+        serviceAccountsEnabled: true,
+      });
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.connected,
+          apiKeyId: null,
+          serviceAccountId: 'sa-kept',
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+        },
+      });
+      unbind.mockResolvedValue(undefined);
+
+      await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({
+        status: 'disconnected',
+      });
+
+      expect(unbind).toHaveBeenCalledWith('tenant-A');
+      expect(deleteServiceAccount).toHaveBeenCalledWith(request, 'sa-kept', { force: true });
+      expect(invalidateAsInternalUser).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledWith(
+        RELAY_APP_CONNECTION_SO_TYPE,
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          serviceAccountId: null,
+          apiKeyId: null,
+          tenantKey: null,
+        }),
+        { id: RELAY_APP_CONNECTION_SO_ID, overwrite: true }
+      );
+    });
+
+    it('clears a stale error when a failed unbind is retried successfully', async () => {
+      const { server, soClient } = createHarness();
+      soClient.get.mockResolvedValue({
+        attributes: {
+          status: RELAY_APP_CONNECTION_STATUS.error,
+          apiKeyId: null,
+          serviceAccountId: null,
+          tenantKey: 'tenant-A',
+          surface: 'slack',
+          error: 'teardown incomplete: 1 workspace(s) failed and remain bound; retry to finish',
+        },
+      });
+      unbind.mockResolvedValue(undefined);
+
+      await expect(new SlackAppService(server).disconnect(request)).resolves.toEqual({
+        status: 'disconnected',
+      });
+
+      expect(unbind).toHaveBeenCalledWith('tenant-A');
+      const [, attributes] = soClient.create.mock.calls[0];
+      expect(attributes).toEqual(
+        expect.objectContaining({
+          status: RELAY_APP_CONNECTION_STATUS.notConnected,
+          apiKeyId: null,
+          serviceAccountId: null,
+          tenantKey: null,
+        })
+      );
+      expect(attributes).not.toHaveProperty('error');
     });
 
     it('is a no-op when the connection does not exist', async () => {
@@ -901,14 +1402,21 @@ describe('SlackAppService', () => {
         bindings: [
           { scope_type: 'SUB', scope_id: 'C123', display_name: 'general', visibility: 'public' },
           { scope_type: 'SUB', scope_id: 'C456' }, // no persisted display snapshot
+          { scope_type: 'SUB', scope_id: 'G789', visibility: 'private' },
         ],
         nextCursor: 'cursor-2',
       });
 
       await expect(new SlackAppService(server).listBindings(request)).resolves.toEqual({
         bindings: [
-          { channel: 'C123', displayName: 'general', status: 'bound_to_self' },
+          {
+            channel: 'C123',
+            displayName: 'general',
+            visibility: 'public',
+            status: 'bound_to_self',
+          },
           { channel: 'C456', status: 'bound_to_self' },
+          { channel: 'G789', visibility: 'private', status: 'bound_to_self' },
         ],
         nextCursor: 'cursor-2',
       });

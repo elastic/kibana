@@ -12,22 +12,48 @@ import { count, dateHistogram, metric, terms } from './columns';
 import { createEsqlConversionCaseContext } from './fixtures';
 
 export const buildTopNCases = (): EsqlConversionCase[] => {
-  const { ecommerce, ecommerceFrom, ecommerceWhere, logs, logsFrom, logsWhere } =
-    createEsqlConversionCaseContext();
+  const {
+    ecommerce,
+    ecommerceFrom,
+    ecommerceWhere,
+    ecommerceWithoutTimeField,
+    logs,
+    logsFrom,
+    logsWhere,
+  } = createEsqlConversionCaseContext();
 
-  // Restricts the query to the top values of an outer dimension, which `LIMIT n BY` cannot do.
-  const outerTopNFilter = ({
+  // Restricts the query to the top values of a dimension that `LIMIT n BY` cannot cap globally
+  // (outer Top values, or Top values above a date histogram). Pass `where: null` to omit the
+  // time filter (data views without a time field).
+  const outerTopNSubquery = ({
     field,
     score,
     sort,
     size,
+    from = logsFrom,
+    where: whereOption,
   }: {
     field: string;
     score: string;
     sort: string;
     size: number;
-  }) =>
-    `WHERE ${field} IN (${logsFrom} | ${logsWhere} | STATS ${score} BY ${field} | SORT ${sort} | LIMIT ${size} | KEEP ${field})`;
+    from?: string;
+    where?: string | null;
+  }) => {
+    const where = whereOption === null ? undefined : whereOption ?? logsWhere;
+    return [
+      from,
+      ...(where ? [where] : []),
+      `WHERE ${field} IS NOT NULL`,
+      `STATS ${score} BY ${field}`,
+      `SORT ${sort}`,
+      `LIMIT ${size}`,
+      `KEEP ${field}`,
+    ].join(' | ');
+  };
+
+  const outerTopNFilter = (args: Parameters<typeof outerTopNSubquery>[0]) =>
+    `WHERE ${args.field} IN (${outerTopNSubquery(args)})`;
 
   return [
     {
@@ -146,9 +172,185 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms with other bucket is not convertible',
+      description: 'single terms with other bucket ordered alphabetically',
       columns: {
-        col1: terms('host.keyword', { otherBucket: true }),
+        col1: terms('host.keyword', { size: 3, otherBucket: true }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS COUNT(*) BY host.keyword | SORT host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        // The dataset has 4 hosts, so size 3 yields an Other row; "Other" sorts before the
+        // lowercase hosts in plain ASC order, so this fails without the named flag.
+        expectedLastRow: { 'host.keyword': 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket ordered alphabetically DESC keeps Other last',
+      columns: {
+        col1: terms('host.keyword', { size: 3, otherBucket: true, orderDirection: 'desc' }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS COUNT(*) BY host.keyword | SORT host.keyword DESC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, key_host_keyword DESC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket ranked by metric DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket ranked by metric ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'asc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword ASC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword | EVAL named_host_keyword = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` ASC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+        expectedLastRow: { 'host.keyword': 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms on an ip field with other bucket groups by the typed ip key',
+      columns: {
+        col1: terms(
+          'clientip',
+          {
+            size: 9,
+            orderBy: { type: 'column', columnId: 'col2' },
+            orderDirection: 'desc',
+            otherBucket: true,
+          },
+          { dataType: 'ip' }
+        ),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE clientip IS NOT NULL | EVAL key_clientip = CASE(clientip IN (${logsFrom} | ${logsWhere} | WHERE clientip IS NOT NULL | STATS rank_clientip = AVG(bytes) BY clientip | SORT rank_clientip DESC, clientip ASC | LIMIT 9 | KEEP clientip), clientip, NULL) | STATS AVG(bytes) BY key_clientip | EVAL named_clientip = CASE(key_clientip IS NULL, 0::LONG, 1::LONG) | SORT named_clientip DESC, \`AVG(bytes)\` DESC, key_clientip ASC | LIMIT 10 | EVAL clientip = COALESCE(TO_STRING(key_clientip), "Other"::KEYWORD) | DROP named_clientip, key_clientip`,
+        columnNames: ['AVG(bytes)', 'clientip'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], clientip: ['col1'] },
+        expectedLastRow: { clientip: 'Other' },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'other bucket key column does not shadow a field that a metric reads',
+      // The sample data has no field named like a helper column.
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('sum', 'key_host_keyword'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword_1 = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = SUM(key_host_keyword) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS SUM(key_host_keyword) BY key_host_keyword_1 | EVAL named_host_keyword = CASE(key_host_keyword_1 IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`SUM(key_host_keyword)\` DESC, key_host_keyword_1 ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword_1), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword_1`,
+        columnNames: ['SUM(key_host_keyword)', 'host.keyword'],
+        expectedSourceIds: { 'SUM(key_host_keyword)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'other bucket named flag column does not shadow a field that a metric reads',
+      // The sample data has no field named like a helper column.
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('sum', 'named_host_keyword'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = SUM(named_host_keyword) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS SUM(named_host_keyword) BY key_host_keyword | EVAL named_host_keyword_1 = CASE(key_host_keyword IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword_1 DESC, \`SUM(named_host_keyword)\` DESC, key_host_keyword ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword), "Other"::KEYWORD) | DROP named_host_keyword_1, key_host_keyword`,
+        columnNames: ['SUM(named_host_keyword)', 'host.keyword'],
+        expectedSourceIds: { 'SUM(named_host_keyword)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      // The data view has a field named like the key column that no layer column references,
+      // for example one a metric filter query could read after the remap.
+      dataset: { ...logs, fieldTypes: { ...logs.fieldTypes, key_host_keyword: 'number' } },
+      description: 'other bucket key column does not shadow a data view field',
+      skipApiExecution: true,
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col2' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | EVAL key_host_keyword_1 = CASE(host.keyword IN (${logsFrom} | ${logsWhere} | WHERE host.keyword IS NOT NULL | STATS rank_host_keyword = AVG(bytes) BY host.keyword | SORT rank_host_keyword DESC, host.keyword ASC | LIMIT 3 | KEEP host.keyword), host.keyword, NULL) | STATS AVG(bytes) BY key_host_keyword_1 | EVAL named_host_keyword = CASE(key_host_keyword_1 IS NULL, 0::LONG, 1::LONG) | SORT named_host_keyword DESC, \`AVG(bytes)\` DESC, key_host_keyword_1 ASC | LIMIT 4 | EVAL host.keyword = COALESCE(TO_STRING(key_host_keyword_1), "Other"::KEYWORD) | DROP named_host_keyword, key_host_keyword_1`,
+        columnNames: ['AVG(bytes)', 'host.keyword'],
+        expectedSourceIds: { 'AVG(bytes)': ['col2'], 'host.keyword': ['col1'] },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'single terms with other bucket and missing values is not convertible',
+      columns: {
+        col1: terms('host.keyword', { otherBucket: true, missingBucket: true }),
         col2: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2'],
@@ -160,16 +362,295 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms above a date histogram is not convertible yet',
+      description: 'nested terms with other bucket on the outer dimension is not convertible yet',
       columns: {
-        col1: terms('host.keyword', {}),
-        col2: dateHistogram('timestamp', { interval: '1h' }),
-        col3: count(),
+        col1: terms('geo.src', {
+          size: 2,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col3: metric('average', 'bytes'),
       },
       columnOrder: ['col1', 'col2', 'col3'],
       expected: {
         success: false,
-        reason: 'terms_date_histogram_not_supported',
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram with other bucket is not convertible yet',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+          otherBucket: true,
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: false,
+        reason: 'terms_other_bucket_not_supported',
+      },
+    },
+    // Top values above a date histogram: rank the top N globally, then plot those series over
+    // time (`IN (subquery)` + optional INLINE STATS rank; no LIMIT n / LIMIT n BY).
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (fixed interval) ranked by metric DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (fixed interval) ranked by metric ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'asc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword ASC',
+          size: 3,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram (auto interval) ranked by metric',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: 'auto' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 4,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS AVG(bytes) BY rank_host_keyword, host.keyword, timestamp = BUCKET(timestamp, 75, ?_tstart, ?_tend) | SORT rank_host_keyword DESC, timestamp ASC | DROP rank_host_keyword`,
+        columnNames: ['AVG(bytes)', 'host.keyword', 'timestamp'],
+        expectedSourceIds: {
+          'AVG(bytes)': ['col3'],
+          'host.keyword': ['col1'],
+          timestamp: ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked alphabetically DESC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'COUNT(*)',
+          sort: 'host.keyword DESC',
+          size: 5,
+        })} | STATS COUNT(*) BY host.keyword, BUCKET(timestamp, 1 day) | SORT host.keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC`,
+        columnNames: ['COUNT(*)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked alphabetically ASC',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 4,
+          orderBy: { type: 'alphabetical' },
+          orderDirection: 'asc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'COUNT(*)',
+          sort: 'host.keyword ASC',
+          size: 4,
+        })} | STATS COUNT(*) BY host.keyword, BUCKET(timestamp, 1 day) | SORT host.keyword ASC, \`BUCKET(timestamp, 1 day)\` ASC`,
+        columnNames: ['COUNT(*)', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram uses the metric column role in STATS only',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: metric('average', 'bytes'),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      columnRoles: { col3: 'avg_bytes' },
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = AVG(bytes)',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = AVG(bytes) BY host.keyword | STATS avg_bytes = AVG(bytes) BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: ['avg_bytes', 'host.keyword', 'BUCKET(timestamp, 1 day)'],
+        expectedSourceIds: {
+          avg_bytes: ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: logs,
+      description: 'terms above a date histogram ranked by a KQL-filtered metric',
+      columns: {
+        col1: terms('host.keyword', {
+          size: 5,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('timestamp', { interval: '1d' }),
+        col3: count({ filter: { language: 'kuery', query: 'bytes > 1000' } }),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${logsFrom} | ${logsWhere} | ${outerTopNFilter({
+          field: 'host.keyword',
+          score: 'rank_host_keyword = COUNT(*) WHERE KQL("bytes > 1000")',
+          sort: 'rank_host_keyword DESC',
+          size: 5,
+        })} | INLINE STATS rank_host_keyword = COUNT(*) WHERE KQL("bytes > 1000") BY host.keyword | STATS COUNT(*) WHERE KQL("bytes > 1000") BY rank_host_keyword, host.keyword, BUCKET(timestamp, 1 day) | SORT rank_host_keyword DESC, \`BUCKET(timestamp, 1 day)\` ASC | DROP rank_host_keyword`,
+        columnNames: [
+          'COUNT(*) WHERE KQL("bytes > 1000")',
+          'host.keyword',
+          'BUCKET(timestamp, 1 day)',
+        ],
+        expectedSourceIds: {
+          'COUNT(*) WHERE KQL("bytes > 1000")': ['col3'],
+          'host.keyword': ['col1'],
+          'BUCKET(timestamp, 1 day)': ['col2'],
+        },
+      },
+    },
+    {
+      group: 'top_n',
+      dataset: ecommerceWithoutTimeField,
+      description: 'terms above a date histogram without a time field omits WHERE in the subquery',
+      skipApiExecution: true,
+      columns: {
+        col1: terms('category.keyword', {
+          size: 3,
+          orderBy: { type: 'column', columnId: 'col3' },
+          orderDirection: 'desc',
+        }),
+        col2: dateHistogram('order_date', { interval: '1d' }),
+        col3: count(),
+      },
+      columnOrder: ['col1', 'col2', 'col3'],
+      expected: {
+        success: true,
+        esql: `${ecommerceFrom} | ${outerTopNFilter({
+          field: 'category.keyword',
+          score: 'rank_category_keyword = COUNT(*)',
+          sort: 'rank_category_keyword DESC',
+          size: 3,
+          from: ecommerceFrom,
+          where: null,
+        })} | INLINE STATS rank_category_keyword = COUNT(*) BY category.keyword | STATS COUNT(*) BY rank_category_keyword, category.keyword, BUCKET(order_date, 1 day) | SORT rank_category_keyword DESC, \`BUCKET(order_date, 1 day)\` ASC | DROP rank_category_keyword`,
+        columnNames: ['COUNT(*)', 'category.keyword', 'BUCKET(order_date, 1 day)'],
+        expectedSourceIds: {
+          'COUNT(*)': ['col3'],
+          'category.keyword': ['col1'],
+          'BUCKET(order_date, 1 day)': ['col2'],
+        },
       },
     },
     // A date histogram above Top values ranks the top N per time bucket, which is the
@@ -298,7 +779,8 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
     {
       group: 'top_n',
       dataset: logs,
-      description: 'terms with accuracy mode and other bucket reports the highest-priority blocker',
+      description:
+        'single terms with accuracy mode and other bucket reports accuracy (Other is supported)',
       columns: {
         col1: terms('host.keyword', { accuracyMode: true, otherBucket: true }),
         col2: metric('average', 'bytes'),
@@ -306,7 +788,7 @@ export const buildTopNCases = (): EsqlConversionCase[] => {
       columnOrder: ['col1', 'col2'],
       expected: {
         success: false,
-        reason: 'terms_other_bucket_not_supported',
+        reason: 'terms_accuracy_mode_not_supported',
       },
     },
     {

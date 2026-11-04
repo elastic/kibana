@@ -7,14 +7,14 @@
 
 import { useMemo } from 'react';
 import { useInstalledSecurityJobsIds } from '../../../../../common/components/ml/hooks/use_installed_security_jobs';
-import { useResolvedLatestEntitiesIndexName } from '../../../../../common/hooks/use_resolved_latest_entities_index_name';
+import { useTileQueryInputs } from './use_tile_query_inputs';
 import { buildEntitiesWithAnomaliesCountQuery } from '../queries/entities_with_anomalies_query';
 import { buildAnomaliesHistoryReachesBackQuery } from '../queries/history_reaches_back';
 import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
-import { buildEntityFilterClauses } from '../../entities_grid/queries/entity_filters';
 import { readFirstNumber } from './read_first_number';
 import { isDeltaStillComing, usePreviousPeriod } from './use_previous_period';
+import type { TileDeltaFailure } from '../data';
 
 interface AnomaliesDeltaOptions {
   spaceId: string;
@@ -25,11 +25,13 @@ interface AnomaliesDeltaOptions {
   isReady: boolean;
   /** The live count, which the previous period is compared with. */
   count: number;
+  /** True when the count came back: a failed, timed-out or skipped count has no change to show. */
+  hasCount: boolean;
 }
 
 /**
  * The delta of the Entities with anomalies tile. Like the count it needs the installed security
- * ML jobs. It runs only once the page's counts have loaded and its own count is above 0, after a
+ * ML jobs. It runs only once the page's counts have loaded and its own count came back, after a
  * check that the anomaly records reach back twice the range.
  */
 export const useEntitiesWithAnomaliesDelta = ({
@@ -39,13 +41,23 @@ export const useEntitiesWithAnomaliesDelta = ({
   entityFilters = EMPTY_ENTITY_FILTERS,
   isReady,
   count,
+  hasCount,
 }: AnomaliesDeltaOptions): {
   delta: number | undefined;
+  /** The count over the previous period, which the sparkline starts from. */
+  previous: number | undefined;
   isDeltaLoading: boolean;
   isHistoryMissing: boolean;
+  /** True once the history check passed, so the sparkline can follow the same rule. */
+  reachesBack: boolean | undefined;
+  /** Set when the history check or the previous-period query failed. */
+  failure: TileDeltaFailure | undefined;
 } => {
-  const { data: resolvedIndex, isLoading: isIndexLoading } =
-    useResolvedLatestEntitiesIndexName(spaceId);
+  const {
+    data: resolvedIndex,
+    isLoading: isIndexLoading,
+    entityFilterClauses,
+  } = useTileQueryInputs(spaceId, entityFilters);
   const { jobIds, loading: isJobsLoading } = useInstalledSecurityJobsIds();
   const index = resolvedIndex?.indexName;
   const isLoadingInputs = isIndexLoading || isJobsLoading;
@@ -59,28 +71,31 @@ export const useEntitiesWithAnomaliesDelta = ({
         ? buildEntitiesWithAnomaliesCountQuery(
             index,
             timeRange,
-            buildEntityFilterClauses(entityFilters),
+            entityFilterClauses,
             jobIds,
             'previous'
           )
         : null,
-    [index, jobIds, timeRange, entityFilters]
+    [index, jobIds, timeRange, entityFilterClauses]
   );
 
-  const { previous, isHistoryMissing, isError } = usePreviousPeriod({
+  const { previous, reachesBack, isHistoryMissing, isError, failure } = usePreviousPeriod({
     tileKey: 'entitiesWithAnomalies',
     guardQuery,
     previousQuery,
-    enabled: !skip && isReady && count > 0 && !isLoadingInputs && hasInputs,
+    enabled: !skip && isReady && hasCount && !isLoadingInputs && hasInputs,
     parse: (raw) => readFirstNumber(raw, 'value'),
   });
 
   return {
     delta: previous !== undefined ? count - previous : undefined,
+    previous,
     isHistoryMissing,
+    reachesBack,
+    failure,
     isDeltaLoading: isDeltaStillComing({
       skip,
-      count,
+      hasCount,
       // Once the inputs have loaded, no installed job or no index means the query can never run.
       isUnavailable: !skip && !isLoadingInputs && !hasInputs,
       isError,

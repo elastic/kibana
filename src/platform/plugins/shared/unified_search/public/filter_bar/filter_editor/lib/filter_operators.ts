@@ -10,8 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import { FILTERS } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
-import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { FilterMetaParams } from '@kbn/es-query/src/filters/build_filters';
+import type { FilterableField } from '@kbn/data-source';
 import { isRangeParams } from '../range_value_input';
 
 export const strings = {
@@ -85,7 +85,7 @@ export interface Operator {
    * A filter predicate for a field,
    * takes precedence over {@link fieldTypes}
    */
-  field?: (field: DataViewField) => boolean;
+  field?: (field: FilterableField) => boolean;
   /**
    * If applicable, preserves or converts filter params when switching between operators
    */
@@ -148,7 +148,7 @@ export const isNotOneOfOperator: Operator = {
 
 const rangeOperatorsSharedProps = {
   type: FILTERS.RANGE,
-  field: (field: DataViewField) => {
+  field: (field: FilterableField) => {
     if (['number', 'number_range', 'date', 'date_range', 'ip', 'ip_range'].includes(field.type))
       return true;
 

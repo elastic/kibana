@@ -26,8 +26,15 @@ interface EntitySeed {
   type: 'host' | 'user' | 'service';
   name: string;
   risk?: [score: number, level: string];
+  /** The risk engine's score of the group, which only the main entity of a group holds. */
+  groupRisk?: [score: number, level: string];
   criticality?: string;
   watchlists?: string[];
+  sources?: string[];
+  /** Days before now that the entity was first seen; 20 by default. */
+  firstSeenDaysAgo?: number;
+  /** Hours before now that the entity was last seen; 1 by default. */
+  lastSeenHoursAgo?: number;
   resolvedTo?: string;
 }
 
@@ -37,15 +44,49 @@ const ENTITIES: readonly EntitySeed[] = [
     type: 'host',
     name: 'web-1',
     risk: [90, 'Critical'],
+    groupRisk: [95, 'Critical'],
     criticality: 'high_impact',
+    sources: ['okta'],
   },
-  { id: 'host:h2', type: 'host', name: 'web-2', risk: [50, 'Moderate'], watchlists: ['wl-1'] },
+  {
+    id: 'host:h2',
+    type: 'host',
+    name: 'web-2',
+    risk: [50, 'Moderate'],
+    criticality: 'medium_impact',
+    watchlists: ['wl-1'],
+  },
   { id: 'host:h3', type: 'host', name: 'web-3' },
-  { id: 'host:h4', type: 'host', name: 'web-4', resolvedTo: 'host:h1' },
-  { id: 'host:h5', type: 'host', name: 'web-5', resolvedTo: 'host:h1' },
+  // The aliases of host:h1 differ from it in every column that its group shows.
+  {
+    id: 'host:h4',
+    type: 'host',
+    name: 'web-4',
+    resolvedTo: 'host:h1',
+    criticality: 'extreme_impact',
+    sources: ['aws'],
+    watchlists: ['wl-2'],
+    firstSeenDaysAgo: 40,
+    lastSeenHoursAgo: 0.5,
+  },
+  {
+    id: 'host:h5',
+    type: 'host',
+    name: 'web-5',
+    resolvedTo: 'host:h1',
+    criticality: 'low_impact',
+    sources: ['okta', 'gcp'],
+    watchlists: ['wl-3'],
+  },
   { id: 'service:payments', type: 'service', name: 'payments', risk: [20, 'Low'] },
-  { id: 'user:alice@okta', type: 'user', name: 'alice', risk: [70, 'High'] },
-  { id: 'user:bob@okta', type: 'user', name: 'bob' },
+  {
+    id: 'user:alice@okta',
+    type: 'user',
+    name: 'alice',
+    risk: [70, 'High'],
+    criticality: 'low_impact',
+  },
+  { id: 'user:bob@okta', type: 'user', name: 'bob', groupRisk: [85, 'High'] },
   { id: 'user:carol@okta', type: 'user', name: 'carol', resolvedTo: 'user:bob@okta' },
 ];
 
@@ -58,15 +99,22 @@ const toIdentityFields = ({ id, type, name }: EntitySeed): Record<string, string
 
 const toEntityDoc = (seed: EntitySeed, now: number) => ({
   ...toIdentityFields(seed),
-  '@timestamp': toIsoAgo(now, HOUR_MS),
+  '@timestamp': toIsoAgo(now, (seed.lastSeenHoursAgo ?? 1) * HOUR_MS),
   'entity.id': seed.id,
   'entity.name': seed.name,
   'entity.EngineMetadata.Type': seed.type,
-  'entity.lifecycle.first_seen': toIsoAgo(now, 20 * DAY_MS),
+  'entity.lifecycle.first_seen': toIsoAgo(now, (seed.firstSeenDaysAgo ?? 20) * DAY_MS),
+  ...(seed.sources ? { 'entity.source': seed.sources } : {}),
   ...(seed.risk
     ? {
         'entity.risk.calculated_score_norm': seed.risk[0],
         'entity.risk.calculated_level': seed.risk[1],
+      }
+    : {}),
+  ...(seed.groupRisk
+    ? {
+        'entity.relationships.resolution.risk.calculated_score_norm': seed.groupRisk[0],
+        'entity.relationships.resolution.risk.calculated_level': seed.groupRisk[1],
       }
     : {}),
   ...(seed.criticality ? { 'asset.criticality': seed.criticality } : {}),
@@ -85,6 +133,8 @@ export const entitiesIndex: FixtureIndex = {
     'entity.lifecycle.first_seen': DATE,
     'entity.risk.calculated_score_norm': FLOAT,
     'entity.risk.calculated_level': KEYWORD,
+    'entity.relationships.resolution.risk.calculated_score_norm': FLOAT,
+    'entity.relationships.resolution.risk.calculated_level': KEYWORD,
   },
   buildDocs: (now) => ENTITIES.map((seed) => toEntityDoc(seed, now)),
 };

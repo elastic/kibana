@@ -22,6 +22,7 @@ import {
   AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID,
   AI_ASSISTANT_PREFERRED_AI_ASSISTANT_TYPE,
   AI_CHAT_EXPERIENCE_TYPE,
+  GEN_AI_SETTINGS_INFERENCE_STREAMING,
   GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
 } from '@kbn/management-settings-ids';
 import { WORKFLOWS_UI_SETTING_ID } from '@kbn/workflows';
@@ -71,6 +72,10 @@ describe('GenAiSettingsApp', () => {
     },
     [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]: {
       value: false,
+      type: 'boolean',
+    },
+    [GEN_AI_SETTINGS_INFERENCE_STREAMING]: {
+      value: true,
       type: 'boolean',
     },
     ...overrides,
@@ -593,6 +598,40 @@ describe('GenAiSettingsApp', () => {
           })
         );
       });
+    });
+  });
+
+  describe('Inference streaming', () => {
+    it('renders the setting and saves it when toggled off', async () => {
+      renderComponent();
+
+      const streamingSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_INFERENCE_STREAMING}`
+      );
+      expect(streamingSwitch).toBeChecked();
+      fireEvent.click(streamingSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(coreStart.settings.client.set).toHaveBeenCalledWith(
+          GEN_AI_SETTINGS_INFERENCE_STREAMING,
+          false
+        );
+      });
+    });
+
+    it('does not render the setting when it is not registered', () => {
+      const { [GEN_AI_SETTINGS_INFERENCE_STREAMING]: _omitted, ...settingsWithoutStreaming } =
+        createSettingsMock();
+      coreStart.settings.client.getAll.mockReturnValue(settingsWithoutStreaming as any);
+
+      renderComponent();
+
+      expect(
+        screen.queryByTestId(`management-settings-editField-${GEN_AI_SETTINGS_INFERENCE_STREAMING}`)
+      ).not.toBeInTheDocument();
     });
   });
 

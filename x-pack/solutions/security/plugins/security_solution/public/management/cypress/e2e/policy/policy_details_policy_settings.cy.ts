@@ -48,7 +48,7 @@ describe(
         it('should render disabled button and display modal if unsaved changes are present', () => {
           loadSettingsUrl(policy.id);
           cy.getByTestSubj('policyDetailsSaveButton').should('be.disabled');
-          cy.getByTestSubj('endpointPolicyForm-malware-enableDisableSwitch').click();
+          cy.getByTestSubj('endpointPolicyForm-perOsMalware-enableDisableSwitch').click();
           cy.getByTestSubj('policyDetailsSaveButton').should('not.be.disabled');
           cy.getByTestSubj('policyProtectionUpdatesTab').click();
           cy.getByTestSubj('policyDetailsUnsavedChangesModal').within(() => {

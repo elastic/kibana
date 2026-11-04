@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiHealth, type EuiBadgeProps } from '@elastic/eui';
+import { EuiHealth, useEuiTheme, type EuiThemeComputed } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
@@ -13,22 +13,22 @@ type Severity = 'low' | 'medium' | 'high' | 'critical';
 
 export const SIGNIFICANT_EVENT_SEVERITY: Record<
   Severity,
-  { color: EuiBadgeProps['color']; label: string }
+  { color: keyof EuiThemeComputed['colors']['severity']; label: string }
 > = {
   low: {
-    color: '#5a6d8c',
+    color: 'neutral',
     label: i18n.translate('xpack.nightshift.significantEventsTable.severityBadge.lowLabel', {
       defaultMessage: 'Low',
     }),
   },
   medium: {
-    color: '#facb3d',
+    color: 'warning',
     label: i18n.translate('xpack.nightshift.significantEventsTable.severityBadge.mediumLabel', {
       defaultMessage: 'Medium',
     }),
   },
   high: {
-    color: '#ed6723',
+    color: 'risk',
     label: i18n.translate('xpack.nightshift.significantEventsTable.severityBadge.highLabel', {
       defaultMessage: 'High',
     }),
@@ -52,11 +52,20 @@ export const scoreSeverity = (score: number): Severity => {
   return 'critical';
 };
 
-export function SeverityBadge({ score, severity }: { score?: number; severity?: Severity }) {
+export function SeverityBadge({
+  score,
+  severity,
+  textSize = 'xs',
+}: {
+  score?: number;
+  severity?: Severity;
+  textSize?: 'xs' | 's';
+}) {
+  const { euiTheme } = useEuiTheme();
   const normalizedSeverity = severity ?? (score !== undefined ? scoreSeverity(score) : undefined);
   if (!normalizedSeverity) {
     return (
-      <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize="xs">
+      <EuiHealth color="text" style={{ lineHeight: 'inherit' }} textSize={textSize}>
         {i18n.translate('xpack.nightshift.significantEventsTable.severityBadge.noSeverity', {
           defaultMessage: 'None',
         })}
@@ -65,7 +74,11 @@ export function SeverityBadge({ score, severity }: { score?: number; severity?: 
   }
   const { color, label } = SIGNIFICANT_EVENT_SEVERITY[normalizedSeverity];
   return (
-    <EuiHealth color={color} style={{ lineHeight: 'inherit' }} textSize="xs">
+    <EuiHealth
+      color={euiTheme.colors.severity[color]}
+      style={{ lineHeight: 'inherit' }}
+      textSize={textSize}
+    >
       {label}
     </EuiHealth>
   );

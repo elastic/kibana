@@ -23,11 +23,13 @@ import {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   setSourceEnabled,
   testIndexName,
   uniqueSuffix,
   updateSource,
+  validateSourceQuery,
 } from '../fixtures';
 
 const TITLE_PREFIX = 'scout-sources-authz';
@@ -74,12 +76,16 @@ apiTest.describe(
       );
       expect(listed).toHaveStatusCode(200);
       expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(200);
 
       const fetched = await getSource(apiClient, cookieHeader, sourceId);
       expect(fetched).toHaveStatusCode(200);
       expect(fetched.body.health).toBe('ok');
 
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
+      expect(
+        await validateSourceQuery(apiClient, cookieHeader, { esql: body.esql })
+      ).toHaveStatusCode(403);
       expect(
         await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
       ).toHaveStatusCode(403);
@@ -90,10 +96,7 @@ apiTest.describe(
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
     });
 
-    // Promoted ES still returns `unknown` for this role. The candidate snapshot
-    // (elastic/elasticsearch#161500) returns `ok`. Unskip once that snapshot is promoted.
-    // eslint-disable-next-line playwright/no-skipped-test -- unskip after the ES snapshot with #161500 is promoted
-    apiTest.skip(
+    apiTest(
       'reports ok health to a reader with only the implicit view grant',
       async ({ apiClient, samlAuth }) => {
         const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_READ_ONLY_NO_ES_ROLE);
@@ -116,6 +119,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asInteractiveUser(NO_NIGHTSHIFT_ROLE);
 
       expect(await listSources(apiClient, cookieHeader)).toHaveStatusCode(403);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(403);
       expect(await getSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);

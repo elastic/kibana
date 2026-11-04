@@ -713,7 +713,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Unenroll an agent`,
-      description: `Unenroll a specific agent, optionally revoking its enrollment API key.`,
+      description: `Unenroll a specific agent. By default, the agent stops sending data and its API keys are invalidated after it acknowledges the unenroll action. To invalidate the API keys immediately, use \`revoke\`. **Force unenroll** in the UI sends \`revoke: true\`.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
@@ -1189,7 +1189,7 @@ export const registerAPIRoutes = (router: FleetAuthzRouter, config: FleetConfigT
         },
       },
       summary: `Bulk unenroll agents`,
-      description: `Unenroll multiple agents, optionally revoking their enrollment API keys.`,
+      description: `Unenroll multiple agents. By default, the agents stop sending data and their API keys are invalidated after they acknowledge the unenroll action. To invalidate the API keys immediately, use \`revoke\`. **Force unenroll** in the UI sends \`revoke: true\`.`,
       options: {
         tags: ['oas-tag:Elastic Agent actions'],
       },
