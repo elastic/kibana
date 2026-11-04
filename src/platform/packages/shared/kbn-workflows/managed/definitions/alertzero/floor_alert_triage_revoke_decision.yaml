@@ -41,6 +41,7 @@ steps:
     type: alertzero.triage.revokeFpDecision
     with:
       decision_id: "{{ inputs.decision_id }}"
+      space_id: "{{ workflow.spaceId }}"
 
   - name: emit_result
     type: workflow.output
