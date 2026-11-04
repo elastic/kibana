@@ -12,6 +12,7 @@ import {
   closeAlertsAsFalsePositive,
   countClosedByDecision,
   fetchDecisionCandidates,
+  type DecisionCursor,
   fetchTriageAlerts,
   findKeyTagsWithVerdicts,
   listLiveExecutionIds,
@@ -570,7 +571,7 @@ describe('fetchTriageAlerts', () => {
 });
 
 describe('fetchDecisionCandidates', () => {
-  const run = (hits: unknown[], filters: Partial<TriageFilters> = {}, after?: unknown[]) => {
+  const run = (hits: unknown[], filters: Partial<TriageFilters> = {}, after?: DecisionCursor) => {
     const callKibanaApi = jest
       .fn()
       .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits } } });
@@ -602,20 +603,53 @@ describe('fetchDecisionCandidates', () => {
     expect(after).toBeUndefined();
   });
 
-  it('hands back the cursor of a full page, and reads the next page from a cursor', async () => {
-    const full = Array.from({ length: ALERT_FETCH_LIMIT }, (_unused, i) => ({
+  const fullPage = (timestampOf: (i: number) => number) =>
+    Array.from({ length: ALERT_FETCH_LIMIT }, (_unused, i) => ({
       _id: `a${i}`,
       _source: {},
-      sort: [i, `uuid-${i}`],
+      sort: [timestampOf(i), `uuid-${i}`],
     }));
-    const first = run(full);
 
-    const { after } = await first.run();
+  it('hands back the cursor of a full page: the last timestamp and the ids read at it', async () => {
+    const { after } = await run(fullPage((i) => (i < ALERT_FETCH_LIMIT - 2 ? i : 9_999_999))).run();
 
-    expect(after).toEqual([ALERT_FETCH_LIMIT - 1, `uuid-${ALERT_FETCH_LIMIT - 1}`]);
+    expect(after).toEqual({
+      timestamp: 9_999_999,
+      seenIds: [`a${ALERT_FETCH_LIMIT - 2}`, `a${ALERT_FETCH_LIMIT - 1}`],
+    });
+  });
+
+  it('reads the next page from the cursor without `search_after`, which the alerts route drops', async () => {
+    const after = { timestamp: 5000, seenIds: ['a1', 'a2'] };
     const next = run([], {}, after);
+
     await next.run();
-    expect(next.callKibanaApi.mock.calls[0][0].body.search_after).toEqual(after);
+
+    const { body } = next.callKibanaApi.mock.calls[0][0];
+    expect(body.search_after).toBeUndefined();
+    expect(body.query.bool.filter).toContainEqual({
+      range: { '@timestamp': { gte: 5000, format: 'epoch_millis' } },
+    });
+    expect(body.query.bool.must_not).toContainEqual({ ids: { values: ['a1', 'a2'] } });
+  });
+
+  it('keeps the ids read before when a whole page sits inside one timestamp', async () => {
+    const previous = { timestamp: 7000, seenIds: ['before'] };
+    const { after } = await run(
+      fullPage(() => 7000),
+      {},
+      previous
+    ).run();
+
+    expect(after?.timestamp).toBe(7000);
+    expect(after?.seenIds).toHaveLength(ALERT_FETCH_LIMIT + 1);
+    expect(after?.seenIds).toContain('before');
+  });
+
+  it('has no cursor on a short page', async () => {
+    const { after } = await run(fullPage((i) => i).slice(0, 5)).run();
+
+    expect(after).toBeUndefined();
   });
 
   it('searches oldest first with a tiebreaker, and reads only the fields it needs', async () => {

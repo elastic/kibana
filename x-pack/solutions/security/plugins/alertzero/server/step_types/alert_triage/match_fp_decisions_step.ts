@@ -35,6 +35,7 @@ import {
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import {
   closeAlertsAsFalsePositive,
+  type DecisionCursor,
   countClosedByDecision,
   fetchDecisionCandidates,
   findOpenAlertIds,
@@ -245,7 +246,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         const count = (byDecision: Map<string, string[]>) =>
           [...byDecision.values()].reduce((sum, ids) => sum + ids.length, 0);
 
-        let after: unknown[] | undefined;
+        let after: DecisionCursor | undefined;
         for (let page = 0; page < MAX_PAGES; page++) {
           const found = await fetchDecisionCandidates(
             contextManager,
