@@ -22,7 +22,6 @@ import {
   EuiSpacer,
   EuiToolTip,
   copyToClipboard,
-  useEuiTheme,
   type EuiBasicTableColumn,
   type CriteriaWithPagination,
   type EuiTableSelectionType,
@@ -137,7 +136,6 @@ const ExperimentRowDetails: React.FC<{ item: EvaluationExperimentSummary }> = ({
 export const ExperimentsListPage: React.FC = () => {
   const history = useHistory();
   const { services } = useKibana();
-  const { euiTheme } = useEuiTheme();
   const savedWorkflowsHref = services.http?.basePath.prepend(
     '/app/workflows?tags=evals-experiment'
   );
@@ -337,7 +335,7 @@ export const ExperimentsListPage: React.FC = () => {
   }, [canCompare, selectedExperiments, history]);
 
   return (
-    <EuiPageSection paddingSize="none" css={{ paddingTop: euiTheme.size.l }}>
+    <EuiPageSection paddingSize="none">
       <EuiFlexGroup>
         <EuiFlexItem>
           <EuiFieldSearch

@@ -19,6 +19,7 @@ import {
   type ActionPolicyCreateOption,
 } from '../../../components/action_policy/create_options/action_policy_create_options_panel';
 import { DeleteActionPolicyConfirmModal } from '../../../components/action_policy/delete_confirmation_modal';
+import { ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE } from '../../../components/action_policy/labels';
 import { CREATE_ACTION_POLICY_WITH_AGENT_INITIAL_PROMPT } from '../../../constants';
 import { useAlertingLocators } from '../../../application/locator_context';
 import { useBulkActionActionPolicies } from '../../../hooks/use_bulk_action_action_policies';
@@ -31,6 +32,7 @@ import {
   useAgentBuilderSkillsRequirements,
 } from '../../../hooks/use_are_agent_builder_skills_available';
 import { useNavigateToAgentBuilder } from '../../../hooks/use_navigate_to_agent_builder';
+import { useIsActionPoliciesLicenseValid } from '../../../hooks/use_is_action_policies_license_valid';
 import { useSnoozeActionPolicy } from '../../../hooks/use_snooze_action_policy';
 import { useUnsnoozeActionPolicy } from '../../../hooks/use_unsnooze_action_policy';
 import { useUpdateActionPolicyApiKey } from '../../../hooks/use_update_action_policy_api_key';
@@ -64,7 +66,7 @@ const CREATE_POLICY_OPTION_TITLE = i18n.translate(
 );
 const CREATE_POLICY_OPTION_DESCRIPTION = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createPolicyDescription',
-  { defaultMessage: 'Match alert episodes and send them to destinations.' }
+  { defaultMessage: 'Match alerts and send them to destinations.' }
 );
 const CREATE_WITH_AGENT_OPTION_TITLE = i18n.translate(
   'xpack.alertingV2.actionPolicyCreateOptionsPanel.createWithAiAgentTitle',
@@ -92,6 +94,7 @@ export const ActionPoliciesTable = () => {
   const areAgentBuilderSkillsAvailable = useAreAgentBuilderSkillsAvailable();
   const abSkillRequirements = useAgentBuilderSkillsRequirements();
   const createWithAgentTooltipText = getCreateActionPolicyWithAgentTooltipText(abSkillRequirements);
+  const isLicenseValid = useIsActionPoliciesLicenseValid();
 
   const navigateToCreate = useCallback(() => {
     actionPolicyLocators.navigateSync({ page: 'create' });
@@ -149,22 +152,13 @@ export const ActionPoliciesTable = () => {
 
   const clonePolicy = useCallback(
     (policy: ActionPolicyResponse) => {
-      const {
-        name,
-        description,
-        destinations,
-        matcher,
-        group_by: groupBy,
-        throttle,
-        grouping_mode: groupingMode,
-      } = policy;
+      const { name, description, destinations, matcher, grouping, throttle } = policy;
       const data: CreateActionPolicyData = {
         name: `${name} [clone]`,
         description,
         destinations,
-        grouping_mode: groupingMode ?? 'per_episode',
+        grouping: grouping ?? { mode: 'per_alert' },
         ...(matcher != null && { matcher }),
-        ...(groupBy != null && { group_by: groupBy }),
         ...(throttle != null && { throttle }),
       };
       createActionPolicy(data, { onSuccess: () => refetchRef.current() });
@@ -184,22 +178,27 @@ export const ActionPoliciesTable = () => {
         title: CREATE_POLICY_OPTION_TITLE,
         description: CREATE_POLICY_OPTION_DESCRIPTION,
         onClick: navigateToCreate,
+        disabled: !isLicenseValid,
+        tooltipText: isLicenseValid ? undefined : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
         'data-test-subj': 'createActionPolicyCard',
       },
       {
         id: 'create-with-agent',
-        iconType: 'productAgent',
+        iconType: 'productAgent' as const,
         title: CREATE_WITH_AGENT_OPTION_TITLE,
         description: CREATE_WITH_AGENT_OPTION_DESCRIPTION,
         onClick: navigateToAgentBuilder,
-        disabled: !areAgentBuilderSkillsAvailable,
-        tooltipText: createWithAgentTooltipText,
+        disabled: !isLicenseValid || !areAgentBuilderSkillsAvailable,
+        tooltipText: isLicenseValid
+          ? createWithAgentTooltipText
+          : ACTION_POLICIES_LICENSE_REQUIRED_MESSAGE,
         'data-test-subj': 'createActionPolicyWithAgentCard',
       },
     ],
     [
       navigateToCreate,
       navigateToAgentBuilder,
+      isLicenseValid,
       areAgentBuilderSkillsAvailable,
       createWithAgentTooltipText,
     ]
@@ -272,8 +271,6 @@ export const ActionPoliciesTable = () => {
           canWrite={canWrite}
           onCreatePolicy={navigateToCreate}
           onCreateWithAgent={navigateToAgentBuilder}
-          createWithAgentDisabled={!areAgentBuilderSkillsAvailable}
-          createWithAgentTooltipText={createWithAgentTooltipText}
         />
         <ContentList emptyState={emptyState}>
           <ActionPoliciesTableContent
@@ -287,6 +284,7 @@ export const ActionPoliciesTable = () => {
             isUnsnoozing={isUnsnoozing}
             unsnoozeVariables={unsnoozeVariables}
             isBulkActionInProgress={isBulkActionInProgress}
+            isLicenseValid={isLicenseValid}
             bulkAction={bulkAction}
             onRefetchReady={onRefetchReady}
             onEdit={navigateToEdit}

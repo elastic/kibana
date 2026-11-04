@@ -21,6 +21,8 @@ import type { HTTPAuthorizationHeader } from '../authentication';
  */
 export const UIAM_INTERNAL_CALLER_ATTESTATION_HEADER = 'x-kbn-uiam-internal-caller-attestation';
 
+export const ES_CLIENT_AUTHENTICATION_HEADER = 'x-client-authentication';
+
 /**
  * Fixed prefix the attestation HMAC is computed over, before the credential it is bound to.
  * Versioned so the derivation can evolve without silently accepting attestations minted by an

@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { ALERT_REASON, ALERT_URL, ALERT_INSTANCE_ID } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
-import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
+import { getEventLog, getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import {
   createConnector,
   createESQLRule,
@@ -481,6 +481,41 @@ export default function ruleTests({ getService }: FtrProviderContext) {
       const messagePattern = /Document count is \d+ in the last 1h. Alert when greater than 0./;
       expect(message).to.match(messagePattern);
       expect(hits).not.to.be.empty();
+    });
+
+    it('runs correctly: unknown index returns an empty run with a warning', async () => {
+      const warning =
+        'The target index [does-not-exist] does not exist. The query returned no results.';
+      const ruleId = await createESQLRule(
+        supertest,
+        objectRemover,
+        connectorId,
+        { name: 'unknown index' },
+        'from does-not-exist | stats c = count(date) | where c > 0'
+      );
+
+      const [executeEvent] = await retry.try(async () => {
+        return await getEventLog({
+          getService,
+          spaceId: Spaces.space1.id,
+          type: 'alert',
+          id: ruleId,
+          provider: 'alerting',
+          actions: new Map([['execute', { equal: 1 }]]),
+        });
+      });
+
+      expect(executeEvent?.event?.outcome).to.be('success');
+      expect(executeEvent?.kibana?.alerting?.outcome).to.be('warning');
+      expect(executeEvent?.message).to.be(warning);
+
+      const { body: rule } = await supertest
+        .get(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule/${ruleId}`)
+        .expect(200);
+
+      expect(rule.execution_status.status).to.be('warning');
+      expect(rule.last_run.outcome).to.be('warning');
+      expect(rule.last_run.outcome_msg).to.eql([warning]);
     });
 
     it('runs correctly and populates recovery context', async () => {

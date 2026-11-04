@@ -73,7 +73,7 @@ const renderCallout = ({
     services: {
       application: { capabilities: { advancedSettings: { save: canSaveAdvancedSettings } } },
       docLinks: { links: { siem: { runAttackDiscoveryInWorkflow: DOCS_URL } } },
-      featureFlags: { getBooleanValue: jest.fn(() => featureAvailable) },
+      featureFlags: { useBooleanValue: jest.fn(() => featureAvailable) },
       storage: storageMock,
       telemetry: { reportEvent },
       uiSettings: {

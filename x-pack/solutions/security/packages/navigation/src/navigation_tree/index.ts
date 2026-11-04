@@ -17,6 +17,7 @@ import { createAlertDetectionsNavigationTree } from './alert_detections_navigati
 import {
   createAlertZeroNavigationTree,
   createAlertZeroSecondaryNavigationTree,
+  isAlertZeroNavVisible,
 } from './alertzero_navigation_tree';
 
 export const defaultNavigationTree = {
@@ -31,5 +32,6 @@ export const defaultNavigationTree = {
   ml: createMachineLearningNavigationTree,
   alertZero: createAlertZeroNavigationTree,
   alertZeroSecondary: createAlertZeroSecondaryNavigationTree,
+  isAlertZeroNavVisible,
 };
 export type DefaultNavigationTree = typeof defaultNavigationTree;

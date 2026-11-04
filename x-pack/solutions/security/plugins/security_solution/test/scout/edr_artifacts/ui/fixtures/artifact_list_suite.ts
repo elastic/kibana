@@ -35,8 +35,10 @@ const STATEFUL_ONLY_REASON =
  * race NONE / READ empty-state assertions.
  *
  * Does not port the Cypress SIEM version matrix — that belongs in API
- * `role_migrations`. Field-operator form coverage stays in leftover
- * `*.cy.ts` list CRUD specs until those migrate.
+ * `role_migrations`. Blocklist signature operator CRUD lives in
+ * `describeBlocklistOperatorField` (same spec file as this list, because
+ * the agnostic list is not space-isolated). Other leftover `*.cy.ts`
+ * field-operator specs migrate the same way.
  */
 export const describeArtifactListPage = (
   artifact: ArtifactTabCase,

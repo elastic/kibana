@@ -33,6 +33,7 @@ import type { InvalidateAPIKeyResult } from '@kbn/core-security-server';
 import type { FakeRawRequest } from '@kbn/core-http-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { SpaceId } from '@kbn/core-spaces-common';
+import { ALERTING_CLONE_API_KEY_HEADER } from '../common';
 import type { RuleTypeRegistry, SpaceIdToNamespaceFunction } from './types';
 import { RulesClient } from './rules_client';
 import { ApiKeyType } from './task_runner/types';
@@ -61,7 +62,8 @@ export interface RulesClientCreateOptions {
   /**
    * When true, clone the request's API key for each newly created rule.
    * The cloned key is independent, non-expiring, and managed by alerting
-   * (invalidated on rule delete/update). Only applies to rule creation.
+   * (invalidated on rule delete/update). Only applies to rule creation, and
+   * is a no-op unless the request is API-key authenticated (nothing to clone).
    */
   cloneApiKeysOnCreate?: boolean;
 }
@@ -198,17 +200,39 @@ export class RulesClientFactory {
 
   /**
    * Attempts to create a UIAM API key when shouldGrantUiam is true and the request has UIAM credentials.
-   * Logs errors and returns undefined if grant fails or credentials are missing/invalid.
+   *
+   * While rules still run with ES API keys (`apiKeyType === 'es'`), every failure is logged and
+   * swallowed so the rule write proceeds with only an ES API key. Once rules run with UIAM keys
+   * (`apiKeyType === 'uiam'`), a rule saved without one cannot search across projects, so a
+   * failed grant fails the rule write instead of degrading silently. Requests without UIAM
+   * credentials are always skipped (never sent to UIAM): a UIAM key can never be minted for them.
+   *
+   * Pass `required: true` when the UIAM key is the only credential the rule will get, as for
+   * UIAM service accounts. Every failure then throws, including the cases that are skipped above.
    */
   private async createUiamApiKey(
     request: KibanaRequest,
-    name: string
+    name: string,
+    { required = false }: { required?: boolean } = {}
   ): Promise<GrantAPIKeyResult | undefined> {
     if (!this.shouldGrantUiam) {
+      if (required) {
+        throw new Error(
+          `Failed to create UIAM API key for alerting rule : ${name}: UIAM is not enabled`
+        );
+      }
       return;
     }
+    const uiamKeyIsRequired = required || this.apiKeyType === ApiKeyType.UIAM;
     const authorizationHeader = HTTPAuthorizationHeader.parseFromRequest(request);
     if (!authorizationHeader || !isUiamCredential(authorizationHeader)) {
+      if (required) {
+        throw new Error(
+          `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`
+        );
+      }
+      // A non-UIAM credential means the caller is not a Cloud user (e.g. an operator), so a
+      // UIAM key can never be minted for them; skip the UIAM grant.
       this.logger.error(
         `Failed to create UIAM API key for alerting rule : ${name}: Invalid or missing UIAM credentials`,
         {
@@ -217,15 +241,13 @@ export class RulesClientFactory {
       );
       return;
     }
+
     try {
       const result = await this.securityService.authc.apiKeys.uiam?.grant(request, {
         name: `uiam-${name}`,
       });
       if (!result) {
-        this.logger.error(`Failed to create UIAM API key for alerting rule : ${name}`, {
-          tags: UIAM_LOGS_GRANT_TAGS,
-        });
-        return;
+        throw new Error(`Failed to create a Cloud API key for alerting rule : ${name}`);
       }
       return result;
     } catch (err) {
@@ -237,6 +259,9 @@ export class RulesClientFactory {
           error: { stack_trace: err.stack },
         }
       );
+      if (uiamKeyIsRequired) {
+        throw err;
+      }
       return;
     }
   }
@@ -444,9 +469,20 @@ export class RulesClientFactory {
         const user = securityService.authc.getCurrentUser(request);
         return user?.username ?? null;
       },
+      async getProfileUid() {
+        const user = securityService.authc.getCurrentUser(request);
+        return user?.profile_uid ?? null;
+      },
       async createAPIKey(name: string, refresh?: boolean | 'wait_for') {
         if (!securityPluginStart) {
           return { apiKeysEnabled: false };
+        }
+        // A UIAM service account gets a UIAM key only. Elasticsearch can't grant a key for it, and
+        // the rule runs on `uiamApiKey` when there is no Elasticsearch key, whatever `apiKeyType` is.
+        const principal = securityService.authc.getPrincipal(request);
+        if (principal?.type === 'service_account' && principal.variant === 'uiam') {
+          const uiamResult = await factory.createUiamApiKey(request, name, { required: true });
+          return { apiKeysEnabled: true, uiamResult };
         }
         // Create an API key using the new grant API - in this case the Kibana system user is creating the
         // API key for the user, instead of having the user create it themselves, which requires api_key
@@ -585,7 +621,14 @@ export class RulesClientFactory {
         }
         return { apiKeysEnabled: false };
       },
-      cloneApiKeysOnCreate: options?.cloneApiKeysOnCreate === true,
+      // A caller running on a borrowed API key (e.g. an Agent Builder task) declares it with this
+      // header so created rules are minted their own framework-managed keys instead of persisting
+      // the caller's. Derived here so every client reaching this factory honors it — the alerting
+      // route context, `getRulesClientWithRequest` (how Detection Engine gets its client), and
+      // `getRulesClientWithRequestInSpace` alike. An explicit option still wins.
+      cloneApiKeysOnCreate:
+        options?.cloneApiKeysOnCreate ??
+        request.headers?.[ALERTING_CLONE_API_KEY_HEADER] === 'true',
       async invalidateApiKeyNow(params) {
         await factory.invalidateApiKeyNow(params);
       },

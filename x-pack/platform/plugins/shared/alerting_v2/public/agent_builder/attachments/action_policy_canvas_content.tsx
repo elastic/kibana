@@ -12,13 +12,16 @@ import {
   type AttachmentRenderProps,
   type CanvasRenderCallbacks,
 } from '@kbn/agent-builder-browser/attachments';
+import { PluginStart } from '@kbn/core-di';
 import { CoreStart, useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
+import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
 import { attachmentDataToActionPolicyPayload } from '@kbn/alerting-v2-utils';
+import { getAlertingV2Locators } from '../../application/bind_locators_to_host';
 import { ActionPolicyDefinitionList } from '../../components/action_policy/details_flyout/action_policy_definition_list';
-import { paths } from '../../constants';
 import { ActionPoliciesApi } from '../../services/action_policies_api';
+import { OBSERVABILITY_ALERTING_HOST } from '../../../common/locators';
 import type { ActionPolicyAttachment } from './action_policy_attachment_definition';
 
 const EMPTY_VALUE = '-';
@@ -36,8 +39,7 @@ export const ActionPolicyCanvasContent = ({
 }: ActionPolicyCanvasContentProps) => {
   const actionPoliciesApi = useService(ActionPoliciesApi);
   const workflowApi = useService(WorkflowApi);
-  const application = useService(CoreStart('application'));
-  const basePath = useService(CoreStart('http')).basePath;
+  const share = useService(PluginStart('share')) as SharePluginStart;
   const notifications = useService(CoreStart('notifications'));
 
   const { data: rawData, origin } = attachment;
@@ -102,8 +104,8 @@ export const ActionPolicyCanvasContent = ({
           type: ActionButtonType.PRIMARY,
           disabled: hasDraftDependencies,
           disabledReason: hasDraftDependencies
-            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveRuleAndWorkflowFirst', {
-                defaultMessage: 'Save rule and workflow before saving policy.',
+            ? i18n.translate('xpack.alertingV2.actionPolicyAttachment.saveWorkflowFirst', {
+                defaultMessage: 'Save workflow before saving policy.',
               })
             : undefined,
           handler: async () => {
@@ -175,8 +177,11 @@ export const ActionPolicyCanvasContent = ({
         icon: 'external',
         type: ActionButtonType.OVERFLOW,
         handler: () => {
-          // TODO: migrate to actionPolicyLocators.navigateSync once agent_builder is wrapped in LocatorProvider
-          application.navigateToUrl(basePath.prepend(paths.actionPolicyEdit(data.id)));
+          getAlertingV2Locators(share).actionPolicyLocators.navigateSync({
+            page: 'edit',
+            actionPolicyId: data.id,
+            host: OBSERVABILITY_ALERTING_HOST.actionPolicies,
+          });
         },
       },
     ]);
@@ -186,8 +191,7 @@ export const ActionPolicyCanvasContent = ({
     registerActionButtons,
     updateOrigin,
     actionPoliciesApi,
-    application,
-    basePath,
+    share,
     notifications,
     data,
     hasDraftDependencies,

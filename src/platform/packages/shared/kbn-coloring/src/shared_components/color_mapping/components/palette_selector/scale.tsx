@@ -16,7 +16,7 @@ import type { KbnPalettes } from '@kbn/palettes';
 import type { RootState } from '../../state/color_mapping';
 import { updatePalette } from '../../state/color_mapping';
 import type { ColorMapping } from '../../config';
-import { updateAssignmentsPalette } from '../../config/assignments';
+import { hasCustomColors, updateAssignmentsPalette } from '../../config/assignments';
 
 export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
   const dispatch = useDispatch();
@@ -36,7 +36,6 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
                   type: 'categorical',
                   paletteId,
                   colorIndex: 0,
-                  touched: false,
                 },
               ],
               sort: 'desc',
@@ -44,7 +43,7 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
           : { type: 'categorical' };
 
       const assignments = updateAssignmentsPalette(
-        model.assignments,
+        model,
         updatedColorMode,
         paletteId,
         palettes,
@@ -52,7 +51,7 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
       );
       dispatch(updatePalette({ paletteId, assignments, colorMode: updatedColorMode }));
     },
-    [paletteId, model.assignments, palettes, dispatch]
+    [paletteId, model, palettes, dispatch]
   );
 
   const [colorScaleModalId, setColorScaleModalId] = useState<'gradient' | 'categorical' | null>(
@@ -134,11 +133,7 @@ export function ScaleMode({ palettes }: { palettes: KbnPalettes }) {
           isIconOnly
           idSelected={colorMode.type}
           onChange={(id) => {
-            const hasChanges = model.assignments.some((a) => a.touched);
-            const hasGradientChanges =
-              model.colorMode.type === 'gradient' && model.colorMode.steps.some((a) => a.touched);
-
-            if (hasChanges || hasGradientChanges) {
+            if (hasCustomColors(model, palettes)) {
               setColorScaleModalId(id as 'gradient' | 'categorical');
             } else {
               updateColorMode(id as 'gradient' | 'categorical', false);

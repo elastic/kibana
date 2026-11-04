@@ -11,7 +11,11 @@ import type {
 } from '@kbn/core-saved-objects-server';
 import type { TypeOf } from '@kbn/config-schema';
 import { transformRRuleToCustomSchedule } from '@kbn/response-ops-schedule-schema';
-import { rawMaintenanceWindowSchemaV1, rawMaintenanceWindowSchemaV2 } from './schema';
+import {
+  rawMaintenanceWindowSchemaV1,
+  rawMaintenanceWindowSchemaV2,
+  rawMaintenanceWindowSchemaV3,
+} from './schema';
 
 type MaintenanceWindowV1 = TypeOf<typeof rawMaintenanceWindowSchemaV1>;
 type MaintenanceWindowV2 = TypeOf<typeof rawMaintenanceWindowSchemaV2>;
@@ -111,6 +115,17 @@ export const maintenanceWindowModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: rawMaintenanceWindowSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: rawMaintenanceWindowSchemaV2,
+    },
+  },
+  '5': {
+    // Schema-only. Pre-MV5 documents need no rewrite: `scope.alertingEnabled` is absent on them,
+    // and the decoder reads a missing flag as `true`, which is exactly what MV4 meant. Not writing
+    // to those documents keeps a rollback to MV4 byte-exact — the rolled-back node sees the same
+    // document it wrote and its forwardCompatibility schema accepts it without error.
+    changes: [],
+    schemas: {
+      forwardCompatibility: rawMaintenanceWindowSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: rawMaintenanceWindowSchemaV3,
     },
   },
 };

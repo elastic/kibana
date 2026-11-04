@@ -46,6 +46,7 @@ function transformConnectorForExport(
     apiKey: _apiKey,
     uiamApiKey: _uiamApiKey,
     uiamApiKeyExternal: _uiamApiKeyExternal,
+    hasInboundEventIdentity: _hasInboundEventIdentity,
     ...exportAttributes
   } = connector.attributes;
   const { ingestTokenHash: _ingestTokenHash, ...exportConfig } = (exportAttributes.config ??
@@ -60,6 +61,7 @@ function transformConnectorForExport(
       isMissingSecrets,
       apiKey: null,
       uiamApiKey: null,
+      hasInboundEventIdentity: false,
     },
   };
 }

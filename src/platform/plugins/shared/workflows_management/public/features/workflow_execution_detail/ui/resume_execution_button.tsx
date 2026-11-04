@@ -7,7 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiCallOut,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiMarkdownFormat,
+  EuiText,
+} from '@elastic/eui';
 import type { JSONSchema7 } from 'json-schema';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
@@ -45,6 +52,18 @@ interface ResumeExecutionButtonProps {
   autoOpen?: boolean;
   /** Step execution document id for the active waitForInput pause; when it changes, re-enable after a prior submit */
   waitingStepExecutionId?: string;
+  /** Lifted by the flyout so the submit state resets when the run or its waiting step changes. */
+  submitState?: {
+    isSubmitting: boolean;
+    isSubmitted: boolean;
+    setSubmitting: (value: boolean) => void;
+    setSubmitted: (value: boolean) => void;
+  };
+  /**
+   * `callout` (default): warning banner used in step detail.
+   * `button`: CTA only, for the inline tree-row panel.
+   */
+  appearance?: 'callout' | 'button';
 }
 
 export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
@@ -56,6 +75,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   approvalLabels,
   autoOpen = false,
   waitingStepExecutionId,
+  submitState,
+  appearance = 'callout',
 }) => {
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
@@ -64,9 +85,18 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const { clearResumeParam } = useWorkflowUrlState();
   const telemetry = useTelemetry();
   const [isModalOpen, setIsModalOpen] = useState(autoOpen && !approvalLabels);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [localSubmitting, setLocalSubmitting] = useState(false);
+  const [localSubmitted, setLocalSubmitted] = useState(false);
+  const [pendingApproval, setPendingApproval] = useState<boolean | null>(null);
+  const isSubmitting = submitState?.isSubmitting ?? localSubmitting;
+  const isSubmitted = submitState?.isSubmitted ?? localSubmitted;
+  const setIsSubmitting = submitState?.setSubmitting ?? setLocalSubmitting;
+  const setIsSubmitted = submitState?.setSubmitted ?? setLocalSubmitted;
   const modalOpenedAtRef = useRef<number | null>(null);
+  // Submit state can be shared across runs, so a late resume must not write back
+  // into the run the user opened in the meantime.
+  const executionIdRef = useRef(executionId);
+  executionIdRef.current = executionId;
   const isApprovalMode = Boolean(approvalLabels);
 
   useEffect(() => {
@@ -77,8 +107,17 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   }, [autoOpen, approvalLabels]);
 
   useEffect(() => {
-    setIsSubmitted(false);
-  }, [waitingStepExecutionId]);
+    if (submitState) {
+      return;
+    }
+    setLocalSubmitted(false);
+  }, [submitState, waitingStepExecutionId]);
+
+  useEffect(() => {
+    if (!isSubmitting) {
+      setPendingApproval(null);
+    }
+  }, [isSubmitting]);
 
   const contextOverride = useMemo<ContextOverrideData | undefined>(() => {
     if (!resumeSchema || isApprovalMode) return undefined;
@@ -109,6 +148,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
   const handleSubmit = useCallback(
     async (stepInputs: Record<string, unknown>) => {
       setIsSubmitting(true);
+      const isSameRun = () => executionIdRef.current === executionId;
       const submittedAt = Date.now();
       const timeInModalMs =
         modalOpenedAtRef.current != null ? submittedAt - modalOpenedAtRef.current : undefined;
@@ -123,10 +163,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         });
         await queryClient.invalidateQueries({ queryKey: ['stepExecution', executionId] });
         notifications?.toasts.addSuccess({
-          title: i18n.translate(
-            'workflowsManagement.executionDetail.resumeButton.successNotificationTitle',
-            { defaultMessage: 'Workflow resumed' }
-          ),
+          title: i18n.translate('workflows.executionDetail.resumeButton.successNotificationTitle', {
+            defaultMessage: 'Workflow resumed',
+          }),
         });
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
@@ -134,15 +173,16 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           timeInModalMs,
           timeSinceStepStartedMs,
         });
-        setIsSubmitted(true);
-        closeModal();
+        if (isSameRun()) {
+          setIsSubmitted(true);
+          closeModal();
+        }
       } catch (error) {
         const errorObj = error instanceof Error ? error : new Error(String(error));
         notifications?.toasts.addError?.(errorObj, {
-          title: i18n.translate(
-            'workflowsManagement.executionDetail.resumeButton.errorNotificationTitle',
-            { defaultMessage: 'Error resuming workflow' }
-          ),
+          title: i18n.translate('workflows.executionDetail.resumeButton.errorNotificationTitle', {
+            defaultMessage: 'Error resuming workflow',
+          }),
         });
         telemetry.reportWorkflowRunResumed({
           workflowExecutionId: executionId,
@@ -152,7 +192,9 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           error: errorObj,
         });
       } finally {
-        setIsSubmitting(false);
+        if (isSameRun()) {
+          setIsSubmitting(false);
+        }
       }
     },
     [
@@ -165,6 +207,8 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       telemetry,
       closeModal,
       waitingStepExecutionId,
+      setIsSubmitted,
+      setIsSubmitting,
     ]
   );
 
@@ -180,26 +224,90 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
       if (modalOpenedAtRef.current == null) {
         modalOpenedAtRef.current = Date.now();
       }
+      setPendingApproval(approved);
       void handleSubmit({ approved });
     },
     [handleSubmit]
   );
 
+  const provideActionButton = (
+    <EuiButton
+      fill={appearance === 'callout'}
+      color="warning"
+      size="s"
+      onClick={openModal}
+      disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+      isLoading={isSubmitting}
+      data-test-subj="provideActionButton"
+    >
+      <FormattedMessage
+        id="workflows.executionDetail.resumeButton.label"
+        defaultMessage="Provide action"
+      />
+    </EuiButton>
+  );
+
+  const approvalButtons =
+    isApprovalMode && approvalLabels ? (
+      <EuiFlexGroup gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            fill
+            color="success"
+            size="s"
+            iconType="check"
+            onClick={() => handleApprovalChoice(true)}
+            disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+            isLoading={isSubmitting}
+            data-test-subj="approveActionButton"
+          >
+            {approvalLabels.approveLabel}
+          </EuiButton>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            color="danger"
+            size="s"
+            iconType="cross"
+            onClick={() => handleApprovalChoice(false)}
+            disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
+            isLoading={isSubmitting}
+            data-test-subj="rejectActionButton"
+          >
+            {approvalLabels.rejectLabel}
+          </EuiButton>
+        </EuiFlexItem>
+      </EuiFlexGroup>
+    ) : null;
+
   if (isApprovalMode && approvalLabels) {
+    if (appearance === 'button') {
+      return approvalButtons;
+    }
     return (
       <EuiCallOut color="warning" announceOnMount={false} data-test-subj="waitForApprovalCallout">
         <EuiFlexGroup direction="column" gutterSize="m">
-          <EuiFlexItem>
-            <EuiText size="s">
-              {resumeMessage ?? (
+          <EuiFlexItem
+            grow={false}
+            data-test-subj="waitForApprovalMessage"
+            css={{
+              maxHeight: 'min(12rem, 30vh)',
+              overflowY: 'auto',
+              overflowWrap: 'anywhere',
+            }}
+          >
+            {resumeMessage ? (
+              <EuiMarkdownFormat textSize="s">{resumeMessage}</EuiMarkdownFormat>
+            ) : (
+              <EuiText size="s">
                 <FormattedMessage
-                  id="workflowsManagement.executionDetail.approvalButton.defaultMessage"
+                  id="workflows.executionDetail.approvalButton.defaultMessage"
                   defaultMessage="Your approval is required to continue this workflow."
                 />
-              )}
-            </EuiText>
+              </EuiText>
+            )}
           </EuiFlexItem>
-          <EuiFlexItem>
+          <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiFlexItem grow={false}>
                 <EuiButton
@@ -209,7 +317,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="check"
                   onClick={() => handleApprovalChoice(true)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === true}
                   data-test-subj="approveActionButton"
                 >
                   {approvalLabels.approveLabel}
@@ -222,7 +330,7 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
                   iconType="cross"
                   onClick={() => handleApprovalChoice(false)}
                   disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-                  isLoading={isSubmitting}
+                  isLoading={isSubmitting && pendingApproval === false}
                   data-test-subj="rejectActionButton"
                 >
                   {approvalLabels.rejectLabel}
@@ -232,6 +340,22 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>
+    );
+  }
+
+  if (appearance === 'button') {
+    return (
+      <>
+        {provideActionButton}
+        {isModalOpen && (
+          <ResumeExecutionModal
+            initialcontextOverride={contextOverride}
+            resumeMessage={resumeMessage}
+            onClose={closeModal}
+            onSubmit={handleModalSubmit}
+          />
+        )}
+      </>
     );
   }
 
@@ -246,26 +370,11 @@ export const ResumeExecutionButton: React.FC<ResumeExecutionButtonProps> = ({
         >
           <EuiFlexItem>
             <FormattedMessage
-              id="workflowsManagement.executionDetail.resumeButton.calloutText"
+              id="workflows.executionDetail.resumeButton.calloutText"
               defaultMessage="User action is required"
             />
           </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButton
-              fill
-              color="warning"
-              size="s"
-              onClick={openModal}
-              disabled={!canExecuteWorkflow || isSubmitting || isSubmitted}
-              isLoading={isSubmitting}
-              data-test-subj="provideActionButton"
-            >
-              <FormattedMessage
-                id="workflowsManagement.executionDetail.resumeButton.label"
-                defaultMessage="Provide action"
-              />
-            </EuiButton>
-          </EuiFlexItem>
+          <EuiFlexItem grow={false}>{provideActionButton}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiCallOut>
 

@@ -16,6 +16,8 @@ export const MAX_MENU_ITEMS = 12;
 export const MAX_FOOTER_ITEMS = 5;
 export const POPOVER_HOVER_DELAY = 300;
 export const TOP_BAR_HEIGHT = 48;
+// Keep in sync with the standard row min-height in `@kbn/ui-app-header`
+export const APP_HEADER_ROW_HEIGHT = 64;
 export const TOP_BAR_POPOVER_GAP = 8;
 export const BOTTOM_POPOVER_GAP = 17;
 export const POPOVER_OFFSET = 5;

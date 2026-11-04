@@ -5,18 +5,19 @@
  * 2.0.
  */
 
+import { of } from 'rxjs';
 import { SLO_COMPOSITE_ENABLED } from '../../common/feature_flags';
 import { isCompositeSloEnabled } from './is_composite_slo_enabled';
 
 describe('isCompositeSloEnabled', () => {
-  it('returns the feature flag value with fallback false', async () => {
-    const getBooleanValue = jest.fn().mockResolvedValue(true);
+  it('reads from getBooleanValue$ on the start contract', async () => {
+    const getBooleanValue$ = jest.fn().mockReturnValue(of(true));
 
-    await expect(isCompositeSloEnabled({ getBooleanValue })).resolves.toBe(true);
-    expect(getBooleanValue).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);
+    await expect(isCompositeSloEnabled({ getBooleanValue$ })).resolves.toBe(true);
+    expect(getBooleanValue$).toHaveBeenCalledWith(SLO_COMPOSITE_ENABLED, false);
   });
 
-  it('returns false when the feature flag is disabled', async () => {
+  it('reads from getBooleanValue on the request-handler context', async () => {
     const getBooleanValue = jest.fn().mockResolvedValue(false);
 
     await expect(isCompositeSloEnabled({ getBooleanValue })).resolves.toBe(false);

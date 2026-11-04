@@ -23,7 +23,11 @@ export const GetEvaluatorRequestQuery = lazySchema(() =>
     /**
      * Pins the lookup to one version. Defaults to the latest.
      */
-    version: z.string().max(64).optional(),
+    version: z
+      .string()
+      .max(64)
+      .optional()
+      .describe('Pins the lookup to one version. Defaults to the latest.'),
   })
 );
 export type GetEvaluatorRequestQuery = z.infer<typeof GetEvaluatorRequestQuery>;
@@ -52,7 +56,13 @@ export const GetEvaluatorResponse = lazySchema(() =>
       /**
        * Up to 500 stored versions of this evaluator, newest first. Absent for built-ins.
        */
-      versions: z.array(z.string().max(64)).max(500).optional(),
+      versions: z
+        .array(z.string().max(64))
+        .max(500)
+        .optional()
+        .describe(
+          'Up to 500 stored versions of this evaluator, newest first. Absent for built-ins.'
+        ),
     }),
   })
 );

@@ -133,10 +133,13 @@ describe('HostLinuxOtelPage', () => {
     expect(returnLink.getAttribute('href')).toContain('foo=bar');
   });
 
-  it('wires the pre-existing-data probe with the otel_host flow id', () => {
+  it('scopes the pre-existing-data probe to linux so other hosts cannot end the session', () => {
     usePreExistingDataCheckMock.mockClear();
     renderPage();
-    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({ flow: 'otel_host' });
+    expect(usePreExistingDataCheckMock).toHaveBeenCalledWith({
+      flow: 'otel_host',
+      osType: 'linux',
+    });
   });
 
   it('reports onboardingFlowType=otel_logs to the window-blur and time-window detection hooks', () => {

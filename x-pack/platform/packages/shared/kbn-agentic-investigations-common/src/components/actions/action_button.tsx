@@ -7,6 +7,7 @@
 
 import React, { memo } from 'react';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
+import { createCardLinkClickHandler } from './card_link_click';
 
 export const ActionButton = memo(
   ({
@@ -14,6 +15,7 @@ export const ActionButton = memo(
     onClick,
     tooltipContent,
     href,
+    isDisabled = false,
     'data-test-subj': dataTestSubj,
   }: {
     iconType: string;
@@ -25,6 +27,7 @@ export const ActionButton = memo(
      * The click is still handled by `onClick` so in-app routing is preserved.
      */
     href?: string;
+    isDisabled?: boolean;
     'data-test-subj'?: string;
   }) => {
     return (
@@ -34,19 +37,10 @@ export const ActionButton = memo(
           aria-label={tooltipContent}
           iconType={iconType}
           color="text"
-          href={href}
+          href={isDisabled ? undefined : href}
+          isDisabled={isDisabled}
           data-test-subj={dataTestSubj}
-          onClick={(event: React.MouseEvent<HTMLButtonElement | HTMLAnchorElement>) => {
-            // The card behind this control is itself clickable, so the event must not reach it.
-            event.stopPropagation();
-            // Let modified clicks (new tab, new window) and middle clicks fall through to the
-            // browser, which is the reason for rendering a real link in the first place.
-            if (event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) {
-              return;
-            }
-            event.preventDefault();
-            onClick();
-          }}
+          onClick={createCardLinkClickHandler(onClick)}
         />
       </EuiToolTip>
     );

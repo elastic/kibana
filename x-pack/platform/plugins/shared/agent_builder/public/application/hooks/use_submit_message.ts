@@ -6,53 +6,82 @@
  */
 
 import { useCallback } from 'react';
-import { v4 as uuidv4 } from 'uuid';
+import { useMutation, useQueryClient } from '@kbn/react-query';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
 import { useConversationContext } from '../context/conversation/conversation_context';
 import { useConversationId } from '../context/conversation/use_conversation_id';
+import { mutationKeys } from '../mutation_keys';
+import { queryKeys } from '../query_keys';
+import { useAgentBuilderServices } from './use_agent_builder_service';
+import { useAgentId } from './use_conversation';
 import { useConversationStream } from './use_conversation_stream';
 import { useNavigation } from './use_navigation';
+import { useToasts } from './use_toasts';
 import { appPaths } from '../utils/app_paths';
 
 /**
- * Single source of truth for "send this message". The conversationId is always passed explicitly
- * to the mutation — for an existing conversation it's just the current id, for a new conversation
- * it's a freshly minted UUID. The mutation never reads conversationId from context closure.
- *
- * For new conversations we also need to transition the user to the new id — that means a URL
- * navigation in the routed app, or an internal state update in the embeddable. We branch on
- * `isEmbeddedContext` rather than asking each provider to expose its own helper.
+ * Single source of truth for "send this message". A new conversation is created on the server
+ * first, so it exists, is cached and is in the sidebar before anything streams into it; then the
+ * user is moved to it, by URL in the routed app or by state in the embeddable.
+ * `isCreatingConversation` is true while that request is in flight, so the input can hold submits.
  */
 export const useSubmitMessage = () => {
   const conversationId = useConversationId();
   const { sendMessage } = useConversationStream();
-  const { isEmbeddedContext, setConversationId, agentId } = useConversationContext();
+  const { isEmbeddedContext, setConversationId } = useConversationContext();
+  const agentId = useAgentId();
   const { navigateToAgentBuilderUrl } = useNavigation();
+  const { conversationsService } = useAgentBuilderServices();
+  const queryClient = useQueryClient();
+  const { addErrorToast } = useToasts();
 
-  return useCallback(
-    (message: string) => {
-      const isNew = !conversationId;
-      const targetId = conversationId ?? uuidv4();
+  const { mutateAsync: createConversation, isLoading: isCreatingConversation } = useMutation({
+    mutationKey: mutationKeys.createConversation,
+    mutationFn: (id: string) => conversationsService.create({ agentId: id }),
+    onSuccess: (created) => {
+      queryClient.setQueryData(queryKeys.conversations.byId(created.id), created);
+      queryClient.invalidateQueries({ queryKey: queryKeys.conversations.list });
+    },
+    onError: (error) => addErrorToast({ title: formatAgentBuilderErrorMessage(error) }),
+  });
 
-      sendMessage({ message, conversationId: targetId });
+  const submitMessage = useCallback(
+    async (message: string) => {
+      if (conversationId) {
+        sendMessage({ message, conversationId });
+        return;
+      }
+      if (!agentId) {
+        throw new Error('agentId is required to start a conversation');
+      }
 
-      if (!isNew) return;
+      let created;
+      try {
+        created = await createConversation(agentId);
+      } catch {
+        return;
+      }
 
-      // navigate only for new conversations, not for continued conversations
+      sendMessage({ message, conversationId: created.id });
+
       if (isEmbeddedContext) {
-        setConversationId?.(targetId);
-      } else if (agentId) {
+        setConversationId?.(created.id);
+      } else {
         navigateToAgentBuilderUrl(
-          appPaths.agent.conversations.byId({ agentId, conversationId: targetId })
+          appPaths.agent.conversations.byId({ agentId, conversationId: created.id })
         );
       }
     },
     [
       conversationId,
       sendMessage,
+      agentId,
+      createConversation,
       isEmbeddedContext,
       setConversationId,
-      agentId,
       navigateToAgentBuilderUrl,
     ]
   );
+
+  return { submitMessage, isCreatingConversation };
 };

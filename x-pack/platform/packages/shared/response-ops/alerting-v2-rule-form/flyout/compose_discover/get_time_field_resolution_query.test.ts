@@ -8,88 +8,60 @@
 import { getTimeFieldResolutionQuery } from './get_time_field_resolution_query';
 import type { RuleQuery } from '../../form/types';
 
-const composedQuery: RuleQuery = {
-  format: 'composed',
+const splitQuery: RuleQuery = {
   base: 'FROM kibana_sample_data_flights | STATS COUNT(*) BY timestamp',
   breach: { segment: '| WHERE Cancelled == "true"' },
 };
 
-const standaloneQuery: RuleQuery = {
-  format: 'standalone',
-  breach: { query: 'FROM logs-* | LIMIT 10' },
+const unsplitQuery: RuleQuery = {
+  base: 'FROM logs-* | LIMIT 10',
+  breach: { segment: '' },
 };
 
 const PROMQL_QUERY = 'PROMQL index=metrics step=1m start=?_tstart end=?_tend (avg(cpu_usage))';
 
 describe('getTimeFieldResolutionQuery', () => {
-  it('returns the base query in alert mode when committed', () => {
-    expect(getTimeFieldResolutionQuery(composedQuery, true, true)).toBe(composedQuery.base);
+  it('returns the base query when committed', () => {
+    expect(getTimeFieldResolutionQuery(splitQuery, true)).toBe(splitQuery.base);
   });
 
-  it('returns the breach query in signal mode when committed', () => {
-    expect(getTimeFieldResolutionQuery(standaloneQuery, false, true)).toBe(
-      standaloneQuery.breach.query
-    );
-  });
-
-  it('falls back to the breach query for standalone alert rules (YAML sandbox)', () => {
-    expect(getTimeFieldResolutionQuery(standaloneQuery, true, true)).toBe(
-      standaloneQuery.breach.query
-    );
+  it('returns the whole pipeline when the breach segment is empty', () => {
+    expect(getTimeFieldResolutionQuery(unsplitQuery, true)).toBe(unsplitQuery.base);
   });
 
   it('returns empty when the query is not committed', () => {
-    expect(getTimeFieldResolutionQuery(composedQuery, true, false)).toBe('');
+    expect(getTimeFieldResolutionQuery(splitQuery, false)).toBe('');
   });
 
-  it('returns empty when the candidate query has no source command', () => {
+  it('returns empty when the base query has no source command', () => {
     expect(
-      getTimeFieldResolutionQuery(
-        { format: 'composed', base: '', breach: { segment: '| WHERE count > 1' } },
-        true,
-        true
-      )
+      getTimeFieldResolutionQuery({ base: '', breach: { segment: '| WHERE count > 1' } }, true)
     ).toBe('');
   });
 
-  it('returns a committed TS composed base query in alert mode', () => {
+  it('returns a committed TS base query', () => {
     const tsQuery: RuleQuery = {
-      format: 'composed',
       base: 'TS metrics-kubeletstatsreceiver.otel-* | STATS COUNT(*) BY @timestamp',
       breach: { segment: '| WHERE throttled == true' },
     };
-    expect(getTimeFieldResolutionQuery(tsQuery, true, true)).toBe(tsQuery.base);
-  });
-
-  it('returns a committed TS standalone query in signal mode', () => {
-    const tsQuery: RuleQuery = {
-      format: 'standalone',
-      breach: { query: 'TS metrics-* | LIMIT 10' },
-    };
-    expect(getTimeFieldResolutionQuery(tsQuery, false, true)).toBe(tsQuery.breach.query);
+    expect(getTimeFieldResolutionQuery(tsQuery, true)).toBe(tsQuery.base);
   });
 
   it('returns a committed PROMQL query', () => {
-    const promqlQuery: RuleQuery = {
-      format: 'standalone',
-      breach: { query: PROMQL_QUERY },
-    };
-    expect(getTimeFieldResolutionQuery(promqlQuery, false, true)).toBe(PROMQL_QUERY);
+    const promqlQuery: RuleQuery = { base: PROMQL_QUERY, breach: { segment: '' } };
+    expect(getTimeFieldResolutionQuery(promqlQuery, true)).toBe(PROMQL_QUERY);
   });
 
   it('returns a committed ROW query', () => {
-    const rowQuery: RuleQuery = {
-      format: 'standalone',
-      breach: { query: 'ROW a = 1' },
-    };
-    expect(getTimeFieldResolutionQuery(rowQuery, true, true)).toBe('ROW a = 1');
+    const rowQuery: RuleQuery = { base: 'ROW a = 1', breach: { segment: '' } };
+    expect(getTimeFieldResolutionQuery(rowQuery, true)).toBe('ROW a = 1');
   });
 
   it('returns a committed query that starts with SET then FROM', () => {
     const setQuery: RuleQuery = {
-      format: 'standalone',
-      breach: { query: 'SET unmapped_fields = "FAIL"; FROM logs-* | LIMIT 10' },
+      base: 'SET unmapped_fields = "FAIL"; FROM logs-* | LIMIT 10',
+      breach: { segment: '' },
     };
-    expect(getTimeFieldResolutionQuery(setQuery, true, true)).toBe(setQuery.breach.query);
+    expect(getTimeFieldResolutionQuery(setQuery, true)).toBe(setQuery.base);
   });
 });

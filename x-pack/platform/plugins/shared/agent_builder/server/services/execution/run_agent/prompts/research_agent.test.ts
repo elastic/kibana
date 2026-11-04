@@ -5,11 +5,13 @@
  * 2.0.
  */
 
+import { ConversationRoundStepType } from '@kbn/agent-builder-common';
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import { getResearchAgentPrompt } from './research_agent';
 import { prepareMessages } from '../utils/to_langchain_messages';
 
 jest.mock('../utils/to_langchain_messages', () => ({
+  ...jest.requireActual('../utils/to_langchain_messages'),
   prepareMessages: jest.fn().mockResolvedValue([['human', 'history']]),
 }));
 
@@ -19,7 +21,7 @@ const NOTICE_MARKER = 'The following skills appear relevant';
 describe('getResearchAgentPrompt', () => {
   const now = new Date().toISOString();
 
-  const makeParams = (overrides: Record<string, any> = {}) =>
+  const makeParams = ({ steps = [], ...overrides }: Record<string, any> = {}) =>
     ({
       conversationTimestamp: now,
       processedConversation: {
@@ -38,9 +40,15 @@ describe('getResearchAgentPrompt', () => {
       },
       configuration: { instructions: '', aiIndices: [] },
       spaceId: 'default',
+      deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
-      actions: [],
-      cycleLimit: 1,
+      run: {
+        steps,
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       relevantSkillsEnabled: false,
       toolManager: {} as any,
@@ -60,6 +68,38 @@ describe('getResearchAgentPrompt', () => {
     referencedContent: [],
   };
 
+  describe('conversation metadata section', () => {
+    const templateParams = (conversationMetadataWritable: boolean) =>
+      makeParams({
+        processedConversation: {
+          ...makeParams().processedConversation,
+          template_id: 'investigation',
+          metadata: { severity: 'high' },
+        },
+        conversationTemplates: {
+          get: jest.fn().mockResolvedValue({
+            name: 'Investigation',
+            fields: { severity: { input_type: 'TEXT' }, owner: { input_type: 'TEXT' } },
+          }),
+        },
+        conversationMetadataWritable,
+      });
+
+    it('asks to write unset fields back when metadata is writable', async () => {
+      const system = asText((await getResearchAgentPrompt(templateParams(true)))[0]);
+      expect(system).toContain('## CONVERSATION METADATA');
+      expect(system).toContain('- `severity` (TEXT): **high**');
+      expect(system).toContain('`set_conversation_metadata`');
+    });
+
+    it('renders the fields without the write-back instruction when metadata is read-only', async () => {
+      const system = asText((await getResearchAgentPrompt(templateParams(false)))[0]);
+      expect(system).toContain('## CONVERSATION METADATA');
+      expect(system).toContain('- `owner` (TEXT): _not yet set_');
+      expect(system).not.toContain('set_conversation_metadata');
+    });
+  });
+
   it('does not render the current date in the system message and forwards conversationTimestamp', async () => {
     const messages = await getResearchAgentPrompt(makeParams());
 
@@ -68,6 +108,36 @@ describe('getResearchAgentPrompt', () => {
     expect(prepareMessages).toHaveBeenCalledWith(
       expect.objectContaining({ conversationTimestamp: now })
     );
+  });
+
+  it('renders the deployment section as the last section of the system message', async () => {
+    const system = asText((await getResearchAgentPrompt(makeParams()))[0]);
+
+    expect(system).toContain('\n## DEPLOYMENT');
+    expect(system).toContain('- Environment: Self-managed');
+    expect(system).toContain('- Stack version: 9.3.0');
+    expect(system.lastIndexOf('\n## ')).toBe(system.indexOf('\n## DEPLOYMENT'));
+  });
+
+  it('renders the serverless project details without a stack version on serverless', async () => {
+    const system = asText(
+      (
+        await getResearchAgentPrompt(
+          makeParams({
+            deployment: {
+              environment: 'serverless',
+              airgapped: false,
+              serverless: { projectType: 'observability', productTier: 'complete' },
+            },
+          })
+        )
+      )[0]
+    );
+
+    expect(system).toContain('- Environment: Elastic Cloud Serverless');
+    expect(system).toContain('- Project type: Observability');
+    expect(system).toContain('- Product tier: Complete');
+    expect(system).not.toContain('Stack version');
   });
 
   it('renders the full skill list when skills is on and relevant-skills is off', async () => {
@@ -99,22 +169,26 @@ describe('getResearchAgentPrompt', () => {
     expect(system).not.toMatch(/- alpha \(.+SKILL\.md\)/);
   });
 
-  it('injects the <relevant_skills> notice after previous rounds when a selection is provided', async () => {
+  it('injects the <relevant_skills> notice after previous rounds when the run has a relevant_skills step', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { bash: false, skills: true },
         relevantSkillsEnabled: true,
-        relevantSkills: {
-          skills: [
-            {
-              id: 'a.alpha',
-              name: 'alpha',
-              path: '/p/SKILL.md',
-              description: 'Alpha skill',
-              relevance_note: 'fits the request',
-            },
-          ],
-        },
+        steps: [
+          {
+            type: ConversationRoundStepType.relevantSkills,
+            source: 'implicit',
+            skills: [
+              {
+                id: 'a.alpha',
+                name: 'alpha',
+                path: '/p/SKILL.md',
+                description: 'Alpha skill',
+                relevance_note: 'fits the request',
+              },
+            ],
+          },
+        ],
       })
     );
     const texts = messages.map(asText);
@@ -126,36 +200,28 @@ describe('getResearchAgentPrompt', () => {
     expect(texts[noticeIdx]).toContain('fits the request');
   });
 
-  it('injects no notice when relevant-skills is disabled even if a selection is present', async () => {
-    const messages = await getResearchAgentPrompt(
-      makeParams({
-        experimentalFeatures: { bash: false, skills: true },
-        relevantSkillsEnabled: false,
-        relevantSkills: { skills: [{ id: 'a', name: 'a', path: '/p', description: 'd' }] },
-      })
-    );
-    expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
-  });
-
-  it('injects no notice when the selection is empty', async () => {
+  it('injects no notice when the relevant_skills step has no skills', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { bash: false, skills: true },
         relevantSkillsEnabled: true,
-        relevantSkills: { skills: [] },
+        steps: [{ type: ConversationRoundStepType.relevantSkills, source: 'implicit', skills: [] }],
       })
     );
     expect(messages.map(asText).some((t) => t.includes(NOTICE_MARKER))).toBe(false);
   });
 
-  it('omits the AI Indices section when the agent declares no AI Indices', async () => {
+  it('renders the AI Indices section when the agent has none assigned', async () => {
     const messages = await getResearchAgentPrompt(
       makeParams({
         experimentalFeatures: { aiIndices: true, bash: false, skills: false },
       })
     );
+    const system = asText(messages[0]);
 
-    expect(asText(messages[0])).not.toContain('## AI INDICES');
+    expect(system).toContain('## AI INDICES');
+    expect(system).toContain('No AI Indices are assigned to this agent');
+    expect(system).not.toContain('Available to this agent:');
   });
 
   it('omits the AI Indices section when AI Index instructions are disabled', async () => {
@@ -192,9 +258,70 @@ describe('getResearchAgentPrompt', () => {
     const system = asText(messages[0]);
 
     expect(system).toContain('## AI INDICES');
-    expect(system).toContain('`sml-main`');
+    expect(system).toContain('ES|QL target: sml-main');
     expect(system).toContain('This conversation runs in the space `marketing`');
     expect(system.indexOf('## AI INDICES')).toBeLessThan(system.indexOf('## INSTRUCTIONS'));
+  });
+
+  it('omits the SML sections when experimental features are off', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: false,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).not.toContain("## SML '#' REFERENCES");
+    expect(system).not.toContain('## CONNECTOR DISCOVERY');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('renders the SML sections with # references when SML is on', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+
+    expect(system).toContain("## SML '#' REFERENCES");
+    expect(system).toContain('`[#label](sml://ENTRY_ID)`');
+    expect(system).not.toMatch(/^(<<<<<<<|=======|>>>>>>>)/m);
+  });
+
+  it('keeps connector discovery on the agent-scoped sml_search when the elastic index is in the catalog', async () => {
+    const messages = await getResearchAgentPrompt(
+      makeParams({
+        configuration: {
+          instructions: '',
+          aiIndices: ['elastic'],
+          aiIndexCatalog: [
+            { id: 'elastic', esqlTarget: 'sml-main', description: 'Kibana resources' },
+          ],
+        },
+        experimentalFeatures: {
+          aiIndices: true,
+          sml: true,
+          bash: false,
+          skills: false,
+        },
+      })
+    );
+    const system = asText(messages[0]);
+    const discovery = system.slice(system.indexOf('## CONNECTOR DISCOVERY'));
+
+    expect(discovery).toContain('use `sml_search` with `types: ["connector"]`');
+    expect(discovery).not.toContain('`elastic` AI Index');
   });
 
   it('renders every catalog entry, including custom AI Indices', async () => {
@@ -213,8 +340,10 @@ describe('getResearchAgentPrompt', () => {
     );
     const system = asText(messages[0]);
 
-    expect(system).toContain('`elastic` (FROM `sml-main`)');
-    expect(system).toContain('`my-custom` (FROM `ai-index-idx-custom`) — Support tickets');
+    expect(system).toContain('Registry ID: `elastic`; ES|QL target: sml-main');
+    expect(system).toContain(
+      'Registry ID: `my-custom`; ES|QL target: ai-index-idx-custom — Support tickets'
+    );
   });
 
   it('includes the static attachment tools guidance but no dynamic (conversation-specific) attachment content', async () => {
@@ -239,9 +368,15 @@ describe('getResearchAgentPrompt', () => {
         aiIndices: [],
       },
       spaceId: 'default',
+      deployment: { environment: 'self_managed', version: '9.3.0', airgapped: false },
       skills: [],
-      actions: [],
-      cycleLimit: 1,
+      run: {
+        steps: [],
+        renderState: {},
+        pendingToolCallIds: [],
+        retryNotices: [],
+        cycleLimit: 1,
+      },
       experimentalFeatures: { aiIndices: false, bash: false, skills: false },
       toolManager: {} as any,
       resultTransformer: jest.fn(),

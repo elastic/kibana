@@ -6,11 +6,12 @@
  */
 
 import type { EsqlQueryRequest, EsqlQueryResponse } from '@elastic/elasticsearch/lib/api/types';
-import type { ElasticsearchClient, PluginInitializerContext } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { inject, injectable } from 'inversify';
-import { PluginInitializer } from '@kbn/core-di-server';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
+import type { EsqlResponseFormatServiceContract } from '../esql_response_format_service/esql_response_format_service';
+import { EsqlResponseFormatServiceToken } from '../esql_response_format_service/tokens';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import type { ExecutionContext } from '../../execution_context';
 import {
@@ -18,10 +19,13 @@ import {
   isRuleExecutionCancellationError,
   toRuleExecutionCancellationError,
 } from '../../execution_context';
-import type { PluginConfig } from '../../../config';
 import { toRows } from './row_coercion';
-import type { EsqlFormatRequest, EsqlFormatRequestOptions, EsqlRowBatchSource } from './formats';
-import { getEsqlResponseFormat } from './formats';
+import type {
+  EsqlFormatRequest,
+  EsqlFormatRequestOptions,
+  EsqlResponseFormat,
+  EsqlRowBatchSource,
+} from './formats';
 
 export interface ExecuteQueryParams {
   query: EsqlQueryRequest['query'];
@@ -30,6 +34,12 @@ export interface ExecuteQueryParams {
   abortSignal?: AbortSignal;
   /** Maximum allowed response body size in bytes. Passed to the ES transport. */
   maxResponseSize?: number;
+  /**
+   * Response format to use for this stream. When provided, overrides the
+   * feature-flag lookup so the caller can pin the format for the lifetime of
+   * a single rule execution and keep the LIMIT and the transport in sync.
+   */
+  format?: EsqlResponseFormat;
 }
 
 export interface QueryServiceContract {
@@ -45,8 +55,8 @@ export class QueryService implements QueryServiceContract {
   constructor(
     private readonly esClient: ElasticsearchClient,
     @inject(LoggerServiceToken) private readonly logger: LoggerServiceContract,
-    @inject(PluginInitializer('config'))
-    private readonly pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    @inject(EsqlResponseFormatServiceToken)
+    private readonly esqlResponseFormatService: EsqlResponseFormatServiceContract
   ) {}
 
   async executeQuery({
@@ -92,15 +102,16 @@ export class QueryService implements QueryServiceContract {
   }
 
   /**
-   * Streams query results through the configured response format. The format is
-   * resolved per call because `xpack.alerting_v2.esql.responseFormat` is a
-   * dynamic setting operators can flip at runtime.
+   * Streams query results through the response format resolved from the
+   * `alertingV2.esqlResponseFormat` feature flag. Resolved per call, because a
+   * rollout can change the flag between two executions of the same rule.
+   * Pass `params.format` to pin a pre-snapshotted format and keep the LIMIT
+   * and the transport in sync within a single execution.
    */
   async *executeQueryStream<T = Record<string, unknown>>(
     params: ExecuteQueryParams
   ): AsyncIterable<T[]> {
-    const { responseFormat } = this.pluginConfigAccessor.get<PluginConfig>().esql;
-    const format = getEsqlResponseFormat(responseFormat);
+    const format = params.format ?? this.esqlResponseFormatService.get();
     const context = createExecutionContext(params.abortSignal ?? new AbortController().signal);
 
     this.logger.debug({

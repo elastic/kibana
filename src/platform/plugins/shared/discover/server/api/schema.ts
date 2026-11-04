@@ -11,11 +11,11 @@ import { z } from '@kbn/zod';
 import {
   asCodeMetaSchema,
   asCodePaginationResponseMetaSchema,
-  asCodeSearchRequestSchema,
+  getAsCodeSearchRequestSchema,
   getAsCodeTagsSchema,
   PAGINATION_MAX_SIZE,
 } from '@kbn/as-code-shared-schemas';
-import type { discoverSessionControlPanelsSchema } from '@kbn/as-code-discover-schema';
+import type { discoverSessionApiControlPanelsSchema } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiDataSchema } from '@kbn/as-code-discover-schema';
 import {
   MAX_DISCOVER_SESSION_TAGS,
@@ -32,34 +32,59 @@ export const discoverSessionApiResponseSchema = z
 
 /* Shared context for warnings produced while transforming a Discover session tab. */
 const discoverSessionWarningBaseSchema = z.object({
-  message: z.string().meta({ description: 'Why stored content was omitted from the response.' }),
-  tab_id: z.string().meta({ description: 'The ID of the affected tab.' }),
+  message: z.string().meta({ description: 'The reason the content was dropped.' }),
+  tab_id: z.string().meta({ description: 'The ID of the tab that contains the dropped content.' }),
 });
 
-/* Reports one invalid panel while allowing the other panels in the tab to be returned. */
-const discoverSessionDroppedPanelWarningSchema = discoverSessionWarningBaseSchema
+const discoverSessionDroppedItemWarningSchema = discoverSessionWarningBaseSchema
   .extend({
-    type: z.literal('dropped_panel'),
-    panel_id: z.string().meta({ description: 'The ID of the omitted control panel.' }),
+    type: z.literal('dropped_item'),
+    key: z
+      .string()
+      .meta({ description: 'The name of the property that contains the dropped item.' }),
+    item_id: z.string().meta({ description: 'The ID of the dropped item.' }),
+    item_type: z
+      .string()
+      .optional()
+      .meta({ description: 'The type identifier of the dropped item, when available.' }),
+    item_config: z
+      .object({})
+      .loose()
+      .optional()
+      .meta({ description: 'The original configuration of the dropped item.' }),
   })
-  .strict();
+  .strict()
+  .meta({
+    id: 'kbn-discover-session-dropped-item-warning',
+    title: 'Dropped item',
+    description:
+      'An item in a tab that was excluded from the response because it failed validation.',
+  });
 
-/* Reports a tab property that could not be returned as a whole. */
 const discoverSessionDroppedPropertyWarningSchema = discoverSessionWarningBaseSchema
   .extend({
     type: z.literal('dropped_property'),
-    key: z.string().meta({ description: 'The name of the property omitted from the response.' }),
+    key: z.string().meta({ description: 'The name of the property that was dropped.' }),
+    value: z
+      .unknown()
+      .optional()
+      .meta({ description: 'The original value of the property that was dropped.' }),
   })
-  .strict();
+  .strict()
+  .meta({
+    id: 'kbn-discover-session-dropped-property-warning',
+    title: 'Dropped property',
+    description: 'A tab property excluded from the response due to malformed data.',
+  });
 
 /* Allows GET responses to preserve valid session data while reporting what was dropped. */
 export const discoverSessionWarningsSchema = z
   .array(
-    z.union([discoverSessionDroppedPanelWarningSchema, discoverSessionDroppedPropertyWarningSchema])
+    z.union([discoverSessionDroppedItemWarningSchema, discoverSessionDroppedPropertyWarningSchema])
   )
   .meta({
     description:
-      'Warnings generated when stored Discover session content cannot be fully represented in the API response.',
+      'Warnings about content omitted from the API response due to conversion or validation errors. The saved session is not modified.',
   });
 
 export const discoverSessionGetResponseSchema = discoverSessionApiResponseSchema.extend({
@@ -73,7 +98,32 @@ export const discoverSessionSanitizeResponseSchema = z
   })
   .strict();
 
-export const discoverSessionSearchParamsSchema = asCodeSearchRequestSchema.extend({
+export const discoverSessionSearchRequestParamsSchema = getAsCodeSearchRequestSchema({
+  tags: {
+    description:
+      'A tag ID to include. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are included.',
+    arrayDescription: 'Tag IDs to include.',
+  },
+  excluded_tags: {
+    description:
+      'A tag ID to exclude. Accepts a single tag ID or multiple tag IDs. When multiple are specified, Discover sessions matching any of the tag IDs are excluded.',
+    arrayDescription: 'Tag IDs to exclude.',
+  },
+}).extend({
+  tag_names: z
+    .union([z.string(), z.array(z.string()).max(100)])
+    .optional()
+    .meta({
+      description:
+        'A tag name to include. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are included. If the same name is shared by multiple tags, sessions matching any of those tags are included.',
+    }),
+  excluded_tag_names: z
+    .union([z.string(), z.array(z.string()).max(100)])
+    .optional()
+    .meta({
+      description:
+        'A tag name to exclude. Accepts a single tag name or multiple tag names. When multiple are specified, Discover sessions matching any of the tag names are excluded. If the same name is shared by multiple tags, sessions matching any of those tags are excluded.',
+    }),
   query: z
     .string()
     .max(MAX_SEARCH_QUERY_LENGTH)
@@ -114,16 +164,16 @@ export const discoverSessionSearchResponseSchema = z
   })
   .strict();
 
-export type DiscoverSessionApiData = z.output<typeof discoverSessionApiDataSchema>;
 export type DiscoverSessionApiResponse = z.output<typeof discoverSessionApiResponseSchema>;
 export type DiscoverSessionGetResponse = z.output<typeof discoverSessionGetResponseSchema>;
 export type DiscoverSessionSanitizeResponse = z.output<
   typeof discoverSessionSanitizeResponseSchema
 >;
 export type DiscoverSessionWarning = z.output<typeof discoverSessionWarningsSchema>[number];
-export type DiscoverSessionSearchParams = z.output<typeof discoverSessionSearchParamsSchema>;
+export type DiscoverSessionSearchRequestParams = z.output<
+  typeof discoverSessionSearchRequestParamsSchema
+>;
 export type DiscoverSessionSearchResponse = z.output<typeof discoverSessionSearchResponseSchema>;
-export type DiscoverSessionControlPanels = z.output<typeof discoverSessionControlPanelsSchema>;
-
-// Input types (shape accepted by the API, before defaults applied)
-export type DiscoverSessionApiDataInput = z.input<typeof discoverSessionApiDataSchema>;
+export type DiscoverSessionApiControlPanels = z.output<
+  typeof discoverSessionApiControlPanelsSchema
+>;

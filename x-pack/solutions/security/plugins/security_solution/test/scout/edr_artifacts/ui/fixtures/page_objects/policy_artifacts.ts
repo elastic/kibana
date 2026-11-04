@@ -6,6 +6,7 @@
  */
 
 import type { Locator, ScoutPage } from '@kbn/scout-security';
+import { expect } from '@kbn/scout-security/ui';
 import { TRUSTED_APP_HASH } from '../artifact_tabs_test_data';
 
 export type PolicyArtifactKind =
@@ -46,6 +47,19 @@ const ARTIFACT_FORM_IDENTITY_FIELDS: Record<
   },
 };
 
+export type BlocklistOperator = 'is' | 'is one of' | 'Match';
+
+/** Field option values for which the blocklist form offers the Match (wildcard) operator. */
+export type BlocklistMatchField = 'file.path.caseless' | 'file.name';
+
+// Option values are ListOperatorTypeEnum. Label `is` is a prefix of `is one of`,
+// so options are selected by value rather than accessible name.
+const BLOCKLIST_OPERATOR_VALUE: Record<BlocklistOperator, string> = {
+  is: 'match',
+  'is one of': 'match_any',
+  Match: 'wildcard',
+};
+
 export class PolicyArtifactsPage {
   readonly emptyUnexisting: Locator;
   readonly emptyUnassigned: Locator;
@@ -64,6 +78,10 @@ export class PolicyArtifactsPage {
   readonly removeFromPolicyAction: Locator;
   readonly confirmModalConfirmButton: Locator;
   readonly perPolicyRadio: Locator;
+  readonly blocklistFieldSelect: Locator;
+  readonly blocklistOperatorSelect: Locator;
+  readonly blocklistValueInput: Locator;
+  readonly blocklistValuesInput: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.emptyUnexisting = this.page.testSubj.locator('policy-artifacts-empty-unexisting');
@@ -90,6 +108,12 @@ export class PolicyArtifactsPage {
     this.confirmModalConfirmButton = this.page.testSubj.locator('confirmModalConfirmButton');
     // Forms prefix this id (`*-form-effectedPolicies-perPolicy`).
     this.perPolicyRadio = this.page.getByTestId(/-perPolicy$/);
+    this.blocklistFieldSelect = this.page.testSubj.locator('blocklist-form-field-select');
+    this.blocklistOperatorSelect = this.page.testSubj.locator(
+      'blocklist-form-operator-select-multi'
+    );
+    this.blocklistValueInput = this.page.testSubj.locator('blocklist-form-value-input');
+    this.blocklistValuesInput = this.page.testSubj.locator('blocklist-form-values-input');
   }
 
   criteria(selector: string): Locator {
@@ -185,8 +209,8 @@ export class PolicyArtifactsPage {
     }
   }
 
-  private async fillComboBox(testSubj: string, value: string, custom = false) {
-    const combo = this.page.components.comboBox(testSubj);
+  private async fillComboBox(testSubj: string, value: string, custom = false, scope?: Locator) {
+    const combo = this.page.components.comboBox(testSubj, scope);
     if (custom) {
       await combo.setCustomSelectedOptions([value]);
       return;
@@ -230,9 +254,90 @@ export class PolicyArtifactsPage {
       'Blocklist name',
       'This is the blocklist description'
     );
-    await this.page.testSubj.locator('blocklist-form-field-select').click();
+    await this.blocklistFieldSelect.click();
     await this.page.testSubj.locator('blocklist-form-file.hash.*').click();
     await this.fillComboBox('blocklist-form-values-input', TRUSTED_APP_HASH.toUpperCase(), true);
+    await this.page.testSubj.locator('blocklist-form-name-input').click();
+  }
+
+  /**
+   * Windows signature is the only blocklist field whose operator can be
+   * `is` (single value) or `is one of` (combo). Hash/path keep a read-only
+   * "is one of".
+   */
+  async fillBlocklistSignatureCreateForm({
+    name,
+    description,
+    operator,
+    value,
+  }: {
+    name: string;
+    description: string;
+    operator: BlocklistOperator;
+    value: string | string[];
+  }) {
+    await this.fillNameAndDescription('blocklists', name, description);
+    await this.selectBlocklistField('file.Ext.code_signature');
+    await this.selectBlocklistOperator(operator);
+    await this.fillBlocklistSignatureValue(operator, value);
+  }
+
+  /**
+   * Path and File Name accept the Match (wildcard) operator with a single
+   * value. On Windows the File Name option value is `file.name`; the form
+   * stores it as `file.name.caseless` once Match is selected.
+   */
+  async fillBlocklistMatchCreateForm({
+    name,
+    description,
+    field,
+    value,
+  }: {
+    name: string;
+    description: string;
+    field: BlocklistMatchField;
+    value: string;
+  }) {
+    await this.fillNameAndDescription('blocklists', name, description);
+    await this.selectBlocklistField(field);
+    await this.selectBlocklistOperator('Match');
+    await this.blocklistValueInput.fill(value);
+  }
+
+  private async selectBlocklistField(value: string) {
+    // SuperSelect's listbox is page-global and `open()` no-ops if any listbox
+    // is still visible. Selecting via the helper waits for this dropdown to
+    // detach so the operator SuperSelect can open afterward.
+    await this.page.components
+      .superSelect('blocklist-form-field-select')
+      .selectOptionByValue(value);
+    await this.blocklistOperatorSelect.waitFor({ state: 'visible' });
+  }
+
+  async selectBlocklistOperator(operator: BlocklistOperator) {
+    await this.blocklistOperatorSelect.waitFor({ state: 'visible' });
+    await this.page.components
+      .superSelect('blocklist-form-operator-select-multi')
+      .selectOptionByValue(BLOCKLIST_OPERATOR_VALUE[operator]);
+
+    if (operator !== 'is one of') {
+      await this.blocklistValueInput.waitFor({ state: 'visible' });
+      return;
+    }
+    await this.blocklistValuesInput.waitFor({ state: 'visible' });
+  }
+
+  private async fillBlocklistSignatureValue(operator: BlocklistOperator, value: string | string[]) {
+    if (operator === 'is') {
+      const singleValue = Array.isArray(value) ? value.join(',') : value;
+      await this.blocklistValueInput.fill(singleValue);
+      return;
+    }
+
+    const values = Array.isArray(value) ? value : [value];
+    await this.page.components
+      .comboBox('blocklist-form-values-input')
+      .setCustomSelectedOptions(values);
     await this.page.testSubj.locator('blocklist-form-name-input').click();
   }
 
@@ -268,6 +373,50 @@ export class PolicyArtifactsPage {
     );
     await this.fillComboBox('fieldAutocompleteComboBox', 'agent.version');
     await this.fillComboBox('valuesAutocompleteMatch', '1234', true);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  /**
+   * Adds one OR group and fills its field and value. The field combobox stores
+   * the selection on the input value, so the new group is the entry whose
+   * field input is still empty.
+   */
+  async addEndpointExceptionOrCondition(field: string, value: string) {
+    await this.page.testSubj.locator('exceptionsOrButton').click();
+    const entry = await this.emptyEndpointExceptionEntry();
+    await this.fillComboBox('fieldAutocompleteComboBox', field, false, entry);
+    await this.fillComboBox('valuesAutocompleteMatch', value, true, entry);
+    await this.commitEndpointExceptionEntry();
+  }
+
+  async addEndpointExceptionOrConditions(
+    conditions: ReadonlyArray<{ field: string; value: string }>
+  ) {
+    for (const condition of conditions) {
+      await this.addEndpointExceptionOrCondition(condition.field, condition.value);
+    }
+  }
+
+  private async emptyEndpointExceptionEntry(): Promise<Locator> {
+    const flyout = this.page.testSubj.locator('endpointExceptionsListPage-flyout');
+    const entries = flyout.getByTestId('exceptionEntriesContainer');
+    let emptyIndex = -1;
+
+    await expect(async () => {
+      const emptyIndexes = await entries.evaluateAll((nodes) =>
+        nodes.flatMap((node, index) => {
+          const input = node.querySelector('[data-test-subj="fieldAutocompleteComboBox"] input');
+          return input instanceof HTMLInputElement && input.value === '' ? [index] : [];
+        })
+      );
+      expect(emptyIndexes).toHaveLength(1);
+      emptyIndex = emptyIndexes[0];
+    }).toPass();
+
+    return flyout.locator(`[data-test-subj="exceptionEntriesContainer"] >> nth=${emptyIndex}`);
+  }
+
+  private async commitEndpointExceptionEntry() {
     await this.page.testSubj.locator('endpointExceptions-form-description-input').click();
   }
 }

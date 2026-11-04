@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { DefaultEvaluators, Evaluator } from '@kbn/evals';
 import { tags } from '@kbn/scout';
 import { METADATA_UNITED_TRANSFORM } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { evaluate } from '../../src/evaluate';
-import {
-  waitForEndpointPackage,
-  waitForTransformPropagation,
-  seedScenario,
-  SCENARIOS,
-} from '../../src/data_generators/endpoint_data';
+import { seedTroubleshootingScenarios } from '../../src/data_generators/scenario_seeding';
 import { cleanupTroubleshootingData } from '../../src/data_generators/cleanup';
+import {
+  CUSTOM_YARA_SIGNATURE_SCENARIOS,
+  cleanupCustomYaraSignatures,
+  seedCustomYaraSignatures,
+} from '../../src/data_generators/custom_yara_signatures_seed';
+import {
+  createTroubleshootingToolUsageEvaluator,
+  GENERATE_INSIGHT_TOOL_ID,
+} from '../../src/troubleshooting_tool_usage_evaluator';
 
 const SKILL_PATH = 'skills/security/endpoint/elastic-defend-configuration-troubleshooting/SKILL.md';
 const UNITED_TRANSFORM_WILDCARD = `${METADATA_UNITED_TRANSFORM}*`;
-const ALL_SCENARIO_COUNT = Object.keys(SCENARIOS).length;
 
 const COMMON_CRITERIA = [
   `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
@@ -192,41 +195,77 @@ const P0_EVALS = [
   },
 ] as const;
 
+/** Signature-only questions name no endpoint, so the agent must answer without generate_insight. */
+const CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS = 12;
+
+const getTroubleshootingEvaluators = ({
+  traceBasedEvaluators: { toolCalls, latency, inputTokens, outputTokens, cachedTokens },
+}: DefaultEvaluators): Evaluator[] => [
+  createTroubleshootingToolUsageEvaluator() as Evaluator,
+  toolCalls,
+  latency,
+  inputTokens,
+  outputTokens,
+  cachedTokens,
+];
+
+const CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA = [
+  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+  'Queried custom YARA signatures with automatic_troubleshooting.get_endpoint_artifacts',
+  'Did not call generate_insight, because the question does not involve a specific endpoint',
+  'Did not give a menu path such as "Security → Manage → Custom YARA Signatures"; when pointing to where signatures are managed, referred to the Custom YARA signatures tab of the Artifacts page',
+] as const;
+
+const CUSTOM_YARA_SIGNATURE_EVALS = [
+  {
+    name: 'custom_yara_signature_not_assigned_to_policy',
+    description:
+      'Validates that the agent identifies an enabled custom YARA signature that is not assigned to any policy.',
+    question: `The custom YARA signature ${CUSTOM_YARA_SIGNATURE_SCENARIOS.noPolicy.name} is enabled but never detects anything. Why?`,
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      `Identified that ${CUSTOM_YARA_SIGNATURE_SCENARIOS.noPolicy.name} is not assigned to any policy and is not global`,
+      'Recommended assigning the signature to the policy of the affected endpoints or making it global',
+    ],
+  },
+  {
+    name: 'custom_yara_signature_disabled',
+    description: 'Validates that the agent identifies a disabled custom YARA signature.',
+    question: `Why does the custom YARA signature ${CUSTOM_YARA_SIGNATURE_SCENARIOS.disabled.name} never alert on any endpoint?`,
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      `Identified that ${CUSTOM_YARA_SIGNATURE_SCENARIOS.disabled.name} is disabled, so it is not packed into the endpoint artifact and never runs`,
+      'Recommended enabling the signature',
+    ],
+  },
+  {
+    name: 'custom_yara_signature_unknown_name',
+    description:
+      'Validates that the agent reports a non-existent custom YARA signature instead of substituting another one.',
+    question:
+      'The custom YARA signature EVAL_TS_yara_totally_made_up_999 is not alerting. What is wrong with it?',
+    criteria: [
+      ...CUSTOM_YARA_SIGNATURE_COMMON_CRITERIA,
+      'Stated that no custom YARA signature named EVAL_TS_yara_totally_made_up_999 exists',
+      'Did not diagnose a different signature as if it were EVAL_TS_yara_totally_made_up_999',
+    ],
+  },
+] as const;
+
 evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, () => {
   let unitedTransformId: string;
 
   evaluate.beforeAll(async ({ kbnClient, esClient, internalEsClient, agentBuilderClient, log }) => {
-    await waitForEndpointPackage(kbnClient, esClient, log);
-
-    const { transforms } = await esClient.transform.getTransformStats({
-      transform_id: UNITED_TRANSFORM_WILDCARD,
-    });
-    unitedTransformId = transforms[0].id;
-
-    try {
-      await agentBuilderClient.converse({
-        agentId: agentBuilderDefaultAgentId,
-        input: 'hello',
-      });
-    } catch (e) {
-      log.warning(`Warmup failed: ${e}`);
-    }
-
-    const clients = { esClient, internalEsClient };
-    await cleanupTroubleshootingData(clients);
-
-    // Seeding is batched here because transform propagation is slow.
-    for (const scenario of Object.values(SCENARIOS)) {
-      await seedScenario(clients, scenario);
-    }
-
-    await waitForTransformPropagation(esClient, log, {
-      metadataCurrent: ALL_SCENARIO_COUNT,
-      metadataUnited: ALL_SCENARIO_COUNT,
+    unitedTransformId = await seedTroubleshootingScenarios({
+      kbnClient,
+      esClient,
+      internalEsClient,
+      agentBuilderClient,
+      log,
     });
   });
 
-  evaluate('incompatible antivirus detection', async ({ evaluateDataset }) => {
+  evaluate('incompatible antivirus detection', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: incompatible antivirus detection',
@@ -249,10 +288,11 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
     });
   });
 
-  evaluate('policy response failure', async ({ evaluateDataset }) => {
+  evaluate('policy response failure', async ({ evaluateDataset, evaluators }) => {
     await evaluateDataset({
       dataset: {
         name: 'endpoint: policy response failure',
@@ -274,11 +314,12 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
           },
         ],
       },
+      extraEvaluators: getTroubleshootingEvaluators(evaluators),
     });
   });
 
   for (const evalDefinition of P0_EVALS) {
-    evaluate(evalDefinition.name, async ({ evaluateDataset }) => {
+    evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
       await evaluateDataset({
         dataset: {
           name: `endpoint: ${evalDefinition.name}`,
@@ -294,9 +335,45 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
             },
           ],
         },
+        extraEvaluators: getTroubleshootingEvaluators(evaluators),
       });
     });
   }
+
+  evaluate.describe('custom YARA signatures', () => {
+    evaluate.beforeAll(async ({ kbnClient }) => {
+      await cleanupCustomYaraSignatures(kbnClient);
+      await seedCustomYaraSignatures(kbnClient);
+    });
+
+    for (const evalDefinition of CUSTOM_YARA_SIGNATURE_EVALS) {
+      evaluate(evalDefinition.name, async ({ evaluateDataset, evaluators }) => {
+        await evaluateDataset({
+          dataset: {
+            name: `endpoint: ${evalDefinition.name}`,
+            description: evalDefinition.description,
+            examples: [
+              {
+                input: {
+                  question: evalDefinition.question,
+                },
+                output: {
+                  criteria: [...evalDefinition.criteria],
+                  max_tool_calls: CUSTOM_YARA_SIGNATURE_MAX_TOOL_CALLS,
+                  forbidden_tools: [GENERATE_INSIGHT_TOOL_ID],
+                },
+              },
+            ],
+          },
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
+        });
+      });
+    }
+
+    evaluate.afterAll(async ({ kbnClient }) => {
+      await cleanupCustomYaraSignatures(kbnClient);
+    });
+  });
 
   evaluate.describe('with stopped united transform', () => {
     evaluate.beforeAll(async ({ esClient }) => {
@@ -306,31 +383,36 @@ evaluate.describe('Automatic Troubleshooting', { tag: tags.stateful.classic }, (
       });
     });
 
-    evaluate('missing_endpoint_list_stopped_united_transform', async ({ evaluateDataset }) => {
-      await evaluateDataset({
-        dataset: {
-          name: 'endpoint: missing_endpoint_list_stopped_united_transform',
-          description:
-            'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
-          examples: [
-            {
-              input: {
-                question: 'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+    evaluate(
+      'missing_endpoint_list_stopped_united_transform',
+      async ({ evaluateDataset, evaluators }) => {
+        await evaluateDataset({
+          dataset: {
+            name: 'endpoint: missing_endpoint_list_stopped_united_transform',
+            description:
+              'Validates that the agent detects a stopped united metadata transform and recommends restarting it.',
+            examples: [
+              {
+                input: {
+                  question:
+                    'I am missing endpoints on the endpoint list page. Can you troubleshoot?',
+                },
+                output: {
+                  criteria: [
+                    `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
+                    'Called get_package_configurations to inspect transform settings and stats',
+                    'Identified that the endpoint.metadata_united transform is stopped',
+                    'Recommended restarting the stopped transform as a remediation step',
+                    'Called generate_insight to persist structured findings',
+                  ],
+                },
               },
-              output: {
-                criteria: [
-                  `Activated the troubleshooting skill by reading ${SKILL_PATH}`,
-                  'Called get_package_configurations to inspect transform settings and stats',
-                  'Identified that the endpoint.metadata_united transform is stopped',
-                  'Recommended restarting the stopped transform as a remediation step',
-                  'Called generate_insight to persist structured findings',
-                ],
-              },
-            },
-          ],
-        },
-      });
-    });
+            ],
+          },
+          extraEvaluators: getTroubleshootingEvaluators(evaluators),
+        });
+      }
+    );
 
     evaluate.afterAll(async ({ esClient, log }) => {
       try {

@@ -346,7 +346,9 @@ export async function simulatePointInTimeFailure(
 export async function getCleanupTaskStatus(
   apiClient: ApiClientFixture
 ): Promise<{ shardMissingCounter?: number }> {
-  const response = await apiClient.get('/cleanup_task_status');
+  const response = await apiClient.get('/cleanup_task_status', {
+    headers: SESSION_API_HEADERS,
+  });
   expect(response).toHaveStatusCode(200);
   return response.body.state;
 }

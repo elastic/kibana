@@ -69,8 +69,7 @@ export const LocationForm = ({
         <EuiSpacer />
         <PolicyHostsField
           privateLocations={privateLocations}
-          isDisabled={isEditingLocation}
-          isEditingShardedLocation={privateLocationToEdit?.isAgentSharding === true}
+          privateLocationToEdit={privateLocationToEdit}
         />
         <EuiSpacer />
         <TagsField tagsList={tagsList} control={control} errors={errors} />

@@ -70,9 +70,7 @@ test.describe('Workflow execution - Parallel step', { tag: [...tags.stateful.cla
     await expect(parallelStep).toHaveCount(1);
 
     // The foreach body ran once per item (3 items -> 3 process_item steps).
-    const processItemButtons = pageObjects.workflowExecution.executionPanel.getByRole('button', {
-      name: 'process_item',
-    });
+    const processItemButtons = pageObjects.workflowExecution.stepsByName('process_item');
     await expect(processItemButtons).toHaveCount(3);
 
     // The downstream step runs after the fan-out joins.

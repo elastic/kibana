@@ -12,7 +12,7 @@ import { ConversationDisplayStatus } from '@kbn/agent-builder-common';
 export const createConversationListItemStyles = (euiTheme: EuiThemeComputed) => css`
   text-decoration: none;
   padding: 6px ${euiTheme.size.s};
-  border-radius: ${euiTheme.border.radius.small};
+  border-radius: ${euiTheme.border.radius.control};
   color: ${euiTheme.colors.textParagraph};
   font-size: ${euiTheme.font.scale.m}${euiTheme.font.defaultUnits};
   cursor: pointer;

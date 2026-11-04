@@ -10,7 +10,7 @@ import { createIntegrationsColumn } from './integrations';
 describe('createIntegrationsColumn', () => {
   it('returns the correct column definition', () => {
     const column = createIntegrationsColumn({
-      getMigrationRuleData: jest.fn(),
+      getRuleIntegrations: jest.fn(),
     });
 
     expect(column).toEqual({

@@ -23,7 +23,10 @@ import {
   type EpisodeSourceError,
 } from '../utils/fetch_from_sources';
 import { buildAlertEventsTimeRangeFilter } from '../utils/build_alert_events_time_range_filter';
-import { useAdditionalEpisodesDataSource } from '../context/episode_data_source_context';
+import {
+  useAdditionalEpisodesDataSource,
+  useQueryV2Source,
+} from '../context/episode_data_source_context';
 import { mergeKpis } from '../utils/merge_kpis';
 import { queryKeys } from '../query_keys';
 import { useToastSourceErrors } from './use_toast_source_errors';
@@ -76,6 +79,7 @@ export const useEpisodesKpisQuery = ({
   timeRange,
 }: UseEpisodesKpisQueryOptions): UseEpisodesKpisQueryResult => {
   const additionalEpisodesDataSource = useAdditionalEpisodesDataSource();
+  const queryV2Source = useQueryV2Source();
   const spaceId = useSpaceId(services.spaces);
 
   // The current user profile is only needed to compute the "assigned to me"
@@ -97,7 +101,8 @@ export const useEpisodesKpisQuery = ({
       filterState,
       timeRange,
       currentUserUid,
-      additionalEpisodesDataSource?.id
+      additionalEpisodesDataSource?.id,
+      queryV2Source
     ),
     queryFn: async ({ signal }) => {
       const timeRangeFilter = buildAlertEventsTimeRangeFilter(timeRange);
@@ -116,6 +121,7 @@ export const useEpisodesKpisQuery = ({
         source: additionalEpisodesDataSource,
         fromSource: (source) =>
           source.fetchKpis?.({ services, filterState, timeRange, abortSignal: signal }),
+        queryV2Source,
       });
 
       return {

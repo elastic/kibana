@@ -7,33 +7,33 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import * as a from 'lodash'; // eslint-disable-line no-restricted-imports
-import * as b from 'lodash/fp'; // eslint-disable-line no-restricted-imports
+import * as a from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import * as b from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
-import { set as c } from 'lodash'; // eslint-disable-line no-restricted-imports
-import { setWith as d } from 'lodash'; // eslint-disable-line no-restricted-imports
-import { template as e } from 'lodash'; // eslint-disable-line no-restricted-imports
+import { set as c } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { setWith as d } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { template as e } from 'lodash'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
 // The following import statements can't be tested because they are not in our package.json
-// import 'lodash.set'; // eslint-disable-line no-restricted-imports
-// import 'lodash.setWith'; // eslint-disable-line no-restricted-imports
-// import 'lodash.template'; // eslint-disable-line no-restricted-imports
+// import 'lodash.set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+// import 'lodash.setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+// import 'lodash.template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
-import 'lodash/set'; // eslint-disable-line no-restricted-imports
-import 'lodash/setWith'; // eslint-disable-line no-restricted-imports
-import 'lodash/template'; // eslint-disable-line no-restricted-imports
+import 'lodash/set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
-import { set as f } from 'lodash/fp'; // eslint-disable-line no-restricted-imports
-import { setWith as g } from 'lodash/fp'; // eslint-disable-line no-restricted-imports
-import { assoc as h } from 'lodash/fp'; // eslint-disable-line no-restricted-imports
-import { assocPath as i } from 'lodash/fp'; // eslint-disable-line no-restricted-imports
-import { template as j } from 'lodash/fp'; // eslint-disable-line no-restricted-imports
+import { set as f } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { setWith as g } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { assoc as h } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { assocPath as i } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import { template as j } from 'lodash/fp'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
-import 'lodash/fp/set'; // eslint-disable-line no-restricted-imports
-import 'lodash/fp/setWith'; // eslint-disable-line no-restricted-imports
-import 'lodash/fp/assoc'; // eslint-disable-line no-restricted-imports
-import 'lodash/fp/assocPath'; // eslint-disable-line no-restricted-imports
-import 'lodash/fp/template'; // eslint-disable-line no-restricted-imports
+import 'lodash/fp/set'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/setWith'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/assoc'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/assocPath'; // eslint-disable-line @kbn/eslint/security_imports_restriction
+import 'lodash/fp/template'; // eslint-disable-line @kbn/eslint/security_imports_restriction
 
 // The following require statements can't be tested because they are not in our package.json
 // require('lodash.set'); // eslint-disable-line no-restricted-modules

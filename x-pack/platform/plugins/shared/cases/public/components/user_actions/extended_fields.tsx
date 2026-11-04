@@ -12,7 +12,7 @@ import type { ExtendedFieldsUserAction } from '../../../common/types/domain';
 import type { CasesConfigurationUI } from '../../../common/ui';
 import type { CaseUI } from '../../../common/ui/types';
 import { getFieldCamelKey, getV2FieldType } from '../../../common/utils/template_fields';
-import { getExtendedFieldDisplayValue } from '../all_cases/extended_field_columns';
+import { getExtendedFieldDisplayValue } from '../all_cases/components/extended_field_columns';
 import type { UserActionBuilder } from './types';
 import { createCommonUpdateUserActionBuilder } from './common';
 import { ScrollableMarkdown } from '../markdown_editor';

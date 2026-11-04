@@ -47,6 +47,10 @@ export interface AgentStat {
    * of the location's monitors.
    */
   monitorsAssigned: number | null;
+  /**
+   * `elastic-agent-complete` image. Browser monitors run only on these agents.
+   */
+  complete: boolean;
 }
 
 export interface LocationAgentStats {
@@ -55,7 +59,16 @@ export interface LocationAgentStats {
   agentPolicyId: string;
   /** Agent policy display name, or the id when the policy can't be resolved. */
   agentPolicyName: string;
-  /** Whether this location opts into condition-based monitor distribution. */
-  isAgentSharding: boolean;
+  /** Whether condition-based monitor distribution is currently active. */
+  isShardingActive: boolean;
   agents: AgentStat[];
+}
+
+/**
+ * Response of `GET …/private_locations/missing_complete_agents`: private
+ * locations with no active agent that can run browser monitors. Locations whose
+ * agents could not be listed are left out, so an unknown state never warns.
+ */
+export interface MissingCompleteAgentLocationsResponse {
+  locations: Array<{ id: string; label: string }>;
 }

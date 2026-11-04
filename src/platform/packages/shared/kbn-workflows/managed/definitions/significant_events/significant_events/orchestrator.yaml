@@ -20,6 +20,13 @@ settings:
     continue: true
 triggers:
   - type: manual
+    inputs:
+      properties:
+        connector_id:
+          type: string
+          maxLength: 255
+          description: "Optional chat model connector or inference endpoint ID for discovery."
+      additionalProperties: false
 steps:
   - name: detect
     type: workflow.execute
@@ -30,3 +37,5 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-discovery"
+      inputs:
+        connector_id: "{{ inputs.connector_id }}"

@@ -1182,8 +1182,6 @@ describe('SearchInterceptor', () => {
 
       describe('when background search is disabled', () => {
         test('should show warning once if a search is not available during restore', async () => {
-          mockCoreStart.featureFlags.getBooleanValue.mockReturnValue(false);
-
           setup({
             isRestore: true,
             isStored: true,

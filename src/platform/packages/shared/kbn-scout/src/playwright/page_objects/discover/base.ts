@@ -11,7 +11,7 @@ import type { ScoutPage } from '../..';
 import { AppMenu } from '../app_menu';
 import { DataGrid } from '../data_grid';
 import { SavedObjectSaveModal } from '../saved_object_save_modal';
-import { KibanaCodeEditorWrapper } from '../../ui_components';
+import { EsqlEditor, KibanaCodeEditorWrapper } from '../../ui_components';
 import { QueryBar } from '../query_bar';
 import { UnifiedTabs } from '../unified_tabs';
 
@@ -39,12 +39,10 @@ export interface TimeoutOptions {
 export const DEFAULT_SAVE_MODAL_TIMEOUT = 30_000;
 export const DISCOVER_QUERY_MODE_KEY = 'discover.defaultQueryMode';
 
-/**
- * Base class for DiscoverApp that holds shared dependencies and typed properties.
- * Do not instantiate directly — use {@link DiscoverApp} instead.
- */
+/** Shared dependencies and constructor for the DiscoverApp inheritance chain. */
 export class DiscoverAppBase {
   public readonly codeEditor: KibanaCodeEditorWrapper;
+  protected readonly esqlEditor: EsqlEditor;
   protected readonly dataGrid: DataGrid;
   protected readonly queryBar: QueryBar;
   protected readonly unifiedTabs: UnifiedTabs;
@@ -54,8 +52,11 @@ export class DiscoverAppBase {
   public readonly saveModal: SavedObjectSaveModal;
   protected readonly appMenu: AppMenu;
 
+  public readonly esqlEditorTestSubjValue = 'ESQLEditor';
+
   constructor(protected readonly page: ScoutPage) {
     this.codeEditor = new KibanaCodeEditorWrapper(page);
+    this.esqlEditor = new EsqlEditor(page);
     this.dataGrid = new DataGrid(page);
     this.queryBar = new QueryBar(page);
     this.unifiedTabs = new UnifiedTabs(page);

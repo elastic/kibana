@@ -64,6 +64,21 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
     setIsPopoverOpen((open) => !open);
   };
 
+  const withClosePopover = (badge: AppHeaderBadge): AppHeaderBadge => {
+    const { onClick } = badge;
+    if (!onClick) {
+      return badge;
+    }
+
+    return {
+      ...badge,
+      onClick: () => {
+        onClick();
+        handleClosePopover();
+      },
+    };
+  };
+
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -109,7 +124,7 @@ export const AppBadges = memo<AppBadgesProps>(({ badges }) => {
             >
               {overflowBadges.map((badge) => (
                 <EuiFlexItem grow={false} key={asPlainText(badge.label)}>
-                  <AppBadge badge={badge} />
+                  <AppBadge badge={withClosePopover(badge)} />
                 </EuiFlexItem>
               ))}
             </EuiFlexGroup>

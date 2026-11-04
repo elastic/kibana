@@ -43,6 +43,7 @@ export {
   setIdGeneratorStrategy,
 } from './src/lib/utils/generate_id';
 export { appendHash, hashKeysOf } from './src/lib/utils/hash';
+export { createSeededRandom } from './src/lib/utils/seeded_random';
 export {
   type ESDocumentWithOperation,
   type SynthtraceESAction,
@@ -53,4 +54,14 @@ export {
 } from './src/types';
 export { log, type LogDocument, LONG_FIELD_NAME } from './src/lib/logs';
 export { otelLog, type OtelLogDocument } from './src/lib/otel_logs';
+export {
+  edotBrowser,
+  type BrowserProfileId,
+  type EdotBrowserClientOptions,
+  type EdotBrowserDocument,
+  type EdotBrowserEvent,
+  type EdotBrowserSite,
+  type EdotBrowserSpanDocument,
+  type HealthProfileName,
+} from './src/lib/edot_browser';
 export { syntheticsMonitor, type SyntheticsMonitorDocument } from './src/lib/synthetics';

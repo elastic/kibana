@@ -27,7 +27,10 @@ import {
   RetryForConflictsDelay,
 } from '../../../../lib/retry_if_conflicts';
 import { bulkCreateRulesSo } from '../../../../data/rule';
-import { bulkMigrateLegacyActions } from '../../../../rules_client/lib';
+import {
+  bulkMigrateLegacyActions,
+  deleteLegacyActionsForRules,
+} from '../../../../rules_client/lib';
 import type { RawRule } from '../../../../types';
 import type { BulkOperationError, RulesClientContext } from '../../../../rules_client/types';
 import type { RuleParams } from '../../types';
@@ -77,6 +80,7 @@ export async function bulkUpdateRules<Params extends RuleParams = never>(
   }
 
   const username = await context.getUserName();
+  const profileUid = await context.getProfileUid();
   const actionsClient = await context.getActionsClient();
   const successfulIds: string[] = [];
   const errors: BulkOperationError[] = [];
@@ -91,6 +95,7 @@ export async function bulkUpdateRules<Params extends RuleParams = never>(
     const result = await runBatch<Params>({
       context,
       username,
+      profileUid,
       actionsClient,
       batch,
       changeTracking,
@@ -118,6 +123,7 @@ export async function bulkUpdateRules<Params extends RuleParams = never>(
 interface RunBatchArgs<Params extends RuleParams> {
   context: RulesClientContext;
   username: string | null;
+  profileUid: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   batch: Array<BulkUpdateRulesItem<Params>>;
   changeTracking?: RuleChangeTracking;
@@ -128,6 +134,7 @@ interface RunBatchArgs<Params extends RuleParams> {
 async function runBatch<Params extends RuleParams>({
   context,
   username,
+  profileUid,
   actionsClient,
   batch,
   changeTracking,
@@ -212,8 +219,9 @@ async function runBatch<Params extends RuleParams>({
     }
   }
 
+  let migratedRuleIds: string[] = [];
   try {
-    await withSpan(
+    migratedRuleIds = await withSpan(
       { name: 'bulkUpdateRules.runBatch.bulkMigrateLegacyActions', type: 'rules' },
       () =>
         bulkMigrateLegacyActions({
@@ -230,6 +238,7 @@ async function runBatch<Params extends RuleParams>({
   const written = await writeWithRetry({
     context,
     username,
+    profileUid,
     actionsClient,
     byId,
     pending: toPrepare,
@@ -238,12 +247,20 @@ async function runBatch<Params extends RuleParams>({
     strict,
   });
 
+  // Legacy actions are deleted only once the rules carrying them are saved, so a conflict can be retried
+  const savedIds = new Set(written.successfulIds);
+  await deleteLegacyActionsForRules(
+    context,
+    migratedRuleIds.filter((id) => savedIds.has(id))
+  );
+
   return { successfulIds: written.successfulIds, errors: [...errors, ...written.errors] };
 }
 
 interface WriteWithRetryArgs<Params extends RuleParams> {
   context: RulesClientContext;
   username: string | null;
+  profileUid: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   byId: Map<string, BulkUpdateRulesItem<Params>>;
   pending: Array<Pending<Params>>;
@@ -256,6 +273,7 @@ interface WriteWithRetryArgs<Params extends RuleParams> {
 async function writeWithRetry<Params extends RuleParams>({
   context,
   username,
+  profileUid,
   actionsClient,
   byId,
   pending,
@@ -274,6 +292,7 @@ async function writeWithRetry<Params extends RuleParams>({
     const attempt = await putAttempt({
       context,
       username,
+      profileUid,
       actionsClient,
       pending: remaining,
       changeTracking,
@@ -310,6 +329,7 @@ async function writeWithRetry<Params extends RuleParams>({
 interface PutAttemptArgs<Params extends RuleParams> {
   context: RulesClientContext;
   username: string | null;
+  profileUid: string | null;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   pending: Array<Pending<Params>>;
   changeTracking?: RuleChangeTracking;
@@ -329,6 +349,7 @@ interface PutAttemptResult {
 async function putAttempt<Params extends RuleParams>({
   context,
   username,
+  profileUid,
   actionsClient,
   pending,
   changeTracking,
@@ -355,6 +376,7 @@ async function putAttempt<Params extends RuleParams>({
             context,
             actionsClient,
             username,
+            profileUid,
             item,
             original,
             allowMissingConnectorSecrets,

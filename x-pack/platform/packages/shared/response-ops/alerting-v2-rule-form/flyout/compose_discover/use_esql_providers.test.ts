@@ -68,6 +68,7 @@ describe('useEsqlAutocomplete', () => {
   const inlineCompletionsProvider = {
     provideInlineCompletions: jest.fn(),
     freeInlineCompletions: jest.fn(),
+    disposeInlineCompletions: jest.fn(),
   };
   const codeActionProvider = { provideCodeActions: jest.fn() };
   const documentHighlightProvider = { provideDocumentHighlights: jest.fn() };
@@ -148,6 +149,14 @@ describe('useEsqlAutocomplete', () => {
       ESQL_LANG_ID,
       documentHighlightProvider
     );
+  });
+
+  it('passes the rule query to the ES|QL callbacks', () => {
+    const query = 'SET project_routing = "_alias:_origin"; FROM logs-*';
+
+    renderHook(() => useEsqlAutocomplete(services, query));
+
+    expect(useEsqlCallbacks).toHaveBeenCalledWith(expect.objectContaining({ query }));
   });
 
   it('disposes registered providers on unmount', () => {

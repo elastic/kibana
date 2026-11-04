@@ -33,6 +33,12 @@ describe('JinaReaderConnector', () => {
     jest.clearAllMocks();
   });
 
+  it('supports Context Engine alongside workflows and Agent Builder', () => {
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('workflows');
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('agentBuilder');
+    expect(JinaReaderConnector.metadata.supportedFeatureIds).toContain('contextEngine');
+  });
+
   describe('browse action', () => {
     it('should browse URL and return markdown content', async () => {
       const mockResponse = {

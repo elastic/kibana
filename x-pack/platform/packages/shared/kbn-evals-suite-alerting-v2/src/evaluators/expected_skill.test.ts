@@ -6,7 +6,7 @@
  */
 
 import type { TaskOutput } from '@kbn/evals';
-import { RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID } from '../constants';
+import { RULE_AUTHORING_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID } from '../constants';
 import { createExpectedSkillEvaluator } from './expected_skill';
 
 const outputWithLoadedSkills = (skillNames: string[]): TaskOutput =>
@@ -28,14 +28,14 @@ const run = (output: TaskOutput, expected: Record<string, unknown> | null) =>
 
 describe('createExpectedSkillEvaluator', () => {
   it('skips when there is no skill-load expectation', async () => {
-    const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {});
+    const result = await run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), {});
     expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 
   it('throws when expectedSkills is an empty array', async () => {
     await expect(
-      run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), { expectedSkills: [] })
+      run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), { expectedSkills: [] })
     ).rejects.toThrow(/non-empty array of skills/i);
   });
 
@@ -46,54 +46,54 @@ describe('createExpectedSkillEvaluator', () => {
   });
 
   it('scores 1 when every expected skill was loaded', async () => {
-    const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+    const result = await run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), {
+      expectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when an expected skill was not loaded', async () => {
     const result = await run(outputWithLoadedSkills(['detection-rule-edit']), {
-      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+      expectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(0);
   });
 
   it('scores 0 when no skills were loaded but one was expected', async () => {
     const result = await run(outputWithLoadedSkills([]), {
-      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+      expectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(0);
   });
 
   it('scores 1 when no forbidden skill was loaded', async () => {
     const result = await run(outputWithLoadedSkills([]), {
-      notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+      notExpectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when a forbidden skill was loaded', async () => {
-    const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      notExpectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+    const result = await run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), {
+      notExpectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(0);
     expect(result.metadata).toEqual(
-      expect.objectContaining({ unexpectedlyLoadedSkills: [RULE_MANAGEMENT_SKILL_ID] })
+      expect.objectContaining({ unexpectedlyLoadedSkills: [RULE_AUTHORING_SKILL_ID] })
     );
   });
 
   it('scores 1 when every skill in expectedSkills was loaded', async () => {
     const result = await run(
-      outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID]),
-      { expectedSkills: [RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID] }
+      outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID]),
+      { expectedSkills: [RULE_AUTHORING_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID] }
     );
     expect(result.score).toBe(1);
   });
 
   it('scores 0 when any skill in expectedSkills was not loaded', async () => {
-    const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      expectedSkills: [RULE_MANAGEMENT_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID],
+    const result = await run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), {
+      expectedSkills: [RULE_AUTHORING_SKILL_ID, WORKFLOW_AUTHORING_SKILL_ID],
     });
     expect(result.score).toBe(0);
     expect(result.metadata).toEqual(
@@ -123,23 +123,23 @@ describe('createExpectedSkillEvaluator', () => {
           type: 'tool_call',
           tool_id: 'load_skill',
           params: {},
-          results: [{ data: { skill: { id: RULE_MANAGEMENT_SKILL_ID, name: 'rule-management' } } }],
+          results: [{ data: { skill: { id: RULE_AUTHORING_SKILL_ID, name: 'rule-authoring' } } }],
         },
       ],
     } as unknown as TaskOutput;
 
-    const result = await run(output, { expectedSkills: [RULE_MANAGEMENT_SKILL_ID] });
+    const result = await run(output, { expectedSkills: [RULE_AUTHORING_SKILL_ID] });
     expect(result.score).toBe(1);
   });
 
   it('reports the loaded skill names in metadata', async () => {
-    const result = await run(outputWithLoadedSkills([RULE_MANAGEMENT_SKILL_ID]), {
-      expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+    const result = await run(outputWithLoadedSkills([RULE_AUTHORING_SKILL_ID]), {
+      expectedSkills: [RULE_AUTHORING_SKILL_ID],
     });
     expect(result.metadata).toEqual(
       expect.objectContaining({
-        loadedNames: [RULE_MANAGEMENT_SKILL_ID],
-        expectedSkills: [RULE_MANAGEMENT_SKILL_ID],
+        loadedNames: [RULE_AUTHORING_SKILL_ID],
+        expectedSkills: [RULE_AUTHORING_SKILL_ID],
       })
     );
   });

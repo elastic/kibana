@@ -7,12 +7,10 @@
 
 import { useQuery } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import {
-  AGENTIC_INVESTIGATIONS_API_VERSION,
-  PROPOSAL_CHARTS_SUMMARY_URL,
-} from '@kbn/agentic-investigations-plugin/common';
-import type { ProposalChartsSummaryResponse } from '@kbn/agentic-investigations-plugin/common';
-import { retryOnTransientError } from '@kbn/agentic-investigations-plugin/public';
+import { PROPOSALS_API_VERSION, PROPOSAL_CHARTS_SUMMARY_URL } from '@kbn/proposals-common';
+import type { ProposalChartsSummaryResponse } from '@kbn/proposals-common';
+import { ALERTZERO_PROPOSAL_ORIGIN } from '../../common/proposals/origin';
+import { retryOnTransientError } from './retry_on_transient_error';
 import { queryKeys } from '../query_keys';
 
 /**
@@ -32,8 +30,10 @@ export const useProposalChartsSummary = ({
     queryKey: queryKeys.proposals.chartsSummary(windowHours, bucketMinutes),
     queryFn: (): Promise<ProposalChartsSummaryResponse> =>
       services.http!.get<ProposalChartsSummaryResponse>(PROPOSAL_CHARTS_SUMMARY_URL, {
-        version: AGENTIC_INVESTIGATIONS_API_VERSION,
-        query: { windowHours, bucketMinutes },
+        version: PROPOSALS_API_VERSION,
+        // Scoped like the queues below it: the index is shared with every other
+        // solution, so an unscoped count would contradict the rows it heads.
+        query: { windowHours, bucketMinutes, origin: ALERTZERO_PROPOSAL_ORIGIN },
       }),
     keepPreviousData: true,
     retry: retryOnTransientError,

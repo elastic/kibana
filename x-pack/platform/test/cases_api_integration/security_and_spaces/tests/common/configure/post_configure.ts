@@ -11,7 +11,10 @@ import {
   ConnectorTypes,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import { MAX_CUSTOM_FIELD_LABEL_LENGTH } from '@kbn/cases-plugin/common/constants';
+import {
+  MAX_CUSTOM_FIELD_LABEL_LENGTH,
+  MAX_WORKFLOW_TAGS_PER_CONFIGURATION,
+} from '@kbn/cases-plugin/common/constants';
 import { ObjectRemover as ActionsRemover } from '../../../../../alerting_api_integration/common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -56,9 +59,9 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(data).to.eql(getConfigurationOutput());
     });
 
-    it('should default extractObservables to true when omitted', async () => {
+    it('should default extractObservables to false when omitted for unknown owners', async () => {
       const configuration = await createConfiguration(supertest);
-      expect(configuration.extractObservables).to.be(true);
+      expect(configuration.extractObservables).to.be(false);
     });
 
     it('should persist extractObservables when explicitly set to false', async () => {
@@ -67,6 +70,39 @@ export default ({ getService }: FtrProviderContext): void => {
         getConfigurationRequest({ overrides: { extractObservables: false } })
       );
       expect(configuration.extractObservables).to.be(false);
+    });
+
+    it('should create a configuration with workflowTags', async () => {
+      const configuration = await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['soc-triage', 'enrichment'] } })
+      );
+
+      expect(configuration.workflowTags).to.eql(['soc-triage', 'enrichment']);
+
+      const [persisted] = await getConfiguration({ supertest });
+      expect(persisted.workflowTags).to.eql(['soc-triage', 'enrichment']);
+    });
+
+    it(`should not create a configuration with more than ${MAX_WORKFLOW_TAGS_PER_CONFIGURATION} workflowTags`, async () => {
+      const workflowTags = Array.from(
+        { length: MAX_WORKFLOW_TAGS_PER_CONFIGURATION + 1 },
+        (_, index) => `tag-${index}`
+      );
+
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags } }),
+        400
+      );
+    });
+
+    it('should not create a configuration with an empty workflow tag', async () => {
+      await createConfiguration(
+        supertest,
+        getConfigurationRequest({ overrides: { workflowTags: ['  '] } }),
+        400
+      );
     });
 
     it('should create a configuration with no customFields', async () => {

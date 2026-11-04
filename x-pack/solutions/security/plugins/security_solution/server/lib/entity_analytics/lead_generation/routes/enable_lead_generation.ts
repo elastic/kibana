@@ -18,6 +18,7 @@ import type { EntityAnalyticsRoutesDeps } from '../../types';
 import type { StartPlugins } from '../../../../plugin';
 import { startLeadGenerationTask } from '../tasks';
 import { createLeadIndexService } from '../indices/lead_index_service';
+import { getUserLeadPrivileges } from '../get_user_lead_privileges';
 import { upsertLeadGenerationConfig } from '../saved_object';
 import { withMinimumLicense } from '../../utils/with_minimum_license';
 
@@ -53,7 +54,7 @@ export const enableLeadGenerationRoute = (
           const { getSpaceId } = await context.securitySolution;
           const spaceId = getSpaceId();
           const coreCtx = await context.core;
-          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
           const soClient = coreCtx.savedObjects.client;
 
           const [, startPlugins] = await getStartServices();
@@ -65,10 +66,29 @@ export const enableLeadGenerationRoute = (
             });
           }
 
+          // Enabling schedules runs that write leads as this user, so require write access up front.
+          const { has_write_permissions: hasWritePermissions } = await getUserLeadPrivileges(
+            request,
+            startPlugins.security,
+            spaceId
+          );
+          if (!hasWritePermissions) {
+            return siemResponse.error({
+              statusCode: 403,
+              body: 'You do not have permission to enable lead generation in this space.',
+            });
+          }
+
           const { connectorId } = request.body;
           await upsertLeadGenerationConfig(soClient, spaceId, { connectorId });
 
-          const indexService = createLeadIndexService({ esClient, logger, spaceId });
+          // The leads index is shared, per-space infrastructure rather than per-user data, so
+          // provisioning it shouldn't depend on the requesting user's own `create_index`/`manage` privileges
+          const indexService = createLeadIndexService({
+            esClient: internalEsClient,
+            logger,
+            spaceId,
+          });
           await indexService.createIndex();
 
           await startLeadGenerationTask({ taskManager, logger, namespace: spaceId, request });

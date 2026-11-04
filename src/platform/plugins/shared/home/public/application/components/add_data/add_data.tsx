@@ -19,6 +19,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { layoutRowOrStackCss } from '@kbn/css-utils/public/layout_css';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -56,6 +57,8 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
   );
   const shouldShowCloudConnectCallout =
     hasCloudConnectPermission && !isAlreadyConnected && !hideAnnouncements;
+  const narrowCloudConnectColumn =
+    !isCloudEnabled && !isCloudConnectStatusLoading && shouldShowCloudConnectCallout;
   if (canAccessIntegrations) {
     return (
       <KibanaPageTemplate.Section
@@ -63,7 +66,16 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
         paddingSize="xl"
         aria-labelledby="homeDataAdd__title"
       >
-        <div css={layoutRowOrStackCss({ threshold: '50rem', gap: euiTheme.size.l, align: 'end' })}>
+        <div
+          css={[
+            layoutRowOrStackCss({
+              threshold: rowThreshold,
+              gap: euiTheme.size.l,
+              align: 'end',
+            }),
+            addDataRowContainer,
+          ]}
+        >
           <div>
             <EuiTitle size="s">
               <h2 id="homeDataAdd__title">
@@ -130,13 +142,13 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
             </div>
           </div>
 
-          <div>
+          <div css={narrowCloudConnectColumn ? cloudConnectColumn : undefined}>
             {!isCloudEnabled ? (
               hasCloudConnectPermission ? (
                 isCloudConnectStatusLoading ? (
                   <CalloutSkeleton />
                 ) : shouldShowCloudConnectCallout ? (
-                  <SetupCloudConnect addBasePath={addBasePath} application={application} />
+                  <SetupCloudConnect application={application} />
                 ) : (
                   <MoveData addBasePath={addBasePath} />
                 )
@@ -165,3 +177,16 @@ export const AddData: FC<Props> = ({ addBasePath, application, isDarkMode, isClo
     return null;
   }
 };
+
+const rowThreshold = '50rem';
+
+const addDataRowContainer = css({
+  containerType: 'inline-size',
+});
+
+// Half the row minus 10% is 45% of the row. Only while the columns sit side by side.
+const cloudConnectColumn = css({
+  [`@container (min-width: ${rowThreshold})`]: {
+    maxInlineSize: '45%',
+  },
+});

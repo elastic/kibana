@@ -5,21 +5,19 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
-import { ID_MAX_LENGTH } from '@kbn/alerting-v2-schemas';
+import { lazySchema, z } from '@kbn/zod/v4';
+import { entityIdSchema, ENTITY_ID_NOTE } from '@kbn/alerting-v2-schemas';
 
 /**
  * Builds the path params schema for routes that accept a single action policy ID.
  */
 
-export const actionPolicyIdParamsSchema = z
-  .object({
-    id: z
-      .string()
-      .min(1)
-      .max(ID_MAX_LENGTH)
-      .describe(
-        'The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list.'
+export const actionPolicyIdParamsSchema = lazySchema(() =>
+  z
+    .object({
+      id: entityIdSchema.describe(
+        `The ID of the action policy. Copy it from the response when you create a policy, fetch one policy, or fetch the policy list. ${ENTITY_ID_NOTE}`
       ),
-  })
-  .strict();
+    })
+    .strict()
+);

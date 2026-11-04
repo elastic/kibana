@@ -68,7 +68,6 @@ export const fetchDeleteMonitor = async ({
     {
       ids: configIds,
     },
-    undefined,
     { version: INITIAL_REST_VERSION, spaceId }
   );
 };
@@ -100,7 +99,6 @@ export const fetchBulkUpdateMonitors = async ({
   return await apiService.put(
     SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_BULK_UPDATE,
     { updates },
-    null,
     { version: INITIAL_REST_VERSION, spaceId }
   );
 };
@@ -129,17 +127,12 @@ export const fetchUpsertMonitor = async ({
   configId,
 }: UpsertMonitorRequest): Promise<UpsertMonitorResponse> => {
   if (configId) {
-    return await apiService.put(
-      `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`,
-      monitor,
-      null,
-      {
-        version: INITIAL_REST_VERSION,
-        internal: true,
-      }
-    );
+    return await apiService.put(`${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS}/${configId}`, monitor, {
+      version: INITIAL_REST_VERSION,
+      internal: true,
+    });
   } else {
-    return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, null, {
+    return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, {
       version: INITIAL_REST_VERSION,
     });
   }
@@ -150,7 +143,7 @@ export const createGettingStartedMonitor = async ({
 }: {
   monitor: SyntheticsMonitor | EncryptedSyntheticsMonitor;
 }): Promise<UpsertMonitorResponse> => {
-  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, undefined, {
+  return await apiService.post(SYNTHETICS_API_URLS.SYNTHETICS_MONITORS, monitor, {
     gettingStarted: true,
     version: INITIAL_REST_VERSION,
   });

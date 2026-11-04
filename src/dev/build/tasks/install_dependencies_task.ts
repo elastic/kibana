@@ -13,7 +13,7 @@ import { exec } from '../lib';
 export const InstallDependencies: Task = {
   description: 'Installing node_modules, including production builds of packages',
 
-  async run(_config, log, build) {
+  async run(config, log, build) {
     await exec(
       log,
       'pnpm',
@@ -23,6 +23,8 @@ export const InstallDependencies: Task = {
         '--no-frozen-lockfile',
         '--config.confirmModulesPurge=false',
         '--prefer-offline',
+        '--store-dir',
+        config.resolveFromRepo('.pnpm-store'),
       ],
       {
         cwd: build.resolvePath(),

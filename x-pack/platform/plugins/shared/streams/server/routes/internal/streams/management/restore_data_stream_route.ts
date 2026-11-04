@@ -6,7 +6,7 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { Streams } from '@kbn/streams-schema';
+import { MAX_STREAM_NAME_LENGTH, Streams } from '@kbn/streams-schema';
 import { STREAMS_API_PRIVILEGES } from '../../../../../common/constants';
 import { createServerRoute } from '../../../create_server_route';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
@@ -23,7 +23,7 @@ export const restoreDataStreamRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ name: z.string() }),
+    path: z.object({ name: z.string().max(MAX_STREAM_NAME_LENGTH) }),
   }),
   handler: async ({
     params,

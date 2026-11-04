@@ -287,6 +287,8 @@ export interface EvaluationSpecificWorkerFixtures {
   connectorParam: EvalConnector | undefined;
   evaluationConnectorParam: EvalConnector | undefined;
   repetitions: number;
+  /** Examples each experiment runs at once unless the spec passes its own `concurrency`. */
+  concurrency: number;
   reportDisplayOptions: ReportDisplayOptions;
   reportModelScore: EvaluationReporter;
   traceEsClient: EsClient;
@@ -304,4 +306,5 @@ export interface EvaluationWorkerFixtures extends ScoutWorkerFixtures {
   connector: EvalConnector;
   evaluationConnector: EvalConnector;
   repetitions: number;
+  concurrency: number;
 }

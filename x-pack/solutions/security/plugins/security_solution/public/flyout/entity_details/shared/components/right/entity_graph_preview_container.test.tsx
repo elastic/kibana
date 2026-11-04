@@ -86,6 +86,32 @@ describe('<EntityGraphPreviewContainer />', () => {
     });
   });
 
+  it('fetches graph data over the pinned time range when opened from the new Entity Analytics home', async () => {
+    const { findByTestId } = render(
+      <TestProviders>
+        <EntityGraphPreviewContainer
+          entityId="test-entity-id"
+          scopeId="entity-analytics-new-entities-table-24h"
+          onShowGraph={mockOnShowGraph}
+          showIcon
+        />
+      </TestProviders>
+    );
+
+    expect(await findByTestId(GRAPH_PREVIEW_TEST_ID)).toBeInTheDocument();
+    expect(mockUseFetchGraphData).toHaveBeenCalledWith(
+      expect.objectContaining({
+        req: {
+          query: {
+            entityIds: [{ id: 'test-entity-id', isOrigin: true }],
+            start: 'now-24h',
+            end: 'now',
+          },
+        },
+      })
+    );
+  });
+
   it('calls onShowGraph when the header link is clicked', async () => {
     const { findByTestId, getByTestId } = renderContainer();
 

@@ -23,13 +23,52 @@ export const AnalysisWindowDays = lazySchema(() => z.number().int().min(1).max(3
 export type AnalysisWindowDays = z.infer<typeof AnalysisWindowDays>;
 
 /**
+ * Minimum number of FP-closed alerts required to trigger analysis on a rule. Matches the tuning sweep's min_fp_count input.
+ */
+export const FpCountThreshold = lazySchema(() => z.number().int().min(2).max(100));
+export type FpCountThreshold = z.infer<typeof FpCountThreshold>;
+
+/**
+ * Minimum FP rate (as % of total alerts) required to trigger analysis. Matches the tuning sweep's min_fp_rate_pct input.
+ */
+export const FpRateThresholdPct = lazySchema(() => z.number().int().min(0).max(100));
+export type FpRateThresholdPct = z.infer<typeof FpRateThresholdPct>;
+
+/**
  * Complete Worker-specific settings for the Rule Tuning Worker, owned by Detection Watch. Sent whole on write; a replacement missing a field is rejected.
  */
 export const RuleTuningWorkerExtras = lazySchema(() =>
   z
     .object({
       analysisWindowDays: AnalysisWindowDays,
+      fpCountThreshold: FpCountThreshold,
+      fpRateThresholdPct: FpRateThresholdPct,
     })
     .strict()
 );
 export type RuleTuningWorkerExtras = z.infer<typeof RuleTuningWorkerExtras>;
+
+/**
+ * How many days back the sweep looks for pending coverage gaps. Matches the coverage sweep's lookback_days input.
+ */
+export const LookbackDays = lazySchema(() => z.number().int().min(8).max(90));
+export type LookbackDays = z.infer<typeof LookbackDays>;
+
+/**
+ * How many coverage gap reviews one scheduled run starts. Matches the coverage sweep's batch_size input.
+ */
+export const MaxGapsPerRun = lazySchema(() => z.number().int().min(1).max(50));
+export type MaxGapsPerRun = z.infer<typeof MaxGapsPerRun>;
+
+/**
+ * Complete Worker-specific settings for the Rule Coverage Worker, owned by Detection Watch. Sent whole on write. A replacement missing a field is rejected.
+ */
+export const RuleCoverageWorkerExtras = lazySchema(() =>
+  z
+    .object({
+      lookbackDays: LookbackDays,
+      maxGapsPerRun: MaxGapsPerRun,
+    })
+    .strict()
+);
+export type RuleCoverageWorkerExtras = z.infer<typeof RuleCoverageWorkerExtras>;

@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import { AppHeaderView } from '@kbn/app-header';
 import { css } from '@emotion/react';
 import { transparentize, useEuiTheme } from '@elastic/eui';
 import { useLocation } from 'react-router-dom';
+import { useAlertZeroDocumentationLink } from '../../hooks/use_alertzero_documentation_link';
+import { AppHeadingTitleContext } from './app_heading_title';
+import { BRAND_TITLE, NAV_ESCALATIONS } from './translations';
 
 /**
  * Routes that rely on the chrome's application scroll container (`#kbnChromeLayoutApplication`).
@@ -23,6 +26,14 @@ import { useLocation } from 'react-router-dom';
  */
 const CHROME_SCROLLED_ROUTES = ['/watches'];
 
+/**
+ * Routes that need the same `overflow: visible` (for a sticky element) but keep the app heading.
+ * Matched exactly: `/` is the landing page, which every other route's path also starts with. The
+ * app root can also report an empty pathname.
+ * The landing page pins the onboarding intro's Continue footer.
+ */
+const CHROME_SCROLLED_EXACT_ROUTES = ['', '/'];
+
 const matchesRoute = (pathname: string, prefixes: string[]) =>
   prefixes.some((prefix) => pathname.startsWith(prefix));
 
@@ -35,14 +46,24 @@ interface AppChromeLayoutProps {
  * and left rail (including Launchpad, Dev Tools, Settings, collapse).
  */
 export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) => {
+  const docLink = useAlertZeroDocumentationLink();
   const { euiTheme } = useEuiTheme();
   const { pathname } = useLocation();
+  // Set by a page through `useAppHeadingTitle`. Overrides the route's title while it's mounted.
+  const [pageTitle, setPageTitle] = useState<string | undefined>();
 
-  const overflow = matchesRoute(pathname, CHROME_SCROLLED_ROUTES) ? 'visible' : 'auto';
+  const isWatchesShell = matchesRoute(pathname, CHROME_SCROLLED_ROUTES);
+  const isChromeScrolled = isWatchesShell || CHROME_SCROLLED_EXACT_ROUTES.includes(pathname);
+  const overflow = isChromeScrolled ? 'visible' : 'auto';
+  const hideAppHeading = isWatchesShell;
+  const appHeadingTitle =
+    pageTitle ?? (matchesRoute(pathname, ['/escalations']) ? NAV_ESCALATIONS : BRAND_TITLE);
 
   return (
-    <>
-      <AppHeaderView title="AlertZero" spacing="compact" />
+    <AppHeadingTitleContext.Provider value={setPageTitle}>
+      {hideAppHeading ? null : (
+        <AppHeaderView title={appHeadingTitle} spacing="compact" docLink={docLink} />
+      )}
       <div
         css={css`
           display: flex;
@@ -64,6 +85,6 @@ export const AppChromeLayout: React.FC<AppChromeLayoutProps> = ({ children }) =>
       >
         {children}
       </div>
-    </>
+    </AppHeadingTitleContext.Provider>
   );
 };

@@ -36,7 +36,7 @@ import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
 import { useHoverTimeout } from '../../hooks/use_hover_timeout';
-import { useScroll } from '../../hooks/use_scroll';
+import { scrollLayoutStyles } from '../../hooks/use_scroll';
 
 export interface PopoverIds {
   popoverNavigationInstructionsId: string;
@@ -167,8 +167,6 @@ export const Popover = ({
     }
   }, [persistent, isOpenedByClick, setHoverTimeout, handleClose]);
 
-  const scrollStyles = useScroll(true);
-
   const handleTriggerMouseDown = useCallback(() => {
     if (persistent) {
       return;
@@ -208,6 +206,15 @@ export const Popover = ({
     },
     [trigger, hasContent, open]
   );
+
+  // Clicking inside pins a persistent popover like a trigger click does, so content that shrinks
+  // out from under the cursor (e.g. a shorter nested panel) does not close it on mouseleave.
+  // Capture phase lets an item's own `closePopover` call run after and win.
+  const handlePopoverClickCapture = useCallback(() => {
+    if (persistent) {
+      setOpenedByClick();
+    }
+  }, [persistent, setOpenedByClick]);
 
   const handlePopoverKeyDown: KeyboardEventHandler<HTMLDivElement> = useCallback(
     (e) => {
@@ -294,8 +301,12 @@ export const Popover = ({
   const popoverContentStyles = css`
     --popover-max-height: 37.5rem;
     width: ${SIDE_PANEL_WIDTH}px;
-    max-height: var(--popover-max-height);
-    ${scrollStyles};
+    // Caps short viewports to the space EUI can position the popover in, between the popover buffers
+    max-height: min(
+      var(--popover-max-height),
+      calc(100dvh - ${TOP_BAR_HEIGHT + TOP_BAR_POPOVER_GAP + BOTTOM_POPOVER_GAP}px)
+    );
+    ${scrollLayoutStyles};
   `;
 
   const maskStyles = css`
@@ -354,6 +365,7 @@ export const Popover = ({
               }
             }
           }}
+          onClickCapture={handlePopoverClickCapture}
           onKeyDown={handlePopoverKeyDown}
           css={popoverContentStyles}
         >

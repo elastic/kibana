@@ -9,6 +9,7 @@
 
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,
+  AS_CODE_DATA_VIEW_SPEC_TYPE,
   AS_CODE_ESQL_DATA_SOURCE_TYPE,
 } from '@kbn/as-code-data-views-schema';
 import { OPTIONS_LIST_CONTROL } from '@kbn/controls-constants';
@@ -25,12 +26,13 @@ import {
   type DiscoverSessionApiMetricsTab,
 } from '@kbn/as-code-discover-schema';
 import { discoverSessionApiResponseSchema } from './schema';
+import { discoverSessionInternalDataSchema } from './internal_schema';
 
 // Keep these values independent from the schema constants so contract changes require an explicit
 // test update.
 const CURRENT_API_LIMITS = {
-  titleLength: 256,
-  descriptionLength: 1000,
+  titleLength: 1_000,
+  descriptionLength: 10_000,
   tabLabelLength: 120,
   tabs: 25,
   breakdownFieldLength: 1000,
@@ -38,6 +40,7 @@ const CURRENT_API_LIMITS = {
   columnOrder: 100,
   sort: 100,
   filters: 100,
+  controlPanels: 1_000,
   rowsPerPage: { min: 1, max: 10_000 },
   sampleSize: { min: 10, max: 10_000 },
   headerRowHeight: { min: 1, max: 5 },
@@ -109,7 +112,6 @@ describe('discoverSessionApiDataSchema', () => {
         {
           ...esqlTab,
           rows_per_page: 25,
-          sample_size: 500,
         },
       ],
     });
@@ -119,7 +121,29 @@ describe('discoverSessionApiDataSchema', () => {
     expect(tab.data_source.type).toBe(AS_CODE_ESQL_DATA_SOURCE_TYPE);
     expect(tab.data_source.query).toBe('FROM logs-* | LIMIT 10');
     expect(tab.rows_per_page).toBe(25);
-    expect(tab.sample_size).toBe(500);
+  });
+
+  it.each([
+    ['sample_size', 500],
+    ['hide_aggregated_preview', true],
+    ['chart_interval', 'auto'],
+    ['chart_interval', 'h'],
+  ])('rejects %s on an ES|QL tab', (field, value) => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'ES|QL only',
+        tabs: [{ ...esqlTab, [field]: value }],
+      })
+    ).toThrow();
+  });
+
+  it('rejects chart_interval on a metrics tab', () => {
+    expect(() =>
+      discoverSessionApiDataSchema.parse({
+        title: 'Metrics',
+        tabs: [{ ...metricsTab, chart_interval: 'auto' }],
+      })
+    ).toThrow();
   });
 
   it('accepts plain string tab types in the exported TypeScript types', () => {
@@ -712,6 +736,35 @@ describe('discoverSessionApiDataSchema', () => {
       expect(validated.tabs[0].label).toHaveLength(CURRENT_API_LIMITS.tabLabelLength);
     });
 
+    it('pins the current control panel limit', () => {
+      const parseWithControlPanels = (count: number) =>
+        discoverSessionApiDataSchema.parse({
+          title: 'Controls',
+          tabs: [
+            {
+              ...esqlTab,
+              control_panels: Array.from({ length: count }, (_, index) => ({
+                id: `control-${index}`,
+                type: 'esql_control',
+                config: {
+                  control_type: 'STATIC_VALUES',
+                  variable_name: `variable${index}`,
+                  variable_type: 'values',
+                  available_options: ['bar'],
+                  selected_options: ['bar'],
+                  single_select: true,
+                },
+              })),
+            },
+          ],
+        });
+
+      expect(
+        parseWithControlPanels(CURRENT_API_LIMITS.controlPanels).tabs[0].control_panels
+      ).toHaveLength(CURRENT_API_LIMITS.controlPanels);
+      expect(() => parseWithControlPanels(CURRENT_API_LIMITS.controlPanels + 1)).toThrow();
+    });
+
     it.each([
       ['rows_per_page', CURRENT_API_LIMITS.rowsPerPage],
       ['sample_size', CURRENT_API_LIMITS.sampleSize],
@@ -829,7 +882,7 @@ describe('discoverSessionApiDataSchema', () => {
           ],
         });
 
-        expect(validated.tabs[0].chart_interval).toBe(chartInterval);
+        expect(validated.tabs[0]).toHaveProperty('chart_interval', chartInterval);
       }
     });
 
@@ -901,6 +954,101 @@ describe('discoverSessionApiDataSchema', () => {
 
       expect(validated.tabs[0].vis_context?.attributes).toHaveProperty(key);
     });
+  });
+});
+
+describe('discoverSessionInternalDataSchema', () => {
+  const inlineTab = {
+    ...classicTab,
+    data_source: {
+      type: AS_CODE_DATA_VIEW_SPEC_TYPE,
+      index_pattern: 'logs-*',
+    },
+  };
+
+  it('preserves an inline ID without allowing it in the public schema', () => {
+    const dataSource = { ...inlineTab.data_source, id: 'Legacy:Inline-ID' };
+    const data = { title: 'Inline session', tabs: [{ ...inlineTab, data_source: dataSource }] };
+
+    expect(discoverSessionInternalDataSchema.parse(data).tabs[0].data_source).toStrictEqual(
+      dataSource
+    );
+    expect(discoverSessionApiDataSchema.safeParse(data).success).toBe(false);
+  });
+
+  it.each([
+    ['classic', classicTab],
+    ['inline without an ID', inlineTab],
+    ['ES|QL', esqlTab],
+    ['Metrics', metricsTab],
+  ])('keeps public defaults for %s tabs', (_name, tab) => {
+    const data = { title: 'Session', tabs: [tab] };
+
+    expect(discoverSessionInternalDataSchema.parse(data)).toStrictEqual(
+      discoverSessionApiDataSchema.parse(data)
+    );
+  });
+
+  it.each([classicTab, esqlTab, metricsTab])(
+    'rejects an inline ID on other data sources: $data_source.type ($#)',
+    (tab) => {
+      expect(
+        discoverSessionInternalDataSchema.safeParse({
+          title: 'Session',
+          tabs: [{ ...tab, data_source: { ...tab.data_source, id: 'inline-id' } }],
+        }).success
+      ).toBe(false);
+    }
+  );
+
+  it.each(['', 'a'.repeat(513)])('rejects an empty or oversized inline ID (%#)', (id) => {
+    expect(
+      discoverSessionInternalDataSchema.safeParse({
+        title: 'Session',
+        tabs: [{ ...inlineTab, data_source: { ...inlineTab.data_source, id } }],
+      }).success
+    ).toBe(false);
+  });
+
+  it.each([
+    ['no tabs', []],
+    ['duplicate tab IDs', [inlineTab, inlineTab]],
+    [
+      'too many tabs',
+      Array.from({ length: CURRENT_API_LIMITS.tabs + 1 }, (_, index) => ({
+        ...inlineTab,
+        id: `tab-${index}`,
+      })),
+    ],
+  ])('rejects %s', (_name, tabs) => {
+    expect(discoverSessionInternalDataSchema.safeParse({ title: 'Session', tabs }).success).toBe(
+      false
+    );
+  });
+
+  it('keeps control validation on inline tabs', () => {
+    expect(
+      discoverSessionInternalDataSchema.safeParse({
+        title: 'Session',
+        tabs: [{ ...inlineTab, control_panels: [{ id: 'invalid-control' }] }],
+      }).success
+    ).toBe(false);
+  });
+
+  it('rejects unknown session and tab properties', () => {
+    expect(
+      discoverSessionInternalDataSchema.safeParse({
+        title: 'Session',
+        tabs: [inlineTab],
+        unexpected: true,
+      }).success
+    ).toBe(false);
+    expect(
+      discoverSessionInternalDataSchema.safeParse({
+        title: 'Session',
+        tabs: [{ ...inlineTab, unexpected: true }],
+      }).success
+    ).toBe(false);
   });
 });
 

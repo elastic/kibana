@@ -11,7 +11,7 @@
  *
  * info:
  *   title: Find Attack Discovery Schedules Internal API endpoint
- *   version: 2023-10-31
+ *   version: 1
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';

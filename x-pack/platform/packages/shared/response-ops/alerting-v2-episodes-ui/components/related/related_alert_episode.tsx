@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { ReactNode } from 'react';
 import React from 'react';
 import { EuiCard, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -20,7 +21,8 @@ import { getNonEmptyGroupingFields } from '../../utils/episode_grouping_data';
 
 export interface RelatedAlertEpisodeProps {
   episode: AlertEpisode;
-  ruleName: string;
+  /** Rule name, or a stand-in when the rule is gone. */
+  title: ReactNode;
   groupingFields: string[];
   /** Source data view used to format grouping values with their field's `fieldFormats` formatter. */
   groupingDataView?: DataView;
@@ -36,7 +38,7 @@ export interface RelatedAlertEpisodeProps {
 
 export function RelatedAlertEpisode({
   episode,
-  ruleName,
+  title,
   groupingFields,
   groupingDataView,
   episodeAction,
@@ -66,7 +68,7 @@ export function RelatedAlertEpisode({
           responsive={true}
           wrap
         >
-          <EuiFlexItem grow={false}>{ruleName}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{title}</EuiFlexItem>
           {status ? (
             <EuiFlexItem grow={false}>
               <AlertEpisodeStatusBadges

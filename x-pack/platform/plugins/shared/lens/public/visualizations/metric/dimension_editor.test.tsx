@@ -387,13 +387,9 @@ describe('dimension editor', () => {
         if (!nameVisibilityGroup) {
           throw new Error('Name visibility group not found');
         }
-        const option = getByTitle(nameVisibilityGroup, NAME_VISIBILITY_TITLES[visibility], {
-          exact: false,
+        return within(nameVisibilityGroup).getByRole('button', {
+          name: NAME_VISIBILITY_TITLES[visibility],
         });
-        if (!option) {
-          throw new Error(`Name visibility option '${visibility}' not found`);
-        }
-        return option;
       };
       const clickOnNameVisibility = async (visibility: NameVisibility) => {
         await userEvent.click(getNameVisibilityOption(visibility));
@@ -449,14 +445,14 @@ describe('dimension editor', () => {
         expect(screen.queryByRole('group', { name: /Label position/i })).not.toBeInTheDocument();
       });
 
-      it.each(['hidden', 'before', 'after'] as const)(
+      it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
         'renders %s as the selected visibility',
         (visibility) => {
           const { getNameVisibilityOption } = renderSecondaryMetricEditor({
             state: { ...localState, secondaryNameVisibility: visibility },
           });
 
-          for (const option of ['hidden', 'before', 'after'] as const) {
+          for (const option of ['hidden', 'before', 'after', 'tooltip'] as const) {
             expect(getNameVisibilityOption(option)).toHaveAttribute(
               'aria-pressed',
               `${option === visibility}`
@@ -473,7 +469,7 @@ describe('dimension editor', () => {
         expect(getNameVisibilityOption('hidden')).toHaveAttribute('aria-pressed', 'true');
       });
 
-      it.each(['hidden', 'before', 'after'] as const)(
+      it.each(['hidden', 'before', 'after', 'tooltip'] as const)(
         'sets the visibility to %s',
         async (visibility) => {
           const setState = jest.fn();

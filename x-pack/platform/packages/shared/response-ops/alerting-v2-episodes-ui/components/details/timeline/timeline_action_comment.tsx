@@ -25,10 +25,11 @@ export const AlertEpisodeTimelineActionComment = ({
   entry,
   profilesMap,
 }: AlertEpisodeTimelineActionCommentProps) => {
-  const profile = entry.actor ? profilesMap.get(entry.actor) : undefined;
+  const actorUid = entry.actor.profile_uid;
+  const profile = actorUid ? profilesMap.get(actorUid) : undefined;
   const assigneeProfile = entry.assignee_uid ? profilesMap.get(entry.assignee_uid) : undefined;
   const displayName =
-    profile?.user.full_name ?? profile?.user.username ?? entry.actor ?? i18n.SYSTEM_LABEL;
+    profile?.user.full_name ?? profile?.user.username ?? actorUid ?? i18n.SYSTEM_LABEL;
   const username = profile ? (
     <EuiFlexGroup
       gutterSize="xs"

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { ToolType } from '@kbn/agent-builder-common';
@@ -22,7 +22,7 @@ import type { SecuritySolutionPluginStartDependencies } from '../../../plugin_co
 export const GET_INSTALLABLE_CATALOG_OVERVIEW_INLINE_TOOL_ID =
   'security.get_installable_catalog_overview';
 
-export const getInstallableCatalogOverviewSchema = z.object({}).strict();
+export const getInstallableCatalogOverviewSchema = lazySchema(() => z.object({}).strict());
 
 const TAGS_AGG_SIZE = 1000;
 const TAGS_AGG_KEY = 'facet_tags';

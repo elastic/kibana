@@ -73,6 +73,21 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
     let proxyServer: httpProxy | undefined;
     let proxyHaveBeenCalled = false;
 
+    const createITOMConnector = async (): Promise<string> => {
+      const { body } = await supertest
+        .post('/api/actions/connector')
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'A servicenow simulator',
+          connector_type_id: '.servicenow-itom',
+          config: {
+            apiUrl: serviceNowSimulatorURL,
+          },
+          secrets: mockServiceNowBasic.secrets,
+        });
+      return body.id;
+    };
+
     before(async () => {
       serviceNowServer = await getServiceNowServer();
       const availablePort = await getPort({ port: getPort.makeRange(9000, 9100) });
@@ -396,18 +411,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
 
     describe('ServiceNow ITOM - Executor', () => {
       before(async () => {
-        const { body } = await supertest
-          .post('/api/actions/connector')
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'A servicenow simulator',
-            connector_type_id: '.servicenow-itom',
-            config: {
-              apiUrl: serviceNowSimulatorURL,
-            },
-            secrets: mockServiceNowBasic.secrets,
-          });
-        simulatedActionId = body.id;
+        simulatedActionId = await createITOMConnector();
       });
 
       describe('Validation', () => {
@@ -492,11 +496,16 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
       });
 
       describe('Execution', () => {
-        // New connectors
         describe('Add event', () => {
+          let addEventActionId = '';
+
+          before(async () => {
+            addEventActionId = await createITOMConnector();
+          });
+
           it('should add an event ', async () => {
             const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .post(`/api/actions/connector/${addEventActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: mockServiceNowBasic.params,
@@ -509,24 +518,30 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: simulatedActionId,
+                id: addEventActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 5 }],
-                  ['execute', { equal: 5 }],
+                  ['execute-start', { gte: 1 }],
+                  ['execute', { gte: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[events.length - 1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(317);
           });
         });
 
         describe('getChoices', () => {
+          let getChoicesActionId = '';
+
+          before(async () => {
+            getChoicesActionId = await createITOMConnector();
+          });
+
           it('should get choices', async () => {
             const { body: result } = await supertest
-              .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+              .post(`/api/actions/connector/${getChoicesActionId}/_execute`)
               .set('kbn-xsrf', 'foo')
               .send({
                 params: {
@@ -539,7 +554,7 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
             expect(proxyHaveBeenCalled).to.equal(true);
             expect(result).to.eql({
               status: 'ok',
-              connector_id: simulatedActionId,
+              connector_id: getChoicesActionId,
               data: [
                 {
                   dependent_value: '',
@@ -574,16 +589,16 @@ export default function serviceNowITOMTest({ getService }: FtrProviderContext) {
                 getService,
                 spaceId: 'default',
                 type: 'action',
-                id: simulatedActionId,
+                id: getChoicesActionId,
                 provider: 'actions',
                 actions: new Map([
-                  ['execute-start', { equal: 6 }],
-                  ['execute', { equal: 6 }],
+                  ['execute-start', { gte: 1 }],
+                  ['execute', { gte: 1 }],
                 ]),
               });
             });
 
-            const executeEvent = events[events.length - 1];
+            const executeEvent = events.find((event) => event?.event?.action === 'execute');
             expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(0);
           });
         });

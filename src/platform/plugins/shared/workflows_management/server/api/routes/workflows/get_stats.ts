@@ -46,6 +46,7 @@ export function registerGetStatsRoute({ router, api, spaces }: RouteDependencies
           const includeExecutionStats =
             request.authzResult?.[WorkflowsManagementApiActions.readExecution] === true;
           const stats = await api.getWorkflowStats(spaceId, {
+            request,
             includeExecutionStats,
             includeManagedExecutionStats: canReadManagedWorkflowExecutions(request),
           });

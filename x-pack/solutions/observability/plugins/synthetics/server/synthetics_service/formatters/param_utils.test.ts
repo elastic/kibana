@@ -42,7 +42,7 @@ describe('getParamsForSpace', () => {
     expect(getParamsForSpace(paramsBySpace, 'space1')).toEqual({ GLOBAL_KEY: 'global' });
   });
 
-  it('lets globally-shared params win on key collision, matching getSyntheticsParams/normalizeConfigs', () => {
+  it('lets globally-shared params win on key collision, matching getSyntheticsParams/formatSavedMonitors', () => {
     const paramsBySpace = {
       space1: { SHARED_KEY: 'local' },
       '*': { SHARED_KEY: 'global' },
@@ -245,6 +245,42 @@ describe('monitorUsesGlobalParams', () => {
     } as SyntheticsMonitor;
 
     expect(monitorUsesGlobalParams(monitor)).toBe(false);
+  });
+
+  it('detects params inside Kerberos/NTLM despite formatter skip list', () => {
+    const kerberosMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.KERBEROS]: {
+        enabled: true,
+        auth_type: 'password',
+        username: 'svc',
+        password: '${kerberosPassword}',
+        keytab: '',
+        config_path: '/etc/krb5.conf',
+        krb5_conf: '',
+        realm: '',
+        service_name: '',
+        enable_krb5_fast: false,
+      },
+    } as SyntheticsMonitor;
+
+    const ntlmMonitor = {
+      ...baseMonitor,
+      [ConfigKey.URLS]: 'https://example.com',
+      [ConfigKey.NTLM]: {
+        enabled: true,
+        username: 'user',
+        password: '${ntlmPassword}',
+        domain: '',
+        workstation: '',
+      },
+    } as SyntheticsMonitor;
+
+    expect(monitorUsesGlobalParams(kerberosMonitor)).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['kerberosPassword'])).toBe(true);
+    expect(monitorUsesGlobalParams(kerberosMonitor, ['unrelated'])).toBe(false);
+    expect(monitorUsesGlobalParams(ntlmMonitor, ['ntlmPassword'])).toBe(true);
   });
 
   it('returns true when monitor has params in hosts field (TCP/ICMP)', () => {

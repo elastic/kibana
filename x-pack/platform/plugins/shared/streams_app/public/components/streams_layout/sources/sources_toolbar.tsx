@@ -19,36 +19,32 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { SourceStatus, SourceType } from './types';
+import type { SourceType } from './types';
 import type { SourceFilterOption } from './source_filter';
 import { SourceFilter } from './source_filter';
 
 interface SourcesToolbarProps {
   query: string;
   typeOptions: Array<SourceFilterOption<SourceType>>;
-  statusOptions: Array<SourceFilterOption<SourceStatus>>;
   selectedTypes: SourceType[];
-  selectedStatuses: SourceStatus[];
   isRefreshing: boolean;
   onQueryChange: (query: string) => void;
   onSelectedTypesChange: (types: SourceType[]) => void;
-  onSelectedStatusesChange: (statuses: SourceStatus[]) => void;
   onRefresh: () => void;
   onAddSource: () => void;
+  isAddDisabled?: boolean;
 }
 
 export const SourcesToolbar = ({
   query,
   typeOptions,
-  statusOptions,
   selectedTypes,
-  selectedStatuses,
   isRefreshing,
   onQueryChange,
   onSelectedTypesChange,
-  onSelectedStatusesChange,
   onRefresh,
   onAddSource,
+  isAddDisabled = false,
 }: SourcesToolbarProps) => {
   const { euiTheme } = useEuiTheme();
 
@@ -77,14 +73,6 @@ export const SourcesToolbar = ({
             options={typeOptions}
             selectedValues={selectedTypes}
             onChange={onSelectedTypesChange}
-          />
-          <SourceFilter
-            label={i18n.translate('xpack.streams.sources.statusFilterLabel', {
-              defaultMessage: 'Status',
-            })}
-            options={statusOptions}
-            selectedValues={selectedStatuses}
-            onChange={onSelectedStatusesChange}
           />
         </EuiFilterGroup>
       </EuiFlexItem>
@@ -119,7 +107,12 @@ export const SourcesToolbar = ({
         />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiButton fill onClick={onAddSource} data-test-subj="streamsAddSourceButton">
+        <EuiButton
+          fill
+          onClick={onAddSource}
+          isDisabled={isAddDisabled}
+          data-test-subj="streamsAddSourceButton"
+        >
           {i18n.translate('xpack.streams.sources.addSourceButtonLabel', {
             defaultMessage: 'Add source',
           })}

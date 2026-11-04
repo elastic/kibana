@@ -10,8 +10,9 @@ import type { ExpandWildcards } from '@elastic/elasticsearch/lib/api/types';
 /**
  * The plugin-owned threat intel indices (`.kibana-threat-reports`,
  * `.kibana-threat-intel-sources`, `.threat-intel-indicators`) are hidden, so a
- * wildcard read skips them unless it opts in. Every wildcard search, PIT, and
- * update-by-query against them has to spread this.
+ * wildcard read skips them unless it opts in. Every wildcard search and
+ * update-by-query against them has to spread this. For `openPointInTime`, use
+ * {@link HIDDEN_INDEX_PIT_OPTIONS} instead.
  *
  * It lives here rather than in `setup/index_templates` because routes and tasks
  * need it and must not depend on the setup layer, and rather than in `common`
@@ -22,4 +23,15 @@ export const HIDDEN_INDEX_SEARCH_OPTIONS = {
   expand_wildcards: ['open', 'hidden'] as ExpandWildcards,
   ignore_unavailable: true,
   allow_no_indices: true,
+};
+
+/**
+ * PIT-valid subset of {@link HIDDEN_INDEX_SEARCH_OPTIONS}. `allow_no_indices` is
+ * a search-only parameter; ES rejects it on `openPointInTime` with
+ * `x_content_parse_exception`. Spread this into every `openPointInTime` call
+ * against the hidden threat intel indices.
+ */
+export const HIDDEN_INDEX_PIT_OPTIONS = {
+  expand_wildcards: HIDDEN_INDEX_SEARCH_OPTIONS.expand_wildcards,
+  ignore_unavailable: HIDDEN_INDEX_SEARCH_OPTIONS.ignore_unavailable,
 };

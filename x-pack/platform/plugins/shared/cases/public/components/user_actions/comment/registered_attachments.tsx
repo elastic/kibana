@@ -8,7 +8,8 @@
 import React, { Suspense } from 'react';
 import { memoize, partition } from 'lodash';
 
-import { EuiButtonIcon, EuiCode, EuiFlexItem, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
+import type { EuiCommentProps } from '@elastic/eui';
+import { EuiCode, EuiLoadingSpinner } from '@elastic/eui';
 
 import type {
   AttachmentType,
@@ -16,7 +17,7 @@ import type {
   CommonAttachmentViewProps,
 } from '../../../client/attachment_framework/types';
 
-import { AttachmentActionType } from '../../../client/attachment_framework/types';
+import { renderAttachmentAction } from '../attachment_action';
 import { UserActionTimestamp } from '../timestamp';
 import type { AttachmentTypeRegistry } from '../../../../common/registry';
 import type { AttachmentV2 } from '../../../../common/types/domain';
@@ -41,8 +42,11 @@ type BuilderArgs<C, R> = Pick<
   attachment: SnakeToCamelCase<C>;
   registry: R;
   isLoading: boolean;
+  isDeleted?: boolean;
   getId: () => string;
   getAttachmentViewProps: () => object;
+  /** Props for the delete toast, when they differ from `getAttachmentViewProps`. */
+  getDeleteViewProps?: () => object;
 };
 
 /**
@@ -88,8 +92,10 @@ export const createRegisteredAttachmentUserActionBuilder = <
   caseData,
   permissions,
   isLoading,
+  isDeleted = false,
   getId,
   getAttachmentViewProps,
+  getDeleteViewProps,
   handleDeleteComment,
 }: BuilderArgs<C, R>): ReturnType<UserActionBuilder> => ({
   build: () => {
@@ -130,65 +136,64 @@ export const createRegisteredAttachmentUserActionBuilder = <
     };
 
     const creationActivity = attachmentType.getCreationActivity(props);
-    const deleteSuccessToast = creationActivity.deleteSuccessToast ?? DELETE_REGISTERED_ATTACHMENT;
+    const className =
+      creationActivity.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
+    const dataTestSubj = `comment-${attachment.type}-${attachmentTypeId}`;
 
+    const row: EuiCommentProps = {
+      username: (
+        <HoverableUserWithAvatarResolver user={attachment.createdBy} userProfiles={userProfiles} />
+      ),
+      className,
+      css: creationActivity.css,
+      event: withActionSourceEvent(creationActivity.event, userAction.source),
+      eventColor: creationActivity.eventColor,
+      'data-test-subj': isDeleted ? `${dataTestSubj}-deleted` : dataTestSubj,
+      timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
+      timelineAvatar: attachmentType.getIcon(props),
+      timelineAvatarAriaLabel: attachmentType.getLabel(),
+    };
+
+    // No body or actions; the copy link stays as the move-to-reference target.
+    if (isDeleted) {
+      return [
+        {
+          ...row,
+          actions: <UserActionContentToolbar id={attachment.id}>{null}</UserActionContentToolbar>,
+        },
+      ];
+    }
+
+    const deleteActivity = getDeleteViewProps
+      ? attachmentType.getCreationActivity({ ...props, ...getDeleteViewProps() })
+      : creationActivity;
+    const deleteSuccessToast = deleteActivity.deleteSuccessToast ?? DELETE_REGISTERED_ATTACHMENT;
     const renderer = getAttachmentRenderer(userAction.id);
     const actions = creationActivity.getActions?.(props) ?? [];
     const [primaryActions, nonPrimaryActions] = partition(actions, 'isPrimary');
     const visiblePrimaryActions = primaryActions.slice(0, 2);
     const nonVisiblePrimaryActions = primaryActions.slice(2, primaryActions.length);
-    const className =
-      creationActivity.className ?? `comment-${attachment.type}-attachment-${attachmentTypeId}`;
 
     return [
       {
-        username: (
-          <HoverableUserWithAvatarResolver
-            user={attachment.createdBy}
-            userProfiles={userProfiles}
-          />
-        ),
-        className,
-        css: creationActivity.css,
-        event: withActionSourceEvent(creationActivity.event, userAction.source),
-        eventColor: creationActivity.eventColor,
-        'data-test-subj': `comment-${attachment.type}-${attachmentTypeId}`,
-        timestamp: <UserActionTimestamp createdAt={userAction.createdAt} />,
-        timelineAvatar: attachmentType.getIcon(props),
-        timelineAvatarAriaLabel: attachmentType.getLabel(),
+        ...row,
+        children: renderer(creationActivity, props),
         actions: (
           <UserActionContentToolbar id={attachment.id}>
-            {visiblePrimaryActions.map(
-              (action) =>
-                (action.type === AttachmentActionType.BUTTON && (
-                  <EuiFlexItem
-                    grow={false}
-                    data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}`}
-                    key={`attachment-${attachmentTypeId}-${attachment.id}`}
-                  >
-                    <EuiToolTip content={action.label} disableScreenReaderOutput>
-                      <EuiButtonIcon
-                        aria-label={action.label}
-                        iconType={action.iconType}
-                        color={action.color ?? 'text'}
-                        onClick={action.onClick}
-                        data-test-subj={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                        key={`attachment-${attachmentTypeId}-${attachment.id}-${action.iconType}`}
-                      />
-                    </EuiToolTip>
-                  </EuiFlexItem>
-                )) ||
-                (action.type === AttachmentActionType.CUSTOM && action.render())
+            {visiblePrimaryActions.map((action) =>
+              renderAttachmentAction(action, `attachment-${attachmentTypeId}-${attachment.id}`)
             )}
             <RegisteredAttachmentsPropertyActions
               isLoading={isLoading}
-              onDelete={() => handleDeleteComment(attachment.id, deleteSuccessToast)}
+              onDelete={(options) =>
+                handleDeleteComment(attachment.id, deleteSuccessToast, options)
+              }
               registeredAttachmentActions={[...nonVisiblePrimaryActions, ...nonPrimaryActions]}
               hideDefaultActions={!!creationActivity.hideDefaultActions}
+              relatedRemoval={attachmentType.getRelatedRemoval?.({ count: 1 })}
             />
           </UserActionContentToolbar>
         ),
-        children: renderer(creationActivity, props),
       },
     ];
   },

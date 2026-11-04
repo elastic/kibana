@@ -32,7 +32,7 @@ import { getConfigurationByOwner } from '../../containers/configure/utils';
 import { CreateCaseOwnerSelector } from './owner_selector';
 import { useAvailableCasesOwners } from '../app/use_available_owners';
 import { getInitialCaseValue } from '../../../common/utils/get_initial_case_value';
-import { getOwnerDefaultValue } from './utils';
+import { getOwnerDefaultValue, getInitialCreateCaseSettings } from './utils';
 import { useSubmitCase } from './use_submit_case';
 import { TemplateFieldsValidationContext } from './template_fields_validation_context';
 
@@ -84,10 +84,11 @@ export const FormFieldsWithFormContext: React.FC<FormFieldsWithFormContextProps>
           defaultValue: getInitialCaseValue({
             owner: newOwner,
             connector: currentConfiguration.connector,
+            settings: getInitialCreateCaseSettings(newOwner, currentConfiguration),
           }),
         });
       },
-      [currentConfiguration.connector, onSelectedOwner, reset]
+      [currentConfiguration, onSelectedOwner, reset]
     );
 
     return (
@@ -215,7 +216,7 @@ export const CreateCaseForm: React.FC<CreateCaseFormProps> = React.memo(
                   )}
                 </EuiFlexItem>
                 <EuiFlexItem grow={false}>
-                  <SubmitCaseButton isSubmitting={isSubmitting} />
+                  <SubmitCaseButton isSubmitting={isSubmitting || isLoadingCaseConfiguration} />
                 </EuiFlexItem>
               </EuiFlexGroup>
             </EuiFormRow>

@@ -11,6 +11,8 @@ applies_to:
 
 The Monday.com connector connects to Monday.com through the official remote Model Context Protocol (MCP) server at `https://mcp.monday.com/mcp`. Agents and workflows use the connector to search boards, read and create items, post updates, and discover workspaces. The connector supports two authentication methods: Monday.com OAuth 2.0 (recommended) and Personal API Token.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-monday-com-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

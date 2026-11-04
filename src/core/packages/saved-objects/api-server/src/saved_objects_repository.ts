@@ -174,6 +174,7 @@ export interface ISavedObjectsRepository {
    * @property {Array<unknown>} [options.searchAfter]
    * @property {string} [options.sortField]
    * @property {string} [options.sortOrder]
+   * @property {Array<SavedObjectsFindSort>} [options.sort] - multi-field sort; mutually exclusive with sortField and sortOrder
    * @property {Array<string>} [options.fields]
    * @property {string} [options.namespace]
    * @property {object} [options.hasReference] - { type, id }

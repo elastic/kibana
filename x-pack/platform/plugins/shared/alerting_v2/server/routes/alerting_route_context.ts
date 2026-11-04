@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { Response } from '@kbn/core-di-server';
-import type { KibanaResponseFactory } from '@kbn/core-http-server';
+import { Request, Response } from '@kbn/core-di-server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core-http-server';
 import { inject, injectable } from 'inversify';
 import type { SettingsServiceContract } from '../lib/services/settings_service/settings_service';
 import { SettingsServiceToken } from '../lib/services/settings_service/tokens';
@@ -20,6 +20,7 @@ export class AlertingRouteContext {
   public readonly logger: LoggerServiceContract;
 
   constructor(
+    @inject(Request) public readonly request: KibanaRequest,
     @inject(Response) public readonly response: KibanaResponseFactory,
     @inject(LoggerServiceToken) loggerService: LoggerServiceContract,
     @inject(SettingsServiceToken) public readonly settings: SettingsServiceContract

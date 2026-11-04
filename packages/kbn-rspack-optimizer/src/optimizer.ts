@@ -23,6 +23,8 @@ export interface RspackOptimizerOptions {
   cache?: boolean;
   dist?: boolean;
   examples?: boolean;
+  /** Include `devOnly` plugins */
+  devOnly?: boolean;
   themeTags?: ThemeTag[];
   /** Explicit plugin paths passed via --plugin-path */
   pluginPaths?: string[];
@@ -51,7 +53,7 @@ interface WorkerMessage {
 /**
  * RSPack-based optimizer for use with kbn-cli-dev-mode
  *
- * This runs RSPack in a separate child process, similar to how @kbn/optimizer
+ * This runs RSPack in a separate child process, similar to how @kbn/rspack-optimizer
  * runs webpack in worker threads. This allows clean termination when the user
  * presses Ctrl+C - we can simply kill the worker process.
  *
@@ -59,7 +61,7 @@ interface WorkerMessage {
  * - Clean shutdown on Ctrl+C (no EPIPE errors, no lingering logs)
  * - RSPack's faster build speed for plugins
  * - No changes to Kibana's bootstrap or bundle serving
- * - Shared deps are already built and cached
+ * - Shared dependency rebuilds complete before RSPack is invalidated
  */
 export class RspackOptimizer {
   private readonly ready$ = new Rx.ReplaySubject<boolean>(1);
@@ -134,6 +136,7 @@ export class RspackOptimizer {
                 cache: this.options.cache,
                 dist: this.options.dist,
                 examples: this.options.examples,
+                devOnly: this.options.devOnly,
                 themeTags: this.options.themeTags ?? [...DEFAULT_THEME_TAGS],
                 hmr: this.options.hmr,
                 pluginPaths: this.options.pluginPaths,

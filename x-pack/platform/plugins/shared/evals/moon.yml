@@ -18,6 +18,7 @@ project:
   sourceRoot: x-pack/platform/plugins/shared/evals
 dependsOn:
   - '@kbn/core'
+  - '@kbn/core-elasticsearch-server-utils'
   - '@kbn/config-schema'
   - '@kbn/logging'
   - '@kbn/features-plugin'
@@ -73,12 +74,11 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
 fileGroups:
   src:
     - common/**/*
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

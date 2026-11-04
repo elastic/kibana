@@ -30,10 +30,15 @@ const version = API_VERSIONS.roles.public.v1;
 export class RolesAPIClient {
   constructor(private readonly http: HttpStart) {}
 
-  public getRoles = async () => {
+  public getRoles = async (options?: { includeReservedRoles?: boolean }) => {
     return await this.http.get<Role[]>('/api/security/role', {
       version,
-      query: { replaceDeprecatedPrivileges: true },
+      query: {
+        replaceDeprecatedPrivileges: true,
+        ...(options?.includeReservedRoles !== undefined
+          ? { includeReservedRoles: options.includeReservedRoles }
+          : {}),
+      },
     });
   };
 

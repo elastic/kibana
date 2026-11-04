@@ -19,11 +19,12 @@ jest.mock('@kbn/workflows-execution-engine/server', () => ({
 }));
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { registerHitlLifecycleAuditor } from '@kbn/workflows-execution-engine/server';
 import { workflowsExtensionsMock } from '@kbn/workflows-extensions/server/mocks';
 
 import { WorkflowsService } from './api/workflows_management_service';
+import { ExecutionDataViewsBootstrap } from './execution_data_views_bootstrap';
 import { WorkflowsPlugin } from './plugin';
 
 const MockedWorkflowsService = WorkflowsService as jest.MockedClass<typeof WorkflowsService>;
@@ -49,6 +50,10 @@ describe('WorkflowsPlugin', () => {
     );
   });
 
+  afterEach(() => {
+    jest.restoreAllMocks();
+  });
+
   it('returns an empty start contract and clears the stopping flag', () => {
     const initializerContext = coreMock.createPluginInitializerContext({
       enabled: true,
@@ -72,6 +77,7 @@ describe('WorkflowsPlugin', () => {
       spaces: {} as any,
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
+      dataViews: {} as any,
     });
 
     expect(start).toEqual({});
@@ -99,6 +105,7 @@ describe('WorkflowsPlugin', () => {
       spaces: {} as any,
       workflowsExtensions: workflowsExtensionsMock.createStart(),
       licensing: {} as any,
+      dataViews: {} as any,
     });
 
     setStopping.mockClear();
@@ -106,6 +113,56 @@ describe('WorkflowsPlugin', () => {
 
     expect(setStopping).toHaveBeenCalledWith(true);
     expect(unregisterHitlLifecycleAuditor).toHaveBeenCalled();
+  });
+
+  it('bootstraps data views with internal clients scoped to the request space', async () => {
+    const initializerContext = coreMock.createPluginInitializerContext({
+      enabled: true,
+      logging: { console: false },
+      available: true,
+      library: { ttlMs: 600_000 },
+    });
+    const plugin = new WorkflowsPlugin(initializerContext);
+    const coreSetup = coreMock.createSetup();
+    const coreStart = coreMock.createStart();
+    const dataViews = { dataViewsServiceFactory: jest.fn() };
+    coreSetup.getStartServices.mockResolvedValue([coreStart, { dataViews }, {}] as never);
+    const spaces = {
+      spacesService: {
+        getActiveSpace: jest.fn(),
+        getSpaceId: jest.fn().mockReturnValue('marketing'),
+      },
+    };
+    const ensureForSpace = jest
+      .spyOn(ExecutionDataViewsBootstrap.prototype, 'ensureForSpaceFireAndForget')
+      .mockImplementation();
+
+    plugin.setup(coreSetup, {
+      spaces: spaces as never,
+      workflowsExtensions: workflowsExtensionsMock.createSetup(),
+    });
+
+    const registerRouteHandlerContext = coreSetup.http.registerRouteHandlerContext as jest.Mock;
+    const contextProvider = registerRouteHandlerContext.mock.calls.find(
+      ([contextName]: [string]) => contextName === 'workflowsManagement'
+    )?.[1];
+    expect(contextProvider).toBeDefined();
+    await contextProvider?.(
+      {} as never,
+      httpServerMock.createKibanaRequest(),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(coreStart.savedObjects.getUnsafeInternalClient).toHaveBeenCalledTimes(1);
+    const internalSavedObjectsClient =
+      coreStart.savedObjects.getUnsafeInternalClient.mock.results[0].value;
+    expect(internalSavedObjectsClient.asScopedToNamespace).toHaveBeenCalledWith('marketing');
+    expect(ensureForSpace).toHaveBeenCalledWith(
+      'marketing',
+      internalSavedObjectsClient.asScopedToNamespace.mock.results[0].value,
+      coreStart.elasticsearch.client.asInternalUser
+    );
+    expect(coreStart.savedObjects.getScopedClient).not.toHaveBeenCalled();
   });
 
   it('does not register connector-event triggers when inbound events are disabled', () => {

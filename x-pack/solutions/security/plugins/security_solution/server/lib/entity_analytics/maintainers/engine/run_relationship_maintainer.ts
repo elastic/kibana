@@ -7,11 +7,13 @@
 
 import { randomUUID } from 'crypto';
 
-import { errors as esErrors } from '@elastic/elasticsearch';
-
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
-import type { EntityUpdateClient, EntityMetadataClient } from '@kbn/entity-store/server';
+import type {
+  EntityUpdateClient,
+  EntityMetadataClient,
+  RelationshipsClient,
+} from '@kbn/entity-store/server';
 
 import type {
   RelationshipIntegrationConfig,
@@ -23,7 +25,10 @@ import {
   buildActorDiscoveryQuery,
   buildActorPageFilter,
   buildLookbackFilter,
+  getPageActorValues,
 } from './build_actor_discovery_query';
+import { preRunReset } from './pre_run_reset';
+import { isIndexNotFound, errMsg } from './es_errors';
 import { buildTargetsPerActorQuery } from './build_targets_per_actor_query';
 import { parseTargetsPerActorRows } from './parse_targets_per_actor_rows';
 import {
@@ -38,6 +43,7 @@ import {
 import { LOOKBACK_WINDOW, MAX_ITERATIONS, DEFAULT_ESQL_TIMEOUT_MS } from './constants';
 import { assertValidNamespace } from './validate_namespace';
 import type {
+  IntegrationStage,
   RelationshipMaintainerSourceResult,
   RelationshipMaintainerTelemetryCollector,
 } from '../types';
@@ -53,27 +59,6 @@ interface CompositeAggregations {
 interface EsqlQueryResult {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
-}
-
-/**
- * Detects the index-not-found case the engine recovers from gracefully (Step 1
- * runs against `logs-{integration}-{namespace}` data streams that don't exist
- * until the integration ships at least one document).
- *
- * Uses the typed `ResponseError` from `@elastic/elasticsearch` rather than
- * duck-typing two error shapes — the contract is anchored to the client we
- * actually depend on, so a future client upgrade that changes internal
- * representation surfaces as a compile-time signal rather than silent
- * failure.
- */
-function isIndexNotFound(err: unknown): boolean {
-  return (
-    err instanceof esErrors.ResponseError && err.body?.error?.type === 'index_not_found_exception'
-  );
-}
-
-function errMsg(err: unknown): string {
-  return err instanceof Error ? err.message : JSON.stringify(err);
 }
 
 function mergeRelTypeApplied(
@@ -117,7 +102,6 @@ async function fetchActorPage(
       logger.info(`${logPrefix} Aborted during composite aggregation`);
       return null;
     }
-    logger.error(`${logPrefix} Composite aggregation failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -138,9 +122,17 @@ async function fetchTargetsForActors(
       filter: [...buildLookbackFilter(config), buildActorPageFilter(config, buckets)],
     },
   };
+  const pageActorValues =
+    config.kind === 'override' && config.scopeToPageActorValues
+      ? getPageActorValues(config, buckets)
+      : undefined;
   try {
     const result = await esClient.esql.query(
-      { query: buildTargetsPerActorQuery(config, namespace), filter: esqlFilter },
+      {
+        query: buildTargetsPerActorQuery(config, namespace, pageActorValues),
+        filter: esqlFilter,
+        ...(pageActorValues ? { params: pageActorValues } : {}),
+      },
       transportOpts
     );
     // Defense in depth: ES|QL responses are typed loosely on the client,
@@ -161,7 +153,6 @@ async function fetchTargetsForActors(
       logger.info(`${logPrefix} Aborted during ES|QL query`);
       return null;
     }
-    logger.error(`${logPrefix} ES|QL query failed: ${errMsg(err)}`);
     throw err;
   }
 }
@@ -185,6 +176,7 @@ async function runIntegration(
   namespace: string,
   crudClient: EntityUpdateClient,
   entityMetadataClient: EntityMetadataClient,
+  relationshipsClient: RelationshipsClient,
   signal: AbortSignal | undefined,
   metadataContext: { scanId: string; observedAt: string },
   requestTimeoutMs: number | undefined,
@@ -195,6 +187,8 @@ async function runIntegration(
   write: WriteEntityIdsResult;
   metadata: WriteRelationshipMetadatasResult;
   outcome: 'index_missing' | 'empty' | 'partial' | 'producing' | 'error';
+  /** Set only when `outcome` is 'error' — which step threw. */
+  failedStage?: IntegrationStage;
   iterations: number;
   truncated: boolean;
 }> {
@@ -224,6 +218,39 @@ async function runIntegration(
     docsFailed: 0,
   };
 
+  const resetOutcome = await preRunReset(
+    config,
+    esClient,
+    logger,
+    namespace,
+    relationshipsClient,
+    signal,
+    transportOpts,
+    logPrefix
+  );
+  if (resetOutcome !== 'proceed') {
+    return {
+      buckets: 0,
+      recordsCount: 0,
+      write: totalWriteResult,
+      metadata: totalMetadataResult,
+      outcome: resetOutcome,
+      iterations: 0,
+      truncated: false,
+    };
+  }
+
+  // Labels the catch-block log so operators can tell which step failed.
+  let failingStage: IntegrationStage | undefined;
+  const runStage = async <T>(stage: IntegrationStage, fn: () => Promise<T>): Promise<T> => {
+    try {
+      return await fn();
+    } catch (err) {
+      failingStage = stage;
+      throw err;
+    }
+  };
+
   try {
     do {
       if (signal?.aborted) {
@@ -234,20 +261,29 @@ async function runIntegration(
       iterations++;
       if (iterations > MAX_ITERATIONS) {
         logger.warn(`${logPrefix} Reached MAX_ITERATIONS (${MAX_ITERATIONS}), stopping`);
+        if (config.resetRelationshipsBeforeRun) {
+          // The relationship was cleared but not fully repopulated, so data is
+          // incomplete until the next clean run.
+          logger.warn(
+            `${logPrefix} Relationship was cleared before this run but pagination was truncated — data is incomplete until the next clean run`
+          );
+        }
         outcome = 'partial';
         truncated = true;
         break;
       }
 
-      const actorPage = await fetchActorPage(
-        config,
-        esClient,
-        logger,
-        namespace,
-        afterKey,
-        transportOpts,
-        signal,
-        logPrefix
+      const actorPage = await runStage('fetch-actors', () =>
+        fetchActorPage(
+          config,
+          esClient,
+          logger,
+          namespace,
+          afterKey,
+          transportOpts,
+          signal,
+          logPrefix
+        )
       );
       if (actorPage === null) {
         outcome = signal?.aborted ? (totalBuckets === 0 ? 'empty' : 'partial') : 'index_missing';
@@ -262,15 +298,17 @@ async function runIntegration(
         break;
       }
 
-      const esqlResult = await fetchTargetsForActors(
-        config,
-        esClient,
-        logger,
-        namespace,
-        buckets,
-        transportOpts,
-        signal,
-        logPrefix
+      const esqlResult = await runStage('fetch-targets', () =>
+        fetchTargetsForActors(
+          config,
+          esClient,
+          logger,
+          namespace,
+          buckets,
+          transportOpts,
+          signal,
+          logPrefix
+        )
       );
       if (esqlResult === null) {
         outcome = 'partial';
@@ -286,13 +324,18 @@ async function runIntegration(
       // Both writes are inside the loop so any transport failure sets outcome:
       // 'error' and the outer loop continues to other integrations.
       if (pageRecords.length > 0) {
-        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await writeEntityIds(
-          crudClient,
-          logger,
-          pageRecords,
-          esClient,
-          namespace,
-          config.validateTargetIds
+        const pageWrite: WriteEntityIdsResult & WriteEntityIdsPageState = await runStage(
+          'entity-write',
+          () =>
+            writeEntityIds(
+              crudClient,
+              logger,
+              pageRecords,
+              esClient,
+              namespace,
+              config.validateTargetIds,
+              logPrefix
+            )
         );
         // Accumulate the entity write immediately — BEFORE the metadata write,
         // which can throw. These entities are already durable in the store, so
@@ -328,16 +371,19 @@ async function runIntegration(
                 : [];
             })
           : actorFiltered;
-        const pageMetadata = await writeRelationshipMetadatas(
-          entityMetadataClient,
-          logger,
-          metadataRecords,
-          {
-            scanId: metadataContext.scanId,
-            lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
-            entitySource: config.id,
-            observedAt: metadataContext.observedAt,
-          }
+        const pageMetadata = await runStage('metadata-write', () =>
+          writeRelationshipMetadatas(
+            entityMetadataClient,
+            logger,
+            metadataRecords,
+            {
+              scanId: metadataContext.scanId,
+              lookbackWindow: config.disableLookbackWindow ? '' : LOOKBACK_WINDOW,
+              entitySource: config.id,
+              observedAt: metadataContext.observedAt,
+            },
+            logPrefix
+          )
         );
 
         totalMetadataResult = {
@@ -368,7 +414,9 @@ async function runIntegration(
       truncated,
     };
   } catch (err) {
-    logger.error(`${logPrefix} Integration failed: ${errMsg(err)}`);
+    logger.error(
+      `${logPrefix} Integration failed at stage=${failingStage ?? 'unknown'}: ${errMsg(err)}`
+    );
     // Return the counters accumulated so far, NOT zeros. Writes stream per page,
     // so pages 1..N-1 are already durable in the entity store when a later page
     // throws (e.g. requestTimeoutMs firing during esql.query or writeEntityIds).
@@ -380,6 +428,7 @@ async function runIntegration(
       write: totalWriteResult,
       metadata: totalMetadataResult,
       outcome: 'error',
+      failedStage: failingStage,
       iterations,
       truncated,
     };
@@ -408,6 +457,7 @@ export const runRelationshipMaintainer = async ({
   namespace,
   crudClient,
   entityMetadataClient,
+  relationshipsClient,
   integrations,
   maintainerName,
   signal,
@@ -420,6 +470,8 @@ export const runRelationshipMaintainer = async ({
   namespace: string;
   crudClient: EntityUpdateClient;
   entityMetadataClient: EntityMetadataClient;
+  /** Used only by integrations that set `resetRelationshipsBeforeRun`. */
+  relationshipsClient: RelationshipsClient;
   integrations: RelationshipIntegrationConfig[];
   /** Identifies which maintainer is running — embedded in per-integration completion logs for unambiguous attribution. */
   maintainerName: RelationshipMaintainerName;
@@ -508,6 +560,7 @@ export const runRelationshipMaintainer = async ({
       write,
       metadata,
       outcome,
+      failedStage,
       iterations,
       truncated: integrationTruncated,
     } = await runIntegration(
@@ -517,6 +570,7 @@ export const runRelationshipMaintainer = async ({
       namespace,
       crudClient,
       entityMetadataClient,
+      relationshipsClient,
       signal,
       metadataContext,
       requestTimeoutMs,
@@ -564,6 +618,8 @@ export const runRelationshipMaintainer = async ({
         scanned: buckets,
         qualified: recordsCount,
         outcome,
+        applied: write.updated,
+        ...(failedStage ? { failedStage } : {}),
       });
       for (const [relType, count] of Object.entries(write.relationshipTypeApplied)) {
         telemetryCollector.relationshipTypeApplied[relType] =

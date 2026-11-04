@@ -34,6 +34,8 @@ import {
   resolveSharedPackagePolicyShard,
   validatePackScheduleFields,
   buildScheduleResponseSlice,
+  buildExecutionDefaultsResponseSlice,
+  toPackExecutionDefaults,
   stripPerQueryRruleFields,
   convergePerQueryIntervals,
 } from './utils';
@@ -117,6 +119,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
           schedule_type: rawScheduleType,
           interval: rawInterval,
           rrule_schedule: rawRruleSchedule,
+          // V5: pack-level execution defaults
+          min_osquery_version: rawMinOsqueryVersion,
+          result_type: rawResultType,
+          platform: rawPlatform,
         } = request.body;
 
         const scheduleType = isRruleFeatureEnabled ? rawScheduleType : undefined;
@@ -225,6 +231,10 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
               ? { interval: packInterval }
               : {}),
             ...(scheduleType === 'rrule' && rruleSchedule ? { rrule_schedule: rruleSchedule } : {}),
+            // V5: pack-level execution defaults (stored verbatim; undefined means "not set")
+            ...(rawMinOsqueryVersion != null ? { min_osquery_version: rawMinOsqueryVersion } : {}),
+            ...(rawResultType != null ? { result_type: rawResultType } : {}),
+            ...(rawPlatform != null ? { platform: rawPlatform } : {}),
           },
           {
             references,
@@ -267,6 +277,11 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
                         },
                         isRruleFeatureEnabled,
                         fallbackStartDate: packSO.attributes.created_at,
+                        packExecutionDefaults: toPackExecutionDefaults({
+                          min_osquery_version: rawMinOsqueryVersion,
+                          result_type: rawResultType,
+                          platform: rawPlatform,
+                        }),
                       }
                     );
                     set(draft, `inputs[0].config.osquery.value.packs.${packKey}`, {
@@ -310,6 +325,7 @@ export const createPackRoute = (router: IRouter, osqueryContext: OsqueryAppConte
             { schedule_type: scheduleType, interval: packInterval, rrule_schedule: rruleSchedule },
             isRruleFeatureEnabled
           ),
+          ...buildExecutionDefaultsResponseSlice(packSO.attributes),
         };
 
         return response.ok({

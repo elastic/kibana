@@ -11,6 +11,10 @@ applies_to:
 
 The Trello connector connects directly to the Trello REST API using an API key and token. It enables AI agents in Agent Builder to search and browse boards, lists, and cards, create and update cards, and post comments.
 
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release.
+::::
+
 ## Create connectors in {{kib}} [define-trello-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**. For example:

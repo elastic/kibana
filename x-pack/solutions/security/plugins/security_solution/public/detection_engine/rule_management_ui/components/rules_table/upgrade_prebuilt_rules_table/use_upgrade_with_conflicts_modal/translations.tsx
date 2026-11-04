@@ -186,7 +186,7 @@ export const RULES_WITH_AUTO_RESOLVED_CONFLICTS_GUIDANCE = ({
                 <p data-test-subj="upgradeConflictsModalRuleTypeChangeWarning">
                   <FormattedMessage
                     id="xpack.securitySolution.detectionEngine.upgradeConflictsModal.rulesWithRuleTypeChangeWarning"
-                    defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. A rule type change can affect how the rule’s actions and exceptions are executed."
+                    defaultMessage="Auto-resolved conflicts include a rule type change for {numOfRulesWithRuleTypeChangeStrong} unmodified {numOfRulesWithRuleTypeChange, plural, =1 {rule} other {rules}}. After updating, review your actions and exceptions, as some may need to be updated."
                     values={{
                       numOfRulesWithRuleTypeChange,
                       numOfRulesWithRuleTypeChangeStrong: (

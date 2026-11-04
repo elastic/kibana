@@ -12,13 +12,14 @@ import type { monaco } from '@kbn/monaco';
 import { filterMonacoYamlMarkers } from './filter_monaco_yaml_markers';
 
 // Mock getScalarValueAtOffset to control what scalar value is found at a given offset
-jest.mock('../../../../common/lib/yaml/get_scalar_value_at_offset', () => ({
+jest.mock('@kbn/workflows-yaml', () => ({
+  ...jest.requireActual('@kbn/workflows-yaml'),
   getScalarValueAtOffset: jest.fn(),
 }));
 
 const { getScalarValueAtOffset } = jest.requireMock<{
   getScalarValueAtOffset: jest.Mock;
-}>('../../../../common/lib/yaml/get_scalar_value_at_offset');
+}>('@kbn/workflows-yaml');
 
 type IMarkerData = monaco.editor.IMarkerData;
 type ITextModel = monaco.editor.ITextModel;

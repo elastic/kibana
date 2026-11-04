@@ -76,6 +76,24 @@ describe('mapResult', () => {
     });
   });
 
+  it('restores a title cut off at an unspaced pipe from the page heading', () => {
+    const input = createHit({
+      content_title: 'Use ES',
+      content_body: '# Use ES|QL in the Kibana UI\nThe ES|QL editor lets you write queries.',
+      product_name: 'kibana',
+      root_type: 'documentation',
+      slug: 'esql-kibana',
+      url: 'https://www.elastic.co/docs/explore-analyze/query-filter/languages/esql-kibana',
+      version: '9.2',
+      ai_subtitle: 'ai_subtitle',
+      ai_summary: 'ai_summary',
+      ai_questions_answered: [],
+      ai_tags: [],
+    });
+
+    expect(mapResult(input).title).toBe('Use ES|QL in the Kibana UI');
+  });
+
   it('returns the expected shape for legacy semantic_text fields', () => {
     const input = createHit(
       {

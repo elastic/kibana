@@ -119,7 +119,17 @@ export interface CloudConnectorFormProps {
 
 export type CloudSetupForCloudConnector = Pick<
   CloudSetup,
-  'isCloudEnabled' | 'cloudId' | 'deploymentUrl' | 'serverless' | 'isServerlessEnabled'
+  | 'isCloudEnabled'
+  | 'cloudId'
+  | 'cloudHost'
+  | 'baseUrl'
+  | 'deploymentUrl'
+  | 'deploymentId'
+  | 'organizationId'
+  | 'csp'
+  | 'region'
+  | 'serverless'
+  | 'isServerlessEnabled'
 >;
 
 export interface GetCloudConnectorRemoteRoleTemplateParams {
@@ -138,4 +148,6 @@ export interface CloudConnectorField {
   id: string;
   helpText?: string;
   tooltip?: string;
+  /** Format error for a non-empty value, shown inline as the user types. */
+  validate?: (value: string | undefined) => string | undefined;
 }

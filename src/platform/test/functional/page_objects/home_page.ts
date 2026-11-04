@@ -13,7 +13,6 @@ export class HomePageObject extends FtrService {
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly retry = this.ctx.getService('retry');
   private readonly find = this.ctx.getService('find');
-  private readonly common = this.ctx.getPageObject('common');
   public readonly log = this.ctx.getService('log');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -89,55 +88,34 @@ export class HomePageObject extends FtrService {
 
   async addSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor(`${id} sample data to be installed`, async () => {
-      if (await this.isSampleDataSetInstalled(id)) {
-        return true;
-      }
+    if (await this.isSampleDataSetInstalled(id)) {
+      return;
+    }
 
-      this.log.debug(`Attempting to add sample data: ${id}`);
-
-      // Echoing the adjustments made to 'removeSampleDataSet', as we are seeing flaky test cases here as well
-      // https://github.com/elastic/kibana/issues/52714
-      await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this.testSubjects.click(`addSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this._waitForSampleDataLoadingAction(id);
-      return await this.isSampleDataSetInstalled(id);
-    });
+    this.log.debug(`Attempting to add sample data: ${id}`);
+    await this.testSubjects.waitForEnabled(`addSampleDataSet${id}`);
+    await this.testSubjects.click(`addSampleDataSet${id}`);
+    await this.retry.waitForWithTimeout(
+      `${id} sample data to be installed`,
+      120_000,
+      async () => await this.isSampleDataSetInstalled(id)
+    );
   }
 
   async removeSampleDataSet(id: string) {
     await this.openSampleDataAccordion();
-    await this.retry.waitFor('sample data to be removed', async () => {
-      if (!(await this.isSampleDataSetInstalled(id))) {
-        return true;
-      }
+    if (!(await this.isSampleDataSetInstalled(id))) {
+      return;
+    }
 
-      this.log.debug(`Attempting to remove sample data: ${id}`);
-
-      // looks like overkill but we're hitting flaky cases where we click but it doesn't remove
-      await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
-      // https://github.com/elastic/kibana/issues/65949
-      // Even after waiting for the "Remove" button to be enabled we still have failures
-      // where it appears the click just didn't work.
-      await this.common.sleep(1010);
-      await this.testSubjects.click(`removeSampleDataSet${id}`);
-      await this.common.sleep(1010);
-      await this._waitForSampleDataLoadingAction(id);
-      return !(await this.isSampleDataSetInstalled(id));
-    });
-  }
-
-  // loading action is either uninstall and install
-  async _waitForSampleDataLoadingAction(id: string) {
-    const sampleDataCard = await this.testSubjects.find(`sampleDataSetCard${id}`);
-    await this.retry.try(async () => {
-      // waitForDeletedByCssSelector needs to be inside retry because it will timeout at least once
-      // before action is complete
-      this.log.debug(`Waiting for loading spinner to be deleted for sampleDataSetCard${id}`);
-      await sampleDataCard.waitForDeletedByCssSelector('.euiLoadingSpinner');
-    });
+    this.log.debug(`Attempting to remove sample data: ${id}`);
+    await this.testSubjects.waitForEnabled(`removeSampleDataSet${id}`);
+    await this.testSubjects.click(`removeSampleDataSet${id}`);
+    await this.retry.waitForWithTimeout(
+      `${id} sample data to be removed`,
+      120_000,
+      async () => !(await this.isSampleDataSetInstalled(id))
+    );
   }
 
   async launchSampleDiscover(id: string) {

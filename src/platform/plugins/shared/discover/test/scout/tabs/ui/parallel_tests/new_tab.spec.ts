@@ -97,7 +97,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
   });
 
   spaceTest('should create a new tab in ES|QL mode', async ({ pageObjects }) => {
-    const { discover, unifiedTabs } = pageObjects;
+    const { discover, unifiedTabs, esqlEditor } = pageObjects;
     const updatedQuery = 'FROM logst* | LIMIT 1050';
 
     // tab 0 - created automatically with the default data view
@@ -115,7 +115,7 @@ spaceTest.describe('Discover tabs - opening a new tab', { tag: '@local-stateful-
         await discover.selectTextBaseLang();
         expect(await discover.getEsqlQueryValue()).toBe('');
 
-        await discover.codeEditor.setCodeEditorValue(updatedQuery);
+        await esqlEditor.setQuery(updatedQuery);
         await discover.submitQuery();
         await discover.waitUntilTabIsLoaded();
         expect(await discover.getEsqlQueryValue()).toBe(updatedQuery);

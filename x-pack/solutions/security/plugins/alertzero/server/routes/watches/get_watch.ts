@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   API_VERSIONS,
   INTERNAL_API_ACCESS,
@@ -14,10 +14,13 @@ import {
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { ALERTZERO_API_PRIVILEGE_READ } from '../../../common/constants';
 import type { RouteDependencies } from '../register_routes';
+import { withAlertZeroEnabled } from '../with_alertzero_enabled';
 
-const GetWatchRequestParams = z.object({
-  watchId: z.string().min(1).max(128),
-});
+const GetWatchRequestParams = lazySchema(() =>
+  z.object({
+    watchId: z.string().min(1).max(128),
+  })
+);
 
 export const registerGetWatchRoute = ({
   router,
@@ -45,7 +48,7 @@ export const registerGetWatchRoute = ({
           },
         },
       },
-      async (_context, request, response) => {
+      withAlertZeroEnabled(async (_context, request, response) => {
         try {
           const { watchId } = request.params;
           const body = await getWatchesService().get(watchId, getSpaceId(request));
@@ -63,6 +66,6 @@ export const registerGetWatchRoute = ({
             body: { message: 'Failed to get watch' },
           });
         }
-      }
+      })
     );
 };

@@ -20,6 +20,7 @@ import userEvent from '@testing-library/user-event';
 import { generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import { buildDataTableRecord } from '@kbn/discover-utils';
+import { createMockEsqlSource } from '@kbn/data-source/src/__mocks__/esql_source.mock';
 
 type DataGridColumn = Partial<Omit<EuiDataGridColumn, 'actions'>> &
   Pick<EuiDataGridColumn, 'id' | 'displayAsText'> & {
@@ -80,11 +81,11 @@ const selectedDocIds = ['0', '1', '2', '3'];
 
 const renderColumns = ({
   wrapperWidth,
-  isPlainRecord = false,
+  isEsql = false,
   docMap = createDocMap(),
 }: {
   wrapperWidth?: number;
-  isPlainRecord?: boolean;
+  isEsql?: boolean;
   docMap?: ReturnType<typeof createDocMap>;
 } = {}) => {
   const wrapper = document.createElement('div');
@@ -97,7 +98,7 @@ const renderColumns = ({
   } = renderHook(() =>
     useComparisonColumns({
       wrapper,
-      isPlainRecord,
+      dataSource: isEsql ? createMockEsqlSource() : undefined,
       fieldColumnId,
       selectedDocIds,
       docMap,
@@ -211,7 +212,7 @@ describe('useComparisonColumns', () => {
   });
 
   it('should use result column display for plain records', () => {
-    const { columns } = renderColumns({ isPlainRecord: true });
+    const { columns } = renderColumns({ isEsql: true });
     expect(columns[1].displayAsText).toBe(`Pinned result: ${selectedDocIds[0]}`);
     expect(columns[2].display).toBe(selectedDocIds[1]);
     expect(columns[2].displayAsText).toBe(`Comparison result: ${selectedDocIds[1]}`);
@@ -235,7 +236,7 @@ describe('useComparisonColumns', () => {
         },
       ])
     );
-    const { columns } = renderColumns({ isPlainRecord: true, docMap });
+    const { columns } = renderColumns({ isEsql: true, docMap });
     expect(columns[1].displayAsText).toBe('Pinned result: 1');
     expect(columns[2].display).toBe('Result 2');
     expect(columns[2].displayAsText).toBe('Comparison result: 2');

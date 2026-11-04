@@ -37,11 +37,27 @@ interface OAuthTokenExchangeAttributes extends BasicAttributes {
   oauthErrorCode?: string;
 }
 
+interface ServiceAccountCreationAttributes extends BasicAttributes {
+  /** Which backend served the request, since the two are mutually exclusive per deployment. */
+  serviceAccountBackend: 'stack' | 'uiam';
+}
+
+/**
+ * Which resource a failed rollback left behind. Separate values rather than separate metrics
+ * because they are distinct resources, not states of one: a single rollback can leak more than
+ * one, and summing them answers "how much is orphaned".
+ */
+interface ServiceAccountRollbackAttributes {
+  serviceAccountRollbackResource: 'token' | 'account' | 'credential';
+}
+
 export type SecurityTelemetryAttributes = Partial<BasicAttributes> &
   Partial<PrivilegeRegistrationAttributes> &
   Partial<UserAuthenticationAttributes> &
   Partial<GetCurrentProfileAttributes> &
-  Partial<OAuthTokenExchangeAttributes>;
+  Partial<OAuthTokenExchangeAttributes> &
+  Partial<ServiceAccountCreationAttributes> &
+  Partial<ServiceAccountRollbackAttributes>;
 
 class SecurityTelemetry {
   private readonly meter = metrics.getMeter('kibana.security');
@@ -55,6 +71,8 @@ class SecurityTelemetry {
   private readonly getCurrentProfileIdCounter: Counter<Attributes>;
   private readonly oauthTokenExchangeAttempts: Counter<Attributes>;
   private readonly oauthTokenExchangeDuration: Histogram<Attributes>;
+  private readonly serviceAccountCreationAttempts: Counter<Attributes>;
+  private readonly serviceAccountRollbackFailures: Counter<Attributes>;
 
   // Adds more boundaries in 50-500ms range where most operations typically fall
   private readonly DEFAULT_BUCKET_BOUNDARIES = [
@@ -159,6 +177,26 @@ class SecurityTelemetry {
         },
       }
     );
+
+    this.serviceAccountCreationAttempts = this.meter.createCounter(
+      'service_accounts.creation.attempts',
+      {
+        description: 'Number of service account creation attempts',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
+
+    this.serviceAccountRollbackFailures = this.meter.createCounter(
+      'service_accounts.creation.rollback.failures',
+      {
+        description:
+          'Number of resources a failed service account creation could not roll back, and so ' +
+          'left behind for an operator to remove',
+        unit: '1',
+        valueType: ValueType.INT,
+      }
+    );
   }
 
   private transformAttributes<T extends SecurityTelemetryAttributes>(attributes: T): Attributes {
@@ -172,6 +210,8 @@ class SecurityTelemetry {
       fakeRequestProfileResolution,
       oauthErrorType,
       oauthErrorCode,
+      serviceAccountBackend,
+      serviceAccountRollbackResource,
       ...rest
     } = attributes;
 
@@ -191,6 +231,10 @@ class SecurityTelemetry {
         : {}),
       ...(oauthErrorType ? { 'oauth.error.type': oauthErrorType } : {}),
       ...(oauthErrorCode ? { 'oauth.error.code': oauthErrorCode } : {}),
+      ...(serviceAccountBackend ? { 'service_account.backend': serviceAccountBackend } : {}),
+      ...(serviceAccountRollbackResource
+        ? { 'service_account.rollback.resource': serviceAccountRollbackResource }
+        : {}),
       ...rest,
     };
 
@@ -249,6 +293,18 @@ class SecurityTelemetry {
       this.transformAttributes<OAuthTokenExchangeAttributes>(attributes);
     this.oauthTokenExchangeAttempts.add(1, transformedAttributes);
     this.oauthTokenExchangeDuration.record(duration, transformedAttributes);
+  };
+
+  recordServiceAccountCreationAttempt = (attributes: ServiceAccountCreationAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<ServiceAccountCreationAttributes>(attributes);
+    this.serviceAccountCreationAttempts.add(1, transformedAttributes);
+  };
+
+  recordServiceAccountRollbackFailure = (attributes: ServiceAccountRollbackAttributes) => {
+    const transformedAttributes =
+      this.transformAttributes<ServiceAccountRollbackAttributes>(attributes);
+    this.serviceAccountRollbackFailures.add(1, transformedAttributes);
   };
 }
 

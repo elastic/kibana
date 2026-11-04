@@ -8,18 +8,58 @@
 import type { AfterExecutionHookContext } from '@kbn/agent-builder-server';
 import {
   ConversationRoundStatus,
+  isPreExecutionWorkflowStep,
   isToolCallStep,
+  ToolResultType,
   type ToolCallStep,
+  type ToolResult,
 } from '@kbn/agent-builder-common';
-import { WORKFLOWS_UI_SETTING_ID, ExecutionStatus } from '@kbn/workflows';
+import {
+  AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+  WORKFLOWS_UI_SETTING_ID,
+  ExecutionStatus,
+} from '@kbn/workflows';
 import type { Logger } from '@kbn/logging';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, ROOT_CONTEXT } from '@opentelemetry/api';
 import type { InternalStartServices } from '../../services/types';
 import { getCurrentSpaceId } from '../../utils/spaces';
 import type { AfterExecutionWorkflowParams } from './types';
+import { withDeclaredInputs } from './with_declared_inputs';
 
 type WorkflowApi = WorkflowsServerPluginSetup['management'];
+
+// Tool results can be megabytes (file reads, command output), so long strings and arrays are cut
+// in place, keeping each result's shape, before a workflow execution receives them.
+export const MAX_TOOL_RESULT_STRING_CHARS = 4_000;
+export const MAX_TOOL_RESULT_ARRAY_ITEMS = 50;
+export const MAX_TOOL_RESULT_DATA_CHARS = 32_000;
+
+const boundToolResultValue = (_key: string, value: unknown): unknown => {
+  if (typeof value === 'string') {
+    return value.slice(0, MAX_TOOL_RESULT_STRING_CHARS);
+  }
+  if (Array.isArray(value)) {
+    return value.slice(0, MAX_TOOL_RESULT_ARRAY_ITEMS);
+  }
+  return value;
+};
+
+const boundToolResult = (result: ToolResult): ToolResult => {
+  const bounded = JSON.stringify(result.data, boundToolResultValue);
+  if (bounded === undefined) {
+    return result;
+  }
+  if (bounded.length > MAX_TOOL_RESULT_DATA_CHARS) {
+    return {
+      tool_result_id: result.tool_result_id,
+      type: ToolResultType.other,
+      data: { omitted: `result data exceeded ${MAX_TOOL_RESULT_DATA_CHARS} characters` },
+    };
+  }
+  return { ...result, data: JSON.parse(bounded) };
+};
 
 export interface RunAfterExecutionWorkflowsParams {
   context: AfterExecutionHookContext;
@@ -39,6 +79,11 @@ export const runAfterExecutionWorkflows = async ({
     return;
   }
 
+  // The conversation and round ids would name a conversation that never gets this round.
+  if (context.conversationAccess === 'readOnly') {
+    return;
+  }
+
   if (context.round.status !== ConversationRoundStatus.completed) {
     return;
   }
@@ -55,11 +100,21 @@ export const runAfterExecutionWorkflows = async ({
   const spaceId = getCurrentSpaceId({ request: context.request, spaces });
   const { round } = context;
 
-  const toolCalls = round.steps.filter(isToolCallStep).map((step: ToolCallStep) => ({
+  const toolCallSteps = round.steps.filter(isToolCallStep);
+  const toolCalls = toolCallSteps.map((step: ToolCallStep) => ({
     tool_id: step.tool_id,
     tool_call_id: step.tool_call_id,
     params: step.params as Record<string, unknown>,
   }));
+  const toolResults = toolCallSteps.flatMap(
+    ({ tool_id: toolId, tool_call_id: toolCallId, results }: ToolCallStep) =>
+      results
+        ? [{ tool_id: toolId, tool_call_id: toolCallId, results: results.map(boundToolResult) }]
+        : []
+  );
+
+  const roundConnectorId = context.connectorId?.trim() || round.model_usage?.connector_id?.trim();
+  const workflowContext = round.steps.find(isPreExecutionWorkflowStep)?.workflow_context;
 
   const workflowParams: AfterExecutionWorkflowParams = {
     prompt: round.input.message ?? '',
@@ -69,16 +124,37 @@ export const runAfterExecutionWorkflows = async ({
     ...(context.agentId ? { agent_id: context.agentId } : {}),
     tool_calls: toolCalls,
   };
+  const optionalWorkflowParams: Pick<
+    AfterExecutionWorkflowParams,
+    'round_connector_id' | 'workflow_context' | 'tool_results'
+  > = {
+    round_connector_id:
+      roundConnectorId && roundConnectorId !== 'unknown' ? roundConnectorId : undefined,
+    workflow_context: workflowContext,
+    tool_results: toolResults.length > 0 ? toolResults : undefined,
+  };
 
   for (const workflowId of workflowIds) {
-    const result = await executeWorkflow({
+    const workflowParamsWithOptionalInputs = await withDeclaredInputs({
       workflowId,
-      workflowParams: workflowParams as unknown as Record<string, unknown>,
-      request: context.request,
-      spaceId,
+      inputs: workflowParams as unknown as Record<string, unknown>,
+      optionalInputs: optionalWorkflowParams,
       workflowApi,
-      waitForCompletion: true,
+      spaceId,
+      request: context.request,
+      logger,
     });
+    const result = await otelContext.with(ROOT_CONTEXT, () =>
+      executeWorkflow({
+        workflowId,
+        workflowParams: workflowParamsWithOptionalInputs,
+        request: context.request,
+        spaceId,
+        workflowApi,
+        waitForCompletion: true,
+        triggeredBy: AGENT_BUILDER_HOOK_TRIGGER_SOURCE,
+      })
+    );
 
     if (!result.success) {
       logger.error(`Post-execution workflow "${workflowId}" failed to execute: ${result.error}`);

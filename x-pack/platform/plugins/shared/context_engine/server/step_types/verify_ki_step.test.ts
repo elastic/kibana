@@ -12,6 +12,7 @@ import type { WorkflowExecutionDto } from '@kbn/workflows';
 import { ExecutionStatus } from '@kbn/workflows';
 import { ExecutionError } from '@kbn/workflows/server';
 import { createVerifyKiStepDefinition } from './verify_ki_step';
+import { createVerifyKi } from './verify_ki';
 import { ESQL_VALID_RUNTIME_VERIFIER_ID, ESQL_VALID_SYNTAX_VERIFIER_ID } from '../ki_verification';
 import type { KiVerifierWorkflowRunner } from '../ki_verification';
 import { mockKiStepTelemetry } from './test_utils';
@@ -110,11 +111,17 @@ describe('verify_ki workflow step', () => {
   const makeDefinition = (withWorkflows = true) =>
     createVerifyKiStepDefinition(
       coreSetup,
-      telemetry.logger,
-      telemetry.analyticsService,
-      withWorkflows
-        ? { getWorkflowsManagement: async () => workflowsManagement, checkExecutePrivilege }
-        : undefined
+      createVerifyKi({
+        getAuditLogger: async (request) => {
+          const [coreStart] = await coreSetup.getStartServices();
+          return coreStart.security.audit.asScoped(request);
+        },
+        workflowVerifierDeps: withWorkflows
+          ? { getWorkflowsManagement: async () => workflowsManagement, checkExecutePrivilege }
+          : undefined,
+        analyticsService: telemetry.analyticsService,
+        logger: telemetry.logger,
+      })
     );
 
   const runHandler = async (
@@ -256,6 +263,21 @@ describe('verify_ki workflow step', () => {
     setContextEngineEnabled(true);
 
     const output = await runHandler({ title: 'no esql here' }, { verifiers: ALL_ESQL_VERIFIERS });
+
+    expect(output).toEqual({ passed: true, results: [] });
+  });
+
+  it('treats an esql attribute rendered as null as absent, so the ES|QL verifiers skip it', async () => {
+    setContextEngineEnabled(true);
+
+    // `${{ patterns | map: 'esql_example' | default: nil }}` with no patterns. Without the null
+    // handling, `esql: null` counts as present and fails as an empty query list. The handler's
+    // input type is the schema output (nulls removed); the engine passes the unparsed input.
+    const unparsedKi = { title: 'orients only', attributes: { esql: null } };
+    const output = await runHandler(
+      unparsedKi as unknown as VerifyKiHandlerContext['input']['ki'],
+      { verifiers: ALL_ESQL_VERIFIERS }
+    );
 
     expect(output).toEqual({ passed: true, results: [] });
   });
@@ -489,11 +511,37 @@ describe('verify_ki workflow step', () => {
 
       await runHandler({ title: 'x' }, { verifiers: [{ workflow_id: 'no-pii', timeout_sec: 15 }] });
 
-      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a');
+      expect(workflowsManagement.getWorkflow).toHaveBeenCalledWith('no-pii', 'space-a', {
+        headers: {},
+      });
       expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
         expect.objectContaining({ id: 'no-pii' }),
         'space-a',
         { ki: { title: 'x' } },
+        { headers: {} },
+        'context-engine:verify-ki',
+        expect.anything()
+      );
+    });
+
+    it('hands a workflow verifier the KI without its null attributes, next to a skipped built-in', async () => {
+      setContextEngineEnabled(true);
+      workflowsManagement.getWorkflowExecution.mockResolvedValue(completedWith({ passed: true }));
+
+      const unparsedKi = { title: 'orients only', attributes: { esql: null, unit: 'sku-1' } };
+      const output = await runHandler(
+        unparsedKi as unknown as VerifyKiHandlerContext['input']['ki'],
+        { verifiers: [ESQL_VALID_SYNTAX_VERIFIER_ID, { workflow_id: 'no-pii' }] }
+      );
+
+      expect(output).toEqual({
+        passed: true,
+        results: [{ verifier: 'workflow:no-pii', passed: true }],
+      });
+      expect(workflowsManagement.runWorkflow).toHaveBeenCalledWith(
+        expect.objectContaining({ id: 'no-pii' }),
+        'space-a',
+        { ki: { title: 'orients only', attributes: { unit: 'sku-1' } } },
         { headers: {} },
         'context-engine:verify-ki',
         expect.anything()
@@ -629,7 +677,8 @@ describe('verify_ki workflow step', () => {
 
       expect(workflowsManagement.getWorkflowExecution).toHaveBeenCalledWith(
         'verifier-exec',
-        'space-a'
+        'space-a',
+        { request: { headers: {} } }
       );
       expect(thrown.type).toBe('InputValidationError');
       expect(thrown.message).toBe(

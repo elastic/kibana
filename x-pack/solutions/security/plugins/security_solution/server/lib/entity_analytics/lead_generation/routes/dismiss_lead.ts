@@ -45,9 +45,16 @@ export const dismissLeadRoute = (router: EntityAnalyticsRoutesDeps['router'], lo
         try {
           const { getSpaceId } = await context.securitySolution;
           const spaceId = getSpaceId();
-          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+          const coreCtx = await context.core;
+          const esClient = coreCtx.elasticsearch.client.asCurrentUser;
+          const internalEsClient = coreCtx.elasticsearch.client.asInternalUser;
 
-          const leadDataClient = createLeadDataClient({ esClient, logger, spaceId });
+          const leadDataClient = createLeadDataClient({
+            esClient,
+            internalEsClient,
+            logger,
+            spaceId,
+          });
           const dismissed = await leadDataClient.dismissLead(request.params.id);
 
           if (!dismissed) {

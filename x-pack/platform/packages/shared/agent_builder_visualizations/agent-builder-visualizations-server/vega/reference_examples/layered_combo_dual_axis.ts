@@ -11,9 +11,8 @@ export const spec: Record<string, unknown> = {
   data: {
     url: {
       '%type%': 'esql',
-      '%timefield%': '@timestamp',
       query:
-        'FROM logs-* | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | STATS request_count = COUNT(*), avg_latency = AVG(latency_ms) BY day = BUCKET(@timestamp, 1 day) | SORT day ASC',
+        'FROM logs-* | STATS request_count = COUNT(*), avg_latency = AVG(latency_ms) BY day = BUCKET(@timestamp, 1 day) | SORT day ASC',
     },
   },
   encoding: {

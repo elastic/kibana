@@ -26,14 +26,18 @@ describe('ingestEntities', () => {
     logger = loggerMock.create();
   });
 
-  // Drains the helper `datasource` (so the mock counts docs) and invokes
-  // `onDrop` once per simulated drop before resolving.
+  // Drains the helper `datasource` (so the mock counts docs), reports `results` through
+  // `onSuccess` and invokes `onDrop` once per simulated drop before resolving.
   const mockHelpersBulk = (
-    drops: Array<{ status: number; error?: { type?: string; reason?: string } }> = []
+    drops: Array<{ status: number; error?: { type?: string; reason?: string } }> = [],
+    results: Array<'created' | 'updated' | 'noop'> = []
   ) => {
     const impl = jest.fn().mockImplementation(async (opts: any) => {
       let total = 0;
       for await (const _ of opts.datasource) total++;
+      for (const result of results) {
+        opts.onSuccess({ result: { update: { _index: TARGET_INDEX, status: 200, result } } });
+      }
       for (const drop of drops) {
         opts.onDrop({ ...drop, document: {}, operation: { create: {} }, retried: false });
       }
@@ -43,6 +47,57 @@ describe('ingestEntities', () => {
     esClient.helpers.bulk = impl as unknown as typeof esClient.helpers.bulk;
     return impl;
   };
+
+  it('splits bulk outcomes into created, updated and noop', async () => {
+    mockHelpersBulk([], ['created', 'created', 'updated', 'noop']);
+
+    const outcome = await ingestEntities({
+      esClient,
+      esqlResponse: makeEsqlResponse(4),
+      targetIndex: TARGET_INDEX,
+      logger,
+      refresh: false,
+    });
+
+    expect(outcome).toEqual({ created: 2, updated: 1, noop: 1 });
+  });
+
+  it('accounts for every row sent: created + updated + noop + dropped', async () => {
+    const onDropped = jest.fn();
+    const rowCount = 5;
+    mockHelpersBulk(
+      [{ status: 403, error: { type: 'security_exception', reason: 'unauthorized' } }],
+      ['created', 'updated', 'updated', 'noop']
+    );
+
+    const { created, updated, noop } = await ingestEntities({
+      esClient,
+      esqlResponse: makeEsqlResponse(rowCount),
+      targetIndex: TARGET_INDEX,
+      logger,
+      refresh: false,
+      onDropped,
+    });
+
+    // The invariant the old single `upserted` counter could not express: it counted rows sent,
+    // including ones the bulk API later rejected.
+    expect(created + updated + noop + onDropped.mock.calls.length).toBe(rowCount);
+  });
+
+  it('reports zeroed counts without calling the bulk API when there is nothing to ingest', async () => {
+    const impl = mockHelpersBulk();
+
+    const outcome = await ingestEntities({
+      esClient,
+      esqlResponse: makeEsqlResponse(0),
+      targetIndex: TARGET_INDEX,
+      logger,
+      refresh: false,
+    });
+
+    expect(outcome).toEqual({ created: 0, updated: 0, noop: 0 });
+    expect(impl).not.toHaveBeenCalled();
+  });
 
   it('does not log when nothing is dropped', async () => {
     mockHelpersBulk();

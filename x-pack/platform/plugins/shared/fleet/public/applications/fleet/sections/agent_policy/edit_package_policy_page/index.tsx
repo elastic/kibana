@@ -55,7 +55,7 @@ import {
   type VarGroupSelection,
 } from '../create_package_policy_page/services';
 import type { AgentPolicy, PackagePolicyEditExtensionComponentProps } from '../../../types';
-import { pkgKeyFromPackageInfo, ExperimentalFeaturesService } from '../../../services';
+import { pkgKeyFromPackageInfo } from '../../../services';
 
 import {
   getInheritedNamespace,
@@ -178,9 +178,7 @@ export const EditPackagePolicyForm = memo<{
   );
 
   // Derive var_group_selections from policy for edit mode
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   const varGroupSelections = useMemo((): VarGroupSelection => {
     if (packagePolicy.var_group_selections) {
       return packagePolicy.var_group_selections;
@@ -319,7 +317,7 @@ export const EditPackagePolicyForm = memo<{
   //  if `from === 'package-edit'`, or `upgrade-from-integrations-policy-list` then it links back to the Integration Policy List
   //  if `from === 'installed-integrations'` then it links back to the Installed Integrations tab
   const cancelUrl = useMemo((): string => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return from === 'package-edit' && packageInfo
@@ -331,7 +329,7 @@ export const EditPackagePolicyForm = memo<{
       : getHref('agent_list');
   }, [from, getHref, packageInfo, policyId]);
   const successRedirectPath = useMemo(() => {
-    if (from === 'installed-integrations') {
+    if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
       return getHref('integrations_installed', {});
     }
     return (from === 'package-edit' || from === 'upgrade-from-integrations-policy-list') &&
@@ -481,7 +479,12 @@ export const EditPackagePolicyForm = memo<{
   const [selectedTab, setSelectedTab] = useState(0);
 
   const layoutProps = {
-    from: extensionView?.useLatestPackageVersion && isUpgrade ? 'upgrade-from-extension' : from,
+    from:
+      from === 'installed-integrations' && isUpgrade
+        ? 'upgrade-from-installed-integrations'
+        : extensionView?.useLatestPackageVersion && isUpgrade
+        ? 'upgrade-from-extension'
+        : from,
     cancelUrl,
     agentPolicies,
     packageInfo,
@@ -825,7 +828,7 @@ const Breadcrumb = memo<{
     );
   } else if (from === 'upgrade-from-fleet-policy-list') {
     breadcrumb = <UpgradeBreadcrumb policyName={agentPolicyName} policyId={policyId} />;
-  } else if (from === 'installed-integrations') {
+  } else if (from === 'installed-integrations' || from === 'upgrade-from-installed-integrations') {
     breadcrumb = <InstalledIntegrationsBreadcrumb policyName={packagePolicyName} />;
   }
 

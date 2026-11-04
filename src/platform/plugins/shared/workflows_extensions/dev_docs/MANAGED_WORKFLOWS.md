@@ -74,6 +74,7 @@ Client surface:
 
 - `install(id, options)` — no request required
 - `uninstall(id, options)` — no request required
+- `disable(id, options)` — no request required; switches the workflow off and changes nothing else (see [Disabling a managed workflow](#disabling-a-managed-workflow))
 - `getWorkflowStatus(id, options)` — no request required
 - `execute(request, id, options)` — **request required** (used for attribution and space context)
 
@@ -129,6 +130,8 @@ await managed.ready();
 
 If any `install` for the plugin was skipped or aborted incomplete this boot, `ready()` **skips destructive orphan cleanup** so still-desired docs are not force-deleted. Missing installs are retried on a later Kibana boot when the owner runs `install` → `ready` again. **Dynamic auto upgrades still run** once `ready()` itself has passed Elasticsearch readiness (they do not depend on the incomplete static `installedDocKeys` set). Logs WARN when orphan cleanup is skipped and again when upgrades proceed despite an incomplete install pass.
 
+When cleanup does run, each orphan is deleted on its own. A failure to remove one document, for example because it still has a non-terminal execution, is logged at error level and does not stop the others. That document is disabled so no new runs start, and a later boot deletes it.
+
 ### Granularity of tracking
 
 Reconciliation tracks installs at the **full document identity** level: `${workflowDocumentId}:${spaceId}`. The `workflowDocumentId` includes any suffix (e.g., `system-my-wf-us-east`). This means:
@@ -154,6 +157,14 @@ After `ready()`: the two instances that were not re-installed (`system-monitor-h
 Orphan reconciliation only targets documents whose definition has `lifecycle: 'static'`. Dynamic workflows are never auto-cleaned — their create/remove lifecycle is explicitly managed by the owning plugin via `install`/`uninstall`.
 
 Dynamic workflows with `versionStrategy: 'auto'` are still eligible for startup upgrades: when the owning plugin calls `ready()`, persisted dynamic instances for that plugin are re-applied from the current registry definition while preserving their stored template values.
+
+For installed workflows with `settings.run_as`, automatic upgrades may reuse the existing
+SA binding without a user request. This is limited to the registered owning plugin's
+code-defined upgrade: the persisted owner, definition ID, space, template values, and
+`run_as` must remain unchanged, and the binding must still match. The write uses optimistic
+concurrency control and never creates or repairs a binding. User-requested edits, initial
+binding, rebinding, and unbinding still require `manage_security` in addition to the normal
+Workflows privileges. Requestless deletion of a bound workflow remains unsupported.
 
 ## 4) Space-scoped vs global installs
 
@@ -184,6 +195,8 @@ This is the right choice for:
 
 - system-level workflows that don't need a per-space copy but still must respect per-space data boundaries at runtime
 - workflows that are space-agnostic (their behavior does not depend on the invoking space at all)
+
+> **Scheduled triggers are not supported for global workflows yet.** A scheduled run has no invoking space, so the platform never schedules a global workflow's `scheduled` triggers (it logs a warning instead). Use a space-scoped install per space if you need scheduled runs. Tracked in elastic/security-team#17380.
 
 ```ts
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -321,7 +334,7 @@ Choosing rules of thumb:
 
 Key distinction: **static** workflows are declarative — the set installed at startup is the source of truth and anything not declared is cleaned up. **Dynamic** workflows are imperative — only explicit `uninstall` removes them during normal operation.
 
-> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, all managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. This ensures that uninstalling a plugin or deleting a definition leaves no dangling documents behind.
+> **Global orphan cleanup (both lifecycles):** Regardless of lifecycle, managed documents are removed at startup if their owning plugin is no longer registered or their definition has been removed from `@kbn/workflows/managed`. Each document is removed independently. A document that fails to delete, for example because it still has a non-terminal execution, is logged at error level, disabled, and retried on the next startup.
 
 ## 7) Authoring a definition
 
@@ -623,6 +636,20 @@ if (state?.templateValues) {
 ```
 
 Use `listInstalledWorkflowStates()` when the owner must inspect all of its installed instances across spaces, such as migrating versioned template values before calling `ready()`. These methods expose persisted managed-workflow state to the owner plugin only; they are not public HTTP workflow APIs.
+
+### Disabling a managed workflow
+
+`disable` switches one of the plugin's own managed workflows off without a request:
+
+```ts
+const disabled = await managed.disable(MY_WORKFLOW_ID, { spaceId: 'my-space' });
+```
+
+It takes the same identity options as `getWorkflowStatus` and changes nothing but `enabled`, so it also works on workflows bound to a service account (`settings.run_as`). Turning a bound workflow back on still requires a user with `manage_security`.
+
+> **Caveat:** a disable lasts only until the next managed update when the definition uses `enablement: 'enforced'`. That update re-applies `enabled` from the definition's YAML without a request, so it switches a disabled workflow back on, including a bound one. Use `enablement: 'restorable'` for a workflow that must stay off across updates.
+
+It resolves to `true` when this call switched the workflow off, and to `false` when the workflow is missing, deleted, not managed, already off, or Workflows is unavailable. The read that guards the write makes this decision, so a workflow switched off or deleted during the call also resolves to `false` and is not written. It throws for an unknown id or a workflow managed by another plugin or definition (`403`).
 
 ## 11) Executing managed workflows
 

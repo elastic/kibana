@@ -25,7 +25,7 @@ import { SIDE_PANEL_WIDTH } from '../../hooks/use_layout_width';
 import { getFocusableElements } from '../../utils/get_focusable_elements';
 import { handleRovingIndex } from '../../utils/handle_roving_index';
 import { updateTabIndices } from '../../utils/update_tab_indices';
-import { useScroll } from '../../hooks/use_scroll';
+import { scrollLayoutStyles } from '../../hooks/use_scroll';
 import { NAVIGATION_SELECTOR_PREFIX } from '../../constants';
 import { getHighContrastBorder } from '../../hooks/use_high_contrast_mode_styles';
 
@@ -38,7 +38,7 @@ const getSidePanelWrapperStyles = (euiThemeContext: UseEuiTheme) => css`
   margin-top: ${layoutVar('application.marginTop', '0px')};
   margin-bottom: ${layoutVar('application.marginBottom', '0px')};
   background-color: ${euiThemeContext.euiTheme.colors.backgroundBasePlain};
-  border-radius: ${euiThemeContext.euiTheme.border.radius.medium};
+  border-radius: ${euiThemeContext.euiTheme.border.radius.frame};
 
   // use outline for consistency with the application layout style
   outline: ${getHighContrastBorder(euiThemeContext)};
@@ -64,7 +64,6 @@ export interface SidePanelProps {
  */
 export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX.Element => {
   const euiThemeContext = useEuiTheme();
-  const scrollStyles = useScroll();
   const wrapperStyles = useMemo(
     () => getSidePanelWrapperStyles(euiThemeContext),
     [euiThemeContext]
@@ -79,13 +78,6 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
       updateTabIndices(elements);
     }
   };
-
-  const navigationPanelStyles = useMemo(
-    () => css`
-      ${scrollStyles}
-    `,
-    [scrollStyles]
-  );
 
   const sidePanelClassName = `${NAVIGATION_SELECTOR_PREFIX}-sidePanel`;
 
@@ -122,12 +114,13 @@ export const SidePanel = ({ children, footer, openerNode }: SidePanelProps): JSX
         css={wrapperStyles}
         data-test-subj={`${sidePanelClassName} ${sidePanelClassName}_${openerNode.id}`}
         hasShadow={false}
+        hasBorder={false}
         role="region"
         color="transparent"
       >
         <EuiSplitPanel.Inner
           color="transparent"
-          css={navigationPanelStyles}
+          css={scrollLayoutStyles}
           data-test-subj={`${NAVIGATION_SELECTOR_PREFIX}-panelContent`}
           onKeyDown={handleRovingIndex}
           panelRef={panelRef}

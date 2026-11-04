@@ -8,9 +8,9 @@ The risk score maintainer (`id: 'risk-score'`) is registered by `security_soluti
 |------|------|----------|---------|
 | `entityAnalyticsEntityStoreV2` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Whether the maintainer is registered at all, checked in `security_solution`'s `plugin.ts` at setup. Requires Kibana restart. | `true` |
 | `securitySolution:entityStoreEnableV2` | UI setting | Runtime `idBasedRiskScoringEnabled` — entity store dual-write (read via `getIsIdBasedRiskScoringEnabled()`) | `true`, `readonly: true` |
-| `riskScoreCreateMissingEntitiesEnabled` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Opt-in for the create-if-missing path only (see below). Requires Kibana restart. | `false` |
+| `riskScoreCreateMissingEntitiesEnabled` | Experimental feature (`kibana.dev.yml` / `enableExperimental`) | Kill switch for the create-if-missing path only (see below). Requires Kibana restart. | `true` |
 
-`riskScoreCreateMissingEntitiesEnabled` is ANDed with the UI setting in `loadRunConfiguration` — **both** must be on for creation to occur, so it can be disabled independently without turning off dual-write:
+`riskScoreCreateMissingEntitiesEnabled` is ANDed with the UI setting in `loadRunConfiguration` — **both** must be on for creation to occur. Set `disable:riskScoreCreateMissingEntitiesEnabled` in `enableExperimental` to turn off creation without turning off dual-write:
 
 ```typescript
 const createMissingEntitiesEnabled =
@@ -24,14 +24,14 @@ const createMissingEntitiesEnabled =
 
 ## Create-If-Missing Path
 
-Base scoring discovers EUIDs from alerts (composite agg + ES|QL), which can include identifiers with no canonical entity store record — `host.id` variations, synthetic identifiers, alerts naming an entity the store never saw. By default these scores are **dropped** (as the v1 maintainer did). When `createMissingEntitiesEnabled` is true, each dropped EUID is re-evaluated against a real alert document and created instead.
+Base scoring discovers EUIDs from alerts (composite agg + ES|QL), which can include identifiers with no canonical entity store record — `host.id` variations, synthetic identifiers, alerts naming an entity the store never saw. Each missing EUID is re-evaluated against a real alert document and created when it passes the policy below. When `createMissingEntitiesEnabled` is disabled, these scores are **dropped** as the v1 maintainer did.
 
 ```mermaid
 flowchart TD
   scores["Base scores from alerts"] --> lookup{"EUID in entity store?"}
   lookup -->|yes| both["Risk index + entity store update"]
   lookup -->|no| gate{"createMissingEntitiesEnabled?"}
-  gate -->|no| dropped["Dropped (pre-existing behaviour)"]
+  gate -->|no| dropped["Dropped (kill switch enabled)"]
   gate -->|yes| fetchDoc["fetchAlertIdentityDocs: chunked, event.outcome:failure excluded"]
   fetchDoc -->|no document found| skipped["Skipped: no_alert_document / policy-rejected"]
   fetchDoc -->|document found| policy{"getEntityCreationCandidate"}

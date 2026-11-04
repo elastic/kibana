@@ -77,6 +77,31 @@ const createMockLabelNode = (): NodeProps =>
     },
   } as unknown as NodeProps);
 
+const createMockSingleEventNode = (): NodeProps => {
+  const base = createMockLabelNode();
+  return {
+    ...base,
+    data: {
+      ...base.data,
+      documentsData: [{ id: 'event-1', type: 'event', event: { id: 'event-1' } }],
+    },
+  } as unknown as NodeProps;
+};
+
+const createMockGroupedEventsNode = (): NodeProps => {
+  const base = createMockLabelNode();
+  return {
+    ...base,
+    data: {
+      ...base.data,
+      documentsData: [
+        { id: 'event-1', type: 'event', event: { id: 'event-1' } },
+        { id: 'event-2', type: 'event', event: { id: 'event-2' } },
+      ],
+    },
+  } as unknown as NodeProps;
+};
+
 describe('useLabelNodeExpandPopover', () => {
   const scopeId = 'test-scope-id';
 
@@ -189,6 +214,147 @@ describe('useLabelNodeExpandPopover', () => {
         'Test Label',
         'show'
       );
+    });
+  });
+
+  describe('telemetry', () => {
+    const onTelemetryEvent = jest.fn();
+    const mockOnOpenEventPreview = jest.fn();
+
+    const clickItem = (testSubject: string, node: NodeProps) => {
+      const items = capturedItemsFn!(node);
+      const item = items.find(
+        (candidate) => candidate.type === 'item' && candidate.testSubject === testSubject
+      );
+      expect(item).toBeDefined();
+      if (item?.type === 'item') {
+        item.onClick?.();
+      }
+    };
+
+    beforeEach(() => {
+      onTelemetryEvent.mockClear();
+      mockOnOpenEventPreview.mockClear();
+    });
+
+    it('reports show_related_events with the show state', () => {
+      renderHook(() => useLabelNodeExpandPopover(scopeId, undefined, onTelemetryEvent));
+      clickItem(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+        createMockLabelNode()
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledTimes(1);
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'event',
+        action: 'show_related_events',
+        state: 'show',
+      });
+    });
+
+    it('reports show_related_events with the hide state when the filter is already active', () => {
+      mockIsFilterActiveForScope.mockReturnValue(true);
+      renderHook(() => useLabelNodeExpandPopover(scopeId, undefined, onTelemetryEvent));
+      clickItem(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+        createMockLabelNode()
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'event',
+        action: 'show_related_events',
+        state: 'hide',
+      });
+    });
+
+    it('reports show_details and still opens the preview', () => {
+      const node = createMockSingleEventNode();
+      renderHook(() =>
+        useLabelNodeExpandPopover(scopeId, mockOnOpenEventPreview, onTelemetryEvent)
+      );
+      clickItem(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID, node);
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'event',
+        action: 'show_details',
+      });
+      expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
+    });
+
+    it('reports show_related_events as grouped_event for a grouped event node', () => {
+      renderHook(() => useLabelNodeExpandPopover(scopeId, undefined, onTelemetryEvent));
+      clickItem(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+        createMockGroupedEventsNode()
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledTimes(1);
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'grouped_event',
+        action: 'show_related_events',
+        state: 'show',
+      });
+    });
+
+    it('reports the hide state of show_related_events on a grouped event node', () => {
+      mockIsFilterActiveForScope.mockReturnValue(true);
+      renderHook(() => useLabelNodeExpandPopover(scopeId, undefined, onTelemetryEvent));
+      clickItem(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+        createMockGroupedEventsNode()
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'grouped_event',
+        action: 'show_related_events',
+        state: 'hide',
+      });
+    });
+
+    it('keeps reporting show_related_events as event for a single event node', () => {
+      renderHook(() => useLabelNodeExpandPopover(scopeId, undefined, onTelemetryEvent));
+      clickItem(
+        GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID,
+        createMockSingleEventNode()
+      );
+
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'event',
+        action: 'show_related_events',
+        state: 'show',
+      });
+    });
+
+    it('reports show_grouped_events for a grouped event node and still opens the preview', () => {
+      const node = createMockGroupedEventsNode();
+      renderHook(() =>
+        useLabelNodeExpandPopover(scopeId, mockOnOpenEventPreview, onTelemetryEvent)
+      );
+      clickItem(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID, node);
+
+      expect(onTelemetryEvent).toHaveBeenCalledTimes(1);
+      expect(onTelemetryEvent).toHaveBeenCalledWith({
+        type: 'node_action',
+        nodeType: 'grouped_event',
+        action: 'show_grouped_events',
+      });
+      expect(mockOnOpenEventPreview).toHaveBeenCalledWith(node.data);
+    });
+
+    it('does not throw on any click path when onTelemetryEvent is omitted', () => {
+      const node = createMockSingleEventNode();
+      renderHook(() => useLabelNodeExpandPopover(scopeId, mockOnOpenEventPreview));
+
+      expect(() => {
+        clickItem(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENTS_WITH_THIS_ACTION_ITEM_ID, node);
+        clickItem(GRAPH_LABEL_EXPAND_POPOVER_SHOW_EVENT_DETAILS_ITEM_ID, node);
+      }).not.toThrow();
     });
   });
 });

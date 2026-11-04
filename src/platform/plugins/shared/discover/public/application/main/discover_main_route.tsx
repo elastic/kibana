@@ -169,6 +169,7 @@ const DiscoverMainRouteContent = (props: SingleTabViewProps) => {
       );
 
       if (!persistedDiscoverSessionId || isSwitchingSession) {
+        dispatch(internalStateActions.closeSaveSessionModal());
         initializeTabs({
           discoverSessionId: nextDiscoverSessionId,
           shouldClearAllTabs: isSwitchingSession,

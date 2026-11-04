@@ -5,9 +5,15 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { get, isObject } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import { DefaultPolicyNotificationMessage } from './policy_config';
+import type { ExperimentalFeatures } from '../../experimental_features';
+import { CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS } from '../service/policy/custom_yara_signatures';
+import {
+  DefaultPolicyNotificationMessage,
+  DefaultPolicyRuleNotificationMessage,
+  DefaultPolicyDeviceNotificationMessage,
+} from './policy_config';
 import type { PolicyConfig, UIPolicyConfig } from '../types';
 import {
   PolicyOperatingSystem,
@@ -21,6 +27,8 @@ interface PolicyProtectionReference {
   osList: PolicyOperatingSystem[];
   enableValue: unknown;
   disableValue: unknown;
+  /** Operating systems where the protection is optional in the policy: absent there means off. */
+  optionalOsList?: PolicyOperatingSystem[];
 }
 
 const allOsValues = [
@@ -30,28 +38,35 @@ const allOsValues = [
 ];
 
 const getPolicyPopupReference = (): Array<{
-  keyPath: string;
+  branchPath: string;
   osList: PolicyOperatingSystem[];
+  defaultMessage: string;
 }> => [
   {
-    keyPath: 'popup.malware.message',
+    branchPath: 'popup.malware',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyNotificationMessage,
   },
   {
-    keyPath: 'popup.memory_protection.message',
+    branchPath: 'popup.memory_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.behavior_protection.message',
+    branchPath: 'popup.behavior_protection',
     osList: [...allOsValues],
+    defaultMessage: DefaultPolicyRuleNotificationMessage,
   },
   {
-    keyPath: 'popup.ransomware.message',
+    // Optional on Linux: an absent branch is skipped like any other stripped popup.
+    branchPath: 'popup.ransomware',
+    osList: [...allOsValues],
+    defaultMessage: DefaultPolicyNotificationMessage,
+  },
+  {
+    branchPath: 'popup.device_control',
     osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
-  },
-  {
-    keyPath: 'popup.device_control.message',
-    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    defaultMessage: DefaultPolicyDeviceNotificationMessage,
   },
 ];
 
@@ -64,9 +79,10 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
   },
   {
     keyPath: 'ransomware.mode',
-    osList: [PolicyOperatingSystem.windows, PolicyOperatingSystem.mac],
+    osList: [...allOsValues],
     disableValue: ProtectionModes.off,
     enableValue: ProtectionModes.prevent,
+    optionalOsList: [PolicyOperatingSystem.linux],
   },
   {
     keyPath: 'memory_protection.mode',
@@ -85,6 +101,13 @@ export const getPolicyProtectionsReference = (): PolicyProtectionReference[] => 
     osList: [PolicyOperatingSystem.windows],
     disableValue: false,
     enableValue: true,
+  },
+  {
+    keyPath: 'attack_surface_reduction.registry_credential_hardening.enabled',
+    osList: [PolicyOperatingSystem.windows],
+    disableValue: false,
+    enableValue: true,
+    optionalOsList: [PolicyOperatingSystem.windows],
   },
   {
     keyPath: 'antivirus_registration.enabled',
@@ -136,6 +159,14 @@ export const disableProtections = (policy: PolicyConfig): PolicyConfig => {
         },
       },
     },
+    linux: {
+      ...result.linux,
+      ...getDisabledLinuxSpecificProtections(result),
+      popup: {
+        ...result.linux.popup,
+        ...getDisabledLinuxSpecificPopups(result),
+      },
+    },
   };
 };
 
@@ -159,6 +190,11 @@ const disableCommonProtections = (policy: PolicyConfig) => {
   }, policy);
 };
 
+/**
+ * `custom_yara_signatures` is left absent when it was never configured: this helper backs both
+ * `disableProtections` and `ensureOnlyEventCollectionIsAllowed`, and forcing an explicit `false`
+ * here would opt a policy out of the future `??=` backfill for a feature it never had.
+ */
 const getDisabledCommonProtectionsForOS = (
   policy: PolicyConfig,
   os: PolicyOperatingSystem
@@ -170,6 +206,9 @@ const getDisabledCommonProtectionsForOS = (
   memory_protection: {
     ...policy[os].memory_protection,
     mode: ProtectionModes.off,
+    ...(policy[os].memory_protection.custom_yara_signatures === undefined
+      ? {}
+      : { custom_yara_signatures: false }),
   },
   malware: {
     ...policy[os].malware,
@@ -181,15 +220,15 @@ const getDisabledCommonProtectionsForOS = (
 
 const getDisabledCommonPopupsForOS = (policy: PolicyConfig, os: PolicyOperatingSystem) => ({
   behavior_protection: {
-    ...policy[os].popup.behavior_protection,
+    ...policy[os].popup?.behavior_protection,
     enabled: false,
   },
   malware: {
-    ...policy[os].popup.malware,
+    ...policy[os].popup?.malware,
     enabled: false,
   },
   memory_protection: {
-    ...policy[os].popup.memory_protection,
+    ...policy[os].popup?.memory_protection,
     enabled: false,
   },
 });
@@ -209,6 +248,9 @@ const getDisabledWindowsSpecificProtections = (policy: PolicyConfig) => ({
     credential_hardening: {
       enabled: false,
     },
+    ...(policy.windows.attack_surface_reduction.registry_credential_hardening === undefined
+      ? {}
+      : { registry_credential_hardening: { enabled: false } }),
   },
 });
 
@@ -238,6 +280,16 @@ const getDisabledMacSpecificPopups = (policy: PolicyConfig) => ({
   },
 });
 
+const getDisabledLinuxSpecificProtections = (policy: PolicyConfig) =>
+  policy.linux.ransomware
+    ? { ransomware: { ...policy.linux.ransomware, mode: ProtectionModes.off } }
+    : {};
+
+const getDisabledLinuxSpecificPopups = (policy: PolicyConfig) =>
+  policy.linux.popup?.ransomware
+    ? { ransomware: { ...policy.linux.popup.ransomware, enabled: false } }
+    : {};
+
 /**
  * Returns the provided with only event collection turned enabled
  * @param policy
@@ -260,19 +312,22 @@ export const isPolicySetToEventCollectionOnly = (
   const protectionsRef = getPolicyProtectionsReference();
   let message: string | undefined;
 
-  const hasEnabledProtection = protectionsRef.some(({ keyPath, osList, disableValue }) => {
-    return osList.some((osValue) => {
-      const fullKeyPathForOs = `${osValue}.${keyPath}`;
-      const currentValue = get(policy, fullKeyPathForOs);
-      const isEnabled = currentValue !== disableValue;
+  const hasEnabledProtection = protectionsRef.some(
+    ({ keyPath, osList, disableValue, optionalOsList = [] }) => {
+      return osList.some((osValue) => {
+        const fullKeyPathForOs = `${osValue}.${keyPath}`;
+        const currentValue = get(policy, fullKeyPathForOs);
+        const isAbsentOptional = currentValue === undefined && optionalOsList.includes(osValue);
+        const isEnabled = !isAbsentOptional && currentValue !== disableValue;
 
-      if (isEnabled) {
-        message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
-      }
+        if (isEnabled) {
+          message = `property [${fullKeyPathForOs}] is set to [${currentValue}]`;
+        }
 
-      return isEnabled;
-    });
-  });
+        return isEnabled;
+      });
+    }
+  );
 
   return {
     isOnlyCollectingEvents: !hasEnabledProtection,
@@ -289,11 +344,16 @@ export function isBillablePolicy(policy: PolicyConfig) {
 export const checkIfPopupMessagesContainCustomNotifications = (policy: PolicyConfig): boolean => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.some(({ keyPath, osList }) => {
+  return popupRefs.some(({ branchPath, osList, defaultMessage }) => {
     return osList.some((osValue) => {
-      const fullKeyPathForOs = `${osValue}.${keyPath}`;
-      const currentValue = get(policy, fullKeyPathForOs);
-      return currentValue !== '' && currentValue !== DefaultPolicyNotificationMessage;
+      const currentValue = get(policy, `${osValue}.${branchPath}.message`);
+      // Legacy {filename} default: the startup migration wrote it into every key of migrated policies.
+      return (
+        currentValue != null &&
+        currentValue !== '' &&
+        currentValue !== defaultMessage &&
+        currentValue !== DefaultPolicyNotificationMessage
+      );
     });
   });
 };
@@ -322,13 +382,17 @@ export const getDeviceControlNotificationConflicts = (
 };
 
 export const resetCustomNotifications = (
-  customNotification = DefaultPolicyNotificationMessage
+  policy: PolicyConfig,
+  customNotification = ''
 ): Partial<PolicyConfig> => {
   const popupRefs = getPolicyPopupReference();
 
-  return popupRefs.reduce((acc, { keyPath, osList }) => {
+  return popupRefs.reduce((acc, { branchPath, osList }) => {
     osList.forEach((osValue) => {
-      set(acc, `${osValue}.${keyPath}`, customNotification);
+      // A stripped branch (e.g. device_control on Essentials) must not be recreated as a partial stub.
+      if (get(policy, `${osValue}.${branchPath}`) !== undefined) {
+        set(acc, `${osValue}.${branchPath}.message`, customNotification);
+      }
     });
     return acc;
   }, {});
@@ -383,6 +447,136 @@ export const removeLinuxDnsEvents = (policy: PolicyConfig): PolicyConfig => {
         ...linuxEventsRest,
       },
     },
+  };
+};
+
+/**
+ * Linux ransomware protection is configurable only from the per-OS policy form, so it is
+ * enabled only when both feature flags are on.
+ */
+export const isLinuxRansomwareProtectionEnabled = ({
+  linuxRansomwareProtection,
+  perOsPolicySettings,
+}: Pick<ExperimentalFeatures, 'linuxRansomwareProtection' | 'perOsPolicySettings'>): boolean =>
+  linuxRansomwareProtection && perOsPolicySettings;
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with Linux ransomware protection and its user
+ * notification removed. Used when `isLinuxRansomwareProtectionEnabled` is false.
+ */
+export const removeLinuxRansomware = (policy: PolicyConfig): PolicyConfig => {
+  // The policy may come from an unvalidated API payload, so tolerate a malformed `linux` branch.
+  if (!isObject(policy.linux)) {
+    return policy;
+  }
+
+  const { ransomware: linuxRansomware, ...linuxRest } = policy.linux;
+  const { popup } = linuxRest;
+
+  if (!isObject(popup)) {
+    return { ...policy, linux: linuxRest };
+  }
+
+  const { ransomware: linuxRansomwarePopup, ...popupRest } = popup;
+
+  return {
+    ...policy,
+    linux: { ...linuxRest, popup: popupRest },
+  };
+};
+
+/**
+ * AI Data Collection is configurable only from the per-OS policy form, so it is enabled only when
+ * both feature flags are on.
+ */
+export const isAiDataCollectionEnabled = ({
+  endpointAiDataCollection,
+  perOsPolicySettings,
+}: Pick<ExperimentalFeatures, 'endpointAiDataCollection' | 'perOsPolicySettings'>): boolean =>
+  endpointAiDataCollection && perOsPolicySettings;
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the `ai_data_collection` block removed from
+ * every OS, so the policy leaves AI event enrichment unset (treated as disabled by Endpoint). Used
+ * when `isAiDataCollectionEnabled` is false.
+ */
+export const removeAiDataCollection = (policy: PolicyConfig): PolicyConfig => {
+  const { ai_data_collection: windowsAiDataCollection, ...windows } = policy.windows;
+  const { ai_data_collection: macAiDataCollection, ...mac } = policy.mac;
+  const { ai_data_collection: linuxAiDataCollection, ...linux } = policy.linux;
+
+  return { ...policy, windows, mac, linux };
+};
+
+/** Leaf field removed from `windows.advanced.kernel.registry_credential_hardening`. */
+const REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD = 'descendants';
+
+/**
+ * Mirrors `removeYaraAdvancedSettingsForOs`: narrows each level before descending into it, prunes
+ * `registry_credential_hardening` once `descendants` is gone, then prunes `kernel` once it is
+ * empty, and otherwise leaves `windows.advanced` untouched.
+ */
+const removeRegistryCredentialHardeningAdvancedSettings = (
+  windowsPolicy: PolicyConfig['windows']
+): PolicyConfig['windows'] => {
+  const { advanced } = windowsPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return windowsPolicy;
+  }
+
+  const kernel = advanced.kernel;
+
+  if (!isAdvancedSettings(kernel)) {
+    return windowsPolicy;
+  }
+
+  const registryCredentialHardening = kernel.registry_credential_hardening;
+
+  if (
+    !isAdvancedSettings(registryCredentialHardening) ||
+    !(REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD in registryCredentialHardening)
+  ) {
+    return windowsPolicy;
+  }
+
+  const remainingRegistryCredentialHardening: AdvancedSettings = {
+    ...registryCredentialHardening,
+  };
+  delete remainingRegistryCredentialHardening[REGISTRY_CREDENTIAL_HARDENING_ADVANCED_FIELD];
+
+  const nextKernel: AdvancedSettings = { ...kernel };
+  if (Object.keys(remainingRegistryCredentialHardening).length > 0) {
+    nextKernel.registry_credential_hardening = remainingRegistryCredentialHardening;
+  } else {
+    delete nextKernel.registry_credential_hardening;
+  }
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(nextKernel).length > 0) {
+    nextAdvanced.kernel = nextKernel;
+  } else {
+    delete nextAdvanced.kernel;
+  }
+
+  return { ...windowsPolicy, advanced: nextAdvanced } as PolicyConfig['windows'];
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Windows registry credential hardening
+ * field removed, along with its `windows.advanced.kernel.registry_credential_hardening.descendants`
+ * advanced setting, which stays hidden in the UI whenever the feature is unavailable.
+ */
+export const removeRegistryCredentialHardening = (policy: PolicyConfig): PolicyConfig => {
+  const { registry_credential_hardening: registryCredentialHardening, ...attackSurfaceReduction } =
+    policy.windows.attack_surface_reduction;
+
+  return {
+    ...policy,
+    windows: removeRegistryCredentialHardeningAdvancedSettings({
+      ...policy.windows,
+      attack_surface_reduction: attackSurfaceReduction,
+    }),
   };
 };
 
@@ -454,6 +648,136 @@ export const setMalwareBoolean = (
   });
   return policy;
 };
+
+export const setCustomYaraSignatures = (
+  policy: PolicyConfig,
+  value: boolean,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    policy[os].memory_protection.custom_yara_signatures = value;
+  });
+  return policy;
+};
+
+/**
+ * Turns off custom YARA signatures only where they are currently enabled.
+ *
+ * An absent field is left absent: it means "never configured", and manufacturing an explicit
+ * `false` would opt the policy out of the future backfill for a feature the user never had
+ * access to. An enabled field still has to be cleared, otherwise the save is rejected by
+ * license validation.
+ */
+export const clearCustomYaraSignaturesIfEnabled = (
+  policy: PolicyConfig,
+  osList: readonly (keyof UIPolicyConfig)[]
+): PolicyConfig => {
+  forEachCouplingOs(osList, (os) => {
+    if (policy[os].memory_protection.custom_yara_signatures) {
+      policy[os].memory_protection.custom_yara_signatures = false;
+    }
+  });
+  return policy;
+};
+
+/** Leaf field of every path in `CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS`. */
+const CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD = 'user_yara_rescan_interval_seconds';
+
+type AdvancedSettings = Record<string, unknown>;
+
+/**
+ * `advanced` and everything under it is free-form, so a stored policy can hold any value where a
+ * settings namespace is expected. Narrowing before use keeps `in` from throwing on a primitive.
+ */
+const isAdvancedSettings = (value: unknown): value is AdvancedSettings =>
+  typeof value === 'object' && value !== null;
+
+/**
+ * Whether the policy carries any of the Enterprise-gated custom YARA advanced settings.
+ */
+export const hasCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): boolean =>
+  [...CUSTOM_YARA_SIGNATURES_ADVANCED_KEYS].some((key) => get(policy, key) !== undefined);
+
+const removeYaraAdvancedSettingsForOs = <T extends { advanced?: unknown }>(osPolicy: T): T => {
+  const { advanced } = osPolicy;
+
+  if (!isAdvancedSettings(advanced)) {
+    return osPolicy;
+  }
+
+  const memoryProtection = advanced.memory_protection;
+
+  if (
+    !isAdvancedSettings(memoryProtection) ||
+    !(CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD in memoryProtection)
+  ) {
+    return osPolicy;
+  }
+
+  const remainingMemoryProtection: AdvancedSettings = { ...memoryProtection };
+  delete remainingMemoryProtection[CUSTOM_YARA_SIGNATURES_ADVANCED_FIELD];
+
+  const nextAdvanced: AdvancedSettings = { ...advanced };
+  if (Object.keys(remainingMemoryProtection).length > 0) {
+    nextAdvanced.memory_protection = remainingMemoryProtection;
+  } else {
+    delete nextAdvanced.memory_protection;
+  }
+
+  return { ...osPolicy, advanced: nextAdvanced } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with the Enterprise-gated custom YARA advanced
+ * settings removed.
+ *
+ * The license downgrade factories need this as much as the feature-gating path does: while these
+ * settings are inert without `custom_yara_signatures`, leaving them in place would make a
+ * downgraded policy keep failing `isEndpointPolicyValidForLicense`, so `license_watch` could
+ * never bring it into compliance.
+ */
+export const removeCustomYaraSignaturesAdvancedSettings = (policy: PolicyConfig): PolicyConfig => ({
+  ...policy,
+  windows: removeYaraAdvancedSettingsForOs(policy.windows),
+  mac: removeYaraAdvancedSettingsForOs(policy.mac),
+  linux: removeYaraAdvancedSettingsForOs(policy.linux),
+});
+
+const removeEnabledCustomYaraSignaturesForOs = <
+  T extends { memory_protection: { custom_yara_signatures?: boolean } }
+>(
+  osPolicy: T
+): T => {
+  if (osPolicy.memory_protection.custom_yara_signatures === false) {
+    return osPolicy;
+  }
+
+  const { custom_yara_signatures: customYaraSignatures, ...memoryProtection } =
+    osPolicy.memory_protection;
+
+  return { ...osPolicy, memory_protection: memoryProtection } as T;
+};
+
+/**
+ * Returns a copy of the passed `PolicyConfig` with custom YARA signatures sanitized for a
+ * deployment where the feature is gated off, along with the Enterprise-gated custom YARA
+ * advanced settings.
+ *
+ * The field is deleted rather than set to `false`, because an explicit `false` would destroy the
+ * "never set" signal, making the future `??=` backfill a no-op and leaving existing customers
+ * permanently opted out. An existing `false` is kept for the same reason in reverse: it records a
+ * deliberate opt-out, so dropping it would let the backfill turn the feature back on.
+ *
+ * @param policy
+ * @returns PolicyConfig with no enabled custom_yara_signatures
+ */
+export const removeCustomYaraSignatures = (policy: PolicyConfig): PolicyConfig =>
+  removeCustomYaraSignaturesAdvancedSettings({
+    ...policy,
+    windows: removeEnabledCustomYaraSignaturesForOs(policy.windows),
+    mac: removeEnabledCustomYaraSignaturesForOs(policy.mac),
+    linux: removeEnabledCustomYaraSignaturesForOs(policy.linux),
+  });
 
 export const setDeviceControlSwitch = (policy: PolicyConfig, value: boolean): PolicyConfig => {
   if (value === false) {

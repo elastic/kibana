@@ -16,6 +16,10 @@ export interface LoadedInboundConnector {
   connectorTypeId: string;
   spaceId: string;
   config: Record<string, unknown>;
+  /** Set when the saved object still has inbound events enabled. */
+  hasInboundEventIdentity?: boolean;
+  /** Set when a preconfigured connector was registered with inbound events on. */
+  hasPreconfiguredInboundEvents?: boolean;
 }
 
 /**
@@ -41,10 +45,13 @@ export async function loadInboundConnector({
   const inMemoryConnector = inMemoryConnectors.find((connector) => connector.id === connectorId);
   let actionTypeId: string | undefined;
   let config: Record<string, unknown> = {};
+  let hasInboundEventIdentity = false;
+  let hasPreconfiguredInboundEvents = false;
 
   if (inMemoryConnector) {
     actionTypeId = inMemoryConnector.actionTypeId;
     config = inMemoryConnector.config ?? {};
+    hasPreconfiguredInboundEvents = inMemoryConnector.isInboundEventsEnabled === true;
   } else {
     try {
       const { attributes } = await unsecuredSavedObjectsClient.get<RawAction>(
@@ -53,6 +60,7 @@ export async function loadInboundConnector({
       );
       actionTypeId = attributes.actionTypeId;
       config = attributes.config ?? {};
+      hasInboundEventIdentity = attributes.hasInboundEventIdentity === true;
     } catch (error) {
       logger.debug(
         `Failed to load inbound connector ${connectorId} space ${spaceId}: ${String(error)}`
@@ -73,5 +81,7 @@ export async function loadInboundConnector({
     connectorTypeId: normalizedTypeId,
     spaceId,
     config,
+    ...(hasInboundEventIdentity ? { hasInboundEventIdentity: true } : {}),
+    ...(hasPreconfiguredInboundEvents ? { hasPreconfiguredInboundEvents: true } : {}),
   };
 }

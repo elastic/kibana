@@ -61,31 +61,18 @@ const resolveDefaultSelectedTabId = (
 /** Renders Header, Body, Footer zones in template order from fully resolved root props. */
 const FlyoutTemplateResolved = ({
   children,
-  onClose,
   size = 'm',
-  minWidth,
-  type,
-  maxWidth,
-  paddingSize,
-  ownFocus,
-  resizable,
-  onResize,
   session = 'start',
-  historyKey,
-  onActive,
   flyoutMenuProps,
-  id,
-  hasChildBackground,
-  outsideClickCloses,
-  focusTrapProps,
-  closeButtonProps,
   tabs: tabsProp,
+  tabBarProps,
   defaultSelectedTabId,
   selectedTabId: controlledSelectedTabId,
   onTabChange,
   'aria-label': ariaLabel,
   'aria-labelledby': ariaLabelledBy,
   'data-test-subj': dataTestSubj,
+  ...euiFlyoutProps
 }: FlyoutTemplateProps) => {
   const htmlIdSuffix = useId().replace(/[^A-Za-z0-9_-]/g, '');
   const flyoutTitleId = useGeneratedHtmlId({ prefix: `flyoutTemplateTitle${htmlIdSuffix}` });
@@ -111,12 +98,14 @@ const FlyoutTemplateResolved = ({
   const headerAttrs = headerItem?.attributes as FlyoutHeaderProps | undefined;
   const bodyAttrs = bodyItem?.attributes as FlyoutBodyProps | undefined;
   const menuTitle = headerAttrs?.title;
-  const menuTitleString = typeof menuTitle === 'string' ? menuTitle : undefined;
+  const menuTitleString =
+    headerAttrs?.titleText ?? (typeof menuTitle === 'string' ? menuTitle : undefined);
   const flyoutAriaLabelledBy =
     ariaLabelledBy ?? (!ariaLabel && headerItem ? flyoutTitleId : undefined);
   const flyoutAriaLabel = flyoutAriaLabelledBy ? undefined : ariaLabel ?? menuTitleString;
 
-  // Feed string titles to EUI's flyout menu for history/navigation.
+  // Feed the title text to EUI's flyout menu for history/navigation. Without it EUI falls back to a
+  // placeholder title, so a header whose title is a node needs `titleText` to be named there.
   const mergedMenuProps = {
     ...(menuTitleString !== undefined ? { title: menuTitleString } : {}),
     ...flyoutMenuProps,
@@ -185,38 +174,25 @@ const FlyoutTemplateResolved = ({
   );
 
   const tabsContextValue = useMemo<FlyoutTabsState>(
-    () => ({ tabs, selectedTabId, selectTab }),
-    [tabs, selectedTabId, selectTab]
+    () => ({ tabs, tabBarProps, selectedTabId, selectTab }),
+    [tabs, tabBarProps, selectedTabId, selectTab]
   );
 
   const collapseState = useHeaderCollapse({ enabled: !headerAttrs?.collapsed });
 
   return (
     <EuiFlyout
-      onClose={onClose}
+      {...euiFlyoutProps}
       size={size}
-      minWidth={minWidth}
-      type={type}
-      maxWidth={maxWidth}
-      paddingSize={paddingSize}
-      ownFocus={ownFocus}
-      resizable={resizable}
-      onResize={onResize}
       session={session}
-      historyKey={historyKey}
-      onActive={onActive}
+      paddingSize="m"
+      data-test-subj={dataTestSubj}
       flyoutMenuDisplayMode="auto"
       flyoutMenuProps={hasMenuProps ? mergedMenuProps : undefined}
-      id={id}
-      hasChildBackground={hasChildBackground}
-      outsideClickCloses={outsideClickCloses}
-      focusTrapProps={focusTrapProps}
-      closeButtonProps={closeButtonProps}
       aria-label={flyoutAriaLabel}
       aria-labelledby={flyoutAriaLabelledBy}
-      data-test-subj={dataTestSubj}
     >
-      <FlyoutTemplateConfigProvider value={{ dataTestSubj, paddingSize }}>
+      <FlyoutTemplateConfigProvider value={{ dataTestSubj }}>
         <FlyoutTabsProvider value={tabsContextValue}>
           <FlyoutHeaderCollapseProvider value={collapseState}>
             {headerItem && (

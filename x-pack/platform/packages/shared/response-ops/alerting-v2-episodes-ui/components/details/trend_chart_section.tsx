@@ -25,6 +25,7 @@ import { prepareTrendInputs } from './prepare_trend_inputs';
 import { mapEventDataToSeries } from './trend_data';
 import type { AlertEpisodeDetailsServices } from './types';
 import { TREND_CHART_HEIGHT, type TrendMetricGroup } from './trend_types';
+import { getPanelTitleSize } from './panel_title_sizes';
 import * as i18n from './translations';
 
 const AlertEpisodeTrendChart = React.lazy(() =>
@@ -34,6 +35,8 @@ const AlertEpisodeTrendChart = React.lazy(() =>
 export interface AlertEpisodeTrendChartSectionProps {
   episodeId: string;
   services: Pick<AlertEpisodeDetailsServices, 'data' | 'http' | 'spaces'>;
+  /** Renders the title one step smaller, for narrow hosts like the details flyout. */
+  compressed?: boolean;
 }
 
 interface MetricBadgesProps {
@@ -75,6 +78,7 @@ const MetricBadges = ({ groups, selected, onSelect }: MetricBadgesProps) => {
 export const AlertEpisodeTrendChartSection = ({
   episodeId,
   services,
+  compressed,
 }: AlertEpisodeTrendChartSectionProps) => {
   const { data, http, spaces } = services;
 
@@ -117,7 +121,7 @@ export const AlertEpisodeTrendChartSection = ({
     <EuiPanel hasBorder paddingSize="m" data-test-subj="alertingV2EpisodeTrendChart">
       <EuiFlexGroup gutterSize="s" alignItems="flexStart" wrap={false} responsive={false}>
         <EuiFlexItem grow={false} css={{ flexShrink: 0 }}>
-          <EuiTitle size="xxs">
+          <EuiTitle size={getPanelTitleSize(compressed)}>
             <h2>{i18n.TREND_CHART_TITLE}</h2>
           </EuiTitle>
         </EuiFlexItem>

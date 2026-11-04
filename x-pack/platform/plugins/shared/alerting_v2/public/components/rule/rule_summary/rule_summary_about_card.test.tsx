@@ -22,21 +22,18 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
+  version: 1,
   metadata: {
     name: 'My Rule',
     description: 'A rule description',
     tags: ['prod', 'latency'],
-    version: 1,
   },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM logs-* | LIMIT 1' },
-  },
-  created_by: 'alice@example.com',
+  query: { base: 'FROM logs-* | LIMIT 1' },
+  created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
-  updated_by: 'bob@example.com',
+  updated_by: { profile_uid: 'bob@example.com' },
   updated_at: '2026-03-04T12:00:00.000Z',
 };
 
@@ -55,7 +52,7 @@ describe('RuleSummaryAboutCard', () => {
   it('shows placeholders when description and tags are missing', () => {
     renderCard({
       ...baseRule,
-      metadata: { name: 'My Rule', version: 1 },
+      metadata: { name: 'My Rule' },
     });
 
     expect(screen.getByText('Description')).toBeInTheDocument();

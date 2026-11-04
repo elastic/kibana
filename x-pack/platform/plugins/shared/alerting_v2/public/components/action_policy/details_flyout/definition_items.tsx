@@ -45,29 +45,29 @@ export const getMatcherItem = (policy: Partial<ActionPolicyResponse>): ListItem 
 };
 
 export const getDispatchModeItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
-  const { grouping_mode: groupingMode } = policy;
+  const { grouping } = policy;
   return {
     title: DISPATCH_PER_LABEL,
-    description: getGroupingModeLabel(groupingMode),
+    description: getGroupingModeLabel(grouping?.mode),
   };
 };
 
 export const getGroupByItem = (policy: Partial<ActionPolicyResponse>): ListItem | null => {
-  const { grouping_mode: groupingMode, group_by: groupBy } = policy;
-  if (groupingMode !== 'per_field' || !groupBy || groupBy.length === 0) {
+  const { grouping } = policy;
+  if (grouping?.mode !== 'per_field') {
     return null;
   }
   return {
     title: GROUP_BY_LABEL,
-    description: <BadgeList items={groupBy} />,
+    description: <BadgeList items={grouping.fields} />,
   };
 };
 
 export const getFrequencyItem = (policy: Partial<ActionPolicyResponse>): ListItem => {
-  const { throttle, grouping_mode: groupingMode } = policy;
+  const { throttle, grouping } = policy;
   return {
     title: FREQUENCY_LABEL,
-    description: getFrequencyLabel(throttle, groupingMode),
+    description: getFrequencyLabel(throttle, grouping?.mode),
   };
 };
 

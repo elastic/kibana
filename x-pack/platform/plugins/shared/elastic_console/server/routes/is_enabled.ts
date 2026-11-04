@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { firstValueFrom } from 'rxjs';
 import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 import { ELASTIC_CONSOLE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import { ELASTIC_CONSOLE_ENABLED_FLAG } from '../../common/feature_flags';
@@ -13,9 +14,8 @@ export const isElasticConsoleEnabled = async (
   coreStart: CoreStart,
   request: KibanaRequest
 ): Promise<boolean> => {
-  const featureFlagEnabled = await coreStart.featureFlags.getBooleanValue(
-    ELASTIC_CONSOLE_ENABLED_FLAG,
-    false
+  const featureFlagEnabled = await firstValueFrom(
+    coreStart.featureFlags.getBooleanValue$(ELASTIC_CONSOLE_ENABLED_FLAG, false)
   );
   if (!featureFlagEnabled) {
     return false;

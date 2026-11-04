@@ -13,6 +13,7 @@ import type {
   MonitorFieldsResult,
 } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
+import { SCHEDULE_INTERVAL_FIELD } from '../../../../common/lib/schedule_to_time';
 
 const keysToOmit = [
   ConfigKey.URLS,
@@ -72,7 +73,7 @@ export function mapSavedObjectToMonitor({
   internal?: boolean;
 }) {
   let result = {
-    ...monitor.attributes,
+    ...omit(monitor.attributes, SCHEDULE_INTERVAL_FIELD),
     created_at: monitor.created_at,
     updated_at: monitor.updated_at,
   } as Result;
@@ -90,9 +91,18 @@ export function mergeSourceMonitor(
   return mergeWith({ ...normalizedPreviousMonitor }, monitor, customizer);
 }
 
-// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors
+// Ensure that METADATA is merged deeply, to protect AAD and prevent decryption errors.
+// Kerberos/NTLM are nested objects — shallow-replacing them on PATCH would wipe sibling
+// fields (e.g. password-only update clearing username/domain and flipping enabled:false
+// after mergeHttpAuthDefaults fills defaults). Explicit null clears the whole block.
 const customizer = (destVal: any, srcValue: any, key: string) => {
   if (key === ConfigKey.ALERT_CONFIG) {
+    return { ...destVal, ...srcValue };
+  }
+  if (key === ConfigKey.KERBEROS || key === ConfigKey.NTLM) {
+    if (srcValue === null) {
+      return null;
+    }
     return { ...destVal, ...srcValue };
   }
   if (key !== ConfigKey.METADATA) {

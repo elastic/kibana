@@ -183,10 +183,20 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     { enabled: !!pkgName }
   );
   const packageInfo = useMemo(() => {
-    if (packageInfoData && packageInfoData.item) {
-      return packageInfoData.item;
+    // The form initializes its inputs once from the package info, so wait for the FIPS status
+    // to avoid initializing them from the unfiltered templates.
+    if (!packageInfoData?.item || fleetStatus.isLoading) {
+      return undefined;
     }
-  }, [packageInfoData]);
+    const item = packageInfoData.item;
+    if (!fleetStatus.isFipsEnabled || !item.policy_templates) {
+      return item;
+    }
+    const fipsCompatibleTemplates = item.policy_templates.filter(
+      (t) => t.fips_compatible !== false
+    );
+    return { ...item, policy_templates: fipsCompatibleTemplates };
+  }, [packageInfoData, fleetStatus.isFipsEnabled, fleetStatus.isLoading]);
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
@@ -272,9 +282,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   // Derive var_group_selections from policy for StepConfigurePackagePolicy
   // Note: StepDefinePackagePolicy handles its own initialization and state management
-  const { enableVarGroups } = ExperimentalFeaturesService.get();
-  const varGroups =
-    enableVarGroups && packageInfo?.var_groups ? packageInfo?.var_groups : undefined;
+  const varGroups = packageInfo?.var_groups;
   // Options unsupported by the policy template the page is scoped to (e.g. opened
   // from the integrations browse page) are hidden from selectors and defaults
   const hiddenVarGroupOptions = useMemo(

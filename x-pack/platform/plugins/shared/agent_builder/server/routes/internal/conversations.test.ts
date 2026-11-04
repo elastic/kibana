@@ -151,7 +151,7 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
       kibanaResponseFactory
     );
 
-    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing');
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1' });
   });
@@ -168,15 +168,15 @@ describe('registerInternalConversationRoutes - _apply_template', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('applies the template when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(applyTemplate).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(applyTemplate).toHaveBeenCalledWith('conv-1', 'phishing', { source: 'http_api' });
   });
 });
 
@@ -248,7 +248,11 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
       kibanaResponseFactory
     );
 
-    expect(patchMetadata).toHaveBeenCalledWith('conv-1', { severity: 'high' });
+    expect(patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'high' },
+      { source: 'http_api' }
+    );
     expect(response.status).toBe(200);
     expect(response.payload).toMatchObject({ id: 'conv-1', metadata: { severity: 'high' } });
   });
@@ -277,15 +281,15 @@ describe('registerInternalConversationRoutes - PATCH /metadata', () => {
     expect(response.status).toBe(500);
   });
 
-  it('returns 404 when the experimental features flag is disabled', async () => {
+  it('patches the metadata when the experimental features flag is disabled', async () => {
     const response = await routeHandler(
       createMockContext({ featureFlagEnabled: false }) as any,
       createRequest(),
       kibanaResponseFactory
     );
 
-    expect(response.status).toBe(404);
-    expect(patchMetadata).not.toHaveBeenCalled();
+    expect(response.status).toBe(200);
+    expect(patchMetadata).toHaveBeenCalled();
   });
 });
 

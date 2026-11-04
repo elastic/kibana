@@ -14,8 +14,8 @@ import {
   EuiFlexItem,
   EuiTitle,
   EuiText,
-  EuiTextColor,
   EuiLink,
+  EuiPanel,
 } from '@elastic/eui';
 import type {
   LanguageDefinition,
@@ -50,7 +50,8 @@ interface Props {
   indexDetails: Index;
   sampleDocuments: SearchHit[];
   isDocumentsLoading: boolean;
-  documentsError: unknown;
+  documentsError: { message?: string } | null;
+  onRefreshDocuments: () => void;
 }
 
 export const DetailsPageOverview: React.FunctionComponent<Props> = ({
@@ -58,6 +59,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
   sampleDocuments,
   isDocumentsLoading,
   documentsError,
+  onRefreshDocuments,
 }) => {
   const { name } = indexDetails;
   const {
@@ -141,7 +143,7 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
 
       <QuickStats indexDetails={indexDetails} />
 
-      <EuiSpacer />
+      <EuiSpacer size="xl" />
 
       {extensionsService.indexOverviewContent ? (
         extensionsService.indexOverviewContent.renderContent({
@@ -149,62 +151,71 @@ export const DetailsPageOverview: React.FunctionComponent<Props> = ({
           getUrlForApp: core.getUrlForApp,
         })
       ) : (
-        <EuiFlexGroup direction="column">
+        <EuiFlexGroup direction="column" gutterSize="m">
           <EuiFlexItem>
-            <EuiTitle size="s">
-              <h2>
-                {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataTitle', {
-                  defaultMessage: 'Add data to this index',
-                })}
-              </h2>
-            </EuiTitle>
-
-            <EuiSpacer size="s" />
-
-            <EuiTextColor color="subdued">
-              <EuiText size="s">
-                <p>
-                  <FormattedMessage
-                    id="xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription"
-                    defaultMessage="Use the bulk API to add data to your index. {docsLink}"
-                    values={{
-                      docsLink: (
-                        <EuiLink href={documentationService.getBulkApi()} target="_blank" external>
-                          <FormattedMessage
-                            id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
-                            defaultMessage="Learn more."
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+            <EuiPanel color="subdued">
+              <EuiFlexGroup direction="column" gutterSize="m">
+                <EuiFlexItem>
+                  <EuiTitle size="xs">
+                    <h2>
+                      {i18n.translate('xpack.idxMgmt.indexDetails.overviewTab.addMoreDataTitle', {
+                        defaultMessage: 'Add data to this index',
+                      })}
+                    </h2>
+                  </EuiTitle>
+                  <EuiSpacer size="xs" />
+                  <EuiText size="s" color="subdued">
+                    <p>
+                      <FormattedMessage
+                        id="xpack.idxMgmt.indexDetails.overviewTab.addMoreDataDescription"
+                        defaultMessage="Use the bulk API to add data to your index. {docsLink}"
+                        values={{
+                          docsLink: (
+                            <EuiLink
+                              href={documentationService.getBulkApi()}
+                              target="_blank"
+                              external
+                            >
+                              <FormattedMessage
+                                id="xpack.idxMgmt.indexDetails.overviewTab.addDocsLink"
+                                defaultMessage="Learn more."
+                              />
+                            </EuiLink>
+                          ),
+                        }}
+                      />
+                    </p>
+                  </EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <CodeBox
+                    languages={languageDefinitions}
+                    codeSnippet={getLanguageDefinitionCodeSnippet(
+                      selectedLanguage,
+                      'ingestDataIndex',
+                      codeSnippetArguments
+                    )}
+                    selectedLanguage={selectedLanguage}
+                    setSelectedLanguage={setSelectedLanguage}
+                    assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
+                    sharePlugin={share}
+                    application={core.application}
+                    consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
                   />
-                </p>
-              </EuiText>
-            </EuiTextColor>
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
           </EuiFlexItem>
 
           <EuiFlexItem>
-            <CodeBox
-              languages={languageDefinitions}
-              codeSnippet={getLanguageDefinitionCodeSnippet(
-                selectedLanguage,
-                'ingestDataIndex',
-                codeSnippetArguments
-              )}
-              selectedLanguage={selectedLanguage}
-              setSelectedLanguage={setSelectedLanguage}
-              assetBasePath={core.http.basePath.prepend(`/plugins/indexManagement/assets`)}
-              sharePlugin={share}
-              application={core.application}
-              consoleRequest={getConsoleRequest('ingestDataIndex', codeSnippetArguments)}
+            <IndexDocuments
+              documents={sampleDocuments}
+              isLoading={isDocumentsLoading}
+              error={documentsError}
+              mappings={mappingsData ?? undefined}
+              onRefresh={onRefreshDocuments}
             />
           </EuiFlexItem>
-          <IndexDocuments
-            documents={sampleDocuments}
-            isLoading={isDocumentsLoading}
-            error={documentsError}
-            mappings={mappingsData ?? undefined}
-          />
         </EuiFlexGroup>
       )}
     </>

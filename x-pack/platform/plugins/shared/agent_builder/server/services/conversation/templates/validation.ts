@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import { isEqual } from 'lodash';
 import { createBadRequestError } from '@kbn/agent-builder-common';
 import type {
   ConversationTemplate,
   ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
   SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
+import { serializeMetadataValue } from './serialize';
 
 const ISO_DATE_RE = /^\d{4}-\d{2}-\d{2}(T[\d:.Z+-]+)?$/;
 
@@ -189,19 +192,12 @@ export const collectFieldViolations = (
   return violations;
 };
 
-/**
- * Validates every key in a metadata update against the template's field definitions.
- * Accumulates all per-field violations and throws a single bad-request error listing them.
- *
- * Throws when:
- *  - A key is not declared in the template.
- *  - Any field's value fails its type or constraint checks.
- *  - A required field is being set to an empty value.
- */
+/** Validates metadata fields and, when stored metadata is supplied, rejects changes to immutable values. */
 export const validateMetadataUpdate = (
   templateId: string,
   fields: Record<string, ConversationTemplateFieldDefinition>,
-  updates: Record<string, unknown>
+  updates: Record<string, unknown>,
+  storedMetadata?: Record<string, SerializedMetadataValue>
 ): void => {
   const allViolations: FieldViolation[] = [];
 
@@ -217,6 +213,17 @@ export const validateMetadataUpdate = (
     const msgs = collectFieldViolations(key, def, value);
     for (const msg of msgs) {
       allViolations.push({ field: key, message: msg });
+    }
+    if (
+      msgs.length === 0 &&
+      def.immutable &&
+      storedMetadata !== undefined &&
+      !isEqual(
+        storedMetadata[key],
+        serializeMetadataValue(value as MetadataFieldValue, def.input_type)
+      )
+    ) {
+      allViolations.push({ field: key, message: `field "${key}" is immutable` });
     }
   }
 
@@ -277,6 +284,16 @@ export const collectTemplateDefinitionErrors = (template: ConversationTemplate):
 
     if (def.options !== undefined && inputType !== 'SELECT') {
       errors.push(`field "${fieldName}": "options" is only valid for SELECT`);
+    }
+
+    // Telemetry reports the template's options, so only SELECT fields can opt in.
+    if (def.report_changes !== undefined && inputType !== 'SELECT') {
+      errors.push(`field "${fieldName}": "report_changes" is only valid for SELECT`);
+    }
+
+    // Telemetry reports the field name as a key of `changed_fields`, where a dot would nest it.
+    if (def.report_changes !== undefined && fieldName.includes('.')) {
+      errors.push(`field "${fieldName}": "report_changes" is only valid for a name without dots`);
     }
 
     // Validate default_value type matches input_type

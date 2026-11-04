@@ -209,4 +209,61 @@ describe('CaseViewTimelines', () => {
       expect(screen.getByTestId('case-view-timelines-batch-actions-button')).toBeInTheDocument();
     });
   });
+
+  describe('remove from case', () => {
+    const caseDataWithTimelines = buildCaseData([
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-1' },
+      { type: SECURITY_TIMELINE_ATTACHMENT_TYPE, attachmentId: 'tl-2' },
+    ]);
+
+    it('adds no remove actions without onRemove', () => {
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} />
+        </TestProviders>
+      );
+
+      const tableProps = mockedTimelinesTable.mock.calls.at(-1)[0];
+      expect(tableProps.actionTimelineToShow).not.toContain('removeFromCase');
+      expect(tableProps.onRemoveFromCase).toBeUndefined();
+      expect(
+        mockedUseEditTimelineBatchActions.mock.calls.at(-1)[0].onRemoveSelectedFromCase
+      ).toBeUndefined();
+    });
+
+    it('removes a single timeline from the row actions', () => {
+      const onRemove = jest.fn();
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} onRemove={onRemove} />
+        </TestProviders>
+      );
+
+      const tableProps = mockedTimelinesTable.mock.calls.at(-1)[0];
+      expect(tableProps.actionTimelineToShow).toContain('removeFromCase');
+
+      tableProps.onRemoveFromCase('tl-1');
+
+      expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['tl-1'] });
+    });
+
+    it('removes the selected timelines from the batch actions', () => {
+      const onRemove = jest.fn();
+      render(
+        <TestProviders>
+          <CaseViewTimelines caseData={caseDataWithTimelines} onRemove={onRemove} />
+        </TestProviders>
+      );
+
+      const { onSelectionChange } = mockedTimelinesTable.mock.calls.at(-1)[0];
+      act(() => onSelectionChange([{ savedObjectId: 'tl-1' }, { savedObjectId: 'tl-2' }]));
+
+      mockedUseEditTimelineBatchActions.mock.calls.at(-1)[0].onRemoveSelectedFromCase();
+
+      expect(onRemove).toHaveBeenCalledWith(
+        { attachmentIds: ['tl-1', 'tl-2'] },
+        { onSuccess: expect.any(Function) }
+      );
+    });
+  });
 });

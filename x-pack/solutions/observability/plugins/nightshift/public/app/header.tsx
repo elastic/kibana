@@ -24,26 +24,47 @@ export interface NightshiftHeaderProps {
   isLoading?: boolean;
   hasActiveInvestigations?: boolean;
   showAllEventsHref?: string;
+  /** Replaces the status-derived hero title. */
+  title?: string;
+  /** Puts the greeting in front of the title on one line ("Good morning! Meet Nightshift"). */
+  isGreetingInline?: boolean;
+  /** Addresses the user by name ("Good morning, Kate!"). */
+  greetingName?: string;
 }
 
-const getGreeting = (): string => {
+const getGreeting = (name?: string): string => {
   const hour = new Date().getHours();
 
   if (hour < 12) {
-    return i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
-      defaultMessage: 'Good morning!',
-    });
+    return name
+      ? i18n.translate('xpack.nightshift.hero.morningGreetingWithName', {
+          defaultMessage: 'Good morning, {name}!',
+          values: { name },
+        })
+      : i18n.translate('xpack.nightshift.hero.morningGreetingDescription', {
+          defaultMessage: 'Good morning!',
+        });
   }
 
   if (hour < 18) {
-    return i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
-      defaultMessage: 'Good afternoon!',
-    });
+    return name
+      ? i18n.translate('xpack.nightshift.hero.afternoonGreetingWithName', {
+          defaultMessage: 'Good afternoon, {name}!',
+          values: { name },
+        })
+      : i18n.translate('xpack.nightshift.hero.afternoonGreetingDescription', {
+          defaultMessage: 'Good afternoon!',
+        });
   }
 
-  return i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
-    defaultMessage: 'Good evening!',
-  });
+  return name
+    ? i18n.translate('xpack.nightshift.hero.eveningGreetingWithName', {
+        defaultMessage: 'Good evening, {name}!',
+        values: { name },
+      })
+    : i18n.translate('xpack.nightshift.hero.eveningGreetingDescription', {
+        defaultMessage: 'Good evening!',
+      });
 };
 
 const getHeroTitle = ({
@@ -74,10 +95,16 @@ export function NightshiftHeader({
   isLoading = false,
   hasActiveInvestigations = false,
   showAllEventsHref,
+  title: titleOverride,
+  isGreetingInline = false,
+  greetingName,
 }: NightshiftHeaderProps): React.ReactElement {
   const { euiTheme } = useEuiTheme();
 
-  const title = getHeroTitle({ isLoading, hasActiveInvestigations });
+  const title = titleOverride ?? getHeroTitle({ isLoading, hasActiveInvestigations });
+  const buttonCss = css`
+    color: ${euiTheme.colors.textSubdued};
+  `;
 
   return (
     <EuiFlexItem
@@ -120,9 +147,11 @@ export function NightshiftHeader({
               </div>
             </EuiFlexItem>
             <EuiFlexItem>
-              <EuiText color="subdued" size="s" textAlign="left">
-                <p>{getGreeting()}</p>
-              </EuiText>
+              {!isGreetingInline && (
+                <EuiText color="subdued" size="s" textAlign="left">
+                  <p>{getGreeting(greetingName)}</p>
+                </EuiText>
+              )}
               <EuiTitle
                 size="m"
                 css={css`
@@ -133,30 +162,45 @@ export function NightshiftHeader({
                   white-space: nowrap;
                 `}
               >
-                <h2>{title}</h2>
+                <h2>
+                  {isGreetingInline && (
+                    <span
+                      css={css`
+                        color: ${euiTheme.colors.textSubdued};
+                      `}
+                    >
+                      {`${getGreeting(greetingName)} `}
+                    </span>
+                  )}
+                  {title}
+                </h2>
               </EuiTitle>
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiFlexItem>
         {showAllEventsHref && (
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              color="text"
-              data-test-subj="o11yNightshiftAppShowAllLink"
-              href={showAllEventsHref}
-              size="s"
-              {...getEbtProps({
-                action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
-                element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
-              })}
-              css={css`
-                color: ${euiTheme.colors.textSubdued};
-              `}
-            >
-              {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
-                defaultMessage: 'Show all events',
-              })}
-            </EuiButtonEmpty>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
+              {showAllEventsHref && (
+                <EuiFlexItem grow={false}>
+                  <EuiButtonEmpty
+                    color="text"
+                    data-test-subj="o11yNightshiftAppShowAllLink"
+                    href={showAllEventsHref}
+                    size="s"
+                    {...getEbtProps({
+                      action: NIGHTSHIFT_EBT_ACTIONS.VIEW_ALL_SIGNIFICANT_EVENTS,
+                      element: NIGHTSHIFT_EBT_ELEMENTS.PAGE_HEADER,
+                    })}
+                    css={buttonCss}
+                  >
+                    {i18n.translate('xpack.nightshift.summary.showAllEventsLinkText', {
+                      defaultMessage: 'Show all events',
+                    })}
+                  </EuiButtonEmpty>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

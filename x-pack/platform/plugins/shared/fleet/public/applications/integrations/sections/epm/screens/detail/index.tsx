@@ -32,6 +32,8 @@ import { KibanaSavedObjectType } from '../../../../../../../common/types/models'
 import { appendReturnParams } from '../../components/return_params';
 
 import {
+  ADD_INTEGRATION_CONFIGURABLE_PACKAGES,
+  isAssetOnlyIntegrationPackage,
   isPackagePrerelease,
   splitPkgKey,
   packageToPackagePolicyInputs,
@@ -69,6 +71,11 @@ import { PermissionsError } from '../../../../layouts';
 
 import { wrapTitleWithDeprecated } from '../../components/utils';
 
+import {
+  AWS_ONBOARDING_PACKAGE_NAME,
+  useOnboardingOverride,
+} from '../home/hooks/use_onboarding_override';
+
 import { DeferredAssetsWarning } from './assets/deferred_assets_warning';
 
 import { getInstallPkgRouteOptions } from './utils';
@@ -95,7 +102,7 @@ import { Configs } from './configs';
 import type { InstallPkgRouteOptions } from './utils/get_install_route_options';
 import { InstallButton } from './settings/install_button';
 import { EditIntegrationFlyout } from './components/edit_integration_flyout';
-import { ErrorIconPanel } from './components/icon_panel';
+import { ErrorIconPanel, getIconPanelWidth } from './components/icon_panel';
 
 export type DetailViewPanelName =
   | 'overview'
@@ -170,7 +177,8 @@ export function Detail() {
   const userCanInstallPackages = canInstallPackages && permissionCheck?.success;
 
   const services = useStartServices();
-  const { spaceId } = useFleetStatus();
+  const { isOnboardingEnabled, navigateToOnboarding, onboardingUrl } = useOnboardingOverride();
+  const { spaceId, isFipsEnabled } = useFleetStatus();
   const agentPolicyIdFromContext = getAgentPolicyId();
   // edit readme state
 
@@ -227,6 +235,13 @@ export function Detail() {
         ? AddIntegrationButtonDisabledReason.MISSING_SECURITY
         : AddIntegrationButtonDisabledReason.MISSING_PRIVILEGES
       : undefined;
+
+  // A preselected agent policy stays on the Fleet wizard, which is the only flow that can
+  // honour it.
+  const isAwsOnboardingEntry =
+    isOnboardingEnabled &&
+    packageInfo?.name === AWS_ONBOARDING_PACKAGE_NAME &&
+    !agentPolicyIdFromContext;
 
   const [prereleaseIntegrationsEnabled, setPrereleaseIntegrationsEnabled] = React.useState<
     boolean | undefined
@@ -357,7 +372,16 @@ export function Detail() {
   useEffect(() => {
     if (packageInfoIsFetchedAfterMount && packageInfoData?.item) {
       const packageInfoResponse = packageInfoData.item;
-      setPackageInfo(packageInfoResponse);
+      const filteredPackageInfo =
+        isFipsEnabled && packageInfoResponse.policy_templates
+          ? {
+              ...packageInfoResponse,
+              policy_templates: packageInfoResponse.policy_templates.filter(
+                (t) => t.fips_compatible !== false
+              ),
+            }
+          : packageInfoResponse;
+      setPackageInfo(filteredPackageInfo);
       setIsCustomPackage(
         (packageInfoResponse?.installationInfo?.install_source &&
           CUSTOM_INTEGRATION_SOURCES.includes(
@@ -375,7 +399,13 @@ export function Detail() {
         setPackageInstallStatus({ name, status, version: installedVersion || null });
       }
     }
-  }, [packageInfoData, packageInfoIsFetchedAfterMount, setPackageInstallStatus, setPackageInfo]);
+  }, [
+    packageInfoData,
+    packageInfoIsFetchedAfterMount,
+    setPackageInstallStatus,
+    setPackageInfo,
+    isFipsEnabled,
+  ]);
 
   const integrationInfo = useMemo(
     () =>
@@ -522,6 +552,12 @@ export function Detail() {
   const handleAddIntegrationPolicyClick = useCallback<ReactEventHandler>(
     (ev) => {
       ev.preventDefault();
+
+      if (isAwsOnboardingEntry) {
+        navigateToOnboarding();
+        return;
+      }
+
       // The object below, given to `createHref` is explicitly accessing keys of `location` in order
       // to ensure that dependencies to this `useCallback` is set correctly (because `location` is mutable)
       const currentPath = history.createHref({
@@ -579,6 +615,8 @@ export function Detail() {
       returnAppId,
       returnPath,
       services.application,
+      isAwsOnboardingEntry,
+      navigateToOnboarding,
     ]
   );
 
@@ -623,6 +661,16 @@ export function Detail() {
       history.push(path);
     },
     [getPath, history]
+  );
+
+  // Temporary: integration packages with nothing to configure on an agent only install assets
+  const isAssetOnlyPackage = useMemo(
+    () =>
+      packageInfo
+        ? !ADD_INTEGRATION_CONFIGURABLE_PACKAGES.includes(packageInfo.name) &&
+          isAssetOnlyIntegrationPackage(packageInfo)
+        : false,
+    [packageInfo]
   );
 
   const headerRightContent = useMemo(
@@ -672,10 +720,37 @@ export function Detail() {
                     },
                   ]
                 : []),
-              ...(packageInfo.type === 'content'
-                ? !isInstalled
-                  ? [{ isDivider: true }, { content: <InstallButton {...packageInfo} /> }]
-                  : [] // if content package is already installed, don't show install button in header
+              ...(packageInfo.type === 'content' || isAssetOnlyPackage
+                ? // Nothing to show when the package is installed or the user can't install it, so no divider either.
+                  // Uploaded asset-only packages keep their edit action.
+                  (!isInstalled && canInstallPackages) || (isAssetOnlyPackage && isCustomPackage)
+                  ? [
+                      { isDivider: true },
+                      {
+                        content: (
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {isAssetOnlyPackage && isCustomPackage && (
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            {!isInstalled && canInstallPackages && (
+                              <EuiFlexItem grow={false}>
+                                <InstallButton
+                                  {...packageInfo}
+                                  variant={isAssetOnlyPackage ? 'assets' : 'package'}
+                                  // distinct from the one in the Settings tab, which shares the page
+                                  data-test-subj="installAssetsHeaderButton"
+                                />
+                              </EuiFlexItem>
+                            )}
+                          </EuiFlexGroup>
+                        ),
+                      },
+                    ]
+                  : []
                 : [
                     { isDivider: true },
                     {
@@ -691,13 +766,17 @@ export function Detail() {
                           <EuiFlexItem grow={false}>
                             <AddIntegrationButton
                               disabledReason={addIntegrationDisabledReason}
-                              href={getHref('add_integration_to_policy', {
-                                pkgkey,
-                                ...(integration ? { integration } : {}),
-                                ...(agentPolicyIdFromContext
-                                  ? { agentPolicyId: agentPolicyIdFromContext }
-                                  : {}),
-                              })}
+                              href={
+                                isAwsOnboardingEntry
+                                  ? onboardingUrl
+                                  : getHref('add_integration_to_policy', {
+                                      pkgkey,
+                                      ...(integration ? { integration } : {}),
+                                      ...(agentPolicyIdFromContext
+                                        ? { agentPolicyId: agentPolicyIdFromContext }
+                                        : {}),
+                                    })
+                              }
                               packageName={wrapTitleWithDeprecated({
                                 packageInfo,
                                 integrationInfo,
@@ -712,7 +791,7 @@ export function Detail() {
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
-                  <Divider />
+                  <Divider data-test-subj="headerDivider" />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
                     <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
@@ -733,6 +812,8 @@ export function Detail() {
       versionOptions,
       updateAvailable,
       isInstalled,
+      isAssetOnlyPackage,
+      canInstallPackages,
       isCustomPackage,
       handleEditIntegrationClick,
       addIntegrationDisabledReason,
@@ -743,6 +824,8 @@ export function Detail() {
       integrationInfo,
       handleAddIntegrationPolicyClick,
       onVersionChange,
+      isAwsOnboardingEntry,
+      onboardingUrl,
     ]
   );
 
@@ -950,7 +1033,7 @@ export function Detail() {
       topContent={securityCallout}
       tabs={headerTabs}
       tabsCss={`
-        margin-left: calc(${theme.euiTheme.size.base} * 6 + ${theme.euiTheme.size.xl} * 2 +
+        margin-left: calc(${getIconPanelWidth(theme.euiTheme.size.base, theme.euiTheme.size.xl)}px +
           ${theme.euiTheme.size.l});
       `}
     >

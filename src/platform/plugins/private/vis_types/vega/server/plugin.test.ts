@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { of } from 'rxjs';
 import { coreMock } from '@kbn/core/server/mocks';
 import { createEmbeddableSetupMock } from '@kbn/embeddable-plugin/server/mocks';
 import { mockGetDrilldownsSchema } from '@kbn/embeddable-plugin/server/mocks';
@@ -36,8 +37,8 @@ describe('VisTypeVegaPlugin (server)', () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
-      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? false : fallback
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
+      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? false : fallback)
     );
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 
@@ -54,8 +55,8 @@ describe('VisTypeVegaPlugin (server)', () => {
     const initializerContext = coreMock.createPluginInitializerContext();
     const coreSetup = coreMock.createSetup();
     const coreStart = coreMock.createStart();
-    coreStart.featureFlags.getBooleanValue.mockImplementation(async (key, fallback) =>
-      key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? true : fallback
+    coreStart.featureFlags.getBooleanValue$.mockImplementation((key, fallback) =>
+      of(key === VEGA_STANDALONE_EMBEDDABLE_FLAG ? true : fallback)
     );
     coreSetup.getStartServices.mockResolvedValue([coreStart, {}, {}]);
 

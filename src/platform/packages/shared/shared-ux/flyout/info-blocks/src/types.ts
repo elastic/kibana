@@ -8,7 +8,7 @@
  */
 
 import type { ReactNode } from 'react';
-import type { EuiTextProps } from '@elastic/eui';
+import type { DataAttributeProps, EuiTextProps } from '@elastic/eui';
 
 /**
  * EUI font-scale keys, mirrored so this API does not depend on an EUI internal.
@@ -16,7 +16,7 @@ import type { EuiTextProps } from '@elastic/eui';
  */
 export type InfoBlockSize = 'xxxs' | 'xxs' | 'xs' | 's' | 'm' | 'l' | 'xl' | 'xxl';
 
-export interface InfoBlockItem {
+export interface InfoBlockItem extends DataAttributeProps {
   /** Stable identity used as the React key. Falls back to array position when omitted. */
   id?: string;
   /** Fixed-style text label rendered above the value. */

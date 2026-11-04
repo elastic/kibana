@@ -32,6 +32,9 @@ export const ESQL_CONVERSION_DATASETS: Record<EsqlConversionDatasetId, EsqlConve
       bytes: 'number',
       'host.keyword': 'string',
       'machine.os.keyword': 'string',
+      'geo.src': 'string',
+      'geo.dest': 'string',
+      'agent.keyword': 'string',
     },
   },
 };

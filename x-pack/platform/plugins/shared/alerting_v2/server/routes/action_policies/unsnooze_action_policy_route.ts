@@ -16,6 +16,7 @@ import { BaseAlertingRoute } from '../base_alerting_route';
 import { unsnoozeActionPolicyOasExamples } from './unsnooze_action_policy_oas_example';
 import { AlertingRouteContext } from '../alerting_route_context';
 import { ALERTING_V2_ACTION_POLICY_API_PATH } from '../constants';
+import { INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION } from '../route_descriptions';
 import {
   ACTION_POLICY_NOT_FOUND_DESCRIPTION,
   ACTION_POLICY_VERSION_CONFLICT_DESCRIPTION,
@@ -33,6 +34,7 @@ export class UnsnoozeActionPolicyRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'Unsnooze an action policy',
     description: 'Remove the snooze from an action policy.',
     oasOperationObject: unsnoozeActionPolicyOasExamples,
@@ -45,6 +47,10 @@ export class UnsnoozeActionPolicyRoute extends BaseAlertingRoute {
       200: {
         body: () => actionPolicyResponseSchema,
         description: 'Returns the unsnoozed action policy.',
+      },
+      400: {
+        body: () => errorResponseSchema,
+        description: INVALID_SCHEMA_OR_PARAMETERS_DESCRIPTION,
       },
       404: {
         body: () => errorResponseSchema,

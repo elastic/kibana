@@ -17,7 +17,7 @@ import {
   type NightshiftStreamFeaturesScenario,
 } from '../__storybook__/provider';
 import { NightshiftApp } from './app';
-import { NightshiftAppHeader } from './app_header';
+import { NightshiftAppHeader } from '../components/app_header';
 
 const noop = () => undefined;
 
@@ -42,10 +42,7 @@ const NightshiftLandingStory = ({
   >
     <MockAppHeaderProvider>
       <EuiPageTemplate restrictWidth={false}>
-        <NightshiftAppHeader
-          onSettingsClick={noop}
-          settingsHref="/app/significant_events/settings"
-        />
+        <NightshiftAppHeader onSettingsClick={noop} settingsHref="/app/nightshift/settings" />
         <EuiPageTemplate.Section component="div" color="subdued" restrictWidth="900px">
           <NightshiftApp />
         </EuiPageTemplate.Section>
@@ -122,9 +119,9 @@ export const OpenEventsOnly: Story = {
   },
 };
 
-export const DismissedEventInResolvedSection: Story = {
+export const InactiveEventInResolvedSection: Story = {
   args: {
-    scenario: 'dismissed',
+    scenario: 'inactive',
   },
 };
 

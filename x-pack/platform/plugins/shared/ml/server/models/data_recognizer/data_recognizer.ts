@@ -721,8 +721,8 @@ export class DataRecognizer {
             } as JobStat;
 
             if (job.data_counts) {
-              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp!;
-              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp!;
+              jobStat.earliestTimestampMs = job.data_counts.earliest_record_timestamp;
+              jobStat.latestTimestampMs = job.data_counts.latest_record_timestamp;
               jobStat.latestResultsTimestampMs = getLatestDataOrBucketTimestamp(
                 jobStat.latestTimestampMs,
                 latestBucketTimestampsByJob[job.job_id] as number

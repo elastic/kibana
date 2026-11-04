@@ -27,12 +27,17 @@ export const createWorkflowsClientProvider = (
 
     return {
       isWorkflowsAvailable,
-      emitEvent: async (triggerId, payload) => {
+      emitEvent: async (triggerId, payload, options) => {
         if (!isWorkflowsAvailable) {
           logger.debug('Workflows is not available in this environment. Trigger event ignored.');
           return;
         }
-        return workflowsExecutionEngine.triggerEvents.emitEvent({ triggerId, payload, request });
+        return workflowsExecutionEngine.triggerEvents.emitEvent({
+          triggerId,
+          payload,
+          request,
+          ...(options?.authenticatedUser ? { authenticatedUser: options.authenticatedUser } : {}),
+        });
       },
       managedWorkflows: {
         install: async (pluginId, id, options) => {
@@ -42,7 +47,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.installManagedWorkflow(id, options, pluginId);
+          await workflowsService.installManagedWorkflow(id, options, pluginId, request);
         },
         uninstall: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {
@@ -51,7 +56,7 @@ export const createWorkflowsClientProvider = (
             );
             return;
           }
-          await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
+          await workflowsService.uninstallManagedWorkflow(id, options, pluginId, request);
         },
         getWorkflowStatus: async (pluginId, id, options) => {
           if (!isWorkflowsAvailable) {
@@ -112,6 +117,13 @@ export const createManagedWorkflowsSystemApiProvider = (
           return;
         }
         await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
+      },
+      disable: async (id, options) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug('Workflows is not available in this environment. Managed disable ignored.');
+          return false;
+        }
+        return workflowsService.disableManagedWorkflow(id, options, pluginId);
       },
       getWorkflowStatus: async (id, options) => {
         if (!isWorkflowsAvailable) {

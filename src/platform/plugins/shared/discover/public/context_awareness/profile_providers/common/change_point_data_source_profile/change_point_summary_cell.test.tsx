@@ -9,18 +9,17 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { BehaviorSubject } from 'rxjs';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { buildChangePointCards } from '@kbn/change-point-chart-viewer';
-import type { UnifiedChangePointGridProps } from '@kbn/change-point-chart-viewer';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
+import type { CellRenderersSearchContext } from '../../../types';
 import { ChangePointSummaryCell } from './change_point_summary_cell';
 import type {
-  ChangePointChartSectionProps$,
-  ChangePointChartSectionSnapshot,
-} from './change_point_context';
-import type { ChangePointSummarySeriesState } from './change_point_summary_series';
+  ChangePointSummarySeriesCache,
+  ChangePointSummarySeriesState,
+} from './change_point_summary_series';
 
 jest.mock('./change_point_summary_chart', () => ({
   ChangePointSummaryChart: ({
@@ -90,6 +89,7 @@ describe('ChangePointSummaryCell', () => {
   const charts = {
     theme: { useChartsBaseTheme: () => ({}) },
   } as unknown as ChartsPluginStart;
+  const data = { search: { esql: jest.fn() } } as unknown as DataPublicPluginStart;
 
   const setCellProps = jest.fn();
 
@@ -101,7 +101,7 @@ describe('ChangePointSummaryCell', () => {
   const gridProps = (flattened: Record<string, unknown>): DataGridCellValueElementProps =>
     ({
       row: { id: '1', raw: {}, flattened },
-      dataView: {},
+      dataView: { isTimeBased: () => false },
       columnId: '_source',
       isDetails: false,
       isExpanded: false,
@@ -110,11 +110,13 @@ describe('ChangePointSummaryCell', () => {
       setCellProps,
     } as unknown as DataGridCellValueElementProps);
 
-  const cellContext = (chartSectionProps$: ChangePointChartSectionProps$) => ({
-    chartSectionProps$,
+  const cellContext = {
     typeColumnId: 'type',
     pvalueColumnId: 'pvalue',
-  });
+    summarySeriesCache: {
+      getSeries$: jest.fn(),
+    } as ChangePointSummarySeriesCache,
+  };
 
   beforeEach(() => {
     setCellProps.mockClear();
@@ -126,11 +128,15 @@ describe('ChangePointSummaryCell', () => {
     table,
     esql = ESQL_NO_BY,
     seriesState,
+    searchContext,
+    isDataLoading,
   }: {
     flattened: Record<string, unknown>;
-    table: Datatable;
+    table?: Datatable;
     esql?: string;
     seriesState?: ChangePointSummarySeriesState;
+    searchContext?: CellRenderersSearchContext;
+    isDataLoading?: boolean;
   }) => {
     mockUseChangePointSummarySeries.mockReturnValue(
       seriesState ?? {
@@ -139,38 +145,36 @@ describe('ChangePointSummaryCell', () => {
         timeColumn: 'bucket',
         valueColumn: 'avg_bytes',
         seriesByEntity: new Map([['', seriesPoints]]),
-        cards: buildChangePointCards({ table, esql }),
+        cards: table ? buildChangePointCards({ table, esql }) : undefined,
       }
     );
 
-    const fetchParams = {
-      table,
-      query: { esql },
-      dataView: { isTimeBased: () => false },
-      filters: [],
-      timeRange: { from: 'now-1d', to: 'now' },
-      searchSessionId: 's1',
-      lastReloadRequestTime: 1,
-    } as unknown as UnifiedChangePointGridProps['fetchParams'];
-
-    const chartSectionProps$ = new BehaviorSubject<ChangePointChartSectionSnapshot | undefined>({
-      fetchParams,
-      fetch$: new BehaviorSubject(undefined) as never,
-      services: { data: { search: { esql: jest.fn() } } } as never,
-      onBrushEnd: undefined,
-      onFilter: undefined,
-    });
+    const resolvedSearchContext =
+      searchContext ??
+      (table
+        ? {
+            table,
+            query: { esql },
+            filters: [],
+            timeRange: { from: 'now-1d', to: 'now' },
+            searchSessionId: 's1',
+            requestId: 1,
+          }
+        : undefined);
 
     return render(
       <ChangePointSummaryCell
         {...gridProps(flattened)}
-        context={cellContext(chartSectionProps$)}
+        context={cellContext}
         charts={charts}
+        data={data}
+        searchContext={resolvedSearchContext}
+        isDataLoading={isDataLoading}
       />
     );
   };
 
-  it('renders the sparkline for a change-point row', () => {
+  it('renders the sparkline for a change-point row without chart section props', () => {
     renderCell({ flattened: CHANGE_POINT_ROW, table: makeTable(NO_BY_ROWS) });
 
     expect(setCellProps).not.toHaveBeenCalled();
@@ -188,14 +192,12 @@ describe('ChangePointSummaryCell', () => {
     expect(screen.getByLabelText('No change point')).toBeInTheDocument();
   });
 
-  it('shows a loading indicator when the table has no columns', () => {
+  it('renders an error icon when the completed table has no columns', () => {
     renderCell({ flattened: CHANGE_POINT_ROW, table: makeTable([CHANGE_POINT_ROW], []) });
 
     expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
-    expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
-    expect(screen.queryByText('-')).not.toBeInTheDocument();
-    expect(screen.queryByLabelText('No change point')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+    expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
   });
 
   it('subscribes for every row when type and pvalue columns are absent from the table', () => {
@@ -329,22 +331,43 @@ describe('ChangePointSummaryCell', () => {
     );
   });
 
-  it('does not subscribe when chart section props are not yet available', () => {
-    const chartSectionProps$ = new BehaviorSubject<ChangePointChartSectionSnapshot | undefined>(
-      undefined
-    );
-
-    render(
-      <ChangePointSummaryCell
-        {...gridProps(CHANGE_POINT_ROW)}
-        context={cellContext(chartSectionProps$)}
-        charts={charts}
-      />
-    );
+  it('shows a loading indicator while the grid search is in flight', () => {
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      isDataLoading: true,
+    });
 
     expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
     expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
     expect(document.querySelector('.euiLoadingChart')).toBeInTheDocument();
+    expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
+  });
+
+  it('renders an error icon when the grid has completed without search context', () => {
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      isDataLoading: false,
+    });
+
+    expect(mockUseChangePointSummarySeries).not.toHaveBeenCalled();
+    expect(screen.queryByTestId('changePointSummaryChartMock')).not.toBeInTheDocument();
+    expect(document.querySelector('.euiLoadingChart')).not.toBeInTheDocument();
+    expect(screen.getByTestId('changePointSummarySeriesError')).toBeInTheDocument();
+  });
+
+  it('subscribes for a completed grid context that has no time range', () => {
+    renderCell({
+      flattened: CHANGE_POINT_ROW,
+      table: makeTable(NO_BY_ROWS),
+      searchContext: {
+        table: makeTable(NO_BY_ROWS),
+        query: { esql: ESQL_NO_BY },
+        requestId: 1,
+      },
+    });
+
+    expect(mockUseChangePointSummarySeries).toHaveBeenCalled();
+    expect(screen.getByTestId('changePointSummaryChartMock')).toBeInTheDocument();
     expect(screen.queryByTestId('changePointSummarySeriesError')).not.toBeInTheDocument();
   });
 

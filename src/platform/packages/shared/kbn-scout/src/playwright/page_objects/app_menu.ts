@@ -23,10 +23,12 @@ const POPOVER_OPEN_TIMEOUT = 2_000;
 export class AppMenu {
   public readonly overflowButton: Locator;
   public readonly popover: Locator;
+  private readonly loadingSkeleton: Locator;
 
   constructor(private readonly page: ScoutPage) {
     this.overflowButton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.overflowButton);
     this.popover = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.popover);
+    this.loadingSkeleton = this.page.testSubj.locator(APP_MENU_TEST_SUBJECTS.loading);
   }
 
   private toLocator(item: Locator | string): Locator {
@@ -62,6 +64,13 @@ export class AppMenu {
    */
   async revealItem(item: Locator | string): Promise<void> {
     const locator = this.toLocator(item);
+
+    // The app menu initialises asynchronously (lazy chunk load, async profile
+    // resolution on security serverless). The loading skeleton (`app-menu-loading`)
+    // is replaced by real items once the config is ready — wait for it to clear
+    // before testing visibility.
+    await this.loadingSkeleton.waitFor({ state: 'hidden', timeout: 30_000 });
+
     if (await locator.isVisible()) {
       return;
     }

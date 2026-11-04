@@ -20,7 +20,6 @@ dependsOn:
   - '@kbn/zod'
   - '@kbn/deeplinks-security'
   - '@kbn/workflows'
-  - '@kbn/agentic-investigations-plugin'
 tags:
   - shared-common
   - package
@@ -33,6 +32,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

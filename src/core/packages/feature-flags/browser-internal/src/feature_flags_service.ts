@@ -20,9 +20,13 @@ import type {
 import { apm } from '@elastic/apm-rum';
 import { type Client, ClientProviderEvents, OpenFeature } from '@openfeature/web-sdk';
 import deepMerge from 'deepmerge';
+import { useMemo } from 'react';
+import type { Observable } from 'rxjs';
 import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
+import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
+import { withTimeout } from '@kbn/std';
 
 /**
  * setup method dependencies
@@ -62,6 +66,32 @@ const getFeatureFlagValueType = (value: FeatureFlagValue): FeatureFlagValueType 
 
   return 'string';
 };
+
+/** Lets useObservable reseed during render when the flag or fallback changes. */
+function withSyncValue<T extends FeatureFlagValue>(
+  source$: Observable<T>,
+  readValue: () => T
+): ValueObservable<T> {
+  return {
+    subscribe: (listener) => source$.subscribe(listener),
+    getValue: readValue,
+  };
+}
+
+/** Subscribes to a flag and reads the synchronous evaluation on each render that changes arguments. */
+function useFeatureFlagValue<T extends FeatureFlagValue>(
+  flagName: string,
+  fallbackValue: T,
+  getValue$: (flagName: string, fallbackValue: T) => Observable<T>,
+  getValue: (flagName: string, fallbackValue: T) => T
+): T {
+  const value$ = useMemo(
+    () =>
+      withSyncValue(getValue$(flagName, fallbackValue), () => getValue(flagName, fallbackValue)),
+    [getValue$, getValue, flagName, fallbackValue]
+  );
+  return useObservable(value$);
+}
 
 export class FeatureFlagsService {
   private readonly featureFlagsClient: Client;
@@ -149,43 +179,34 @@ export class FeatureFlagsService {
 
     await this.waitForProviderInitialization();
 
+    const getBooleanValue = (flagName: string, fallbackValue: boolean) =>
+      this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue);
+    const getBooleanValue$ = (flagName: string, fallbackValue: boolean) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getBooleanValue(flagName, fallbackValue)));
+    const getStringValue = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue);
+    const getStringValue$ = <Value extends string>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getStringValue(flagName, fallbackValue)));
+    const getNumberValue = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue);
+    const getNumberValue$ = <Value extends number>(flagName: string, fallbackValue: Value) =>
+      observeFeatureFlag$(flagName).pipe(map(() => getNumberValue(flagName, fallbackValue)));
+
+    const useBooleanValue = (flagName: string, fallbackValue: boolean): boolean =>
+      useFeatureFlagValue(flagName, fallbackValue, getBooleanValue$, getBooleanValue);
+    const useStringValue = <Value extends string>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getStringValue$, getStringValue);
+    const useNumberValue = <Value extends number>(flagName: string, fallbackValue: Value): Value =>
+      useFeatureFlagValue(flagName, fallbackValue, getNumberValue$, getNumberValue);
+
     return {
       appendContext: (contextToAppend) => this.appendContext(contextToAppend),
-      getBooleanValue: (flagName: string, fallbackValue: boolean) =>
-        this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue),
-      getStringValue: <Value extends string>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getStringValue, flagName, fallbackValue),
-      getNumberValue: <Value extends number>(flagName: string, fallbackValue: Value) =>
-        this.evaluateFlag<Value>(this.featureFlagsClient.getNumberValue, flagName, fallbackValue),
-      getBooleanValue$: (flagName, fallbackValue) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag(this.featureFlagsClient.getBooleanValue, flagName, fallbackValue)
-          )
-        );
-      },
-      getStringValue$: <Value extends string>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getStringValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
-      getNumberValue$: <Value extends number>(flagName: string, fallbackValue: Value) => {
-        return observeFeatureFlag$(flagName).pipe(
-          map(() =>
-            this.evaluateFlag<Value>(
-              this.featureFlagsClient.getNumberValue,
-              flagName,
-              fallbackValue
-            )
-          )
-        );
-      },
+      getBooleanValue$,
+      useBooleanValue,
+      getStringValue$,
+      useStringValue,
+      getNumberValue$,
+      useNumberValue,
     };
   }
 
@@ -202,21 +223,21 @@ export class FeatureFlagsService {
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
-    let timeoutId: NodeJS.Timeout | undefined;
-    await Promise.race([
-      this.isProviderReadyPromise,
-      new Promise((resolve) => {
-        timeoutId = setTimeout(resolve, 2 * 1000);
-      }).then(() => {
-        const msg = `The feature flags provider took too long to initialize.
+    if (!this.isProviderReadyPromise) {
+      return;
+    }
+    const outcome = await withTimeout({
+      promise: this.isProviderReadyPromise,
+      timeoutMs: 2 * 1000,
+    });
+    if (outcome.timedout) {
+      const msg = `The feature flags provider took too long to initialize.
         Won't hold the page load any longer.
         Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
-        this.logger.warn(msg);
-        // Flag the transaction as slow so that we can quantify how often it happens
-        apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
-      }),
-    ]);
-    clearTimeout(timeoutId);
+      this.logger.warn(msg);
+      // Flag the transaction as slow so that we can quantify how often it happens
+      apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
+    }
   }
 
   /**
