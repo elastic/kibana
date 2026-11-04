@@ -15,6 +15,8 @@ import {
 import {
   DECISION_AUTO_CLOSE_SEVERITIES,
   DECISION_DAILY_CLOSE_CAP,
+  DECISION_MATCH_TOTAL_BUDGET_MS,
+  DECISION_MATCH_WORK_BUDGET_MS,
   DECISION_NOTES_PER_SWEEP,
   NOTE_CONCURRENCY,
   VERDICT_INCONCLUSIVE_TAG,
@@ -74,6 +76,8 @@ const NOTHING = {
   excluded_by_severity: 0,
   tag_failures: 0,
   notes_missing: 0,
+  deferred: 0,
+  out_of_time: false,
 };
 
 /**
@@ -112,6 +116,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         }
 
         const now = Date.now();
+        // After the work deadline no new decision is started and no new page is read: the rest waits
+        // for the next sweep. After the total deadline no new note is started.
+        const workDeadline = now + DECISION_MATCH_WORK_BUDGET_MS;
+        const totalDeadline = now + DECISION_MATCH_TOTAL_BUDGET_MS;
         const filters = {
           minSeverity: input.min_severity,
           excludeBuildingBlocks: input.exclude_building_blocks,
@@ -125,25 +133,29 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         const decisionsById = new Map<string, StoredDecision>();
         let notesLeft = DECISION_NOTES_PER_SWEEP;
 
+        const outOfTime = () => {
+          if (Date.now() <= workDeadline) return false;
+          totals.out_of_time = true;
+          return true;
+        };
+
         /**
-         * Says on each alert why it was closed or kept out of analysis, so an analyst reading the
-         * alert does not have to look the decision up. A note that cannot be written never undoes
-         * the close: it is counted in `notes_missing`.
+         * Notes say on each alert why it was closed or kept out of analysis, so an analyst reading
+         * the alert does not have to look the decision up. They are queued here and written once
+         * for the whole step, in one pool: the notes route takes one note per call, so a pool per
+         * decision would leave most decisions waiting on one call each. A note that cannot be
+         * written never undoes the close: it is counted in `notes_missing`.
          */
-        const addNotes = async (id: string, alertIds: string[], action: 'closed' | 'skipped') => {
+        const noteJobs: Array<{ alertId: string; note: string }> = [];
+        const queueNotes = (id: string, alertIds: string[], action: 'closed' | 'skipped') => {
           const decision = decisionsById.get(id);
-          const allowed = alertIds.slice(0, notesLeft);
+          const allowed = decision === undefined ? [] : alertIds.slice(0, notesLeft);
           notesLeft -= allowed.length;
-          const failed =
-            decision === undefined || allowed.length === 0
-              ? allowed
-              : await writeAlertNotes(
-                  contextManager,
-                  allowed,
-                  noteText(decision, action),
-                  NOTE_CONCURRENCY
-                );
-          totals.notes_missing += alertIds.length - allowed.length + failed.length;
+          if (decision !== undefined) {
+            const note = noteText(decision, action);
+            allowed.forEach((alertId) => noteJobs.push({ alertId, note }));
+          }
+          totals.notes_missing += alertIds.length - allowed.length;
         };
 
         const warn = (what: string, error: unknown) =>
@@ -152,6 +164,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
         /** Tags the alerts of each decision. A decision that cannot be tagged is counted and skipped. */
         const tag = async (prefix: string, byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
+            if (outOfTime()) {
+              totals.deferred++;
+              continue;
+            }
             try {
               await tagInChunks(write, { alertIds, add: [`${prefix}${id}`], remove: [] });
             } catch (error) {
@@ -190,6 +206,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
          */
         const close = async (byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
+            if (outOfTime()) {
+              totals.deferred++;
+              continue;
+            }
             let tagged: string[] = [];
             try {
               if (!room.has(id)) {
@@ -216,7 +236,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 await closeAlertsAsFalsePositive(contextManager, closing);
                 totals.closed += closing.length;
                 room.set(id, (room.get(id) ?? 0) - closing.length);
-                await addNotes(id, closing, 'closed');
+                queueNotes(id, closing, 'closed');
               }
             } catch (error) {
               totals.close_failures++;
@@ -228,6 +248,10 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
 
         const tagSkipped = async (byDecision: Map<string, string[]>) => {
           for (const [id, alertIds] of byDecision) {
+            if (outOfTime()) {
+              totals.deferred++;
+              continue;
+            }
             try {
               await tagInChunks(write, {
                 alertIds,
@@ -235,7 +259,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
                 remove: [],
               });
               totals.skipped += alertIds.length;
-              await addNotes(id, alertIds, 'skipped');
+              queueNotes(id, alertIds, 'skipped');
             } catch (error) {
               totals.tag_failures++;
               warn(`Could not tag the alerts of decision ${id}`, error);
@@ -248,6 +272,7 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
 
         let after: DecisionCursor | undefined;
         for (let page = 0; page < MAX_PAGES; page++) {
+          if (outOfTime()) break;
           const found = await fetchDecisionCandidates(
             contextManager,
             input.analysis_tag_prefix,
@@ -291,6 +316,11 @@ export const getTriageMatchFpDecisionsStepDefinition = ({
           after = found.after;
           if (after === undefined) break;
         }
+
+        totals.notes_missing += await writeAlertNotes(contextManager, noteJobs, {
+          concurrency: NOTE_CONCURRENCY,
+          deadline: totalDeadline,
+        });
 
         return result('ok', { ...totals, decisions_matched: decisionsSeen.size });
       } catch (error) {
