@@ -5,34 +5,48 @@
  * 2.0.
  */
 
-import { memoize } from 'lodash';
+import { memoize, once } from 'lodash';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
 import type { MappingField } from '@kbn/agent-builder-genai-utils';
 import { otherResult } from '@kbn/agent-builder-genai-utils/tools/utils/results';
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
-import { createIncludeFrozenSchema, getIncludeFrozenByDefault } from './include_frozen_schema';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
+
+const createGetIndexMappingsSchemaShape = () => ({
+  indices: z
+    .array(z.string())
+    .min(1)
+    .describe(
+      'List of indices, aliases, datastreams, or ES|QL views to retrieve fields for. Views return their output columns.'
+    ),
+  raw: z
+    .boolean()
+    .default(false)
+    .describe(
+      '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
+    ),
+});
 
 const createGetIndexMappingsSchema = memoize((includeFrozenByDefault: boolean) =>
   z.object({
-    indices: z
-      .array(z.string())
-      .min(1)
-      .describe(
-        'List of indices, aliases, datastreams, or ES|QL views to retrieve fields for. Views return their output columns.'
-      ),
-    raw: z
-      .boolean()
-      .default(false)
-      .describe(
-        '(Optional) Whether to return the raw mapping tree instead of the summarized fields.'
-      ),
+    ...createGetIndexMappingsSchemaShape(),
     include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
   })
 );
 
-type GetIndexMappingsSchema = ReturnType<typeof createGetIndexMappingsSchema>;
+const createServerlessGetIndexMappingsSchema = once(() =>
+  z.object(createGetIndexMappingsSchemaShape())
+);
+
+type GetIndexMappingsSchema =
+  | ReturnType<typeof createGetIndexMappingsSchema>
+  | ReturnType<typeof createServerlessGetIndexMappingsSchema>;
 
 const renderTypeSegment = (field: MappingField): string => {
   const parts: string[] = [field.type];
@@ -67,12 +81,12 @@ const NO_FIELDS_FROZEN_EXCLUDED_NOTE =
 
 const NO_FIELDS_NOTE = 'No fields found.';
 
-const fieldsNote = (totalFields: number, includeFrozen: boolean): string | undefined => {
+const fieldsNote = (totalFields: number, frozenExcluded: boolean): string | undefined => {
   if (totalFields > FIELD_LIMIT) {
     return truncationNote(totalFields);
   }
   if (totalFields === 0) {
-    return includeFrozen ? NO_FIELDS_NOTE : NO_FIELDS_FROZEN_EXCLUDED_NOTE;
+    return frozenExcluded ? NO_FIELDS_FROZEN_EXCLUDED_NOTE : NO_FIELDS_NOTE;
   }
   return undefined;
 };
@@ -95,7 +109,11 @@ const countMappingNodes = (properties: Record<string, MappingNodeProps> | undefi
 
 type GetIndexMappingsTool = DynamicSchemaBuiltinToolDefinition<GetIndexMappingsSchema>;
 
-export const getIndexMappingsTool = (): GetIndexMappingsTool => {
+export const getIndexMappingsTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): GetIndexMappingsTool => {
   return {
     id: platformCoreTools.getIndexMapping,
     type: ToolType.builtin,
@@ -109,8 +127,13 @@ export const getIndexMappingsTool = (): GetIndexMappingsTool => {
       openWorldHint: false,
     },
     getSchema: async (schemaContext) =>
-      createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
-    handler: async ({ indices, raw, include_frozen: includeFrozen }, { esClient }) => {
+      isServerless
+        ? createServerlessGetIndexMappingsSchema()
+        : createGetIndexMappingsSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (params, { esClient }) => {
+      const { indices, raw } = params;
+      const includeFrozen = getIncludeFrozenParam(params);
+      const frozenExcluded = !isServerless && !includeFrozen;
       // getIndexFields transparently handles the local-vs-CCS split:
       //  - local indices use _mapping API (full mapping tree in rawMapping)
       //  - CCS indices use batched _field_caps API (flat field list)
@@ -126,7 +149,7 @@ export const getIndexMappingsTool = (): GetIndexMappingsTool => {
           const totalFields = v.fields.length;
           const truncated = totalFields > FIELD_LIMIT;
           const cappedFields = truncated ? v.fields.slice(0, FIELD_LIMIT) : v.fields;
-          const note = fieldsNote(totalFields, includeFrozen);
+          const note = fieldsNote(totalFields, frozenExcluded);
 
           if (raw) {
             if (v.rawMapping) {

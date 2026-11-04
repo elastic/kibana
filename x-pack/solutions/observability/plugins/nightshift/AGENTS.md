@@ -4,6 +4,8 @@ This file applies to the `nightshift` plugin. `nightshift_investigations`, `nigh
 
 Source of the rule: `ai-essentials/rules/test-value.mdc` (copied in, keep in sync by hand).
 
+PR description rule: follow the [`nightshift-pr-description` skill](../../../../../.agents/skills/nightshift-pr-description/SKILL.md) when writing or rewriting a pull request description. It scales what the description shows to the change's risk tier.
+
 # Tests earn their place
 
 Every test runs on every CI run, forever, and costs money, time and review attention. Write the smallest set that protects the behaviour of the change. A change that needs no test gets none, and the report says why.

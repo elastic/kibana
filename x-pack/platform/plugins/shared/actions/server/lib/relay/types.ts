@@ -137,6 +137,11 @@ export interface RelayReadMessagesInput {
   limit?: number;
 }
 
+/** A single thread (`GET .../channels/:id/threads/:ts`); the whole thread unless narrowed. */
+export interface RelayReadThreadInput extends RelayReadMessagesInput {
+  threadTs: string;
+}
+
 export interface RelayReadMessage {
   ts: string;
   threadTs?: string;
@@ -148,7 +153,7 @@ export interface RelayReadMessage {
 
 export interface RelayReadResponse {
   channel: { id: string; name: string };
-  /** Newest first. */
+  /** Channel reads come newest first, thread reads oldest first. */
   messages: RelayReadMessage[];
   /** Slack has more in the window, or the Relay clipped the response at its size cap. */
   truncated: boolean;
@@ -179,6 +184,8 @@ export interface RelayClientContract {
   trigger(input: RelayTriggerInput): Promise<RelayTriggerResponse>;
   /** Read a window of a bound public channel. 403 `not_readable` on any denial; 429 if Slack throttled it. */
   readMessages(input: RelayReadMessagesInput): Promise<RelayReadResponse>;
+  /** Read one thread of a bound public channel. Fails like `readMessages`. */
+  readThread(input: RelayReadThreadInput): Promise<RelayReadResponse>;
   isRelayOrigin(url: string): boolean;
   postCallback(url: string, body: unknown, signal: AbortSignal): Promise<RelayCallbackResponse>;
 }
