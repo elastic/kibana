@@ -103,6 +103,7 @@ import { registerAssistantAgentType } from './agents/assistant';
 import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createTimeConverterTool } from './tools/time_converter/tool';
+import { createSlackReadTool } from './tools/slack_read/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -374,6 +375,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      plugins.agentBuilder.tools.register({
+        ...createSlackReadTool({ getActions: () => this.actionsStart }),
+        availability: createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        }),
+      });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
