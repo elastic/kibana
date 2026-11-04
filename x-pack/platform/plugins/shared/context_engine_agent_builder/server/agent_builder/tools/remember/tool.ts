@@ -16,7 +16,6 @@ import {
   MAX_SESSION_MEMORY_CONTENT_LENGTH,
   MAX_SESSION_MEMORY_ID_LENGTH,
 } from '@kbn/context-engine-plugin/common/constants';
-import { SESSION_MEMORY_TYPE_SUGGESTIONS } from '@kbn/context-engine-plugin/common/http_api/session_memory';
 import type { ContextEnginePluginStart } from '@kbn/context-engine-plugin/server';
 import type { CoreStart } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -25,9 +24,6 @@ import dedent from 'dedent';
 import { assertContextEngineWriteAccess } from '../../assert_context_engine_write_access';
 import { createMemoryToolsAvailability } from '../ai_index_tools_availability';
 
-/** Agent id recorded for MCP calls, which run outside an Agent Builder agent. */
-const MCP_AGENT_ID = 'mcp';
-
 const rememberSchema = lazySchema(() =>
   z.object({
     content: z
@@ -35,16 +31,6 @@ const rememberSchema = lazySchema(() =>
       .min(1)
       .max(MAX_SESSION_MEMORY_CONTENT_LENGTH)
       .describe('The memory, in enough words to use it later without re-deriving it.'),
-    type: z
-      .string()
-      .min(1)
-      .max(MAX_SESSION_MEMORY_ID_LENGTH)
-      .optional()
-      .describe(
-        `Optional category, for example ${SESSION_MEMORY_TYPE_SUGGESTIONS.join(
-          ', '
-        )}. Any other short label is accepted.`
-      ),
     aiIndexId: aiIndexIdFieldSchema
       .optional()
       .describe(
@@ -85,8 +71,8 @@ export const createRememberTool = ({
   },
   description: dedent`
     Store a memory for the current user and session in Context Engine session memory.
-    Memories are scoped to the user, the session (the current conversation), and this agent, and
-    can be recalled across sessions. Record what will be useful later: preferences the user
+    Memories are scoped to the user and the session (the current conversation), and can be
+    recalled across sessions. Record what will be useful later: preferences the user
     stated, constraints to respect, facts established, decisions made, or a summary of what was
     tried. Optionally scope
     the memory to an AI index with aiIndexId. For MCP calls, omit sessionId unless continuing with
@@ -130,10 +116,8 @@ export const createRememberTool = ({
       const stored = await (await getContextEngineStart()).getSessionMemoryService().remember({
         session_id: sessionId,
         user_id: userId,
-        agent_id: agent?.agentId ?? MCP_AGENT_ID,
         space: spaceId,
         ...(params.aiIndexId ? { ai_index_id: [params.aiIndexId] } : {}),
-        ...(params.type ? { type: params.type } : {}),
         content: params.content,
       });
 

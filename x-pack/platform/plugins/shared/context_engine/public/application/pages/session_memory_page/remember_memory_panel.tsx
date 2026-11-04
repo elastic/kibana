@@ -5,20 +5,11 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiComboBox,
-  EuiForm,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTextArea,
-} from '@elastic/eui';
+import { EuiButton, EuiForm, EuiFormRow, EuiPanel, EuiSpacer, EuiTextArea } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnSuccessCallout } from '@kbn/ui-callout';
 import React, { useState } from 'react';
-import { SESSION_MEMORY_TYPE_SUGGESTIONS } from '../../../../common/http_api/session_memory';
 import type {
   RememberSessionMemoryBody,
   SessionMemoryMediaItem,
@@ -32,12 +23,6 @@ import { hasWriteIdentity, useSessionContext } from './session_context';
 import type { SessionContextValue } from './session_context';
 
 const labels = {
-  type: i18n.translate('xpack.contextEngine.sessionMemory.remember.type', {
-    defaultMessage: 'Type',
-  }),
-  typePlaceholder: i18n.translate('xpack.contextEngine.sessionMemory.remember.typePlaceholder', {
-    defaultMessage: 'Select or type a category',
-  }),
   content: i18n.translate('xpack.contextEngine.sessionMemory.remember.content', {
     defaultMessage: 'Content',
   }),
@@ -50,33 +35,25 @@ const labels = {
   fileHelp: i18n.translate('xpack.contextEngine.sessionMemory.remember.fileHelp', {
     defaultMessage: 'PNG, JPEG, WebP, GIF, or PDF under 1 MB. Embedded with the content.',
   }),
-  optional: i18n.translate('xpack.contextEngine.sessionMemory.remember.optional', {
-    defaultMessage: 'Optional',
-  }),
   submit: i18n.translate('xpack.contextEngine.sessionMemory.remember.submit', {
     defaultMessage: 'Remember',
   }),
 };
 
 export const buildRememberBody = (
-  { sessionId, userId, agentId, spaceId, aiIndexIds }: SessionContextValue,
-  { type, content, media }: { type: string; content: string; media?: SessionMemoryMediaItem }
+  { sessionId, userId, spaceId, aiIndexIds }: SessionContextValue,
+  { content, media }: { content: string; media?: SessionMemoryMediaItem }
 ): RememberSessionMemoryBody => ({
   session_id: sessionId.trim(),
   user_id: userId ?? '',
-  agent_id: agentId.trim(),
   ...(spaceId ? { space: spaceId } : {}),
   ...(aiIndexIds.length ? { ai_index_id: aiIndexIds } : {}),
-  ...(type.trim() ? { type: type.trim() } : {}),
   ...(content.trim() ? { content: content.trim() } : {}),
   ...(media ? { media: [media] } : {}),
 });
 
-const typeOptions = SESSION_MEMORY_TYPE_SUGGESTIONS.map((label) => ({ label }));
-
 export const RememberMemoryPanel = () => {
   const session = useSessionContext();
-  const [type, setType] = useState('');
   const [content, setContent] = useState('');
   const [media, setMedia] = useState<SessionMemoryMediaItem | undefined>();
   const { mutate, isLoading, data } = useRememberSessionMemory();
@@ -88,7 +65,7 @@ export const RememberMemoryPanel = () => {
     if (!canSubmit) {
       return;
     }
-    mutate(buildRememberBody(session, { type, content, media }));
+    mutate(buildRememberBody(session, { content, media }));
   };
 
   return (
@@ -109,21 +86,6 @@ export const RememberMemoryPanel = () => {
         }
       />
       <EuiForm component="form" onSubmit={submit}>
-        <EuiFormRow label={labels.type} labelAppend={labels.optional} fullWidth>
-          <EuiComboBox
-            fullWidth
-            compressed
-            singleSelection={{ asPlainText: true }}
-            options={typeOptions}
-            selectedOptions={type ? [{ label: type }] : []}
-            onChange={(selected) => setType(selected[0]?.label ?? '')}
-            onCreateOption={(created) => setType(created.trim())}
-            placeholder={labels.typePlaceholder}
-            isDisabled={isLoading}
-            data-test-subj="contextSessionMemoryRemember-type"
-            aria-label={labels.type}
-          />
-        </EuiFormRow>
         <EuiFormRow label={labels.content} helpText={labels.contentHelp} fullWidth>
           <EuiTextArea
             fullWidth

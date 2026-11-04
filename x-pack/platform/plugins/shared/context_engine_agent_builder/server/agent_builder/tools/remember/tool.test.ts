@@ -61,7 +61,7 @@ describe('remember tool', () => {
     } as unknown as ToolHandlerContext;
   };
 
-  const params = { content: 'Prefers dark mode.', type: 'preference' };
+  const params = { content: 'Prefers dark mode.' };
 
   const run = async (
     input: Parameters<NonNullable<ReturnType<typeof createTool>['handler']>>[0] = params,
@@ -86,15 +86,13 @@ describe('remember tool', () => {
     }));
   });
 
-  it('uses the expected id and accepts content with an optional type and AI index', () => {
+  it('uses the expected id and accepts content with an optional AI index', () => {
     const tool = createTool();
     expect(tool.id).toBe(contextEngineMemoryTools.remember);
     expect(tool.availability?.cacheMode).toBe('none');
     expect(tool.schema.safeParse({ content: 'x' }).success).toBe(true);
     expect(tool.schema.safeParse({ ...params, aiIndexId: 'support' }).success).toBe(true);
     expect(tool.schema.safeParse({ content: '' }).success).toBe(false);
-    expect(tool.schema.safeParse({ type: 'preference' }).success).toBe(false);
-    expect(tool.schema.shape.type.description).toContain('preference');
     expect(tool.schema.shape.sessionId.description).toContain(
       'sessionId returned by an earlier remember call'
     );
@@ -114,7 +112,7 @@ describe('remember tool', () => {
     expect(remember).not.toHaveBeenCalled();
   });
 
-  it('stores the memory for the current user, conversation, agent, and space', async () => {
+  it('stores the memory for the current user, conversation, and space', async () => {
     const result = await run({ ...params, aiIndexId: 'support' });
 
     expect(assertContextEngineWriteAccessMock).toHaveBeenCalledWith(
@@ -123,10 +121,8 @@ describe('remember tool', () => {
     expect(remember).toHaveBeenCalledWith({
       session_id: 'conversation-1',
       user_id: 'kathleen',
-      agent_id: 'agent-1',
       space: 'space-1',
       ai_index_id: ['support'],
-      type: 'preference',
       content: 'Prefers dark mode.',
     });
     expect(result).toEqual({
@@ -136,13 +132,12 @@ describe('remember tool', () => {
     });
   });
 
-  it('omits type and AI index when not given', async () => {
+  it('omits the AI index when not given', async () => {
     await run({ content: 'Prefers dark mode.' });
 
     expect(remember).toHaveBeenCalledWith({
       session_id: 'conversation-1',
       user_id: 'kathleen',
-      agent_id: 'agent-1',
       space: 'space-1',
       content: 'Prefers dark mode.',
     });

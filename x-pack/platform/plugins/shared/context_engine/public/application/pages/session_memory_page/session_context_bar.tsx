@@ -18,11 +18,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect } from 'react';
-import { useAgentBuilderAgents } from '../../hooks/use_agent_builder_agents';
+import React from 'react';
 import { useAiIndexOptions } from './use_ai_index_options';
 import { useSessionContext } from './session_context';
 
@@ -32,12 +30,6 @@ const labels = {
   }),
   newSession: i18n.translate('xpack.contextEngine.sessionMemory.context.newSession', {
     defaultMessage: 'Start a new session',
-  }),
-  agent: i18n.translate('xpack.contextEngine.sessionMemory.context.agent', {
-    defaultMessage: 'Agent',
-  }),
-  agentPlaceholder: i18n.translate('xpack.contextEngine.sessionMemory.context.agentPlaceholder', {
-    defaultMessage: 'Select or type an agent id',
   }),
   aiIndex: i18n.translate('xpack.contextEngine.sessionMemory.context.aiIndex', {
     defaultMessage: 'AI indices',
@@ -50,34 +42,12 @@ const labels = {
 
 /**
  * The shared identity strip above the panels: who (current user), where (current space), and the
- * session, agent, and AI index every remember, search, and event call is scoped to.
+ * session and AI indices every remember and search call is scoped to.
  */
 export const SessionContextBar = () => {
-  const {
-    userId,
-    spaceId,
-    sessionId,
-    setSessionId,
-    newSession,
-    agentId,
-    setAgentId,
-    aiIndexIds,
-    setAiIndexIds,
-  } = useSessionContext();
-  const { agents, isLoading: isLoadingAgents } = useAgentBuilderAgents();
+  const { userId, spaceId, sessionId, setSessionId, newSession, aiIndexIds, setAiIndexIds } =
+    useSessionContext();
   const { options: aiIndexOptions, isLoading: isLoadingAiIndices } = useAiIndexOptions();
-
-  // Default to the Elastic AI agent once the list arrives; the list also holds platform agents
-  // (e.g. Context Engine's own setup agent) that are not sensible authors of a manual memory.
-  useEffect(() => {
-    if (agentId || agents.length === 0) {
-      return;
-    }
-    const defaultAgent = agents.find((agent) => agent.id === agentBuilderDefaultAgentId);
-    setAgentId((defaultAgent ?? agents[0]).id);
-  }, [agentId, agents, setAgentId]);
-
-  const agentOptions = agents.map((agent) => ({ label: agent.id, value: agent.id }));
 
   return (
     <EuiPanel color="subdued" hasBorder paddingSize="m" data-test-subj="contextSessionContextBar">
@@ -132,23 +102,6 @@ export const SessionContextBar = () => {
           </EuiFormRow>
         </EuiFlexItem>
         <EuiFlexItem>
-          <EuiFormRow label={labels.agent} fullWidth>
-            <EuiComboBox
-              fullWidth
-              compressed
-              singleSelection={{ asPlainText: true }}
-              isLoading={isLoadingAgents}
-              options={agentOptions}
-              selectedOptions={agentId ? [{ label: agentId, value: agentId }] : []}
-              onChange={(selected) => setAgentId(selected[0]?.label ?? '')}
-              onCreateOption={(created) => setAgentId(created.trim())}
-              placeholder={labels.agentPlaceholder}
-              data-test-subj="contextSessionContextAgent"
-              aria-label={labels.agent}
-            />
-          </EuiFormRow>
-        </EuiFlexItem>
-        <EuiFlexItem>
           <EuiFormRow label={labels.aiIndex} fullWidth>
             <EuiComboBox
               fullWidth
@@ -174,7 +127,7 @@ export const SessionContextBar = () => {
         <p>
           <FormattedMessage
             id="xpack.contextEngine.sessionMemory.context.help"
-            defaultMessage="Memories and events are written for this user, space, session, and agent. The session id is generated per visit; edit it to continue an earlier session."
+            defaultMessage="Memories are written for this user, space, and session. The session id is generated per visit; edit it to continue an earlier session."
           />
         </p>
       </EuiText>

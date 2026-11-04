@@ -25,8 +25,6 @@ const memory = {
   '@timestamp': '2026-09-24T12:00:00.000Z',
   session_id: 'conversation-0',
   user_id: 'kathleen',
-  agent_id: 'agent-1',
-  type: 'preference',
   content: 'Prefers dark mode.',
 };
 
@@ -119,7 +117,6 @@ describe('recall tool', () => {
                 score: 0.9,
                 timestamp: '2026-09-24T12:00:00.000Z',
                 session_id: 'conversation-0',
-                type: 'preference',
                 content: 'Prefers dark mode.',
               },
             ],

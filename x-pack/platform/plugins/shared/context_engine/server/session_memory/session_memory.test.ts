@@ -14,7 +14,6 @@ describe('SessionMemoryService', () => {
     const body = {
       session_id: 's-1',
       user_id: 'u-1',
-      agent_id: 'a-1',
       content: 'Prefers dark mode',
     };
     const stored = { ...body, id: 'm-1', '@timestamp': '2026-01-01T00:00:00.000Z' };

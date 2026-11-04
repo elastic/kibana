@@ -23,8 +23,6 @@ export const buildSessionContext = (
   sessionId: 'session-1',
   setSessionId: jest.fn(),
   newSession: jest.fn(),
-  agentId: 'elastic-agent',
-  setAgentId: jest.fn(),
   aiIndexIds: [],
   setAiIndexIds: jest.fn(),
   ...overrides,

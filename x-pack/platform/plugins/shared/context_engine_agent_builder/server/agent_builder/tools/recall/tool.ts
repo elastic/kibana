@@ -77,7 +77,7 @@ export const createRecallTool = ({
     meaning. Use it before answering when earlier sessions may hold preferences, facts, or decisions
     relevant to the question. By default every session of the user is searched; pass
     scope 'session' to look only at the current conversation. Results come back best match first
-    with a relevance score, the memory text, its type, and the session it was recorded in.
+    with a relevance score, the memory text, and the session it was recorded in.
   `,
   schema: recallSchema,
   handler: async (params, context) => {
@@ -128,7 +128,6 @@ export const createRecallTool = ({
                 score: _score,
                 timestamp: memory['@timestamp'],
                 session_id: memory.session_id,
-                ...(memory.type ? { type: memory.type } : {}),
                 ...(memory.content ? { content: memory.content } : {}),
                 ...(memory.media?.length
                   ? { media: memory.media.map(({ type }) => ({ type })) }

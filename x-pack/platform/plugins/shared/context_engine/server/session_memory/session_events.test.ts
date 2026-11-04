@@ -11,7 +11,7 @@ import { SessionEventsService } from './session_events';
 describe('SessionEventsService', () => {
   it('POSTs the event to the ES session events save endpoint', async () => {
     const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    const body = { session_id: 's-1', user_id: 'u-1', agent_id: 'a-1', transcript: 'user: hi' };
+    const body = { session_id: 's-1', user_id: 'u-1', transcript: 'user: hi' };
     const stored = { ...body, id: 'e-1', '@timestamp': '2026-01-01T00:00:00.000Z' };
     esClient.transport.request.mockResolvedValue(stored);
 

@@ -38,7 +38,6 @@ const memory = {
   '@timestamp': '2026-01-01T00:00:00.000Z',
   session_id: 's-1',
   user_id: 'u-1',
-  agent_id: 'a-1',
 };
 
 describe('SearchMemoryPanel', () => {
@@ -71,7 +70,7 @@ describe('SearchMemoryPanel', () => {
     });
   });
 
-  it('applies the session, agent, and AI index filters when checked', () => {
+  it('applies the session and AI index filters when checked', () => {
     const mutate = jest.fn();
     mockUseSearchSessionMemory.mockReturnValue(mutationResult({ mutate }));
     renderWithProviders(<SearchMemoryPanel />, {
@@ -83,14 +82,12 @@ describe('SearchMemoryPanel', () => {
     });
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-user'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-session'));
-    fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-agent'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-filter-aiIndex'));
     fireEvent.click(screen.getByTestId('contextSessionMemorySearch-submit'));
 
     expect(mutate).toHaveBeenCalledWith({
       query: 'dark mode',
       session_id: 'session-1',
-      agent_id: 'elastic-agent',
       space: 'default',
       ai_index_id: 'support',
       size: 10,

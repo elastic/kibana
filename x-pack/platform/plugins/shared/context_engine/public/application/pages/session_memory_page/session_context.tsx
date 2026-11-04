@@ -13,7 +13,7 @@ import { useSpaceId } from '../../hooks/use_space_id';
 
 /**
  * The identity and scope every session memory call shares. User and space come from the Kibana
- * session; the session id is generated per page visit and the agent and AI index are picked once.
+ * session; the session id is generated per page visit and the AI indices are picked once.
  */
 export interface SessionContextValue {
   userId: string | undefined;
@@ -21,8 +21,6 @@ export interface SessionContextValue {
   sessionId: string;
   setSessionId: (sessionId: string) => void;
   newSession: () => void;
-  agentId: string;
-  setAgentId: (agentId: string) => void;
   aiIndexIds: string[];
   setAiIndexIds: (aiIndexIds: string[]) => void;
 }
@@ -39,7 +37,6 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
   const userId = useCurrentUserId();
   const { spaceId } = useSpaceId(spaces);
   const [sessionId, setSessionId] = useState(generateSessionId);
-  const [agentId, setAgentId] = useState('');
   const [aiIndexIds, setAiIndexIds] = useState<string[]>([]);
   const newSession = useCallback(() => setSessionId(generateSessionId()), []);
 
@@ -50,12 +47,10 @@ export const SessionContextProvider = ({ children }: { children: React.ReactNode
       sessionId,
       setSessionId,
       newSession,
-      agentId,
-      setAgentId,
       aiIndexIds,
       setAiIndexIds,
     }),
-    [userId, spaceId, sessionId, newSession, agentId, aiIndexIds]
+    [userId, spaceId, sessionId, newSession, aiIndexIds]
   );
 
   return <SessionContext.Provider value={value}>{children}</SessionContext.Provider>;
@@ -69,6 +64,6 @@ export const useSessionContext = (): SessionContextValue => {
   return value;
 };
 
-/** Whether the required write identity (session, user, agent) is known. */
-export const hasWriteIdentity = ({ sessionId, userId, agentId }: SessionContextValue): boolean =>
-  sessionId.trim().length > 0 && Boolean(userId) && agentId.trim().length > 0;
+/** Whether the required write identity (session, user) is known. */
+export const hasWriteIdentity = ({ sessionId, userId }: SessionContextValue): boolean =>
+  sessionId.trim().length > 0 && Boolean(userId);

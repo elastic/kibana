@@ -52,10 +52,8 @@ export const rememberSessionMemoryBodySchema = schema.object(
   {
     session_id: idSchema,
     user_id: idSchema,
-    agent_id: idSchema,
     space: optionalIdSchema,
     ai_index_id: aiIndexIdsSchema,
-    type: optionalIdSchema,
     content: schema.maybe(schema.string({ maxLength: MAX_SESSION_MEMORY_CONTENT_LENGTH })),
     media: schema.maybe(
       schema.arrayOf(mediaItemSchema, { maxSize: MAX_SESSION_MEMORY_MEDIA_ITEMS })
@@ -75,7 +73,6 @@ export const searchSessionMemoryBodySchema = schema.object({
   query: schema.oneOf([schema.string({ minLength: 1 }), mediaItemSchema]),
   session_id: optionalIdSchema,
   user_id: optionalIdSchema,
-  agent_id: optionalIdSchema,
   space: optionalIdSchema,
   ai_index_id: optionalIdSchema,
   size: schema.number({
@@ -102,7 +99,6 @@ export const sessionScopeQuerySchema = schema.object({
 export const listSessionMemoryQuerySchema = schema.object({
   session_id: optionalIdSchema,
   user_id: optionalIdSchema,
-  agent_id: optionalIdSchema,
   space: optionalIdSchema,
   ai_index_id: optionalIdSchema,
   size: listSizeSchema,
@@ -111,7 +107,6 @@ export const listSessionMemoryQuerySchema = schema.object({
 export const saveSessionEventBodySchema = schema.object({
   session_id: idSchema,
   user_id: idSchema,
-  agent_id: idSchema,
   round_id: optionalIdSchema,
   space: optionalIdSchema,
   ai_index_id: aiIndexIdsSchema,

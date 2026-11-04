@@ -28,7 +28,7 @@ interface RegisteredRoute {
   validate: unknown;
 }
 
-const scope = { session_id: 's-1', user_id: 'u-1', agent_id: 'a-1' };
+const scope = { session_id: 's-1', user_id: 'u-1' };
 
 describe('session memory routes', () => {
   let routes: Record<string, RegisteredRoute>;

@@ -14,7 +14,7 @@ import {
 } from '../../../common/constants';
 import { listSessionMemory, rememberSessionMemory, searchSessionMemory } from './session_memory';
 
-const scope = { session_id: 's-1', user_id: 'u-1', agent_id: 'a-1' };
+const scope = { session_id: 's-1', user_id: 'u-1' };
 
 describe('rememberSessionMemory', () => {
   it('POSTs the memory body to the versioned remember endpoint', async () => {

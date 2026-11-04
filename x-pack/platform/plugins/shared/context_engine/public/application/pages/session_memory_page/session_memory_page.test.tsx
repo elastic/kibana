@@ -25,13 +25,6 @@ jest.mock('../../hooks/use_session_memory_mutations', () => ({
   useSearchSessionMemory: () => ({ mutate: jest.fn(), isLoading: false }),
   useListSessionMemory: () => ({ mutate: jest.fn(), isLoading: false }),
 }));
-jest.mock('../../hooks/use_agent_builder_agents', () => ({
-  useAgentBuilderAgents: () => ({
-    agents: [{ id: 'elastic-agent', name: 'Elastic' }],
-    isLoading: false,
-    error: undefined,
-  }),
-}));
 jest.mock('./use_ai_index_options', () => ({
   useAiIndexOptions: () => ({
     options: [{ label: 'support', value: 'support' }],

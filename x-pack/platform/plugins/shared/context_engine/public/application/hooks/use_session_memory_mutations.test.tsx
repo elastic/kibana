@@ -13,7 +13,7 @@ import { act, renderHook, waitFor } from '@testing-library/react';
 import React from 'react';
 import { useRememberSessionMemory, useSearchSessionMemory } from './use_session_memory_mutations';
 
-const scope = { session_id: 's-1', user_id: 'u-1', agent_id: 'a-1' };
+const scope = { session_id: 's-1', user_id: 'u-1' };
 
 const renderWithQueryClient = <T,>(core: CoreStart, useHook: () => T) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });

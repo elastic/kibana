@@ -19,24 +19,12 @@ export interface SessionMemoryMediaItem {
   format?: SessionMemoryMediaFormat;
 }
 
-/** Suggested memory categories; `type` is free text, so any other value is accepted too. */
-export const SESSION_MEMORY_TYPE_SUGGESTIONS = [
-  'preference',
-  'constraint',
-  'fact',
-  'statement',
-  'summary',
-  'decision',
-] as const;
-
 /** Body of `POST /_context_engine/session_memory/_remember`. `@timestamp` is never sent; ES assigns it. */
 export interface RememberSessionMemoryBody {
   session_id: string;
   user_id: string;
-  agent_id: string;
   space?: string;
   ai_index_id?: string[];
-  type?: string;
   content?: string;
   media?: SessionMemoryMediaItem[];
   attributes?: Record<string, unknown>;
@@ -61,7 +49,6 @@ export interface SessionScopeQuery {
 export interface ListSessionMemoryQuery extends SessionScopeQuery {
   session_id?: string;
   user_id?: string;
-  agent_id?: string;
 }
 
 export interface ListSessionMemoryResponse {
@@ -78,7 +65,6 @@ export interface SearchSessionMemoryBody {
   query: SessionMemorySearchQuery;
   session_id?: string;
   user_id?: string;
-  agent_id?: string;
   space?: string;
   ai_index_id?: string;
   size?: number;
@@ -98,7 +84,6 @@ export interface SearchSessionMemoryResponse {
 export interface SaveSessionEventBody {
   session_id: string;
   user_id: string;
-  agent_id: string;
   round_id?: string;
   space?: string;
   ai_index_id?: string[];

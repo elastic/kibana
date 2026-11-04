@@ -67,7 +67,7 @@ describe('saveSessionEventForRound', () => {
     return { run, save, logger, contextEngine };
   };
 
-  it('saves the round verbatim as a session event scoped to the conversation, user, and agent', async () => {
+  it('saves the round verbatim as a session event scoped to the conversation and user', async () => {
     const { run, save } = setup();
     const round = buildRound();
 
@@ -76,7 +76,6 @@ describe('saveSessionEventForRound', () => {
     expect(save).toHaveBeenCalledWith({
       session_id: 'conv-1',
       user_id: 'kathleen',
-      agent_id: 'elastic-ai-agent',
       round_id: 'round-1',
       space: 'default',
       transcript: JSON.stringify(round),

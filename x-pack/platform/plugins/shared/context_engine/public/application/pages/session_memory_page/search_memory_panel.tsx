@@ -48,13 +48,12 @@ import { SessionMemoryCard } from './session_memory_card';
 type QueryMode = 'text' | 'file' | 'list';
 
 /** Which parts of the session context narrow the search. */
-export type SearchFilterKey = 'user' | 'session' | 'agent' | 'aiIndex';
+export type SearchFilterKey = 'user' | 'session' | 'aiIndex';
 export type SearchFilters = Record<SearchFilterKey, boolean>;
 
 export const DEFAULT_SEARCH_FILTERS: SearchFilters = {
   user: true,
   session: false,
-  agent: false,
   aiIndex: false,
 };
 
@@ -92,9 +91,6 @@ const labels = {
   filterSession: i18n.translate('xpack.contextEngine.sessionMemory.search.filterSession', {
     defaultMessage: 'this session',
   }),
-  filterAgent: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAgent', {
-    defaultMessage: 'this agent',
-  }),
   filterAiIndex: i18n.translate('xpack.contextEngine.sessionMemory.search.filterAiIndex', {
     defaultMessage: 'this AI index',
   }),
@@ -114,13 +110,12 @@ const labels = {
 
 /** The session context fields the checked filters select; shared by search and list. */
 export const buildListQuery = (
-  { sessionId, userId, agentId, spaceId, aiIndexIds }: SessionContextValue,
+  { sessionId, userId, spaceId, aiIndexIds }: SessionContextValue,
   filters: SearchFilters,
   size: number
 ): ListSessionMemoryQuery => ({
   ...(filters.session && sessionId.trim() ? { session_id: sessionId.trim() } : {}),
   ...(filters.user && userId ? { user_id: userId } : {}),
-  ...(filters.agent && agentId.trim() ? { agent_id: agentId.trim() } : {}),
   ...(spaceId ? { space: spaceId } : {}),
   // The APIs filter on a single AI index, so the filter only applies to a lone selection.
   ...(filters.aiIndex && aiIndexIds.length === 1 ? { ai_index_id: aiIndexIds[0] } : {}),
@@ -181,11 +176,6 @@ export const SearchMemoryPanel = () => {
       id: 'session',
       label: labels.filterSession,
       'data-test-subj': 'contextSessionMemorySearch-filter-session',
-    },
-    {
-      id: 'agent',
-      label: labels.filterAgent,
-      'data-test-subj': 'contextSessionMemorySearch-filter-agent',
     },
     {
       id: 'aiIndex',

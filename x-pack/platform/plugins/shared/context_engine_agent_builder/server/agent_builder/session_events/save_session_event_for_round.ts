@@ -59,8 +59,7 @@ const resolveUserId = async ({
 
 /**
  * After-execution hook body: records the completed round, serialized as-is, as a Context Engine
- * session event. The conversation is the session, the Kibana user is the user, and the executing
- * agent is the agent.
+ * session event. The conversation is the session and the Kibana user is the user.
  * Skipped for runs that never join a conversation and while the memory feature is off. Failures
  * are logged, never surfaced to the conversation.
  */
@@ -71,12 +70,12 @@ export const saveSessionEventForRound = async ({
   getSpaces,
   logger,
 }: SaveSessionEventForRoundParams): Promise<void> => {
-  const { request, round, conversationId, agentId } = context;
+  const { request, round, conversationId } = context;
 
   // The round never lands in a conversation, so there is no session to attach it to.
-  if (context.conversationAccess === 'readOnly' || !conversationId || !agentId) {
+  if (context.conversationAccess === 'readOnly' || !conversationId) {
     logger.debug(
-      `Skipping session event for round [${round.id}]: access [${context.conversationAccess}], conversation [${conversationId}], agent [${agentId}]`
+      `Skipping session event for round [${round.id}]: access [${context.conversationAccess}], conversation [${conversationId}]`
     );
     return;
   }
@@ -111,7 +110,6 @@ export const saveSessionEventForRound = async ({
     const saved = await contextEngine.getSessionEventsService().save({
       session_id: conversationId,
       user_id: userId,
-      agent_id: agentId,
       round_id: round.id,
       space,
       transcript,

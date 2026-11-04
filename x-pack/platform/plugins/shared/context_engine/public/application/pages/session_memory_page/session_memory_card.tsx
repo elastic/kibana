@@ -75,7 +75,7 @@ interface SessionMemoryCardProps {
   'data-test-subj': string;
 }
 
-/** A stored memory: its image or document thumbnail, type, text, age, and (for a search hit) score. */
+/** A stored memory: its image or document thumbnail, text, age, and (for a search hit) score. */
 export const SessionMemoryCard = ({
   memory,
   score,
@@ -125,13 +125,6 @@ export const SessionMemoryCard = ({
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-            {memory.type && (
-              <EuiFlexItem grow={false}>
-                <EuiBadge color="primary" data-test-subj={`${dataTestSubj}-type`}>
-                  {memory.type}
-                </EuiBadge>
-              </EuiFlexItem>
-            )}
             {hasPdf && (
               <EuiFlexItem grow={false}>
                 <EuiBadge color="hollow" iconType="document">
@@ -142,11 +135,6 @@ export const SessionMemoryCard = ({
             <EuiFlexItem grow={false}>
               <EuiBadge color="hollow" iconType="user">
                 {memory.user_id}
-              </EuiBadge>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiBadge color="hollow" iconType="machineLearningApp">
-                {memory.agent_id}
               </EuiBadge>
             </EuiFlexItem>
             {memory.ai_index_id?.map((aiIndexId) => (
