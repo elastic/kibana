@@ -65,8 +65,6 @@ export interface ConsistentFailureIssuesOptions {
   es: ESClient;
   /** Client of the repository the issues are filed in. */
   github: GithubApi;
-  /** `owner/name` of that repository; team labels are only added in `elastic/kibana`. */
-  repo: string;
   build: CurrentBuild;
   dryRun: boolean;
   now?: Date;
@@ -219,7 +217,7 @@ const describeSuite = ({ filePath, framework }: FailingSuite): string =>
 export const reportConsistentFailureIssues = async (
   options: ConsistentFailureIssuesOptions
 ): Promise<ConsistentFailureIssuesSummary> => {
-  const { log, failures, es, github, repo, build, dryRun, now = new Date() } = options;
+  const { log, failures, es, github, build, dryRun, now = new Date() } = options;
   const summary: ConsistentFailureIssuesSummary = { created: [], tracked: [], skipped: [] };
 
   const candidates = candidatesOf(failures);

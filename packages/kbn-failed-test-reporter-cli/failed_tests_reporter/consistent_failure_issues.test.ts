@@ -137,7 +137,6 @@ const report = (
     log,
     failures: [],
     github: mockGithub().github,
-    repo: 'elastic/appex-qa-ai',
     build,
     dryRun: false,
     ...overrides,

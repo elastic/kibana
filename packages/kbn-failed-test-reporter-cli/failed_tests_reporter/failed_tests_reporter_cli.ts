@@ -77,7 +77,6 @@ async function checkConsistentFailures({
       failures,
       es,
       github: new GithubApi({ log, token: process.env.GITHUB_TOKEN, dryRun, repo }),
-      repo,
       build: { pipeline, branch },
       dryRun,
     });
