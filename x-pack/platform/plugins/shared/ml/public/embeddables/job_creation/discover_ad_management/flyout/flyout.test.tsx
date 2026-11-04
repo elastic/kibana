@@ -63,11 +63,19 @@ jest.mock('../../../../application/services/ml_api_service/jobs', () => ({
 jest.mock('../../../../application/contexts/kibana', () => ({
   useMlKibana: () => ({
     services: {
+      share: { url: { locators: { get: () => undefined } } },
       uiSettings: {},
       cps: undefined,
       data: {
         dataViews: {},
-        query: { timefilter: { timefilter: { calculateBounds: mockCalculateBounds } } },
+        query: {
+          timefilter: {
+            timefilter: {
+              calculateBounds: mockCalculateBounds,
+              getTime: () => ({ from: 'now-7d', to: 'now' }),
+            },
+          },
+        },
       },
     },
   }),
@@ -114,7 +122,19 @@ const SUCCESS = {
   datafeedStarted: { success: true },
 };
 
-const renderFlyout = ({ openSuggestions = true, runAnalysis = true } = {}) => {
+const mockClearPreviousRun = jest.fn();
+const PREVIOUS_RUN = {
+  timeRange: { from: 'now-7d', to: 'now' },
+  ranAt: Date.now(),
+  suggestions: [suggestion('old')],
+};
+const history = (previousRun?: typeof PREVIOUS_RUN, isLoaded = true) => ({
+  previousRun,
+  isLoaded,
+  clearPreviousRun: mockClearPreviousRun,
+});
+
+const renderFlyout = ({ openSuggestions = true } = {}) => {
   const onClose = jest.fn();
   render(
     <I18nProvider>
@@ -123,11 +143,22 @@ const renderFlyout = ({ openSuggestions = true, runAnalysis = true } = {}) => {
   );
   if (openSuggestions) {
     fireEvent.click(screen.getByTestId('mlDiscoverADManagementSuggestSection'));
-    if (runAnalysis) {
-      fireEvent.click(screen.getByTestId('mlDiscoverADManagementRun'));
-    }
   }
   return { onClose };
+};
+
+// Renders the flyout, with the suggestions open, so that it can be rendered again
+const renderFlyoutForRerender = () => {
+  const onClose = jest.fn();
+  // a new element each time, as React doesn't render the same one again
+  const createElement = () => (
+    <I18nProvider>
+      <DiscoverADManagementFlyout indexPattern="logs-*" onClose={onClose} />
+    </I18nProvider>
+  );
+  const { rerender } = render(createElement());
+  fireEvent.click(screen.getByTestId('mlDiscoverADManagementSuggestSection'));
+  return { rerender: () => rerender(createElement()) };
 };
 
 const openConfigStep = async (id: string) => {
@@ -149,7 +180,7 @@ describe('DiscoverADManagementFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockState$.next(loaded([suggestion('a'), suggestion('b')]));
-    useSuggestionHistoryMock.mockReturnValue(undefined);
+    useSuggestionHistoryMock.mockReturnValue(history());
     mockGetFullTimeRange.mockResolvedValue(FULL_RANGE);
     mockCreateAndSaveJob.mockResolvedValue(SUCCESS);
     mockProgress$ = new Subject<number>();
@@ -170,16 +201,47 @@ describe('DiscoverADManagementFlyout', () => {
     expect(screen.queryByText('Title a')).not.toBeInTheDocument();
   });
 
-  it('does not run the analysis until it is asked to', () => {
-    renderFlyout({ runAnalysis: false });
+  it('analyzes the data automatically when there are no previous results', () => {
+    renderFlyout();
 
-    expect(mockSuggest).not.toHaveBeenCalled();
-    expect(screen.queryByText('Title a')).not.toBeInTheDocument();
-
-    fireEvent.click(screen.getByTestId('mlDiscoverADManagementRun'));
-
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
     expect(mockSuggest).toHaveBeenCalledWith('logs-*', { from: 'now-30d', to: 'now' });
     expect(screen.getByText('Title a')).toBeInTheDocument();
+    expect(screen.queryByTestId('mlDiscoverADManagementRun')).not.toBeInTheDocument();
+  });
+
+  it('shows the previous results, without analyzing the data, when there are some', () => {
+    useSuggestionHistoryMock.mockReturnValue(history(PREVIOUS_RUN));
+    renderFlyout();
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+    expect(screen.getByText('Title old')).toBeInTheDocument();
+    expect(screen.queryByText('Title a')).not.toBeInTheDocument();
+  });
+
+  it('waits to know whether there are previous results before it analyzes the data', () => {
+    useSuggestionHistoryMock.mockReturnValue(history(undefined, false));
+    const { rerender } = renderFlyoutForRerender();
+
+    expect(mockSuggest).not.toHaveBeenCalled();
+
+    useSuggestionHistoryMock.mockReturnValue(history(undefined, true));
+    rerender();
+    expect(mockSuggest).toHaveBeenCalledTimes(1);
+  });
+
+  it('does not analyze the data when the previous results are cleared', () => {
+    useSuggestionHistoryMock.mockReturnValue(history(PREVIOUS_RUN));
+    const { rerender } = renderFlyoutForRerender();
+
+    fireEvent.click(screen.getByTestId('mlDiscoverADManagementClearPrevious'));
+    expect(mockClearPreviousRun).toHaveBeenCalledTimes(1);
+
+    useSuggestionHistoryMock.mockReturnValue(history(undefined));
+    rerender();
+
+    expect(screen.queryByTestId('mlDiscoverADManagementPrevious')).not.toBeInTheDocument();
+    expect(mockSuggest).not.toHaveBeenCalled();
   });
 
   it('asks for suggestions for the index pattern, and lists them', () => {
@@ -385,12 +447,8 @@ describe('DiscoverADManagementFlyout', () => {
     expect(screen.queryByTestId('mlDiscoverADManagementCreated')).not.toBeInTheDocument();
   });
 
-  it('lists the previous run below the latest one', () => {
-    useSuggestionHistoryMock.mockReturnValue({
-      timeRange: { from: 'now-7d', to: 'now' },
-      ranAt: Date.now(),
-      suggestions: [suggestion('old')],
-    });
+  it('lists the previous run', () => {
+    useSuggestionHistoryMock.mockReturnValue(history(PREVIOUS_RUN));
     renderFlyout();
 
     expect(screen.getByTestId('mlDiscoverADManagementPrevious')).toBeInTheDocument();

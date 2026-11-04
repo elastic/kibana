@@ -18,8 +18,18 @@ const mockJobsSummary = jest.fn();
 // The same api each render, as the real context gives.
 const mockMlApi = { jobs: { jobsSummary: mockJobsSummary } };
 
+const mockGetUrl = jest.fn();
+const mockGetTime = jest.fn();
+
+// The same services each render, as the real context gives.
+const mockServices = {
+  share: { url: { locators: { get: () => ({ getUrl: mockGetUrl }) } } },
+  data: { query: { timefilter: { timefilter: { getTime: mockGetTime } } } },
+};
+
 jest.mock('../../../../application/contexts/kibana', () => ({
   useMlApi: () => mockMlApi,
+  useMlKibana: () => ({ services: mockServices }),
 }));
 
 describe('SelectedJob', () => {
@@ -35,6 +45,8 @@ describe('SelectedJob', () => {
     setSelectedJobId('selected-*', undefined);
     mockJobsSummary.mockReset();
     mockJobsSummary.mockResolvedValue([{ id: 'mine', description: 'Watches the logs' }]);
+    mockGetTime.mockReturnValue({ from: 'now-7d', to: 'now' });
+    mockGetUrl.mockResolvedValue('/app/ml/explorer?job=mine');
   });
 
   it('shows nothing when there is no job selected', () => {
@@ -77,5 +89,39 @@ describe('SelectedJob', () => {
 
     expect(getSelectedJobId$('selected-*').getValue()).toBeUndefined();
     expect(screen.queryByTestId('mlDiscoverADManagementSelectedJob')).not.toBeInTheDocument();
+  });
+
+  describe('viewing the job in Anomaly Explorer', () => {
+    it('links to the page for the job and the time range of the chart, in a new tab', async () => {
+      setSelectedJobId('selected-*', 'mine');
+      renderIt();
+
+      const button = await screen.findByTestId('mlDiscoverADManagementSelectedJobExplorer');
+
+      expect(button).toHaveAttribute('href', '/app/ml/explorer?job=mine');
+      expect(button).toHaveAttribute('target', '_blank');
+      expect(mockGetUrl).toHaveBeenCalledWith({
+        page: 'explorer',
+        pageState: { jobIds: ['mine'], timeRange: { from: 'now-7d', to: 'now' } },
+      });
+    });
+
+    it('is not shown without a job', () => {
+      renderIt();
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementSelectedJobExplorer')
+      ).not.toBeInTheDocument();
+    });
+
+    it('is not shown when the page url could not be made', async () => {
+      mockGetUrl.mockRejectedValue(new Error('boom'));
+      setSelectedJobId('selected-*', 'mine');
+      renderIt();
+
+      expect(await screen.findByText('mine')).toBeInTheDocument();
+      expect(
+        screen.queryByTestId('mlDiscoverADManagementSelectedJobExplorer')
+      ).not.toBeInTheDocument();
+    });
   });
 });

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { useMlKibana } from '../../contexts/kibana';
-import { getPreviousRun, saveRun } from './previous_runs';
+import { clearRun, getPreviousRun, saveRun } from './previous_runs';
 import type { SuggestionRun } from './previous_runs';
 import type { SuggestionsState } from './job_suggestion_service';
 
@@ -36,6 +36,15 @@ const useUsername = (): string | undefined => {
   return username;
 };
 
+export interface SuggestionHistory {
+  /** The run which was remembered when the flyout was opened. */
+  previousRun: SuggestionRun | undefined;
+  /** Whether what was remembered has been read, so that no previous run means there is none. */
+  isLoaded: boolean;
+  /** Forgets the previous run. */
+  clearPreviousRun: () => void;
+}
+
 /**
  * Remembers the last completed run for the index pattern, and returns the run which was
  * remembered when the flyout was opened. That run is kept for as long as the flyout is open,
@@ -44,10 +53,11 @@ const useUsername = (): string | undefined => {
 export const useSuggestionHistory = (
   indexPattern: string,
   state: SuggestionsState
-): SuggestionRun | undefined => {
+): SuggestionHistory => {
   const storage = useMemo(() => new Storage(window.localStorage), []);
   const username = useUsername();
   const [previousRun, setPreviousRun] = useState<SuggestionRun>();
+  const [loadedIndexPattern, setLoadedIndexPattern] = useState<string>();
 
   const latestRun = useMemo<SuggestionRun | undefined>(
     () =>
@@ -61,6 +71,7 @@ export const useSuggestionHistory = (
   useEffect(() => {
     if (username === undefined) return;
     setPreviousRun(getPreviousRun(storage, username, indexPattern));
+    setLoadedIndexPattern(indexPattern);
   }, [storage, username, indexPattern]);
 
   useEffect(() => {
@@ -68,5 +79,14 @@ export const useSuggestionHistory = (
     saveRun(storage, username, indexPattern, latestRun);
   }, [storage, username, indexPattern, latestRun]);
 
-  return previousRun;
+  const clearPreviousRun = useCallback(() => {
+    if (username === undefined || previousRun === undefined) return;
+    // A run which was made since the flyout was opened has taken its place, and is kept as the previous run for next time.
+    if (getPreviousRun(storage, username, indexPattern)?.ranAt === previousRun.ranAt) {
+      clearRun(storage, username, indexPattern);
+    }
+    setPreviousRun(undefined);
+  }, [storage, username, indexPattern, previousRun]);
+
+  return { previousRun, isLoaded: loadedIndexPattern === indexPattern, clearPreviousRun };
 };

@@ -9,6 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
+  EuiButton,
   EuiButtonIcon,
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,7 +18,9 @@ import {
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
-import { useMlApi } from '../../../../application/contexts/kibana';
+import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
+import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
+import { useMlApi, useMlKibana } from '../../../../application/contexts/kibana';
 import { useSelectedJobId } from '../../../../application/components/job_suggestion/use_selected_job_id';
 
 const deselectLabel = i18n.translate('xpack.ml.discoverADManagementFlyout.deselectJobAriaLabel', {
@@ -31,8 +34,19 @@ interface Props {
 /** The job whose results are shown on the chart, which is nothing when there is no job selected. */
 export const SelectedJob: FC<Props> = ({ indexPattern }) => {
   const mlApi = useMlApi();
+  const {
+    services: {
+      share,
+      data: {
+        query: {
+          timefilter: { timefilter },
+        },
+      },
+    },
+  } = useMlKibana();
   const [selectedJobId, selectJob] = useSelectedJobId(indexPattern);
   const [description, setDescription] = useState<{ jobId: string; text: string }>();
+  const [explorerUrl, setExplorerUrl] = useState<{ jobId: string; url: string }>();
 
   useEffect(() => {
     if (!selectedJobId) {
@@ -52,11 +66,34 @@ export const SelectedJob: FC<Props> = ({ indexPattern }) => {
     };
   }, [mlApi, selectedJobId]);
 
+  // The page is for the time range of the chart, which is not known to the page which is opened in another tab
+  useEffect(() => {
+    if (!selectedJobId) {
+      return;
+    }
+    let isCurrent = true;
+    share.url.locators
+      .get(ML_APP_LOCATOR)
+      ?.getUrl({
+        page: ML_PAGES.ANOMALY_EXPLORER,
+        pageState: { jobIds: [selectedJobId], timeRange: timefilter.getTime() },
+      })
+      .then((url) => {
+        if (isCurrent) setExplorerUrl({ jobId: selectedJobId, url });
+      })
+      // The button is not shown without the url
+      .catch(() => {});
+    return () => {
+      isCurrent = false;
+    };
+  }, [share, timefilter, selectedJobId]);
+
   if (!selectedJobId) {
     return null;
   }
 
   const text = description?.jobId === selectedJobId ? description.text : undefined;
+  const url = explorerUrl?.jobId === selectedJobId ? explorerUrl.url : undefined;
 
   return (
     <>
@@ -83,11 +120,29 @@ export const SelectedJob: FC<Props> = ({ indexPattern }) => {
                 {text}
               </EuiText>
             ) : null}
+            {url ? (
+              <>
+                <EuiSpacer size="s" />
+                <EuiButton
+                  size="s"
+                  iconType="external"
+                  iconSide="right"
+                  href={url}
+                  target="_blank"
+                  data-test-subj="mlDiscoverADManagementSelectedJobExplorer"
+                >
+                  <FormattedMessage
+                    id="xpack.ml.discoverADManagementFlyout.viewInAnomalyExplorerButton"
+                    defaultMessage="View in Anomaly Explorer"
+                  />
+                </EuiButton>
+              </>
+            ) : null}
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
             <EuiToolTip content={deselectLabel} disableScreenReaderOutput>
               <EuiButtonIcon
-                iconType="trash"
+                iconType="cross"
                 color="text"
                 aria-label={deselectLabel}
                 onClick={() => selectJob(undefined)}

@@ -94,3 +94,13 @@ export const saveRun = (
     // storage is full or turned off, must not get in the way.
   }
 };
+
+/** Forgets the last run which was made for an index pattern. */
+export const clearRun = (storage: Storage, username: string, indexPattern: string): void => {
+  const { [indexPattern]: _cleared, ...others } = readRuns(storage, username);
+  try {
+    storage.set(getStorageKey(username), others);
+  } catch (error) {
+    // Not being able to forget it, for example when the browser's storage is turned off, must not get in the way.
+  }
+};

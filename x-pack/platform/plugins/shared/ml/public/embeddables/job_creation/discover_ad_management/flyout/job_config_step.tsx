@@ -365,7 +365,6 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                size="s"
                 onClick={addResultsToChart}
                 data-test-subj="mlDiscoverADManagementAddResultsToChart"
               >
@@ -507,7 +506,6 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
           <EuiSpacer size="l" />
           <EuiButton
             fill
-            size="s"
             iconType="play"
             isLoading={createStatus.status === 'creating'}
             isDisabled={!canCreate}

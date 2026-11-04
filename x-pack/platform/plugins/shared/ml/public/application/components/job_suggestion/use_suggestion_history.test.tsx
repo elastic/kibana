@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
+import { act, renderHook, waitFor } from '@testing-library/react';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { JOB_TYPE } from '../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../common/types/job_suggestions';
@@ -68,7 +68,7 @@ describe('useSuggestionHistory', () => {
     const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
 
     await waitFor(() => expect(mockSecurity?.authc.getCurrentUser).toHaveBeenCalled());
-    expect(result.current).toBeUndefined();
+    expect(result.current.previousRun).toBeUndefined();
   });
 
   it('returns the run which was stored for the index pattern', async () => {
@@ -76,7 +76,7 @@ describe('useSuggestionHistory', () => {
 
     const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
 
-    await waitFor(() => expect(result.current).toEqual(run('earlier')));
+    await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
   });
 
   it('does not return the run of another index pattern or user', async () => {
@@ -86,7 +86,7 @@ describe('useSuggestionHistory', () => {
     const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
 
     await waitFor(() => expect(mockSecurity?.authc.getCurrentUser).toHaveBeenCalled());
-    expect(result.current).toBeUndefined();
+    expect(result.current.previousRun).toBeUndefined();
   });
 
   it('stores a run when it completes', async () => {
@@ -108,14 +108,14 @@ describe('useSuggestionHistory', () => {
       ({ state }: { state: SuggestionsState }) => useSuggestionHistory('logs-*', state),
       { initialProps: { state: { status: 'loading' } as SuggestionsState } }
     );
-    await waitFor(() => expect(result.current).toEqual(run('earlier')));
+    await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
 
     rerender({ state: loaded('new') });
 
     await waitFor(() =>
       expect(getPreviousRun(storage, 'alice', 'logs-*')).toEqual(run('new', 2000))
     );
-    expect(result.current).toEqual(run('earlier'));
+    expect(result.current.previousRun).toEqual(run('earlier'));
   });
 
   it('does not store runs which failed or found nothing', async () => {
@@ -137,7 +137,7 @@ describe('useSuggestionHistory', () => {
 
     const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
 
-    await waitFor(() => expect(result.current).toEqual(run('earlier')));
+    await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
   });
 
   it('carries on when the user cannot be found', async () => {
@@ -146,6 +146,56 @@ describe('useSuggestionHistory', () => {
 
     const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
 
-    await waitFor(() => expect(result.current).toEqual(run('earlier')));
+    await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
+  });
+
+  it('says when what was remembered has been read, whether or not there was a run', async () => {
+    const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
+    expect(result.current.isLoaded).toBe(false);
+
+    await waitFor(() => expect(result.current.isLoaded).toBe(true));
+    expect(result.current.previousRun).toBeUndefined();
+  });
+
+  describe('clearing the previous run', () => {
+    it('forgets the run, in the browser too', async () => {
+      saveRun(storage, 'alice', 'logs-*', run('earlier'));
+      const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
+      await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
+
+      act(() => result.current.clearPreviousRun());
+
+      expect(result.current.previousRun).toBeUndefined();
+      expect(getPreviousRun(storage, 'alice', 'logs-*')).toBeUndefined();
+    });
+
+    it('keeps a run which was made since it was opened for next time', async () => {
+      saveRun(storage, 'alice', 'logs-*', run('earlier'));
+      const { result, rerender } = renderHook(
+        ({ state }: { state: SuggestionsState }) => useSuggestionHistory('logs-*', state),
+        { initialProps: { state: { status: 'loading' } as SuggestionsState } }
+      );
+      await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
+      rerender({ state: loaded('new') });
+      await waitFor(() =>
+        expect(getPreviousRun(storage, 'alice', 'logs-*')).toEqual(run('new', 2000))
+      );
+
+      act(() => result.current.clearPreviousRun());
+
+      expect(result.current.previousRun).toBeUndefined();
+      expect(getPreviousRun(storage, 'alice', 'logs-*')).toEqual(run('new', 2000));
+    });
+
+    it('does not forget the runs of other index patterns', async () => {
+      saveRun(storage, 'alice', 'logs-*', run('earlier'));
+      saveRun(storage, 'alice', 'metrics-*', run('other index', 500));
+      const { result } = renderHook(() => useSuggestionHistory('logs-*', { status: 'loading' }));
+      await waitFor(() => expect(result.current.previousRun).toEqual(run('earlier')));
+
+      act(() => result.current.clearPreviousRun());
+
+      expect(getPreviousRun(storage, 'alice', 'metrics-*')).toEqual(run('other index', 500));
+    });
   });
 });

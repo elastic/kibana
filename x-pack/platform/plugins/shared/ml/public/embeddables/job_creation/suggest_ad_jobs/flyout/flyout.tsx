@@ -80,7 +80,7 @@ export const SuggestADJobsFlyout: FC<Props> = ({
     return () => jobSuggestionService.cancel();
   }, [jobSuggestionService, indexPattern, timeRange]);
 
-  const previousRun = useSuggestionHistory(indexPattern, state);
+  const { previousRun } = useSuggestionHistory(indexPattern, state);
 
   const openInWizard = useCallback(
     async (suggestion: JobSuggestion) => {

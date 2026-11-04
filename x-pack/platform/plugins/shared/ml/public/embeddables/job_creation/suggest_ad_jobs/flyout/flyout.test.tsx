@@ -62,6 +62,11 @@ jest.mock('../../../../application/contexts/kibana', () => ({
 }));
 
 const useSuggestionHistoryMock = jest.mocked(useSuggestionHistory);
+const history = (previousRun: SuggestionRun | undefined) => ({
+  previousRun,
+  isLoaded: true,
+  clearPreviousRun: jest.fn(),
+});
 
 const suggestion = (id: string, overrides: Partial<JobSuggestion> = {}): JobSuggestion => ({
   id,
@@ -116,7 +121,7 @@ describe('SuggestADJobsFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockState$.next({ status: 'loading' });
-    useSuggestionHistoryMock.mockReturnValue(undefined);
+    useSuggestionHistoryMock.mockReturnValue(history(undefined));
     jobCloningService.clearJobCloningData();
   });
 
@@ -268,11 +273,13 @@ describe('SuggestADJobsFlyout', () => {
 
     it('still shows the previous results once the analysis is stopped', () => {
       setState({ status: 'cancelled' });
-      useSuggestionHistoryMock.mockReturnValue({
-        timeRange: { from: 'now-7d', to: 'now' },
-        ranAt: Date.now(),
-        suggestions: [suggestion('old-1')],
-      });
+      useSuggestionHistoryMock.mockReturnValue(
+        history({
+          timeRange: { from: 'now-7d', to: 'now' },
+          ranAt: Date.now(),
+          suggestions: [suggestion('old-1')],
+        })
+      );
       renderFlyout();
 
       expect(screen.getByTestId('mlSuggestADJobsPreviousCard-old-1')).toBeInTheDocument();
@@ -312,7 +319,7 @@ describe('SuggestADJobsFlyout', () => {
 
     it('shows the previous run below the loading text', () => {
       setState({ status: 'loading' });
-      useSuggestionHistoryMock.mockReturnValue(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
 
       expect(
@@ -326,7 +333,7 @@ describe('SuggestADJobsFlyout', () => {
 
     it('shows the previous run below the current results', () => {
       setState(loaded([suggestion('a')]));
-      useSuggestionHistoryMock.mockReturnValue(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
 
       expect(
@@ -342,7 +349,7 @@ describe('SuggestADJobsFlyout', () => {
 
     it('shows the previous run when the new run fails', () => {
       setState({ status: 'error', error: 'AI features are not available.' });
-      useSuggestionHistoryMock.mockReturnValue(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
 
       expect(screen.getByTestId('mlSuggestADJobsError')).toBeInTheDocument();
@@ -351,7 +358,7 @@ describe('SuggestADJobsFlyout', () => {
 
     it('says what time range the previous run covered and how long ago it was', () => {
       setState({ status: 'loading' });
-      useSuggestionHistoryMock.mockReturnValue(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       renderFlyout();
 
       expect(screen.getByTestId('mlSuggestADJobsPreviousRun')).toHaveTextContent(
@@ -361,7 +368,7 @@ describe('SuggestADJobsFlyout', () => {
 
     it('opens the wizard for a suggestion of the previous run', async () => {
       setState(loaded([suggestion('a')]));
-      useSuggestionHistoryMock.mockReturnValue(previousRun());
+      useSuggestionHistoryMock.mockReturnValue(history(previousRun()));
       const { onClose } = renderFlyout();
 
       fireEvent.click(screen.getByTestId('mlSuggestADJobsPreviousCard-old-1'));

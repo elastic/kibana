@@ -8,7 +8,7 @@
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { JOB_TYPE } from '../../../../common/constants/new_job';
 import type { JobSuggestion } from '../../../../common/types/job_suggestions';
-import { getPreviousRun, saveRun } from './previous_runs';
+import { clearRun, getPreviousRun, saveRun } from './previous_runs';
 import type { SuggestionRun } from './previous_runs';
 
 const suggestion = (id: string): JobSuggestion => ({
@@ -128,5 +128,26 @@ describe('previous runs', () => {
     });
 
     expect(() => saveRun(storage, 'alice', 'logs-*', run('a'))).not.toThrow();
+  });
+
+  it('forgets the run of an index pattern, and no other', () => {
+    saveRun(storage, 'alice', 'logs-*', run('a'));
+    saveRun(storage, 'alice', 'metrics-*', run('b'));
+    saveRun(storage, 'bob', 'logs-*', run('c'));
+
+    clearRun(storage, 'alice', 'logs-*');
+
+    expect(getPreviousRun(storage, 'alice', 'logs-*')).toBeUndefined();
+    expect(getPreviousRun(storage, 'alice', 'metrics-*')).toEqual(run('b'));
+    expect(getPreviousRun(storage, 'bob', 'logs-*')).toEqual(run('c'));
+  });
+
+  it('carries on when the browser will not forget the run', () => {
+    saveRun(storage, 'alice', 'logs-*', run('a'));
+    jest.spyOn(storage, 'set').mockImplementation(() => {
+      throw new Error('quota exceeded');
+    });
+
+    expect(() => clearRun(storage, 'alice', 'logs-*')).not.toThrow();
   });
 });

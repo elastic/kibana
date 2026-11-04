@@ -42,7 +42,7 @@ export const getAnomalyScoreColor = (score: number): string | undefined =>
   SEVERITY_COLORS.find(({ minScore }) => score >= minScore)?.color;
 
 /** The opacity of the annotations until the pointer is over one, which makes it opaque */
-export const FADED_OPACITY = 0.4;
+export const FADED_OPACITY = 0.6;
 
 const toFadedColor = (hexColor: string): string => {
   const [red, green, blue] = [1, 3, 5].map((start) =>

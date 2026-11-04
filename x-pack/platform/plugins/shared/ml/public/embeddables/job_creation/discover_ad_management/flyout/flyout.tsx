@@ -6,13 +6,12 @@
  */
 import type { FC, ReactNode } from 'react';
 import type { IconType } from '@elastic/eui';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import moment from 'moment';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFlyoutBody,
   EuiFlyoutFooter,
@@ -108,7 +107,6 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   );
   const state = useObservable(jobSuggestionService.state$, jobSuggestionService.state);
 
-  // Nothing is analyzed until it is asked for.
   const [hasRequested, setHasRequested] = useState(false);
   const runAnalysis = (range: SuggestionTimeRange) => {
     setHasRequested(true);
@@ -122,7 +120,23 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   }, [jobSuggestionService, isSuggesting]);
   useEffect(() => () => jobSuggestionService.cancel(), [jobSuggestionService]);
 
-  const previousRun = useSuggestionHistory(indexPattern, state);
+  const {
+    previousRun,
+    isLoaded: isHistoryLoaded,
+    clearPreviousRun,
+  } = useSuggestionHistory(indexPattern, state);
+
+  // The first time the suggestions are opened, they are analyzed when there is nothing from before to show.
+  // Clearing the previous results afterwards doesn't start an analysis.
+  const hasCheckedHistory = useRef(false);
+  useEffect(() => {
+    if (!isSuggesting || !isHistoryLoaded || hasCheckedHistory.current) return;
+    hasCheckedHistory.current = true;
+    if (!previousRun) {
+      setHasRequested(true);
+      void jobSuggestionService.suggest(indexPattern, timeRange);
+    }
+  }, [isSuggesting, isHistoryLoaded, previousRun, jobSuggestionService, indexPattern, timeRange]);
 
   const latest = useMemo(
     () => (state.status === 'loaded' ? toListed('latest', state.suggestions) : []),
@@ -177,14 +191,14 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
         onTimeChange={({ start, end }) => {
           const range = { from: start, to: end };
           setTimeRange(range);
-          if (hasRequested) runAnalysis(range);
+          runAnalysis(range);
         }}
         onRefresh={() => runAnalysis(timeRange)}
         isDisabled={hasRequested && state.status === 'loading'}
         data-test-subj="mlDiscoverADManagementAnalysisTimeRange"
       />
       <EuiSpacer size="m" />
-      {hasRequested ? (
+      {hasRequested && (
         <>
           <SuggestionStatus
             state={state}
@@ -199,30 +213,34 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
             </React.Fragment>
           ))}
         </>
-      ) : (
-        <EuiButton
-          fill
-          iconType="machineLearningApp"
-          onClick={() => runAnalysis(timeRange)}
-          data-test-subj={`${TEST_SUBJ_PREFIX}Run`}
-        >
-          <FormattedMessage
-            id="xpack.ml.discoverADManagementFlyout.runAnalysisButton"
-            defaultMessage="Run analysis"
-          />
-        </EuiButton>
       )}
       {previousRun && previous.length > 0 && (
         <div data-test-subj={`${TEST_SUBJ_PREFIX}Previous`}>
           <EuiHorizontalRule margin="s" />
-          <EuiTitle size="xs">
-            <h3>
-              <FormattedMessage
-                id="xpack.ml.suggestADJobsFlyout.previousResultsTitle"
-                defaultMessage="Previous results"
-              />
-            </h3>
-          </EuiTitle>
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem>
+              <EuiTitle size="xs">
+                <h3>
+                  <FormattedMessage
+                    id="xpack.ml.suggestADJobsFlyout.previousResultsTitle"
+                    defaultMessage="Previous results"
+                  />
+                </h3>
+              </EuiTitle>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiButtonEmpty
+                size="xs"
+                onClick={clearPreviousRun}
+                data-test-subj={`${TEST_SUBJ_PREFIX}ClearPrevious`}
+              >
+                <FormattedMessage
+                  id="xpack.ml.discoverADManagementFlyout.clearPreviousResultsButton"
+                  defaultMessage="Clear"
+                />
+              </EuiButtonEmpty>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiText size="s" color="subdued">
             <FormattedMessage
               id="xpack.ml.suggestADJobsFlyout.previousResultsDescription"
