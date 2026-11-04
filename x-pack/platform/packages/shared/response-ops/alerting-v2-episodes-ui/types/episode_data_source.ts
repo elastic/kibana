@@ -77,6 +77,11 @@ export interface EpisodeSourceKpis {
 export interface EpisodeSourceHistogram {
   counts: HistogramBucketCount[];
   isCapHit: boolean;
+  /**
+   * Alerts per breakdown value across the time range, used to rank which values get their own
+   * series. Counts the source already folded carry the `HISTOGRAM_OTHER_BREAKDOWN` breakdown value.
+   */
+  breakdownTotals?: Record<string, number>;
 }
 
 export type EpisodeFetchErrorSurface = 'list' | 'kpis' | 'histogram';

@@ -11,9 +11,11 @@ import type { EpisodesFilterState } from '../../queries/episodes_query';
 import type { EpisodeSourceHistogram } from '../../types/episode_data_source';
 import {
   mergeBucketCounts,
+  sumBreakdownTotals,
   type HistogramBucketCount,
   type TimeBucket,
 } from '../../utils/histogram_utils';
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../../constants';
 import {
   buildClassicAlertsHistogramAggs,
   buildClassicAlertsQuery,
@@ -53,19 +55,30 @@ const toRunningTotals = (aggregation?: ClassicHistogramRangeAggregation): number
  * Overlap count per histogram bucket: alerts started before the bucket ends minus alerts
  * ended at or before it starts (see `buildClassicAlertsHistogramAggs`).
  */
-const toBucketCounts = (
+const toOverlapCounts = (
   { started, ended }: ClassicHistogramOverlapAggregations,
-  buckets: TimeBucket[],
-  breakdown?: string
-): HistogramBucketCount[] => {
+  bucketCount: number
+): number[] => {
   const startedTotals = toRunningTotals(started);
   const endedTotals = toRunningTotals(ended);
-  return buckets.map(({ start }, i) => ({
+  return Array.from(
+    { length: bucketCount },
+    (_, i) => (startedTotals[i] ?? 0) - (endedTotals[i] ?? 0)
+  );
+};
+
+const toBucketCounts = (
+  counts: number[],
+  buckets: TimeBucket[],
+  breakdown?: string
+): HistogramBucketCount[] =>
+  buckets.map(({ start }, i) => ({
     bucketStart: start,
-    count: (startedTotals[i] ?? 0) - (endedTotals[i] ?? 0),
+    count: counts[i],
     ...(breakdown !== undefined ? { breakdown } : {}),
   }));
-};
+
+const isNonEmpty = ({ count }: HistogramBucketCount): boolean => count > 0;
 
 /**
  * Returns per-bucket classic alert overlap counts computed from Elasticsearch
@@ -101,30 +114,46 @@ export const fetchClassicAlertsHistogram = async ({
   );
 
   const aggregations = response.aggregations ?? {};
+  const overall = toOverlapCounts(aggregations, buckets.length);
 
   if (!breakdownField) {
-    return { counts: toBucketCounts(aggregations, buckets), isCapHit: false };
+    return { counts: toBucketCounts(overall, buckets), isCapHit: false };
   }
 
   if (!breakdown) {
+    // Every matching alert starts before the last bucket ends, so the final running total is the alert count.
+    const alertCount = toRunningTotals(aggregations.started).at(-1) ?? 0;
     return {
-      counts: toBucketCounts(aggregations, buckets, CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN).filter(
-        ({ count }) => count > 0
+      counts: toBucketCounts(overall, buckets, CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN).filter(
+        isNonEmpty
       ),
       isCapHit: false,
+      breakdownTotals: { [CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN]: alertCount },
     };
   }
 
-  const terms = aggregations.breakdown;
-  const counts = (terms?.buckets ?? []).flatMap(({ key, ...overlapAggregations }) =>
-    toBucketCounts(overlapAggregations, buckets, breakdown.normalize(String(key))).filter(
-      ({ count }) => count > 0
-    )
+  const terms = (aggregations.breakdown?.buckets ?? []).map(
+    ({ key, doc_count: alertCount, ...overlapAggregations }) => ({
+      value: breakdown.normalize(String(key)),
+      alertCount,
+      counts: toOverlapCounts(overlapAggregations, buckets.length),
+    })
+  );
+  const rest = overall.map(
+    (count, i) => count - terms.reduce((sum, { counts }) => sum + counts[i], 0)
   );
 
-  // Normalised breakdown values can collapse several raw terms into one (e.g. recovered + untracked).
   return {
-    counts: mergeBucketCounts(counts),
-    isCapHit: (terms?.sum_other_doc_count ?? 0) > 0,
+    // Normalised values can collapse several raw terms into one (e.g. recovered + untracked).
+    counts: mergeBucketCounts(
+      ...terms.map(({ value, counts }) =>
+        toBucketCounts(counts, buckets, value).filter(isNonEmpty)
+      ),
+      toBucketCounts(rest, buckets, HISTOGRAM_OTHER_BREAKDOWN).filter(isNonEmpty)
+    ),
+    isCapHit: false,
+    breakdownTotals: sumBreakdownTotals(
+      ...terms.map(({ value, alertCount }) => ({ [value]: alertCount }))
+    ),
   };
 };

@@ -54,4 +54,11 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
 /** Upper bound on histogram buckets per request; mirrors the `histogram:maxBars` default. */
 export const HISTOGRAM_MAX_BUCKETS = 1000;
+/** Maximum breakdown values drawn as their own histogram series; the rest are folded into one series. */
+export const HISTOGRAM_MAX_BREAKDOWN_SERIES = 8;
+/** Breakdown value of the series that folds every value beyond the top `HISTOGRAM_MAX_BREAKDOWN_SERIES`. */
+export const HISTOGRAM_OTHER_BREAKDOWN = i18n.translate(
+  'xpack.alertingV2EpisodesUi.episodesHistogram.otherBreakdown',
+  { defaultMessage: 'Other' }
+);
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

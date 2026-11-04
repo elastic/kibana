@@ -16,7 +16,7 @@ import { useEpisodesHistogramQuery } from './use_episodes_histogram_query';
 import { executeEsqlQuery } from '../utils/execute_esql_query';
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import type { EpisodeSourceHistogram } from '../types/episode_data_source';
-import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
+import { HISTOGRAM_EPISODE_LIMIT, HISTOGRAM_OTHER_BREAKDOWN } from '../constants';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
 import type { HistogramBucketCount, HistogramEpisodeRow } from '../utils/histogram_utils';
@@ -268,6 +268,49 @@ describe('useEpisodesHistogramQuery', () => {
       { time_bucket: '2024-01-01T00:00:00.000Z', count: 3 },
       { time_bucket: '2024-01-01T01:00:00.000Z', count: 3 },
     ]);
+  });
+
+  it('ranks breakdown values across v2 and the source, folding the rest into Other', async () => {
+    const v2Row: HistogramEpisodeRow = {
+      first_timestamp: '2024-01-01T00:00:00.000Z',
+      last_timestamp: '2024-01-01T00:30:00.000Z',
+      'episode.status': 'inactive',
+      'rule.id': 'v2-rule',
+    };
+    mockExecuteEsqlQuery.mockResolvedValue([v2Row, v2Row, v2Row]);
+    const sourceRuleIds = Array.from({ length: 8 }, (_, i) => `v1-rule-${i}`);
+    const fetchHistogram = jest.fn().mockResolvedValue({
+      counts: [
+        ...sourceRuleIds.map((breakdown) => ({ bucketStart: HOUR_0, count: 1, breakdown })),
+        { bucketStart: HOUR_0, count: 5, breakdown: HISTOGRAM_OTHER_BREAKDOWN },
+      ],
+      isCapHit: false,
+      breakdownTotals: Object.fromEntries(sourceRuleIds.map((ruleId) => [ruleId, 2])),
+    });
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesHistogramQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: mockTimeRange,
+          bucketInterval: '1h',
+          breakdownField: 'rule.id',
+        }),
+      { wrapper: createWrapper(sourceWithHistogram(fetchHistogram)) }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const firstBucketRows = (result.current.table?.rows ?? []).filter(
+      (row) => row.time_bucket === '2024-01-01T00:00:00.000Z'
+    );
+    // v2-rule (3 episodes) plus the first 7 tied source rules are kept; v1-rule-7 joins Other.
+    expect(Object.fromEntries(firstBucketRows.map((row) => [row['rule.id'], row.count]))).toEqual({
+      'v2-rule': 3,
+      ...Object.fromEntries(sourceRuleIds.slice(0, 7).map((ruleId) => [ruleId, 1])),
+      [HISTOGRAM_OTHER_BREAKDOWN]: 6,
+    });
   });
 
   it('clamps the bucket interval before generating buckets for sources', async () => {

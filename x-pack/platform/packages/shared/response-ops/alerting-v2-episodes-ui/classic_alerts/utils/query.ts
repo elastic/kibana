@@ -33,6 +33,7 @@ import {
 } from '../../components/severity/severity_utils';
 import type { SeverityExtension } from '../../types/episode_data_source';
 import type { TimeBucket } from '../../utils/histogram_utils';
+import { HISTOGRAM_MAX_BREAKDOWN_SERIES } from '../../constants';
 import { mapClassicStatusToEpisodeStatus } from './map_alert';
 
 export interface ClassicAlertsTimeRange {
@@ -202,7 +203,6 @@ export const buildClassicAlertsSort = (
 
 /** Breakdown value used when a classic alert has no equivalent for the v2 breakdown field. */
 export const CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN = 'unknown';
-export const CLASSIC_HISTOGRAM_BREAKDOWN_SIZE = 50;
 
 export interface ClassicHistogramBreakdown {
   field: string;
@@ -236,16 +236,6 @@ export const resolveClassicHistogramBreakdown = (
   breakdownField: string
 ): ClassicHistogramBreakdown | undefined => CLASSIC_HISTOGRAM_BREAKDOWNS[breakdownField];
 
-/** Elasticsearch `search.max_buckets` default. */
-const ES_MAX_BUCKETS = 65_536;
-
-/**
- * Terms size for the breakdown: at most `CLASSIC_HISTOGRAM_BREAKDOWN_SIZE`, lowered so the
- * response (two range buckets per histogram bucket for every term) stays under `search.max_buckets`.
- */
-export const getClassicHistogramBreakdownSize = (bucketCount: number): number =>
-  Math.min(CLASSIC_HISTOGRAM_BREAKDOWN_SIZE, Math.floor(ES_MAX_BUCKETS / (2 * bucketCount + 1)));
-
 /** Contiguous epoch-millis ranges ending at each boundary: `(-inf, b0)`, `[b0, b1)`, ... */
 const toSlotRanges = (boundaries: number[]): estypes.AggregationsAggregationRange[] =>
   boundaries.map((to, i) => (i > 0 ? { from: boundaries[i - 1], to } : { to }));
@@ -255,6 +245,9 @@ const toSlotRanges = (boundaries: number[]): estypes.AggregationsAggregationRang
  * of alerts that started before the bucket ends (`started`) and the number that ended at or
  * before it starts (`ended`). Their difference is the bucket's overlap count. Open alerts have
  * no end and are treated as ending at `nowMs`, so they only count in buckets that start before now.
+ *
+ * With a breakdown, the same aggregations run per top `HISTOGRAM_MAX_BREAKDOWN_SERIES` term next
+ * to the overall ones, so the counts of every other term can be derived as overall minus top terms.
  */
 export const buildClassicAlertsHistogramAggs = ({
   buckets,
@@ -284,11 +277,12 @@ export const buildClassicAlertsHistogramAggs = ({
   }
 
   return {
+    ...overlapAggs,
     breakdown: {
       terms: {
         field: breakdown.field,
         missing: breakdown.missing,
-        size: getClassicHistogramBreakdownSize(buckets.length),
+        size: HISTOGRAM_MAX_BREAKDOWN_SERIES,
       },
       aggs: overlapAggs,
     },

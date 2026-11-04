@@ -8,6 +8,7 @@
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { fetchClassicAlertsHistogram } from './fetch_classic_histogram';
 import type { TimeBucket } from '../../utils/histogram_utils';
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../../constants';
 
 const mockHttp = httpServiceMock.createStartContract();
 
@@ -85,12 +86,13 @@ describe('fetchClassicAlertsHistogram', () => {
     mockHttp.post.mockResolvedValue({
       hits: { hits: [] },
       aggregations: {
+        ...overlap([5, 0], [0, 3]),
         breakdown: {
           sum_other_doc_count: 0,
           buckets: [
-            { key: 'active', ...overlap([2, 0], [0, 0]) },
-            { key: 'recovered', ...overlap([2, 0], [0, 2]) },
-            { key: 'untracked', ...overlap([1, 0], [0, 1]) },
+            { key: 'active', doc_count: 2, ...overlap([2, 0], [0, 0]) },
+            { key: 'recovered', doc_count: 2, ...overlap([2, 0], [0, 2]) },
+            { key: 'untracked', doc_count: 1, ...overlap([1, 0], [0, 1]) },
           ],
         },
       },
@@ -110,17 +112,19 @@ describe('fetchClassicAlertsHistogram', () => {
       { bucketStart: buckets[1].start, count: 2, breakdown: 'active' },
       { bucketStart: buckets[0].start, count: 3, breakdown: 'inactive' },
     ]);
+    expect(result.breakdownTotals).toEqual({ active: 2, inactive: 3 });
   });
 
   it('maps the ack breakdown onto kibana.alert.workflow_status', async () => {
     mockHttp.post.mockResolvedValue({
       hits: { hits: [] },
       aggregations: {
+        ...overlap([4], [0]),
         breakdown: {
           buckets: [
-            { key: 'acknowledged', ...overlap([1], [0]) },
-            { key: 'open', ...overlap([2], [0]) },
-            { key: 'closed', ...overlap([1], [0]) },
+            { key: 'acknowledged', doc_count: 1, ...overlap([1], [0]) },
+            { key: 'open', doc_count: 2, ...overlap([2], [0]) },
+            { key: 'closed', doc_count: 1, ...overlap([1], [0]) },
           ],
         },
       },
@@ -160,15 +164,17 @@ describe('fetchClassicAlertsHistogram', () => {
     expect(result.counts).toEqual([
       { bucketStart: buckets[0].start, count: 6, breakdown: 'unknown' },
     ]);
+    expect(result.breakdownTotals).toEqual({ unknown: 6 });
   });
 
-  it('reports isCapHit when breakdown terms are truncated', async () => {
+  it('folds alerts outside the top terms into Other', async () => {
     mockHttp.post.mockResolvedValue({
       hits: { hits: [] },
       aggregations: {
+        ...overlap([60, 0], [0, 20]),
         breakdown: {
           sum_other_doc_count: 10,
-          buckets: [{ key: 'rule-a', ...overlap([50], [0]) }],
+          buckets: [{ key: 'rule-a', doc_count: 50, ...overlap([50, 0], [0, 15]) }],
         },
       },
     });
@@ -176,11 +182,21 @@ describe('fetchClassicAlertsHistogram', () => {
     const result = await fetchClassicAlertsHistogram({
       ruleTypeIds: TEST_RULE_TYPE_IDS,
       services: { http: mockHttp },
-      buckets: [buckets[0]],
+      buckets,
       nowMs: NOW,
       breakdownField: 'rule.id',
     });
 
-    expect(result.isCapHit).toBe(true);
+    expect(getRequestBody().aggs.breakdown.terms.size).toBe(8);
+    expect(result).toEqual({
+      counts: [
+        { bucketStart: buckets[0].start, count: 50, breakdown: 'rule-a' },
+        { bucketStart: buckets[1].start, count: 35, breakdown: 'rule-a' },
+        { bucketStart: buckets[0].start, count: 10, breakdown: HISTOGRAM_OTHER_BREAKDOWN },
+        { bucketStart: buckets[1].start, count: 5, breakdown: HISTOGRAM_OTHER_BREAKDOWN },
+      ],
+      isCapHit: false,
+      breakdownTotals: { 'rule-a': 50 },
+    });
   });
 });

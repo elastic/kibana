@@ -33,10 +33,13 @@ import {
 import { useToastSourceErrors } from './use_toast_source_errors';
 import {
   clampBucketInterval,
+  countEpisodesByBreakdown,
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
+  limitBreakdownSeries,
   mergeBucketCounts,
+  sumBreakdownTotals,
   type HistogramBucketCount,
   type HistogramEpisodeRow,
   type TimeBucket,
@@ -138,12 +141,19 @@ export const useEpisodesHistogramQuery = ({
       });
 
       const v2Rows = v2 ?? [];
+      const counts = mergeBucketCounts(
+        computeOverlapCounts(v2Rows, buckets, breakdownField, nowMs),
+        ...additional.map((histogram) => histogram.counts)
+      );
+      const breakdownTotals = breakdownField
+        ? sumBreakdownTotals(
+            countEpisodesByBreakdown(v2Rows, breakdownField),
+            ...additional.map((histogram) => histogram.breakdownTotals ?? {})
+          )
+        : undefined;
 
       return {
-        counts: mergeBucketCounts(
-          computeOverlapCounts(v2Rows, buckets, breakdownField, nowMs),
-          ...additional.map(({ counts }) => counts)
-        ),
+        counts: breakdownTotals ? limitBreakdownSeries(counts, breakdownTotals) : counts,
         buckets,
         isCapHit:
           v2Rows.length >= HISTOGRAM_EPISODE_LIMIT || additional.some(({ isCapHit }) => isCapHit),

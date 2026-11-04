@@ -5,10 +5,14 @@
  * 2.0.
  */
 
+import { HISTOGRAM_OTHER_BREAKDOWN } from '../constants';
 import {
   clampBucketInterval,
   computeBucketInterval,
+  countEpisodesByBreakdown,
+  limitBreakdownSeries,
   mergeBucketCounts,
+  sumBreakdownTotals,
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
@@ -253,5 +257,70 @@ describe('mergeBucketCounts', () => {
     expect(
       mergeBucketCounts([{ bucketStart: 0, count: 1 }], [{ bucketStart: 0, count: 2 }])
     ).toEqual([{ bucketStart: 0, count: 3 }]);
+  });
+});
+
+describe('countEpisodesByBreakdown', () => {
+  it('counts episodes per breakdown value, using unknown for missing values', () => {
+    const row = (ruleId: string | null): HistogramEpisodeRow => ({
+      first_timestamp: '2024-01-01T00:00:00.000Z',
+      last_timestamp: '2024-01-01T01:00:00.000Z',
+      'episode.status': 'inactive',
+      'rule.id': ruleId,
+    });
+
+    expect(countEpisodesByBreakdown([row('a'), row('a'), row('b'), row(null)], 'rule.id')).toEqual({
+      a: 2,
+      b: 1,
+      unknown: 1,
+    });
+  });
+});
+
+describe('sumBreakdownTotals', () => {
+  it('sums totals for the same breakdown value across sources', () => {
+    expect(sumBreakdownTotals({ a: 1, b: 2 }, { b: 3, c: 4 })).toEqual({ a: 1, b: 5, c: 4 });
+  });
+});
+
+describe('limitBreakdownSeries', () => {
+  const OTHER = HISTOGRAM_OTHER_BREAKDOWN;
+
+  it('keeps the top values and folds the rest, including pre-folded counts, into one series', () => {
+    const counts = [
+      { bucketStart: 0, count: 5, breakdown: 'a' },
+      { bucketStart: 0, count: 3, breakdown: 'b' },
+      { bucketStart: 0, count: 2, breakdown: 'c' },
+      { bucketStart: HOUR, count: 1, breakdown: 'c' },
+      { bucketStart: 0, count: 4, breakdown: OTHER },
+    ];
+
+    expect(limitBreakdownSeries(counts, { a: 9, b: 6, c: 2, [OTHER]: 100 }, 2)).toEqual([
+      { bucketStart: 0, count: 5, breakdown: 'a' },
+      { bucketStart: 0, count: 3, breakdown: 'b' },
+      { bucketStart: 0, count: 6, breakdown: OTHER },
+      { bucketStart: HOUR, count: 1, breakdown: OTHER },
+    ]);
+  });
+
+  it('breaks total ties by value in ascending order', () => {
+    const counts = [
+      { bucketStart: 0, count: 1, breakdown: 'b' },
+      { bucketStart: 0, count: 1, breakdown: 'a' },
+    ];
+
+    expect(limitBreakdownSeries(counts, { b: 1, a: 1 }, 1)).toEqual([
+      { bucketStart: 0, count: 1, breakdown: OTHER },
+      { bucketStart: 0, count: 1, breakdown: 'a' },
+    ]);
+  });
+
+  it('leaves counts unchanged when there are no more values than the limit', () => {
+    const counts = [
+      { bucketStart: 0, count: 2, breakdown: 'active' },
+      { bucketStart: 0, count: 1, breakdown: 'inactive' },
+    ];
+
+    expect(limitBreakdownSeries(counts, { active: 2, inactive: 1 })).toEqual(counts);
   });
 });

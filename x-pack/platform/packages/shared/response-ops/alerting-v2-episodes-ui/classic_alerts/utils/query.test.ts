@@ -9,7 +9,6 @@ import {
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
   buildClassicAlertsHistogramAggs,
-  getClassicHistogramBreakdownSize,
   resolveClassicHistogramBreakdown,
 } from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -228,32 +227,20 @@ describe('buildClassicAlertsHistogramAggs', () => {
     });
   });
 
-  it('nests the range aggregations under a breakdown terms aggregation', () => {
+  it('adds the range aggregations per top breakdown term next to the overall ones', () => {
     const aggs = buildClassicAlertsHistogramAggs({
       buckets,
       nowMs: T0,
       breakdown: resolveClassicHistogramBreakdown('rule.id'),
     });
 
-    expect(Object.keys(aggs)).toEqual(['breakdown']);
+    expect(Object.keys(aggs)).toEqual(['started', 'ended', 'breakdown']);
     expect(aggs.breakdown.terms).toEqual({
       field: 'kibana.alert.rule.uuid',
       missing: 'unknown',
-      size: 50,
+      size: 8,
     });
     expect(Object.keys(aggs.breakdown.aggs ?? {})).toEqual(['started', 'ended']);
-  });
-});
-
-describe('getClassicHistogramBreakdownSize', () => {
-  it('uses the full breakdown size for typical bucket counts', () => {
-    expect(getClassicHistogramBreakdownSize(60)).toBe(50);
-  });
-
-  it('shrinks the breakdown size so the response stays under search.max_buckets', () => {
-    const size = getClassicHistogramBreakdownSize(1000);
-    expect(size).toBe(32);
-    expect(size * (2 * 1000 + 1)).toBeLessThanOrEqual(65_536);
   });
 });
 

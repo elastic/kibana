@@ -8,7 +8,11 @@
 import moment from 'moment';
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
-import { HISTOGRAM_MAX_BUCKETS } from '../constants';
+import {
+  HISTOGRAM_MAX_BREAKDOWN_SERIES,
+  HISTOGRAM_MAX_BUCKETS,
+  HISTOGRAM_OTHER_BREAKDOWN,
+} from '../constants';
 
 export interface TimeBucket {
   start: number;
@@ -86,6 +90,9 @@ export const generateTimeBuckets = (
   return buckets;
 };
 
+const toBreakdownValue = (episode: HistogramEpisodeRow, breakdownField: string): string =>
+  String(episode[breakdownField] ?? 'unknown');
+
 /**
  * For each bucket, counts episodes whose [first_timestamp, last_timestamp] overlaps with
  * [bucket.start, bucket.end]. Active episodes (status = 'active') have no recovery event yet —
@@ -114,7 +121,7 @@ export const computeOverlapCounts = (
 
     const counts = new Map<string, number>();
     for (const { ep } of overlapping) {
-      const key = String(ep[breakdownField] ?? 'unknown');
+      const key = toBreakdownValue(ep, breakdownField);
       counts.set(key, (counts.get(key) ?? 0) + 1);
     }
     return [...counts.entries()].map(([breakdown, count]) => ({
@@ -138,6 +145,64 @@ export const mergeBucketCounts = (...sources: HistogramBucketCount[][]): Histogr
     }
   }
   return [...merged.values()];
+};
+
+/** Counts episodes per breakdown value, the ranking used by `limitBreakdownSeries`. */
+export const countEpisodesByBreakdown = (
+  episodes: HistogramEpisodeRow[],
+  breakdownField: string
+): Record<string, number> => {
+  const totals: Record<string, number> = {};
+  for (const episode of episodes) {
+    const value = toBreakdownValue(episode, breakdownField);
+    totals[value] = (totals[value] ?? 0) + 1;
+  }
+  return totals;
+};
+
+/** Sums per-breakdown-value totals across sources. */
+export const sumBreakdownTotals = (
+  ...sources: Array<Record<string, number>>
+): Record<string, number> => {
+  const totals: Record<string, number> = {};
+  for (const source of sources) {
+    for (const [value, total] of Object.entries(source)) {
+      totals[value] = (totals[value] ?? 0) + total;
+    }
+  }
+  return totals;
+};
+
+/** Code-unit order, matching how Elasticsearch `terms` breaks count ties (`_key` ascending). */
+const compareValues = (a: string, b: string): number => {
+  if (a === b) return 0;
+  return a < b ? -1 : 1;
+};
+
+/**
+ * Keeps the `limit` breakdown values with the highest totals as their own series and folds every
+ * other value, including counts a source already folded, into one `HISTOGRAM_OTHER_BREAKDOWN`
+ * series. Bucket totals are unchanged.
+ */
+export const limitBreakdownSeries = (
+  counts: HistogramBucketCount[],
+  totals: Record<string, number>,
+  limit: number = HISTOGRAM_MAX_BREAKDOWN_SERIES
+): HistogramBucketCount[] => {
+  const kept = new Set(
+    Object.entries(totals)
+      .filter(([value]) => value !== HISTOGRAM_OTHER_BREAKDOWN)
+      .sort(([a, aTotal], [b, bTotal]) => bTotal - aTotal || compareValues(a, b))
+      .slice(0, limit)
+      .map(([value]) => value)
+  );
+  return mergeBucketCounts(
+    counts.map((count) =>
+      count.breakdown === undefined || kept.has(count.breakdown)
+        ? count
+        : { ...count, breakdown: HISTOGRAM_OTHER_BREAKDOWN }
+    )
+  );
 };
 
 /** Formats overlap counts as a Lens-compatible Datatable for @kbn/unified-histogram. */
