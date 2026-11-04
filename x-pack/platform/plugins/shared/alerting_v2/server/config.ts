@@ -122,10 +122,93 @@ const validateDataRetention = (duration: string): string | undefined => {
   }
 };
 
+const MIN_DISPATCHER_ACTIONS_RETENTION = '1d';
+
+const validateDispatcherActionsRetention = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+  if (parseDurationToMs(duration) < parseDurationToMs(MIN_DISPATCHER_ACTIONS_RETENTION)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_ACTIONS_RETENTION}`;
+  }
+};
+
 const retentionSchema = schema.object({
   ruleEvents: schema.object({
     enabled: schema.boolean({ defaultValue: false }),
     dataRetention: schema.string({ defaultValue: '90d', validate: validateDataRetention }),
+  }),
+  alertActions: schema.object({
+    dispatcher: schema.object({
+      enabled: schema.boolean({ defaultValue: false }),
+      dataRetention: schema.string({
+        defaultValue: '90d',
+        validate: validateDispatcherActionsRetention,
+      }),
+    }),
+  }),
+});
+
+const MIN_DISPATCHER_TIMEOUT = '1m';
+const MAX_DISPATCHER_TIMEOUT = '5m';
+const MIN_DISPATCHER_ALERTS_PER_TICK = 1000;
+const MAX_DISPATCHER_ALERTS_PER_TICK = 10000;
+
+const validateDispatcherTimeout = (duration: string): string | undefined => {
+  const formatError = validateDuration(duration);
+  if (formatError) {
+    return formatError;
+  }
+
+  const durationMs = parseDurationToMs(duration);
+  if (durationMs < parseDurationToMs(MIN_DISPATCHER_TIMEOUT)) {
+    return `duration cannot be less than ${MIN_DISPATCHER_TIMEOUT}`;
+  }
+  if (durationMs > parseDurationToMs(MAX_DISPATCHER_TIMEOUT)) {
+    return `duration cannot exceed ${MAX_DISPATCHER_TIMEOUT}`;
+  }
+};
+
+const dispatcherSchema = schema.object({
+  /**
+   * Operator kill switch. While true, every dispatcher tick is a no-op: no
+   * alert is scanned or notified and the watermark is held, so the backlog is
+   * dispatched late once the switch is removed. Without a persisted watermark
+   * (first tick after a deploy) resume cold-starts and older events are lost.
+   * Logged once per Kibana start as `DISPATCHER_PAUSED`; revert the override
+   * after the incident.
+   */
+  paused: schema.boolean({ defaultValue: false }),
+  run: schema.object({
+    /**
+     * Task Manager timeout for one dispatcher tick. The tick's soft deadline
+     * is 15s before it. Raise it when slow Elasticsearch responses make
+     * ticks hit `DISPATCHER_TICK_DEADLINE_EXCEEDED`. The default is the floor:
+     * the timeout can only be raised, up to 5m.
+     */
+    timeout: schema.string({
+      defaultValue: MIN_DISPATCHER_TIMEOUT,
+      validate: validateDispatcherTimeout,
+    }),
+    alerts: schema.object({
+      /**
+       * Alerts scanned per dispatcher tick. Lower it when ticks cannot finish
+       * before their deadline under alert overload: smaller batches complete
+       * and the watermark keeps advancing. The drain rate is roughly this many
+       * alerts per ~5 s tick, so too low a value lets lag grow under sustained
+       * load. Below the alerts one rule run writes with the same `@timestamp`,
+       * the truncation edge cannot pass them; the 1000 floor makes that rarer.
+       * Defaults to the ES|QL maximum of 10000.
+       */
+      max: schema.number({
+        defaultValue: MAX_DISPATCHER_ALERTS_PER_TICK,
+        min: MIN_DISPATCHER_ALERTS_PER_TICK,
+        max: MAX_DISPATCHER_ALERTS_PER_TICK,
+        validate: (value: number): string | undefined =>
+          Number.isInteger(value) ? undefined : 'value must be an integer',
+      }),
+    }),
   }),
 });
 
@@ -137,11 +220,13 @@ export const configSchema = schema.object({
   }),
   rules: rulesSchema,
   retention: retentionSchema,
+  dispatcher: dispatcherSchema,
 });
 
 export type PluginConfig = TypeOf<typeof configSchema>;
 export type RulesConfig = TypeOf<typeof rulesSchema>;
 export type RetentionConfig = TypeOf<typeof retentionSchema>;
+export type DispatcherConfig = TypeOf<typeof dispatcherSchema>;
 
 /**
  * Rows a single execution may request: the product-level `alerts.max` ceiling,

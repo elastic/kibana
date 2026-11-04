@@ -139,9 +139,10 @@ apiTest.describe(
       // Top level is the priority process: it defers on the cap and takes the global volume field.
       expect(engine.maxLogsPerWindowCapBehavior).toBe('defer');
       expect(engine.maxLogsPerWindow).toBe(500000);
-      // Non-priority drops on the cap, ignores the global volume field and has its own frequency.
+      // Non-priority drops on the cap (the one field that still diverges by design), but shares
+      // the global volume field like any other field, and has its own frequency.
       expect(engine.nonPriority?.maxLogsPerWindowCapBehavior).toBe('drop');
-      expect(engine.nonPriority?.maxLogsPerWindow).toBe(100000);
+      expect(engine.nonPriority?.maxLogsPerWindow).toBe(500000);
       expect(engine.nonPriority?.frequency).toBe('5m');
 
       // The store is installed once for the file, so clear both layers for later cases.

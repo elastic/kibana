@@ -10,7 +10,10 @@ import { createCatalogWatchPlaceholder } from '../watches/watch_helpers';
 import { RULE_TUNING_DEFAULT_EXTRAS } from '../worker_settings';
 import type { Watch } from '.';
 import {
+  CandidatesRequestBody,
   GetWatchResponse,
+  HuntBehaviorRequestBody,
+  HuntCoordinatorResult,
   ListWatchesResponse,
   RuleTuningWorkerExtras,
   UpdateWorkerRequestBody,
@@ -22,6 +25,20 @@ import {
 // The catalog placeholders are what the watches routes actually return for a not-installed
 // Watch, so they are the right input for the response schemas.
 const CATALOG_WATCHES = SYSTEM_SECURITY_WATCH_IDS.map(createCatalogWatchPlaceholder);
+
+describe('CandidatesRequestBody', () => {
+  it('defaults lookback_days to 30', () => {
+    expect(CandidatesRequestBody.parse({}).lookback_days).toBe(30);
+  });
+
+  it('keeps an explicit lookback_days', () => {
+    expect(CandidatesRequestBody.parse({ lookback_days: 14 }).lookback_days).toBe(14);
+  });
+
+  it.each([0, 3651])('rejects lookback_days %d', (lookbackDays) => {
+    expect(CandidatesRequestBody.safeParse({ lookback_days: lookbackDays }).success).toBe(false);
+  });
+});
 
 describe('AlertZero schema smoke tests', () => {
   it('parses catalog watches through ListWatchesResponse', () => {
@@ -151,5 +168,63 @@ describe('AlertZero schema smoke tests', () => {
         settings: { autonomy: 'assisted' },
       }).success
     ).toBe(true);
+  });
+});
+
+describe('HuntBehaviorRequestBody excluded_iocs', () => {
+  it('parses an optional excluded_iocs array', () => {
+    expect(
+      HuntBehaviorRequestBody.parse({
+        text: 'report body',
+        excluded_iocs: [{ type: 'ip', value: '169.254.169.254' }],
+      }).excluded_iocs
+    ).toEqual([{ type: 'ip', value: '169.254.169.254' }]);
+  });
+});
+
+describe('HuntCoordinatorResult excluded_report_iocs', () => {
+  const baseResult = {
+    status: 'tier1_only' as const,
+    run_id: 'run-1',
+    index_patterns: ['logs-*'],
+    tier2_targets: [],
+    tier2_target_sources: [],
+    report_intent_targets: [],
+    actionable_indices: [],
+    tier1: {
+      tier: 1 as const,
+      status: 'no_environment_hits' as const,
+      has_confirmed_hit: false,
+      searched_iocs: 0,
+      searched_techniques: 0,
+      resolved_iocs: [],
+      resolved_techniques: [],
+      time_range: { from: 'now-24h', to: 'now' },
+      counts: {
+        total_hits: 0,
+        returned_hits: 0,
+        affected_hosts: 0,
+        affected_users: 0,
+      },
+      hits: [],
+      affected_assets: { hosts: [], users: [], services: [] },
+      per_index: [],
+    },
+    message: 'ok',
+    next_step: 'none',
+    has_confirmed_hit: false,
+    completeness: 'complete' as const,
+    completed_successfully: true,
+    headline: 'headline',
+    narrative: 'narrative',
+  };
+
+  it('parses excluded_report_iocs with a positive count', () => {
+    expect(
+      HuntCoordinatorResult.parse({
+        ...baseResult,
+        excluded_report_iocs: { count: 7 },
+      }).excluded_report_iocs
+    ).toEqual({ count: 7 });
   });
 });

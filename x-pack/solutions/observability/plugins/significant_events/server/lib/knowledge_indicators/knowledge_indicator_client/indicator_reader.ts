@@ -64,6 +64,76 @@ export class IndicatorReader {
     return this.revisionReader.countLatestRevisions(inPredicate(TYPE, [type]), IS_NOT_DELETED);
   }
 
+  /** Distinct live entity slugs, matching the entities `getFeatures` returns but without its limit. */
+  countEntities(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXCLUDED,
+      IS_NOT_EXPIRED,
+      inPredicate(FEATURE_TYPE, ['entity'])
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere, FEATURE_SLUG);
+  }
+
+  countFeatures(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_FEATURE]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(IS_NOT_DELETED, IS_NOT_EXCLUDED, IS_NOT_EXPIRED);
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
+  countUnbackedQueries(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
+      ruleUnbackedPostGroupingWhere('only')
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
+  countRuleBackedQueries(sourceIds: string[]): Promise<number> {
+    if (sourceIds.length === 0) {
+      return Promise.resolve(0);
+    }
+
+    const where = combineWhere(
+      inPredicate(TYPE, [KI_TYPE_QUERY]),
+      inPredicate(SOURCE_ID, sourceIds)
+    );
+    const postGroupingWhere = combineWhere(
+      IS_NOT_DELETED,
+      IS_NOT_EXPIRED,
+      esql.exp`${esql.col(QUERY_RULE_BACKED)} == true`
+    );
+
+    return this.revisionReader.countLatestRevisions(where, postGroupingWhere);
+  }
+
   async getFeatures(
     sources: string | string[],
     options: {
@@ -136,6 +206,37 @@ export class IndicatorReader {
     );
     const hits = docs.filter(isStoredFeatureKnowledgeIndicator).map(fromStoredFeature);
     return { hits };
+  }
+
+  async getFeatureSourcesBySlug(
+    sourceIds: string[],
+    featureType: string,
+    slugs: string[]
+  ): Promise<Map<string, string[]>> {
+    const bySlug = new Map<string, string[]>();
+    if (sourceIds.length === 0 || slugs.length === 0) {
+      return bySlug;
+    }
+    // Tombstones carry no `feature.*` fields: filtering on them before the latest-per-group pick
+    // would resurface deleted features through their previous revision.
+    const docs = await this.revisionReader.fetchLatestRevisions(
+      combineWhere(inPredicate(SOURCE_ID, sourceIds), inPredicate(TYPE, [KI_TYPE_FEATURE])),
+      combineWhere(
+        IS_NOT_DELETED,
+        IS_NOT_EXCLUDED,
+        IS_NOT_EXPIRED,
+        inPredicate(FEATURE_TYPE, [featureType]),
+        inPredicate(FEATURE_SLUG, slugs)
+      )
+    );
+    for (const doc of docs) {
+      if (!isStoredFeatureKnowledgeIndicator(doc)) continue;
+      const slug = doc.feature.slug;
+      const sources = bySlug.get(slug) ?? [];
+      if (!sources.includes(doc['source.id'])) sources.push(doc['source.id']);
+      bySlug.set(slug, sources);
+    }
+    return bySlug;
   }
 
   async getFeature(sourceId: string, id: string): Promise<Feature> {

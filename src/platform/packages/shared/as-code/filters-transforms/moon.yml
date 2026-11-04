@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/logging'
   - '@kbn/as-code-filters-constants'
   - '@kbn/zod'
+  - '@kbn/core-saved-objects-server'
 tags:
   - shared-common
   - package
@@ -35,6 +36,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -1,0 +1,8 @@
+[
+  {
+    "number": 900001,
+    "state": "open",
+    "title": "[Security Solution][Bug] `Raw document_parsing_exception` shown instead of a friendly message for an invalid IP in a value list",
+    "body": "Adding an invalid IP to an ip-type value list shows the raw document_parsing_exception from Elasticsearch instead of a user-friendly message. Recording attached."
+  }
+]

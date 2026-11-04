@@ -18,7 +18,6 @@ import {
   registerSubscriptionStatusEvents,
 } from './telemetry';
 
-// Off by default: billing admins get the no-access tooltip in real Serverless environments.
 const ENABLED_FLAG = 'subscriptionStatus.enabled';
 
 interface SubscriptionStatusSetupDeps {
@@ -45,7 +44,7 @@ export class SubscriptionStatusPlugin
   public start(core: CoreStart, { cloud }: SubscriptionStatusStartDeps) {
     if (!cloud) return;
     this.flagSubscription = core.featureFlags
-      .getBooleanValue$(ENABLED_FLAG, false)
+      .getBooleanValue$(ENABLED_FLAG, true)
       .pipe(distinctUntilChanged())
       .subscribe((enabled) => {
         if (enabled) {

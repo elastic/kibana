@@ -43,7 +43,6 @@ import {
 import { resolveArtifactId } from '@kbn/alerting-v2-utils';
 import { buildRulePayload } from '@kbn/alerting-v2-utils';
 import { dashboardIdSchema } from '../../../lib/artifact_types';
-import { AGENT_BUILDER_TAG } from '../../common/constants';
 import {
   findBackingIndices,
   formatBackingIndexWarning,
@@ -69,29 +68,12 @@ const isDashboardArtifact = (artifact: RuleArtifact): artifact is DashboardArtif
 const isRunbookArtifact = (artifact: RuleArtifact): artifact is RunbookArtifact =>
   artifact.type === RUNBOOK_ARTIFACT_TYPE;
 
-// Mirrors the `tagsSchema` cap in @kbn/alerting-v2-schemas (max 20 tags). Kept
-// local to avoid forcing an export purely for this guard.
-const MAX_RULE_TAGS = 20;
-
 // Mirrors `artifactsSchema.max(100)` in @kbn/alerting-v2-schemas.
 const MAX_RULE_ARTIFACTS = 100;
 
 // Saved-object type for Kibana dashboards. Same string as DASHBOARD_ARTIFACT_TYPE
 // but a different concept (SO type vs rule artifact type).
 const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
-
-/**
- * Ensures the agent-builder provenance tag is present without clobbering any
- * tags the user or LLM already set. Skips silently if the tag cap is already
- * reached, so we never push a payload that fails schema validation.
- */
-const withAgentBuilderTag = (tags: string[] | undefined): string[] => {
-  const existing = tags ?? [];
-  if (existing.includes(AGENT_BUILDER_TAG) || existing.length >= MAX_RULE_TAGS) {
-    return existing;
-  }
-  return [...existing, AGENT_BUILDER_TAG];
-};
 
 /**
  * Maps dashboard saved-object IDs onto `dashboard` artifacts in the create/update
@@ -692,21 +674,6 @@ export const executeRuleOperations = async (
     throw new RuleOperationValidationError(
       'A rule name is required when creating a new rule. Use a set_metadata operation with a name.'
     );
-  }
-
-  // Stamp the agent-builder provenance tag on every rule created or edited via
-  // Agent Builder so they can be measured (telemetry) and filtered in the Rules
-  // list. Merged after all operations so it never overwrites user/LLM-provided
-  // tags. Applied on edits too, so a rule that loses the tag regains it whenever
-  // the agent touches it.
-  if (next.metadata) {
-    next = {
-      ...next,
-      metadata: {
-        ...next.metadata,
-        tags: withAgentBuilderTag(next.metadata.tags),
-      },
-    };
   }
 
   if (!isStateTransitionAllowed(next)) {

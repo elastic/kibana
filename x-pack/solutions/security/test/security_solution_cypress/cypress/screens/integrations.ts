@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-export const ADD_INTEGRATION_BTN = '[data-test-subj="addIntegrationPolicyButton"]';
-
 export const SAVE_AND_CONTINUE_BTN = '[data-test-subj="createPackagePolicySaveButton"]';
 
 export const MODAL_CONFIRMATION_TITLE = '[data-test-subj="confirmModalTitleText"]';

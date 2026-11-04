@@ -26,6 +26,7 @@ import { createUnresolveAction } from './unresolve';
 import { createEditTagsAction } from './edit_tags';
 import { createEditAssigneeAction } from './edit_assignee';
 import { createOpenInDiscoverAction } from './open_in_discover';
+import { createOpenAlertEventsHistoryAction } from './open_alert_events_history';
 
 export interface EpisodeActionsDeps {
   http: HttpStart;
@@ -45,6 +46,17 @@ export interface EpisodeActionsDeps {
     episodeIsoTimestamp: string;
     ruleId: string;
   }) => string | undefined | Promise<string | undefined>;
+  /** Resolver for the Discover URL containing all rule events for one episode. */
+  getAlertEventsHistoryHref?: (args: {
+    episodeId: string;
+    episodeStart: string;
+    spaceId: string;
+  }) => string | undefined | Promise<string | undefined>;
+  /**
+   * Whether Discover can open an episode's rule-events history. Required with
+   * `getAlertEventsHistoryHref`; omitted or false hides the action.
+   */
+  isAlertEventsHistoryAvailable?: () => boolean;
   additionalDataSource?: EpisodeDataSource;
 }
 
@@ -80,6 +92,15 @@ export const createEpisodeActions = (deps: EpisodeActionsDeps): EpisodeAction[] 
     ),
     createEditAssigneeAction(deps),
     createOpenInDiscoverAction(deps),
+    ...(deps.getAlertEventsHistoryHref
+      ? [
+          createOpenAlertEventsHistoryAction({
+            spaces: deps.spaces,
+            getAlertEventsHistoryHref: deps.getAlertEventsHistoryHref,
+            isAvailable: deps.isAlertEventsHistoryAvailable ?? (() => false),
+          }),
+        ]
+      : []),
     ...(additionalDataSource?.createActions?.(deps) ?? []),
   ].sort((a, b) => a.order - b.order);
 };

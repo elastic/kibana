@@ -29,6 +29,7 @@ import {
   openPointInTime,
   updateAgent,
 } from './crud';
+import { throwIfAgentlessAgentPolicy } from './hosted_agent';
 import { RollbackActionRunner } from './rollback_action_runner';
 import { rollbackBatch } from './rollback_action_runner';
 import { createAgentAction } from './actions';
@@ -83,6 +84,10 @@ export async function sendRollbackAgentAction(
       `Cannot roll back upgrade for agent ${agent.id} on hosted agent policy ${agentPolicy.id}`
     );
   }
+  throwIfAgentlessAgentPolicy(
+    agentPolicy,
+    `Cannot roll back upgrade for managed agent ${agent.id}`
+  );
 
   const now = new Date().toISOString();
   const currentSpaceId = getCurrentNamespace(soClient);

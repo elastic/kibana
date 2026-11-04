@@ -6,15 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { CaseUI } from '@kbn/cases-plugin/common';
 import { SECURITY_EVENT_ATTACHMENT_TYPE } from '@kbn/cases-plugin/common';
 import { EventTabContent } from './event_tab_content';
-import type { Event } from './table';
+import type { CaseViewEventsTableProps } from './table';
 
 jest.mock('./table', () => ({
-  EventsTableForCases: ({ events }: { events: Event[] }) => (
+  EventsTableForCases: ({ events, onRemove }: CaseViewEventsTableProps) => (
     <div data-test-subj="events-table-mock">
+      {onRemove && (
+        <button
+          type="button"
+          data-test-subj="remove-events-mock"
+          onClick={() => onRemove({ attachmentIds: ['event-1'] })}
+        />
+      )}
       {events.length} {'events'}
       {events.map((e) => (
         <span key={String(e.eventId)} data-test-subj={`event-${String(e.eventId)}`}>
@@ -82,5 +89,23 @@ describe('EventTabContent', () => {
     render(<EventTabContent caseData={caseData} />);
 
     expect(screen.getByTestId('events-table-mock')).toHaveTextContent('1 events');
+  });
+
+  it('passes onRemove to the events table', () => {
+    const caseData = { id: 'case-1', comments: [] } as unknown as CaseUI;
+    const onRemove = jest.fn();
+
+    render(<EventTabContent caseData={caseData} onRemove={onRemove} />);
+    fireEvent.click(screen.getByTestId('remove-events-mock'));
+
+    expect(onRemove).toHaveBeenCalledWith({ attachmentIds: ['event-1'] });
+  });
+
+  it('hides removal without onRemove', () => {
+    const caseData = { id: 'case-1', comments: [] } as unknown as CaseUI;
+
+    render(<EventTabContent caseData={caseData} />);
+
+    expect(screen.queryByTestId('remove-events-mock')).not.toBeInTheDocument();
   });
 });

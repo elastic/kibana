@@ -10,10 +10,9 @@ import {
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
 import type { Automation } from '../../hooks/use_automations';
+import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
-export type AlertStatus = 'any' | 'active' | 'inactive';
 export type ScheduleUnit = 'hour' | 'day' | 'week';
-export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self' | 'thread';
 const SLACK_TARGETS: SlackTarget[] = ['channel', 'self', 'thread'];
 
@@ -35,7 +34,6 @@ export type TriggerFormValues =
       ruleNamePattern: string;
       ruleNames: string[];
       ruleTags: string[];
-      alertStatus: AlertStatus;
     }
   | {
       kind: 'every';
@@ -47,7 +45,13 @@ export type TriggerFormValues =
       endTime: string;
       timezone: string;
     }
-  | { kind: SlackTriggerKind; channels: string[]; users: string[]; messageFilter: string };
+  | {
+      kind: SlackTriggerKind;
+      channels: string[];
+      users: string[];
+      bots: string[];
+      messageFilter: string;
+    };
 
 export type SlackTriggerFormValues = Extract<TriggerFormValues, { kind: SlackTriggerKind }>;
 
@@ -68,7 +72,6 @@ export interface AutomationFormValues {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   instructions: string;
-  mode: InstructionMode;
   slackAction?: SlackActionFormValues;
   isEnabled: boolean;
 }
@@ -78,10 +81,10 @@ const WEEKDAYS = [1, 2, 3, 4, 5];
 
 export const createTriggerFormValues = (kind: TriggerFormValues['kind']): TriggerFormValues => {
   if (isSlackTriggerKind(kind)) {
-    return { kind, channels: [], users: [], messageFilter: '' };
+    return { kind, channels: [], users: [], bots: [], messageFilter: '' };
   }
   if (kind === 'alert') {
-    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [], alertStatus: 'any' };
+    return { kind, ruleNamePattern: '', ruleNames: [], ruleTags: [] };
   }
   return {
     kind,
@@ -102,7 +105,6 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   trigger: undefined,
   dailyDispatchLimit: '20',
   instructions: '',
-  mode: 'investigate',
   slackAction: undefined,
   isEnabled: false,
 });
@@ -143,13 +145,13 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
           ruleNamePattern: row.ruleNamePattern ?? '',
           ruleNames: row.ruleNames ?? [],
           ruleTags: row.tags ?? [],
-          alertStatus: row.alertStatus ?? 'any',
         }
       : row?.kind === 'slack'
       ? {
           kind: SLACK_EVENT_TO_FORM_KIND[row.event],
           channels: row.channels ?? [],
           users: row.users ?? [],
+          bots: row.bots ?? [],
           messageFilter: row.messageFilter ?? '',
         }
       : preset
@@ -181,9 +183,11 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     tags: automation.tags ?? [],
     description: automation.description ?? '',
     trigger,
-    dailyDispatchLimit: String(automation.runtime.dailyDispatchLimit ?? 20),
+    dailyDispatchLimit:
+      automation.runtime.dailyDispatchLimit === undefined
+        ? UNLIMITED_DAILY_LIMIT
+        : String(automation.runtime.dailyDispatchLimit),
     instructions: automation.execution.promptTemplate ?? '',
-    mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
       completion?.action === 'post_to_slack'
         ? {

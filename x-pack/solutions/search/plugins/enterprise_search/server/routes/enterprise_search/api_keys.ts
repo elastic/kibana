@@ -26,7 +26,7 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
           keyName: schema.string({ maxLength: 1000 }),
         }),
         params: schema.object({
-          indexName: schema.string(),
+          indexName: schema.string({ maxLength: 1024 }),
         }),
       },
     },
@@ -95,7 +95,7 @@ export function registerApiKeysRoutes({ log, router }: RouteDependencies) {
       },
       validate: {
         params: schema.object({
-          apiKeyId: schema.string(),
+          apiKeyId: schema.string({ maxLength: 512 }),
         }),
       },
     },

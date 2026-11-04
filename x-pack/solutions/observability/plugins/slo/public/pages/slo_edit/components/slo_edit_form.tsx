@@ -5,19 +5,17 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiSteps } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import { EuiFlexGroup } from '@elastic/eui';
 import type { GetSLOResponse } from '@kbn/slo-schema';
 import React from 'react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../constants';
-import { useSectionFormValidation } from '../hooks/use_section_form_validation';
-import { useShowSections } from '../hooks/use_show_sections';
 import type { CreateSLOForm, FormSettings } from '../types';
 import { SloEditFormDescriptionSection } from './slo_edit_form_description_section';
 import { SloEditFormFooter } from './slo_edit_form_footer';
 import { SloEditFormIndicatorSection } from './slo_edit_form_indicator_section';
 import { SloEditFormObjectiveSection } from './slo_edit_form_objective_section';
+import { SloEditFormSteps } from './slo_edit_form_steps';
 
 export interface Props {
   initialValues?: CreateSLOForm;
@@ -31,6 +29,10 @@ const DEFAULT_FORM_SETTINGS: FormSettings = {
   allowedIndicatorTypes: [],
 };
 
+/**
+ * Form root. It must not read `formState` or call `watch` so that field changes never re-render the
+ * whole form; per-field subscriptions live in the children via `useWatch` / `useFormState`.
+ */
 export function SloEditForm({
   slo,
   initialValues,
@@ -45,51 +47,15 @@ export function SloEditForm({
     values: initialValues,
     mode: 'all',
   });
-  const { watch, getFieldState, getValues, formState } = form;
-
-  const { isIndicatorSectionValid, isObjectiveSectionValid, isDescriptionSectionValid } =
-    useSectionFormValidation({
-      getFieldState,
-      getValues,
-      formState,
-      watch,
-    });
-
-  const { showDescriptionSection, showObjectiveSection } = useShowSections(
-    isEditMode,
-    formState.isValidating,
-    isIndicatorSectionValid,
-    isObjectiveSectionValid
-  );
 
   return (
     <FormProvider {...form}>
       <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="sloForm">
-        <EuiSteps
-          steps={[
-            {
-              title: i18n.translate('xpack.slo.sloEdit.definition.title', {
-                defaultMessage: 'Define SLI',
-              }),
-              children: <SloEditFormIndicatorSection formSettings={formSettings} />,
-              status: isIndicatorSectionValid ? 'complete' : 'incomplete',
-            },
-            {
-              title: i18n.translate('xpack.slo.sloEdit.objectives.title', {
-                defaultMessage: 'Set objectives',
-              }),
-              children: showObjectiveSection ? <SloEditFormObjectiveSection /> : null,
-              status: showObjectiveSection && isObjectiveSectionValid ? 'complete' : 'incomplete',
-            },
-            {
-              title: i18n.translate('xpack.slo.sloEdit.description.title', {
-                defaultMessage: 'Describe SLO',
-              }),
-              children: showDescriptionSection ? <SloEditFormDescriptionSection /> : null,
-              status:
-                showDescriptionSection && isDescriptionSectionValid ? 'complete' : 'incomplete',
-            },
-          ]}
+        <SloEditFormSteps
+          isEditMode={isEditMode}
+          indicatorSection={<SloEditFormIndicatorSection formSettings={formSettings} />}
+          objectiveSection={<SloEditFormObjectiveSection />}
+          descriptionSection={<SloEditFormDescriptionSection />}
         />
 
         <SloEditFormFooter slo={slo} onFlyoutClose={onFlyoutClose} isEditMode={isEditMode} />

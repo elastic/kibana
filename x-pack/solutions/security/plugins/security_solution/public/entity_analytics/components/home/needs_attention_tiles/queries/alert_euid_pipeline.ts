@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+import { getEuidEsqlDocumentsContainsIdFilter } from '@kbn/entity-store/common/domain/euid';
+import { getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
+import { ALLOWED_ENTITY_TYPES } from '../../entities_grid/common';
 import { indentForkBranch } from '../../entities_grid/queries/esql';
 import {
   buildPerTypeEuidEvals,
@@ -39,6 +42,32 @@ const KEEP_COLUMNS = '_ea_entity_id, `kibana.alert.severity`';
 /** The column that holds the bucket of an alert when `bucketExpression` is given. */
 export const ALERT_BUCKET_COLUMN = 'bucket';
 
+/**
+ * Alerts the entity store accepts as that type's entity (its `documentsFilter`). The fields are not
+ * cast: the alerts and the entity index map them the same way, and a cast would keep ES|QL from
+ * pushing the filter down to Lucene.
+ */
+const buildEntityAcceptanceCondition = (
+  entityType: (typeof ALLOWED_ENTITY_TYPES)[number]
+): string =>
+  `(${getEuidEsqlDocumentsContainsIdFilter(getBuiltInEntityDefinition(entityType), {
+    castFields: false,
+  })})`;
+
+/** Alerts accepted as at least one allowed type, so alerts with no identity skip the EVALs. */
+const buildAnyEntityIdentityCondition = (): string =>
+  ALLOWED_ENTITY_TYPES.map(buildEntityAcceptanceCondition).join(' OR ');
+
+/**
+ * The OR above only says that some type accepts the alert, so each EUID is nulled unless its own
+ * type accepts it. Otherwise a host field would keep a failed-outcome user alert counted as a user.
+ */
+const evalAcceptedTypedEuids = (): string =>
+  `| EVAL ${ALLOWED_ENTITY_TYPES.map(
+    (entityType) =>
+      `${entityType}_euid = CASE(${buildEntityAcceptanceCondition(entityType)}, ${entityType}_euid)`
+  ).join(', ')}`;
+
 export interface AlertEuidPipelineOptions {
   /**
    * Condition both alert branches add, when the FROM also reads the entity index. Rows of the other
@@ -60,8 +89,14 @@ export const buildAlertEuidPipeline = (
   const keepColumns = bucketExpression ? `${KEEP_COLUMNS}, @timestamp` : KEEP_COLUMNS;
   const guard = alertBranchCondition ? [`(${alertBranchCondition})`] : [];
   const derivedSteps = [
-    `WHERE ${[...guard, '`kibana.alert.entity.id` IS NULL'].join(' AND ')}`,
+    // Its own conjunct, so ES|QL can push it down and skip alerts with no identity before the EVALs.
+    `WHERE ${[
+      ...guard,
+      '`kibana.alert.entity.id` IS NULL',
+      `(${buildAnyEntityIdentityCondition()})`,
+    ].join(' AND ')}`,
     ...buildPerTypeEuidEvals(),
+    evalAcceptedTypedEuids(),
     evalGuardedTypedEuids('_ea_entity_id'),
     `| KEEP ${keepColumns}`,
   ];
@@ -69,7 +104,9 @@ export const buildAlertEuidPipeline = (
   const fork = [
     '| FORK (',
     `    WHERE ${[...guard, '`kibana.alert.entity.id` IS NOT NULL'].join(' AND ')}`,
-    '    | EVAL _ea_entity_id = `kibana.alert.entity.id`',
+    // An unmapped alerts field is nullified to NULL. FORK then rejects the branch because the
+    // derived EUIDs are KEYWORD. The cast keeps this branch KEYWORD when the alerts index is absent.
+    '    | EVAL _ea_entity_id = `kibana.alert.entity.id`::KEYWORD',
     `    | KEEP ${keepColumns}`,
     '  )',
     '  (',

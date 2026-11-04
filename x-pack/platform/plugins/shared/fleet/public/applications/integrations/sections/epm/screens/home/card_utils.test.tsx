@@ -301,11 +301,82 @@ describe('Card utils', () => {
       expect(cardItem.signalTypes).toEqual(['logs', 'metrics', 'traces']);
     });
 
+    describe('addIntegrationFromCatalog', () => {
+      it('should carry the classification of catalog packages', () => {
+        const mapPackage = (item: Record<string, unknown>) =>
+          mapToCard({
+            item: { id: item.name, version: '1.0.0', ...item },
+            addBasePath,
+            getHref,
+          } as any);
+
+        expect(
+          mapPackage({ name: 'okta', type: 'integration', data_streams: [{ type: 'logs' }] })
+            .addIntegrationFromCatalog
+        ).toBe(true);
+        expect(
+          mapPackage({ name: 'corelight', type: 'integration' }).addIntegrationFromCatalog
+        ).toBe(false);
+        expect(mapPackage({ name: 'some_input', type: 'input' }).addIntegrationFromCatalog).toBe(
+          true
+        );
+      });
+
+      it('should prefer the classification computed on the catalog tile', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'okta',
+            name: 'okta',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+            addIntegrationFromCatalog: false,
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.addIntegrationFromCatalog).toBe(false);
+      });
+
+      it('should not be set for UI links', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'language_client.python',
+            type: 'ui_link',
+            title: 'Python',
+            uiInternalPath: '/app/home',
+          },
+          addBasePath,
+          getHref,
+        } as any);
+
+        expect(cardItem.addIntegrationFromCatalog).toBeUndefined();
+      });
+    });
+
     describe('when enableIntegrationTileClickToAdd is enabled', () => {
       beforeEach(() => {
         ExperimentalFeaturesService.init({
           enableIntegrationTileClickToAdd: true,
         } as any);
+      });
+
+      it('should route to the overview page when the user cannot add integrations', () => {
+        const cardItem = mapToCard({
+          item: {
+            id: 'okta',
+            name: 'okta',
+            version: '1.0.0',
+            type: 'integration',
+            data_streams: [{ type: 'logs' }],
+          },
+          addBasePath,
+          getHref,
+          canAddIntegration: false,
+        } as any);
+
+        expect(cardItem.url).toBe('integration_details_overview');
       });
 
       it('should route integration packages to the add-integration page', () => {
@@ -470,7 +541,7 @@ describe('Card utils', () => {
       });
     });
 
-    describe('when enableIntegrationTileClickToAdd is disabled (default)', () => {
+    describe('when enableIntegrationTileClickToAdd is disabled', () => {
       it('should route integration packages to the overview page', () => {
         const cardItem = mapToCard({
           item: { id: 'okta', name: 'okta', version: '1.0.0', type: 'integration' },

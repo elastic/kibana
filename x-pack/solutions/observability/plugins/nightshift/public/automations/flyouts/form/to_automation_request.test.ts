@@ -87,7 +87,6 @@ describe('automation request', () => {
             ruleNamePattern: ' cpu ',
             ruleNames: ['Disk full'],
             ruleTags: ['infra'],
-            alertStatus: 'inactive',
           },
         })
       ).toEqual({
@@ -100,12 +99,11 @@ describe('automation request', () => {
               kind: 'alert',
               ruleNamePattern: 'cpu',
               ruleNames: ['Disk full'],
-              alertStatus: 'inactive',
               tags: ['infra'],
             },
           ],
         },
-        execution: { promptTemplate: 'Find the cause', reasoningMode: 'investigate' },
+        execution: { promptTemplate: 'Find the cause' },
         completions: [],
         runtime: { dailyDispatchLimit: 20 },
       });
@@ -116,7 +114,6 @@ describe('automation request', () => {
         toAutomationRequestBody({
           ...values,
           name: 'Report',
-          mode: 'investigate',
           trigger: everyTrigger({ unit: 'week', time: '08:00', daysOfWeek: [1], timezone: 'PST' }),
         })
       ).toMatchObject({
@@ -131,7 +128,7 @@ describe('automation request', () => {
             },
           ],
         },
-        execution: { reasoningMode: 'investigate' },
+        execution: {},
       });
     });
 
@@ -168,6 +165,7 @@ describe('automation request', () => {
             kind: 'slack_message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: ' outage ',
           },
         }).trigger
@@ -178,6 +176,7 @@ describe('automation request', () => {
             event: 'message',
             channels: ['#oncall'],
             users: ['emily'],
+            bots: ['PagerDuty'],
             messageFilter: 'outage',
           },
         ],
@@ -191,6 +190,31 @@ describe('automation request', () => {
       name: 'Triage',
       trigger: { ...createTriggerFormValues('alert'), ruleNamePattern: 'cpu' },
     } as Parameters<typeof toAutomationUpdateBody>[0];
+
+    it('edits and clears instructions while preserving a legacy reasoning mode', () => {
+      const automation = buildAutomation({
+        execution: { promptTemplate: 'Original focus', reasoningMode: 'observe' },
+      });
+      const values = {
+        ...toAutomationFormValues(automation),
+        trigger: createTriggerFormValues('alert'),
+        instructions: ' Updated focus ',
+      };
+      const update = toAutomationUpdateBody(values, automation);
+      expect(update.execution).toEqual({
+        promptTemplate: 'Updated focus',
+        reasoningMode: 'observe',
+      });
+      expect(
+        toAutomationFormValues({
+          ...automation,
+          execution: { ...automation.execution, promptTemplate: 'Updated focus' },
+        }).instructions
+      ).toBe('Updated focus');
+      expect(
+        toAutomationUpdateBody({ ...values, instructions: ' ' }, automation).execution
+      ).toEqual({ promptTemplate: null, reasoningMode: 'observe' });
+    });
 
     it('keeps trigger fields and rows the form does not model', () => {
       const automation = buildAutomation({
@@ -331,6 +355,20 @@ describe('automation request', () => {
       expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
         dailyDispatchLimit: 15,
       });
+    });
+
+    it('sends a null daily limit when the form is unlimited', () => {
+      const automation = buildAutomation({ runtime: { dailyDispatchLimit: 15 } });
+      const values = {
+        ...toAutomationFormValues(automation),
+        dailyDispatchLimit: 'unlimited',
+        trigger: toAutomationFormValues(automation).trigger,
+      } as Parameters<typeof toAutomationUpdateBody>[0];
+
+      expect(toAutomationUpdateBody(values, automation).runtime).toEqual({
+        dailyDispatchLimit: null,
+      });
+      expect(toAutomationRequestBody(values).runtime).toEqual({});
     });
 
     it('keeps the stored completion of a Slack-triggered automation on unrelated edits', () => {

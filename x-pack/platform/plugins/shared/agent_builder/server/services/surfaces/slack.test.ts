@@ -5,16 +5,18 @@
  * 2.0.
  */
 
+import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { slackSurface } from './slack';
 
 describe('slackSurface', () => {
-  it('renders the composition as Block Kit', () => {
+  it('renders the composition as Block Kit', async () => {
+    const runtime = await isomerPluginMock.createStartContract().getRuntime();
     const composition = {
       type: 'view' as const,
       body: [{ type: 'markdown' as const, text: 'There are **3** [alerts](https://example.com).' }],
     };
 
-    expect(slackSurface.render(composition)).toEqual({
+    expect(slackSurface.render(composition, runtime)).toEqual({
       text: expect.any(String),
       blocks: [
         {

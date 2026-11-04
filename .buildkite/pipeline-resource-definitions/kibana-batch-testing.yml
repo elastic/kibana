@@ -54,12 +54,14 @@ spec:
           branch: main
           env:
             TEST_CHANNELS: 'ci-batch-3h'
+            SCOUT_TEST_RUN_SCOPE: 'batch-3h'
         Daily:
           cronline: 0 0 * * 0-5
           message: 'Scheduled batch (daily)'
           branch: main
           env:
             TEST_CHANNELS: 'ci-batch-daily'
+            SCOUT_TEST_RUN_SCOPE: 'batch-daily'
         'Daily (IPv6)':
           cronline: 0 2 * * 0-5
           message: 'Scheduled batch (daily, IPv6-only)'
@@ -68,11 +70,13 @@ spec:
             TEST_CHANNELS: 'ci-on-commit,ci-batch-3h,ci-batch-daily'
             AGENT_LOOPBACK_IPV6_ONLY: 'true'
             KIBANA_TEST_IPV6_ONLY: 'true'
+            SCOUT_TEST_RUN_SCOPE: 'batch-daily-ipv6'
         Weekly:
           cronline: 0 6 * * 5
           message: 'Scheduled batch (weekly)'
           branch: main
           env:
             TEST_CHANNELS: 'ci-batch-weekly'
+            SCOUT_TEST_RUN_SCOPE: 'batch-weekly'
       tags:
         - kibana

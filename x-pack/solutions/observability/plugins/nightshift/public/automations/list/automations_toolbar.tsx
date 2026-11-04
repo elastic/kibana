@@ -60,6 +60,7 @@ export const AutomationsToolbar = ({
   onRangeChange,
   onRefresh,
   onCreate,
+  createDisabledReason,
 }: {
   filters: AutomationFilters;
   options: AutomationFilterOptions;
@@ -74,6 +75,8 @@ export const AutomationsToolbar = ({
   onRangeChange: (range: TimeRange, label: string) => void;
   onRefresh: () => void;
   onCreate?: () => void;
+  /** Shows the create action disabled, with this reason, instead of hiding it. */
+  createDisabledReason?: string;
 }) => {
   const { euiTheme } = useEuiTheme();
   const [toolbar, setToolbar] = useState<HTMLDivElement | null>(null);
@@ -83,11 +86,7 @@ export const AutomationsToolbar = ({
     [statusLabels.enabled]: <EuiIcon type="play" color="success" aria-hidden={true} />,
     [statusLabels.paused]: <EuiIcon type="pause" color="subdued" aria-hidden={true} />,
     [statusLabels.rateLimited]: (
-      <EuiIcon
-        type="hourglass"
-        color={euiTheme.colors.vis.euiColorVisWarning0}
-        aria-hidden={true}
-      />
+      <EuiIcon type="hourglass" color={euiTheme.colors.textWarning} aria-hidden={true} />
     ),
   };
   const from = pageIndex * pageSize + 1;
@@ -175,7 +174,32 @@ export const AutomationsToolbar = ({
           <EuiFlexItem grow={false}>
             <AutomationsTimeRangePicker onRangeChange={onRangeChange} onRefresh={onRefresh} />
           </EuiFlexItem>
-          {onCreate && (
+          {createDisabledReason && (
+            <EuiFlexItem grow={false}>
+              <EuiToolTip content={createDisabledReason}>
+                {isCompact ? (
+                  <EuiButtonIcon
+                    display="fill"
+                    iconType="plus"
+                    aria-label={listLabels.create}
+                    isDisabled
+                    data-test-subj="nightshiftAutomationsPageButton"
+                  />
+                ) : (
+                  <EuiButton
+                    data-test-subj="nightshiftAutomationsPageButton"
+                    fill
+                    size="s"
+                    iconType="plus"
+                    isDisabled
+                  >
+                    {listLabels.create}
+                  </EuiButton>
+                )}
+              </EuiToolTip>
+            </EuiFlexItem>
+          )}
+          {onCreate && !createDisabledReason && (
             <EuiFlexItem grow={false}>
               {isCompact ? (
                 <EuiToolTip content={listLabels.create} disableScreenReaderOutput>

@@ -44,7 +44,13 @@ import {
   toAutomationFormValues,
   type AutomationFormValues,
 } from '../flyouts/form/automation_form_values';
-import { canSaveAutomation, getSaveBlocker, isTriggerValid } from '../flyouts/form/validation';
+import {
+  canSaveAutomation,
+  getInstructionsError,
+  getSaveBlocker,
+  isTriggerValid,
+} from '../flyouts/form/validation';
+import { triggerLabels } from '../flyouts/form/triggers/translations';
 import { toAutomationUpdateBody } from '../flyouts/form/to_automation_request';
 import { SectionHeader, FormSection } from '../flyouts/form/section_header';
 import {
@@ -128,6 +134,7 @@ export const AutomationDetailFlyout = ({
   automations,
   automation,
   canManage,
+  editDisabledReason,
   usedToday,
   runRange,
   rangeLabel,
@@ -138,6 +145,8 @@ export const AutomationDetailFlyout = ({
   automations: Automation[];
   automation: Automation;
   canManage: boolean;
+  /** Why editing is not possible, shown on the disabled controls instead of hiding them. */
+  editDisabledReason?: string;
   usedToday: number;
   runRange: RunRange;
   rangeLabel: string;
@@ -160,6 +169,7 @@ export const AutomationDetailFlyout = ({
   const [blockedPath, setBlockedPath] = useState<string>();
   const [exit, setExit] = useState<{ path?: string }>();
   const [isNameInvalid, setIsNameInvalid] = useState(false);
+  const [showValidationErrors, setShowValidationErrors] = useState(false);
   const [selectedRun, setSelectedRun] = useState<Run>();
   const [isActionsOpen, setIsActionsOpen] = useState(false);
   const originalValues = useMemo(() => toAutomationFormValues(automation), [automation]);
@@ -275,6 +285,7 @@ export const AutomationDetailFlyout = ({
   const startEditing = (changes: Partial<AutomationFormValues> = {}) => {
     setValues({ ...originalValues, ...changes });
     setIsNameInvalid(false);
+    setShowValidationErrors(false);
     setIsEditing(true);
     setIsActionsOpen(false);
   };
@@ -286,10 +297,10 @@ export const AutomationDetailFlyout = ({
   `;
   const save = () => {
     if (!values.trigger || !isTriggerValid(values.trigger)) return;
-    if (!values.name.trim()) {
-      setIsNameInvalid(true);
-      return;
-    }
+    setShowValidationErrors(true);
+    const isNameMissing = !values.name.trim();
+    setIsNameInvalid(isNameMissing);
+    if (isNameMissing || getInstructionsError(values.instructions, values.trigger)) return;
     updateAutomation.mutate(
       {
         id: automation.id,
@@ -415,20 +426,22 @@ export const AutomationDetailFlyout = ({
                       {
                         title: labels.enabled,
                         value: (
-                          <EuiSwitch
-                            compressed
-                            showLabel={false}
-                            label={labels.enabled}
-                            checked={automation.isEnabled}
-                            disabled={!canManage}
-                            onChange={(event) =>
-                              toggleAutomation.mutate({
-                                id: automation.id,
-                                name: automation.name,
-                                isEnabled: event.target.checked,
-                              })
-                            }
-                          />
+                          <EuiToolTip content={editDisabledReason}>
+                            <EuiSwitch
+                              compressed
+                              showLabel={false}
+                              label={labels.enabled}
+                              checked={automation.isEnabled}
+                              disabled={!canManage}
+                              onChange={(event) =>
+                                toggleAutomation.mutate({
+                                  id: automation.id,
+                                  name: automation.name,
+                                  isEnabled: event.target.checked,
+                                })
+                              }
+                            />
+                          </EuiToolTip>
                         ),
                       },
                       {
@@ -474,14 +487,18 @@ export const AutomationDetailFlyout = ({
                               color: isLimitHigh ? euiTheme.colors.textWarning : undefined,
                             }}
                           >
-                            {usedToday} / {automation.runtime.dailyDispatchLimit ?? '—'}
-                            <EuiSpacer size="xs" />
-                            <EuiProgress
-                              size="s"
-                              color={isLimitHigh ? limitColor : 'success'}
-                              value={usedToday}
-                              max={automation.runtime.dailyDispatchLimit ?? 1}
-                            />
+                            {usedToday} / {dailyLimit ?? triggerLabels.noLimit}
+                            {dailyLimit !== undefined && (
+                              <>
+                                <EuiSpacer size="xs" />
+                                <EuiProgress
+                                  size="s"
+                                  color={isLimitHigh ? limitColor : 'success'}
+                                  value={usedToday}
+                                  max={dailyLimit}
+                                />
+                              </>
+                            )}
                           </div>
                         ),
                       },
@@ -514,10 +531,14 @@ export const AutomationDetailFlyout = ({
                     values={values}
                     tagSuggestions={automations.flatMap(({ tags }) => tags ?? [])}
                     isNameInvalid={isNameInvalid}
-                    savedLimit={Number(originalValues.dailyDispatchLimit)}
+                    showValidationErrors={showValidationErrors}
+                    savedLimit={dailyLimit}
                     onChange={(changes) => {
                       setValues((current) => ({ ...current, ...changes }));
                       if ('name' in changes) setIsNameInvalid(false);
+                      if ('trigger' in changes && changes.trigger?.kind !== values.trigger?.kind) {
+                        setShowValidationErrors(false);
+                      }
                     }}
                   />
                 ) : isRunsTab ? (
@@ -617,6 +638,17 @@ export const AutomationDetailFlyout = ({
                       </EuiButton>
                     </EuiToolTip>
                   </>
+                ) : editDisabledReason ? (
+                  <EuiToolTip content={editDisabledReason}>
+                    <EuiButton
+                      data-test-subj="automationEditButton"
+                      size="s"
+                      iconType="pencil"
+                      isDisabled
+                    >
+                      {labels.edit}
+                    </EuiButton>
+                  </EuiToolTip>
                 ) : (
                   canManage && (
                     <>

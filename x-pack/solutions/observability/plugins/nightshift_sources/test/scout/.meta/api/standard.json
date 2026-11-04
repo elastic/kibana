@@ -1,5 +1,5 @@
 {
-  "sha1": "6aa4db489e905ed4610878d540536951d2c4a5d7",
+  "sha1": "4ae190f15ba12c48d2e0d584533ef8bb1883aa5d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -16,7 +16,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 59,
+        "line": 60,
         "column": 52
       }
     },
@@ -32,7 +32,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 80,
+        "line": 82,
         "column": 14
       }
     },
@@ -48,7 +48,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 90,
+        "line": 92,
         "column": 14
       }
     },
@@ -64,8 +64,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_authorization.spec.ts",
-        "line": 99,
+        "line": 101,
         "column": 42
+      }
+    },
+    {
+      "id": "6a4859f7a35af73-43e7ded8acf2c23",
+      "title": "Nightshift sources lifecycle lists the All logs recommendation until a matching source exists",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 67,
+        "column": 7
       }
     },
     {
@@ -80,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 48,
-        "column": 11
+        "line": 98,
+        "column": 94
       }
     },
     {
@@ -96,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 125,
-        "column": 23
+        "line": 176,
+        "column": 25
       }
     },
     {
@@ -112,8 +128,24 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 144,
-        "column": 21
+        "line": 195,
+        "column": 11
+      }
+    },
+    {
+      "id": "6a4859f7a35af73-d85823435d3289e",
+      "title": "Nightshift sources lifecycle creates a disabled source and keeps its state through an update",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 242,
+        "column": 16
       }
     },
     {
@@ -128,8 +160,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 191,
-        "column": 16
+        "line": 274,
+        "column": 17
       }
     },
     {
@@ -144,8 +176,40 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 220,
-        "column": 24
+        "line": 310,
+        "column": 28
+      }
+    },
+    {
+      "id": "6a4859f7a35af73-8098fd00a029028",
+      "title": "Nightshift sources lifecycle searches titles by their words, also among the given ids",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 379,
+        "column": 14
+      }
+    },
+    {
+      "id": "6a4859f7a35af73-d1ddaa4bffd2b22",
+      "title": "Nightshift sources lifecycle lists a source by id only in the space it belongs to",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
+        "line": 470,
+        "column": 15
       }
     },
     {
@@ -160,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 290,
-        "column": 26
+        "line": 439,
+        "column": 27
       }
     },
     {
@@ -176,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_lifecycle.spec.ts",
-        "line": 292,
-        "column": 80
+        "line": 445,
+        "column": 27
       }
     },
     {
@@ -375,7 +439,7 @@
     {
       "id": "bd16983193fab33-5343124ec890df5",
       "title": "POST /internal/nightshift/sources validation accepts TS over a pattern with no indices yet",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -384,7 +448,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 142,
+        "line": 145,
         "column": 13
       }
     },
@@ -400,7 +464,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 150,
+        "line": 153,
         "column": 14
       }
     },
@@ -416,7 +480,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 158,
+        "line": 161,
         "column": 28
       }
     },
@@ -432,7 +496,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 167,
+        "line": 170,
         "column": 89
       }
     },
@@ -448,7 +512,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 181,
+        "line": 184,
         "column": 13
       }
     },
@@ -464,7 +528,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/nightshift_sources/test/scout/api/tests/sources_validation.spec.ts",
-        "line": 201,
+        "line": 204,
         "column": 9
       }
     }

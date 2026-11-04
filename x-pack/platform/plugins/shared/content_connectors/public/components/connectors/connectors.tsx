@@ -145,7 +145,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
           {
             id: 'newConnectorNative',
             label: i18n.translate(
-              'xpack.enterpriseSearch.connectors.newNativeConnectorButtonLabel',
+              'xpack.contentConnectors.connectors.newNativeConnectorButtonLabel',
               {
                 defaultMessage: 'New Elastic managed Connector',
               }
@@ -157,7 +157,7 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
           {
             id: 'newConnectorClient',
             label: i18n.translate(
-              'xpack.enterpriseSearch.connectors.newConnectorsClientButtonLabel',
+              'xpack.contentConnectors.connectors.newConnectorsClientButtonLabel',
               { defaultMessage: 'New Self-managed Connector' }
             ),
             iconType: 'plusCircle',
@@ -251,24 +251,23 @@ const Connectors: React.FC<ConnectorsProps> = ({ isCrawler, isCrawlerSelfManaged
                     incremental: true,
                     placeholder: !isCrawler
                       ? i18n.translate(
-                          'xpack.contentConnectorsTable.euiSearchBar.filterConnectorsPlaceholder',
+                          'xpack.contentConnectors.euiSearchBar.filterConnectorsPlaceholder',
                           { defaultMessage: 'Filter connectors' }
                         )
                       : i18n.translate(
-                          'xpack.contentConnectorsTable.euiSearchBar.filterCrawlersPlaceholder',
+                          'xpack.contentConnectors.euiSearchBar.filterCrawlersPlaceholder',
                           { defaultMessage: 'Filter web crawlers' }
                         ),
                   }}
                   aria-label={
                     !isCrawler
                       ? i18n.translate(
-                          'xpack.contentConnectorsTable.euiSearchBar.filterConnectorsLabel',
+                          'xpack.contentConnectors.euiSearchBar.filterConnectorsLabel',
                           { defaultMessage: 'Filter connectors' }
                         )
-                      : i18n.translate(
-                          'xpack.contentConnectorsTable.euiSearchBar.filterCrawlersLabel',
-                          { defaultMessage: 'Filter web crawlers' }
-                        )
+                      : i18n.translate('xpack.contentConnectors.euiSearchBar.filterCrawlersLabel', {
+                          defaultMessage: 'Filter web crawlers',
+                        })
                   }
                   onChange={(event) => setSearchValue(event.queryText)}
                 />

@@ -5,12 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+import { screen, waitFor } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
+import { setMockedPresentationUtilServices } from '@kbn/presentation-util-plugin/public/mocks';
+import { renderWithProviders } from '../test_utils/test_utils';
 import type { SaveProps } from './app';
-import { type SaveVisualizationProps, runSaveLensVisualization } from './save_modal_container';
+import {
+  type SaveVisualizationProps,
+  runSaveLensVisualization,
+  SaveModalContainer,
+} from './save_modal_container';
 import { defaultDoc, makeDefaultServices } from '../mocks';
 import { faker } from '@faker-js/faker';
 import { makeAttributeService } from '../mocks/services_mock';
+import type { LensDocument } from '@kbn/lens-common';
 import { LENS_EMBEDDABLE_TYPE } from '@kbn/lens-common';
+import { trackCreateUiCounterEvents } from '../lens_ui_telemetry';
+
+jest.mock('../lens_ui_telemetry', () => ({
+  ...jest.requireActual('../lens_ui_telemetry'),
+  trackCreateUiCounterEvents: jest.fn(),
+}));
 
 describe('runSaveLensVisualization', () => {
   // Need to call reset here as makeDefaultServices() reuses some mocks from core
@@ -407,5 +423,96 @@ describe('runSaveLensVisualization', () => {
       expect(props.redirectTo).not.toHaveBeenCalled();
       expect(props.application.navigateToApp).toHaveBeenCalledWith('lens', { path: '/' });
     });
+  });
+});
+
+describe('SaveModalContainer', () => {
+  beforeAll(() => setMockedPresentationUtilServices());
+
+  beforeEach(() => {
+    jest.mocked(trackCreateUiCounterEvents).mockClear();
+  });
+
+  const byValueDoc: LensDocument = { ...defaultDoc, savedObjectId: undefined };
+  const esqlDoc: LensDocument = {
+    ...byValueDoc,
+    state: {
+      ...byValueDoc.state,
+      datasourceStates: {
+        textBased: { layers: { layer1: { query: { esql: 'FROM logs' }, columns: [] } } },
+      },
+    },
+  };
+
+  const renderAndSave = async (
+    props: Partial<React.ComponentProps<typeof SaveModalContainer>>,
+    waitForSave: jest.Mock,
+    { saveAsNewCopy = false }: { saveAsNewCopy?: boolean } = {}
+  ) => {
+    renderWithProviders(
+      <SaveModalContainer
+        lensServices={makeDefaultServices()}
+        lastKnownDoc={byValueDoc}
+        initialInput={undefined}
+        onClose={jest.fn()}
+        {...props}
+      />
+    );
+    await userEvent.type(await screen.findByTestId('savedObjectTitle'), 'my chart');
+    if (saveAsNewCopy) {
+      await userEvent.click(screen.getByTestId('saveAsNewCheckbox'));
+    }
+    await userEvent.click(screen.getByLabelText('None'));
+    await userEvent.click(screen.getByTestId('confirmSaveSavedObjectButton'));
+    await waitFor(() => expect(waitForSave).toHaveBeenCalled());
+  };
+
+  it('should track an ES|QL creation with its source when a chart is saved from chat', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave, lastKnownDoc: esqlDoc, telemetrySource: 'chat' }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('esql', 'chat');
+  });
+
+  it('should pass no source for a DSL chart saved by a caller that does not set one', async () => {
+    const onSave = jest.fn();
+    await renderAndSave({ onSave }, onSave);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', undefined);
+  });
+
+  it('should not track a creation when an existing chart is saved', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave
+    );
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
+  });
+
+  it('should track a creation when an existing chart is saved as a new copy', async () => {
+    const onSave = jest.fn();
+    await renderAndSave(
+      {
+        onSave,
+        lastKnownDoc: defaultDoc,
+        initialInput: { attributes: defaultDoc, ref_id: defaultDoc.savedObjectId },
+        telemetrySource: 'chat',
+      },
+      onSave,
+      { saveAsNewCopy: true }
+    );
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledTimes(1);
+    expect(trackCreateUiCounterEvents).toHaveBeenCalledWith('dsl', 'chat');
+  });
+
+  it('should not track a creation when the Lens app handles the save', async () => {
+    const runSave = jest.fn();
+    await renderAndSave({ runSave }, runSave);
+    expect(trackCreateUiCounterEvents).not.toHaveBeenCalled();
   });
 });
