@@ -78,9 +78,11 @@ const toExecutionResponse = (execution: WorkflowExecutionDto): OnboardingSuggest
 export const createOnboardingClient = ({
   getDeps,
   logger,
+  ensureFailureSweep,
 }: {
   getDeps: () => OnboardingClientDeps;
   logger: Logger;
+  ensureFailureSweep?: (request: KibanaRequest, spaceId: string) => Promise<void>;
 }): OnboardingClient => {
   const getSpaceId = (request: KibanaRequest): string =>
     getDeps().spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
@@ -146,6 +148,7 @@ export const createOnboardingClient = ({
         spaceId,
         availability: agentAvailability,
       });
+      await ensureFailureSweep?.(request, spaceId);
       logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
       return { agent_installed: true };
     },
