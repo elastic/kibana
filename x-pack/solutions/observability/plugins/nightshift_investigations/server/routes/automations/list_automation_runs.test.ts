@@ -342,6 +342,43 @@ it('links activation and recovery runs of an alert-only workflow to their own st
   ]);
 });
 
+it('titles a webhook recovery run after its alert, marked as recovered', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      { id: 'exec-active', status: 'completed', triggeredBy: 'inboundWebhook.received' },
+      { id: 'exec-recovered', status: 'completed', triggeredBy: 'inboundWebhook.received' },
+    ],
+    total: 2,
+  });
+  mockSearchStepExecutions.mockImplementation(async ({ stepId }) => ({
+    results:
+      stepId === 'trigger_investigation'
+        ? [
+            {
+              workflowRunId: 'exec-active',
+              input: { title: 'Disk almost full on web-1' },
+              output: { investigation_id: 'inv-1' },
+            },
+          ]
+        : stepId === 'follow_up_recovered_alert'
+        ? [
+            {
+              workflowRunId: 'exec-recovered',
+              input: { rule_name: 'Disk almost full on web-1' },
+              output: { investigation_id: 'inv-1' },
+            },
+          ]
+        : [],
+  }));
+
+  const result = await call('auto-1');
+  expect(result.runs.map(({ title }) => title)).toEqual([
+    'Disk almost full on web-1',
+    'Recovered: Disk almost full on web-1',
+  ]);
+});
+
 it('reports a recovery follow-up that failed as failed, not skipped', async () => {
   mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
   mockGetWorkflowExecutions.mockResolvedValue({

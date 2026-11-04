@@ -115,14 +115,15 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       );
 
     const runs = executions.results.map((exec) => {
-      const step =
+      const startedStep =
         (exec.triggeredBy === 'alerting.v1.alertStatusChanged'
-          ? alertSteps.get(exec.id) ??
-            legacyAlertSteps.get(exec.id) ??
-            recoveredAlertSteps.get(exec.id)
+          ? alertSteps.get(exec.id) ?? legacyAlertSteps.get(exec.id)
           : exec.triggeredBy === 'slack2.message'
           ? slackSteps.get(exec.id)
           : undefined) ?? defaultSteps.get(exec.id);
+      const recoveredStep = recoveredAlertSteps.get(exec.id);
+      const isRecoveryFollowUp = startedStep === undefined && recoveredStep !== undefined;
+      const step = startedStep ?? recoveredStep;
       const input =
         step?.input && !Array.isArray(step.input) && typeof step.input === 'object'
           ? step.input
@@ -134,6 +135,9 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
       const getString = (value: unknown) => (typeof value === 'string' ? value : undefined);
 
       const skipReason = SKIP_REASONS.find((reason) => reason === output['skip_reason']);
+      const ruleName = getString(input['rule_name']);
+      const recoveredTitle = ruleName ? `Recovered: ${ruleName}` : undefined;
+      const title = isRecoveryFollowUp ? recoveredTitle : getString(input['title']);
 
       return {
         id: exec.id,
@@ -142,7 +146,7 @@ export const listAutomationRunsRoute = createNightshiftInvestigationsServerRoute
         finishedAt: exec.finishedAt,
         duration: exec.duration,
         triggeredBy: exec.triggeredBy,
-        title: getString(input['title']),
+        title,
         message: getString(input['message']),
         investigationId: getString(output['investigation_id']),
         skipReason: skipReason ?? null,
