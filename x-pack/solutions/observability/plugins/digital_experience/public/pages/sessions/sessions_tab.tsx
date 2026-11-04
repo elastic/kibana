@@ -382,8 +382,9 @@ export function SessionsTab({
   const { status, loading, error, refresh, enable, enabling, enableError } = useSessionsStatus();
   const enableProps = { canManage, onEnable: enable, enabling, enableError };
 
-  // A deleted API key leaves the transforms without access. Someone who can set sessions up grants
-  // a new one by visiting, once per visit, as the Update button would; a failure shows as usual.
+  // A deleted API key doesn't stop the transforms, but updates no longer apply by themselves.
+  // Someone who can set sessions up grants a new one by visiting, once per visit, as the Update
+  // button would; a failure shows as usual.
   const regranted = useRef(false);
   useEffect(() => {
     if (status?.apiKeyInvalid && canManage && !regranted.current) {

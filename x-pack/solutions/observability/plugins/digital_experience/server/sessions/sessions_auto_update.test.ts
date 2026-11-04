@@ -201,54 +201,55 @@ describe('sessions auto update', () => {
   });
 
   describe('withApiKeyStatus', () => {
+    const check = { checkKey: true };
+
     it('leaves the status alone without a stored key', async () => {
       const { typed } = createApiKeys();
 
-      expect(await withApiKeyStatus(status, typed)).toBe(status);
+      expect(await withApiKeyStatus(status, typed, check)).toBe(status);
     });
 
     it('leaves the status alone when the transforms run with other credentials', async () => {
       const { typed } = createApiKeys({ stored: keyOf('other') });
 
-      expect(await withApiKeyStatus(status, typed)).toBe(status);
+      expect(await withApiKeyStatus(status, typed, check)).toBe(status);
     });
 
-    it('marks an update as automatic when the transforms run with the stored key', async () => {
+    it('marks an update as automatic when the transforms run with a working stored key', async () => {
       const { apiKeys, typed } = createApiKeys({ stored: keyOf('old') });
 
-      expect(await withApiKeyStatus(status, typed)).toEqual({ ...status, autoUpdate: true });
+      expect(await withApiKeyStatus(status, typed, check)).toEqual({ ...status, autoUpdate: true });
       expect(apiKeys.isValid).toHaveBeenCalledWith(keyOf('old'));
     });
 
-    it('reports a deleted key before the transforms fail', async () => {
+    it('only turns automatic updates off for a deleted key, as the transforms keep running', async () => {
       const { typed } = createApiKeys({ stored: keyOf('old'), valid: false });
-      const healthy = { ...status, health: 'healthy' as const, needsUpdate: false };
+      const healthy = { ...status, health: 'healthy' as const, needsUpdate: false, reason: null };
 
-      expect(await withApiKeyStatus(healthy, typed)).toEqual({
+      expect(await withApiKeyStatus(healthy, typed, check)).toEqual({
         ...healthy,
-        needsUpdate: true,
         apiKeyInvalid: true,
-        reason: expect.stringContaining('was invalidated or has expired'),
       });
     });
 
-    it('explains failing transforms by an invalidated key and asks for an update', async () => {
+    it("explains that a needed update can't apply automatically with a deleted key", async () => {
       const { typed } = createApiKeys({ stored: keyOf('old'), valid: false });
-      const degraded = { ...status, health: 'degraded' as const, needsUpdate: false };
 
-      expect(await withApiKeyStatus(degraded, typed)).toEqual({
-        ...degraded,
-        needsUpdate: true,
+      expect(await withApiKeyStatus(status, typed, check)).toEqual({
+        ...status,
         apiKeyInvalid: true,
-        reason: expect.stringContaining('was invalidated or has expired'),
+        reason: expect.stringContaining("so this update can't apply automatically"),
       });
     });
 
-    it('keeps the automatic update when failing transforms still have a valid key', async () => {
-      const { typed } = createApiKeys({ stored: keyOf('old') });
-      const degraded = { ...status, health: 'degraded' as const };
+    it("doesn't check the key unless asked", async () => {
+      const { apiKeys, typed } = createApiKeys({ stored: keyOf('old'), valid: false });
 
-      expect(await withApiKeyStatus(degraded, typed)).toEqual({ ...degraded, autoUpdate: true });
+      expect(await withApiKeyStatus(status, typed, { checkKey: false })).toEqual({
+        ...status,
+        autoUpdate: true,
+      });
+      expect(apiKeys.isValid).not.toHaveBeenCalled();
     });
   });
 

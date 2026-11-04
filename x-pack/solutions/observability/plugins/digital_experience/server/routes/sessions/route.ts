@@ -134,16 +134,18 @@ const statusRoute = createDigitalExperienceServerRoute({
     logger,
   }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
+    const canManage =
+      request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
     try {
-      // Transform metadata only; no session data is read with the internal user.
+      // Transform metadata only; no session data is read with the internal user. Only users who
+      // can grant a new key act on a deleted one, so only they pay for checking it.
       const status = await withApiKeyStatus(
         await getSessionsStatus(elasticsearch.client.asInternalUser, {
           settings: sessionsSettings,
         }),
-        sessionsApiKeys
+        sessionsApiKeys,
+        { checkKey: canManage }
       );
-      const canManage =
-        request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
       return canManage ? status : withoutEnabler(status);
     } catch (error) {
       logger.error(`Could not read the sessions status: ${messageOf(error)}`);
@@ -208,7 +210,8 @@ const enableRoute = createDigitalExperienceServerRoute({
         await getSessionsStatus(elasticsearch.client.asInternalUser, {
           settings: sessionsSettings,
         }),
-        sessionsApiKeys
+        sessionsApiKeys,
+        { checkKey: true }
       );
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');

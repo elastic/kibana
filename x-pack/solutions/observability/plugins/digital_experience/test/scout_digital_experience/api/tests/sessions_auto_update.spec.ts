@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { apiTest, type ApiClientFixture } from '@kbn/scout-oblt';
+import { apiTest, type ApiClientFixture, type EsClient } from '@kbn/scout-oblt';
 import { expect } from '@kbn/scout-oblt/api';
+import { BROWSER_SDK_LANGUAGE } from '../../../../common/otel_data';
 import {
+  SESSIONS_INDEX,
   SESSIONS_INDEX_PATTERN,
   SESSIONS_MANAGED_BY,
   SESSIONS_SOURCE_INDICES,
@@ -28,6 +30,53 @@ const API_KEY_NAME = 'Digital Experience sessions (used by the sessions transfor
 /** The health task runs within seconds of `run_soon`; a minute leaves room for the update. */
 const UPDATE_TIMEOUT_MS = 60_000;
 const UPDATE_POLL_MS = 1_000;
+
+/** Checkpoints are triggered with `_schedule_now`, so summarizing takes seconds, not minutes. */
+const RECOVERY_TIMEOUT_MS = 120_000;
+const RECOVERY_POLL_MS = 2_000;
+
+/** Raw EDOT Browser events of the deleted key case, under a service no other suite uses. */
+const RAW_EVENTS_INDEX = 'logs-generic.otel-default';
+const RECOVERY_SERVICE = 'dx-key-recovery';
+const SESSION_BEFORE_DELETE = 'dx-recovery-before';
+const SESSION_WHILE_DELETED = 'dx-recovery-while-deleted';
+const SESSION_AFTER_NEW_KEY = 'dx-recovery-after-new-key';
+
+/** A page view the sessions transform summarizes: a browser SDK event with a session. */
+const ingestPageView = async (esClient: EsClient, sessionId: string, timestampMs: number) => {
+  await esClient.index({
+    index: RAW_EVENTS_INDEX,
+    op_type: 'create',
+    refresh: 'wait_for',
+    document: {
+      '@timestamp': new Date(timestampMs).toISOString(),
+      event_name: 'browser.navigation',
+      resource: {
+        attributes: {
+          'service.name': RECOVERY_SERVICE,
+          'telemetry.sdk.language': BROWSER_SDK_LANGUAGE,
+        },
+      },
+      attributes: {
+        'session.id': sessionId,
+        'url.full': `https://${RECOVERY_SERVICE}.example.com/`,
+      },
+    },
+  });
+};
+
+const isSummarized = async (esClient: EsClient, sessionId: string) => {
+  const { count } = await esClient.count({
+    index: SESSIONS_INDEX,
+    query: { term: { 'session.id': sessionId } },
+    ignore_unavailable: true,
+  });
+  return count > 0;
+};
+
+/** Runs a checkpoint now instead of at the next `frequency`. */
+const runCheckpoint = (esClient: EsClient) =>
+  esClient.transform.scheduleNowTransform({ transform_id: SESSIONS_TRANSFORM_ID });
 
 /** A transform an earlier Kibana would have left behind, as after an upgrade. */
 const LEFTOVER_TRANSFORM_ID = 'digital-experience-sessions-0';
@@ -64,6 +113,12 @@ apiTest.describe(
 
     apiTest.afterAll(async ({ esClient }) => {
       await deleteSessionsData(esClient);
+      await esClient.deleteByQuery({
+        index: RAW_EVENTS_INDEX,
+        query: { term: { 'resource.attributes.service.name': RECOVERY_SERVICE } },
+        refresh: true,
+        ignore_unavailable: true,
+      });
       if (grantedKeyIds.size > 0) {
         await esClient.security.invalidateApiKey({ ids: [...grantedKeyIds] });
       }
@@ -129,31 +184,49 @@ apiTest.describe(
     );
 
     apiTest(
-      'reports a deleted API key right away, and enabling again grants a new one',
+      'keeps summarizing sessions after its API key is deleted, and enabling again restores automatic updates',
       async ({ apiClient, esClient }) => {
+        // A fresh transform, whose first checkpoint covers everything up to the sync delay.
+        await deleteSessionsData(esClient);
+        await ingestPageView(esClient, SESSION_BEFORE_DELETE, Date.now() - 5 * 60_000);
         const { keyId: deletedKeyId } = await enable(apiClient);
+        const waitUntilSummarized = (sessionId: string) =>
+          expect
+            .poll(
+              async () => {
+                await runCheckpoint(esClient);
+                return isSummarized(esClient, sessionId);
+              },
+              { timeout: RECOVERY_TIMEOUT_MS, intervals: [RECOVERY_POLL_MS] }
+            )
+            .toBe(true);
+        await waitUntilSummarized(SESSION_BEFORE_DELETE);
 
         await esClient.security.invalidateApiKey({ ids: [deletedKeyId] });
 
-        // Before the transforms fail at their next checkpoint.
+        // The last checkpoint ended at least the 60s sync delay before now, so an event 50s ago
+        // is only summarized by a later one, which runs after the key is gone.
+        await ingestPageView(esClient, SESSION_WHILE_DELETED, Date.now() - 50_000);
+        await waitUntilSummarized(SESSION_WHILE_DELETED);
+        const {
+          transforms: [stats],
+        } = await esClient.transform.getTransformStats({ transform_id: SESSIONS_TRANSFORM_ID });
+        expect(stats.health?.status?.toLowerCase()).toBe('green');
+
+        // Only updating without a user stops working.
         expect(await getStatus(apiClient)).toMatchObject({
           apiKeyInvalid: true,
-          needsUpdate: true,
           autoUpdate: false,
+          needsUpdate: false,
         });
 
         // What the Sessions tab does when a user who can set sessions up opens it.
-        const { status: recovered, keyId: newKeyId } = await enable(apiClient);
+        const { status: restored, keyId: newKeyId } = await enable(apiClient);
         expect(newKeyId).not.toBe(deletedKeyId);
-        expect(recovered).toMatchObject({
-          apiKeyInvalid: false,
-          needsUpdate: false,
-          autoUpdate: true,
-        });
-        const {
-          api_keys: [newKey],
-        } = await esClient.security.getApiKey({ id: newKeyId });
-        expect(newKey.invalidated).toBe(false);
+        expect(restored).toMatchObject({ apiKeyInvalid: false, autoUpdate: true });
+
+        await ingestPageView(esClient, SESSION_AFTER_NEW_KEY, Date.now() - 50_000);
+        await waitUntilSummarized(SESSION_AFTER_NEW_KEY);
       }
     );
   }

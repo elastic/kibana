@@ -105,7 +105,10 @@ export interface SessionsStatus {
    * task applies a needed update without a user.
    */
   autoUpdate: boolean;
-  /** True when the stored API key the transforms run with was invalidated or expired. */
+  /**
+   * True when the stored API key was invalidated or expired. The transforms keep running, but
+   * updates no longer apply automatically. Only checked for users who can manage sessions.
+   */
   apiKeyInvalid: boolean;
   /**
    * True while the current transforms haven't completed their first checkpoint: the sessions

@@ -242,9 +242,9 @@ describe('SessionsTab', () => {
     expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument();
   });
 
-  it('keeps the Update button when granting a new key by itself fails', async () => {
+  it('keeps the Update button for a pending update when granting a new key by itself fails', async () => {
     respondWith({
-      sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true, health: 'degraded' }),
+      sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true, health: 'outdated' }),
     });
     const respond = mockFetch.getMockImplementation();
     mockFetch.mockImplementation(async (endpoint: string, ...rest: unknown[]) => {
@@ -259,7 +259,7 @@ describe('SessionsTab', () => {
       'Could not enable sessions.'
     );
     expect(screen.getByTestId('digitalExperienceSessionsNeedUpdate')).toHaveTextContent(
-      'was invalidated or has expired'
+      'new sessions may be missing or incomplete until they are updated'
     );
     expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
     // Once per visit: the failure doesn't retry in a loop.
@@ -268,8 +268,8 @@ describe('SessionsTab', () => {
     );
   });
 
-  it('grants a new API key by itself when a manager visits after the key was deleted', async () => {
-    respondWith({ sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true }) });
+  it('quietly grants a new API key when a manager visits after the key was deleted', async () => {
+    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
     renderTab();
 
     await waitFor(() =>
@@ -277,19 +277,16 @@ describe('SessionsTab', () => {
         mockFetch.mock.calls.filter(([endpoint]) => endpoint === ENABLE_ENDPOINT)
       ).toHaveLength(1)
     );
-    // The enable response is healthy, so the warning goes away.
-    await waitFor(() =>
-      expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument()
-    );
+    // Sessions keep updating with a deleted key, so there is nothing to warn about.
+    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+    expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument();
   });
 
-  it('only warns users who cannot set sessions up about a deleted key', async () => {
-    respondWith({ sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true }) });
+  it('never grants a key for users who cannot set sessions up', async () => {
+    respondWith({ sessionsStatus: status({ apiKeyInvalid: true }) });
     renderTab({ manageSessions: false });
 
-    expect(await screen.findByTestId('digitalExperienceSessionsNeedUpdate')).toHaveTextContent(
-      'Ask an administrator'
-    );
+    expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
     expect(mockFetch.mock.calls.some(([endpoint]) => endpoint === ENABLE_ENDPOINT)).toBe(false);
   });
 

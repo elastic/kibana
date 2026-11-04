@@ -55,10 +55,11 @@ const logHealthChanges = (
     logger.info(`Sessions transforms are no longer ${previous.health}.`);
   }
   if (status.apiKeyInvalid && previous.apiKeyInvalid !== true) {
-    logger.error(
-      `${status.reason} A user with the Digital Experience "Set up and update session summaries" privilege can open the Sessions tab, which grants a new one.`
+    logger.warn(
+      'The stored API key Kibana updates the sessions transforms with was invalidated or has expired. Sessions keep updating, but upgrades and settings changes no longer apply automatically until a user with the Digital Experience "Set up and update session summaries" privilege opens the Sessions tab, which grants a new key.'
     );
-  } else if (status.needsUpdate && !status.apiKeyInvalid && previous.needsUpdate !== true) {
+  }
+  if (status.needsUpdate && previous.needsUpdate !== true) {
     logger.warn(
       `${status.reason} A user with the Digital Experience "Set up and update session summaries" privilege must enable sessions again.`
     );
@@ -120,7 +121,8 @@ export const registerSessionsHealthTask = ({
                 settings,
                 signal,
               }),
-              apiKeys
+              apiKeys,
+              { checkKey: true }
             );
           const previous = taskInstance.state as SessionsHealthTaskState;
 

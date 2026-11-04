@@ -182,7 +182,10 @@ describe('sessions routes', () => {
         });
 
         expect(await result).toEqual(body);
-        expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys);
+        // Only users who can grant a new key pay for checking it.
+        expect(withApiKeyStatus).toHaveBeenCalledWith(enabled, sessionsApiKeys, {
+          checkKey: canManage,
+        });
       }
     );
 

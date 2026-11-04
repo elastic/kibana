@@ -145,29 +145,15 @@ export function SessionsStatusCallout({
         <KbnWarningCallout
           data-test-subj="digitalExperienceSessionsNeedUpdate"
           size="s"
-          title={
-            status.apiKeyInvalid
-              ? i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidTitle', {
-                  defaultMessage: 'Sessions lost their access',
-                })
-              : i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
-                  defaultMessage: 'Sessions need an update',
-                })
-          }
+          title={i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
+            defaultMessage: 'Sessions need an update',
+          })}
           text={
             <p>
-              {status.apiKeyInvalid
-                ? i18n.translate(
-                    'xpack.digitalExperience.sessions.status.apiKeyInvalidDescription',
-                    {
-                      defaultMessage:
-                        'The API key that sessions are built with was invalidated or has expired, so new sessions are missing until they are updated.',
-                    }
-                  )
-                : i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
-                    defaultMessage:
-                      'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
-                  })}{' '}
+              {i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
+                defaultMessage:
+                  'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
+              })}{' '}
               {canManage ? null : ASK_ADMIN_TEXT}
             </p>
           }

@@ -131,30 +131,29 @@ const keyInUse = async (
 };
 
 const invalidKeyReason = (key: SessionsApiKey) =>
-  `The API key [${key.name}] that the sessions transforms run with was invalidated or has expired; enable sessions again to grant a new one.`;
+  `The API key [${key.name}] that Kibana updates the sessions transforms with was invalidated or has expired, so this update can't apply automatically; enable sessions again to apply it and grant a new key.`;
 
 /**
- * Adds what the stored API key means for `status`: whether a needed update applies by itself, or
- * whether the key stopped working, which makes the transforms fail at their next checkpoint until
- * a user updates them.
+ * Adds what the stored API key means for `status`: whether a needed update applies by itself. A
+ * deleted key doesn't stop the transforms, which keep the identity they were last updated with;
+ * it only stops Kibana from updating them without a user. `checkKey` asks Elasticsearch whether
+ * the key still works, which logs an authentication error in Kibana when it doesn't, so only
+ * callers that act on the answer ask.
  */
 export const withApiKeyStatus = async (
   status: SessionsStatus,
-  apiKeys: SessionsApiKeys
+  apiKeys: SessionsApiKeys,
+  { checkKey }: { checkKey: boolean }
 ): Promise<SessionsStatus> => {
   const key = await keyInUse(status, apiKeys);
   if (!key) {
     return status;
   }
-  // Checked even while the transforms look healthy, so a deleted key shows before they fail.
-  if (!(await apiKeys.isValid(key))) {
-    const newer =
-      status.installedVersion != null && status.installedVersion > status.currentVersion;
+  if (checkKey && !(await apiKeys.isValid(key))) {
     return {
       ...status,
       apiKeyInvalid: true,
-      needsUpdate: !newer,
-      reason: newer ? status.reason : invalidKeyReason(key),
+      reason: status.needsUpdate ? invalidKeyReason(key) : status.reason,
     };
   }
   return { ...status, autoUpdate: true };

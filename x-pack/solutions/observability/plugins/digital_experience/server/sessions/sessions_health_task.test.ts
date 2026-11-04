@@ -103,7 +103,7 @@ describe('sessions health task', () => {
       settings,
       signal,
     });
-    expect(withApiKeyStatus).toHaveBeenCalledWith(healthyStatus, apiKeys);
+    expect(withApiKeyStatus).toHaveBeenCalledWith(healthyStatus, apiKeys, { checkKey: true });
     expect(updateSessionsWithApiKey).not.toHaveBeenCalled();
     expect(logger.warn).not.toHaveBeenCalled();
   });
@@ -205,34 +205,31 @@ describe('sessions health task', () => {
     );
   });
 
-  it('logs a deleted API key once, as an error, without trying to update with it', async () => {
-    const invalid: SessionsStatus = {
-      ...healthyStatus,
-      needsUpdate: true,
-      apiKeyInvalid: true,
-      reason:
-        'The API key [x] that the sessions transforms run with was invalidated or has expired.',
-    };
+  it('warns once about a deleted API key, without trying to update with it', async () => {
+    const invalid: SessionsStatus = { ...healthyStatus, apiKeyInvalid: true };
     jest.mocked(getSessionsStatus).mockResolvedValue(invalid);
     const first = setup();
 
     expect(await first.run()).toEqual({
-      state: { health: 'healthy', needsUpdate: true, newerVersion: false, apiKeyInvalid: true },
+      state: { health: 'healthy', needsUpdate: false, newerVersion: false, apiKeyInvalid: true },
     });
+    expect(withApiKeyStatus).toHaveBeenCalledWith(invalid, apiKeys, { checkKey: true });
     expect(updateSessionsWithApiKey).not.toHaveBeenCalled();
-    expect(first.logger.error).toHaveBeenCalledWith(
-      expect.stringContaining('can open the Sessions tab, which grants a new one')
+    expect(first.logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining(
+        'Sessions keep updating, but upgrades and settings changes no longer apply automatically'
+      )
     );
-    expect(first.logger.warn).not.toHaveBeenCalled();
+    expect(first.logger.error).not.toHaveBeenCalled();
 
     const second = setup({
       health: 'healthy',
-      needsUpdate: true,
+      needsUpdate: false,
       newerVersion: false,
       apiKeyInvalid: true,
     });
     await second.run();
-    expect(second.logger.error).not.toHaveBeenCalled();
+    expect(second.logger.warn).not.toHaveBeenCalled();
   });
 
   it('logs a problem once, not on every run while it lasts', async () => {

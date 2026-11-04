@@ -196,11 +196,12 @@ with the updater's privileges, which as the internal user would bypass the enabl
 privileges. Elasticsearch can't protect an API key from deletion: anyone with `manage_api_key` or
 `manage_security`, or the enabling user with `manage_own_api_key`, can invalidate it. The key is
 named "Digital Experience sessions (used by the sessions transforms)" and marked managed, so the API
-keys page warns before deleting it. Status checks the key on every read and the health task on every
-run, so a deleted key shows up within 5 minutes, logged once as an error, before the transforms fail
-at their next checkpoint. The next time a user with the manage sessions privilege opens the Sessions
-tab, it grants a new key automatically, as the **Update sessions** button would; everyone else sees
-a warning to ask such a user. If
+keys page warns before deleting it. A deleted key doesn't stop the transforms: they keep the
+identity they were last created or updated with, and keep summarizing sessions. It only stops
+Kibana from updating them without a user, so an upgrade or settings change then needs **Update
+sessions**. The health task checks the key on every run and logs a deleted one once, as a warning.
+Status checks it for users with the manage sessions privilege, and when one of them opens the
+Sessions tab, it grants a new key automatically, as the **Update sessions** button would. If
 transforms fall behind under peak traffic, they lag and then catch up; no data is lost.
 
 There is no disable action yet. One must invalidate the stored API key and delete its saved object.
