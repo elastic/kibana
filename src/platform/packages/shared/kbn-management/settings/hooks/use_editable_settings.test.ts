@@ -286,6 +286,33 @@ describe('useEditableSettings', () => {
     });
   });
 
+  it('reports a reload on the retry when a reload-required change saved in a failed save', async () => {
+    const { result, settingsClient, updateErrors$ } = setup();
+    settingsClient.set.mockImplementation(async (key: string) => {
+      if (key === STRING_SETTING) {
+        updateErrors$.next(new Error('Bad request'));
+        return false;
+      }
+      return true;
+    });
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+    await act(async () => {
+      await expect(result.current.saveAll()).rejects.toThrow('Bad request');
+    });
+
+    settingsClient.set.mockResolvedValue(true);
+    await act(async () => {
+      await expect(result.current.saveAll()).resolves.toEqual({ requiresReload: true });
+    });
+    await act(async () => {
+      await expect(result.current.saveAll()).resolves.toEqual({ requiresReload: false });
+    });
+  });
+
   it('saves the other changes when the client rejects one of them', async () => {
     const { result, settingsClient } = setup();
     settingsClient.set.mockImplementation(async (key: string) => {

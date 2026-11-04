@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { isEmpty, pickBy } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
@@ -26,7 +26,10 @@ export interface UseEditableSettingsParams {
 }
 
 export interface SaveAllResult {
-  /** True if any saved setting requires a page reload to take effect. */
+  /**
+   * True if a setting saved by this call, or by an earlier call that rejected, requires a page
+   * reload.
+   */
   requiresReload: boolean;
 }
 
@@ -114,14 +117,19 @@ export const useEditableSettings = ({
 
   const cleanUnsavedChanges = useCallback(() => setUnsavedChanges({}), []);
 
+  // A reload-required change can save in a call that then rejects, so the reload is reported by
+  // the next call that resolves.
+  const pendingReloadRef = useRef(false);
+  const takePendingReload = useCallback(() => {
+    const requiresReload = pendingReloadRef.current;
+    pendingReloadRef.current = false;
+    return requiresReload;
+  }, []);
+
   const saveAll = useCallback(async (): Promise<SaveAllResult> => {
     if (isEmpty(unsavedChanges)) {
-      return { requiresReload: false };
+      return { requiresReload: takePendingReload() };
     }
-
-    const requiresReload = Object.keys(unsavedChanges).some(
-      (id) => fields[id]?.requiresPageReload === true
-    );
 
     // A request failure resolves `set` to false and puts the server's message on this stream.
     // The stream is client-wide, so it only supplies messages; the return values decide what failed.
@@ -154,6 +162,9 @@ export const useEditableSettings = ({
         unconfirmedIds.push(id);
       } else {
         savedChanges.set(id, change);
+        if (fields[id]?.requiresPageReload) {
+          pendingReloadRef.current = true;
+        }
       }
     });
 
@@ -180,8 +191,8 @@ export const useEditableSettings = ({
       throw new Error(failureMessages.join('; '));
     }
 
-    return { requiresReload };
-  }, [fields, settingsClient, unsavedChanges]);
+    return { requiresReload: takePendingReload() };
+  }, [fields, settingsClient, unsavedChanges, takePendingReload]);
 
   return {
     fields,
