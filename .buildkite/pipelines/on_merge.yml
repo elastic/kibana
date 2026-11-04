@@ -1,3 +1,9 @@
+# Keep in sync with DEFAULT_AGENT_IMAGE_CONFIG in .buildkite/pipeline-utils/agent_images.ts
+agents:
+  provider: gcp
+  image: family/kibana-ubuntu-2404
+  imageProject: elastic-images-prod
+  diskSizeGb: 85
 env:
   GITHUB_COMMIT_STATUS_ENABLED: 'true'
   GITHUB_COMMIT_STATUS_CONTEXT: 'buildkite/on-merge'

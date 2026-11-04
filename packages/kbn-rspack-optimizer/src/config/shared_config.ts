@@ -498,6 +498,19 @@ export function getSharedModuleRules(
       sideEffects: true,
       generator: { filename: 'maplibre-gl/[name][ext]' },
     },
+    // MapLibre 6 imports .mjs plugins, but evaluates .js plugins, which Kibana's CSP blocks.
+    {
+      test: /[\\/]@mapbox[\\/]mapbox-gl-rtl-text[\\/]mapbox-gl-rtl-text\.min\.js$/,
+      resourceQuery: /asUrl/,
+      type: 'asset/resource',
+      generator: { filename: 'maplibre-gl/[name].[contenthash].mjs' },
+    },
+    // MapLibre wraps a cross-origin (CDN) worker URL with `new URL(url, import.meta.url)`.
+    // Rspack would otherwise bundle that as an asset context module and throw at runtime.
+    {
+      test: /[\\/]maplibre-gl[\\/]dist[\\/]maplibre-gl\.mjs$/,
+      parser: { url: false },
+    },
     getRawQueryLoaderRule(),
     getPeggyLoaderRule(),
   ];
