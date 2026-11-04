@@ -13,12 +13,13 @@ import { isEmpty } from 'lodash';
 
 import { useDispatch } from 'react-redux-v7';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { NotificationsStart } from '@kbn/core/public';
 import {
   ADD_TO_TIMELINE,
   ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE,
   TooltipWithKeyboardShortcut,
   getAdditionalScreenReaderOnlyContext,
-  useAppToasts,
 } from '@kbn/securitysolution-timeline-components';
 import type { HoverActionComponentProps } from '@kbn/securitysolution-timeline-components';
 import type { TimelinesStartServices } from '../../..';
@@ -87,7 +88,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
     startServices,
   }) => {
     const dispatch = useDispatch();
-    const { addSuccess } = useAppToasts();
+    const { toasts } = useKibana<{ notifications: NotificationsStart }>().services.notifications;
     const startDragToTimeline = useGetHandleStartDragToTimeline({ draggableId, field });
 
     const handleStartDragToTimeline = useCallback(() => {
@@ -103,7 +104,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
                 dataProvider: provider,
               })
             );
-            addSuccess({
+            toasts.addSuccess({
               title: toMountPoint(
                 <AddSuccessMessage>
                   {ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE(provider.name, timelineType === 'default')}
@@ -119,7 +120,7 @@ const AddToTimelineButton: React.FC<AddToTimelineButtonProps> = React.memo(
         onClick();
       }
     }, [
-      addSuccess,
+      toasts,
       dataProvider,
       dispatch,
       draggableId,

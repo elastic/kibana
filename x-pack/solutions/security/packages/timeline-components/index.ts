@@ -27,9 +27,10 @@ export { getAdditionalScreenReaderOnlyContext } from './components/hover_actions
 export { PRESS, TooltipWithKeyboardShortcut } from './components/tooltip_with_keyboard_shortcut';
 export type { TooltipWithKeyboardShortcutProps } from './components/tooltip_with_keyboard_shortcut';
 
-// Shared hooks / helpers consumed by the add-to-timeline button (still owned by the plugin for now)
-export { useAppToasts } from './hooks/use_app_toasts';
-export type { UseAppToasts } from './hooks/use_app_toasts';
+// Strings consumed by the add-to-timeline button, which still lives in the `timelines` plugin because it
+// depends on the plugin's redux store. They move out of this package together with that button once the
+// store moves into `security_solution`.
+// TODO: drop these once the add-to-timeline UI is relocated (https://github.com/elastic/kibana/issues/302611).
 export {
   ADD_TO_TIMELINE,
   ADDED_TO_TIMELINE_OR_TEMPLATE_MESSAGE,

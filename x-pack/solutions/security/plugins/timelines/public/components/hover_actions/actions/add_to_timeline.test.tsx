@@ -27,14 +27,6 @@ import {
 
 const coreStart = coreMock.createStart();
 
-const mockAddSuccess = jest.fn();
-jest.mock('@kbn/securitysolution-timeline-components', () => ({
-  ...jest.requireActual('@kbn/securitysolution-timeline-components'),
-  useAppToasts: () => ({
-    addSuccess: mockAddSuccess,
-  }),
-}));
-
 jest.mock('../../../hooks/use_selector');
 
 const mockDispatch = jest.fn();

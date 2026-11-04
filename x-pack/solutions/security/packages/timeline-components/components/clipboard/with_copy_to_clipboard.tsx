@@ -6,6 +6,7 @@
  */
 
 import { EuiToolTip } from '@elastic/eui';
+import type { ToastsStart } from '@kbn/core/public';
 
 import React from 'react';
 import { COPY_TO_CLIPBOARD } from '../hover_actions/actions/translations';
@@ -18,12 +19,13 @@ import { Clipboard } from './clipboard';
  * the clipboard and displays a confirmation toast
  */
 export const WithCopyToClipboard = React.memo<{
+  addSuccess: ToastsStart['addSuccess'];
   isHoverAction?: boolean;
   keyboardShortcut?: string;
   showTooltip?: boolean;
   text: string;
   titleSummary?: string;
-}>(({ isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
+}>(({ addSuccess, isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
   return showTooltip ? (
     <EuiToolTip
       content={
@@ -36,6 +38,7 @@ export const WithCopyToClipboard = React.memo<{
       }
     >
       <Clipboard
+        addSuccess={addSuccess}
         content={text}
         isHoverAction={isHoverAction}
         titleSummary={titleSummary}
@@ -44,6 +47,7 @@ export const WithCopyToClipboard = React.memo<{
     </EuiToolTip>
   ) : (
     <Clipboard
+      addSuccess={addSuccess}
       content={text}
       isHoverAction={isHoverAction}
       titleSummary={titleSummary}

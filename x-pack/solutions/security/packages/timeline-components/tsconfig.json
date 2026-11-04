@@ -12,8 +12,5 @@
     "@kbn/es-query",
     "@kbn/data-plugin",
     "@kbn/core",
-    "@kbn/kibana-react-plugin",
-    "@kbn/securitysolution-t-grid",
-    "@kbn/search-errors"
   ]
 }
