@@ -143,6 +143,5 @@ GridPanel.displayName = 'KbnGridLayoutPanel';
 const styles = {
   panel: css({
     height: 'calc(var(--kbnGridRowHeight) * 1px)',
-    outline: '1px solid red;',
   }),
 };

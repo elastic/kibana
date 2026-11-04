@@ -47,6 +47,10 @@ export const GridPanelDragPreview = React.memo(() => {
   return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
 });
 
-const styles = css({ display: 'none', pointerEvents: 'none', backgroundColor: 'red' });
+const styles = css({
+  display: 'none',
+  pointerEvents: 'none',
+  height: 'calc(var(--kbnGridRowHeight) * 1px)',
+});
 
 GridPanelDragPreview.displayName = 'KbnGridLayoutPanelDragPreview';

@@ -167,7 +167,7 @@ const styles = {
     //     )`,
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active), &:has(.kbnGridSectionHeader--active)': {
+    '&:has(.kbnGridPanel--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',

@@ -7,6 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { transparentize, UseEuiTheme, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
+
 import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import { FlexLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -18,6 +21,7 @@ import {
   DASHBOARD_MARGIN_SIZE,
   DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
 } from '../dashboard_renderer/grid/constants';
+import { PinnedPanelRenderer } from './pinned_panel_renderer';
 
 export const DashboardPinnedPanelsRenderer = () => {
   const dashboardApi = useDashboardApi();
@@ -33,45 +37,35 @@ export const DashboardPinnedPanelsRenderer = () => {
       const panels = dashboardApi.layout$.getValue().pinnedPanels;
       if (!panels[id]) return;
       const type = panels[id].type;
-
-      const panelProps = {
-        isSharedItem: false,
-        showBadges: false,
-        showBorder: true,
-        showShadow: false,
-      };
-
-      return (
-        <EmbeddableRenderer
-          type={type}
-          maybeId={id}
-          getParentApi={() => dashboardApi}
-          key={`${type}_${id}`}
-          panelProps={panelProps}
-          onApiAvailable={(api) => {
-            embeddableApiRef.current = api;
-            dashboardApi.registerChildApi(api);
-          }}
-          hidePanelChrome={true}
-        />
-      );
+      return <PinnedPanelRenderer id={id} type={type} setDragHandles={setDragHandles} />;
     },
-    [dashboardApi]
+    [dashboardApi.layout$]
   );
 
   return (
-    <FlexLayout
-      layout={flexLayout}
-      gridSettings={{
-        gutterSize: DASHBOARD_MARGIN_SIZE,
-        rowHeight: 32,
-        columnCount: 12,
-        keyboardDragTopLimit: 0,
-      }}
-      // useCustomDragHandle={true}
-      renderPanelContents={renderPanelContents}
-      onLayoutChange={() => {}}
-      accessMode={'EDIT'}
-    />
+    <span css={styles}>
+      <FlexLayout
+        layout={flexLayout}
+        gridSettings={{
+          gutterSize: DASHBOARD_MARGIN_SIZE,
+          rowHeight: 32,
+          columnCount: 12,
+          keyboardDragTopLimit: 0,
+        }}
+        useCustomDragHandle={true}
+        renderPanelContents={renderPanelContents}
+        onLayoutChange={() => {}}
+        accessMode={'EDIT'}
+      />
+    </span>
   );
 };
+
+const styles = ({ euiTheme }: UseEuiTheme) => css`
+  .kbnGridPanel--dragPreview,
+  .kbnGridSection--dragPreview {
+    border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
+
+    background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+  }
+`;
