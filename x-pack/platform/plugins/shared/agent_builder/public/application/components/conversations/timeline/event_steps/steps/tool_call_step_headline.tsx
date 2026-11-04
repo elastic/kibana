@@ -42,6 +42,13 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
     color: ${hasErrorResult ? euiTheme.colors.textDanger : euiTheme.colors.textDisabled};
   `;
 
+  const intentStyles = css`
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  `;
+
   const toolBadge = (
     <EuiBadge color={hasErrorResult ? 'danger' : 'default'}>
       <strong
@@ -64,6 +71,16 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
         role="status"
         aria-label={toolCallAriaLabel}
       >
+        {step.intent ? (
+          <EuiFlexItem
+            grow={false}
+            css={intentStyles}
+            title={step.intent}
+            data-test-subj="agentBuilderToolCallIntent"
+          >
+            {step.intent}
+          </EuiFlexItem>
+        ) : null}
         <EuiFlexItem grow={false}>{toolBadge}</EuiFlexItem>
         <EuiFlexItem grow={false}>
           <span css={suffixStyles}>
