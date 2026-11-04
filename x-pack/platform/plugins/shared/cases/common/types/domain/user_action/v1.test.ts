@@ -6,7 +6,7 @@
  */
 
 import { AttachmentType } from '../attachment/v1';
-import { UserActionTypes, UserActionsSchema } from './v1';
+import { CaseUserActionWithoutReferenceIdsSchema, UserActionTypes, UserActionsSchema } from './v1';
 
 describe('User actions', () => {
   describe('UserActionsSchema', () => {
@@ -51,6 +51,37 @@ describe('User actions', () => {
       const result = UserActionsSchema.safeParse(withSource);
       expect(result.success).toBe(true);
       expect(result.data).toStrictEqual(withSource);
+    });
+  });
+
+  describe('CaseUserActionWithoutReferenceIdsSchema', () => {
+    const userAction = {
+      type: UserActionTypes.title,
+      payload: { title: 'new title' },
+      created_at: '2020-02-19T23:06:33.798Z',
+      created_by: {
+        full_name: 'Leslie Knope',
+        username: 'lknope',
+        email: 'leslie.knope@elastic.co',
+      },
+      owner: 'cases',
+      action: 'update',
+    };
+
+    it('accepts a source with a known type', () => {
+      const result = CaseUserActionWithoutReferenceIdsSchema.safeParse({
+        ...userAction,
+        source: { type: 'api', id: 'api' },
+      });
+      expect(result.success).toBe(true);
+    });
+
+    it('rejects a source with an unknown type', () => {
+      const result = CaseUserActionWithoutReferenceIdsSchema.safeParse({
+        ...userAction,
+        source: { type: 'futuristic', id: 'x1' },
+      });
+      expect(result.success).toBe(false);
     });
   });
 });

@@ -68,6 +68,12 @@ const UserActionCommonAttributesSchema = lazySchema(() =>
   })
 );
 
+const UserActionCommonWriteAttributesSchema = lazySchema(() =>
+  UserActionCommonAttributesSchema.extend({
+    source: ActionSourceSchema.nullable().optional(),
+  })
+);
+
 /**
  * This should only be used for the getAll route and it should be removed when the route is removed
  * @deprecated use CaseUserActionInjectedIdsSchema instead
@@ -124,8 +130,8 @@ export const CaseUserActionBasicSchema = UserActionPayloadSchema.and(
   UserActionCommonAttributesSchema
 );
 
-export const CaseUserActionWithoutReferenceIdsSchema = UserActionsWithoutIdsSchema.and(
-  UserActionCommonAttributesSchema
+export const CaseUserActionWithoutReferenceIdsSchema = lazySchema(() =>
+  UserActionsWithoutIdsSchema.and(UserActionCommonWriteAttributesSchema)
 );
 
 /**
