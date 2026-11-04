@@ -33,7 +33,6 @@ export interface ContractResponse {
 
 export type RouteResult = OperationMatch | OperationMismatch;
 
-/** Produces the mock's answer to a valid request. */
 export interface ResponderContext {
   /**
    * State kept for the emulator's run, until `reset()`. A responder keeps its entries under keys
@@ -42,11 +41,13 @@ export interface ResponderContext {
   readonly state: Map<unknown, unknown>;
   /**
    * The default chain's answer: the operation's fixture, else its first conforming recording,
-   * else an example or a sample of its schema, paged for paginated operations.
+   * else an example or a sample of its schema, paged for paginated operations. Each call gets
+   * its own copy, which the responder is free to change.
    */
   readonly next: () => Promise<ContractResponse>;
 }
 
+/** Produces the mock's answer to a valid request. */
 export type Responder = (
   operation: ContractOperation,
   request: ContractRequest,

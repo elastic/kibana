@@ -53,7 +53,7 @@ beforeEach(() => {
   clock.reset();
   jest.resetAllMocks();
   jest.restoreAllMocks();
-  mockRevokeEarsCredentials.mockResolvedValue(undefined);
+  mockRevokeEarsCredentials.mockResolvedValue({ earsRequestIds: [], errors: [] });
   connectorTokenClient = new ConnectorTokenClient({
     unsecuredSavedObjectsClient,
     encryptedSavedObjectsClient,

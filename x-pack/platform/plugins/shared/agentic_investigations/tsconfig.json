@@ -52,7 +52,21 @@
     "@kbn/charts-theme",
     "@kbn/core-ui-settings-browser",
     "@kbn/visualization-utils",
-    "@kbn/shared-ux-ai-components"
+    "@kbn/shared-ux-ai-components",
+    "@kbn/deeplinks-observability",
+    "@kbn/alerting-v2-constants",
+    "@kbn/share-plugin",
+    "@kbn/utility-types",
+    "@kbn/alerting-v2-episodes-ui",
+    "@kbn/alerts-ui-shared",
+    "@kbn/data-plugin",
+    "@kbn/data-views-plugin",
+    "@kbn/expressions-plugin",
+    "@kbn/unified-doc-viewer-plugin",
+    "@kbn/rule-data-utils",
+    "@kbn/alerting-types",
+    "@kbn/charts-plugin",
+    "@kbn/flyout-template"
   ],
   "exclude": ["target/**/*"]
 }

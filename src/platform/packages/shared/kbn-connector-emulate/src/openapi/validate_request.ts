@@ -7,15 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getPropertyNames, getSchemaTypes } from './coerce_value';
+import { getSchemaTypes } from './coerce_value';
 import type { ParameterInput } from './read_parameters';
-import { isExplodedFormObject, readParameters } from './read_parameters';
+import { nonParameterQueryKeys, readParameters, spreadsQueryKeys } from './read_parameters';
 import { validateValue } from './schema_violations';
 import type { ContractOperation, OperationParameter, Violation } from './types';
 import { validateContent } from './validate_content';
-
-/** The query parameter that selects the page in opaque next-page URLs the mock issues. */
-export const MOCK_PAGE_PARAM = 'contract-mock-page';
 
 export interface RequestInput extends ParameterInput {
   /** Parsed JSON, or the raw text for other media types. */
@@ -63,34 +60,22 @@ const checkParameters = (operation: ContractOperation, input: RequestInput): Vio
   });
 
 // Schemas can't express these, but vendors reject such query strings.
-const checkQueryEncoding = (
-  { parameters, security, fixedQuery = [], spec: { document } }: ContractOperation,
-  { query }: RequestInput
-): Violation[] => {
+const checkQueryEncoding = (operation: ContractOperation, { query }: RequestInput): Violation[] => {
+  const {
+    parameters,
+    spec: { document },
+  } = operation;
   const declared = parameters.filter((parameter) => parameter.in === 'query');
-  // Exploded form-style objects send each property as its own key, `?min=1&max=5`.
-  const objectProperties = new Set(
-    declared.flatMap((parameter) => {
-      const schema = parameter.schema?.schema;
-      return isExplodedFormObject(parameter, getSchemaTypes(schema, document))
-        ? [...getPropertyNames(schema, document)]
-        : [];
-    })
+  const nonParameters = nonParameterQueryKeys(operation);
+  // A form-exploded object takes any query key as one of its properties.
+  const takesAnyKey = declared.some((parameter) =>
+    spreadsQueryKeys(parameter, getSchemaTypes(parameter.schema?.schema, document))
   );
-  // API keys sent in the query are declared by security schemes, not as parameters, and the
-  // query parameters of `x-ms-paths` keys by the key.
-  const implied = new Set([
-    ...security
-      .flat()
-      .flatMap(({ credential }) => (credential?.in === 'query' ? [credential.name] : [])),
-    ...fixedQuery.map(({ name }) => name),
-  ]);
   const undeclared = Object.keys(query)
     .filter(
       (key) =>
-        key !== MOCK_PAGE_PARAM &&
-        !implied.has(key) &&
-        !objectProperties.has(key) &&
+        !takesAnyKey &&
+        !nonParameters.has(key) &&
         !declared.some(
           ({ name, style }) =>
             key === name || (style === 'deepObject' && key.startsWith(`${name}[`))

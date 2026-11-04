@@ -10,6 +10,7 @@ import moment from 'moment';
 import { coreMock, elasticsearchServiceMock, httpServerMock } from '@kbn/core/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { GEN_AI_SETTINGS_INFERENCE_STREAMING } from '@kbn/management-settings-ids';
+import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { InferenceSetupDependencies } from './types';
 import {
   createInferenceStreamingResolver,
@@ -17,6 +18,14 @@ import {
   resolveOnFailureMode,
   resolveReplacementsEncryptionKey,
 } from './plugin';
+import { createClient } from './inference_client';
+
+jest.mock('./inference_client', () => ({
+  ...jest.requireActual('./inference_client'),
+  createClient: jest.fn(),
+}));
+
+const createClientMock = jest.mocked(createClient);
 
 describe('resolveReplacementsEncryptionKey', () => {
   it('returns undefined when anonymization is disabled', async () => {
@@ -147,30 +156,34 @@ describe('createInferenceStreamingResolver', () => {
   });
 });
 
+const createPlugin = (workersEnabled: boolean) =>
+  new InferencePlugin(
+    coreMock.createPluginInitializerContext({
+      enabled: true,
+      workers: {
+        anonymization: {
+          enabled: workersEnabled,
+          minThreads: 0,
+          maxThreads: 3,
+          maxQueue: 20,
+          idleTimeout: moment.duration(30, 'seconds'),
+          taskTimeout: moment.duration(15, 'seconds'),
+        },
+      },
+    })
+  );
+
+const setupDependencies = { actions: {} } as unknown as InferenceSetupDependencies;
+
 describe('InferencePlugin.setup', () => {
   const setupPlugin = (
     workersEnabled: boolean,
     plugins: Partial<InferenceSetupDependencies> = {}
   ) => {
-    const plugin = new InferencePlugin(
-      coreMock.createPluginInitializerContext({
-        enabled: true,
-        workers: {
-          anonymization: {
-            enabled: workersEnabled,
-            minThreads: 0,
-            maxThreads: 3,
-            maxQueue: 20,
-            idleTimeout: moment.duration(30, 'seconds'),
-            taskTimeout: moment.duration(15, 'seconds'),
-          },
-        },
-      })
-    );
-    return plugin.setup(coreMock.createSetup(), {
-      actions: {},
+    return createPlugin(workersEnabled).setup(coreMock.createSetup(), {
+      ...setupDependencies,
       ...plugins,
-    } as unknown as InferenceSetupDependencies);
+    });
   };
 
   for (const workersEnabled of [true, false]) {
@@ -186,5 +199,59 @@ describe('InferencePlugin.setup', () => {
 
   it('does not require the anonymization settings plugin', () => {
     expect(() => setupPlugin(true)).not.toThrow();
+  });
+
+  it('accepts one feature endpoint resolver', () => {
+    const { registerFeatureEndpointResolver } = setupPlugin(true);
+
+    expect(() => registerFeatureEndpointResolver(jest.fn())).not.toThrow();
+  });
+
+  it('throws when a second feature endpoint resolver is registered', () => {
+    const { registerFeatureEndpointResolver } = setupPlugin(true);
+    registerFeatureEndpointResolver(jest.fn());
+
+    expect(() => registerFeatureEndpointResolver(jest.fn())).toThrow(
+      'A feature endpoint resolver is already registered'
+    );
+  });
+});
+
+describe('InferencePlugin.start getClient', () => {
+  const request = httpServerMock.createKibanaRequest();
+
+  const getClientOptions = async (resolver?: jest.Mock) => {
+    const plugin = createPlugin(false);
+    const { registerFeatureEndpointResolver } = plugin.setup(
+      coreMock.createSetup(),
+      setupDependencies
+    );
+    if (resolver) {
+      registerFeatureEndpointResolver(resolver);
+    }
+    plugin
+      .start(coreMock.createStart(), { actions: actionsMock.createStart() })
+      .getClient({ request });
+    await plugin.stop();
+    expect(createClientMock).toHaveBeenCalledTimes(1);
+    return createClientMock.mock.calls[0][0];
+  };
+
+  afterEach(() => {
+    createClientMock.mockReset();
+  });
+
+  it('passes the registered feature endpoint resolver scoped to the request', async () => {
+    const resolver = jest.fn().mockResolvedValue({ connectorId: 'top' });
+    const { resolveFeatureEndpoint } = await getClientOptions(resolver);
+
+    await expect(resolveFeatureEndpoint?.('my_feature')).resolves.toEqual({ connectorId: 'top' });
+    expect(resolver).toHaveBeenCalledWith('my_feature', request);
+  });
+
+  it('passes no feature endpoint resolver when none is registered', async () => {
+    const { resolveFeatureEndpoint } = await getClientOptions();
+
+    expect(resolveFeatureEndpoint).toBeUndefined();
   });
 });

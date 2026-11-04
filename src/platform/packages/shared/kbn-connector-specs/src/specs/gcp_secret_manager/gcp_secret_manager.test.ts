@@ -112,6 +112,13 @@ describe('GcpSecretManager', () => {
       expect(getAction('accessSecretVersion').isTool).toBe(false);
     });
 
+    it('bounds addSecretVersion payloads at 64KiB of UTF-8', () => {
+      const { input } = getAction('addSecretVersion');
+      const base = { projectId: PROJECT, secretId: SECRET };
+      expect(input.safeParse({ ...base, payload: 'a'.repeat(65536) }).success).toBe(true);
+      expect(input.safeParse({ ...base, payload: 'é'.repeat(32769) }).success).toBe(false);
+    });
+
     it('covers every action in exactly one of the two lists', () => {
       expect(Object.keys(GcpSecretManager.actions).sort()).toEqual(
         [...readOnlyTools, ...restrictedActions].sort()

@@ -72,7 +72,8 @@ export const validateResponse = (
   );
   return [
     ...checkHeaders(operation, response, values),
-    ...(body === undefined || response.contents.length === 0
+    // Payloads are often optional, so an empty body is a body left out.
+    ...(body === undefined || body === '' || response.contents.length === 0
       ? []
       : validateContent(operation, response.contents, {
           contentType: values['content-type'],

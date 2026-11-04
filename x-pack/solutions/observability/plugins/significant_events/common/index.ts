@@ -23,10 +23,7 @@ export type {
   SignificantEventsSortOrder,
 } from './events_list';
 
-export { SIGNIFICANT_EVENTS_SEMANTIC_CODE_SEARCH_GROUNDING_ENABLED_FLAG } from './feature_flags';
-
 export {
-  SIGNIFICANT_EVENTS_APP_ROUTE,
   SIGNIFICANT_EVENT_TIERED_FEATURES,
   SIGNIFICANT_EVENTS_TIERED_FEATURE,
   SIGNIFICANT_EVENTS_DISCOVERY_AGENT_ID,
@@ -63,6 +60,8 @@ export {
 
 export {
   SIGNIFICANT_EVENT_DETECTION_ATTACHMENT_TYPE,
+  toLifecycleDetection,
+  type LifecycleDetectionInput,
   type SignificantEventDetectionAttachment,
 } from './significant_event_detection_attachment';
 
@@ -110,12 +109,19 @@ export {
 } from './maintenance/paused_callout_copy';
 export type { SignificantEventsMaintenanceState } from './maintenance/state_machine';
 
-export { DEFAULT_RUN_LIMITS, MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS } from './run_quotas';
+export {
+  DEFAULT_RUN_LIMITS,
+  isRunQuotaReached,
+  MAX_RUN_LIMIT,
+  MIN_RUN_LIMIT,
+  RUN_QUOTA_GROUPS,
+} from './run_quotas';
 export type {
   RunQuotaConsumeRequest,
   RunQuotaConsumeResponse,
   RunQuotaGroup,
   RunQuotaSettings,
+  RunQuotaSettingsPatch,
   RunQuotaSettingsUpdate,
   RunQuotaWindow,
   RunQuotasResponse,

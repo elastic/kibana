@@ -18,7 +18,9 @@ import type {
   EuiSuperSelectObject,
 } from '../../../../eui_components';
 import type { RunA11yScanOptions } from '../../../../utils';
-import type { PathOptions } from '../../../../../common/services/kibana_url';
+import type { GotoAppOptions } from './goto_app';
+
+export type { GotoAppOptions } from './goto_app';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -32,15 +34,11 @@ export type ScoutPage = Page & {
   /**
    * Navigates to the specified Kibana application.
    * @param appName - The name of the Kibana app (e.g., 'discover', 'dashboard').
-   * @param pathOptions - Optional query string parameters and hash to apply to the app URL.
-   * @param options - Additional navigation options, passed directly to Playwright's `goto` method.
+   * @param options - URL `params` and `hash`, Playwright `goto` options, and `readyWhen` / `readyTimeout`.
+   * With `readyWhen`, navigation resolves on `commit` and waits for that locator to be visible.
    * @returns A Promise resolving to a Playwright `Response` or `null`.
    */
-  gotoApp: (
-    appName: string,
-    pathOptions?: PathOptions,
-    options?: Parameters<Page['goto']>[1]
-  ) => ReturnType<Page['goto']>;
+  gotoApp: (appName: string, options?: GotoAppOptions) => ReturnType<Page['goto']>;
   /**
    * Presses a key until the element with the css selector is in focus. If multiple elements match it will
    * press the key until the first occurrence of the element is focused.

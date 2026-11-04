@@ -9,7 +9,10 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import type { IUiSettingsClient } from '@kbn/core/server';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type {
+  BuiltinToolDefinition,
+  DynamicSchemaBuiltinToolDefinition,
+} from '@kbn/agent-builder-server';
 import type { BuiltinSkillBoundedTool } from '@kbn/agent-builder-server/skills';
 import type { ToolHandlerContext } from '@kbn/agent-builder-server/tools/handler';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
@@ -103,7 +106,10 @@ export const mockSourcesClient = (slugs: readonly string[]) => ({
 export const createMockRequest = () => httpServerMock.createKibanaRequest();
 
 export const invokeHandler = async <TSchema extends ZodObject<any>>(
-  tool: BuiltinSkillBoundedTool<TSchema> | BuiltinToolDefinition<TSchema>,
+  tool:
+    | BuiltinSkillBoundedTool<TSchema>
+    | BuiltinToolDefinition<TSchema>
+    | DynamicSchemaBuiltinToolDefinition<TSchema>,
   input: z.infer<TSchema>,
   context: ToolHandlerContext
 ) => {

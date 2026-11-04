@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { fromXml, isBareXmlValue, isXmlMediaType } from '../xml/xml_codec';
 import { coerceValue, wrapFormArrays } from './coerce_value';
 import type { Direction } from './schema_violations';
 import { validateValue } from './schema_violations';
@@ -18,9 +19,12 @@ const SUBJECTS = { request: 'Request', response: 'Response' } as const;
 
 const getMediaType = (contentType = ''): string => contentType.split(';')[0].trim().toLowerCase();
 
-/** Whether a content type is one JSON document: `application/json` or a `+json` type. */
+/**
+ * Whether a content type is one JSON document: `application/json`, a `+json` type, or
+ * `application/x-amz-json-1.0` and `-1.1`, which AWS's JSON RPC protocols send.
+ */
 export const isJsonMediaType = (contentType?: string): boolean =>
-  /[/+]json$/.test(getMediaType(contentType));
+  /[/+]json$|^application\/x-amz-json-1\.[01]$/.test(getMediaType(contentType));
 
 // Specs key content by media type, by range such as `text/*`, or by `*/*`.
 const findContent = (contents: readonly MediaTypeContent[], mediaType: string) => {
@@ -56,7 +60,19 @@ export const validateContent = (
   { contentType, body, direction }: ContentInput
 ): Violation[] => {
   const subject = SUBJECTS[direction];
-  const mediaType = getMediaType(contentType);
+  // A response body without a Content-Type is taken to be the only media type the operation
+  // declares, as is a request body when that is raw bytes, which clients often send without one.
+  // Opaque blobs also take JSON, but raw bytes are what they default to.
+  const only =
+    contents.length === 1
+      ? contents[0]
+      : contents.find(({ mediaType }) => getMediaType(mediaType) === 'application/octet-stream');
+  const assumed =
+    only &&
+    (direction === 'response' || getMediaType(only.mediaType) === 'application/octet-stream')
+      ? getMediaType(only.mediaType)
+      : '';
+  const mediaType = getMediaType(contentType) || assumed;
   const content = findContent(contents, mediaType);
   if (!content) {
     const declared = contents.map((candidate) => candidate.mediaType).join(', ');
@@ -68,15 +84,27 @@ export const validateContent = (
       },
     ];
   }
-  if (!canValidate(mediaType)) {
+  if (!canValidate(mediaType) && !isXmlMediaType(mediaType)) {
     return [];
   }
   const { document } = operation.spec;
   const schema = content.schema?.schema;
-  const value =
-    mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
-      ? coerceValue(wrapFormArrays(toFormFields(body), schema, document), schema, document)
-      : body;
+  // XML documents are read as the value their schema describes. Fixtures may give a scalar
+  // response directly, but a request is on the wire and has to be a document.
+  const xml =
+    isXmlMediaType(mediaType) &&
+    typeof body === 'string' &&
+    !(direction === 'response' && isBareXmlValue(body, schema, document))
+      ? fromXml(body, schema, document)
+      : undefined;
+  if (xml && 'error' in xml) {
+    return [{ path: ['body'], code: 'xml', message: `${subject} body is not XML: ${xml.error}` }];
+  }
+  const value = xml
+    ? xml.value
+    : mediaType === FORM_MEDIA_TYPE && typeof body === 'string'
+    ? coerceValue(wrapFormArrays(toFormFields(body), schema, document), schema, document)
+    : body;
   return validateValue(operation, content.schema, value, {
     path: ['body'],
     subject: `${subject} body`,
