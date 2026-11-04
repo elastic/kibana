@@ -47,6 +47,9 @@ const validate = (raw: unknown, filename: string): FixtureFile => {
       ) {
         throw new Error(`${where}: every "expect" entry needs a "path"`);
       }
+      if (rawExpectation.path !== '$' && rawExpectation.path.split('.').includes('')) {
+        throw new Error(`${where}: path "${rawExpectation.path}" has an empty segment`);
+      }
       if (!EXPECTED_TYPES.includes(rawExpectation.type as ExpectedType)) {
         throw new Error(
           `${where}: expect "${rawExpectation.path}" has invalid type "${String(
@@ -72,8 +75,18 @@ const validate = (raw: unknown, filename: string): FixtureFile => {
 /** Loads all YAML fixture files from the canary directory. */
 export const loadFixtures = (fixturesDir: string = FIXTURES_DIR): FixtureFile[] => {
   const files = fs.readdirSync(fixturesDir).filter((f) => f.endsWith('.yaml'));
+  const seen = new Map<string, string>();
   return files.map((file) => {
     const content = fs.readFileSync(path.join(fixturesDir, file), 'utf-8');
-    return validate(parse(content), file);
+    const fixture = validate(parse(content), file);
+    // Fixtures run concurrently against one connector per spec, so two files for a spec would race to create it.
+    const firstFile = seen.get(fixture.spec_id);
+    if (firstFile) {
+      throw new Error(
+        `Fixture ${file}: spec_id ${fixture.spec_id} is already used by ${firstFile}; put all its cases in one file`
+      );
+    }
+    seen.set(fixture.spec_id, file);
+    return fixture;
   });
 };

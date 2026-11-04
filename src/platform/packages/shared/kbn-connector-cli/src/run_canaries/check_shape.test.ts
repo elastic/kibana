@@ -56,6 +56,19 @@ describe('checkShape', () => {
     ]);
   });
 
+  it.each([
+    'repos.',
+    'repos..name',
+    'repos. .name',
+    'repos.0x0.name',
+    'repos.00.name',
+    'repos.0e0.name',
+  ])('does not read "%s" as an array index', (path) => {
+    expect(checkShape(data, [{ path, type: 'string' }])).toEqual([
+      `"${path}" is missing (expected string)`,
+    ]);
+  });
+
   it('reports a type mismatch, telling arrays and objects apart', () => {
     expect(
       checkShape(data, [

@@ -223,6 +223,18 @@ describe('executeConnector', () => {
     ).rejects.toThrow(/timed out/);
   });
 
+  it('leaves no deadline timer behind when the request cannot even be created', async () => {
+    jest.useFakeTimers();
+    try {
+      await expect(
+        executeConnector({ url: 'http://[invalid', auth: 'elastic:changeme' }, 'abc', params)
+      ).rejects.toThrow();
+      expect(jest.getTimerCount()).toBe(0);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
   it('rejects when the response keeps trickling in past the deadline', async () => {
     await createTestServer((_req, res) => {
       res.writeHead(200, { 'Content-Type': 'application/json' });

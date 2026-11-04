@@ -118,7 +118,7 @@ The runner needs the same prerequisites as `create_connectors` (`vault login`, E
 
 ### Fixtures
 
-A fixture file in `src/canary/` pairs with the manifest that has the same `spec_id`. The fixture's existence opts that connector in. The runner creates the `(testing)` connector from the manifest if it doesn't exist yet. If it does, the runner reuses it and re-syncs its config and secrets from the manifest and Vault first, so a rotated credential is picked up (this needs Vault access on every run). Fixture files run concurrently, and their output is printed in fixture order.
+A fixture file in `src/canary/` pairs with the manifest that has the same `spec_id`. The fixture's existence opts that connector in. The runner creates the `(testing)` connector from the manifest if it doesn't exist yet. If it does, the runner reuses it and re-syncs its config and secrets from the manifest and Vault first, so a rotated credential is picked up (this needs Vault access on every run). Fixture files run concurrently, and each one's output is printed as a block when it finishes (the returned results stay in fixture order). A spec id can have only one fixture file, so concurrent files never race to create the same connector.
 
 ```yaml
 spec_id: .jira-cloud
@@ -134,7 +134,7 @@ cases:
         type: string
 ```
 
-Types are `string`, `number`, `boolean`, `object`, `array` and `null`. The path `$` is the response itself. Paths split on `.`, so a response key that itself contains a dot can't be addressed, and only a response's own properties are matched. If the action declares an `output` schema, the response is also parsed with it. Most actions don't have one, so the `expect` list is the real assertion.
+Types are `string`, `number`, `boolean`, `object`, `array` and `null`. The path `$` is the response itself. Paths split on `.`, so a response key that itself contains a dot can't be addressed, and only a response's own properties are matched. Empty segments (`items.`, `a..b`) are rejected, and array segments must be plain non-negative integers. If the action declares an `output` schema, the response is also parsed with it. Most actions don't have one, so the `expect` list is the real assertion.
 
 The reserved `_test` action (a spec's connection check, when it enables one) is also allowed. It is the way to prove credentials are valid when no read action fails on bad credentials, as with Jira's `getProjects`, which succeeds anonymously.
 
@@ -151,7 +151,7 @@ Only actions declared `scope: 'read'` are allowed. The scope is advisory and set
 | `misc` | No HTTP status, timeout, network failure, 408/429, or the connector couldn't be set up |
 | `fixture` | The fixture doesn't fit the current spec (unknown action, wrong scope, input fails the action's schema), or Kibana rejected the params. Not vendor drift |
 
-The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (401, 403, unauthorized, forbidden, bad credentials, invalid token) to still report `auth`; anything else is `misc`. That fallback is untested against a real MCP auth failure.
+The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (`HTTP`/`status` followed by 401 or 403, unauthorized, forbidden, bad credentials, invalid token) to still report `auth`; anything else is `misc`. Checked live against `.github` with a bad token ("unauthorized: token authentication failed").
 
 ## Vault
 

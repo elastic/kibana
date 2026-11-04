@@ -14,9 +14,10 @@ import type { Classification } from './types';
 const AUTH_STATUS_CODES = new Set([401, 403]);
 const TRANSIENT_STATUS_CODES = new Set([408, 429]);
 const AUTH_ERROR_NAMES = new Set(['ConnectorAuthorizationError']);
-// Fallback for errors that carry no HTTP status, such as MCP-backed connectors.
+// Fallback for errors that carry no HTTP status, such as MCP-backed connectors. A bare 401/403 only counts next to
+// "HTTP" or "status", so an unrelated number in a message is not mistaken for an auth failure.
 const AUTH_MESSAGE_PATTERN =
-  /\b(401|403)\b|unauthori[sz]ed|forbidden|bad credentials|invalid (api )?(key|token)|authentication failed/i;
+  /\b(?:http|status(?: code)?)\s*:?\s*(?:401|403)\b|unauthori[sz]ed|forbidden|bad credentials|invalid (api )?(key|token)|authentication failed/i;
 
 const getStatusCode = (result: ExecuteConnectorResult): number | undefined => {
   const statusCode = Number(result.error_meta?.statusCode);

@@ -52,11 +52,19 @@ describe('classifyErrorResult', () => {
     expect(classifyErrorResult(result).outcome).toBe('auth');
   });
 
-  it('does not treat a status-less error with an unrelated number as auth', () => {
-    expect(classifyErrorResult(errorResult({ message: 'returned 14031 rows' })).outcome).toBe(
-      'misc'
-    );
-  });
+  it.each(['Request failed with status code 401', 'HTTP 403', 'status: 401'])(
+    'classifies a status-less error naming the status ("%s") as auth',
+    (message) => {
+      expect(classifyErrorResult(errorResult({ message })).outcome).toBe('auth');
+    }
+  );
+
+  it.each(['returned 14031 rows', 'Tool call failed after 403 ms', 'retry in 401s'])(
+    'does not treat a status-less error with an unrelated number ("%s") as auth',
+    (message) => {
+      expect(classifyErrorResult(errorResult({ message })).outcome).toBe('misc');
+    }
+  );
 
   it('ignores a non-numeric status code', () => {
     const result = errorResult({ error_meta: { statusCode: 'nope' } });

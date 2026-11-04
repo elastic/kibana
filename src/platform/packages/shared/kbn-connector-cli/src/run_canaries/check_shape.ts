@@ -14,13 +14,17 @@ const MISSING = Symbol('missing');
 /** `$` addresses the response `data` itself, for actions whose result has no fields to check. */
 const ROOT_PATH = '$';
 
+// `Number()` would also accept '', ' ', '0x0' and '1e0', so a typo in a path could resolve to a real element.
+const ARRAY_INDEX_PATTERN = /^(0|[1-9]\d*)$/;
+
 const resolvePath = (data: unknown, dottedPath: string): unknown => {
   if (dottedPath === ROOT_PATH) return data;
   let current = data;
   for (const segment of dottedPath.split('.')) {
     if (Array.isArray(current)) {
+      if (!ARRAY_INDEX_PATTERN.test(segment)) return MISSING;
       const index = Number(segment);
-      if (!Number.isInteger(index) || index < 0 || index >= current.length) return MISSING;
+      if (index >= current.length) return MISSING;
       current = current[index];
     } else if (
       typeof current === 'object' &&

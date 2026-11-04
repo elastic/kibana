@@ -35,13 +35,7 @@ function request(
   return new Promise((resolve, reject) => {
     const isSsl = url.startsWith('https');
     const requestFn = isSsl ? https.request : http.request;
-    const deadline =
-      deadlineMs === undefined
-        ? undefined
-        : setTimeout(
-            () => req.destroy(new Error(`Request timed out after ${deadlineMs}ms`)),
-            deadlineMs
-          );
+    let deadline: NodeJS.Timeout | undefined;
     const req = requestFn(url, { ...options, rejectUnauthorized: false }, (res) => {
       let data = '';
       res.on('data', (chunk) => (data += chunk));
@@ -54,6 +48,13 @@ function request(
       clearTimeout(deadline);
       reject(err);
     });
+    // Armed only once `requestFn` has returned, so a synchronous throw leaves no timer behind.
+    if (deadlineMs !== undefined) {
+      deadline = setTimeout(
+        () => req.destroy(new Error(`Request timed out after ${deadlineMs}ms`)),
+        deadlineMs
+      );
+    }
     if (body) req.write(body);
     req.end();
   });

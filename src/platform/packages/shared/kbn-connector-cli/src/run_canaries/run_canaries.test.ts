@@ -217,7 +217,7 @@ describe('runCanaries', () => {
       { ...manifest, spec_id: '.other', name: 'Other' },
     ]);
     executeConnectorMock.mockImplementation(async (_conn, id, params) => {
-      // The first fixture finishes last, to show that output order does not depend on completion order.
+      // The first fixture finishes last, to show that the returned results stay in fixture order.
       if (params.subAction === 'getMe') await new Promise((resolve) => setTimeout(resolve, 20));
       return { connector_id: id, status: 'ok', data: { login: 'a' } };
     });
@@ -226,6 +226,70 @@ describe('runCanaries', () => {
 
     expect(results.map((r) => r.specId)).toEqual(['.fake', '.other']);
     expect(results.every((r) => r.outcome === 'ok')).toBe(true);
+  });
+
+  it('prints each fixture as soon as it finishes, without waiting for the slower ones', async () => {
+    loadFixturesMock.mockReturnValue([
+      fixtureFile([caseFor()]),
+      { spec_id: '.other', cases: [caseFor({ action: 'search' })] },
+    ]);
+    getConnectorSpecMock.mockReturnValue(
+      specWith({ getMe: { scope: 'read' }, search: { scope: 'read' } })
+    );
+    loadManifestsMock.mockReturnValue([
+      manifest,
+      { ...manifest, spec_id: '.other', name: 'Other' },
+    ]);
+    let releaseSlow: () => void = () => {};
+    executeConnectorMock.mockImplementation(async (_conn, id, params) => {
+      if (params.subAction === 'getMe')
+        await new Promise<void>((resolve) => (releaseSlow = resolve));
+      return { connector_id: id, status: 'ok', data: { login: 'a' } };
+    });
+    const printed: string[] = [];
+    const recordingLog = new ToolingLog();
+    jest.spyOn(recordingLog, 'info').mockImplementation((...args) => {
+      printed.push(String(args[0]));
+      return true;
+    });
+
+    const pending = runCanaries({ log: recordingLog, dryRun: false });
+    await new Promise((resolve) => setTimeout(resolve, 20));
+    expect(printed.some((line) => line.includes('search'))).toBe(true);
+    expect(printed.some((line) => line.includes('getMe'))).toBe(false);
+
+    releaseSlow();
+    await pending;
+    expect(printed.some((line) => line.includes('getMe'))).toBe(true);
+  });
+
+  it('fails only the remaining cases of a fixture that throws unexpectedly, keeping other results', async () => {
+    loadFixturesMock.mockReturnValue([
+      fixtureFile([caseFor(), caseFor({ name: 'second' })]),
+      { spec_id: '.other', cases: [caseFor()] },
+    ]);
+    loadManifestsMock.mockReturnValue([
+      manifest,
+      { ...manifest, spec_id: '.other', name: 'Other' },
+    ]);
+    getConnectorSpecMock.mockImplementation((id: string) => {
+      if (id === '.fake') throw new Error('spec exploded');
+      return specWith({ getMe: { scope: 'read' } });
+    });
+    executeConnectorMock.mockResolvedValue({
+      connector_id: 'x',
+      status: 'ok',
+      data: { login: 'a' },
+    });
+
+    const results = await runCanaries({ log, dryRun: false });
+
+    expect(results.map((r) => [r.specId, r.outcome])).toEqual([
+      ['.fake', 'misc'],
+      ['.fake', 'misc'],
+      ['.other', 'ok'],
+    ]);
+    expect(results[0].reason).toContain('spec exploded');
   });
 
   it('runs the _test sub-action and checks the response root with a $ path', async () => {

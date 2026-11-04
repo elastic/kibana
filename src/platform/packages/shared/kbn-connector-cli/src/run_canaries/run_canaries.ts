@@ -164,6 +164,18 @@ interface FixtureRun {
   lines: string[];
 }
 
+const recordResult = (
+  run: FixtureRun,
+  specId: string,
+  fixtureCase: FixtureCase,
+  classification: Classification
+): void => {
+  const label = describeCase(specId, fixtureCase);
+  run.results.push({ specId, action: fixtureCase.action, label, ...classification });
+  const reason = classification.reason ? ` — ${classification.reason}` : '';
+  run.lines.push(`  ${OUTCOME_TAGS[classification.outcome]} ${label}${reason}`);
+};
+
 export const runCanaries = async ({
   log,
   dryRun,
@@ -198,20 +210,10 @@ export const runCanaries = async ({
     existing.push(...(await listConnectors(connection)));
   }
 
-  // Each fixture file targets its own connector, so files run concurrently and print in order afterwards.
-  const runFixture = async (fixture: FixtureFile): Promise<FixtureRun> => {
-    const run: FixtureRun = { results: [], lines: [] };
-    const record = (fixtureCase: FixtureCase, classification: Classification) => {
-      const label = describeCase(fixture.spec_id, fixtureCase);
-      run.results.push({
-        specId: fixture.spec_id,
-        action: fixtureCase.action,
-        label,
-        ...classification,
-      });
-      const reason = classification.reason ? ` — ${classification.reason}` : '';
-      run.lines.push(`  ${OUTCOME_TAGS[classification.outcome]} ${label}${reason}`);
-    };
+  // Each fixture file targets its own connector (spec ids are unique), so files run concurrently.
+  const runFixture = async (fixture: FixtureFile, run: FixtureRun): Promise<void> => {
+    const record = (fixtureCase: FixtureCase, classification: Classification) =>
+      recordResult(run, fixture.spec_id, fixtureCase, classification);
 
     const cases = fixture.cases.filter((c) => c.enabled !== false);
     const skipped = fixture.cases.length - cases.length;
@@ -227,7 +229,7 @@ export const runCanaries = async ({
         ? `no connector spec with id ${fixture.spec_id}`
         : `no enabled manifest with spec_id ${fixture.spec_id}`;
       cases.forEach((fixtureCase) => record(fixtureCase, { outcome: 'fixture', reason }));
-      return run;
+      return;
     }
 
     let connectorId: string | undefined;
@@ -267,11 +269,30 @@ export const runCanaries = async ({
 
       record(fixtureCase, await executeCase(connection, connectorId, spec, fixtureCase));
     }
-    return run;
   };
 
-  const runs = await Promise.all(fixtures.map(runFixture));
-  runs.forEach(({ lines }) => lines.forEach((line) => log.info(line)));
+  // A fixture's block is printed as soon as it finishes, and an unexpected throw only fails that fixture's remaining cases.
+  const runs = await Promise.all(
+    fixtures.map(async (fixture) => {
+      const run: FixtureRun = { results: [], lines: [] };
+      try {
+        await runFixture(fixture, run);
+      } catch (err) {
+        const message = err instanceof Error ? err.message.split('\n')[0] : String(err);
+        fixture.cases
+          .filter((c) => c.enabled !== false)
+          .slice(run.results.length)
+          .forEach((fixtureCase) =>
+            recordResult(run, fixture.spec_id, fixtureCase, {
+              outcome: 'misc',
+              reason: `unexpected runner error: ${message}`,
+            })
+          );
+      }
+      run.lines.forEach((line) => log.info(line));
+      return run;
+    })
+  );
   const results = runs.flatMap((run) => run.results);
 
   const counts: Record<CanaryOutcome, number> = {

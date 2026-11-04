@@ -70,6 +70,30 @@ describe('loadFixtures', () => {
     });
   });
 
+  it('rejects two fixture files for the same spec_id', () => {
+    const content =
+      'spec_id: .github\ncases:\n  - action: a\n    expect: [{path: a, type: string}]';
+    write('github.yaml', content);
+    write('github_more.yaml', content);
+    expect(() => loadFixtures(dir)).toThrow(/spec_id \.github is already used by github\.yaml/);
+  });
+
+  it.each(['items.', 'items..name', '.items'])(
+    'rejects the path "%s" with an empty segment',
+    (p) => {
+      write(
+        'bad.yaml',
+        `spec_id: .x\ncases:\n  - action: a\n    expect: [{path: "${p}", type: string}]`
+      );
+      expect(() => loadFixtures(dir)).toThrow(/has an empty segment/);
+    }
+  );
+
+  it('accepts the $ root path', () => {
+    write('ok.yaml', 'spec_id: .x\ncases:\n  - action: a\n    expect: [{path: $, type: object}]');
+    expect(loadFixtures(dir)).toHaveLength(1);
+  });
+
   it('ignores non-yaml files', () => {
     write('README.md', '# not a fixture');
     expect(loadFixtures(dir)).toEqual([]);
