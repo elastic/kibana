@@ -88,7 +88,7 @@ export const appDefinitions: Record<AppId, AppDefinition> = {
     description: i18n.translate(
       'management.landing.withCardNavigation.searchConnectorsDescription',
       {
-        defaultMessage: 'Manage Content Connectors.',
+        defaultMessage: 'Manage Content Crawlers.',
       }
     ),
     icon: connectorLogo,

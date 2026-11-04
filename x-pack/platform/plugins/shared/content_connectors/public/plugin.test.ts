@@ -91,7 +91,7 @@ const setupPlugin = ({ uiEnabled }: { uiEnabled: boolean }) => {
 
 describe('SearchConnectorsPlugin (public)', () => {
   describe('setup()', () => {
-    it('registers the Content Connectors management app synchronously, before getStartServices resolves', () => {
+    it('registers the Content Crawlers management app synchronously, before getStartServices resolves', () => {
       const plugin = createPlugin({ ui: { enabled: true } });
       const coreSetup = coreMock.createSetup() as unknown as PluginCoreSetup;
       const { managementSetup } = createSetupDependencies();
@@ -106,7 +106,7 @@ describe('SearchConnectorsPlugin (public)', () => {
         expect.objectContaining({
           id: PLUGIN_ID,
           order: 8,
-          keywords: ['content connectors', 'search'],
+          keywords: ['content crawlers', 'search'],
           mount: expect.any(Function),
         })
       );
