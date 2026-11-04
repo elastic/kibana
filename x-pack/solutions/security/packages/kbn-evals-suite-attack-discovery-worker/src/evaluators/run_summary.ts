@@ -64,6 +64,9 @@ export const describeRow = (
 
 export const EVALUATOR_FAILED_LABEL = 'EVALUATOR_FAILED';
 
+/** What every evaluator scores a row whose task failed (the row error carries the cause). */
+export const ROW_FAILED_LABEL = 'ROW_FAILED';
+
 /**
  * Wraps each evaluator so every observed score is recorded, keyed by evaluator name, and every
  * CODE miss is kept with its row. Scores pass through unchanged, with one exception: an evaluator
@@ -132,12 +135,25 @@ export const withScoreCollection = (
  */
 export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[]): void => {
   if (failures.length === 0) return;
-  const lines = failures.map(
-    ({ evaluator, row, score, label, explanation }) =>
-      `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${
-        explanation ? ` (${explanation})` : ''
-      }`
-  );
+  // A failed row scores every CODE evaluator `ROW_FAILED`; one line per row says so once, since
+  // the row error already carries the cause.
+  const failedRows = new Map<string, number>();
+  failures
+    .filter(({ label }) => label === ROW_FAILED_LABEL)
+    .forEach(({ row }) => failedRows.set(row, (failedRows.get(row) ?? 0) + 1));
+  const lines = [
+    ...[...failedRows].map(
+      ([row, count]) => `  - ${row}: ${count} code evaluator(s) ${ROW_FAILED_LABEL}`
+    ),
+    ...failures
+      .filter(({ label }) => label !== ROW_FAILED_LABEL)
+      .map(
+        ({ evaluator, row, score, label, explanation }) =>
+          `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${
+            explanation ? ` (${explanation})` : ''
+          }`
+      ),
+  ];
   throw new Error(
     `${datasetName}: ${
       failures.length

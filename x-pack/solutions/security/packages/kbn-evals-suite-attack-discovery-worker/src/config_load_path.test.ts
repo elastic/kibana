@@ -34,6 +34,27 @@ const loadedBy = (entry: string): string[] => {
   return Object.keys(require.cache);
 };
 
+/** Jest transformers other than the swc/babel ones that parse source: each handles a file type. */
+const presetTransforms = (): Array<[string, string]> => {
+  const entries = ['@kbn/jest/jest-preset', '@kbn/jest/jest_node/jest-preset'].flatMap((preset) =>
+    Object.entries((jest.requireActual(preset) as { transform: Record<string, string> }).transform)
+  );
+  const unique = new Map(entries);
+  return [...unique].filter(([, transformer]) => !/swc|babel/.test(transformer));
+};
+
+/**
+ * Module paths a transform key matches. The keys are regexes, so the candidates are built from the
+ * words in the pattern (each as written, and with its last letter dropped for a trailing `?`) plus
+ * the empty extension, and kept when the key matches them.
+ */
+const pathsMatchedBy = (key: string): string[] => {
+  const words = key.match(/[a-z]+/g) ?? [];
+  const extensions = new Set(['', ...words, ...words.map((word) => word.slice(0, -1))]);
+  const matcher = new RegExp(key);
+  return [...extensions].map((ext) => `/x/module.${ext}`).filter((path) => matcher.test(path));
+};
+
 const rawTextIn = (paths: string[]): string[] => paths.filter((path) => RAW_TEXT_MODULE.test(path));
 
 describe('Playwright config load path', () => {
@@ -49,6 +70,20 @@ describe('Playwright config load path', () => {
       extensions.map(() => true)
     );
     expect(RAW_TEXT_MODULE.test('/x/module.ts')).toBe(false);
+  });
+
+  describe('against the Jest preset transforms', () => {
+    const transforms = presetTransforms();
+
+    it('finds the transforms that handle raw text', () => {
+      expect(transforms.length).toBeGreaterThanOrEqual(3);
+    });
+
+    it.each(transforms)('flags every path the %s transform handles', (key) => {
+      const paths = pathsMatchedBy(key);
+      expect(paths.length).toBeGreaterThan(0);
+      expect(paths.filter((path) => !RAW_TEXT_MODULE.test(path))).toEqual([]);
+    });
   });
 
   it('walks the whole chain the config loads', () => {

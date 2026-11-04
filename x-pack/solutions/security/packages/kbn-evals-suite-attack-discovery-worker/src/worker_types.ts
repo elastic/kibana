@@ -120,8 +120,9 @@ export interface WorkerOutcomeEvent {
 export interface WorkerArtifacts {
   /**
    * Set only on the placeholder a failed row returns (seed, run, collect, cancel or cleanup threw,
-   * or the row's scenario is unknown). Every
-   * evaluator checks it first and reports `ROW_FAILED` instead of scoring the empty artifacts.
+   * or the row's scenario is unknown, or the experiment aborted before the row started). Every
+   * built-in evaluator checks it first and reports `ROW_FAILED` instead of scoring the empty
+   * artifacts.
    */
   rowError?: string;
   runnerExecutionId: string;

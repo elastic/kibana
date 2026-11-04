@@ -21,7 +21,12 @@ export const evaluate = base.extend<
   // `auto` so a spec cannot skip the preflight and score a stack that routes to the wrong
   // model or lacks the workflows. The routing it writes is restored on teardown.
   adWorkerPreflight: [
-    async ({ fetch, esClient, log, connector }, use) => {
+    async ({ fetch, esClient, log, connector, repetitions }, use) => {
+      if (repetitions > 1) {
+        log.warning(
+          `Attack Discovery Worker evals run with repetitions=${repetitions}. Every repeat re-runs all rows serially in the shared eval space, and the Playwright test timeout covers one pass over the rows. Use repetitions=1 (EVAL_REPETITIONS / --repetitions).`
+        );
+      }
       const preflight = await runPreflight({
         fetch,
         esClient,

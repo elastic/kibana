@@ -11,7 +11,8 @@ import { getPlaywrightTestTimeoutMs } from './src/constants';
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
-  // Every row runs in the same space, so a repetition would re-seed over the previous one.
+  // Rows share one space and run serially, and the test timeout below is sized for one pass over
+  // them, so a repeat (EVAL_REPETITIONS or `--repetitions` override this) can time the test out.
   repetitions: 1,
   // The runner's concurrency key is per space (`cancel-in-progress`, max 1), so a second
   // concurrent trigger in the eval space cancels the first. Rows run one at a time.

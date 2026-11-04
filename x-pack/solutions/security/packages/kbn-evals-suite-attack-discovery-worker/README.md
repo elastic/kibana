@@ -33,8 +33,19 @@ evaluators and the judges report the same label instead of scoring an empty row.
 has resolved, `createEvaluateDataset` throws one error (an `AggregateError` when there are several)
 listing the row failures, an executor-level rejection, every dirty space and the failed code scores.
 
-Every row runs in its own space inside one shared experiment, and `runExperiment` has no
-repetitions option, so `playwright.config.ts` keeps `repetitions: 1` (the executor defaults to 3).
+If the executor itself throws (its own span or model lookup, not one of our rows), `runExperiment`
+rejects at once while a row may be mid-run and later rows are still queued. `createEvaluateDataset`
+then closes a gate so queued rows do not seed (they return an `experiment aborted` placeholder and
+are counted in one `N queued row(s) did not run` error), waits for every running row to finish its
+cancel and cleanup, and only then runs the final clean-space check.
+
+All rows share the eval space (`EVAL_SPACE_ID`) and run one at a time, so `playwright.config.ts`
+sets `repetitions: 1`. `runExperiment` has no repetitions option and the executor defaults to 3,
+so the value comes from the config; `EVAL_REPETITIONS` or the CLI `--repetitions` override it. A
+higher value does not corrupt the space (each row cleans up before the next), but every repeat
+re-runs the whole model-backed Worker serially and the Playwright test timeout
+(`getPlaywrightTestTimeoutMs`) is sized for one pass over the rows, so the test can time out
+mid-dataset. The suite logs a warning when the effective value is above 1.
 
 An evaluator that throws (typically the LLM judge: `Missing scores for …` or an inference error)
 does not reject the experiment either. Every evaluator, including `evaluatorOverrides`, is wrapped:
@@ -79,7 +90,7 @@ space's fingerprints and its discoveries, and fails if a delete reports failures
 conflicts, a timeout, or fewer deletions than matches.
 
 `src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any module the Jest preset
-transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`) ends up loaded at
+transforms without swc (`.yaml`, `.yml`, `.txt`, `.html`, `.peggy`, `.pegg`, `.text`, `.tex`, or a path ending in a bare `.`) ends up loaded at
 config time (the `@kbn/workflows/managed` barrel and deep imports of its definitions both do). Jest
 transforms those but the Playwright loader cannot parse them. The guard covers only the static load
 chain of `playwright.config.ts`, the modules loaded synchronously while the config evaluates. It

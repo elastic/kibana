@@ -68,6 +68,31 @@ describe('CODE gate', () => {
     expect(() => assertCodeScoresPass('dataset', failures)).toThrow(/PositiveControlRecall/);
   });
 
+  it('summarises ROW_FAILED misses once per row instead of once per evaluator', () => {
+    const failure = (evaluator: string, row: string) => ({
+      evaluator,
+      row,
+      score: null,
+      label: 'ROW_FAILED',
+    });
+    let message = '';
+    try {
+      assertCodeScoresPass('dataset', [
+        failure('RunnerCompleted', 'space: row-a'),
+        failure('NegativeControl', 'space: row-a'),
+        failure('RunnerCompleted', 'space: row-b'),
+        { evaluator: 'VerdictMatchesGold', row: 'space: row-b', score: 0, label: 'wrong' },
+      ]);
+    } catch (error) {
+      message = (error as Error).message;
+    }
+    expect(message).toContain('4 CODE evaluator miss(es)');
+    expect(message).toContain('space: row-a: 2 code evaluator(s) ROW_FAILED');
+    expect(message).toContain('space: row-b: 1 code evaluator(s) ROW_FAILED');
+    expect(message).toContain('VerdictMatchesGold [space: row-b]: 0');
+    expect(message).not.toContain('RunnerCompleted [');
+  });
+
   it('still requires exactly 1 from evaluators without a threshold', async () => {
     const failures = await gate(evaluatorScoring({ name: 'NegativeControl', score: 0.9 }));
     expect(failures).toHaveLength(1);

@@ -539,14 +539,13 @@ const isRefusedOnFirstAttempt = (error: unknown): boolean => {
  * - not settled: the bulk itself rejected (a transport failure, a 5xx, or a 4xx that followed a
  *   transport retry; only a 4xx on the first attempt counts as settled) and may still be running
  *   in Elasticsearch. A first empty read-back proves nothing, so the delete and read-back repeat
- *   for the whole
- *   `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if the read-back of
- *   the LAST round finds no id (a write that landed earlier was deleted by a later round). Ids
- *   found then throw. One last pass per window instead of consecutive clean reads keeps the total
- *   fixed. A write that lands after the window is not removed here; the final clean-space check
- *   after the last row (`assertCleanSpace` in `createEvaluateDataset`, which runs after every row
- *   has finished because a row's failure is recorded, not thrown) and the next row's own check
- *   report it.
+ *   for the whole `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if
+ *   the read-back of the LAST round finds no id (a write that landed earlier was deleted by a
+ *   later round). Ids found then throw. One last pass per window instead of consecutive clean
+ *   reads keeps the total fixed. A write that lands after the window is not removed here; the
+ *   final clean-space check after the last row (`assertCleanSpace` in `createEvaluateDataset`,
+ *   which runs after every row has finished because a row's failure is recorded, not thrown) and
+ *   the next row's own check report it.
  */
 const removeSeededAlertsById = async ({
   esClient,

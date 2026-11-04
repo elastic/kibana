@@ -138,43 +138,22 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
   });
 };
 
-const stubExecutor = (): EvalsExecutorClient =>
-  ({
-    runExperiment: async (
-      {
-        datasets,
-        task,
-      }: {
-        datasets: Array<{ examples: WorkerExample[] }>;
-        task: (example: WorkerExample) => Promise<WorkerArtifacts>;
-      },
-      evaluators: Array<Evaluator<WorkerExample, WorkerArtifacts>>
-    ) => {
-      for (const dataset of datasets) {
-        for (const example of dataset.examples) {
-          const output = await task(example);
-          for (const evaluator of evaluators) {
-            await evaluator.evaluate({
-              input: example.input,
-              output,
-              expected: example.output,
-              metadata: example.metadata,
-            });
-          }
-        }
-      }
-      return [];
-    },
-    getDatasetRunResults: async () => [],
-  } as unknown as EvalsExecutorClient);
-
 /**
  * Runs rows the way the real executor does (`kibana_evals_executor/client.ts`): one job per row on
  * a concurrency-1 limiter that starts the next job once the previous one settles, `task` then the
  * evaluators inside the job, no per-row catch, and `Promise.all` over the jobs. The first throw
  * rejects `runExperiment` at once while later queued jobs keep running detached.
+ *
+ * `abort` models a throw from the executor's own code (a span wrapper, `getModel`) in the job at
+ * `index`: `after-task` once that row's task has settled, `during-task` while it is still running.
  */
-const realStyleExecutor = (): EvalsExecutorClient =>
+interface ExecutorAbort {
+  index: number;
+  when: 'after-task' | 'during-task';
+  error: Error;
+}
+
+const realStyleExecutor = (abort?: ExecutorAbort): EvalsExecutorClient =>
   ({
     runExperiment: async (
       {
@@ -193,9 +172,14 @@ const realStyleExecutor = (): EvalsExecutorClient =>
         return run;
       };
       const jobs = datasets.flatMap(({ examples }) =>
-        examples.map((example) =>
+        examples.map((example, index) =>
           limited(async () => {
+            if (abort?.index === index && abort.when === 'during-task') {
+              void task(example);
+              throw abort.error;
+            }
             const taskOutput = await task(example);
+            if (abort?.index === index) throw abort.error;
             await Promise.all(
               evaluators.map((evaluator) =>
                 evaluator.evaluate({
@@ -237,19 +221,6 @@ const client = {
   cancelPending: jest.fn(async () => undefined),
 } as unknown as AttackDiscoveryWorkerClient;
 
-const evaluateRow = (scenarioId: string) =>
-  createEvaluateDataset({
-    client,
-    evaluators,
-    executorClient: stubExecutor(),
-    esClient: {} as Client,
-    fetch: jest.fn() as unknown as HttpHandler,
-    log,
-    routing,
-  })({
-    dataset: { name: 'seam', description: 'positive control', examples: [rowFor(scenarioId)] },
-  });
-
 const evaluateExamples = (
   examples: WorkerExample[],
   evaluatorOverrides?: Array<Evaluator<WorkerExample, WorkerArtifacts>>
@@ -267,11 +238,11 @@ const evaluateExamples = (
     evaluatorOverrides,
   });
 
-const evaluateRows = (scenarioIds: string[]) =>
+const evaluateRows = (scenarioIds: string[], abort?: ExecutorAbort) =>
   createEvaluateDataset({
     client,
     evaluators,
-    executorClient: realStyleExecutor(),
+    executorClient: realStyleExecutor(abort),
     esClient: {} as Client,
     fetch: jest.fn() as unknown as HttpHandler,
     log,
@@ -279,6 +250,8 @@ const evaluateRows = (scenarioIds: string[]) =>
   })({
     dataset: { name: 'seam', description: 'real-style', examples: scenarioIds.map(rowFor) },
   });
+
+const evaluateRow = (scenarioId: string) => evaluateRows([scenarioId]);
 
 /** The settled error of a rejected promise, or a failure when it resolved. */
 const rejectionOf = async (promise: Promise<unknown>): Promise<Error> => {
@@ -562,8 +535,65 @@ describe('createEvaluateDataset', () => {
       seed.mockRejectedValueOnce(new Error('seed failed'));
       const error = await rejectionOf(evaluateRows([FIRST]));
       expect(error.message).toMatch(/CODE evaluator miss/);
-      expect(error.message).toMatch(/RunnerCompleted \[[^\]]*\]: ROW_FAILED/);
-      expect(error.message).toMatch(/NegativeControl \[[^\]]*\]: ROW_FAILED/);
+      expect(error.message).toMatch(/: benign-batch: \d+ code evaluator\(s\) ROW_FAILED/);
+      // One line for the row, not one per evaluator.
+      expect(error.message.match(/ROW_FAILED/g)).toHaveLength(1);
+    });
+
+    describe('when the executor itself throws', () => {
+      const ROWS = [
+        'benign-batch',
+        'shared-ci-egress',
+        'same-display-name-cross-account',
+        'threshold-meta-alerts',
+      ];
+      const executorError = new Error('executor span failed');
+
+      it('does not seed queued rows after the executor rejected, and says they did not run', async () => {
+        collect.mockResolvedValue(quietArtifacts());
+        const error = await rejectionOf(
+          evaluateRows(ROWS, { index: 0, when: 'after-task', error: executorError })
+        );
+        const seedCallsAtSettle = seed.mock.calls.length;
+        // Let the jobs still queued in the executor's limiter start.
+        await new Promise((resolve) => setTimeout(resolve, 20));
+        expect(seed).toHaveBeenCalledTimes(seedCallsAtSettle);
+        // The next job can start in the same tick the executor rejects; it is awaited, not
+        // detached. The rest never start.
+        expect(seedCallsAtSettle).toBeLessThan(ROWS.length);
+        expect(error.message).toContain('executor span failed');
+        expect(error.message).toContain(
+          `${ROWS.length - seedCallsAtSettle} queued row(s) did not run`
+        );
+      });
+
+      it('rejects with the executor error itself when nothing else went wrong', async () => {
+        collect.mockResolvedValue(quietArtifacts());
+        const error = await rejectionOf(
+          evaluateRows(ROWS.slice(0, 1), { index: 0, when: 'after-task', error: executorError })
+        );
+        expect(error.message).toContain('executor span failed');
+        expect(error.message).not.toMatch(/did not run/);
+      });
+
+      it('checks the space only after the row that was still running has cleaned up', async () => {
+        collect.mockImplementation(
+          () => new Promise((resolve) => setTimeout(() => resolve(quietArtifacts()), 20))
+        );
+        const error = await rejectionOf(
+          evaluateRows(ROWS, { index: 0, when: 'during-task', error: executorError })
+        );
+        expect(error.message).toContain('executor span failed');
+        const finalCheck = assertClean.mock.calls.findIndex(
+          ([args]) => args.when === 'after the last row'
+        );
+        expect(finalCheck).toBeGreaterThanOrEqual(0);
+        // Every row that started was cleaned up before the space was checked.
+        expect(cleanup).toHaveBeenCalledTimes(seed.mock.calls.length);
+        cleanup.mock.invocationCallOrder.forEach((order) =>
+          expect(order).toBeLessThan(assertClean.mock.invocationCallOrder[finalCheck])
+        );
+      });
     });
 
     it('runs the final clean-space check even though the executor would have rejected', async () => {

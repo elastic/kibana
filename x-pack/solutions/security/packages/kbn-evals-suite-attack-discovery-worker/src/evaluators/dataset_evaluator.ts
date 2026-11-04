@@ -43,6 +43,7 @@ import {
   createRunCollector,
   describeRow,
   logRunSummary,
+  ROW_FAILED_LABEL,
   withScoreCollection,
 } from './run_summary';
 
@@ -54,8 +55,6 @@ export interface JudgeProvenance {
 }
 
 const DIRECTION = 'maximize' as const;
-
-export const ROW_FAILED_LABEL = 'ROW_FAILED';
 
 /**
  * What a row returns when it threw. The task never throws for a row: the real executor rejects the
@@ -343,9 +342,17 @@ export const createEvaluateDataset =
     const recordRowError = (rowLabel: string, error: unknown) =>
       rowErrors.push(new Error(`${rowLabel} failed: ${errorMessage(error)}`, { cause: error }));
 
+    // Set once the executor has rejected. A job still queued in the executor's limiter starts
+    // after that, so `runRow` must not seed for it; the rows already running are awaited below.
+    let closed = false;
+    let rowsStarted = 0;
+    const inFlight = new Set<Promise<WorkerArtifacts>>();
+
     const runRow = async (
       input: { scenarioId: string; spaceId: string } | undefined
     ): Promise<WorkerArtifacts> => {
+      if (closed) return failedRowArtifacts('experiment aborted');
+      rowsStarted += 1;
       const rowLabel = describeRow(input);
       const scenario = AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
       if (!input || !scenario) {
@@ -423,7 +430,11 @@ export const createEvaluateDataset =
             generation_model: routing.generationModel,
             review_model: routing.reviewModel,
           },
-          task: async ({ input }) => runRow(input),
+          task: ({ input }) => {
+            const row = runRow(input);
+            inFlight.add(row);
+            return row.finally(() => inFlight.delete(row));
+          },
         },
         // Includes `evaluatorOverrides`: a throw from any evaluator is recorded as a row error, not
         // thrown into the executor. Overrides are opaque test doubles, so they are not given the
@@ -442,8 +453,20 @@ export const createEvaluateDataset =
       );
     } catch (error) {
       // Backstop: the wrapper above catches evaluator throws, so only an executor-level failure
-      // (not one of ours) should land here.
+      // (not one of ours, e.g. its own span or model lookup) should land here. `runExperiment`
+      // rejected at once, so a row may still be mid-run and later jobs are still queued: close the
+      // gate so none of those seeds, then let every running row finish its cleanup before the
+      // space is checked.
+      closed = true;
       problems.push(error);
+      await Promise.allSettled([...inFlight]);
+    }
+    // Rows that never started (queued behind the abort, so they will only get the placeholder).
+    // One summary error, not one per row: the executor error above already fails the dataset, and
+    // this keeps them from reading as passes.
+    const rowsNotRun = closed ? Math.max(0, dataset.examples.length - rowsStarted) : 0;
+    if (rowsNotRun > 0) {
+      rowErrors.push(new Error(`${rowsNotRun} queued row(s) did not run: the experiment aborted`));
     }
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
