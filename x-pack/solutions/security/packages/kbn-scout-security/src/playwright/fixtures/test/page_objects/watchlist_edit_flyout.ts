@@ -7,14 +7,10 @@
 
 import type { ScoutPage, Locator } from '@kbn/scout';
 
-/**
- * Watchlist create / edit flyout (`WatchlistFlyout`), opened from the Watchlists tab of the
- * Entity analytics management page or from the entity filters bar.
- */
+/** Watchlist create / edit flyout (`WatchlistFlyout`). */
 export class WatchlistEditFlyout {
   public readonly flyout: Locator;
   public readonly header: Locator;
-  /** Index pattern combo box of the index (rule based) data source. */
   public readonly indexPatternComboBox: Locator;
   /** Warning shown when an index data source has no API key (the callout has no test subject). */
   public readonly missingApiKeyCallout: Locator;

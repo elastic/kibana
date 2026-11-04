@@ -26,8 +26,6 @@ export class EntityAnalyticsManagementPage {
   public engineStatusTab: Locator;
   /** Rendered only when the `entityAnalyticsWatchlistEnabled` experimental feature is on. */
   public readonly watchlistsTab: Locator;
-
-  // Watchlists tab
   public readonly watchlistsTable: Locator;
 
   // Risk Score tab
@@ -69,8 +67,6 @@ export class EntityAnalyticsManagementPage {
     this.assetCriticalityTab = this.page.testSubj.locator('assetCriticalityTab');
     this.engineStatusTab = this.page.testSubj.locator('engineStatusTab');
     this.watchlistsTab = this.page.testSubj.locator('watchlistsTab');
-
-    // Watchlists tab
     this.watchlistsTable = this.page.testSubj.locator('watchlistsManagementTable');
 
     // Risk Score tab
@@ -143,7 +139,6 @@ export class EntityAnalyticsManagementPage {
     return this.watchlistsTable.getByRole('row').filter({ hasText: name });
   }
 
-  /** Opens the edit flyout from the row action of the named watchlist. */
   async openWatchlistEdit(name: string) {
     await this.watchlistRow(name).getByRole('button', { name: 'Edit watchlist' }).click();
   }
