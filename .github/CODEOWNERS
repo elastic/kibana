@@ -3819,7 +3819,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
-/src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
