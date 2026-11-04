@@ -24,13 +24,10 @@ jest.mock('../../../common/agent_avatar', () => ({
 
 const mockUseAgentById = jest.mocked(useAgentBuilderAgentById);
 
-const renderReport = (
-  event: Parameters<typeof SubagentReportEvent>[0]['event'],
-  isUnread = false
-) =>
+const renderReport = (event: Parameters<typeof SubagentReportEvent>[0]['event']) =>
   render(
     <I18nProvider>
-      <SubagentReportEvent event={event} isUnread={isUnread} />
+      <SubagentReportEvent event={event} />
     </I18nProvider>
   );
 
@@ -48,10 +45,6 @@ describe('SubagentReportEvent', () => {
 
     expect(screen.getByRole('status')).toHaveTextContent('Background agent finished · Researcher');
     expect(screen.getByTestId('agentAvatar')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderTimelineSubagentReport')).toHaveAttribute(
-      'data-unread',
-      'false'
-    );
     expect(screen.queryByText(/APPLE/)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button'));
@@ -62,13 +55,9 @@ describe('SubagentReportEvent', () => {
   it('leaves the name out while the agent is unknown', () => {
     mockUseAgentById.mockReturnValue({ agent: null, isLoading: false, error: null } as never);
 
-    renderReport(event, true);
+    renderReport(event);
 
     expect(screen.getByRole('status')).toHaveTextContent(/^Background agent finished$/);
-    expect(screen.getByTestId('agentBuilderTimelineSubagentReport')).toHaveAttribute(
-      'data-unread',
-      'true'
-    );
     expect(screen.queryByTestId('agentAvatar')).not.toBeInTheDocument();
   });
 });

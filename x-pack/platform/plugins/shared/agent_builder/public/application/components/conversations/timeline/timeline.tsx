@@ -16,7 +16,6 @@ import { CustomEvent } from './items/custom_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
-import { unreadMessageKeys } from './unread_messages';
 
 interface TimelineProps {
   items: TimelineItem[];
@@ -50,8 +49,6 @@ export const Timeline: React.FC<TimelineProps> = ({
     [items]
   );
 
-  const unread = useMemo(() => unreadMessageKeys(items), [items]);
-
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -70,7 +67,7 @@ export const Timeline: React.FC<TimelineProps> = ({
               );
               break;
             case 'agentMessage':
-              content = <SubagentReportEvent event={item.event} isUnread={unread.has(item.key)} />;
+              content = <SubagentReportEvent event={item.event} />;
               break;
             case 'agentTurn':
               content = (

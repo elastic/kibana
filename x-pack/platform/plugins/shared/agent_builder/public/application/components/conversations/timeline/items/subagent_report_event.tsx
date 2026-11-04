@@ -17,17 +17,10 @@ import { UserMessageText } from '../user_message/user_message_text';
 
 interface SubagentReportEventProps {
   event: AgentMessageEvent;
-  isUnread?: boolean;
 }
 
-/**
- * A background sub-agent's report, drawn like a step: one line, the text behind a click. It is
- * faded until a run has read it.
- */
-export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({
-  event,
-  isUnread = false,
-}) => {
+/** A background sub-agent's report, drawn like a step: one line, the text behind a click. */
+export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({ event }) => {
   const { euiTheme } = useEuiTheme();
   const { agent } = useAgentBuilderAgentById(event.actor.id);
   const [isExpanded, setIsExpanded] = useState(false);
@@ -56,11 +49,7 @@ export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({
       gutterSize="s"
       alignItems="flexStart"
       responsive={false}
-      css={css`
-        opacity: ${isUnread ? 0.6 : 1};
-      `}
       data-test-subj="agentBuilderTimelineSubagentReport"
-      data-unread={isUnread}
     >
       <EuiFlexItem
         grow={false}
