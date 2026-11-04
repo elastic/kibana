@@ -59,9 +59,11 @@ export function generateWorkflowYaml({
   automationId,
   automation,
   serviceAccountId,
+  universalAlerts = true,
 }: {
   automationId: string;
   automation: NightshiftAutomationAttributes;
+  universalAlerts?: boolean;
   /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
   serviceAccountId?: string;
 }): string {
@@ -69,13 +71,18 @@ export function generateWorkflowYaml({
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) * 2 + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+    Number(alertRows.length > 0) * (universalAlerts ? 2 : 1) +
+      Number(slackRows.length > 0) +
+      Number(Boolean(schedule)) >
+    1;
   const alertWorkflow =
     alertRows.length > 0 || (slackRows.length === 0 && !schedule)
       ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
       : undefined;
   const alertV2Workflow =
-    alertRows.length > 0 ? generateAlertV2Workflow(automationId, automation, alertRows) : undefined;
+    universalAlerts && alertRows.length > 0
+      ? generateAlertV2Workflow(automationId, automation, alertRows)
+      : undefined;
   const slackWorkflow =
     slackRows.length > 0
       ? generateSlackWorkflow(automationId, automation, slackRows, hasMultipleTriggers)

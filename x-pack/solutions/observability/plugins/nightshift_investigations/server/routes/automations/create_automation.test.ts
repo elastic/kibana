@@ -33,6 +33,7 @@ const call = (overrides: Record<string, unknown> = {}, user?: Record<string, str
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(user),
   } as never);

@@ -492,6 +492,33 @@ describe('generateWorkflowYaml', () => {
       });
     });
 
+    it('emits no universal alert trigger or steps when universal alerting is unavailable', () => {
+      const automation = scheduledAutomation();
+      automation.trigger.rows.push({ kind: 'alert' });
+      const yaml = parse(
+        generateWorkflowYaml({ automationId: 'auto-123', automation, universalAlerts: false })
+      );
+      expect(yaml.triggers.map((trigger: { type: string }) => trigger.type)).toEqual([
+        'alerting.v1.alertStatusChanged',
+        'scheduled',
+      ]);
+      expect(JSON.stringify(yaml.steps)).not.toContain('_v2');
+    });
+
+    it('keeps an alert-only automation unguarded when universal alerting is unavailable', () => {
+      const yaml = parse(
+        generateWorkflowYaml({
+          automationId: 'auto-123',
+          automation: baseAutomation(),
+          universalAlerts: false,
+        })
+      );
+      expect(yaml.triggers).toHaveLength(1);
+      expect(yaml.steps.map((step: { name: string }) => step.name)).not.toContain(
+        'trigger_investigation_alert_v2'
+      );
+    });
+
     it('isolates scheduled and alert steps when both sources are configured', () => {
       const automation = scheduledAutomation();
       automation.trigger.rows.push({ kind: 'alert' });

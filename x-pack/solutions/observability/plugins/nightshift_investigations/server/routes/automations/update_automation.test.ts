@@ -37,6 +37,7 @@ const call = (body: Record<string, unknown>) =>
     params: params.parse({ path: { id: 'automation-1' }, body }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    isUniversalAlertingAvailable: () => true,
     getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
