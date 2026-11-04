@@ -33,14 +33,14 @@ test('a PR with no Nightshift files is out of scope', () => {
   assert.equal(result.tier, null);
 });
 
-test('tests, stories, evals and docs in Nightshift paths are Low', () => {
+test('tests, stories, eval data and docs in Nightshift paths are Low', () => {
   const result = classify(
     [
       file(`${NI}/server/lib/foo.test.ts`),
       file(`${NI}/server/lib/__mocks__/foo.ts`),
       file('x-pack/solutions/observability/plugins/nightshift/public/card.stories.tsx'),
       file(
-        'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/src/x.ts'
+        'x-pack/solutions/observability/packages/kbn-evals-suite-nightshift-investigations/src/datasets/x.ts'
       ),
       file('x-pack/solutions/observability/plugins/significant_events/README.md'),
     ],
@@ -93,6 +93,50 @@ test('production code, prompts and config are not Low', () => {
   ]) {
     assert.equal(classify([file(path)], member).tier, 'not_low', path);
   }
+});
+
+const EVALS = 'x-pack/solutions/observability/packages';
+
+test('eval datasets, seed data, scenarios, data generators and snapshot scripts are Low', () => {
+  for (const path of [
+    `${EVALS}/kbn-evals-suite-significant-events/src/datasets/bank_of_anthos/discovery.ts`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/datasets.ts`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/src/seed_data/alerts.ts`,
+    `${EVALS}/kbn-evals-suite-observability-ai/src/scenarios/payment.ts`,
+    `${EVALS}/kbn-evals-suite-significant-events/src/data_generators/snapshot_indices.ts`,
+    // Bumping a snapshot run ID, as in PR 295083.
+    `${EVALS}/kbn-evals-suite-significant-events/scripts/replay_eval_snapshot/index.ts`,
+  ]) {
+    assert.equal(classify([file(path)], member).tier, 'low', path);
+  }
+});
+
+test('eval judges, scorers, evaluators, prompts and harness code are not Low', () => {
+  for (const path of [
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/judges/scoring.ts`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/judges/prompts.ts`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/judges/tool_call_health/system_prompt.text`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/task.ts`,
+    `${EVALS}/kbn-evals-suite-significant-events/src/evaluators/discovery/common/scores_calibration.ts`,
+    `${EVALS}/kbn-evals-suite-observability-ai/src/criteria_evaluator.ts`,
+    `${EVALS}/kbn-evals-suite-nightshift-investigations/playwright.config.ts`,
+    // A judge that happens to sit under a datasets folder is still a judge.
+    `${EVALS}/kbn-evals-suite-significant-events/src/datasets/judge_prompt.ts`,
+  ]) {
+    assert.equal(classify([file(path)], member).tier, 'not_low', path);
+  }
+  // Tests of a judge are still tests.
+  assert.equal(
+    classify(
+      [
+        file(
+          `${EVALS}/kbn-evals-suite-nightshift-investigations/evals/investigation/judges/scoring.test.ts`
+        ),
+      ],
+      member
+    ).tier,
+    'low'
+  );
 });
 
 test('instruction files for coding agents are not Low', () => {

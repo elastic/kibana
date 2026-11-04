@@ -52,8 +52,10 @@ const LOW_PATTERNS = [
   ...TEST_PATTERNS,
   /\.stories\.tsx?$/,
   /\/__storybook__\//,
-  // Dev-only eval suites.
-  /^x-pack\/solutions\/observability\/packages\/kbn-evals-suite-(nightshift-[^/]+|significant-events|observability-ai)\//,
+  // Eval data only: datasets, seed data, scenarios, data generators and snapshot scripts.
+  // Judges, scorers, evaluators, their prompts and the eval harness decide what results mean,
+  // so they are not Low (see the Medium tier in .agents/skills/nightshift-review).
+  /^x-pack\/solutions\/observability\/packages\/kbn-evals-suite-(nightshift-[^/]+|significant-events|observability-ai)\/(?!.*(judge|evaluat|scor|criteria|prompt|\.text$))(.*\/)?(datasets|seed_data|scenarios|data_generators|[^/]*_snapshots?)(\/|\.ts$)/,
   // Docs only. Instruction files for coding agents are not Low.
   /^(?!.*\/(AGENTS|CLAUDE|SKILL)\.md$).*\.md$/,
 ];
@@ -87,7 +89,7 @@ const classify = (files, { totalFiles = files.length, authorAssociation } = {}) 
     if (!paths.every(isNightshift)) {
       reasons.push(`\`${f.filename}\` is outside Nightshift paths`);
     } else if (!paths.every(isLowPath)) {
-      reasons.push(`\`${f.filename}\` is not a test, story, eval or doc file`);
+      reasons.push(`\`${f.filename}\` is not a test, story, eval data or doc file`);
     } else if (isTest(f.filename) && f.status === 'removed') {
       reasons.push(`\`${f.filename}\` deletes a test file`);
     } else if (isTest(f.filename) && f.patch === undefined && f.changes > 0) {
@@ -105,7 +107,7 @@ const MAX_REASONS = 10;
 const commentBody = ({ tier, reasons }) => {
   const head =
     tier === 'low'
-      ? '**Nightshift risk (shadow mode): Low.** Every changed file is a test, story, eval or doc file in a Nightshift path. Once approval is turned on, a PR like this could merge on a bot approval after Libra and CI pass.'
+      ? '**Nightshift risk (shadow mode): Low.** Every changed file is a test, story, eval data or doc file in a Nightshift path. Once approval is turned on, a PR like this could merge on a bot approval after Libra and CI pass.'
       : '**Nightshift risk (shadow mode): not Low.** This PR needs the usual human review.';
   const list = reasons
     .slice(0, MAX_REASONS)
