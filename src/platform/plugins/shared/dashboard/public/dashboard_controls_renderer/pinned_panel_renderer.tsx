@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import React, { useCallback, useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 
 import {
   EuiFlexItem,
@@ -33,6 +33,7 @@ import {
 import { combineLatest, of, Subscription } from 'rxjs';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { DragHandle } from './pinned_panel_drag_handle';
+import { FloatingActions } from './floating_actions';
 
 export const PinnedPanelRenderer = ({
   id,
@@ -45,6 +46,7 @@ export const PinnedPanelRenderer = ({
 }) => {
   const styles = useMemoCss(controlPanelStyles);
   const dashboardApi = useDashboardApi();
+  const prependWrapperRef = useRef<HTMLDivElement>(null);
 
   const [api, setApi] = useState<
     (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
@@ -68,10 +70,9 @@ export const PinnedPanelRenderer = ({
     const subscriptions = new Subscription();
     subscriptions.add(
       combineLatest([
-        ...(apiPublishesTitle(api)
-          ? [api.title$, api.defaultTitle$ ?? of(undefined)]
-          : [of(undefined), of(undefined)]),
-        apiPublishesLabel(api) ? api.label$ : of(undefined),
+        apiPublishesTitle(api) ? api.title$.asObservable() : of(undefined),
+        apiPublishesTitle(api) ? api.defaultTitle$?.asObservable() ?? of(undefined) : of(undefined),
+        apiPublishesLabel(api) ? api.label$.asObservable() : of(undefined),
       ]).subscribe(([title = '', defaultTitle = '', label = '']) => {
         setPanelLabel(title || label || defaultTitle);
       })
@@ -109,73 +110,72 @@ export const PinnedPanelRenderer = ({
       data-test-subj="control-frame"
       // css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
     >
-      {/* <FloatingActions
+      <FloatingActions
         data-test-subj="control-frame-floating-actions"
         api={api}
         uuid={id}
         viewMode={viewMode}
-        disabledActions={disabledActionIds}
-        prependWrapperRef={prependWrapperRef}
-      > */}
-      <EuiFormRow
-        data-test-subj="control-frame-title"
-        fullWidth
-        id={`control-title-${id}`}
-        aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
-          defaultMessage: 'Control for ${controlTitle}',
-          values: { controlTitle: panelLabel },
-        })}
+        // disabledActions={disabledActionIds}
       >
-        <EuiFormControlLayout
-          compressed={true}
+        <EuiFormRow
+          data-test-subj="control-frame-title"
           fullWidth
-          className={classNames('controlFrame__formControlLayout', {
-            'controlFrame__formControlLayout--edit': isEditable,
-            type,
+          id={`control-title-${id}`}
+          aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
+            defaultMessage: 'Control for ${controlTitle}',
+            values: { controlTitle: panelLabel },
           })}
-          css={styles.formControl}
-          prepend={
-            <>
-              {api?.CustomPrependComponent ? (
-                <>
-                  <DragHandle
-                    isEditable={true}
-                    controlTitle={'Test'}
-                    setDragHandles={setDragHandles}
-                  />
-                  <api.CustomPrependComponent />
-                </>
-              ) : (
-                <>
-                  <DragHandle
-                    isEditable={true}
-                    controlTitle={panelLabel}
-                    setDragHandles={setDragHandles}
-                  >
-                    {controlLabel}
-                  </DragHandle>
-                </>
-              )}
-            </>
-          }
         >
-          <EmbeddableRenderer
-            type={type}
-            maybeId={id}
-            getParentApi={() => dashboardApi}
-            key={`${type}_${id}`}
-            panelProps={{
-              isSharedItem: false,
-              showBadges: false,
-              showBorder: true,
-              showShadow: false,
-            }}
-            onApiAvailable={onApiAvailable}
-            hidePanelChrome={true}
-          />
-        </EuiFormControlLayout>
-      </EuiFormRow>
-      {/* </FloatingActions> */}
+          <EuiFormControlLayout
+            compressed={true}
+            fullWidth
+            className={classNames('controlFrame__formControlLayout', {
+              'controlFrame__formControlLayout--edit': isEditable,
+              type,
+            })}
+            css={styles.formControl}
+            prepend={
+              <>
+                {api?.CustomPrependComponent ? (
+                  <>
+                    <DragHandle
+                      isEditable={true}
+                      controlTitle={'Test'}
+                      setDragHandles={setDragHandles}
+                    />
+                    <api.CustomPrependComponent />
+                  </>
+                ) : (
+                  <>
+                    <DragHandle
+                      isEditable={true}
+                      controlTitle={panelLabel}
+                      setDragHandles={setDragHandles}
+                    >
+                      {controlLabel}
+                    </DragHandle>
+                  </>
+                )}
+              </>
+            }
+          >
+            <EmbeddableRenderer
+              type={type}
+              maybeId={id}
+              getParentApi={() => dashboardApi}
+              key={`${type}_${id}`}
+              panelProps={{
+                isSharedItem: false,
+                showBadges: false,
+                showBorder: true,
+                showShadow: false,
+              }}
+              onApiAvailable={onApiAvailable}
+              hidePanelChrome={true}
+            />
+          </EuiFormControlLayout>
+        </EuiFormRow>
+      </FloatingActions>
     </EuiFlexItem>
   );
 };
