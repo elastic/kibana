@@ -465,17 +465,6 @@ describe('ExecutionsIoDataClient', () => {
   });
 
   it('updates a document after the write index rejects the create', async () => {
-    esClient.mget.mockResolvedValueOnce({
-      docs: [
-        {
-          _index: NEWER_INDEX,
-          _id: 'output:step-1',
-          found: true,
-          _source: { type: 'output', value: { done: false }, size: 1 },
-        },
-        { _index: OLDER_INDEX, _id: 'output:step-1', found: false },
-      ],
-    } as never);
     esClient.bulk
       .mockResolvedValueOnce({
         errors: true,
@@ -519,6 +508,8 @@ describe('ExecutionsIoDataClient', () => {
       ],
     });
 
+    expect(esClient.mget).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
     expect(esClient.bulk).toHaveBeenCalledTimes(2);
     expect(esClient.bulk).toHaveBeenNthCalledWith(2, {
       refresh: undefined,
@@ -545,17 +536,6 @@ describe('ExecutionsIoDataClient', () => {
   });
 
   it('creates a new document and updates one the write index rejected', async () => {
-    esClient.mget.mockResolvedValueOnce({
-      docs: [
-        {
-          _index: NEWER_INDEX,
-          _id: 'output:step-1',
-          found: true,
-          _source: { type: 'output', value: { done: false }, size: 1 },
-        },
-        { _index: OLDER_INDEX, _id: 'output:step-1', found: false },
-      ],
-    } as never);
     esClient.bulk
       .mockResolvedValueOnce({
         errors: true,
@@ -618,13 +598,8 @@ describe('ExecutionsIoDataClient', () => {
       ],
     });
 
-    expect(esClient.mget).toHaveBeenCalledTimes(1);
-    expect(esClient.mget).toHaveBeenCalledWith({
-      docs: [
-        { _index: NEWER_INDEX, _id: 'output:step-1' },
-        { _index: OLDER_INDEX, _id: 'output:step-1' },
-      ],
-    });
+    expect(esClient.mget).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
     expect(esClient.bulk).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({

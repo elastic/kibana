@@ -169,8 +169,14 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       return;
     }
 
-    const existing = await this.getByIds(conflicts.map((document) => document.id));
-    const located = new Map(existing.items.map((item) => [item.document.id, item.index]));
+    // A data stream only rejects the create when the id is already in the write
+    // index, and that bulk item names the index. getByIds can miss it.
+    const located = new Map(
+      conflicts.flatMap((document) => {
+        const index = writtenById.get(document.id)?.index;
+        return index ? [[document.id, index] as const] : [];
+      })
+    );
     const updated = await this.updateDocuments(conflicts, located, refresh);
     conflicts.forEach((document, index) => {
       const item = updated[index];
