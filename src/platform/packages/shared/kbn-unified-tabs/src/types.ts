@@ -55,6 +55,7 @@ export interface TabMenuItemWithClick {
   name: TabMenuItemName | string;
   label: string;
   onClick: (() => void) | null; // `null` can be overridden inside tab menu
+  color?: 'text' | 'danger';
 }
 
 export type TabMenuItem = TabMenuItemWithClick | 'divider';

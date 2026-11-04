@@ -136,6 +136,7 @@ export const CellFrame = ({
     <EuiContextMenuItem
       key="delete"
       icon="trash"
+      color="danger"
       onClick={() => {
         closeMenu();
         store.removeCell(cell.id);

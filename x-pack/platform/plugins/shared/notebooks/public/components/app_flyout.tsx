@@ -337,6 +337,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
               name: 'deleteApp',
               label: i18n.translate('xpack.notebook.app.deleteApp', { defaultMessage: 'Delete' }),
               onClick: () => deleteTab(item),
+              color: 'danger',
             },
           ]}
           onEBTEvent={() => {}}
