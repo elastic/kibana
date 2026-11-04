@@ -44,7 +44,7 @@ describe('probeSources', () => {
     ['date', true],
     ['date_nanos', true],
     ['null', false],
-    ['keyword', false],
+    ['keyword', true],
   ])('reads @timestamp of type %s as hasTimeSeries %s', async (type, hasTimeSeries) => {
     const client = setup(async () => probeResponse(type));
 
@@ -60,6 +60,15 @@ describe('probeSources', () => {
       failed: false,
       hasTimeSeries: false,
     });
+  });
+
+  it('sends no probe when a later pattern is unsafe', async () => {
+    const client = setup(async () => probeResponse('date'));
+
+    await expect(probeSources(client, ['metrics-*', 'metrics-*,logs-*'])).rejects.toThrow(
+      '"metrics-*,logs-*"'
+    );
+    expect(client.esql.query).not.toHaveBeenCalled();
   });
 
   it('sends the probe query of the pattern', async () => {

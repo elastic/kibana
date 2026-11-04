@@ -13,8 +13,10 @@ import type { GeneratedQuery } from './types';
  * Builds the probe that decides whether a source gets a `TS` plan. The executor runs it as the
  * user, once per distinct pattern, and reads the type of the `@timestamp` column:
  *
- * - `date` or `date_nanos`: at least one readable time-series index is behind the pattern, so the
- *   source gets a `TS` plan next to its `FROM` plan.
+ * - any type but `null`: at least one readable time-series index is behind the pattern, so the
+ *   source gets a `TS` plan next to its `FROM` plan. `TS` resolves only time-series indices and the
+ *   column is `null` only when none maps it, so an unexpected type runs the `TS` plan, where it
+ *   fails visibly, rather than leaving those indices out.
  * - `null`: `TS` resolved no index the user can read. The pattern has no time-series index,
  *   matches nothing, or its time-series indices are unreadable; Elasticsearch drops all three
  *   silently and the probe cannot tell them apart. The source runs under `FROM` alone.

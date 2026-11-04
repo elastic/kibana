@@ -16,7 +16,7 @@ import type { EsqlQueryResult } from './esql_client';
 // concrete index name: Elasticsearch applies privileges and alias filters when the queries run, and
 // each result is read afterwards for what the query could not do (plan_result.ts). Outcomes:
 //
-//   `@timestamp` typed `date`/`date_nanos`  a readable time-series index exists   TS and FROM plans
+//   `@timestamp` of any type but `null`     a readable time-series index exists   TS and FROM plans
 //   `@timestamp` typed `null`               none readable, or none at all         FROM plan only
 //   `verification_exception`                a concrete index that is not time     FROM plan only
 //                                           series (the FROM plan reads it), or a
@@ -24,9 +24,16 @@ import type { EsqlQueryResult } from './esql_client';
 //                                           plan then fails visibly)
 //   any other failure                       unknown; reported as a source error   no plan runs
 //
-// The last row matters: the FROM plan excludes time-series indices, so reading a timeout or a
-// rejection as "no time-series index" would silently drop them. The error class comes from the
-// response body's `error.type`, never from the message, which is undocumented and may change.
+// The first row accepts any type but `null`: `TS` resolves only time-series indices, and the column
+// is `null` only when none of them maps `@timestamp`, so any other type means one exists. Were the
+// type ever unexpected, the TS plan would fail visibly, where reading it as "none" would have the
+// FROM plan silently drop those indices. (A mix of `date` and `date_nanos` indices probes as
+// `date_nanos` on 9.6.)
+//
+// The last row matters for the same reason: the FROM plan excludes time-series indices, so reading
+// a timeout or a rejection as "no time-series index" would silently drop them. The error class
+// comes from the response body's `error.type`, never from the message, which is undocumented and
+// may change.
 
 /** What the probe found behind one pattern, or why it could not tell. */
 export type ProbeResult =
@@ -34,13 +41,12 @@ export type ProbeResult =
   | { failed: true; status: number | null; reason: string };
 
 const TIMESTAMP_COLUMN = '@timestamp';
-const TIME_SERIES_TIMESTAMP_TYPES: ReadonlySet<string> = new Set(['date', 'date_nanos']);
 
 const fromResponse = ({ columns }: EsqlQueryResult): ProbeResult => {
   const timestamp = columns.find(({ name }) => name === TIMESTAMP_COLUMN);
   return {
     failed: false,
-    hasTimeSeries: timestamp !== undefined && TIME_SERIES_TIMESTAMP_TYPES.has(timestamp.type),
+    hasTimeSeries: timestamp !== undefined && timestamp.type !== 'null',
   };
 };
 
@@ -65,8 +71,11 @@ export const probeSources = async (
   { signal }: { signal?: AbortSignal } = {}
 ): Promise<Map<string, ProbeResult>> => {
   const unique = [...new Set(patterns)];
+  // Build every probe before sending any, so a pattern that throws cannot leave earlier requests
+  // in flight with no rejection handler.
+  const probes = unique.map((pattern) => buildProbeQuery(pattern));
   const settled = await Promise.allSettled(
-    unique.map((pattern) => executeEsql(client, buildProbeQuery(pattern), { signal }))
+    probes.map((probe) => executeEsql(client, probe, { signal }))
   );
   return new Map(
     unique.map((pattern, position): [string, ProbeResult] => {
