@@ -15,8 +15,8 @@ You can use this connector in **Agent Builder** and **Workflows**.
 
 Some capabilities of this connector are only available from a certain version:
 
-- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Quick Connect OAuth 2.0. On a default installation the picker lists it first and shows a **Recommended** badge.
-- {applies_to}`stack: preview =9.5` **Quick Connect OAuth 2.0** is included only when `xpack.actions.auth.ears.enabled` is `true`. That setting defaults to `false`.
+- {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Quick Connect OAuth 2.0. The picker lists it first and shows a **Recommended** badge. On self-managed {{kib}}, it requires `xpack.actions.auth.ears.enabled` (default `true`) and `xpack.actions.auth.ears.url`.
+- {applies_to}`stack: preview =9.5` **Quick Connect OAuth 2.0** is included only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false`.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.5` **OAuth Client Credentials (Private Key JWT)** is available. **Bearer token** is not offered for a new connector.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Send, update, and create actions to post channel and chat messages, edit a message, look up a user, and create a chat.
 - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` Workflow events from Microsoft Graph change notifications.
@@ -69,7 +69,7 @@ serverless: preview
 ::::{applies-switch}
 :::{applies-item} stack: preview =9.5
 
-Included only when `xpack.actions.auth.ears.enabled` is `true`. That setting defaults to `false`. When it is on, select **Quick Connect OAuth 2.0** and follow the authorization prompt. No app registration is required.
+Included only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set. `xpack.actions.auth.ears.enabled` defaults to `false`. When Quick Connect is available, select **Quick Connect OAuth 2.0** and follow the authorization prompt. No app registration is required.
 
 :::
 :::{applies-item} stack: preview 9.6
@@ -103,7 +103,7 @@ No setup required. Select **Quick Connect OAuth 2.0** when creating the connecto
 4. Obtain a user access token through the OAuth delegated flow (for example, Authorization Code flow).
 5. Enter the user access token in the token field. On 9.4 the field is **Microsoft API token**. From 9.5, and on Serverless, edit a connector that already uses **Bearer token** and enter the token in **Token**.
 
-#### OAuth authorization code (delegated auth)
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 1. Sign in to the [Azure portal](https://portal.azure.com). Select **Azure Active Directory → App registrations**.
 2. Create a new application registration.
@@ -184,12 +184,12 @@ Microsoft Teams connectors support **Bearer token**, **OAuth 2.0 Authorization C
 :::
 :::{applies-item} stack: preview =9.5
 
-On a default installation the picker offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working and shows **Token**. **Quick Connect OAuth 2.0** is listed first, with a **Recommended** badge, only when `xpack.actions.auth.ears.enabled` is `true`.
+On a default installation the picker offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working and shows **Token**. **Quick Connect OAuth 2.0** is listed first, with a **Recommended** badge, only when `xpack.actions.auth.ears.enabled` is `true` and `xpack.actions.auth.ears.url` is set.
 
 :::
 :::{applies-item} stack: preview 9.6
 
-When you create a connector, the picker lists **Quick Connect OAuth 2.0** first and marks it with a **Recommended** badge. It also offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working.
+When you create a connector, the picker lists **Quick Connect OAuth 2.0** first and marks it with a **Recommended** badge when `xpack.actions.auth.ears.enabled` is `true` (the default) and `xpack.actions.auth.ears.url` is set. It also offers **OAuth 2.0 Authorization Code**, **OAuth Client Credentials**, and **OAuth Client Credentials (Private Key JWT)**. **Bearer token** is not offered. A connector that already uses a bearer token keeps working.
 
 :::
 :::{applies-item} serverless: preview
@@ -205,7 +205,7 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth authorization code method. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Elastic's managed OAuth flow for Microsoft Teams. No app setup is required. Select this option and authorize access to your Microsoft Teams workspace through Elastic. Provides delegated access (the connector acts as the authenticated user) with the same permissions as the OAuth 2.0 Authorization Code method. Your Microsoft 365 administrator might need to grant consent for the Elastic app. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### Bearer token (delegated auth)
 
@@ -235,7 +235,7 @@ Token
 :::
 ::::
 
-#### OAuth authorization code (delegated auth)
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 Authorization URL
 :   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
@@ -301,7 +301,7 @@ The Microsoft Teams connector has the following actions.
 
 **List joined teams**
 :   Returns the authenticated user's joined teams when using delegated auth, or the specified user's joined teams when `userId` is provided for app-only auth.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code).
 
 **List channels**
 :   Returns channels for the specified team.
@@ -315,7 +315,7 @@ The Microsoft Teams connector has the following actions.
 
 **List chats**
 :   Returns chats for the authenticated user.
-    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code).
+    - `userId` (optional): User ID for app-only auth through client credentials. Omit when using delegated auth (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code).
     - `top` (optional): Number of chats to return, up to 50.
 
 **List chat messages**
@@ -324,7 +324,7 @@ The Microsoft Teams connector has the following actions.
     - `top` (optional): Number of messages to return, up to 50.
 
 **Search messages**
-:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (Quick Connect OAuth 2.0, bearer token, or OAuth authorization code). Not supported with app-only (client credentials) auth.
+:   Searches for messages across Teams and chats using the Microsoft Graph Search API. It supports Keyword Query Language (KQL) syntax. Requires delegated authentication (Quick Connect OAuth 2.0, bearer token, or OAuth 2.0 Authorization Code). Not supported with app-only (client credentials) auth.
     - `query` (required): Search query string (for example, `from:alice sent>2024-01-01`).
     - `from` (optional): Offset for pagination.
     - `size` (optional): Number of results to return, up to 25.

@@ -27,7 +27,7 @@ For the ServiceNow ITSM, SecOps, and ITOM connectors used with alerting and case
 In {{sn}}, you need:
 
 - The `admin` role, to register an OAuth application in the Application Registry.
-- A {{sn}} user with the roles for the actions you plan to use. With OAuth 2.0 Client Credentials, this is the user associated with the OAuth client. With OAuth 2.0 Authorization Code, this is the account that signs in to authorize the connector.
+- A {{sn}} user with the roles for the actions you plan to use. With OAuth Client Credentials, this is the user associated with the OAuth client. With OAuth 2.0 Authorization Code, this is the account that signs in to authorize the connector.
   - **Read operations** (Search, Get record, List records): `itil` for incidents, `knowledge` for knowledge articles.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Write operations** (Create/Update/Close incident, Add comment, Add work note): `itil` with write permissions.
   - {applies_to}`serverless: preview` {applies_to}`stack: preview 9.6+` **Security incidents** (Create security incident): `sn_si_incident_write`.
@@ -46,7 +46,7 @@ To use the connector, set up OAuth in {{sn}}, create the connector in {{kib}}, a
 
 {{sn}} connectors authenticate with OAuth 2.0. Register an OAuth application in {{sn}} for the method you plan to use, then copy its client ID and client secret.
 
-#### OAuth 2.0 Client Credentials
+#### OAuth Client Credentials
 
 1. Select **System OAuth → Application Registry**.
 2. Select **New**, then select **Create an OAuth API endpoint for external clients**.

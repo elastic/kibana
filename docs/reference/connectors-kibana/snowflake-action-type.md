@@ -177,7 +177,7 @@ Use this method to let users authorize the connector with their own Snowflake ac
 3. In {{kib}}, create a Snowflake connector and select **OAuth 2.0 Authorization Code** as the authentication method. Enter:
    - **Authorization URL**: `https://<account>.snowflakecomputing.com/oauth/authorize`
    - **Token URL**: `https://<account>.snowflakecomputing.com/oauth/token-request`
-   - **Client ID** and **Client Secret** from step 2.
+   - **Client ID** and **Client secret** from step 2.
 4. Authorize with your Snowflake account.
 
 ### Programmatic access token (PAT)

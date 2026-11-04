@@ -28,7 +28,7 @@ serverless: preview
 stack: preview 9.6
 ```
 
-Elastic's managed OAuth flow for SharePoint Online. The picker lists this option first and shows a **Recommended** badge. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
+Elastic's managed OAuth flow for SharePoint Online. The picker lists this option first and shows a **Recommended** badge. On self-managed {{kib}}, it requires `xpack.actions.auth.ears.enabled` (default `true`) and `xpack.actions.auth.ears.url`. No app registration is required. Select this option and authorize access through Elastic. Provides delegated access (the connector acts as the authenticated user) with read-only access to sites and files. An administrator might need to approve the Elastic app and grant it access to specific sites. Refer to [Quick Connect OAuth 2.0](/reference/connectors-kibana/quick-connect-oauth.md).
 
 #### OAuth client credentials (app-only auth)
 
@@ -63,7 +63,7 @@ Private key (PEM)
 Private key passphrase
 :   Optional. Set this only when the private key is encrypted.
 
-#### OAuth authorization code (delegated auth)
+#### OAuth 2.0 Authorization Code (delegated auth)
 
 Authorization URL
 :   The Microsoft Entra ID authorization endpoint. Use the format: `https://login.microsoftonline.com/{tenant-id}/oauth2/v2.0/authorize`. Replace `{tenant-id}` with your Azure AD tenant ID.
@@ -215,7 +215,7 @@ To use certificate-based app-only authentication, register an application in Mic
     - **Private key (PEM)**: upload `private_key.pem`.
     - **Private key passphrase**: only if you generated an encrypted private key.
 
-### OAuth authorization code (delegated auth)
+### OAuth 2.0 Authorization Code (delegated auth)
 
 To use delegated (per-user) authentication, register an application and configure the Authorization Code flow:
 
