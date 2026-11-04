@@ -44,8 +44,9 @@ const HTTP_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'PUT', 'POST',
 const NDJSON_CONTENT_TYPE = 'application/x-ndjson';
 const NOT_FOUND = 404;
 const KIBANA_PRODUCT_ORIGIN = 'kibana';
-// Splits a `Warning` header on commas outside quoted warning text, as elasticsearch-js does.
-const WARNING_SEPARATOR = /(?!\B"[^"]*),(?![^"]*"\B)/;
+// One `Warning` header entry: code, agent, quoted text and an optional quoted date. Browsers join
+// repeated headers with ", ", and the quoted text can itself contain commas.
+const WARNING_ENTRY = /\d{3} \S+ "(?:[^"\\]|\\.)*"(?: "[^"]*")?/g;
 const ELASTICSEARCH_WARNING = /^\d\d\d Elasticsearch-/;
 
 const isHttpMethod = (method: string): method is HttpMethod => HTTP_METHODS.has(method);
@@ -136,7 +137,7 @@ const toWarnings = (response: Response): string[] | null => {
   if (warning == null) {
     return null;
   }
-  return warning.split(WARNING_SEPARATOR).filter((entry) => ELASTICSEARCH_WARNING.test(entry));
+  return (warning.match(WARNING_ENTRY) ?? []).filter((entry) => ELASTICSEARCH_WARNING.test(entry));
 };
 
 const toResult = <TBody>(

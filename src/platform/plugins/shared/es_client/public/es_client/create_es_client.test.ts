@@ -13,6 +13,8 @@ import { EsClientPlugin } from '../plugin';
 import type { EsClient } from './types';
 
 const ELASTICSEARCH_WARNING = '299 Elasticsearch-9.0.0 "this request accesses system indices"';
+const DEPRECATION_WARNING = '299 Elasticsearch-9.0.0 "[q] is deprecated, use [query]"';
+const WARNING_HEADER = `${ELASTICSEARCH_WARNING}, 199 agent "other", ${DEPRECATION_WARNING}`;
 const KIBANA_ORIGIN = { 'x-elastic-product-origin': 'kibana' } as const;
 const NDJSON = { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' } as const;
 
@@ -287,17 +289,15 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
   describe('WHEN the meta option is set', () => {
     it('SHOULD resolve with the status, headers, warnings and request', async () => {
       const { client, fetch } = await setup();
-      fetch.mockResolvedValue(
-        okResponse({ count: 3 }, { warning: `${ELASTICSEARCH_WARNING}, 199 agent "other"` })
-      );
+      fetch.mockResolvedValue(okResponse({ count: 3 }, { warning: WARNING_HEADER }));
 
       const result = await client.count({ index: 'my-index', q: 'a b' }, { meta: true });
 
       expect(result).toEqual({
         body: { count: 3 },
         statusCode: 200,
-        headers: { warning: `${ELASTICSEARCH_WARNING}, 199 agent "other"` },
-        warnings: [ELASTICSEARCH_WARNING],
+        headers: { warning: WARNING_HEADER },
+        warnings: [ELASTICSEARCH_WARNING, DEPRECATION_WARNING],
         meta: {
           aborted: false,
           request: {
