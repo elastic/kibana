@@ -7,18 +7,19 @@
 
 import type { EvaluatorResult, RegisteredEvaluatorDefinition } from '@kbn/evals-plugin/server';
 import { z, lazySchema } from '@kbn/zod/v4';
-import { roundEvidenceSchema } from '../render_round';
+import { roundEvidenceSchema, truncate } from '../render_round';
 import { capExplanation, gradeToScore, runJudge } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
 import {
   ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME,
+  MAX_JUDGE_INPUT_CHARS,
   alertOutcomeRcaAccuracyOutputSchema,
   alertOutcomeRcaAccuracyPrompt,
 } from './prompt';
 
-const alertOutcomeReferenceDataSchema = lazySchema(() =>
-  z.object({ alert_outcome: z.string().max(100_000) })
-);
+// Unbounded on purpose: the schema is checked for the whole evaluation, so a rejection here would
+// fail every evaluator in the set. `evaluate` truncates instead.
+const alertOutcomeReferenceDataSchema = lazySchema(() => z.object({ alert_outcome: z.string() }));
 
 type AlertOutcomeReferenceData = z.infer<typeof alertOutcomeReferenceDataSchema>;
 
@@ -97,27 +98,16 @@ const definition: RegisteredEvaluatorDefinition<AlertOutcomeReferenceData> = {
     }
 
     const confirmedRootCause = referenceData?.alert_outcome ?? '';
-    const report = round.response.message;
     if (!confirmedRootCause.trim()) {
       return { scores: [], notApplicable: { reason: 'no confirmed cause' } };
-    }
-    if (!report.trim()) {
-      return {
-        scores: toScores({
-          effective: 0,
-          hallucinated: false,
-          reasoning: 'No report to grade.',
-          offendingClaim: '',
-        }),
-      };
     }
 
     const output = await runJudge({
       inferenceClient,
       prompt: alertOutcomeRcaAccuracyPrompt,
       input: {
-        confirmed_root_cause: confirmedRootCause || 'None',
-        investigation_report: report || 'None',
+        confirmed_root_cause: truncate(confirmedRootCause, MAX_JUDGE_INPUT_CHARS),
+        investigation_report: truncate(round.response.message, MAX_JUDGE_INPUT_CHARS),
       },
       toolName: ALERT_OUTCOME_RCA_ACCURACY_TOOL_NAME,
       outputSchema: alertOutcomeRcaAccuracyOutputSchema,

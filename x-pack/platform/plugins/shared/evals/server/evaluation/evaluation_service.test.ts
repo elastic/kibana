@@ -332,7 +332,7 @@ describe('createEvaluationService', () => {
           status: 'error',
           evaluator: expect.objectContaining({ name: 'alert_outcome' }),
           error: {
-            code: 'evidence_unmet',
+            code: 'not_applicable',
             message: 'Evaluator not applicable: no confirmed cause',
           },
         },

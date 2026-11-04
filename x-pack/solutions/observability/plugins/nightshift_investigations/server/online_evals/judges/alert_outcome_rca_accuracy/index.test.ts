@@ -10,6 +10,7 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import { MAX_EXPLANATION_LENGTH } from '../run_judge';
 import type { AlertOutcomeRcaAccuracyOutput } from './prompt';
+import { MAX_JUDGE_INPUT_CHARS, alertOutcomeRcaAccuracyPrompt } from './prompt';
 import { alertOutcomeRcaFixtures } from './fixtures';
 import { alertOutcomeRcaAccuracyJudge, applyPenalty } from '.';
 
@@ -193,33 +194,33 @@ describe('nightshift_alert_outcome_rca_accuracy', () => {
     expect(result).toEqual({ scores: [], notApplicable: { reason: 'no confirmed cause' } });
   });
 
-  it('returns the zero result without calling the LLM when the report is empty', async () => {
-    const { prompt, inferenceClient } = createInferenceClient();
+  it('skips an empty report through the evidence schema, before evaluate runs', () => {
+    const { evidenceSchema } = alertOutcomeRcaAccuracyJudge;
 
-    const { scores, notApplicable } = await evaluate(inferenceClient, { report: '   ' });
+    expect(evidenceSchema?.safeParse(roundFor('   ')).success).toBe(false);
+    expect(evidenceSchema?.safeParse(roundFor(REPORT)).success).toBe(true);
+  });
 
-    expect(prompt).not.toHaveBeenCalled();
-    expect(notApplicable).toBeUndefined();
-    expect(scores).toEqual([
-      {
-        name: 'alert_outcome_rca_depth',
-        score: 0,
-        label: 'score=0/3',
-        explanation: 'No report to grade.',
-      },
-      {
-        name: 'alert_outcome_rca_accuracy',
-        score: 0,
-        label: 'score=0/3',
-        explanation: 'No report to grade.',
-      },
-      {
-        name: 'alert_outcome_rca_no_hallucination',
-        score: 1,
-        label: 'hallucinated=false',
-        explanation: 'none',
-      },
-    ]);
+  it('accepts a confirmed cause of any length in the reference data schema', () => {
+    const { referenceDataSchema } = alertOutcomeRcaAccuracyJudge;
+
+    expect(referenceDataSchema?.safeParse({ alert_outcome: 'x'.repeat(150_000) }).success).toBe(
+      true
+    );
+  });
+
+  it('truncates a long confirmed cause and report before prompting', async () => {
+    const { prompt, inferenceClient } = createInferenceClient(judgeOutput());
+
+    await evaluate(inferenceClient, { cause: 'c'.repeat(150_000), report: 'r'.repeat(150_000) });
+
+    const { input } = prompt.mock.calls[0][0];
+    const { confirmed_root_cause: cause, investigation_report: report } = input;
+    expect(cause.startsWith('c'.repeat(MAX_JUDGE_INPUT_CHARS))).toBe(true);
+    expect(cause.endsWith('[truncated 60000 characters]')).toBe(true);
+    expect(report.startsWith('r'.repeat(MAX_JUDGE_INPUT_CHARS))).toBe(true);
+    expect(report.endsWith('[truncated 60000 characters]')).toBe(true);
+    expect(alertOutcomeRcaAccuracyPrompt.input.safeParse(input).success).toBe(true);
   });
 
   it('caps explanations', async () => {

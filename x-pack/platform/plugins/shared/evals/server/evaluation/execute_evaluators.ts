@@ -273,7 +273,7 @@ export const executeEvaluators = async (
           status: 'error',
           evaluator: await describeEvaluator(definition, connectorId),
           error: {
-            code: 'evidence_unmet',
+            code: 'not_applicable',
             message: `Evaluator not applicable: ${result.notApplicable.reason}`,
           },
         };
