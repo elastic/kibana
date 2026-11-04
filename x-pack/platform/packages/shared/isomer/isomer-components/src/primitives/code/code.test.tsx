@@ -25,8 +25,9 @@ const codeOf = (text: string, language?: string): CodeNode => ({
 const view = (node: CodeNode) => validate({ type: 'view', body: [node] });
 
 describe('code', () => {
-  it('takes code of any length and a lowercase language', () => {
-    expect(view(codeOf('x'.repeat(20000))).valid).toBe(true);
+  it('takes up to 12,000 characters and a lowercase language', () => {
+    expect(view(codeOf('x'.repeat(12000))).valid).toBe(true);
+    expect(view(codeOf('x'.repeat(12001))).valid).toBe(false);
     expect(view(codeOf(' \n ')).valid).toBe(false);
     expect(view(codeOf('FROM logs', 'esql')).valid).toBe(true);
     expect(view(codeOf('FROM logs', 'ES|QL')).valid).toBe(false);
@@ -56,22 +57,6 @@ describe('code', () => {
       .join('');
 
     expect(printed).toBe(text.slice(0, 12000));
-  });
-
-  it('cuts longer code in Slack, with a note saying how much it shows', () => {
-    const { blocks } = surfaces.slack.renderNode(codeOf('x'.repeat(20000)));
-    const printed = (blocks as SlackRichTextBlock[])
-      .filter(({ type }) => type === 'rich_text')
-      .flatMap(({ elements }) => elements as SlackRichTextPreformatted[])
-      .flatMap(({ elements }) => elements)
-      .map((inline) => ('text' in inline ? inline.text : ''))
-      .join('');
-
-    expect(printed).toBe(`${'x'.repeat(11999)}…`);
-    expect(blocks.at(-1)).toEqual({
-      type: 'context',
-      elements: [{ type: 'mrkdwn', text: 'Showing the first 11,999 of 20,000 characters' }],
-    });
   });
 
   it('fences Markdown longer than any backtick run, with the language', () => {

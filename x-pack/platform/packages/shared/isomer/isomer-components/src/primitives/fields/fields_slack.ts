@@ -6,7 +6,7 @@
  */
 
 import type { SlackSectionBlock } from '@elastic/isomer-sdk/slack';
-import { SLACK_LIMITS, bold, clampSlackText } from '@elastic/isomer-sdk/slack';
+import { SLACK_LIMITS, bold } from '@elastic/isomer-sdk/slack';
 
 import { clampEscapedMrkdwn } from '../../lib';
 import { fieldEntries } from './field_entries';
@@ -16,7 +16,7 @@ import type { FieldsNode } from './fields';
 export const fieldsSlackRenderer = (node: FieldsNode): SlackSectionBlock => ({
   type: 'section',
   fields: fieldEntries(node).map(({ label, value }) => {
-    const heading = `${bold(clampSlackText(label, SLACK_LIMITS.headerTextChars))}\n`;
+    const heading = `${bold(label)}\n`;
     return {
       type: 'mrkdwn',
       text: `${heading}${clampEscapedMrkdwn(

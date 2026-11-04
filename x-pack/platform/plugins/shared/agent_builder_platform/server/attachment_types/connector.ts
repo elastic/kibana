@@ -12,7 +12,7 @@ import {
   connectorAttachmentDataSchema,
 } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition, SurfaceNode } from '@kbn/agent-builder-server/attachments';
-import { hasText } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import { formatSchemaForLlm } from '@kbn/agent-builder-server';
 import {
@@ -131,7 +131,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
             label: i18n.translate('xpack.agentBuilderPlatform.attachments.connector.surface.type', {
               defaultMessage: 'Type',
             }),
-            value: typeName,
+            value: toLine(typeName, SURFACE_LIMITS.fieldValue),
           },
           ...(actionNames.length > 0
             ? [
@@ -140,7 +140,7 @@ export const createConnectorAttachmentType = (): AttachmentTypeDefinition<
                     'xpack.agentBuilderPlatform.attachments.connector.surface.actions',
                     { defaultMessage: 'Actions' }
                   ),
-                  value: actionNames.join(', '),
+                  value: clampText(actionNames.join(', '), SURFACE_LIMITS.fieldValue),
                 },
               ]
             : []),

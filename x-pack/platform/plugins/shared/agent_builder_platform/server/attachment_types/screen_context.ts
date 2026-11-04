@@ -11,7 +11,7 @@ import {
 } from '@kbn/agent-builder-common/attachments';
 import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, hasText } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, clampText, hasText, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 
 /**
@@ -86,7 +86,11 @@ export const createScreenContextAttachmentType = (): AttachmentTypeDefinition<
         ),
       ]
         .filter((item): item is { label: string; value: string } => Boolean(item))
-        .slice(0, SURFACE_LIMITS.fieldItems);
+        .slice(0, SURFACE_LIMITS.fieldItems)
+        .map(({ label, value }) => ({
+          label: toLine(label, SURFACE_LIMITS.fieldLabel),
+          value: clampText(value, SURFACE_LIMITS.fieldValue),
+        }));
 
       return {
         type: 'view',

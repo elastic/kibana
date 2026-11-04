@@ -6,7 +6,7 @@
  */
 
 import type { SlackBlock } from '@elastic/isomer-sdk/slack';
-import { SLACK_LIMITS, clampSlackText, link as mrkdwnLink } from '@elastic/isomer-sdk/slack';
+import { SLACK_LIMITS, link as mrkdwnLink } from '@elastic/isomer-sdk/slack';
 
 import { oneLine } from '../../lib';
 import type { LinkNode } from './link';
@@ -24,7 +24,7 @@ export const linkSlackRenderer = (
   if (!url || url.length > SLACK_LIMITS.urlChars) {
     return [];
   }
-  const label = clampSlackText(oneLine(node.label), SLACK_LIMITS.buttonTextChars);
+  const label = oneLine(node.label);
   const text = mrkdwnLink(url, label);
   if (text.length <= SLACK_LIMITS.sectionTextChars) {
     return { type: 'section', text: { type: 'mrkdwn', text } };

@@ -18,7 +18,7 @@ import { sectionReactRenderer } from './section_react';
 
 const sectionSchema = z.object({
   type: z.literal('section'),
-  title: plainText().describe('The section label, in plain text, such as "Impact".'),
+  title: plainText(150).describe('The section label, in plain text, such as "Impact".'),
   collapsible: z.boolean().optional().describe('Whether Slack lets the reader collapse it.'),
   body: z.array(unresolvedBodyNodeSchema).min(1).describe('The section content, in order.'),
 });

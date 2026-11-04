@@ -118,7 +118,7 @@ describe('buildComposition', () => {
     );
   });
 
-  it('keeps a long title and subtitle whole, which Slack fits on one line', async () => {
+  it('fits a long title and subtitle on one line within the header and context limits', async () => {
     const toSurfaceComposition: ToSurfaceComposition = () => ({
       type: 'view',
       title: `Long\n${'t'.repeat(400)}`,
@@ -130,18 +130,10 @@ describe('buildComposition', () => {
       await compose('<render_attachment id="a1" />', { toSurfaceComposition })
     ).body;
 
-    expect(header).toEqual({ type: 'header', text: `Long\n${'t'.repeat(400)}`, level: 2 });
-    expect(subtitle).toEqual({ type: 'context', items: [{ text: 's'.repeat(800) }] });
+    expect(header).toEqual({ type: 'header', text: expect.stringMatching(/^Long t+…$/), level: 2 });
+    expect(header.type === 'header' && header.text.length).toBe(200);
+    expect(subtitle.type === 'context' && subtitle.items[0].text.length).toBe(500);
     expect(runtime.validate({ type: 'view', body: [header, subtitle] }).valid).toBe(true);
-
-    const [slackHeader] = runtime.surfaces.slack.render(
-      { type: 'view', body: [header] },
-      { heading: false }
-    ).blocks;
-    expect(slackHeader).toMatchObject({
-      type: 'header',
-      text: { text: expect.stringMatching(/^Long t+…$/) },
-    });
   });
 
   it('leaves out the heading when the composition has neither title nor subtitle', async () => {

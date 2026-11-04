@@ -19,9 +19,9 @@ import { fieldsSlackRenderer } from './fields_slack';
 
 const itemSchema = z
   .object({
-    label: plainText().describe('What the value is, in plain text, such as "Time range".'),
+    label: plainText(100).describe('What the value is, in plain text, such as "Time range".'),
     value: z
-      .union([plainText(), structuredValueSchema])
+      .union([plainText(1000), structuredValueSchema])
       .describe(
         'The value: plain text, or `{ raw, format?, precision?, currency? }` to format a number or date the same on every surface.'
       ),

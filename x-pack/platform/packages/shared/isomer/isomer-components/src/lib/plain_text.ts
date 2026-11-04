@@ -7,11 +7,11 @@
 
 import { requiredString } from '@elastic/isomer-sdk';
 
-/** A plain-text field with at least one character that isn't whitespace, of any length: each surface fits it. */
-export const plainText = () =>
-  requiredString().refine((value) => value === '' || /\S/.test(value), {
-    error: 'must not be blank',
-  });
+/** A plain-text field of at most `max` characters, at least one of them not whitespace. */
+export const plainText = (max: number) =>
+  requiredString()
+    .max(max)
+    .refine((value) => value === '' || /\S/.test(value), { error: 'must not be blank' });
 
 /** `value` with runs of whitespace, newlines included, collapsed to one space. */
 export const oneLine = (value: string): string => value.replace(/\s+/g, ' ').trim();

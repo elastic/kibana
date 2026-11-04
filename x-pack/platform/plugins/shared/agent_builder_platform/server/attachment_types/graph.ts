@@ -10,7 +10,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, hasText } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, toLine } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
@@ -87,10 +87,7 @@ const toGraphSurfaceComposition = ({
   edges,
 }: GraphAttachmentData): SurfaceComposition => {
   const labels = new Map(nodes.map(({ id, data }) => [id, data.label]));
-  const toCell = (id: string) => {
-    const label = labels.get(id);
-    return hasText(label) ? label : id;
-  };
+  const toCell = (id: string) => toLine(labels.get(id) || id, SURFACE_LIMITS.tableCell) || null;
 
   const hasRelationshipLabels = edges.some(({ label }) => label && /\S/.test(label));
   const shownEdges = edges.slice(0, SURFACE_LIMITS.tableRows);
@@ -124,7 +121,9 @@ const toGraphSurfaceComposition = ({
             ],
             rows: shownEdges.map(({ source, target, label }) => [
               toCell(source),
-              ...(hasRelationshipLabels ? [hasText(label) ? label : null] : []),
+              ...(hasRelationshipLabels
+                ? [label ? toLine(label, SURFACE_LIMITS.tableCell) || null : null]
+                : []),
               toCell(target),
             ]),
             ...(edges.length > shownEdges.length ? { totalRows: edges.length } : {}),

@@ -5,17 +5,41 @@
  * 2.0.
  */
 
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
-
 /**
- * Limits for surface compositions. Text of any length is fine, since each surface fits it, but a
- * `fields` node takes at most `fieldItems` items, and a table shows `tableRows` rows before it
- * counts the rest.
+ * Limits of the `@kbn/isomer-components` primitives that surface compositions use. A node over its
+ * limit fails validation, and that leaves the whole attachment out, so values are clamped to them.
  */
 export const SURFACE_LIMITS = {
-  fieldItems: SLACK_LIMITS.fieldsPerSection,
+  headerText: 200,
+  contextText: 500,
+  codeText: 12000,
+  fieldLabel: 100,
+  /** Slack shows at most 10 fields in a section. */
+  fieldItems: 10,
+  fieldValue: 1000,
+  linkPath: 2000,
+  tableCell: 500,
+  /** Rows a table shows before the rest are counted. */
   tableRows: 50,
 } as const;
+
+/**
+ * `value` cut to `max` characters, with an ellipsis when it's cut. Limits count UTF-16 code units,
+ * so the cut drops a lone high surrogate rather than split a character such as an emoji.
+ */
+export const clampText = (value: string, max: number): string => {
+  if (value.length <= max) {
+    return value;
+  }
+
+  const cut = value.slice(0, max - 1).replace(/[\uD800-\uDBFF]$/, '');
+
+  return `${cut.trimEnd()}…`;
+};
+
+/** `value` on one line, cut to `max` characters. */
+export const toLine = (value: string, max: number): string =>
+  clampText(value.replace(/\s+/g, ' ').trim(), max);
 
 /** Whether `value` has something other than whitespace, which plain-text primitives require. */
 export const hasText = (value: string | undefined): value is string =>

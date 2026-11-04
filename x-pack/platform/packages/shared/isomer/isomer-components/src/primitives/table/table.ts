@@ -29,7 +29,7 @@ export const MAX_TABLE_CELLS = 10000;
 
 const columnSchema = z
   .object({
-    label: plainText().describe('The column heading, in plain text.'),
+    label: plainText(100).describe('The column heading, in plain text.'),
     format: z
       .enum(STRUCTURED_VALUE_FORMATS)
       .optional()
@@ -47,7 +47,7 @@ const columnSchema = z
   })
   .strict();
 
-const cellSchema = z.union([z.string(), z.number(), z.null()]);
+const cellSchema = z.union([z.string().max(500), z.number(), z.null()]);
 
 type RowCell = string | number | null;
 
