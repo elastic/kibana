@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor } from '@testing-library/react';
 import { createMockActionConnector } from '@kbn/alerts-ui-shared/src/common/test_utils/connector.mock';
-import type { AccessPolicyResponse, AccessStateResponse } from '@kbn/access-control-ui';
+import type { AccessPolicyResponse, AccessStateResponse } from '@kbn/ols-ui';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import EditConnectorFlyout from '.';
 import type { ActionConnector, GenericValidationResult } from '../../../../types';
@@ -18,8 +18,8 @@ import { createAppMockRenderer } from '../../test_utils';
 
 jest.setTimeout(15_000);
 
-const POLICY_PATH = '/internal/security/access_control/action/_policy';
-const OBJECT_PATH = '/internal/security/access_control/action/123';
+const POLICY_PATH = '/internal/security/ols/action/_policy';
+const OBJECT_PATH = '/internal/security/ols/action/123';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
@@ -41,7 +41,7 @@ const ACCESS: AccessStateResponse = {
   restricted: false,
   is_owner: true,
   permissions: ['view', 'use', 'edit', 'delete', 'manage_access', 'transfer'],
-  via_recovery: [],
+  permissions_via_recovery: [],
   can_claim: false,
   current_principal: { type: 'user', id: 'u_owner' },
   acl: {
@@ -75,7 +75,7 @@ const connector: ActionConnector = createMockActionConnector({
   secrets: { secretTextField: 'super secret' },
 });
 
-describe('EditConnectorFlyout with object-level access control', () => {
+describe('EditConnectorFlyout with object-level security (OLS)', () => {
   let appMockRenderer: AppMockRenderer;
   let policy: AccessPolicyResponse;
   let access: AccessStateResponse;
@@ -124,7 +124,7 @@ describe('EditConnectorFlyout with object-level access control', () => {
     appMockRenderer.coreStart.http.post = jest.fn().mockResolvedValue({ users: [] });
   });
 
-  it('hides the Access tab while object-level access control is disabled', async () => {
+  it('hides the Access tab while object-level security (OLS) is disabled', async () => {
     policy = { ...POLICY, enabled: false };
     renderFlyout();
 

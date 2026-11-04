@@ -8,7 +8,8 @@
  */
 
 import type {
-  CoreScopedAccessControl,
+  CoreOlsService,
+  CoreScopedOlsService,
   CoreSecurityDelegateHandle,
   CoreServiceAccountsService,
   ResolvedServiceAccountWorkload,
@@ -68,9 +69,9 @@ const createSetupMock = () => {
   return mock;
 };
 
-// By default object-level security is disabled and allows everything, as before platform OLS.
-const createScopedAccessControlMock = (): jest.Mocked<CoreScopedAccessControl> => ({
-  isEnabled: jest.fn().mockReturnValue(false),
+// Start contracts default to `authz.ols: null`, which means OLS is disabled. Tests that need OLS assign
+// `createOls()`, whose scoped service allows everything until a test mocks a decision.
+const createScopedOlsMock = (): jest.Mocked<CoreScopedOlsService> => ({
   getPrincipal: jest.fn().mockResolvedValue(undefined),
   evaluate: jest.fn(),
   authorize: jest.fn().mockResolvedValue(new Map()),
@@ -80,9 +81,8 @@ const createScopedAccessControlMock = (): jest.Mocked<CoreScopedAccessControl> =
   primeRecovery: jest.fn(),
 });
 
-const createAccessControlMock = () => ({
-  isEnabled: jest.fn().mockReturnValue(false),
-  asScoped: jest.fn().mockImplementation(createScopedAccessControlMock),
+const createOlsMock = (): jest.MockedObjectDeep<CoreOlsService> => ({
+  asScoped: jest.fn().mockImplementation(createScopedOlsMock),
 });
 
 export type SecurityStartMock = jest.MockedObjectDeep<Omit<SecurityServiceStart, 'audit'>> & {
@@ -99,7 +99,7 @@ const createStartMock = (): SecurityStartMock => {
     }),
     audit: auditServiceMock.create(),
     serviceAccounts: createServiceAccountsStartMock(),
-    accessControl: createAccessControlMock(),
+    authz: { ols: null },
   });
 
   return mock;
@@ -142,7 +142,7 @@ const createInternalStartMock = (): InternalSecurityStartMock => {
     serviceAccounts: lazyObject({
       asScopedToPlugin: jest.fn().mockImplementation(createServiceAccountsStartMock),
     }),
-    accessControl: createAccessControlMock(),
+    authz: { ols: null },
   });
 
   return mock;
@@ -192,8 +192,8 @@ export const securityServiceMock = {
   create: createServiceMock,
   createSetup: createSetupMock,
   createServiceAccounts: createServiceAccountsStartMock,
-  createAccessControl: createAccessControlMock,
-  createScopedAccessControl: createScopedAccessControlMock,
+  createOls: createOlsMock,
+  createScopedOls: createScopedOlsMock,
   createDelegateHandle: createDelegateHandleMock,
   createStart: createStartMock,
   createInternalSetup: createInternalSetupMock,

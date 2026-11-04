@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { SavedObject } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -19,16 +19,16 @@ import { actionsAuthorizationMock } from '../../../../authorization/actions_auth
 import type { InMemoryConnector, RawAction } from '../../../../types';
 import { resolveConnectorName } from './resolve_connector_name';
 
-const PRIVATE_ACL: CanonicalAcl = {
+const PRIVATE_ACL: StoredAcl = {
   version: [1],
   owner: { type: ['user'], id: ['u_owner'] },
   general_access: ['none'],
   entries: [],
 };
-const PUBLIC_ACL: CanonicalAcl = { ...PRIVATE_ACL, general_access: ['edit'] };
-const INVALID_ACL: CanonicalAcl = { ...PUBLIC_ACL, version: [] };
+const PUBLIC_ACL: StoredAcl = { ...PRIVATE_ACL, general_access: ['edit'] };
+const INVALID_ACL: StoredAcl = { ...PUBLIC_ACL, version: [] };
 
-const savedConnector = (id: string, name: string, acl?: CanonicalAcl): SavedObject<RawAction> => ({
+const savedConnector = (id: string, name: string, acl?: StoredAcl): SavedObject<RawAction> => ({
   id,
   type: 'action',
   references: [],
@@ -69,9 +69,10 @@ const createContext = ({
   });
 
   const securityService = securityServiceMock.createStart();
-  const scoped = securityServiceMock.createScopedAccessControl();
-  securityService.accessControl.asScoped.mockReturnValue(scoped);
-  scoped.isEnabled.mockReturnValue(enabled);
+  const scoped = securityServiceMock.createScopedOls();
+  const ols = securityServiceMock.createOls();
+  ols.asScoped.mockReturnValue(scoped);
+  securityService.authz.ols = enabled ? ols : null;
 
   const authorization = actionsAuthorizationMock.create();
   return {

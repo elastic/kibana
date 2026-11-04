@@ -9,7 +9,7 @@
  * Get all actions with in-memory connectors
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { omit } from 'lodash';
@@ -46,7 +46,7 @@ interface GetAllHelperOpts {
 interface GetAllHelperResult {
   connectors: ConnectorWithExtraFindData[];
   /** ACLs of the stored connectors, by connector ID. */
-  acls: Map<string, CanonicalAcl>;
+  acls: Map<string, StoredAcl>;
 }
 
 export async function getAll({
@@ -135,7 +135,7 @@ async function getAllHelper({
   sandboxCapableOnly = false,
 }: GetAllHelperOpts): Promise<GetAllHelperResult> {
   const connectorIdsWithIdentity = new Set<string>();
-  const acls = new Map<string, CanonicalAcl>();
+  const acls = new Map<string, StoredAcl>();
   const connectorIdsWithEventsEnabled = new Set(
     inMemoryConnectors
       .filter((connector) => connector.isInboundEventsEnabled === true)

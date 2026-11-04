@@ -6,7 +6,7 @@
  */
 import type { HttpSetup } from '@kbn/core/public';
 import type { RewriteRequestCase, RewriteResponseCase } from '@kbn/actions-plugin/common';
-import type { AccessDraft } from '@kbn/access-control-ui';
+import type { AccessDraft } from '@kbn/ols-ui';
 import { BASE_ACTION_API_PATH } from '../../constants';
 import type {
   ActionConnector,
@@ -55,7 +55,7 @@ export async function createActionConnector({
   http,
   connector,
   id,
-  accessControl,
+  acl,
 }: {
   http: HttpSetup;
   connector: Pick<
@@ -64,7 +64,7 @@ export async function createActionConnector({
   >;
   id?: string;
   /** Initial object-level access. The connector is created with it in the same request. */
-  accessControl?: AccessDraft;
+  acl?: AccessDraft;
 }): Promise<ActionConnector> {
   const path = id
     ? `${BASE_ACTION_API_PATH}/connector/${encodeURIComponent(id)}`
@@ -73,7 +73,7 @@ export async function createActionConnector({
   const res = await http.post<Parameters<typeof rewriteBodyRes>[0]>(path, {
     body: JSON.stringify({
       ...rewriteBodyRequest(connector),
-      ...(accessControl ? { access_control: accessControl } : {}),
+      ...(acl ? { acl } : {}),
     }),
   });
   return rewriteBodyRes(res) as ActionConnector;

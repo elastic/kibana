@@ -172921,9 +172921,9 @@ components:
     Kibana_HTTP_APIs_new_connector:
       additionalProperties: false
       properties:
-        access_control:
+        acl:
           additionalProperties: false
-          description: Initial access to the connector. The creator becomes its owner. Only valid when object-level access control is enabled.
+          description: Initial access to the connector. The creator becomes its owner. Only valid when object-level security (OLS) is enabled.
           type: object
           properties:
             entries:

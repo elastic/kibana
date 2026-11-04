@@ -6,7 +6,7 @@
  */
 
 import type { AuthMode } from '@kbn/connector-specs';
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { RawAction, ActionType } from '../../../types';
 import { ensureConnectorOperation } from '../../../lib/connector_access';
 import { getActionKibanaPrivileges } from '../../../lib/get_action_kibana_privileges';
@@ -52,7 +52,7 @@ export async function getConnectorAuth(
   let actionTypeId: string | undefined;
   let authMode: AuthMode | undefined;
   let config: Record<string, unknown> = {};
-  let acl: CanonicalAcl | undefined;
+  let acl: StoredAcl | undefined;
 
   try {
     if (isPreconfigured(context, connectorId) || isSystemAction(context, connectorId)) {

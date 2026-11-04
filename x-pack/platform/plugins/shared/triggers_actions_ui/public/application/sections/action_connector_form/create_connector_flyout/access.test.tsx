@@ -9,7 +9,7 @@ import React, { lazy } from 'react';
 import userEvent from '@testing-library/user-event';
 import { screen, waitFor, within } from '@testing-library/react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import type { AccessPolicyResponse } from '@kbn/access-control-ui';
+import type { AccessPolicyResponse } from '@kbn/ols-ui';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
@@ -25,7 +25,7 @@ jest.setTimeout(15_000);
 
 const { loadActionTypes } = jest.requireMock('../../../lib/action_connector_api');
 
-const POLICY_PATH = '/internal/security/access_control/action/_policy';
+const POLICY_PATH = '/internal/security/ols/action/_policy';
 
 const POLICY: AccessPolicyResponse = {
   enabled: true,
@@ -44,7 +44,7 @@ const createConnectorResponse = {
   id: '123',
 };
 
-describe('CreateConnectorFlyout with object-level access control', () => {
+describe('CreateConnectorFlyout with object-level security (OLS)', () => {
   let appMockRenderer: AppMockRenderer;
   let policy: AccessPolicyResponse;
   const actionTypeRegistry = actionTypeRegistryMock.create();
@@ -133,7 +133,7 @@ describe('CreateConnectorFlyout with object-level access control', () => {
         config: { testTextField: 'My text field' },
         secrets: {},
         connector_type_id: actionTypeModel.id,
-        access_control: {
+        acl: {
           general_access: 'none',
           entries: [{ type: 'service_account', id: 'kibana/svc', access: 'use' }],
         },
@@ -141,7 +141,7 @@ describe('CreateConnectorFlyout with object-level access control', () => {
     );
   });
 
-  it('shows no Access section and sends no access while access control is disabled', async () => {
+  it('shows no Access section and sends no access while OLS is disabled', async () => {
     policy = { ...POLICY, enabled: false };
     await renderAndFillForm();
 
@@ -152,6 +152,6 @@ describe('CreateConnectorFlyout with object-level access control', () => {
 
     await userEvent.click(screen.getByTestId('create-connector-flyout-save-btn'));
 
-    await waitFor(() => expect(getCreateBody()).not.toHaveProperty('access_control'));
+    await waitFor(() => expect(getCreateBody()).not.toHaveProperty('acl'));
   });
 });

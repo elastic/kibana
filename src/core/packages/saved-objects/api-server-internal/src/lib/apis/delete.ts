@@ -38,7 +38,7 @@ export const performDelete = async <T>(
     mappings,
   }: ApiExecutionContext
 ): Promise<{}> => {
-  const { common: commonHelper, preflight: preflightHelper, acl: aclHelper } = helpers;
+  const { common: commonHelper, preflight: preflightHelper, acl: olsHelper } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
 
@@ -94,7 +94,7 @@ export const performDelete = async <T>(
     }
 
     // Checked before the multiple-spaces error below, which would otherwise reveal a hidden object.
-    await aclHelper.enforce('delete', namespace, {
+    await olsHelper.enforce('delete', namespace, {
       type,
       id,
       source: preflightResult.rawDocSource?._source,
@@ -119,7 +119,7 @@ export const performDelete = async <T>(
       // concurrent access change returns a conflict instead of deleting with revoked access.
       ...getExpectedVersionProperties(
         undefined,
-        aclHelper.isEnforced(type) ? preflightResult?.rawDocSource : undefined
+        olsHelper.isEnforced(type) ? preflightResult?.rawDocSource : undefined
       ),
       refresh,
     },

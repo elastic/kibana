@@ -69,11 +69,8 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
       await api.request('stranger', 'get', `api/actions/connector/${privateId}`)
     ).toHaveStatusCode(404);
 
-    const records = await readAuditSince(
-      offset,
-      (r) => forObject(r, 'access_control_denied').length > 0
-    );
-    const [denied] = forObject(records, 'access_control_denied');
+    const records = await readAuditSince(offset, (r) => forObject(r, 'ols_denied').length > 0);
+    const [denied] = forObject(records, 'ols_denied');
     expect(denied.event.outcome).toBe('failure');
     expect(denied.kibana?.space_id).toBe(ctx.spaceId);
     expect(denied.message).not.toContain(connectorName);
@@ -88,11 +85,8 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
       })
     ).toHaveStatusCode(200);
 
-    const records = await readAuditSince(
-      offset,
-      (r) => forObject(r, 'access_control_access').length > 0
-    );
-    expect(forObject(records, 'access_control_access')[0].event.outcome).toBe('success');
+    const records = await readAuditSince(offset, (r) => forObject(r, 'ols_access').length > 0);
+    expect(forObject(records, 'ols_access')[0].event.outcome).toBe('success');
   });
 
   apiTest(
@@ -103,17 +97,13 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
       expect(await api.request('admin', 'get', 'api/actions/connectors')).toHaveStatusCode(200);
       await api.setAccess(privateId, { general_access: 'use' });
 
-      const records = await readAuditSince(
-        offset,
-        (r) => forObject(r, 'access_control_update').length > 0
-      );
+      const records = await readAuditSince(offset, (r) => forObject(r, 'ols_update').length > 0);
       const overrides = records.filter(
-        ({ event, kibana }) =>
-          event.action === 'access_control_admin_override' && !kibana?.saved_object
+        ({ event, kibana }) => event.action === 'ols_admin_override' && !kibana?.saved_object
       );
       expect(overrides).toHaveLength(1);
 
-      const [update] = forObject(records, 'access_control_update');
+      const [update] = forObject(records, 'ols_update');
       expect(update.message).toContain('general access: none -> use');
     }
   );
@@ -134,10 +124,7 @@ apiTest.describe('Object-level security audit', { tag: '@local-stateful-classic'
     expect(response).toHaveStatusCode(200);
     expect(response.body[0].error.statusCode).toBe(404);
 
-    const records = await readAuditSince(
-      offset,
-      (r) => forObject(r, 'access_control_denied').length > 0
-    );
+    const records = await readAuditSince(offset, (r) => forObject(r, 'ols_denied').length > 0);
     expect(
       records.filter(
         ({ event, kibana }) =>

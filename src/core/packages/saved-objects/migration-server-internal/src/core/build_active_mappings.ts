@@ -104,7 +104,7 @@ export function getBaseMappings(): IndexMappingSafe {
           },
         },
       },
-      // Platform object-level access control. Every stored ACL value must be indexed or rejected,
+      // Object-level security (OLS). Every stored ACL value must be indexed or rejected,
       // because point reads and read filters must decide on the same values: do not add
       // `ignore_above` or `ignore_malformed` here.
       acl: {

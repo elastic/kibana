@@ -40,7 +40,6 @@ import type {
 } from '@kbn/task-manager-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 
-import { AclService } from './access_control/acl_service';
 import { AnalyticsService } from './analytics';
 import type { AnonymousAccessServiceStart } from './anonymous_access';
 import { AnonymousAccessService } from './anonymous_access';
@@ -49,6 +48,7 @@ import type { InternalAuthenticationServiceStart } from './authentication';
 import { AuthenticationService } from './authentication';
 import type { AuthorizationServiceSetupInternal } from './authorization';
 import { AuthorizationService } from './authorization';
+import { OlsService } from './authorization/ols/ols_service';
 import { buildSecurityApi, buildUserProfileApi } from './build_delegate_apis';
 import type { ConfigSchema, ConfigType } from './config';
 import { createConfig } from './config';
@@ -225,12 +225,12 @@ export class SecurityPlugin
     return this.userProfileStart;
   };
 
-  private aclService?: AclService;
-  private readonly getAclService = () => {
-    if (!this.aclService) {
-      throw new Error(`aclService is not registered!`);
+  private olsService?: OlsService;
+  private readonly getOlsService = () => {
+    if (!this.olsService) {
+      throw new Error(`olsService is not registered!`);
     }
-    return this.aclService;
+    return this.olsService;
   };
 
   private readonly fipsService: FipsService;
@@ -420,8 +420,8 @@ export class SecurityPlugin
       authz: this.authorizationSetup,
       savedObjects: core.savedObjects,
       getCurrentUser,
-      accessControlEnabled: config.accessControl.enabled,
-      getAclService: this.getAclService,
+      olsEnabled: config.authz.ols.enabled,
+      getOlsService: this.getOlsService,
     });
 
     this.registerDeprecations(core, license);
@@ -434,7 +434,7 @@ export class SecurityPlugin
         audit: this.auditSetup,
         config,
         logger: this.logger,
-        getAclService: this.getAclService,
+        getOlsService: this.getOlsService,
       })
     ));
     core.userProfile.registerUserProfileDelegate(
@@ -461,7 +461,7 @@ export class SecurityPlugin
       getAnonymousAccessService: this.getAnonymousAccess,
       getUserProfileService: this.getUserProfileService,
       getServiceAccountsService: this.getServiceAccountsService,
-      getAclService: this.getAclService,
+      getOlsService: this.getOlsService,
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       serverlessProjectId: cloud?.serverless?.projectId,
       serverlessProjectType: cloud?.serverless?.projectType,
@@ -599,8 +599,8 @@ export class SecurityPlugin
       online$: watchOnlineStatus$(),
     });
 
-    this.aclService = new AclService({
-      enabled: config.accessControl.enabled,
+    this.olsService = new OlsService({
+      enabled: config.authz.ols.enabled,
       clusterClient,
       authz: this.authorizationSetup!,
       audit: this.auditSetup!,
@@ -609,7 +609,7 @@ export class SecurityPlugin
       getAuthenticatedPrincipal: core.security.authc.getPrincipal,
       serviceAccountExists: async (id) =>
         (await this.serviceAccountsStart?.backend.exists(id)) ?? false,
-      logger: this.logger.get('access-control'),
+      logger: this.logger.get('ols'),
     });
 
     this.anonymousAccessStart = this.anonymousAccessService.start({

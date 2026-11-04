@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { generalAccessPermits, type CanonicalAcl } from '@kbn/access-control';
+import { generalAccessPermits, type StoredAcl } from '@kbn/ols';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   type AuthenticatedUser,
-  type CoreScopedAccessControl,
+  type CoreScopedOlsService,
   type SecurityServiceStart,
   SavedObjectsErrorHelpers,
 } from '@kbn/core/server';
@@ -220,7 +220,7 @@ export class ActionExecutor {
             actionTypeId: connectorTypeId,
             acl,
             authorization,
-            accessControl: security?.accessControl.asScoped(request),
+            ols: security?.authz.ols?.asScoped(request),
             spaceId: spaceId ?? DEFAULT_SPACE_ID,
           });
         }
@@ -270,7 +270,7 @@ export class ActionExecutor {
         // shortcut: system callers that need restricted connectors require a reviewed allowlist.
         if (
           !isInMemory &&
-          security?.accessControl.isEnabled() &&
+          security?.authz.ols &&
           !generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')
         ) {
           errorMessage = `Cannot execute unsecured action on a restricted connector`;
@@ -924,7 +924,7 @@ export interface ActionInfo {
   connectorVersion?: string;
   rawAction: RawAction;
   /** Object-level access of a stored connector, as stored. In-memory connectors have none. */
-  acl?: CanonicalAcl;
+  acl?: StoredAcl;
 }
 
 function getErrorSource(error: Error): TaskErrorSource | undefined {
@@ -1061,17 +1061,17 @@ const ensureAllowedToUseConnector = async ({
   actionTypeId,
   acl,
   authorization,
-  accessControl,
+  ols,
   spaceId,
 }: {
   actionId: string;
   actionTypeId: string;
-  acl?: CanonicalAcl;
+  acl?: StoredAcl;
   authorization: ActionsAuthorization;
-  accessControl?: CoreScopedAccessControl;
+  ols?: CoreScopedOlsService;
   spaceId: string;
 }) => {
-  if (!accessControl?.isEnabled() || generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')) {
+  if (!ols || generalAccessPermits(CONNECTOR_ACCESS_POLICY, acl, 'use')) {
     return;
   }
 
@@ -1080,7 +1080,7 @@ const ensureAllowedToUseConnector = async ({
     // checked here only for system connectors and connectors with sub-features.
     await authorization.ensureAuthorized({ operation: 'execute', actionTypeId });
 
-    const decisions = await accessControl.authorize({
+    const decisions = await ols.authorize({
       type: ACTION_SAVED_OBJECT_TYPE,
       spaceId,
       operation: 'use',

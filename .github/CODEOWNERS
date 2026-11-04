@@ -545,8 +545,6 @@ src/platform/packages/shared/esql/kbn-esql-utils @elastic/kibana-discover
 src/platform/packages/shared/home/sample_data_card @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_tab @elastic/appex-sharedux
 src/platform/packages/shared/home/sample_data_types @elastic/appex-sharedux
-src/platform/packages/shared/kbn-access-control @elastic/kibana-security
-src/platform/packages/shared/kbn-access-control-ui @elastic/kibana-security
 src/platform/packages/shared/kbn-actions-types @elastic/response-ops
 src/platform/packages/shared/kbn-actions-utils @elastic/response-ops
 src/platform/packages/shared/kbn-aiops-utils @elastic/search-ml-ux
@@ -686,6 +684,7 @@ src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 src/platform/packages/shared/kbn-occ @elastic/workflows-eng
 src/platform/packages/shared/kbn-ols @elastic/kibana-security
+src/platform/packages/shared/kbn-ols-ui @elastic/kibana-security
 src/platform/packages/shared/kbn-openapi-bundler @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-openapi-common @elastic/security-detection-engineering
 src/platform/packages/shared/kbn-openapi-generator @elastic/security-detection-engineering

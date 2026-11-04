@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AccessDraft } from '@kbn/access-control-ui';
+import type { AccessDraft } from '@kbn/ols-ui';
 import type { ReactNode } from 'react';
 import { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -35,7 +35,7 @@ export interface UseConnectorCreateFormParams {
   /** Skips the "Created '<name>'" success toast; see `useCreateConnector`. */
   hideSuccessToast?: boolean;
   /** Initial object-level access, when the host lets people restrict the new connector. */
-  accessControl?: AccessDraft;
+  acl?: AccessDraft;
 }
 
 /**
@@ -50,7 +50,7 @@ export const useConnectorCreateForm = ({
   actionTypeId,
   initialConnector,
   hideSuccessToast,
-  accessControl,
+  acl,
 }: UseConnectorCreateFormParams) => {
   const services = useKibana().services;
   const connectorContext = useContext(ConnectorContext);
@@ -142,7 +142,7 @@ export const useConnectorCreateForm = ({
         config: config ?? {},
         secrets: secrets ?? {},
         id: id ?? '',
-        ...(accessControl ? { accessControl } : {}),
+        ...(acl ? { acl } : {}),
         ...isInboundEventsEnabledPayload(
           typeId,
           isInboundEventsEnabled,
@@ -153,7 +153,7 @@ export const useConnectorCreateForm = ({
 
     setShowFormErrors(true);
     return undefined;
-  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled, accessControl]);
+  }, [submit, preSubmitValidator, createConnector, isClusterInboundEventsEnabled, acl]);
 
   useEffect(() => {
     isMounted.current = true;

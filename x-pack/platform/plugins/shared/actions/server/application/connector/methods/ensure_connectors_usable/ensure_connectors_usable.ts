@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { CanonicalAcl, Principal } from '@kbn/access-control';
+import type { StoredAcl, Principal } from '@kbn/ols';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 
 import type { ActionsClientContext } from '../../../../actions_client';
@@ -43,10 +43,8 @@ export const ensureConnectorsUsable = async ({
   ids,
   principal,
 }: EnsureConnectorsUsableParams): Promise<void> => {
-  const accessControl = context.securityService?.accessControl.asScoped(context.request, {
-    principal,
-  });
-  if (!accessControl?.isEnabled() || ids.length === 0) {
+  const ols = context.securityService?.authz.ols?.asScoped(context.request, { principal });
+  if (!ols || ids.length === 0) {
     return;
   }
 
@@ -56,7 +54,7 @@ export const ensureConnectorsUsable = async ({
     await context.unsecuredSavedObjectsClient.bulkGet<RawAction>(
       ids.map((id) => ({ type: ACTION_SAVED_OBJECT_TYPE, id }))
     );
-  const objects: Array<{ id: string; acl?: CanonicalAcl }> = [];
+  const objects: Array<{ id: string; acl?: StoredAcl }> = [];
   const connectorIdsByType = new Map<string, string[]>();
   for (const connector of connectors) {
     if (isSavedObjectErrorResult(connector)) {
@@ -86,7 +84,7 @@ export const ensureConnectorsUsable = async ({
     }
   }
 
-  const decisions = await accessControl.authorize({
+  const decisions = await ols.authorize({
     type: ACTION_SAVED_OBJECT_TYPE,
     spaceId: getConnectorSpaceId(context),
     operation: 'use',

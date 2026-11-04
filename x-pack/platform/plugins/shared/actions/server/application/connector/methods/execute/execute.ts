@@ -6,12 +6,9 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { RawAction, ActionTypeExecutorResult } from '../../../../types';
-import {
-  ensureConnectorOperation,
-  getConnectorAccessControl,
-} from '../../../../lib/connector_access';
+import { ensureConnectorOperation, getConnectorOls } from '../../../../lib/connector_access';
 import { getActionKibanaPrivileges } from '../../../../lib/get_action_kibana_privileges';
 import { isPreconfigured } from '../../../../lib/is_preconfigured';
 import { isSystemAction } from '../../../../lib/is_system_action';
@@ -26,7 +23,7 @@ export async function execute(
   const log = context.logger;
   const { actionId, params, source, relatedSavedObjects, signal } = connectorExecuteParams;
   let actionTypeId: string | undefined;
-  let acl: CanonicalAcl | undefined;
+  let acl: StoredAcl | undefined;
   let lookupError: Error | undefined;
   const isInMemory = isPreconfigured(context, actionId) || isSystemAction(context, actionId);
 
@@ -67,7 +64,7 @@ export async function execute(
 
   // A stored connector the caller cannot view must not reach the executor, which would only
   // report a failed execution instead of the missing connector.
-  if (lookupError && !isInMemory && getConnectorAccessControl(context)) {
+  if (lookupError && !isInMemory && getConnectorOls(context)) {
     throw lookupError;
   }
 

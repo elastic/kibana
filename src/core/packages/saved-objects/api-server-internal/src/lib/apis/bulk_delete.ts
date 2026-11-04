@@ -66,7 +66,7 @@ export const performBulkDelete = async <T>(
     mappings,
   }: ApiExecutionContext
 ): Promise<SavedObjectsBulkDeleteResponse> => {
-  const { common: commonHelper, preflight: preflightHelper, acl: aclHelper } = helpers;
+  const { common: commonHelper, preflight: preflightHelper, acl: olsHelper } = helpers;
   const { securityExtension } = extensions;
 
   const { refresh = DEFAULT_REFRESH_SETTING, force } = options;
@@ -158,7 +158,7 @@ export const performBulkDelete = async <T>(
       );
     }
   }
-  const aclDecisions = await aclHelper.authorize(
+  const aclDecisions = await olsHelper.authorize(
     'delete',
     namespace,
     expectedResults.filter(isRight).map(({ value: { type, id } }) => ({
@@ -173,7 +173,7 @@ export const performBulkDelete = async <T>(
       if (isLeft(result)) {
         return result;
       }
-      const aclError = aclHelper.getError(aclDecisions, result.value);
+      const aclError = olsHelper.getError(aclDecisions, result.value);
       return aclError
         ? left({ id: result.value.id, type: result.value.type, error: errorContent(aclError) })
         : right({ ...result.value, esRequestIndex: esRequestIndex++ });
@@ -204,7 +204,7 @@ export const performBulkDelete = async <T>(
         // With object-level security, each delete is bound to the document that was authorized.
         ...getExpectedVersionProperties(
           undefined,
-          aclHelper.isEnforced(expectedResult.value.type)
+          olsHelper.isEnforced(expectedResult.value.type)
             ? preflightDocs.get(getAclObjectKey(expectedResult.value.type, expectedResult.value.id))
             : undefined
         ),

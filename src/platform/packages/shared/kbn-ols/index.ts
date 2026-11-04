@@ -9,65 +9,56 @@
 
 export {
   ACL_LEVELS,
-  compareLevels,
-  isAclLevel,
-  isEntryLevel,
-  isGeneralAccessLevel,
-  lowestAllowed,
-  maxLevel,
-  type AclLevel,
-  type EntryLevel,
-  type GeneralAccessLevel,
-} from './src/levels';
-export {
   PRINCIPAL_TYPES,
-  type Principal,
-  type PrincipalType,
-  type StoredPrincipal,
-} from './src/principals';
-export {
-  isReservedOperation,
   REQUIRED_OPERATIONS,
   RESERVED_OPERATIONS,
-  validateAccessPolicy,
   type AccessOperation,
   type AccessPolicy,
-  type ReservedOperation,
-} from './src/policy';
-export {
-  ACL_FIELD,
-  getAclState,
-  normalizeAclSource,
-  toAclSource,
-  type Acl,
-  type AclEntry,
-  type AclGrant,
+  type AclChange,
+  type AclDecision,
+  type AclDocument,
+  type AclDocumentEntry,
+  type AclInput,
+  type AclLevel,
+  type AclObjectDecision,
   type AclState,
+  type AclWarning,
   type StoredAcl,
   type StoredAclEntry,
-} from './src/acl';
-export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/read_filter';
+  type EntryLevel,
+  type GeneralAccessLevel,
+  type Principal,
+  type PrincipalType,
+  type ReservedOperation,
+} from './src/types';
+export { compareLevels, lowestAllowed, maxLevel } from './src/levels';
+export { validateAccessPolicy } from './src/policy';
+export { ACL_FIELD, normalizeAclSource, toStoredAcl } from './src/normalize';
 export {
   evaluateAcl,
   generalAccessPermits,
+  getAclState,
+  getPrincipalKind,
   isRestricted,
   toObjectDecision,
-  type AclDecision,
-  type AclObjectDecision,
   type EvaluateAclParams,
-} from './src/evaluation';
+} from './src/evaluate';
+export { buildAclReadFilter, type BuildAclReadFilterParams } from './src/query';
 export {
   AclChangeError,
   MAX_ACL_ENTRIES,
   prepareAclChange,
   prepareInitialAcl,
-  readEditableAcl,
-  type AclChange,
+  toAclDocument,
   type AclChangeErrorCode,
-  type EditableAcl,
-  type EditableAclEntry,
-  type InitialAccess,
   type PrepareAclChangeParams,
   type PrepareInitialAclParams,
   type PreparedAclChange,
-} from './src/changes';
+} from './src/change';
+export {
+  ACL_SHAPE_FIXTURES,
+  FIXTURE_POLICY,
+  FIXTURE_PROBES,
+  type AclShapeFixture,
+  type FixtureProbe,
+} from './src/contract/shapes';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeAclSource, type CanonicalAcl } from '@kbn/access-control';
+import { normalizeAclSource, type StoredAcl } from '@kbn/ols';
 import type { Payload } from '@hapi/boom';
 import type { AuthorizeCreateObject, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
@@ -80,7 +80,7 @@ export const performBulkCreate = async <T>(
     serializer: serializerHelper,
     migration: migrationHelper,
     user: userHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const namespace = commonHelper.getCurrentNamespace(options.namespace);
@@ -234,7 +234,7 @@ export const performBulkCreate = async <T>(
 
   // An occupied ID the caller cannot view is reported as missing, with or without overwrite, and
   // overwriting a visible object needs edit. Objects of other types are not affected.
-  const aclDecisions = await aclHelper.authorize(
+  const aclDecisions = await olsHelper.authorize(
     overwrite ? 'edit' : 'view',
     namespace,
     preflightCheckResponse.flatMap(({ type, id, existingDocument, error }) => {
@@ -261,7 +261,7 @@ export const performBulkCreate = async <T>(
         let existingOriginId: string | undefined;
         let versionProperties;
         let accessControl: SavedObjectAccessControl | undefined;
-        let existingAcl: CanonicalAcl | undefined;
+        let existingAcl: StoredAcl | undefined;
         let isOverwrite = false;
         const {
           esRequestIndex,
@@ -271,7 +271,7 @@ export const performBulkCreate = async <T>(
         if (esRequestIndex !== undefined) {
           const preflightResult = preflightCheckResponse[esRequestIndex];
           const { type, id, existingDocument, error } = preflightResult;
-          const aclError = aclHelper.getError(aclDecisions, { type, id });
+          const aclError = olsHelper.getError(aclDecisions, { type, id });
           if (aclError) {
             return left({ id, type, error: errorContent(aclError) });
           }
@@ -291,7 +291,7 @@ export const performBulkCreate = async <T>(
           // With object-level security, an overwrite is bound to the document that was authorized.
           versionProperties = getExpectedVersionProperties(
             version,
-            aclHelper.isEnforced(type) ? existingDocument : undefined
+            olsHelper.isEnforced(type) ? existingDocument : undefined
           );
           existingOriginId = existingDocument?._source?.originId;
           existingAcl = existingDocument && normalizeAclSource(existingDocument._source);
@@ -310,10 +310,10 @@ export const performBulkCreate = async <T>(
         const accessControlToWrite = accessControl ? accessControl : object.accessControl;
 
         // An overwrite always keeps the stored access, and only access changes can replace it.
-        let aclToWrite: CanonicalAcl | undefined = existingAcl;
-        if (!isOverwrite && (object.initialAcl || aclHelper.isEnforced(object.type))) {
+        let aclToWrite: StoredAcl | undefined = existingAcl;
+        if (!isOverwrite && (object.initialAcl || olsHelper.isEnforced(object.type))) {
           try {
-            aclToWrite = await aclHelper.getInitialAcl(object.type, namespace, object.initialAcl);
+            aclToWrite = await olsHelper.getInitialAcl(object.type, namespace, object.initialAcl);
           } catch (error) {
             return left({ id: object.id, type: object.type, error: errorContent(error) });
           }
@@ -377,7 +377,7 @@ export const performBulkCreate = async <T>(
 
         // A create that found no document must not replace one created concurrently.
         const writeMethod =
-          aclHelper.isEnforced(object.type) && !isOverwrite && !version ? 'create' : method;
+          olsHelper.isEnforced(object.type) && !isOverwrite && !version ? 'create' : method;
         bulkCreateParams.push(
           {
             [writeMethod]: {

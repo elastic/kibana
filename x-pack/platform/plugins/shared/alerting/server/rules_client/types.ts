@@ -14,7 +14,7 @@ import type {
   ISavedObjectsRepository,
   UiSettingsServiceStart,
   AnalyticsServiceStart,
-  CoreAccessControlService,
+  CoreOlsService,
 } from '@kbn/core/server';
 import type { ActionsClient, ActionsAuthorization } from '@kbn/actions-plugin/server';
 import type {
@@ -98,10 +98,10 @@ export interface RulesClientContext {
    */
   readonly getActionsClientWithRequest?: (request: KibanaRequest) => Promise<ActionsClient>;
   /**
-   * Platform object-level security. Always provided by {@link RulesClientFactory}; rule API keys
-   * are not checked against connector access when it is absent or disabled.
+   * Object-level security (OLS), `null` when disabled. Always provided by {@link RulesClientFactory};
+   * rule API keys are not checked against connector access when it is absent or `null`.
    */
-  readonly accessControl?: CoreAccessControlService;
+  readonly ols?: CoreOlsService | null;
   readonly actionsAuthorization: ActionsAuthorization;
   readonly getEventLogClient: () => Promise<IEventLogClient>;
   readonly internalSavedObjectsRepository: ISavedObjectsRepository;

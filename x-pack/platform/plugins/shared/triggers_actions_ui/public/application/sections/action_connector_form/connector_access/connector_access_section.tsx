@@ -10,10 +10,10 @@ import { EuiAccordion, EuiSpacer, EuiText, EuiTitle, useGeneratedHtmlId } from '
 import { i18n } from '@kbn/i18n';
 import {
   AccessDraftEditor,
-  useAccessControlApi,
+  useOlsApi,
   type AccessDraft,
   type AccessPolicyResponse,
-} from '@kbn/access-control-ui';
+} from '@kbn/ols-ui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CONNECTOR_ACCESS_COPY } from './connector_access_copy';
 
@@ -35,7 +35,7 @@ export const ConnectorAccessSection = ({
   isDisabled,
 }: ConnectorAccessSectionProps) => {
   const { http } = useKibana().services;
-  const api = useAccessControlApi(http);
+  const api = useOlsApi(http);
   const accordionId = useGeneratedHtmlId({ prefix: 'connectorAccess' });
   const suggestPrincipals = useCallback(
     (name: string, signal: AbortSignal) => api.suggest('action', name, signal),

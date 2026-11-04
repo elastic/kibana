@@ -10,7 +10,7 @@ import type {
   SavedObjectsClientContract,
   Logger,
 } from '@kbn/core/server';
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { SpaceId } from '@kbn/core-spaces-common';
 import { isSavedObjectErrorResult } from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -68,7 +68,7 @@ export interface GetConnectorsResult {
   connector: InMemoryConnector | RawAction;
   isInMemory: boolean;
   id: string;
-  acl?: CanonicalAcl;
+  acl?: StoredAcl;
 }
 
 export type ExecutionEnqueuer<T> = (
@@ -80,7 +80,7 @@ export type ExecutionEnqueuer<T> = (
  * Throws unless the caller can run every stored connector it is about to enqueue.
  */
 export type EnsureConnectorsUsable = (
-  connectors: Array<{ id: string; acl?: CanonicalAcl }>
+  connectors: Array<{ id: string; acl?: StoredAcl }>
 ) => Promise<void>;
 
 export type BulkExecutionEnqueuer<T> = (

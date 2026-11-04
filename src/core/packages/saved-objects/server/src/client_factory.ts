@@ -12,7 +12,7 @@ import type {
   SavedObjectsClientContract,
   ISavedObjectsRepository,
 } from '@kbn/core-saved-objects-api-server';
-import type { ISavedObjectsAclExtension } from './extensions/acl';
+import type { ISavedObjectsOlsExtension } from './extensions/ols';
 import type { ISavedObjectsEncryptionExtension } from './extensions/encryption';
 import type { SavedObjectsExtensions } from './extensions/extensions';
 import type { ISavedObjectsSecurityExtension } from './extensions/security';
@@ -64,8 +64,8 @@ export type SavedObjectsSecurityExtensionFactory = SavedObjectsExtensionFactory<
  * extension that fails closed.
  * @public
  */
-export type SavedObjectsAclExtensionFactory = SavedObjectsExtensionFactory<
-  ISavedObjectsAclExtension | undefined
+export type SavedObjectsOlsExtensionFactory = SavedObjectsExtensionFactory<
+  ISavedObjectsOlsExtension | undefined
 >;
 
 /**

@@ -16,7 +16,7 @@ import {
   evaluateAcl,
   normalizeAclSource,
   type FixtureProbe,
-} from '@kbn/access-control';
+} from '@kbn/ols';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { MAIN_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';

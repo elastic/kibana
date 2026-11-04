@@ -21,7 +21,6 @@ import type { SubFeaturePrivilegeIterator } from '@kbn/features-plugin/server/fe
 import type { KibanaSolution } from '@kbn/projects-solutions-groups';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { defineAccessControlRoutes } from './access_control';
 import { defineAnalyticsRoutes } from './analytics';
 import { defineAnonymousAccessRoutes } from './anonymous_access';
 import { defineApiKeysRoutes } from './api_keys';
@@ -40,11 +39,11 @@ import { defineUserProfileRoutes } from './user_profile';
 import { defineUsersRoutes } from './users';
 import { defineViewRoutes } from './views';
 import type { SecurityLicense } from '../../common';
-import type { AclService } from '../access_control/acl_service';
 import type { AnalyticsServiceSetup } from '../analytics';
 import type { AnonymousAccessServiceStart } from '../anonymous_access';
 import type { InternalAuthenticationServiceStart } from '../authentication';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
+import type { OlsService } from '../authorization/ols/ols_service';
 import type { ConfigType } from '../config';
 import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import type { ServiceAccountsServiceStart } from '../service_accounts';
@@ -73,7 +72,7 @@ export interface RouteDefinitionParams {
   getAnonymousAccessService: () => AnonymousAccessServiceStart;
   /** `null` when service accounts are not enabled for this deployment. */
   getServiceAccountsService: () => ServiceAccountsServiceStart | null;
-  getAclService: () => AclService;
+  getOlsService: () => OlsService;
   getSpaceId: (request: KibanaRequest) => string;
   serverlessProjectId: string | undefined;
   serverlessProjectType: KibanaSolution | undefined;
@@ -84,7 +83,6 @@ export interface RouteDefinitionParams {
 }
 
 export function defineRoutes(params: RouteDefinitionParams) {
-  defineAccessControlRoutes(params);
   defineAnalyticsRoutes(params);
   defineApiKeysRoutes(params);
   defineAuthenticationRoutes(params);

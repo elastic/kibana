@@ -14,7 +14,7 @@ import type { IPreflightCheckHelper } from './preflight_check';
 import type { ISerializerHelper } from './serializer';
 import type { IMigrationHelper } from './migration';
 import type { UserHelper } from './user';
-import type { IAclHelper } from './acl';
+import type { IOlsHelper } from './ols';
 
 export { CommonHelper, type ICommonHelper } from './common';
 export { EncryptionHelper, type IEncryptionHelper } from './encryption';
@@ -22,7 +22,7 @@ export { ValidationHelper, type IValidationHelper } from './validation';
 export { SerializerHelper, type ISerializerHelper } from './serializer';
 export { MigrationHelper, type IMigrationHelper } from './migration';
 export { UserHelper } from './user';
-export { AclHelper, type IAclHelper, type AclHelperObject } from './acl';
+export { OlsHelper, type IOlsHelper, type OlsHelperObject } from './ols';
 export {
   PreflightCheckHelper,
   type IPreflightCheckHelper,
@@ -42,5 +42,5 @@ export interface RepositoryHelpers {
   serializer: ISerializerHelper;
   migration: IMigrationHelper;
   user: UserHelper;
-  acl: IAclHelper;
+  acl: IOlsHelper;
 }

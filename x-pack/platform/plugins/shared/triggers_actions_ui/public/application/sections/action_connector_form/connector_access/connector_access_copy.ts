@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { AccessCopy } from '@kbn/access-control-ui';
+import type { AccessCopy } from '@kbn/ols-ui';
 
 /**
  * Connector wording for the shared access panel: the `use` level means running the connector.

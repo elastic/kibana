@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { normalizeAclSource } from '@kbn/access-control';
+import { normalizeAclSource } from '@kbn/ols';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
 import {
   SavedObjectsErrorHelpers,
@@ -60,7 +60,7 @@ export const performCreate = async <T>(
     serializer: serializerHelper,
     migration: migrationHelper,
     user: userHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension } = extensions;
 
@@ -166,7 +166,7 @@ export const performCreate = async <T>(
   const occupyingDocument =
     preflightResult?.existingDocument ?? preflightResult?.error?.conflictingDocument;
   if (occupyingDocument) {
-    await aclHelper.enforce(overwrite ? 'edit' : 'view', namespace, {
+    await olsHelper.enforce(overwrite ? 'edit' : 'view', namespace, {
       type,
       id,
       source: occupyingDocument._source,
@@ -187,7 +187,7 @@ export const performCreate = async <T>(
   }
   const aclToWrite = preflightResult?.existingDocument
     ? existingAcl
-    : await aclHelper.getInitialAcl(type, namespace, initialAcl);
+    : await olsHelper.getInitialAcl(type, namespace, initialAcl);
 
   // 1. If the originId has been *explicitly set* in the options (defined or undefined), respect that.
   // 2. Otherwise, preserve the originId of the existing object that is being overwritten, if any.
@@ -229,7 +229,7 @@ export const performCreate = async <T>(
 
   // With object-level security, the write must hit the document that was authorized: an overwrite
   // is bound to it, and a create that found no document must not replace one created concurrently.
-  const isAclEnforced = aclHelper.isEnforced(type);
+  const isAclEnforced = olsHelper.isEnforced(type);
   const existingDocument = preflightResult?.existingDocument;
   const requestParams: IndexRequest | CreateRequest = {
     id: raw._id,

@@ -92,7 +92,7 @@ export async function internalBulkResolve<T>(
   const {
     common: commonHelper,
     migration: migrationHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = apiExecutionContext.helpers;
   const { securityExtension } = apiExecutionContext.extensions;
 
@@ -165,7 +165,7 @@ export async function internalBulkResolve<T>(
   // shortcut: this check runs before the security extension authorizes the results, so a caller
   // without recovery primed may cost a second privilege request. Revisit with the move to a single
   // Security-owned authorizer.
-  const aclDecisions = await aclHelper.authorize(
+  const aclDecisions = await olsHelper.authorize(
     'view',
     namespace,
     docObjects.flatMap(({ type, id }, index) => {

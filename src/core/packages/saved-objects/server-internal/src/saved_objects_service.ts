@@ -35,7 +35,7 @@ import type {
   SavedObjectsEncryptionExtensionFactory,
   SavedObjectsSecurityExtensionFactory,
   SavedObjectsSpacesExtensionFactory,
-  SavedObjectsAclExtensionFactory,
+  SavedObjectsOlsExtensionFactory,
   SavedObjectsExtensions,
   SavedObjectsExtensionFactory,
 } from '@kbn/core-saved-objects-server';
@@ -127,7 +127,7 @@ export class SavedObjectsService
   private encryptionExtensionFactory?: SavedObjectsEncryptionExtensionFactory;
   private securityExtensionFactory?: SavedObjectsSecurityExtensionFactory;
   private spacesExtensionFactory?: SavedObjectsSpacesExtensionFactory;
-  private aclExtensionFactory?: SavedObjectsAclExtensionFactory;
+  private olsExtensionFactory?: SavedObjectsOlsExtensionFactory;
   private accessControlTransforms?: SavedObjectsAccessControlTransforms;
 
   private migrator$ = new Subject<IKibanaMigrator>();
@@ -227,14 +227,14 @@ export class SavedObjectsService
         }
         this.spacesExtensionFactory = factory;
       },
-      setAclExtension: (factory) => {
+      setOlsExtension: (factory) => {
         if (this.started) {
-          throw new Error('cannot call `setAclExtension` after service startup.');
+          throw new Error('cannot call `setOlsExtension` after service startup.');
         }
-        if (this.aclExtensionFactory) {
-          throw new Error('acl extension is already set, and can only be set once');
+        if (this.olsExtensionFactory) {
+          throw new Error('OLS extension is already set, and can only be set once');
         }
-        this.aclExtensionFactory = factory;
+        this.olsExtensionFactory = factory;
       },
       setAccessControlTransforms: (transforms) => {
         if (this.started) {
@@ -395,7 +395,7 @@ export class SavedObjectsService
       encryptionExtensionFactory: this.encryptionExtensionFactory,
       securityExtensionFactory: this.securityExtensionFactory,
       spacesExtensionFactory: this.spacesExtensionFactory,
-      aclExtensionFactory: this.aclExtensionFactory,
+      olsExtensionFactory: this.olsExtensionFactory,
     });
 
     if (this.clientFactoryProvider) {

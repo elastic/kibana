@@ -4,13 +4,13 @@ This branch is a proof of concept. It is not release evidence. Phase-1 tasks sti
 
 ## 1. Summary
 
-Connectors now have an owner and an ACL when `xpack.security.accessControl.enabled: true`. The ACL is stored in
+Connectors now have an owner and an ACL when `xpack.security.authz.ols.enabled: true`. The ACL is stored in
 the root `acl` field of the Saved Object. Levels are cumulative: `none < view < use < edit < manage`.
 
 What works end to end:
 
 - **Create.** A connector is public by default (`general_access: edit`). The creator is the owner. A private
-  connector is created in one request with `access_control`. No interval exists in which it is public.
+  connector is created in one request with `acl`. No interval exists in which it is public.
 - **List and read.** The list, point reads, `bulkGet`, `resolve` and `find` apply the ACL. Elasticsearch filters
   `find`, so totals, aggregations and pages count only visible objects.
 - **Execute.** HTTP execution, enqueue, task execution and connector auth paths need `use`. An object the caller
@@ -25,13 +25,13 @@ What works end to end:
   matches only a hidden connector reads as missing. A workflow bound to a service account runs its connector steps
   as that service account.
 - **Edit and delete.** These need `edit`. Denied OAuth, token, rotation, update and delete requests change nothing.
-- **Access management.** The generic API under `/internal/security/access_control/{type}` reads, replaces,
+- **Access management.** The generic API under `/internal/security/ols/{type}` reads, replaces,
   claims and transfers access, with optimistic concurrency. The owner manages access. A recovery administrator
   (wildcard privileges) can view, manage access and transfer, but cannot run or edit.
 - **Import and export.** Export never includes `acl`. Import makes the importer the owner of new objects and keeps
   the destination ACL on overwrite.
 - **Audit.** Denials, grant-based access, recovery and access changes are audited without titles.
-- **UI.** The connector flyout has an Access tab built on the shared `@kbn/access-control-ui` panel, and the
+- **UI.** The connector flyout has an Access tab built on the shared `@kbn/ols-ui` panel, and the
   create flyout has an Access section.
 - **Hard disable.** With the setting off (the default), nothing changes for users, and stored ACLs are kept.
 
@@ -40,7 +40,7 @@ sequenceDiagram
   participant C as Caller
   participant R as SO repository
   participant S as Security extension
-  participant A as ACL extension (Security)
+  participant A as OLS extension (Security)
   C->>R: get / bulkGet / update / delete
   R->>S: feature privileges (+ recovery action)
   S-->>R: 403 if feature privileges are missing
@@ -66,19 +66,19 @@ sequenceDiagram
 
 ## 2. D1 evidence
 
-The PoC keeps the dedicated `acl` extension slot (PD4). It also adds a request-scoped **audit scope** in place of
+The PoC keeps the dedicated OLS extension slot (`ols`, PD4). It also adds a request-scoped **audit scope** in place of
 a merge with the security extension.
 
 | Criterion                           | Result                                                                                                                                                                                                                                      | Evidence                                                                               |
 | ----------------------------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | -------------------------------------------------------------------------------------- |
-| Error ordering                      | Feature privileges are checked first, as today, so a missing feature privilege still gives 403. Then OLS gives 404 for hidden objects and 403 for visible objects with too little access.                                                   | `acl_enforcement.test.ts`, `connector_access.spec.ts`                                  |
+| Error ordering                      | Feature privileges are checked first, as today, so a missing feature privilege still gives 403. Then OLS gives 404 for hidden objects and 403 for visible objects with too little access.                                                   | `ols_enforcement.test.ts`, `connector_access.spec.ts`                                  |
 | Audit ordering                      | Repository methods run in an audit scope (`AsyncLocalStorage`). Security wraps the logger it gives the security extension. When the scope ends, `saved_object_*` events about objects that OLS denied are dropped. Only the denial remains. | `audit.test.ts`, `audit.spec.ts` "logs a hidden object only as an object-level denial" |
 | Exclusion                           | A scoped client that excludes `acl` throws.                                                                                                                                                                                                 | `scoped_client_provider.test.ts`                                                       |
-| No provider, or no RBAC             | Core uses a fail-closed extension: general access only, restricted objects hidden, access changes rejected.                                                                                                                                 | `fail_closed_acl_extension.test.ts`, `saved_objects/index.test.ts`                     |
-| Setting off                         | The extension allows every object. Core keeps stored ACLs on writes. Initial access requests return 400.                                                                                                                                    | `access_control_disabled.spec.ts`                                                      |
+| No provider, or no RBAC             | Core uses a fail-closed extension: general access only, restricted objects hidden, access changes rejected.                                                                                                                                 | `fail_closed_ols_extension.test.ts`, `saved_objects/index.test.ts`                     |
+| Setting off                         | The extension allows every object. Core keeps stored ACLs on writes. Initial access requests return 400.                                                                                                                                    | `ols_disabled.spec.ts`                                                      |
 | Privilege requests, both extensions | Zero extra requests. The recovery action rides on the request the security extension already makes (`primeRecovery`).                                                                                                                       | `saved_objects_security_extension.test.ts`                                             |
 | Privilege requests, Actions client  | Zero extra requests. `ActionsAuthorization` adds the recovery action to its own check. General access needs no recovery check at all.                                                                                                       | `actions_authorization.test.ts`                                                        |
-| Principal lookups                   | At most one per request, and only for restricted objects. Sessions and Basic credentials use the profile ID. API keys read their own record (`with_profile_uid`). UIAM keys have no principal.                                              | `principal.test.ts`, `scoped_acl_service.test.ts`                                      |
+| Principal lookups                   | At most one per request, and only for restricted objects. Sessions and Basic credentials use the profile ID. API keys read their own record (`with_profile_uid`). UIAM keys have no principal.                                              | `principal.test.ts`, `scoped_ols_service.test.ts`                                      |
 | Read filter parity                  | The Elasticsearch filter and the evaluator agree on every fixture shape, also with `search.allow_expensive_queries: false`.                                                                                                                 | `acl_parity.test.ts` (real Elasticsearch, 7 tests)                                     |
 
 **Recommendation:** keep the dedicated slot. The audit scope solves the ordering problem without changes to the
@@ -99,21 +99,21 @@ Operation coverage, by the rows of the OLS validation plan:
 
 | Surface                                          | Coverage                                                                                                        |
 | ------------------------------------------------ | --------------------------------------------------------------------------------------------------------------- |
-| `get`, `bulkGet`, `resolve`, `bulkResolve`       | Enforced. `acl_enforcement.test.ts`; `connector_access.spec.ts`.                                                |
-| `find`, PIT finder, `openPointInTimeForType`     | Read filter per type and space. `acl_enforcement.test.ts`, `acl_parity.test.ts`. PIT pages use the same filter. |
+| `get`, `bulkGet`, `resolve`, `bulkResolve`       | Enforced. `ols_enforcement.test.ts`; `connector_access.spec.ts`.                                                |
+| `find`, PIT finder, `openPointInTimeForType`     | Read filter per type and space. `ols_enforcement.test.ts`, `acl_parity.test.ts`. PIT pages use the same filter. |
 | Create with caller ID                            | Hidden occupied ID gives 404. `connector_access.spec.ts` "reports a hidden caller-selected ID as missing".      |
-| Create, bulk create with initial ACL             | Atomic. `connector_create.spec.ts`; `acl_enforcement.test.ts`.                                                  |
+| Create, bulk create with initial ACL             | Atomic. `connector_create.spec.ts`; `ols_enforcement.test.ts`.                                                  |
 | Overwrite, update, bulk update, upsert, counters | Enforced and ACL kept. Counters on registered types are rejected (gap below).                                   |
-| Delete and bulk delete                           | `edit` needed; write bound to the authorized `seq_no`. `acl_enforcement.test.ts`; `connector_access.spec.ts`.   |
-| Access change, claim, transfer                   | `access_api.spec.ts` (including concurrent claims and stale versions); `acl_enforcement.test.ts` "#changeAcl".  |
+| Delete and bulk delete                           | `edit` needed; write bound to the authorized `seq_no`. `ols_enforcement.test.ts`; `connector_access.spec.ts`.   |
+| Access change, claim, transfer                   | `access_api.spec.ts` (including concurrent claims and stale versions); `ols_enforcement.test.ts` "#changeAcl".  |
 | Import/copy                                      | `import_export.spec.ts`. A hidden ID is never reported as a conflict.                                           |
 | Export by type or IDs                            | Hidden objects are skipped, also with SOM All. `import_export.spec.ts`.                                         |
-| Reference collection and conflict checks         | `collectMultiNamespaceReferences` and `checkConflicts` mask hidden objects. `acl_enforcement.test.ts`.          |
+| Reference collection and conflict checks         | `collectMultiNamespaceReferences` and `checkConflicts` mask hidden objects. `ols_enforcement.test.ts`.          |
 | `updateObjectsSpaces`                            | Rejected for registered types.                                                                                  |
 | Namespace deletion and reference cleanup         | System operations; unchanged. Not documented as a policy yet.                                                   |
-| Raw Saved Objects `search`, `esql`               | Rejected for registered types. `acl_enforcement.test.ts`.                                                       |
+| Raw Saved Objects `search`, `esql`               | Rejected for registered types. `ols_enforcement.test.ts`.                                                       |
 | Internal repositories and decrypted reads        | Actions reads decrypted connectors only after an ACL check (`connector_access.ts`).                             |
-| Mixed registered/unregistered types              | Only registered types are decided. `acl_enforcement.test.ts` "does not filter unregistered types".              |
+| Mixed registered/unregistered types              | Only registered types are decided. `ols_enforcement.test.ts` "does not filter unregistered types".              |
 
 Personas in the Scout API suites (all Basic-auth users): owner, `use` grantee, stranger, feature-read user, user
 without Actions, SOM All user, recovery administrator, and an owner API key with read-only privileges. A Kibana
@@ -158,13 +158,13 @@ Two choices in the rule paths need review:
 - **PS13:** Workflow validation lists connectors on every request. With many restricted connectors, this adds an
   ACL decision per request.
 - **PS5:** counters on registered types are rejected, because counters have no preflight read.
-- **PS4:** excluding the `acl` extension always throws. Guardrail G2 needs a reviewed allowlist of system uses.
+- **PS4:** excluding the `ols` extension always throws. Guardrail G2 needs a reviewed allowlist of system uses.
 - **PS8:** UIAM API keys and UIAM service accounts get general access only ([kibana#271760](https://github.com/elastic/kibana/issues/271760)).
 - **D2:** `acl` is a root field, so every read includes it. Its cost is part of the bench.
 - **CI:** the Scout suites with object-level security enabled (`ols_poc`) and disabled run in CI. The `ols_poc`
   config set needs Apps DX review.
 - **FTR:** the existing Actions and Alerting suites ran locally twice: with the setting off, as CI runs them, and
-  with `xpack.security.accessControl.enabled=true` added to each config. Connectors stay public by default, so
+  with `xpack.security.authz.ols.enabled=true` added to each config. Connectors stay public by default, so
   existing behavior must not change in either mode.
   - Of the 34 API configs, 31 pass in both modes, and the connectors and rules UI configs pass in both modes (13 and
     48 tests).

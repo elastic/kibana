@@ -91,6 +91,13 @@ describe('getDefaultSecurityImplementation', () => {
     });
   });
 
+  describe('authz.ols', () => {
+    // A missing delegate must not read as deliberately disabled OLS, so the default is never `null`.
+    it('is a fail-closed service', () => {
+      expect(implementation.authz.ols).not.toBeNull();
+    });
+  });
+
   describe('fakeRequestEnricher', () => {
     it('is a no-op (no security delegate registered)', () => {
       expect(() =>

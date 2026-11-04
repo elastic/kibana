@@ -6,8 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import { getAclState, isRestricted } from '@kbn/access-control';
-import type { CanonicalAcl } from '@kbn/access-control';
+import { getAclState, isRestricted } from '@kbn/ols';
+import type { StoredAcl } from '@kbn/ols';
 
 import { CONNECTOR_ACCESS_POLICY } from '../../../../../common/access_policy';
 import type { ActionsClientContext } from '../../../../actions_client';
@@ -15,7 +15,7 @@ import { ACTION_SAVED_OBJECT_TYPE } from '../../../../constants/saved_objects';
 import { MAX_ACTIONS_RETURNED } from '../../../../data/connector/constants';
 import { ConnectorAuditAction, connectorAuditEvent } from '../../../../lib/audit_events';
 import type { ConnectorAccessContext } from '../../../../lib/connector_access';
-import { getConnectorAccessControl, getConnectorSpaceId } from '../../../../lib/connector_access';
+import { getConnectorOls, getConnectorSpaceId } from '../../../../lib/connector_access';
 import type { RawAction } from '../../../../types';
 import { filterInferenceConnectors } from '../get_all';
 
@@ -34,7 +34,7 @@ export interface ResolveConnectorNameParams {
 
 interface Candidate {
   id: string;
-  acl?: CanonicalAcl;
+  acl?: StoredAcl;
 }
 
 /**
@@ -63,8 +63,8 @@ export const resolveConnectorName = async ({
   }
 
   // With object-level security disabled, ACLs restrict nothing, so the first match is kept as before.
-  const accessControl = getConnectorAccessControl(context);
-  if (!accessControl) {
+  const ols = getConnectorOls(context);
+  if (!ols) {
     return candidates[0].id;
   }
 
@@ -83,7 +83,7 @@ export const resolveConnectorName = async ({
 
   // A connector the caller cannot view is reported as missing, so that its ID never leaks.
   // Unrestricted connectors are visible without any lookup.
-  const [visibleCandidate] = await accessControl.filterVisible({
+  const [visibleCandidate] = await ols.filterVisible({
     type: ACTION_SAVED_OBJECT_TYPE,
     spaceId: getConnectorSpaceId(context),
     objects: [candidates[0]],

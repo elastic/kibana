@@ -7,7 +7,7 @@
 
 import Boom from '@hapi/boom';
 
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { KibanaRequest, SecurityServiceStart } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
@@ -24,7 +24,7 @@ export type ConnectorOperation = 'use' | 'edit' | 'delete';
 
 export interface ConnectorAccessContext {
   request: KibanaRequest;
-  securityService?: Pick<SecurityServiceStart, 'accessControl'>;
+  securityService?: { authz: Pick<SecurityServiceStart['authz'], 'ols'> };
   /** Space the connector lives in, when it is not the request's space. */
   spaceId?: string;
   spaces?: Pick<SpacesServiceStart, 'getSpaceId'>;
@@ -34,13 +34,11 @@ export const getConnectorSpaceId = ({ spaceId, spaces, request }: ConnectorAcces
   spaceId ?? spaces?.getSpaceId(request) ?? DEFAULT_SPACE_ID;
 
 /**
- * Returns the request's object-level security service, or `undefined` when object-level security
- * is disabled and connectors keep their behavior from before it.
+ * Returns the request's object-level security (OLS) service, or `undefined` when OLS is disabled and
+ * connectors keep their behavior from before it.
  */
-export const getConnectorAccessControl = (context: ConnectorAccessContext) => {
-  const accessControl = context.securityService?.accessControl.asScoped(context.request);
-  return accessControl?.isEnabled() ? accessControl : undefined;
-};
+export const getConnectorOls = (context: ConnectorAccessContext) =>
+  context.securityService?.authz.ols?.asScoped(context.request);
 
 /**
  * Throws unless the caller can perform the operation on a stored connector. A connector the caller
@@ -51,7 +49,7 @@ export const getConnectorAccessControl = (context: ConnectorAccessContext) => {
  */
 export const ensureConnectorOperation = async (
   context: ConnectorAccessContext,
-  { id, acl, operation }: { id: string; acl?: CanonicalAcl; operation: ConnectorOperation }
+  { id, acl, operation }: { id: string; acl?: StoredAcl; operation: ConnectorOperation }
 ) => ensureConnectorsOperation(context, { connectors: [{ id, acl }], operation });
 
 /**
@@ -63,14 +61,14 @@ export const ensureConnectorsOperation = async (
   {
     connectors,
     operation,
-  }: { connectors: Array<{ id: string; acl?: CanonicalAcl }>; operation: ConnectorOperation }
+  }: { connectors: Array<{ id: string; acl?: StoredAcl }>; operation: ConnectorOperation }
 ) => {
-  const accessControl = getConnectorAccessControl(context);
-  if (!accessControl || connectors.length === 0) {
+  const ols = getConnectorOls(context);
+  if (!ols || connectors.length === 0) {
     return;
   }
 
-  const decisions = await accessControl.authorize({
+  const decisions = await ols.authorize({
     type: ACTION_SAVED_OBJECT_TYPE,
     spaceId: getConnectorSpaceId(context),
     operation,

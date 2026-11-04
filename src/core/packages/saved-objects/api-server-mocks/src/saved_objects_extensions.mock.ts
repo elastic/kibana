@@ -11,7 +11,7 @@ import type {
   ISavedObjectsEncryptionExtension,
   ISavedObjectsSecurityExtension,
   ISavedObjectsSpacesExtension,
-  ISavedObjectsAclExtension,
+  ISavedObjectsOlsExtension,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
 import { lazyObject } from '@kbn/lazy-object';
@@ -60,8 +60,8 @@ const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> =>
     asScopedToNamespace: jest.fn().mockImplementation(createSpacesExtension),
   });
 
-// By default the ACL extension allows everything, as for types without an access policy.
-const createAclExtension = (): jest.Mocked<ISavedObjectsAclExtension> =>
+// By default the OLS extension allows everything, as for types without an access policy.
+const createOlsExtension = (): jest.Mocked<ISavedObjectsOlsExtension> =>
   lazyObject({
     getReadFilters: jest.fn().mockResolvedValue(new Map()),
     authorizeObjects: jest.fn().mockResolvedValue(new Map()),
@@ -75,7 +75,7 @@ const create = (): jest.Mocked<SavedObjectsExtensions> =>
     encryptionExtension: createEncryptionExtension(),
     securityExtension: createSecurityExtension(),
     spacesExtension: createSpacesExtension(),
-    aclExtension: createAclExtension(),
+    olsExtension: createOlsExtension(),
   });
 
 export const savedObjectsExtensionsMock = {
@@ -83,5 +83,5 @@ export const savedObjectsExtensionsMock = {
   createEncryptionExtension,
   createSecurityExtension,
   createSpacesExtension,
-  createAclExtension,
+  createOlsExtension,
 };

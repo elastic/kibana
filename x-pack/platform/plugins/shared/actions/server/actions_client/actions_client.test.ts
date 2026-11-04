@@ -3854,11 +3854,17 @@ describe('object-level security', () => {
     general_access: ['none'],
     entries: [],
   };
-  const scopedAccessControl = securityServiceMock.createScopedAccessControl();
+  const scopedOls = securityServiceMock.createScopedOls();
+
+  const ols = securityServiceMock.createOls();
+
+  afterEach(() => {
+    securityService.authz.ols = null;
+  });
 
   beforeEach(() => {
-    securityService.accessControl.asScoped.mockReturnValue(scopedAccessControl);
-    scopedAccessControl.isEnabled.mockReturnValue(true);
+    ols.asScoped.mockReturnValue(scopedOls);
+    securityService.authz.ols = ols;
     actionTypeRegistry.register(getConnectorType({ id: 'my-ols-type', preSaveHook }));
     unsecuredSavedObjectsClient.get.mockResolvedValue({
       id: '1',
@@ -3870,7 +3876,7 @@ describe('object-level security', () => {
   });
 
   const deny = (status: 'forbidden' | 'not_found') =>
-    scopedAccessControl.authorize.mockResolvedValue(
+    scopedOls.authorize.mockResolvedValue(
       new Map([['1', status === 'forbidden' ? { status, operation: 'edit' } : { status }]])
     );
 
@@ -3881,7 +3887,7 @@ describe('object-level security', () => {
       output: { statusCode: 403 },
     });
 
-    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+    expect(scopedOls.authorize).toHaveBeenCalledWith(
       expect.objectContaining({ operation: 'delete', objects: [{ id: '1', acl: PRIVATE_ACL }] })
     );
     expect(connectorTokenClient.deleteConnectorTokens).not.toHaveBeenCalled();
@@ -3898,7 +3904,7 @@ describe('object-level security', () => {
       actionsClient.update({ id: '1', action: { name: 'renamed', config: {}, secrets: {} } })
     ).rejects.toMatchObject({ output: { statusCode: 403 } });
 
-    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+    expect(scopedOls.authorize).toHaveBeenCalledWith(
       expect.objectContaining({ operation: 'edit' })
     );
     expect(preSaveHook).not.toHaveBeenCalled();
@@ -3947,20 +3953,20 @@ describe('object-level security', () => {
     await expect(ensureConnectorsUsable?.([{ id: '1', acl: PRIVATE_ACL }])).rejects.toMatchObject({
       output: { statusCode: 403 },
     });
-    expect(scopedAccessControl.authorize).toHaveBeenCalledWith(
+    expect(scopedOls.authorize).toHaveBeenCalledWith(
       expect.objectContaining({ operation: 'use', objects: [{ id: '1', acl: PRIVATE_ACL }] })
     );
   });
 
   test('validates requested access before the pre-save hook, and creates in one request', async () => {
-    const accessControl = { general_access: 'none' as const, entries: [] };
-    scopedAccessControl.validateInitialAcl.mockRejectedValueOnce(
+    const acl = { general_access: 'none' as const, entries: [] };
+    scopedOls.validateInitialAcl.mockRejectedValueOnce(
       Boom.badRequest('Access cannot be restricted')
     );
 
     await expect(
       actionsClient.create({
-        action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, accessControl },
+        action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, acl },
       })
     ).rejects.toMatchObject({ output: { statusCode: 400 } });
     expect(preSaveHook).not.toHaveBeenCalled();
@@ -3972,17 +3978,17 @@ describe('object-level security', () => {
       references: [],
     });
     await actionsClient.create({
-      action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, accessControl },
+      action: { actionTypeId: 'my-ols-type', name: 'p', config: {}, secrets: {}, acl },
     });
     expect(unsecuredSavedObjectsClient.create).toHaveBeenCalledWith(
       'action',
       expect.anything(),
-      expect.objectContaining({ initialAcl: accessControl })
+      expect.objectContaining({ initialAcl: acl })
     );
   });
 
   test('changes nothing while object-level security is disabled', async () => {
-    scopedAccessControl.isEnabled.mockReturnValue(false);
+    securityService.authz.ols = null;
     unsecuredSavedObjectsClient.find.mockResolvedValue({
       saved_objects: [],
       total: 0,
@@ -3992,7 +3998,7 @@ describe('object-level security', () => {
 
     await actionsClient.delete({ id: '1' });
 
-    expect(scopedAccessControl.authorize).not.toHaveBeenCalled();
+    expect(scopedOls.authorize).not.toHaveBeenCalled();
     expect(unsecuredSavedObjectsClient.delete).toHaveBeenCalled();
   });
 });

@@ -43,7 +43,7 @@ describe('buildSecurityApi', () => {
       getAuthc: () => authc,
       getSession: () => session,
       getServiceAccounts: () => serviceAccounts,
-      getAclService: jest.fn(),
+      getOlsService: jest.fn(),
       audit: auditService,
       config: { uiam: { enabled: false } },
       logger,
@@ -244,7 +244,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts: () => serviceAccounts,
-        getAclService: jest.fn(),
+        getOlsService: jest.fn(),
         audit: auditService,
         config,
         logger,
@@ -267,6 +267,42 @@ describe('buildSecurityApi', () => {
     });
   });
 
+  describe('authz.ols', () => {
+    const buildApiWithOls = (enabled?: boolean) => {
+      const scoped = {};
+      const olsService = { asScoped: jest.fn().mockReturnValue(scoped) };
+      const getOlsService = jest.fn().mockReturnValue(olsService);
+      const securityApi = buildSecurityApi({
+        getAuthc: () => authc,
+        getSession: () => session,
+        getServiceAccounts: () => serviceAccounts,
+        getOlsService,
+        audit: auditService,
+        config: enabled === undefined ? {} : { authz: { ols: { enabled } } },
+        logger,
+      });
+      return { securityApi, getOlsService, olsService, scoped };
+    };
+
+    it('is null when OLS is disabled', () => {
+      expect(buildApiWithOls(false).securityApi.authz.ols).toBeNull();
+    });
+
+    it('is null when the setting is not available', () => {
+      expect(buildApiWithOls().securityApi.authz.ols).toBeNull();
+    });
+
+    it('scopes the OLS service lazily when OLS is enabled', () => {
+      const { securityApi, getOlsService, olsService, scoped } = buildApiWithOls(true);
+      expect(getOlsService).not.toHaveBeenCalled();
+
+      const request = httpServerMock.createKibanaRequest();
+      const principal = { type: 'user' as const, id: 'u_profile' };
+      expect(securityApi.authz.ols?.asScoped(request, { principal })).toBe(scoped);
+      expect(olsService.asScoped).toHaveBeenCalledWith(request, { principal });
+    });
+  });
+
   describe('serviceAccounts.create', () => {
     const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
@@ -277,7 +313,7 @@ describe('buildSecurityApi', () => {
         getAuthc: () => authc,
         getSession: () => session,
         getServiceAccounts,
-        getAclService: jest.fn(),
+        getOlsService: jest.fn(),
         audit: auditService,
         config: {},
         logger,
@@ -492,7 +528,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
-          getAclService: jest.fn(),
+          getOlsService: jest.fn(),
           audit: auditService,
           config: { uiam: { enabled: true } },
           logger,
@@ -576,7 +612,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
-          getAclService: jest.fn(),
+          getOlsService: jest.fn(),
           audit: auditService,
           config: { uiam: { enabled: false } },
           logger,
@@ -597,7 +633,7 @@ describe('buildSecurityApi', () => {
           getAuthc: () => authc,
           getSession: () => session,
           getServiceAccounts: () => serviceAccounts,
-          getAclService: jest.fn(),
+          getOlsService: jest.fn(),
           audit: auditService,
           config: {},
           logger,

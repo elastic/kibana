@@ -10,11 +10,11 @@ import { SavedObjectsClient } from '@kbn/core/server';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
 import { getImportTransformsFactory } from './access_control_transforms';
+import { SavedObjectsOlsExtension } from './saved_objects_ols_extension';
 import { SavedObjectsSecurityExtension } from './saved_objects_security_extension';
-import type { AclService } from '../access_control/acl_service';
-import { createScopedAuditLogger } from '../access_control/audit';
-import { SavedObjectsAclExtension } from '../access_control/saved_objects_acl_extension';
 import type { AuthorizationServiceSetupInternal } from '../authorization';
+import { createScopedAuditLogger } from '../authorization/ols/audit';
+import type { OlsService } from '../authorization/ols/ols_service';
 
 export { SecurityAction } from './types';
 
@@ -27,9 +27,9 @@ interface SetupSavedObjectsParams {
   savedObjects: CoreSetup['savedObjects'];
   getCurrentUser: (request: KibanaRequest) => AuthenticatedUser | null;
   /** Whether platform object-level security is enforced. */
-  accessControlEnabled: boolean;
+  olsEnabled: boolean;
   /** The object-level security service, available after start. */
-  getAclService: () => AclService;
+  getOlsService: () => OlsService;
 }
 
 export function setupSavedObjects({
@@ -37,8 +37,8 @@ export function setupSavedObjects({
   authz,
   savedObjects,
   getCurrentUser,
-  accessControlEnabled,
-  getAclService,
+  olsEnabled,
+  getOlsService,
 }: SetupSavedObjectsParams) {
   savedObjects.setClientFactoryProvider(
     // This is not used by Kibana itself, but it can be leveraged for Kibana to use a third-party authentication header if there is a custom
@@ -69,22 +69,22 @@ export function setupSavedObjects({
           errors: SavedObjectsClient.errors,
           getCurrentUser: () => getCurrentUser(request),
           typeRegistry,
-          primeRecovery: accessControlEnabled
+          primeRecovery: olsEnabled
             ? (type, spaceIds, granted) =>
-                getAclService().asScoped(request).primeRecovery(type, spaceIds, granted)
+                getOlsService().asScoped(request).primeRecovery(type, spaceIds, granted)
             : undefined,
         })
       : undefined;
   });
 
-  savedObjects.setAclExtension(({ request }) => {
+  savedObjects.setOlsExtension(({ request }) => {
     // Without RBAC for the request, object-level security cannot be enforced by Security, and Core
     // falls back to an extension that fails closed. Deliberately disabled enforcement is different:
     // the service then allows every object while Core keeps preserving stored ACLs.
-    if (accessControlEnabled && !authz.mode.useRbacForRequest(request)) {
+    if (olsEnabled && !authz.mode.useRbacForRequest(request)) {
       return undefined;
     }
-    return new SavedObjectsAclExtension(getAclService().asScoped(request));
+    return new SavedObjectsOlsExtension(getOlsService().asScoped(request));
   });
 
   savedObjects.setAccessControlTransforms({

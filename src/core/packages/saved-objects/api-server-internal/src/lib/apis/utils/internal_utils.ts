@@ -18,7 +18,7 @@ import {
   type SavedObjectsRawDocParseOptions,
   type SavedObjectAccessControl,
 } from '@kbn/core-saved-objects-server';
-import { normalizeAclSource } from '@kbn/access-control';
+import { normalizeAclSource } from '@kbn/ols';
 import { SavedObjectsUtils, ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import {
   decodeRequestVersion,

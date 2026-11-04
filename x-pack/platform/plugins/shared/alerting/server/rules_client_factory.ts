@@ -535,7 +535,7 @@ export class RulesClientFactory {
         }
         return actions.getActionsClientWithRequest(otherRequest);
       },
-      accessControl: securityService.accessControl,
+      ols: securityService.authz.ols,
       async getEventLogClient() {
         if (isExplicitSpaceOverride) {
           return eventLog.getClientWithRequestInSpace(request, spaceId);

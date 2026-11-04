@@ -8,7 +8,7 @@
 import { useRef, useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { UserConfiguredActionConnector } from '@kbn/alerts-ui-shared/src/common/types/action_types';
-import type { AccessDraft } from '@kbn/access-control-ui';
+import type { AccessDraft } from '@kbn/ols-ui';
 import type { ActionConnector } from '../../types';
 import { createActionConnector } from '../lib/action_connector_api';
 import { useKibana } from '../../common/lib/kibana';
@@ -17,7 +17,7 @@ type CreateConnectorSchema = Pick<
   UserConfiguredActionConnector<Record<string, unknown>, Record<string, unknown>>,
   'actionTypeId' | 'name' | 'config' | 'secrets' | 'id' | 'isInboundEventsEnabled'
 > & {
-  accessControl?: AccessDraft;
+  acl?: AccessDraft;
 };
 
 export interface CreateConnectorError {
@@ -62,12 +62,12 @@ export const useCreateConnector = ({
     abortCtrlRef.current = new AbortController();
 
     try {
-      const { id, accessControl, ...connectorData } = connector;
+      const { id, acl, ...connectorData } = connector;
       const res = await createActionConnector({
         http,
         connector: connectorData,
         id,
-        accessControl,
+        acl,
       });
 
       if (isMounted.current) {

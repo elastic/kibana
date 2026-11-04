@@ -53,7 +53,7 @@ const createConnectorRequestBodyFields = {
       defaultValue: {},
     }
   ),
-  access_control: schema.maybe(
+  acl: schema.maybe(
     schema.object(
       {
         general_access: schema.oneOf(
@@ -77,7 +77,7 @@ const createConnectorRequestBodyFields = {
       {
         meta: {
           description:
-            'Initial access to the connector. The creator becomes its owner. Only valid when object-level access control is enabled.',
+            'Initial access to the connector. The creator becomes its owner. Only valid when object-level security (OLS) is enabled.',
         },
       }
     )

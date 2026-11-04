@@ -86,7 +86,7 @@ export const executeUpdate = async <T>(
     migration: migrationHelper,
     validation: validationHelper,
     user: userHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const typeDefinition = registry.getType(type)!;
@@ -142,7 +142,7 @@ export const executeUpdate = async <T>(
   }
 
   if (!docNotFound) {
-    await aclHelper.enforce('edit', namespace, {
+    await olsHelper.enforce('edit', namespace, {
       type,
       id,
       source: preflightDocResult.rawDocSource?._source,
@@ -206,7 +206,7 @@ export const executeUpdate = async <T>(
     }
 
     // An upsert that creates the object follows the creation rules, with default access.
-    const aclToWrite = await aclHelper.getInitialAcl(type, namespace);
+    const aclToWrite = await olsHelper.getInitialAcl(type, namespace);
 
     // ignore attributes if creating a new doc: only use the upsert attributes
     // don't include upsert if the object already exists; ES doesn't allow upsert in combination with version properties

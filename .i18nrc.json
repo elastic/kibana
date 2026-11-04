@@ -41,6 +41,7 @@
     ],
     "data": "src/platform/plugins/shared/data",
     "observabilityAlertDetails": "x-pack/solutions/observability/packages/alert-details",
+    "olsUi": "src/platform/packages/shared/kbn-ols-ui",
     "dashboardMarkdown": "src/platform/plugins/shared/dashboard_markdown",
     "dataViews": "src/platform/plugins/shared/data_views",
     "defaultNavigation": [
@@ -200,7 +201,6 @@
     "uiActionsExamples": "examples/ui_action_examples",
     "usageCollection": "src/platform/plugins/shared/usage_collection",
     "userProfileComponents": "src/platform/packages/shared/kbn-user-profile-components",
-    "accessControlUi": "src/platform/packages/shared/kbn-access-control-ui",
     "utils": "x-pack/solutions/security/packages/kbn-securitysolution-utils/src",
     "visDefaultEditor": "src/platform/plugins/private/vis_default_editor",
     "visTypeGauge": "src/platform/plugins/private/vis_types/gauge",

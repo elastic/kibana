@@ -58,7 +58,7 @@ export const routeDefinitionParamsMock = {
       getServiceAccountsService: jest
         .fn()
         .mockReturnValue(serviceAccountsServiceMock.createStart()),
-      getAclService: jest.fn(),
+      getOlsService: jest.fn(),
       getSpaceId: jest.fn().mockReturnValue('default'),
       serverlessProjectId: 'mock-project-id',
       serverlessProjectType: 'search',

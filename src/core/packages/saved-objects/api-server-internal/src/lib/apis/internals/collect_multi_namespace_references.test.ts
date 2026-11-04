@@ -93,7 +93,7 @@ describe('collectMultiNamespaceReferences', () => {
       getIndexForType: (type: string) => `index-for-${type}`,
       createPointInTimeFinder: jest.fn() as CreatePointInTimeFinderFn,
       securityExtension,
-      aclHelper: apiHelperMocks.create().acl,
+      olsHelper: apiHelperMocks.create().acl,
       objects,
       options,
     };

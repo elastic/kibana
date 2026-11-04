@@ -54,8 +54,8 @@ export const validateRuleKeyConnectorAccess = async (
     createdInThisRequest,
   }: ValidateRuleKeyConnectorAccessParams
 ): Promise<void> => {
-  const { accessControl, getActionsClientWithRequest } = context;
-  if (!accessControl?.isEnabled() || (!apiKey && !uiamApiKey)) {
+  const { ols, getActionsClientWithRequest } = context;
+  if (!ols || (!apiKey && !uiamApiKey)) {
     return;
   }
 
@@ -80,7 +80,7 @@ export const validateRuleKeyConnectorAccess = async (
     // A key minted in this request may not be searchable yet. It acts for the caller by
     // construction: a granted key belongs to the caller, and a cloned key copies the caller's own.
     const principal = createdInThisRequest
-      ? await accessControl.asScoped(context.request).getPrincipal()
+      ? await ols.asScoped(context.request).getPrincipal()
       : undefined;
     const keyActionsClient = await getActionsClientWithRequest(
       createKeyRequest(`ApiKey ${apiKey}`, spaceId)

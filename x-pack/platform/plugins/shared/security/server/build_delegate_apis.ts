@@ -17,9 +17,9 @@ import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-ser
 import type { Logger } from '@kbn/logging';
 import type { AuditServiceSetup } from '@kbn/security-plugin-types-server';
 
-import type { AclService } from './access_control/acl_service';
 import type { InternalAuthenticationServiceStart } from './authentication';
 import { createFakeRequestEnrichment } from './authentication/fake_request_enrichment';
+import type { OlsService } from './authorization/ols/ols_service';
 import type { ServiceAccountsServiceStart } from './service_accounts';
 import type { Session } from './session_management';
 import { getPrintableSessionId } from './session_management';
@@ -29,7 +29,7 @@ export const buildSecurityApi = ({
   getAuthc,
   getSession,
   getServiceAccounts,
-  getAclService,
+  getOlsService,
   audit,
   config,
   logger,
@@ -37,9 +37,13 @@ export const buildSecurityApi = ({
   getAuthc: () => InternalAuthenticationServiceStart;
   getSession: () => Pick<Session, 'getSID'>;
   getServiceAccounts: () => ServiceAccountsServiceStart | null;
-  getAclService: () => AclService;
+  getOlsService: () => OlsService;
   audit: AuditServiceSetup;
-  config: { uiam?: { enabled: boolean }; serviceAccounts?: { enabled: boolean } };
+  config: {
+    uiam?: { enabled: boolean };
+    serviceAccounts?: { enabled: boolean };
+    authz?: { ols?: { enabled: boolean } };
+  };
   logger: Logger;
 }): CoreSecurityDelegateContract => {
   const enrichment = createFakeRequestEnrichment(logger.get('fake-request-enrichment'));
@@ -140,10 +144,11 @@ export const buildSecurityApi = ({
       withScopedRequestForWorkload: async (pluginId, params, fn) =>
         requireServiceAccounts().workloads.withScopedRequest(pluginId, params, fn),
     },
-    // The service exists only after start, while the delegate is registered during setup.
-    accessControl: {
-      isEnabled: () => getAclService().isEnabled(),
-      asScoped: (request, options) => getAclService().asScoped(request, options),
+    authz: {
+      // The service exists only after start, while the delegate is registered during setup.
+      ols: config.authz?.ols?.enabled
+        ? { asScoped: (request, options) => getOlsService().asScoped(request, options) }
+        : null,
     },
     fakeRequestEnricher: enrichment.enrichRequestWithUserProfile,
   };

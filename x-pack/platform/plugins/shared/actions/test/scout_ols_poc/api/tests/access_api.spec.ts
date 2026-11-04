@@ -21,7 +21,7 @@ const CONNECTOR_INDEX = '.kibana_alerting_cases';
 const KIBANA_SYSTEM_HEADERS = {
   authorization: `Basic ${Buffer.from('kibana_system:changeme').toString('base64')}`,
 };
-const accessPath = (id: string) => `internal/security/access_control/action/${id}`;
+const accessPath = (id: string) => `internal/security/ols/action/${id}`;
 
 apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () => {
   let ctx: OlsTestContext;
@@ -63,7 +63,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
       restricted: true,
       is_owner: true,
       can_claim: false,
-      via_recovery: [],
+      permissions_via_recovery: [],
       current_principal: ctx.principal('owner'),
     });
     expect(owner.body.permissions).toContain('manage_access');
@@ -79,7 +79,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
     const admin = await getAccess(api, 'admin', id);
     expect(admin).toHaveStatusCode(200);
-    expect(admin.body.via_recovery).toContain('manage_access');
+    expect(admin.body.permissions_via_recovery).toContain('manage_access');
     expect(admin.body.acl).toBeDefined();
 
     expect(await getAccess(api, 'stranger', id)).toHaveStatusCode(404);
@@ -327,11 +327,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
 
   apiTest('returns the policy, and 404 for types without one', async ({ apiClient }) => {
     const api = ctx.api(apiClient);
-    const policy = await api.request(
-      'reader',
-      'get',
-      'internal/security/access_control/action/_policy'
-    );
+    const policy = await api.request('reader', 'get', 'internal/security/ols/action/_policy');
     expect(policy).toHaveStatusCode(200);
     expect(policy.body).toMatchObject({
       enabled: true,
@@ -340,10 +336,10 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     });
 
     expect(
-      await api.request('owner', 'get', 'internal/security/access_control/dashboard/_policy')
+      await api.request('owner', 'get', 'internal/security/ols/dashboard/_policy')
     ).toHaveStatusCode(404);
     expect(
-      await api.request('noActions', 'get', 'internal/security/access_control/action/_policy')
+      await api.request('noActions', 'get', 'internal/security/ols/action/_policy')
     ).toHaveStatusCode(403);
   });
 
@@ -352,7 +348,7 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     const response = await api.request(
       'owner',
       'post',
-      'internal/security/access_control/action/_suggest_principals',
+      'internal/security/ols/action/_suggest_principals',
       {
         name: 'OLS',
         size: 50,
@@ -370,14 +366,9 @@ apiTest.describe('Connector access API', { tag: '@local-stateful-classic' }, () 
     expect(byUid.get(ctx.principal('noActions').id)).toStrictEqual([]);
 
     expect(
-      await api.request(
-        'reader',
-        'post',
-        'internal/security/access_control/action/_suggest_principals',
-        {
-          name: 'OLS',
-        }
-      )
+      await api.request('reader', 'post', 'internal/security/ols/action/_suggest_principals', {
+        name: 'OLS',
+      })
     ).toHaveStatusCode(403);
   });
 });

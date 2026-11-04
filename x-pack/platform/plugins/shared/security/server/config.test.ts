@@ -23,9 +23,6 @@ describe('config schema', () => {
   it('generates proper defaults', () => {
     expect(ConfigSchema.validate({})).toMatchInlineSnapshot(`
       Object {
-        "accessControl": Object {
-          "enabled": false,
-        },
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
@@ -63,6 +60,11 @@ describe('config schema', () => {
             "token": undefined,
           },
           "selector": Object {},
+        },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -88,9 +90,6 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: false })).toMatchInlineSnapshot(`
       Object {
-        "accessControl": Object {
-          "enabled": false,
-        },
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
@@ -128,6 +127,11 @@ describe('config schema', () => {
             "token": undefined,
           },
           "selector": Object {},
+        },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
         },
         "cookieName": "sid",
         "encryptionKey": "aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
@@ -153,9 +157,6 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { dist: true })).toMatchInlineSnapshot(`
       Object {
-        "accessControl": Object {
-          "enabled": false,
-        },
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
@@ -194,6 +195,11 @@ describe('config schema', () => {
           },
           "selector": Object {},
         },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
+        },
         "cookieName": "sid",
         "fipsMode": Object {
           "enabled": false,
@@ -217,9 +223,6 @@ describe('config schema', () => {
 
     expect(ConfigSchema.validate({}, { serverless: true, dist: true })).toMatchInlineSnapshot(`
       Object {
-        "accessControl": Object {
-          "enabled": false,
-        },
         "audit": Object {
           "enabled": false,
           "include_saved_object_names": true,
@@ -260,6 +263,11 @@ describe('config schema', () => {
             "token": undefined,
           },
           "selector": Object {},
+        },
+        "authz": Object {
+          "ols": Object {
+            "enabled": false,
+          },
         },
         "cookieName": "sid",
         "fipsMode": Object {

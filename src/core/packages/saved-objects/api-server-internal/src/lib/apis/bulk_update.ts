@@ -90,7 +90,7 @@ export const performBulkUpdate = async <T>(
     migration: migrationHelper,
     user: userHelper,
     validation: validationHelper,
-    acl: aclHelper,
+    acl: olsHelper,
   } = helpers;
   const { securityExtension } = extensions;
   const { migrationVersionCompatibility } = options;
@@ -241,7 +241,7 @@ export const performBulkUpdate = async <T>(
     'bulk_update'
   );
 
-  const aclDecisions = await aclHelper.authorize(
+  const aclDecisions = await olsHelper.authorize(
     'edit',
     namespace,
     validObjects.flatMap(({ value: { type, id, esRequestIndex, objectNamespace } }) => {
@@ -278,7 +278,7 @@ export const performBulkUpdate = async <T>(
         // With object-level security, the write is bound to the document that was authorized.
         const versionProperties = getExpectedVersionProperties(
           version,
-          docFound && aclHelper.isEnforced(type) ? (actualResult as SavedObjectsRawDoc) : undefined
+          docFound && olsHelper.isEnforced(type) ? (actualResult as SavedObjectsRawDoc) : undefined
         );
         const isMultiNS = registry.isMultiNamespace(type);
 
@@ -298,7 +298,7 @@ export const performBulkUpdate = async <T>(
           });
         }
 
-        const aclError = aclHelper.getError(aclDecisions, { type, id });
+        const aclError = olsHelper.getError(aclDecisions, { type, id });
         if (aclError) {
           return left({ id, type, error: errorContent(aclError) });
         }

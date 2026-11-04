@@ -107,11 +107,7 @@ apiTest.describe('Connector import and export', { tag: '@local-stateful-classic'
       const result = await importConnectors(apiClient, 'grantee', [forged], false);
       expect(result.success).toBe(true);
 
-      const { body } = await api.request(
-        'grantee',
-        'get',
-        `internal/security/access_control/action/${id}`
-      );
+      const { body } = await api.request('grantee', 'get', `internal/security/ols/action/${id}`);
       expect(body.is_owner).toBe(true);
       expect(body.acl.general_access).toStrictEqual(['edit']);
     }
@@ -129,11 +125,7 @@ apiTest.describe('Connector import and export', { tag: '@local-stateful-classic'
     expect(
       await api.request('stranger', 'get', `api/actions/connector/${privateId}`)
     ).toHaveStatusCode(404);
-    const { body } = await api.request(
-      'owner',
-      'get',
-      `internal/security/access_control/action/${privateId}`
-    );
+    const { body } = await api.request('owner', 'get', `internal/security/ols/action/${privateId}`);
     expect(body.is_owner).toBe(true);
     expect(body.restricted).toBe(true);
   });

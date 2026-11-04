@@ -40,7 +40,7 @@ import {
   DEPRECATED_LLM_CONNECTOR_INFO,
 } from '@kbn/response-ops-rule-form/src/translations';
 import { connectorTypePublishesKeys } from '@kbn/connector-specs';
-import { useAccessPolicy, type AccessDraft } from '@kbn/access-control-ui';
+import { useAccessPolicy, type AccessDraft } from '@kbn/ols-ui';
 import { isConnectorTypeTestable } from '../../../lib/is_connector_type_testable';
 import { SectionLoading } from '../../../components/section_loading';
 import { CreateConnectorFilter } from './create_connector_filter';
@@ -145,7 +145,7 @@ const CreateConnectorFlyoutComponent: React.FC<CreateConnectorFlyoutProps> = ({
     actionTypeId: actionType?.id,
     initialConnector,
     hideSuccessToast,
-    accessControl: accessDraft,
+    acl: accessDraft,
   });
 
   useEffect(() => {

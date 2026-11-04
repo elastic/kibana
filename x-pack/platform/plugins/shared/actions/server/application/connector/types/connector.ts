@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CanonicalAcl } from '@kbn/access-control';
+import type { StoredAcl } from '@kbn/ols';
 import type { TypeOf } from '@kbn/config-schema';
 import type { connectorSchema, connectorWithExtraFindDataSchema } from '../schemas';
 
@@ -36,5 +36,5 @@ export interface ConnectorWithExtraFindData extends Connector {
  */
 export interface ConnectorWithAcl {
   connector: ConnectorWithExtraFindData;
-  acl?: CanonicalAcl;
+  acl?: StoredAcl;
 }

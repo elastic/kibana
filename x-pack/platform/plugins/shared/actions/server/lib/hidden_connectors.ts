@@ -7,7 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { CoreScopedAccessControl } from '@kbn/core-security-server';
+import type { CoreScopedOlsService } from '@kbn/core-security-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { KueryNode } from '@kbn/es-query';
@@ -15,7 +15,7 @@ import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { ACTION_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
 import type { ConnectorAccessContext } from './connector_access';
-import { getConnectorAccessControl, getConnectorSpaceId } from './connector_access';
+import { getConnectorOls, getConnectorSpaceId } from './connector_access';
 
 const RAW_ID_PREFIX = `${ACTION_SAVED_OBJECT_TYPE}:`;
 const PAGE_SIZE = 1000;
@@ -28,14 +28,14 @@ const POINT_IN_TIME_KEEP_ALIVE = '1m';
  */
 export const getHiddenConnectorIds = async ({
   esClient,
-  accessControl,
+  ols,
   spaceIds,
 }: {
   esClient: ElasticsearchClient;
-  accessControl: Pick<CoreScopedAccessControl, 'getReadFilter'>;
+  ols: Pick<CoreScopedOlsService, 'getReadFilter'>;
   spaceIds: string[];
 }): Promise<string[]> => {
-  const visible = await accessControl.getReadFilter({ type: ACTION_SAVED_OBJECT_TYPE, spaceIds });
+  const visible = await ols.getReadFilter({ type: ACTION_SAVED_OBJECT_TYPE, spaceIds });
   if (!visible) {
     return [];
   }
@@ -91,8 +91,8 @@ export const excludeHiddenConnectors = async (
   context: ConnectorAccessContext & { esClient: ElasticsearchClient },
   { filter, namespaces }: { filter: KueryNode; namespaces?: Array<string | undefined> }
 ): Promise<KueryNode> => {
-  const accessControl = getConnectorAccessControl(context);
-  if (!accessControl) {
+  const ols = getConnectorOls(context);
+  if (!ols) {
     return filter;
   }
 
@@ -102,7 +102,7 @@ export const excludeHiddenConnectors = async (
       : [getConnectorSpaceId(context)];
   const hiddenIds = await getHiddenConnectorIds({
     esClient: context.esClient,
-    accessControl,
+    ols,
     spaceIds,
   });
   if (hiddenIds.length === 0) {

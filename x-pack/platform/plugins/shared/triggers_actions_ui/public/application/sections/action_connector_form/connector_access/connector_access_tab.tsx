@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { ObjectAccessPanel } from '@kbn/access-control-ui';
+import { ObjectAccessPanel } from '@kbn/ols-ui';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CONNECTOR_ACCESS_COPY } from './connector_access_copy';
 

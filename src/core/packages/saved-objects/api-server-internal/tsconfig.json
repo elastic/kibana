@@ -11,7 +11,7 @@
     "**/*.ts",
   ],
   "kbn_references": [
-    "@kbn/access-control",
+    "@kbn/ols",
     "@kbn/config-schema",
     "@kbn/es-query",
     "@kbn/core-elasticsearch-client-server-internal",
