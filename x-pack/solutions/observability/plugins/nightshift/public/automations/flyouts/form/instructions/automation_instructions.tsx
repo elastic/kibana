@@ -9,16 +9,16 @@ import React, { useLayoutEffect, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
   EuiPanel,
   EuiPopover,
+  EuiSelectable,
   EuiSpacer,
   EuiText,
   useEuiTheme,
+  type EuiSelectableOption,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
@@ -57,13 +57,13 @@ const modes: Record<
       defaultMessage: 'Investigate',
     }),
     help: i18n.translate('xpack.nightshift.automations.flyout.investigateModeHelp', {
-      defaultMessage: 'Search and reason over context to trace issues and surface likely causes.',
+      defaultMessage: 'Search and reason over context to trace issues and surface likely causes',
     }),
     placeholder: i18n.translate('xpack.nightshift.automations.flyout.investigatePlaceholder', {
       defaultMessage:
         'Describe how Nightshift should investigate and respond when this automation runs…',
     }),
-    icon: 'reporter',
+    icon: 'inspect',
     color: 'primary',
     badgeColor: 'primary',
     accent: 'textPrimary',
@@ -71,7 +71,7 @@ const modes: Record<
   ask: {
     label: i18n.translate('xpack.nightshift.automations.flyout.askMode', { defaultMessage: 'Ask' }),
     help: i18n.translate('xpack.nightshift.automations.flyout.askModeHelp', {
-      defaultMessage: 'Get direct answers and explanations without running a deep investigation.',
+      defaultMessage: 'Get direct answers and explanations without running a deep investigation',
     }),
     placeholder: i18n.translate('xpack.nightshift.automations.flyout.askPlaceholder', {
       defaultMessage: 'Ask a question when this automation runs…',
@@ -105,6 +105,16 @@ export const AutomationInstructions = ({
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const current = modes[mode];
   const accent = euiTheme.colors[current.accent];
+  const modeOptions: Array<EuiSelectableOption<{ mode: InstructionMode }>> = (
+    Object.keys(modes) as InstructionMode[]
+  ).map((key) => ({
+    key,
+    mode: key,
+    label: modes[key].label,
+    checked: key === mode ? 'on' : undefined,
+    textWrap: 'wrap',
+    'data-test-subj': `automationInstructionMode-${key}`,
+  }));
 
   useLayoutEffect(() => {
     const textarea = textareaRef.current;
@@ -226,19 +236,13 @@ export const AutomationInstructions = ({
               </EuiButton>
             }
           >
-            <EuiContextMenuPanel
-              css={{ inlineSize: 300 }}
-              items={(Object.keys(modes) as InstructionMode[]).map((key) => (
-                <EuiContextMenuItem
-                  key={key}
-                  icon={key === mode ? 'check' : 'empty'}
-                  layoutAlign="top"
-                  onClick={() => {
-                    onModeChange(key);
-                    setIsOpen(false);
-                  }}
-                  data-test-subj={`automationInstructionMode-${key}`}
-                >
+            <EuiSelectable<{ mode: InstructionMode }>
+              aria-label={labels.mode}
+              singleSelection
+              options={modeOptions}
+              listProps={{ bordered: false, isVirtualized: false, paddingSize: 's' }}
+              renderOption={(option) => (
+                <>
                   <EuiFlexGroup
                     gutterSize="s"
                     alignItems="center"
@@ -246,18 +250,26 @@ export const AutomationInstructions = ({
                     component="span"
                   >
                     <EuiFlexItem grow={false} component="span">
-                      <EuiIcon type={modes[key].icon} size="s" aria-hidden={true} />
+                      <EuiIcon type={modes[option.mode].icon} size="m" aria-hidden={true} />
                     </EuiFlexItem>
                     <EuiFlexItem grow={false} component="span">
-                      <strong>{modes[key].label}</strong>
+                      <strong>{option.label}</strong>
                     </EuiFlexItem>
                   </EuiFlexGroup>
                   <EuiText size="xs" color="subdued">
-                    {modes[key].help}
+                    {modes[option.mode].help}
                   </EuiText>
-                </EuiContextMenuItem>
-              ))}
-            />
+                </>
+              )}
+              onChange={(_options, _event, changed) => {
+                if (changed.mode) {
+                  onModeChange(changed.mode);
+                  setIsOpen(false);
+                }
+              }}
+            >
+              {(list) => <div css={{ inlineSize: 300 }}>{list}</div>}
+            </EuiSelectable>
           </EuiPopover>
         </div>
       </div>
