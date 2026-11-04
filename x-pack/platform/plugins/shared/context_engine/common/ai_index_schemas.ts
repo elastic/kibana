@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   MAX_AI_INDEX_AUTOMATION_LENGTH,
   MAX_AI_INDEX_AUTOMATIONS,
@@ -93,61 +93,71 @@ export const aiIndexIdFieldSchema = z
 const [elasticAgentTraceSchema, indexTraceSchema, esqlTraceSchema] = aiIndexTraceSchema.options;
 const [esqlSourceSchema, connectorSourceSchema] = aiIndexSourceSchema.options;
 
-const fieldSummarySchema = z.object({
-  path: z.string(),
-  type: z.string(),
-  searchable: z.boolean(),
-  aggregatable: z.boolean(),
-});
+const fieldSummarySchema = lazySchema(() =>
+  z.object({
+    path: z.string(),
+    type: z.string(),
+    searchable: z.boolean(),
+    aggregatable: z.boolean(),
+  })
+);
 
 /** Added to a source when `_suggest_automation_context` has inspected it; absent otherwise. */
 const sourceContextFieldsSchema = {
-  row_count: z.number().optional(),
-  sample_documents: z.array(z.record(z.string(), z.unknown())).optional(),
-  fields: z.array(fieldSummarySchema).optional(),
-  inspection_error: z.string().optional(),
+  row_count: lazySchema(() => z.number().optional()),
+  sample_documents: lazySchema(() => z.array(z.record(z.string(), z.unknown())).optional()),
+  fields: lazySchema(() => z.array(fieldSummarySchema).optional()),
+  inspection_error: lazySchema(() => z.string().optional()),
 };
 
-export const aiIndexSourceContextSchema = z.discriminatedUnion('type', [
-  esqlSourceSchema.extend(sourceContextFieldsSchema),
-  connectorSourceSchema.extend(sourceContextFieldsSchema),
-]);
+export const aiIndexSourceContextSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    esqlSourceSchema.extend(sourceContextFieldsSchema),
+    connectorSourceSchema.extend(sourceContextFieldsSchema),
+  ])
+);
 
 /** Added to an automation when `_suggest_automation_context` has read its definition. */
-export const aiIndexAutomationContextSchema = aiIndexAutomationSchema.extend({
-  yaml: z.string().optional(),
-  fetch_error: z.string().optional(),
-});
+export const aiIndexAutomationContextSchema = lazySchema(() =>
+  aiIndexAutomationSchema.extend({
+    yaml: z.string().optional(),
+    fetch_error: z.string().optional(),
+  })
+);
 
 /** Added to a trace when `_suggest_automation_context` has counted it. */
 const traceContextFieldsSchema = {
-  row_count: z.number().optional(),
-  count_error: z.string().optional(),
+  row_count: lazySchema(() => z.number().optional()),
+  count_error: lazySchema(() => z.string().optional()),
 };
 
-export const aiIndexTraceContextSchema = z.discriminatedUnion('type', [
-  elasticAgentTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
-  indexTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
-  esqlTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
-]);
+export const aiIndexTraceContextSchema = lazySchema(() =>
+  z.discriminatedUnion('type', [
+    elasticAgentTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
+    indexTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
+    esqlTraceSchema.extend({ query: z.string() }).extend(traceContextFieldsSchema),
+  ])
+);
 
-export const aiIndexSignalsSummarySchema = z.object({
-  total: z.number(),
-  by_tag: z.array(z.object({ tag: z.string(), count: z.number() })),
-});
+export const aiIndexSignalsSummarySchema = lazySchema(() =>
+  z.object({
+    total: z.number(),
+    by_tag: z.array(z.object({ tag: z.string(), count: z.number() })),
+  })
+);
 
 // Overwrite sources/automations/traces because an attachment carries read-time context
 // (field summaries, sample documents, existing automation YAML, trace counts) alongside the
 // derived/runtime query that traces always carry.
-export const aiIndexAttachmentDataSchema = aiIndexPropertiesSchema
-  .omit({ sources: true, automations: true, traces: true })
-  .extend({
+export const aiIndexAttachmentDataSchema = lazySchema(() =>
+  aiIndexPropertiesSchema.omit({ sources: true, automations: true, traces: true }).extend({
     id: aiIndexIdFieldSchema,
     sources: z.array(aiIndexSourceContextSchema).max(MAX_AI_INDEX_SOURCES),
     automations: z.array(aiIndexAutomationContextSchema).max(MAX_AI_INDEX_AUTOMATIONS),
     traces: z.array(aiIndexTraceContextSchema).max(MAX_AI_INDEX_TRACES),
     signals_summary: aiIndexSignalsSummarySchema.optional(),
-  });
+  })
+);
 
 export interface AiIndexFieldSummary {
   path: string;
