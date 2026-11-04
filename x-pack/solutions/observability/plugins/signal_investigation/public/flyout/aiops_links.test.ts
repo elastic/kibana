@@ -7,7 +7,13 @@
 
 import type { InvestigationSeed } from '@kbn/investigation-seed';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import { buildAnalysisToolLink, buildLeadDrilldownHref } from './aiops_links';
+import {
+  buildAnalysisToolLink,
+  buildLeadDrilldownHref,
+  buildLeadDrilldownLabel,
+  buildLogRateLeadScope,
+  buildLogRatePreviewQuery,
+} from './aiops_links';
 
 const seed = (overrides: Partial<InvestigationSeed> = {}): InvestigationSeed => ({
   origin: { app: 'alerts', alertId: 'alert-1', ruleTypeId: 'apm.threshold' },
@@ -408,6 +414,57 @@ describe('buildLeadDrilldownHref', () => {
       technique: 'Anomaly detection',
       label: 'Open Anomaly Detection settings',
       href: '/kbn/app/apm/settings/anomaly-detection',
+    });
+
+    expect(buildLeadDrilldownLabel('log_rate_analysis')).toBe('Open in Discover');
+    expect(buildLeadDrilldownLabel('log_change_points')).toBe('Open in Discover');
+    expect(buildLeadDrilldownLabel('metric_change_points')).toBe('Open host details');
+    expect(buildLeadDrilldownLabel('dependency_change_points')).toBe('Open in APM');
+  });
+
+  it('builds a shared log rate scope and preview query that preserves seed query, filters, entity scope, lead filter, and time range', () => {
+    const logSeed = seed({
+      query: { language: 'lucene', query: 'status:500' },
+      filters: [{ meta: { key: 'host.name' }, query: { term: { 'host.name': 'web-1' } } }],
+    });
+    const scope = buildLogRateLeadScope({
+      lead: {
+        id: 'lra-1',
+        analyzerId: 'log_rate_analysis',
+        summary: 'error.message: "PAYMENT_TIMEOUT"',
+        relevance: 'Logs for service checkout',
+        ranking: { signal: 'strong', timing: 'during', relationship: 'service' },
+        locatorParams: {
+          'entity.0.field': 'service.name',
+          'entity.0.value': 'checkout',
+          leadField: 'error.message',
+          leadValue: 'PAYMENT_TIMEOUT',
+          indexPattern: 'logs-payments-*',
+          timeField: 'event.ingested',
+          rangeFrom: '2026-11-02T11:00:00.000Z',
+          rangeTo: '2026-11-02T11:20:00.000Z',
+        },
+      },
+      seed: logSeed,
+    });
+
+    expect(buildLogRatePreviewQuery(scope)).toEqual({
+      bool: {
+        must: [{ query_string: { query: 'status:500' } }],
+        filter: [
+          { term: { 'host.name': 'web-1' } },
+          { match_phrase: { 'service.name': 'checkout' } },
+          { match_phrase: { 'error.message': 'PAYMENT_TIMEOUT' } },
+          {
+            range: {
+              'event.ingested': {
+                gte: '2026-11-02T11:00:00.000Z',
+                lte: '2026-11-02T11:20:00.000Z',
+              },
+            },
+          },
+        ],
+      },
     });
   });
 });

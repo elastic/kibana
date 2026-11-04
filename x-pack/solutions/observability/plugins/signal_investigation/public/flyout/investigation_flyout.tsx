@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
   EuiButton,
@@ -21,8 +21,10 @@ import {
   EuiSelect,
   EuiSpacer,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core/public';
@@ -68,9 +70,11 @@ import {
 } from './aiops_links';
 import { analyzerApplies, inapplicabilityMessage } from './analyzer_applicability';
 import {
+  MAX_SEED_HISTORY_ENTRIES,
   type CoverageItemState,
   type CoverageStatus,
   type DateFormatter,
+  type SeedHistoryEntry,
   applyEntityPivot,
   buildAgentVerifyInitialMessage,
   canOfferWindowEntityPivot,
@@ -82,6 +86,8 @@ import {
   formatLeadShiftMultiplier,
   formatPivotEntityLabel,
   formatSeedStepLabel,
+  loadInvestigationSession,
+  saveInvestigationSession,
   selectEmptyLeadsKind,
 } from './flyout_state';
 import {
@@ -99,6 +105,9 @@ import {
 } from './host_resolution';
 import type { ChartMetricOption } from '../actions/lens_seed_extractor';
 import { LeadFeedbackControls, type LeadFeedbackVerdict } from './lead_feedback';
+import { LeadPreviewContent, LeadPreviewFlyout } from './lead_preview';
+
+type InvestigationFlyoutRef = ReturnType<CoreStart['overlays']['openFlyoutTemplate']>;
 
 interface AnalyzerCatalogItem {
   id: string;
@@ -216,205 +225,278 @@ const investigateEntityLabel = (value: string): string =>
 
 const LeadCard = ({
   lead,
+  seed,
   drilldownHref,
   toolLink,
   comparison,
   entityPivot,
+  data,
   formatDate,
   feedbackValue,
   feedbackEnabled,
+  isInlinePreview,
+  isExpanded,
   onLeadClick,
   onPivotClick,
   onFeedbackChange,
 }: {
   lead: InvestigationLead;
+  seed: InvestigationSeed;
   drilldownHref: string | undefined;
   toolLink: AnalysisToolLink;
   comparison?: SignalAnalyzerComparison;
   entityPivot?: SignalAnalyzerPivot;
+  data?: DataPublicPluginStart;
   formatDate: DateFormatter;
   feedbackValue: LeadFeedbackVerdict | undefined;
   feedbackEnabled: boolean;
+  isInlinePreview: boolean;
+  isExpanded: boolean;
   onLeadClick: () => void;
   onPivotClick?: (pivot: SignalAnalyzerPivot) => void;
   onFeedbackChange: (next: LeadFeedbackVerdict | undefined) => void;
-}) => (
-  <EuiPanel hasBorder paddingSize="m" hasShadow={false} data-test-subj="signalInvestigationLead">
-    <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
-      <EuiFlexItem>
-        <EuiText size="s">
-          <p>
-            {drilldownHref ? (
-              <EuiLink
-                href={drilldownHref}
-                onClick={onLeadClick}
-                data-test-subj="signalInvestigationLeadLink"
-                {...getEbtProps({
-                  action: 'signalInvestigationLeadDrilldown',
-                  element: 'signalInvestigationLeadCard',
+}) => {
+  const previewPanelId = `signalInvestigationLeadPreview-${lead.id}`;
+  return (
+    <EuiPanel hasBorder paddingSize="l" hasShadow={false} data-test-subj="signalInvestigationLead">
+      <EuiFlexGroup direction="column" gutterSize="m" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem>
+              <EuiText size="s">
+                <p>
+                  <EuiLink
+                    onClick={onLeadClick}
+                    aria-expanded={isInlinePreview ? isExpanded : undefined}
+                    aria-controls={isInlinePreview ? previewPanelId : undefined}
+                    data-test-subj="signalInvestigationLeadLink"
+                    {...getEbtProps({
+                      action: 'signalInvestigationLeadPreview',
+                      element: 'signalInvestigationLeadCard',
+                    })}
+                  >
+                    {lead.summary}
+                  </EuiLink>
+                </p>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <LeadFeedbackControls
+                leadId={lead.id}
+                value={feedbackValue}
+                feedbackEnabled={feedbackEnabled}
+                onChange={onFeedbackChange}
+              />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {comparison
+                ? i18n.translate('xpack.signalInvestigation.flyout.leadRelevanceWithComparison', {
+                    defaultMessage: '{relevance} · {comparison}',
+                    values: {
+                      relevance: lead.relevance,
+                      comparison: formatComparisonWindows(comparison, formatDate),
+                    },
+                  })
+                : lead.occurredAt
+                ? i18n.translate('xpack.signalInvestigation.flyout.leadRelevanceWithTime', {
+                    defaultMessage: '{relevance} · {occurredAt}',
+                    values: { relevance: lead.relevance, occurredAt: formatDate(lead.occurredAt) },
+                  })
+                : lead.relevance}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        {lead.shift ? (
+          <EuiFlexItem grow={false}>
+            <EuiToolTip
+              position="top"
+              content={i18n.translate('xpack.signalInvestigation.flyout.shiftRateTooltipMessage', {
+                defaultMessage:
+                  'Document rate scaled to the length of the deviation window for direct comparison with the baseline window.',
+              })}
+            >
+              <div
+                tabIndex={0}
+                role="group"
+                aria-label={i18n.translate('xpack.signalInvestigation.flyout.shiftAriaLabel', {
+                  defaultMessage: 'Normalized document rate comparison',
                 })}
+                data-test-subj={`signalInvestigationLeadShift-${lead.id}`}
               >
-                {lead.summary}
-              </EuiLink>
-            ) : (
-              lead.summary
-            )}
-          </p>
-        </EuiText>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <LeadFeedbackControls
-          leadId={lead.id}
-          value={feedbackValue}
-          feedbackEnabled={feedbackEnabled}
-          onChange={onFeedbackChange}
-        />
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiText size="xs" color="subdued">
-      <p>
-        {comparison
-          ? i18n.translate('xpack.signalInvestigation.flyout.leadRelevanceWithComparison', {
-              defaultMessage: '{relevance} · {comparison}',
-              values: {
-                relevance: lead.relevance,
-                comparison: formatComparisonWindows(comparison, formatDate),
-              },
-            })
-          : lead.occurredAt
-          ? i18n.translate('xpack.signalInvestigation.flyout.leadRelevanceWithTime', {
-              defaultMessage: '{relevance} · {occurredAt}',
-              values: { relevance: lead.relevance, occurredAt: formatDate(lead.occurredAt) },
-            })
-          : lead.relevance}
-      </p>
-    </EuiText>
-    {lead.shift ? (
-      <div
-        role="group"
-        aria-label={i18n.translate('xpack.signalInvestigation.flyout.shiftAriaLabel', {
-          defaultMessage: 'Normalized document rate comparison',
-        })}
-        data-test-subj={`signalInvestigationLeadShift-${lead.id}`}
-      >
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiProgress
-              size="xs"
+                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                  <EuiFlexItem>
+                    <EuiProgress
+                      size="xs"
+                      color="subdued"
+                      value={lead.shift.baseline}
+                      max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
+                      valueText={String(lead.shift.baseline)}
+                      label={i18n.translate(
+                        'xpack.signalInvestigation.flyout.shiftBaselineRateLabel',
+                        {
+                          defaultMessage: 'Baseline normalized rate',
+                        }
+                      )}
+                      data-test-subj={`signalInvestigationShiftBaseline-${lead.id}`}
+                    />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiProgress
+                      size="xs"
+                      color="primary"
+                      value={lead.shift.deviation}
+                      max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
+                      valueText={String(lead.shift.deviation)}
+                      label={i18n.translate(
+                        'xpack.signalInvestigation.flyout.shiftDeviationRateLabel',
+                        {
+                          defaultMessage: 'Deviation normalized rate',
+                        }
+                      )}
+                      data-test-subj={`signalInvestigationShiftDeviation-${lead.id}`}
+                    />
+                  </EuiFlexItem>
+                  {(() => {
+                    const multiplierLabel = formatLeadShiftMultiplier(lead.shift);
+                    return multiplierLabel ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiBadge
+                          color="default"
+                          data-test-subj={`signalInvestigationShiftMultiplier-${lead.id}`}
+                        >
+                          {multiplierLabel}
+                        </EuiBadge>
+                      </EuiFlexItem>
+                    ) : null;
+                  })()}
+                </EuiFlexGroup>
+              </div>
+            </EuiToolTip>
+          </EuiFlexItem>
+        ) : null}
+        <EuiFlexItem grow={false}>
+          <EuiFlexGroup gutterSize="s" wrap responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{signalLabel(lead.ranking.signal)}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{timingLabel(lead.ranking.timing)}</EuiBadge>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiBadge color="hollow">{relationshipLabel(lead.ranking.relationship)}</EuiBadge>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.signalInvestigation.flyout.foundUsingTechnique', {
+                defaultMessage: 'Found using {technique}',
+                values: { technique: toolLink.technique },
+              })}
+              {toolLink.href ? (
+                <>
+                  {' · '}
+                  <EuiLink
+                    href={toolLink.href}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    external
+                    data-test-subj="signalInvestigationLeadToolLink"
+                    {...getEbtProps({
+                      action: 'signalInvestigationOpenDedicatedTool',
+                      element: 'signalInvestigationLeadCard',
+                    })}
+                  >
+                    {toolLink.label}
+                  </EuiLink>
+                </>
+              ) : null}
+              {entityPivot && onPivotClick ? (
+                <>
+                  {' · '}
+                  <EuiLink
+                    onClick={() => onPivotClick(entityPivot)}
+                    data-test-subj={`signalInvestigationLeadPivot-${lead.id}`}
+                    {...getEbtProps({
+                      action: 'signalInvestigationPivotEntity',
+                      element: 'signalInvestigationLeadCard',
+                    })}
+                  >
+                    {investigateEntityLabel(entityPivot.value)}
+                  </EuiLink>
+                </>
+              ) : null}
+            </p>
+          </EuiText>
+        </EuiFlexItem>
+        {isInlinePreview && isExpanded ? (
+          <EuiFlexItem grow={false}>
+            <EuiPanel
+              id={previewPanelId}
               color="subdued"
-              value={lead.shift.baseline}
-              max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
-              valueText={String(lead.shift.baseline)}
-              label={i18n.translate('xpack.signalInvestigation.flyout.shiftBaselineRateLabel', {
-                defaultMessage: 'Baseline normalized rate',
-              })}
-              data-test-subj={`signalInvestigationShiftBaseline-${lead.id}`}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem>
-            <EuiProgress
-              size="xs"
-              color="primary"
-              value={lead.shift.deviation}
-              max={Math.max(lead.shift.baseline, lead.shift.deviation, 1)}
-              valueText={String(lead.shift.deviation)}
-              label={i18n.translate('xpack.signalInvestigation.flyout.shiftDeviationRateLabel', {
-                defaultMessage: 'Deviation normalized rate',
-              })}
-              data-test-subj={`signalInvestigationShiftDeviation-${lead.id}`}
-            />
-          </EuiFlexItem>
-          {(() => {
-            const multiplierLabel = formatLeadShiftMultiplier(lead.shift);
-            return multiplierLabel ? (
-              <EuiFlexItem grow={false}>
-                <EuiBadge
-                  color="default"
-                  data-test-subj={`signalInvestigationShiftMultiplier-${lead.id}`}
-                >
-                  {multiplierLabel}
-                </EuiBadge>
-              </EuiFlexItem>
-            ) : null;
-          })()}
-        </EuiFlexGroup>
-      </div>
-    ) : null}
-    <EuiFlexGroup gutterSize="xs" wrap responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{signalLabel(lead.ranking.signal)}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{timingLabel(lead.ranking.timing)}</EuiBadge>
-      </EuiFlexItem>
-      <EuiFlexItem grow={false}>
-        <EuiBadge color="hollow">{relationshipLabel(lead.ranking.relationship)}</EuiBadge>
-      </EuiFlexItem>
-    </EuiFlexGroup>
-    <EuiText size="xs" color="subdued">
-      <p>
-        {i18n.translate('xpack.signalInvestigation.flyout.foundUsingTechnique', {
-          defaultMessage: 'Found using {technique}',
-          values: { technique: toolLink.technique },
-        })}
-        {toolLink.href ? (
-          <>
-            {' · '}
-            <EuiLink
-              href={toolLink.href}
-              data-test-subj="signalInvestigationLeadToolLink"
-              {...getEbtProps({
-                action: 'signalInvestigationOpenDedicatedTool',
-                element: 'signalInvestigationLeadCard',
-              })}
+              paddingSize="m"
+              hasShadow={false}
+              data-test-subj={`signalInvestigationLeadInlinePreview-${lead.id}`}
             >
-              {toolLink.label}
-            </EuiLink>
-          </>
+              <LeadPreviewContent
+                lead={lead}
+                seed={seed}
+                comparison={comparison}
+                drilldownHref={drilldownHref}
+                toolLink={toolLink}
+                data={data}
+                formatDate={formatDate}
+              />
+            </EuiPanel>
+          </EuiFlexItem>
         ) : null}
-        {entityPivot && onPivotClick ? (
-          <>
-            {' · '}
-            <EuiLink
-              onClick={() => onPivotClick(entityPivot)}
-              data-test-subj={`signalInvestigationLeadPivot-${lead.id}`}
-              {...getEbtProps({
-                action: 'signalInvestigationPivotEntity',
-                element: 'signalInvestigationLeadCard',
-              })}
-            >
-              {investigateEntityLabel(entityPivot.value)}
-            </EuiLink>
-          </>
-        ) : null}
-      </p>
-    </EuiText>
-  </EuiPanel>
-);
+      </EuiFlexGroup>
+    </EuiPanel>
+  );
+};
 
 export const InvestigationFlyoutBody = ({
   core,
+  data,
   share,
   licensing,
   agentBuilder,
   seed: initialSeed,
+  session = 'start',
   metricOptions = [],
   initialMetricId,
   metricUnreadable = false,
   previousSeedLabel,
+  feedbackByLead: controlledFeedbackByLead,
+  onFeedbackByLeadChange,
+  onMetricChange,
   onPivot,
   onBack,
   onClose,
 }: {
   core: CoreStart;
+  data?: DataPublicPluginStart;
   share?: SharePluginStart;
   licensing?: LicensingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   seed: InvestigationSeed;
+  session?: 'start' | 'inherit';
   metricOptions?: readonly ChartMetricOption[];
   initialMetricId?: string;
   metricUnreadable?: boolean;
   previousSeedLabel?: string;
+  feedbackByLead?: Readonly<Record<string, LeadFeedbackVerdict | undefined>>;
+  onFeedbackByLeadChange?: (
+    updater: (
+      current: Record<string, LeadFeedbackVerdict | undefined>
+    ) => Record<string, LeadFeedbackVerdict | undefined>
+  ) => void;
+  onMetricChange?: (metricId: string) => void;
   onPivot?: (nextSeed: InvestigationSeed, currentMetricId: string | undefined) => void;
   onBack?: () => void;
   onClose: () => void;
@@ -424,16 +506,38 @@ export const InvestigationFlyoutBody = ({
   );
   const selectedMetric =
     metricOptions.find((option) => option.id === selectedMetricId) ?? metricOptions[0];
-  const seed: InvestigationSeed =
-    metricOptions.length > 1 && selectedMetric
-      ? {
-          ...initialSeed,
-          metric: {
-            operationType: selectedMetric.operationType,
-            ...(selectedMetric.field ? { field: selectedMetric.field } : {}),
-          },
-        }
-      : initialSeed;
+  const seed: InvestigationSeed = useMemo(
+    () =>
+      metricOptions.length > 1 && selectedMetric
+        ? {
+            ...initialSeed,
+            metric: {
+              operationType: selectedMetric.operationType,
+              ...(selectedMetric.field ? { field: selectedMetric.field } : {}),
+            },
+          }
+        : initialSeed,
+    [initialSeed, metricOptions.length, selectedMetric]
+  );
+
+  const childFlyoutRef = useRef<InvestigationFlyoutRef | null>(null);
+  const [expandedLeadId, setExpandedLeadId] = useState<string | null>(null);
+  const isInlinePreview = session === 'inherit';
+
+  const closeChildFlyout = useCallback(() => {
+    const ref = childFlyoutRef.current;
+    childFlyoutRef.current = null;
+    if (ref && typeof ref.close === 'function') {
+      void ref.close();
+    }
+  }, []);
+
+  useEffect(() => {
+    setExpandedLeadId(null);
+    return () => {
+      closeChildFlyout();
+    };
+  }, [seed, closeChildFlyout]);
 
   useEffect(() => {
     registerFindingsAttachmentUiDefinition(agentBuilder);
@@ -642,17 +746,83 @@ export const InvestigationFlyoutBody = ({
     canOfferWindowEntityPivot(seed) && logRateResult?.pivot ? logRateResult.pivot : undefined;
 
   const triggerPivot = (pivot: SignalAnalyzerPivot): void => {
+    closeChildFlyout();
     onPivot?.(applyEntityPivot(seed, pivot), selectedMetric?.id);
+  };
+
+  const handleBack = (): void => {
+    closeChildFlyout();
+    onBack?.();
+  };
+
+  const handleClose = (): void => {
+    closeChildFlyout();
+    onClose();
   };
 
   const leads = rankLeads(
     leadQueries.flatMap((query) => (query.data as SignalAnalyzerResult | undefined)?.leads ?? [])
   );
 
-  const [feedbackByLead, setFeedbackByLead] = useState<
+  const [localFeedbackByLead, setLocalFeedbackByLead] = useState<
     Record<string, LeadFeedbackVerdict | undefined>
   >({});
+  const feedbackByLead = controlledFeedbackByLead ?? localFeedbackByLead;
+  const updateFeedbackByLead = onFeedbackByLeadChange ?? setLocalFeedbackByLead;
   const feedbackEnabled = core.notifications.feedback.isEnabled();
+
+  const openLeadPreview = (
+    lead: InvestigationLead,
+    rank: number,
+    toolLink: AnalysisToolLink,
+    drilldownHref: string | undefined
+  ): void => {
+    if (isInlinePreview) {
+      const willExpand = expandedLeadId !== lead.id;
+      if (willExpand) {
+        reportSignalInvestigationLeadClicked(core.analytics, {
+          analyzerId: lead.analyzerId,
+          rank,
+        });
+      }
+      setExpandedLeadId(willExpand ? lead.id : null);
+      return;
+    }
+
+    reportSignalInvestigationLeadClicked(core.analytics, {
+      analyzerId: lead.analyzerId,
+      rank,
+    });
+
+    closeChildFlyout();
+    const comparison = lead.analyzerId === LOG_RATE_ANALYSIS_ID ? logRateComparison : undefined;
+    let openedRef: InvestigationFlyoutRef | null = null;
+    openedRef = core.overlays.openFlyoutTemplate(
+      {
+        size: 's',
+        session: 'inherit',
+        'data-test-subj': 'signalInvestigationLeadPreviewFlyout',
+        onClose: () => {
+          if (childFlyoutRef.current === openedRef) {
+            childFlyoutRef.current = null;
+          }
+        },
+      },
+      ({ onClose: closePreview }) => (
+        <LeadPreviewFlyout
+          lead={lead}
+          seed={seed}
+          comparison={comparison}
+          drilldownHref={drilldownHref}
+          toolLink={toolLink}
+          data={data}
+          formatDate={formatDate}
+          onClose={closePreview}
+        />
+      )
+    );
+    childFlyoutRef.current = openedRef ?? null;
+  };
 
   const settled = coverage.filter((item) => item.status !== 'running').length;
   const total = coverage.length;
@@ -779,29 +949,29 @@ export const InvestigationFlyoutBody = ({
             share,
             canUseAiops,
           });
+          const drilldownHref = buildLeadDrilldownHref({ lead, seed, share });
           const leadPivot = onPivot ? extractLeadEntityPivot(lead, seed) : undefined;
           return (
             <EuiFlexItem key={lead.id} grow={false}>
               <LeadCard
                 lead={lead}
-                drilldownHref={buildLeadDrilldownHref({ lead, seed, share })}
+                seed={seed}
+                drilldownHref={drilldownHref}
                 toolLink={toolLink}
                 comparison={
                   lead.analyzerId === LOG_RATE_ANALYSIS_ID ? logRateComparison : undefined
                 }
                 entityPivot={leadPivot}
+                data={data}
                 formatDate={formatDate}
                 feedbackValue={feedbackByLead[lead.id]}
                 feedbackEnabled={feedbackEnabled}
-                onLeadClick={() =>
-                  reportSignalInvestigationLeadClicked(core.analytics, {
-                    analyzerId: lead.analyzerId,
-                    rank,
-                  })
-                }
+                isInlinePreview={isInlinePreview}
+                isExpanded={isInlinePreview && expandedLeadId === lead.id}
+                onLeadClick={() => openLeadPreview(lead, rank, toolLink, drilldownHref)}
                 onPivotClick={onPivot ? triggerPivot : undefined}
                 onFeedbackChange={(next) => {
-                  setFeedbackByLead((current) => ({ ...current, [lead.id]: next }));
+                  updateFeedbackByLead((current) => ({ ...current, [lead.id]: next }));
                   if (next !== undefined) {
                     reportSignalInvestigationLeadFeedback(core.analytics, {
                       analyzerId: lead.analyzerId,
@@ -858,7 +1028,7 @@ export const InvestigationFlyoutBody = ({
   })();
 
   return (
-    <FlyoutTemplate onClose={onClose}>
+    <FlyoutTemplate onClose={handleClose}>
       <FlyoutTemplate.Header
         title={i18n.translate('xpack.signalInvestigation.flyout.title', {
           defaultMessage: 'Find related changes',
@@ -868,7 +1038,7 @@ export const InvestigationFlyoutBody = ({
             {previousSeedLabel && onBack ? (
               <div>
                 <EuiLink
-                  onClick={onBack}
+                  onClick={handleBack}
                   data-test-subj="signalInvestigationBackLink"
                   {...getEbtProps({
                     action: 'signalInvestigationPivotBack',
@@ -905,7 +1075,11 @@ export const InvestigationFlyoutBody = ({
                     element: 'signalInvestigationFlyoutHeader',
                   })}
                   value={selectedMetric?.id ?? ''}
-                  onChange={(event) => setSelectedMetricId(event.target.value)}
+                  onChange={(event) => {
+                    const nextMetricId = event.target.value;
+                    setSelectedMetricId(nextMetricId);
+                    onMetricChange?.(nextMetricId);
+                  }}
                   options={metricOptions.map((option) => ({
                     value: option.id,
                     text: option.label,
@@ -994,6 +1168,9 @@ export const InvestigationFlyoutBody = ({
                             {' · '}
                             <EuiLink
                               href={item.toolLinkHref}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              external
                               data-test-subj={`signalInvestigationCoverageLink-${item.id}`}
                               {...getEbtProps({
                                 action: 'signalInvestigationOpenDedicatedTool',
@@ -1045,36 +1222,48 @@ export const InvestigationFlyoutBody = ({
   );
 };
 
-interface SeedHistoryEntry {
-  seed: InvestigationSeed;
-  metricId?: string;
-}
-
 const seedHistoryKey = (seed: InvestigationSeed, index: number): string =>
   `${index}:${seed.entities['service.name'] ?? ''}:${seed.entities['host.name'] ?? ''}`;
 
 export const InvestigationFlyoutContainer = ({
   core,
+  data,
   share,
   licensing,
   agentBuilder,
   seed: initialSeed,
+  session = 'start',
   metricOptions,
   metricUnreadable,
   onClose,
 }: {
   core: CoreStart;
+  data?: DataPublicPluginStart;
   share?: SharePluginStart;
   licensing?: LicensingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   seed: InvestigationSeed;
+  session?: 'start' | 'inherit';
   metricOptions?: readonly ChartMetricOption[];
   metricUnreadable?: boolean;
   onClose: () => void;
 }) => {
-  const [history, setHistory] = useState<readonly SeedHistoryEntry[]>([
-    { seed: initialSeed, metricId: metricOptions?.[0]?.id },
-  ]);
+  const initialRestored = useMemo(() => loadInvestigationSession({ initialSeed }), [initialSeed]);
+  const [history, setHistory] = useState<readonly SeedHistoryEntry[]>(
+    () => initialRestored?.history ?? [{ seed: initialSeed, metricId: metricOptions?.[0]?.id }]
+  );
+  const [feedbackByLead, setFeedbackByLead] = useState<
+    Record<string, LeadFeedbackVerdict | undefined>
+  >(() => ({ ...(initialRestored?.feedbackByLead ?? {}) }));
+
+  useEffect(() => {
+    saveInvestigationSession({
+      initialSeed,
+      history,
+      feedbackByLead,
+    });
+  }, [initialSeed, history, feedbackByLead]);
+
   const currentIndex = history.length - 1;
   const current = history[currentIndex] ?? { seed: initialSeed, metricId: metricOptions?.[0]?.id };
   const previous = currentIndex > 0 ? history[currentIndex - 1] : undefined;
@@ -1083,15 +1272,33 @@ export const InvestigationFlyoutContainer = ({
     <InvestigationFlyoutBody
       key={seedHistoryKey(current.seed, currentIndex)}
       core={core}
+      data={data}
       share={share}
       licensing={licensing}
       agentBuilder={agentBuilder}
       seed={current.seed}
+      session={session}
       metricOptions={metricOptions}
       initialMetricId={current.metricId}
       metricUnreadable={metricUnreadable}
       previousSeedLabel={previous ? formatSeedStepLabel(previous.seed) : undefined}
+      feedbackByLead={feedbackByLead}
+      onFeedbackByLeadChange={setFeedbackByLead}
+      onMetricChange={(nextMetricId) => {
+        setHistory((prev) => {
+          if (prev.length === 0) {
+            return prev;
+          }
+          const updated = [...prev];
+          updated[updated.length - 1] = {
+            ...updated[updated.length - 1],
+            metricId: nextMetricId,
+          };
+          return updated;
+        });
+      }}
       onPivot={(nextSeed, currentMetricId) => {
+        setFeedbackByLead({});
         setHistory((prev) => {
           const updated = [...prev];
           if (updated.length > 0) {
@@ -1100,12 +1307,16 @@ export const InvestigationFlyoutContainer = ({
               metricId: currentMetricId,
             };
           }
-          return [...updated, { seed: nextSeed, metricId: currentMetricId }];
+          const nextHistory = [...updated, { seed: nextSeed, metricId: currentMetricId }];
+          return nextHistory.length > MAX_SEED_HISTORY_ENTRIES
+            ? [nextHistory[0], ...nextHistory.slice(-(MAX_SEED_HISTORY_ENTRIES - 1))]
+            : nextHistory;
         });
       }}
       onBack={
         previous
           ? () => {
+              setFeedbackByLead({});
               setHistory((prev) => (prev.length > 1 ? prev.slice(0, -1) : prev));
             }
           : undefined
@@ -1117,6 +1328,7 @@ export const InvestigationFlyoutContainer = ({
 
 export const openInvestigationFlyout = ({
   core,
+  data,
   share,
   licensing,
   agentBuilder,
@@ -1126,6 +1338,7 @@ export const openInvestigationFlyout = ({
   metricUnreadable,
 }: {
   core: CoreStart;
+  data?: DataPublicPluginStart;
   share?: SharePluginStart;
   licensing?: LicensingPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
@@ -1145,10 +1358,12 @@ export const openInvestigationFlyout = ({
       <QueryClientProvider client={client}>
         <InvestigationFlyoutContainer
           core={core}
+          data={data}
           share={share}
           licensing={licensing}
           agentBuilder={agentBuilder}
           seed={seed}
+          session={session}
           metricOptions={metricOptions}
           metricUnreadable={metricUnreadable}
           onClose={onClose}

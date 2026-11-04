@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DiscoverSharedPublicStart } from '@kbn/discover-shared-plugin/public';
 import type { InvestigationSeed } from '@kbn/investigation-seed';
 import type { LensPublicStart } from '@kbn/lens-plugin/public';
@@ -47,6 +48,7 @@ interface SignalInvestigationPublicSetupDeps {
 
 interface SignalInvestigationPublicStartDeps {
   agentBuilder?: AgentBuilderPluginStart;
+  data: DataPublicPluginStart;
   discoverShared: DiscoverSharedPublicStart;
   lens: LensPublicStart;
   licensing: LicensingPluginStart;
@@ -136,6 +138,7 @@ export class SignalInvestigationPublicPlugin
       const { openInvestigationFlyout } = await import('./flyout/investigation_flyout');
       openInvestigationFlyout({
         core,
+        data: plugins.data,
         share: plugins.share,
         licensing: plugins.licensing,
         agentBuilder: plugins.agentBuilder,

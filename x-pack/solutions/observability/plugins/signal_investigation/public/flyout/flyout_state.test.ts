@@ -225,21 +225,127 @@ describe('entity pivot helpers', () => {
     ).toEqual({ field: 'service.name', value: 'payments' });
   });
 
-  it('formats spike and dip shift multipliers and omits zero-denominator or equal shifts', () => {
+  it('formats spike, dip, and New shift labels and omits zero-deviation or equal shifts', () => {
     expect(formatLeadShiftMultiplier({ baseline: 10, deviation: 50, kind: 'document_rate' })).toBe(
       '5× higher'
     );
     expect(formatLeadShiftMultiplier({ baseline: 50, deviation: 10, kind: 'document_rate' })).toBe(
       '5× lower'
     );
+    expect(formatLeadShiftMultiplier({ baseline: 0, deviation: 50, kind: 'document_rate' })).toBe(
+      'New'
+    );
     expect(
-      formatLeadShiftMultiplier({ baseline: 0, deviation: 50, kind: 'document_rate' })
+      formatLeadShiftMultiplier({ baseline: 0, deviation: 0, kind: 'document_rate' })
     ).toBeUndefined();
     expect(
       formatLeadShiftMultiplier({ baseline: 50, deviation: 0, kind: 'document_rate' })
     ).toBeUndefined();
     expect(
       formatLeadShiftMultiplier({ baseline: 20, deviation: 20, kind: 'document_rate' })
+    ).toBeUndefined();
+  });
+
+  it('saves and restores investigation history and votes only when the initial seed matches and is unexpired', () => {
+    const store = new Map<string, string>();
+    const mockStorage = {
+      getItem: (key: string) => store.get(key) ?? null,
+      setItem: (key: string, value: string) => {
+        store.set(key, value);
+      },
+    };
+    const pivotedSeed = applyEntityPivot(seed, { field: 'service.name', value: 'payments' });
+    const now = 1_700_000_000_000;
+
+    const {
+      INVESTIGATION_SESSION_STORAGE_KEY,
+      INVESTIGATION_SESSION_TTL_MS,
+      loadInvestigationSession,
+      saveInvestigationSession,
+    } = jest.requireActual('./flyout_state') as typeof import('./flyout_state');
+
+    saveInvestigationSession({
+      initialSeed: seed,
+      history: [
+        { seed, metricId: 'm1' },
+        { seed: pivotedSeed, metricId: 'm2' },
+      ],
+      feedbackByLead: { 'lead-1': 'useful', 'lead-2': undefined },
+      storage: mockStorage,
+      now,
+    });
+
+    const restored = {
+      history: [
+        { seed, metricId: 'm1' },
+        { seed: pivotedSeed, metricId: 'm2' },
+      ],
+      feedbackByLead: { 'lead-1': 'useful' },
+    };
+
+    expect(
+      loadInvestigationSession({
+        initialSeed: seed,
+        storage: mockStorage,
+        now: now + 60_000,
+      })
+    ).toEqual(restored);
+
+    // Explicit undefined fields are absent after the stored JSON round trip
+    expect(
+      loadInvestigationSession({
+        initialSeed: { ...seed, query: undefined },
+        storage: mockStorage,
+        now: now + 60_000,
+      })
+    ).toEqual(restored);
+
+    // Different query or filters do not match
+    expect(
+      loadInvestigationSession({
+        initialSeed: { ...seed, query: { language: 'kuery', query: 'status:500' } },
+        storage: mockStorage,
+        now: now + 60_000,
+      })
+    ).toBeUndefined();
+    expect(
+      loadInvestigationSession({
+        initialSeed: {
+          ...seed,
+          filters: [{ meta: { key: 'host.name' }, query: { term: { 'host.name': 'web-1' } } }],
+        },
+        storage: mockStorage,
+        now: now + 60_000,
+      })
+    ).toBeUndefined();
+
+    // Expired entry is ignored
+    expect(
+      loadInvestigationSession({
+        initialSeed: seed,
+        storage: mockStorage,
+        now: now + INVESTIGATION_SESSION_TTL_MS + 1,
+      })
+    ).toBeUndefined();
+
+    // Malformed or mismatched version is ignored
+    store.set(INVESTIGATION_SESSION_STORAGE_KEY, '{not-json');
+    expect(
+      loadInvestigationSession({ initialSeed: seed, storage: mockStorage, now })
+    ).toBeUndefined();
+
+    store.set(
+      INVESTIGATION_SESSION_STORAGE_KEY,
+      JSON.stringify({
+        version: 99,
+        savedAt: now,
+        initialSeed: seed,
+        history: [{ seed }],
+        feedbackByLead: {},
+      })
+    );
+    expect(
+      loadInvestigationSession({ initialSeed: seed, storage: mockStorage, now })
     ).toBeUndefined();
   });
 

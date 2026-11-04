@@ -53,6 +53,7 @@ export interface InvestigationLead {
   relevance: string;
   ranking: LeadRanking;
   shift?: InvestigationLeadShift;
+  relatedFields?: readonly string[];
   locatorParams?: Readonly<Record<string, string | number>>;
 }
 

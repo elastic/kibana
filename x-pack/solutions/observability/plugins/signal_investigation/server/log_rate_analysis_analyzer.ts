@@ -42,6 +42,7 @@ import { resolveLogIndex, unavailableDataViewResult } from './resolve_log_index'
 
 export const LOG_RATE_ANALYSIS_ANALYZER_ID = 'log_rate_analysis';
 export const MAX_LOG_RATE_LEADS = 10;
+export const MAX_RELATED_FIELDS = 5;
 
 const MIN_DEVIATION_DURATION_MS = 60_000;
 const BASELINE_DURATION_MULTIPLIER = 2;
@@ -477,51 +478,107 @@ export const mapLogRateAnalysisResult = ({
   const rangeFrom = occurredAt;
   const rangeTo = comparison.deviation.to;
 
-  const allLeads: InvestigationLead[] = result.significantItems.map((item) => {
+  interface LeadCandidate {
+    lead: InvestigationLead;
+    fieldName: string;
+    isFieldLead: boolean;
+    dedupeKey: string;
+  }
+
+  const candidates: LeadCandidate[] = result.significantItems.map((item) => {
     const fieldValue = truncateValue(item.fieldValue);
+    const isFieldLead = item.fieldType !== 'log message pattern';
+    const normalizedPValue =
+      item.pValue !== undefined && item.pValue !== null && Number.isFinite(item.pValue)
+        ? String(item.pValue)
+        : 'null';
+    const dedupeKey = JSON.stringify([
+      item.fieldValue.trim(),
+      rangeFrom,
+      rangeTo,
+      item.change.baseline,
+      item.change.deviation,
+      normalizedPValue,
+    ]);
+
     return {
-      id: leadId(item.fieldName, item.fieldValue, occurredAt),
-      analyzerId: LOG_RATE_ANALYSIS_ANALYZER_ID,
-      summary: i18n.translate('xpack.signalInvestigation.logRateAnalysis.summary', {
-        defaultMessage:
-          '{fieldName}: "{fieldValue}" (normalized rate {baseline} in baseline to {deviation} in deviation, p = {pValue})',
-        values: {
-          fieldName: item.fieldName,
-          fieldValue,
+      fieldName: item.fieldName.trim().slice(0, MAX_INVESTIGATION_FIELD_CHARS),
+      isFieldLead,
+      dedupeKey,
+      lead: {
+        id: leadId(item.fieldName, item.fieldValue, occurredAt),
+        analyzerId: LOG_RATE_ANALYSIS_ANALYZER_ID,
+        summary: i18n.translate('xpack.signalInvestigation.logRateAnalysis.summary', {
+          defaultMessage:
+            '{fieldName}: "{fieldValue}" (normalized rate {baseline} in baseline to {deviation} in deviation, p = {pValue})',
+          values: {
+            fieldName: item.fieldName,
+            fieldValue,
+            baseline: item.change.baseline,
+            deviation: item.change.deviation,
+            pValue: formatPValue(item.pValue),
+          },
+        }),
+        occurredAt,
+        relevance,
+        ranking: {
+          signal: logRateSignalBand(item.pValue),
+          timing: timingBand(occurredAt, seed.timeRange.from, seed.timeRange.to),
+          relationship,
+        },
+        shift: {
           baseline: item.change.baseline,
           deviation: item.change.deviation,
-          pValue: formatPValue(item.pValue),
+          kind: 'document_rate',
         },
-      }),
-      occurredAt,
-      relevance,
-      ranking: {
-        signal: logRateSignalBand(item.pValue),
-        timing: timingBand(occurredAt, seed.timeRange.from, seed.timeRange.to),
-        relationship,
-      },
-      shift: {
-        baseline: item.change.baseline,
-        deviation: item.change.deviation,
-        kind: 'document_rate',
-      },
-      locatorParams: {
-        ...entityLocatorParams(entities),
-        ...(item.fieldType === 'log message pattern'
-          ? {}
-          : { leadField: item.fieldName, leadValue: item.fieldValue }),
-        rangeFrom,
-        rangeTo,
-        ...(!isEsql && seed.dataViewId ? { dataViewId: seed.dataViewId } : {}),
-        ...(index ? { indexPattern: index } : {}),
-        ...(timeField ? { timeField } : {}),
+        locatorParams: {
+          ...entityLocatorParams(entities),
+          ...(isFieldLead ? { leadField: item.fieldName, leadValue: item.fieldValue } : {}),
+          rangeFrom,
+          rangeTo,
+          ...(!isEsql && seed.dataViewId ? { dataViewId: seed.dataViewId } : {}),
+          ...(index ? { indexPattern: index } : {}),
+          ...(timeField ? { timeField } : {}),
+        },
       },
     };
   });
 
-  const ranked = [...allLeads].sort(compareLeads);
-  const leads = ranked.slice(0, MAX_LOG_RATE_LEADS);
-  const truncated = ranked.length > MAX_LOG_RATE_LEADS;
+  const rankedCandidates = [...candidates].sort((a, b) => compareLeads(a.lead, b.lead));
+  const groupsByKey = new Map<string, LeadCandidate[]>();
+  for (const candidate of rankedCandidates) {
+    const existing = groupsByKey.get(candidate.dedupeKey);
+    if (existing) {
+      existing.push(candidate);
+    } else {
+      groupsByKey.set(candidate.dedupeKey, [candidate]);
+    }
+  }
+
+  const collapsedLeads: InvestigationLead[] = Array.from(groupsByKey.values()).map((group) => {
+    const primary = group.find((candidate) => candidate.isFieldLead) ?? group[0];
+    const relatedFields: string[] = [];
+    for (const candidate of group) {
+      if (candidate === primary) {
+        continue;
+      }
+      const { fieldName } = candidate;
+      if (
+        fieldName.length > 0 &&
+        fieldName !== primary.fieldName &&
+        !relatedFields.includes(fieldName)
+      ) {
+        relatedFields.push(fieldName);
+        if (relatedFields.length >= MAX_RELATED_FIELDS) {
+          break;
+        }
+      }
+    }
+    return relatedFields.length > 0 ? { ...primary.lead, relatedFields } : primary.lead;
+  });
+
+  const leads = collapsedLeads.slice(0, MAX_LOG_RATE_LEADS);
+  const truncated = collapsedLeads.length > MAX_LOG_RATE_LEADS;
 
   const message = truncated
     ? isEsql

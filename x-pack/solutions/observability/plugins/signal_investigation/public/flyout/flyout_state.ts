@@ -9,6 +9,7 @@ import datemath from '@kbn/datemath';
 import { i18n } from '@kbn/i18n';
 import {
   MAX_INVESTIGATION_FIELD_CHARS,
+  investigationSeedSchema,
   type InvestigationSeed,
   resolveInvestigationHosts,
 } from '@kbn/investigation-seed';
@@ -19,8 +20,13 @@ import type {
   SignalAnalyzerComparison,
   SignalAnalyzerPivot,
 } from '@kbn/signal-investigation-contract';
-import { truncate } from 'lodash';
-import { MAX_ATTACHMENT_LEADS, type LeadFeedbackVerdict } from '../../common/findings_attachment';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { isEqual, truncate } from 'lodash';
+import {
+  LEAD_FEEDBACK_VERDICTS,
+  MAX_ATTACHMENT_LEADS,
+  type LeadFeedbackVerdict,
+} from '../../common/findings_attachment';
 
 export type CoverageStatus = AnalyzerResultStatus | 'running';
 
@@ -141,16 +147,16 @@ export const formatSeedStepLabel = (seed: InvestigationSeed): string => {
   });
 };
 
-/** Formats a multiplier badge label for a lead's rate shift, or `undefined` when either rate is zero or equal. */
+/** Formats a multiplier or New badge label for a lead's rate shift, or `undefined` when the shift has no badge. */
 export const formatLeadShiftMultiplier = (shift: InvestigationLeadShift): string | undefined => {
   const { baseline, deviation } = shift;
-  if (
-    !Number.isFinite(baseline) ||
-    !Number.isFinite(deviation) ||
-    baseline <= 0 ||
-    deviation <= 0
-  ) {
+  if (!Number.isFinite(baseline) || !Number.isFinite(deviation) || baseline < 0 || deviation <= 0) {
     return undefined;
+  }
+  if (baseline === 0) {
+    return i18n.translate('xpack.signalInvestigation.flyout.shiftNewLabel', {
+      defaultMessage: 'New',
+    });
   }
   if (deviation > baseline) {
     const ratio = deviation / baseline;
@@ -357,4 +363,138 @@ export const formatCoverageLineText = (
   }
 
   return baseLine;
+};
+
+export const INVESTIGATION_SESSION_STORAGE_KEY = 'kbn.signalInvestigation.session.v1';
+export const INVESTIGATION_SESSION_VERSION = 1;
+export const INVESTIGATION_SESSION_TTL_MS = 30 * 60 * 1000;
+export const MAX_SEED_HISTORY_ENTRIES = 10;
+
+const MAX_STORED_FEEDBACK_ENTRIES = 100;
+
+export interface SeedHistoryEntry {
+  seed: InvestigationSeed;
+  metricId?: string;
+}
+
+export interface StoredInvestigationSession {
+  version: typeof INVESTIGATION_SESSION_VERSION;
+  savedAt: number;
+  initialSeed: InvestigationSeed;
+  history: readonly SeedHistoryEntry[];
+  feedbackByLead: Readonly<Record<string, LeadFeedbackVerdict | undefined>>;
+}
+
+const seedHistoryEntrySchema = lazySchema(() =>
+  z.strictObject({
+    seed: investigationSeedSchema,
+    metricId: z.string().min(1).max(MAX_INVESTIGATION_FIELD_CHARS).optional(),
+  })
+);
+
+const storedInvestigationSessionSchema = lazySchema(() =>
+  z.strictObject({
+    version: z.literal(INVESTIGATION_SESSION_VERSION),
+    savedAt: z.number().finite(),
+    initialSeed: investigationSeedSchema,
+    history: z.array(seedHistoryEntrySchema).min(1).max(MAX_SEED_HISTORY_ENTRIES),
+    feedbackByLead: z
+      .record(
+        z.string().min(1).max(MAX_INVESTIGATION_FIELD_CHARS),
+        z.enum(LEAD_FEEDBACK_VERDICTS).optional()
+      )
+      .refine((record) => Object.keys(record).length <= MAX_STORED_FEEDBACK_ENTRIES),
+  })
+);
+
+const defaultSessionStorage = (): Storage | undefined => {
+  try {
+    return typeof window !== 'undefined' ? window.sessionStorage : undefined;
+  } catch {
+    return undefined;
+  }
+};
+
+/** Loads and validates a stored investigation session when its initial seed matches and it has not expired. */
+export const loadInvestigationSession = ({
+  initialSeed,
+  storage = defaultSessionStorage(),
+  now = Date.now(),
+}: {
+  initialSeed: InvestigationSeed;
+  storage?: Pick<Storage, 'getItem'>;
+  now?: number;
+}): Pick<StoredInvestigationSession, 'history' | 'feedbackByLead'> | undefined => {
+  if (!storage) {
+    return undefined;
+  }
+  try {
+    const raw = storage.getItem(INVESTIGATION_SESSION_STORAGE_KEY);
+    if (!raw) {
+      return undefined;
+    }
+    const parsed: unknown = JSON.parse(raw);
+    const validated = storedInvestigationSessionSchema.safeParse(parsed);
+    if (!validated.success) {
+      return undefined;
+    }
+    const { savedAt, initialSeed: storedSeed, history, feedbackByLead } = validated.data;
+    if (now < savedAt || now - savedAt > INVESTIGATION_SESSION_TTL_MS) {
+      return undefined;
+    }
+    const normalizedInitialSeed: unknown = JSON.parse(JSON.stringify(initialSeed));
+    if (
+      !isEqual(storedSeed, normalizedInitialSeed) ||
+      !isEqual(history[0]?.seed, normalizedInitialSeed)
+    ) {
+      return undefined;
+    }
+    return { history, feedbackByLead };
+  } catch {
+    return undefined;
+  }
+};
+
+/** Saves the current investigation history and votes for this browser tab. */
+export const saveInvestigationSession = ({
+  initialSeed,
+  history,
+  feedbackByLead,
+  storage = defaultSessionStorage(),
+  now = Date.now(),
+}: {
+  initialSeed: InvestigationSeed;
+  history: readonly SeedHistoryEntry[];
+  feedbackByLead: Readonly<Record<string, LeadFeedbackVerdict | undefined>>;
+  storage?: Pick<Storage, 'setItem'>;
+  now?: number;
+}): void => {
+  if (!storage || history.length === 0) {
+    return;
+  }
+  try {
+    const boundedFeedback: Record<string, LeadFeedbackVerdict> = {};
+    for (const [leadId, verdict] of Object.entries(feedbackByLead)) {
+      if (
+        (verdict === 'useful' || verdict === 'not_useful') &&
+        leadId.length > 0 &&
+        leadId.length <= MAX_INVESTIGATION_FIELD_CHARS
+      ) {
+        boundedFeedback[leadId] = verdict;
+        if (Object.keys(boundedFeedback).length >= MAX_STORED_FEEDBACK_ENTRIES) {
+          break;
+        }
+      }
+    }
+    const payload: StoredInvestigationSession = {
+      version: INVESTIGATION_SESSION_VERSION,
+      savedAt: now,
+      initialSeed,
+      history: history.slice(0, MAX_SEED_HISTORY_ENTRIES),
+      feedbackByLead: boundedFeedback,
+    };
+    storage.setItem(INVESTIGATION_SESSION_STORAGE_KEY, JSON.stringify(payload));
+  } catch {
+    // Ignore unavailable or full sessionStorage.
+  }
 };

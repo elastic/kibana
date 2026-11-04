@@ -39,8 +39,8 @@ export const unavailableDataViewResult = (): SignalAnalyzerResult => ({
 });
 
 /**
- * Resolves the log index and time field for a seed: the alert's log view, then an explicit
- * index pattern, then a saved data view, then the configured log sources.
+ * Resolves the log index and time field for a seed: the alert's log view, then a read-only
+ * ES|QL index, then a saved data view, then an explicit index pattern, then the configured log sources.
  */
 export const resolveLogIndex = async ({
   seed,
@@ -87,10 +87,6 @@ export const resolveLogIndex = async ({
     }
   }
 
-  if (seed.indexPattern) {
-    return { kind: 'resolved', index: seed.indexPattern, timeField: DEFAULT_TIME_FIELD };
-  }
-
   if (seed.dataViewId) {
     try {
       const service = await dataViews.dataViewsServiceFactory(
@@ -110,10 +106,17 @@ export const resolveLogIndex = async ({
       };
     } catch (error) {
       if (isSavedObjectNotFound(error)) {
+        if (seed.indexPattern) {
+          return { kind: 'resolved', index: seed.indexPattern, timeField: DEFAULT_TIME_FIELD };
+        }
         return { kind: 'unavailable' };
       }
       throw error;
     }
+  }
+
+  if (seed.indexPattern) {
+    return { kind: 'resolved', index: seed.indexPattern, timeField: DEFAULT_TIME_FIELD };
   }
 
   return {

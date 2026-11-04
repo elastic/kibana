@@ -99,7 +99,16 @@ test.describe(
         await expect(dependencyCoverage).toContainText('found');
 
         await dependencyLeadLink.click();
-        await expect(page).toHaveURL(/\/app\/apm\/dependencies\//);
+        await expect(signalInvestigationFlyout.leadPreviewFlyout).toBeVisible();
+        await expect(signalInvestigationFlyout.leadDrilldownLink).toContainText('Open in APM');
+        await expect(signalInvestigationFlyout.leadDrilldownLink).toHaveAttribute(
+          'href',
+          /\/app\/apm\/dependencies\//
+        );
+        await expect(signalInvestigationFlyout.leadDrilldownLink).toHaveAttribute(
+          'target',
+          '_blank'
+        );
       });
     });
   }

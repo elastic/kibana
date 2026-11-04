@@ -14,7 +14,7 @@ import {
 import type { MlLocatorParams } from '@kbn/ml-common-types/locator';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
-import { buildPhraseFilter, type Filter } from '@kbn/es-query';
+import { buildEsQuery, buildPhraseFilter, type Filter, type Query } from '@kbn/es-query';
 import { type InvestigationSeed, isEsqlQuery } from '@kbn/investigation-seed';
 import { LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
@@ -255,6 +255,103 @@ const phraseFilters = (
   return filters;
 };
 
+export interface LogRateLeadScope {
+  rangeFrom: string;
+  rangeTo: string;
+  dataViewId?: string;
+  indexPattern?: string;
+  timeField: string;
+  leadField?: string;
+  leadValue?: string;
+  query?: Query;
+  filters: Filter[];
+}
+
+/** Extracts the shared time window, data view or index pattern, query, and phrase filters for a log rate lead. */
+export const buildLogRateLeadScope = ({
+  lead,
+  seed,
+}: {
+  lead: InvestigationLead;
+  seed: InvestigationSeed;
+}): LogRateLeadScope => {
+  const params = lead.locatorParams ?? {};
+  const rangeFrom = String(params.rangeFrom ?? seed.timeRange.from);
+  const rangeTo = String(params.rangeTo ?? seed.timeRange.to);
+  const isEsql = Boolean(seed.query && isEsqlQuery(seed.query));
+  const dataViewId = isEsql
+    ? undefined
+    : typeof params.dataViewId === 'string'
+    ? params.dataViewId
+    : seed.dataViewId;
+  const indexPattern = typeof params.indexPattern === 'string' ? params.indexPattern : undefined;
+  const timeField = typeof params.timeField === 'string' ? params.timeField : '@timestamp';
+  const leadField =
+    typeof params.leadField === 'string' && params.leadField.length > 0
+      ? params.leadField
+      : undefined;
+  const leadValue =
+    typeof params.leadValue === 'string' && params.leadValue.length > 0
+      ? params.leadValue
+      : undefined;
+  const query = seed.query && !isEsqlQuery(seed.query) ? seed.query : undefined;
+
+  return {
+    rangeFrom,
+    rangeTo,
+    ...(dataViewId ? { dataViewId } : {}),
+    ...(indexPattern ? { indexPattern } : {}),
+    timeField,
+    ...(leadField ? { leadField } : {}),
+    ...(leadValue ? { leadValue } : {}),
+    ...(query ? { query } : {}),
+    filters: [...seed.filters, ...phraseFilters(params, dataViewId, indexPattern)],
+  };
+};
+
+/** Builds the Elasticsearch bool query for a log rate field lead's preview sample search. */
+export const buildLogRatePreviewQuery = (
+  scope: LogRateLeadScope,
+  resolvedTimeField: string = scope.timeField
+): Record<string, unknown> => {
+  const { bool } = buildEsQuery(undefined, scope.query ? [scope.query] : [], scope.filters);
+  const timeRangeClause = {
+    range: {
+      [resolvedTimeField]: {
+        gte: scope.rangeFrom,
+        lte: scope.rangeTo,
+      },
+    },
+  };
+  return {
+    bool: {
+      ...(bool.must.length > 0 ? { must: bool.must } : {}),
+      filter: [...bool.filter, timeRangeClause],
+      ...(bool.should.length > 0 ? { should: bool.should } : {}),
+      ...(bool.must_not.length > 0 ? { must_not: bool.must_not } : {}),
+    },
+  };
+};
+
+/** Returns the localized action label for a lead's primary deep-link button. */
+export const buildLeadDrilldownLabel = (analyzerId: string): string => {
+  switch (analyzerId) {
+    case 'log_rate_analysis':
+    case 'log_change_points':
+      return i18n.translate('xpack.signalInvestigation.links.openInDiscoverLabel', {
+        defaultMessage: 'Open in Discover',
+      });
+    case 'metric_change_points':
+      return i18n.translate('xpack.signalInvestigation.links.openHostDetailsLabel', {
+        defaultMessage: 'Open host details',
+      });
+    default:
+      return i18n.translate('xpack.signalInvestigation.links.openInApmLabel', {
+        defaultMessage: 'Open in APM',
+      });
+  }
+};
+
 /** Builds the primary drill-down href for a lead card using the registered Observability or Logs locator. */
 export const buildLeadDrilldownHref = ({
   lead,
@@ -352,24 +449,16 @@ export const buildLeadDrilldownHref = ({
   }
 
   if (lead.analyzerId === 'log_rate_analysis') {
-    const isEsql = Boolean(seed.query && isEsqlQuery(seed.query));
-    const dataViewId = isEsql
-      ? undefined
-      : typeof params.dataViewId === 'string'
-      ? params.dataViewId
-      : seed.dataViewId;
-    const indexPattern = typeof params.indexPattern === 'string' ? params.indexPattern : undefined;
-    const timeField = typeof params.timeField === 'string' ? params.timeField : '@timestamp';
-    const query = seed.query && !isEsqlQuery(seed.query) ? seed.query : undefined;
+    const scope = buildLogRateLeadScope({ lead, seed });
     return getRedirectUrl(share, LOGS_LOCATOR_ID, {
-      timeRange: { from: rangeFrom, to: rangeTo },
+      timeRange: { from: scope.rangeFrom, to: scope.rangeTo },
       tab: { id: 'new' },
-      ...(dataViewId ? { dataViewId } : {}),
-      ...(!dataViewId && indexPattern
-        ? { dataViewSpec: { title: indexPattern, timeFieldName: timeField } }
+      ...(scope.dataViewId ? { dataViewId: scope.dataViewId } : {}),
+      ...(!scope.dataViewId && scope.indexPattern
+        ? { dataViewSpec: { title: scope.indexPattern, timeFieldName: scope.timeField } }
         : {}),
-      ...(query ? { query } : {}),
-      filters: [...seed.filters, ...phraseFilters(params, dataViewId, indexPattern)],
+      ...(scope.query ? { query: scope.query } : {}),
+      filters: scope.filters,
     });
   }
 

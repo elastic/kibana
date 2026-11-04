@@ -16,6 +16,8 @@ export class SignalInvestigationFlyoutPage {
   public readonly coverageAccordionButton: Locator;
   public readonly leadList: Locator;
   public readonly leadCards: Locator;
+  public readonly leadPreviewFlyout: Locator;
+  public readonly leadDrilldownLink: Locator;
   public readonly alertDetailsButton: Locator;
   public readonly discoverAppMenuAction: Locator;
 
@@ -32,6 +34,8 @@ export class SignalInvestigationFlyoutPage {
     });
     this.leadList = this.page.testSubj.locator('signalInvestigationLeadList');
     this.leadCards = this.page.testSubj.locator('signalInvestigationLead');
+    this.leadPreviewFlyout = this.page.testSubj.locator('signalInvestigationLeadPreviewFlyout');
+    this.leadDrilldownLink = this.page.testSubj.locator('signalInvestigationLeadDrilldownLink');
     this.alertDetailsButton = this.page.testSubj.locator('alertDetailsFindRelatedChanges');
     this.discoverAppMenuAction = this.page.testSubj.locator('discoverAppMenuFindRelatedChanges');
   }

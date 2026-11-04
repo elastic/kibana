@@ -372,6 +372,96 @@ describe('mapLogRateAnalysisResult', () => {
     expect(truncatedLead?.summary).toContain(`"${'l'.repeat(120)}…"`);
     expect(truncatedLead?.summary).not.toContain(longer);
   });
+
+  it('collapses same-documents duplicates before applying the lead cap, prefers a field lead over a message pattern, and keeps same-value fields with different rates separate', () => {
+    const duplicateGroup = [
+      item({
+        fieldType: 'log message pattern',
+        fieldName: 'message',
+        fieldValue: 'PAYMENT_TIMEOUT',
+        pValue: 0.0001,
+        change: { baseline: 0, deviation: 4290 },
+      }),
+      item({
+        fieldType: 'metadata',
+        fieldName: 'error.message',
+        fieldValue: 'PAYMENT_TIMEOUT',
+        pValue: 0.0001,
+        change: { baseline: 0, deviation: 4290 },
+      }),
+      item({
+        fieldType: 'metadata',
+        fieldName: 'event.original',
+        fieldValue: 'PAYMENT_TIMEOUT',
+        pValue: 0.0001,
+        change: { baseline: 0, deviation: 4290 },
+      }),
+    ];
+    const differentRateSameValue = item({
+      fieldType: 'metadata',
+      fieldName: 'http.response.body',
+      fieldValue: 'PAYMENT_TIMEOUT',
+      pValue: 0.002,
+      change: { baseline: 12, deviation: 4290 },
+    });
+    const fillerDistinct = Array.from({ length: 8 }, (_, index) =>
+      item({
+        fieldType: 'metadata',
+        fieldName: `custom.field_${index}`,
+        fieldValue: `val-${index}`,
+        pValue: 0.01 + index * 0.001,
+      })
+    );
+
+    const tenDistinctWithDuplicates = mapLogRateAnalysisResult({
+      result: {
+        logRateAnalysisType: 'spike',
+        zeroDocsFallback: false,
+        significantItems: [...duplicateGroup, differentRateSameValue, ...fillerDistinct],
+      },
+      seed: chartSeed({ dataViewId: 'logs-view' }),
+      windowParameters,
+    });
+
+    expect(tenDistinctWithDuplicates.leads).toHaveLength(MAX_LOG_RATE_LEADS);
+    expect(tenDistinctWithDuplicates.message).toBeUndefined();
+    expect(tenDistinctWithDuplicates.leads[0].summary).toContain(
+      'error.message: "PAYMENT_TIMEOUT"'
+    );
+    expect(tenDistinctWithDuplicates.leads[0].locatorParams).toMatchObject({
+      leadField: 'error.message',
+      leadValue: 'PAYMENT_TIMEOUT',
+    });
+    expect(tenDistinctWithDuplicates.leads[0].relatedFields).toEqual(['message', 'event.original']);
+    expect(
+      tenDistinctWithDuplicates.leads.some((lead) =>
+        lead.summary.includes('http.response.body: "PAYMENT_TIMEOUT"')
+      )
+    ).toBe(true);
+
+    const elevenDistinctWithDuplicates = mapLogRateAnalysisResult({
+      result: {
+        logRateAnalysisType: 'spike',
+        zeroDocsFallback: false,
+        significantItems: [
+          ...duplicateGroup,
+          differentRateSameValue,
+          ...fillerDistinct,
+          item({
+            fieldType: 'metadata',
+            fieldName: 'extra.field',
+            fieldValue: 'extra-value',
+            pValue: 0.04,
+          }),
+        ],
+      },
+      seed: chartSeed({ dataViewId: 'logs-view' }),
+      windowParameters,
+    });
+
+    expect(elevenDistinctWithDuplicates.leads).toHaveLength(MAX_LOG_RATE_LEADS);
+    expect(elevenDistinctWithDuplicates.message).toBe('Showing the first 10 leads.');
+  });
 });
 
 describe('createLogRateAnalysisAnalyzer', () => {
@@ -445,6 +535,62 @@ describe('createLogRateAnalysisAnalyzer', () => {
         }),
       })
     );
+  });
+
+  it('resolves a saved data view ahead of a copied indexPattern, falls back to indexPattern only when the data view is not found, and rethrows forbidden errors', async () => {
+    dataViewGet.mockResolvedValueOnce({
+      getIndexPattern: () => 'saved-dv-logs-*',
+      timeFieldName: 'event.ingested',
+    });
+
+    await analyzer.run(
+      seed({ dataViewId: 'logs-view', indexPattern: 'copied-logs-*' }),
+      deps,
+      new AbortController().signal
+    );
+
+    expect(runLogRateAnalysisMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        arguments: expect.objectContaining({
+          index: 'saved-dv-logs-*',
+          timefield: 'event.ingested',
+        }),
+      })
+    );
+
+    runLogRateAnalysisMock.mockClear();
+    dataViewGet.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.createGenericNotFoundError('index-pattern', 'unsaved-lens-dv')
+    );
+
+    await analyzer.run(
+      seed({ dataViewId: 'unsaved-lens-dv', indexPattern: 'logs-unsaved-*' }),
+      deps,
+      new AbortController().signal
+    );
+
+    expect(runLogRateAnalysisMock).toHaveBeenCalledWith(
+      expect.objectContaining({
+        arguments: expect.objectContaining({
+          index: 'logs-unsaved-*',
+          timefield: '@timestamp',
+        }),
+      })
+    );
+
+    runLogRateAnalysisMock.mockClear();
+    dataViewGet.mockRejectedValueOnce(
+      SavedObjectsErrorHelpers.decorateForbiddenError(new Error('forbidden data view'))
+    );
+
+    await expect(
+      analyzer.run(
+        seed({ dataViewId: 'secret-dv', indexPattern: 'logs-fallback-*' }),
+        deps,
+        new AbortController().signal
+      )
+    ).rejects.toThrow('forbidden data view');
+    expect(runLogRateAnalysisMock).not.toHaveBeenCalled();
   });
 
   it('resolves a saved data view, including its time field', async () => {

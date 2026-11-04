@@ -76,15 +76,15 @@ test.describe(
         await signalInvestigationFlyout.waitForAnalysesComplete();
       });
 
-      await test.step('open Analysis coverage and follow the Log Rate Analysis link', async () => {
+      await test.step('open Analysis coverage and verify the Log Rate Analysis link', async () => {
         await signalInvestigationFlyout.openCoverageAccordion();
         const logRateCoverage = signalInvestigationFlyout.coverageItem('log_rate_analysis');
         await expect(logRateCoverage).toContainText('Log rate analysis');
 
         const logRateLink = signalInvestigationFlyout.coverageLink('log_rate_analysis');
         await expect(logRateLink).toBeVisible();
-        await logRateLink.click();
-        await expect(page).toHaveURL(/\/app\/ml\/aiops\/log_rate_analysis/);
+        await expect(logRateLink).toHaveAttribute('href', /\/app\/ml\/aiops\/log_rate_analysis/);
+        await expect(logRateLink).toHaveAttribute('target', '_blank');
       });
     });
   }

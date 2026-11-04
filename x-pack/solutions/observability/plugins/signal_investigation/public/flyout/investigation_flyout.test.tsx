@@ -14,7 +14,7 @@ import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { SignalAnalyzerResult } from '@kbn/signal-investigation-contract';
 import React from 'react';
-import { BehaviorSubject } from 'rxjs';
+import { BehaviorSubject, Observable, Subject } from 'rxjs';
 import {
   SIGNAL_INVESTIGATION_ANALYZERS_PATH,
   signalInvestigationLeadsPath,
@@ -138,6 +138,10 @@ const renderFlyoutContainer = (
 };
 
 describe('InvestigationFlyoutBody', () => {
+  beforeEach(() => {
+    window.sessionStorage.clear();
+  });
+
   it('waits for service_hosts before running metric_change_points and forwards resolved hosts', async () => {
     let resolveServiceHosts: ((value: SignalAnalyzerResult) => void) | undefined;
     const serviceHostsPromise = new Promise<SignalAnalyzerResult>((resolve) => {
@@ -781,11 +785,351 @@ describe('InvestigationFlyoutBody', () => {
       '4× lower'
     );
     expect(screen.getByTestId('signalInvestigationLeadShift-lra-zero')).toBeInTheDocument();
-    expect(
-      screen.queryByTestId('signalInvestigationShiftMultiplier-lra-zero')
-    ).not.toBeInTheDocument();
+    expect(screen.getByTestId('signalInvestigationShiftMultiplier-lra-zero')).toHaveTextContent(
+      'New'
+    );
     expect(
       screen.queryByTestId('signalInvestigationLeadShift-svc-no-shift')
     ).not.toBeInTheDocument();
+  });
+
+  it('opens a child flyout on lead click in session start, replaces an existing child flyout, and closes it on pivot, Back, and main flyout close', async () => {
+    const get = jest.fn(async () => ({
+      analyzers: [{ id: 'dependency_change_points', displayName: 'Dependency change points' }],
+    }));
+    const post = jest.fn(async () => ({
+      leads: [
+        {
+          id: 'dep-redis',
+          analyzerId: 'dependency_change_points',
+          summary: 'Latency spike on redis',
+          relevance: 'One-hop dependency redis',
+          ranking: { signal: 'strong', timing: 'during', relationship: 'dependency' },
+          locatorParams: { dependencyName: 'redis' },
+        },
+        {
+          id: 'dep-postgres',
+          analyzerId: 'dependency_change_points',
+          summary: 'Latency spike on postgres',
+          relevance: 'One-hop dependency postgres',
+          ranking: { signal: 'moderate', timing: 'during', relationship: 'dependency' },
+          locatorParams: { dependencyName: 'postgres' },
+        },
+      ],
+      entities: {},
+      status: 'found',
+    }));
+
+    const closeRefs: jest.Mock[] = [];
+    const { core, openFlyoutTemplate, reportEvent } = makeCore({ get, post });
+    openFlyoutTemplate.mockImplementation(() => {
+      const close = jest.fn(async () => {});
+      closeRefs.push(close);
+      return { close };
+    });
+
+    const onClose = jest.fn();
+    const user = userEvent.setup();
+    renderFlyoutContainer({
+      core,
+      seed: makeSeed(),
+      session: 'start',
+      onClose,
+    });
+
+    const leadButtons = await screen.findAllByTestId('signalInvestigationLeadLink');
+    expect(leadButtons[0].tagName).toBe('BUTTON');
+    expect(leadButtons[0]).not.toHaveAttribute('href');
+
+    await user.click(leadButtons[0]);
+    expect(reportEvent).toHaveBeenCalledWith(SIGNAL_INVESTIGATION_LEAD_CLICKED_EVENT, {
+      analyzerId: 'dependency_change_points',
+      rank: 1,
+    });
+    expect(openFlyoutTemplate).toHaveBeenCalledTimes(1);
+    expect(openFlyoutTemplate).toHaveBeenLastCalledWith(
+      expect.objectContaining({
+        size: 's',
+        session: 'inherit',
+        'data-test-subj': 'signalInvestigationLeadPreviewFlyout',
+      }),
+      expect.any(Function)
+    );
+
+    // Clicking the second lead closes the first child flyout before opening the new one
+    await user.click(leadButtons[1]);
+    expect(closeRefs[0]).toHaveBeenCalledTimes(1);
+    expect(openFlyoutTemplate).toHaveBeenCalledTimes(2);
+
+    // Pivoting closes the active child flyout
+    await user.click(screen.getByTestId('signalInvestigationLeadPivot-dep-redis'));
+    expect(closeRefs[1]).toHaveBeenCalledTimes(1);
+
+    // Reopen a child flyout on the pivoted step, then click Back
+    const pivotedLeadButtons = await screen.findAllByTestId('signalInvestigationLeadLink');
+    await user.click(pivotedLeadButtons[0]);
+    expect(openFlyoutTemplate).toHaveBeenCalledTimes(3);
+
+    await user.click(screen.getByTestId('signalInvestigationBackLink'));
+    expect(closeRefs[2]).toHaveBeenCalledTimes(1);
+  });
+
+  it('expands an inline preview with aria-expanded in session inherit, fetches bounded sample docs only for log rate field leads, and ignores aborted or stale responses', async () => {
+    const get = jest.fn(async () => ({
+      analyzers: [
+        { id: 'log_rate_analysis', displayName: 'Log rate analysis' },
+        { id: 'log_change_points', displayName: 'Log change points' },
+      ],
+    }));
+    const post = jest.fn(async (path: string): Promise<SignalAnalyzerResult> => {
+      if (path === signalInvestigationLeadsPath('log_rate_analysis')) {
+        return {
+          leads: [
+            {
+              id: 'lra-field',
+              analyzerId: 'log_rate_analysis',
+              summary: 'error.message: "PAYMENT_TIMEOUT"',
+              relevance: 'Logs for service checkout',
+              ranking: { signal: 'strong', timing: 'during', relationship: 'service' },
+              relatedFields: ['message'],
+              locatorParams: {
+                'entity.0.field': 'service.name',
+                'entity.0.value': 'checkout',
+                leadField: 'error.message',
+                leadValue: 'PAYMENT_TIMEOUT',
+                indexPattern: 'logs-payments-*',
+                timeField: '@timestamp',
+                rangeFrom: '2026-11-02T11:00:00.000Z',
+                rangeTo: '2026-11-02T11:20:00.000Z',
+              },
+            },
+            {
+              id: 'lra-pattern',
+              analyzerId: 'log_rate_analysis',
+              summary: 'message: "timeout *"',
+              relevance: 'Logs for service checkout',
+              ranking: { signal: 'moderate', timing: 'during', relationship: 'service' },
+              locatorParams: {
+                indexPattern: 'logs-payments-*',
+                timeField: '@timestamp',
+                rangeFrom: '2026-11-02T11:00:00.000Z',
+                rangeTo: '2026-11-02T11:20:00.000Z',
+              },
+            },
+          ],
+          entities: {},
+          status: 'found',
+        };
+      }
+      return {
+        leads: [
+          {
+            id: 'lcp-lead',
+            analyzerId: 'log_change_points',
+            summary: 'Log pattern "Connection refused" spike on checkout',
+            relevance: 'Logs for service checkout',
+            ranking: { signal: 'weak', timing: 'during', relationship: 'service' },
+            locatorParams: {
+              kql: 'service.name : "checkout"',
+              rangeFrom: '2026-11-02T11:00:00.000Z',
+              rangeTo: '2026-11-02T11:20:00.000Z',
+            },
+          },
+        ],
+        entities: {},
+        status: 'found',
+      };
+    });
+
+    const searchSubject = new Subject<unknown>();
+    const searchCalls: Array<{ request: unknown; options: { abortSignal?: AbortSignal } }> = [];
+    const search = jest.fn((request: unknown, options: { abortSignal?: AbortSignal } = {}) => {
+      searchCalls.push({ request, options });
+      return new Observable((subscriber) => {
+        const sub = searchSubject.subscribe(subscriber);
+        return () => sub.unsubscribe();
+      });
+    });
+
+    const share = {
+      url: {
+        locators: {
+          get: () => ({ getRedirectUrl: () => '/app/discover#/view' }),
+        },
+      },
+    } as never;
+
+    const { core, openFlyoutTemplate, reportEvent } = makeCore({ get, post });
+    const user = userEvent.setup();
+    renderFlyoutContainer({
+      core,
+      data: { search: { search } } as never,
+      share,
+      seed: makeSeed({
+        origin: { app: 'discover', surface: 'histogram' },
+        query: { language: 'kuery', query: 'http.response.status_code >= 500' },
+      }),
+      session: 'inherit',
+      onClose: jest.fn(),
+    });
+
+    const leadButtons = await screen.findAllByTestId('signalInvestigationLeadLink');
+    expect(leadButtons[0]).toHaveAttribute('aria-expanded', 'false');
+    expect(leadButtons[0]).toHaveAttribute('data-ebt-action', 'signalInvestigationLeadPreview');
+
+    // Expand the field lead inline
+    await user.click(leadButtons[0]);
+    expect(openFlyoutTemplate).not.toHaveBeenCalled();
+    expect(leadButtons[0]).toHaveAttribute('aria-expanded', 'true');
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    expect(reportEvent).toHaveBeenCalledWith(SIGNAL_INVESTIGATION_LEAD_CLICKED_EVENT, {
+      analyzerId: 'log_rate_analysis',
+      rank: 1,
+    });
+    expect(
+      screen.getByTestId('signalInvestigationLeadInlinePreview-lra-field')
+    ).toBeInTheDocument();
+    expect(screen.getByTestId('signalInvestigationPreviewRelatedFields')).toHaveTextContent(
+      'message'
+    );
+    expect(screen.getByTestId('signalInvestigationLeadDrilldownLink')).toHaveAttribute(
+      'href',
+      '/app/discover#/view'
+    );
+    expect(screen.getByTestId('signalInvestigationLeadDrilldownLink')).toHaveAttribute(
+      'target',
+      '_blank'
+    );
+    expect(screen.getByTestId('signalInvestigationPreviewLoading')).toBeInTheDocument();
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(searchCalls[0]?.request).toMatchObject({
+      params: {
+        index: 'logs-payments-*',
+        body: {
+          size: 5,
+          track_total_hits: false,
+          _source: expect.arrayContaining([
+            '@timestamp',
+            'error.message',
+            'message',
+            'service.name',
+            'host.name',
+          ]),
+        },
+      },
+    });
+
+    // Switch to the message-pattern lead: aborts the in-flight search and does not start a new search
+    await user.click(leadButtons[1]);
+    expect(searchCalls[0]?.options.abortSignal?.aborted).toBe(true);
+    expect(search).toHaveBeenCalledTimes(1);
+    expect(leadButtons[0]).toHaveAttribute('aria-expanded', 'false');
+    expect(leadButtons[1]).toHaveAttribute('aria-expanded', 'true');
+
+    // Late emission on the aborted stream is ignored
+    act(() => {
+      searchSubject.next({
+        rawResponse: {
+          hits: {
+            hits: [{ _id: 'stale-doc', _source: { message: 'STALE_LOG_LINE' } }],
+          },
+        },
+      });
+    });
+    expect(screen.queryByText('STALE_LOG_LINE')).not.toBeInTheDocument();
+
+    // Expanding the log change point lead also does not trigger a sample search
+    await user.click(leadButtons[2]);
+    expect(search).toHaveBeenCalledTimes(1);
+
+    // Re-expand the field lead and emit sample documents
+    await user.click(leadButtons[0]);
+    expect(search).toHaveBeenCalledTimes(2);
+    act(() => {
+      searchSubject.next({
+        rawResponse: {
+          hits: {
+            hits: [
+              {
+                _id: 'doc-1',
+                _source: {
+                  '@timestamp': '2026-11-02T11:05:00.000Z',
+                  'service.name': 'checkout',
+                  message: 'PAYMENT_TIMEOUT while calling gateway',
+                },
+              },
+            ],
+          },
+        },
+      });
+    });
+    expect(await screen.findByText('PAYMENT_TIMEOUT while calling gateway')).toBeInTheDocument();
+
+    // Collapsing the same lead does not report another click
+    const leadClickedCalls = reportEvent.mock.calls.filter(
+      (call) => call[0] === SIGNAL_INVESTIGATION_LEAD_CLICKED_EVENT
+    );
+    await user.click(leadButtons[0]);
+    expect(leadButtons[0]).toHaveAttribute('aria-expanded', 'false');
+    expect(
+      reportEvent.mock.calls.filter((call) => call[0] === SIGNAL_INVESTIGATION_LEAD_CLICKED_EVENT)
+    ).toHaveLength(leadClickedCalls.length);
+  });
+
+  it('restores pivot history and votes from sessionStorage when reopened with the identical initial seed', async () => {
+    const get = jest.fn(async () => ({
+      analyzers: [{ id: 'dependency_change_points', displayName: 'Dependency change points' }],
+    }));
+    const post = jest.fn(async () => ({
+      leads: [
+        {
+          id: 'dep-redis',
+          analyzerId: 'dependency_change_points',
+          summary: 'Latency spike on redis',
+          relevance: 'One-hop dependency redis',
+          ranking: { signal: 'strong', timing: 'during', relationship: 'dependency' },
+          locatorParams: { dependencyName: 'redis' },
+        },
+      ],
+      entities: {},
+      status: 'found',
+    }));
+
+    const initialSeed = makeSeed();
+    const { core } = makeCore({ get, post, feedbackEnabled: true });
+    const user = userEvent.setup();
+
+    const { unmount } = renderFlyoutContainer({
+      core,
+      seed: initialSeed,
+      onClose: jest.fn(),
+    });
+
+    await screen.findByText('Latency spike on redis');
+    await user.click(screen.getByTestId('signalInvestigationLeadPivot-dep-redis'));
+    expect(await screen.findByTestId('signalInvestigationBackLink')).toHaveTextContent(
+      'Back to checkout'
+    );
+    await user.click(screen.getByTestId('signalInvestigationFeedbackUseful-dep-redis'));
+    expect(screen.getByTestId('signalInvestigationFeedbackUseful-dep-redis')).toHaveAttribute(
+      'aria-pressed',
+      'true'
+    );
+
+    unmount();
+
+    // Reopen with the identical initial seed: restores both the pivoted step and the vote
+    renderFlyoutContainer({
+      core,
+      seed: initialSeed,
+      onClose: jest.fn(),
+    });
+
+    expect(await screen.findByTestId('signalInvestigationBackLink')).toHaveTextContent(
+      'Back to checkout'
+    );
+    expect(
+      await screen.findByTestId('signalInvestigationFeedbackUseful-dep-redis')
+    ).toHaveAttribute('aria-pressed', 'true');
   });
 });
