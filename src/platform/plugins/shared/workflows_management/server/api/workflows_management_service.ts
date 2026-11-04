@@ -794,6 +794,15 @@ export class WorkflowsService {
     );
   }
 
+  public async disableManagedWorkflow(
+    id: ManagedWorkflowId,
+    options: ManagedWorkflowOperationOptions,
+    registeredPluginId: string
+  ): Promise<boolean> {
+    await this.ensureInitialized();
+    return this.managedWorkflowsService.disableManagedWorkflow(id, options, registeredPluginId);
+  }
+
   public async getManagedWorkflowStatus(
     id: ManagedWorkflowId,
     options: GetManagedWorkflowStatusOptions,
