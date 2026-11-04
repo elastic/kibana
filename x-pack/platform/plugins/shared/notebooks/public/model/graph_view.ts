@@ -78,7 +78,7 @@ const layoutNodes = (
   edges: readonly GraphViewEdge[]
 ): GraphViewNode[] => {
   const graph = new graphlib.Graph();
-  graph.setGraph({ rankdir: 'TB', nodesep: 32, ranksep: 64 });
+  graph.setGraph({ rankdir: 'TB', nodesep: 56, ranksep: 96 });
   graph.setDefaultEdgeLabel(() => ({}));
   nodes.forEach((node) => graph.setNode(node.id, { ...sizeOf(node) }));
   edges.forEach(({ source, target }) => graph.setEdge(source, target));
