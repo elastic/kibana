@@ -286,12 +286,19 @@ describe('reportToParent', () => {
     expect(removeIfExists).not.toHaveBeenCalled();
   });
 
-  it('still attempts the wake when the retry task cannot be scheduled', async () => {
+  it('still attempts the wake when the retry task cannot be scheduled, and schedules again when it must be retried', async () => {
     ensureScheduled.mockRejectedValueOnce(new Error('task manager down'));
-
     await expect(report()).resolves.toBeUndefined();
-
     expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
+    expect(ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(removeIfExists).not.toHaveBeenCalled();
+
+    ensureScheduled.mockRejectedValueOnce(new Error('task manager down'));
+    maybeExecuteAgent.mockRejectedValueOnce(
+      createConversationBusyError({ conversationId: 'conversation-1', activeExecutionId: 'x' })
+    );
+    await report();
+    expect(ensureScheduled).toHaveBeenCalledTimes(3);
     expect(removeIfExists).not.toHaveBeenCalled();
   });
 });

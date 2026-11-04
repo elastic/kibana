@@ -154,26 +154,30 @@ export const reportToParent = async ({
   }
 
   const taskId = wakeParentTaskId(childExecutionId);
-  let scheduled = false;
-  try {
-    await taskManager.ensureScheduled(
-      {
-        id: taskId,
-        taskType: taskTypes.wakeParent,
-        params: { conversationId, childExecutionId },
-        state: {},
-        scope: ['agent-builder'],
-        enabled: true,
-        runAt: new Date(Date.now() + WAKE_PARENT_RETRY_INTERVAL_MS),
-      },
-      { request: wake.request, cloneApiKey: true }
-    );
-    scheduled = true;
-  } catch (error) {
-    logger.warn(
-      `Failed to schedule the wake retry for background execution ${childExecutionId}: ${error.message}`
-    );
-  }
+  const scheduleRetry = async (): Promise<boolean> => {
+    try {
+      await taskManager.ensureScheduled(
+        {
+          id: taskId,
+          taskType: taskTypes.wakeParent,
+          params: { conversationId, childExecutionId },
+          state: {},
+          scope: ['agent-builder'],
+          enabled: true,
+          runAt: new Date(Date.now() + WAKE_PARENT_RETRY_INTERVAL_MS),
+        },
+        { request: wake.request, cloneApiKey: true }
+      );
+      return true;
+    } catch (error) {
+      logger.warn(
+        `Failed to schedule the wake retry for background execution ${childExecutionId}: ${error.message}`
+      );
+      return false;
+    }
+  };
+
+  let scheduled = await scheduleRetry();
 
   let settled = false;
   try {
@@ -189,7 +193,15 @@ export const reportToParent = async ({
       }: ${error.message}`
     );
   }
-  if (!settled || !scheduled) {
+
+  if (!settled) {
+    // One more try at leaving a retry behind, for a scheduling failure that has since passed.
+    if (!scheduled) {
+      scheduled = await scheduleRetry();
+    }
+    return;
+  }
+  if (!scheduled) {
     return;
   }
 
