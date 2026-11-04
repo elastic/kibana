@@ -22,9 +22,10 @@ describe('AutomationUsageCell', () => {
     expect(screen.getByText('—')).toBeInTheDocument();
   });
 
-  it('shows a dash without a limit', () => {
+  it('shows no limit and no progress bar for an unlimited automation', () => {
     render(<AutomationUsageCell used={3} isRateLimited={false} />);
 
-    expect(screen.getByText('—')).toBeInTheDocument();
+    expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / No limit');
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 });

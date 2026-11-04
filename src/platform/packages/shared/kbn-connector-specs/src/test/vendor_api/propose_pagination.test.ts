@@ -64,6 +64,41 @@ describe('assessPagination', () => {
     });
   });
 
+  it('reads operations under x-ms-paths', () => {
+    expect(
+      assessPagination(
+        {
+          openapi: '3.0.3',
+          paths: {},
+          'x-ms-paths': {
+            '/?comp=list': {
+              get: { 'x-ms-pageable': { nextLinkName: 'NextMarker' }, responses: json({}) },
+            },
+          },
+        },
+        { method: 'get', path: '/?comp=list' }
+      )
+    ).toMatchObject({ listLike: true, reason: 'it has x-ms-pageable' });
+  });
+
+  it('reads operations declared next to a path item $ref', () => {
+    expect(
+      assessPagination(
+        {
+          openapi: '3.1.0',
+          paths: {
+            '/mixed': {
+              $ref: '#/components/pathItems/Shared',
+              get: { 'x-ms-pageable': { nextLinkName: 'nextLink' }, responses: json({}) },
+            },
+          },
+          components: { pathItems: { Shared: { post: { responses: json({}) } } } },
+        },
+        { method: 'get', path: '/mixed' }
+      )
+    ).toMatchObject({ listLike: true, reason: 'it has x-ms-pageable' });
+  });
+
   it('reads x-ms-pageable, where a null nextLinkName means a single page', () => {
     expect(
       proposalOf({
@@ -80,6 +115,9 @@ describe('assessPagination', () => {
       },
     });
     expect(proposalOf({ 'x-ms-pageable': { nextLinkName: null } })?.pagination).toBe('none');
+    expect(
+      proposalOf({ 'x-ms-pageable': { nextLinkName: 'nextLink' }, responses: json({}) })?.pagination
+    ).toEqual({ style: 'next_url', response: { itemsPath: 'value', nextPath: 'nextLink' } });
   });
 
   it('reads an opaque x-ms-pageable next link without a request parameter', () => {

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { describeGaps, gapCountPhrase, type DedupedCoverageGaps } from './dedupe_coverage_gaps';
 import { truncateAtWord } from './coverage_text';
 import type { ReportHuntContext } from './load_report_hunt_context';
 
@@ -13,6 +14,8 @@ export const MAX_THREAT_SUMMARY_CHARS = 2000;
 
 /** IOCs named in the summary before the remainder is counted. */
 const MAX_SUMMARY_IOCS = 10;
+/** The unsearched line is capped so a long gap list cannot crowd the report extract out. */
+const MAX_UNSEARCHED_CHARS = 800;
 /** An extract shorter than this is thin enough to earn a body lead-in. */
 const THIN_EXTRACT_CHARS = 200;
 /** The lead-in is a hint at the story, not the article; `content` carries the longer excerpt. */
@@ -51,7 +54,7 @@ export const buildReportExtract = ({
  * tested (its hypothesis, else the report quote the behavior came from, else the report
  * title). A run with no hit has no finding, so it leads with the top executed behavior's
  * report quote and then the structured extract, and only borrows a short body lead-in when
- * both are thin.
+ * both are thin. A retired run adds a closing line naming the gaps it could not search.
  */
 export const buildThreatSummary = ({
   hasConfirmedHit,
@@ -60,6 +63,7 @@ export const buildThreatSummary = ({
   report,
   techniqueIds,
   fallbackTitle,
+  unsearched,
 }: {
   hasConfirmedHit: boolean;
   hypothesis?: string;
@@ -67,6 +71,8 @@ export const buildThreatSummary = ({
   report?: ReportHuntContext;
   techniqueIds?: string[];
   fallbackTitle?: string;
+  /** Gaps of a retired run, named after the extract so a rule author sees what was not searched. */
+  unsearched?: DedupedCoverageGaps;
 }): string => {
   if (hasConfirmedHit) {
     const story = hypothesis ?? evidenceQuote ?? report?.title ?? fallbackTitle ?? '';
@@ -79,5 +85,17 @@ export const buildThreatSummary = ({
   if (thin && report?.bodyText) {
     lines.push(truncateAtWord(report.bodyText, BODY_LEAD_IN_CHARS));
   }
-  return truncateAtWord(lines.join('\n'), MAX_THREAT_SUMMARY_CHARS);
+  const prefix = unsearched ? `Not searched by Hunt Watch (${gapCountPhrase(unsearched)}): ` : '';
+  const described = unsearched
+    ? describeGaps(unsearched, MAX_UNSEARCHED_CHARS - prefix.length)
+    : undefined;
+  if (!described) {
+    return truncateAtWord(lines.join('\n'), MAX_THREAT_SUMMARY_CHARS);
+  }
+  const unsearchedLine = `${prefix}${described}`;
+  const story = truncateAtWord(
+    lines.join('\n'),
+    MAX_THREAT_SUMMARY_CHARS - unsearchedLine.length - 1
+  );
+  return story ? `${story}\n${unsearchedLine}` : unsearchedLine;
 };

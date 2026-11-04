@@ -79,4 +79,65 @@ describe('createEvaluateContract', () => {
     });
     expect(evaluationService.evaluate).not.toHaveBeenCalled();
   });
+
+  describe('in-memory evidence', () => {
+    const ROUND = {
+      input: { message: 'Why did the checkout alert fire?' },
+      response: { message: 'A bad deploy of the payments service.' },
+      steps: [{ tool_id: 'search_logs', result: { hits: 12 } }],
+    };
+
+    it('passes the round and reference data through, without a trace reader', async () => {
+      const { evaluate, evaluationService, getTraceReader } = setup();
+
+      await evaluate({
+        request,
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        evidence: { round: ROUND, reference_data: { expected: 'A bad deploy' } },
+      });
+
+      expect(getTraceReader).not.toHaveBeenCalled();
+      expect(evaluationService.evaluate).toHaveBeenCalledWith({
+        request,
+        spaceId: 'request-space',
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        evidence: { round: ROUND, referenceData: { expected: 'A bad deploy' } },
+      });
+    });
+
+    it('rejects a round missing the response', async () => {
+      const { evaluate, evaluationService } = setup();
+
+      const evaluation = evaluate({
+        request,
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        evidence: {
+          round: { input: ROUND.input, steps: [] } as unknown as typeof ROUND,
+        },
+      });
+
+      await expect(evaluation).rejects.toMatchObject({
+        message: expect.stringContaining('Invalid evaluation input'),
+        responseType: 'badRequest',
+      });
+      expect(evaluationService.evaluate).not.toHaveBeenCalled();
+    });
+
+    it('rejects a call that passes both a subject and evidence', async () => {
+      const { evaluate, evaluationService } = setup();
+
+      const evaluation = evaluate({
+        request,
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        subject: { traces: [{ trace_id: TRACE_ID }] },
+        evidence: { round: ROUND },
+      } as unknown as Parameters<typeof evaluate>[0]);
+
+      await expect(evaluation).rejects.toMatchObject({
+        message: 'Invalid evaluation input: pass either subject or evidence, not both',
+        responseType: 'badRequest',
+      });
+      expect(evaluationService.evaluate).not.toHaveBeenCalled();
+    });
+  });
 });

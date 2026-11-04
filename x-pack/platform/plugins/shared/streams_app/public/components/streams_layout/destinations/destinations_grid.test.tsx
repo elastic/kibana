@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import {
   DESTINATION_GRID_COLUMNS,
@@ -15,14 +15,20 @@ import {
 } from './destinations_grid';
 import type { ElasticsearchDestinationViewModel, S3DestinationViewModel } from './types';
 
-const mockUseDestinationIndexStats = jest.fn((_options: { enabled: boolean }) => ({}));
-jest.mock('./use_destination_index_stats', () => ({
-  useDestinationIndexStats: (options: { enabled: boolean }) =>
-    mockUseDestinationIndexStats(options),
-}));
-jest.mock('./destination_indices_table', () => ({
-  DestinationIndicesTable: () => null,
-}));
+const mockDestinationIndicesTable = jest.fn((_props: { destinationId: string }) => null);
+const mockIndicesTableMount = jest.fn((_destinationId: string) => undefined);
+jest.mock('./destination_indices_table', () => {
+  const { useEffect } = jest.requireActual<typeof import('react')>('react');
+  return {
+    DestinationIndicesTable: (props: { destinationId: string }) => {
+      const { destinationId } = props;
+      useEffect(() => {
+        mockIndicesTableMount(destinationId);
+      }, [destinationId]);
+      return mockDestinationIndicesTable(props);
+    },
+  };
+});
 
 const destination = (
   partial: Partial<ElasticsearchDestinationViewModel> = {}
@@ -32,6 +38,8 @@ const destination = (
   type: 'elasticsearch',
   signals: ['logs'],
   mode: 'auto',
+  indexBySignal: {},
+  writePatternsBySignal: {},
   ...partial,
 });
 
@@ -65,8 +73,11 @@ describe('DestinationsGrid', () => {
       <DestinationsGrid
         status="ready"
         destinations={destinations}
-        resolvedIndicesByDestination={{}}
+        resolvedIndicesByDestination={new Map()}
         resolvedIndicesStatus="ready"
+        destinationDetailRefs={new Map()}
+        onShowDestinationDetail={jest.fn()}
+        onHideDestinationDetail={jest.fn()}
         hasActiveFilters={false}
         visibleColumns={DESTINATION_GRID_COLUMNS.map(({ id }) => id)}
         pagination={{ pageIndex: 0, pageSize: 10 }}
@@ -79,10 +90,12 @@ describe('DestinationsGrid', () => {
       />
     );
 
-  const isStatsEnabled = () => mockUseDestinationIndexStats.mock.lastCall?.[0].enabled;
+  const renderedIndexTableIds = () =>
+    mockDestinationIndicesTable.mock.calls.map(([{ destinationId }]) => destinationId);
 
   beforeEach(() => {
-    mockUseDestinationIndexStats.mockClear();
+    mockDestinationIndicesTable.mockClear();
+    mockIndicesTableMount.mockClear();
   });
 
   it('expands an S3 row to show its bucket, region, prefix and key status', async () => {
@@ -98,19 +111,31 @@ describe('DestinationsGrid', () => {
     expect(details.queryByRole('heading')).not.toBeInTheDocument();
   });
 
-  it('does not fetch index stats when only an S3 row is expanded', async () => {
+  it('does not render the indices table when only an S3 row is expanded', async () => {
     renderGrid([s3Destination, destination()]);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand details for Archive' }));
 
-    expect(isStatsEnabled()).toBe(false);
+    expect(renderedIndexTableIds()).toEqual([]);
   });
 
-  it('fetches index stats once an Elasticsearch row is expanded', async () => {
+  it('renders the indices table for an expanded Elasticsearch row', async () => {
     renderGrid([s3Destination, destination()]);
 
     await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod logs' }));
 
-    expect(isStatsEnabled()).toBe(true);
+    await waitFor(() => expect(new Set(renderedIndexTableIds())).toEqual(new Set(['es-logs'])));
+  });
+
+  it('keeps an expanded row mounted when another row is expanded', async () => {
+    renderGrid([destination(), destination({ id: 'es-metrics', name: 'Prod metrics' })]);
+
+    await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod logs' }));
+    await waitFor(() => expect(mockIndicesTableMount.mock.calls).toEqual([['es-logs']]));
+    await userEvent.click(screen.getByRole('button', { name: 'Expand indices for Prod metrics' }));
+
+    await waitFor(() =>
+      expect(mockIndicesTableMount.mock.calls).toEqual([['es-logs'], ['es-metrics']])
+    );
   });
 });

@@ -6,9 +6,13 @@
  */
 
 import { applicationsRouteRepository } from './applications/route';
+import { overviewRouteRepository } from './overview/route';
+import { sessionsRouteRepository } from './sessions/route';
 
 export const getGlobalDigitalExperienceServerRouteRepository = () => ({
   ...applicationsRouteRepository,
+  ...overviewRouteRepository,
+  ...sessionsRouteRepository,
 });
 
 export type DigitalExperienceServerRouteRepository = ReturnType<

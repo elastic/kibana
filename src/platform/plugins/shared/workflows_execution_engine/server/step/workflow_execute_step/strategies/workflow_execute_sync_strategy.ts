@@ -28,6 +28,7 @@ import type { WorkflowExecutionRepository } from '../../../repositories/workflow
 import type { WorkflowsExecutionEnginePluginStart } from '../../../types';
 import type { StepExecutionRuntime } from '../../../workflow_context_manager/step_execution_runtime';
 import type { IWorkflowEventLogger } from '../../../workflow_event_logger';
+import { buildChildEventChainContext } from '../build_child_event_chain_context';
 import { buildChildLineageContext } from '../build_child_lineage_context';
 import type { StrategyResult } from '../types';
 
@@ -132,6 +133,7 @@ export class WorkflowExecuteSyncStrategy {
           parentStepId: this.stepExecutionRuntime.node.stepId,
           parentDepth,
           ...buildChildLineageContext({ invocation: 'sync', parent: workflowExecution }),
+          ...buildChildEventChainContext(workflowExecution),
           ...(inheritParentIdentity ? { inheritParentIdentity: true, parentStepName } : {}),
         },
         request

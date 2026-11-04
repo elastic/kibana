@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_SERVERLESS_TAGS } from '../../tags';
 
-const { SERVICE_NAME, OTEL_APPS } = testData;
+const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS } = testData;
 
 const isClassicRumRequest = (url: string): boolean => /\/internal\/(apm|ux)\//.test(url);
 
@@ -47,10 +47,10 @@ test.describe(
         await expect(digitalExperience.sourceFilter).toBeHidden();
       });
 
-      await test.step('opens the placeholder from an EDOT Browser row', async () => {
+      await test.step('opens the EDOT Browser Overview from an EDOT Browser row', async () => {
         await digitalExperience.applicationLink(OTEL_APPS.shop).click();
 
-        await expect(digitalExperience.otelOverviewPlaceholder).toBeVisible();
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(OTEL_SHOP_PAGE_LOADS);
       });
 
       await test.step('shows no Classic Overview', async () => {

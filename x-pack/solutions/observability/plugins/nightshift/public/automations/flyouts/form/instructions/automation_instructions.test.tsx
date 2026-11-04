@@ -5,53 +5,59 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
-import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationInstructions } from './automation_instructions';
-import type { InstructionMode } from '../automation_form_values';
-
-const onInstructionsChange = jest.fn();
-
-const Instructions = () => {
-  const [mode, setMode] = useState<InstructionMode>('investigate');
-  return (
-    <I18nProvider>
-      <AutomationInstructions
-        instructions=""
-        mode={mode}
-        onInstructionsChange={onInstructionsChange}
-        onModeChange={setMode}
-      />
-    </I18nProvider>
-  );
-};
+import { createTriggerFormValues } from '../automation_form_values';
 
 describe('AutomationInstructions', () => {
-  it('reports typed instructions', () => {
-    render(<Instructions />);
-
-    fireEvent.change(screen.getByTestId('automationInstructions'), {
-      target: { value: 'Find the cause' },
-    });
-
+  it('reports typed guidance with an accessible optional Slack field', () => {
+    const onInstructionsChange = jest.fn();
+    render(
+      <AutomationInstructions
+        instructions=""
+        trigger={createTriggerFormValues('slack_message')}
+        onInstructionsChange={onInstructionsChange}
+      />
+    );
+    const input = screen.getByRole('textbox', { name: 'Additional Instructions' });
+    expect(input).toHaveAttribute(
+      'placeholder',
+      'Optionally add context or priorities to guide the investigation when a Slack message triggers this automation…'
+    );
+    expect(input).not.toBeRequired();
+    expect(screen.getByText('Maximum 5,000 characters.')).toBeInTheDocument();
+    fireEvent.change(input, { target: { value: 'Find the cause' } });
     expect(onInstructionsChange).toHaveBeenCalledWith('Find the cause');
   });
 
-  it('switches between Investigate and Ask modes', async () => {
-    render(<Instructions />);
-
-    expect(screen.getByTestId('automationInstructions')).toHaveAttribute(
-      'placeholder',
-      'Describe how Nightshift should investigate and respond when this automation runs…'
+  it('shows stored oversized text and an error instead of truncating it', () => {
+    const instructions = 'x'.repeat(5001);
+    render(
+      <AutomationInstructions
+        instructions={instructions}
+        trigger={createTriggerFormValues('alert')}
+        onInstructionsChange={jest.fn()}
+      />
     );
-    fireEvent.click(screen.getByTestId('automationInstructionMode'));
-    fireEvent.click(await screen.findByTestId('automationInstructionMode-ask'));
-
-    expect(screen.getByTestId('automationInstructionMode')).toHaveTextContent('Ask');
-    expect(screen.getByTestId('automationInstructions')).toHaveAttribute(
-      'placeholder',
-      'Ask a question when this automation runs…'
+    expect(screen.getByRole('textbox', { name: 'Additional Instructions' })).toHaveValue(
+      instructions
     );
+    expect(screen.getByRole('textbox', { name: 'Additional Instructions' })).toBeInvalid();
+    expect(screen.getByText('Instructions must be at most 5000 characters.')).toBeInTheDocument();
+  });
+
+  it('shows the optional empty state without a mode badge in the overview', () => {
+    render(
+      <AutomationInstructions
+        instructions=""
+        trigger={createTriggerFormValues('alert')}
+        onInstructionsChange={jest.fn()}
+        readOnly
+      />
+    );
+    expect(screen.getByText('No additional instructions')).toBeInTheDocument();
+    expect(screen.queryByRole('textbox')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('automationInstructionMode')).not.toBeInTheDocument();
   });
 });

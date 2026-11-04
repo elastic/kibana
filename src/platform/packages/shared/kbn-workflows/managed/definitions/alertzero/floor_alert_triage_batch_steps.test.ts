@@ -206,11 +206,17 @@ describe('floor_alert_triage_batch — Investigations', () => {
     ).toBe(false);
   });
 
-  it('attaches each proposal its own alerts in chunks of 20, retrying a failed chunk', () => {
-    expect(stepByName('attach_mint_alerts')?.foreach).toContain('chunk: 20');
-    const chunk = stepByName('attach_mint_alert_chunk');
-    expect(chunk?.['on-failure']?.retry?.['max-attempts']).toBe(3);
-    expect(chunk?.['on-failure']?.continue).toBe(true);
+  it('attaches each new proposal its alerts once, by the tag of its Investigation, retrying on failure', () => {
+    const attach = stepByName('attach_mint_alerts');
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.foreach).toBeUndefined();
+    expect(attach?.with?.data).toEqual({
+      tags: [
+        'az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}',
+      ],
+    });
+    expect(attach?.['on-failure']?.retry?.['max-attempts']).toBe(3);
+    expect(attach?.['on-failure']?.continue).toBe(true);
   });
 });
 
@@ -1019,7 +1025,8 @@ describe('floor_alert_triage_batch — a failed batch Investigation', () => {
     expect(evalExpr(gate.condition, { variables: { home_conversation_id: '' } })).toBe(false);
     expect(evalExpr(gate.condition, { variables: { home_conversation_id: 'conv-1' } })).toBe(true);
     expect(gate.steps.map((step) => step.name)).toEqual([
-      'init_other_attach_tracking',
+      'init_other_tag_tracking',
+      'tag_other_alerts',
       'attach_other_alerts',
       'count_other_entities',
       'attach_other_impact_gate',
@@ -1027,6 +1034,28 @@ describe('floor_alert_triage_batch — a failed batch Investigation', () => {
       'close_batch_investigation',
       'report_batch_investigation_closed',
     ]);
+  });
+
+  it('tags the alerts with the Investigation that holds them, and attaches them only to the batch Investigation', () => {
+    expect(stepByName('tag_other_alerts')?.foreach).toBe(
+      '${{ variables.other_alert_ids | chunk: 500 | json }}'
+    );
+    expect(stepByName('tag_other_alert_chunk')?.with?.tags).toEqual({
+      tags_to_add: ['az:triage_investigation:{{ variables.home_conversation_id }}'],
+      tags_to_remove: [],
+    });
+    const attach = stepByName('attach_other_alerts');
+    expect(attach?.type).toBe('ai.attachment.add');
+    expect(attach?.with?.data).toEqual({
+      tags: ['az:triage_investigation:{{ variables.home_conversation_id }}'],
+    });
+    // A proposal's Investigation already has the attachment from when the proposal was created.
+    expect(
+      evalExpr(attach?.if as string, { variables: { batch_conversation_created: false } })
+    ).toBe(false);
+    expect(
+      evalExpr(attach?.if as string, { variables: { batch_conversation_created: true } })
+    ).toBe(true);
   });
 
   it('does not take the new home when the create failed', () => {
@@ -1404,22 +1433,29 @@ describe('floor_alert_triage_batch — grouping', () => {
     expect(evalExpr(resolve.group_joins, context)).toEqual([]);
   });
 
-  it('gives each new proposal its own Investigation, alerts, impact and az:proposal tag', () => {
+  it('gives each new proposal its own Investigation, alerts, impact, az:proposal and Investigation tags', () => {
     const loop = stepByName('process_mints');
     expect(loop?.foreach).toBe('${{ variables.group_mints | json }}');
     const inner = flatten(loop?.steps ?? []).map((step) => step.name);
     expect(inner).toEqual(
       expect.arrayContaining([
         'create_proposal_investigation',
-        'attach_mint_alert_chunk',
+        'attach_mint_alerts',
         'attach_mint_impact',
         'tag_mint_alert_chunk',
       ])
     );
     expect(stepByName('tag_mint_alert_chunk')?.with?.tags).toEqual({
-      tags_to_add: ['az:proposal:{{ steps.process_mints.item.proposal_id }}'],
+      tags_to_add: [
+        'az:proposal:{{ steps.process_mints.item.proposal_id }}',
+        'az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}',
+      ],
       tags_to_remove: [],
     });
+    // The first message reports failed tag writes, so the tags are written before it.
+    expect(inner.indexOf('tag_mint_alerts')).toBeLessThan(
+      inner.indexOf('post_comment_mint_analysis')
+    );
   });
 
   it('records the conversation of each proposal at its position, for the notes and the reviews', () => {
@@ -1463,7 +1499,7 @@ describe('floor_alert_triage_batch — grouping', () => {
       expect(fill?.condition).toBe('${{ steps.create_proposal_investigation.error == blank }}');
       expect(flatten(fill?.steps ?? []).map((step) => step.name)).toEqual(
         expect.arrayContaining([
-          'attach_mint_alert_chunk',
+          'attach_mint_alerts',
           'post_comment_mint_analysis',
           'attach_mint_impact',
           'tag_mint_alert_chunk',
@@ -1503,19 +1539,20 @@ describe('floor_alert_triage_batch — grouping', () => {
     });
   });
 
-  it('adds the joined alerts to the owner, tags them with its root id and links just those alerts there', () => {
+  it('adds the joined alerts to the owner by its tags, without attaching them, and links just those alerts there', () => {
     const loop = stepByName('process_joins');
     expect(loop?.foreach).toBe('${{ variables.group_joins | json }}');
-    expect(stepByName('attach_joined_alert_chunk')?.with?.conversation_id).toBe(
-      '{{ steps.process_joins.item.conversation_id }}'
-    );
+    expect(stepByName('attach_joined_alerts')).toBeUndefined();
     expect(stepByName('attach_joined_impact')?.type).toBe('investigations.attachImpact');
     expect(stepByName('attach_joined_impact')?.with).toEqual({
       conversationId: '{{ steps.process_joins.item.conversation_id }}',
       entities: '${{ steps.process_joins.item.impacted_entities }}',
     });
     expect(stepByName('tag_joined_alert_chunk')?.with?.tags).toEqual({
-      tags_to_add: ['az:proposal:{{ steps.process_joins.item.owner_proposal_id }}'],
+      tags_to_add: [
+        'az:proposal:{{ steps.process_joins.item.owner_proposal_id }}',
+        'az:triage_investigation:{{ steps.process_joins.item.conversation_id }}',
+      ],
       tags_to_remove: [],
     });
     expect(flatten(loop?.steps ?? []).map((step) => step.name)).toContain(
@@ -1536,14 +1573,14 @@ describe('floor_alert_triage_batch — grouping', () => {
     ).toContain('[View the added alerts](/s/team/app/security/alerts?filters=x)');
   });
 
-  it('counts the alert chunks that fail to attach and says so in the Investigation', () => {
+  it('counts the alert chunks that fail to tag and says so in the Investigation', () => {
     [
-      ['attach_mint_alert_chunk', 'record_attach_mint_alert_chunk_failure'],
-      ['attach_joined_alert_chunk', 'record_attach_joined_alert_chunk_failure'],
-      ['attach_other_alert_chunk', 'record_attach_other_alert_chunk_failure'],
-    ].forEach(([attach, record]) => {
-      expect(stepByName(attach)?.['on-failure']?.continue).toBe(true);
-      expect(stepByName(record)?.if).toBe(`\${{ steps.${attach}.error != blank }}`);
+      ['tag_mint_alert_chunk', 'record_tag_mint_alert_chunk_failure'],
+      ['tag_joined_alert_chunk', 'record_tag_joined_alert_chunk_failure'],
+      ['tag_other_alert_chunk', 'record_tag_other_alert_chunk_failure'],
+    ].forEach(([tag, record]) => {
+      expect(stepByName(tag)?.['on-failure']?.continue).toBe(true);
+      expect(stepByName(record)?.if).toBe(`\${{ steps.${tag}.error != blank }}`);
     });
 
     const message = (stepByName('post_comment_joined_owner')?.with as { message: string }).message;
@@ -1551,11 +1588,30 @@ describe('floor_alert_triage_batch — grouping', () => {
       renderString(message, {
         workflow: { spaceId: 'team' },
         inputs: { rule_name: 'Rule A' },
-        variables: { failed_attach_chunk_count: failed, total_attach_chunk_count: 5 },
+        variables: { failed_tag_chunk_count: failed },
         steps: { process_joins: { item: { alert_ids: ['a'], total_alerts: 3, revision: 2 } } },
       });
-    expect(render(2)).toContain('2 of 5 alert chunk(s) failed to attach after retries');
-    expect(render(0)).not.toContain('failed to attach');
+    expect(render(1)).toContain('Some alerts could not be tagged after retries');
+    expect(render(0)).not.toContain('could not be tagged');
+  });
+
+  it.each([
+    ['post_comment_mint_analysis', 'attach_mint_alerts'],
+    ['post_comment_other_alerts', 'attach_other_alerts'],
+  ])('says in %s when the alerts attachment failed', (comment, attach) => {
+    const message = (stepByName(comment)?.with as { message: string }).message;
+    const render = (steps: Record<string, unknown>, failed = 0) =>
+      renderString(message, {
+        workflow: { spaceId: 'team' },
+        inputs: { rule_name: 'Rule A' },
+        variables: { failed_tag_chunk_count: failed },
+        steps: { process_mints: { item: { alert_ids: ['a'] } }, classify_alerts: {}, ...steps },
+      });
+    const failedAttach = { [attach]: { error: { message: 'x' } } };
+    expect(render(failedAttach, 1)).toContain('The alerts failed to attach after retries');
+    expect(render(failedAttach, 1)).not.toContain('could not be tagged');
+    expect(render({}, 1)).toContain('Some alerts could not be tagged after retries');
+    expect(render({})).not.toContain('⚠️');
   });
 
   it('reports whether the batch created a conversation, for a proposal, a failure or its own alerts', () => {

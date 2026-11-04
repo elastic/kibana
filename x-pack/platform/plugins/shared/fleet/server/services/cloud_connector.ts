@@ -39,6 +39,7 @@ import {
   buildPackagePolicyFilterExcludingHiddenPackages,
   CLOUD_CONNECTOR_LIST_DEFAULT_PER_PAGE,
 } from '../../common/constants/cloud_connector';
+import { isIamRoleArn } from '../../common/services/cloud_connectors';
 
 import {
   CloudConnectorCreateError,
@@ -580,6 +581,15 @@ export class CloudConnectorService implements CloudConnectorServiceInterface {
       if (!roleArn) {
         logger.error('Package policy must contain role_arn variable');
         throw new CloudConnectorInvalidVarsError('Package policy must contain role_arn variable');
+      }
+
+      // Same rule as the browser's Role ARN field: the agent assumes this role, so a malformed
+      // value is rejected here rather than failing later at authentication.
+      if (!isIamRoleArn(roleArn)) {
+        logger.error('role_arn must be an IAM role ARN');
+        throw new CloudConnectorInvalidVarsError(
+          'role_arn must be an IAM role ARN (arn:<partition>:iam::<account>:role/<name>)'
+        );
       }
 
       // external_id is optional for AWS. When present, it must be a valid

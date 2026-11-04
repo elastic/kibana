@@ -22,15 +22,13 @@ import {
   createRuntimeMetadata,
   createSourceViewModel,
   createUnitSource,
-  defaultSignalsForSourceType,
   getConfiguredSources,
   getUnitSources,
-  sourceTypeSelectsSignals,
   telemetryForSelectedSignals,
   toConfiguredSource,
   withUnitSources,
-  type SourceSignal,
 } from '../source_models';
+import { canSubmitSourceForm, type SourceCreationFormData } from '../source_form';
 import { createSourceId, getAvailableSourceTypes, type SourceEnvironment } from '../source_helpers';
 import { notifyUnitUpdated } from '../../notify_unit_updated';
 import { getFormattedError } from '../../../../util/errors';
@@ -46,12 +44,6 @@ import type {
 } from '../types';
 
 type ApiKeyOperation = 'load' | 'generate' | 'delete' | 'persist';
-export type SourceNameValidationError = 'required' | 'duplicate';
-
-export interface SourceCreationFormErrors {
-  sourceName?: SourceNameValidationError;
-  signals?: 'required';
-}
 
 interface ApiKeyError {
   operation: ApiKeyOperation;
@@ -90,13 +82,8 @@ export interface SourcesStateInput {
   parentRef: AnyActorRef;
 }
 
+/** The source staged from a submitted create form. */
 export interface SourceCreationContext {
-  formData: {
-    sourceType: SourceType;
-    sourceName: string;
-    signals: SourceSignal[];
-  };
-  formErrors: SourceCreationFormErrors;
   createdSource?: SourceViewModel;
 }
 
@@ -129,16 +116,12 @@ export type SourcesStateEvent =
       message: string;
       intent: 'create' | 'delete';
     }
-  | { type: 'source.create' }
+  | { type: 'source.create'; formData: SourceCreationFormData }
   | { type: 'source.delete'; sourceId: string }
   | { type: 'source.deleteMany'; sourceIds: string[] }
   | { type: 'source.view'; sourceId: string }
   | { type: 'apiKey.generate'; sourceId: string }
   | { type: 'apiKey.delete'; sourceId: string; apiKeyId: string }
-  | { type: 'sourceType.select'; sourceType: SourceType }
-  | { type: 'sourceName.change'; sourceName: string }
-  | { type: 'signals.change'; signals: SourceSignal[] }
-  | { type: 'sourceName.blur' }
   | { type: 'create.done' }
   | { type: 'create.cancel' }
   | { type: 'modal.openCreate' }
@@ -164,74 +147,6 @@ export type SourcesStateEvent =
     };
 
 const getErrorMessage = (error: unknown): string => getFormattedError(error).message;
-
-const normalizeSourceName = (sourceName: string): string => sourceName.trim().toLocaleLowerCase();
-
-export const getSourceNameValidationError = ({
-  sourceName,
-  unitDefinition,
-}: {
-  sourceName: string;
-  unitDefinition: Unit;
-}): SourceNameValidationError | undefined => {
-  const normalizedSourceName = normalizeSourceName(sourceName);
-  if (!normalizedSourceName) {
-    return 'required';
-  }
-
-  return getUnitSources(unitDefinition).some(
-    ({ name }) => name && normalizeSourceName(name) === normalizedSourceName
-  )
-    ? 'duplicate'
-    : undefined;
-};
-
-const getSignalValidationError = ({
-  sourceType,
-  signals,
-}: {
-  sourceType: SourceType;
-  signals: readonly SourceSignal[];
-}): SourceCreationFormErrors['signals'] =>
-  sourceTypeSelectsSignals(sourceType) && signals.length === 0 ? 'required' : undefined;
-
-const getCreationFormErrors = ({
-  sourceName,
-  sourceType,
-  signals,
-  unitDefinition,
-}: {
-  sourceName: string;
-  sourceType: SourceType;
-  signals: readonly SourceSignal[];
-  unitDefinition: Unit;
-}): SourceCreationFormErrors => ({
-  sourceName: getSourceNameValidationError({ sourceName, unitDefinition }),
-  signals: getSignalValidationError({ sourceType, signals }),
-});
-
-const getFormErrorsFromCreation = (
-  formData: SourceCreationContext['formData'],
-  unitDefinition: Unit
-): SourceCreationFormErrors =>
-  getCreationFormErrors({
-    sourceName: formData.sourceName,
-    sourceType: formData.sourceType,
-    signals: formData.signals,
-    unitDefinition,
-  });
-
-/** Keep an empty name quiet until the name field has already shown a required error. */
-const withoutUnrevealedRequiredNameError = (
-  next: SourceCreationFormErrors,
-  previous: SourceCreationFormErrors
-): SourceCreationFormErrors => ({
-  ...next,
-  sourceName:
-    next.sourceName === 'required' && previous.sourceName !== 'required'
-      ? undefined
-      : next.sourceName,
-});
 
 const hasSource = (unitDefinition: Unit, sourceId: string): boolean =>
   getUnitSources(unitDefinition).some(({ id }) => id === sourceId);
@@ -397,18 +312,6 @@ export const sourcesStateMachine = setup({
         sourceEnvironment,
         sourceEnvironmentError: undefined,
         availableSourceTypes,
-        creationContext:
-          context.creationContext &&
-          !availableSourceTypes.includes(context.creationContext.formData.sourceType)
-            ? {
-                ...context.creationContext,
-                formData: {
-                  ...context.creationContext.formData,
-                  sourceType:
-                    availableSourceTypes[0] ?? context.creationContext.formData.sourceType,
-                },
-              }
-            : context.creationContext,
         metadataBySourceId: Object.fromEntries(
           getConfiguredSources(context.unitDefinition).map((source) => {
             const resolvedMetadata = createRuntimeMetadata(source, sourceEnvironment);
@@ -441,40 +344,13 @@ export const sourcesStateMachine = setup({
       return {
         ...sidecars,
         hasReceivedUnit: true,
-        creationContext: context.creationContext
-          ? context.creationContext.createdSource
-            ? {
-                ...context.creationContext,
-                createdSource: sourceIds.has(context.creationContext.createdSource.id)
-                  ? context.creationContext.createdSource
-                  : undefined,
-              }
-            : {
-                ...context.creationContext,
-                formErrors: withoutUnrevealedRequiredNameError(
-                  getFormErrorsFromCreation(context.creationContext.formData, event.unitDefinition),
-                  context.creationContext.formErrors
-                ),
-              }
-          : undefined,
-      };
-    }),
-    startFreshCreate: assign(({ context, event }) => {
-      if (event.type !== 'modal.openCreate') {
-        return {};
-      }
-      const sourceType = context.availableSourceTypes[0] ?? 'async_bulk';
-      return {
-        creationContext: {
-          formData: {
-            sourceType,
-            sourceName: '',
-            signals: defaultSignalsForSourceType(sourceType),
-          },
-          formErrors: {},
-        },
-        revealedApiKey: undefined,
-        apiKeyError: undefined,
+        creationContext: context.creationContext?.createdSource
+          ? {
+              createdSource: sourceIds.has(context.creationContext.createdSource.id)
+                ? context.creationContext.createdSource
+                : undefined,
+            }
+          : context.creationContext,
       };
     }),
     clearCreate: assign({
@@ -503,89 +379,11 @@ export const sourcesStateMachine = setup({
         apiKeyError: undefined,
       };
     }),
-    selectSourceType: assign(({ context, event }) => {
-      if (
-        event.type !== 'sourceType.select' ||
-        !context.creationContext ||
-        (context.availableSourceTypes.length > 0 &&
-          !context.availableSourceTypes.includes(event.sourceType))
-      ) {
-        return {};
-      }
-      const formData = {
-        ...context.creationContext.formData,
-        sourceType: event.sourceType,
-        signals: defaultSignalsForSourceType(event.sourceType),
-      };
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData,
-          formErrors: withoutUnrevealedRequiredNameError(
-            getFormErrorsFromCreation(formData, context.unitDefinition),
-            context.creationContext.formErrors
-          ),
-        },
-      };
-    }),
-    updateSignals: assign(({ context, event }) => {
-      if (event.type !== 'signals.change' || !context.creationContext) {
-        return {};
-      }
-      const formData = {
-        ...context.creationContext.formData,
-        signals: event.signals,
-      };
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData,
-          formErrors: withoutUnrevealedRequiredNameError(
-            getFormErrorsFromCreation(formData, context.unitDefinition),
-            context.creationContext.formErrors
-          ),
-        },
-      };
-    }),
-    updateSourceName: assign(({ context, event }) => {
-      if (event.type !== 'sourceName.change' || !context.creationContext) {
-        return {};
-      }
-      return {
-        creationContext: {
-          ...context.creationContext,
-          formData: {
-            ...context.creationContext.formData,
-            sourceName: event.sourceName,
-          },
-          formErrors: getFormErrorsFromCreation(
-            {
-              ...context.creationContext.formData,
-              sourceName: event.sourceName,
-            },
-            context.unitDefinition
-          ),
-        },
-      };
-    }),
-    validateSourceName: assign(({ context }) =>
-      context.creationContext
-        ? {
-            creationContext: {
-              ...context.creationContext,
-              formErrors: getFormErrorsFromCreation(
-                context.creationContext.formData,
-                context.unitDefinition
-              ),
-            },
-          }
-        : {}
-    ),
     stageCreatedSource: assign(({ context, event }) => {
-      if (event.type !== 'source.create' || !context.creationContext) {
+      if (event.type !== 'source.create') {
         return {};
       }
-      const { sourceType: type, sourceName, signals } = context.creationContext.formData;
+      const { sourceType: type, sourceName, signals } = event.formData;
       const name = sourceName.trim();
       const id = createSourceId({
         name,
@@ -604,7 +402,6 @@ export const sourcesStateMachine = setup({
       const metadata = createRuntimeMetadata(source, context.sourceEnvironment);
       return {
         creationContext: {
-          ...context.creationContext,
           createdSource: {
             ...source,
             ...metadata,
@@ -845,18 +642,13 @@ export const sourcesStateMachine = setup({
     ),
   },
   guards: {
-    canCreateSource: ({ context }) => {
-      const creation = context.creationContext;
-      if (!creation) {
-        return false;
-      }
-      const errors = getFormErrorsFromCreation(creation.formData, context.unitDefinition);
-      return (
-        !errors.sourceName &&
-        !errors.signals &&
-        context.availableSourceTypes.includes(creation.formData.sourceType)
-      );
-    },
+    canCreateSource: ({ context, event }) =>
+      event.type === 'source.create' &&
+      canSubmitSourceForm({
+        formData: event.formData,
+        unitDefinition: context.unitDefinition,
+        availableSourceTypes: context.availableSourceTypes,
+      }),
     isCreatedSource: ({ context, event }) => {
       const createdSourceId = context.creationContext?.createdSource?.id;
       return (
@@ -973,24 +765,17 @@ export const sourcesStateMachine = setup({
             'modal.openCreate': {
               guard: 'unitSaveIsIdle',
               target: 'supplyingConfiguration',
-              actions: 'startFreshCreate',
+              actions: 'clearCreate',
             },
           },
         },
         supplyingConfiguration: {
           on: {
-            'sourceType.select': { actions: 'selectSourceType' },
-            'sourceName.change': { actions: 'updateSourceName' },
-            'signals.change': { actions: 'updateSignals' },
-            'sourceName.blur': { actions: 'validateSourceName' },
-            'source.create': [
-              {
-                target: 'persisting',
-                guard: and(['canCreateSource', 'unitSaveIsIdle']),
-                actions: ['stageCreatedSource', 'notifyParentCreate'],
-              },
-              { actions: 'validateSourceName' },
-            ],
+            'source.create': {
+              target: 'persisting',
+              guard: and(['canCreateSource', 'unitSaveIsIdle']),
+              actions: ['stageCreatedSource', 'notifyParentCreate'],
+            },
           },
         },
         persisting: {
