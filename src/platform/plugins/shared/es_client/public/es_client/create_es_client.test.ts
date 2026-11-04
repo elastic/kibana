@@ -101,6 +101,12 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       { method: 'GET' },
     ],
     [
+      'send names that start with dots',
+      (client) => client.get({ index: '.kibana', id: '..a' }),
+      '/.kibana/_doc/..a',
+      { method: 'GET' },
+    ],
+    [
       'send list query parameters as comma-separated values',
       (client) => client.search({ index: 'my-index', _source_includes: ['a', 'b'] }),
       '/my-index/_search',
@@ -269,6 +275,21 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       'methods the proxy does not support',
       (client) => client.transport.request({ method: 'PATCH', path: '/' }),
       'does not support the PATCH method',
+    ],
+    [
+      'a ".." path parameter',
+      (client) => client.delete({ index: 'my-index', id: '..' }),
+      'cannot send /my-index/_doc/..: "." and ".." path segments are not supported',
+    ],
+    [
+      'a "." path parameter',
+      (client) => client.get({ index: 'my-index', id: '.' }),
+      'path segments are not supported',
+    ],
+    [
+      'a percent-encoded dot segment in a raw path',
+      (client) => client.transport.request({ method: 'GET', path: '/my-index/_doc/.%2E' }),
+      'path segments are not supported',
     ],
   ])('SHOULD reject %s without sending a request', async (_name, call, message) => {
     const { client, fetch } = await setup();

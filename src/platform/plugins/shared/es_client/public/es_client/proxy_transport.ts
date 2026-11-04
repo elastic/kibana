@@ -49,7 +49,13 @@ const KIBANA_PRODUCT_ORIGIN = 'kibana';
 const WARNING_ENTRY = /\d{3} \S+ "(?:[^"\\]|\\.)*"(?: "[^"]*")?/g;
 const ELASTICSEARCH_WARNING = /^\d\d\d Elasticsearch-/;
 
+// Browsers resolve these segments, even percent-encoded, so the request would reach another path.
+const DOT_SEGMENT = /^(?:\.|%2e){1,2}$/i;
+
 const isHttpMethod = (method: string): method is HttpMethod => HTTP_METHODS.has(method);
+
+const hasDotSegment = (path: string): boolean =>
+  path.split('/').some((segment) => DOT_SEGMENT.test(segment));
 
 const addQueryEntries = (query: HttpFetchQuery, querystring: Querystring): void => {
   if (querystring == null) {
@@ -190,6 +196,11 @@ export const createProxyTransport = (proxyFetch: ProxyFetch): EsClientTransport 
     const { method, path } = params;
     if (!isHttpMethod(method)) {
       throw new Error(`The Elasticsearch proxy does not support the ${method} method.`);
+    }
+    if (hasDotSegment(path)) {
+      throw new Error(
+        `The Elasticsearch proxy cannot send ${path}: "." and ".." path segments are not supported.`
+      );
     }
 
     const asStream = options.asStream === true;
