@@ -15,6 +15,7 @@ import {
   ExecutionStatus,
   createBackgroundExecutionAlreadyReportedError,
   createConversationBusyError,
+  createConversationNotFoundError,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution, AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -144,6 +145,11 @@ describe('wakeParent', () => {
     await expect(wake()).resolves.toBe('skipped');
 
     conversationClient.get.mockResolvedValueOnce({ id: 'conversation-1', state: {} } as never);
+    await expect(wake()).resolves.toBe('skipped');
+
+    conversationClient.get.mockRejectedValueOnce(
+      createConversationNotFoundError({ conversationId: 'conversation-1' })
+    );
     await expect(wake()).resolves.toBe('skipped');
 
     isPendingResumeConversationMock.mockReturnValueOnce(true);

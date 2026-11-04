@@ -15,6 +15,7 @@ import {
   ExecutionStatus,
   isBackgroundExecutionAlreadyReportedError,
   isConversationBusyError,
+  isConversationNotFoundError,
   isRoundCompleteEvent,
 } from '@kbn/agent-builder-common';
 import type { AgentExecution, AgentExecutionService } from '@kbn/agent-builder-server/execution';
@@ -73,7 +74,16 @@ export const wakeParent = async ({
     request,
     user: { ...child.owner, isAdmin: false },
   });
-  const conversation = await conversationClient.get(conversationId);
+  const conversation = await conversationClient.get(conversationId).catch((error: unknown) => {
+    // A parent deleted while the child ran has nothing left to report to.
+    if (isConversationNotFoundError(error)) {
+      return undefined;
+    }
+    throw error;
+  });
+  if (!conversation) {
+    return 'skipped';
+  }
 
   // A running parent has not stored its state yet, so it is tried and answers busy; an idle one
   // is skipped when it already reported the result or is waiting on a prompt.

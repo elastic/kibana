@@ -60,7 +60,6 @@ const eventsForKnownRound = (
     ? storedForRound
     : keepStoredAgentMessages(storedForRound, roundToEvents(round, conversation));
 
-/** A round carries no agent author, so a rewritten `user_message` keeps its stored agent actor. */
 /** A round records no agent author, so its regenerated events take the stored agent message as is. */
 export const keepStoredAgentMessages = (
   stored: ConversationEvent[],
