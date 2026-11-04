@@ -69,7 +69,7 @@ export const upsertDashboardSchema = lazySchema(() =>
     time_range: timeRangeSchema
       .optional()
       .describe(
-        'Override the dashboard time range. ONLY set this when the user explicitly requested a specific time window (e.g. "show the last 7 days", "set time range to May 20–24"). Do NOT set it otherwise — a data-aware default is applied automatically. Convert natural language to Kibana date math or ISO 8601: "last 30 minutes" → { from: "now-30m", to: "now" }, "last 90 days" → { from: "now-90d", to: "now" }, "May 20–24" → { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
+        'Override the dashboard time range. ONLY set this when the user explicitly requested a specific time window (e.g. "show the last 7 days", "set time range to May 20–24"). Do NOT set it otherwise — a data-aware default is applied automatically. The time range in the screen context is the page\'s current time picker state, not a request: copy it only when the user refers to it, e.g. "for this time range". Convert natural language to Kibana date math or ISO 8601: "last 30 minutes" → { from: "now-30m", to: "now" }, "last 90 days" → { from: "now-90d", to: "now" }, "May 20–24" → { from: "2024-05-20T00:00:00.000Z", to: "2024-05-24T23:59:59.999Z", mode: "absolute" }.'
       ),
     sections: z
       .array(upsertSectionSchema)
