@@ -187,7 +187,9 @@ export const createToolCallMessage = (
       return {
         id: toolCall.toolCallId,
         name: sanitizeToolId(toolCall.toolName),
-        args: toolCall.intent ? { [INTENT_PARAM]: toolCall.intent, ...toolCall.args } : toolCall.args,
+        args: toolCall.intent
+          ? { [INTENT_PARAM]: toolCall.intent, ...toolCall.args }
+          : toolCall.args,
       };
     }),
   });

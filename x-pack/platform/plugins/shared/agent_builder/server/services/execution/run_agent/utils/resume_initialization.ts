@@ -27,10 +27,7 @@ import {
   type PromptStorageState,
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
-import type {
-  ToolCallWithIntent,
-  ToolIdMapping,
-} from '@kbn/agent-builder-genai-utils/langchain';
+import type { ToolCallWithIntent, ToolIdMapping } from '@kbn/agent-builder-genai-utils/langchain';
 import type { ResearchOutcome, ToolRenderStateMap } from '../transient_state';
 import type { ConversationTurn } from './conversation_turn';
 import { toModelToolCall } from './dynamic_tool_call';

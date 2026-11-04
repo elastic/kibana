@@ -381,7 +381,7 @@ describe('processResearchResponse - execute_dynamic_tool', () => {
 
     const turn = processResearchResponse(message, { cycle: 1, toolManager: dynamicToolManager });
 
-    const [update] = turn.stepUpdates as Array<{ step: Record<string, unknown> }>;
+    const [update] = turn.stepUpdates as unknown as Array<{ step: Record<string, unknown> }>;
     expect(update.step).toMatchObject({
       tool_id: 'skill.tool',
       params: { q: 'a' },
