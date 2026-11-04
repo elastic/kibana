@@ -14,11 +14,6 @@ import type {
 } from './types';
 
 export type { ContextEnginePluginSetup, ContextEnginePluginStart } from './types';
-export type {
-  AiIndexChangeEvent,
-  AiIndexChangeField,
-  AiIndexChangeHandler,
-} from './ai_indices/changes';
 
 export const plugin: PluginInitializer<
   ContextEnginePluginSetup,
