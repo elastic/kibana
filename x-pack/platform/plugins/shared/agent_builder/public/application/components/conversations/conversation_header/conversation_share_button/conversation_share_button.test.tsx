@@ -6,7 +6,8 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
+import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import {
@@ -18,6 +19,7 @@ import { useConversation, useConversationPermissions } from '../../../../hooks/u
 import { useSuggestUsers } from '../../../../hooks/use_suggest_users';
 import { useUpdateConversationAccessControl } from '../../../../hooks/use_conversation_access_control';
 import { useUserProfiles } from '../../../../hooks/use_user_profiles';
+import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { ConversationShareButton } from './conversation_share_button';
 
 jest.mock('../../../../hooks/use_conversation', () => ({
@@ -38,7 +40,11 @@ jest.mock('../../../../hooks/use_user_profiles', () => ({
 }));
 
 jest.mock('../../../../hooks/agents/use_agent_by_id', () => ({
-  useAgentBuilderAgentById: () => ({ agent: null, isLoading: false, error: null }),
+  useAgentBuilderAgentById: jest.fn(() => ({ agent: null, isLoading: false, error: null })),
+}));
+
+jest.mock('../../../../hooks/use_conversation_flyout_session_props', () => ({
+  useConversationFlyoutSessionProps: () => ({}),
 }));
 
 const mockUseConversation = jest.mocked(useConversation);
@@ -46,6 +52,7 @@ const mockUseConversationPermissions = jest.mocked(useConversationPermissions);
 const mockUseSuggestUsers = jest.mocked(useSuggestUsers);
 const mockUseUpdateConversationAccessControl = jest.mocked(useUpdateConversationAccessControl);
 const mockUseUserProfiles = jest.mocked(useUserProfiles);
+const mockUseAgentBuilderAgentById = jest.mocked(useAgentBuilderAgentById);
 
 const mutate = jest.fn();
 let updateOptions: Parameters<typeof useUpdateConversationAccessControl>[0];
@@ -100,9 +107,11 @@ const baseConversation = {
 const renderShareButton = ({
   conversation = baseConversation,
   canUpdateAccessControl = true,
+  suggestedProfiles = [],
 }: {
   conversation?: ConversationWithPermissions;
   canUpdateAccessControl?: boolean;
+  suggestedProfiles?: Array<typeof memberProfile>;
 } = {}) => {
   mockUseConversation.mockReturnValue({
     conversation,
@@ -117,7 +126,7 @@ const renderShareButton = ({
     delete: false,
     update_access_control: canUpdateAccessControl,
   });
-  mockUseSuggestUsers.mockReturnValue({ data: [], isFetching: false } as never);
+  mockUseSuggestUsers.mockReturnValue({ data: suggestedProfiles, isFetching: false } as never);
   mockUseUserProfiles.mockReturnValue({
     data: [ownerProfile, memberProfile, secondMemberProfile, thirdMemberProfile],
   } as never);
@@ -126,16 +135,18 @@ const renderShareButton = ({
     return { mutate, isLoading: false } as never;
   });
 
-  render(
-    <EuiThemeProvider>
-      <IntlProvider locale="en">
-        <ConversationShareButton />
-      </IntlProvider>
-    </EuiThemeProvider>
-  );
+  return render(renderShareButtonTree());
 };
 
-const openPopover = async () => {
+const renderShareButtonTree = () => (
+  <EuiThemeProvider>
+    <IntlProvider locale="en">
+      <ConversationShareButton />
+    </IntlProvider>
+  </EuiThemeProvider>
+);
+
+const openFlyout = async () => {
   await act(async () => {
     fireEvent.click(screen.getByTestId('agentBuilderConversationInviteButton'));
   });
@@ -144,6 +155,11 @@ const openPopover = async () => {
 describe('ConversationShareButton', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAgentBuilderAgentById.mockReturnValue({
+      agent: null,
+      isLoading: false,
+      error: null,
+    } as never);
   });
 
   it('does not render without access-control update permission or shared members', () => {
@@ -152,7 +168,7 @@ describe('ConversationShareButton', () => {
     expect(screen.queryByTestId('agentBuilderConversationInviteButton')).not.toBeInTheDocument();
   });
 
-  it('opens a read-only members popover without access-control update permission', async () => {
+  it('opens a read-only members flyout without access-control update permission', async () => {
     renderShareButton({
       canUpdateAccessControl: false,
       conversation: {
@@ -171,14 +187,15 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    expect(screen.getByTestId('agentBuilderConversationInviteButton')).toHaveTextContent('2');
+    expect(screen.getByTestId('agentBuilderConversationInviteButton')).toHaveTextContent('Share');
 
-    await openPopover();
+    await openFlyout();
 
-    expect(screen.getByTestId('agentBuilderConversationSharingPopover')).toBeInTheDocument();
-    expect(screen.getByRole('heading', { name: 'Participants' })).toBeInTheDocument();
-    expect(screen.queryByRole('heading', { name: 'Sharing' })).not.toBeInTheDocument();
-    expect(screen.queryByText('Current members')).not.toBeInTheDocument();
+    expect(screen.getByTestId('agentBuilderConversationSharingFlyout')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'In this chat (2)' })).toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationSharingInviteSection')
+    ).not.toBeInTheDocument();
     expect(screen.getByText('Ethan Smith')).toBeInTheDocument();
     expect(screen.getByText('Alex Kim')).toBeInTheDocument();
     expect(
@@ -192,7 +209,7 @@ describe('ConversationShareButton', () => {
     ).not.toBeInTheDocument();
   });
 
-  it('opens the sharing popover with owner and current members', async () => {
+  it('opens the sharing flyout with invite and users sections', async () => {
     renderShareButton({
       conversation: {
         ...baseConversation,
@@ -210,15 +227,20 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    await openPopover();
-
-    expect(screen.getByTestId('agentBuilderConversationSharingPopover')).toBeInTheDocument();
+    await openFlyout();
+    expect(screen.getByTestId('agentBuilderConversationSharingFlyout')).toBeInTheDocument();
+    expect(screen.getByRole('heading', { level: 3, name: 'Share this chat' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'General access' })).toBeInTheDocument();
+    expect(
+      screen.getByTestId('agentBuilderConversationSharingAccessModeSelect')
+    ).toHaveAccessibleName(expect.stringContaining('General access'));
+    expect(screen.getByRole('heading', { name: 'Invite users' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'In this chat (2)' })).toBeInTheDocument();
     expect(screen.getByText('Ethan Smith')).toBeInTheDocument();
     expect(screen.getByText('Alex Kim')).toBeInTheDocument();
     expect(screen.getByText('Author')).toBeInTheDocument();
     expect(screen.queryByText('Member')).not.toBeInTheDocument();
     expect(screen.getByText('Only manually added members can see this chat')).toBeInTheDocument();
-    expect(screen.getByTestId('agentBuilderConversationSharingUserSearchIcon')).toBeInTheDocument();
   });
 
   it('orders current members alphabetically by display name', async () => {
@@ -251,7 +273,7 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    await openPopover();
+    await openFlyout();
 
     expect(
       screen.getAllByTestId('agentBuilderConversationShareMemberRow').map((row) => row.textContent)
@@ -263,78 +285,43 @@ describe('ConversationShareButton', () => {
     ]);
   });
 
-  it('counts only the author while the conversation is private to the owner', () => {
-    renderShareButton();
-
-    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
-
-    expect(trigger).toHaveTextContent('1');
-    expect(trigger).toHaveAccessibleName('Sharing, 1 user has access');
-  });
-
-  it('counts the author and every invited member in the trigger', () => {
+  it.each([
+    ['private to the owner', ConversationAccessControlMode.Private, []],
+    [
+      'shared with members',
+      ConversationAccessControlMode.Private,
+      [
+        {
+          type: 'user' as const,
+          id: 'member-1',
+          role: ConversationAccessControlRole.Member,
+          added_at: '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    ],
+    ['public', ConversationAccessControlMode.Public, []],
+  ])('labels the trigger Share while the conversation is %s', (_, accessMode, entries) => {
     renderShareButton({
       conversation: {
         ...baseConversation,
-        access_control: {
-          access_mode: ConversationAccessControlMode.Private,
-          entries: [
-            {
-              type: 'user',
-              id: 'member-1',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-01-01T00:00:00.000Z',
-            },
-            {
-              type: 'user',
-              id: 'member-2',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-01-02T00:00:00.000Z',
-            },
-            {
-              type: 'user',
-              id: 'member-3',
-              role: ConversationAccessControlRole.Member,
-              added_at: '2026-01-03T00:00:00.000Z',
-            },
-          ],
-        },
+        access_control: { access_mode: accessMode, entries },
       },
     });
 
-    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
-
-    expect(trigger).toHaveTextContent('4');
-    expect(trigger).toHaveAccessibleName('Sharing, 4 users have access');
+    expect(screen.getByTestId('agentBuilderConversationInviteButton')).toHaveTextContent('Share');
   });
 
-  it('shows the public label instead of a count while the conversation is public', () => {
-    renderShareButton({
-      conversation: {
-        ...baseConversation,
-        access_control: {
-          access_mode: ConversationAccessControlMode.Public,
-          entries: [],
-        },
-      },
-    });
-
-    const trigger = screen.getByTestId('agentBuilderConversationInviteButton');
-
-    expect(trigger).toHaveTextContent('Public');
-    expect(trigger).toHaveAccessibleName('Sharing, public');
-  });
-
-  it('shows the author in the sharing popover before anyone is invited', async () => {
+  it('shows the author in the sharing flyout before anyone is invited', async () => {
     renderShareButton();
 
-    await openPopover();
+    await openFlyout();
 
     const memberRows = screen.getAllByTestId('agentBuilderConversationShareMemberRow');
 
     expect(memberRows).toHaveLength(1);
     expect(memberRows[0]).toHaveTextContent('Ethan Smith');
     expect(memberRows[0]).toHaveTextContent('Author');
+    expect(screen.getByRole('heading', { name: 'In this chat (1)' })).toBeInTheDocument();
   });
 
   it('saves public access with no ACL entries', async () => {
@@ -355,7 +342,7 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    await openPopover();
+    await openFlyout();
 
     await act(async () => {
       fireEvent.click(screen.getByTestId('agentBuilderConversationSharingAccessModeSelect'));
@@ -367,9 +354,11 @@ describe('ConversationShareButton', () => {
       fireEvent.click(screen.getByText('Public'));
     });
 
-    expect(screen.queryByText('Current members')).not.toBeInTheDocument();
     expect(
-      screen.queryByTestId('agentBuilderConversationSharingUserSearch')
+      screen.queryByTestId('agentBuilderConversationSharingInviteSection')
+    ).not.toBeInTheDocument();
+    expect(
+      screen.queryByTestId('agentBuilderConversationSharingUsersSection')
     ).not.toBeInTheDocument();
 
     expect(mutate).toHaveBeenCalledWith({
@@ -396,7 +385,7 @@ describe('ConversationShareButton', () => {
       },
     });
 
-    await openPopover();
+    await openFlyout();
     fireEvent.click(screen.getByTestId('agentBuilderConversationShareRemoveMember'));
 
     expect(mutate).toHaveBeenCalledWith({
@@ -405,19 +394,19 @@ describe('ConversationShareButton', () => {
     });
   });
 
-  it('enables user suggestions only while the restricted sharing popover is open', async () => {
+  it('fetches user suggestions only while the restricted sharing flyout is open', async () => {
     renderShareButton();
 
-    expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: false });
+    expect(mockUseSuggestUsers).not.toHaveBeenCalled();
 
-    await openPopover();
+    await openFlyout();
 
     expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: true });
   });
 
-  it('resets the user suggestion search when reopening the sharing popover', async () => {
+  it('resets the user suggestion search when reopening the sharing flyout', async () => {
     renderShareButton();
-    await openPopover();
+    await openFlyout();
 
     fireEvent.change(screen.getByLabelText('Search for users to add'), {
       target: { value: 'not-a-user' },
@@ -428,21 +417,95 @@ describe('ConversationShareButton', () => {
     });
 
     await act(async () => {
-      fireEvent.click(screen.getByTestId('agentBuilderConversationSharingCloseButton'));
+      fireEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
     });
-    await openPopover();
+    await openFlyout();
 
     expect(mockUseSuggestUsers).toHaveBeenLastCalledWith('', { enabled: true });
   });
 
-  it('shows save errors inside the popover', async () => {
+  it('shows save errors inside the flyout', async () => {
     renderShareButton();
-    await openPopover();
+    await openFlyout();
 
     act(() => {
       updateOptions.onError?.(new Error('nope'));
     });
 
     expect(screen.getByText('Failed to update sharing settings')).toBeInTheDocument();
+  });
+
+  it('adds every selected user at once', async () => {
+    const user = userEvent.setup();
+    renderShareButton({ suggestedProfiles: [memberProfile, secondMemberProfile] });
+    await openFlyout();
+
+    const addButton = screen.getByTestId('agentBuilderConversationSharingAddUsersButton');
+    expect(addButton).toBeDisabled();
+
+    await user.click(screen.getByRole('combobox', { name: 'Search for users to add' }));
+    await user.click(screen.getByRole('option', { name: /Alex Kim/ }));
+    await user.click(screen.getByRole('combobox', { name: 'Search for users to add' }));
+    await user.click(screen.getByRole('option', { name: /Sam Delacroix/ }));
+
+    expect(mutate).not.toHaveBeenCalled();
+
+    await user.click(addButton);
+
+    expect(mutate).toHaveBeenCalledTimes(1);
+    expect(mutate).toHaveBeenCalledWith({
+      access_mode: ConversationAccessControlMode.Private,
+      entries: [
+        { type: 'user', id: 'member-1', role: ConversationAccessControlRole.Member },
+        { type: 'user', id: 'member-2', role: ConversationAccessControlRole.Member },
+      ],
+    });
+    expect(screen.getByRole('heading', { name: 'In this chat (3)' })).toBeInTheDocument();
+    expect(addButton).toBeDisabled();
+  });
+
+  it('drops pending invites when switching to another conversation with the flyout open', async () => {
+    const user = userEvent.setup();
+    const { rerender } = renderShareButton({ suggestedProfiles: [memberProfile] });
+    await openFlyout();
+
+    await user.click(screen.getByRole('combobox', { name: 'Search for users to add' }));
+    await user.click(screen.getByRole('option', { name: /Alex Kim/ }));
+    expect(screen.getByTestId('agentBuilderConversationSharingAddUsersButton')).toBeEnabled();
+
+    mockUseConversation.mockReturnValue({
+      conversation: { ...baseConversation, id: 'conversation-2' },
+      isLoading: false,
+      isFetching: false,
+      isFetched: true,
+      isError: false,
+      error: null,
+    });
+    rerender(renderShareButtonTree());
+
+    expect(screen.getByTestId('agentBuilderConversationSharingFlyout')).toBeInTheDocument();
+    expect(updateOptions.conversationId).toBe('conversation-2');
+    expect(screen.getByTestId('agentBuilderConversationSharingAddUsersButton')).toBeDisabled();
+
+    await user.click(screen.getByTestId('agentBuilderConversationSharingAddUsersButton'));
+    expect(mutate).not.toHaveBeenCalled();
+  });
+
+  it('shows the agent access warning in the users section', async () => {
+    mockUseAgentBuilderAgentById.mockReturnValue({
+      agent: { name: 'Support agent' },
+      isLoading: false,
+      error: null,
+    } as never);
+    renderShareButton();
+    await openFlyout();
+
+    expect(
+      within(screen.getByTestId('agentBuilderConversationSharingUsersSection')).getByTestId(
+        'agentBuilderConversationSharingAgentAccessWarning'
+      )
+    ).toHaveTextContent(
+      'Search results display all users, but only users with access to Support agent can see this chat.'
+    );
   });
 });
