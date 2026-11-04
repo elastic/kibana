@@ -945,6 +945,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
