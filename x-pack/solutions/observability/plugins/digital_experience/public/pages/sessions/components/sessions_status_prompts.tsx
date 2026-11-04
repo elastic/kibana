@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getEbtProps } from '@kbn/ebt-click';
-import { KbnDangerCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
 import type { SessionsStatus } from '../../../../common/sessions';
 import { DIGITAL_EXPERIENCE_EBT_ACTIONS, SESSIONS_EBT_ELEMENTS } from '../../../ebt_constants';
 
@@ -120,21 +120,54 @@ export function SessionsStatusCallout({
       </>
     );
   }
+  // Applied by a background task with the API key granted at setup; nothing to do but wait.
+  if (status.needsUpdate && status.autoUpdate) {
+    return (
+      <>
+        <KbnInfoCallout
+          data-test-subj="digitalExperienceSessionsUpdating"
+          size="s"
+          title={i18n.translate('xpack.digitalExperience.sessions.status.updatingTitle', {
+            defaultMessage: 'Sessions are being updated',
+          })}
+          text={i18n.translate('xpack.digitalExperience.sessions.status.updatingDescription', {
+            defaultMessage:
+              'Sessions were set up by an earlier version or with other settings. They update automatically within a few minutes, with the access granted when they were set up.',
+          })}
+        />
+        <EuiSpacer size="m" />
+      </>
+    );
+  }
   if (status.needsUpdate) {
     return (
       <>
         <KbnWarningCallout
           data-test-subj="digitalExperienceSessionsNeedUpdate"
           size="s"
-          title={i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
-            defaultMessage: 'Sessions need an update',
-          })}
+          title={
+            status.apiKeyInvalid
+              ? i18n.translate('xpack.digitalExperience.sessions.status.apiKeyInvalidTitle', {
+                  defaultMessage: 'Sessions lost their access',
+                })
+              : i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateTitle', {
+                  defaultMessage: 'Sessions need an update',
+                })
+          }
           text={
             <p>
-              {i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
-                defaultMessage:
-                  'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
-              })}{' '}
+              {status.apiKeyInvalid
+                ? i18n.translate(
+                    'xpack.digitalExperience.sessions.status.apiKeyInvalidDescription',
+                    {
+                      defaultMessage:
+                        'The API key that sessions are built with was invalidated or has expired, so new sessions are missing until they are updated.',
+                    }
+                  )
+                : i18n.translate('xpack.digitalExperience.sessions.status.needsUpdateDescription', {
+                    defaultMessage:
+                      'Sessions were set up by an earlier version or with other settings, so new sessions may be missing or incomplete until they are updated.',
+                  })}{' '}
               {canManage ? null : ASK_ADMIN_TEXT}
             </p>
           }

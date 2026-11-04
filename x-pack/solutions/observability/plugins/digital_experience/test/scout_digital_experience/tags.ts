@@ -15,4 +15,7 @@ export const DIGITAL_EXPERIENCE_TAGS = [
 // navigation need.
 export const DIGITAL_EXPERIENCE_WITH_UX_TAGS = ['@local-stateful-classic'];
 
+// Stateful only: whether Kibana can grant and store API keys on serverless (UIAM) is still open.
+export const DIGITAL_EXPERIENCE_STATEFUL_TAGS = ['@local-stateful-classic'];
+
 export const DIGITAL_EXPERIENCE_SERVERLESS_TAGS = ['@local-serverless-observability_complete'];

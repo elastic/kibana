@@ -25,6 +25,7 @@ import { EBT_CLICK_ACTIONS, getEbtProps } from '@kbn/ebt-click';
 import { useAbortableAsync } from '@kbn/react-hooks';
 import { getDateISORange } from '@kbn/timerange';
 import { KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
+import { SESSIONS_LOOKBACK_DAYS } from '../../../common/sessions';
 import type { ApplicationSource } from '../../../common/types/applications';
 import { canManageSessions } from '../../capabilities';
 import { ColumnSelector } from '../../components/column_selector';
@@ -112,6 +113,31 @@ const noSessionsPrompt = (
   />
 );
 
+/** The sessions index is being built after setup or an update, so it may still be empty. */
+const rebuildingPrompt = (
+  <EuiEmptyPrompt
+    data-test-subj="digitalExperienceSessionsRebuilding"
+    icon={<EuiLoadingLogo logo="logoObservability" size="xl" />}
+    titleSize="s"
+    title={
+      <h2>
+        {i18n.translate('xpack.digitalExperience.sessions.rebuildingTitle', {
+          defaultMessage: 'Building sessions',
+        })}
+      </h2>
+    }
+    body={
+      <p>
+        {i18n.translate('xpack.digitalExperience.sessions.rebuildingDescription', {
+          defaultMessage:
+            'Sessions are being built from up to {days} days of data. This can take a while; they show up here as they are built.',
+          values: { days: SESSIONS_LOOKBACK_DAYS },
+        })}
+      </p>
+    }
+  />
+);
+
 const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   <EuiEmptyPrompt
     data-test-subj="digitalExperienceSessionsNoMatches"
@@ -141,7 +167,15 @@ const NoMatchingSessionsPrompt = ({ onClear }: { onClear: () => void }) => (
   />
 );
 
-function SessionsList({ serviceName, source }: { serviceName: string; source: ApplicationSource }) {
+function SessionsList({
+  serviceName,
+  source,
+  rebuilding,
+}: {
+  serviceName: string;
+  source: ApplicationSource;
+  rebuilding: boolean;
+}) {
   const apiClient = useApiClient();
   const formatters = useFormatters();
   const { timeRange } = useTimeRange();
@@ -237,11 +271,10 @@ function SessionsList({ serviceName, source }: { serviceName: string; source: Ap
         />
       );
     }
-    return hasActiveFilters ? (
-      <NoMatchingSessionsPrompt onClear={clearFilters} />
-    ) : (
-      noSessionsPrompt
-    );
+    if (hasActiveFilters) {
+      return <NoMatchingSessionsPrompt onClear={clearFilters} />;
+    }
+    return rebuilding ? rebuildingPrompt : noSessionsPrompt;
   };
 
   return (
@@ -374,7 +407,7 @@ export function SessionsTab({
       {/* Clears the page header's tabs. */}
       <EuiSpacer size="m" />
       <SessionsStatusCallout status={status} {...enableProps} />
-      <SessionsList serviceName={serviceName} source={source} />
+      <SessionsList serviceName={serviceName} source={source} rebuilding={status.rebuilding} />
     </>
   );
 }

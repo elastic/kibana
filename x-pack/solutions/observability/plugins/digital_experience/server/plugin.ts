@@ -13,6 +13,10 @@ import type {
   Plugin as PluginType,
 } from '@kbn/core/server';
 import type { ApmDataAccessPluginSetup } from '@kbn/apm-data-access-plugin/server';
+import type {
+  EncryptedSavedObjectsPluginSetup,
+  EncryptedSavedObjectsPluginStart,
+} from '@kbn/encrypted-saved-objects-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type {
@@ -22,6 +26,11 @@ import type {
 import type { DigitalExperienceConfig } from './config';
 import { registerDigitalExperienceFeature } from './register_feature';
 import { getGlobalDigitalExperienceServerRouteRepository } from './routes/get_global_digital_experience_route_repository';
+import {
+  SessionsApiKeys,
+  sessionsApiKeyEncryptionParams,
+  sessionsApiKeySavedObjectType,
+} from './sessions/sessions_api_key';
 import {
   registerSessionsHealthTask,
   scheduleSessionsHealthTask,
@@ -34,10 +43,13 @@ interface DigitalExperienceSetupDeps {
   /** Optional: only its presence is read, as the Classic RUM source needs it. */
   ux?: unknown;
   taskManager?: TaskManagerSetupContract;
+  /** Optional: without it, or without an encryption key, sessions need manual updates. */
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginSetup;
 }
 
 interface DigitalExperienceStartDeps {
   taskManager?: TaskManagerStartContract;
+  encryptedSavedObjects?: EncryptedSavedObjectsPluginStart;
 }
 
 export class Plugin
@@ -51,8 +63,19 @@ export class Plugin
     this.config = initializerContext.config.get<DigitalExperienceConfig>();
   }
 
-  public setup(core: CoreSetup, plugins: DigitalExperienceSetupDeps) {
+  public setup(core: CoreSetup<DigitalExperienceStartDeps>, plugins: DigitalExperienceSetupDeps) {
     registerDigitalExperienceFeature(plugins.features);
+
+    core.savedObjects.registerType(sessionsApiKeySavedObjectType);
+    plugins.encryptedSavedObjects?.registerType(sessionsApiKeyEncryptionParams);
+    const sessionsApiKeys = new SessionsApiKeys({
+      logger: this.logger,
+      encryptedSavedObjects: plugins.encryptedSavedObjects,
+      getStartServices: async () => {
+        const [coreStart, pluginsStart] = await core.getStartServices();
+        return { core: coreStart, encryptedSavedObjects: pluginsStart.encryptedSavedObjects };
+      },
+    });
 
     const { buildFlavor } = this.initializerContext.env.packageInfo;
     const settings = this.config.sessions;
@@ -65,6 +88,7 @@ export class Plugin
         isServerless: buildFlavor === 'serverless',
         isUxEnabled: plugins.ux !== undefined,
         sessionsSettings: settings,
+        sessionsApiKeys,
       },
       runDevModeChecks: this.initializerContext.env.mode.dev,
     });
@@ -75,6 +99,7 @@ export class Plugin
         logger: this.logger,
         taskManager: plugins.taskManager,
         settings,
+        apiKeys: sessionsApiKeys,
       });
     }
   }

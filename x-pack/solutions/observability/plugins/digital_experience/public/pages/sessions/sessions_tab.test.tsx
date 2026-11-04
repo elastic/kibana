@@ -47,6 +47,9 @@ const status = (overrides: Partial<SessionsStatus> = {}): SessionsStatus => ({
   installedVersion: 1,
   currentVersion: 1,
   needsUpdate: false,
+  autoUpdate: false,
+  apiKeyInvalid: false,
+  rebuilding: false,
   reason: null,
   lagSeconds: 30,
   configured: { frequency: '1m', partitions: 1 },
@@ -225,6 +228,30 @@ describe('SessionsTab', () => {
     expect(await screen.findByTestId('digitalExperienceSessionsNeedUpdate')).toBeInTheDocument();
     expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
     expect(await screen.findByTestId('digitalExperienceSessionRow-session-1')).toBeInTheDocument();
+  });
+
+  it('says an update applies by itself when sessions run with a stored API key', async () => {
+    respondWith({
+      sessionsStatus: status({ needsUpdate: true, autoUpdate: true, health: 'outdated' }),
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsUpdating')).toHaveTextContent(
+      'They update automatically within a few minutes'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionsNeedUpdate')).not.toBeInTheDocument();
+  });
+
+  it('asks for an update when the stored API key was invalidated', async () => {
+    respondWith({
+      sessionsStatus: status({ needsUpdate: true, apiKeyInvalid: true, health: 'degraded' }),
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsNeedUpdate')).toHaveTextContent(
+      'was invalidated or has expired'
+    );
+    expect(screen.getByTestId('digitalExperienceSessionsUpdate')).toBeInTheDocument();
   });
 
   it('warns when sessions were set up by a newer Kibana, which this one cannot update', async () => {
@@ -513,6 +540,19 @@ describe('SessionsTab', () => {
     expect(await screen.findByTestId('digitalExperienceSessionsEmpty')).toHaveTextContent(
       'session.id'
     );
+  });
+
+  it('says sessions are being built instead of showing none', async () => {
+    respondWith({
+      sessionsStatus: status({ rebuilding: true }),
+      list: listResponse({ sessions: [], total: 0 }),
+    });
+    renderTab();
+
+    expect(await screen.findByTestId('digitalExperienceSessionsRebuilding')).toHaveTextContent(
+      'Sessions are being built from up to 30 days of data'
+    );
+    expect(screen.queryByTestId('digitalExperienceSessionsEmpty')).not.toBeInTheDocument();
   });
 
   it('offers to clear the filters when none match', async () => {

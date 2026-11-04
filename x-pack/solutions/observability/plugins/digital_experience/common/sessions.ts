@@ -71,6 +71,7 @@ export interface SessionsSettings {
 /** Whose credentials a transform runs with, as Elasticsearch recorded them on the last update. */
 export interface SessionsTransformAuthorization {
   roles: string[] | null;
+  apiKeyId: string | null;
   apiKeyName: string | null;
   serviceAccount: string | null;
 }
@@ -99,6 +100,18 @@ export interface SessionsStatus {
   currentVersion: number;
   /** True when a user with the manage sessions privilege must enable sessions again. */
   needsUpdate: boolean;
+  /**
+   * True when the transforms run with a stored API key that Kibana can still use, so a background
+   * task applies a needed update without a user.
+   */
+  autoUpdate: boolean;
+  /** True when the stored API key the transforms run with was invalidated or expired. */
+  apiKeyInvalid: boolean;
+  /**
+   * True while the current transforms haven't completed their first checkpoint: the sessions
+   * index is being built, from up to `SESSIONS_LOOKBACK_DAYS` of data, and may be empty.
+   */
+  rebuilding: boolean;
   reason: string | null;
   /** Largest freshness lag across partitions, in seconds. */
   lagSeconds: number | null;

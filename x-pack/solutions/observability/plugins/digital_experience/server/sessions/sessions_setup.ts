@@ -164,34 +164,45 @@ export const buildSessionsTransforms = ({ frequency, partitions }: SessionsSetti
   );
 
 /**
- * Installs or refreshes the sessions transforms, their dest pipeline, and the dest index
- * template as the requesting user (secondary auth), so the transforms only read what that
- * user can read. Safe to call repeatedly; also applies a changed frequency or partition count.
+ * Throws unless the user can set sessions up: the privileges the setup and the transforms need,
+ * and unrestricted reads of the source data. Runs as the user, as an API key with role
+ * descriptors can't answer the read check.
  */
-export const enableSessions = async ({
-  esClient,
-  logger,
-  settings,
-  enabledBy,
-  now = new Date(),
-}: {
-  esClient: IScopedClusterClient;
-  logger: Logger;
-  settings: SessionsSettings;
-  /** Username recorded on the transforms, so status can show whose access they run with. */
-  enabledBy: string | null;
-  now?: Date;
-}): Promise<void> => {
-  const missingPrivileges = await getMissingSessionsPrivileges(esClient.asCurrentUser);
+export const checkSessionsPrivileges = async (client: ElasticsearchClient): Promise<void> => {
+  const missingPrivileges = await getMissingSessionsPrivileges(client);
   if (missingPrivileges.length > 0) {
     throw new SessionsPrivilegesError(missingPrivileges);
   }
   // `has_privileges` doesn't see document- or field-level security, so check it separately.
-  const restricted = await getRestrictedSourceIndices(esClient.asCurrentUser);
+  const restricted = await getRestrictedSourceIndices(client);
   if (restricted.indices.length > 0) {
     throw new SessionsRestrictedReadError(restricted.indices, restricted.reason);
   }
+};
 
+/** Who enabled sessions, as recorded on the transforms. */
+export interface SessionsEnabledMeta {
+  enabledBy: string | null;
+  enabledAt: string;
+}
+
+/**
+ * Installs or refreshes the sessions transforms, their dest pipeline, and the dest index
+ * template, with `esClient`'s credentials as the transforms' secondary authorization: they only
+ * read what those credentials can read. Doesn't check privileges; see `checkSessionsPrivileges`.
+ * Safe to call repeatedly; also applies a changed frequency or partition count.
+ */
+export const installSessions = async ({
+  esClient,
+  logger,
+  settings,
+  enabled,
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  settings: SessionsSettings;
+  enabled: SessionsEnabledMeta;
+}): Promise<void> => {
   const client = esClient.asSecondaryAuthUser;
   const installed = await managedTransforms(client);
   // Never downgrade: that would delete the newer transforms and their summaries.
@@ -203,7 +214,7 @@ export const enableSessions = async ({
   await client.ingest.putPipeline(sessionsDestPipeline);
   await client.indices.putIndexTemplate(sessionsIndexTemplate);
 
-  const enabledMeta = { enabled_by: enabledBy, enabled_at: now.toISOString() };
+  const enabledMeta = { enabled_by: enabled.enabledBy, enabled_at: enabled.enabledAt };
   const desired = buildSessionsTransforms(settings).map((transform) => ({
     ...transform,
     _meta: { ...transform._meta, ...enabledMeta },
@@ -239,8 +250,8 @@ export const enableSessions = async ({
       continue;
     }
     // Sends everything `_update` accepts (all but the pivot, which a version bump replaces), so
-    // spec changes reach existing installs. Updating also refreshes the stored credentials to the
-    // enabling user.
+    // spec changes reach existing installs. Updating also replaces the transform's stored
+    // credentials with the secondary ones.
     const { pivot, defer_validation: deferValidation, ...updatable } = transform;
     await client.transform.updateTransform(updatable);
     const { transforms } = await client.transform.getTransformStats({ transform_id: transformId });
@@ -255,9 +266,10 @@ export const enableSessions = async ({
   }
 
   // Created here rather than by the transform once it starts, so the index exists when enabling
-  // returns and the list can read it; the index template gives it its mappings. As the current
-  // user, checked above for `create_index`: Elasticsearch ignores secondary authorization here.
-  // Created without checking first, as `indices.exists` needs `view_index_metadata`.
+  // returns and the list can read it; the index template gives it its mappings. With the same
+  // credentials as the transforms, which have `create_index`, but as the primary ones:
+  // Elasticsearch ignores secondary authorization here. Created without checking first, as
+  // `indices.exists` needs `view_index_metadata`.
   const user = esClient.asCurrentUser;
   await createUnlessExists(user, SESSIONS_INDEX);
 
@@ -268,6 +280,33 @@ export const enableSessions = async ({
   );
 
   await waitUntilSearchable(user);
+};
+
+/**
+ * Checks the user's privileges, then installs or refreshes the sessions transforms with the
+ * user's own credentials, so the transforms only read what that user can read.
+ */
+export const enableSessions = async ({
+  esClient,
+  logger,
+  settings,
+  enabledBy,
+  now = new Date(),
+}: {
+  esClient: IScopedClusterClient;
+  logger: Logger;
+  settings: SessionsSettings;
+  /** Username recorded on the transforms, so status can show whose access they run with. */
+  enabledBy: string | null;
+  now?: Date;
+}): Promise<void> => {
+  await checkSessionsPrivileges(esClient.asCurrentUser);
+  await installSessions({
+    esClient,
+    logger,
+    settings,
+    enabled: { enabledBy, enabledAt: now.toISOString() },
+  });
 };
 
 const createUnlessExists = async (client: ElasticsearchClient, index: string): Promise<void> => {
@@ -341,6 +380,7 @@ const authorizationOf = ({
   authorization
     ? {
         roles: authorization.roles ?? null,
+        apiKeyId: authorization.api_key?.id ?? null,
         apiKeyName: authorization.api_key?.name ?? null,
         serviceAccount: authorization.service_account ?? null,
       }
@@ -427,6 +467,9 @@ export const getSessionsStatus = async (
       state: null,
       installedVersion: null,
       needsUpdate: false,
+      autoUpdate: false,
+      apiKeyInvalid: false,
+      rebuilding: false,
       reason: null,
       lagSeconds: null,
       installedPartitions: 0,
@@ -459,6 +502,10 @@ export const getSessionsStatus = async (
     .map(({ lagSeconds }) => lagSeconds)
     .filter((lag): lag is number => lag != null);
 
+  const completedCheckpoint = (id: string) =>
+    (allStats.find((stats) => stats.id === id)?.checkpointing?.last?.checkpoint ?? 0) > 0;
+  const rebuilding = current.length > 0 && !current.some(({ id }) => completedCheckpoint(id));
+
   const outdated = current.length !== statuses.length;
   const configDrift =
     current.length !== settings.partitions ||
@@ -479,6 +526,9 @@ export const getSessionsStatus = async (
     state: worst.state,
     installedVersion,
     needsUpdate,
+    autoUpdate: false,
+    apiKeyInvalid: false,
+    rebuilding,
     reason:
       worst.health === 'degraded' || worst.health === 'lagging'
         ? worst.reason

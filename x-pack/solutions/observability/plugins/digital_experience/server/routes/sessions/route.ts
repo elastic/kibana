@@ -27,7 +27,8 @@ import {
 } from '../../../common/sessions';
 import { getSession } from '../../sessions/get_session';
 import { listSessions } from '../../sessions/list_sessions';
-import { enableSessions, getSessionsStatus } from '../../sessions/sessions_setup';
+import { enableSessionsForUser, withApiKeyStatus } from '../../sessions/sessions_auto_update';
+import { getSessionsStatus } from '../../sessions/sessions_setup';
 import { SessionsNewerVersionError } from '../../sessions/sessions_newer_version_error';
 import { SessionsPrivilegesError } from '../../sessions/sessions_privileges_error';
 import { SessionsRestrictedReadError } from '../../sessions/sessions_restricted_read_error';
@@ -125,13 +126,22 @@ const statusRoute = createDigitalExperienceServerRoute({
       extendedPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions],
     },
   },
-  handler: async ({ context, request, sessionsSettings, logger }): Promise<SessionsStatus> => {
+  handler: async ({
+    context,
+    request,
+    sessionsSettings,
+    sessionsApiKeys,
+    logger,
+  }): Promise<SessionsStatus> => {
     const { elasticsearch } = await context.core;
     try {
       // Transform metadata only; no session data is read with the internal user.
-      const status = await getSessionsStatus(elasticsearch.client.asInternalUser, {
-        settings: sessionsSettings,
-      });
+      const status = await withApiKeyStatus(
+        await getSessionsStatus(elasticsearch.client.asInternalUser, {
+          settings: sessionsSettings,
+        }),
+        sessionsApiKeys
+      );
       const canManage =
         request.authzResult?.[DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] === true;
       return canManage ? status : withoutEnabler(status);
@@ -148,14 +158,22 @@ const enableRoute = createDigitalExperienceServerRoute({
   security: {
     authz: { requiredPrivileges: [DIGITAL_EXPERIENCE_API_PRIVILEGES.manageSessions] },
   },
-  handler: async ({ context, sessionsSettings, logger }): Promise<SessionsStatus> => {
+  handler: async ({
+    context,
+    request,
+    sessionsSettings,
+    sessionsApiKeys,
+    logger,
+  }): Promise<SessionsStatus> => {
     const { elasticsearch, security } = await context.core;
     const enabledBy = security.authc.getCurrentUser()?.username ?? null;
-    const audit = (outcome: 'success' | 'failure', error?: Error) =>
+    const audit = (outcome: 'success' | 'failure', error?: Error, apiKeyName?: string) =>
       security.audit.logger.log({
         message:
           outcome === 'success'
-            ? `User [${enabledBy}] enabled Digital Experience sessions`
+            ? `User [${enabledBy}] enabled Digital Experience sessions${
+                apiKeyName ? ` with a new API key [${apiKeyName}]` : ''
+              }`
             : `Failed attempt by user [${enabledBy}] to enable Digital Experience sessions`,
         event: {
           action: 'digital_experience_sessions_enable',
@@ -166,23 +184,32 @@ const enableRoute = createDigitalExperienceServerRoute({
         ...(error ? { error: { code: error.name, message: error.message } } : {}),
       });
 
+    let apiKeyName: string | undefined;
     try {
-      await enableSessions({
+      const apiKey = await enableSessionsForUser({
         esClient: elasticsearch.client,
+        apiKeys: sessionsApiKeys,
+        request,
         logger,
         settings: sessionsSettings,
         enabledBy,
       });
+      apiKeyName = apiKey?.name;
     } catch (error) {
       audit('failure', error);
       throw toEnableError(error, logger);
     }
-    audit('success');
-    logger.info(`Sessions enabled by [${enabledBy}]`);
+    audit('success', undefined, apiKeyName);
+    logger.info(
+      `Sessions enabled by [${enabledBy}]${apiKeyName ? ` with API key [${apiKeyName}]` : ''}`
+    );
     try {
-      return await getSessionsStatus(elasticsearch.client.asInternalUser, {
-        settings: sessionsSettings,
-      });
+      return await withApiKeyStatus(
+        await getSessionsStatus(elasticsearch.client.asInternalUser, {
+          settings: sessionsSettings,
+        }),
+        sessionsApiKeys
+      );
     } catch (error) {
       throw toReadError(error, logger, 'the sessions status');
     }

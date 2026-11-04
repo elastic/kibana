@@ -13,6 +13,8 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { SessionsSettings, SessionsStatus } from '../../common/sessions';
+import type { SessionsApiKeys } from './sessions_api_key';
+import { updateSessionsWithApiKey, withApiKeyStatus } from './sessions_auto_update';
 import { getSessionsStatus } from './sessions_setup';
 
 export const SESSIONS_HEALTH_TASK_TYPE = 'digital_experience:sessions-health';
@@ -25,7 +27,11 @@ const stateSchemaV1 = schema.object({
   needsUpdate: schema.maybe(schema.boolean()),
   newerVersion: schema.maybe(schema.boolean()),
 });
-type SessionsHealthTaskState = TypeOf<typeof stateSchemaV1>;
+/** Adds the last automatic update failure, so a run only logs a new one. */
+const stateSchemaV2 = stateSchemaV1.extends({
+  autoUpdateError: schema.maybe(schema.string()),
+});
+type SessionsHealthTaskState = TypeOf<typeof stateSchemaV2>;
 
 const isProblem = (health: string | undefined): boolean =>
   health === 'degraded' || health === 'lagging';
@@ -58,42 +64,83 @@ const logHealthChanges = (
   return { health: status.health, needsUpdate: status.needsUpdate, newerVersion };
 };
 
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
+
 /**
- * Registers a task that only reports sessions transform health, version and lag. It never
- * creates or updates a transform: any transform update re-stamps the transform with the
- * updater's privileges, and doing that as the internal user would let it read every source
- * index regardless of the readers' privileges.
+ * Registers a task that reports sessions transform health, version and lag, and applies a needed
+ * update when the transforms run with a stored API key, using that same key. It never updates a
+ * transform otherwise: any transform update re-stamps the transform with the updater's
+ * privileges, and doing that as the internal user would let it read every source index
+ * regardless of the readers' privileges.
  */
 export const registerSessionsHealthTask = ({
   core,
   logger,
   taskManager,
   settings,
+  apiKeys,
 }: {
   core: CoreSetup;
   logger: Logger;
   taskManager: TaskManagerSetupContract;
   settings: SessionsSettings;
+  apiKeys: SessionsApiKeys;
 }): void => {
   taskManager.registerTaskDefinitions({
     [SESSIONS_HEALTH_TASK_TYPE]: {
       title: 'Digital Experience sessions health check',
       description:
-        'Reports the health, version and lag of the Digital Experience sessions transforms.',
-      timeout: '1m',
+        'Reports the health, version and lag of the Digital Experience sessions transforms, and updates them with their stored API key.',
+      // Long enough for an update, which waits up to 30s for a rebuilt sessions index.
+      timeout: '2m',
       maxAttempts: 1,
       cost: TaskCost.Tiny,
       priority: TaskPriority.Maintenance,
-      stateSchemaByVersion: { 1: { schema: stateSchemaV1, up: (state) => state } },
+      stateSchemaByVersion: {
+        1: { schema: stateSchemaV1, up: (state) => state },
+        2: { schema: stateSchemaV2, up: (state) => state },
+      },
       createTaskRunner: ({ taskInstance, signal }) => ({
         run: async () => {
           const [coreStart] = await core.getStartServices();
-          const status = await getSessionsStatus(coreStart.elasticsearch.client.asInternalUser, {
-            settings,
-            signal,
-          });
+          const readStatus = async () =>
+            withApiKeyStatus(
+              await getSessionsStatus(coreStart.elasticsearch.client.asInternalUser, {
+                settings,
+                signal,
+              }),
+              apiKeys
+            );
           const previous = taskInstance.state as SessionsHealthTaskState;
-          return { state: logHealthChanges(logger, status, previous) };
+
+          let status = await readStatus();
+          let autoUpdateError: string | undefined;
+          if (status.needsUpdate && status.autoUpdate) {
+            try {
+              await updateSessionsWithApiKey({
+                status,
+                apiKeys,
+                logger,
+                audit: coreStart.security.audit.withoutRequest,
+                settings,
+              });
+              logger.info(
+                `Updated the sessions transforms to version ${status.currentVersion} and the configured settings with their stored API key.`
+              );
+              status = await readStatus();
+            } catch (error) {
+              autoUpdateError = messageOf(error);
+              if (autoUpdateError !== previous.autoUpdateError) {
+                logger.error(
+                  `Could not update the sessions transforms with their stored API key: ${autoUpdateError}`
+                );
+              }
+            }
+          }
+          return {
+            state: { ...logHealthChanges(logger, status, previous), autoUpdateError },
+          };
         },
       }),
     },
