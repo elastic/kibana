@@ -60,6 +60,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespace,
     setNamespace,
     namespaceError,
+    outputId,
+    setOutputId,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -450,6 +452,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
+        showOutput={deploymentMethod === 'agent_based'}
+        outputId={outputId}
+        onOutputIdChange={setOutputId}
+        outputPackageName={bareNamePackage}
       />
       <EuiSpacer size="m" />
 

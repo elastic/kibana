@@ -75,6 +75,8 @@ export interface BuildPolicyBodyOpts {
   namespace: string;
   /** The global namespace, which every instance without a namespace of its own deploys into. */
   globalNamespace?: string;
+  /** Output chosen for agent-based policies. Unset leaves what the policy has. */
+  outputId?: string;
   authenticateAndDeployStep: AuthenticateAndDeployStepState;
   servicesMap: Map<string, AwsServiceMatrixEntry>;
   /** When set, use this cloud_connector on the policy instead of preserving the existing one.

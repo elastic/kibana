@@ -98,6 +98,11 @@ export interface ServiceSettingsPersistedState {
    * its own (`ServiceVars.namespace`). Empty or absent inherits the agent policy's.
    */
   namespace?: string;
+  /**
+   * Output every package policy of an agent-based deploy sends its data to. Empty inherits the
+   * agent policy's; absent means never chosen. Managed and ECF deploys have no output to pick.
+   */
+  outputId?: string;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -231,6 +236,18 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
         namespace: value,
+      });
+    },
+    [persisted, setPersisted]
+  );
+
+  const outputId = persisted?.outputId ?? '';
+
+  const setOutputId = useCallback(
+    (value: string) => {
+      setPersisted({
+        ...(persisted ?? { globalRegion: '', serviceVars: {} }),
+        outputId: value,
       });
     },
     [persisted, setPersisted]
@@ -576,6 +593,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
+    outputId,
+    setOutputId,
     bareNamePackage,
     instances,
     filteredInstances,

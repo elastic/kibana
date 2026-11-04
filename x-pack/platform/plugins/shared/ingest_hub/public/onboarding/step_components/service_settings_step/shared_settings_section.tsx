@@ -52,6 +52,12 @@ interface SharedSettingsSectionProps {
   namespaceError?: string;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
+  /** Whether to offer the output, which only an agent-based deploy can set. */
+  showOutput?: boolean;
+  outputId?: string;
+  onOutputIdChange?: (outputId: string) => void;
+  /** Package of the policies the output applies to. */
+  outputPackageName?: string;
 }
 
 /**
@@ -75,6 +81,10 @@ export function SharedSettingsSection({
   onNamespaceChange,
   namespaceError,
   hasDeployedServices = false,
+  showOutput = false,
+  outputId = '',
+  onOutputIdChange = () => {},
+  outputPackageName = 'aws',
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -254,6 +264,10 @@ export function SharedSettingsSection({
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
             hasDeployedServices={hasDeployedServices}
+            showOutput={showOutput}
+            outputId={outputId}
+            onOutputIdChange={onOutputIdChange}
+            outputPackageName={outputPackageName}
           />
         </div>
       </div>

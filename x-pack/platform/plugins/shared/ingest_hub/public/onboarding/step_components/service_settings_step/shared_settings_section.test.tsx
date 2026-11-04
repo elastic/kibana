@@ -12,7 +12,12 @@ import { I18nProvider } from '@kbn/i18n-react';
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({ services: { docLinks: undefined } }),
 }));
+const mockUseOutputs = jest.fn();
 jest.mock('@kbn/fleet-plugin/public', () => ({
+  useOutputs: (...args: unknown[]) => mockUseOutputs(...args),
+  PackagePolicyOutputSelect: jest.requireActual(
+    '@kbn/fleet-plugin/public/applications/fleet/sections/agent_policy/create_package_policy_page/components/steps/components/package_policy_output_select'
+  ).PackagePolicyOutputSelect,
   NamespaceComboBox: ({
     namespace,
     onNamespaceChange,
@@ -61,6 +66,15 @@ const renderSection = (props: Partial<React.ComponentProps<typeof SharedSettings
 };
 
 describe('SharedSettingsSection', () => {
+  beforeEach(() => {
+    mockUseOutputs.mockReturnValue({
+      isLoading: false,
+      canUseOutputPerIntegration: true,
+      allowedOutputs: [{ id: 'logstash-1', name: 'My Logstash' }],
+      inheritedOutputName: 'Default',
+    });
+  });
+
   it('shows the integration name and the description', () => {
     renderSection({ integrationName: 'my-aws', description: 'Production' });
 
@@ -166,6 +180,48 @@ describe('SharedSettingsSection', () => {
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.queryByTestId('sharedSettingsNamespace-note')).not.toBeInTheDocument();
+    });
+  });
+
+  describe('output', () => {
+    it('is hidden unless the deployment is agent-based', () => {
+      renderSection();
+
+      expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
+    });
+
+    it('offers the inherited output and the allowed ones', () => {
+      renderSection({ showOutput: true, outputId: '' });
+
+      const select = screen.getByTestId('sharedSettingsOutput');
+      expect(select).toHaveValue('');
+      expect(
+        screen.getByText('Inherited from agent policy (currently Default)')
+      ).toBeInTheDocument();
+      expect(screen.getByText('My Logstash')).toBeInTheDocument();
+    });
+
+    it('reports the chosen output', () => {
+      const onOutputIdChange = jest.fn();
+      renderSection({ showOutput: true, onOutputIdChange });
+
+      fireEvent.change(screen.getByTestId('sharedSettingsOutput'), {
+        target: { value: 'logstash-1' },
+      });
+
+      expect(onOutputIdChange).toHaveBeenCalledWith('logstash-1');
+    });
+
+    it('is hidden when the license does not allow an output per integration', () => {
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: false,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ showOutput: true });
+
+      expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
     });
   });
 });

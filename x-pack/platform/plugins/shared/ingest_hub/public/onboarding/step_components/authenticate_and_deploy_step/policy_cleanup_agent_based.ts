@@ -131,6 +131,7 @@ export async function updateAgentBasedPolicy(
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
+    outputId,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -253,6 +254,8 @@ export async function updateAgentBasedPolicy(
   const updateResult = await sendUpdatePackagePolicy(policyId, {
     name: policyName,
     namespace: policyNamespace,
+    // An empty choice is the inherited output, which clears an override the policy had.
+    ...(outputId !== undefined ? { output_id: outputId || null } : {}),
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,

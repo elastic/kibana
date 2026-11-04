@@ -25,6 +25,8 @@ export interface BuildPackagePolicyOpts {
   /** Integration name as entered in step 2; the policy name is derived from it. */
   integrationName?: string;
   description?: string;
+  /** Output the package policies send their data to. Unset inherits the agent policy's. */
+  outputId?: string;
 }
 
 export interface PkgInfo {
@@ -224,6 +226,7 @@ export async function buildGroupPackagePolicy(
   description?: string;
   package: { name: string; version: string };
   namespace?: string;
+  output_id?: string;
   vars?: Record<string, string | SecretRefValue>;
   inputs: Record<string, unknown>;
 }> {
@@ -237,8 +240,10 @@ export async function buildGroupPackagePolicy(
     agentCredentials,
     integrationName,
     description,
+    outputId,
   } = opts;
   const descriptionField = description?.trim() ? { description: description.trim() } : {};
+  const outputField = outputId ? { output_id: outputId } : {};
 
   // Build serviceVarsMap for all members. Key by service.id for buildPackageInputs.
   // Look up vars by instanceId first; fall back to serviceId for sessions predating instance keying.
@@ -309,6 +314,7 @@ export async function buildGroupPackagePolicy(
         ...descriptionField,
         package: { name: firstService.packageName, version: pkgVersion },
         ...(group.namespace ? { namespace: group.namespace } : {}),
+        ...outputField,
         ...(vars ? { vars } : {}),
         inputs: { ...disabledOtherInputs, ...selfDisabled },
       };
@@ -341,6 +347,7 @@ export async function buildGroupPackagePolicy(
     ...descriptionField,
     package: { name: firstService.packageName, version: pkgVersion },
     ...(group.namespace ? { namespace: group.namespace } : {}),
+    ...outputField,
     ...(vars ? { vars } : {}),
     // disabled entries first so our enabled inputs win if there's any key overlap
     inputs: { ...disabledOtherInputs, ...disabledOwnInputs, ...prunedInputs },
