@@ -6,7 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { GETTING_STARTED_SESSIONSTORAGE_KEY } from '@kbn/search-shared-ui';
+import { GETTING_STARTED_LOCALSTORAGE_KEY } from '@kbn/search-shared-ui';
 import { useGettingStartedLoaded } from './use_getting_started_loaded';
 import { useUsageTracker } from '../contexts/usage_tracker_context';
 import { AnalyticsEvents } from '../../common';
@@ -21,7 +21,7 @@ describe('useGettingStartedLoaded', () => {
   const mockLoad = jest.fn();
 
   beforeEach(() => {
-    sessionStorage.clear();
+    localStorage.clear();
     mockLoad.mockReset();
     mockUseUsageTracker.mockReturnValue({ load: mockLoad, click: jest.fn(), count: jest.fn() });
   });
@@ -38,9 +38,9 @@ describe('useGettingStartedLoaded', () => {
     expect(mockLoad).toHaveBeenCalledWith(AnalyticsEvents.gettingStartedChatLoaded);
   });
 
-  it('sets the getting started session storage key', () => {
+  it('remembers in local storage that getting started was visited', () => {
     renderHook(() => useGettingStartedLoaded());
 
-    expect(sessionStorage.getItem(GETTING_STARTED_SESSIONSTORAGE_KEY)).toBe('true');
+    expect(localStorage.getItem(GETTING_STARTED_LOCALSTORAGE_KEY)).toBe('true');
   });
 });

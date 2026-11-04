@@ -71,6 +71,7 @@ export const registerWriteHuntEvidenceRoute = ({
             searchedTechniqueIds,
             pendingTechniqueIds,
             replayedWholeReport,
+            retryableReasons,
           } = request.body;
 
           const visible = await isReportVisibleToSpace(reportsEsClient, { spaceId, reportId });
@@ -78,7 +79,7 @@ export const registerWriteHuntEvidenceRoute = ({
             return response.notFound({ body: { message: `Report ${reportId} not found` } });
           }
 
-          await writeHuntEvidence(
+          const { settledByCap } = await writeHuntEvidence(
             reportsEsClient,
             {
               spaceId,
@@ -90,11 +91,12 @@ export const registerWriteHuntEvidenceRoute = ({
               searchedTechniqueIds,
               pendingTechniqueIds,
               replayedWholeReport,
+              retryableReasons,
             },
             logger
           );
 
-          const body: WriteHuntEvidenceResponse = { acknowledged: true };
+          const body: WriteHuntEvidenceResponse = { acknowledged: true, settledByCap };
           return response.ok({ body });
         } catch (err) {
           logger.warn(`write_hunt_evidence route failed: ${(err as Error).message}`);

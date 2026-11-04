@@ -15,19 +15,19 @@ import {
   useAutomationRunsInRange,
   useToggleAutomation,
   useUpdateAutomation,
-} from '../hooks/use_automations';
+} from '../../data/automations/use_automations';
 import { useKibana } from '../../hooks/use_kibana';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 
-jest.mock('../hooks/use_automations', () => ({
+jest.mock('../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
-jest.mock('../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [],
     isLoading: false,
@@ -107,6 +107,14 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
+  it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
+    renderFlyout();
+    startEditing();
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+
+    expect(screen.queryByTestId('automationDailyLimitUnsavedCallout')).not.toBeInTheDocument();
+  });
+
   it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
     renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });
 
@@ -147,6 +155,45 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
 
     expect(screen.getByTestId('automationSaveButton')).toBeInTheDocument();
     expect(screen.getByTestId('automationName')).toHaveValue('Renamed');
+  });
+
+  it('validates missing scheduled instructions on save and resets feedback on trigger changes', async () => {
+    renderFlyout();
+    startEditing();
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Every…'));
+    const instructions = screen.getByTestId('automationInstructions');
+    expect(instructions).toBeValid();
+    expect(screen.getByTestId('automationSaveButton')).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).not.toHaveBeenCalled();
+    expect(instructions).toBeInvalid();
+    expect(
+      screen.getByText(
+        'Add instructions describing what this scheduled automation should investigate.'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Alert triggered'));
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Every…'));
+    expect(screen.getByTestId('automationInstructions')).toBeValid();
+
+    fireEvent.change(screen.getByTestId('automationInstructions'), {
+      target: { value: 'Check checkout health' },
+    });
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        id: automation.id,
+        body: expect.objectContaining({
+          execution: expect.objectContaining({ promptTemplate: 'Check checkout health' }),
+        }),
+      },
+      expect.any(Object)
+    );
   });
 
   it('cancels editing without saving', () => {
