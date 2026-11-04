@@ -14,6 +14,7 @@ import type {
 } from '@elastic/elasticsearch';
 import type { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
+import { PRODUCT_ORIGIN_HEADER } from '../../common';
 import type { EsClientRequestParams, HttpMethod } from '../../common/types';
 import type { EsClientResult, EsClientTransport, TransportRequestOptionsAsStream } from './types';
 
@@ -30,6 +31,7 @@ type RequestMeta = EsClientResult['meta']['request'];
 const HTTP_METHODS: ReadonlySet<string> = new Set(['GET', 'HEAD', 'PUT', 'POST', 'DELETE']);
 const NDJSON_CONTENT_TYPE = 'application/x-ndjson';
 const NOT_FOUND = 404;
+const KIBANA_PRODUCT_ORIGIN = 'kibana';
 // Splits a `Warning` header on commas outside quoted warning text, as elasticsearch-js does.
 const WARNING_SEPARATOR = /(?!\B"[^"]*),(?![^"]*"\B)/;
 const ELASTICSEARCH_WARNING = /^\d\d\d Elasticsearch-/;
@@ -97,14 +99,19 @@ const toBody = ({ body, bulkBody }: TransportRequestParams): string | object | u
   throw new Error('The Elasticsearch proxy client only sends string and JSON bodies.');
 };
 
+// Headers with a default value; a differently cased name would be sent as a second value.
+const CANONICAL_HEADER_NAMES: Readonly<Record<string, string>> = {
+  'content-type': 'Content-Type',
+  [PRODUCT_ORIGIN_HEADER]: PRODUCT_ORIGIN_HEADER,
+};
+
 const toHeaders = (headers: RequestHeaders, isNdjson: boolean): Record<string, string> => {
-  const result: Record<string, string> = {};
+  const result: Record<string, string> = { [PRODUCT_ORIGIN_HEADER]: KIBANA_PRODUCT_ORIGIN };
   for (const [name, value] of Object.entries(headers ?? {})) {
     if (value === undefined) {
       continue;
     }
-    // Kibana's fetch adds a default `Content-Type`; a differently cased name would be sent as a second value.
-    const key = name.toLowerCase() === 'content-type' ? 'Content-Type' : name;
+    const key = CANONICAL_HEADER_NAMES[name.toLowerCase()] ?? name;
     result[key] = Array.isArray(value) ? value.join(', ') : value;
   }
   if (isNdjson && !result['Content-Type']) {

@@ -10,3 +10,4 @@
 export const ES_CLIENT_BASE_PATH = '/internal/es_client';
 export const ES_CLIENT_ROUTE_PATH = `${ES_CLIENT_BASE_PATH}/{path*}`;
 export const ES_CLIENT_API_VERSION = '1';
+export const PRODUCT_ORIGIN_HEADER = 'x-elastic-product-origin';

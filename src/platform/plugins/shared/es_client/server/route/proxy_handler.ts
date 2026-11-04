@@ -13,7 +13,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { TransportRequestOptions } from '@elastic/elasticsearch';
 import type { Headers, KibanaRequest, RequestHandler, ResponseHeaders } from '@kbn/core/server';
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
-import { ES_CLIENT_BASE_PATH } from '../../common';
+import { ES_CLIENT_BASE_PATH, PRODUCT_ORIGIN_HEADER } from '../../common';
 import { getRequestAbortedSignal } from '../lib/get_request_aborted_signal';
 import type { RouteDependencies } from '../types';
 
@@ -53,8 +53,9 @@ const getHeader = (headers: Headers, name: string): string | undefined => {
 export const getProxyHeaders = (request: KibanaRequest, hasBody: boolean): IncomingHttpHeaders => {
   const proxyHeaders: IncomingHttpHeaders = {
     'content-type': getHeader(request.headers, 'content-type') ?? 'application/json',
-    // Clears the Kibana-origin default so Elasticsearch attributes deprecations to the user.
-    'x-elastic-product-origin': '',
+    // Without a client value, the empty header clears the scoped client's Kibana-origin default;
+    // Elasticsearch treats it as no origin.
+    [PRODUCT_ORIGIN_HEADER]: getHeader(request.headers, PRODUCT_ORIGIN_HEADER) ?? '',
   };
 
   const accept = getHeader(request.headers, 'accept');

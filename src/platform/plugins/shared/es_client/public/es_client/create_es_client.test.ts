@@ -12,6 +12,7 @@ import { coreMock } from '@kbn/core/public/mocks';
 import { EsClientPlugin } from '../plugin';
 
 const ELASTICSEARCH_WARNING = '299 Elasticsearch-9.0.0 "this request accesses system indices"';
+const KIBANA_ORIGIN = { 'x-elastic-product-origin': 'kibana' } as const;
 
 const setup = async () => {
   const coreSetup = coreMock.createSetup();
@@ -142,7 +143,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
               method: 'GET',
               path: '/my-index/_count',
               querystring: 'q=a%20b',
-              headers: {},
+              headers: KIBANA_ORIGIN,
               body: undefined,
             },
           },
@@ -280,7 +281,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
         method: 'POST',
         query: { refresh: true },
         body: '{"index":{"_id":"1"}}\n{"message":"hello"}\n',
-        headers: { 'Content-Type': 'application/x-ndjson' },
+        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' },
       })
     );
   });
@@ -303,7 +304,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       '/internal/es_client/_msearch',
       expect.objectContaining({
         body: '{"index":"my-index"}\n{"query":{"match_all":{}}}\n',
-        headers: { 'Content-Type': 'application/x-ndjson' },
+        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' },
       })
     );
   });
@@ -321,9 +322,33 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       '/internal/es_client/my-index/_search',
       expect.objectContaining({
         signal,
-        headers: { 'Content-Type': 'application/vnd.elasticsearch+json' },
+        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+json' },
       })
     );
+  });
+
+  describe('WHEN sending the product origin', () => {
+    it('SHOULD mark requests as coming from Kibana', async () => {
+      const { client, fetch } = await setup();
+
+      await client.indices.stats({ index: '*' });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/*/_stats',
+        expect.objectContaining({ headers: KIBANA_ORIGIN })
+      );
+    });
+
+    it('SHOULD let the caller replace it regardless of header case', async () => {
+      const { client, fetch } = await setup();
+
+      await client.search({ index: 'my-index' }, { headers: { 'X-Elastic-Product-Origin': '' } });
+
+      expect(fetch).toHaveBeenCalledWith(
+        '/internal/es_client/my-index/_search',
+        expect.objectContaining({ headers: { 'x-elastic-product-origin': '' } })
+      );
+    });
   });
 
   describe('WHEN sending bulk requests', () => {
@@ -374,7 +399,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
 
       expect(fetch).toHaveBeenCalledWith(
         '/internal/es_client/',
-        expect.objectContaining({ headers: { 'x-list': 'a, b' } })
+        expect.objectContaining({ headers: { ...KIBANA_ORIGIN, 'x-list': 'a, b' } })
       );
     });
 
@@ -390,7 +415,7 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
         '/internal/es_client/_bulk',
         expect.objectContaining({
           body: '{"delete":{"_id":"1"}}\n',
-          headers: { 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' },
+          headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' },
         })
       );
     });

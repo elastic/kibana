@@ -182,7 +182,30 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(headers).not.toHaveProperty('host');
     expect(headers).not.toHaveProperty('transfer-encoding');
     expect(headers['content-type']).toBe('application/json');
-    expect(headers['x-elastic-product-origin']).toBe('');
+  });
+
+  describe('WHEN the client sends a product origin', () => {
+    it('SHOULD pass it through to Elasticsearch', async () => {
+      const { run, transportRequest } = setup({
+        headers: { 'x-elastic-product-origin': 'kibana' },
+      });
+
+      await run();
+
+      const [, options] = transportRequest.mock.calls[0];
+      expect(options?.headers?.['x-elastic-product-origin']).toBe('kibana');
+    });
+  });
+
+  describe('WHEN the client sends no product origin', () => {
+    it("SHOULD clear the scoped client's Kibana origin", async () => {
+      const { run, transportRequest } = setup();
+
+      await run();
+
+      const [, options] = transportRequest.mock.calls[0];
+      expect(options?.headers?.['x-elastic-product-origin']).toBe('');
+    });
   });
 
   it('SHOULD stream the Elasticsearch response back with its status and selected headers', async () => {

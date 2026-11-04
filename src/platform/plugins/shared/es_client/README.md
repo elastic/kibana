@@ -25,7 +25,8 @@ Requests use API version `1` (`elastic-api-version` header). Internal APIs carry
 - **Path encoding.** The Elasticsearch path is taken from the raw URL, so percent-encoded characters (for example `%2F` in a document id) are preserved.
 - **GET and HEAD have no body.** Kibana does not accept request bodies on GET or HEAD. Use POST for search-style APIs (`_search`, `_count`, `_msearch`, ...), which Elasticsearch accepts.
 - **Compressed bodies.** Request bodies are forwarded still compressed together with their `content-encoding`, so gzip-compressed requests (for example from Elasticsearch clients with compression enabled) work.
-- **Headers.** Only `content-type`, `content-encoding` (for requests with a body), `accept` and `x-forwarded-*` headers are sent to Elasticsearch. Cookies and other client headers are not forwarded; credentials come from the scoped Elasticsearch client. Elasticsearch receives Kibana's request id as `x-opaque-id`; Kibana adopts a client's `x-opaque-id` as that id only when `server.requestId.allowFromAnyIp` or `server.requestId.ipAllowlist` permits it.
+- **Headers.** Only `content-type`, `content-encoding` (for requests with a body), `accept`, `x-elastic-product-origin` and `x-forwarded-*` headers are sent to Elasticsearch. Cookies and other client headers are not forwarded; credentials come from the scoped Elasticsearch client. Elasticsearch receives Kibana's request id as `x-opaque-id`; Kibana adopts a client's `x-opaque-id` as that id only when `server.requestId.allowFromAnyIp` or `server.requestId.ipAllowlist` permits it.
+- **Product origin.** A client's `x-elastic-product-origin` header is passed to Elasticsearch. Without one, Elasticsearch receives no product origin rather than the scoped client's default `kibana`, so system index access produces deprecation warnings that Kibana attributes to the user.
 
 ## Authorization
 
@@ -62,6 +63,7 @@ It is built from the client's generated API modules, not its `Client` class, whi
 - Errors reject with Kibana's `HttpFetchError` (status on `error.response.status`, Elasticsearch body on `error.body`) instead of `ResponseError`. `exists`-style APIs resolve `false` for `404`, and the `ignore` option resolves with the error body.
 - With `meta: true`, calls resolve with `EsClientResult`: the `body`, `statusCode`, `headers`, `warnings` and `meta.request` / `meta.aborted` of the Node client's `TransportResult`. Connection details, attempts and the request context are not available in the browser.
 - With `asStream: true`, calls resolve with the response body as a `ReadableStream`, or with an `EsClientResult` holding it when `meta: true` is also set.
+- Requests send `x-elastic-product-origin: kibana`, as core's server client does. Pass the header in `headers` to replace it.
 - Supported request options are `headers`, `signal`, `querystring`, `ignore`, `meta` and `asStream`.
 - `helpers`, `child()`, `close()` and diagnostics are not available, and `transport` only implements `request`.
 - `bulk` is reimplemented in this plugin because the generated module loads the Node transport.
