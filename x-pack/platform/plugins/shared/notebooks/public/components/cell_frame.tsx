@@ -18,9 +18,10 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiToolTip,
+  euiCanAnimate,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, keyframes } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -34,6 +35,11 @@ import { RunButton } from './run_button';
 import { useNotebook } from './notebook_context';
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
+
+const focusPulse = (rest: string, highlight: string) => keyframes`
+  0%, 100% { box-shadow: ${rest}; }
+  50% { box-shadow: ${highlight}; }
+`;
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
@@ -138,8 +144,17 @@ export const CellFrame = ({
         hasShadow={false}
         paddingSize="s"
         css={css`
-          box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}
-            ${isFocused ? `, 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.primary}` : ''};
+          box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor};
+          ${isFocused &&
+          css`
+            ${euiCanAnimate} {
+              animation: ${focusPulse(
+                  `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`,
+                  `inset 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.primary}`
+                )}
+                ${euiTheme.animation.slow} ${euiTheme.animation.resistance} 3;
+            }
+          `}
         `}
         data-test-subj={`notebookCell-${cell.name}`}
       >
