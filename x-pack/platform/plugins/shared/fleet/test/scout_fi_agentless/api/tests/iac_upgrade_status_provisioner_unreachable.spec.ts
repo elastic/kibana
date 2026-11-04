@@ -18,6 +18,10 @@ const PUBLIC_HEADERS = { 'elastic-api-version': '2023-10-31' };
 
 const ROLE_ARN = 'arn:aws:iam::123456789012:role/ElasticFederatedIdentityTest';
 
+// Fleet rejects a duplicate agent policy or connector name, so an interrupted run that left either
+// behind (its id was never captured, so teardown cannot remove it) would fail every later run.
+const RUN_SUFFIX = Date.now().toString(36);
+
 /**
  * A Federated Identity saved with the static fallback template has no `iac_key`. Where the IaC
  * Provisioner is not reachable (this config set configures no provisioner URL, like an ECH
@@ -42,7 +46,7 @@ apiTest.describe(
         method: 'POST',
         path: '/api/fleet/agent_policies',
         headers: PUBLIC_HEADERS,
-        body: { name: 'iac-unreachable-policy', namespace: 'default' },
+        body: { name: `iac-unreachable-policy-${RUN_SUFFIX}`, namespace: 'default' },
       });
       agentPolicyId = agentPolicy.item.id;
 
@@ -52,7 +56,7 @@ apiTest.describe(
         path: '/api/fleet/cloud_connectors',
         headers: PUBLIC_HEADERS,
         body: {
-          name: 'iac-unreachable-connector',
+          name: `iac-unreachable-connector-${RUN_SUFFIX}`,
           cloudProvider: 'aws',
           accountType: 'single-account',
           vars: { role_arn: { type: 'text', value: ROLE_ARN } },
@@ -66,7 +70,7 @@ apiTest.describe(
         path: '/api/fleet/package_policies',
         headers: PUBLIC_HEADERS,
         body: {
-          name: 'iac-unreachable-guardduty',
+          name: `iac-unreachable-guardduty-${RUN_SUFFIX}`,
           namespace: 'default',
           policy_ids: [agentPolicyId],
           package: { name: 'aws', version: '8.1.0' },
