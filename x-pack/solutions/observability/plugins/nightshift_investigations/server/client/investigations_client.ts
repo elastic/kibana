@@ -78,6 +78,7 @@ import {
 import {
   buildAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
+  buildInvestigationRoundMessage,
   type AlertRecoveredMessageInput,
 } from './build_investigation_message';
 import {
@@ -86,6 +87,7 @@ import {
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
@@ -485,6 +487,7 @@ export class NightshiftInvestigationsClient {
       title,
       trigger_type,
       message,
+      instructions,
       timeout_seconds,
       source_ids,
       connector_id,
@@ -498,6 +501,11 @@ export class NightshiftInvestigationsClient {
       entryPoint,
     }: { automationBudget?: AutomationBudget; entryPoint: InvestigationEntryPoint }
   ): Promise<StartInvestigationResponse> {
+    if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+      throw badRequest(
+        `Instructions must be at most ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
+      );
+    }
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -582,15 +590,20 @@ export class NightshiftInvestigationsClient {
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
+    const roundMessage = isFollowUp
+      ? buildFollowUpMessage({
+          subject: resolvedSubject,
+          message: prepared.message,
+          alerts,
+          newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
+        })
+      : prepared.message;
     const inputs = {
-      message: isFollowUp
-        ? buildFollowUpMessage({
-            subject: resolvedSubject,
-            message: prepared.message,
-            alerts,
-            newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
-          })
-        : prepared.message,
+      message: buildInvestigationRoundMessage({
+        message: roundMessage,
+        instructions,
+        isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
+      }),
       // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
       // investigation from the first round instead.
       ...(title ? { title } : {}),
@@ -1117,14 +1130,27 @@ export class NightshiftInvestigationsClient {
     };
   }
 
-  /** Resolves the telemetry retained by an investigation's conversation, without applying defaults. */
+  /**
+   * Resolves the telemetry retained by an investigation's conversation, without applying defaults.
+   *
+   * The caller may not be able to read the conversation: the sandbox tools resolve this while the
+   * agent runs as the space's service account, and that account cannot see a conversation its
+   * owner keeps private - which every conversation started from the Agent Builder UI is, unlike
+   * the public ones the investigation entry point creates. Such a conversation gets no telemetry
+   * target at all, so the sandbox never reaches a telemetry cluster on behalf of a private chat.
+   */
   async getTelemetryTarget(conversationId: string): Promise<TelemetryTarget> {
     const { agentBuilder } = this.requireWriteDeps();
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
     const conversation = (await conversations.bulkGet([conversationId])).get(conversationId);
-    if (!conversation) throw new InvestigationNotFoundError(conversationId);
+    if (!conversation) {
+      this.logger.debug(
+        `Conversation "${conversationId}" is not readable by this caller; it gets no telemetry target`
+      );
+      return {};
+    }
     const telemetryTarget = telemetryTargetNameSchema
       .optional()
       .parse(conversation.metadata?.telemetry_target);

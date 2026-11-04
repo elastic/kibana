@@ -1018,6 +1018,8 @@ describe('RuleEventsClient', () => {
       expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(
         q.indexOf('@timestamp >= TO_DATETIME(?fromIso)')
       );
+      expect(q).toContain('COALESCE(`alert.status`, "active") IN ("active", "recovering")');
+      expect(q.indexOf('COALESCE(`alert.status`, "active")')).toBeLessThan(q.indexOf('LIMIT 500'));
       expect(q).toContain('SORT @timestamp DESC');
       expect(q).toContain(
         'MV_INTERSECTS(FIELD_EXTRACT(data, "signals.metadata.rule_uuid"), ["rule-A"])'
@@ -1103,6 +1105,55 @@ describe('RuleEventsClient', () => {
         ['event-1', 'active', 'confirms'],
         ['event-2', 'recovering', 'refutes'],
       ]);
+    });
+
+    describe('time bounds', () => {
+      const requestOf = (query: jest.Mock) => query.mock.calls[0][0] as EsqlRequest;
+      const LOOKBACK_FILTER = '@timestamp >= TO_DATETIME(?lookbackIso)';
+      const FROM_FILTER = '@timestamp >= TO_DATETIME(?fromIso)';
+
+      it('applies a lookback after the lineage is aggregated, with its own parameter', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeGreaterThan(-1);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q).not.toContain('?fromIso');
+        expect(params).toContainEqual({ lookbackIso: '2026-08-01T00:00:00.000Z' });
+      });
+
+      it('adds no time filter when neither bound is given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({ ruleUuids: ['rule-A'] });
+
+        expect(requestOf(query).query).not.toContain('@timestamp >=');
+      });
+
+      it('applies each bound at its own position with its own value when both are given', async () => {
+        const { client, query } = createClient(async () => sourceResponse([]));
+
+        await client.findLiveMemberships({
+          ruleUuids: ['rule-A'],
+          lookback: '2026-08-01T00:00:00.000Z',
+          from: '2026-10-01T00:00:00.000Z',
+        });
+
+        const { query: q, params } = requestOf(query);
+        expect(q.indexOf('INLINE STATS created_at')).toBeLessThan(q.indexOf(LOOKBACK_FILTER));
+        expect(q.indexOf(LOOKBACK_FILTER)).toBeLessThan(q.indexOf(FROM_FILTER));
+        expect(params).toEqual(
+          expect.arrayContaining([
+            { lookbackIso: '2026-08-01T00:00:00.000Z' },
+            { fromIso: '2026-10-01T00:00:00.000Z' },
+          ])
+        );
+      });
     });
   });
 

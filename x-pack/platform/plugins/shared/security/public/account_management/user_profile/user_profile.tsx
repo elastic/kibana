@@ -55,6 +55,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
   type ContrastModeValue,
   type DarkModeValue,
+  getUserAvatarColor,
+  getUserAvatarInitials,
   type LocaleValue,
   UserAvatar,
   type UserProfileData,
@@ -65,12 +67,7 @@ import { usePrimeUserLocale } from './use_prime_user_locale';
 import { createImageHandler, getRandomColor, VALID_HEX_COLOR } from './utils';
 import type { AuthenticatedUser } from '../../../common';
 import { IMAGE_FILE_TYPES } from '../../../common/constants';
-import {
-  canUserChangeDetails,
-  canUserChangePassword,
-  getUserAvatarColor,
-  getUserAvatarInitials,
-} from '../../../common/model';
+import { canUserChangeDetails, canUserChangePassword } from '../../../common/model';
 import { useSecurityApiClients } from '../../components';
 import { Breadcrumb } from '../../components/breadcrumb';
 import { ChangePasswordModal } from '../../management/users/edit_user/change_password_modal';

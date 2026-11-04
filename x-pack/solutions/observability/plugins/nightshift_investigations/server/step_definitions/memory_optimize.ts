@@ -19,7 +19,7 @@ import {
   investigationRoundInputsSchema,
   withToolResults,
 } from '../investigation_round';
-import { runMemoryOptimize } from '../memory/register_memory';
+import { isMemoryOptimizeSkipped, runMemoryOptimize } from '../memory/register_memory';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { withTimeout } from './with_timeout';
@@ -178,6 +178,9 @@ export const memoryOptimizeStepDefinition = ({
               context.abortSignal
             );
             summary = res;
+            if (isMemoryOptimizeSkipped(res)) {
+              return res;
+            }
             if (res?.openedIds) {
               span?.setAttribute('nightshift.opened_ids', JSON.stringify(res.openedIds));
             }
@@ -201,11 +204,16 @@ export const memoryOptimizeStepDefinition = ({
           ...(context.input.round_id ? { round_id: context.input.round_id } : {}),
           workflow_execution_id: workflowExecutionId,
           outcome: 'failure',
-          ...(summary && summary.writeFailureCount > 0
+          ...(summary && !isMemoryOptimizeSkipped(summary) && summary.writeFailureCount > 0
             ? { write_failure_count: summary.writeFailureCount }
             : {}),
         });
         throw error;
+      }
+
+      // A deliberate skip is neither a success nor a failure, so it reports nothing.
+      if (isMemoryOptimizeSkipped(summary)) {
+        return { output: { status: 'ok' as const, skipped: true } };
       }
 
       if (!summary) {

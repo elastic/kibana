@@ -20,19 +20,18 @@ export interface ProcessingDiagnostic extends Pick<StreamsUnit.Diagnostic, 'code
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
-// The distributor reports either `processors.<index>...` (schema violations) or
-// `processors > <id>` (compiler errors), in the path or only in the message.
-const PROCESSOR_INDEX_PATTERN = /\bprocessors[.[/](\d+)/;
-const PROCESSOR_ID_PATTERN = /\bprocessors\s*>\s*([a-z0-9-]+)/;
+// The distributor locates a processor by its index in the unit document, which is stable because
+// the unit is serialized in the order it is traced against here. Compiler errors carry a JSON
+// pointer such as `/processors/1/config/0`; schema violations have no pointer and start their
+// message with the dotted location instead, `processors.1.config.0...: ...`.
+const PROCESSOR_POINTER = /^\/processors\/(\d+)(?:\/|$)/;
+const PROCESSOR_LOCATION_PREFIX = /^processors\.(\d+)(?:[.:\s]|$)/;
 
-const traceProcessorId = (text: string, unit: Unit): string | undefined => {
-  const processors = unit.unit.processors ?? [];
-  const byId = PROCESSOR_ID_PATTERN.exec(text)?.[1];
-  if (byId && processors.some(({ id }) => id === byId)) {
-    return byId;
-  }
-  const index = PROCESSOR_INDEX_PATTERN.exec(text)?.[1];
-  return index === undefined ? undefined : processors[Number(index)]?.id;
+const readProcessorIndex = (path: string | undefined, message: string): number | undefined => {
+  const index = path
+    ? PROCESSOR_POINTER.exec(path)?.[1]
+    : PROCESSOR_LOCATION_PREFIX.exec(message)?.[1];
+  return index === undefined ? undefined : Number(index);
 };
 
 /** The diagnostics the streams unit route returns in the body of a rejected save. */
@@ -47,20 +46,23 @@ const readDiagnostics = (error: unknown): unknown[] => {
 };
 
 /** Distributor diagnostics from a failed unit save, traced back to processors of `savedUnit`. */
-export const getProcessingDiagnostics = (error: unknown, savedUnit: Unit): ProcessingDiagnostic[] =>
-  readDiagnostics(error).flatMap((diagnostic) => {
+export const getProcessingDiagnostics = (
+  error: unknown,
+  savedUnit: Unit
+): ProcessingDiagnostic[] => {
+  const processors = savedUnit.unit.processors ?? [];
+  return readDiagnostics(error).flatMap((diagnostic) => {
     if (!isRecord(diagnostic) || typeof diagnostic.message !== 'string') {
       return [];
     }
     const { code, message, path } = diagnostic;
+    const index = readProcessorIndex(typeof path === 'string' ? path : undefined, message);
     return [
       {
         code: typeof code === 'string' ? code : '',
         message,
-        processorId: traceProcessorId(
-          `${typeof path === 'string' ? path : ''} ${message}`,
-          savedUnit
-        ),
+        processorId: index === undefined ? undefined : processors[index]?.id,
       },
     ];
   });
+};

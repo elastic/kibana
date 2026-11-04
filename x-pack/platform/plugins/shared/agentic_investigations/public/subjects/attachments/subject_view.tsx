@@ -360,8 +360,17 @@ const AlertsSubjectRows: React.FC<{ alerts: SubjectRowData[] }> = ({ alerts }) =
  * An investigation's subjects in one bordered list. Several alerts collapse into one "N alerts"
  * row, which opens the alerts list filtered to them.
  */
-export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({ subjects }) => {
+export const SubjectList: React.FC<{ subjects: SubjectRowData[] }> = ({
+  subjects: allSubjects,
+}) => {
   const { euiTheme } = useEuiTheme();
+  const subjects = useMemo(
+    () =>
+      allSubjects.filter(
+        ({ type, trigger_type: triggerType }) => type !== 'slack_thread' || triggerType
+      ),
+    [allSubjects]
+  );
   const alerts = useMemo(() => subjects.filter(({ type }) => type === 'alert'), [subjects]);
 
   const rows = useMemo(() => {

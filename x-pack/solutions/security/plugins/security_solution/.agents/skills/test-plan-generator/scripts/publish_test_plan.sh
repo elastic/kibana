@@ -25,10 +25,12 @@
 #       <!-- generated-by: <model> -->
 #       <!-- verbosity: <lean|standard|detailed> -->
 #       <!-- tokens: input=… output=… cache_create=… cache_read=… total=… -->
+#       <!-- cost: usd=… pricing=YYYY-MM-DD -->
 #     <model> comes from --model, else from the draft's generated-by marker;
 #     the script refuses to publish without one. A missing verbosity marker
-#     (draft from an older skill version) becomes `standard`. The tokens
-#     marker is kept only if the draft has one. The draft file is not edited.
+#     (draft from an older skill version) becomes `standard`. The tokens and
+#     cost markers are kept only if the draft has them; a cost marker without
+#     a tokens marker is refused. The draft file is not edited.
 #   - --dry-run prints the comment body that would be published and exits
 #     without calling GitHub or deleting the draft.
 #   - Requires `gh` (GitHub CLI) installed and authenticated. If `gh` is not
@@ -37,7 +39,8 @@
 # Exit codes:
 #   0  success
 #   64 usage / argument error
-#   65 draft file is malformed (no model, invalid or duplicated top marker)
+#   65 draft file is malformed (no model, invalid or duplicated top marker,
+#      cost marker without tokens marker)
 #   66 draft file does not exist
 #   69 `gh` CLI is not installed
 #   70 unexpected response from GitHub API (could not resolve comment id, etc.)
@@ -121,6 +124,8 @@ GENERATED_BY_RE='^<!-- generated-by: (.*) -->$'
 VERBOSITY_RE='^<!-- verbosity: (.*) -->$'
 TOKENS_RE='^<!-- tokens: (.*) -->$'
 TOKENS_VALUE_RE='^input=[0-9]+ output=[0-9]+ cache_create=[0-9]+ cache_read=[0-9]+ total=[0-9]+$'
+COST_RE='^<!-- cost: (.*) -->$'
+COST_VALUE_RE='^usd=[0-9]+\.[0-9]{4} pricing=[0-9]{4}-[0-9]{2}-[0-9]{2}$'
 
 if [[ -n "$MODEL" && ! "$MODEL" =~ $MODEL_RE ]]; then
   echo "error: invalid --model '$MODEL'" >&2
@@ -144,6 +149,7 @@ SEEN_MARKER='false'
 DRAFT_MODEL=''
 VERBOSITY=''
 TOKENS=''
+COST=''
 while IFS= read -r line || [[ -n "$line" ]]; do
   line="${line%$'\r'}"
   if [[ -z "$line" ]]; then
@@ -164,12 +170,20 @@ while IFS= read -r line || [[ -n "$line" ]]; do
     [[ -z "$TOKENS" ]] || duplicated 'tokens'
     TOKENS="${BASH_REMATCH[1]}"
     [[ "$TOKENS" =~ $TOKENS_VALUE_RE ]] || malformed "invalid tokens marker '$TOKENS'"
+  elif [[ "$line" =~ $COST_RE ]]; then
+    [[ -z "$COST" ]] || duplicated 'cost'
+    COST="${BASH_REMATCH[1]}"
+    [[ "$COST" =~ $COST_VALUE_RE ]] || malformed "invalid cost marker '$COST'"
   else
     break
   fi
   HEADER_LINES=$((HEADER_LINES + PENDING_BLANKS + 1))
   PENDING_BLANKS=0
 done <"$DRAFT_FILE"
+
+if [[ -n "$COST" && -z "$TOKENS" ]]; then
+  malformed 'cost marker without a tokens marker: both come from the same session-token-usage.py run.'
+fi
 
 if [[ -z "$MODEL" ]]; then
   [[ -n "$DRAFT_MODEL" ]] || malformed 'no model identifier: pass --model <id> (the id written in the footer).'
@@ -190,6 +204,9 @@ trap 'rm -f -- "$PUBLISH_FILE"' EXIT
   echo "<!-- verbosity: $VERBOSITY -->"
   if [[ -n "$TOKENS" ]]; then
     echo "<!-- tokens: $TOKENS -->"
+  fi
+  if [[ -n "$COST" ]]; then
+    echo "<!-- cost: $COST -->"
   fi
   tail -n "+$((HEADER_LINES + 1))" -- "$DRAFT_FILE"
 } >"$PUBLISH_FILE"
