@@ -12,6 +12,7 @@ import {
   HISTOGRAM_MAX_BREAKDOWN_SERIES,
   HISTOGRAM_MAX_BUCKETS,
   HISTOGRAM_OTHER_BREAKDOWN,
+  HISTOGRAM_UNKNOWN_BREAKDOWN,
 } from '../constants';
 
 export interface TimeBucket {
@@ -98,7 +99,7 @@ export const generateTimeBuckets = (
 };
 
 const toBreakdownValue = (episode: HistogramEpisodeRow, breakdownField: string): string =>
-  String(episode[breakdownField] ?? 'unknown');
+  String(episode[breakdownField] ?? HISTOGRAM_UNKNOWN_BREAKDOWN);
 
 /**
  * For each bucket, counts episodes whose [first_timestamp, last_timestamp] overlaps with

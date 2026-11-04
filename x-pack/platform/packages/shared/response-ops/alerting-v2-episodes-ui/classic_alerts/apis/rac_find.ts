@@ -59,7 +59,6 @@ export interface ClassicHistogramOverlapAggregations {
 
 export interface ClassicHistogramAggregations extends ClassicHistogramOverlapAggregations {
   breakdown?: {
-    sum_other_doc_count?: number;
     buckets: Array<
       ClassicHistogramOverlapAggregations & { key: string | number; doc_count: number }
     >;

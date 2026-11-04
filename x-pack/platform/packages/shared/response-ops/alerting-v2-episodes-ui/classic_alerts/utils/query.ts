@@ -33,7 +33,7 @@ import {
 } from '../../components/severity/severity_utils';
 import type { SeverityExtension } from '../../types/episode_data_source';
 import type { TimeBucket } from '../../utils/histogram_utils';
-import { HISTOGRAM_MAX_BREAKDOWN_SERIES } from '../../constants';
+import { HISTOGRAM_MAX_BREAKDOWN_SERIES, HISTOGRAM_UNKNOWN_BREAKDOWN } from '../../constants';
 import { mapClassicStatusToEpisodeStatus } from './map_alert';
 
 export interface ClassicAlertsTimeRange {
@@ -201,9 +201,6 @@ export const buildClassicAlertsSort = (
   return [{ [field]: { order, unmapped_type: 'keyword' } }];
 };
 
-/** Breakdown value used when a classic alert has no equivalent for the v2 breakdown field. */
-export const CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN = 'unknown';
-
 export interface ClassicHistogramBreakdown {
   field: string;
   missing: string;
@@ -216,12 +213,12 @@ const identity = (value: string): string => value;
 const CLASSIC_HISTOGRAM_BREAKDOWNS: Readonly<Record<string, ClassicHistogramBreakdown>> = {
   'episode.status': {
     field: ALERT_STATUS,
-    missing: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+    missing: HISTOGRAM_UNKNOWN_BREAKDOWN,
     normalize: mapClassicStatusToEpisodeStatus,
   },
   'rule.id': {
     field: ALERT_RULE_UUID,
-    missing: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+    missing: HISTOGRAM_UNKNOWN_BREAKDOWN,
     normalize: identity,
   },
   last_ack_action: {

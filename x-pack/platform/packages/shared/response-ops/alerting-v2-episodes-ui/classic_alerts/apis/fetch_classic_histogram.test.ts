@@ -88,7 +88,6 @@ describe('fetchClassicAlertsHistogram', () => {
       aggregations: {
         ...overlap([5, 0], [0, 3]),
         breakdown: {
-          sum_other_doc_count: 0,
           buckets: [
             { key: 'active', doc_count: 2, ...overlap([2, 0], [0, 0]) },
             { key: 'recovered', doc_count: 2, ...overlap([2, 0], [0, 2]) },
@@ -173,7 +172,6 @@ describe('fetchClassicAlertsHistogram', () => {
       aggregations: {
         ...overlap([60, 0], [0, 20]),
         breakdown: {
-          sum_other_doc_count: 10,
           buckets: [{ key: 'rule-a', doc_count: 50, ...overlap([50, 0], [0, 15]) }],
         },
       },

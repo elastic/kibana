@@ -15,12 +15,12 @@ import {
   type HistogramBucketCount,
   type TimeBucket,
 } from '../../utils/histogram_utils';
-import { HISTOGRAM_OTHER_BREAKDOWN } from '../../constants';
+import { HISTOGRAM_OTHER_BREAKDOWN, HISTOGRAM_UNKNOWN_BREAKDOWN } from '../../constants';
 import {
   buildClassicAlertsHistogramAggs,
   buildClassicAlertsQuery,
-  CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
   resolveClassicHistogramBreakdown,
+  type ClassicHistogramBreakdown,
 } from '../utils/query';
 import {
   type BaseRacOptions,
@@ -81,6 +81,54 @@ const toBucketCounts = (
 const isNonEmpty = ({ count }: HistogramBucketCount): boolean => count > 0;
 
 /**
+ * Maps the range aggregations onto bucket counts. With a breakdown, values outside the top terms
+ * are returned under `HISTOGRAM_OTHER_BREAKDOWN` as overall minus top terms.
+ */
+const toClassicHistogram = (
+  aggregations: ClassicHistogramAggregations,
+  buckets: TimeBucket[],
+  breakdownField?: string,
+  breakdown?: ClassicHistogramBreakdown
+): Omit<EpisodeSourceHistogram, 'isCapHit'> => {
+  const overall = toOverlapCounts(aggregations, buckets.length);
+
+  if (!breakdownField) {
+    return { counts: toBucketCounts(overall, buckets) };
+  }
+
+  if (!breakdown) {
+    // Every matching alert starts before the last bucket ends, so the final running total is the alert count.
+    const alertCount = toRunningTotals(aggregations.started).at(-1) ?? 0;
+    return {
+      counts: toBucketCounts(overall, buckets, HISTOGRAM_UNKNOWN_BREAKDOWN).filter(isNonEmpty),
+      breakdownTotals: { [HISTOGRAM_UNKNOWN_BREAKDOWN]: alertCount },
+    };
+  }
+
+  const terms = (aggregations.breakdown?.buckets ?? []).map(
+    ({ key, doc_count: alertCount, ...overlapAggregations }) => ({
+      value: breakdown.normalize(String(key)),
+      alertCount,
+      counts: toOverlapCounts(overlapAggregations, buckets.length),
+    })
+  );
+  const rest = overall.map(
+    (count, i) => count - terms.reduce((sum, { counts }) => sum + counts[i], 0)
+  );
+
+  return {
+    // Normalised values can collapse several raw terms into one (e.g. recovered + untracked).
+    counts: mergeBucketCounts(
+      ...terms.map(({ value, counts }) => toBucketCounts(counts, buckets, value)),
+      toBucketCounts(rest, buckets, HISTOGRAM_OTHER_BREAKDOWN)
+    ).filter(isNonEmpty),
+    breakdownTotals: sumBreakdownTotals(
+      ...terms.map(({ value, alertCount }) => ({ [value]: alertCount }))
+    ),
+  };
+};
+
+/**
  * Returns per-bucket classic alert overlap counts computed from Elasticsearch
  * range aggregations (RBAC enforced by the RAC alerts API).
  */
@@ -113,47 +161,8 @@ export const fetchClassicAlertsHistogram = async ({
     abortSignal
   );
 
-  const aggregations = response.aggregations ?? {};
-  const overall = toOverlapCounts(aggregations, buckets.length);
-
-  if (!breakdownField) {
-    return { counts: toBucketCounts(overall, buckets), isCapHit: false };
-  }
-
-  if (!breakdown) {
-    // Every matching alert starts before the last bucket ends, so the final running total is the alert count.
-    const alertCount = toRunningTotals(aggregations.started).at(-1) ?? 0;
-    return {
-      counts: toBucketCounts(overall, buckets, CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN).filter(
-        isNonEmpty
-      ),
-      isCapHit: false,
-      breakdownTotals: { [CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN]: alertCount },
-    };
-  }
-
-  const terms = (aggregations.breakdown?.buckets ?? []).map(
-    ({ key, doc_count: alertCount, ...overlapAggregations }) => ({
-      value: breakdown.normalize(String(key)),
-      alertCount,
-      counts: toOverlapCounts(overlapAggregations, buckets.length),
-    })
-  );
-  const rest = overall.map(
-    (count, i) => count - terms.reduce((sum, { counts }) => sum + counts[i], 0)
-  );
-
   return {
-    // Normalised values can collapse several raw terms into one (e.g. recovered + untracked).
-    counts: mergeBucketCounts(
-      ...terms.map(({ value, counts }) =>
-        toBucketCounts(counts, buckets, value).filter(isNonEmpty)
-      ),
-      toBucketCounts(rest, buckets, HISTOGRAM_OTHER_BREAKDOWN).filter(isNonEmpty)
-    ),
+    ...toClassicHistogram(response.aggregations ?? {}, buckets, breakdownField, breakdown),
     isCapHit: false,
-    breakdownTotals: sumBreakdownTotals(
-      ...terms.map(({ value, alertCount }) => ({ [value]: alertCount }))
-    ),
   };
 };
