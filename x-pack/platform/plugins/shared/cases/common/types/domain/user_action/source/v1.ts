@@ -45,6 +45,18 @@ export const ActionSourceRt = rt.intersection([
 
 export type ActionSource = rt.TypeOf<typeof ActionSourceRt>;
 
+/**
+ * Read-side shape. `type` accepts any string so documents written by a newer
+ * version with an unknown source type still decode instead of failing the feed.
+ */
+export const PersistedActionSourceSchema = lazySchema(() =>
+  ActionSourceSchema.extend({
+    type: z.string(),
+  })
+);
+
+export type PersistedActionSource = z.infer<typeof PersistedActionSourceSchema>;
+
 export const isActionSource = (value: unknown): value is ActionSource => {
   if (!isPlainObject(value)) {
     return false;
