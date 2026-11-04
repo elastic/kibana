@@ -38,6 +38,8 @@ import type {
   WorkflowEnablementApi,
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
+import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_handler';
+import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
 import { AiIndexRegistry } from './ai_indices/registry';
@@ -81,6 +83,7 @@ export class ContextEnginePlugin
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
+  private readonly aiIndexChanges: AiIndexChangeNotifier;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
     (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
@@ -88,6 +91,7 @@ export class ContextEnginePlugin
 
   constructor(context: PluginInitializerContext) {
     this.logger = context.logger.get();
+    this.aiIndexChanges = new AiIndexChangeNotifier(this.logger.get('ai_index_changes'));
   }
 
   setup(
@@ -221,6 +225,7 @@ export class ContextEnginePlugin
       }
       return this.scheduleService;
     };
+    this.aiIndexChanges.register(createFeedbackAnalysisChangeHandler(getScheduleService));
 
     const isMemoryEnabled = async (request: KibanaRequest) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -237,7 +242,7 @@ export class ContextEnginePlugin
       logger: this.logger.get('routes'),
       getAiIndexService,
       getImprovementsService,
-      getScheduleService,
+      aiIndexChanges: this.aiIndexChanges,
       isMemoryEnabled,
       getAiIndexDataReadService: (params) => {
         if (!this.createAiIndexDataReadService) {
@@ -345,6 +350,7 @@ export class ContextEnginePlugin
 
   start(coreStart: CoreStart, startDeps: ContextEngineStartDependencies): ContextEnginePluginStart {
     this.aiIndexRegistry.freeze();
+    this.aiIndexChanges.freeze();
     const aiIndexLogger = this.logger.get('ai_indices');
 
     this.esClient = coreStart.elasticsearch.client.asInternalUser;

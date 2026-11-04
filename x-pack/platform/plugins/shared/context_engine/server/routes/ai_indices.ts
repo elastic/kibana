@@ -36,6 +36,7 @@ import {
   AI_INDEX_QUERY_PATH,
 } from '../../common/constants';
 import type {
+  AiIndexHttpItem,
   CreateAiIndexResponse,
   DeleteAiIndexResponse,
   GetAiIndexResponse,
@@ -77,7 +78,7 @@ import {
   deleteAutomationResources,
   deleteBackingStoreResource,
 } from '../ai_indices/delete_resources';
-import type { FeedbackAnalysisScheduleService } from '../feedback_analysis/schedule';
+import type { AiIndexChangeField, AiIndexChangeNotifier } from '../ai_indices/changes';
 import type { ImprovementsServiceApi } from '../improvements/service';
 import type { GetAiIndexDataReadServiceParams } from '../types';
 import { getKi } from '../ai_indices/ki_get';
@@ -147,16 +148,16 @@ const hasWorkflowDeletePrivilege = (request: KibanaRequest): boolean =>
 
 class MemoryFeatureDisabledError extends Error {}
 
-const isMemoryEnabledOnExistingAiIndex = async (
+const findAiIndex = async (
   aiIndexService: AiIndexService,
   aiIndexId: string,
   spaceId: string
-): Promise<boolean> => {
+): Promise<AiIndexHttpItem | undefined> => {
   try {
-    return (await aiIndexService.get(aiIndexId, spaceId)).memory_enabled;
+    return await aiIndexService.get(aiIndexId, spaceId);
   } catch (error) {
     if (error instanceof AiIndexNotFoundError) {
-      return false;
+      return undefined;
     }
     throw error;
   }
@@ -219,7 +220,7 @@ export const registerAiIndexRoutes = ({
   getAiIndexService,
   getAiIndexDataReadService,
   getImprovementsService,
-  getScheduleService,
+  aiIndexChanges,
   isMemoryEnabled,
   getActions,
   getAgentBuilder,
@@ -235,7 +236,7 @@ export const registerAiIndexRoutes = ({
     esClient: ElasticsearchClient,
     spaceId: string
   ) => ImprovementsServiceApi;
-  getScheduleService: () => FeedbackAnalysisScheduleService;
+  aiIndexChanges: Pick<AiIndexChangeNotifier, 'notify'>;
   isMemoryEnabled: (request: KibanaRequest) => Promise<boolean>;
   getActions: () => Promise<ActionsPluginStart>;
   getAgentBuilder: () => Promise<AgentBuilderPluginStart | undefined>;
@@ -243,22 +244,39 @@ export const registerAiIndexRoutes = ({
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
   analyticsService: ContextEngineAnalyticsService;
 }) => {
-  const reconcileSchedule = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
+  /** Reads the saved AI index back and tells the change handlers what the save changed. */
+  const notifySaved = async ({
+    aiIndexId,
+    spaceId,
+    request,
+    previous,
+    saved,
+  }: {
+    aiIndexId: string;
+    spaceId: string;
+    request: KibanaRequest;
+    previous: AiIndexHttpItem | undefined;
+    saved?: readonly AiIndexChangeField[];
+  }) => {
+    let current: AiIndexHttpItem;
     try {
-      const aiIndex = await getAiIndexService().get(aiIndexId, spaceId);
-      await getScheduleService().reconcile({
-        aiIndexId,
-        spaceId,
-        ...(aiIndex.feedback_analysis ? { feedbackAnalysis: aiIndex.feedback_analysis } : {}),
-        request,
-      });
+      current = await getAiIndexService().get(aiIndexId, spaceId);
     } catch (error) {
       logger.warn(
-        `Stored the feedback analysis configuration for AI index '${aiIndexId}', but failed to reconcile its schedule: ${
+        `Saved AI index '${aiIndexId}' in space '${spaceId}', but could not read it back to apply the change: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return;
     }
+    await aiIndexChanges.notify({
+      aiIndexId,
+      spaceId,
+      request,
+      previous,
+      current,
+      ...(saved !== undefined && { saved }),
+    });
   };
   // Create an AI Index
   router.versioned
@@ -338,7 +356,7 @@ export const registerAiIndexRoutes = ({
           const spaceId = resolveSpaceId(await getSpaces(), request);
           await getAiIndexService().create(id, spaceId, properties);
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.CREATE, id }));
-          await reconcileSchedule(id, spaceId, request);
+          await notifySaved({ aiIndexId: id, spaceId, request, previous: undefined });
           const body: CreateAiIndexResponse = { status: 'created' };
           return response.created({ body });
         } catch (error) {
@@ -413,10 +431,11 @@ export const registerAiIndexRoutes = ({
         try {
           const spaceId = resolveSpaceId(await getSpaces(), request);
           const aiIndexService = getAiIndexService();
+          const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
           if (
             request.body.memory_enabled === true &&
             !(await isMemoryEnabled(request)) &&
-            !(await isMemoryEnabledOnExistingAiIndex(aiIndexService, aiIndexId, spaceId))
+            previous?.memory_enabled !== true
           ) {
             throw new MemoryFeatureDisabledError(
               'Context Engine memory is disabled. Enable the global memory feature flag before setting memory_enabled to true.'
@@ -438,7 +457,7 @@ export const registerAiIndexRoutes = ({
           const putAction =
             status === 'created' ? AiIndexAuditAction.CREATE : AiIndexAuditAction.UPDATE;
           auditLogger.log(aiIndexAuditEvent({ action: putAction, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, spaceId, request);
+          await notifySaved({ aiIndexId, spaceId, request, previous });
           const body: PutAiIndexResponse = { status };
           return status === 'created' ? response.created({ body }) : response.ok({ body });
         } catch (error) {
@@ -1029,13 +1048,21 @@ export const registerAiIndexRoutes = ({
         const { aiIndexId } = request.params;
         const spaceId = resolveSpaceId(await getSpaces(), request);
         try {
-          const feedbackAnalysis = await getAiIndexService().setFeedbackAnalysis(
+          const aiIndexService = getAiIndexService();
+          const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
+          const feedbackAnalysis = await aiIndexService.setFeedbackAnalysis(
             aiIndexId,
             spaceId,
             request.body
           );
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
-          await reconcileSchedule(aiIndexId, spaceId, request);
+          await notifySaved({
+            aiIndexId,
+            spaceId,
+            request,
+            previous,
+            saved: ['feedback_analysis'],
+          });
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
           return response.ok({ body });
         } catch (error) {
@@ -1114,15 +1141,7 @@ export const registerAiIndexRoutes = ({
           // undone, so an audit record is owed for it whatever happens next.
           auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.DELETE, id: aiIndexId }));
 
-          await getScheduleService()
-            .remove({ aiIndexId, spaceId })
-            .catch((error) => {
-              logger.warn(
-                `Deleted AI index '${aiIndexId}', but failed to remove its analysis schedule: ${
-                  error instanceof Error ? error.message : String(error)
-                }`
-              );
-            });
+          await aiIndexChanges.notify({ aiIndexId, spaceId, request, previous: aiIndex });
 
           // From here on, failures are best-effort: the AI index entry is already gone (the primary
           // goal), so any failure is reported back to the caller as a partial-failure
