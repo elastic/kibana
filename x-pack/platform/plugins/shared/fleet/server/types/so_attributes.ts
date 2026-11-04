@@ -417,6 +417,8 @@ export interface CloudOnboardingDeploymentSOAttributes {
   description?: string;
   /** Global data stream namespace from the Service settings step. Absent or empty means each policy inherits its agent policy's namespace. */
   namespace?: string;
+  /** Whether the global namespace uses dedicated index templates (the package's namespace_customization_enabled_for list), as set in the Service settings step. Absent means off. */
+  dedicatedNamespaceTemplates?: boolean;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
   instances?: CloudOnboardingInstance[];
   /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */

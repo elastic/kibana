@@ -147,6 +147,13 @@ export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchema
   updatedBy: schema.maybe(schema.string({ maxLength: 1024 })),
 });
 
+// ── V7: dedicatedNamespaceTemplates ──────────────────────────────────────────
+// Whether the global namespace uses dedicated index templates. Not in mappings.properties
+// (dynamic: false), so no mapping change is needed.
+export const CloudOnboardingDeploymentSchemaV7 = CloudOnboardingDeploymentSchemaV6.extends({
+  dedicatedNamespaceTemplates: schema.maybe(schema.boolean()),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

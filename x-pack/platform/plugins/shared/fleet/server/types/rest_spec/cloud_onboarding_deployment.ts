@@ -213,6 +213,14 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       },
     })
   ),
+  dedicatedNamespaceTemplates: schema.maybe(
+    schema.boolean({
+      meta: {
+        description:
+          'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+      },
+    })
+  ),
   packageNames: schema.maybe(
     schema.arrayOf(schema.string(), {
       maxSize: 100,
@@ -360,6 +368,14 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: {
           description:
             'Global data stream namespace from the Service settings step. When omitted, an agent-based deployment inherits the agent policy namespace, other deployment methods use the default namespace.',
+        },
+      })
+    ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
         },
       })
     ),
@@ -568,6 +584,14 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
           },
         })
       )
+    ),
+    dedicatedNamespaceTemplates: schema.maybe(
+      schema.boolean({
+        meta: {
+          description:
+            'Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.',
+        },
+      })
     ),
     packageNames: schema.maybe(
       schema.arrayOf(schema.string({ minLength: 1, maxLength: 255 }), {
