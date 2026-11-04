@@ -11,7 +11,11 @@ import {
   ALERTING_V2_EPISODES_LOCATOR,
   ALERTING_V2_EPISODES_STATUS_ALL,
 } from '@kbn/alerting-v2-constants';
-import { ALERTS_LOCATOR_ID, createObservabilityAlertingV2Host } from '@kbn/deeplinks-observability';
+import {
+  ALERTS_LOCATOR_ID,
+  createObservabilityAlertingV2Host,
+  NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR_ID,
+} from '@kbn/deeplinks-observability';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import { isUniversalAlertSnapshot } from '../../../common/subjects/subject';
@@ -35,9 +39,19 @@ export type SubjectLocatorInput = Pick<SubjectRowData, 'type' | 'id'> & {
 };
 
 /**
+ * The significant event id a subject stands for. Only a `significant_event` subject carries it as
+ * its id; an alert raised by a significant event holds an episode id, which is not the event id.
+ */
+export const resolveSignificantEventId = ({
+  type,
+  id,
+}: Pick<SubjectLocatorInput, 'type' | 'id'>): string | undefined =>
+  type === 'significant_event' ? id : undefined;
+
+/**
  * The page a subject opens, as a locator and its params, from the subject's type and id: an
  * alert's details page (a classic alert by its `kibana.alert.uuid`, an alerting v2 alert by its
- * episode id).
+ * episode id) or a significant event's flyout in Nightshift.
  */
 export const getSubjectLocatorTarget = ({
   type,
@@ -52,6 +66,10 @@ export const getSubjectLocatorTarget = ({
   }
   if (type === 'alert') {
     return { locatorId: ALERTS_LOCATOR_ID, params: { alertId: id } };
+  }
+  const eventId = resolveSignificantEventId({ type, id });
+  if (eventId !== undefined) {
+    return { locatorId: NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR_ID, params: { eventId } };
   }
   return undefined;
 };
@@ -160,8 +178,8 @@ export interface SubjectLink {
 
 /**
  * Where a click on a subject goes: the page its locator resolves to, else the link it carries.
- * Subjects without either (a significant event, a question, a Slack thread without a permalink)
- * do not link.
+ * Subjects without either (a question, a Slack thread without a permalink, a significant event
+ * when Nightshift is not available) do not link.
  */
 export const useSubjectLink = (subject: SubjectRowData | undefined): SubjectLink => {
   const subjectType = subject?.type;

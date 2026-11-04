@@ -153,6 +153,11 @@ export {
 } from './src/settings';
 
 export {
+  NIGHTSHIFT_EVENT_ID_QUERY_PARAM,
+  type NightshiftSignificantEventLocatorParams,
+} from './src/significant_event_locator';
+
+export {
   createHttpServiceAccountsApi,
   ensureNightshiftServiceAccounts,
   getSecurityRoleUrl,

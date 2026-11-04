@@ -283,6 +283,79 @@ describe('SubjectView alert flyout', () => {
   });
 });
 
+describe('SubjectView significant event', () => {
+  const significantEvent = {
+    ...base,
+    subjectType: 'significant_event' as const,
+    subjectId: 'event-1',
+    summary: 'Checkout errors spiked',
+  };
+
+  it("links to the event's flyout in Nightshift and navigates in the app on a plain click", async () => {
+    const { services, navigate } = createShare();
+    renderView(significantEvent, services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
+        'href',
+        '/located/NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR?{"eventId":"event-1"}'
+      )
+    );
+    const row = screen.getByTestId('investigationSubject-significant_event');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    await waitFor(() => expect(navigate).toHaveBeenCalledWith({ eventId: 'event-1' }));
+  });
+
+  it('lets the browser handle a new-tab click', async () => {
+    const { services, navigate } = createShare();
+    renderView(significantEvent, services);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute('href')
+    );
+    const row = screen.getByTestId('investigationSubject-significant_event');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(false);
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['there is no share service', {}],
+    [
+      'the Nightshift locator is not registered',
+      { share: { url: { locators: { get: () => undefined } } } } as unknown as SubjectServices,
+    ],
+    [
+      'the locator cannot resolve a URL',
+      {
+        share: {
+          url: {
+            locators: {
+              get: () => ({
+                getUrl: () => Promise.reject(new Error('no url')),
+                navigate: jest.fn(),
+              }),
+            },
+          },
+        },
+      } as unknown as SubjectServices,
+    ],
+  ])('renders plain text without a link when %s', async (_case, services) => {
+    renderView(significantEvent, services);
+
+    const row = screen.getByTestId('investigationSubject-significant_event');
+    // Let a pending URL lookup settle before asserting that nothing became a link.
+    await waitFor(() => expect(row).toHaveTextContent('Checkout errors spiked'));
+    expect(row.tagName).toBe('DIV');
+    expect(row).not.toHaveAttribute('href');
+  });
+});
+
 const alertStart = (id: string): string => `2026-07-28T14:0${id.slice(-1)}:00.000Z`;
 
 const alertSubject = (id: string): SubjectRowData => ({
