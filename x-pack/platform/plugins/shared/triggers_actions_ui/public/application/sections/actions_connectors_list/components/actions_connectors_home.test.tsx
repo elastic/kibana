@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import * as React from 'react';
-import { render, screen } from '@testing-library/react';
+import React, { lazy, Suspense } from 'react';
+import { act, render, screen } from '@testing-library/react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { Router } from '@kbn/shared-ux-router';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -18,6 +18,40 @@ import type { MatchParams } from './actions_connectors_home';
 import ActionsConnectorsHome from './actions_connectors_home';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import userEvent from '@testing-library/user-event';
+import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
+import { useKibana } from '../../../../common/lib/kibana';
+
+// Jest resolves @elastic/eui to test-env, whose EuiIcon ignores component types.
+// Production EuiIcon renders them, so a lazy icon suspends. Mirror that here.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+
+  const EuiIcon = ({
+    type,
+    className,
+    ...rest
+  }: {
+    type?: unknown;
+    className?: string;
+    [key: string]: unknown;
+  }) => {
+    const classes = ['euiIcon', className].filter(Boolean).join(' ');
+    if (typeof type === 'string' || type == null) {
+      return ReactActual.createElement('span', {
+        ...rest,
+        className: classes,
+        'data-euiicon-type': type,
+      });
+    }
+    return ReactActual.createElement(type as React.ElementType, { ...rest, className: classes });
+  };
+
+  return {
+    ...actual,
+    EuiIcon,
+  };
+});
 
 let lastActionsConnectorsListProps: Record<string, unknown> | undefined;
 
@@ -26,7 +60,7 @@ jest.mock('../../../lib/action_connector_api', () => ({
   loadActionTypes: jest.fn(),
   loadConnectorAuthStatus: jest.fn(),
 }));
-const { loadAllActions, loadConnectorAuthStatus } = jest.requireMock(
+const { loadAllActions, loadActionTypes, loadConnectorAuthStatus } = jest.requireMock(
   '../../../lib/action_connector_api'
 );
 jest.mock('../../../../common/lib/kibana');
@@ -181,6 +215,68 @@ describe('ActionsConnectorsHome', () => {
       name: 'Select a connector',
     });
     expect(selectConnectorFlyout).toBeInTheDocument();
+  });
+
+  it('keeps the page mounted when create connector card icons are lazy', async () => {
+    let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void = () =>
+      undefined;
+    const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
+      (resolve) => {
+        resolveIcon = resolve;
+      }
+    );
+    const actionType = actionTypeRegistryMock.createMockActionTypeModel({
+      id: 'lazy-home-type',
+      iconClass: lazy(() => deferred),
+      selectMessage: 'test',
+      actionConnectorFields: null,
+    });
+    const { actionTypeRegistry } = useKibana().services;
+    (actionTypeRegistry.has as jest.Mock).mockReturnValue(true);
+    (actionTypeRegistry.get as jest.Mock).mockReturnValue(actionType);
+    loadActionTypes.mockResolvedValue([
+      {
+        id: actionType.id,
+        enabled: true,
+        name: 'Lazy home',
+        enabledInConfig: true,
+        enabledInLicense: true,
+        minimumLicenseRequired: 'basic',
+        supportedFeatureIds: ['alerting'],
+      },
+    ]);
+
+    const props = connectorsTabProps();
+    render(
+      <Suspense fallback={<div data-test-subj="outer-fallback" />}>
+        <IntlProvider locale="en">
+          <Router history={props.history}>
+            <QueryClientProvider client={queryClient}>
+              <MockAppHeaderProvider>
+                <ActionsConnectorsHome {...props} />
+              </MockAppHeaderProvider>
+            </QueryClientProvider>
+          </Router>
+        </IntlProvider>
+      </Suspense>
+    );
+
+    await userEvent.click(await screen.findByTestId('createConnectorButton'));
+
+    expect(await screen.findByRole('heading', { name: 'Select a connector' })).toBeInTheDocument();
+    expect(await screen.findByTestId(`${actionType.id}-card`)).toBeInTheDocument();
+    expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('centerJustifiedSpinner')).not.toBeInTheDocument();
+
+    await act(async () => {
+      resolveIcon({
+        default: (iconProps) => <svg {...iconProps} data-test-subj="resolved-home-icon" />,
+      });
+    });
+
+    expect(await screen.findByTestId('resolved-home-icon')).toBeInTheDocument();
+    expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('centerJustifiedSpinner')).not.toBeInTheDocument();
   });
 
   it('hide "Create connector" button when the user only has read access', async () => {
