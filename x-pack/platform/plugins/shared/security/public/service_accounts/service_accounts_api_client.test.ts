@@ -97,4 +97,31 @@ describe('ServiceAccountsAPIClient', () => {
       );
     });
   });
+
+  describe('#findByRoles', () => {
+    it('posts the roles to the internal route', async () => {
+      const http = httpServiceMock.createStartContract();
+      const response = {
+        serviceAccounts: [
+          {
+            id: 'service-account-id',
+            name: 'nightshift-relay',
+            roles: ['viewer'],
+            enabled: true,
+            workloadCount: 2,
+          },
+        ],
+        complete: true,
+      };
+      http.post.mockResolvedValue(response);
+
+      await expect(
+        new ServiceAccountsAPIClient(http).findByRoles(['viewer', 'editor'])
+      ).resolves.toBe(response);
+
+      expect(http.post).toHaveBeenCalledWith('/internal/security/service_account/_find_by_roles', {
+        body: JSON.stringify({ roles: ['viewer', 'editor'] }),
+      });
+    });
+  });
 });

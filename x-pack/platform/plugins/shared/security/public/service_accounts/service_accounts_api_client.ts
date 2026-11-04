@@ -7,6 +7,7 @@
 
 import type { HttpStart } from '@kbn/core/public';
 import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-browser';
+import type { FindServiceAccountsByRolesResponse } from '@kbn/core-security-common';
 
 import type {
   DeleteServiceAccountResponse,
@@ -62,6 +63,13 @@ export class ServiceAccountsAPIClient {
     return await this.http.delete<DeleteServiceAccountResponse>(
       `/internal/security/service_account/${encodeURIComponent(id)}`,
       { query: { ...(force ? { force: true } : {}) } }
+    );
+  }
+
+  public async findByRoles(roles: string[]): Promise<FindServiceAccountsByRolesResponse> {
+    return await this.http.post<FindServiceAccountsByRolesResponse>(
+      '/internal/security/service_account/_find_by_roles',
+      { body: JSON.stringify({ roles }) }
     );
   }
 
