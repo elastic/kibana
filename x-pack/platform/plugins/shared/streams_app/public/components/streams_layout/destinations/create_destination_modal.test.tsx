@@ -113,7 +113,7 @@ describe('CreateDestinationModal', () => {
       const { createDestination } = renderModal();
 
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
-      expect(screen.getByText('Enter a name for all OTel signals')).toBeInTheDocument();
+      expect(screen.getByText('Name all OTel signals')).toBeInTheDocument();
       await userEvent.type(
         screen.getByTestId('streamsCreateDestination-docs-index'),
         'accounting-2026'

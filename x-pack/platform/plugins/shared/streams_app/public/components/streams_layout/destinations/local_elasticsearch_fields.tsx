@@ -310,7 +310,7 @@ const StaticFields = ({
     {
       id: 'shared',
       label: i18n.translate('xpack.streams.destinations.sharedIndexNamingLabel', {
-        defaultMessage: 'Enter a name for all OTel signals',
+        defaultMessage: 'Name all OTel signals',
       }),
       'data-test-subj': 'streamsCreateDestinationIndexNaming-shared',
     },

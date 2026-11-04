@@ -280,7 +280,10 @@ export const validateAutoWritePattern = (
   return undefined;
 };
 
-/** A static index name the transpiler accepts (`isValidStaticIndexName`), with no shape rule. */
+/**
+ * A static index name the transpiler accepts (`isValidStaticIndexName`), with no shape rule.
+ * A leading dot is rejected too, as Elasticsearch reserves those names for hidden and system indices.
+ */
 export const validateFreeFormIndexName = (
   index: string
 ): FreeFormIndexValidationError | undefined => {
@@ -302,6 +305,7 @@ export const validateFreeFormIndexName = (
   }
   if (
     RESERVED_STREAM_NAMES.includes(value) ||
+    value.startsWith('.') ||
     INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
     new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
   ) {

@@ -446,6 +446,10 @@ describe('docs targets', () => {
     expect(validateFreeFormIndexName('a'.repeat(256))).toBe('invalidName');
   });
 
+  it('rejects a docs index that starts with a dot', () => {
+    expect(validateFreeFormIndexName('.accounting')).toBe('invalidName');
+  });
+
   it('accepts docs write patterns under the three prefixes', () => {
     expect(validateDocsWritePattern('logs-orders-*')).toBeUndefined();
     expect(validateDocsWritePattern('metrics-*')).toBeUndefined();
