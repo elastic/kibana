@@ -135,7 +135,15 @@ export const buildModifiedVisAttributes = (
     colorMode: { type: 'categorical' },
     assignments: [
       {
-        rules: [{ type: 'match', pattern: HISTOGRAM_OTHER_BREAKDOWN, matchEntireWord: true }],
+        // matchCase keeps Lens from lowercasing the pattern, which would never match the value
+        rules: [
+          {
+            type: 'match',
+            pattern: HISTOGRAM_OTHER_BREAKDOWN,
+            matchEntireWord: true,
+            matchCase: true,
+          },
+        ],
         color: { type: 'colorCode', colorCode: colors.mediumShade },
         touched: true,
       },
