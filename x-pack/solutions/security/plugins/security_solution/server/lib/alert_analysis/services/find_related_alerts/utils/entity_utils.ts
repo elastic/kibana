@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
+import { cloneDeep, get } from 'lodash';
+import { set } from '@kbn/safer-lodash-set';
 import { RELATED_ALERT_ENTITY_LIST_MAX_LENGTH } from '../../../../../../common/api/alert_analysis/related_alerts';
 
 export interface SourceEntities {
@@ -29,10 +30,23 @@ export const RELATED_ALERT_SOURCE_ALLOWLIST = [
   'destination.ip',
   'process.name',
   'process.executable',
+  'process.command_line',
+  'process.parent.command_line',
+  'kibana.alert.rule.description',
   'file.name',
   'file.path',
   'message',
 ] as const;
+
+/**
+ * Long free-text fields included in related alerts. `_source` filtering cannot truncate, so these
+ * are capped after the search to keep up to RELATED_ALERTS_INLINE_MAX_RESULTS alerts bounded.
+ */
+export const RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS: Readonly<Record<string, number>> = {
+  'process.command_line': 300,
+  'process.parent.command_line': 300,
+  'kibana.alert.rule.description': 200,
+};
 
 export const RELATED_ALERT_ENTITY_SOURCE_INCLUDES = [
   'host.name',
@@ -85,3 +99,27 @@ export function normalizeToStringArray(value: unknown): string[] {
   }
   return [];
 }
+
+const truncateString = (value: string, maxLength: number): string =>
+  value.length > maxLength ? `${value.slice(0, maxLength)}… [truncated]` : value;
+
+/** Caps long text fields; handles both nested and dotted `_source` shapes. Returns a copy. */
+export const truncateRelatedAlertLongFields = (
+  source: Record<string, unknown>
+): Record<string, unknown> => {
+  const result = cloneDeep(source);
+  for (const [path, maxLength] of Object.entries(RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS)) {
+    const target: string | string[] = result[path] !== undefined ? [path] : path;
+    const value: unknown = get(result, target);
+    if (typeof value === 'string') {
+      set(result, target, truncateString(value, maxLength));
+    } else if (Array.isArray(value)) {
+      set(
+        result,
+        target,
+        value.map((item) => (typeof item === 'string' ? truncateString(item, maxLength) : item))
+      );
+    }
+  }
+  return result;
+};

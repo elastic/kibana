@@ -14,6 +14,7 @@ import type {
   FindRelatedAlertsResult,
   FindRelatedAlertsSuccess,
 } from '../../../lib/alert_analysis/services/find_related_alerts';
+import { SECURITY_ENTITY_RISK_SCORE_TOOL_ID, SECURITY_GET_ENTITY_TOOL_ID } from '../../tools';
 import { RELATED_ALERTS_INLINE_MAX_RESULTS } from '../../../lib/alert_analysis/services/find_related_alerts';
 
 jest.mock('../../../lib/alert_analysis/services/find_related_alerts');
@@ -25,6 +26,8 @@ const { findRelatedAlerts } = jest.requireMock(
 interface ResultData {
   message?: string;
   relatedAlerts?: Array<Record<string, unknown>>;
+  totalMatched?: number;
+  isTruncated?: boolean;
   sourceEntities?: {
     hostNames: string[];
     userNames: string[];
@@ -50,6 +53,32 @@ const makeSuccess = (
 });
 
 describe('alertAnalysisSkill', () => {
+  describe('content', () => {
+    it('registers both risk lookup tools so one is available whichever mode is on', async () => {
+      const ids = await alertAnalysisSkill.getRegistryTools?.();
+      expect(ids).toEqual(
+        expect.arrayContaining([SECURITY_ENTITY_RISK_SCORE_TOOL_ID, SECURITY_GET_ENTITY_TOOL_ID])
+      );
+    });
+
+    it('falls back to security.get_entity when security.entity_risk_score is unavailable', () => {
+      expect(alertAnalysisSkill.content).toContain(
+        "'security.entity_risk_score' if it is available"
+      );
+      expect(alertAnalysisSkill.content).toContain("'security.get_entity'");
+    });
+
+    it('tells the model to judge related alerts by command line and honour truncation', () => {
+      expect(alertAnalysisSkill.content).toContain('process.command_line');
+      expect(alertAnalysisSkill.content).toContain("'totalMatched' and 'isTruncated'");
+    });
+
+    it('only falls back to platform.core tools when the skill tools return no data', () => {
+      expect(alertAnalysisSkill.content).toContain('only as a fallback when they return no data');
+      expect(alertAnalysisSkill.content).not.toMatch(/Do NOT use platform\.core/);
+    });
+  });
+
   describe('get-related-alerts inline tool', () => {
     it('schema exposes alertId, timeWindowHours, and optional entity shortcut params', async () => {
       const inlineTools = await alertAnalysisSkill.getInlineTools?.();
@@ -160,7 +189,23 @@ describe('alertAnalysisSkill', () => {
         );
       });
 
-      it('returns message, sourceEntities, and relatedAlerts only — no surplus metadata', async () => {
+      it('surfaces totalMatched and isTruncated so the model knows the list was cut', async () => {
+        findRelatedAlerts.mockResolvedValueOnce(
+          makeSuccess({
+            relatedAlerts: [{ _id: 'r1', _index: 'idx' }],
+            totalMatched: 99,
+            returnedCount: 1,
+            isTruncated: true,
+          })
+        );
+
+        const result = await callHandler({ alertId: 'alert-123' });
+
+        expect(getData(result).totalMatched).toBe(99);
+        expect(getData(result).isTruncated).toBe(true);
+      });
+
+      it('returns message, sourceEntities, relatedAlerts, and truncation metadata only', async () => {
         findRelatedAlerts.mockResolvedValueOnce(
           makeSuccess({
             message: 'Found 2 related alerts sharing entities with alert alert-123.',
@@ -177,9 +222,15 @@ describe('alertAnalysisSkill', () => {
         expect(result.results[0].type).toBe(ToolResultType.other);
         expect(getData(result).relatedAlerts).toHaveLength(2);
         expect(getData(result).sourceEntities?.hostNames).toEqual(['h1']);
-        expect(getData(result)).not.toHaveProperty('totalMatched');
-        expect(getData(result)).not.toHaveProperty('returnedCount');
-        expect(getData(result)).not.toHaveProperty('isTruncated');
+        expect(getData(result).totalMatched).toBe(0);
+        expect(getData(result).isTruncated).toBe(false);
+        expect(Object.keys(getData(result)).sort()).toEqual([
+          'isTruncated',
+          'message',
+          'relatedAlerts',
+          'sourceEntities',
+          'totalMatched',
+        ]);
       });
 
       it('returns error result when findRelatedAlerts returns ok: false', async () => {

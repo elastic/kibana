@@ -224,7 +224,13 @@ describe('findRelatedAlerts', () => {
       2,
       expect.objectContaining({
         size: 25,
-        _source: expect.arrayContaining(['@timestamp', 'message', 'host.name']),
+        _source: expect.arrayContaining([
+          '@timestamp',
+          'message',
+          'host.name',
+          'process.command_line',
+          'process.parent.command_line',
+        ]),
       })
     );
 
@@ -236,6 +242,36 @@ describe('findRelatedAlerts', () => {
       expect(result.message).toBe(
         'Found 1 of 99 related alerts sharing entities with alert alert-1.'
       );
+    }
+  });
+
+  it('truncates long command lines in returned related alerts', async () => {
+    mockSourceAlert({ 'host.name': 'host-a' });
+    (esClient.search as jest.Mock).mockResolvedValueOnce({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: 'related-1',
+            _index: '.alerts-security.alerts-default',
+            _source: { process: { command_line: 'x'.repeat(5000) } },
+          },
+        ],
+      },
+    });
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+      hostNames: ['host-a'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      const processDoc = result.relatedAlerts[0].process as { command_line: string };
+      expect(processDoc.command_line.length).toBeLessThan(1000);
+      expect(processDoc.command_line).toContain('[truncated]');
     }
   });
 });
