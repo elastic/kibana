@@ -8,15 +8,15 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
+import { ConnectSourcesGrid } from '../components/entities/sandbox_connector/connect_sources_grid';
 import { CONNECT_SUB_STEP_TITLES, OnboardingConnectStep } from './connect_step';
 
-jest.mock('../sandbox_connectors/connect_sources_grid', () => ({
+jest.mock('../components/entities/sandbox_connector/connect_sources_grid', () => ({
   ConnectSourcesGrid: jest.fn(({ group, trailing }) => (
     <div data-test-subj={`grid-${group}`}>{trailing}</div>
   )),
 }));
-jest.mock('../sandbox_connectors/add_data_card', () => ({
+jest.mock('../components/entities/sandbox_connector/add_data_card', () => ({
   AddDataCard: () => <div data-test-subj="addDataCardStub" />,
 }));
 
