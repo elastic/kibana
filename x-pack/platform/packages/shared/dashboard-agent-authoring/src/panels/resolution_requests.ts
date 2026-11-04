@@ -10,17 +10,17 @@ import type { PanelContent } from '../resolve_panel';
 import {
   buildConfigPanelContent,
   findConfigPanelType,
+  findPanelKind,
   findPanelRenderer,
   getEditableEmbeddableTypes,
   type PanelRequestContent,
   type PanelResolutionRequest,
   type UpsertPanelContent,
 } from './registry';
-import { isEsqlLensPanel } from './vis';
 
 /**
  * Error for content that cannot edit the existing panel: it targets another kind or is an
- * attachment, or the panel is a Lens panel not backed by ES|QL or of an unknown type, which are
+ * attachment, or the panel is one its kind cannot edit (`canEdit`) or of an unknown type, which are
  * replaced only after the user confirms. Undefined when the content can edit the panel.
  */
 const getPanelEditError = (
@@ -30,10 +30,13 @@ const getPanelEditError = (
   const { id, type } = existingPanel;
   const replaceHint = `To replace it with another kind of panel, remove "${id}" and add the new panel with a new id in the same call.`;
   const confirmReplaceHint = `Tell the user it cannot be edited, and replace it only after they confirm: then remove "${id}" and add the new panel with a new id in the same call.`;
-  const renderer = findPanelRenderer(type);
-  if (renderer === 'lens' && !isEsqlLensPanel(existingPanel)) {
-    return `Panel "${id}" is a Lens panel that is not backed by ES|QL, so it cannot be edited. ${confirmReplaceHint}`;
+  const kind = findPanelKind(type);
+  if (kind?.canEdit && !kind.canEdit(existingPanel)) {
+    return `Panel "${id}" is a ${
+      kind.uneditableDescription ?? `${kind.label} panel`
+    }, so it cannot be edited. ${confirmReplaceHint}`;
   }
+  const renderer = findPanelRenderer(type);
   const configPanelType = findConfigPanelType(type);
   if (!renderer && !configPanelType) {
     return `Panel "${id}" with type "${type}" cannot be edited. ${confirmReplaceHint}`;
@@ -174,7 +177,10 @@ export const planPanelContent = ({
 
   if (content.source === 'config') {
     const { type, config } = content;
-    return { source: 'config', panelContent: buildConfigPanelContent(type, config) };
+    const panelContent = buildConfigPanelContent(type, config);
+    return 'error' in panelContent
+      ? { error: `Panel "${id}": ${panelContent.error}` }
+      : { source: 'config', panelContent };
   }
 
   if (content.source === 'attachment') {

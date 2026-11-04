@@ -409,6 +409,38 @@ describe('executeDashboardUpsert', () => {
     );
   });
 
+  it('fails only the panel with an invalid ML config and leaves the rest applied', async () => {
+    const existingConfig = { job_ids: ['job-1'], swimlane_type: 'overall' };
+    const existing = createPanel('swimlane', 'ml_anomaly_swimlane', existingConfig);
+
+    const result = await executeDashboardUpsert({
+      dashboardData: { title: 'Test', panels: [existing] },
+      upsert: {
+        panels: [
+          {
+            id: 'swimlane',
+            content: {
+              source: 'config',
+              type: 'ml_anomaly_swimlane',
+              config: { job_ids: 'job-1', swimlane_type: 'overall' },
+            },
+          },
+          { id: 'notes', content: markdownContent('Notes') },
+        ],
+      },
+      logger,
+    });
+
+    expect(result.failures).toEqual([
+      panelFailure(
+        'swimlane',
+        expect.stringMatching(/^Panel "swimlane": Invalid anomaly swim lane config\./)
+      ),
+    ]);
+    expect(findPanel(result.dashboardData, 'swimlane')).toEqual(existing);
+    expect(findPanel(result.dashboardData, 'notes')).toBeDefined();
+  });
+
   it('places new panels below existing panels, which keep their place, until the layout step', async () => {
     const result = await executeDashboardUpsert({
       dashboardData: { title: 'Test', panels: [createLensPanel('existing', 0)] },
