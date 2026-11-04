@@ -114,6 +114,14 @@ export function getFromIndexCommandString(
 const DEBOUNCE_OPTIONS_FOR_DECORATOR = { wait: 500 };
 
 /**
+ * Word separators passed to Monaco's `findMatches` when highlighting FROM source indices. Index
+ * names cannot contain whitespace, commas, or quotes, so treating all of them as word boundaries
+ * ensures every name in a multi-index `FROM a, b` is matched as its own token. Monaco's default of
+ * only spaces merges `a,` into a single word and skips every name that is followed by a comma.
+ */
+const INDEX_NAME_WORD_SEPARATORS = [' ', '\t', '\n', '\r', ',', '"', "'", '`'].join('');
+
+/**
  * The index editor always operates on the origin project, while a FROM query can be fanned out
  * across linked projects via Cross-Project Search (CPS). Editing is only safe when the query is
  * scoped to the origin, so the badge is offered only for origin-only routing: unset routing (no
@@ -225,7 +233,14 @@ export const useFromIndexCommand = (
         ? fromIndexEditBadgeClassName
         : fromIndexAddBadgeClassName;
       const matches =
-        editorModel.current?.findMatches(indexName, true, false, true, ' ', true) || [];
+        editorModel.current?.findMatches(
+          indexName,
+          true,
+          false,
+          true,
+          INDEX_NAME_WORD_SEPARATORS,
+          true
+        ) || [];
 
       matches.forEach((match) => {
         newDecorations.push({
