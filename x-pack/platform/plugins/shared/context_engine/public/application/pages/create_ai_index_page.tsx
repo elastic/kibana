@@ -23,10 +23,8 @@ import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
-import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
-import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { useNavigation } from '../hooks/use_navigation';
 import {
   ContextEngineSubPageHeader,
@@ -52,10 +50,8 @@ const createPageTitle = i18n.translate('xpack.contextEngine.createAiIndex.title'
 export const CreateAiIndexPage = () => {
   const { createContextEngineUrl, navigateToContextEngine } = useNavigation();
   const { createAiIndex, isCreating } = useCreateAiIndex();
-  const isMemoryFeatureEnabled = useMemoryEnabled();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
-  const [memoryEnabled, setMemoryEnabled] = useState(true);
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
   useContextEngineBreadcrumbs([{ text: createPageTitle }]);
@@ -71,7 +67,6 @@ export const CreateAiIndexPage = () => {
     const created = await createAiIndex({
       id,
       description,
-      memoryEnabled: isMemoryFeatureEnabled ? memoryEnabled : undefined,
       sources: [],
     });
     if (created) {
@@ -139,18 +134,6 @@ export const CreateAiIndexPage = () => {
             />
           </EuiFormRow>
         </EuiPanel>
-
-        {isMemoryFeatureEnabled && (
-          <>
-            <EuiSpacer size="l" />
-
-            <MemorySettingsPanel
-              checked={memoryEnabled}
-              onChange={({ target: { checked } }) => setMemoryEnabled(checked)}
-              toggleTestSubject="contextCreateAiIndexMemoryToggle"
-            />
-          </>
-        )}
 
         <EuiSpacer size="l" />
 

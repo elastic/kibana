@@ -35,7 +35,6 @@ export const registerInvestigationsAiIndex = ({
     description:
       'Security knowledge indicators that AlertZero Watches hand to each other, such as ' +
       'detection coverage gaps and forensics handoffs.',
-    memory_enabled: false,
     dest: HUNT_COVERAGE_AI_INDEX_DEST,
     automations: [],
     sources: [],
@@ -46,7 +45,6 @@ export const registerInvestigationsAiIndex = ({
     description:
       'Attack Discovery fingerprints used to attach a later attack to the Investigation ' +
       'that already describes it. Not a forensics handoff.',
-    memory_enabled: false,
     dest: getAiIndexDest('index', ATTACK_FINGERPRINT_AI_INDEX_ID),
     automations: [],
     sources: [],

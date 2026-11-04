@@ -33,7 +33,6 @@ import {
   AiIndexNotFoundError,
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
-  InvalidDreamingConfigError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
@@ -41,28 +40,14 @@ import { buildTraceQueries } from './trace_queries';
 import { createAiIndexIdentityDslFilter } from '../utils/ai_index_identity_filter';
 
 /** Resolves the identity a pre-upgrade document carries implicitly, in its `_id` and its absence of a space. */
-const toAiIndexDocument = (source: StoredAiIndexDocument, docId: string): AiIndexDocument => ({
+const toAiIndexDocument = (
+  { memory_enabled: _legacyMemoryEnabled, ...source }: StoredAiIndexDocument,
+  docId: string
+): AiIndexDocument => ({
   ...source,
   id: source.id ?? docId,
   space: source.space ?? DEFAULT_SPACE_ID,
 });
-
-const resolveMemoryEnabled = (
-  document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
-): boolean => document.memory_enabled ?? !document.managed;
-
-/** Dreaming builds long-term memory from the memories an AI index holds, so it needs memory on. */
-const assertCanDream = (
-  aiIndexId: string,
-  memoryEnabled: boolean,
-  dreaming: AiIndexDreamingConfig | undefined
-): void => {
-  if (dreaming?.enabled && !memoryEnabled) {
-    throw new InvalidDreamingConfigError(
-      `AI index '${aiIndexId}' does not have memory enabled, so it cannot dream.`
-    );
-  }
-};
 
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
@@ -72,7 +57,6 @@ const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   }),
   ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
   managed: document.managed ?? false,
-  memory_enabled: resolveMemoryEnabled(document),
   dest: document.dest,
   automations: document.automations,
   sources: document.sources,
@@ -156,7 +140,6 @@ export class AiIndexService {
     if (this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexManagedError(aiIndexId);
     }
-    assertCanDream(aiIndexId, properties.memory_enabled ?? true, properties.dreaming);
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId, spaceId);
@@ -184,7 +167,6 @@ export class AiIndexService {
     spaceId: string,
     properties: AiIndexProperties
   ): Promise<'created' | 'updated'> {
-    assertCanDream(aiIndexId, properties.memory_enabled ?? true, properties.dreaming);
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId, spaceId);
@@ -227,7 +209,6 @@ export class AiIndexService {
         id: aiIndexId,
         space: spaceId,
         managed: true,
-        memory_enabled: properties.memory_enabled ?? false,
       },
       existing,
       { docId: buildManagedAiIndexDocId(spaceId, aiIndexId) }
@@ -244,7 +225,6 @@ export class AiIndexService {
     const now = new Date().toISOString();
     const fullDocument: AiIndexDocument = {
       ...document,
-      memory_enabled: document.memory_enabled ?? true,
       date_created: existing?.document.date_created ?? now,
       date_modified: now,
     };
@@ -312,7 +292,6 @@ export class AiIndexService {
       spaceId,
       {
         ...existing.document,
-        memory_enabled: resolveMemoryEnabled(existing.document),
         feedback_analysis: feedbackAnalysis,
       },
       existing
@@ -335,15 +314,7 @@ export class AiIndexService {
     if (!existing) {
       throw new AiIndexNotFoundError(aiIndexId);
     }
-    const memoryEnabled = resolveMemoryEnabled(existing.document);
-    assertCanDream(aiIndexId, memoryEnabled, dreaming);
-
-    await this.writeDocument(
-      aiIndexId,
-      spaceId,
-      { ...existing.document, memory_enabled: memoryEnabled, dreaming },
-      existing
-    );
+    await this.writeDocument(aiIndexId, spaceId, { ...existing.document, dreaming }, existing);
 
     return dreaming;
   }
