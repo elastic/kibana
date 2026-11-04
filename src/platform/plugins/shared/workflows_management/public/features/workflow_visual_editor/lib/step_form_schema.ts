@@ -11,10 +11,12 @@ import { i18n } from '@kbn/i18n';
 import {
   getBuiltInStepDefinition,
   getStepDeprecationInfo,
+  LoopStepPropsSchema,
   resolveKibanaStepTypeAlias,
 } from '@kbn/workflows';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
+import { isReferenceValue } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
 
@@ -52,6 +54,11 @@ export interface StepFormField {
   readonly options?: readonly string[];
   /** Schema default (from `.default()`), used to pre-fill new steps. */
   readonly defaultValue?: unknown;
+  /**
+   * `false` when the engine reads the value exactly as typed (e.g. a loop cap), so the form
+   * must not offer references for it. Declared with `.meta({ templatable: false })`.
+   */
+  readonly templatable?: false;
 }
 
 export interface StepFormSchema {
@@ -326,9 +333,16 @@ const fieldsFromObject = (
         language,
         options,
         defaultValue: getDefault(fieldSchema),
+        ...(readFieldMeta(fieldSchema)?.templatable === false
+          ? { templatable: false as const }
+          : {}),
       };
     });
 };
+
+/** Loop-only root keys that live on the step schema, not on its `configSchema`. */
+const LOOP_STEP_TYPES: ReadonlySet<string> = new Set(['while', 'foreach']);
+const LOOP_ROOT_PROPS_SCHEMA = LoopStepPropsSchema.pick({ 'max-iterations': true });
 
 /**
  * Connector type lookup candidates for a step: exact type, Kibana OAS aliases
@@ -362,6 +376,9 @@ export const getStepFormSchema = (
       stepType,
       fields: [
         ...fieldsFromObject(stepType, builtIn.configSchema, []),
+        ...(LOOP_STEP_TYPES.has(stepType)
+          ? fieldsFromObject(stepType, LOOP_ROOT_PROPS_SCHEMA, [])
+          : []),
         ...fieldsFromObject(stepType, builtIn.inputSchema, ['with']),
       ],
     };
@@ -386,6 +403,7 @@ export const getStepFormSchema = (
   }
   // Field paths stay under the edited step type; only the schema is resolved
   // through aliases so deprecated YAML types still get a usable form.
+  fields.push(...fieldsFromObject(stepType, connector.configSchema, []));
   fields.push(...fieldsFromObject(stepType, connector.paramsSchema, ['with']));
   return { stepType, fields };
 };
@@ -430,7 +448,10 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
     });
   }
 
-  if (field.kind === 'number') {
+  // Runtime-evaluated reference — skip typed-field validation entirely.
+  const isReference = isReferenceValue(value);
+
+  if (field.kind === 'number' && !isReference) {
     const numeric =
       typeof value === 'number' ? value : typeof value === 'string' ? Number(value) : NaN;
     if (typeof value === 'number' && Number.isNaN(value)) {
@@ -445,10 +466,7 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
     }
   }
 
-  // Runtime-evaluated template expression — skip typed-field validation entirely.
-  const isExpression = typeof value === 'string' && value.includes('{{');
-
-  if (field.kind === 'select' && field.options && field.options.length > 0 && !isExpression) {
+  if (field.kind === 'select' && field.options && field.options.length > 0 && !isReference) {
     const allowed = field.options.map(String);
     if (!allowed.includes(String(value))) {
       return i18n.translate('workflows.stepConfigPanel.validation.mustBeOneOf', {
@@ -465,7 +483,7 @@ export const validateStepField = (field: StepFormField, value: unknown): string 
     });
   }
 
-  if (field.kind === 'boolean' && typeof value !== 'boolean' && !isExpression) {
+  if (field.kind === 'boolean' && typeof value !== 'boolean' && !isReference) {
     // TODO: surface schema-specific boolean messages when a zod issue code is available
     return i18n.translate('workflows.stepConfigPanel.validation.invalidValue', {
       defaultMessage: 'Invalid value',

@@ -57,6 +57,30 @@ describe('step_form_schema', () => {
   });
 
   describe('getStepFormSchema', () => {
+    it('emits a connector configSchema at the step root', () => {
+      const mapLike = {
+        type: 'data.map',
+        paramsSchema: z.object({ fields: z.record(z.string(), z.string()) }),
+        configSchema: z.object({ items: z.unknown().meta({ advanced: false }) }),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const items = getStepFormSchema('data.map', [mapLike])?.fields.find((f) => f.key === 'items');
+      expect(items).toMatchObject({ path: ['items'], advanced: false });
+      expect(items?.templatable).toBeUndefined();
+    });
+
+    it('adds a non-templatable max-iterations field to loop steps', () => {
+      const maxIterations = getStepFormSchema('while', [])?.fields.find(
+        (f) => f.key === 'max-iterations'
+      );
+      expect(maxIterations).toMatchObject({ path: ['max-iterations'], templatable: false });
+      expect(getStepFormSchema('foreach', [])?.fields.some((f) => f.key === 'max-iterations')).toBe(
+        true
+      );
+    });
+
     it('derives connector fields from paramsSchema under `with` plus connector-id', () => {
       const schema = getStepFormSchema('slack', connectors);
       expect(schema).toBeDefined();
@@ -526,6 +550,21 @@ describe('step_form_schema', () => {
           'PATCH'
         )
       ).toBe('Must be one of: GET, POST, PUT, DELETE');
+    });
+
+    it('skips typed checks for whole references', () => {
+      const numberField: StepFormField = {
+        key: 'n',
+        path: ['n'],
+        label: 'N',
+        required: false,
+        kind: 'number',
+      };
+      expect(validateStepField(numberField, '{{ steps.a.output.count }}')).toBeUndefined();
+      expect(validateStepField(numberField, '${{ steps.a.output.count }}')).toBeUndefined();
+      expect(validateStepField(numberField, 'Found {{ steps.a.output.count }}')).toBe(
+        'Must be a number'
+      );
     });
 
     it('reports unclosed template expressions', () => {

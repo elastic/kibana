@@ -17,6 +17,7 @@ import type { DataReferenceItem } from '../lib/build_data_reference_catalog';
 import {
   isDataReferenceEntity,
   isDataReferenceInsertable,
+  toReferenceIconType,
 } from '../lib/build_data_reference_catalog';
 
 ensureWorkflowGraphEuiIcons();
@@ -214,7 +215,7 @@ export function DataReferenceItemRowContent({
         }}
         aria-hidden
       >
-        <FieldIcon type={item.typeLabel} size="s" shape="square" />
+        <FieldIcon type={toReferenceIconType(item.typeLabel)} size="s" shape="square" />
       </span>
       <span
         css={{

@@ -18,6 +18,7 @@ import {
   isDataReferenceExpandable,
   isDataReferenceInsertable,
   overlayValueSample,
+  toReferenceIconType,
 } from './build_data_reference_catalog';
 import { getDocumentOrderPredecessors } from './get_document_order_predecessors';
 
@@ -54,7 +55,7 @@ describe('buildDataReferenceCatalog', () => {
   const definition = {
     name: 'Demo',
     triggers: [{ type: 'manual' }],
-    consts: { region: 'us-east-1' },
+    consts: { region: 'us-east-1', tags: ['a', 'b'], nothing: null },
     steps: [
       { name: 'first', type: 'console', with: { message: 'hi' } },
       { name: 'second', type: 'console', with: { message: 'yo' } },
@@ -90,7 +91,7 @@ describe('buildDataReferenceCatalog', () => {
     // Untyped / opaque outputs: one insertable object leaf under the entity.
     expect(stepsGroup?.items[0].children?.[0]).toMatchObject({
       path: 'steps.first.output',
-      typeLabel: 'object',
+      typeLabel: 'unknown',
       drillable: false,
       note: expect.stringMatching(/does not declare output fields/),
     });
@@ -136,6 +137,10 @@ describe('buildDataReferenceCatalog', () => {
       originLabel: 'Workflow context',
     });
     expect(isDataReferenceDraggable(region!)).toBe(true);
+    expect(constsParent?.children?.find((i) => i.path === 'consts.tags')?.typeLabel).toBe('array');
+    expect(constsParent?.children?.find((i) => i.path === 'consts.nothing')?.typeLabel).toBe(
+      'null'
+    );
 
     expect(context?.items.find((i) => i.path === 'kibanaUrl')).toMatchObject({
       label: 'kibanaUrl',
@@ -314,11 +319,23 @@ describe('overlayValueSample', () => {
   });
 
   it('caps array samples at 10 elements', () => {
-    const result = overlayValueSample(entity([]), { items: Array.from({ length: 15 }, (_, i) => i) });
+    const result = overlayValueSample(entity([]), {
+      items: Array.from({ length: 15 }, (_, i) => i),
+    });
     const items = result.children?.find((child) => child.path === 'steps.first.output.items');
     expect(items?.children).toHaveLength(10);
     expect(items?.children?.[0]).toEqual(
       expect.objectContaining({ path: 'steps.first.output.items[0]', label: '[0]', subtitle: '0' })
     );
+  });
+});
+
+describe('toReferenceIconType', () => {
+  it('maps typed lists, integers and nullable unions to icon types', () => {
+    expect(toReferenceIconType('string[]')).toBe('array');
+    expect(toReferenceIconType('integer')).toBe('number');
+    expect(toReferenceIconType('string | null')).toBe('string');
+    expect(toReferenceIconType('string | number')).toBe('unknown');
+    expect(toReferenceIconType('boolean')).toBe('boolean');
   });
 });

@@ -209,7 +209,7 @@ const schemaToItems = (
     return [
       pathLeafItem({
         path: pathPrefix,
-        typeLabel: 'object',
+        typeLabel: 'unknown',
         originLabel,
       }),
     ];
@@ -220,7 +220,7 @@ const schemaToItems = (
     return [
       pathLeafItem({
         path: pathPrefix,
-        typeLabel: 'object',
+        typeLabel: 'unknown',
         originLabel,
       }),
     ];
@@ -394,7 +394,7 @@ const buildStepEntities = (
       children = [
         pathLeafItem({
           path: outputPath,
-          typeLabel: 'object',
+          typeLabel: 'unknown',
           originLabel,
           note: opaqueNote,
         }),
@@ -431,7 +431,7 @@ const buildConstItems = (
     items.push(
       pathLeafItem({
         path: `consts.${key}`,
-        typeLabel: typeof value,
+        typeLabel: sampleTypeLabel(value),
         originLabel,
         subtitle: formatConstValue(value),
       })
@@ -613,6 +613,25 @@ export const flattenDataReferenceLeaves = (
 };
 
 export const formatDataReferenceToken = (path: string): string => `{{ ${path} }}`;
+
+/** Known `FieldIcon` types for the labels the catalog can produce; anything else reads as unknown. */
+const ICON_TYPE_ALIASES: Readonly<Record<string, string>> = {
+  integer: 'number',
+  record: 'object',
+};
+
+/**
+ * Maps a catalog `typeLabel` (`string[]`, `integer`, `string | null`…) to the `FieldIcon`
+ * type that draws it, so typed lists and unions don't fall back to the unknown icon.
+ */
+export const toReferenceIconType = (typeLabel: string): string => {
+  if (typeLabel.endsWith('[]')) return 'array';
+  if (typeLabel.includes(' | ')) {
+    const members = typeLabel.split(' | ').filter((member) => member !== 'null');
+    return members.length === 1 ? toReferenceIconType(members[0]) : 'unknown';
+  }
+  return ICON_TYPE_ALIASES[typeLabel] ?? typeLabel;
+};
 
 /** Cap on array elements shown from a sample, so large outputs (e.g. ES hits) stay readable. */
 const MAX_SAMPLE_ARRAY_ITEMS = 10;

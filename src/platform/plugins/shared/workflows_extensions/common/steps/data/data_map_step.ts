@@ -15,7 +15,7 @@ import type { CommonStepDefinition } from '../../step_registry/types';
 export const DataMapStepTypeId = 'data.map';
 
 export const ConfigSchema = z.object({
-  items: z.unknown(),
+  items: z.unknown().meta({ advanced: false }),
 });
 
 /** Reserved key that triggers array iteration in a nested field spec. */

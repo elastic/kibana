@@ -10,12 +10,7 @@
 import type YAML from 'yaml';
 import { isScalar } from 'yaml';
 import type { monaco } from '@kbn/monaco';
-import {
-  getScalarValueAtOffset,
-  isDynamicValue,
-  isLiquidTagValue,
-  isVariableValue,
-} from '@kbn/workflows-yaml';
+import { getScalarValueAtOffset, isReferenceValue } from '@kbn/workflows-yaml';
 
 export function filterMonacoYamlMarkers(
   markers: monaco.editor.IMarkerData[],
@@ -31,13 +26,7 @@ export function filterMonacoYamlMarkers(
         });
 
         const scalarNode = getScalarValueAtOffset(yamlDocument, markerOffset);
-        if (
-          scalarNode &&
-          isScalar(scalarNode) &&
-          (isDynamicValue(scalarNode.value) ||
-            isVariableValue(scalarNode.value) ||
-            isLiquidTagValue(scalarNode.value))
-        ) {
+        if (scalarNode && isScalar(scalarNode) && isReferenceValue(scalarNode.value)) {
           // Filter out markers with dynamic values, variable values, or Liquid tags
           // (e.g. ${{ }}, {{ }}, {% ... %}, {%- ... -%}) as we cannot reliably validate them statically
           return false;

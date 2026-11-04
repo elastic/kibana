@@ -256,10 +256,10 @@ export const MaxIterationsObjectSchema = z.object({
   'on-limit': z.enum(['continue', 'fail']),
 });
 
-export const MaxIterationsSchema = z.union([
-  z.number().int().positive(),
-  MaxIterationsObjectSchema,
-]);
+// The engine reads loop caps exactly as typed, so the form must not offer references for them.
+export const MaxIterationsSchema = z
+  .union([z.number().int().positive(), MaxIterationsObjectSchema])
+  .meta({ templatable: false });
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 
 export const DEFAULT_LOOP_MAX_ITERATIONS = 2000;

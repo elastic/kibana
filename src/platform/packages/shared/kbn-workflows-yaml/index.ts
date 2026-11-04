@@ -26,6 +26,7 @@ export {
   isDynamicValue,
   isVariableValue,
   isLiquidTagValue,
+  isReferenceValue,
 } from './common/regex';
 
 // JSON Schema template-tolerance weaver

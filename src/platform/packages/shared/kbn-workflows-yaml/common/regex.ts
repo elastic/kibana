@@ -161,3 +161,12 @@ export function isLiquidTagValue(value: unknown): boolean {
   }
   return LIQUID_TAG_VALUE_REGEX.test(value);
 }
+
+/**
+ * The one rule for "this value is a reference": a whole `{{ ... }}`, a whole `${{ ... }}`,
+ * or a value containing any `{% ... %}` tag. Typed-field checks are skipped for these values
+ * because they only resolve at run time.
+ */
+export function isReferenceValue(value: unknown): boolean {
+  return isVariableValue(value) || isDynamicValue(value) || isLiquidTagValue(value);
+}
