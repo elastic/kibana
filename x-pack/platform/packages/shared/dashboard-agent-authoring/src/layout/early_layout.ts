@@ -15,10 +15,9 @@ import { getErrorMessage } from '../utils';
 import {
   arrangeDashboardLayout,
   attemptDashboardLayout,
-  getKind,
   getPanelsById,
-  getPlacement,
-  getSectionIds,
+  hasLayoutChanges,
+  needsLayout,
   type ArrangeLayoutResult,
   type LayoutAttempt,
   type Widgets,
@@ -30,34 +29,6 @@ export interface EarlyLayout {
   /** Lays out the resolved dashboard, reusing the early arrangement where it still fits. */
   finish: (dashboardData: DashboardAttachmentData) => Promise<ArrangeLayoutResult>;
 }
-
-/**
- * Whether the resolved dashboard has the panels and sections the prediction had, in the same
- * containers and of the same kinds, so the early arrangement applies as it is.
- */
-const matchesPrediction = (predicted: Widgets, resolved: Widgets): boolean => {
-  const predictedPlacement = getPlacement(predicted);
-  const resolvedPlacement = getPlacement(resolved);
-  const predictedSectionIds = getSectionIds(predicted);
-  const resolvedSectionIds = getSectionIds(resolved);
-  const predictedPanelsById = getPanelsById(predicted);
-  const isSameKind = (panel: AttachmentPanel): boolean => {
-    const predictedPanel = predictedPanelsById.get(panel.id);
-    if (!predictedPanel) {
-      return false;
-    }
-    const predictedKind = getKind(predictedPanel);
-    const kind = getKind(panel);
-    return predictedKind.type === kind.type && predictedKind.chartType === kind.chartType;
-  };
-  return (
-    predictedPlacement.size === resolvedPlacement.size &&
-    [...resolvedPlacement].every(([id, sectionId]) => predictedPlacement.get(id) === sectionId) &&
-    predictedSectionIds.size === resolvedSectionIds.size &&
-    [...resolvedSectionIds].every((id) => predictedSectionIds.has(id)) &&
-    [...getPanelsById(resolved).values()].every(isSameKind)
-  );
-};
 
 /** Copies the grids of `arranged` onto the panels and sections of `dashboardData` that it has. */
 const copyLayout = (
@@ -88,10 +59,11 @@ const copyLayout = (
 
 /**
  * Starts the layout call on the dashboard predicted from the upsert plan, so it runs while panel
- * content resolves. `finish` applies the early arrangement when the resolved dashboard matches the
- * prediction. When a panel failed or resolved to another kind, it asks for a repair, with the early
- * arrangement as the previous layout. When the early call failed, it lays out the resolved dashboard
- * as `arrangeDashboardLayout` does.
+ * content resolves. `finish` keeps the resolved dashboard as it is when nothing needs placing, e.g.
+ * when every planned change failed. It applies the early arrangement when the resolved dashboard
+ * matches the prediction. When a panel failed, or resolved to another kind or text, it asks for a
+ * repair, with the early arrangement as the previous layout. When the early call or the repair
+ * failed, it lays out the resolved dashboard as `arrangeDashboardLayout` does.
  */
 export const startEarlyLayout = ({
   originalPanels,
@@ -115,33 +87,48 @@ export const startEarlyLayout = ({
 
   return {
     finish: async (dashboardData) => {
-      const attempt = await earlyAttempt;
-      if (attempt.status !== 'arranged') {
-        if (attempt.status === 'failed') {
-          logger.debug(`Early dashboard layout failed, laying out again: ${attempt.error}`);
-        }
-        return arrangeDashboardLayout({
+      if (!needsLayout({ originalPanels, dashboardData, instructions })) {
+        return { dashboardData };
+      }
+      const layOutResolved = (): Promise<ArrangeLayoutResult> =>
+        arrangeDashboardLayout({
           originalPanels,
           dashboardData,
           instructions,
           arrangeLayout,
           logger,
         });
+
+      const attempt = await earlyAttempt;
+      if (attempt.status !== 'arranged') {
+        if (attempt.status === 'failed') {
+          logger.debug(`Early dashboard layout failed, laying out again: ${attempt.error}`);
+        }
+        return layOutResolved();
       }
 
       const { panels: arrangedPanels } = attempt.dashboardData;
       const placedDashboardData = copyLayout(arrangedPanels, dashboardData);
-      if (matchesPrediction(arrangedPanels, dashboardData.panels)) {
+      if (!hasLayoutChanges(dashboardData.panels, arrangedPanels)) {
         return { dashboardData: placedDashboardData };
       }
       logger.debug('Resolved dashboard differs from the early layout, repairing it');
       // The early arrangement already follows the instructions, so the repair only fills the gaps.
-      return arrangeDashboardLayout({
+      const repair = await attemptDashboardLayout({
         originalPanels: arrangedPanels,
         dashboardData: placedDashboardData,
         arrangeLayout,
-        logger,
       });
+      if (repair.status === 'arranged') {
+        return { dashboardData: repair.dashboardData };
+      }
+      if (repair.status === 'unchanged') {
+        return { dashboardData: placedDashboardData };
+      }
+      logger.debug(
+        `Repairing the early dashboard layout failed, laying out again: ${repair.error}`
+      );
+      return layOutResolved();
     },
   };
 };

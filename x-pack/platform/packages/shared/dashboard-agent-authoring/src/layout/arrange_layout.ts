@@ -54,9 +54,9 @@ const createAliases = (widgets: Widgets): Map<string, string> => {
 };
 
 /** The container of every panel: the id of its section, or `null` for the top level. */
-export type Placement = ReadonlyMap<string, string | null>;
+type Placement = ReadonlyMap<string, string | null>;
 
-export const getPlacement = (widgets: Widgets): Placement =>
+const getPlacement = (widgets: Widgets): Placement =>
   new Map(
     widgets.flatMap(
       (widget): Array<[string, string | null]> =>
@@ -64,7 +64,7 @@ export const getPlacement = (widgets: Widgets): Placement =>
     )
   );
 
-export const getSectionIds = (widgets: Widgets): Set<string> =>
+const getSectionIds = (widgets: Widgets): Set<string> =>
   new Set(widgets.filter(isSection).map(({ id }) => id));
 
 /** Whether a panel or section was added or removed, or a panel moved to another container. */
@@ -81,7 +81,7 @@ const hasContainerChanges = (widgets: Widgets, originalWidgets: Widgets): boolea
   );
 };
 
-export const getKind = ({ type, config }: AttachmentPanel): LayoutPanelKind => ({
+const getKind = ({ type, config }: AttachmentPanel): LayoutPanelKind => ({
   type,
   ...(typeof config.type === 'string' ? { chartType: config.type } : {}),
 });
@@ -130,6 +130,23 @@ const getChangedTextIds = (widgets: Widgets, originalWidgets: Widgets): Set<stri
       .map(({ id }) => id)
   );
 };
+
+/**
+ * Whether the grids of `originalWidgets` may not fit `widgets`: a panel or section was added or
+ * removed, a panel moved to another container, or a panel changed its kind or markdown text.
+ */
+export const hasLayoutChanges = (widgets: Widgets, originalWidgets: Widgets): boolean =>
+  hasContainerChanges(widgets, originalWidgets) ||
+  getPreviousKinds(widgets, originalWidgets).size > 0 ||
+  getChangedTextIds(widgets, originalWidgets).size > 0;
+
+/** Whether the dashboard needs a layout call: a layout was asked for, or its grids may not fit. */
+export const needsLayout = ({
+  originalPanels,
+  dashboardData: { panels },
+  instructions,
+}: Pick<LayoutAttemptParams, 'originalPanels' | 'dashboardData' | 'instructions'>): boolean =>
+  panels.length > 0 && (instructions !== undefined || hasLayoutChanges(panels, originalPanels));
 
 const byReadingOrder = (a: AttachmentPanel, b: AttachmentPanel): number =>
   a.grid.y - b.grid.y || a.grid.x - b.grid.x;
@@ -259,21 +276,13 @@ export const attemptDashboardLayout = async ({
   instructions,
   arrangeLayout,
 }: LayoutAttemptParams): Promise<LayoutAttempt> => {
-  if (dashboardData.panels.length === 0) {
+  if (!needsLayout({ originalPanels, dashboardData, instructions })) {
     return { status: 'unchanged' };
   }
 
   const aliasById = createAliases(dashboardData.panels);
   const previousKinds = getPreviousKinds(dashboardData.panels, originalPanels);
   const changedTextIds = getChangedTextIds(dashboardData.panels, originalPanels);
-  if (
-    instructions === undefined &&
-    previousKinds.size === 0 &&
-    changedTextIds.size === 0 &&
-    !hasContainerChanges(dashboardData.panels, originalPanels)
-  ) {
-    return { status: 'unchanged' };
-  }
   const request = toLayoutRequest(
     dashboardData.panels,
     originalPanels,
