@@ -19,7 +19,7 @@ import type { EpisodeSourceHistogram } from '../types/episode_data_source';
 import { HISTOGRAM_EPISODE_LIMIT } from '../constants';
 import { EpisodeDataSourceProvider } from '../context/episode_data_source_context';
 import { useSpaceId } from './use_space_id';
-import type { HistogramEpisodeRow } from '../utils/histogram_utils';
+import type { HistogramBucketCount, HistogramEpisodeRow } from '../utils/histogram_utils';
 
 jest.mock('../utils/execute_esql_query');
 jest.mock('./use_space_id');
@@ -41,6 +41,9 @@ const mockTimeRange = {
   from: '2024-01-01T00:00:00.000Z',
   to: '2024-01-01T02:00:00.000Z',
 };
+
+const HOUR_0 = new Date('2024-01-01T00:00:00.000Z').getTime();
+const HOUR_1 = new Date('2024-01-01T01:00:00.000Z').getTime();
 
 const createWrapper = (
   dataSource?: ReturnType<typeof createTestEpisodeSource>,
@@ -226,18 +229,18 @@ describe('useEpisodesHistogramQuery', () => {
     expect(should[1]).toEqual({ exists: { field: 'action_type' } });
   });
 
-  it('concatenates source histogram rows with v2 rows', async () => {
+  it('sums source histogram counts with v2 counts per bucket', async () => {
     const v2Row: HistogramEpisodeRow = {
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T00:30:00.000Z',
       'episode.status': 'inactive',
     };
-    const sourceRow: HistogramEpisodeRow = {
-      first_timestamp: '2024-01-01T01:00:00.000Z',
-      last_timestamp: '2024-01-01T01:30:00.000Z',
-      'episode.status': 'active',
-    };
+    const sourceCounts: HistogramBucketCount[] = [
+      { bucketStart: HOUR_0, count: 2 },
+      { bucketStart: HOUR_1, count: 3 },
+    ];
     mockExecuteEsqlQuery.mockResolvedValue([v2Row]);
+    const fetchHistogram = jest.fn().mockResolvedValue({ counts: sourceCounts, isCapHit: false });
 
     const { result } = renderHook(
       () =>
@@ -247,33 +250,53 @@ describe('useEpisodesHistogramQuery', () => {
           timeRange: mockTimeRange,
           bucketInterval: '1h',
         }),
-      {
-        wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false }))
-        ),
-      }
+      { wrapper: createWrapper(sourceWithHistogram(fetchHistogram)) }
     );
 
     await waitFor(() => expect(result.current.isLoading).toBe(false));
 
-    expect(result.current.table).toBeDefined();
-    const rows = result.current.table?.rows ?? [];
-    expect(rows.length).toBeGreaterThanOrEqual(2);
+    expect(fetchHistogram).toHaveBeenCalledWith(
+      expect.objectContaining({
+        buckets: [
+          { start: HOUR_0, end: HOUR_1 },
+          { start: HOUR_1, end: HOUR_1 + 3_600_000 },
+        ],
+        nowMs: expect.any(Number),
+      })
+    );
+    expect(result.current.table?.rows).toEqual([
+      { time_bucket: '2024-01-01T00:00:00.000Z', count: 3 },
+      { time_bucket: '2024-01-01T01:00:00.000Z', count: 3 },
+    ]);
   });
 
-  it('does not set isCapHit when combined rows exceed limit but neither source does individually', async () => {
-    const half = Math.floor(HISTOGRAM_EPISODE_LIMIT / 2);
-    const v2Rows = Array.from({ length: half }, () => ({
+  it('clamps the bucket interval before generating buckets for sources', async () => {
+    mockExecuteEsqlQuery.mockResolvedValue([]);
+    const fetchHistogram = jest.fn().mockResolvedValue({ counts: [], isCapHit: false });
+
+    const { result } = renderHook(
+      () =>
+        useEpisodesHistogramQuery({
+          services: mockServices,
+          filterState: {},
+          timeRange: { from: '2024-01-01T00:00:00.000Z', to: '2024-01-31T00:00:00.000Z' },
+          bucketInterval: '1m',
+        }),
+      { wrapper: createWrapper(sourceWithHistogram(fetchHistogram)) }
+    );
+
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+
+    const [{ buckets }] = fetchHistogram.mock.calls[0];
+    expect(buckets.length).toBeLessThanOrEqual(1000);
+  });
+
+  it('does not set isCapHit when neither v2 nor the source hit their cap', async () => {
+    const v2Rows = Array.from({ length: HISTOGRAM_EPISODE_LIMIT - 1 }, () => ({
       first_timestamp: '2024-01-01T00:00:00.000Z',
       last_timestamp: '2024-01-01T01:00:00.000Z',
       'episode.status': 'inactive' as const,
     }));
-    const sourceRows: HistogramEpisodeRow[] = Array.from({ length: half + 1 }, () => ({
-      first_timestamp: '2024-01-01T00:00:00.000Z',
-      last_timestamp: '2024-01-01T01:00:00.000Z',
-      'episode.status': 'active',
-    }));
-
     mockExecuteEsqlQuery.mockResolvedValue(v2Rows);
 
     const { result } = renderHook(
@@ -286,7 +309,12 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: sourceRows, isCapHit: false }))
+          sourceWithHistogram(
+            jest.fn().mockResolvedValue({
+              counts: [{ bucketStart: HOUR_0, count: 50_000 }],
+              isCapHit: false,
+            })
+          )
         ),
       }
     );
@@ -309,7 +337,7 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [], isCapHit: true }))
+          sourceWithHistogram(jest.fn().mockResolvedValue({ counts: [], isCapHit: true }))
         ),
       }
     );
@@ -319,13 +347,7 @@ describe('useEpisodesHistogramQuery', () => {
     expect(result.current.isCapHit).toBe(true);
   });
 
-  it('skips the v2 query and builds the table from source rows when queryV2Source is false', async () => {
-    const sourceRow: HistogramEpisodeRow = {
-      first_timestamp: '2024-01-01T01:00:00.000Z',
-      last_timestamp: '2024-01-01T01:30:00.000Z',
-      'episode.status': 'active',
-    };
-
+  it('skips the v2 query and builds the table from source counts when queryV2Source is false', async () => {
     const { result } = renderHook(
       () =>
         useEpisodesHistogramQuery({
@@ -336,7 +358,12 @@ describe('useEpisodesHistogramQuery', () => {
         }),
       {
         wrapper: createWrapper(
-          sourceWithHistogram(jest.fn().mockResolvedValue({ rows: [sourceRow], isCapHit: false })),
+          sourceWithHistogram(
+            jest.fn().mockResolvedValue({
+              counts: [{ bucketStart: HOUR_1, count: 1 }],
+              isCapHit: false,
+            })
+          ),
           false
         ),
       }

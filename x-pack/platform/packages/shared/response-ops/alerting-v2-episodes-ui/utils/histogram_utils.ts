@@ -8,6 +8,7 @@
 import moment from 'moment';
 
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
+import { HISTOGRAM_MAX_BUCKETS } from '../constants';
 
 export interface TimeBucket {
   start: number;
@@ -45,6 +46,26 @@ export const intervalToMs = (interval: string): number => {
   if (!match) return 3_600_000; // unknown format: fall back to 1 h
   const n = match[1] ? parseInt(match[1], 10) : 1;
   return moment.duration(n, match[2] as moment.unitOfTime.DurationConstructor).asMilliseconds();
+};
+
+/**
+ * Returns `interval` unchanged when it yields at most `maxBuckets` buckets over [startMs, endMs];
+ * otherwise returns the smallest multiple of the same unit that fits.
+ */
+export const clampBucketInterval = (
+  startMs: number,
+  endMs: number,
+  interval: string,
+  maxBuckets: number = HISTOGRAM_MAX_BUCKETS
+): string => {
+  const ratio = (endMs - startMs) / intervalToMs(interval) / maxBuckets;
+  if (ratio <= 1) return interval;
+
+  const match = interval.match(/^(\d*)([smhdwMy])$/);
+  if (!match) return interval;
+  const [, count, unit] = match;
+  const n = count ? parseInt(count, 10) : 1;
+  return `${n * Math.ceil(ratio)}${unit}`;
 };
 
 /** Generates non-overlapping buckets aligned to interval boundaries covering [startMs, endMs]. */
@@ -102,6 +123,21 @@ export const computeOverlapCounts = (
       breakdown,
     }));
   });
+};
+
+/** Sums bucket counts sharing the same (bucketStart, breakdown) pair across sources. */
+export const mergeBucketCounts = (...sources: HistogramBucketCount[][]): HistogramBucketCount[] => {
+  const merged = new Map<string, HistogramBucketCount>();
+  for (const { bucketStart, count, breakdown } of sources.flat()) {
+    const key = `${bucketStart}::${breakdown ?? ''}`;
+    const existing = merged.get(key);
+    if (existing) {
+      existing.count += count;
+    } else {
+      merged.set(key, { bucketStart, count, ...(breakdown !== undefined ? { breakdown } : {}) });
+    }
+  }
+  return [...merged.values()];
 };
 
 /** Formats overlap counts as a Lens-compatible Datatable for @kbn/unified-histogram. */

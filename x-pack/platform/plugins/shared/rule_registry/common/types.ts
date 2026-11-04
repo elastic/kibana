@@ -34,10 +34,78 @@ export const sortSchema = t.union([sortCombinationsSchema, t.array(sortCombinati
 
 export const minDocCount = t.number;
 
+const allowedFilterKeysSchema = t.union([
+  t.literal('bool'),
+  t.literal('boosting'),
+  t.literal('common'),
+  t.literal('combined_fields'),
+  t.literal('constant_score'),
+  t.literal('dis_max'),
+  t.literal('distance_feature'),
+  t.literal('exists'),
+  t.literal('function_score'),
+  t.literal('fuzzy'),
+  t.literal('geo_bounding_box'),
+  t.literal('geo_distance'),
+  t.literal('geo_polygon'),
+  t.literal('geo_shape'),
+  t.literal('has_child'),
+  t.literal('has_parent'),
+  t.literal('ids'),
+  t.literal('intervals'),
+  t.literal('knn'),
+  t.literal('match'),
+  t.literal('match_all'),
+  t.literal('match_bool_prefix'),
+  t.literal('match_none'),
+  t.literal('match_phrase'),
+  t.literal('match_phrase_prefix'),
+  t.literal('more_like_this'),
+  t.literal('multi_match'),
+  t.literal('nested'),
+  t.literal('parent_id'),
+  t.literal('percolate'),
+  t.literal('pinned'),
+  t.literal('prefix'),
+  t.literal('query_string'),
+  t.literal('range'),
+  t.literal('rank_feature'),
+  t.literal('regexp'),
+  t.literal('rule'),
+  t.literal('semantic'),
+  t.literal('shape'),
+  t.literal('simple_query_string'),
+  t.literal('span_containing'),
+  t.literal('span_field_masking'),
+  t.literal('span_first'),
+  t.literal('span_multi'),
+  t.literal('span_near'),
+  t.literal('span_not'),
+  t.literal('span_or'),
+  t.literal('span_term'),
+  t.literal('span_within'),
+  t.literal('term'),
+  t.literal('terms'),
+  t.literal('terms_set'),
+  t.literal('text_expansion'),
+  t.literal('weighted_tokens'),
+  t.literal('wildcard'),
+  t.literal('wrapper'),
+  t.literal('type'),
+]);
+
+type AssertAssignable<T, U extends T> = T;
+
+// Used to check that the validation schema is aligned with the type from ES
+declare type _ = AssertAssignable<
+  keyof Omit<NonNullable<QueryDslQueryContainer>, 'script' | 'script_score'>,
+  t.TypeOf<typeof allowedFilterKeysSchema>
+>;
+
+export const alertsGroupFilterSchema = t.record(allowedFilterKeysSchema, t.any);
+
 interface BucketAggsSchemas {
-  filter?: {
-    term?: { [x: string]: string | boolean | number };
-  };
+  filter?: t.TypeOf<typeof alertsGroupFilterSchema>;
   histogram?: {
     field?: string;
     interval?: number;
@@ -83,7 +151,7 @@ interface BucketAggsSchemas {
  * Schemas for the Bucket aggregations.
  *
  * Currently supported:
- * - filter
+ * - filter (any query DSL clause accepted by `alertsGroupFilterSchema`)
  * - histogram
  * - nested
  * - terms
@@ -115,11 +183,7 @@ interface BucketAggsSchemas {
  */
 const bucketAggsTempsSchemas: t.Type<BucketAggsSchemas> = t.exact(
   t.partial({
-    filter: t.exact(
-      t.partial({
-        term: t.record(t.string, t.union([t.string, t.boolean, t.number])),
-      })
-    ),
+    filter: alertsGroupFilterSchema,
     date_histogram: t.exact(
       t.partial({
         field: t.string,
@@ -329,76 +393,6 @@ export const alertsAggregationsSchema = t.record(
   t.string,
   t.intersection([metricsAggsSchemas, bucketAggsSchemas])
 );
-
-const allowedFilterKeysSchema = t.union([
-  t.literal('bool'),
-  t.literal('boosting'),
-  t.literal('common'),
-  t.literal('combined_fields'),
-  t.literal('constant_score'),
-  t.literal('dis_max'),
-  t.literal('distance_feature'),
-  t.literal('exists'),
-  t.literal('function_score'),
-  t.literal('fuzzy'),
-  t.literal('geo_bounding_box'),
-  t.literal('geo_distance'),
-  t.literal('geo_polygon'),
-  t.literal('geo_shape'),
-  t.literal('has_child'),
-  t.literal('has_parent'),
-  t.literal('ids'),
-  t.literal('intervals'),
-  t.literal('knn'),
-  t.literal('match'),
-  t.literal('match_all'),
-  t.literal('match_bool_prefix'),
-  t.literal('match_none'),
-  t.literal('match_phrase'),
-  t.literal('match_phrase_prefix'),
-  t.literal('more_like_this'),
-  t.literal('multi_match'),
-  t.literal('nested'),
-  t.literal('parent_id'),
-  t.literal('percolate'),
-  t.literal('pinned'),
-  t.literal('prefix'),
-  t.literal('query_string'),
-  t.literal('range'),
-  t.literal('rank_feature'),
-  t.literal('regexp'),
-  t.literal('rule'),
-  t.literal('semantic'),
-  t.literal('shape'),
-  t.literal('simple_query_string'),
-  t.literal('span_containing'),
-  t.literal('span_field_masking'),
-  t.literal('span_first'),
-  t.literal('span_multi'),
-  t.literal('span_near'),
-  t.literal('span_not'),
-  t.literal('span_or'),
-  t.literal('span_term'),
-  t.literal('span_within'),
-  t.literal('term'),
-  t.literal('terms'),
-  t.literal('terms_set'),
-  t.literal('text_expansion'),
-  t.literal('weighted_tokens'),
-  t.literal('wildcard'),
-  t.literal('wrapper'),
-  t.literal('type'),
-]);
-
-type AssertAssignable<T, U extends T> = T;
-
-// Used to check that the validation schema is aligned with the type from ES
-declare type _ = AssertAssignable<
-  keyof Omit<NonNullable<QueryDslQueryContainer>, 'script' | 'script_score'>,
-  t.TypeOf<typeof allowedFilterKeysSchema>
->;
-
-export const alertsGroupFilterSchema = t.record(allowedFilterKeysSchema, t.any);
 
 export type PutIndexTemplateRequest = estypes.IndicesPutIndexTemplateRequest & {
   body?: { composed_of?: string[] };

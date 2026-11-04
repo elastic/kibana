@@ -8,53 +8,99 @@
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { TimeRange } from '@kbn/es-query';
 import type { EpisodesFilterState } from '../../queries/episodes_query';
-import type { HistogramEpisodeRow } from '../../utils/histogram_utils';
-import { buildClassicAlertsQuery } from '../utils/query';
+import type { EpisodeSourceHistogram } from '../../types/episode_data_source';
 import {
-  type ClassicAlertSource,
-  mapClassicAlertToHistogramRow,
-  CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS,
-} from '../utils/map_alert';
-import { CLASSIC_ALERTS_HISTOGRAM_LIMIT } from '../constants';
-import { type BaseRacOptions, findClassicAlerts, toTimeRangeParam } from './rac_find';
+  mergeBucketCounts,
+  type HistogramBucketCount,
+  type TimeBucket,
+} from '../../utils/histogram_utils';
+import {
+  buildClassicAlertsHistogramAggs,
+  buildClassicAlertsQuery,
+  classicHistogramBucketAggName,
+  CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+  resolveClassicHistogramBreakdown,
+} from '../utils/query';
+import {
+  type BaseRacOptions,
+  type ClassicHistogramAggregations,
+  findClassicAlerts,
+  toTimeRangeParam,
+} from './rac_find';
 
 export interface FetchClassicAlertsHistogramOptions extends BaseRacOptions {
   timeRange?: TimeRange | null;
   filterState?: EpisodesFilterState;
   breakdownField?: string;
+  buckets: TimeBucket[];
+  nowMs: number;
   abortSignal?: AbortSignal;
   services: { http: HttpStart };
 }
 
-/** Returns classic alert histogram rows (RBAC enforced by the RAC alerts API). */
+const EMPTY_HISTOGRAM: EpisodeSourceHistogram = { counts: [], isCapHit: false };
+
+/**
+ * Returns per-bucket classic alert overlap counts computed by Elasticsearch
+ * filter aggregations (RBAC enforced by the RAC alerts API).
+ */
 export const fetchClassicAlertsHistogram = async ({
   ruleTypeIds,
   timeRange,
   filterState,
   breakdownField,
+  buckets,
+  nowMs,
   abortSignal,
   services: { http },
-}: FetchClassicAlertsHistogramOptions): Promise<HistogramEpisodeRow[]> => {
-  const response = await findClassicAlerts(
+}: FetchClassicAlertsHistogramOptions): Promise<EpisodeSourceHistogram> => {
+  if (buckets.length === 0) {
+    return EMPTY_HISTOGRAM;
+  }
+
+  const breakdown = breakdownField ? resolveClassicHistogramBreakdown(breakdownField) : undefined;
+
+  const response = await findClassicAlerts<ClassicHistogramAggregations>(
     http,
     {
       rule_type_ids: ruleTypeIds,
       query: buildClassicAlertsQuery(filterState, toTimeRangeParam(timeRange)),
-      size: CLASSIC_ALERTS_HISTOGRAM_LIMIT,
+      aggs: buildClassicAlertsHistogramAggs({ buckets, nowMs, breakdown }),
+      size: 0,
       track_total_hits: false,
-      _source: [...CLASSIC_ALERT_HISTOGRAM_SOURCE_FIELDS],
+      _source: false,
     },
     abortSignal
   );
 
-  return response.hits.hits.flatMap((hit) =>
-    hit._source
-      ? [
-          mapClassicAlertToHistogramRow(
-            hit._source as unknown as ClassicAlertSource,
-            breakdownField
-          ),
-        ]
-      : []
-  );
+  let isCapHit = false;
+  const counts = buckets.flatMap(({ start }, i): HistogramBucketCount[] => {
+    const agg = response.aggregations?.[classicHistogramBucketAggName(i)];
+    if (!agg) {
+      return [];
+    }
+    if (!breakdownField) {
+      return [{ bucketStart: start, count: agg.doc_count }];
+    }
+    if (!breakdown) {
+      return [
+        {
+          bucketStart: start,
+          count: agg.doc_count,
+          breakdown: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+        },
+      ];
+    }
+    if ((agg.breakdown?.sum_other_doc_count ?? 0) > 0) {
+      isCapHit = true;
+    }
+    return (agg.breakdown?.buckets ?? []).map(({ key, doc_count: count }) => ({
+      bucketStart: start,
+      count,
+      breakdown: breakdown.normalize(String(key)),
+    }));
+  });
+
+  // Normalised breakdown values can collapse several raw terms into one (e.g. recovered + untracked).
+  return { counts: mergeBucketCounts(counts), isCapHit };
 };

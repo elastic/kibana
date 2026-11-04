@@ -6,7 +6,9 @@
  */
 
 import {
+  clampBucketInterval,
   computeBucketInterval,
+  mergeBucketCounts,
   generateTimeBuckets,
   computeOverlapCounts,
   formatHistogramDatatable,
@@ -202,5 +204,54 @@ describe('formatHistogramDatatable', () => {
       'episode.status'
     );
     expect(table.rows[0]['episode.status']).toBeNull();
+  });
+});
+
+describe('clampBucketInterval', () => {
+  it('returns the interval unchanged when the bucket count fits', () => {
+    expect(clampBucketInterval(0, 16 * HOUR, '1m')).toBe('1m');
+    expect(clampBucketInterval(0, DAY, '1m')).toBe('2m');
+    expect(clampBucketInterval(0, 1000 * MIN, 'm')).toBe('m');
+  });
+
+  it('scales the interval by the smallest factor that fits within the cap', () => {
+    expect(clampBucketInterval(0, 1001 * MIN, 'm')).toBe('2m');
+    expect(clampBucketInterval(0, 30 * DAY, '1m')).toBe('44m');
+    expect(clampBucketInterval(0, 30 * DAY, '1m', 100)).toBe('432m');
+  });
+
+  it('keeps multi-unit prefixes when scaling', () => {
+    expect(clampBucketInterval(0, 3000 * 5 * MIN, '5m')).toBe('15m');
+  });
+
+  it('returns unknown formats unchanged', () => {
+    expect(clampBucketInterval(0, 365 * DAY, 'auto')).toBe('auto');
+  });
+});
+
+describe('mergeBucketCounts', () => {
+  it('sums counts for the same bucket and breakdown across sources in first-seen order', () => {
+    expect(
+      mergeBucketCounts(
+        [
+          { bucketStart: 0, count: 2, breakdown: 'active' },
+          { bucketStart: HOUR, count: 1, breakdown: 'active' },
+        ],
+        [
+          { bucketStart: 0, count: 3, breakdown: 'active' },
+          { bucketStart: 0, count: 4, breakdown: 'inactive' },
+        ]
+      )
+    ).toEqual([
+      { bucketStart: 0, count: 5, breakdown: 'active' },
+      { bucketStart: HOUR, count: 1, breakdown: 'active' },
+      { bucketStart: 0, count: 4, breakdown: 'inactive' },
+    ]);
+  });
+
+  it('sums counts without a breakdown', () => {
+    expect(
+      mergeBucketCounts([{ bucketStart: 0, count: 1 }], [{ bucketStart: 0, count: 2 }])
+    ).toEqual([{ bucketStart: 0, count: 3 }]);
   });
 });

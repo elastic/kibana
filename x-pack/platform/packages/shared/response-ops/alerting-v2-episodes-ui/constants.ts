@@ -52,4 +52,6 @@ export const HISTOGRAM_BREAKDOWN_COLUMNS: DatatableColumn[] = [
   },
 ];
 export const HISTOGRAM_EPISODE_LIMIT = 10_000;
+/** Upper bound on histogram buckets per request; mirrors the `histogram:maxBars` default. */
+export const HISTOGRAM_MAX_BUCKETS = 1000;
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

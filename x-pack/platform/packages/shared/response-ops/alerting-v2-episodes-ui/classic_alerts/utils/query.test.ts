@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { buildClassicAlertsQuery, buildClassicAlertsSort } from './query';
+import {
+  buildClassicAlertsQuery,
+  buildClassicAlertsSort,
+  buildClassicAlertsHistogramAggs,
+  resolveClassicHistogramBreakdown,
+} from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
 
 /** Extracts `bool.filter` from a query container, throwing if the shape is unexpected. */
@@ -190,5 +195,72 @@ describe('buildClassicAlertsSort', () => {
     expect(scriptSort._script.script.source).toContain("if (v == 'warning') { return 4; }");
     expect(scriptSort._script.script.source).toContain("if (v == 'critical') { return 7; }");
     expect(sort[1]).toEqual({ '@timestamp': { order: 'desc', unmapped_type: 'keyword' } });
+  });
+});
+
+describe('buildClassicAlertsHistogramAggs', () => {
+  const HOUR = 3_600_000;
+  const T0 = new Date('2024-01-01T00:00:00.000Z').getTime();
+  const buckets = [
+    { start: T0, end: T0 + HOUR },
+    { start: T0 + HOUR, end: T0 + 2 * HOUR },
+  ];
+
+  it('builds one strict overlap filter per bucket', () => {
+    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs: T0 + 2 * HOUR });
+
+    expect(Object.keys(aggs)).toEqual(['bucket_0', 'bucket_1']);
+    expect(aggs.bucket_0).toEqual({
+      filter: {
+        bool: {
+          filter: [
+            { range: { 'kibana.alert.start': { lt: '2024-01-01T01:00:00.000Z' } } },
+            {
+              bool: {
+                should: [
+                  { range: { 'kibana.alert.end': { gt: '2024-01-01T00:00:00.000Z' } } },
+                  { bool: { must_not: { exists: { field: 'kibana.alert.end' } } } },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+          ],
+        },
+      },
+    });
+  });
+
+  it('excludes open alerts from buckets starting at or after now', () => {
+    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs: T0 + HOUR });
+    const should = (
+      aggs.bucket_1.filter as { bool: { filter: Array<{ bool?: { should: unknown[] } }> } }
+    ).bool.filter[1].bool?.should;
+
+    expect(should).toEqual([{ range: { 'kibana.alert.end': { gt: '2024-01-01T01:00:00.000Z' } } }]);
+  });
+
+  it('adds a breakdown terms sub-aggregation when a breakdown is given', () => {
+    const aggs = buildClassicAlertsHistogramAggs({
+      buckets,
+      nowMs: T0,
+      breakdown: resolveClassicHistogramBreakdown('rule.id'),
+    });
+
+    expect(aggs.bucket_0.aggs).toEqual({
+      breakdown: { terms: { field: 'kibana.alert.rule.uuid', missing: 'unknown', size: 50 } },
+    });
+  });
+});
+
+describe('resolveClassicHistogramBreakdown', () => {
+  it('returns undefined for breakdowns without a classic equivalent', () => {
+    expect(resolveClassicHistogramBreakdown('last_assignee_uid')).toBeUndefined();
+  });
+
+  it('normalises classic status values onto episode statuses', () => {
+    const breakdown = resolveClassicHistogramBreakdown('episode.status');
+    expect(breakdown?.normalize('active')).toBe('active');
+    expect(breakdown?.normalize('recovered')).toBe('inactive');
+    expect(breakdown?.normalize('untracked')).toBe('inactive');
   });
 });

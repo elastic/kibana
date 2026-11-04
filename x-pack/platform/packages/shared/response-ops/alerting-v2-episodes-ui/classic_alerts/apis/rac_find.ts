@@ -48,6 +48,16 @@ export interface ClassicKpiAggregations {
   snoozed: { doc_count: number };
 }
 
+export interface ClassicHistogramBucketAggregation {
+  doc_count: number;
+  breakdown?: {
+    sum_other_doc_count?: number;
+    buckets: Array<{ key: string | number; doc_count: number }>;
+  };
+}
+
+export type ClassicHistogramAggregations = Record<string, ClassicHistogramBucketAggregation>;
+
 export interface ClassicTagsAggregations {
   tags: estypes.AggregationsStringTermsAggregate;
 }

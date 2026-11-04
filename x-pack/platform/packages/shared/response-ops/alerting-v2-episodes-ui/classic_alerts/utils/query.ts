@@ -10,14 +10,17 @@ import dateMath from '@kbn/datemath';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import {
   ALERT_DURATION,
+  ALERT_END,
   ALERT_RULE_UUID,
   ALERT_SEVERITY,
+  ALERT_START,
   ALERT_STATUS,
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_DELAYED,
   ALERT_STATUS_RECOVERED,
   ALERT_STATUS_UNTRACKED,
   ALERT_UUID,
+  ALERT_WORKFLOW_STATUS,
   ALERT_WORKFLOW_TAGS,
   TIMESTAMP,
 } from '@kbn/rule-data-utils';
@@ -29,6 +32,8 @@ import {
   EPISODE_SEVERITY_SORT_RANK,
 } from '../../components/severity/severity_utils';
 import type { SeverityExtension } from '../../types/episode_data_source';
+import type { TimeBucket } from '../../utils/histogram_utils';
+import { mapClassicStatusToEpisodeStatus } from './map_alert';
 
 export interface ClassicAlertsTimeRange {
   from: string;
@@ -193,4 +198,107 @@ export const buildClassicAlertsSort = (
 
   const field = (sortState && SORT_FIELD_MAP[sortState.sortField]) ?? TIMESTAMP;
   return [{ [field]: { order, unmapped_type: 'keyword' } }];
+};
+
+/** Breakdown value used when a classic alert has no equivalent for the v2 breakdown field. */
+export const CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN = 'unknown';
+export const CLASSIC_HISTOGRAM_BREAKDOWN_SIZE = 50;
+
+export interface ClassicHistogramBreakdown {
+  field: string;
+  missing: string;
+  normalize: (value: string) => string;
+}
+
+const identity = (value: string): string => value;
+
+/** Maps v2 histogram breakdown fields onto the classic alert field and value normalisation. */
+const CLASSIC_HISTOGRAM_BREAKDOWNS: Readonly<Record<string, ClassicHistogramBreakdown>> = {
+  'episode.status': {
+    field: ALERT_STATUS,
+    missing: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+    normalize: mapClassicStatusToEpisodeStatus,
+  },
+  'rule.id': {
+    field: ALERT_RULE_UUID,
+    missing: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
+    normalize: identity,
+  },
+  last_ack_action: {
+    field: ALERT_WORKFLOW_STATUS,
+    missing: 'open',
+    normalize: (value) => (value === 'acknowledged' ? 'ack' : 'unack'),
+  },
+};
+
+/** Returns the classic breakdown mapping for a v2 breakdown field, or undefined when none exists. */
+export const resolveClassicHistogramBreakdown = (
+  breakdownField: string
+): ClassicHistogramBreakdown | undefined => CLASSIC_HISTOGRAM_BREAKDOWNS[breakdownField];
+
+/**
+ * Overlap filter for one histogram bucket: the alert started before the bucket ends and
+ * either ended after the bucket starts or is still open. Open alerts only count in buckets
+ * that start before `nowMs`, matching the client-side overlap counting for v2 episodes.
+ */
+const buildBucketOverlapFilter = (
+  { start, end }: TimeBucket,
+  nowMs: number
+): estypes.QueryDslQueryContainer => {
+  const stillOpen: estypes.QueryDslQueryContainer[] =
+    start < nowMs ? [{ bool: { must_not: { exists: { field: ALERT_END } } } }] : [];
+
+  return {
+    bool: {
+      filter: [
+        { range: { [ALERT_START]: { lt: new Date(end).toISOString() } } },
+        {
+          bool: {
+            should: [
+              { range: { [ALERT_END]: { gt: new Date(start).toISOString() } } },
+              ...stillOpen,
+            ],
+            minimum_should_match: 1,
+          },
+        },
+      ],
+    },
+  };
+};
+
+export const classicHistogramBucketAggName = (index: number): string => `bucket_${index}`;
+
+/**
+ * Builds one `filter` aggregation per histogram bucket so Elasticsearch returns
+ * per-bucket overlap counts instead of documents.
+ */
+export const buildClassicAlertsHistogramAggs = ({
+  buckets,
+  nowMs,
+  breakdown,
+}: {
+  buckets: TimeBucket[];
+  nowMs: number;
+  breakdown?: ClassicHistogramBreakdown;
+}): Record<string, estypes.AggregationsAggregationContainer> => {
+  const breakdownAggs = breakdown
+    ? {
+        aggs: {
+          breakdown: {
+            terms: {
+              field: breakdown.field,
+              missing: breakdown.missing,
+              size: CLASSIC_HISTOGRAM_BREAKDOWN_SIZE,
+            },
+          },
+        },
+      }
+    : {};
+
+  return Object.fromEntries(
+    buckets.map((bucket, i) => [
+      classicHistogramBucketAggName(i),
+      { filter: buildBucketOverlapFilter(bucket, nowMs), ...breakdownAggs },
+    ])
+  );
 };
