@@ -23,10 +23,6 @@ import { loadDocumentation } from './documentation';
 import { createRequestDocumentationPromptNoResource } from './prompts';
 import { withPromqlKeyword } from './promql_keyword';
 
-/**
- * Default wall-clock bound for executing a generated query. Matches Kibana's default
- * `elasticsearch.requestTimeout`, minus the client retries that would otherwise multiply it.
- */
 export const DEFAULT_EXECUTION_TIMEOUT_MS = 30_000;
 
 export class GenerateEsqlNoDataError extends Error {
@@ -117,9 +113,7 @@ export interface GenerateEsqlOptions {
   maxRetries?: number;
   /**
    * How long, in milliseconds, a generated query may run before it is given up on. Applies to
-   * every execution of the generation loop (`execute` `'data'` or `'schema'`); client-side
-   * retries are disabled so this is a wall-clock bound. On timeout the model gets one chance to
-   * write a cheaper query before the call ends with a timeout error.
+   * every execution of the generation loop.
    * Defaults to {@link DEFAULT_EXECUTION_TIMEOUT_MS} (30 seconds).
    */
   executionTimeoutMs?: number;

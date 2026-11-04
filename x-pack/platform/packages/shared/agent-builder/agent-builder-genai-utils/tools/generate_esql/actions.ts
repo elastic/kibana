@@ -47,10 +47,6 @@ export interface ExecuteQueryAction {
   success: boolean;
   results?: EsqlResponse;
   error?: string;
-  /**
-   * Set when execution was given up on because the query took too long. The query was not wrong,
-   * it was too expensive: the retry asks for a cheaper query rather than a fix, and only once.
-   */
   timedOut?: boolean;
 }
 
