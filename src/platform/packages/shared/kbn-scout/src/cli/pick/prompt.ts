@@ -26,6 +26,12 @@ interface PromptOptions<T> {
 
 const PAGE_SIZE = 12;
 
+/** Thrown when the user presses Esc to go back to the previous question */
+export class GoBack extends Error {}
+
+let shownPrompts = 0;
+export const getShownPrompts = () => shownPrompts;
+
 const matches = ({ label, hint }: Choice<unknown>, query: string) => {
   const text = `${label} ${hint ?? ''}`.toLowerCase();
   return query
@@ -44,7 +50,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
     throw createFailError('scout pick needs an interactive terminal');
   }
 
-  return new Promise((resolve) => {
+  shownPrompts++;
+  return new Promise((resolve, reject) => {
     let query = '';
     let cursor = 0;
     let renderedLines = 0;
@@ -84,8 +91,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
           : []),
         chalk.dim(
           multiple
-            ? '  ↑↓ move · space select · ctrl+a select all · enter confirm'
-            : '  ↑↓ move · enter select'
+            ? '  ↑↓ move · space select · ctrl+a select all · enter confirm · esc back'
+            : '  ↑↓ move · enter select · esc back'
         ),
       ];
 
@@ -94,11 +101,15 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
       renderedLines = lines.length;
     };
 
-    const finish = (picked: Array<Choice<T>>) => {
+    const close = () => {
       stdin.off('keypress', onKeypress);
       stdin.setRawMode(false);
       stdin.pause();
       clear();
+    };
+
+    const finish = (picked: Array<Choice<T>>) => {
+      close();
       const answer =
         picked.length > 3
           ? `${picked.length} selected`
@@ -115,6 +126,11 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
         clear();
         stdout.write('\x1b[?25h');
         process.exit(130);
+      } else if (key.name === 'escape') {
+        close();
+        stdout.write('\x1b[?25h');
+        reject(new GoBack());
+        return;
       } else if (key.name === 'return') {
         const picked = multiple ? choices.filter((choice) => selected.has(choice)) : [];
         if (picked.length || (multiple && allowEmpty)) {

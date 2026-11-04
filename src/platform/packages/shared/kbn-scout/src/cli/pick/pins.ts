@@ -15,7 +15,10 @@ import type { PickableConfig } from './configs';
 const STATE_FILE = Path.resolve(REPO_ROOT, '.scout/pins.json');
 
 /** What the picker needs to run a config without loading all Scout configs */
-export type PinnedConfig = Pick<PickableConfig, 'path' | 'label' | 'configSet' | 'targets'>;
+export type PinnedConfig = Pick<
+  PickableConfig,
+  'path' | 'label' | 'configSet' | 'category' | 'targets'
+>;
 
 export interface LastRun {
   config: PinnedConfig;
@@ -27,14 +30,16 @@ export interface PickState {
   pins?: PinnedConfig[];
   last?: LastRun;
   verbose?: boolean;
+  headed?: boolean;
 }
 
-export const toPinned = ({ path, label, configSet, targets }: PinnedConfig): PinnedConfig => ({
+export const toPinned = ({
   path,
   label,
   configSet,
+  category,
   targets,
-});
+}: PinnedConfig): PinnedConfig => ({ path, label, configSet, category, targets });
 
 export const readState = (): PickState =>
   Fs.existsSync(STATE_FILE) ? JSON.parse(Fs.readFileSync(STATE_FILE, 'utf8')) : {};
