@@ -153,36 +153,43 @@ export const createOnboardingClient = ({
 
       const spaceId = getSpaceId(request);
 
-      let connectorId: string | undefined;
+      await installInvestigationAgent({
+        agentBuilder,
+        spaceId,
+        availability: agentAvailability,
+      });
+      logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
+
       try {
         if (!actions || !elasticsearch) {
           throw new OnboardingUnavailableError('Connectors are not available');
         }
         const url = resolveLocalElasticsearchUrl({ cloud, elasticsearch, esHosts });
-        connectorId = await ensureLocalElasticsearchConnector({
+        const connectorId = await ensureLocalElasticsearchConnector({
           esClient: elasticsearch.client.asScoped(request).asCurrentUser,
           actionsClient: await actions.getActionsClientWithRequest(request),
           spaceId,
           url,
           logger,
         });
+        const registry = await agentBuilder.agents.getRegistry({ request });
+        const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+        const currentConnectorIds = agent.configuration.connector_ids ?? [];
+        if (!currentConnectorIds.includes(connectorId)) {
+          await registry.update(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+            configuration: { connector_ids: [...currentConnectorIds, connectorId] },
+          });
+        }
+        logger.info(
+          `Added local Elasticsearch connector "${connectorId}" to the investigation agent in space "${spaceId}"`
+        );
       } catch (error) {
         logger.error(
-          `Could not prepare a local Elasticsearch connector for the investigation agent in ` +
-            `space "${spaceId}": ${(error as Error).message}`
+          `Could not add the local Elasticsearch connector to the investigation agent in space "${spaceId}": ` +
+            `connector: ${(error as Error).message}`
         );
       }
 
-      await installInvestigationAgent({
-        agentBuilder,
-        spaceId,
-        availability: agentAvailability,
-        connectorIds: connectorId ? [connectorId] : [],
-      });
-      logger.info(
-        `Enabled Nightshift in space "${spaceId}": investigation agent installed` +
-          (connectorId ? ` with local Elasticsearch connector "${connectorId}"` : '')
-      );
       return { agent_installed: true };
     },
 

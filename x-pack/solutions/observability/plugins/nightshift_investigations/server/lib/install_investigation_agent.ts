@@ -19,12 +19,10 @@ export const installInvestigationAgent = async ({
   agentBuilder,
   spaceId,
   availability,
-  connectorIds = [],
 }: {
   agentBuilder: AgentBuilderPluginStart;
   spaceId: string;
   availability: AgentAvailabilityConfig;
-  connectorIds?: string[];
 }): Promise<void> => {
   await agentBuilder.agents.ensure({
     spaceId,
@@ -42,7 +40,6 @@ export const installInvestigationAgent = async ({
       configuration: {
         tools: [],
         skill_ids: [],
-        connector_ids: connectorIds,
       },
     },
   });
