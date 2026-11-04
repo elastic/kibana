@@ -91,6 +91,7 @@ export const registerHuntLibraryRoutes = ({
   logger,
   getSpaceId,
   getWorkflowsManagement,
+  resolveUserNames,
   isServerless,
 }: RouteDependencies) => {
   const cache = new HuntAvailabilityCache();
@@ -280,6 +281,7 @@ export const registerHuntLibraryRoutes = ({
             request,
             spaceId: getSpaceId(request),
             definitionId: definition.id,
+            resolveUserNames,
           });
           const body: HuntHistoryResponse = { history };
           return response.ok({ body });

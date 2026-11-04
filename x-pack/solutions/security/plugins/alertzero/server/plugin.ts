@@ -110,6 +110,7 @@ export class AlertZeroPlugin
   };
   private spaces?: AlertZeroStartDependencies['spaces'];
   private taskManager?: AlertZeroStartDependencies['taskManager'];
+  private security?: AlertZeroStartDependencies['security'];
   private workflowsManagementApi?: WorkflowsServerPluginSetup['management'];
   /** Resolved during `start`; the report step awaits it for its owner-bound managed check. */
   private managedWorkflows?: Promise<PluginScopedManagedWorkflowsApi | undefined>;
@@ -346,6 +347,19 @@ export class AlertZeroPlugin
         this.workflowsManagementApi
           ? new WatchWorkflowsManagementClientImpl(this.workflowsManagementApi)
           : undefined,
+      resolveUserNames: async (uids) => {
+        const names = new Map<string, string>();
+        if (!this.security || uids.length === 0) return names;
+        try {
+          const profiles = await this.security.userProfiles.bulkGet({ uids: new Set(uids) });
+          for (const { uid, user } of profiles) {
+            names.set(uid, user.full_name || user.email || user.username);
+          }
+        } catch (err) {
+          this.logger.warn(`Failed to resolve user profile names: ${(err as Error).message}`);
+        }
+        return names;
+      },
       reportTelemetryEvent: createAlertZeroTelemetryReporter({
         analytics: coreSetup.analytics,
         logger: this.logger.get('telemetry'),
@@ -358,6 +372,7 @@ export class AlertZeroPlugin
   start(core: CoreStart, plugins: AlertZeroStartDependencies): AlertZeroPluginStart {
     this.spaces = plugins.spaces;
     this.taskManager = plugins.taskManager;
+    this.security = plugins.security;
     this.coreStart = core;
     // The kill switch for Alert Triage grouping. It stays on where no flag provider exists.
     this.triageGroupingFlagSubscription = core.featureFlags

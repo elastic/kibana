@@ -46,6 +46,8 @@ export interface RouteDependencies {
   isServerless: boolean;
   /** The workflows management client; undefined when workflows management is unavailable. */
   getWorkflowsManagement: () => WatchWorkflowsManagementClient | undefined;
+  /** Display names for user profile uids; uids that cannot be resolved are omitted. Never throws. */
+  resolveUserNames: (uids: string[]) => Promise<Map<string, string>>;
   /** Reports an AlertZero telemetry event; never throws. */
   reportTelemetryEvent: AlertZeroTelemetryReporter;
 }

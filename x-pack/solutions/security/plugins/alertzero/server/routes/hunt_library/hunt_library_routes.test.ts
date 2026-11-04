@@ -30,12 +30,19 @@ const makeDeps = ({
     updateExecutionLabels: jest.fn().mockResolvedValue({}),
   };
   const managementRef: { current: typeof management | undefined } = { current: management };
+  const resolveUserNames = jest
+    .fn()
+    .mockImplementation(
+      async (uids: string[]) =>
+        new Map(uids.filter((uid) => uid === 'u_analyst').map((uid) => [uid, 'Ana Lyst']))
+    );
 
   registerHuntLibraryRoutes({
     router: router as unknown as RouteDependencies['router'],
     logger: loggingSystemMock.createLogger(),
     getSpaceId: () => 'default',
     getWorkflowsManagement: () => managementRef.current,
+    resolveUserNames,
     isServerless,
   } as unknown as RouteDependencies);
 
@@ -378,7 +385,7 @@ describe('hunt launch route', () => {
         {
           id: 'e2',
           startedAt: '2026-11-03T10:00:00.000Z',
-          executedBy: 'analyst',
+          executedBy: 'u_analyst',
           labels: labels('s2'),
         },
         { id: 'e1', startedAt: '2026-11-02T10:00:00.000Z', labels: labels('s1', 'exploratory') },
@@ -400,7 +407,7 @@ describe('hunt launch route', () => {
             definitionVersion: 1,
             outcome: 'exploratory',
             startedAt: '2026-11-03T10:00:00.000Z',
-            startedBy: 'analyst',
+            startedBy: 'Ana Lyst',
           },
           {
             kind: 'manual_session',

@@ -19,18 +19,21 @@ const DEFAULT_OUTCOME = 'exploratory';
 /**
  * A hunt's manual run history, newest first. Executions are found by the `hunt.definition_id`
  * label and grouped by `hunt.session_id`, so a retried launch shows once. A session whose outcome
- * label was never written reads as exploratory.
+ * label was never written reads as exploratory. `startedBy` is the user's display name when their
+ * profile resolves.
  */
 export const listHuntHistory = async ({
   client,
   request,
   spaceId,
   definitionId,
+  resolveUserNames,
 }: {
   client: WatchWorkflowsManagementClient;
   request: KibanaRequest;
   spaceId: string;
   definitionId: string;
+  resolveUserNames: (uids: string[]) => Promise<Map<string, string>>;
 }): Promise<HuntHistoryEntry[]> => {
   const executions = await client.findExecutionsByLabel({
     workflowId: ALERTZERO_HUNT_MANUAL_SESSION_WORKFLOW_ID,
@@ -57,5 +60,12 @@ export const listHuntHistory = async ({
       ...(execution.executedBy ? { startedBy: execution.executedBy } : {}),
     });
   }
-  return [...bySession.values()];
+
+  const entries = [...bySession.values()];
+  const uids = [...new Set(entries.flatMap(({ startedBy }) => (startedBy ? [startedBy] : [])))];
+  const names = await resolveUserNames(uids);
+  // A uid with no profile (a deleted user, an API key) keeps its raw id rather than showing blank.
+  return entries.map((entry) =>
+    entry.startedBy ? { ...entry, startedBy: names.get(entry.startedBy) ?? entry.startedBy } : entry
+  );
 };
