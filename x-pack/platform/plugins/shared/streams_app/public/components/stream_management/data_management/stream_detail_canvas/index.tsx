@@ -1020,7 +1020,7 @@ export const buildConfiguredDestinationNode = (
         ? { bucket: destination.bucket }
         : {
             endpoint: destination.endpoint,
-            targetedIndexNames: [...new Set(Object.values(destination.indexBySignal))],
+            remoteIndexNames: [...new Set(Object.values(destination.indexBySignal))],
           };
     return {
       id: configuredDestinationNodeId(destination.id),

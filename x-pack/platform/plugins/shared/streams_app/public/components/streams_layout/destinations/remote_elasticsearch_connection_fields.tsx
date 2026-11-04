@@ -102,7 +102,7 @@ export const RemoteElasticsearchConnectionFields = ({
           'xpack.streams.destinations.remoteElasticsearch.apiKeyHelpDescription',
           {
             defaultMessage:
-              'Create it on the remote cluster with write access to the target indices.',
+              'Use the Encoded value of an API key created on the remote cluster with write access to the target indices.',
           }
         )}
         isInvalid={Boolean(apiKeyError)}

@@ -47,6 +47,7 @@ export interface DestinationNodeData extends Record<string, unknown> {
   signals?: DestinationSignal[];
   indexCount?: number;
   targetedIndexNames?: string[];
+  remoteIndexNames?: string[];
 }
 
 export interface RoutingNodeRule {

@@ -141,7 +141,8 @@ describe('buildConfiguredDestinationNode', () => {
       expect(node.data.indexCount).toBeUndefined();
       expect(node.data.streamName).toBeUndefined();
       expect(node.data.endpoint).toBe('https://my-cluster.es.example.com:9243/proxy/');
-      expect(node.data.targetedIndexNames).toEqual(['remote-logs', 'remote-traces']);
+      expect(node.data.remoteIndexNames).toEqual(['remote-logs', 'remote-traces']);
+      expect(node.data.targetedIndexNames).toBeUndefined();
     });
   });
 
