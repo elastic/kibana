@@ -38,9 +38,11 @@ export class EntityInventoryPlugin
     >
 {
   private readonly logger: Logger;
+  private readonly isDev: boolean;
 
   constructor(initializerContext: PluginInitializerContext<EntityInventoryConfig>) {
     this.logger = initializerContext.logger.get();
+    this.isDev = initializerContext.env.mode.dev;
   }
 
   public setup(
@@ -53,7 +55,7 @@ export class EntityInventoryPlugin
       dependencies: { getInventoryService: this.createInventoryService(core) },
       core,
       logger: this.logger,
-      runDevModeChecks: false,
+      runDevModeChecks: this.isDev,
     });
     this.logger.debug('Entity inventory plugin set up');
   }
@@ -69,18 +71,14 @@ export class EntityInventoryPlugin
   public stop(): void {}
 
   /**
-   * Builds an `InventoryService` over the entity definitions client for the request's space, using
-   * `DEFAULT_SPACE_ID` when the spaces plugin is not available.
+   * Builds an `InventoryService` over the request-scoped entity definitions client, which resolves
+   * the request's space itself.
    */
   private createInventoryService =
     (core: CoreSetup<EntityInventoryStartDependencies, EntityInventoryPluginStart>) =>
     async (request: KibanaRequest): Promise<InventoryService> => {
-      const [, { entityStore, spaces }] = await core.getStartServices();
-      const spaceId = spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
-      return new InventoryService(
-        entityStore.getEntityDefinitionsClientForSpace(spaceId),
-        this.logger
-      );
+      const [, { entityStore }] = await core.getStartServices();
+      return new InventoryService(entityStore.getEntityDefinitionsClient(request), this.logger);
     };
 
   /**

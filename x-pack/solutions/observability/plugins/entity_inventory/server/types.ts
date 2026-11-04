@@ -6,7 +6,6 @@
  */
 
 import type { EntityStoreSetupContract, EntityStoreStartContract } from '@kbn/entity-store/server';
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 
 export type EntityInventoryPluginSetup = void;
 export type EntityInventoryPluginStart = void;
@@ -17,5 +16,4 @@ export interface EntityInventorySetupDependencies {
 
 export interface EntityInventoryStartDependencies {
   entityStore: EntityStoreStartContract;
-  spaces?: SpacesPluginStart;
 }

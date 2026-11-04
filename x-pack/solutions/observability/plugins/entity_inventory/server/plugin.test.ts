@@ -8,13 +8,11 @@
 import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import type { EntityStoreSetupContract } from '@kbn/entity-store/server';
 import { registerRoutes } from '@kbn/server-route-repository';
-import { spacesMock } from '@kbn/spaces-plugin/server/mocks';
 import type { EntityInventoryConfig } from './config';
 import { ENTITY_DEFINITIONS } from './definitions';
 import { k8sDeploymentDefinition } from './definitions/kubernetes/k8s_deployment';
 import { EntityInventoryPlugin } from './plugin';
 import { entityInventoryRouteRepository } from './routes';
-import type { EntityInventoryStartDependencies } from './types';
 
 jest.mock('@kbn/server-route-repository', () => ({
   ...jest.requireActual('@kbn/server-route-repository'),
@@ -86,14 +84,12 @@ describe('EntityInventoryPlugin setup', () => {
 describe('EntityInventoryPlugin routes', () => {
   const registerRoutesMock = jest.mocked(registerRoutes);
 
-  const setUpWithStartDependencies = (
-    startDependencies: Partial<EntityInventoryStartDependencies>
-  ) => {
-    const getEntityDefinitionsClientForSpace = jest.fn().mockReturnValue({ list: jest.fn() });
+  const setUpWithStartDependencies = () => {
+    const getEntityDefinitionsClient = jest.fn().mockReturnValue({ list: jest.fn() });
     const core = coreMock.createSetup();
     core.getStartServices.mockResolvedValue([
       coreMock.createStart(),
-      { entityStore: { getEntityDefinitionsClientForSpace }, ...startDependencies },
+      { entityStore: { getEntityDefinitionsClient } },
       undefined,
     ]);
     const { plugin } = buildPlugin();
@@ -106,7 +102,7 @@ describe('EntityInventoryPlugin routes', () => {
     }
     const [{ dependencies }] = lastCall;
     return {
-      getEntityDefinitionsClientForSpace,
+      getEntityDefinitionsClient,
       getInventoryService: dependencies.getInventoryService,
     };
   };
@@ -128,27 +124,12 @@ describe('EntityInventoryPlugin routes', () => {
     );
   });
 
-  it("builds the service for the request's space", async () => {
-    const spaces = spacesMock.createStart();
-    spaces.spacesService.getSpaceId = jest.fn().mockReturnValue('other');
-    const { getEntityDefinitionsClientForSpace, getInventoryService } = setUpWithStartDependencies({
-      spaces,
-    });
+  it('builds the service from the entity definitions client for the request', async () => {
+    const { getEntityDefinitionsClient, getInventoryService } = setUpWithStartDependencies();
     const request = httpServerMock.createKibanaRequest();
 
     await getInventoryService(request);
 
-    expect(spaces.spacesService.getSpaceId).toHaveBeenCalledWith(request);
-    expect(getEntityDefinitionsClientForSpace).toHaveBeenCalledWith('other');
-  });
-
-  it('falls back to the default space without the spaces plugin', async () => {
-    const { getEntityDefinitionsClientForSpace, getInventoryService } = setUpWithStartDependencies(
-      {}
-    );
-
-    await getInventoryService(httpServerMock.createKibanaRequest());
-
-    expect(getEntityDefinitionsClientForSpace).toHaveBeenCalledWith('default');
+    expect(getEntityDefinitionsClient).toHaveBeenCalledWith(request);
   });
 });

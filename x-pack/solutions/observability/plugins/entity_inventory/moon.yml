@@ -23,7 +23,6 @@ dependsOn:
   - '@kbn/logging-mocks'
   - '@kbn/scout-oblt'
   - '@kbn/server-route-repository'
-  - '@kbn/spaces-plugin'
 tags:
   - plugin
   - prod
