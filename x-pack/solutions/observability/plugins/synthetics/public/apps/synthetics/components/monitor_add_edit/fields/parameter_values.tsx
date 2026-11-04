@@ -126,6 +126,9 @@ export const pairsToParamsJson = (pairs: Pair[]): string => {
   return entries.length ? `{${entries.join(',')}}` : '';
 };
 
+const getEmptyValueRowIds = (rows: ParameterRow[]): ReadonlySet<string> =>
+  new Set(rows.filter(({ value }) => !value).map(({ id }) => id));
+
 export const ParameterValuesEditor = ({
   onBlur,
   onChange,
@@ -144,7 +147,19 @@ export const ParameterValuesEditor = ({
   const [isJsonMode, setIsJsonMode] = useState(() => !canUseParameterPairs(value));
   const [rows, setRows] = useState<ParameterRow[]>(() => createRows(value));
   const [visibleRows, setVisibleRows] = useState<Record<string, boolean>>({});
-  const [editingId, setEditingId] = useState<string>();
+  // Empty values have nothing to protect, so those rows are editable without clicking edit.
+  const [editingIds, setEditingIds] = useState<ReadonlySet<string>>(() =>
+    getEmptyValueRowIds(rows)
+  );
+  const [focusId, setFocusId] = useState<string>();
+  const loadRows = useCallback(
+    (params?: string) => {
+      const nextRows = createRows(params);
+      setRows(nextRows);
+      setEditingIds(getEmptyValueRowIds(nextRows));
+    },
+    [createRows]
+  );
   const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
   const knownValue = useRef(value ?? '');
   // The form can hand values back late or batched, so values we emitted must not look external.
@@ -164,9 +179,9 @@ export const ParameterValuesEditor = ({
     }
     emittedValues.current = [];
     knownValue.current = current;
-    setRows(createRows(value));
+    loadRows(value);
     setIsJsonMode(!canUseParameterPairs(value));
-  }, [createRows, value]);
+  }, [loadRows, value]);
 
   const emit = useCallback(
     (next: string) => {
@@ -198,11 +213,24 @@ export const ParameterValuesEditor = ({
   }, [rows]);
 
   useEffect(() => {
-    if (editingId === undefined) {
+    if (focusId === undefined) {
       return;
     }
-    inputRefs.current[editingId]?.focus();
-  }, [editingId]);
+    inputRefs.current[focusId]?.focus();
+    setFocusId(undefined);
+  }, [focusId]);
+
+  const startEditing = useCallback((id: string) => {
+    setEditingIds((ids) => new Set(ids).add(id));
+  }, []);
+
+  const stopEditing = useCallback((id: string) => {
+    setEditingIds((ids) => {
+      const next = new Set(ids);
+      next.delete(id);
+      return next;
+    });
+  }, []);
 
   const modeToggle = isJsonMode ? (
     <EuiToolTip content={canUsePairs ? undefined : PAIRS_UNAVAILABLE_LABEL}>
@@ -211,7 +239,7 @@ export const ParameterValuesEditor = ({
         iconType="list"
         isDisabled={!canUsePairs}
         onClick={() => {
-          setRows(createRows(value));
+          loadRows(value);
           setIsJsonMode(false);
         }}
         size="s"
@@ -242,7 +270,9 @@ export const ParameterValuesEditor = ({
               iconType="plus"
               isDisabled={readOnly}
               onClick={() => {
-                updateRows([createRow(['', '']), ...rows]);
+                const newRow = createRow(['', '']);
+                startEditing(newRow.id);
+                updateRows([newRow, ...rows]);
               }}
               size="s"
             >
@@ -300,7 +330,8 @@ export const ParameterValuesEditor = ({
                 }
               );
               const isValueVisible = Boolean(visibleRows[id]);
-              const showValue = isValueVisible || editingId === id;
+              const isEditing = editingIds.has(id);
+              const showValue = isValueVisible || isEditing;
               const visibilityLabel = isValueVisible
                 ? HIDE_PARAMETER_VALUE_LABEL
                 : SHOW_PARAMETER_VALUE_LABEL;
@@ -350,11 +381,13 @@ export const ParameterValuesEditor = ({
                           inputRefs.current[id] = node;
                         }}
                         onBlur={() => {
-                          setEditingId((current) => (current === id ? undefined : current));
+                          if (paramValue) {
+                            stopEditing(id);
+                          }
                           onBlur?.();
                         }}
                         onChange={(event) => updateRow({ value: event.target.value })}
-                        readOnly={readOnly || editingId !== id}
+                        readOnly={readOnly || !isEditing}
                         type={showValue ? 'text' : 'password'}
                         value={paramValue}
                       />
@@ -371,7 +404,8 @@ export const ParameterValuesEditor = ({
                               isDisabled={readOnly}
                               size="s"
                               onClick={() => {
-                                setEditingId(id);
+                                startEditing(id);
+                                setFocusId(id);
                               }}
                             />
                           </EuiToolTip>

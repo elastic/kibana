@@ -163,6 +163,41 @@ describe('ParameterValuesEditor', () => {
     expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"token":""}');
   });
 
+  it('lets a new row take a value without clicking edit, then hides it', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams="" />);
+
+    fireEvent.click(getByTestId('syntheticsMonitorConfigParams__button'));
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+
+    fireEvent.change(getByTestId('keyValuePairsKey0'), { target: { value: 'token' } });
+    fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: 'abc' } });
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"token":"abc"}');
+
+    fireEvent.blur(getByTestId('keyValuePairsValue0'));
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+  });
+
+  it('keeps empty values editable', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams={'{"token":""}'} />);
+
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+
+    fireEvent.blur(getByTestId('keyValuePairsValue0'));
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+  });
+
+  it('keeps earlier new rows editable when more rows are added', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams="" />);
+
+    fireEvent.click(getByTestId('syntheticsMonitorConfigParams__button'));
+    fireEvent.click(getByTestId('syntheticsMonitorConfigParams__button'));
+
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
+    expect(getByTestId('keyValuePairsValue1')).not.toHaveAttribute('readonly');
+  });
+
   it('hides the next value after deleting a visible row', () => {
     const { getAllByTestId, getByTestId } = render(
       <ParameterValuesEditorForm defaultParams={'{"first":"one","second":"two"}'} />
