@@ -126,7 +126,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
         <EuiPageTemplate.Section paddingSize="m">
           {view === 'graph' ? (
             <Suspense fallback={<EuiLoadingSpinner />}>
-              <LazyDependencyGraph onSelectCell={selectCell} />
+              <LazyDependencyGraph onOpenCell={selectCell} />
             </Suspense>
           ) : (
             <CellList />

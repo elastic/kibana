@@ -6,7 +6,7 @@
  */
 
 import type { CellDefinition, InputDefinition } from '../../common/types';
-import { buildGraphView, getDataSources, type GraphViewNode } from './graph_view';
+import { buildGraphView, getDataSources, getDownstream, type GraphViewNode } from './graph_view';
 
 const esql = (name: string, query: string): CellDefinition => ({
   id: name,
@@ -97,6 +97,14 @@ describe('buildGraphView', () => {
       ])
     );
     expect(edges).toHaveLength(5);
+  });
+
+  it('collects the nodes and edges downstream of a node', () => {
+    const { edges } = viewOf(cells);
+    const downstream = getDownstream(edges, 'os');
+    expect([...downstream.nodes].sort()).toEqual(['c', 'os', 'q']);
+    expect([...downstream.edges].sort()).toEqual(['os->q', 'q->c']);
+    expect([...getDownstream(edges, 'notes').edges]).toEqual([]);
   });
 
   it('lays nodes out top to bottom in dependency order', () => {

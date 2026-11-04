@@ -91,6 +91,27 @@ const layoutNodes = (
   });
 };
 
+/** A node with everything it feeds, directly or transitively, and the edges between them. */
+export const getDownstream = (
+  edges: readonly GraphViewEdge[],
+  rootId: string
+): { nodes: ReadonlySet<string>; edges: ReadonlySet<string> } => {
+  const nodes = new Set([rootId]);
+  const reached = new Set<string>();
+  const queue = [rootId];
+  while (queue.length > 0) {
+    const current = queue.shift();
+    edges.forEach(({ id, source, target }) => {
+      if (source !== current) return;
+      reached.add(id);
+      if (nodes.has(target)) return;
+      nodes.add(target);
+      queue.push(target);
+    });
+  }
+  return { nodes, edges: reached };
+};
+
 /** The cells, the data sources they read, and the dependencies between them, laid out for display. */
 export const buildGraphView = (
   cells: Readonly<Record<string, CellDefinition>>,
