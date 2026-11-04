@@ -102,10 +102,11 @@ describe.each([
     expect(reportStringLengthViolation).toHaveBeenCalledWith(
       expect.objectContaining({ bound: 'max', limit: 3 })
     );
-    expect(helper.warn({ minLength: 3, label: 'test.field' }).validate('ab')).toBe('ab');
-    expect(reportStringLengthViolation).toHaveBeenCalledWith(
-      expect.objectContaining({ bound: 'min', limit: 3 })
-    );
+    jest.mocked(reportStringLengthViolation).mockClear();
+    const explicitMinimum = helper.warn({ minLength: 3, label: 'test.field' });
+    expect(() => explicitMinimum.validate('ab')).toThrow();
+    expect(explicitMinimum.validate('abc')).toBe('abc');
+    expect(reportStringLengthViolation).not.toHaveBeenCalled();
     expect(helper({ minLength: 0 }).validate('')).toBe('');
     expect(() => helper({ maxLength: undefined }).validate('x'.repeat(maxLength + 1))).toThrow();
   });
@@ -204,6 +205,19 @@ test('exports accurate OpenAPI length metadata in both modes', () => {
       { [metaFields.META_FIELD_X_OAS_PLANNED_MIN_LENGTH]: 1 },
       { [metaFields.META_FIELD_X_OAS_PLANNED_MAX_LENGTH]: 512 },
     ])
+  );
+});
+
+test('publishes an explicit minimum as an enforced OpenAPI bound in reporting mode', () => {
+  const reporting = schema.savedObjectId.warn({ minLength: 1 }).getSchema().describe();
+  expect(reporting.metas).toEqual(
+    expect.arrayContaining([
+      { [metaFields.META_FIELD_X_OAS_MIN_LENGTH]: 1 },
+      { [metaFields.META_FIELD_X_OAS_PLANNED_MAX_LENGTH]: 512 },
+    ])
+  );
+  expect(reporting.metas).not.toEqual(
+    expect.arrayContaining([{ [metaFields.META_FIELD_X_OAS_PLANNED_MIN_LENGTH]: 1 }])
   );
 });
 

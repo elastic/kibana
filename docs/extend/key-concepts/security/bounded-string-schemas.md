@@ -76,7 +76,7 @@ schema.object({ id: schema.savedObjectId({ maxLength: 250 }) });
 
 Undefined overrides retain the defaults. Limits must be finite, non-negative integers with minimum less than or equal to maximum; anything else throws at schema construction time. Use overrides to preserve an existing route contract when adopting a helper — do not loosen a bound that is already stricter than the default.
 
-In Zod, apply ordinary composition (`.optional()`, `.nullable()`, `.regex()`, `.refine()`) **after** selecting strict or reporting mode. Strict schemas emit their length limits in JSON Schema / OpenAPI output; reporting schemas emit no length limits at all, because they enforce none — see [Generated OpenAPI output](#generated-openapi-output).
+In Zod, apply ordinary composition (`.optional()`, `.nullable()`, `.regex()`, `.refine()`) **after** selecting strict or reporting mode. Strict schemas emit their length limits in JSON Schema / OpenAPI output; reporting schemas emit only the limits they enforce, which is none unless `minLength` is passed explicitly — see [Generated OpenAPI output](#generated-openapi-output).
 
 ## Reporting mode
 
@@ -86,11 +86,11 @@ Adopting a bound on an existing route risks rejecting traffic that works today. 
 savedObjectId.warn({ label: 'dashboard.panelId' });
 ```
 
-`.warn()` enforces **neither** length bound. Input shorter than the minimum or longer than the maximum is accepted and recorded as a violation instead of failing validation, so adopting reporting mode on an existing route cannot change which requests that route accepts. `minLength` and `maxLength` overrides change the reported thresholds rather than enforcing them. Call `.warn()` on the factory, before composing the returned schema.
+`.warn()` does not enforce the helper's default bounds. Input shorter than the default minimum or longer than the maximum is accepted and recorded as a violation instead of failing validation, so adopting reporting mode on an existing route cannot change which requests that route accepts. A `maxLength` override changes the reported threshold. An explicit `minLength` override is different: it describes the route's existing contract, so it stays **enforced** and is not reported. Pass one when the route already rejects short input, for example `savedObjectId.warn({ minLength: 1, label: 'dashboard.panelId' })` for a field that is `schema.string({ minLength: 1 })` today. Call `.warn()` on the factory, before composing the returned schema.
 
 Every other validator stays active: reporting mode preserves custom `validate`, `hostname`, coercion, defaults and metadata options. Default values retain config-schema's existing behavior: they are not validated.
 
-Because the minimum is reported rather than enforced, the histogram shows up front whether a route receives empty strings that the strict helper would later reject.
+Because the default minimum is reported rather than enforced, the histogram shows up front whether a route receives empty strings that the strict helper would later reject.
 
 ### Telemetry
 
@@ -129,7 +129,7 @@ The strict helper starts rejecting input the route accepted the day before, and 
 
 Strict helpers publish their bounds as ordinary `minLength` and `maxLength` keywords.
 
-Reporting schemas enforce nothing, so they publish no `minLength` or `maxLength` — adopting `.warn()` never tells clients that input they send today has become invalid. Instead they advertise the bounds the field intends to enforce through two vendor extensions, which clients can read as advance notice:
+Reporting schemas publish no `maxLength`, and no `minLength` unless an explicit `minLength` override keeps one enforced — adopting `.warn()` never tells clients that input they send today has become invalid. Instead they advertise the bounds the field intends to enforce through two vendor extensions, which clients can read as advance notice:
 
 ```yaml
 panelId:
@@ -138,7 +138,7 @@ panelId:
   x-kibana-planned-max-length: 512
 ```
 
-A planned minimum of zero is omitted. Nothing validates these values; they change to real `minLength` / `maxLength` keywords when the route moves to the strict helper.
+A planned minimum is omitted when it is zero or when an explicit override already enforces it. Nothing validates these values; they change to real `minLength` / `maxLength` keywords when the route moves to the strict helper.
 
 ## Fields no helper fits
 

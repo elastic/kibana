@@ -63,18 +63,20 @@ const strictString = (
 };
 
 // Accepts out-of-bounds input and records a violation instead of rejecting it, so that adopting
-// reporting mode cannot change which requests a route accepts. Neither bound is enforced; both
-// are published as advisory OpenAPI extensions.
+// reporting mode cannot change which requests a route accepts. The maximum and the helper's
+// default minimum are reported and published as advisory OpenAPI extensions; an explicit
+// `minLength` override describes the route's existing contract, so it stays enforced.
 const reportingString = (
   helper: ReportedStringHelperName,
   { minLength, maxLength }: StringHelperLimits,
   { label, ...options }: ZodStringWarnOptions
 ): z.ZodString => {
-  const { minLength: _min, maxLength: _max, ...params } = options;
-  return z
-    .string(params)
+  const { minLength: explicitMinLength, maxLength: _max, ...params } = options;
+  const reportsMinimum = explicitMinLength === undefined;
+  const base = reportsMinimum ? z.string(params) : z.string(params).min(minLength);
+  return base
     .check(({ value }) => {
-      if (value.length < minLength) {
+      if (reportsMinimum && value.length < minLength) {
         reportStringLengthViolation({
           helper,
           library: 'zod',
@@ -96,7 +98,7 @@ const reportingString = (
     })
     .meta({
       openapi: {
-        ...(minLength > 0 ? { [X_KIBANA_PLANNED_MIN_LENGTH]: minLength } : {}),
+        ...(reportsMinimum && minLength > 0 ? { [X_KIBANA_PLANNED_MIN_LENGTH]: minLength } : {}),
         [X_KIBANA_PLANNED_MAX_LENGTH]: maxLength,
       },
     });

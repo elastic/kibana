@@ -51,21 +51,23 @@ export interface LabeledSchemaHelper {
 }
 
 // Accepts out-of-bounds input and records a violation instead of rejecting it, so that adopting
-// reporting mode cannot change which requests a route accepts. Neither bound is enforced; both
-// are published as advisory OpenAPI extensions.
+// reporting mode cannot change which requests a route accepts. The maximum and the helper's
+// default minimum are reported and published as advisory OpenAPI extensions; an explicit
+// `minLength` override describes the route's existing contract, so it stays enforced.
 const reportingString = (
   helper: ReportedStringHelperName,
   { minLength, maxLength }: StringHelperLimits,
   { label, validate, ...options }: StringWarnOptions
-): Type<string> =>
-  new StringType({
+): Type<string> => {
+  const reportsMinimum = options.minLength === undefined;
+  return new StringType({
     ...options,
-    minLength: undefined,
+    minLength: reportsMinimum ? undefined : minLength,
     maxLength: undefined,
-    plannedMinLength: minLength > 0 ? minLength : undefined,
+    plannedMinLength: reportsMinimum && minLength > 0 ? minLength : undefined,
     plannedMaxLength: maxLength,
     validate: (value) => {
-      if (value.length < minLength) {
+      if (reportsMinimum && value.length < minLength) {
         reportStringLengthViolation({
           helper,
           library: 'config-schema',
@@ -87,6 +89,7 @@ const reportingString = (
       return validate?.(value);
     },
   });
+};
 
 const makeHelper = (helper: StringHelperName): SchemaHelper => {
   const strict = (options: StringOptions = {}): Type<string> =>

@@ -102,10 +102,11 @@ describe.each([
     expect(reportStringLengthViolation).toHaveBeenCalledWith(
       expect.objectContaining({ bound: 'max', limit: 3 })
     );
-    expect(helper.warn({ minLength: 3, label: 'test.field' }).parse('ab')).toBe('ab');
-    expect(reportStringLengthViolation).toHaveBeenCalledWith(
-      expect.objectContaining({ bound: 'min', limit: 3 })
-    );
+    jest.mocked(reportStringLengthViolation).mockClear();
+    const explicitMinimum = helper.warn({ minLength: 3, label: 'test.field' });
+    expect(() => explicitMinimum.parse('ab')).toThrow();
+    expect(explicitMinimum.parse('abc')).toBe('abc');
+    expect(reportStringLengthViolation).not.toHaveBeenCalled();
     expect(helper({ minLength: 0 }).parse('')).toBe('');
     expect(() => helper({ maxLength: undefined }).parse('x'.repeat(maxLength + 1))).toThrow();
   });
@@ -186,6 +187,12 @@ test('exports accurate JSON Schema limits in both modes', () => {
   expect(reporting).toMatchObject({ type: 'string' });
   expect(reporting).not.toHaveProperty('minLength');
   expect(reporting).not.toHaveProperty('maxLength');
+});
+
+test('publishes an explicit minimum as an enforced JSON Schema bound in reporting mode', () => {
+  const reporting = savedObjectId.warn({ minLength: 1 });
+  expect(z.toJSONSchema(reporting)).toMatchObject({ type: 'string', minLength: 1 });
+  expect(reporting.meta()).toEqual({ openapi: { 'x-kibana-planned-max-length': 512 } });
 });
 
 test('publishes the planned bounds of a reporting schema as OpenAPI extensions', () => {
