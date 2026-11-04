@@ -39,6 +39,8 @@ export interface GetTabMenuItemsFnProps {
   onDuplicate: (item: TabItem) => void;
   onCloseOtherTabs: (item: TabItem) => void;
   onCloseTabsToTheRight: (item: TabItem) => void;
+  /** Hides the "Close other tabs" and "Close tabs to the right" menu items */
+  disableCloseTabsMenuItems?: boolean;
   /** Optional function to provide menu items placed after the core tab menu items */
   getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
   /** Optional function to provide additional menu items placed at the end of the menu */
@@ -51,31 +53,34 @@ export const getTabMenuItemsFn = ({
   onDuplicate,
   onCloseOtherTabs,
   onCloseTabsToTheRight,
+  disableCloseTabsMenuItems = false,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
 }: GetTabMenuItemsFnProps): GetTabMenuItems => {
   return (item) => {
-    const closeOtherTabsItem = hasSingleTab(tabsState)
-      ? null
-      : getTabMenuItem({
-          item,
-          name: TabMenuItemName.closeOtherTabs,
-          label: i18n.translate('unifiedTabs.tabMenu.closeOtherTabsMenuItem', {
-            defaultMessage: 'Close other tabs',
-          }),
-          onClick: onCloseOtherTabs,
-        });
+    const closeOtherTabsItem =
+      disableCloseTabsMenuItems || hasSingleTab(tabsState)
+        ? null
+        : getTabMenuItem({
+            item,
+            name: TabMenuItemName.closeOtherTabs,
+            label: i18n.translate('unifiedTabs.tabMenu.closeOtherTabsMenuItem', {
+              defaultMessage: 'Close other tabs',
+            }),
+            onClick: onCloseOtherTabs,
+          });
 
-    const closeTabsToTheRightItem = isLastTab(tabsState, item)
-      ? null
-      : getTabMenuItem({
-          item,
-          name: TabMenuItemName.closeTabsToTheRight,
-          label: i18n.translate('unifiedTabs.tabMenu.closeTabsToTheRightMenuItem', {
-            defaultMessage: 'Close tabs to the right',
-          }),
-          onClick: onCloseTabsToTheRight,
-        });
+    const closeTabsToTheRightItem =
+      disableCloseTabsMenuItems || isLastTab(tabsState, item)
+        ? null
+        : getTabMenuItem({
+            item,
+            name: TabMenuItemName.closeTabsToTheRight,
+            label: i18n.translate('unifiedTabs.tabMenu.closeTabsToTheRightMenuItem', {
+              defaultMessage: 'Close tabs to the right',
+            }),
+            onClick: onCloseTabsToTheRight,
+          });
 
     const items: TabMenuItem[] = [
       getTabMenuItem({

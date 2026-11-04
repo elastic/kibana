@@ -342,6 +342,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           onEBTEvent={() => {}}
           disableTabsBarMenu
           disableCloseButton
+          disableCloseTabsMenuItems
           data-test-subj="notebookAppTabs"
         />
       </EuiFlexItem>

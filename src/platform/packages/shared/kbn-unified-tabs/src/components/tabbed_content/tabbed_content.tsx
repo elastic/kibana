@@ -69,6 +69,8 @@ export interface TabbedContentProps
   onEBTEvent: (event: TabsEBTEvent) => void;
   tabContentIdOverride?: string;
   appendRight?: React.ReactNode;
+  /** Hides the "Close other tabs" and "Close tabs to the right" menu items */
+  disableCloseTabsMenuItems?: boolean;
   /** Optional function to provide menu items placed after rename/duplicate */
   getTopTabMenuItems?: (item: TabItem) => TabMenuItem[];
   /** Optional function to provide additional menu items placed at the end of the menu */
@@ -117,6 +119,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
   disableInlineLabelEditing = false,
   disableDragAndDrop = false,
   disableTabsBarMenu = false,
+  disableCloseTabsMenuItems = false,
   appendRight,
   getTopTabMenuItems,
   getAdditionalTabMenuItems,
@@ -416,6 +419,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
       onDuplicate,
       onCloseOtherTabs,
       onCloseTabsToTheRight,
+      disableCloseTabsMenuItems,
       getTopTabMenuItems,
       getAdditionalTabMenuItems,
     });
@@ -425,6 +429,7 @@ export const TabbedContent: React.FC<TabbedContentProps> = ({
     onDuplicate,
     onCloseOtherTabs,
     onCloseTabsToTheRight,
+    disableCloseTabsMenuItems,
     getTopTabMenuItems,
     getAdditionalTabMenuItems,
   ]);

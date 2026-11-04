@@ -72,6 +72,22 @@ describe('getTabMenuItemsFn', () => {
     ]);
   });
 
+  it('omits the close menu items when disableCloseTabsMenuItems is set', () => {
+    const getTabMenuItems = getTabMenuItemsFn({
+      tabsState: { items, selectedItem: items[0] },
+      maxItemsCount: 10,
+      onDuplicate: jest.fn(),
+      onCloseOtherTabs: jest.fn(),
+      onCloseTabsToTheRight: jest.fn(),
+      disableCloseTabsMenuItems: true,
+    });
+    const menuItems = getTabMenuItems(items[0]);
+    expect(menuItems.map(mapMenuItem)).toEqual([
+      TabMenuItemName.enterRenamingMode,
+      TabMenuItemName.duplicate,
+    ]);
+  });
+
   it('returns correct menu items for the last item of many tabs', () => {
     const getTabMenuItems = getTabMenuItemsFn({
       tabsState: { items, selectedItem: items[0] },
