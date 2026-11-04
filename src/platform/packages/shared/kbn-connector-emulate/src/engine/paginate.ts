@@ -8,7 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import { cloneDeep, get, isEqual, maxBy, omit, unset } from 'lodash';
+import { cloneDeep, get, isEqual, maxBy, omit, toPath, unset } from 'lodash';
 import type { ContractRequest, ContractResponse, Responder } from '../contract/types';
 import { isRecord } from '../openapi/schema_walk';
 import { MOCK_PAGE_PARAM } from '../openapi/read_parameters';
@@ -399,6 +399,21 @@ const pagingParameters = (pagination: PaginationDescriptor): string[] => {
   return request.sizeParam === undefined ? [selector] : [selector, request.sizeParam];
 };
 
+// Removes a body parameter and the objects it leaves empty, so a body that only sends `page` for
+// its `page.cursor` compares equal to one that doesn't send `page` at all.
+const removeBodyParameter = (body: object, name: string) => {
+  unset(body, name);
+  const parents = toPath(name).slice(0, -1);
+  for (let depth = parents.length; depth > 0; depth--) {
+    const parent = parents.slice(0, depth);
+    const value = get(body, parent);
+    if (!isRecord(value) || Object.keys(value).length > 0) {
+      return;
+    }
+    unset(body, parent);
+  }
+};
+
 // What sets a recording's collection apart from the operation's others: its path parameters, and
 // its query and body without the parameters that select a page.
 const toRecordedScope = (
@@ -410,7 +425,7 @@ const toRecordedScope = (
   const scopedQuery = location === 'query' ? omit(query, names) : query;
   const scopedBody = location === 'body' && isRecord(body) ? cloneDeep(body) : body;
   if (location === 'body' && isRecord(scopedBody)) {
-    names.forEach((name) => unset(scopedBody, name));
+    names.forEach((name) => removeBodyParameter(scopedBody, name));
   }
   const hasBody =
     scopedBody !== undefined && !(isRecord(scopedBody) && Object.keys(scopedBody).length === 0);

@@ -98,6 +98,27 @@ const spec = {
     '/alerts': {
       get: { responses: listResponse({ nextLink: { type: 'string', format: 'uri' } }) },
     },
+    '/nested-search': {
+      post: {
+        requestBody: {
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                properties: {
+                  filter: { type: 'string' },
+                  page: {
+                    type: 'object',
+                    properties: { cursor: { type: 'string' }, limit: { type: 'integer' } },
+                  },
+                },
+              },
+            },
+          },
+        },
+        responses: listResponse({ next_cursor: { type: 'string' } }),
+      },
+    },
     '/users/{id}/items': {
       get: {
         parameters: [
@@ -129,6 +150,15 @@ const spec = {
 };
 
 const pagination: PaginatedOperation[] = [
+  {
+    operation: { method: 'POST', path: '/nested-search' },
+    pagination: {
+      style: 'cursor',
+      request: { in: 'body', cursorParam: 'page.cursor', sizeParam: 'page.limit' },
+      response: { itemsPath: 'channels', nextPath: 'next_cursor' },
+      end: 'missing',
+    },
+  },
   {
     operation: { method: 'GET', path: '/users/{id}/items' },
     pagination: {
@@ -510,6 +540,44 @@ describe('withPagination', () => {
       const { body } = await getJson(fetch, '/users/3/items');
 
       expect(ids(body)).toEqual(['A1']);
+    });
+
+    it('keeps pages together when only later ones send the object holding a nested cursor', async () => {
+      const nestedPage = (
+        body: Record<string, unknown>,
+        names: string[],
+        next?: string
+      ): RecordedExchange => ({
+        operation: { method: 'POST', path: '/nested-search' },
+        request: { body },
+        response: {
+          status: 200,
+          body: { channels: toChannels(...names), ...(next ? { next_cursor: next } : {}) },
+        },
+      });
+      const { fetch } = createRecordedMock([
+        nestedPage({ filter: 'open' }, ['A'], 'second'),
+        nestedPage({ filter: 'open', page: { cursor: 'second' } }, ['B']),
+        nestedPage({ filter: 'closed' }, ['C']),
+      ]);
+      const search = async (body: Record<string, unknown>) => {
+        const response = await fetch('https://api.example.com/nested-search', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify(body),
+        });
+        return response.json();
+      };
+
+      const first = await search({ filter: 'open', page: { limit: 1 } });
+      const second = await search({
+        filter: 'open',
+        page: { limit: 1, cursor: first.next_cursor },
+      });
+      const other = await search({ filter: 'closed' });
+
+      expect(first.next_cursor).toBe('second');
+      expect([ids(first), ids(second), ids(other)]).toEqual([['A'], ['B'], ['C']]);
     });
 
     it('serves a fixture as written instead of the recordings', async () => {
