@@ -134,7 +134,7 @@ export class WorkflowsPlugin
   ): WorkflowsPublicPluginStart {
     // Initialize singletons with workflowsExtensions
     stepSchemas.initialize(plugins.workflowsExtensions);
-    triggerSchemas.initialize(plugins.workflowsExtensions);
+    triggerSchemas.initialize(plugins.workflowsExtensions, core.featureFlags);
 
     this.subscribeToWorkflowsSettingChange(core);
 

@@ -187,7 +187,10 @@ describe('WorkflowsPlugin', () => {
       plugin.start(coreStart, startDeps as any);
 
       expect(stepSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
-      expect(triggerSchemas.initialize).toHaveBeenCalledWith(startDeps.workflowsExtensions);
+      expect(triggerSchemas.initialize).toHaveBeenCalledWith(
+        startDeps.workflowsExtensions,
+        coreStart.featureFlags
+      );
     });
 
     describe('disabling workflows from Advanced Settings', () => {

@@ -41,6 +41,12 @@ export const WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG =
   'workflows.kibanaRequest.coreSelfClientEnabled';
 
 /**
+ * When true, a workflow can declare a `page` trigger. Off by default.
+ * Enable with `feature_flags.overrides: { workflows.pages.enabled: true }` in `kibana.yml`.
+ */
+export const WORKFLOWS_PAGES_ENABLED_FLAG = 'workflows.pages.enabled';
+
+/**
  * Global Advanced Setting gating the Workflow Template Library tech preview.
  *
  * Registered as a global uiSetting (not per-space) so the same toggle is

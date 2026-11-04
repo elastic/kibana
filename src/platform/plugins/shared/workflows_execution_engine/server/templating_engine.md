@@ -56,6 +56,25 @@ tags: "${{ inputs.tags }}"  # ✅ Works
 items: "${{ inputs.items | slice: 0, 2 }}"  # ✅ Works with filters
 ```
 
+#### Page inputs
+
+A `page` trigger declares its own `inputs`. Steps read the values a page visitor submitted as `page.inputs.<name>`, not as `inputs.<name>`. `inputs.*` holds only the values of manual runs, API calls, and child runs, so a template shows where its data comes from. A workflow can declare inputs on both its `manual` and `page` triggers.
+
+```yaml
+triggers:
+  - type: page
+    title: Report an incident
+    inputs:
+      properties:
+        summary:
+          type: string
+steps:
+  - name: log
+    type: console
+    with:
+      message: "{{ page.inputs.summary }}"
+```
+
 #### Expressions in provided input values
 
 A caller can pass a `${{ }}` string as an input value when it starts a run. The engine evaluates that value only when a person or API caller started the run directly (`triggeredBy: manual`). Every other source keeps the value as a literal string. This includes child runs (`workflow-step`), scheduled runs, alerts, event triggers, HITL, workflow pages (`page`), and plugin callers. A `page` visitor is anonymous, and an expression can read `consts` and the rest of the render context.

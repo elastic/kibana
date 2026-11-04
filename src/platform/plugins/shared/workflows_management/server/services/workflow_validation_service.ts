@@ -18,6 +18,7 @@ import {
   toCustomTriggerSchemaConfigs,
   type ValidateWorkflowResponseDto,
   WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
+  WORKFLOWS_PAGES_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type { GetAvailableConnectorsResponse } from '@kbn/workflows/types/v1';
 import type { ServerTriggerDefinition } from '@kbn/workflows-extensions/server';
@@ -136,7 +137,8 @@ export class WorkflowValidationService {
     const triggerDefinitions = this.getRegisteredCustomTriggerDefinitions();
     const zodSchema = getWorkflowZodSchemaFromConnectors(
       allConnectors,
-      toCustomTriggerSchemaConfigs(triggerDefinitions)
+      toCustomTriggerSchemaConfigs(triggerDefinitions),
+      { includePageTrigger: await this.isPageTriggerEnabled() }
     );
     const warnIgnoredKibanaFetcher = await firstValueFrom(
       this.deps
@@ -177,7 +179,14 @@ export class WorkflowValidationService {
 
     return getWorkflowZodSchemaFromConnectors(
       await this.resolveConnectors(spaceId, request),
-      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions())
+      toCustomTriggerSchemaConfigs(this.getRegisteredCustomTriggerDefinitions()),
+      { includePageTrigger: await this.isPageTriggerEnabled() }
+    );
+  }
+
+  private isPageTriggerEnabled(): Promise<boolean> {
+    return firstValueFrom(
+      this.deps.getCoreStart().featureFlags.getBooleanValue$(WORKFLOWS_PAGES_ENABLED_FLAG, false)
     );
   }
 

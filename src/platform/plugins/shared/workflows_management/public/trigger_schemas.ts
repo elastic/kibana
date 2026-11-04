@@ -7,10 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { FeatureFlagsStart } from '@kbn/core/public';
 import {
   type CustomTriggerSchemaConfig,
   getTriggerName,
   toCustomTriggerSchemaConfigs,
+  type TriggerSchemaOptions,
+  WORKFLOWS_PAGES_ENABLED_FLAG,
 } from '@kbn/workflows';
 import type {
   PublicTriggerDefinition,
@@ -24,9 +27,21 @@ import type {
  */
 class TriggerSchemas {
   private extensions: WorkflowsExtensionsPublicPluginStart | null = null;
+  private pageTriggerEnabled = false;
 
-  public initialize(workflowsExtensions: WorkflowsExtensionsPublicPluginStart): void {
+  public initialize(
+    workflowsExtensions: WorkflowsExtensionsPublicPluginStart,
+    featureFlags?: FeatureFlagsStart
+  ): void {
     this.extensions = workflowsExtensions;
+    featureFlags?.getBooleanValue$(WORKFLOWS_PAGES_ENABLED_FLAG, false).subscribe((enabled) => {
+      this.pageTriggerEnabled = enabled;
+    });
+  }
+
+  /** Built-in trigger options for YAML schema generation (the `page` trigger feature flag). */
+  public getTriggerSchemaOptions(): TriggerSchemaOptions {
+    return { includePageTrigger: this.pageTriggerEnabled };
   }
 
   /**

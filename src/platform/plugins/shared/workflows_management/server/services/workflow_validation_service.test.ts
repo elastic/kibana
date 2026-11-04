@@ -11,6 +11,7 @@ import { of } from 'rxjs';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { CustomTriggerSchemaConfig } from '@kbn/workflows';
+import { WORKFLOWS_PAGES_ENABLED_FLAG } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import type { WorkflowValidationDeps } from './types';
 import {
@@ -32,6 +33,8 @@ jest.mock('@kbn/esql-server-utils', () => ({
 const hostNameColumns = [{ name: 'host.name', type: 'keyword', userDefined: false }];
 
 interface MakeDepsOptions {
+  /** Value of the `workflows.pages.enabled` feature flag. */
+  pagesEnabled?: boolean;
   /** Connector types the request can see, as `listTypes` returns them. */
   listedConnectorTypes?: Array<Record<string, unknown>>;
   /** Registered step definitions, keyed by step type. */
@@ -40,7 +43,7 @@ interface MakeDepsOptions {
 
 const makeDeps = (
   listedTriggers: CustomTriggerSchemaConfig[] = [],
-  { listedConnectorTypes = [], stepDefinitions = {} }: MakeDepsOptions = {}
+  { listedConnectorTypes = [], stepDefinitions = {}, pagesEnabled = false }: MakeDepsOptions = {}
 ): {
   deps: WorkflowValidationDeps;
   actionsClient: { getAll: jest.Mock };
@@ -64,7 +67,9 @@ const makeDeps = (
       getCoreStart: () =>
         ({
           featureFlags: {
-            getBooleanValue$: jest.fn().mockReturnValue(of(false)),
+            getBooleanValue$: jest.fn((flag: string) =>
+              of(flag === WORKFLOWS_PAGES_ENABLED_FLAG ? pagesEnabled : false)
+            ),
           },
           elasticsearch: {
             client: { asScoped: jest.fn().mockReturnValue({ asCurrentUser: {} }) },
@@ -397,6 +402,48 @@ describe('WorkflowValidationService', () => {
 
       expect(result.valid).toBe(true);
     });
+  });
+
+  describe('page trigger feature flag', () => {
+    const pageWorkflowYaml = [
+      'name: page',
+      'triggers:',
+      '  - type: page',
+      '    title: Report an incident',
+      'steps:',
+      '  - name: step-one',
+      '    type: console',
+      '    with:',
+      '      message: "hello"',
+      '',
+    ].join('\n');
+
+    it.each([
+      [false, false],
+      [true, true],
+    ])(
+      'with workflows.pages.enabled %s, a page trigger is valid: %s',
+      async (pagesEnabled, valid) => {
+        const { deps } = makeDeps([], { pagesEnabled });
+        const service = new WorkflowValidationService(deps);
+        const request = {} as any;
+
+        const result = await service.validateWorkflow(pageWorkflowYaml, 'default', request, {
+          includeVariableRules: false,
+          includeEsqlRules: false,
+        });
+        const schema = await service.getWorkflowZodSchema({ loose: false }, 'default', request);
+
+        expect(result.valid).toBe(valid);
+        expect(
+          schema.safeParse({
+            name: 'page',
+            triggers: [{ type: 'page', title: 'Report an incident' }],
+            steps: [{ name: 'step-one', type: 'console', with: { message: 'hello' } }],
+          }).success
+        ).toBe(valid);
+      }
+    );
   });
 
   describe('validateWorkflow ES|QL rules', () => {
