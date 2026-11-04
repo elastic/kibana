@@ -6,17 +6,22 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { act, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
 import { CoreScopedHistory } from '@kbn/core/public';
+import { coreMock } from '@kbn/core/public/mocks';
 import { I18nProvider } from '@kbn/i18n-react';
+import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RouterProvider } from '@kbn/typed-react-router-config';
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import type { ObservabilitySharedPluginStart } from '@kbn/observability-shared-plugin/public';
-import { EntityInventoryShell } from '.';
+import { createCoreStartMock, createStartDependenciesMock } from '../mocks';
+import { ENTITY_INVENTORY_PAGES } from '../pages';
 import { entityInventoryRouter } from '../routes/config';
+import { ENTITY_LIST_PLACEHOLDER } from './translations';
+import { EntityInventoryShell, renderApp } from '.';
 
 const PageTemplate = (({ children }: { children: React.ReactNode }) => (
   <div>{children}</div>
@@ -29,9 +34,13 @@ const renderShell = (history: History) => {
     <I18nProvider>
       <EuiProvider>
         <MockAppHeaderProvider>
-          <RouterProvider history={history} router={entityInventoryRouter}>
-            <EntityInventoryShell PageTemplate={PageTemplate} />
-          </RouterProvider>
+          <KibanaContextProvider
+            services={{ ...createCoreStartMock(), ...createStartDependenciesMock() }}
+          >
+            <RouterProvider history={history} router={entityInventoryRouter}>
+              <EntityInventoryShell PageTemplate={PageTemplate} />
+            </RouterProvider>
+          </KibanaContextProvider>
         </MockAppHeaderProvider>
       </EuiProvider>
     </I18nProvider>
@@ -46,14 +55,20 @@ const renderShellAt = (path: string) => {
 };
 
 describe('EntityInventoryShell', () => {
-  it.each(['/all-resources', '/hosts', '/kubernetes'])(
-    'renders the content of the page %s',
-    (path) => {
+  it.each(ENTITY_INVENTORY_PAGES)(
+    'renders the page shell and title for the entity category of $path',
+    ({ entityCategory, path, title }) => {
       renderShellAt(path);
 
-      expect(
-        screen.getByRole('heading', { name: 'Entity Inventory content here.' })
-      ).toBeInTheDocument();
+      expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
+        'data-entity-category',
+        entityCategory
+      );
+      expect(screen.getByRole('heading', { name: title })).toBeInTheDocument();
+      expect(screen.getByTestId('mockSearchBar')).toBeInTheDocument();
+      expect(screen.getByTestId('entityInventoryPlaceholder')).toHaveTextContent(
+        ENTITY_LIST_PLACEHOLDER
+      );
     }
   );
 
@@ -61,9 +76,10 @@ describe('EntityInventoryShell', () => {
     const { history } = renderShellAt(path);
 
     expect(history.location.pathname).toBe('/all-resources');
-    expect(
-      screen.getByRole('heading', { name: 'Entity Inventory content here.' })
-    ).toBeInTheDocument();
+    expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
+      'data-entity-category',
+      'all'
+    );
   });
 
   it('redirects the base path of the app, where the scoped history has an empty pathname', () => {
@@ -74,8 +90,31 @@ describe('EntityInventoryShell', () => {
     renderShell(scopedHistory);
 
     expect(parentHistory.location.pathname).toBe(`${APP_BASE_PATH}/all-resources`);
+    expect(screen.getByTestId('entityInventoryPageShell')).toHaveAttribute(
+      'data-entity-category',
+      'all'
+    );
+  });
+});
+
+describe('renderApp', () => {
+  it('mounts the routed app within the core rendering context and unmounts it', () => {
+    const core = createCoreStartMock();
+    const params = coreMock.createAppMountParameters(APP_BASE_PATH);
+    params.history.push('/kubernetes');
+
+    let unmount: () => void = () => {};
+    act(() => {
+      unmount = renderApp(core, createStartDependenciesMock(), params);
+    });
+
+    expect(core.rendering.addContext).toHaveBeenCalledTimes(1);
     expect(
-      screen.getByRole('heading', { name: 'Entity Inventory content here.' })
-    ).toBeInTheDocument();
+      params.element.querySelector('[data-test-subj="entityInventoryPageShell"]')
+    ).toHaveAttribute('data-entity-category', 'kubernetes');
+
+    act(() => unmount());
+
+    expect(params.element.childElementCount).toBe(0);
   });
 });

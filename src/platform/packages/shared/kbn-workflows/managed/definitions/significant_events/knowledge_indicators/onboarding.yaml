@@ -72,12 +72,15 @@ triggers:
         description: "Days before a KI feature expires."
       - name: featuresEntityFilteredRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample for entity-filtered documents in features identification."
       - name: featuresDiverseRatio
         type: number
+        default: 0.4
         description: "Fraction (0–1) of sample for diverse documents in features identification."
       - name: featuresMaxExcludedInPrompt
         type: number
+        default: 10
         description: "Max excluded features sent in LLM prompt during features identification."
       - name: featuresMaxEntityFilters
         type: number

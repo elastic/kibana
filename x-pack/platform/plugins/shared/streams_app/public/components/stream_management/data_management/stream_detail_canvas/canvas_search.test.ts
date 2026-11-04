@@ -138,6 +138,23 @@ describe('resolveCanvasSearch', () => {
       configuredDestinationNodeId('d-logs'),
     ]);
   });
+
+  it('matches the S3 bucket when a description replaces it as the subtitle', () => {
+    const destination: DestinationNode = {
+      id: configuredDestinationNodeId('d-s3'),
+      type: DESTINATION_NODE_TYPE,
+      position: { x: 0, y: 0 },
+      data: {
+        destinationId: 'd-s3',
+        title: 'Archive',
+        subtitle: 'Long-term log archive',
+        bucket: 'my-archive-bucket',
+      },
+    };
+    expect(
+      nodeIdsOf(resolveCanvasSearch({ nodes: [destination], edges: [] }, 'archive-bucket'))
+    ).toEqual([configuredDestinationNodeId('d-s3')]);
+  });
 });
 
 describe('applyCanvasSearch', () => {

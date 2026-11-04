@@ -184,7 +184,6 @@ exports[`pull_request fragments pull_request/api_contracts 1`] = `
           },
         ],
       },
-      "soft_fail": true,
       "timeout_in_minutes": 30,
     },
   ],

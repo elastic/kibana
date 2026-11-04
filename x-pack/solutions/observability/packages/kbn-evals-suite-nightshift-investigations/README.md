@@ -181,7 +181,8 @@ remains an execution failure. Ordinary reports are preserved unchanged.
 The `evals_nightshift_investigations` server config extends `evals_tracing` whenever the hook
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
-and sandbox, disables Cortex, and exports full Agent Builder payloads (user messages, system
+and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
+only by the suite, disables Cortex, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and remote telemetry credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.

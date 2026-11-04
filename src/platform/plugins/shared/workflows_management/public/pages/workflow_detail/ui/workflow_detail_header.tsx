@@ -348,14 +348,17 @@ export const WorkflowDetailHeader = React.memo(
             defaultMessage: 'Unsaved changes',
           }),
           color: 'primary',
-          onClick: () => setHighlightDiff((state) => !state),
-          onClickAriaLabel: highlightDiff
-            ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
-                defaultMessage: 'Hide diff highlighting',
-              })
-            : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
-                defaultMessage: 'Show diff highlighting',
-              }),
+          // A new workflow has no saved version to diff against, so the badge is not a toggle.
+          ...(workflowId && {
+            onClick: () => setHighlightDiff((state) => !state),
+            onClickAriaLabel: highlightDiff
+              ? i18n.translate('workflows.unsavedChangesBadge.hideDiff', {
+                  defaultMessage: 'Unsaved changes, hide diff highlighting',
+                })
+              : i18n.translate('workflows.unsavedChangesBadge.showDiff', {
+                  defaultMessage: 'Unsaved changes, show diff highlighting',
+                }),
+          }),
           'data-test-subj': 'workflowUnsavedChangesBadge',
         });
       } else if (workflowId && savedLabel) {
