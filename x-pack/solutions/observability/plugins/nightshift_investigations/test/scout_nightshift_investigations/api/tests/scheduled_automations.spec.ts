@@ -178,7 +178,7 @@ apiTest.describe('Scheduled Nightshift automations', { tag: tags.stateful.classi
       expect(execution.data.workflowDefinition.settings?.timeout).toBe('60m');
       expect(execution.data.context).toMatchObject({
         inputs: {
-          message: body.execution.promptTemplate,
+          message: `Instructions:\n${body.execution.promptTemplate}`,
           timeout_seconds: body.runtime.timeoutSeconds,
           context: { scope_query: schedule.scopeQuery, source: 'manual' },
         },
