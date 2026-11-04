@@ -77,9 +77,13 @@ triggers:
             Document ids of the DETECTION alerts the Attack Discovery correlated.
             Not the Attack Discovery's own id — that is `attack_discovery_id`.
             Nothing below ever closes these: an attack being closed says nothing
-            about the alerts underneath it. A true-positive or inconclusive verdict
-            acknowledges them and tags them `az:ad_correlated`, which keeps them out
-            of the Worker's next runs.
+            about the alerts underneath it. A false-positive verdict acknowledges
+            them and tags them `az:ad_fp_chain`. A true-positive or inconclusive
+            verdict waits for the gate: approval or any dismissal acknowledges the
+            ones still open and tags them `az:ad_correlated`, and a false-positive
+            dismissal also tags `az:ad_fp_chain`. An expired proposal or a failed
+            analysis leaves them open. The tags are what the next run excludes.
+            Alert Triage still selects them.
         summary_markdown:
           type: string
           maxLength: 8000
@@ -117,9 +121,13 @@ triggers:
           maxLength: 32
           description: >-
             Why `related_investigation_id` was set. `false_positive` when the
-            earlier Investigation is a closed false positive. `builtin_account`
-            when the only shared user is a built-in account such as SYSTEM,
-            Administrator, or root. Empty when there is no link.
+            earlier Investigation is a closed false positive. `closed` when it
+            is closed for any other reason. `proposal_expired` when its forensics
+            proposal expired. `analysis_failed` when its FP/TP analysis failed.
+            `builtin_account` when the only shared user is a built-in account such
+            as SYSTEM, Administrator, or root. `investigation_missing` when an
+            attach waited 15 minutes and the Investigation was still not there.
+            Empty when there is no link.
         sibling_alert_ids:
           type: array
           maxItems: 1000
@@ -128,9 +136,10 @@ triggers:
             maxLength: 256
           description: >-
             Detection alert ids from the same-run attacks attached to this
-            Investigation, excluding ids already in `alert_ids`. A true-positive or
-            inconclusive verdict tags and acknowledges them with `alert_ids`. Empty
-            when this attack has no siblings.
+            Investigation, excluding ids already in `alert_ids`. A false-positive
+            verdict tags and acknowledges them with `alert_ids`. A true-positive
+            or inconclusive verdict does that when the gate ends. Empty when this
+            attack has no siblings.
         sibling_attack_discovery_ids:
           type: array
           maxItems: 1000
@@ -202,6 +211,12 @@ consts:
   # Worker, following the `az:` convention of the Alert Triage Worker. The batched
   # generation query excludes alerts carrying it; keep the literal there in sync.
   ad_correlated_tag: az:ad_correlated
+  # Marks the detection alerts behind an attack this Worker closed as a false
+  # positive. Same convention, and the same generation query excludes it; keep
+  # that literal in sync. Alert Triage does not skip it: an alert in a
+  # false-positive attack can still be malicious on its own, and acknowledged
+  # stays eligible for triage.
+  ad_fp_chain_tag: az:ad_fp_chain
 steps:
   # kibana-q0t5: the Investigation id is a pure function of the attack, so every
   # execution that reviews this attack addresses the SAME Investigation — a hand
@@ -280,8 +295,10 @@ steps:
   #
   # kibana-d7aa: still no pre-create lookup, and none is needed — the id is derived
   # rather than discovered. Uniqueness across producers is the persist 409 on the
-  # attack hash; a regrouped alert set, and Kibana scheduled AD vs this Worker, are
-  # intentional producer splits. `generation_source` exists but is not passed yet.
+  # attack hash; a regrouped alert set, Kibana scheduled AD vs this Worker, and a manual
+  # run vs this Worker are intentional producer splits. The Worker passes
+  # `generation_source`, which is what splits it from a manual run by the user who
+  # last saved the Worker (same `ownerId`).
   - name: open_investigation
     type: ai.conversation.create
     with:
@@ -363,8 +380,10 @@ steps:
     on-failure:
       continue: true
 
-  # A closed false positive, or a match that is only a built-in account on the
-  # same host, starts a new Investigation. This note is the link back.
+  # A match that does not join the earlier Investigation starts a new one.
+  # That is a closed Investigation, an expired proposal, a failed analysis, a
+  # built-in account on the same host, or an attach that never found its
+  # Investigation. This note is the link back.
   - name: journal_related_investigation
     type: workflow.execute
     if: "${{ inputs.related_investigation_id != blank }}"
@@ -378,10 +397,22 @@ steps:
           This attack shares only a built-in account on the same host with
           Investigation {{ inputs.related_investigation_id }} and does not share
           its alerts. It is reviewed on its own.
-          {% else %}
-          This attack shares entities with closed false-positive Investigation
-          {{ inputs.related_investigation_id }} and does not share its alerts.
+          {% elsif inputs.related_link_reason == 'investigation_missing' %}
+          Failed to attach this attack to Investigation
+          {{ inputs.related_investigation_id }}. That Investigation was not
+          available after waiting 15 minutes, so this attack is reviewed on its own.
+          {% elsif inputs.related_link_reason == 'proposal_expired' %}
+          This attack matches Investigation {{ inputs.related_investigation_id }},
+          whose forensics proposal expired with no decision. It is reviewed on its own.
+          {% elsif inputs.related_link_reason == 'analysis_failed' %}
+          This attack matches Investigation {{ inputs.related_investigation_id }},
+          whose analysis failed. It is reviewed on its own.
+          {% elsif inputs.related_link_reason == 'closed' %}
+          This attack matches closed Investigation {{ inputs.related_investigation_id }}.
           It is reviewed on its own.
+          {% else %}
+          This attack matches closed false-positive Investigation
+          {{ inputs.related_investigation_id }}. It is reviewed on its own.
           {% endif %}
     on-failure:
       continue: true
@@ -777,8 +808,10 @@ steps:
           # `reason: false_positive` is the verdict, recorded on the attack itself.
           # The claim is about the ATTACK — this narrative is not supported by its
           # evidence — not about the detection alerts underneath, which is why
-          # `update_related_alerts` stays false and they are left exactly as they
-          # were. An Attack-Discovery-level false positive is not an alert-level one.
+          # `update_related_alerts` stays false. An Attack-Discovery-level false
+          # positive is not an alert-level one, so these alerts are not closed.
+          # The retirement steps after the switch acknowledge the ones still open
+          # and tag them `az:ad_fp_chain`.
           #
           # This is the LIFECYCLE, not bookkeeping, so it does NOT continue on failure.
           # The Investigation is already closed by the time this runs, so a timeout or a
@@ -833,7 +866,7 @@ steps:
                 conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
                 message: >-
                   Closed the Investigation and the attack as a false positive.
-                  Detection alerts are left open.
+                  Detection alerts are not closed.
             on-failure:
               continue: true
 
@@ -973,36 +1006,89 @@ steps:
         classification: "{{ steps.resolve_analysis.output.verdict }}"
         workflow_execution_id: "{{ execution.id }}"
 
-  # The correlated detection alerts, retired from the Worker's queue. Written BEFORE
-  # the gate, not after the decision: the gate can park this run for up to 168h, and
-  # every Worker run in that window would otherwise correlate the same alerts again
-  # and persist a near-duplicate attack with an Investigation of its own.
+  # The alerts this decision covers are the fingerprint's `alert_ids`, capped at
+  # 100, plus this review's `alert_ids` and its same-run `sibling_alert_ids`.
+  # Continuations attached while the review was running are on the fingerprint
+  # and are not in the inputs. The Investigation's alert attachments are not
+  # read. Alerts past the cap stay security-team#20597. A miss retires the
+  # alerts this review already has.
+  #
+  # The fingerprint index is shared across spaces, and the Investigation id is
+  # derived from the attack id with no space component. `attributes.space_id`
+  # keeps another space's alert ids out of this run. The matcher's own
+  # fingerprint search filters the same field.
+  - name: read_fingerprint_alerts
+    type: elasticsearch.search
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      size: 1
+      _source:
+        - attributes.alert_ids
+      query:
+        bool:
+          filter:
+            - term:
+                type: security.attack_fingerprint
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
+            - term:
+                attributes.investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+
+  - name: resolve_chain_alert_ids
+    type: data.set
+    on-failure:
+      continue: true
+    with:
+      alert_ids: "${{ steps.read_fingerprint_alerts.output.hits.hits[0]._source.attributes.alert_ids | default: consts.no_alert_ids }}"
+
+  - name: resolve_retire_alert_ids
+    type: data.set
+    with:
+      alert_ids: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids | concat: steps.resolve_chain_alert_ids.output.alert_ids | uniq }}"
+
+  # Which alerts leave the Worker's queue, and under which tag. A false positive
+  # does not escalate — the attack is already closed — but its alerts are retired
+  # here, under `az:ad_fp_chain`. A true positive or inconclusive waits for the
+  # gate. The lookback is one schedule interval plus a minute, so a parked gate
+  # is not re-read, and the tag has to match the decision the analyst makes.
+  # A failed or unknown verdict, and a review given no alerts, retire nothing:
+  # the tag write rejects an empty id list.
+  - name: resolve_alert_retirement
+    type: data.set
+    with:
+      retire: >-
+        ${{ inputs.alert_ids != blank and steps.resolve_analysis.output.verdict == 'false_positive' }}
+      tag: "{{ consts.ad_fp_chain_tag }}"
+
+  # The detection alerts behind a false-positive attack, retired from the
+  # Worker's queue at the verdict. A true positive or inconclusive waits for the
+  # gate below: that decision picks the tag, and a parked gate is not re-read
+  # because generation looks back one schedule interval plus a minute.
   #
   # Tagged first, because the tag is what the generation query excludes on, so a
   # failed status write after it still keeps the alerts out of the next run.
   #
-  # Bookkeeping, not the lifecycle: no step here is a reason to cancel the escalation
-  # the verdict calls for, so each retries and then continues. A write can return 200
-  # and change nothing, so `verify_alerts_retired` reads the alerts back and the
-  # journal note says what actually landed. One call each, because `alert_ids` holds
-  # at most 1000 ids. The `alert_ids` guard is required: the tag write rejects an
-  # empty id list.
+  # Bookkeeping, not the lifecycle: no step here is a reason to cancel the
+  # escalation a true positive or inconclusive calls for, so each retries and
+  # then continues. A write can return 200 and change nothing, so
+  # `verify_alerts_retired` reads the alerts back and the journal note says what
+  # actually landed. One call each, because `alert_ids` holds at most 1000 ids.
   #
   # Every alert is tagged, closed ones included: a tag changes no status, and it is
   # what traces an alert to this Worker. `sibling_alert_ids` are the detection alerts
-  # on the same-run attacks attached to this Investigation; they leave the queue with
-  # this attack's alerts. An omitted list concatenates as nothing.
+  # on the same-run attacks attached to this Investigation. `resolve_retire_alert_ids`
+  # also includes continuation alerts the fingerprint recorded while this review ran.
   - name: tag_correlated_alerts
     type: security.setAlertTags
-    if: >-
-      ${{ steps.resolve_escalation.output.escalate == true
-        and inputs.alert_ids != blank }}
+    if: "${{ steps.resolve_alert_retirement.output.retire == true }}"
     with:
-      alert_ids: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
+      alert_ids: "${{ steps.resolve_retire_alert_ids.output.alert_ids }}"
       # Listed item by item because security.setAlertTags takes an array here and its
       # input schema is a union, so a whole-array template fails workflow validation.
       tags_to_add:
-        - "{{ consts.ad_correlated_tag }}"
+        - "{{ steps.resolve_alert_retirement.output.tag }}"
     on-failure:
       retry:
         max-attempts: 3
@@ -1028,9 +1114,7 @@ steps:
   # `open`, which the read-back reports.
   - name: acknowledge_correlated_alerts
     type: kibana.SetAlertsStatus
-    if: >-
-      ${{ steps.resolve_escalation.output.escalate == true
-        and inputs.alert_ids != blank }}
+    if: "${{ steps.resolve_alert_retirement.output.retire == true }}"
     timeout: "60s"
     with:
       status: acknowledged
@@ -1039,7 +1123,7 @@ steps:
         bool:
           filter:
             - ids:
-                values: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
+                values: "${{ steps.resolve_retire_alert_ids.output.alert_ids }}"
             - term:
                 kibana.alert.workflow_status: open
     on-failure:
@@ -1051,21 +1135,19 @@ steps:
   # Both writes refresh the index, so this read sees them.
   - name: verify_alerts_retired
     type: elasticsearch.search
-    if: >-
-      ${{ steps.resolve_escalation.output.escalate == true
-        and inputs.alert_ids != blank }}
+    if: "${{ steps.resolve_alert_retirement.output.retire == true }}"
     with:
       index: .alerts-security.alerts-{{ workflow.spaceId }}
       size: 0
       track_total_hits: true
       query:
         ids:
-          values: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids }}"
+          values: "${{ steps.resolve_retire_alert_ids.output.alert_ids }}"
       aggregations:
         tagged:
           filter:
             term:
-              kibana.alert.workflow_tags: "{{ consts.ad_correlated_tag }}"
+              kibana.alert.workflow_tags: "{{ steps.resolve_alert_retirement.output.tag }}"
         open:
           filter:
             term:
@@ -1087,12 +1169,10 @@ steps:
   # Counts resolved once, because Liquid cannot compare the result of a filter chain.
   - name: resolve_alerts_retired
     type: data.set
-    if: >-
-      ${{ steps.resolve_escalation.output.escalate == true
-        and inputs.alert_ids != blank }}
+    if: "${{ steps.resolve_alert_retirement.output.retire == true }}"
     with:
       read: "${{ steps.verify_alerts_retired.output.hits != null }}"
-      requested: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids | size }}"
+      requested: "${{ steps.resolve_retire_alert_ids.output.alert_ids | size }}"
       tagged: "${{ steps.verify_alerts_retired.output.aggregations.tagged.doc_count | default: 0 }}"
       open: "${{ steps.verify_alerts_retired.output.aggregations.open.doc_count | default: 0 }}"
       acknowledged: "${{ steps.verify_alerts_retired.output.aggregations.acknowledged.doc_count | default: 0 }}"
@@ -1103,9 +1183,7 @@ steps:
   # reads it as user input. The execution history keeps the message.
   - name: journal_alerts_retired
     type: workflow.execute
-    if: >-
-      ${{ steps.resolve_escalation.output.escalate == true
-        and inputs.alert_ids != blank }}
+    if: "${{ steps.resolve_alert_retirement.output.retire == true }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
@@ -1114,12 +1192,13 @@ steps:
         conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
         message: >-
           {%- assign retired = steps.resolve_alerts_retired.output -%}
+          {%- assign tag = steps.resolve_alert_retirement.output.tag -%}
           {% if retired.read != true %}Could not read the
           {{ retired.requested }} correlated detection alert(s) back, so whether they
-          were tagged {{ consts.ad_correlated_tag }} and acknowledged is unknown. See
+          were tagged {{ tag }} and acknowledged is unknown. See
           review execution {{ execution.id }}.{% else %}Tagged {{ retired.tagged }} of
           {{ retired.requested }} correlated detection alert(s)
-          {{ consts.ad_correlated_tag }}{% if retired.tagged < retired.requested %}; later
+          {{ tag }}{% if retired.tagged < retired.requested %}; later
           Worker runs may correlate the other {{ retired.requested | minus: retired.tagged }}
           again{% else %}, so later Worker runs skip them{% endif %}. Acknowledged:
           {{ retired.acknowledged }}{% if retired.closed > 0 %}; already closed and left as
@@ -1151,6 +1230,26 @@ steps:
         autoApprove: "${{ steps.resolve_escalation.output.auto_approve }}"
         impact: high
         confidence: medium
+    on-failure:
+      continue: true
+
+  # A gate that errors leaves `{status: open}` and no verdict, which is also
+  # what an analysis still in progress looks like. Later attacks would attach
+  # and never be decided. This one marker is what the matcher treats as a
+  # failed analysis. A cancel or a restart still writes nothing.
+  - name: record_gate_failed
+    type: ai.conversation.metadata.patch
+    if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error != blank }}"
+    with:
+      conversation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+      updates:
+        status: open
+        verdict: >-
+          The escalation gate failed. GATE FAILED, so no lifecycle action was
+          taken and the Investigation is left open. See review execution
+          {{ execution.id }}.
+    on-failure:
+      continue: true
 
   # The gate's own output already says WHAT was decided. This recovers the prose
   # that goes with it — `decidedBy`, `dismissReason`, `rationale` — which the gate
@@ -1158,7 +1257,7 @@ steps:
   # is limited to the fields a gating workflow branches on.
   - name: read_proposal_decision
     type: kibana.request
-    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}"
     with:
       request:
         method: GET
@@ -1194,7 +1293,7 @@ steps:
   # Only for an escalated review; the outcome follows the journal note's order.
   - name: report_handoff_resolved
     type: alertzero.reportWorkerOutcome
-    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}"
     on-failure:
       continue: true
     with:
@@ -1214,7 +1313,7 @@ steps:
 
   - name: journal_decision_recorded
     type: workflow.execute
-    if: "${{ steps.resolve_escalation.output.escalate == true }}"
+    if: "${{ steps.resolve_escalation.output.escalate == true and steps.escalation_gate.error == blank }}"
     with:
       workflow-id: system-alertzero-journal-note
       run-as-mode: inherit
@@ -1281,6 +1380,136 @@ steps:
       investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
       close_reason: other
 
+  # Continuations that arrived during the gate are on the fingerprint and were
+  # not in the verdict write. A miss leaves those steps with the alerts this
+  # review already had. These writes run before `close_attack_declined`: that
+  # step fails the run, and a failed close must not leave the alerts untagged.
+  - name: read_fingerprint_alerts_after_gate
+    type: elasticsearch.search
+    if: "${{ steps.record_decision.output.approved == true or steps.record_decision.output.declined == true or steps.record_decision.output.expired == true }}"
+    on-failure:
+      continue: true
+    with:
+      index: ai-index-idx-security-attack-fingerprints
+      size: 1
+      _source:
+        - attributes.alert_ids
+      query:
+        bool:
+          filter:
+            - term:
+                type: security.attack_fingerprint
+            - term:
+                attributes.space_id: "{{ workflow.spaceId }}"
+            - term:
+                attributes.investigation_id: "{{ steps.resolve_investigation_id.output.investigation_id }}"
+
+  - name: resolve_gate_chain_alert_ids
+    type: data.set
+    if: "${{ steps.record_decision.output.approved == true or steps.record_decision.output.declined == true or steps.record_decision.output.expired == true }}"
+    on-failure:
+      continue: true
+    with:
+      alert_ids: "${{ steps.read_fingerprint_alerts_after_gate.output.hits.hits[0]._source.attributes.alert_ids | default: consts.no_alert_ids }}"
+
+  - name: resolve_gate_alert_ids
+    type: data.set
+    if: "${{ steps.record_decision.output.approved == true or steps.record_decision.output.declined == true or steps.record_decision.output.expired == true }}"
+    with:
+      alert_ids: "${{ inputs.alert_ids | concat: inputs.sibling_alert_ids | concat: steps.resolve_gate_chain_alert_ids.output.alert_ids | uniq }}"
+
+  # The analyst called the proposal a false positive. Tag every alert on the
+  # Investigation, including continuations that attached during the wait, with
+  # both tags, and acknowledge the ones still open. The model had escalated, and
+  # the analyst called the proposal a false positive. This does not close the
+  # alerts. The Investigation still closes as `other`: a dismiss reason is about
+  # the proposal.
+  - name: tag_dismissed_false_positive
+    type: security.setAlertTags
+    if: "${{ steps.record_decision.output.declined == true and steps.read_proposal_decision.output.dismissReason == 'false_positive' and steps.resolve_gate_alert_ids.output.alert_ids != blank }}"
+    with:
+      alert_ids: "${{ steps.resolve_gate_alert_ids.output.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.ad_fp_chain_tag }}"
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # Any other dismissal. The model escalated and the analyst did not call the
+  # proposal a false positive, so the alerts take the escalation tag.
+  - name: tag_dismissed_other
+    type: security.setAlertTags
+    if: "${{ steps.record_decision.output.declined == true and steps.read_proposal_decision.output.dismissReason != 'false_positive' and steps.resolve_gate_alert_ids.output.alert_ids != blank }}"
+    with:
+      alert_ids: "${{ steps.resolve_gate_alert_ids.output.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  - name: acknowledge_dismissed
+    type: kibana.SetAlertsStatus
+    if: "${{ steps.record_decision.output.declined == true and steps.resolve_gate_alert_ids.output.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      status: acknowledged
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ steps.resolve_gate_alert_ids.output.alert_ids }}"
+            - term:
+                kibana.alert.workflow_status: open
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  # The handoff was approved. Tag every alert on the Investigation
+  # `az:ad_correlated` and acknowledge the ones still open, including
+  # continuations that attached while the gate was open. Alerts already
+  # acknowledged are not matched below.
+  - name: tag_approved_handoff
+    type: security.setAlertTags
+    if: "${{ steps.record_decision.output.approved == true and steps.resolve_gate_alert_ids.output.alert_ids != blank }}"
+    with:
+      alert_ids: "${{ steps.resolve_gate_alert_ids.output.alert_ids }}"
+      tags_to_add:
+        - "{{ consts.ad_correlated_tag }}"
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
+  - name: acknowledge_approved_handoff
+    type: kibana.SetAlertsStatus
+    if: "${{ steps.record_decision.output.approved == true and steps.resolve_gate_alert_ids.output.alert_ids != blank }}"
+    timeout: "60s"
+    with:
+      status: acknowledged
+      conflicts: proceed
+      query:
+        bool:
+          filter:
+            - ids:
+                values: "${{ steps.resolve_gate_alert_ids.output.alert_ids }}"
+            - term:
+                kibana.alert.workflow_status: open
+    on-failure:
+      retry:
+        max-attempts: 3
+        delay: 5s
+      continue: true
+
   # Closed with NO `reason`, unlike the false-positive branch. There the analysis
   # produced a verdict about the attack, so `false_positive` records it. Here the
   # analyst only declined an escalation, which says the attack is not worth deeper
@@ -1337,8 +1566,8 @@ steps:
       continue: true
 
   # Nobody decided. Closing an attack because no human looked at it within 72h is
-  # the wrong default, so this records the lapse and changes nothing else: the
-  # Attack Discovery and the Investigation both stay open.
+  # the wrong default, so this records the lapse and leaves the Attack Discovery
+  # and the Investigation open. Alerts retired at the verdict stay acknowledged.
   - name: record_decision_lapsed
     type: ai.conversation.metadata.patch
     if: "${{ steps.record_decision.output.expired == true }}"

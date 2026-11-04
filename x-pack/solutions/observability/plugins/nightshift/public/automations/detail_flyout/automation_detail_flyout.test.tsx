@@ -107,6 +107,14 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
   const renameTo = (name: string) =>
     fireEvent.change(screen.getByTestId('automationName'), { target: { value: name } });
 
+  it('hides the unsaved limit callout when a limited automation is switched to unlimited', () => {
+    renderFlyout();
+    startEditing();
+    fireEvent.click(screen.getByTestId('automationDailyLimitUnlimited'));
+
+    expect(screen.queryByTestId('automationDailyLimitUnsavedCallout')).not.toBeInTheDocument();
+  });
+
   it('shows edit disabled, with the reason, when only a privilege is missing', async () => {
     renderFlyout({ canManage: false, editDisabledReason: 'Requires manage_security' });
 

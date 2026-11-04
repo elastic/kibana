@@ -99,4 +99,22 @@ describe('automation form values', () => {
       isEnabled: true,
     });
   });
+
+  it('maps an automation without a daily limit to unlimited', () => {
+    const automation: Automation = {
+      id: 'automation-1',
+      name: 'Unlimited',
+      automationType: 'custom',
+      isEnabled: true,
+      trigger: { rows: [{ kind: 'alert' }] },
+      execution: {},
+      completions: [],
+      runtime: {},
+      createdAt: '2026-10-01T00:00:00.000Z',
+      updatedAt: '2026-10-01T00:00:00.000Z',
+      author: 'elastic',
+    };
+
+    expect(toAutomationFormValues(automation).dailyDispatchLimit).toBe('unlimited');
+  });
 });

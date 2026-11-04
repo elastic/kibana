@@ -51,7 +51,6 @@ export {
   type FeatureUpsert,
   type FeatureWithFilter,
   type IgnoredFeature,
-  CODE_ANALYSIS_FEATURE_TYPE,
   COMPUTED_FEATURE_TYPES,
   DATASET_ANALYSIS_FEATURE_TYPE,
   ERROR_LOGS_FEATURE_TYPE,
@@ -74,6 +73,8 @@ export {
   normalizeFeatureSlugForMatching,
   toBaseFeature,
 } from './src/feature';
+
+export { type AggregatedFeature, groupFeaturesAcrossSources } from './src/feature_aggregation';
 
 export { FeatureAccumulator } from './src/feature_accumulator';
 

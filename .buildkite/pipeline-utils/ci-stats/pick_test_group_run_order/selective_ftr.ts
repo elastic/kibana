@@ -163,3 +163,13 @@ export function shouldSkipFtrTests(
 
   return false;
 }
+
+/** Directly affected modules when the diff cannot affect FTR; null when FTR must run. */
+export async function getFtrSkipModules(changedFiles: string[]): Promise<string[] | null> {
+  const directlyAffected = await getFtrRelevantModules(changedFiles);
+
+  if (directlyAffected === null || !shouldSkipFtrTests(directlyAffected, changedFiles)) {
+    return null;
+  }
+  return [...directlyAffected];
+}
