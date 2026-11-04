@@ -396,12 +396,19 @@ Reading `breakdown`:
 Reading `trend`:
 - Hours are clock hours. The current hour is partial, and so is the first bucket when the window
   start cuts it; neither is a complete hour. The latest complete hour is the hour before the current
-  one: a missing row means 0 failing lines.
-- State the latest complete hour's count, by its time (09:00), next to the lowest and highest counts
-  of the earlier complete hours (compact, per Numbers), as a count range (380–455) over the hours it
-  covers (03-06 11:00 to 03-07 08:00), and leave the direction to the reader. With no earlier complete hour, state only the
-  latest counts.
-- State the current hour's count separately, with its time span (10:00 to 10:41), marked partial.
+  one. The query keeps only failing lines, so an hour with no row had no failing lines, not no data:
+  treat every missing hour as 0, the current partial hour included. A `trend` with no rows at all is
+  not measured, not all zeros.
+- State the latest complete hour's count, by its time (09:00; `0 at 09:00` when its row is missing),
+  next to the lowest and highest counts of the earlier complete hours with a failure (compact, per
+  Numbers), as a count range (380–455) over the hours it covers (03-06 11:00 to 03-07 08:00). Always
+  add how many of the M earlier complete hours had a failure ("on 18 of 22 hours"), even when all
+  did (`22 of 22`), where M counts every complete hour from the window's first complete hour through
+  the hour before the latest complete one, not only the failing hours. When none had a failure, say
+  "no failing line in the M earlier hours" instead of a range. Leave the direction to the reader.
+  With no earlier complete hour, state only the latest counts.
+- State the current hour's count separately (`0` when its row is missing), with its time span (10:00
+  to 10:41), marked partial.
 
 Reading `baseline`:
 - (Isolating shape) The days with a failure, out of the days with any `lines`. A day with no lines is
@@ -412,18 +419,20 @@ Reading `baseline`:
   lowest and highest `share` of the earlier complete days, as a span of dates (03-06 against 03-01 to
   03-05), and leave the comparison to the reader. With no earlier complete day, state only its
   `share`.
-- (Both shapes) Onset: `earliest` of the first day with a failure, worded "its first failing line is
-  at {earliest}" (MM-DD HH:MM). When it falls on the window's first day, name the window start: "the
-  first failing line in the 7-day window from {window start} is at {earliest}". Write the year only
-  when it differs from the window's. It claims nothing about earlier data, which the window may not
-  hold.
+- (Both shapes) Onset: `earliest` of the first day with a failure (MM-DD HH:MM). Use the qualified
+  wording "the first failing line in the 7-day window from {window start} is at {earliest}" whenever
+  no earlier day with data is in the window: always when the scope has no total, and in the isolating
+  shape when the failure starts on the first day with data. Use the bare "its first failing line is
+  at {earliest}" only when earlier complete days with data had no failure; it is the only form that
+  implies the failure started then. Write the year only when it differs from the window's. The
+  qualified form claims nothing about earlier data, which the window may not hold.
 - (Isolating shape) Say "failure on N of N days with data" when every day with data has a failing
   line, otherwise "failure on N of M days with data"; when the earlier days with data have no failing
   line, say so. When `trend` shows no failing line or is not measured, say only "N days with a
   failure".
 - **No isolating scope (`baseline`):** the shape carries no total, so there is no `lines` to say
   which days have data, and a day without a row may be quiet or have no data. Report "N days with a
-  failure in the window, its first failing line is at {earliest}", never "of M days
+  failure in the window, then the onset per the Onset bullet", never "of M days
   with data", and state the lowest and highest `count` across its complete days with a failure. The
   allowed statements are those and the `trend` reading (Reading `trend`): no "new since", no
   claim about days without a row.
@@ -611,12 +620,12 @@ Each entry:
     found instead>."`
   - Example of a match, with illustrative values (the value is the text between the double quotes):
     ```
-    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1`, `retries = 0` and `duration_ms = 30,100`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed; the failing rows all carry `retries = 0` and reach 2 of 9 `region` and 3 of 12 `zone`, and the sampled failing messages were the same timeout message. Failing lines ran 380–455 an hour from 03-06 11:00 to 03-07 08:00 (396 at 09:00, 290 from 10:00 to 10:41, partial) and 5.4–5.6% of lines a day on 03-01 to 03-05 (5.5% on 03-06), with a failure on all 8 days with data, the first failing line in the 7-day window from 02-28 10:41 at 02-28 11:20; within 09:41 to 10:41 `region = eu-1` had 301 rows (last seen 10:41) and `region = us-2` 111 (last seen 10:12); not measured: the breakdown by `zone` (it timed out)."
+    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1`, `retries = 0` and `duration_ms = 30,100`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed; the failing rows all carry `retries = 0` and reach 2 of 9 `region` and 3 of 12 `zone`, and the sampled failing messages were the same timeout message. Failing lines ran 380–455 an hour, on 18 of the 22 hours from 03-06 11:00 to 03-07 08:00 (396 at 09:00, 290 from 10:00 to 10:41, partial) and 5.4–5.6% of lines a day on 03-01 to 03-05 (5.5% on 03-06), with a failure on 8 of 8 days with data, the first failing line in the 7-day window from 02-28 10:41 at 02-28 11:20; within 09:41 to 10:41 `region = eu-1` had 301 rows (last seen 10:41) and `region = us-2` 111 (last seen 10:12); not measured: the breakdown by `zone` (it timed out)."
     ```
   - Sentence 3 for a rule with no isolating scope (no totals, so no share and no count of days with
     data), after a sentence 2 that gave the window and its date:
     ```
-    "Failing lines ran 2.5–4.1k an hour from 11-03 10:00 to 11-04 07:00 (3.9k at 08:00, 1.2k from 09:00 to 09:20, partial) and 89–96k a day on 10-29 to 11-03, on 8 days in the 7-day window from 10-28 09:20 (10-28 and 11-04 are partial), the first failing line in that window at 10-28 11:05."
+    "Failing lines ran 2.5–4.1k an hour, on 20 of the 22 hours from 11-03 10:00 to 11-04 07:00 (3.9k at 08:00, 1.2k from 09:00 to 09:20, partial) and 89.0–96.0k a day on 10-29 to 11-03, on 8 days in the 7-day window from 10-28 09:20 (10-28 and 11-04 are partial), the first failing line in that window at 10-28 11:05."
     ```
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
