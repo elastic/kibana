@@ -89,7 +89,7 @@ apiTest.describe(
         ],
         locations: [{ label: privateLocation.id, count: 1 }],
         projects: [],
-        schedules: [{ label: '3', count: 1 }],
+        schedules: [{ label: '3m', count: 1 }],
       });
     });
 
@@ -128,7 +128,7 @@ apiTest.describe(
         { label: 'synthetics', count: 2 },
       ]);
       expect(body.locations).toStrictEqual([{ label: privateLocation.id, count: 2 }]);
-      expect(body.schedules).toStrictEqual([{ label: '3', count: 2 }]);
+      expect(body.schedules).toStrictEqual([{ label: '3m', count: 2 }]);
     });
 
     apiTest('get list of filters with both legacy and modern monitors', async ({ apiClient }) => {
@@ -176,7 +176,7 @@ apiTest.describe(
         { label: 'synthetics', count: 4 },
       ]);
       expect(body.locations).toStrictEqual([{ label: privateLocation.id, count: 4 }]);
-      expect(body.schedules).toStrictEqual([{ label: '3', count: 4 }]);
+      expect(body.schedules).toStrictEqual([{ label: '3m', count: 4 }]);
     });
   }
 );
