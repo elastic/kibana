@@ -622,6 +622,8 @@ describe('When on integration detail', () => {
         const installButton = await renderResult.findByTestId('installAssetsButton');
         expect(installButton).toHaveTextContent('Install assets');
         expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+        // the divider between the version and the button
+        expect(renderResult.getAllByTestId('headerDivider')).toHaveLength(1);
       },
       TESTS_TIMEOUT
     );
@@ -658,6 +660,27 @@ describe('When on integration detail', () => {
         await renderResult.findByTestId('tab-overview');
         expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
         expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should not show the install button, nor a dangling header divider, without the privilege to install',
+      async () => {
+        const { integrations } = testRenderer.startServices.authz;
+        const canInstallPackages = integrations.installPackages;
+        integrations.installPackages = false;
+        try {
+          await renderAssetOnlyDetail();
+
+          await renderResult.findByTestId('tab-overview');
+          expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+          expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+          // only the version is left in the header, no empty slot with a divider next to it
+          expect(renderResult.queryByTestId('headerDivider')).toBeNull();
+        } finally {
+          integrations.installPackages = canInstallPackages;
+        }
       },
       TESTS_TIMEOUT
     );

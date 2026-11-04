@@ -721,7 +721,7 @@ export function Detail() {
                   ]
                 : []),
               ...(packageInfo.type === 'content' || isAssetOnlyPackage
-                ? !isInstalled
+                ? !isInstalled && canInstallPackages
                   ? [
                       { isDivider: true },
                       {
@@ -733,7 +733,7 @@ export function Detail() {
                         ),
                       },
                     ]
-                  : [] // if the package is already installed, don't show install button in header
+                  : [] // if the package is already installed, or the user can't install it, don't show the install button (nor its divider) in the header
                 : [
                     { isDivider: true },
                     {
@@ -774,7 +774,7 @@ export function Detail() {
             ].map((item, index) => (
               <EuiFlexItem grow={false} key={index} data-test-subj={item['data-test-subj']}>
                 {item.isDivider ?? false ? (
-                  <Divider />
+                  <Divider data-test-subj="headerDivider" />
                 ) : item.label ? (
                   <EuiDescriptionList className="eui-textRight" compressed textStyle="reverse">
                     <EuiDescriptionListTitle>{item.label}</EuiDescriptionListTitle>
@@ -796,6 +796,7 @@ export function Detail() {
       updateAvailable,
       isInstalled,
       isAssetOnlyPackage,
+      canInstallPackages,
       isCustomPackage,
       handleEditIntegrationClick,
       addIntegrationDisabledReason,
