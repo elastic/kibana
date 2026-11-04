@@ -614,6 +614,9 @@ export const flattenDataReferenceLeaves = (
 
 export const formatDataReferenceToken = (path: string): string => `{{ ${path} }}`;
 
+/** Value form: keeps the referenced data's type (list stays a list), only valid as a whole value. */
+export const formatValueReferenceToken = (path: string): string => `\${{ ${path} }}`;
+
 /** Known `FieldIcon` types for the labels the catalog can produce; anything else reads as unknown. */
 const ICON_TYPE_ALIASES: Readonly<Record<string, string>> = {
   integer: 'number',

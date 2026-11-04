@@ -7,12 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
+import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
 
 jest.mock('@kbn/code-editor', () => {
   const MockReact = jest.requireActual('react');
@@ -1016,5 +1017,112 @@ with:
     const saved = onFragmentChange.mock.calls[onFragmentChange.mock.calls.length - 1][0] as string;
     // Document keeps structured YAML — display collapse must not flatten the source.
     expect(saved).toMatch(/body:\n\s+fields: null\n\s+id: none/);
+  });
+
+  describe('Fixed | Data switch', () => {
+    const switchConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'switchy',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          retries: z.number().optional(),
+          debug: z.boolean().optional(),
+          method: z.enum(['GET', 'POST']).optional(),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Switchy',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const renderSwitchy = (fragment: string) =>
+      renderPanel({ stepType: 'switchy', connectors: switchConnectors, initialFragment: fragment });
+    const savedFragments = (spy: jest.Mock) =>
+      spy.mock.calls.map(([fragment]) => fragment as string);
+
+    it('writes the value form when a number takes data, and clears it going back to Fixed', () => {
+      const { onFragmentChange } = renderSwitchy('name: s\ntype: switchy\nwith:\n  retries: 3\n');
+      expect(screen.getByTestId('workflowStepConfigField-with.retries')).toHaveValue(3);
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-source-data'));
+      const box = screen.getByTestId('workflowStepConfigField-with.retries');
+      expect(box).toHaveTextContent('Select data from an earlier step');
+      // Switching alone never rewrites the YAML.
+      expect(savedFragments(onFragmentChange).every((f) => /retries: 3/.test(f))).toBe(true);
+
+      fireEvent.focusIn(within(box).getByTestId('workflowStepConfigField-with.retries-pick'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ consts.limit }}');
+      });
+      const picked = savedFragments(onFragmentChange).pop();
+      expect(picked).toMatch(/retries: ["']?\$\{\{ consts\.limit \}\}["']?/);
+      expect(screen.getByTestId('workflowStepConfigField-with.retries-chip')).toHaveTextContent(
+        'consts.limit'
+      );
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-source-fixed'));
+      expect(savedFragments(onFragmentChange).pop()).not.toMatch(/retries/);
+    });
+
+    it('never writes an empty string when a yes/no field switches to Data', () => {
+      const { onFragmentChange } = renderSwitchy('name: s\ntype: switchy\nwith:\n  debug: true\n');
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.debug-source-data'));
+      expect(savedFragments(onFragmentChange).some((f) => /debug: (""|'')/.test(f))).toBe(false);
+
+      fireEvent.focusIn(screen.getByTestId('workflowStepConfigField-with.debug-pick'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ consts.flag }}');
+      });
+      expect(savedFragments(onFragmentChange).pop()).toMatch(
+        /debug: ["']?\$\{\{ consts\.flag \}\}["']?/
+      );
+    });
+
+    it('flags a legacy text-form reference on a number and rewrites it on "Keep the type"', () => {
+      const { onFragmentChange } = renderSwitchy(
+        'name: s\ntype: switchy\nwith:\n  retries: "{{ consts.limit }}"\n'
+      );
+      const chip = screen.getByTestId('workflowStepConfigField-with.retries-chip');
+      expect(chip).toHaveAttribute('data-tone', 'warning');
+      // A reference is never a "Must be a number" error.
+      expect(screen.queryByText('Must be a number')).not.toBeInTheDocument();
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.retries-keepType'));
+      expect(savedFragments(onFragmentChange).pop()).toMatch(
+        /retries: ["']?\$\{\{ consts\.limit \}\}["']?/
+      );
+    });
+
+    it('keeps a dropdown reference in the text form and offers no literal {{ }} option', () => {
+      const { onFragmentChange } = renderSwitchy('name: s\ntype: switchy\nwith:\n  method: GET\n');
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.method-source-data'));
+      fireEvent.focusIn(screen.getByTestId('workflowStepConfigField-with.method-pick'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ inputs.method }}');
+      });
+      expect(savedFragments(onFragmentChange).pop()).toMatch(
+        /method: ["']?\{\{ inputs\.method \}\}["']?/
+      );
+      // A text-form reference in a text field is correct, so it is not flagged.
+      expect(screen.getByTestId('workflowStepConfigField-with.method-chip')).toHaveAttribute(
+        'data-tone',
+        'neutral'
+      );
+    });
+
+    it('offers no references or switch for a fixed-only loop cap', () => {
+      renderPanel({
+        stepType: 'while',
+        initialFragment:
+          'name: w\ntype: while\ncondition: "x"\nmax-iterations: 10\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+      });
+      const field = screen.getByTestId('workflowStepConfigField-max-iterations');
+      const row = field.closest('.workflowStepConfigFieldRow') as HTMLElement;
+      expect(field).toHaveValue('10');
+      expect(row).toHaveTextContent('Read exactly as typed');
+      expect(within(row).queryByTestId('workflowStepConfigDataReference')).not.toBeInTheDocument();
+      expect(
+        within(row).queryByTestId('workflowStepConfigField-max-iterations-source-data')
+      ).not.toBeInTheDocument();
+    });
   });
 });

@@ -48,15 +48,20 @@ import {
   stepSupportsErrorHandling,
   workflowsEditorChromeOverrides,
 } from '@kbn/workflows-ui';
+import { isReferenceValue } from '@kbn/workflows-yaml';
 import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { ReferenceCapableField } from './reference_capable_field';
+import { ReferenceValueBox } from './reference_value_box';
 import { StepErrorHandlingSection } from './step_error_handling_section';
 import { SwitchCasesField } from './switch_cases_field';
+import type { ValueSource } from './value_source_toggle';
+import { ValueSourceToggle } from './value_source_toggle';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import type { ReferenceForm } from '../lib/reference_value';
 import {
   fieldLabelDivergesFromKey,
   getStepFormSchema,
@@ -1349,6 +1354,13 @@ function StepFieldRow({
   const switchId = useGeneratedHtmlId({ prefix: `workflowStepConfigSwitch-${fieldId(field)}` });
   const [accused, setAccused] = useState(false);
   const [jsonDraftError, setJsonDraftError] = useState<string | undefined>();
+  const fixedOnly = field.templatable === false;
+  const testSubj = `workflowStepConfigField-${field.path.join('.')}`;
+  // Fixed | Data: any whole reference is "Data". Switching to Data before anything is picked
+  // keeps the typed value until a pick replaces it.
+  const [forcedData, setForcedData] = useState(false);
+  const valueIsReference = isReferenceValue(value);
+  const source: ValueSource = !fixedOnly && (valueIsReference || forcedData) ? 'data' : 'fixed';
 
   useEffect(() => {
     if (showValidation) setAccused(true);
@@ -1397,6 +1409,11 @@ function StepFieldRow({
           {field.key}
         </EuiText>
       ) : null}
+      {showOptionalMarker ? (
+        <EuiText size="xs" color="subdued">
+          {optionalLabel}
+        </EuiText>
+      ) : null}
     </span>
   );
 
@@ -1419,47 +1436,77 @@ function StepFieldRow({
     '&:focus, &:focus-visible': removeExpandedCss,
   };
 
+  const handleSourceChange = (next: ValueSource) => {
+    if (next === 'data') {
+      setForcedData(true);
+      return;
+    }
+    setForcedData(false);
+    // Only a reference needs clearing; a typed value that was kept stays as it is.
+    if (valueIsReference) onChange(field.required && field.kind === 'boolean' ? false : undefined);
+  };
+  const handleDataChange = (next: string | undefined) => {
+    setForcedData(true);
+    onChange(next);
+  };
+  const hasSourceToggle =
+    !fixedOnly && (field.kind === 'boolean' || field.kind === 'number' || field.kind === 'select');
+  const sourceToggle = hasSourceToggle ? (
+    <ValueSourceToggle
+      source={source}
+      fieldLabel={field.label}
+      onChange={handleSourceChange}
+      data-test-subj={`${testSubj}-source`}
+    />
+  ) : undefined;
+  // Dropdowns hold text, so their reference is the text form; numbers and yes/no keep their type.
+  const referenceForm: ReferenceForm = field.kind === 'select' ? 'text' : 'value';
+
+  const removeControl = onRemove ? (
+    <span
+      css={{
+        display: 'inline-flex',
+        alignItems: 'center',
+        // Expand ✕ on row hover / own focus.
+        '.workflowStepConfigFieldRow:hover &, &:focus-within': {
+          '[data-remove-field]': removeExpandedCss,
+        },
+      }}
+    >
+      <EuiButtonIcon
+        iconType="cross"
+        size="xs"
+        color="text"
+        title={removeLabel}
+        aria-label={removeLabel}
+        onClick={onRemove}
+        data-remove-field=""
+        data-test-subj={`workflowStepConfigRemoveOptional-${fieldId(field)}`}
+        css={removeExpandCss}
+      />
+    </span>
+  ) : undefined;
+
+  // "Optional" sits right after the label; the remove ✕ and the Fixed | Data switch take the far side.
   const labelAppend =
-    showOptionalMarker || onRemove ? (
-      <span
-        css={{
-          display: 'inline-flex',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          // Expand ✕ to the right of Optional on row hover / own focus.
-          '.workflowStepConfigFieldRow:hover &, &:focus-within': {
-            '[data-remove-field]': removeExpandedCss,
-          },
-        }}
-      >
-        {showOptionalMarker ? (
-          <EuiText size="xs" color="subdued">
-            {optionalLabel}
-          </EuiText>
-        ) : null}
-        {onRemove ? (
-          <EuiButtonIcon
-            iconType="cross"
-            size="xs"
-            color="text"
-            title={removeLabel}
-            aria-label={removeLabel}
-            onClick={onRemove}
-            data-remove-field=""
-            data-test-subj={`workflowStepConfigRemoveOptional-${fieldId(field)}`}
-            css={removeExpandCss}
-          />
-        ) : null}
+    removeControl || sourceToggle ? (
+      <span css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
+        {removeControl}
+        {sourceToggle}
       </span>
     ) : undefined;
 
-  const helpText = representable
-    ? field.description
-    : i18n.translate('workflows.stepConfigPanel.definedInYaml', {
+  const fixedOnlyHint = i18n.translate('workflows.stepConfigPanel.fixedOnlyHint', {
+    defaultMessage: 'Read exactly as typed. Not a template.',
+  });
+  const fixedOnlyAppend = <EuiIcon type="lock" aria-hidden />;
+  const helpText = !representable
+    ? i18n.translate('workflows.stepConfigPanel.definedInYaml', {
         defaultMessage: 'Defined in YAML',
-      });
-
-  const testSubj = `workflowStepConfigField-${field.path.join('.')}`;
+      })
+    : fixedOnly
+    ? [field.description, fixedOnlyHint].filter(Boolean).join(' ')
+    : field.description;
 
   if (!representable) {
     return (
@@ -1485,34 +1532,7 @@ function StepFieldRow({
   }
 
   if (field.kind === 'boolean') {
-    // Any string value is a Liquid/Mustache expression; `true`/`false` is typed mode.
-    const exprMode = typeof value === 'string';
-
-    const switchToExprLabel = i18n.translate('workflows.stepConfigPanel.switchToExpression', {
-      defaultMessage: 'Switch to expression mode',
-    });
-    const switchToTypedLabel = i18n.translate('workflows.stepConfigPanel.switchToTyped', {
-      defaultMessage: 'Switch to typed mode',
-    });
-
-    const exprToggleButton = (
-      <EuiToolTip
-        content={exprMode ? switchToTypedLabel : switchToExprLabel}
-        disableScreenReaderOutput
-      >
-        <EuiButtonIcon
-          iconType={exprMode ? 'apps' : 'code'}
-          size="xs"
-          color="text"
-          aria-label={exprMode ? switchToTypedLabel : switchToExprLabel}
-          aria-pressed={exprMode}
-          onClick={() => (exprMode ? onChange(false) : onChange(''))}
-          data-test-subj={`${testSubj}-exprToggle`}
-        />
-      </EuiToolTip>
-    );
-
-    if (exprMode) {
+    if (source === 'data') {
       return (
         <div className="workflowStepConfigFieldRow">
           <StepValidatedFormRow
@@ -1524,38 +1544,16 @@ function StepFieldRow({
             fullWidth
             display="row"
           >
-            <ReferenceCapableField
+            <ReferenceValueBox
               catalog={referenceCatalog}
-              value={typeof value === 'string' ? value : ''}
-              onChange={onChange}
-              onExpand={onExpand}
-            >
-              {({
-                value: textValue,
-                teachingPlaceholder,
-                appendControls,
-                reportChange,
-                attachInputRef,
-                isOpen,
-              }) => (
-                <EuiFieldText
-                  compressed
-                  fullWidth
-                  isInvalid={isInvalid}
-                  value={textValue}
-                  placeholder={textValue.length === 0 ? teachingPlaceholder : undefined}
-                  inputRef={attachInputRef}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    reportChange(next, e.target.selectionStart ?? next.length);
-                  }}
-                  onBlur={accuseIfInvalid}
-                  append={[appendControls, exprToggleButton]}
-                  data-test-subj={testSubj}
-                  aria-expanded={isOpen}
-                />
-              )}
-            </ReferenceCapableField>
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              data-test-subj={testSubj}
+            />
           </StepValidatedFormRow>
         </div>
       );
@@ -1601,11 +1599,9 @@ function StepFieldRow({
               aria-describedby={helpText ? `${switchId}-help` : undefined}
               data-test-subj={testSubj}
             />
+            {removeControl}
           </div>
-          <div css={{ display: 'inline-flex', alignItems: 'center', gap: euiTheme.size.xs }}>
-            {labelAppend}
-            {exprToggleButton}
-          </div>
+          {sourceToggle}
         </div>
         {helpText ? (
           <EuiText size="xs" color="subdued" id={`${switchId}-help`}>
@@ -1631,66 +1627,20 @@ function StepFieldRow({
   );
 
   switch (field.kind) {
-    case 'number': {
-      // Expression mode: any string containing {{ is a Liquid template, not a numeric literal.
-      const numExprMode = typeof value === 'string' && (value as string).includes('{{');
-      const numSwitchToExprLabel = i18n.translate('workflows.stepConfigPanel.switchToExpression', {
-        defaultMessage: 'Switch to expression mode',
-      });
-      const numSwitchToTypedLabel = i18n.translate('workflows.stepConfigPanel.switchToTyped', {
-        defaultMessage: 'Switch to typed mode',
-      });
-      const numExprToggle = (
-        <EuiToolTip
-          content={numExprMode ? numSwitchToTypedLabel : numSwitchToExprLabel}
-          disableScreenReaderOutput
-        >
-          <EuiButtonIcon
-            iconType={numExprMode ? 'apps' : 'code'}
-            size="xs"
-            color="text"
-            aria-label={numExprMode ? numSwitchToTypedLabel : numSwitchToExprLabel}
-            aria-pressed={numExprMode}
-            onClick={() => (numExprMode ? onChange(undefined) : onChange('{{  }}'))}
-            data-test-subj={`${testSubj}-exprToggle`}
-          />
-        </EuiToolTip>
-      );
+    case 'number':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
-          {numExprMode ? (
-            <ReferenceCapableField
+          {source === 'data' ? (
+            <ReferenceValueBox
               catalog={referenceCatalog}
-              value={typeof value === 'string' ? value : ''}
-              onChange={onChange}
-              onExpand={onExpand}
-            >
-              {({
-                value: textValue,
-                teachingPlaceholder,
-                appendControls,
-                reportChange,
-                attachInputRef,
-                isOpen,
-              }) => (
-                <EuiFieldText
-                  compressed
-                  fullWidth
-                  isInvalid={isInvalid}
-                  value={textValue}
-                  placeholder={textValue.length === 0 ? teachingPlaceholder : undefined}
-                  inputRef={attachInputRef}
-                  onChange={(e) => {
-                    const next = e.target.value;
-                    reportChange(next, e.target.selectionStart ?? next.length);
-                  }}
-                  onBlur={accuseIfInvalid}
-                  append={[appendControls, numExprToggle]}
-                  data-test-subj={testSubj}
-                  aria-expanded={isOpen}
-                />
-              )}
-            </ReferenceCapableField>
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              data-test-subj={testSubj}
+            />
           ) : (
             <EuiFieldNumber
               compressed
@@ -1699,36 +1649,45 @@ function StepFieldRow({
               value={typeof value === 'number' || typeof value === 'string' ? value : ''}
               onChange={(e) => onChange(e.target.value === '' ? undefined : Number(e.target.value))}
               onBlur={accuseIfInvalid}
-              append={numExprToggle}
+              append={fixedOnly ? fixedOnlyAppend : undefined}
               data-test-subj={testSubj}
             />
           )}
         </StepValidatedFormRow>
       );
-    }
     case 'select': {
-      // EuiComboBox: enum values + {{ }} template entry — same control for typed and expression mode.
-      const selectOptions = [
-        ...(field.options ?? []).map((o) => ({ label: o })),
-        { label: '{{ }}' },
-      ];
+      const selectOptions = (field.options ?? []).map((o) => ({ label: o }));
       const strVal = value === undefined || value === null ? undefined : String(value);
       const selectedOptions = strVal !== undefined ? [{ label: strVal }] : [];
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
-          <EuiComboBox
-            singleSelection={{ asPlainText: true }}
-            options={selectOptions}
-            selectedOptions={selectedOptions}
-            onChange={(opts) => onChange(opts[0]?.label ?? undefined)}
-            onCreateOption={(text) => onChange(text)}
-            isClearable={false}
-            compressed
-            fullWidth
-            isInvalid={isInvalid}
-            onBlur={accuseIfInvalid}
-            data-test-subj={testSubj}
-          />
+          {source === 'data' ? (
+            <ReferenceValueBox
+              catalog={referenceCatalog}
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              data-test-subj={testSubj}
+            />
+          ) : (
+            <EuiComboBox
+              aria-label={field.label}
+              singleSelection={{ asPlainText: true }}
+              options={selectOptions}
+              selectedOptions={selectedOptions}
+              onChange={(opts) => onChange(opts[0]?.label ?? undefined)}
+              onCreateOption={(text) => onChange(text)}
+              isClearable={false}
+              compressed
+              fullWidth
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              data-test-subj={testSubj}
+            />
+          )}
         </StepValidatedFormRow>
       );
     }
@@ -1746,6 +1705,7 @@ function StepFieldRow({
             onDraftErrorChange={setDraftError}
             // TODO(slice7): ES|QL keeps its specialized editor — no expand here.
             onExpand={field.language === 'esql' ? undefined : onExpand}
+            fixedOnly={fixedOnly}
           />
         </StepValidatedFormRow>
       );
@@ -1882,6 +1842,22 @@ function StepFieldRow({
     }
     case 'text':
     default:
+      if (fixedOnly) {
+        return wrapRow(
+          <StepValidatedFormRow {...rowProps}>
+            <EuiFieldText
+              compressed
+              fullWidth
+              isInvalid={isInvalid}
+              value={value === undefined || value === null ? '' : String(value)}
+              onChange={(e) => onChange(e.target.value)}
+              onBlur={accuseIfInvalid}
+              append={fixedOnlyAppend}
+              data-test-subj={testSubj}
+            />
+          </StepValidatedFormRow>
+        );
+      }
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <ReferenceCapableField
@@ -1938,6 +1914,7 @@ function CodeField({
   onBlur,
   onDraftErrorChange,
   onExpand,
+  fixedOnly = false,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1948,6 +1925,8 @@ function CodeField({
   onBlur: () => void;
   onDraftErrorChange: (error: string | undefined) => void;
   onExpand?: () => void;
+  /** The engine reads this value exactly as typed: no picker, no references. */
+  fixedOnly?: boolean;
 }) {
   const { euiTheme } = useEuiTheme();
   const isJson = field.language === 'json';
@@ -2135,6 +2114,22 @@ function CodeField({
           </div>
         )}
       </ReferenceCapableField>
+    );
+  }
+
+  if (fixedOnly) {
+    return (
+      <EuiFieldText
+        compressed
+        fullWidth
+        isInvalid={isInvalid}
+        value={draft}
+        onChange={(e) => applyDraft(e.target.value)}
+        onBlur={onBlur}
+        append={<EuiIcon type="lock" aria-hidden />}
+        data-test-subj={testSubj}
+        data-language={field.language}
+      />
     );
   }
 
