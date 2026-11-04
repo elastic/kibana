@@ -341,13 +341,14 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
   );
 };
 
-/** Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard. */
-const getGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
+/**
+ * Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard.
+ * Without snapping, the grid dots and drop preview are left out since panels land where they're dropped.
+ */
+const getGridStyles = (euiTheme: UseEuiTheme['euiTheme'], snapToGrid: boolean) => {
   const dot = (position: string) =>
     `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
-  return css`
-    padding-top: ${euiTheme.size.l};
-
+  const snapGuides = css`
     .kbnGridSection--targeted {
       background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
         calc((var(--kbnGridGutterSize) / 2) * -1px);
@@ -361,6 +362,10 @@ const getGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
     .kbnGridPanel--dragPreview {
       background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
     }
+  `;
+  return css`
+    padding-top: ${euiTheme.size.l};
+    ${snapToGrid && snapGuides}
 
     .kbnGridPanel--resizeHandle:after {
       display: block;
@@ -409,7 +414,7 @@ const AppGrid = ({
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );
-  const gridStyles = useMemo(() => getGridStyles(euiTheme), [euiTheme]);
+  const gridStyles = useMemo(() => getGridStyles(euiTheme, snapToGrid), [euiTheme, snapToGrid]);
 
   const onLayoutChange = useCallback(
     (next: GridLayoutData) =>
