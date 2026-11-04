@@ -9,6 +9,7 @@
     "@kbn/core",
     "@kbn/config-schema",
     "@kbn/entity-store",
+    "@kbn/logging-mocks",
     "@kbn/server-route-repository",
     "@kbn/spaces-plugin"
   ]

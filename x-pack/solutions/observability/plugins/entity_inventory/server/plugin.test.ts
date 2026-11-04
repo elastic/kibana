@@ -100,7 +100,11 @@ describe('EntityInventoryPlugin routes', () => {
     plugin.setup(core, {
       entityStore: buildEntityStoreSetup(jest.fn().mockReturnValue({ ok: true })),
     });
-    const [{ dependencies }] = registerRoutesMock.mock.calls[0];
+    const { lastCall } = registerRoutesMock.mock;
+    if (!lastCall) {
+      throw new Error('registerRoutes was not called during setup');
+    }
+    const [{ dependencies }] = lastCall;
     return {
       getEntityDefinitionsClientForSpace,
       getInventoryService: dependencies.getInventoryService,
