@@ -145,6 +145,28 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('scores 0 when an earlier validated draft had the connector but the final workflow dropped it', async () => {
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [
+        agentGenerateStep(),
+        agentValidateStep(WORKFLOW_WITH_SLACK),
+        agentValidateStep(WORKFLOW_WITHOUT_SLACK),
+      ],
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ connectorPresent: false });
+  });
+
+  it('prefers the delivered attachment over validation inputs', async () => {
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [agentGenerateStep(), agentValidateStep(WORKFLOW_WITH_SLACK)],
+      workflowAttachments: [{ id: 'att-1', version: 2, yaml: WORKFLOW_WITHOUT_SLACK }],
+    });
+    expect(result.score).toBe(0);
+  });
+
   it('passes when generate_workflow returns the YAML itself (non-agent callers)', async () => {
     const result = await run({
       messages: [{ message: 'Here is your workflow.' }],
@@ -251,7 +273,7 @@ describe('ConnectorInvoked evaluator', () => {
   });
 
   describe('collectProducedText', () => {
-    it('gathers messages, attachments, validate params.yaml and generate data.yaml, nothing else', () => {
+    it('gathers messages, attachments and generate data.yaml; validate params.yaml only as a last-candidate fallback', () => {
       const text = collectProducedText({
         messages: [{ message: 'one' }],
         workflowAttachments: [{ id: 'a', version: 1, yaml: 'attachment-yaml' }],
@@ -271,7 +293,7 @@ describe('ConnectorInvoked evaluator', () => {
       });
       expect(text).toContain('one');
       expect(text).toContain('attachment-yaml');
-      expect(text).toContain('validated-yaml');
+      expect(text).not.toContain('validated-yaml');
       expect(text).toContain('generated-yaml');
       ['validate-result-only', 'generate-param', 'comment-only', 'analysis-only'].forEach(
         (excluded) => expect(text).not.toContain(excluded)
