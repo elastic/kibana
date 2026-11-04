@@ -96,6 +96,8 @@ export const withEvalsTracing = (baseConfig: ScoutServerConfig): ScoutServerConf
       },
       serverArgs: [
         ...baseConfig.kbnTestServer.serverArgs,
+        // Non-streaming inference calls from evals can run past the 120 s default; a dropped socket fails the example with no retry.
+        '--server.socketTimeout=900000',
         '--xpack.evals.enabled=true',
         // Suites ingest scores and read datasets through the evals routes.
         '--xpack.evals.mode=full',

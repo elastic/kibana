@@ -37,6 +37,12 @@ describe.each([
     process.env = originalEnv;
   });
 
+  it('raises the Kibana socket timeout above the 120 s default for non-streaming inference calls', () => {
+    const { kbnTestServer } = loadServers(modulePath, {});
+
+    expect(kbnTestServer.serverArgs).toContain('--server.socketTimeout=900000');
+  });
+
   it('adds no secure file without GCS_CREDENTIALS', () => {
     const { esTestCluster } = loadServers(modulePath, {});
 
