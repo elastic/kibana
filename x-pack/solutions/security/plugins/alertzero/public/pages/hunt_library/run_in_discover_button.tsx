@@ -11,7 +11,9 @@ import type { CoreStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import { v4 as uuidv4 } from 'uuid';
-import type { HuntLibraryDetail } from '../../../common/hunt_library';
+import type { SerializableRecord } from '@kbn/utility-types';
+import type { HuntLaunchResponse, HuntLibraryDetail } from '../../../common/hunt_library';
+import { buildHuntProfileLocatorState } from '../../../common/hunt_library_profile_state';
 import { buildDiscoverEsqlUrl } from '../../agent_builder/attachment_types/navigation/discover_urls';
 import { useLaunchHunt } from '../../hooks/use_launch_hunt';
 import { ALERTZERO_UI_EVENTS, useAlertZeroTelemetry } from '../../telemetry';
@@ -49,14 +51,27 @@ export const RunInDiscoverButton: React.FC<RunInDiscoverButtonProps> = ({ hunt }
     if (attempt.current?.huntId !== hunt.id) {
       attempt.current = { huntId: hunt.id, sessionId: uuidv4() };
     }
+    let launch: HuntLaunchResponse;
     try {
-      await mutateAsync({ huntId: hunt.id, sessionId: attempt.current.sessionId });
+      launch = await mutateAsync({ huntId: hunt.id, sessionId: attempt.current.sessionId });
     } catch {
       services.notifications?.toasts.addDanger({ title: i18n.RUN_ERROR_TITLE });
       return;
     }
     attempt.current = undefined;
     reportEvent(ALERTZERO_UI_EVENTS.HuntLaunched, { hunt_id: hunt.id });
+
+    // The signed token travels in navigation state, which a URL cannot carry, so Hunt mode needs
+    // the locator. Without a token Discover still opens, in its normal mode.
+    const locator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
+    if (launch?.profile_token && locator) {
+      await locator.navigate({
+        query: { esql: hunt.query.query },
+        timeRange: hunt.query.defaultTimeRange,
+        profileState: buildHuntProfileLocatorState(launch.profile_token),
+      } as SerializableRecord);
+      return;
+    }
     await services.application?.navigateToUrl(discoverUrl);
   };
 

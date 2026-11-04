@@ -16,6 +16,7 @@ jest.mock('@kbn/kibana-react-plugin/public', () => ({ useKibana: jest.fn() }));
 jest.mock('../../hooks/use_launch_hunt');
 
 const getRedirectUrl = jest.fn().mockReturnValue('/app/discover#/?esql');
+const navigate = jest.fn().mockResolvedValue(undefined);
 const navigateToUrl = jest.fn().mockResolvedValue(undefined);
 const addDanger = jest.fn();
 const reportEvent = jest.fn();
@@ -28,7 +29,7 @@ const setup = ({ share = true }: { share?: boolean } = {}) => {
             url: {
               locators: {
                 get: (id: string) =>
-                  id === 'DISCOVER_APP_LOCATOR' ? { getRedirectUrl } : undefined,
+                  id === 'DISCOVER_APP_LOCATOR' ? { getRedirectUrl, navigate } : undefined,
               },
             },
           }
@@ -68,6 +69,22 @@ describe('RunInDiscoverButton', () => {
     });
     expect(reportEvent).toHaveBeenCalledTimes(1);
     expect(reportEvent).toHaveBeenCalledWith('alertzero_ui_hunt_launched', { hunt_id: hunt.id });
+  });
+
+  it('opens Discover through the locator with the signed Hunt state when the launch returns a token', async () => {
+    mockMutation(jest.fn().mockResolvedValue({ profile_token: 'signed-token' }));
+    const hunt = makeDetail();
+    render(<RunInDiscoverButton hunt={hunt} />);
+
+    fireEvent.click(screen.getByTestId('alertZeroHuntRunInDiscover'));
+
+    await waitFor(() => expect(navigate).toHaveBeenCalledTimes(1));
+    expect(navigate).toHaveBeenCalledWith({
+      query: { esql: hunt.query.query },
+      timeRange: hunt.query.defaultTimeRange,
+      profileState: { huntSession: { token: 'signed-token' } },
+    });
+    expect(navigateToUrl).not.toHaveBeenCalled();
   });
 
   it('does not open Discover when recording the session fails, and says so', async () => {

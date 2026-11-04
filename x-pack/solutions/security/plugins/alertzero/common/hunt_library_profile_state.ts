@@ -37,9 +37,7 @@ export interface HuntProfileTokenPayload {
 }
 
 /** The Discover locator `profileState` that opens a Hunt session. */
-export interface HuntProfileLocatorState {
-  [HUNT_PROFILE_STATE_KEY]: { token: string };
-}
+export type HuntProfileLocatorState = Record<typeof HUNT_PROFILE_STATE_KEY, { token: string }>;
 
 /** Builds the locator `profileState` that carries a signed token into Discover. */
 export const buildHuntProfileLocatorState = (token: string): HuntProfileLocatorState => ({
