@@ -107,6 +107,8 @@ export interface NotebookApp {
   hideTimePicker?: boolean;
   /** Panels keep the gaps left between them instead of moving up to close them. */
   freePlacement?: boolean;
+  /** Set to false to move and resize panels in fine steps instead of whole grid cells. */
+  snapToGrid?: boolean;
   /** Shown at the top of the app; the tab title is separate and only labels the tab. */
   heading?: string;
   description?: string;

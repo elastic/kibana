@@ -6,7 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../common/constants';
+import { GRID_SUBDIVISIONS, MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../common/constants';
 
 export const MAX_CELLS = 200;
 export const MAX_QUERY_LENGTH = 20_000;
@@ -119,6 +119,7 @@ const cellsSchema = schema.recordOf(idSchema, cellSchema, {
 });
 
 const gridUnitSchema = schema.number({ min: 0, max: MAX_GRID_UNITS });
+const panelSizeSchema = schema.number({ min: 1 / GRID_SUBDIVISIONS, max: MAX_GRID_UNITS });
 
 const appSchema = schema.object({
   id: idSchema,
@@ -129,13 +130,14 @@ const appSchema = schema.object({
       cellId: idSchema,
       x: gridUnitSchema,
       y: gridUnitSchema,
-      width: schema.number({ min: 1, max: MAX_GRID_UNITS }),
-      height: schema.number({ min: 1, max: MAX_GRID_UNITS }),
+      width: panelSizeSchema,
+      height: panelSizeSchema,
     }),
     { maxSize: MAX_CELLS }
   ),
   hideTimePicker: schema.maybe(schema.boolean()),
   freePlacement: schema.maybe(schema.boolean()),
+  snapToGrid: schema.maybe(schema.boolean()),
   heading: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
   description: schema.maybe(schema.string({ maxLength: MAX_DESCRIPTION_LENGTH })),
 });

@@ -122,6 +122,25 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
             data-test-subj="notebookAppSettingsFreePlacement"
           />
         </EuiFormRow>
+        <EuiFormRow
+          helpText={i18n.translate('xpack.notebook.appSettings.snapToGridHelp', {
+            defaultMessage:
+              'Panels line up with the grid as you move and resize them. Turn off to place them more precisely.',
+          })}
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.notebook.appSettings.snapToGrid', {
+              defaultMessage: 'Snap to grid',
+            })}
+            checked={app.snapToGrid ?? true}
+            onChange={({ target: { checked } }) =>
+              store.updateApp(appId, ({ snapToGrid, ...rest }) =>
+                checked ? rest : { ...rest, snapToGrid: false }
+              )
+            }
+            data-test-subj="notebookAppSettingsSnapToGrid"
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
     </NotebookFlyout>
   );

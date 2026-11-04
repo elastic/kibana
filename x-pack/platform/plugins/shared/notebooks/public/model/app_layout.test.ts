@@ -251,6 +251,18 @@ describe('grid layout conversion', () => {
     });
   });
 
+  it('stores fine positions as fractions of a grid cell', () => {
+    const fine = toGridLayout(panels, 4);
+    expect(fine.p2).toMatchObject({ column: 24, row: 0, width: 24, height: 16 });
+    const nudged = { ...fine, p2: { ...fine.p2, column: 25, row: 3 } };
+    expect(applyGridLayout(panels, nudged, 4)[1]).toMatchObject({ x: 6.25, y: 0.75 });
+  });
+
+  it('rounds fine positions to whole cells when snapping again', () => {
+    const fine = [{ ...panels[0], x: 0.75, width: 5.25 }];
+    expect(toGridLayout(fine).p1).toMatchObject({ column: 1, width: 5 });
+  });
+
   it('keeps a panel the layout does not mention where it was', () => {
     const { p1 } = toGridLayout(panels);
     expect(applyGridLayout(panels, { p1 })).toEqual(panels);

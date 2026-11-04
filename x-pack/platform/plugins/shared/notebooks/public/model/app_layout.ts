@@ -89,22 +89,44 @@ export const appendPanel = (
   panels: [...app.panels, ...packPanels([cell], getBottom(app.panels), createId)],
 });
 
-/** The app's panels in the shape the grid layout engine edits, keyed by panel id. */
-export const toGridLayout = (panels: readonly AppPanel[]): GridLayoutData =>
-  Object.fromEntries(
+/**
+ * The app's panels in the shape the grid layout engine edits, keyed by panel id. `scale` is how
+ * many engine cells make up one app grid cell; positions between engine cells are rounded.
+ */
+export const toGridLayout = (panels: readonly AppPanel[], scale = 1): GridLayoutData => {
+  const toCells = (units: number) => Math.round(units * scale);
+  return Object.fromEntries(
     panels.map(({ id, x, y, width, height }) => [
       id,
-      { type: 'panel' as const, id, column: x, row: y, width, height },
+      {
+        type: 'panel' as const,
+        id,
+        column: toCells(x),
+        row: toCells(y),
+        width: Math.max(1, toCells(width)),
+        height: Math.max(1, toCells(height)),
+      },
     ])
   );
+};
 
 /** The panels moved and resized to match the grid layout; panels it doesn't mention keep their place. */
-export const applyGridLayout = (panels: readonly AppPanel[], layout: GridLayoutData): AppPanel[] =>
+export const applyGridLayout = (
+  panels: readonly AppPanel[],
+  layout: GridLayoutData,
+  scale = 1
+): AppPanel[] =>
   panels.map((panel) => {
     const widget = layout[panel.id];
     if (widget?.type !== 'panel') return panel;
     const { column, row, width, height } = widget;
-    return { ...panel, x: column, y: row, width, height };
+    return {
+      ...panel,
+      x: column / scale,
+      y: row / scale,
+      width: width / scale,
+      height: height / scale,
+    };
   });
 
 /**

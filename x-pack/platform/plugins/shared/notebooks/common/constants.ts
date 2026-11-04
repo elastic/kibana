@@ -18,3 +18,6 @@ export const MAX_TITLE_LENGTH = 1024;
 export const PLUGIN_NAME = i18n.translate('xpack.notebook.pluginName', {
   defaultMessage: 'Notebooks',
 });
+
+/** Without snap to grid, panels move and resize in steps of this fraction of a grid cell. */
+export const GRID_SUBDIVISIONS = 4;

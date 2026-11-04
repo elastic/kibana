@@ -52,6 +52,7 @@ import {
   reconcileApps,
   toGridLayout,
 } from '../model/app_layout';
+import { GRID_SUBDIVISIONS } from '../../common/constants';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
@@ -119,7 +120,7 @@ const MOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.movePanel', {
 });
 
 /** Dashboard-style panel chrome: a dashed outline and floating move and menu actions on hover. */
-const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean) => {
+const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean, inset: number) => {
   const { euiTheme } = euiThemeContext;
   const visible = css`
     z-index: ${euiTheme.levels.menu};
@@ -130,7 +131,8 @@ const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean) => {
   return {
     container: css`
       position: relative;
-      height: 100%;
+      margin: ${inset}px;
+      height: calc(100% - ${inset * 2}px);
       &:hover .${HOVER_ACTIONS_CLASS}, &:has(:focus-visible) .${HOVER_ACTIONS_CLASS} {
         ${visible}
       }
@@ -188,19 +190,22 @@ const AppGridPanel = ({
   panel,
   setDragHandles,
   onRevealCell,
+  inset,
 }: {
   app: NotebookApp;
   panel: AppPanel;
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
   onRevealCell: (cellId: string) => void;
+  /** Space in pixels kept clear around the panel, standing in for the grid gutter. */
+  inset: number;
 }) => {
   const { store } = useNotebook();
   const euiThemeContext = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const styles = useMemo(
-    () => getPanelStyles(euiThemeContext, isMenuOpen),
-    [euiThemeContext, isMenuOpen]
+    () => getPanelStyles(euiThemeContext, isMenuOpen, inset),
+    [euiThemeContext, isMenuOpen, inset]
   );
   const dragHandleRef = useCallback(
     (element: HTMLButtonElement | null) => setDragHandles([element]),
@@ -384,27 +389,33 @@ const AppGrid = ({
 }) => {
   const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
-  const layout = useMemo(() => toGridLayout(app.panels), [app.panels]);
+  const snapToGrid = app.snapToGrid ?? true;
+  const gutterSize = euiTheme.base / 2;
+  // Without snapping, the engine works on a finer grid with no gutter; panels inset themselves by
+  // half a gutter so they keep the same spacing and row height as the snapped grid.
+  const scale = snapToGrid ? 1 : GRID_SUBDIVISIONS;
+  const layout = useMemo(() => toGridLayout(app.panels, scale), [app.panels, scale]);
   const gridSettings = useMemo<GridSettings>(
     () => ({
-      gutterSize: euiTheme.base / 2,
-      rowHeight: APP_ROW_HEIGHT,
-      columnCount: APP_GRID_COLUMNS,
+      gutterSize: snapToGrid ? gutterSize : 0,
+      rowHeight: snapToGrid ? APP_ROW_HEIGHT : (APP_ROW_HEIGHT + gutterSize) / scale,
+      columnCount: APP_GRID_COLUMNS * scale,
       keyboardDragTopLimit: 0,
       allowGaps: app.freePlacement ?? false,
     }),
-    [euiTheme.base, app.freePlacement]
+    [snapToGrid, gutterSize, scale, app.freePlacement]
   );
   const gridStyles = useMemo(() => getGridStyles(euiTheme), [euiTheme]);
 
   const onLayoutChange = useCallback(
     (next: GridLayoutData) =>
       store.updateApp(app.id, (current) => {
-        const panels = applyGridLayout(current.panels, next);
+        const panels = applyGridLayout(current.panels, next, scale);
         return isEqual(panels, current.panels) ? current : { ...current, panels };
       }),
-    [store, app.id]
+    [store, app.id, scale]
   );
+  const panelInset = snapToGrid ? 0 : gutterSize / 2;
 
   const renderPanelContents = useCallback(
     (panelId: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
@@ -415,10 +426,11 @@ const AppGrid = ({
           panel={panel}
           setDragHandles={setDragHandles}
           onRevealCell={onRevealCell}
+          inset={panelInset}
         />
       ) : null;
     },
-    [app, onRevealCell]
+    [app, onRevealCell, panelInset]
   );
 
   if (app.panels.length === 0) {
@@ -435,7 +447,7 @@ const AppGrid = ({
   return (
     <div data-test-subj="notebookAppGrid">
       <GridLayout
-        key={app.freePlacement ? 'free' : 'compact'}
+        key={`${app.freePlacement ? 'free' : 'compact'}-${snapToGrid ? 'snap' : 'fine'}`}
         layout={layout}
         gridSettings={gridSettings}
         renderPanelContents={renderPanelContents}

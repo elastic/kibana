@@ -130,6 +130,7 @@ describe('notebookAttributesSchema', () => {
         ...app,
         hideTimePicker: true,
         freePlacement: true,
+        snapToGrid: false,
         heading: 'Traffic overview',
         description: 'Daily visits by host',
       })),
