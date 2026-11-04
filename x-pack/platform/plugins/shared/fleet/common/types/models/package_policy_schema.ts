@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../services';
+import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 export const PackagePolicyNamespaceSchema = schema.string({
@@ -67,7 +67,7 @@ export const DeprecationInfoSchema = schema.object(
 );
 
 const PackagePolicyStreamsSchema = {
-  id: schema.maybe(schema.string()), // BWC < 7.11
+  id: schema.maybe(schema.string({ validate: validateNoPathTraversalIdSchema })), // BWC < 7.11
   enabled: schema.boolean(),
   keep_enabled: schema.maybe(schema.boolean()),
   release: schema.maybe(
@@ -97,7 +97,7 @@ const PackagePolicyStreamsSchema = {
 };
 
 export const PackagePolicyInputsSchema = {
-  id: schema.maybe(schema.string()),
+  id: schema.maybe(schema.string({ validate: validateNoPathTraversalIdSchema })),
   name: schema.maybe(schema.string()),
   type: schema.string(),
   policy_template: schema.maybe(schema.string()),
