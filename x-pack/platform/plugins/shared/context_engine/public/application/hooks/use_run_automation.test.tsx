@@ -48,7 +48,7 @@ jest.mock('@kbn/workflows-ui', () => ({
   },
 }));
 
-const renderUseRunAutomation = () => {
+const renderUseRunAutomation = (options: { onStarted?: (executionId: string) => void } = {}) => {
   const core = coreMock.createStart();
   core.application.getUrlForApp.mockReturnValue('/app/workflows/wf-1');
   core.notifications.toasts.addSuccess = mockAddSuccess;
@@ -57,7 +57,7 @@ const renderUseRunAutomation = () => {
   const queryClient = new QueryClient();
   jest.spyOn(queryClient, 'invalidateQueries');
 
-  const { result } = renderHook(() => useRunAutomation(), {
+  const { result } = renderHook(() => useRunAutomation(options), {
     wrapper: ({ children }) => (
       <I18nProvider>
         <QueryClientProvider client={queryClient}>
@@ -87,6 +87,18 @@ describe('useRunAutomation', () => {
     expect(queryClient.invalidateQueries).toHaveBeenCalledWith({
       queryKey: ['context_engine', 'workflow_latest_execution', 'workflow-1'],
     });
+  });
+
+  it('reports the started execution to the caller', () => {
+    const onStarted = jest.fn();
+    renderUseRunAutomation({ onStarted });
+
+    capturedRunWorkflowOptions?.onSuccess(
+      { workflowExecutionId: 'run-1' } as RunWorkflowResponseDto,
+      { id: 'workflow-1', inputs: {} } as RunWorkflowParams
+    );
+
+    expect(onStarted).toHaveBeenCalledWith('run-1');
   });
 
   it('delegates runAutomation to useRunWorkflow mutate', () => {

@@ -19,7 +19,13 @@ export interface UseRunAutomationResult {
   isLoading: boolean;
 }
 
-export const useRunAutomation = (): UseRunAutomationResult => {
+export interface UseRunAutomationOptions {
+  onStarted?: (executionId: string) => void;
+}
+
+export const useRunAutomation = ({
+  onStarted,
+}: UseRunAutomationOptions = {}): UseRunAutomationResult => {
   const {
     services: { application, notifications },
   } = useKibana();
@@ -27,8 +33,8 @@ export const useRunAutomation = (): UseRunAutomationResult => {
 
   const { mutate, isLoading } = useRunWorkflow({
     onSuccess: (data, { id: automationId }) => {
-      // The row shows the new run as running right away instead of at the next poll.
       queryClient.invalidateQueries({ queryKey: latestWorkflowExecutionQueryKey(automationId) });
+      onStarted?.(data.workflowExecutionId);
       const executionHref = application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: getWorkflowExecutionPath(automationId, data.workflowExecutionId),
       });

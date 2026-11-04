@@ -25,7 +25,7 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { getInputsFromDefinition } from '@kbn/workflows/spec/lib/field_conversion';
 import { RunWorkflowInputsModal, requiresUserSuppliedInputs } from '@kbn/workflows-ui';
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../../common/telemetry';
 import type { AiIndexAutomation } from '../../../../common/http_api/ai_indices';
 import { useAutomationRowMenuItems } from '../../hooks/use_automation_row_menu_items';
@@ -112,8 +112,13 @@ const LastExecution = ({
       </EuiText>
     );
   }
-  const time = <FormattedRelative value={new Date(execution.startedAt)} />;
   const icon = statusIcon(execution.status);
+  // Skipped runs may have no start time, so the status stands in for it.
+  const when = execution.startedAt ? (
+    <FormattedRelative value={new Date(execution.startedAt)} />
+  ) : (
+    icon?.label
+  );
   return (
     <EuiFlexGroup
       gutterSize="xs"
@@ -139,10 +144,10 @@ const LastExecution = ({
         <EuiText size="xs" color="subdued" className="eui-textTruncate">
           {href ? (
             <EuiLink href={href} color="text">
-              {time}
+              {when}
             </EuiLink>
           ) : (
-            time
+            when
           )}
         </EuiText>
       </EuiFlexItem>
@@ -173,7 +178,8 @@ export const AutomationRow = ({
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [isInputsModalOpen, setIsInputsModalOpen] = useState(false);
-  const { runAutomation, isLoading } = useRunAutomation();
+  const [startedExecutionId, setStartedExecutionId] = useState<string>();
+  const { runAutomation, isLoading } = useRunAutomation({ onStarted: setStartedExecutionId });
   const {
     services: { application },
   } = useKibana();
@@ -181,13 +187,32 @@ export const AutomationRow = ({
   const enabled = workflowSummary?.enabled;
   const definition = workflowSummary?.definition;
   const hasWorkflowDefinition = definition != null;
-  const latest = useLatestWorkflowExecution(automation.value, { enabled: hasWorkflowDefinition });
+  const latest = useLatestWorkflowExecution(automation.value, {
+    enabled: hasWorkflowDefinition,
+    awaitedExecutionId: startedExecutionId,
+  });
   const isRunning = isLoading || latest.isRunning;
+  const runningExecutionId = latest.activeExecutionId ?? startedExecutionId;
+  const runningHref = runningExecutionId
+    ? application.getUrlForApp(WORKFLOWS_APP_ID, {
+        path: getWorkflowExecutionPath(automation.value, runningExecutionId),
+      })
+    : undefined;
   const latestExecutionHref = latest.execution
     ? application.getUrlForApp(WORKFLOWS_APP_ID, {
         path: getWorkflowExecutionPath(automation.value, latest.execution.id),
       })
     : undefined;
+
+  useEffect(() => {
+    if (
+      startedExecutionId !== undefined &&
+      (latest.execution?.id === startedExecutionId ||
+        latest.activeExecutionId === startedExecutionId)
+    ) {
+      setStartedExecutionId(undefined);
+    }
+  }, [latest.execution?.id, latest.activeExecutionId, startedExecutionId]);
   const actionsAriaLabel = i18n.translate(
     'xpack.contextEngine.aiIndexDetail.automations.actionsAriaLabel',
     { defaultMessage: 'Actions for {name}', values: { name: displayName } }
@@ -230,42 +255,42 @@ export const AutomationRow = ({
         icon={<ItemRowIcon iconType="workflow" />}
         actions={
           <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-            {canRun ? (
+            {isRunning ? (
               <EuiFlexItem grow={false}>
-                {isRunning ? (
-                  <EuiToolTip content={runningLabel} disableScreenReaderOutput>
-                    {latestExecutionHref && latest.isRunning ? (
-                      <EuiLink
-                        href={latestExecutionHref}
-                        aria-label={runningLabel}
-                        data-test-subj="contextAutomationRunning"
-                      >
-                        <EuiLoadingSpinner size="m" />
-                      </EuiLink>
-                    ) : (
-                      <EuiLoadingSpinner
-                        size="m"
-                        aria-label={runningLabel}
-                        data-test-subj="contextAutomationRunning"
-                      />
-                    )}
-                  </EuiToolTip>
-                ) : (
-                  <EuiToolTip content={runLabel} disableScreenReaderOutput>
-                    <EuiButtonIcon
-                      iconType="play"
-                      color="text"
-                      aria-label={runLabel}
-                      isDisabled={isRunDisabled}
-                      onClick={handleRun}
-                      data-test-subj="contextRunAutomationButton"
-                      {...getEbtProps({
-                        element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-                        action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
-                      })}
+                <EuiToolTip content={runningLabel} disableScreenReaderOutput>
+                  {runningHref ? (
+                    <EuiLink
+                      href={runningHref}
+                      aria-label={runningLabel}
+                      data-test-subj="contextAutomationRunning"
+                    >
+                      <EuiLoadingSpinner size="m" />
+                    </EuiLink>
+                  ) : (
+                    <EuiLoadingSpinner
+                      size="m"
+                      aria-label={runningLabel}
+                      data-test-subj="contextAutomationRunning"
                     />
-                  </EuiToolTip>
-                )}
+                  )}
+                </EuiToolTip>
+              </EuiFlexItem>
+            ) : canRun ? (
+              <EuiFlexItem grow={false}>
+                <EuiToolTip content={runLabel} disableScreenReaderOutput>
+                  <EuiButtonIcon
+                    iconType="play"
+                    color="text"
+                    aria-label={runLabel}
+                    isDisabled={isRunDisabled}
+                    onClick={handleRun}
+                    data-test-subj="contextRunAutomationButton"
+                    {...getEbtProps({
+                      element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
+                      action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
+                    })}
+                  />
+                </EuiToolTip>
               </EuiFlexItem>
             ) : null}
             <EuiFlexItem grow={false}>
@@ -317,7 +342,15 @@ export const AutomationRow = ({
               </EuiBadge>
             </EuiFlexItem>
           ) : null}
-          {hasWorkflowDefinition && latest.execution !== undefined ? (
+          {latest.isError ? (
+            <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
+              <EuiText size="xs" color="danger" data-test-subj="contextAutomationLastExecution">
+                {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.statusUnavailable', {
+                  defaultMessage: 'Status unavailable',
+                })}
+              </EuiText>
+            </EuiFlexItem>
+          ) : hasWorkflowDefinition && latest.execution !== undefined ? (
             <EuiFlexItem grow={false} css={{ minWidth: 0 }}>
               <LastExecution execution={latest.execution} href={latestExecutionHref} />
             </EuiFlexItem>

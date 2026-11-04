@@ -366,6 +366,7 @@ describe('AutomationRow', () => {
     it('shows a spinner linking to the running execution instead of Run', () => {
       mockLatestExecution.mockReturnValue({
         execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        activeExecutionId: 'run-1',
         isRunning: true,
         isLoading: false,
       });
@@ -376,6 +377,48 @@ describe('AutomationRow', () => {
         'href',
         '/app/workflows/workflow-value-id?tab=executions&executionId=run-1'
       );
+    });
+
+    it('shows the running spinner to users who cannot run workflows', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: { id: 'run-1', status: 'running', startedAt: new Date().toISOString() },
+        activeExecutionId: 'run-1',
+        isRunning: true,
+        isLoading: false,
+      });
+      renderAutomationRow({ ...runnable, canRun: false });
+
+      expect(screen.getByTestId('contextAutomationRunning')).toBeInTheDocument();
+      expect(screen.queryByTestId('contextRunAutomationButton')).not.toBeInTheDocument();
+    });
+
+    it('says the status is unavailable when the execution query fails', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: undefined,
+        isRunning: false,
+        isError: true,
+        isLoading: false,
+      });
+      renderAutomationRow(runnable);
+
+      expect(screen.getByTestId('contextAutomationLastExecution')).toHaveTextContent(
+        'Status unavailable'
+      );
+      expect(screen.getByTestId('contextRunAutomationButton')).toBeEnabled();
+    });
+
+    it('shows the status in place of the time for a skipped run without a start time', () => {
+      mockLatestExecution.mockReturnValue({
+        execution: { id: 'run-2', status: 'skipped' },
+        isRunning: false,
+        isLoading: false,
+      });
+      renderAutomationRow(runnable);
+
+      expect(screen.getByTestId('contextAutomationLastExecution')).toHaveTextContent('Skipped');
+      expect(
+        screen.getByTestId('contextAutomationLastExecutionStatus-skipped')
+      ).toBeInTheDocument();
     });
 
     it('shows when the workflow last ran and how it ended', () => {
