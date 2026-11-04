@@ -130,3 +130,22 @@ export interface HuntPreserveResponse {
   /** True when this request created the Investigation. */
   created: boolean;
 }
+
+/** Everything Discover needs to reopen a hunt from an Investigation. */
+export interface HuntContinueResponse {
+  /** A fresh session, so run history shows the continuation as its own session. */
+  session_id: string;
+  execution_id: string;
+  investigation_id: string;
+  definition_id: string;
+  /** Signed state that opens Discover in Hunt mode, linked to this Investigation. */
+  profile_token: string;
+  /** The Discover state to restore. Row selection and other UI state are not restored. */
+  resume: {
+    query: string;
+    filters: Array<Record<string, string | number | boolean | null>>;
+    time_range: { from: string; to: string };
+    columns: string[];
+    data_view_id: string;
+  };
+}
