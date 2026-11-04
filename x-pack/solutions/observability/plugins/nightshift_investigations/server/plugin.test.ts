@@ -23,6 +23,7 @@ const createPlugin = (memoryEnabled = false) =>
       cortex: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
+      findings_recorder: { enabled: true },
     })
   );
 
@@ -168,6 +169,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
       expect.arrayContaining([
         'nightshift.resolveModel',
         'nightshift.onlineEvals.classifyRound',
+        'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
         'nightshift.cortexHydrate',

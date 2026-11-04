@@ -349,6 +349,35 @@ describe('buildInvestigationMessage with a mixed alert array', () => {
   });
 });
 
+describe('buildInvestigationMessage with a v2 alert without a rule', () => {
+  const base: V2AlertSnapshot = {
+    alert_version: 'v2',
+    id: 'episode-1',
+    group_hash: 'hash-1',
+    status: 'active',
+    start: '2026-08-24T12:00:00.000Z',
+  };
+
+  it('names the episode from its rule name', () => {
+    const message = buildInvestigationMessage({
+      alerts: [{ ...base, source: 'elastic.significant_events', rule_name: 'Ad hoc' }],
+    });
+
+    expect(message).toContain(
+      'Alerting v2 episode episode-1 (elastic.significant_events, "Ad hoc") is active'
+    );
+    expect(message).not.toContain('of rule');
+    expect(message).not.toContain('the id above');
+  });
+
+  it('describes the episode by its id alone', () => {
+    const message = buildInvestigationMessage({ alerts: [base] });
+
+    expect(message).toContain('Alerting v2 episode episode-1 is active');
+    expect(message).not.toContain('of rule');
+  });
+});
+
 describe('buildAlertRecoveredFollowUpMessage', () => {
   const baseRecovery = {
     alertUuid: 'alert-uuid-1',

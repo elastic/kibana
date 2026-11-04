@@ -145906,12 +145906,14 @@ paths:
           name: query
           required: false
           schema:
+            maxLength: 4096
             type: string
         - description: Number of results per page.
           in: query
           name: size
           required: false
           schema:
+            maximum: 10000
             minimum: 1
             type: number
         - description: Page number.
@@ -145936,6 +145938,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -145945,6 +145948,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 1000
             type: array
@@ -146573,6 +146577,7 @@ paths:
           name: stepExecutionId
           required: false
           schema:
+            maxLength: 255
             type: string
         - description: Number of log entries per page.
           in: query
@@ -146596,6 +146601,7 @@ paths:
           name: sortField
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Sort order.
           in: query
@@ -148388,6 +148394,13 @@ paths:
           schema:
             maxLength: 255
             type: string
+        - description: Filter by execution name using a case-insensitive substring.
+          in: query
+          name: runName
+          required: false
+          schema:
+            maxLength: 128
+            type: string
         - description: Filter by execution status.
           in: query
           name: statuses
@@ -148427,6 +148440,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -148435,6 +148449,7 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Whether to exclude step-level execution data.
@@ -148448,6 +148463,7 @@ paths:
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by finishedAt (inclusive when parsed with roundUp).
@@ -148455,6 +148471,7 @@ paths:
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Field to collapse execution results by.
@@ -148517,6 +148534,7 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
         - description: Datemath upper bound for filtering executions by startedAt (inclusive when parsed with roundUp).
@@ -148524,6 +148542,7 @@ paths:
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
             x-state: Generally available; added in 9.5.0
       responses:
@@ -148648,6 +148667,7 @@ paths:
           name: stepId
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Include step input data.
           in: query
@@ -148681,12 +148701,14 @@ paths:
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering step executions by startedAt (inclusive when parsed with roundUp).
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
       responses:
         '200':
@@ -148815,6 +148837,7 @@ paths:
           required: false
           schema:
             items:
+              maxLength: 1024
               type: string
             maxItems: 100
             type: array
@@ -148823,30 +148846,35 @@ paths:
           name: concurrencyGroupKey
           required: false
           schema:
+            maxLength: 1024
             type: string
         - description: Datemath lower bound for filtering executions by startedAt.
           in: query
           name: startedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by startedAt.
           in: query
           name: startedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath lower bound for filtering executions by finishedAt.
           in: query
           name: finishedAfter
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Datemath upper bound for filtering executions by finishedAt.
           in: query
           name: finishedBefore
           required: false
           schema:
+            maxLength: 64
             type: string
         - description: Field to collapse execution results by.
           in: query
@@ -162699,6 +162727,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -162993,6 +163026,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental; added in 9.5.0
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -163007,6 +163045,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         force:
           default: false
           type: boolean
@@ -169221,6 +169264,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -170387,6 +170435,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    change_point_grid: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                     custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -170412,6 +170461,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -170677,6 +170727,122 @@ components:
         - grid
         - config
       title: APM Service map
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          description: Panel configuration stored inline
+          properties:
+            apply_dashboard_context:
+              default: true
+              description: When true, the panel uses the dashboard filters, query, and ES|QL variables. When false, it uses static_context.
+              type: boolean
+            description:
+              description: A short description of the panel.
+              type: string
+            esql:
+              description: The ES|QL query that detects the change points.
+              maxLength: 10000
+              type: string
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            static_context:
+              additionalProperties: false
+              description: Filters, query, and ES|QL variables captured from Discover. Used only when apply_dashboard_context is false.
+              type: object
+              properties:
+                esql_variables:
+                  description: ES|QL variable values captured from Discover.
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        maxLength: 256
+                        type: string
+                      type:
+                        enum:
+                          - time_literal
+                          - fields
+                          - values
+                          - multi_values
+                          - functions
+                        type: string
+                      value:
+                        anyOf:
+                          - maxLength: 2048
+                            type: string
+                          - type: number
+                          - items:
+                              anyOf:
+                                - maxLength: 2048
+                                  type: string
+                                - type: number
+                            maxItems: 100
+                            type: array
+                    required:
+                      - key
+                      - value
+                      - type
+                  maxItems: 50
+                  type: array
+                filters:
+                  description: Filters captured from Discover.
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                  maxItems: 100
+                  type: array
+                query:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
+                  description: KQL or Lucene query captured from Discover.
+            time_range:
+              additionalProperties: false
+              description: Panel time range. When set, it overrides the dashboard time range.
+              type: object
+              properties:
+                from:
+                  description: The start of the time range. Accepts date math (for example, now-7d) or an ISO 8601 timestamp.
+                  maxLength: 128
+                  type: string
+                mode:
+                  description: Use absolute for fixed timestamps, or relative for date math that is re-evaluated at query time.
+                  enum:
+                    - absolute
+                    - relative
+                  type: string
+                to:
+                  description: The end of the time range. Accepts date math (for example, now) or an ISO 8601 timestamp.
+                  maxLength: 128
+                  type: string
+              required:
+                - from
+                - to
+            title:
+              description: The panel title.
+              type: string
+          required:
+            - esql
+          title: By value
+          type: object
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - change_point_grid
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Change point charts
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
       additionalProperties: false
@@ -172584,6 +172750,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                change_point_grid: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                 custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -172609,6 +172776,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -189431,6 +189599,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available; added in 9.5.0
         packagePolicyIds:
           items:
             minLength: 0
