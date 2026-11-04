@@ -12,7 +12,7 @@
 const fs = require('fs');
 const path = require('path');
 
-const NUM_FILES = 1000;
+const NUM_FILES = 2000;
 const FUNCS_PER_FILE = 100;
 
 const BASE_DIR = __dirname;

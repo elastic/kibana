@@ -17,8 +17,22 @@ if [ ! -d "$NODE_DIR/gen" ] || [ ! -d "$GO_DIR/gen" ]; then
   exit 1
 fi
 
+RSS_SAMPLES=20
+RSS_INTERVAL=0.25
+
 get_rss_kb() {
   ps -o rss= -p "$1" 2>/dev/null | tr -d ' '
+}
+
+avg_rss_kb() {
+  local pid="$1" total=0
+  for _ in $(seq 1 "$RSS_SAMPLES"); do
+    local sample
+    sample=$(get_rss_kb "$pid")
+    total=$((total + sample))
+    sleep "$RSS_INTERVAL"
+  done
+  echo $((total / RSS_SAMPLES))
 }
 
 now_ms() {
@@ -38,7 +52,7 @@ wait_for_server() {
 }
 
 echo "=== Memory Demo: Node.js vs Go ==="
-echo "    ~1,000,000 lines of loaded code per server"
+echo "    ~2,000,000 lines of loaded code per server"
 echo
 
 # --- Go: build ---
@@ -62,12 +76,13 @@ wait_for_server "http://localhost:3001/health" 120
 NODE_READY=$(now_ms)
 NODE_STARTUP_MS=$((NODE_READY - NODE_START))
 curl -sf http://localhost:3001/health >/dev/null
-sleep 2
+sleep 1
 
-NODE_RSS=$(get_rss_kb "$NODE_PID")
+echo "  Sampling RSS (${RSS_SAMPLES} × ${RSS_INTERVAL}s)..."
+NODE_RSS=$(avg_rss_kb "$NODE_PID")
 NODE_RSS_MB=$((NODE_RSS / 1024))
 echo "  Node.js startup: ${NODE_STARTUP_MS} ms"
-echo "  Node.js RSS:     ${NODE_RSS_MB} MB (${NODE_RSS} KB)"
+echo "  Node.js RSS:     ${NODE_RSS_MB} MB (${NODE_RSS} KB avg)"
 
 kill "$NODE_PID" 2>/dev/null; wait "$NODE_PID" 2>/dev/null || true
 unset NODE_PID
@@ -82,12 +97,13 @@ wait_for_server "http://localhost:3002/health" 10
 GO_READY=$(now_ms)
 GO_STARTUP_MS=$((GO_READY - GO_START))
 curl -sf http://localhost:3002/health >/dev/null
-sleep 2
+sleep 1
 
-GO_RSS=$(get_rss_kb "$GO_PID")
+echo "  Sampling RSS (${RSS_SAMPLES} × ${RSS_INTERVAL}s)..."
+GO_RSS=$(avg_rss_kb "$GO_PID")
 GO_RSS_MB=$((GO_RSS / 1024))
 echo "  Go startup: ${GO_STARTUP_MS} ms"
-echo "  Go RSS:     ${GO_RSS_MB} MB (${GO_RSS} KB)"
+echo "  Go RSS:     ${GO_RSS_MB} MB (${GO_RSS} KB avg)"
 
 kill "$GO_PID" 2>/dev/null; wait "$GO_PID" 2>/dev/null || true
 unset GO_PID
@@ -106,5 +122,5 @@ printf "| Go         | %8d | %12d |\n" "$GO_RSS_MB" "$GO_STARTUP_MS"
 printf "| **Difference** | %5s | %9s |\n" "${MEMORY_RATIO}x" "${STARTUP_RATIO}x"
 echo ""
 echo "Why: Node.js parses, compiles (to bytecode), and holds source for all"
-echo "1M lines at runtime. Go compiles ahead of time — the 1M lines become"
+echo "2M lines at runtime. Go compiles ahead of time — the 2M lines become"
 echo "machine code baked into the binary; only actual allocations hit RSS."
