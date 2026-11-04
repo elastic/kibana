@@ -1259,10 +1259,13 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
  */
 const PERMANENT_HTTP_STATUSES = new Set([400, 401, 403, 405, 410, 499, 501]);
 
+const getHttpStatus = (error: unknown): unknown => {
+  if (error == null || typeof error !== 'object') return undefined;
+  return (error as { response?: { status?: unknown } }).response?.status;
+};
+
 const isPermanentHttpError = (error: unknown): boolean => {
-  if (error == null || typeof error !== 'object') return false;
-  const response = (error as { response?: { status?: unknown } }).response;
-  const status = response?.status;
+  const status = getHttpStatus(error);
   return typeof status === 'number' && PERMANENT_HTTP_STATUSES.has(status);
 };
 
@@ -1299,7 +1302,11 @@ const isValidationFinished = (validation: unknown): boolean => {
  *   generation in the same pipeline.
  * - `zero_alerts`: the product short-circuits a run that retrieved no alerts
  *   (`handleNoAlerts`) — it reports `completed` with `alerts_context_count: 0`
- *   and never starts the generation or validation workflows.
+ *   and never starts the generation or validation workflows. The run tool
+ *   (`run_attack_discovery_tool/index.ts`) returns that same shape from its
+ *   fallback for every outcome other than `validation_succeeded` ("validation
+ *   failed" log), so a new non-throwing orchestration outcome routed through
+ *   that fallback would be read here as a zero-alert run.
  * `pending` is deliberately not covered: a pending run may still reach validation.
  */
 export type ValidationUnreachableReason = 'execution_failed' | 'zero_alerts';
@@ -1395,8 +1402,10 @@ export const waitForValidationPhase = async ({
         return lastTracking;
       }
       // A correct zero-alert run has no generation workflow to read, so a
-      // tracking read that is not indexed yet is not worth failing it over.
-      if (validationUnreachableReason === 'zero_alerts') {
+      // tracking read that is not indexed yet (404) is not worth failing it
+      // over. Any other error (429/5xx/network) is an outage, which must not
+      // be scored as the correct `handleNoAlerts` short-circuit.
+      if (validationUnreachableReason === 'zero_alerts' && getHttpStatus(lastError) === 404) {
         return { generation: null, validation: null };
       }
       throw new Error(

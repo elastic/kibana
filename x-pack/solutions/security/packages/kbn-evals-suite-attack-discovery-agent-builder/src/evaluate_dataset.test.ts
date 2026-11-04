@@ -1675,6 +1675,26 @@ describe('slow-path handoff (#293046): waitForValidationPhase', () => {
     }
   });
 
+  it.each([
+    ['500', Object.assign(new Error('500'), { response: { status: 500 } })],
+    ['429', Object.assign(new Error('429'), { response: { status: 429 } })],
+    ['network error', new Error('connection refused')],
+  ])(
+    'throws instead of returning an empty snapshot for a zero-alert run on a %s tracking error',
+    async (_name, trackingError) => {
+      const fetch = jest.fn().mockRejectedValue(trackingError);
+
+      await expect(
+        waitForValidationPhase({
+          fetch,
+          executionId: 'exec-1',
+          validationUnreachableReason: 'zero_alerts',
+        })
+      ).rejects.toThrow(/failed before reaching the validation phase/);
+      expect(fetch).toHaveBeenCalledTimes(1);
+    }
+  );
+
   it('still throws for a failed execution that never produced a tracking snapshot', async () => {
     const fetch = jest
       .fn()
@@ -2081,7 +2101,13 @@ describe('zero-alert short-circuit: task-level wait', () => {
           ],
         },
       });
-      await jest.advanceTimersByTimeAsync(1_000).then(() => pending);
+      // Attach the catch immediately and advance the whole wait budget: if the
+      // `inspectWorkflow` wiring is reverted the loop would otherwise run the
+      // full budget under frozen fake timers and hang instead of failing.
+      const settledRun = pending.catch((error: Error) => error);
+      await jest.advanceTimersByTimeAsync(WAIT_FOR_VALIDATION_PHASE_TIMEOUT_MS);
+      const runResult = await settledRun;
+      expect(runResult).not.toBeInstanceOf(Error);
 
       const trackingCalls = fetch.mock.calls.filter(([url]) => url.endsWith('/tracking'));
       expect(trackingCalls).toHaveLength(1);
