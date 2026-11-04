@@ -37,6 +37,7 @@ import { isEnabledFailureStore, Streams } from '@kbn/streams-schema';
 import React, { useCallback, useMemo } from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { isDraftGetResponse, getEsqlViewName } from '@kbn/streams-schema';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamDetail } from '../../hooks/use_stream_detail';
 import {
@@ -132,6 +133,10 @@ export function IngestRateChartContent({
   const histogramFetch = getStreamHistogram(esqlSource);
   const histogramResult = useAsync(() => histogramFetch, [histogramFetch]);
 
+  // A refetch cancels the running request, and its AbortError can land after the new call started.
+  const histogramLoading = histogramResult.loading || isRequestAbortedError(histogramResult.error);
+  const histogramUnavailable = Boolean(histogramResult.error) && !histogramLoading;
+
   const allTimeseries = useMemo(
     () =>
       esqlResultToTimeseries({
@@ -209,7 +214,7 @@ export function IngestRateChartContent({
       >
         <EuiFlexItem grow css={chartColumnCss}>
           <div data-test-subj="streamsAppStreamOverviewChartPlotColumn">
-            {histogramResult.loading && !histogramResult.value ? (
+            {histogramLoading && !histogramResult.value ? (
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
@@ -217,6 +222,28 @@ export function IngestRateChartContent({
               >
                 <EuiFlexItem grow={false}>
                   <EuiLoadingChart size="l" />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ) : histogramUnavailable ? (
+              <EuiFlexGroup
+                justifyContent="center"
+                alignItems="center"
+                style={{ height: CHART_HEIGHT }}
+              >
+                <EuiFlexItem grow={false}>
+                  <EuiText
+                    size="s"
+                    color="subdued"
+                    textAlign="center"
+                    data-test-subj="streamsAppIngestRateChartError"
+                  >
+                    <p>
+                      {i18n.translate('xpack.streams.ingestRateChart.histogramErrorMessage', {
+                        defaultMessage:
+                          'No ingest rate to show. This index may not have a @timestamp field.',
+                      })}
+                    </p>
+                  </EuiText>
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (
@@ -311,6 +338,7 @@ export function IngestRateChartContent({
         isQueryStream={isQueryStream}
         isDraft={isDraft}
         totals={totals}
+        histogramUnavailable={histogramUnavailable}
       />
     </EuiPanel>
   );

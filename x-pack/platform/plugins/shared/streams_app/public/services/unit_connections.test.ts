@@ -417,6 +417,55 @@ describe('unit connections', () => {
     expect(connectSourceToDestination(unit, 'bulk-input', 'es-logs')).toBe(unit);
   });
 
+  it('wires a docs source to an auto destination on a docs pipeline', () => {
+    const unit = unitWith([]);
+    unit.unit.sources = [{ id: 'orders', type: 'async_bulk', supported_telemetry: ['docs'] }];
+    unit.unit.destinations = [
+      {
+        id: 'central',
+        type: 'elasticsearch',
+        supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
+      },
+    ];
+
+    const next = connectSourceToDestination(unit, 'orders', 'central');
+
+    expect(next.unit.pipelines[0]?.supported_telemetry).toEqual(['docs']);
+  });
+
+  it('keeps an OTLP pipeline to an auto destination on the OTel signals', () => {
+    const unit = unitWith([]);
+    unit.unit.sources = [
+      { id: 'otlp-input', type: 'otlp', supported_telemetry: ['logs', 'metrics', 'traces'] },
+    ];
+    unit.unit.destinations = [
+      {
+        id: 'central',
+        type: 'elasticsearch',
+        supported_telemetry: ['logs', 'metrics', 'traces', 'docs'],
+      },
+    ];
+
+    const next = connectSourceToDestination(unit, 'otlp-input', 'central');
+
+    expect(next.unit.pipelines[0]?.supported_telemetry).toEqual(['logs', 'metrics', 'traces']);
+  });
+
+  it('refuses a Managed _bulk source wired to a destination without docs', () => {
+    const unit = unitWith([]);
+    unit.unit.sources = [{ id: 'orders', type: 'async_bulk', supported_telemetry: ['docs'] }];
+    unit.unit.destinations = [
+      {
+        id: 'es-logs',
+        type: 'elasticsearch',
+        supported_telemetry: ['logs', 'metrics', 'traces'],
+      },
+    ];
+
+    expect(canConnectSourceToDestination(unit, 'orders', 'es-logs')).toBe(false);
+    expect(connectSourceToDestination(unit, 'orders', 'es-logs')).toBe(unit);
+  });
+
   it('builds a new pipeline from the signals both sides support', () => {
     const unit = unitWith([]);
     unit.unit.sources = [

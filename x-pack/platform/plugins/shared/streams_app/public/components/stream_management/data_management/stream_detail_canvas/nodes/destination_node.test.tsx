@@ -71,6 +71,12 @@ describe('DestinationNode', () => {
     expect(isShown('streamsCanvasDestinationSignalBadge')).toBe(true);
   });
 
+  it('labels a docs destination as Documents', () => {
+    renderNode({ ...ELASTICSEARCH_NODE_DATA, signals: ['docs'] });
+
+    expect(screen.getByTestId('streamsCanvasDestinationSignalBadge').textContent).toBe('Documents');
+  });
+
   it('no longer shows the index count as a badge next to the title', () => {
     renderNode(ELASTICSEARCH_NODE_DATA);
 

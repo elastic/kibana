@@ -318,6 +318,42 @@ POST kbn:/internal/streams/components/_validate
 
 The local snapshot `streams_app/public/services/component_catalogue/catalogue_snapshot/components_v1.json` is a test, Storybook and Scout fixture only. Scout UI specs mock both routes through `streams_app/test/scout/common/ui/fixtures/component_catalogue_mocks.ts`.
 
+## Managed `_bulk` sources and the docs signal
+
+A Managed `_bulk` source (`async_bulk`) carries documents only (streams-spec `schema/sources/async_bulk.schema.yaml`). The UI creates it with `supported_telemetry: [docs]`, no signal picker and no `config`:
+
+```yaml
+sources:
+  - id: orders
+    name: Orders
+    type: async_bulk
+    supported_telemetry: [docs]
+```
+
+The source shows two endpoints under the managed input URL:
+
+- `<managed input url>/inputs/elasticsearch/<source_id>/_bulk`
+- `<managed input url>/inputs/elasticsearch/<source_id>/<target>/_bulk`, where `<target>` is the fallback index for action lines without an `_index`
+
+The ingress accepts `create` actions only. The effective `_index` of each document (the action's `_index`, else `<target>`) must start with `logs-`, `metrics-` or `traces-`. Other names get a 403 for that document inside an HTTP 200. A 201 means the document was queued, not indexed, and the response echoes the requested `_index` even when a Fixed destination writes it somewhere else. Documents that match no route on the map are dropped.
+
+Where an Elasticsearch destination writes docs, and the key scope Kibana mints for it:
+
+| Mode | Saved config for docs | Key scope for docs |
+|---|---|---|
+| Auto (default) | `docs` in `supported_telemetry`, no `index` or `write_patterns` | `logs-*`, `metrics-*`, `traces-*` next to the `-*-*` patterns of the OTel signals |
+| Auto, custom write patterns with Documents selected | one `write_patterns` entry scoped to `[docs]` with every pattern. Each pattern must start with `logs-`, `metrics-` or `traces-` | those patterns |
+| Fixed | one `index` entry scoped to `[docs]`. Any static index or data stream name, never composed from the shared OTel name | that index |
+
+In Auto, documents land in the request's `_index`, so they can only reach the three prefixes. A Fixed docs index replaces the `_index`, but the ingress still checks the request's `_index` against the prefixes. A docs index that matches no built-in data stream template (`logs-*-*`, `metrics-*-*`, `traces-*-*`), such as `accounting-2026`, is created as a plain index with dynamic mappings.
+
+Units stored before this change are not migrated:
+
+- An `async_bulk` source saved with OTel signals fails validate with E021 (`E021_UNSUPPORTED_SIGNAL`). Validate covers the whole unit, so every unit PUT on that map fails and the diagnostics panel shows the error. Nothing on the map saves, not even an unrelated change, until that source is deleted and recreated as a docs source.
+- An Auto destination saved with `[logs, metrics, traces]` keeps those signals and does not connect to a docs source. Recreate it to carry docs.
+
+The Managed `_bulk` source has a cURL snippet and no Logstash tab. The ingress has no `GET` routes under `/inputs/elasticsearch/{source_id}/` (`GET /`, `HEAD /` and `GET /_license` answer 404), and the Logstash Elasticsearch output waits on those health checks before it sends anything, so it hangs at startup.
+
 ## End-to-end testing
 
 The full UI-engineer runbook (kind, two Tilts, serverless ES, Kibana, then one script) is [dev/full_dev_flow/README.md](./dev/full_dev_flow/README.md). Short version once the four long-lived processes are up:

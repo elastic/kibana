@@ -217,6 +217,38 @@ describe('GET /internal/streams/unit/{id}/_resolve_indices', () => {
     ]);
   });
 
+  it('lists each index once when docs patterns overlap the logs pattern', async () => {
+    getUnitOrEmpty.mockResolvedValue({
+      unit: {
+        destinations: [
+          {
+            id: 'es-auto',
+            name: 'Auto',
+            type: 'elasticsearch',
+            supported_telemetry: ['logs', 'docs'],
+            config: [],
+          },
+        ],
+      },
+      ui_metadata: {},
+    });
+    const resolveIndex = jest.fn().mockResolvedValue({
+      data_streams: [{ name: 'logs-app-default' }],
+      indices: [{ name: 'logs-orders' }],
+    });
+    const getDataStream = jest.fn().mockResolvedValue({ data_streams: [] });
+
+    const result = await callHandler({ resolveIndex, getDataStream });
+
+    expect(resolveIndex).toHaveBeenCalledWith(
+      expect.objectContaining({ name: 'logs-*-*,logs-*,metrics-*,traces-*' })
+    );
+    expect(result.destinations['es-auto'].indices.map((index) => index.name)).toEqual([
+      'logs-app-default',
+      'logs-orders',
+    ]);
+  });
+
   it('reports data stream lookup failures instead of "not found"', async () => {
     getUnitOrEmpty.mockResolvedValue(mixedDestinationUnit);
     const resolveIndex = jest.fn().mockResolvedValue({

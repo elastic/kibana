@@ -5,13 +5,19 @@
  * 2.0.
  */
 
-import { collectUnitComponentIds } from '@kbn/streams-schema';
+import { collectUnitComponentIds, getSignalTargetsWritePatterns } from '@kbn/streams-schema';
+import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
 import { createDestinationId, getDestinationNameValidationError } from './destination_helpers';
 import {
   DESTINATION_SIGNALS,
+  getDestinationCreateSpec,
   getFormDestinationSignals,
+  isPrefixedDestinationSignal,
+  PREFIXED_DESTINATION_SIGNALS,
   SIGNAL_INDEX_FIELDS,
   validateAutoWritePattern,
+  validateDocsWritePattern,
+  validateFreeFormIndexName,
   validateStaticSignalIndex,
 } from './destination_models';
 import { getDestinationTypeDefinition } from './destination_type_registry';
@@ -87,8 +93,33 @@ const getS3NameError = ({
 
 type LocalElasticsearchErrors = Pick<
   DestinationCreationFormErrors,
-  'staticIndexes' | 'customSignals' | 'logsIndex' | 'metricsIndex' | 'tracesIndex'
+  | 'staticIndexes'
+  | 'customSignals'
+  | 'logsIndex'
+  | 'metricsIndex'
+  | 'tracesIndex'
+  | 'docsIndex'
+  | 'docsWritePatterns'
 >;
+
+const getDocsWritePatternsError = (
+  elasticsearch: ElasticsearchDestinationFormData
+): LocalElasticsearchErrors['docsWritePatterns'] => {
+  const patterns = elasticsearch.docsWritePatterns.map((pattern) => pattern.trim()).filter(Boolean);
+  if (patterns.length === 0) {
+    return 'required';
+  }
+  const entryErrors = patterns.flatMap((pattern) => {
+    const error = validateDocsWritePattern(pattern);
+    return error ? [{ pattern, error }] : [];
+  });
+  if (entryErrors.length > 0) {
+    return entryErrors;
+  }
+  // Only docs can overflow the API key route's pattern cap (OTel adds at most three).
+  const keyScope = getSignalTargetsWritePatterns(getDestinationCreateSpec(elasticsearch));
+  return keyScope.length > MAX_RESOLVE_INDEX_PATTERNS ? 'tooMany' : undefined;
+};
 
 const getLocalElasticsearchErrors = (
   elasticsearch: ElasticsearchDestinationFormData
@@ -101,7 +132,7 @@ const getLocalElasticsearchErrors = (
     if (elasticsearch.customSignals.length === 0) {
       errors.customSignals = 'required';
     }
-    for (const signal of elasticsearch.customSignals) {
+    for (const signal of elasticsearch.customSignals.filter(isPrefixedDestinationSignal)) {
       const field = SIGNAL_INDEX_FIELDS[signal];
       const error = elasticsearch[field].trim()
         ? validateAutoWritePattern(signal, elasticsearch[field])
@@ -110,20 +141,30 @@ const getLocalElasticsearchErrors = (
         errors[field] = error;
       }
     }
+    if (elasticsearch.customSignals.includes('docs')) {
+      const docsWritePatternsError = getDocsWritePatternsError(elasticsearch);
+      if (docsWritePatternsError) {
+        errors.docsWritePatterns = docsWritePatternsError;
+      }
+    }
     return errors;
   }
-  const hasIndex = Object.values(SIGNAL_INDEX_FIELDS).some(
-    (field) => elasticsearch[field].trim().length > 0
-  );
+  const hasIndex =
+    Object.values(SIGNAL_INDEX_FIELDS).some((field) => elasticsearch[field].trim().length > 0) ||
+    elasticsearch.docsIndex.trim().length > 0;
   if (!hasIndex) {
     errors.staticIndexes = 'required';
   }
-  for (const signal of DESTINATION_SIGNALS) {
+  for (const signal of PREFIXED_DESTINATION_SIGNALS) {
     const field = SIGNAL_INDEX_FIELDS[signal];
     const error = validateStaticSignalIndex(signal, elasticsearch[field]);
     if (error) {
       errors[field] = error;
     }
+  }
+  const docsIndexError = validateFreeFormIndexName(elasticsearch.docsIndex);
+  if (docsIndexError) {
+    errors.docsIndex = docsIndexError;
   }
   return errors;
 };
@@ -166,11 +207,14 @@ const ERROR_FIELD_PATHS: Record<DestinationCreationFormField, readonly FormField
     'elasticsearch.logsIndex',
     'elasticsearch.metricsIndex',
     'elasticsearch.tracesIndex',
+    'elasticsearch.docsIndex',
   ],
   customSignals: ['elasticsearch.customSignals'],
   logsIndex: ['elasticsearch.logsIndex'],
   metricsIndex: ['elasticsearch.metricsIndex'],
   tracesIndex: ['elasticsearch.tracesIndex'],
+  docsIndex: ['elasticsearch.docsIndex'],
+  docsWritePatterns: ['elasticsearch.docsWritePatterns'],
   region: ['s3.region'],
   bucket: ['s3.bucket'],
   accessKeyId: ['s3.accessKeyId'],

@@ -11,7 +11,11 @@ import {
   getDestinationCreationFormErrors,
   getVisibleDestinationFormErrors,
 } from './destination_form';
-import { EMPTY_ELASTICSEARCH_DESTINATION_FORM, EMPTY_S3_DESTINATION_FORM } from './types';
+import {
+  EMPTY_ELASTICSEARCH_DESTINATION_FORM,
+  EMPTY_S3_DESTINATION_FORM,
+  type DestinationCreationFormData,
+} from './types';
 
 const unitDefinition: StreamsUnit.GetResponse = {
   unit: {
@@ -21,6 +25,16 @@ const unitDefinition: StreamsUnit.GetResponse = {
   },
   ui_metadata: {},
 };
+
+const elasticsearchForm = (
+  elasticsearch: Partial<typeof EMPTY_ELASTICSEARCH_DESTINATION_FORM>
+): DestinationCreationFormData => ({
+  storageKind: 'local_elasticsearch',
+  s3: { ...EMPTY_S3_DESTINATION_FORM },
+  destinationName: 'Orders',
+  description: '',
+  elasticsearch: { ...EMPTY_ELASTICSEARCH_DESTINATION_FORM, ...elasticsearch },
+});
 
 describe('destination form', () => {
   it('allows auto mode without an index', () => {
@@ -261,6 +275,92 @@ describe('destination form', () => {
       expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
     }
   );
+  describe('docs targets', () => {
+    it('requires a docs write pattern once docs is selected', () => {
+      const formData = elasticsearchForm({ useCustomWritePatterns: true, customSignals: ['docs'] });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns).toBe(
+        'required'
+      );
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+    });
+
+    it('marks each invalid docs write pattern on its own', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['docs'],
+        docsWritePatterns: ['logs-orders-*', 'accounting-*', 'Logs-x-*'],
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toEqual([
+        { pattern: 'accounting-*', error: 'docsPrefix' },
+        { pattern: 'Logs-x-*', error: 'uppercase' },
+      ]);
+    });
+
+    const docsPatterns = (count: number) =>
+      Array.from({ length: count }, (_, index) => `logs-orders${index}-*`);
+
+    it('accepts 32 write patterns across OTel and docs', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: docsPatterns(31),
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toBeUndefined();
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+    });
+
+    it('rejects 33 write patterns across OTel and docs', () => {
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['logs', 'docs'],
+        logsIndex: 'logs-billing-*',
+        docsWritePatterns: docsPatterns(32),
+      });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns).toBe(
+        'tooMany'
+      );
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
+    });
+
+    it('marks a docs write pattern longer than 1024 characters', () => {
+      const longPattern = `logs-${'a'.repeat(1020)}`;
+      const formData = elasticsearchForm({
+        useCustomWritePatterns: true,
+        customSignals: ['docs'],
+        docsWritePatterns: [`logs-${'a'.repeat(1019)}`, longPattern],
+      });
+
+      expect(
+        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
+      ).toEqual([{ pattern: longPattern, error: 'tooLong' }]);
+    });
+
+    it('accepts a fixed destination with only a docs index', () => {
+      const formData = elasticsearchForm({ auto: false, docsIndex: 'accounting-2026' });
+      const errors = getDestinationCreationFormErrors({ formData, unitDefinition });
+
+      expect(errors.staticIndexes).toBeUndefined();
+      expect(errors.docsIndex).toBeUndefined();
+      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
+    });
+
+    it('rejects an invalid docs index', () => {
+      const formData = elasticsearchForm({ auto: false, docsIndex: 'Acc' });
+
+      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsIndex).toBe(
+        'uppercase'
+      );
+    });
+  });
 });
 
 describe('S3', () => {
