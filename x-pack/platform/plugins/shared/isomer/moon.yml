@@ -33,6 +33,13 @@ dependsOn:
   - '@kbn/core-ui-settings-server-internal'
   - '@kbn/data-views-plugin'
   - '@kbn/field-formats-common'
+  - '@kbn/dashboard-plugin'
+  - '@kbn/as-code-filters-schema'
+  - '@kbn/as-code-filters-transforms'
+  - '@kbn/as-code-shared-schemas'
+  - '@kbn/as-code-shared-transforms'
+  - '@kbn/controls-constants'
+  - '@kbn/controls-schemas'
 tags:
   - plugin
   - prod
@@ -43,5 +50,6 @@ fileGroups:
   src:
     - common/**/*
     - server/**/*
+    - server/**/*.json
     - '!target/**/*'
 tasks: {}
