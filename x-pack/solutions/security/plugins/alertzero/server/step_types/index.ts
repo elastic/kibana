@@ -117,9 +117,7 @@ export const registerStepDefinitions = ({
       getMode: getDecisionAutoCloseMode,
     })
   );
-  workflowsExtensions.registerStepDefinition(
-    getTriageRevokeFpDecisionStepDefinition({ isContextEngineEnabled })
-  );
+  workflowsExtensions.registerStepDefinition(getTriageRevokeFpDecisionStepDefinition());
 };
 
 export { getPackageReportStepDefinition } from './package_report';
