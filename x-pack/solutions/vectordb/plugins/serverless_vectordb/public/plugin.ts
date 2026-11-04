@@ -42,10 +42,10 @@ export class ServerlessVectordbPlugin
   ): ServerlessVectordbPluginSetup {
     consolePlugin?.setDefaultEditorContent?.(CONSOLE_DEFAULT_CONTENT);
 
-    // Set before the first mount so the chrome never renders for a first-time user.
-    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({
-      hideChrome: !hasSeenOnboarding(),
-    }));
+    // Read once: updaters re-run on every applications$ change, and the landing page marks
+    // onboarding seen on mount, so a lazy read would show the chrome mid-wizard.
+    const hideChrome = !hasSeenOnboarding();
+    const appUpdater$ = new BehaviorSubject<AppUpdater>(() => ({ hideChrome }));
     const showChrome = () => appUpdater$.next(() => ({ hideChrome: false }));
 
     core.application.register({
