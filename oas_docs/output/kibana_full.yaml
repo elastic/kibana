@@ -52168,7 +52168,7 @@ paths:
           application/json:
             examples:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
-                description: Create a new AWS cloud onboarding instance using an Elastic Agent (agent-based)
+                description: Create a new cloud onboarding instance for AWS using an Elastic Agent (agent-based)
                 value:
                   authMethod: assume_role
                   mechanisms:
@@ -52182,7 +52182,7 @@ paths:
                       regions:
                         - us-east-1
               postCloudOnboardingDeploymentEcfRequestExample:
-                description: Create a new AWS cloud onboarding instance using Elastic Cloud Forwarder (ECF)
+                description: Create a new cloud onboarding instance for AWS using Elastic Cloud Forwarder (ECF)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -52196,7 +52196,7 @@ paths:
                         - us-east-1
                       s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
               postCloudOnboardingDeploymentRequestExample:
-                description: Create a new AWS cloud onboarding instance using identity federation (managed integration)
+                description: Create a new cloud onboarding instance for AWS using identity federation (managed integration)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -167766,6 +167766,7 @@ components:
           type: string
         onboarding_deployment_id:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
           nullable: true
           type: string
           x-state: Experimental; added in 9.7.0
@@ -168205,6 +168206,7 @@ components:
           type: string
         onboarding_deployment_id:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
           nullable: true
           type: string
           x-state: Experimental; added in 9.7.0
@@ -177920,7 +177922,7 @@ components:
           type: string
         onboarding_deployment_id:
           description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
-          maxLength: 255
+          maxLength: 256
           type: string
           x-state: Experimental; added in 9.7.0
         package:
@@ -185409,6 +185411,7 @@ components:
           type: string
         onboarding_deployment_id:
           description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
           nullable: true
           type: string
           x-state: Experimental; added in 9.7.0
