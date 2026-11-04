@@ -135,8 +135,8 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 **Dashboards and Visualizations**:
 * Add custom content panels with your own HTML and CSS to dashboards, and render them inside Agent Builder conversations [#286439]({{kib-pull}}286439), [#289506]({{kib-pull}}289506).
-* Add an **Enhance** action to dashboards in edit mode. It opens an Agent Builder conversation with your dashboard and a screenshot of it attached, so an agent can improve the dashboard's text, layout, and chart presentation. The action appears when Agent Builder is available, you can edit the dashboard, and at least one panel uses an {{esql}} query [#292666]({{kib-pull}}292666), [#288432]({{kib-pull}}288432).
-* Add undo and redo to dashboards, with toolbar buttons and the `Cmd+Z` or `Ctrl+Z` and `Cmd+Y` or `Ctrl+Y` shortcuts [#277103]({{kib-pull}}277103).
+* Add an **Enhance** action to dashboards in edit mode so an agent can improve the dashboard's text, layout, and chart presentation. The action appears when Agent Builder is available, you can edit the dashboard, and at least one panel uses an {{esql}} query [#292666]({{kib-pull}}292666), [#288432]({{kib-pull}}288432).
+* Add undo and redo capabilities to dashboards, available using the toolbar and keyboard shortcuts [#277103]({{kib-pull}}277103).
 * Add an **Import dashboard** action to the dashboard listing page, and show why a JSON file was rejected when an import fails [#289891]({{kib-pull}}289891), [#298913]({{kib-pull}}298913).
 * Add an **Export JSON** panel action that opens a flyout where you can view and download the panel's JSON definition [#273427]({{kib-pull}}273427).
 * Enable the Agent Builder dashboard tool to add a visualization or custom content panel that is already in the conversation to a dashboard. The panel you approved in chat is the one that lands on the dashboard [#290219]({{kib-pull}}290219).
