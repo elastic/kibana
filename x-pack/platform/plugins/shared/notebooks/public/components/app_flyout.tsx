@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,6 +32,7 @@ import type {
   NotebookApp,
 } from '../../common/types';
 import {
+  appDependsOn,
   APP_GRID_COLUMNS,
   createEmptyApp,
   generateDefaultApp,
@@ -233,7 +234,11 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookAp
   const { store, activeAppId$ } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
-  const pinnedTime = findPinnedTimeCell(cells);
+  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
+  const pinnedTime = useMemo(() => {
+    const cell = findPinnedTimeCell(cells);
+    return cell && appDependsOn(app, cells, cellOrder, cell.id) ? cell : undefined;
+  }, [app, cells, cellOrder]);
   const addApp = (next: NotebookApp) => {
     store.addApp(next);
     activeAppId$.next(next.id);

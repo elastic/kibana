@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
+import { buildGraph, getDescendants } from './graph';
 
 export const APP_GRID_COLUMNS = 12;
 
@@ -85,6 +86,17 @@ export const appendPanel = (
   ...app,
   panels: [...app.panels, ...packPanels([cell], getBottom(app.panels), createId)],
 });
+
+/** Whether any cell the app shows depends on the given cell, directly or through other cells. */
+export const appDependsOn = (
+  app: NotebookApp,
+  cells: Readonly<Record<string, CellDefinition>>,
+  cellOrder: readonly string[],
+  cellId: string
+): boolean => {
+  const dependents = getDescendants(buildGraph(cells, cellOrder), [cellId]);
+  return app.panels.some((panel) => dependents.has(panel.cellId));
+};
 
 const SECTION_ORDER: ReadonlyArray<CellDefinition['type']> = ['markdown', 'input', 'chart', 'esql'];
 

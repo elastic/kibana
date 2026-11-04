@@ -6,7 +6,13 @@
  */
 
 import type { CellDefinition, NotebookApp } from '../../common/types';
-import { appendPanel, createEmptyApp, generateDefaultApp, getNewAppTitle } from './app_layout';
+import {
+  appDependsOn,
+  appendPanel,
+  createEmptyApp,
+  generateDefaultApp,
+  getNewAppTitle,
+} from './app_layout';
 import { createPinnedTimeCell } from './cell_factory';
 import { NotebookStore } from './notebook_store';
 
@@ -91,6 +97,33 @@ describe('appendPanel', () => {
     };
     const next = appendPanel(app, dropdown('host'), () => 'new');
     expect(next.panels[1]).toEqual({ id: 'new', cellId: 'host', x: 0, y: 9, width: 4, height: 2 });
+  });
+});
+
+describe('appDependsOn', () => {
+  const time = createPinnedTimeCell({});
+  const timed: CellDefinition = {
+    id: 'timed',
+    name: 'timed',
+    type: 'esql',
+    runMode: 'auto',
+    query: 'FROM logs | WHERE @timestamp >= ?_tstart',
+  };
+  const cells = toRecord([time, timed, chart('trend', 'timed'), esql('raw')]);
+  const order = [time.id, 'timed', 'trend', 'raw'];
+  const appOf = (...cellIds: string[]): NotebookApp => ({
+    id: 'app',
+    title: 'App 1',
+    panels: cellIds.map((cellId) => ({ id: cellId, cellId, x: 0, y: 0, width: 1, height: 1 })),
+  });
+
+  it('follows dependencies through intermediate cells', () => {
+    expect(appDependsOn(appOf('trend'), cells, order, time.id)).toBe(true);
+  });
+
+  it('is false when no shown cell uses the cell', () => {
+    expect(appDependsOn(appOf('raw'), cells, order, time.id)).toBe(false);
+    expect(appDependsOn(appOf(), cells, order, time.id)).toBe(false);
   });
 });
 
