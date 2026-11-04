@@ -36,8 +36,9 @@ listing the row failures, an executor-level rejection, every dirty space and the
 If the executor itself throws (its own span or model lookup, not one of our rows), `runExperiment`
 rejects at once while a row may be mid-run and later rows are still queued. `createEvaluateDataset`
 then closes a gate so queued rows do not seed (they return an `experiment aborted` placeholder and
-are counted in one `N queued row(s) did not run` error), waits for every running row to finish its
-cancel and cleanup, and only then runs the final clean-space check.
+are reported in one `the experiment aborted after N row run(s) started` error, with no count of
+the skipped rows), waits for every running row to finish its cancel and cleanup, and only then
+runs the final clean-space check.
 
 All rows share the eval space (`EVAL_SPACE_ID`) and run one at a time, so `playwright.config.ts`
 sets `repetitions: 1`. `runExperiment` has no repetitions option and the executor defaults to 3,

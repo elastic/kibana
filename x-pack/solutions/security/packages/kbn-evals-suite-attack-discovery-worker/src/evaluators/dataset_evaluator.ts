@@ -344,6 +344,8 @@ export const createEvaluateDataset =
 
     // Set once the executor has rejected. A job still queued in the executor's limiter starts
     // after that, so `runRow` must not seed for it; the rows already running are awaited below.
+    // Those gated jobs still run their evaluators after this function returns: they write no ES
+    // data, but their `ROW_FAILED` scores may reach `collector` after `logRunSummary`.
     let closed = false;
     let rowsStarted = 0;
     const inFlight = new Set<Promise<WorkerArtifacts>>();
@@ -461,12 +463,15 @@ export const createEvaluateDataset =
       problems.push(error);
       await Promise.allSettled([...inFlight]);
     }
-    // Rows that never started (queued behind the abort, so they will only get the placeholder).
-    // One summary error, not one per row: the executor error above already fails the dataset, and
-    // this keeps them from reading as passes.
-    const rowsNotRun = closed ? Math.max(0, dataset.examples.length - rowsStarted) : 0;
-    if (rowsNotRun > 0) {
-      rowErrors.push(new Error(`${rowsNotRun} queued row(s) did not run: the experiment aborted`));
+    // Rows queued behind the abort only get the placeholder, and start after this point, so how
+    // many there are is not known here (the executor queues one job per example per repetition).
+    // One summary error, not one per row, and no count: it keeps them from reading as passes.
+    if (closed) {
+      rowErrors.push(
+        new Error(
+          `the experiment aborted after ${rowsStarted} row run(s) started; any row queued after that was skipped (no seed, scored ROW_FAILED)`
+        )
+      );
     }
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });

@@ -518,7 +518,8 @@ const idsStillPresent = async ({
  * True only when Elasticsearch refused the request on its FIRST attempt: a 4xx status and
  * `meta.meta.attempts === 0` (the transport's count of retries). The transport retries connection
  * errors, timeouts and 502/503/504, so attempt 1 may have been accepted before attempt 2 got a 429
- * or 413; any retry, or no attempts information, leaves the bulk possibly running.
+ * or 413; any retry, or no attempts information, leaves the bulk possibly running. A 4xx a proxy
+ * in front of Elasticsearch produced is out of scope.
  */
 const isRefusedOnFirstAttempt = (error: unknown): boolean => {
   const { meta } = (error ?? {}) as {

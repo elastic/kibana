@@ -146,6 +146,10 @@ const attackArtifacts = (overrides: Partial<WorkerArtifacts> = {}): WorkerArtifa
  *
  * `abort` models a throw from the executor's own code (a span wrapper, `getModel`) in the job at
  * `index`: `after-task` once that row's task has settled, `during-task` while it is still running.
+ *
+ * `onJobs` receives the queued job promises as soon as they exist, so a test can await the jobs
+ * that outlive the rejected `runExperiment` (`Promise.allSettled(jobs)`) or react to one job's
+ * rejection, without any timer.
  */
 interface ExecutorAbort {
   index: number;
@@ -153,7 +157,10 @@ interface ExecutorAbort {
   error: Error;
 }
 
-const realStyleExecutor = (abort?: ExecutorAbort): EvalsExecutorClient =>
+const realStyleExecutor = (
+  abort?: ExecutorAbort,
+  onJobs?: (jobs: Array<Promise<void>>) => void
+): EvalsExecutorClient =>
   ({
     runExperiment: async (
       {
@@ -193,6 +200,7 @@ const realStyleExecutor = (abort?: ExecutorAbort): EvalsExecutorClient =>
           })
         )
       );
+      onJobs?.(jobs);
       await Promise.all(jobs);
       return [];
     },
@@ -238,11 +246,15 @@ const evaluateExamples = (
     evaluatorOverrides,
   });
 
-const evaluateRows = (scenarioIds: string[], abort?: ExecutorAbort) =>
+const evaluateRows = (
+  scenarioIds: string[],
+  abort?: ExecutorAbort,
+  onJobs?: (jobs: Array<Promise<void>>) => void
+) =>
   createEvaluateDataset({
     client,
     evaluators,
-    executorClient: realStyleExecutor(abort),
+    executorClient: realStyleExecutor(abort, onJobs),
     esClient: {} as Client,
     fetch: jest.fn() as unknown as HttpHandler,
     log,
@@ -549,40 +561,56 @@ describe('createEvaluateDataset', () => {
       ];
       const executorError = new Error('executor span failed');
 
-      it('does not seed queued rows after the executor rejected, and says they did not run', async () => {
+      it('does not seed queued rows after the executor rejected, and says the experiment aborted', async () => {
         collect.mockResolvedValue(quietArtifacts());
+        let jobs: Array<Promise<void>> = [];
         const error = await rejectionOf(
-          evaluateRows(ROWS, { index: 0, when: 'after-task', error: executorError })
+          evaluateRows(ROWS, { index: 0, when: 'after-task', error: executorError }, (queued) => {
+            jobs = queued;
+          })
         );
         const seedCallsAtSettle = seed.mock.calls.length;
-        // Let the jobs still queued in the executor's limiter start.
-        await new Promise((resolve) => setTimeout(resolve, 20));
+        // Every job still queued in the executor's limiter has now started and finished.
+        expect(jobs).toHaveLength(ROWS.length);
+        await Promise.allSettled(jobs);
         expect(seed).toHaveBeenCalledTimes(seedCallsAtSettle);
         // The next job can start in the same tick the executor rejects; it is awaited, not
         // detached. The rest never start.
         expect(seedCallsAtSettle).toBeLessThan(ROWS.length);
         expect(error.message).toContain('executor span failed');
         expect(error.message).toContain(
-          `${ROWS.length - seedCallsAtSettle} queued row(s) did not run`
+          `the experiment aborted after ${seedCallsAtSettle} row run(s) started; any row queued after that was skipped`
         );
       });
 
-      it('rejects with the executor error itself when nothing else went wrong', async () => {
+      it('reports an abort even for a single row, without claiming a count of skipped rows', async () => {
         collect.mockResolvedValue(quietArtifacts());
         const error = await rejectionOf(
           evaluateRows(ROWS.slice(0, 1), { index: 0, when: 'after-task', error: executorError })
         );
         expect(error.message).toContain('executor span failed');
-        expect(error.message).not.toMatch(/did not run/);
+        expect(error.message).toContain('the experiment aborted after 1 row run(s) started');
+        expect(error.message).not.toMatch(/\d+ queued row/);
       });
 
       it('checks the space only after the row that was still running has cleaned up', async () => {
-        collect.mockImplementation(
-          () => new Promise((resolve) => setTimeout(() => resolve(quietArtifacts()), 20))
-        );
+        // The running row's `collect` stays pending until the executor has rejected, so the row is
+        // provably still mid-run (seeded, not cleaned up) when the rejection reaches the dataset.
+        let release: (artifacts: ReturnType<typeof quietArtifacts>) => void = () => undefined;
+        const released = new Promise<ReturnType<typeof quietArtifacts>>((resolve) => {
+          release = resolve;
+        });
+        collect.mockImplementation(() => released);
+        let cleanupsAtReject = -1;
         const error = await rejectionOf(
-          evaluateRows(ROWS, { index: 0, when: 'during-task', error: executorError })
+          evaluateRows(ROWS, { index: 0, when: 'during-task', error: executorError }, (jobs) => {
+            jobs[0].catch(() => {
+              cleanupsAtReject = cleanup.mock.calls.length;
+              release(quietArtifacts());
+            });
+          })
         );
+        expect(cleanupsAtReject).toBe(0);
         expect(error.message).toContain('executor span failed');
         const finalCheck = assertClean.mock.calls.findIndex(
           ([args]) => args.when === 'after the last row'
