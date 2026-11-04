@@ -29,17 +29,32 @@ Run on 2026-11-04 with all three scripts, the misrouting checks, and the session
 - Encrypted saved objects no longer get raw keys. Core hands them a crypto for the request's tenant, and only for requests received over HTTP: a fake request that targets a tenant throws. A connector created through `project-b` and copied into cluster A fails to decrypt there with `Failed to decrypt attribute "secrets"`, so it uses B's own key.
 - Session login works for non-home tenants. User profile activation and profile reads now follow the request, so login through `project-b` returns 200 and syncs the profile in cluster B.
 
+## M4: sessions per tenant
+
+Run on 2026-11-04 with `session_check.sh`, `session_cleanup_check.sh`, the token provider check, and three browser tabs (see the README):
+
+- Before M4, login through `project-b` "worked" only because authentication followed the header: the session itself went to cluster A's session index, and B's cookie sent with header `project-a` returned 200. Now each tenant's sessions are stored in its own cluster's session index, which is created on first use. B's cookie gets a 401 through `project-a`.
+- The session cookie records its tenant, and a request for another tenant ignores the cookie before any session index lookup.
+- Session contents are encrypted with the tenant's `securityEncryptionKey` from `tenants.yml`, handed to the security plugin as a crypto through core security. Changing only B's key logs B out and leaves A and C logged in. The cookie itself still uses the process-wide `xpack.security.encryptionKey`, because core registers one cookie strategy per process.
+- Profile changes (theme, avatar) and profile bulk gets through the security plugin's routes go to the tenant's cluster.
+- The SAML, OIDC, PKI, token, and Kerberos providers get, refresh, and invalidate tokens on the tenant's cluster. Only the token provider was run end to end: login, refresh after the access token expired, and logout through `project-b`. The others have unit tests only.
+- The session cleanup task also cleans the session indices of the tenants this Kibana instance served since it started.
+- In a browser, all three tenants stay logged in side by side on `project-<x>.localhost`, and logging out of one leaves the others logged in.
+
 ## What still reaches the home cluster
 
 - **Advanced settings reads:** the value is stored in the right cluster, but reads come from a process-wide cache keyed only by space (`sharedUserProvidedCache` in ui-settings). So one tenant sees another's values. The cache key needs the tenant, and `asScopedToClient(savedObjectsClient)` doesn't have it.
+- **Initial solution view setup:** the spaces plugin's `InitialSolutionSetupService` keeps one `setupComplete` flag for the whole process. Once one tenant picks a solution view, no other tenant is asked, even though its default space has none.
+- **User profiles through core's public API:** `core.userProfile` `suggest`, `bulkGet`, and `update` take no request, so they use the home cluster. Callers include Cases, alerting, Agent Builder, and the Spaces plugin, which fails to save "last selected space" for non-home tenants with `document_missing_exception`. The fix is an optional `request` on core's user profile API, then updating each caller.
 - **Event log:** each connector run in `project-b` writes its event log entries to cluster A (42 entries in one `eso_check.sh` run). The writes happen in a buffered timer, outside the request, so they don't know its tenant.
 - **Misrouting detector call sites** seen during tenant requests, before the detector was removed:
   - licensing's license fetcher (one global license)
   - the Agent Builder SML indexer (`SmlIndexerImpl.deleteEntry`)
   - Fleet `getSettings`
   - ESO point-in-time finders created without a request, for example Synthetics params
-- **Sessions** are stored in the home cluster's session index and aren't tied to a tenant (M4). User profile `bulkGet`, `suggest`, and `update` still use the home cluster.
 - **Background work:** `apiKeys.validate()` and task manager fake requests carry no tenant, so they use the home cluster.
+- **Session cleanup** only knows the tenants this Kibana instance served since it started. After a restart, a tenant's expired sessions stay until a request for it arrives, and one task cleaning every tenant in turn won't scale to thousands of tenants (see task claiming in the planning doc).
+- **Session cleanup audit events** are logged without a request, so they don't say which tenant the removed sessions belonged to.
 
 ## Stretch-goal results
 

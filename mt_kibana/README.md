@@ -1,6 +1,6 @@
 # Multi-tenant Kibana M1 spike
 
-One Kibana dev server routes API requests to three local Elasticsearch clusters, one per tenant: `project-a`, `project-b`, and `project-c`. The `x-elastic-tenant-id` header picks the tenant, and [`tenants.yml`](tenants.yml) holds each tenant's credentials and saved objects encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
+One Kibana dev server routes API requests to three local Elasticsearch clusters, one per tenant: `project-a`, `project-b`, and `project-c`. The `x-elastic-tenant-id` header picks the tenant, and [`tenants.yml`](tenants.yml) holds each tenant's credentials, saved objects encryption key, and session encryption key. With no header, requests go to the home cluster (`elasticsearch.hosts`, which is `project-a`).
 
 Run every command from the repo root. Remove this folder (`git rm -r mt_kibana`) before opening a PR.
 
@@ -13,6 +13,7 @@ Kibana stays a single process. Each request is tagged with its tenant when it ar
 - **Elasticsearch**: `asScoped(request)` returns a client for the request's tenant, built from that tenant's credentials. Requests without a tenant use the home cluster.
 - **Saved objects**: repositories that use Kibana's internal user now take the request, so data views, spaces, and settings are stored in the tenant's cluster. Encrypted saved objects use the tenant's own key: core hands ESO a crypto for it, never the key itself.
 - **Security**: authentication and user profiles follow the request, so basic auth, API keys, and session login work for each tenant.
+- **Sessions**: each tenant's sessions are stored in its own cluster's session index, encrypted with the tenant's session key, and the session cookie only works for the tenant it was created for. Token-based login providers (SAML, OIDC, PKI, token, Kerberos) get and refresh tokens on the tenant's cluster.
 
 [`FINDINGS.md`](FINDINGS.md) lists what still goes to the home cluster.
 
@@ -35,7 +36,7 @@ mt_kibana/start_es.sh b   # project-b on :9201, elastic:changeme-b
 mt_kibana/start_es.sh c   # project-c on :9202, elastic:changeme-c
 ```
 
-The passwords differ on purpose, so a misrouted request fails with a 401. Installs and data live in `.es/mt/`, which git ignores. Every start wipes that cluster's data, so rerun its init (step 2) after a restart.
+The passwords differ on purpose, so a misrouted request fails with a 401. Installs and data live in `.es/mt/`, which git ignores. Every start wipes that cluster's data, so rerun its init (step 2) after a restart. Extra arguments go to Elasticsearch, for example `mt_kibana/start_es.sh b -E xpack.security.authc.token.enabled=true`.
 
 ## 2. Initialise each cluster
 
@@ -64,6 +65,12 @@ Drop the last flag to get the single-tenant "red" baseline: `smoke.sh` then pass
 
 `mt_kibana/eso_check.sh` creates `.index` and webhook connectors through `project-b` and `project-c` and runs them, including in parallel. It checks that each run reads its own tenant's connector, decrypts its secrets, and writes only to its own cluster. It also prints where the connector's event log entries landed.
 
+`mt_kibana/session_check.sh` creates the same user on every cluster, so a session replayed against the wrong tenant could authenticate. It logs in through `project-b` and checks that the session is stored only in cluster B, that profile changes land in cluster B, that `project-a` rejects B's cookie, that logout removes the session, and that 30 parallel logins across the tenants each land in their own cluster.
+
+`mt_kibana/session_cleanup_check.sh` checks that the session cleanup task removes an expired session from cluster B. It takes about a minute, and needs Kibana started with `--xpack.security.session.lifespan=30s --xpack.security.session.cleanupInterval=10s`.
+
+Token provider check: start the clusters with `-E xpack.security.authc.token.enabled=true -E xpack.security.authc.token.timeout=1m`, and Kibana with `--xpack.security.authc.providers.basic.basic.order=0 --xpack.security.authc.providers.token.token.order=1`. Log in through `project-b` as in the session login example below, with `"providerType":"token","providerName":"token"`. After a minute the access token has expired, and `/internal/security/me` still returns 200 because Kibana refreshed it on cluster B.
+
 Isolation check for the per-tenant keys: create a webhook connector with a secret through `project-b`. Then start single-tenant Kibana against cluster B with the default key: `node scripts/kibana --dev --no-base-path --no-optimizer --elasticsearch.hosts=http://localhost:9201 --elasticsearch.password=changeme-b`. Running the connector fails with `Failed to decrypt attribute "secrets"`.
 Misrouting checks:
 
@@ -85,7 +92,7 @@ curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-e
 curl -s -o /dev/null -w '%{http_code}\n' -H "authorization: ApiKey $key" -H 'x-elastic-tenant-id: project-a' localhost:5601/api/stats
 ```
 
-Session login through `project-b`, as the browser does it (expect 200, then `elastic`). In a browser, send the header with a header-injecting extension:
+Session login through `project-b`, as the browser does it (expect 200, then `elastic`). For a real browser, see [step 5](#5-use-it-in-a-browser):
 
 ```bash
 h=(-H 'x-elastic-tenant-id: project-b' -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: kibana' -H 'content-type: application/json')
@@ -112,6 +119,18 @@ logging.loggers:
   - name: elasticsearch.query
     level: debug
 ```
+
+## 5. Use it in a browser
+
+Give each tenant its own hostname, so the browser keeps a separate session cookie for each. Chrome sends `*.localhost` to your machine, so no `/etc/hosts` change is needed:
+
+- `http://project-a.localhost:5601`
+- `http://project-b.localhost:5601`
+- `http://project-c.localhost:5601`
+
+In a header-injecting extension (for example ModHeader), add one rule per hostname that sets `x-elastic-tenant-id` to that tenant, the way the proxy will. Log in as `elastic` with the tenant's password (`changeme-a` and so on). [MANUAL_UI_TEST.md](MANUAL_UI_TEST.md) is a step-by-step browser walkthrough. On a single hostname, logging into one tenant replaces the other tenant's cookie. Separate browser profiles also work.
+
+Logout is a browser navigation (`/logout`). Calling `/api/security/logout` with `kbn-xsrf` or other AJAX headers returns a 400 instead of redirecting.
 
 ## Owners
 
