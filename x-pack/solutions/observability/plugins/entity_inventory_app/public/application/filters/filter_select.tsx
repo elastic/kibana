@@ -103,7 +103,7 @@ export function FilterSelect({
   const isMultiSelect = !singleSelection;
 
   return (
-    <EuiFilterGroup>
+    <EuiFilterGroup compressed>
       <EuiPopover
         aria-label={label}
         button={
