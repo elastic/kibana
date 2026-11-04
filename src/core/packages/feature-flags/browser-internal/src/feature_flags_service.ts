@@ -10,6 +10,8 @@
 import type { CoreContext } from '@kbn/core-base-browser-internal';
 import type { InternalHttpSetup } from '@kbn/core-http-browser-internal';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
+import type { OverlayStart } from '@kbn/core-overlays-browser';
+import type { RenderingService } from '@kbn/core-rendering-browser';
 import type { Logger } from '@kbn/logging';
 import type {
   EvaluationContext,
@@ -49,6 +51,18 @@ export interface FeatureFlagsSetupDeps {
  */
 type FeatureFlagValue = boolean | string | number;
 type FeatureFlagValueType = 'boolean' | 'string' | 'number';
+
+const HELPER_STORAGE_KEY = 'core.featureFlags.helper.enabled';
+
+export interface FeatureFlagsHelperDeps {
+  http: InternalHttpSetup;
+  overlays: Pick<OverlayStart, 'openFlyout'>;
+  rendering: Pick<RenderingService, 'addContext'>;
+}
+
+declare global {
+  var toggleFeatureFlagsHelper: (() => void) | undefined;
+}
 
 interface ReportedFlagValue {
   type: FeatureFlagValueType;
@@ -111,6 +125,8 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly contextChanged$ = new Subject<void>();
   private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
+  private helperDeps?: FeatureFlagsHelperDeps;
+  private unmountHelper?: () => void;
   private isProviderReadyPromise?: Promise<void>;
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private http?: InternalHttpSetup;
@@ -204,7 +220,60 @@ export class FeatureFlagsService {
    * Stop lifecycle method
    */
   public async stop() {
+    this.unmountHelper?.();
+    this.unmountHelper = undefined;
     await OpenFeature.close();
+  }
+
+  /**
+   * Asks the provider to fetch the server snapshot now, instead of waiting for the next poll.
+   */
+  public async refresh(): Promise<void> {
+    await OpenFeature.setContext(this.context);
+  }
+
+  /**
+   * Exposes `toggleFeatureFlagsHelper()` on the page. The helper UI stays out of the
+   * page-load bundle until the first time it is turned on.
+   */
+  public registerHelper(deps: FeatureFlagsHelperDeps): void {
+    this.helperDeps = deps;
+    this.logger.info(
+      'To inspect and override feature flags, run toggleFeatureFlagsHelper() in the browser console.'
+    );
+    globalThis.toggleFeatureFlagsHelper = () => {
+      const enabled = localStorage.getItem(HELPER_STORAGE_KEY) !== 'true';
+      void this.setHelperEnabled(enabled);
+    };
+    if (localStorage.getItem(HELPER_STORAGE_KEY) === 'true') {
+      void this.setHelperEnabled(true);
+    }
+  }
+
+  private async setHelperEnabled(enabled: boolean): Promise<void> {
+    localStorage.setItem(HELPER_STORAGE_KEY, String(enabled));
+    if (!enabled) {
+      this.unmountHelper?.();
+      this.unmountHelper = undefined;
+      this.logger.info('Feature flags helper disabled.');
+      return;
+    }
+    if (this.unmountHelper || !this.helperDeps) {
+      return;
+    }
+
+    const deps = this.helperDeps;
+    const { mountFeatureFlagsHelper } = await import('./helper');
+    if (localStorage.getItem(HELPER_STORAGE_KEY) !== 'true' || this.unmountHelper) {
+      return;
+    }
+    this.unmountHelper = mountFeatureFlagsHelper({
+      http: deps.http,
+      overlays: deps.overlays,
+      rendering: deps.rendering,
+      refreshFlags: () => this.refresh(),
+    }).unmount;
+    this.logger.info('Feature flags helper enabled.');
   }
 
   /**
