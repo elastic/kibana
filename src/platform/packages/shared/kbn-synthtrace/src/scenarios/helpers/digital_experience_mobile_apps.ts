@@ -46,6 +46,8 @@ export interface DigitalExperienceMobileApp {
   appId: string;
   health: HealthProfileName;
   sessionsPerMinute: number;
+  /** Overrides the number of installations the sessions take turns among. */
+  installations?: number;
   /** Omits the environment, which EDOT iOS then reports as `default`. */
   withoutEnvironment?: boolean;
   /** Overrides the default weights of the listed devices only; a weight of 0 leaves one out. */
@@ -462,18 +464,24 @@ export const generateEdotReactNativeSessions = (
     seed,
     platform,
     withManualSpans,
-  }: DigitalExperienceMobileScenarioOpts & { environment: string; from: number }
+    apps = DIGITAL_EXPERIENCE_MOBILE_APPS,
+  }: DigitalExperienceMobileScenarioOpts & {
+    environment: string;
+    from: number;
+    apps?: readonly DigitalExperienceMobileApp[];
+  }
 ): Array<SynthtraceGenerator<EdotReactNativeDocument>> => {
   const platforms: readonly MobilePlatform[] =
     platform === 'both' ? ['android', 'ios'] : [platform];
 
-  return DIGITAL_EXPERIENCE_MOBILE_APPS.map(
+  return apps.map(
     ({
       serviceName,
       versions,
       appId,
       health,
       sessionsPerMinute,
+      installations: installationCount,
       withoutEnvironment,
       deviceWeights,
       model,
@@ -492,10 +500,9 @@ export const generateEdotReactNativeSessions = (
       const healthProfile = edotReactNative.healthProfiles[health];
       const perMinute = sessionsPerMinute * scale;
       // Sessions take turns among the installations, so that each opens the app at a fixed interval
-      const installations = Math.max(
-        Math.ceil(perMinute * MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION),
-        1
-      );
+      const installations =
+        installationCount ??
+        Math.max(Math.ceil(perMinute * MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION), 1);
 
       return generatePerMinute<EdotReactNativeDocument>(range, perMinute, ({ time, index }) => {
         // An installation keeps its device and app version across sessions

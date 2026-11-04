@@ -987,6 +987,33 @@ node scripts/synthtrace digital_experience_mobile --live --scenarioOpts platform
 node scripts/synthtrace digital_experience_mobile --from=now-1h --to=now --scenarioOpts withManualSpans=false,seed=my-seed
 ```
 
+#### Smaller `digital_experience_mobile` scenarios
+
+These generate the same kind of EDOT React Native data for a single app, which makes the output of the EDOT React Native generators easier to inspect. Apart from `digital_experience_mobile_single_session`, they take the options of `digital_experience_mobile`.
+
+| Scenario | Generates |
+| -------- | --------- |
+| `digital_experience_mobile_single_app` | `weather-demo-react-native` alone, with its three versions on both platforms |
+| `digital_experience_mobile_single_installation` | one installation of `notes-mobile`, so every session shares one `app.installation.id`, device and app version. It opens the app every 45 minutes, so use a range of a few hours. |
+| `digital_experience_mobile_single_session` | one session of `notes-mobile`, starting at `--from`. Not meant for `--live`. |
+| `digital_experience_mobile_minimal_app` | one session per minute of `minimal-mobile`, which has one screen with one request, no widgets and no spans of its own |
+
+Options of `digital_experience_mobile_single_session`:
+
+- `platform` (`android` or `ios`, default `android`): a Pixel 8 or an iPhone 15 Pro.
+- `health` (`healthy`, `slow`, `erroring` or `critical`, default `healthy`).
+- `screenViews` (number, default `4`) and `visits` (number, default `1`).
+- `withManualSpans` and `seed`: as for `digital_experience_mobile`.
+
+**Usage:**
+
+```sh
+node scripts/synthtrace digital_experience_mobile_single_app --from=now-30m --to=now
+node scripts/synthtrace digital_experience_mobile_single_installation --from=now-6h --to=now --scenarioOpts platform=ios
+node scripts/synthtrace digital_experience_mobile_single_session --from=now-30m --to=now --scenarioOpts platform=ios,health=critical
+node scripts/synthtrace digital_experience_mobile_minimal_app --from=now-30m --to=now
+```
+
 ### SRE Incident Scenarios
 
 Located in `sre_incidents/` directory:

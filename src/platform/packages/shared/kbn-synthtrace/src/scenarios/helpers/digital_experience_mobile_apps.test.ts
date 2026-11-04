@@ -20,6 +20,7 @@ import {
   DIGITAL_EXPERIENCE_MOBILE_APPS,
   generateEdotReactNativeSessions,
   parseDigitalExperienceMobileScenarioOpts,
+  type DigitalExperienceMobileApp,
   type DigitalExperienceMobileScenarioOpts,
 } from './digital_experience_mobile_apps';
 
@@ -32,7 +33,12 @@ const range = timerange(
 const FROM = range.from.getTime();
 
 const collect = (
-  opts: Partial<DigitalExperienceMobileScenarioOpts & { from: number }> = {},
+  opts: Partial<
+    DigitalExperienceMobileScenarioOpts & {
+      from: number;
+      apps: readonly DigitalExperienceMobileApp[];
+    }
+  > = {},
   timeRange: Timerange = range
 ): EdotReactNativeDocument[] =>
   generateEdotReactNativeSessions(timeRange, {
@@ -301,6 +307,23 @@ describe('digital experience mobile apps', () => {
         expect(regression.length).toBeGreaterThan(0);
         regression.forEach((doc) => expect(resourceOf(doc)['service.version']).toBe('3.8.0'));
       });
+    });
+
+    it('generates only the given apps, over their fixed number of installations', () => {
+      const weatherDemo = DIGITAL_EXPERIENCE_MOBILE_APPS.find(
+        ({ serviceName }) => serviceName === 'weather-demo-react-native'
+      );
+      if (!weatherDemo) {
+        throw new Error('weather-demo-react-native is missing');
+      }
+      const appDocs = collect({ apps: [{ ...weatherDemo, installations: 1 }] });
+      expect(new Set(appDocs.map(serviceOf))).toEqual(new Set([weatherDemo.serviceName]));
+      const installationIds = new Set(
+        appDocs
+          .map((doc) => (isSpan(doc) ? doc.resource.attributes : doc.resource?.attributes))
+          .flatMap((attributes) => attributes?.['app.installation.id'] ?? [])
+      );
+      expect(installationIds.size).toBe(1);
     });
 
     it('keeps everything within the range', () => {
