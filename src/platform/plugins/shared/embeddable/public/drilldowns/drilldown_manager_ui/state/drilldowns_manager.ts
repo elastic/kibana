@@ -295,7 +295,7 @@ export class DrilldownsManager {
   public readonly onDelete = (ids: string[]) => {
     const { drilldowns$, setDrilldowns, toastService } = this.deps;
     try {
-      setDrilldowns([...drilldowns$.getValue().filter(({ actionId }) => !ids.includes(actionId))]);
+      setDrilldowns(drilldowns$.getValue().filter(({ actionId }) => !ids.includes(actionId)));
       this.deps.toastService.addSuccess(
         ids.length === 1
           ? {

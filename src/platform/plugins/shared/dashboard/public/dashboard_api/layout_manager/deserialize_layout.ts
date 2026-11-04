@@ -21,13 +21,14 @@ export function deserializeLayout(
   const layout: DashboardLayout = {
     panels: {},
     sections: {},
-    pinnedPanels: (pinnedPanels ?? []).reduce((prev, panel, index) => {
-      const panelId = panel.id ?? v4();
-      const { width, grow, type, config } = panel;
-      childState[panelId] = config; // push to child state
-      return { ...prev, [panelId]: { type, width, grow, order: index } };
-    }, {}),
+    pinnedPanels: {},
   };
+  (pinnedPanels ?? []).forEach((panel, index) => {
+    const panelId = panel.id ?? v4();
+    const { width, grow, type, config } = panel;
+    childState[panelId] = config; // push to child state
+    layout.pinnedPanels[panelId] = { type, width, grow, order: index };
+  });
 
   function pushPanel(panel: DashboardPanel, sectionId?: string) {
     const panelId = panel.id ?? v4();

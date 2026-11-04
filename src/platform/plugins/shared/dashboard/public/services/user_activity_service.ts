@@ -95,17 +95,16 @@ class DashboardUserActivitySession {
         query: state.attributes.query,
         filters: state.attributes.filters,
         panel_count: this.api.getPanelCount(),
-        errors: Object.entries(this.api.children$.getValue()).reduce(
-          (prev: Array<{ panel_id: string; error: string }>, [id, child]) => {
+        errors: Object.entries(this.api.children$.getValue()).flatMap(
+          ([id, child]): Array<{ panel_id: string; error: string }> => {
             if (apiPublishesBlockingError(child)) {
               const blockingError = child.blockingError$.getValue();
               if (blockingError) {
-                return [...prev, { panel_id: id, error: blockingError.message }];
+                return [{ panel_id: id, error: blockingError.message }];
               }
             }
-            return prev;
-          },
-          []
+            return [];
+          }
         ),
       };
     }
