@@ -63,15 +63,32 @@ const TYPE_ONLY_KEYS = new Set([
   'implements',
 ]);
 
-const swcTransformers = new Map(
-  ['.js', '.mjs', '.ts', '.tsx'].map((extension) => [
-    extension,
-    createTransformer(getJestSwcConfig(`/__kbn_jest_transformer__${extension}`)),
-  ])
-);
+// The Emotion plugin only changes files that use Emotion and costs about twice the rest of the
+// SWC transform, so files that can't use it skip it.
+const EMOTION_USAGE = /@emotion|\bcss\b|styled|keyframes/;
 
-function getSwcTransformer(sourcePath) {
-  return swcTransformers.get(Path.extname(sourcePath)) ?? swcTransformers.get('.js');
+const createSwcTransformers = (withEmotion) =>
+  new Map(
+    ['.js', '.mjs', '.ts', '.tsx'].map((extension) => {
+      const config = getJestSwcConfig(`/__kbn_jest_transformer__${extension}`);
+      const { experimental } = config.jsc;
+      return [
+        extension,
+        createTransformer(
+          withEmotion
+            ? config
+            : { ...config, jsc: { ...config.jsc, experimental: { ...experimental, plugins: [] } } }
+        ),
+      ];
+    })
+  );
+
+const swcTransformers = createSwcTransformers(true);
+const swcTransformersWithoutEmotion = createSwcTransformers(false);
+
+function getSwcTransformer(sourcePath, code) {
+  const transformers = EMOTION_USAGE.test(code) ? swcTransformers : swcTransformersWithoutEmotion;
+  return transformers.get(Path.extname(sourcePath)) ?? transformers.get('.js');
 }
 
 // --- AST helpers -------------------------------------------------------------------------------
@@ -1507,7 +1524,7 @@ const transformer = {
 
   process(sourceText, sourcePath, transformOptions) {
     const prepared = prepareSource(sourceText, sourcePath);
-    const result = getSwcTransformer(sourcePath).process(
+    const result = getSwcTransformer(sourcePath, prepared.code).process(
       prepared.code,
       sourcePath,
       transformOptions
@@ -1518,7 +1535,7 @@ const transformer = {
 
   async processAsync(sourceText, sourcePath, transformOptions) {
     const prepared = prepareSource(sourceText, sourcePath);
-    const swcTransformer = getSwcTransformer(sourcePath);
+    const swcTransformer = getSwcTransformer(sourcePath, prepared.code);
     // @swc/jest's async transform always emits ESM, so only use it when Jest asked for ESM.
     const result = transformOptions?.supportsStaticESM
       ? await swcTransformer.processAsync(prepared.code, sourcePath, transformOptions)
