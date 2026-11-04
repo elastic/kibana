@@ -476,7 +476,9 @@ describe('searchKnowledgeIndicators', () => {
 
     it('loads topology-expanded ids in bounded batches', async () => {
       const expandedIds = Array.from({ length: 5_001 }, (_, index) => `feature-${index}`);
-      const getFeatures = jest.fn(async () => []);
+      const getFeatures = jest.fn(
+        async (_sourceId: string, _options: { featureIds?: string[] }): Promise<Feature[]> => []
+      );
 
       await searchKnowledgeIndicators({
         params: { kind: ['feature'], feature_ids: ['seed'] },
