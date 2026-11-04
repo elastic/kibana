@@ -805,7 +805,7 @@ describe('UiamServiceAccounts', () => {
         type: 'api_key',
         apiKeyId: 'api-key-id',
         variant: 'uiam',
-        displayName: 'nightshift key',
+        apiKeyName: 'nightshift key',
       });
     });
 
@@ -933,7 +933,7 @@ describe('UiamServiceAccounts', () => {
         type: 'api_key',
         apiKeyId: 'api-key-id',
         variant: 'uiam',
-        displayName: 'nightshift key',
+        apiKeyName: 'nightshift key',
       });
     });
 

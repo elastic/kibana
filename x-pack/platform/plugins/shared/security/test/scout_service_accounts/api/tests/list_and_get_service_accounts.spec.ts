@@ -50,10 +50,15 @@ const uniqueName = (prefix: string) => `${prefix}-${Date.now()}-${Math.floor(Mat
 
 const getPath = (id: string) => `${SERVICE_ACCOUNT_ENDPOINT}/${encodeURIComponent(id)}`;
 
-/**
- * What this suite expects back. No `createdBy`, which is UIAM-only for now while this suite
- * exercises the Elasticsearch backend, and no creation time, which neither backend reports.
- */
+/** The creator the directory reports for an account. */
+interface DirectoryCreator {
+  type: string;
+  username?: string;
+  userProfileId?: string;
+  displayName?: string;
+}
+
+/** What this suite expects back. No creation time, which neither backend reports. */
 interface DirectoryEntry {
   id: string;
   name: string;
@@ -61,6 +66,7 @@ interface DirectoryEntry {
   enabled: boolean;
   assumable: boolean;
   description?: string;
+  createdBy?: DirectoryCreator;
   /** Reported by the list only. */
   workloadCount?: number;
 }
@@ -80,16 +86,18 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   let kibanaManaged: ServiceAccountPrincipal;
   /** Created straight through Elasticsearch, so Kibana holds nothing to assume it with. */
   let foreign: ServiceAccountPrincipal;
+  /** The admin `kibanaManaged` is created as, named the way the directory should name them. */
+  let adminCreator: DirectoryCreator;
+  /** The Elasticsearch user `foreign` is created as. */
+  let esClientUsername: string;
 
   const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
 
   /**
    * The account created through Kibana in `beforeAll`, as the directory reports it.
    *
-   * Asserted whole, which pins the absence of a creator as much as the rest: Elasticsearch does
-   * not record who created an account yet, and Kibana deliberately does not answer with the
-   * creator of the credential it stored instead. A followup reports both fields once
-   * Elasticsearch has them, and this assertion is what will catch that change.
+   * Asserted whole. The creator is what Elasticsearch recorded for the admin's request, named by
+   * the admin's user profile.
    *
    * Only the list counts the workloads bound to an account, so `listed` adds that count.
    */
@@ -103,6 +111,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       roles: ['viewer'],
       enabled: true,
       assumable: true,
+      createdBy: adminCreator,
       ...(listed && { workloadCount: 0 }),
     });
   };
@@ -110,6 +119,27 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   apiTest.beforeAll(async ({ apiClient, esClient, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     adminHeaders = { ...cookieHeader, ...REQUEST_HEADERS };
+
+    const me = await apiClient.get('internal/security/me', {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+    const profile = await apiClient.get('internal/security/user_profile', {
+      headers: adminHeaders,
+      responseType: 'json',
+    });
+    const { username, profile_uid: userProfileId } = me.body as {
+      username: string;
+      profile_uid: string;
+    };
+    const fullName = (profile.body as { user: { full_name?: string } }).user.full_name;
+    adminCreator = {
+      type: 'user',
+      username,
+      userProfileId,
+      ...(fullName && { displayName: fullName }),
+    };
+    ({ username: esClientUsername } = await esClient.security.authenticate());
 
     kibanaManaged = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('directory') };
     created.push(kibanaManaged);
@@ -205,7 +235,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
 
       // Kibana can describe an account it did not create, but holds no token to act as it with.
       // `assumable` is how the UI tells the two apart.
-      const notManaged = accounts.find(({ id }) => id === idOf(foreign));
+      const [{ createdBy, ...notManaged }] = accounts.filter(({ id }) => id === idOf(foreign));
       expect(notManaged).toStrictEqual({
         id: idOf(foreign),
         name: foreign.name,
@@ -214,6 +244,9 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
         assumable: false,
         workloadCount: 0,
       });
+      // Whoever wrote the account is its creator, even outside Kibana. Whether that user has a
+      // profile depends on the cluster, so only the username is pinned.
+      expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
 
       // Built-in accounts are Elasticsearch's own and never appear in the directory.
       expect(accounts.map(({ id }) => id)).not.toContain('elastic/kibana');
@@ -265,13 +298,15 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     });
 
     expect(response.statusCode).toBe(200);
-    expect(response.body).toStrictEqual({
+    const { createdBy, ...entry } = response.body as DirectoryEntry;
+    expect(entry).toStrictEqual({
       id: idOf(foreign),
       name: foreign.name,
       roles: ['monitoring_user'],
       enabled: false,
       assumable: false,
     });
+    expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
   });
 
   apiTest(
@@ -370,13 +405,16 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
 
       expect(after.statusCode).toBe(200);
       // The stored token cannot authenticate this account, so Kibana can no longer act as it.
-      expect(after.body).toStrictEqual({
+      const { createdBy, ...entry } = after.body as DirectoryEntry;
+      expect(entry).toStrictEqual({
         id: idOf(recreated),
         name: recreated.name,
         roles: ['monitoring_user'],
         enabled: true,
         assumable: false,
       });
+      // The recreated account names whoever recreated it, not who asked Kibana for the original.
+      expect(createdBy).toMatchObject({ type: 'user', username: esClientUsername });
     }
   );
 
