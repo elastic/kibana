@@ -185,7 +185,7 @@ const needsTraceHydration = (score: EvaluationScoreDocument): boolean =>
 
 /**
  * Gives docs without a stored `task.output` a synthetic one carrying the hydrated tool
- * steps so trail extraction (trace cards, reliability repTrails) works unchanged.
+ * and reasoning steps so trail extraction (trace cards, reliability repTrails) works unchanged.
  * Stored output always wins. The answer is only the subject model's final `stop` message from
  * the trace and is absent when the trace holds none (e.g. the run ended on a tool call).
  */
@@ -202,7 +202,11 @@ const withHydratedOutput = (
       task: {
         ...score.task,
         output: {
-          steps: summary.toolIds.map((toolId) => ({ type: 'tool_call', tool_id: toolId })),
+          steps: summary.steps.map((step) =>
+            step.type === 'tool'
+              ? { type: 'tool_call', tool_id: step.toolId }
+              : { type: 'reasoning', reasoning: step.text }
+          ),
           ...(summary.answer !== undefined ? { messages: [{ message: summary.answer }] } : {}),
         },
       },

@@ -1362,6 +1362,69 @@ describe('queryMatrixTraces trace hydration', () => {
     });
   });
 
+  describe('trace reasoning hydration', () => {
+    const narrationSpan = (id: string, startOffsetMs: number, content: string) =>
+      span('chat model-x', id, 's3', startOffsetMs, 10, {
+        'gen_ai.output.messages': JSON.stringify([
+          {
+            role: 'assistant',
+            finish_reason: 'tool_calls',
+            parts: [
+              { type: 'text', content },
+              { type: 'tool_call', id: 'c1', name: 'load_skill', arguments: {} },
+            ],
+          },
+        ]),
+      });
+    const reasoningTrace = {
+      ...traceResponse,
+      spans: [...traceResponse.spans, narrationSpan('n1', 4000, 'x'.repeat(800))],
+    };
+
+    it('counts reasoning toward steps but not tool calls, truncated to 500 chars', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [scoredDoc({ trace_id: 'trace-1' })],
+          jest.fn(async () => reasoningTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.stepCount).toBe(4);
+      expect(entry.toolCount).toBe(3);
+      expect(entry.toolTrail).toEqual([
+        'attachments.read',
+        'load_skill',
+        'security.security_labs_search',
+      ]);
+      expect(entry.steps?.[0]).toEqual({ type: 'reasoning', text: 'x'.repeat(500) });
+      expect(entry.repTrails).toEqual([
+        ['attachments.read', 'load_skill', 'security.security_labs_search'],
+      ]);
+    });
+
+    it('keeps stored task.output steps authoritative over trace reasoning', async () => {
+      const traces = await queryMatrixTraces(
+        clientWith(
+          [
+            scoredDoc({
+              trace_id: 'trace-1',
+              output: { steps: [{ type: 'tool_call', tool_id: 'stored' }] },
+            }),
+          ],
+          jest.fn(async () => reasoningTrace)
+        ) as never,
+        makeLog() as never,
+        aggregated as never
+      );
+
+      const entry = traces['model-x:direct:suite-1:example-1'];
+      expect(entry.steps).toEqual([{ type: 'tool', toolId: 'stored', toolParams: undefined }]);
+    });
+  });
+
   it('fetches each trace id once even when several docs share it', async () => {
     const getTrace = jest.fn(async () => traceResponse);
     const docs = [scoredDoc({ trace_id: 'trace-1' }), scoredDoc({ trace_id: 'trace-1' })];

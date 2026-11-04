@@ -7,10 +7,20 @@
 
 import type { GetTraceResponse } from '@kbn/evals-common';
 
+/** One hydrated step, in span start order. */
+export type TraceSummaryStep =
+  | { type: 'tool'; toolId: string }
+  | { type: 'reasoning'; text: string };
+
 /** What the matrix keeps from an OTel trace fetched via the evals trace route. */
 export interface TraceSummary {
   /** Tool names in call order, from `execute_tool` spans. */
   toolIds: string[];
+  /**
+   * Tool calls interleaved with the subject model's narration before each tool-calling turn
+   * (`reasoning`), ordered by span start time. `toolIds` is exactly the `tool` entries.
+   */
+  steps: TraceSummaryStep[];
   /** Summed over `chat *` spans; undefined when no span reported usage. */
   inputTokens?: number;
   outputTokens?: number;
@@ -76,6 +86,34 @@ const finalTextOf = (raw: unknown): string | undefined => {
 };
 
 /**
+ * Concatenated text parts of a `gen_ai.output.messages` attribute when a message finished with
+ * `tool_calls` (the model's narration before calling tools); undefined for other finish reasons,
+ * malformed JSON, or whitespace-only text.
+ */
+const narrationOf = (raw: unknown): string | undefined => {
+  if (typeof raw !== 'string') return undefined;
+  let messages: unknown;
+  try {
+    messages = JSON.parse(raw);
+  } catch {
+    return undefined;
+  }
+  if (!Array.isArray(messages)) return undefined;
+  const text = (messages as OutputMessage[])
+    .filter(
+      (message) => message && typeof message === 'object' && message.finish_reason === 'tool_calls'
+    )
+    .flatMap((message) => (Array.isArray(message.parts) ? message.parts : []))
+    .filter(
+      (part): part is { type: 'text'; content: string } =>
+        Boolean(part) && part.type === 'text' && typeof part.content === 'string'
+    )
+    .map((part) => part.content)
+    .join('');
+  return text.trim().length > 0 ? text : undefined;
+};
+
+/**
  * Reduces a trace's spans to the tool trail, token totals and root latency. A trace with
  * no spans carries no evidence about what the run did, so it yields `undefined` rather than
  * a summary whose empty trail would read as "the agent called no tools".
@@ -90,6 +128,7 @@ export const summarizeTraceSpans = (
   const ordered = [...spans].sort((a, b) => Date.parse(a.start_time) - Date.parse(b.start_time));
 
   const toolIds: string[] = [];
+  const steps: TraceSummaryStep[] = [];
   let inputTokens: number | undefined;
   let outputTokens: number | undefined;
   let answer: string | undefined;
@@ -108,6 +147,7 @@ export const summarizeTraceSpans = (
           ? named
           : span.name.slice(EXECUTE_TOOL_PREFIX.length);
       toolIds.push(toolId);
+      steps.push({ type: 'tool', toolId });
     } else if (span.name.startsWith(CHAT_PREFIX)) {
       const input = toNumber(span.attributes?.['gen_ai.usage.input_tokens']);
       const output = toNumber(span.attributes?.['gen_ai.usage.output_tokens']);
@@ -118,6 +158,8 @@ export const summarizeTraceSpans = (
         // Spans are start-ordered, so the last subject `stop` span wins.
         const text = finalTextOf(span.attributes?.['gen_ai.output.messages']);
         if (text !== undefined) answer = text;
+        const narration = narrationOf(span.attributes?.['gen_ai.output.messages']);
+        if (narration !== undefined) steps.push({ type: 'reasoning', text: narration });
       }
     }
   }
@@ -130,6 +172,7 @@ export const summarizeTraceSpans = (
 
   return {
     toolIds,
+    steps,
     inputTokens,
     outputTokens,
     latencyMs: rootDuration ?? durationMs,

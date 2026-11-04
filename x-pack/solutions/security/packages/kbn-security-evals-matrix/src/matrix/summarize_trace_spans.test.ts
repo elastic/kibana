@@ -155,3 +155,89 @@ describe('summarizeTraceSpans answer extraction', () => {
     expect(summary?.subjectChatSpans).toBe(0);
   });
 });
+
+describe('summarizeTraceSpans reasoning steps', () => {
+  const toolSpan = (id: string, offset: number, tool: string) =>
+    span(`execute_tool ${tool}`, id, offset, { 'gen_ai.tool.name': tool });
+
+  it('orders subject narration before its tool step by start time', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        toolSpan('t1', 20, 'platform.core.search'),
+        span(`chat ${SUBJECT}`, 'a', 10, output('tool_calls', [text('Let me search.'), toolCall])),
+        span(`chat ${SUBJECT}`, 'b', 30, output('stop', [text('done')])),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.steps).toEqual([
+      { type: 'reasoning', text: 'Let me search.' },
+      { type: 'tool', toolId: 'platform.core.search' },
+    ]);
+    expect(summary?.toolIds).toEqual(['platform.core.search']);
+  });
+
+  it('concatenates text parts around tool_call parts', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        span(
+          `chat ${SUBJECT}`,
+          'a',
+          10,
+          output('tool_calls', [text('first '), toolCall, text('second')])
+        ),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.steps).toEqual([{ type: 'reasoning', text: 'first second' }]);
+  });
+
+  it('ignores helper-model tool_calls spans with text', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        span(`chat ${HELPER}`, 'a', 10, output('tool_calls', [text('helper narration')])),
+        toolSpan('t1', 20, 'platform.core.search'),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.steps).toEqual([{ type: 'tool', toolId: 'platform.core.search' }]);
+  });
+
+  it('emits no step for a tool_calls span with only tool_call parts or blank text', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        span(`chat ${SUBJECT}`, 'a', 10, output('tool_calls', [toolCall])),
+        span(`chat ${SUBJECT}`, 'b', 20, output('tool_calls', [text('  \n '), toolCall])),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.steps).toEqual([]);
+  });
+
+  it('does not duplicate the final stop span text as a reasoning step', () => {
+    const summary = summarizeTraceSpans(
+      trace([span(`chat ${SUBJECT}`, 'a', 10, output('stop', [text('the answer')]))]),
+      SUBJECT
+    );
+    expect(summary?.answer).toBe('the answer');
+    expect(summary?.steps).toEqual([]);
+  });
+
+  it('emits no step for malformed output JSON and does not throw', () => {
+    const summary = summarizeTraceSpans(
+      trace([
+        span(`chat ${SUBJECT}`, 'a', 10, { 'gen_ai.output.messages': '[{"finish_reason":"tool_' }),
+        span(`chat ${SUBJECT}`, 'b', 20, { 'gen_ai.output.messages': '{"not":"an array"}' }),
+        span(`chat ${SUBJECT}`, 'c', 30, { 'gen_ai.output.messages': 42 }),
+      ]),
+      SUBJECT
+    );
+    expect(summary?.steps).toEqual([]);
+  });
+
+  it('emits no reasoning steps without a subject model id', () => {
+    const summary = summarizeTraceSpans(
+      trace([span(`chat ${SUBJECT}`, 'a', 10, output('tool_calls', [text('narration')]))])
+    );
+    expect(summary?.steps).toEqual([]);
+  });
+});
