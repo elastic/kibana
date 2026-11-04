@@ -8,17 +8,12 @@
 import React, { useCallback, useMemo, useState, type CSSProperties } from 'react';
 import {
   Background,
-  BaseEdge,
   Controls,
-  EdgeLabelRenderer,
-  getBezierPath,
   Handle,
   MarkerType,
   Position,
   ReactFlow,
   type Edge,
-  type EdgeProps,
-  type EdgeTypes,
   type Node,
   type NodeChange,
   type NodeProps,
@@ -27,12 +22,10 @@ import {
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
-  EuiCode,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
-  EuiPopover,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -60,10 +53,6 @@ type Highlight = 'selected' | 'downstream' | 'dimmed' | 'none';
 type CellFlowNode = Node<{ cellId: string; width: number; highlight: Highlight }, 'cell'>;
 type SourceFlowNode = Node<{ label: string; width: number; highlight: Highlight }, 'source'>;
 type FlowNode = CellFlowNode | SourceFlowNode;
-type DependencyFlowEdge = Edge<{ params: readonly string[] }, 'dependency'>;
-
-const EDGE_HOVER_WIDTH = 20;
-
 const hiddenHandleCss = css`
   visibility: hidden;
 `;
@@ -236,82 +225,6 @@ const SourceNode = ({ data: { label, width, highlight } }: NodeProps<SourceFlowN
 
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
-const EDGE_VARIABLES_LABEL = i18n.translate('xpack.notebook.graph.edgeVariables', {
-  defaultMessage: 'Variables passed along this edge',
-});
-
-const DependencyEdgeView = ({
-  id,
-  sourceX,
-  sourceY,
-  targetX,
-  targetY,
-  sourcePosition,
-  targetPosition,
-  markerEnd,
-  style,
-  data,
-}: EdgeProps<DependencyFlowEdge>) => {
-  const [path, labelX, labelY] = getBezierPath({
-    sourceX,
-    sourceY,
-    targetX,
-    targetY,
-    sourcePosition,
-    targetPosition,
-  });
-  const [isHovered, setIsHovered] = useState(false);
-  const params = data?.params ?? [];
-  return (
-    <>
-      <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} interactionWidth={0} />
-      {params.length > 0 && (
-        // Non-selectable edges get `pointer-events: none`; this path opts back in for hover.
-        <path
-          d={path}
-          fill="none"
-          stroke="transparent"
-          strokeWidth={EDGE_HOVER_WIDTH}
-          pointerEvents="stroke"
-          onMouseEnter={() => setIsHovered(true)}
-          onMouseLeave={() => setIsHovered(false)}
-        />
-      )}
-      {isHovered && params.length > 0 && (
-        <EdgeLabelRenderer>
-          <div
-            css={css`
-              position: absolute;
-              transform: translate(-50%, -50%) translate(${labelX}px, ${labelY}px);
-              pointer-events: none;
-            `}
-          >
-            <EuiPopover
-              aria-label={EDGE_VARIABLES_LABEL}
-              isOpen
-              button={<span />}
-              closePopover={() => {}}
-              ownFocus={false}
-              anchorPosition="upCenter"
-              panelPaddingSize="s"
-            >
-              <EuiFlexGroup direction="column" gutterSize="xs" responsive={false}>
-                {params.map((param) => (
-                  <EuiFlexItem key={param} grow={false}>
-                    <EuiCode transparentBackground>?{param}</EuiCode>
-                  </EuiFlexItem>
-                ))}
-              </EuiFlexGroup>
-            </EuiPopover>
-          </div>
-        </EdgeLabelRenderer>
-      )}
-    </>
-  );
-};
-
-const EDGE_TYPES: EdgeTypes = { dependency: DependencyEdgeView };
-
 /** The notebook's cells and data sources as a top-to-bottom dependency graph. */
 export const DependencyGraph = ({
   onSelectCell,
@@ -369,7 +282,7 @@ export const DependencyGraph = ({
               data: { label: node.label, width: node.width, highlight },
             };
       }),
-      edges: view.edges.map(({ id, source, target, params }): DependencyFlowEdge => {
+      edges: view.edges.map(({ id, source, target }): Edge => {
         const isHighlighted = downstream?.edges.has(id) ?? false;
         const isDimmed = downstream !== undefined && !isHighlighted;
         const color = isHighlighted ? euiTheme.colors.primary : undefined;
@@ -377,8 +290,6 @@ export const DependencyGraph = ({
           id,
           source,
           target,
-          type: 'dependency',
-          data: { params },
           markerEnd: { type: MarkerType.ArrowClosed, color },
           animated: isHighlighted,
           zIndex: isHighlighted ? 1 : 0,
@@ -413,7 +324,6 @@ export const DependencyGraph = ({
           nodes={nodes}
           edges={edges}
           nodeTypes={NODE_TYPES}
-          edgeTypes={EDGE_TYPES}
           colorMode={colorMode === 'DARK' ? 'dark' : 'light'}
           onNodesChange={onNodesChange}
           nodesConnectable={false}
