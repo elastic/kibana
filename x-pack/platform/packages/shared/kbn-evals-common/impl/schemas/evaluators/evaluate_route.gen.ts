@@ -67,12 +67,68 @@ export const EvaluateResultError = lazySchema(() =>
 );
 export type EvaluateResultError = z.infer<typeof EvaluateResultError>;
 
+/**
+ * Tokens used by the evaluator's model calls, summed over every call it made, including retries and calls that failed. Absent when the evaluator made no model call. Named like Agent Builder's round usage, so the two can be summed.
+ */
+export const EvaluateResultUsage = lazySchema(() =>
+  z.object({
+    /**
+     * Input tokens, including tokens served from the prompt cache.
+     */
+    input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .describe('Input tokens, including tokens served from the prompt cache.'),
+    /**
+     * Input tokens served from the prompt cache (part of `input_tokens`), when reported.
+     */
+    cached_input_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe(
+        'Input tokens served from the prompt cache (part of `input_tokens`), when reported.'
+      ),
+    /**
+     * Output tokens, including reasoning tokens.
+     */
+    output_tokens: z.number().int().min(0).describe('Output tokens, including reasoning tokens.'),
+    /**
+     * Reasoning tokens (part of `output_tokens`), when reported.
+     */
+    reasoning_tokens: z
+      .number()
+      .int()
+      .min(0)
+      .optional()
+      .describe('Reasoning tokens (part of `output_tokens`), when reported.'),
+    /**
+     * Model calls the evaluator made.
+     */
+    llm_calls: z.number().int().min(0).describe('Model calls the evaluator made.'),
+    /**
+     * Calls with no token counts in the totals: the call failed, or the provider reported no usage.
+     */
+    llm_calls_without_usage: z
+      .number()
+      .int()
+      .min(0)
+      .describe(
+        'Calls with no token counts in the totals: the call failed, or the provider reported no usage.'
+      ),
+  })
+);
+export type EvaluateResultUsage = z.infer<typeof EvaluateResultUsage>;
+
 export const EvaluateResult = lazySchema(() =>
   z.object({
     status: z.enum(['ok', 'error']),
     evaluator: EvaluateResultEvaluator,
     scores: z.array(EvaluateResultScore).optional(),
     error: EvaluateResultError.optional(),
+    usage: EvaluateResultUsage.optional(),
   })
 );
 export type EvaluateResult = z.infer<typeof EvaluateResult>;

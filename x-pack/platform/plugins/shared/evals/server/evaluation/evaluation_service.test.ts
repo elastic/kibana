@@ -8,6 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import type { ChatCompletionTokenCount, InferenceCallbacks } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { createEvaluatorRegistryMock } from '../evaluators/registry.mock';
@@ -129,7 +130,11 @@ describe('createEvaluationService', () => {
         scores: [{ name: 'groundedness', score: 0.9, label: 'GROUNDED' }],
       },
     ]);
-    expect(getClient).toHaveBeenCalledWith({ request, bindTo: { connectorId: 'judge-connector' } });
+    expect(getClient).toHaveBeenCalledWith({
+      request,
+      bindTo: { connectorId: 'judge-connector' },
+      callbacks: expect.any(Object),
+    });
     expect(groundedness.evaluate).toHaveBeenCalledWith(
       expect.objectContaining({
         trace: expect.objectContaining({ traceId: TRACE_ID, esClient: traceReader }),
@@ -161,6 +166,68 @@ describe('createEvaluationService', () => {
         scores: [{ name: 'latency', score: 1 }],
       }),
     ]);
+  });
+
+  it("reports each evaluator's own model usage, including failed calls", async () => {
+    type Outcome = { tokens?: ChatCompletionTokenCount } | { fail: true };
+    const call = (inferenceClient: unknown, outcome: Outcome) =>
+      (inferenceClient as { prompt: (outcome: Outcome) => Promise<void> }).prompt(outcome);
+    const careful = buildEvaluator({
+      name: 'careful',
+      kind: 'llm',
+      evaluate: jest.fn(async ({ inferenceClient }) => {
+        await call(inferenceClient, {
+          tokens: { prompt: 100, completion: 20, thinking: 30, cached: 40, total: 150 },
+        });
+        await call(inferenceClient, {});
+        return { scores: [{ name: 'careful', score: 1 }] };
+      }),
+    });
+    const flaky = buildEvaluator({
+      name: 'flaky',
+      kind: 'llm',
+      evaluate: jest.fn(async ({ inferenceClient }) => {
+        await call(inferenceClient, { fail: true });
+        return { scores: [] };
+      }),
+    });
+    const latency = buildEvaluator({ name: 'latency' });
+    const { evaluate, getClient } = setup([careful, flaky, latency]);
+    getClient.mockImplementation(({ callbacks }: { callbacks: InferenceCallbacks }) => ({
+      prompt: async (outcome: Outcome) => {
+        if ('fail' in outcome) {
+          const error = new Error('rate limited');
+          [callbacks.error].flat().forEach((handler) => handler?.({ error }));
+          throw error;
+        }
+        [callbacks.complete].flat().forEach((handler) => handler?.({ tokens: outcome.tokens }));
+      },
+    }));
+
+    const results = await evaluate({
+      evaluators: [
+        { name: 'careful', connector_id: 'judge-connector' },
+        { name: 'flaky', connector_id: 'judge-connector' },
+        { name: 'latency' },
+      ],
+    });
+
+    expect(results.map(({ evaluator, usage }) => [evaluator.name, usage])).toEqual([
+      [
+        'careful',
+        {
+          input_tokens: 100,
+          cached_input_tokens: 40,
+          output_tokens: 50,
+          reasoning_tokens: 30,
+          llm_calls: 2,
+          llm_calls_without_usage: 1,
+        },
+      ],
+      ['flaky', { input_tokens: 0, output_tokens: 0, llm_calls: 1, llm_calls_without_usage: 1 }],
+      ['latency', undefined],
+    ]);
+    expect(results[1].status).toBe('error');
   });
 
   it('throws for an unknown evaluator before running any', async () => {
@@ -248,6 +315,7 @@ describe('createEvaluationService', () => {
       expect(getClient).toHaveBeenCalledWith({
         request,
         bindTo: { connectorId: 'judge-connector' },
+        callbacks: expect.any(Object),
       });
       const [context] = (groundedness.evaluate as jest.Mock).mock.calls[0];
       expect(context.round).toBe(EVIDENCE_ROUND);
