@@ -119,7 +119,8 @@ apiTest.describe('Elasticsearch proxy', { tag: tags.deploymentAgnostic }, () => 
     expect(response).toHaveStatusCode(200);
     const asyncId = response.headers['x-elasticsearch-async-id'];
     expect(asyncId).toMatch(/\S+/);
-    expect(response.headers['x-elasticsearch-async-is-running']).toBe('?0');
+    // `?1` WHEN the query outlasts the default wait_for_completion_timeout, for example under load
+    expect(response.headers['x-elasticsearch-async-is-running']).toMatch(/^\?[01]$/);
 
     const deleteResponse = await apiClient.delete(`${PROXY_PATH}/_query/async/${asyncId}`, {
       headers,
