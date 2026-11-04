@@ -26,7 +26,6 @@ dependsOn:
   - '@kbn/workflows-management-plugin'
   - '@kbn/security-plugin'
   - '@kbn/zod'
-  - '@kbn/zod-helpers'
   - '@kbn/core-http-server'
   - '@kbn/management-settings-ids'
   - '@kbn/agent-builder-tools-base'
