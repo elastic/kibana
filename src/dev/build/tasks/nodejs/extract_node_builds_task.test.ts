@@ -25,7 +25,7 @@ const log = new ToolingLog();
 const testWriter = new ToolingLogCollectingWriter();
 log.setWriters([testWriter]);
 
-const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.node-version'), 'utf8').trim();
+const nodeVersion = Fs.readFileSync(Path.resolve(REPO_ROOT, '.nvmrc'), 'utf8').trim();
 
 // The node variant may be overriden by an environment variable,
 // to provide test coverage against pointer-compression
@@ -69,11 +69,9 @@ async function setup() {
 }
 
 let originalGlibc217: string | undefined;
-let originalPointerCompression: string | undefined;
 
 beforeAll(() => {
   originalGlibc217 = process.env.CI_FORCE_NODE_GLIBC_217;
-  originalPointerCompression = process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
 });
 
 beforeEach(() => {
@@ -83,7 +81,6 @@ beforeEach(() => {
   jest.spyOn(Fs, 'existsSync').mockImplementation(() => false);
 
   delete process.env.CI_FORCE_NODE_GLIBC_217;
-  delete process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
 });
 
 afterEach(() => {
@@ -96,16 +93,13 @@ afterAll(() => {
   } else {
     process.env.CI_FORCE_NODE_GLIBC_217 = originalGlibc217;
   }
-
-  if (originalPointerCompression === undefined) {
-    delete process.env.CI_FORCE_NODE_POINTER_COMPRESSION;
-  } else {
-    process.env.CI_FORCE_NODE_POINTER_COMPRESSION = originalPointerCompression;
-  }
 });
 
-async function runExtractNodeBuildsTask() {
+async function runExtractNodeBuildsTask(forceNodePointerCompression = false) {
   const { config } = await setup();
+  jest
+    .spyOn(config, 'shouldForceNodePointerCompression')
+    .mockReturnValue(forceNodePointerCompression);
 
   await ExtractNodeBuilds.run(config, log);
 
@@ -136,9 +130,8 @@ describe('runs expected fs operations', () => {
     expect(usedMethods).toMatchSnapshot();
   });
 
-  it('pointer-compression variant (CI_FORCE_NODE_POINTER_COMPRESSION)', async () => {
-    process.env.CI_FORCE_NODE_POINTER_COMPRESSION = 'true';
-    const usedMethods = await runExtractNodeBuildsTask();
+  it('pointer-compression variant (--force-node-pointer-compression)', async () => {
+    const usedMethods = await runExtractNodeBuildsTask(true);
     expect(usedMethods).toMatchSnapshot();
   });
 });

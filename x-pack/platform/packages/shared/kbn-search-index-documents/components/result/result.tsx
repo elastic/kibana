@@ -87,7 +87,7 @@ export const Result: React.FC<ResultProps> = ({
                 <ResultHeader
                   title={
                     metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
+                    i18n.translate('xpack.searchIndexDocuments.result.title.id', {
                       defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })
@@ -101,7 +101,7 @@ export const Result: React.FC<ResultProps> = ({
                   showScore={showScore}
                   title={
                     metaData.title ??
-                    i18n.translate('searchIndexDocuments.result.title.id', {
+                    i18n.translate('xpack.searchIndexDocuments.result.title.id', {
                       defaultMessage: 'Document ID: {id}',
                       values: { id: metaData.id },
                     })

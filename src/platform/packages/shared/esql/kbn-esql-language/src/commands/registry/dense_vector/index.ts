@@ -29,9 +29,9 @@ export const denseVectorCommand: ICommand = {
   methods: denseVectorCommandMethods,
   metadata: {
     docPreserving: true,
-    description: i18n.translate('kbn-esql-language.esql.definitions.denseVectorDoc', {
+    description: i18n.translate('esqlLanguage.esql.definitions.denseVectorDoc', {
       defaultMessage:
-        'Generates an embedding per row for each listed text field, appending a <field>_dense_vector column.',
+        "Generates an embedding per row for each listed text field, appending a '<'field>_dense_vector column.",
     }),
     declaration:
       'DENSE_VECTOR field1 [, field2, ...] [WITH { ["inference_id": "<id>"] ["type": "text"|"image"] ["timeout": "<duration>"] }]\n' +

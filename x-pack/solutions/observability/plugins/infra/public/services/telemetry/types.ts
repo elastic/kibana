@@ -102,7 +102,7 @@ export interface AnomalyDetectionFilterFieldChangeParams {
 }
 
 export interface SchemaSelectorParams {
-  interaction: 'open dropdown' | 'select schema';
+  interaction: 'open dropdown' | 'select schema' | 'switch schema from empty state';
   schema_selected?: DataSchemaFormat | null;
   schemas_available?: DataSchemaFormat[];
 }

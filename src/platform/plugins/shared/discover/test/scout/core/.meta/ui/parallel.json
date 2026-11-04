@@ -1,5 +1,5 @@
 {
-  "sha1": "f0a0caf6495d454dd98a88e32187b04202ec8857",
+  "sha1": "6c4e9f5d18d224f8fea7ac6d9865ab40659952a4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -96,7 +96,7 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/discover/test/scout/core/ui/parallel_tests/cascade_layout_interactions.spec.ts",
-        "line": 35,
+        "line": 36,
         "column": 66
       }
     },

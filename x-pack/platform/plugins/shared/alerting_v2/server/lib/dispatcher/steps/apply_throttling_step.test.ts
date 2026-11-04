@@ -323,14 +323,7 @@ describe('ApplyThrottlingStep', () => {
       createActionGroup({ id: `${longSegment}-g${i}`, policyId: 'p1' })
     );
     const policies = new Map([
-      [
-        'p1',
-        createActionPolicy({
-          id: 'p1',
-          grouping: { mode: 'all' },
-          throttle: { strategy: 'time_interval', interval: '1h' },
-        }),
-      ],
+      ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'on_status_change' } })],
     ]);
 
     const firstId = groups[0].id;
@@ -339,12 +332,21 @@ describe('ApplyThrottlingStep', () => {
     // The first and last chunks each return a recent row for their group, so
     // only those two groups are throttled if both responses are concatenated.
     mockEsClient.esql.query.mockImplementation((args: { query: string }) => {
-      const rows: Array<{ action_group_id: string; last_notified: string }> = [];
+      const rows: Array<{ action_group_id: string; last_notified: string; alert_status: string }> =
+        [];
       if (args.query.includes(firstId)) {
-        rows.push({ action_group_id: firstId, last_notified: '2026-01-22T07:30:00.000Z' });
+        rows.push({
+          action_group_id: firstId,
+          last_notified: '2026-01-22T08:00:00.000Z',
+          alert_status: 'active',
+        });
       }
       if (args.query.includes(lastId)) {
-        rows.push({ action_group_id: lastId, last_notified: '2026-01-22T07:30:00.000Z' });
+        rows.push({
+          action_group_id: lastId,
+          last_notified: '2026-01-22T08:00:00.000Z',
+          alert_status: 'active',
+        });
       }
       return Promise.resolve(createLastNotifiedTimestampsResponse(rows));
     });
@@ -359,8 +361,9 @@ describe('ApplyThrottlingStep', () => {
 
     expect(result.type).toBe('continue');
     if (result.type !== 'continue') return;
+    // Rows from both chunks are merged: only the first and last group had an unchanged status.
+    expect(result.data?.plan?.throttled?.map(({ id }) => id)).toEqual([firstId, lastId]);
     expect(result.data?.plan?.toDispatch).toHaveLength(198);
-    expect(result.data?.plan?.throttled.map(({ id }) => id)).toEqual([firstId, lastId]);
   });
 
   it('compares the alert_status of the last notified record for on_status_change', async () => {
@@ -415,5 +418,164 @@ describe('ApplyThrottlingStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.plan?.toDispatch).toHaveLength(0);
     expect(result.data?.plan?.throttled).toHaveLength(0);
+  });
+
+  describe('notified lookup', () => {
+    const groupOf = (id: string, policyId: string) => createActionGroup({ id, policyId });
+
+    it('skips the lookup when no throttling decision reads it', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      const policies = new Map([
+        ['every', createActionPolicy({ id: 'every', throttle: { strategy: 'every_time' } })],
+        ['digest', createActionPolicy({ id: 'digest', grouping: { mode: 'all' } })],
+      ]);
+
+      const result = await new ApplyThrottlingStep(queryService).execute(
+        createDispatcherPipelineState({
+          groups: [groupOf('g1', 'every'), groupOf('g2', 'digest')],
+          policies,
+        }),
+        logger
+      );
+
+      expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+      expect(result.type).toBe('continue');
+      if (result.type !== 'continue') return;
+      expect(result.data?.plan?.toDispatch).toHaveLength(2);
+    });
+
+    it('reads only the records inside the throttle interval', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
+      const policies = new Map([
+        [
+          'digest',
+          createActionPolicy({
+            id: 'digest',
+            grouping: { mode: 'all' },
+            throttle: { strategy: 'time_interval', interval: '5m' },
+          }),
+        ],
+        [
+          'reminder',
+          createActionPolicy({
+            id: 'reminder',
+            throttle: { strategy: 'per_status_interval', interval: '1h' },
+          }),
+        ],
+      ]);
+
+      await new ApplyThrottlingStep(queryService).execute(
+        createDispatcherPipelineState({
+          groups: [groupOf('g1', 'digest'), groupOf('g2', 'reminder')],
+          policies,
+        }),
+        logger
+      );
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(2);
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.stringContaining('"g1"'),
+          filter: { range: { '@timestamp': { gte: '2026-01-22T07:55:00.000Z' } } },
+        }),
+        expect.anything()
+      );
+      expect(mockEsClient.esql.query).toHaveBeenCalledWith(
+        expect.objectContaining({
+          query: expect.stringContaining('"g2"'),
+          filter: { range: { '@timestamp': { gte: '2026-01-22T07:00:00.000Z' } } },
+        }),
+        expect.anything()
+      );
+    });
+
+    it('reads every record for on_status_change and for an invalid interval', async () => {
+      const { queryService, mockEsClient } = createQueryService();
+      mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
+      const policies = new Map([
+        [
+          'status',
+          createActionPolicy({ id: 'status', throttle: { strategy: 'on_status_change' } }),
+        ],
+        [
+          'broken',
+          createActionPolicy({
+            id: 'broken',
+            grouping: { mode: 'all' },
+            throttle: { strategy: 'time_interval', interval: 'not-a-duration' },
+          }),
+        ],
+      ]);
+
+      await new ApplyThrottlingStep(queryService).execute(
+        createDispatcherPipelineState({
+          groups: [groupOf('g1', 'status'), groupOf('g2', 'broken')],
+          policies,
+        }),
+        logger
+      );
+
+      expect(mockEsClient.esql.query).toHaveBeenCalledTimes(1);
+      const [[request]] = mockEsClient.esql.query.mock.calls;
+      expect(request.filter).toBeUndefined();
+      expect(request.query).toContain('"g1"');
+      expect(request.query).toContain('"g2"');
+    });
+  });
+});
+
+describe('ApplyThrottlingStep alreadyNotified', () => {
+  const policies = new Map([
+    ['p1', createActionPolicy({ id: 'p1', throttle: { strategy: 'every_time' } })],
+  ]);
+  const notifiedAlert = createAlert({ alert_id: 'alert-notified' });
+  const pendingAlert = createAlert({ alert_id: 'alert-pending', group_hash: 'hash-2' });
+  const alreadyNotified = [
+    createActionGroup({ id: 'g1', policyId: 'p1', alerts: [notifiedAlert] }),
+  ];
+
+  it('carries already-notified groups into the plan when no group is left to throttle', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    const step = new ApplyThrottlingStep(queryService);
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        groups: [],
+        alreadyNotified,
+        policies,
+        dispatchable: [notifiedAlert],
+      }),
+      logger
+    );
+
+    expect(mockEsClient.esql.query).not.toHaveBeenCalled();
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.plan?.alreadyNotified).toEqual(alreadyNotified);
+    expect(result.data?.plan?.unmatched).toEqual([]);
+  });
+
+  it('carries already-notified groups next to the throttling decision', async () => {
+    const { queryService, mockEsClient } = createQueryService();
+    mockEsClient.esql.query.mockResolvedValue(createLastNotifiedTimestampsResponse());
+    const step = new ApplyThrottlingStep(queryService);
+    const pendingGroup = createActionGroup({ id: 'g1', policyId: 'p1', alerts: [pendingAlert] });
+
+    const result = await step.execute(
+      createDispatcherPipelineState({
+        groups: [pendingGroup],
+        alreadyNotified,
+        policies,
+        dispatchable: [notifiedAlert, pendingAlert],
+      }),
+      logger
+    );
+
+    expect(result.type).toBe('continue');
+    if (result.type !== 'continue') return;
+    expect(result.data?.plan?.toDispatch).toEqual([pendingGroup]);
+    expect(result.data?.plan?.alreadyNotified).toEqual(alreadyNotified);
+    expect(result.data?.plan?.unmatched).toEqual([]);
   });
 });

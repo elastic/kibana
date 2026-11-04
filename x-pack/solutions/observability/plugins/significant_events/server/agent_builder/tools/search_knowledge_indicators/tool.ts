@@ -36,7 +36,7 @@ import {
 } from './handler';
 import {
   loadSourceCatalog,
-  resolveSourcesBySlug,
+  resolveSourcesBySlugOrId,
   restrictCatalogToReadable,
 } from '../../utils/resolve_source_slugs';
 
@@ -78,7 +78,7 @@ const searchKnowledgeIndicatorsSchema = lazySchema(() =>
       .array(z.string().max(MAX_ID_LENGTH))
       .optional()
       .describe(
-        'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Use only when `kind: ["feature"]` is specified.'
+        'Seed the topology search with these IDs. Features whose feature.id matches are always returned. When `feature_types` includes `"dependency"` and `"entity"`, dependency features matching these IDs by source or target endpoint are also returned, along with entity features connected through those dependency edges. Expansion uses the service topology of the searched sources; `topology_expansion.truncated` reports whether related features may be missing. Use only when `kind: ["feature"]` is specified.'
       ),
     query_types: z
       .array(z.enum([QUERY_TYPE_MATCH, QUERY_TYPE_STATS]))
@@ -146,7 +146,9 @@ export function createSearchKnowledgeIndicatorsTool({
 
       Pass source slugs in \`slugs\`. Omit \`slugs\` to search every source in this space.
       Results report each source as its slug. The \`sources\` list gives \`slug\`, \`title\`, and
-      \`view_name\` for every source the results belong to, with or without \`slugs\`.
+      \`view_name\` for every source the results belong to, with or without \`slugs\`. Without \`slugs\`
+      it lists only the sources that own the returned KIs, so it is not the list of sources in this
+      space.
 
       Use this tool to:
       - Gather domain context for a specific source or group of sources
@@ -205,7 +207,7 @@ export function createSearchKnowledgeIndicatorsTool({
         const maxPerPage =
           view === 'full' ? KI_SEARCH_MAX_PER_PAGE_FULL : MAX_SEARCH_KNOWLEDGE_INDICATORS_PER_PAGE;
         const fullCatalog = await loadSourceCatalog(scopedClients.sourcesClient);
-        const sources = slugs ? resolveSourcesBySlug(fullCatalog, slugs) : undefined;
+        const sources = slugs ? resolveSourcesBySlugOrId(fullCatalog, slugs) : undefined;
         // Stored KIs are read as the internal user, so check the caller's own data access first.
         // Named sources must all be readable; an unscoped search covers only the readable ones.
         if (sources) {
@@ -216,7 +218,10 @@ export function createSearchKnowledgeIndicatorsTool({
         const catalog = sources
           ? fullCatalog
           : await restrictCatalogToReadable(fullCatalog, scopedClients.sourcesClient);
-        const kiClient = await scopedClients.getKnowledgeIndicatorClient();
+        const [kiClient, topologySnapshotClient] = await Promise.all([
+          scopedClients.getKnowledgeIndicatorClient(),
+          scopedClients.getTopologySnapshotClient(),
+        ]);
         const params = {
           ...restParams,
           ...(sources ? { source_ids: sources.map((source) => source.id) } : {}),
@@ -227,6 +232,7 @@ export function createSearchKnowledgeIndicatorsTool({
           catalog,
           sources,
           kiClient,
+          topologySnapshotClient,
           logger,
           params,
           view,

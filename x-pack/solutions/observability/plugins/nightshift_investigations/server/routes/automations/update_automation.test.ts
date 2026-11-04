@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { updateAutomationRoute } from './update_automation';
-import { createRouteContext } from './test_helpers';
+import { createRouteContext, createServiceAccountService } from './test_helpers';
 
 const { handler, params } = updateAutomationRoute['PUT /internal/nightshift/automations/{id}'];
 
@@ -37,11 +37,15 @@ const call = (body: Record<string, unknown>) =>
     params: params.parse({ path: { id: 'automation-1' }, body }),
     getAutomationsSoClient,
     getWorkflowsManagement,
+    getInvestigatorServiceAccountService: () => serviceAccountService,
     context: createRouteContext(),
   } as never);
 
+let serviceAccountService = createServiceAccountService();
+
 beforeEach(() => {
   jest.clearAllMocks();
+  serviceAccountService = createServiceAccountService();
   soClient.get.mockResolvedValue({ attributes: existing });
 });
 
@@ -154,9 +158,16 @@ describe('request validation', () => {
     expect(() => parseRows([{ ...slackRow, event: 'mention' }])).toThrow();
   });
 
+  it('rejects a daily dispatch limit of zero and accepts removing the limit', () => {
+    const parseLimit = (dailyDispatchLimit: number | null) =>
+      params.parse({ path: { id: 'automation-1' }, body: { runtime: { dailyDispatchLimit } } });
+    expect(() => parseLimit(0)).toThrow();
+    expect(parseLimit(null).body.runtime).toEqual({ dailyDispatchLimit: null });
+  });
+
   it('rejects a Slack trigger row with no filters', () => {
     expect(() => parseRows([{ kind: 'slack', event: 'message' }])).toThrow(
-      'at least one of channels, users or messageFilter'
+      'at least one of channels, users, bots or messageFilter'
     );
   });
 
@@ -332,3 +343,19 @@ it.each([{ name: 'Changed' }, { isEnabled: false }])(
     expect(soClient.update).not.toHaveBeenCalled();
   }
 );
+
+it('keeps the automation bound to the automations service account', async () => {
+  await call({ name: 'Triage renamed' });
+
+  expect(parse(updateWorkflow.mock.calls[0][1].yaml).settings.run_as).toBe(
+    'kibana/nightshift_automations'
+  );
+});
+
+it('refuses callers who cannot write a bound workflow before writing anything', async () => {
+  serviceAccountService.resolveAutomationRunAs.mockRejectedValue(new Error('manage_security'));
+
+  await expect(call({ isEnabled: false })).rejects.toThrow('manage_security');
+  expect(updateWorkflow).not.toHaveBeenCalled();
+  expect(soClient.update).not.toHaveBeenCalled();
+});

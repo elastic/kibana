@@ -7,4 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 require('@kbn/setup-node-env');
-require('@kbn/test').runJestNegative();
+require('@kbn/jest').runJestNegative();

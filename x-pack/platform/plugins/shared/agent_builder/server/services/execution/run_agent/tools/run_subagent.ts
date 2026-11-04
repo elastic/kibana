@@ -204,6 +204,7 @@ const resolveSubagentApiGrant = async ({
   prompts,
   promptId,
   agentId,
+  discoveryEnabled,
 }: {
   requested: AutoApprovedApi[];
   interactivity: InteractivityConfig;
@@ -211,6 +212,7 @@ const resolveSubagentApiGrant = async ({
   prompts: ToolPromptManager;
   promptId: string;
   agentId: string;
+  discoveryEnabled: boolean;
 }): Promise<SubagentApiGrant> => {
   const unknownApis = findUnknownApis(requested);
   if (unknownApis.length > 0) {
@@ -218,7 +220,11 @@ const resolveSubagentApiGrant = async ({
       status: 'unknown_apis',
       message:
         `Unknown auto_approved_apis: ${formatUnknownApis(unknownApis)}. Each entry must name an ` +
-        `API that exists on its target. Use the ${internalTools.discoverApis} tool to find the identifier.`,
+        `API that exists on its target. ` +
+        (discoveryEnabled
+          ? `Use the ${internalTools.discoverApis} tool to find the identifier.`
+          : `Do not retry with another identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, leave it out of auto_approved_apis.`),
     };
   }
 
@@ -310,6 +316,7 @@ export const createSubagentTool = ({
   subagentTracker,
   conversationExists,
   transientOnly = false,
+  discoveryEnabled = false,
 }: {
   /** Id of the agent currently executing (the "owner") */
   ownerAgentId: string;
@@ -331,6 +338,8 @@ export const createSubagentTool = ({
    * background one reports through conversation state, neither of which that run keeps.
    */
   transientOnly?: boolean;
+  /** Whether the `discover_apis` tool is available, so errors can point the model at it. */
+  discoveryEnabled?: boolean;
 }) => {
   const orderedAllowed = orderAllowedWithSelfFirst(allowedSubagents);
   const allowedIds = orderedAllowed.map((a) => a.id) as [string, ...string[]];
@@ -453,6 +462,7 @@ export const createSubagentTool = ({
           prompts,
           promptId: `${SubAgentToolName}.${callContext.toolCallId}.auto_approved_apis`,
           agentId: subagentLabel,
+          discoveryEnabled,
         });
 
         if (grant.status === 'unknown_apis') {

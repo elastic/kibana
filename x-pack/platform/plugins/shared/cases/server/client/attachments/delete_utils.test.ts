@@ -400,7 +400,7 @@ describe('deleteCaseAttachments', () => {
       expect(attachments.map(({ id }) => id)).toEqual(['mock-comment-1']);
       expect(clientArgs.casesEventBus.emitAttachmentsDeleted).toHaveBeenCalledWith(
         clientArgs.request,
-        expect.objectContaining({ attachmentIds: ['mock-comment-1'] })
+        expect.objectContaining({ ids: ['mock-comment-1'] })
       );
     });
 
@@ -543,13 +543,13 @@ describe('deleteCaseAttachments', () => {
       expect(emitAttachmentsDeleted).toHaveBeenCalledTimes(2);
       expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
         caseId,
-        attachmentIds: ['mock-comment-1', 'mock-comment-2'],
+        ids: ['mock-comment-1', 'mock-comment-2'],
         attachmentType: 'user',
         owner: 'securitySolution',
       });
       expect(emitAttachmentsDeleted).toHaveBeenCalledWith(clientArgs.request, {
         caseId,
-        attachmentIds: ['mock-comment-4'],
+        ids: ['mock-comment-4'],
         attachmentType: 'alert',
         owner: 'securitySolution',
         alertIds: ['test-id'],

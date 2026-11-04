@@ -9,6 +9,7 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { SandboxPluginStart, SandboxSession } from '@kbn/sandbox-plugin/server';
 import { hydrateDecisionTreeWorkspace } from '../decision_trees/register_decision_trees';
 import { decisionTreeHydrateStepDefinition } from './decision_tree_hydrate';
+import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 
 jest.mock('../decision_trees/register_decision_trees', () => ({
   hydrateDecisionTreeWorkspace: jest.fn().mockResolvedValue(3),
@@ -33,10 +34,15 @@ describe('decisionTreeHydrateStepDefinition', () => {
     getScopedEsClient.mockReturnValue(esClient);
   });
 
-  const createContext = (sandboxId: string, spaceId = 'default', prompt?: string) =>
+  const createContext = (
+    sandboxId: string,
+    spaceId = 'default',
+    prompt?: string,
+    agentId?: string
+  ) =>
     ({
-      input: { sandbox_id: sandboxId, prompt },
-      rawInput: { sandbox_id: sandboxId, prompt },
+      input: { sandbox_id: sandboxId, prompt, agent_id: agentId },
+      rawInput: { sandbox_id: sandboxId, prompt, agent_id: agentId },
       contextManager: {
         getContext: jest.fn().mockReturnValue({ workflow: { spaceId } }),
         getFakeRequest: jest.fn(),
@@ -140,6 +146,42 @@ describe('decisionTreeHydrateStepDefinition', () => {
         notification: '',
       },
     });
+  });
+
+  it.each([[NIGHTSHIFT_ASSISTANT_AGENT_ID], [''], ['elastic-ai-agent']])(
+    'skips without touching the sandbox for agent %p',
+    async (agentId) => {
+      const sandboxStart = makeSandboxStart();
+      const definition = decisionTreeHydrateStepDefinition({
+        getSandboxStart: () => sandboxStart,
+        logger: loggerMock.create(),
+        isEnabled: () => true,
+      });
+
+      const result = await definition.handler(
+        createContext('default__conv-1', 'default', undefined, agentId)
+      );
+
+      expect(sandboxStart.getSessionForSpace).not.toHaveBeenCalled();
+      expect(hydrateDecisionTreeWorkspace).not.toHaveBeenCalled();
+      expect(result).toEqual({
+        output: expect.objectContaining({ tree_count: 0, skipped: true, notification: '' }),
+      });
+    }
+  );
+
+  it('hydrates for the investigator', async () => {
+    const definition = decisionTreeHydrateStepDefinition({
+      getSandboxStart: () => makeSandboxStart(),
+      logger: loggerMock.create(),
+      isEnabled: () => true,
+    });
+
+    await definition.handler(
+      createContext('default__conv-1', 'default', undefined, NIGHTSHIFT_INVESTIGATION_AGENT_ID)
+    );
+
+    expect(hydrateDecisionTreeWorkspace).toHaveBeenCalled();
   });
 
   it('throws when the sandbox is not configured', async () => {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ALL_PIPELINES, SIGNAL_PREFIX, getSignalType } from './utils';
+import { ALL_PIPELINES, SIGNAL_PREFIX, getComponentHealthStatus, getSignalType } from './utils';
 
 describe('collector_config_view utils', () => {
   describe('constants', () => {
@@ -37,6 +37,26 @@ describe('collector_config_view utils', () => {
 
     it('should handle pipeline ids with multiple slashes', () => {
       expect(getSignalType('metrics/sub/path')).toBe('metrics');
+    });
+  });
+
+  describe('getComponentHealthStatus', () => {
+    it.each([
+      ['StatusOK', 'healthy'],
+      ['StatusStarting', 'healthy'],
+      ['StatusRecoverableError', 'unhealthy'],
+      ['StatusPermanentError', 'unhealthy'],
+      ['StatusFatalError', 'unhealthy'],
+      ['StatusStopping', 'unhealthy'],
+      ['StatusStopped', 'unhealthy'],
+      ['StatusNone', 'unknown'],
+      ['SomethingElse', 'unknown'],
+    ])('should map %s to %s', (status, expected) => {
+      expect(getComponentHealthStatus({ healthy: status === 'StatusOK', status })).toBe(expected);
+    });
+
+    it('should return unknown when component health is undefined', () => {
+      expect(getComponentHealthStatus(undefined)).toBe('unknown');
     });
   });
 });

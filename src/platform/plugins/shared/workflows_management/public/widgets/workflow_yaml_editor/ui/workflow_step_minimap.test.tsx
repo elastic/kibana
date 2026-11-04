@@ -11,7 +11,7 @@ import { act, fireEvent, render, screen, waitFor } from '@testing-library/react'
 import React, { createRef } from 'react';
 import type { YamlValidationErrorSeverity, YamlValidationResult } from '@kbn/workflows-yaml';
 import { WorkflowStepMinimap } from './workflow_step_minimap';
-import { setYamlString } from '../../../entities/workflows/store';
+import { setCursorPosition, setYamlString } from '../../../entities/workflows/store';
 import { createMockStore } from '../../../entities/workflows/store/__mocks__/store.mock';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
 import { createMockMonacoEditor } from '../../../shared/test_utils/mock_monaco';
@@ -23,6 +23,16 @@ steps:
   - name: step-a
     type: slack.sendMessage
   - name: step-b
+    type: slack.sendMessage
+`;
+
+const THREE_STEP_YAML = `\
+steps:
+  - name: step-a
+    type: slack.sendMessage
+  - name: step-b
+    type: slack.sendMessage
+  - name: step-c
     type: slack.sendMessage
 `;
 
@@ -199,6 +209,129 @@ describe('WorkflowStepMinimap', () => {
     fireEvent.click(pill, { detail: 1 });
 
     expect(blurSpy).toHaveBeenCalledTimes(1);
+  });
+
+  describe('keyboard navigation', () => {
+    const getPills = () => ['step-a', 'step-b', 'step-c'].map((id) => screen.getByTitle(id));
+    const getTabStops = () => getPills().filter((pill) => pill.tabIndex === 0);
+
+    it('groups the step buttons in a labelled, vertical toolbar inside the navigation landmark', async () => {
+      renderMinimap(THREE_STEP_YAML);
+
+      const toolbar = await screen.findByRole('toolbar', { name: 'Workflow steps' });
+      expect(toolbar).toHaveAttribute('aria-orientation', 'vertical');
+      expect(screen.getByRole('navigation')).toContainElement(toolbar);
+      getPills().forEach((pill) => expect(toolbar).toContainElement(pill));
+    });
+
+    it('exposes a single tab stop on the first step when no step is current', async () => {
+      renderMinimap(THREE_STEP_YAML);
+
+      await waitFor(() => {
+        expect(getTabStops()).toEqual([screen.getByTitle('step-a')]);
+      });
+      expect(getPills().map((pill) => pill.tabIndex)).toEqual([0, -1, -1]);
+      expect(document.querySelectorAll('[aria-current]')).toHaveLength(0);
+    });
+
+    it('marks the step under the editor cursor as current and makes it the tab stop', async () => {
+      const { store } = renderMinimap(THREE_STEP_YAML);
+      await waitFor(() => {
+        expect(screen.getByTitle('step-b')).toBeInTheDocument();
+      });
+
+      // Line 4 is the `- name: step-b` line.
+      act(() => {
+        store.dispatch(setCursorPosition({ lineNumber: 4, column: 1 }));
+      });
+
+      const stepB = screen.getByTitle('step-b');
+      expect(stepB).toHaveAttribute('aria-current', 'step');
+      expect(document.querySelectorAll('[aria-current]')).toHaveLength(1);
+      expect(getTabStops()).toEqual([stepB]);
+    });
+
+    it('moves focus and the tab stop with ArrowDown/ArrowUp, stopping at the ends', async () => {
+      renderMinimap(THREE_STEP_YAML);
+      await waitFor(() => {
+        expect(screen.getByTitle('step-a')).toBeInTheDocument();
+      });
+      const [stepA, stepB, stepC] = getPills();
+
+      stepA.focus();
+      fireEvent.keyDown(stepA, { key: 'ArrowUp' });
+      expect(stepA).toHaveFocus();
+
+      fireEvent.keyDown(stepA, { key: 'ArrowDown' });
+      expect(stepB).toHaveFocus();
+      expect(getTabStops()).toEqual([stepB]);
+
+      fireEvent.keyDown(stepB, { key: 'ArrowDown' });
+      expect(stepC).toHaveFocus();
+      fireEvent.keyDown(stepC, { key: 'ArrowDown' });
+      expect(stepC).toHaveFocus();
+      expect(getTabStops()).toEqual([stepC]);
+
+      fireEvent.keyDown(stepC, { key: 'ArrowUp' });
+      expect(stepB).toHaveFocus();
+    });
+
+    it('jumps to the first and last step with Home and End', async () => {
+      renderMinimap(THREE_STEP_YAML);
+      await waitFor(() => {
+        expect(screen.getByTitle('step-a')).toBeInTheDocument();
+      });
+      const [stepA, stepB, stepC] = getPills();
+
+      stepB.focus();
+      fireEvent.keyDown(stepB, { key: 'End' });
+      expect(stepC).toHaveFocus();
+      expect(getTabStops()).toEqual([stepC]);
+
+      fireEvent.keyDown(stepC, { key: 'Home' });
+      expect(stepA).toHaveFocus();
+      expect(getTabStops()).toEqual([stepA]);
+    });
+
+    it('does not move the editor cursor while navigating with the arrow keys', async () => {
+      const { editor } = renderMinimap(THREE_STEP_YAML);
+      await waitFor(() => {
+        expect(screen.getByTitle('step-a')).toBeInTheDocument();
+      });
+      const [stepA] = getPills();
+
+      stepA.focus();
+      fireEvent.keyDown(stepA, { key: 'ArrowDown' });
+
+      expect(editor.setPosition).not.toHaveBeenCalled();
+      expect(editor.focus).not.toHaveBeenCalled();
+    });
+
+    it('returns the tab stop to the current step once focus leaves the minimap', async () => {
+      const { store } = renderMinimap(THREE_STEP_YAML);
+      await waitFor(() => {
+        expect(screen.getByTitle('step-a')).toBeInTheDocument();
+      });
+      act(() => {
+        store.dispatch(setCursorPosition({ lineNumber: 4, column: 1 }));
+      });
+      const [stepA, stepB, stepC] = getPills();
+
+      stepB.focus();
+      fireEvent.keyDown(stepB, { key: 'End' });
+      expect(getTabStops()).toEqual([stepC]);
+
+      // Focus moves to an element outside of the minimap.
+      const outside = document.createElement('button');
+      document.body.appendChild(outside);
+      act(() => {
+        outside.focus();
+      });
+
+      expect(getTabStops()).toEqual([stepB]);
+      expect(stepA.tabIndex).toBe(-1);
+      outside.remove();
+    });
   });
 
   describe('screen-reader severity text', () => {

@@ -42,6 +42,7 @@ const indexPattern = {
   getComputedFields,
   getSourceFiltering: () => mockSource,
   getAllowHidden: jest.fn(),
+  getIndexPattern: () => 'foo',
 } as unknown as DataView;
 
 const indexPattern2 = {
@@ -49,6 +50,7 @@ const indexPattern2 = {
   getComputedFields,
   getSourceFiltering: () => mockSource2,
   getAllowHidden: jest.fn(),
+  getIndexPattern: () => 'foo',
 } as unknown as DataView;
 
 const fields3 = [{ name: 'foo-bar' }, { name: 'field1' }, { name: 'field2' }];
@@ -64,6 +66,7 @@ const indexPattern3 = {
   },
   getComputedFields,
   getSourceFiltering: () => mockSource,
+  getIndexPattern: () => 'foo',
 } as unknown as DataView;
 
 const runtimeFieldDef = {

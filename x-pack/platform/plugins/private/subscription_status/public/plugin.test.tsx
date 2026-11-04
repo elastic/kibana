@@ -36,18 +36,8 @@ const startPlugin = (flag$?: BehaviorSubject<boolean>) => {
 };
 
 describe('SubscriptionStatusPlugin', () => {
-  it('does not show the badge for a Serverless trial by default', async () => {
+  it('shows the badge for a Serverless trial by default', async () => {
     const core = startPlugin();
-
-    // Give a wrongly started badge time to resolve before asserting it never rendered.
-    await new Promise((resolve) => setTimeout(resolve, 0));
-
-    expect(core.chrome.controls.subscriptionBadge.set).not.toHaveBeenCalledWith(expect.anything());
-    expect(core.analytics.reportEvent).not.toHaveBeenCalled();
-  });
-
-  it('shows the badge for a Serverless trial when the feature flag is on', async () => {
-    const core = startPlugin(new BehaviorSubject(true));
 
     await waitFor(() =>
       expect(core.chrome.controls.subscriptionBadge.set).toHaveBeenCalledWith(expect.anything())
@@ -56,6 +46,16 @@ describe('SubscriptionStatusPlugin', () => {
       hasBillingAccess: false,
       projectType: 'search',
     });
+  });
+
+  it('does not show the badge for a Serverless trial when the feature flag is off', async () => {
+    const core = startPlugin(new BehaviorSubject(false));
+
+    // Give a wrongly started badge time to resolve before asserting it never rendered.
+    await new Promise((resolve) => setTimeout(resolve, 0));
+
+    expect(core.chrome.controls.subscriptionBadge.set).not.toHaveBeenCalledWith(expect.anything());
+    expect(core.analytics.reportEvent).not.toHaveBeenCalled();
   });
 
   it('removes the badge when the feature flag turns off', async () => {

@@ -13,6 +13,7 @@ import { useMemo } from 'react';
 import {
   computeTopologyFingerprint,
   ExecutionStatus,
+  getTriggerName,
   transformWorkflowToGraph,
 } from '@kbn/workflows';
 import type {
@@ -25,6 +26,7 @@ import type {
 } from '@kbn/workflows';
 import { computeWorkflowLayout } from './workflow_layout_pipeline';
 import type { LayoutSnapshot } from './workflow_layout_pipeline';
+import { useOptionalWorkflowsUiServices } from '../../context';
 
 /** Stable empty result used when no workflow is loaded, avoiding `as TransformResult` casts. */
 const EMPTY_TRANSFORM: TransformResult = {
@@ -95,14 +97,20 @@ export function useWorkflowLayout({
   onPerfMark,
   onLayoutFailed,
 }: UseWorkflowLayoutParams): UseWorkflowLayoutResult {
+  const services = useOptionalWorkflowsUiServices();
   const transformed: TransformResult = useMemo(() => {
     if (transformedProp) return transformedProp;
     if (!workflow) return EMPTY_TRANSFORM;
     const t0 = performance.now();
-    const next = transformWorkflowToGraph(workflow);
+    const next = transformWorkflowToGraph(workflow, (triggerType) =>
+      getTriggerName(
+        triggerType,
+        services?.workflowsExtensions.getTriggerDefinition(triggerType)?.title
+      )
+    );
     onPerfMark?.('transform_ms', performance.now() - t0);
     return next;
-  }, [transformedProp, workflow, onPerfMark]);
+  }, [transformedProp, workflow, onPerfMark, services]);
 
   // Stable string capturing only topology (step names/types/nesting/trigger
   // types). Non-structural edits (descriptions, params, expressions) produce

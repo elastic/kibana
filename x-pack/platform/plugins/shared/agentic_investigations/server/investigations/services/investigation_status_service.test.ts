@@ -60,13 +60,22 @@ describe('assertNoUnexpectedProposals', () => {
 
 describe('InvestigationStatusService.getPreview', () => {
   const makeDeps = (
-    proposalListResult: Array<{ id: string; action?: { name?: string }; actionWorkflowId?: string }>
+    proposalListResult: Array<{
+      id: string;
+      action?: { name?: string };
+      actionWorkflowId?: string;
+    }>,
+    runningCount = 0
   ) => {
     const proposalsService = {
-      list: jest.fn().mockResolvedValue({
-        proposals: proposalListResult,
-        total: proposalListResult.length,
-      }),
+      // The pending read and the running read share this method and differ by `status`.
+      list: jest
+        .fn()
+        .mockImplementation(async ({ status }: { status: string }) =>
+          status === 'executing'
+            ? { proposals: [], total: runningCount }
+            : { proposals: proposalListResult, total: proposalListResult.length }
+        ),
     };
     const proposals = {
       getProposalsService: () => proposalsService,
@@ -98,10 +107,38 @@ describe('InvestigationStatusService.getPreview', () => {
     const result = await service.getPreview(request, 'conv-1');
     expect(result.pending_proposals).toEqual([{ id: 'p-1', action_name: 'Block IP' }]);
     expect(proposalsService.list).toHaveBeenCalledWith(
-      expect.objectContaining({ conversationId: 'conv-1' }),
+      expect.objectContaining({ conversationId: 'conv-1', status: 'pending' }),
       SPACE_ID,
       request
     );
+  });
+
+  it('counts the approved proposals whose action is still running', async () => {
+    const { service } = makeDeps([], 2);
+    const result = await service.getPreview(request, 'conv-1');
+    expect(result.running_proposal_count).toBe(2);
+    expect(result.pending_proposal_count).toBe(0);
+  });
+
+  it('reads the running proposals without the deadline filter, since a running one keeps its deadline', async () => {
+    const { service, proposalsService } = makeDeps([], 1);
+    await service.getPreview(request, 'conv-1');
+    expect(proposalsService.list).toHaveBeenCalledWith(
+      expect.objectContaining({
+        conversationId: 'conv-1',
+        status: 'executing',
+        excludeSuperseded: true,
+        excludeExpired: false,
+      }),
+      SPACE_ID,
+      request
+    );
+  });
+
+  it('reports no running proposals when none are running', async () => {
+    const { service } = makeDeps([{ id: 'p-1' }]);
+    const result = await service.getPreview(request, 'conv-1');
+    expect(result.running_proposal_count).toBe(0);
   });
 
   it('falls back to actionWorkflowId when action is absent', async () => {
@@ -340,5 +377,96 @@ describe('InvestigationStatusService.setStatus — releaseGate conflict classifi
     expect(patchMetadata).toHaveBeenCalled();
     expect(result.dismissed_proposal_ids).toHaveLength(0);
     expect(result.failed_proposal_ids).toHaveLength(0);
+  });
+});
+
+// ---------------------------------------------------------------------------
+// InvestigationStatusService.setSeverity
+// ---------------------------------------------------------------------------
+
+describe('InvestigationStatusService.setSeverity', () => {
+  const makeService = (conversation: Record<string, unknown> = MOCK_CONVERSATION) => {
+    const client = {
+      get: jest.fn().mockResolvedValue(conversation),
+      patchMetadata: jest.fn().mockResolvedValue({ conversation, changedFields: ['severity'] }),
+      addEvents: jest.fn().mockResolvedValue([]),
+    };
+    const service = new InvestigationStatusService({
+      getConversationClient: jest.fn().mockResolvedValue(client),
+      getProposals: jest.fn().mockReturnValue(undefined),
+      getSpaceId: jest.fn().mockReturnValue(SPACE_ID),
+      logger,
+    });
+    return { service, client };
+  };
+
+  it('writes the severity and records the change with the previous one', async () => {
+    const { service, client } = makeService({
+      ...MOCK_CONVERSATION,
+      metadata: { severity: 'high' },
+    });
+
+    const result = await service.setSeverity(request, 'conv-1', { severity: 'low' });
+
+    expect(client.patchMetadata).toHaveBeenCalledWith(
+      'conv-1',
+      { severity: 'low' },
+      { access: 'converse' }
+    );
+    expect(client.addEvents).toHaveBeenCalledWith({
+      conversationId: 'conv-1',
+      events: [
+        {
+          type: 'investigation_severity_changed',
+          data: { severity: 'low', previous_severity: 'high' },
+        },
+      ],
+    });
+    expect(result).toEqual({
+      conversation_id: 'conv-1',
+      severity: 'low',
+      previous_severity: 'high',
+    });
+  });
+
+  it('omits the previous severity when none was set', async () => {
+    const { service, client } = makeService();
+
+    await service.setSeverity(request, 'conv-1', { severity: 'critical' });
+
+    expect(client.addEvents).toHaveBeenCalledWith(
+      expect.objectContaining({
+        events: [{ type: 'investigation_severity_changed', data: { severity: 'critical' } }],
+      })
+    );
+  });
+
+  it('does nothing when the severity is unchanged', async () => {
+    const { service, client } = makeService({
+      ...MOCK_CONVERSATION,
+      metadata: { severity: 'medium' },
+    });
+
+    await service.setSeverity(request, 'conv-1', { severity: 'medium' });
+
+    expect(client.patchMetadata).not.toHaveBeenCalled();
+    expect(client.addEvents).not.toHaveBeenCalled();
+  });
+
+  it('still succeeds when the timeline event cannot be written', async () => {
+    const { service, client } = makeService();
+    client.addEvents.mockRejectedValue(new Error('boom'));
+
+    await expect(service.setSeverity(request, 'conv-1', { severity: 'low' })).resolves.toEqual(
+      expect.objectContaining({ severity: 'low' })
+    );
+    expect(logger.warn).toHaveBeenCalled();
+  });
+
+  it('rejects a conversation on another template', async () => {
+    const { service, client } = makeService({ ...MOCK_CONVERSATION, template_id: 'escalation' });
+
+    await expect(service.setSeverity(request, 'conv-1', { severity: 'low' })).rejects.toThrow();
+    expect(client.patchMetadata).not.toHaveBeenCalled();
   });
 });

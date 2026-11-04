@@ -21,6 +21,7 @@
     "@kbn/shared-ux-page-kibana-template",
     "@kbn/ai-assistant-icon",
     "@kbn/i18n-react",
+    "@kbn/app-header",
   ],
   "exclude": [
     "target/**/*"
