@@ -944,6 +944,54 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     }
   });
 
+  it('puts the related alert process and truncated command lines on each summary line', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+      with: { related_summary: { summary: string } };
+    };
+    const engine = createWorkflowLiquidEngine();
+    const longCmd = 'B'.repeat(500);
+    const output = engine.parseAndRenderSync(summaryStep.with.related_summary.summary, {
+      steps: {
+        get_related_alerts: {
+          output: {
+            alerts: [
+              {
+                rule_name: 'SSH Remote port tunneling',
+                severity: 'high',
+                timestamp: '2026-01-01T00:00:00Z',
+                process_name: 'sshd',
+                process_executable: '/usr/sbin/sshd',
+                process_command_line: '/usr/sbin/sshd -R',
+                process_parent_command_line: longCmd,
+              },
+              { rule_name: 'Bare rule', severity: 'low', timestamp: '2026-01-01T00:01:00Z' },
+            ],
+          },
+        },
+      },
+    });
+
+    expect(output).toContain('process=sshd exe=/usr/sbin/sshd cmd=/usr/sbin/sshd -R');
+    expect(output).toContain(`parent_cmd=${'B'.repeat(197)}...`);
+    expect(output).not.toContain('B'.repeat(201));
+    expect(output).toContain('; Bare rule [low] at 2026-01-01T00:01:00Z');
+    expect(output).not.toContain('cmd=; ');
+  });
+
+  it('does not let shared identifiers or rule names alone raise TP confidence', () => {
+    const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
+      with: { message: string };
+    };
+    const { message } = messageStep.with;
+    expect(message).toContain(
+      'only when their own activity (process, command line) is independently suspicious'
+    );
+    expect(message).toContain('rule name alone, are not evidence');
+    expect(message).not.toContain(
+      'sharing strong identifiers (process lineage, unique IDs) raise TP confidence'
+    );
+  });
+
   it('truncates related summary to bound prompt size', () => {
     const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
       with: { message: string };

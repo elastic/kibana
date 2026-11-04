@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { addEntitiesWithLimit, buildIgnoreMap, extractEntityValues } from './entity_utils';
+import {
+  addEntitiesWithLimit,
+  buildIgnoreMap,
+  extractEntityValues,
+  getValuesAtPath,
+} from './entity_utils';
 import { buildEntityShouldClauses } from './query_utils';
 import { clampPositiveInt, computePageSize, toIso } from './number_utils';
 import { symmetrizeAliases, expandEntitiesByAliases } from './alias_utils';
@@ -134,6 +139,21 @@ const fetchSeedAlert = async (
 
 // ── Alert metadata extraction ───────────────────────────────────────────────
 
+const ALERT_PROCESS_FIELDS = {
+  process_name: 'process.name',
+  process_executable: 'process.executable',
+  process_command_line: 'process.command_line',
+  process_parent_command_line: 'process.parent.command_line',
+} as const;
+
+const getFirstString = (source: Record<string, unknown> | undefined, field: string) => {
+  const flat = source?.[field];
+  if (typeof flat === 'string') return flat;
+  return getValuesAtPath(source, field.split('.')).find(
+    (value): value is string => typeof value === 'string'
+  );
+};
+
 const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
   const source = hit._source as Record<string, unknown> | undefined;
   const ts = source?.['@timestamp'];
@@ -145,6 +165,13 @@ const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
     timestamp: typeof ts === 'string' ? ts : undefined,
     rule_name: source?.['kibana.alert.rule.name'] as string | undefined,
     severity: source?.['kibana.alert.severity'] as string | undefined,
+    process_name: getFirstString(source, ALERT_PROCESS_FIELDS.process_name),
+    process_executable: getFirstString(source, ALERT_PROCESS_FIELDS.process_executable),
+    process_command_line: getFirstString(source, ALERT_PROCESS_FIELDS.process_command_line),
+    process_parent_command_line: getFirstString(
+      source,
+      ALERT_PROCESS_FIELDS.process_parent_command_line
+    ),
     ts_ms: Number.isFinite(tsMs) ? tsMs : undefined,
   };
 };
@@ -239,6 +266,7 @@ export const buildRelatedAlertsGraph = async (
       '@timestamp',
       'kibana.alert.rule.name',
       'kibana.alert.severity',
+      ...Object.values(ALERT_PROCESS_FIELDS),
       ...entityFields,
     ])
   );

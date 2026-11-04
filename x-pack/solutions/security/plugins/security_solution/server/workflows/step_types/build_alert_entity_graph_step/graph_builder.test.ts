@@ -235,6 +235,82 @@ describe('buildRelatedAlertsGraph', () => {
     expect(result.stats?.depth_reached).toBeGreaterThanOrEqual(1);
   });
 
+  it('returns process name, executable and command lines for discovered alerts', async () => {
+    const t0 = Date.UTC(2026, 0, 1, 0, 0, 0);
+    const seedIndex = 'seed-index';
+    const searchIndex = 'alerts-index';
+
+    const docs: Doc[] = [
+      { _id: 'A', _index: seedIndex, _source: src({ '@timestamp': iso(t0), host: { id: 'h1' } }) },
+      {
+        _id: 'B',
+        _index: searchIndex,
+        _source: src({
+          '@timestamp': iso(t0 + 10 * 60 * 1000),
+          host: { id: 'h1' },
+          'kibana.alert.rule.name': 'SSH Remote port tunneling',
+          process: {
+            name: 'sshd',
+            executable: '/usr/sbin/sshd',
+            command_line: '/usr/sbin/sshd -R',
+            parent: { command_line: '/usr/sbin/sshd -D' },
+          },
+        }),
+      },
+      {
+        _id: 'C',
+        _index: searchIndex,
+        _source: src({
+          '@timestamp': iso(t0 + 20 * 60 * 1000),
+          host: { id: 'h1' },
+          'process.command_line': 'sshd-keygen-wrapper',
+        }),
+      },
+    ];
+
+    const esClient = makeEsClient({ seedIndex, seedId: 'A', docs });
+
+    const result = await buildRelatedAlertsGraph({
+      esClient,
+      seed: { alertId: 'A', alertIndex: seedIndex },
+      searchIndex,
+      entityFields: ['host.id'],
+      seedWindowMs: 60 * 60 * 1000,
+      expandWindowMs: 60 * 60 * 1000,
+      maxDepth: 1,
+      maxAlerts: 10,
+      pageSize: 100,
+      maxTermsPerQuery: 100,
+      maxEntitiesPerField: 100,
+      ignoreEntities: [],
+      entityFieldScores: { 'host.id': 4 },
+      minEntityScore: 4,
+      includeSeed: false,
+    });
+
+    expect(result.alerts).toEqual([
+      expect.objectContaining({
+        alert_id: 'B',
+        rule_name: 'SSH Remote port tunneling',
+        process_name: 'sshd',
+        process_executable: '/usr/sbin/sshd',
+        process_command_line: '/usr/sbin/sshd -R',
+        process_parent_command_line: '/usr/sbin/sshd -D',
+      }),
+      expect.objectContaining({ alert_id: 'C', process_command_line: 'sshd-keygen-wrapper' }),
+    ]);
+
+    const requestedSource = (esClient.search as jest.Mock).mock.calls[0][0]._source as string[];
+    expect(requestedSource).toEqual(
+      expect.arrayContaining([
+        'process.name',
+        'process.executable',
+        'process.command_line',
+        'process.parent.command_line',
+      ])
+    );
+  });
+
   it('links alerts via min_entity_score when configured', async () => {
     const t0 = Date.UTC(2026, 0, 1, 0, 0, 0);
     const seedIndex = 'seed-index';
