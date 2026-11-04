@@ -15,9 +15,11 @@ import {
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiInlineEditTitle,
   EuiMarkdownFormat,
-  EuiSelect,
+  EuiTab,
+  EuiTabs,
   EuiText,
   EuiToolTip,
   useEuiTheme,
@@ -228,7 +230,7 @@ const NoApps = () => {
   );
 };
 
-const APP_SELECT_LABEL = i18n.translate('xpack.notebook.app.select', { defaultMessage: 'App' });
+const NEW_APP_LABEL = i18n.translate('xpack.notebook.app.new', { defaultMessage: 'New app' });
 
 const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookApp[] }) => {
   const { store, activeAppId$ } = useNotebook();
@@ -247,21 +249,30 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookAp
   return (
     // Leaves room for the flyout's close button in the top-right corner.
     <EuiFlexGroup direction="column" gutterSize="s" css={{ paddingRight: euiTheme.size.xl }}>
+      <EuiFlexItem grow={false}>
+        <EuiTabs size="s" bottomBorder={false} data-test-subj="notebookAppTabs">
+          {apps.map(({ id, title }) => (
+            <EuiTab
+              key={id}
+              isSelected={id === app.id}
+              onClick={() => activeAppId$.next(id)}
+              data-test-subj={`notebookAppTab-${title}`}
+            >
+              {title}
+            </EuiTab>
+          ))}
+          <EuiTab
+            aria-label={NEW_APP_LABEL}
+            title={NEW_APP_LABEL}
+            onClick={() => addApp(createEmptyApp(apps))}
+            data-test-subj="notebookAppNew"
+          >
+            <EuiIcon type="plus" aria-hidden={true} />
+          </EuiTab>
+        </EuiTabs>
+      </EuiFlexItem>
       <EuiFlexItem>
         <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          {apps.length > 1 && (
-            <EuiFlexItem grow={false} css={{ minWidth: 160 }}>
-              <EuiSelect
-                compressed
-                prepend={APP_SELECT_LABEL}
-                aria-label={APP_SELECT_LABEL}
-                value={app.id}
-                options={apps.map(({ id, title }) => ({ value: id, text: title }))}
-                onChange={(event) => activeAppId$.next(event.target.value)}
-                data-test-subj="notebookAppSelect"
-              />
-            </EuiFlexItem>
-          )}
           <EuiFlexItem css={{ minWidth: 0 }}>
             <EuiInlineEditTitle
               key={app.id}
@@ -293,16 +304,6 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: readonly NotebookAp
               {i18n.translate('xpack.notebook.app.generateAnother', {
                 defaultMessage: 'Generate',
               })}
-            </EuiButtonEmpty>
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <EuiButtonEmpty
-              size="xs"
-              iconType="plusCircle"
-              onClick={() => addApp(createEmptyApp(apps))}
-              data-test-subj="notebookAppNew"
-            >
-              {i18n.translate('xpack.notebook.app.new', { defaultMessage: 'New' })}
             </EuiButtonEmpty>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
