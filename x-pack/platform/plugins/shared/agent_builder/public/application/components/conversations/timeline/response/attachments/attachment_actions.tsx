@@ -6,6 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
+import { flushSync } from 'react-dom';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,6 +30,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
   iconOnly = false,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
+  const [loadingLabel, setLoadingLabel] = useState<string | null>(null);
 
   const secondaryButtons = buttons.filter((b) => b.type === ActionButtonType.SECONDARY);
   const primaryButtons = buttons.filter((b) => b.type === ActionButtonType.PRIMARY);
@@ -54,6 +56,21 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     );
   }, []);
 
+  const makeClickHandler = useCallback(
+    (button: ActionButton) => async () => {
+      flushSync(() => setLoadingLabel(button.label));
+      try {
+        const result = button.handler();
+        if (result instanceof Promise) {
+          await result;
+        }
+      } finally {
+        setLoadingLabel(null);
+      }
+    },
+    []
+  );
+
   // Derive the navigation/click props for an EUI button. When `href` is set we
   // render an anchor (so middle-click / cmd-click / "Open in new tab" all work
   // natively); `rel="noopener noreferrer"` is added automatically when
@@ -62,73 +79,82 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
     href: button.href,
     target: button.href && button.openInNewTab ? '_blank' : undefined,
     rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-    onClick: button.handler,
+    onClick: makeClickHandler(button),
   });
+
+  const isAnyLoading = loadingLabel !== null;
 
   return (
     <EuiFlexGroup gutterSize="s" alignItems="center" justifyContent="flexEnd" responsive={false}>
-      {secondaryButtons.map((button) => (
-        <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
+      {secondaryButtons.map((button) => {
+        return (
+          <EuiFlexItem grow={false} key={button.label}>
+            {iconOnly ? (
+              <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
+                <span tabIndex={button.disabled ? 0 : undefined}>
+                  <EuiButtonIcon
+                    aria-label={button.label}
+                    color="text"
+                    size="s"
+                    iconType={button.icon ?? ''}
+                    isDisabled={button.disabled || isAnyLoading}
+                    {...getNavProps(button)}
+                  />
+                </span>
+              </EuiToolTip>
+            ) : (
+              maybeWrapWithTooltip(
+                button,
+                <EuiButtonEmpty
+                  color={button.color ?? 'text'}
                   size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
+                  iconType={button.icon}
+                  isDisabled={button.disabled || isAnyLoading}
                   {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButtonEmpty
-                color={button.color ?? 'text'}
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButtonEmpty>
-            )
-          )}
-        </EuiFlexItem>
-      ))}
-      {primaryButtons.map((button) => (
-        <EuiFlexItem grow={false} key={button.label}>
-          {iconOnly ? (
-            <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
-              <span tabIndex={button.disabled ? 0 : undefined}>
-                <EuiButtonIcon
-                  aria-label={button.label}
-                  color="text"
+                >
+                  {button.label}
+                </EuiButtonEmpty>
+              )
+            )}
+          </EuiFlexItem>
+        );
+      })}
+      {primaryButtons.map((button) => {
+        const isThisLoading = loadingLabel === button.label;
+        return (
+          <EuiFlexItem grow={false} key={button.label}>
+            {iconOnly ? (
+              <EuiToolTip content={button.disabled ? button.disabledReason : button.label}>
+                <span tabIndex={button.disabled ? 0 : undefined}>
+                  <EuiButtonIcon
+                    aria-label={button.label}
+                    color="text"
+                    size="s"
+                    iconType={button.icon ?? ''}
+                    isDisabled={button.disabled || isAnyLoading}
+                    isLoading={isThisLoading}
+                    {...getNavProps(button)}
+                  />
+                </span>
+              </EuiToolTip>
+            ) : (
+              maybeWrapWithTooltip(
+                button,
+                <EuiButton
+                  color={button.color ?? 'text'}
                   size="s"
-                  iconType={button.icon ?? ''}
-                  isDisabled={button.disabled}
+                  iconType={button.icon}
+                  isDisabled={button.disabled || isAnyLoading}
+                  isLoading={isThisLoading}
                   {...getNavProps(button)}
-                />
-              </span>
-            </EuiToolTip>
-          ) : (
-            maybeWrapWithTooltip(
-              button,
-              <EuiButton
-                color={button.color ?? 'text'}
-                size="s"
-                iconType={button.icon}
-                isDisabled={button.disabled}
-                {...getNavProps(button)}
-              >
-                {button.label}
-              </EuiButton>
-            )
-          )}
-        </EuiFlexItem>
-      ))}
+                >
+                  {button.label}
+                </EuiButton>
+              )
+            )}
+          </EuiFlexItem>
+        );
+      })}
       {overflowButtons.length > 0 && (
         <EuiFlexItem grow={false}>
           <EuiPopover
@@ -149,6 +175,7 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                     defaultMessage: 'More actions',
                   })}
                   onClick={togglePopover}
+                  isDisabled={isAnyLoading}
                   size="s"
                 />
               </EuiToolTip>
@@ -166,14 +193,14 @@ export const AttachmentActions: React.FC<AttachmentActionsProps> = ({
                   items: overflowButtons.map((button) => ({
                     name: button.label,
                     icon: button.icon,
-                    disabled: button.disabled,
+                    disabled: button.disabled || isAnyLoading,
                     toolTipContent: button.disabled ? button.disabledReason : undefined,
                     href: button.href,
                     target: button.href && button.openInNewTab ? '_blank' : undefined,
                     rel: button.href && button.openInNewTab ? 'noopener noreferrer' : undefined,
-                    onClick: () => {
+                    onClick: async () => {
                       closePopover();
-                      button.handler();
+                      await makeClickHandler(button)();
                     },
                   })),
                 },
