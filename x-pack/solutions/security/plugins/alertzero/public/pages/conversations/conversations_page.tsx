@@ -417,6 +417,9 @@ const ConversationsPageContent: React.FC = () => {
           <AlertZeroPageHeader
             // The header renders the charts-summary count, so it tracks that query
             // rather than the section pages, which now load independently.
+            // `isLoading` is the first fetch only. A background `isFetching` keeps the
+            // previous count on screen and must not replay the greeting turn.
+            animateQueueGreeting
             isLoading={isLoading}
             hasError={hasSummaryError}
             // Closed proposals are rows but not work: a window holding only decisions
