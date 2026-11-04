@@ -58,7 +58,7 @@ Pass the \`embeddable_id\` of the app (or, for an app created in this conversati
 
 If the document has problems, this returns them one by one, each naming the component it is about. Fix every one and call the tool again.
 
-This tool only reaches apps attached to the conversation: apps the user sent from an editor with "Generate with chat", and apps created here with ${CREATE_CUSTOM_APP_TOOL_ID}.
+This tool only reaches apps attached to the conversation: apps the user sent from the page of an app with "Refine with AI" or "Describe it", and apps created here with ${CREATE_CUSTOM_APP_TOOL_ID}.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated app inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\`.
 
@@ -94,7 +94,7 @@ ${CUSTOM_APP_AUTHORING_GUIDE}`,
           ? `No custom app "${
               attachmentId ?? embeddableId
             }" is attached to this conversation. Attached apps: ${attached.join(', ')}.`
-          : `No custom app is attached to this conversation. To make a new one, use ${CREATE_CUSTOM_APP_TOOL_ID}; to change one on a dashboard, ask the user to open its editor and choose "Generate with chat".`
+          : `No custom app is attached to this conversation. To make a new one, use ${CREATE_CUSTOM_APP_TOOL_ID}; to change an app that exists, ask the user to open it and choose "Refine with AI".`
       );
     }
 

@@ -78,10 +78,10 @@ describe('the form', () => {
     (mockRunner.track as jest.Mock).mockReset();
   });
 
-  it('shows each field with its label, and what is written on the button', () => {
+  it('shows each field with its label, and what is written on the button', async () => {
     show(documentWith());
 
-    expect(screen.getByLabelText('Reason')).toHaveValue('');
+    expect(await screen.findByLabelText('Reason')).toHaveValue('');
     expect(screen.getByLabelText('Urgency')).toHaveValue('low');
     expect(screen.getByRole('button', { name: 'Escalate' })).toBeEnabled();
   });

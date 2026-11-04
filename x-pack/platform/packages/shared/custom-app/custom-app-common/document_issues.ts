@@ -41,7 +41,7 @@ const locate = (
 };
 
 /**
- * Everything wrong with a document, in a form an editor can show: the message, and the node it
+ * Everything wrong with a document, in a form that can be shown: the message, and the node it
  * belongs to so the author can be taken there. An empty list means the document is valid.
  */
 export const getDocumentIssues = (document: unknown): DocumentIssue[] => {

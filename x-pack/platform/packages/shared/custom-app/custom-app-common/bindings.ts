@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import {
   BADGE_COLORS,
   CARD_ICONS,
@@ -17,19 +17,22 @@ import {
   THEME_ACCENTS,
   THEME_SHAPES,
 } from './constants';
+import { getCapability } from './capabilities/capability_registry';
 import type { AppNode } from './document_schema';
 
 /** A valid ES|QL parameter name, so a state key can be used as `?key` in a query. */
-export const stateKeySchema = z
-  .string()
-  .max(MAX_STATE_KEY_LENGTH)
-  .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
-  .refine((key) => !RESERVED_STATE_KEYS.includes(key.toLowerCase()), {
-    message: `Reserved by ES|QL for the time range: ${RESERVED_STATE_KEYS.join(', ')}`,
-  });
+export const stateKeySchema = lazySchema(() =>
+  z
+    .string()
+    .max(MAX_STATE_KEY_LENGTH)
+    .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
+    .refine((key) => !RESERVED_STATE_KEYS.includes(key.toLowerCase()), {
+      message: `Reserved by ES|QL for the time range: ${RESERVED_STATE_KEYS.join(', ')}`,
+    })
+);
 
 /** The value of a state key, in place of a value that is written down. */
-export const stateRefSchema = z.object({ $state: stateKeySchema });
+export const stateRefSchema = lazySchema(() => z.object({ $state: stateKeySchema }));
 export type StateRef = z.output<typeof stateRefSchema>;
 
 export const isStateRef = (value: unknown): value is StateRef =>
@@ -57,33 +60,41 @@ export const stateRef = <T>(key: string): T => ({ $state: key } as unknown as T)
  * Whether a component is shown: when the key is true, or, with `equals`, when it is that value, such
  * as the option of a select. Left out, it is always shown.
  */
-export const visibleWhenSchema = z
-  .object({
-    $state: stateKeySchema,
-    equals: z
-      .union([z.string().max(MAX_STATE_STRING_LENGTH), z.number().finite(), z.boolean()])
-      .optional(),
-  })
-  .optional();
+export const visibleWhenSchema = lazySchema(() =>
+  z
+    .object({
+      $state: stateKeySchema,
+      equals: z
+        .union([z.string().max(MAX_STATE_STRING_LENGTH), z.number().finite(), z.boolean()])
+        .optional(),
+    })
+    .optional()
+);
 
 export type VisibleWhen = NonNullable<z.output<typeof visibleWhenSchema>>;
 
 /** What a bindable property is when it is written down, and the kind of value that can set it. */
-export const calloutColorSchema = z
-  .enum(['primary', 'success', 'warning', 'danger'])
-  .default('primary');
-export const chartTypeSchema = z.enum(['bar', 'line', 'area', 'donut']).optional();
-export const annotationsVisibleSchema = z.boolean().default(true);
-export const betterWhenSchema = z.enum(['higher', 'lower']).default('higher');
-export const progressMaxSchema = z.number().finite().positive().default(100);
-export const progressColorSchema = z.enum(PROGRESS_COLORS).default('primary');
-export const badgeColorSchema = z.enum(BADGE_COLORS).default('default');
-export const stackDirectionSchema = z.enum(['vertical', 'horizontal']).default('vertical');
-export const cardIconSchema = z.enum(CARD_ICONS).optional();
-export const columnsCountSchema = z.number().int().min(2).max(MAX_COLUMNS).default(2);
-export const sectionOpenSchema = z.boolean().optional();
-export const themeAccentSchema = z.enum(THEME_ACCENTS).optional();
-export const themeShapeSchema = z.enum(THEME_SHAPES).optional();
+export const calloutColorSchema = lazySchema(() =>
+  z.enum(['primary', 'success', 'warning', 'danger']).default('primary')
+);
+export const chartTypeSchema = lazySchema(() =>
+  z.enum(['bar', 'line', 'area', 'donut']).optional()
+);
+export const annotationsVisibleSchema = lazySchema(() => z.boolean().default(true));
+export const betterWhenSchema = lazySchema(() => z.enum(['higher', 'lower']).default('higher'));
+export const progressMaxSchema = lazySchema(() => z.number().finite().positive().default(100));
+export const progressColorSchema = lazySchema(() => z.enum(PROGRESS_COLORS).default('primary'));
+export const badgeColorSchema = lazySchema(() => z.enum(BADGE_COLORS).default('default'));
+export const stackDirectionSchema = lazySchema(() =>
+  z.enum(['vertical', 'horizontal']).default('vertical')
+);
+export const cardIconSchema = lazySchema(() => z.enum(CARD_ICONS).optional());
+export const columnsCountSchema = lazySchema(() =>
+  z.number().int().min(2).max(MAX_COLUMNS).default(2)
+);
+export const sectionOpenSchema = lazySchema(() => z.boolean().optional());
+export const themeAccentSchema = lazySchema(() => z.enum(THEME_ACCENTS).optional());
+export const themeShapeSchema = lazySchema(() => z.enum(THEME_SHAPES).optional());
 
 type BoundKind = 'string' | 'number' | 'boolean';
 
@@ -96,21 +107,9 @@ interface BoundProp {
 
 const prop = (schema: z.ZodType, kind: BoundKind): BoundProp => ({ schema, kind });
 
-/** The properties of each type of component that can be set by a value, by their path. */
-export const BOUND_PROPS: Readonly<Record<string, Readonly<Record<string, BoundProp>>>> = {
-  callout: { color: prop(calloutColorSchema, 'string') },
-  chart: {
-    chartType: prop(chartTypeSchema, 'string'),
-    'annotations.visible': prop(annotationsVisibleSchema, 'boolean'),
-  },
-  metric: { betterWhen: prop(betterWhenSchema, 'string') },
-  progress: { max: prop(progressMaxSchema, 'number'), color: prop(progressColorSchema, 'string') },
-  badge: { color: prop(badgeColorSchema, 'string') },
-  stack: { direction: prop(stackDirectionSchema, 'string') },
-  card: { icon: prop(cardIconSchema, 'string') },
-  columns: { columns: prop(columnsCountSchema, 'number') },
-  section: { open: prop(sectionOpenSchema, 'boolean') },
-};
+/** The properties of a type of component that can be set by a value, by their path. */
+export const getBoundProps = (type: string): Readonly<Record<string, BoundProp>> | undefined =>
+  getCapability(type)?.bound as Readonly<Record<string, BoundProp>> | undefined;
 
 /** The same for the theme of a page. */
 export const THEME_BOUND_PROPS: Readonly<Record<string, BoundProp>> = {
@@ -164,7 +163,7 @@ export const resolveBoundProps = (
   node: AppNode,
   values: Readonly<Record<string, unknown>>
 ): AppNode => {
-  const props = BOUND_PROPS[node.type];
+  const props = getBoundProps(node.type);
   if (!props) return node;
 
   return Object.entries(props).reduce<AppNode>((resolved, [path, bound]) => {
@@ -183,7 +182,7 @@ export const getBoundSignature = (
   node: AppNode,
   values: Readonly<Record<string, unknown>>
 ): string => {
-  const props = BOUND_PROPS[node.type];
+  const props = getBoundProps(node.type);
   if (!props) return '';
   return JSON.stringify(
     Object.entries(props).flatMap(([path, bound]) => {

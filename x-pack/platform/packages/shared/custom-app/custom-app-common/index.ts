@@ -91,22 +91,14 @@ export {
   isEmptyDocument,
 } from './node_tree';
 export { getStateDefaults } from './state_defaults';
-export {
-  addNode,
-  createNodeId,
-  createStateKey,
-  duplicateNode,
-  findNode,
-  moveNode,
-  pruneUnusedValues,
-  removeNode,
-  removeStateKey,
-  setStateDeclaration,
-  stateKeyForColumn,
-  updateNode,
-  type MutationResult,
-  type NodeLocation,
-} from './document_mutations';
 export { getDocumentIssues, type DocumentIssue } from './document_issues';
 
-export * from './a2ui';
+export {
+  checkCapability,
+  defineCapability,
+  describeCapability,
+  getCapability,
+  listCapabilities,
+  registerCapability,
+  type CapabilityManifest,
+} from './capabilities';

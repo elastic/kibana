@@ -6,7 +6,6 @@
  */
 
 import { appDocumentSchema, appDocumentShapeSchema, customAppStateSchema } from './document_schema';
-import { pruneUnusedValues } from './document_mutations';
 import {
   collectQueries,
   collectSources,
@@ -1065,12 +1064,6 @@ describe('what happens when a chart is clicked', () => {
     expect(issues(chartDoc([{ type: 'openFlyout', flyout: 'nope' }], state))).toContain(
       'which is not a flyout'
     );
-  });
-
-  it('counts the value it remembers among those that are used', () => {
-    const document = appDocumentSchema.parse(chartDoc([remember], state));
-
-    expect(Object.keys(pruneUnusedValues(document).state)).toEqual(['user']);
   });
 
   it('does not take more actions than any other event', () => {

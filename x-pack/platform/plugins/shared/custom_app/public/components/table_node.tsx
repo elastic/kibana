@@ -45,7 +45,7 @@ const NUMBER_TYPES = new Set([
 const DATE_TYPES = new Set(['date', 'date_nanos']);
 
 /** How a column is shown follows from what the query says it holds, so authors need not say. */
-const formatOf = (type: string | undefined): CellFormat =>
+export const formatOf = (type: string | undefined): CellFormat =>
   type !== undefined && NUMBER_TYPES.has(type)
     ? 'number'
     : type !== undefined && DATE_TYPES.has(type)

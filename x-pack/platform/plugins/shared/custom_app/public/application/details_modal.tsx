@@ -33,7 +33,7 @@ interface DetailsModalProps {
   onCancel: () => void;
 }
 
-/** The name and the description of an app: all a person decides about one outside its editor. */
+/** The name and the description of an app: all a person decides about one besides what is in it. */
 export const DetailsModal = ({
   heading,
   confirmLabel,

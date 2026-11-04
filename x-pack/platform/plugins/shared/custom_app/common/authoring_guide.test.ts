@@ -126,8 +126,9 @@ describe('the authoring guide', () => {
   });
 
   it('says a text is Markdown, and that a heading and a callout are not', () => {
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('A text is written in Markdown');
-    expect(CUSTOM_APP_AUTHORING_GUIDE).toContain('so no Markdown in them');
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toMatch(/- text \{[^\n]*written in Markdown/);
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toMatch(/- heading \{[^\n]*no Markdown/);
+    expect(CUSTOM_APP_AUTHORING_GUIDE).toMatch(/- callout \{[^\n]*no Markdown/);
   });
 
   it('teaches a select that takes its options from a query, and how an All option is kept', () => {

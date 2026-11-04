@@ -8,7 +8,7 @@
 import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import isEqual from 'lodash/isEqual';
-import { EuiConfirmModal, EuiFlyout, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
+import { EuiConfirmModal, EuiLoadingSpinner, EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -16,16 +16,12 @@ import {
   appDocumentSchema,
   CUSTOM_APP_EMBEDDABLE_TYPE,
   isEmptyDocument,
-  updateNode,
   type AppDocument,
 } from '@kbn/custom-app-common';
 import { SavedObjectSaveModalDashboard } from '@kbn/presentation-util-plugin/public';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
-import { EDITOR_FEATURE_FLAG } from '../../common/feature_flags';
-import { InlineEditContext, type ChangeNodeWords } from '../runtime/inline_edit_context';
-import { EditorFlyout } from '../editor/editor_flyout';
 import { useChatWithPage } from './use_chat_with_page';
 import { useListBack, useListBreadcrumb } from './list_breadcrumb';
 import { useUnsavedChangesGuard } from './use_unsaved_changes_guard';
@@ -55,27 +51,18 @@ export const ViewPage = ({
   chrome,
   notifications,
   canSave,
-  featureFlags,
   agentBuilder,
   onAppLeave,
   stateTransfer,
   canWriteDashboards,
 }: AppServices) => {
-  const isEditorEnabled = featureFlags.useBooleanValue(EDITOR_FEATURE_FLAG, true);
-  const canEdit = canSave && isEditorEnabled;
   const { id } = useParams<{ id: string }>();
   const history = useHistory();
-  const flyoutTitleId = useId();
   const discardTitleId = useId();
   const [state, setState] = useState<ViewState>({ status: 'loading' });
-  const [isEditing, setIsEditing] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
-  /** The draft the editor is showing, so that it is seen on the page before it is saved. */
-  const [preview, setPreview] = useState<AppDocument>();
-  /** What was applied in the editor and is not saved yet. Absent when the page shows what is saved. */
+  /** What the agent changed and is not saved yet. Absent when the page shows what is saved. */
   const [draft, setDraft] = useState<AppDocument>();
-  /** Where the editor starts when it is not from the app: the example. */
-  const [seed, setSeed] = useState<AppDocument>();
   const [isDiscarding, setIsDiscarding] = useState(false);
   const [isAddingToDashboard, setIsAddingToDashboard] = useState(false);
 
@@ -110,18 +97,12 @@ export const ViewPage = ({
     chrome.setBreadcrumbs(breadcrumbs);
   }, [chrome, breadcrumbs]);
 
-  const closeEditor = useCallback(() => {
-    setIsEditing(false);
-    setPreview(undefined);
-    setSeed(undefined);
-  }, []);
-
   useUnsavedChangesGuard(draft !== undefined, onAppLeave);
 
   const savedDocument = state.status === 'ready' ? state.document : undefined;
   const shownDocument = useMemo(
-    () => preview ?? draft ?? savedDocument ?? createEmptyDocument(),
-    [preview, draft, savedDocument]
+    () => draft ?? savedDocument ?? createEmptyDocument(),
+    [draft, savedDocument]
   );
   // What the agent makes comes back here, as a change that is not saved yet.
   const describe = useChatWithPage({
@@ -131,27 +112,10 @@ export const ViewPage = ({
       [draft, savedDocument]
     ),
     onDocument: useCallback(
-      (document: AppDocument) => {
-        setDraft(isEqual(document, savedDocument) ? undefined : document);
-        closeEditor();
-      },
-      [closeEditor, savedDocument]
+      (document: AppDocument) => setDraft(isEqual(document, savedDocument) ? undefined : document),
+      [savedDocument]
     ),
   });
-
-  // Words changed on the page itself join the draft, to be saved with it like any other change.
-  const changeNodeWords = useMemo<ChangeNodeWords | undefined>(
-    () =>
-      canSave && savedDocument && !isEditing
-        ? (nodeId, field, words) => {
-            const result = updateNode(draft ?? savedDocument, nodeId, { [field]: words });
-            if (result.ok) {
-              setDraft(isEqual(result.document, savedDocument) ? undefined : result.document);
-            }
-          }
-        : undefined,
-    [canSave, draft, isEditing, savedDocument]
-  );
 
   const save = useCallback(
     async (details: { title: string; description?: string }, document: AppDocument) => {
@@ -281,32 +245,8 @@ export const ViewPage = ({
           testId: 'customAppSave',
           run: saveDraft,
         }
-      : canEdit && state.status === 'ready'
-      ? {
-          id: 'edit',
-          label: i18n.translate('xpack.customApp.standalone.edit', { defaultMessage: 'Edit' }),
-          iconType: 'pencil',
-          disableButton: isEditing,
-          testId: 'customAppEdit',
-          run: () => setIsEditing(true),
-        }
       : undefined,
     items: [
-      ...(hasDraft && canEdit && state.status === 'ready'
-        ? [
-            {
-              id: 'edit',
-              order: 1,
-              label: i18n.translate('xpack.customApp.standalone.edit', {
-                defaultMessage: 'Edit',
-              }),
-              iconType: 'pencil',
-              disableButton: isEditing,
-              testId: 'customAppEdit',
-              run: () => setIsEditing(true),
-            },
-          ]
-        : []),
       ...(canRefine
         ? [
             {
@@ -421,10 +361,9 @@ export const ViewPage = ({
               ))}
             </ul>
           </KbnDangerCallout>
-        ) : isEmptyDocument(preview ?? draft ?? state.document) ? (
+        ) : isEmptyDocument(draft ?? state.document) ? (
           <EmptyApp
             canEdit={canSave}
-            onBuild={isEditorEnabled ? () => setIsEditing(true) : undefined}
             onDescribe={
               describe
                 ? () =>
@@ -435,48 +374,14 @@ export const ViewPage = ({
                     )
                 : undefined
             }
-            onUseExample={() => {
-              // Without the editor the example is the app itself, which can be saved as it is.
-              if (!isEditorEnabled) {
-                setDraft(createDefaultDocument());
-                return;
-              }
-              setSeed(createDefaultDocument());
-              setIsEditing(true);
-            }}
+            // The example is the app itself, which can be saved as it is.
+            onUseExample={() => setDraft(createDefaultDocument())}
           />
         ) : (
-          <InlineEditContext.Provider value={preview ? undefined : changeNodeWords}>
-            <LiveApp document={shownDocument} appId={app.id} />
-          </InlineEditContext.Provider>
+          <LiveApp document={shownDocument} appId={app.id} />
         )}
       </EuiPageTemplate.Section>
 
-      {isEditing && state.status === 'ready' && (
-        <EuiFlyout
-          type="push"
-          size={760}
-          // The same room the editor has when it opens on a dashboard.
-          paddingSize="m"
-          // The editor asks before it throws a draft away, so it is left only through its own buttons.
-          onClose={() => {}}
-          hideCloseButton
-          aria-labelledby={flyoutTitleId}
-          data-test-subj="customAppEditorFlyout"
-        >
-          <EditorFlyout
-            initialDocument={seed ?? draft ?? state.document}
-            ariaLabelledBy={flyoutTitleId}
-            onPreview={setPreview}
-            onCancel={closeEditor}
-            // Applying changes the page, and nothing more: saving is the page's Save.
-            onSave={(document) => {
-              setDraft(isEqual(document, state.document) ? undefined : document);
-              closeEditor();
-            }}
-          />
-        </EuiFlyout>
-      )}
       {isAddingToDashboard && (
         <SavedObjectSaveModalDashboard
           objectType={i18n.translate('xpack.customApp.standalone.objectType', {

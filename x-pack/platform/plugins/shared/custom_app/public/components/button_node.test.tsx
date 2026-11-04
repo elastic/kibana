@@ -56,10 +56,10 @@ describe('the button', () => {
     (mockRunner.track as jest.Mock).mockReset();
   });
 
-  it('is shown with what is written on it', () => {
+  it('is shown with what is written on it', async () => {
     show(documentWith([]));
 
-    expect(screen.getByRole('button', { name: 'Isolate host' })).toBeEnabled();
+    expect(await screen.findByRole('button', { name: 'Isolate host' })).toBeEnabled();
   });
 
   it('asks for the workflow to be run when it is pressed, with what the app holds', async () => {

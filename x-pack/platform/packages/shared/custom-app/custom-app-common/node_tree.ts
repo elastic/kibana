@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { getCapability } from './capabilities/capability_registry';
 import { ANNOTATIONS_SOURCE_SUFFIX, OPTIONS_SOURCE_SUFFIX } from './constants';
 import { isContainerNode, type Action, type AppNode, type DataSource } from './document_schema';
 
@@ -20,71 +21,37 @@ export const isEmptyDocument = (document: { root: AppNode }): boolean =>
   document.root.type === 'stack' && document.root.children.length === 0;
 
 /** The props of a node whose text may contain `{{state.key}}` references. */
-export const getInterpolatedText = (
-  node: AppNode
-): ReadonlyArray<{ prop: string; text: string }> => {
-  switch (node.type) {
-    case 'heading':
-    case 'text':
-      return [{ prop: 'text', text: node.text }];
-    case 'callout':
-      return [
-        { prop: 'title', text: node.title },
-        ...(node.text === undefined ? [] : [{ prop: 'text', text: node.text }]),
-      ];
-    case 'stat':
-    case 'flyout':
-    case 'metric':
-      return [{ prop: 'title', text: node.title }];
-    case 'card':
-      return [
-        ...(node.title === undefined ? [] : [{ prop: 'title', text: node.title }]),
-        ...(node.description === undefined
-          ? []
-          : [{ prop: 'description', text: node.description }]),
-      ];
-    case 'badge':
-      return [{ prop: 'text', text: node.text }];
-    case 'progress':
-      return node.label === undefined ? [] : [{ prop: 'label', text: node.label }];
-    case 'section':
-      return [{ prop: 'label', text: node.label }];
-    case 'chart':
-      return node.title === undefined ? [] : [{ prop: 'title', text: node.title }];
-    case 'link':
-      return [
-        { prop: 'label', text: node.label },
-        ...(node.to.type === 'app' && node.to.path !== undefined
-          ? [{ prop: 'path', text: node.to.path }]
-          : []),
-      ];
-    default:
-      return [];
-  }
+export const getInterpolatedText = (node: AppNode): ReadonlyArray<{ prop: string; text: string }> =>
+  getCapabilityText(node);
+
+const getCapabilityText = (node: AppNode): ReadonlyArray<{ prop: string; text: string }> => {
+  const capability = getCapability(node.type);
+  return [
+    ...(capability?.interpolated ?? []).flatMap((prop) => {
+      const text = (node as unknown as Record<string, unknown>)[prop];
+      return typeof text === 'string' ? [{ prop, text }] : [];
+    }),
+    ...((
+      capability?.extraText as
+        | ((node: AppNode) => ReadonlyArray<{ prop: string; text: string }>)
+        | undefined
+    )?.(node) ?? []),
+  ];
 };
 
 /** The ES|QL query a node runs, if it shows data. */
-export const getNodeQuery = (node: AppNode): string | undefined =>
-  node.type === 'stat' ||
-  node.type === 'metric' ||
-  node.type === 'progress' ||
-  node.type === 'chart' ||
-  node.type === 'custom_content' ||
-  node.type === 'table' ||
-  node.type === 'key_value'
-    ? node.query
+export const getNodeQuery = (node: AppNode): string | undefined => {
+  const data = getCapability(node.type)?.data;
+  return data === 'query' || data === 'query_or_source'
+    ? (node as { query?: string }).query
     : undefined;
+};
 
 /** Where a node gets what it shows, if it shows data: a query, or a source of cases. */
 export const getNodeSource = (node: AppNode): DataSource | undefined => {
-  if (
-    node.type === 'stat' ||
-    node.type === 'metric' ||
-    node.type === 'progress' ||
-    node.type === 'table' ||
-    node.type === 'key_value'
-  ) {
-    if (node.source) return node.source;
+  if (getCapability(node.type)?.data === 'query_or_source') {
+    const { source } = node as { source?: DataSource };
+    if (source) return source;
   }
   const query = getNodeQuery(node);
   return query === undefined ? undefined : { type: 'esql', query };
@@ -102,12 +69,15 @@ export const collectSources = (root: AppNode): Record<string, DataSource> => {
   const source = getNodeSource(root);
   return {
     ...(source === undefined ? {} : { [root.id]: source }),
-    ...(root.type === 'select' && root.optionsQuery !== undefined
-      ? { [getOptionsSourceId(root.id)]: { type: 'esql', query: root.optionsQuery } }
-      : {}),
-    ...(root.type === 'chart' && root.annotations !== undefined
-      ? { [getAnnotationsSourceId(root.id)]: { type: 'esql', query: root.annotations.query } }
-      : {}),
+    ...Object.fromEntries(
+      (
+        (
+          getCapability(root.type)?.sources as
+            | ((node: AppNode) => ReadonlyArray<{ suffix: string; query: string }>)
+            | undefined
+        )?.(root) ?? []
+      ).map(({ suffix, query }) => [`${root.id}${suffix}`, { type: 'esql', query }])
+    ),
     ...Object.assign({}, ...getNodeChildren(root).map(collectSources)),
   };
 };
@@ -121,54 +91,32 @@ export const getSourceStateKeys = (source: DataSource): string[] => {
 };
 
 /** The state keys an input node reads and writes: one for an input, one for each field of a form. */
-export const getNodeBindings = (node: AppNode): string[] => {
-  switch (node.type) {
-    case 'select':
-    case 'button_group':
-    case 'switch':
-    case 'search':
-    case 'list_input':
-      return [node.bind];
-    case 'form':
-      return node.fields.map(({ bind }) => bind);
-    default:
-      return [];
-  }
-};
+export const getNodeBindings = (node: AppNode): string[] =>
+  (getCapability(node.type)?.bindings as ((node: AppNode) => string[]) | undefined)?.(node) ?? [];
 
 /**
  * What kind of value an input sets: a list for a box of lines, and for a select that takes several
  * options, a true or a false for a switch, and text for every other.
  */
-export const getBindingType = (node: AppNode): 'string' | 'list' | 'boolean' =>
-  node.type === 'list_input' || (node.type === 'select' && node.multiple === true)
-    ? 'list'
-    : node.type === 'switch'
-    ? 'boolean'
-    : 'string';
+export const getBindingType = (node: AppNode): 'string' | 'list' | 'boolean' => {
+  const kind = getCapability(node.type)?.bindingType;
+  if (typeof kind === 'function')
+    return (kind as (node: AppNode) => 'string' | 'list' | 'boolean')(node);
+  return kind ?? 'string';
+};
 
 /** The actions a node can run, with the event that runs them. */
 export const getNodeActions = (
   node: AppNode
 ): ReadonlyArray<{ event: string; actions: readonly Action[] }> => {
-  switch (node.type) {
-    case 'table':
-      return [{ event: 'onRowClick', actions: node.onRowClick }];
-    case 'chart':
-      return [{ event: 'onChartClick', actions: node.onClick }];
-    case 'button':
-      return [{ event: 'onClick', actions: node.onClick }];
-    case 'form':
-      return [{ event: 'onSubmit', actions: node.onSubmit }];
-    case 'select':
-    case 'button_group':
-    case 'switch':
-    case 'search':
-    case 'list_input':
-      return [{ event: 'onChange', actions: node.onChange }];
-    default:
-      return [];
+  const events = getCapability(node.type)?.events;
+  if (events) {
+    return Object.entries(events).map(([event, prop]) => ({
+      event,
+      actions: (node as unknown as Record<string, readonly Action[]>)[prop],
+    }));
   }
+  return [];
 };
 
 /** Every query in the tree, by the id of the node that runs it. */

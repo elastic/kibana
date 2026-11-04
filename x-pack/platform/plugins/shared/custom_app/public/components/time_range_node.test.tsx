@@ -76,10 +76,10 @@ const setup = ({
 };
 
 describe('the time range component', () => {
-  it('shows the period the queries are running with', () => {
+  it('shows the period the queries are running with', async () => {
     setup();
 
-    expect(screen.getByTestId('picker')).toHaveTextContent('now-1h to now');
+    expect(await screen.findByTestId('picker')).toHaveTextContent('now-1h to now');
   });
 
   it('shows the last day until the first fetch says what the period is', () => {

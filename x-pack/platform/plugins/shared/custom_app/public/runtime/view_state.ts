@@ -15,6 +15,7 @@ import {
   type AppDocument,
   type AppNode,
   type StateValue,
+  getCapability,
 } from '@kbn/custom-app-common';
 
 /** What a link has to carry for another person, or a refresh, to see the app as it was left. */
@@ -34,7 +35,7 @@ const MAX_ENCODED_LENGTH = 4_000;
 const MAX_TIME_LENGTH = 64;
 
 const collectFormKeys = (node: AppNode): string[] => [
-  ...(node.type === 'form' ? getNodeBindings(node) : []),
+  ...(getCapability(node.type)?.private === true ? getNodeBindings(node) : []),
   ...getNodeChildren(node).flatMap(collectFormKeys),
 ];
 
@@ -124,7 +125,7 @@ export const decodeView = (
   const flyoutIds = new Set<string>();
   const pending = [document.root];
   for (let node = pending.pop(); node; node = pending.pop()) {
-    if (node.type === 'flyout') flyoutIds.add(node.id);
+    if (getCapability(node.type)?.overlay === true) flyoutIds.add(node.id);
     pending.push(...getNodeChildren(node));
   }
   const flyout = typeof parsed.f === 'string' && flyoutIds.has(parsed.f) ? parsed.f : undefined;

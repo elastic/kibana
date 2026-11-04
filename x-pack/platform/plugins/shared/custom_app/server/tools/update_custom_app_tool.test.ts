@@ -95,7 +95,7 @@ describe('the update custom app tool', () => {
       );
 
       expect(result.type).toBe(ToolResultType.error);
-      expect(JSON.stringify(result.data)).toContain('Generate with chat');
+      expect(JSON.stringify(result.data)).toContain('Refine with AI');
       expect(context.update).not.toHaveBeenCalled();
       expect(context.sendUiEvent).not.toHaveBeenCalled();
     });

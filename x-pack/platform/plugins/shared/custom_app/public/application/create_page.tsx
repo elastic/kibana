@@ -5,17 +5,15 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useId, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { EuiFlyout, EuiPageTemplate } from '@elastic/eui';
+import { EuiPageTemplate } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AppHeader, type AppHeaderMenu } from '@kbn/app-header';
 import { isEmptyDocument, type AppDocument } from '@kbn/custom-app-common';
-import { EDITOR_FEATURE_FLAG } from '../../common/feature_flags';
 import { EmptyApp } from '../components/empty_app';
 import { LiveApp } from '../components/live_app';
 import { createDefaultDocument, createEmptyDocument } from '../default_document';
-import { EditorFlyout } from '../editor/editor_flyout';
 import { DetailsModal } from './details_modal';
 import { useChatWithPage } from './use_chat_with_page';
 import { useListBack, useListBreadcrumb } from './list_breadcrumb';
@@ -28,26 +26,18 @@ const toMessage = (error: unknown): string =>
 
 /**
  * A new app, as a dashboard does it: it is put together on the page, with nothing saved, and gets
- * a name, and an id, when Save is pressed. Applying the editor only changes the draft, so leaving
+ * a name, and an id, when Save is pressed. What the agent makes only changes the draft, so leaving
  * before that leaves nothing behind.
  */
 export const CreatePage = ({
   client,
   chrome,
   notifications,
-  featureFlags,
   agentBuilder,
   onAppLeave,
 }: AppServices) => {
-  const isEditorEnabled = featureFlags.useBooleanValue(EDITOR_FEATURE_FLAG, true);
   const history = useHistory();
-  const flyoutTitleId = useId();
   const [draft, setDraft] = useState<AppDocument>(() => createEmptyDocument());
-  /** Where the editor starts when it is not from the draft: the example. */
-  const [seed, setSeed] = useState<AppDocument>();
-  const [isEditing, setIsEditing] = useState(false);
-  /** What the editor shows on the page while it is open, before it is applied. */
-  const [preview, setPreview] = useState<AppDocument>();
   const [isNaming, setIsNaming] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   /** Set once the app is saved: the page is left for it, and nothing is unsaved any more. */
@@ -80,23 +70,11 @@ export const CreatePage = ({
     chrome.setBreadcrumbs(breadcrumbs);
   }, [chrome, breadcrumbs]);
 
-  const closeEditor = useCallback(() => {
-    setIsEditing(false);
-    setPreview(undefined);
-    setSeed(undefined);
-  }, []);
-
   // What the agent makes comes back here, as a draft, and not only into the chat.
   const describe = useChatWithPage({
     agentBuilder,
     getDocument: useCallback(() => draft, [draft]),
-    onDocument: useCallback(
-      (document: AppDocument) => {
-        setDraft(document);
-        closeEditor();
-      },
-      [closeEditor]
-    ),
+    onDocument: setDraft,
   });
 
   const create = useCallback(
@@ -130,21 +108,6 @@ export const CreatePage = ({
     items: isEmpty
       ? []
       : [
-          ...(isEditorEnabled
-            ? [
-                {
-                  id: 'edit',
-                  order: 1,
-                  label: i18n.translate('xpack.customApp.standalone.edit', {
-                    defaultMessage: 'Edit',
-                  }),
-                  iconType: 'pencil',
-                  disableButton: isEditing,
-                  testId: 'customAppEdit',
-                  run: () => setIsEditing(true),
-                },
-              ]
-            : []),
           ...(describe
             ? [
                 {
@@ -189,10 +152,9 @@ export const CreatePage = ({
         menu={menu}
       />
       <EuiPageTemplate.Section grow>
-        {isEmptyDocument(preview ?? draft) ? (
+        {isEmptyDocument(draft) ? (
           <EmptyApp
             canEdit
-            onBuild={isEditorEnabled ? () => setIsEditing(true) : undefined}
             onDescribe={
               describe
                 ? () =>
@@ -203,46 +165,13 @@ export const CreatePage = ({
                     )
                 : undefined
             }
-            onUseExample={() => {
-              // Without the editor the example is the app itself, which can be saved as it is.
-              if (!isEditorEnabled) {
-                setDraft(createDefaultDocument());
-                return;
-              }
-              setSeed(createDefaultDocument());
-              setIsEditing(true);
-            }}
+            // The example is the app itself, which can be saved as it is.
+            onUseExample={() => setDraft(createDefaultDocument())}
           />
         ) : (
-          <LiveApp document={preview ?? draft} />
+          <LiveApp document={draft} />
         )}
       </EuiPageTemplate.Section>
-
-      {isEditing && (
-        <EuiFlyout
-          type="push"
-          size={760}
-          // The same room the editor has when it opens on a dashboard.
-          paddingSize="m"
-          // The editor asks before it throws a draft away, so it is left only through its own buttons.
-          onClose={() => {}}
-          hideCloseButton
-          aria-labelledby={flyoutTitleId}
-          data-test-subj="customAppEditorFlyout"
-        >
-          <EditorFlyout
-            initialDocument={seed ?? draft}
-            ariaLabelledBy={flyoutTitleId}
-            onPreview={setPreview}
-            onCancel={closeEditor}
-            // Applying changes the page, and nothing more: saving is the page's Save.
-            onSave={(document) => {
-              setDraft(document);
-              closeEditor();
-            }}
-          />
-        </EuiFlyout>
-      )}
 
       {isNaming && (
         <DetailsModal

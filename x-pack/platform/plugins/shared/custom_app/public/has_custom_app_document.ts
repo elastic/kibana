@@ -9,7 +9,7 @@ import type { AppDocument } from '@kbn/custom-app-common';
 
 /** What a custom app panel offers to anything that wants to look at what it is made of. */
 export interface HasCustomAppDocument {
-  /** The saved document, not a preview that is being shown while the editor is open. */
+  /** The saved document. */
   getDocument: () => AppDocument;
 }
 

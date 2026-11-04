@@ -10,7 +10,6 @@ import {
   BehaviorSubject,
   EMPTY,
   catchError,
-  combineLatest,
   distinctUntilChanged,
   map,
   merge,
@@ -21,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { isToolUiEvent, type ToolUiEvent } from '@kbn/agent-builder-common';
 import type { BrowserChatEvent } from '@kbn/agent-builder-browser';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import type {
   DefaultEmbeddableApi,
   EmbeddablePublicDefinition,
@@ -36,7 +34,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
   useStateFromPublishingSubject,
-  type HasEditCapabilities,
   type HasLibraryTransforms,
   type HasTypeDisplayName,
   type PublishesDataLoading,
@@ -55,7 +52,6 @@ import type {
   CustomAppByValueState,
   CustomAppEmbeddableState,
 } from '../server';
-import { EDITOR_FEATURE_FLAG } from '../common/feature_flags';
 import { isByReferenceState } from '../common/by_reference';
 import { createSavedAppsClient, type SavedAppsClient } from './application/saved_apps_client';
 import { AppFrame } from './components/app_frame';
@@ -83,7 +79,6 @@ const isCustomAppUpdatedUiEvent = (
 
 export type CustomAppApi = DefaultEmbeddableApi<CustomAppEmbeddableState> &
   HasTypeDisplayName &
-  HasEditCapabilities &
   HasCustomAppDocument &
   HasCustomAppLibraryId &
   PublishesDataLoading &
@@ -118,11 +113,6 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
   type: CUSTOM_APP_EMBEDDABLE_TYPE,
   buildEmbeddable: async ({ initialState, finalizeApi, parentApi, uuid }) => {
     const { core, search, agentBuilder } = getServices();
-    // Followed for as long as the panel is there, so that a change of the flag shows.
-    const editorEnabled$ = new BehaviorSubject(true);
-    const editorFlagSubscription = core.featureFlags
-      .getBooleanValue$(EDITOR_FEATURE_FLAG, true)
-      .subscribe((enabled) => editorEnabled$.next(enabled));
     const savedApps = createSavedAppsClient(core.http);
     // A panel is either an app of its own, or a link to one of the library.
     const libraryId = isByReferenceState(initialState) ? initialState.ref_id : undefined;
@@ -138,9 +128,6 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     const defaultDescription$ = new BehaviorSubject<string | undefined>(library?.description);
     const document$ = new BehaviorSubject<AppDocument>(initialDocument);
 
-    // What the editor's Preview button shows on the panel instead of the saved document. It is
-    // not part of the panel's state, so previewing never marks the dashboard as changed.
-    const previewDocument$ = new BehaviorSubject<AppDocument | undefined>(undefined);
     // Whether the panel is being laid out or looked at, which decides what an empty app offers.
     const viewMode$ = getViewModeSubject(parentApi) ?? new BehaviorSubject('view');
     const renderedDocument$ = new BehaviorSubject<AppDocument>(initialDocument);
@@ -254,43 +241,8 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       defaultDescription$,
       dataLoading$: dataLayer.loading$,
       serializeState,
-      isEditingEnabled: () => editorEnabled$.getValue(),
       getDocument: () => document$.getValue(),
       getLibraryId: () => libraryId,
-      onEdit: async ({ returnFocus } = {}) => {
-        const flyoutRef = openLazyFlyout({
-          core,
-          parentApi,
-          returnFocus,
-          flyoutProps: { focusedPanelId: uuid, size: 760, minWidth: 520 },
-          loadContent: async ({ closeFlyout, ariaLabelledBy }) => {
-            const { EditorFlyout } = await import('./editor/editor_flyout');
-            return (
-              <EditorFlyout
-                initialDocument={document$.getValue()}
-                ariaLabelledBy={ariaLabelledBy}
-                isShared={libraryId !== undefined}
-                onPreview={(document) => previewDocument$.next(document)}
-                onGenerateWithChat={
-                  agentBuilder
-                    ? (draft) => {
-                        // The draft goes with the attachment; chat opens beside the dashboard,
-                        // where the editor would be in its way.
-                        closeFlyout();
-                        generateWithChat(draft);
-                      }
-                    : undefined
-                }
-                onCancel={closeFlyout}
-                onSave={async (document) => {
-                  if (await applyDocument(document)) closeFlyout();
-                }}
-              />
-            );
-          },
-        });
-        flyoutRef.onClose.then(() => previewDocument$.next(undefined));
-      },
       getTypeDisplayName: () =>
         i18n.translate('xpack.customApp.embeddable.typeDisplayName', {
           defaultMessage: 'Custom app',
@@ -315,9 +267,9 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
     });
 
     // The panel shows the preview while there is one, and the saved document otherwise.
-    const renderedSubscription = combineLatest([document$, previewDocument$])
-      .pipe(map(([document, preview]) => preview ?? document))
-      .subscribe((document) => renderedDocument$.next(document));
+    const renderedSubscription = document$.subscribe((document) =>
+      renderedDocument$.next(document)
+    );
 
     // Whichever document is shown, the runtime and the sources follow it.
     const documentSubscription = renderedDocument$
@@ -332,7 +284,6 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
       Component: function CustomAppEmbeddableComponent() {
         const [document] = useBatchedPublishingSubjects(renderedDocument$);
         const viewMode = useStateFromPublishingSubject(viewMode$);
-        const isEditorEnabled = useStateFromPublishingSubject(editorEnabled$);
 
         // Subscribed here rather than when the panel is built so that the nodes below, whose
         // effects run first, have already declared the sources they read when the first fetch
@@ -379,7 +330,6 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
             stateSubscription.unsubscribe();
             documentSubscription.unsubscribe();
             renderedSubscription.unsubscribe();
-            editorFlagSubscription.unsubscribe();
             dataLayer.destroy();
           },
           []
@@ -393,7 +343,6 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                   {isEmptyDocument(document) ? (
                     <EmptyApp
                       canEdit={viewMode === 'edit'}
-                      onBuild={isEditorEnabled ? () => api.onEdit() : undefined}
                       onDescribe={agentBuilder ? () => generateWithChat(document) : undefined}
                       onUseExample={() => document$.next(createDefaultDocument())}
                     />

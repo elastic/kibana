@@ -22,7 +22,6 @@ import { i18n } from '@kbn/i18n';
 interface EmptyAppProps {
   /** Without a way to change the app, it only says that it is empty. */
   canEdit: boolean;
-  onBuild?: () => void;
   /** Absent when chat is not available, and then nothing offers it. */
   onDescribe?: () => void;
   onUseExample?: () => void;
@@ -37,13 +36,13 @@ interface Way {
   onClick: () => void;
 }
 
-/** The widest it grows: three ways to begin side by side, and no wider than they need. */
+/** The widest it grows: the ways to begin side by side, and no wider than they need. */
 const MAX_WIDTH = 820;
 /** A way to begin is never narrower than this, and wraps under the others before it would be. */
 const MIN_CARD_WIDTH = 200;
 
 /** What an app with nothing in it shows: what it is for, and the ways to begin it. */
-export const EmptyApp = ({ canEdit, onBuild, onDescribe, onUseExample }: EmptyAppProps) => {
+export const EmptyApp = ({ canEdit, onDescribe, onUseExample }: EmptyAppProps) => {
   const ways: Way[] = [
     ...(onDescribe
       ? [
@@ -58,21 +57,6 @@ export const EmptyApp = ({ canEdit, onBuild, onDescribe, onUseExample }: EmptyAp
               defaultMessage: 'Tell the assistant what you need and it builds the app.',
             }),
             onClick: onDescribe,
-          },
-        ]
-      : []),
-    ...(onBuild
-      ? [
-          {
-            testSubj: 'customAppEmptyBuild',
-            icon: 'pencil',
-            title: i18n.translate('xpack.customApp.empty.build', {
-              defaultMessage: 'Build it yourself',
-            }),
-            description: i18n.translate('xpack.customApp.empty.buildDescription', {
-              defaultMessage: 'Add filters, charts and tables one by one in the editor.',
-            }),
-            onClick: onBuild,
           },
         ]
       : []),

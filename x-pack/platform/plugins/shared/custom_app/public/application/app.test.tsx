@@ -8,7 +8,7 @@
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
 import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import React from 'react';
-import { act, render, screen, waitFor, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { createMemoryHistory } from 'history';
 import { BehaviorSubject, Subject } from 'rxjs';
@@ -78,41 +78,6 @@ jest.mock('../components/live_app', () => ({
     </div>
   ),
 }));
-jest.mock('../editor/editor_flyout', () => ({
-  EditorFlyout: ({
-    initialDocument,
-    onSave,
-    onCancel,
-    onPreview,
-  }: {
-    initialDocument: { root: { id: string; children?: unknown[] } };
-    onSave: (document: unknown) => void;
-    onCancel: () => void;
-    onPreview: (document: unknown) => void;
-  }) => (
-    <div
-      data-test-subj="editor"
-      data-starts-from={`${initialDocument.root.id}:${initialDocument.root.children?.length ?? 0}`}
-    >
-      <button
-        type="button"
-        onClick={() => onPreview({ state: {}, root: { type: 'text', id: 'draft', text: 'x' } })}
-      >
-        {'preview draft'}
-      </button>
-      <button
-        type="button"
-        onClick={() => onSave({ state: {}, root: { type: 'text', id: 'edited', text: 'x' } })}
-      >
-        {'save draft'}
-      </button>
-      <button type="button" onClick={onCancel}>
-        {'cancel editor'}
-      </button>
-    </div>
-  ),
-}));
-
 const savedApp = (overrides: Partial<SavedApp> = {}): SavedApp => ({
   id: 'app-1',
   title: 'Service explorer',
@@ -192,9 +157,25 @@ const queryMenuItem = async (testId: string) => {
   return screen.queryByTestId(testId);
 };
 
+let lastAgent: ReturnType<typeof makeAgentBuilder> | undefined;
+
+/** The agent makes a change to the app that is on the page, which becomes a draft that is not saved. */
+const applyAgentDraft = async () => {
+  const describeButton = screen.queryByTestId('customAppEmptyDescribe');
+  await userEvent.click(describeButton ?? (await findMenuItem('customAppRefineWithAi')));
+  const { attachments } = lastAgent!.openChat.mock.calls.at(-1)![0];
+  await act(async () =>
+    lastAgent!.answer(attachments[0].id, {
+      state: {},
+      root: { type: 'text', id: 'edited', text: 'x' },
+    })
+  );
+  // What was pressed to ask may have left the menu open.
+  await userEvent.keyboard('{Escape}');
+};
+
 const setup = ({
   canSave = true,
-  isEditorEnabled = true,
   canWriteDashboards = true,
   path = '/',
   prepare,
@@ -203,15 +184,17 @@ const setup = ({
 }: {
   /** What the person answers when asked whether to leave with unsaved changes. */
   confirmLeave?: boolean;
-  agentBuilder?: ReturnType<typeof makeAgentBuilder>;
+  /** An assistant that can be made to answer. Null for a page where chat is not available. */
+  agentBuilder?: ReturnType<typeof makeAgentBuilder> | null;
   canWriteDashboards?: boolean;
   canSave?: boolean;
-  isEditorEnabled?: boolean;
   path?: string;
   /** Sets up what the client answers, before the page asks. */
   prepare?: (client: jest.Mocked<SavedAppsClient>) => void;
 } = {}) => {
   const client = makeClient();
+  const agent = agentBuilder === null ? undefined : agentBuilder ?? makeAgentBuilder();
+  lastAgent = agent;
   const onAppLeave = jest.fn();
   const navigateToWithEmbeddablePackages = jest.fn().mockResolvedValue(undefined);
   prepare?.(client);
@@ -229,8 +212,7 @@ const setup = ({
         chrome={chrome as never}
         notifications={notifications as never}
         canSave={canSave}
-        featureFlags={{ useBooleanValue: () => isEditorEnabled } as never}
-        agentBuilder={agentBuilder as never}
+        agentBuilder={agent as never}
         onAppLeave={onAppLeave}
         stateTransfer={{ navigateToWithEmbeddablePackages } as never}
         canWriteDashboards={canWriteDashboards}
@@ -314,16 +296,13 @@ describe('the custom apps page', () => {
   });
 
   describe('a new app', () => {
-    const openEditor = async () =>
-      userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
-    const apply = async () =>
-      userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+    const openEditor = async () => {};
+    const apply = applyAgentDraft;
 
     it('opens on an empty state and not on an example, with nothing saved', async () => {
       const { client } = setup({ path: '/create' });
 
       expect(await screen.findByText('Build your app')).toBeInTheDocument();
-      expect(screen.queryByTestId('editor')).not.toBeInTheDocument();
       expect(screen.queryByTestId('liveApp')).not.toBeInTheDocument();
       expect(client.create).not.toHaveBeenCalled();
     });
@@ -335,25 +314,6 @@ describe('the custom apps page', () => {
       expect(screen.getByTestId('customAppSave')).toBeDisabled();
       const handler = onAppLeave.mock.calls.at(-1)?.[0];
       expect(handler({ confirm: () => 'confirm', default: () => 'default' })).toBe('default');
-    });
-
-    it('opens the editor on nothing when asked to build it', async () => {
-      setup({ path: '/create' });
-
-      await openEditor();
-
-      expect(await screen.findByTestId('editor')).toHaveAttribute('data-starts-from', 'root:0');
-    });
-
-    it('opens the editor on the example when asked to start from it, and drops it if the editor is cancelled', async () => {
-      setup({ path: '/create' });
-
-      await userEvent.click(await screen.findByTestId('customAppEmptyExample'));
-      const startsFrom = (await screen.findByTestId('editor')).getAttribute('data-starts-from');
-      expect(startsFrom).toMatch(/^root:[1-9]/);
-
-      await userEvent.click(screen.getByRole('button', { name: 'cancel editor' }));
-      expect(screen.getByText('Build your app')).toBeInTheDocument();
     });
 
     describe('with the assistant', () => {
@@ -440,32 +400,21 @@ describe('the custom apps page', () => {
         expect(screen.getByText('Build your app')).toBeInTheDocument();
       });
 
-      it('closes the editor when the agent answers, which would show an old draft', async () => {
-        const agent = makeAgentBuilder();
-        setup({ path: '/create', agentBuilder: agent });
-        await userEvent.click(await screen.findByTestId('customAppEmptyDescribe'));
-        const { id } = attachedTo(agent);
-        await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
-        expect(await screen.findByTestId('editor')).toBeInTheDocument();
-
-        await act(async () => agent.answer(id, madeByTheAgent));
-
-        await waitFor(() => expect(screen.queryByTestId('editor')).not.toBeInTheDocument());
-        expect(screen.getByTestId('liveApp')).toHaveTextContent('agent-made');
-      });
-
       it('offers to refine an app that has something in it, and sends it as it is', async () => {
         const agent = makeAgentBuilder();
         setup({ path: '/create', agentBuilder: agent });
-        await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
-        await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+        await applyAgentDraft();
 
         await userEvent.click(await findMenuItem('customAppRefineWithAi'));
 
         expect(agent.openChat).toHaveBeenCalledWith(
           expect.objectContaining({ initialMessage: 'Change this app so that ' })
         );
-        expect(attachedTo(agent).data.document.root).toMatchObject({ id: 'edited' });
+        expect(
+          agent.openChat.mock.calls.at(-1)![0].attachments[0].data.document.root
+        ).toMatchObject({
+          id: 'edited',
+        });
       });
 
       it('does not offer to refine an app that is empty, which is what describing it is for', async () => {
@@ -477,54 +426,20 @@ describe('the custom apps page', () => {
     });
 
     it('does not offer to describe it when chat is not available', async () => {
-      setup({ path: '/create' });
+      setup({ path: '/create', agentBuilder: null });
 
-      await screen.findByTestId('customAppEmptyBuild');
+      await screen.findByTestId('customAppEmptyExample');
       expect(screen.queryByTestId('customAppEmptyDescribe')).not.toBeInTheDocument();
     });
 
-    it('offers no editor when it is turned off, and still offers the assistant and the example', async () => {
-      setup({ path: '/create', isEditorEnabled: false, agentBuilder: makeAgentBuilder() });
-
-      await screen.findByTestId('customAppEmptyDescribe');
-      expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
-      expect(screen.getByTestId('customAppEmptyExample')).toBeInTheDocument();
-    });
-
-    it('makes the example the draft itself when the editor is turned off, ready to be saved', async () => {
-      setup({ path: '/create', isEditorEnabled: false });
+    it('makes the example the draft itself, ready to be saved', async () => {
+      setup({ path: '/create' });
 
       await userEvent.click(await screen.findByTestId('customAppEmptyExample'));
 
-      expect(screen.queryByTestId('editor')).not.toBeInTheDocument();
       expect(await screen.findByTestId('liveApp')).toBeInTheDocument();
       expect(screen.queryByText('Build your app')).not.toBeInTheDocument();
-      expect(await queryMenuItem('customAppEdit')).not.toBeInTheDocument();
       expect(screen.getByTestId('customAppSave')).toBeEnabled();
-    });
-
-    it('shows the draft as the editor changes it, in place of the empty state', async () => {
-      setup({ path: '/create' });
-      await openEditor();
-
-      await userEvent.click(await screen.findByRole('button', { name: 'preview draft' }));
-
-      expect(screen.getByTestId('liveApp')).toHaveTextContent('draft');
-      expect(screen.queryByTestId('customAppEmpty')).not.toBeInTheDocument();
-    });
-
-    it('applies what the editor applies to the page, and no more: nothing is asked, nothing is saved', async () => {
-      const { client } = setup({ path: '/create' });
-      await openEditor();
-
-      await apply();
-
-      expect(screen.queryByTestId('editor')).not.toBeInTheDocument();
-      expect(screen.queryByTestId('customAppDetailsModal')).not.toBeInTheDocument();
-      expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
-      expect(screen.getByText('Unsaved')).toBeInTheDocument();
-      expect(screen.getByTestId('customAppSave')).toBeEnabled();
-      expect(client.create).not.toHaveBeenCalled();
     });
 
     it('asks for a name only when Save is pressed, then saves it and opens it', async () => {
@@ -570,29 +485,6 @@ describe('the custom apps page', () => {
       expect(screen.queryByTestId('customAppDetailsModal')).not.toBeInTheDocument();
       expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
       expect(client.create).not.toHaveBeenCalled();
-    });
-
-    it('goes back to the empty state, and leaves nothing behind, when the editor is cancelled', async () => {
-      const { client, history } = setup({ path: '/create' });
-      await openEditor();
-      await userEvent.click(await screen.findByRole('button', { name: 'preview draft' }));
-
-      await userEvent.click(screen.getByRole('button', { name: 'cancel editor' }));
-
-      expect(screen.queryByTestId('editor')).not.toBeInTheDocument();
-      expect(screen.getByText('Build your app')).toBeInTheDocument();
-      expect(history.location.pathname).toBe('/create');
-      expect(client.create).not.toHaveBeenCalled();
-    });
-
-    it('can be edited again after it was applied, starting from what was applied', async () => {
-      setup({ path: '/create' });
-      await openEditor();
-      await apply();
-
-      await userEvent.click(await findMenuItem('customAppEdit'));
-
-      expect(await screen.findByTestId('editor')).toHaveAttribute('data-starts-from', 'edited:0');
     });
 
     it('says why, and keeps the draft, when it could not be saved', async () => {
@@ -651,16 +543,6 @@ describe('the custom apps page', () => {
     });
   });
 
-  describe('a saved app when the editor is turned off', () => {
-    it('is not offered to change in the editor, but can still be refined with the assistant', async () => {
-      setup({ path: '/view/app-1', isEditorEnabled: false, agentBuilder: makeAgentBuilder() });
-      await screen.findByTestId('liveApp');
-
-      expect(screen.queryByTestId('customAppEdit')).not.toBeInTheDocument();
-      expect(await findMenuItem('customAppRefineWithAi')).toBeInTheDocument();
-    });
-  });
-
   describe('refining a saved app with the assistant', () => {
     const attachedTo = (agent: ReturnType<typeof makeAgentBuilder>) =>
       agent.openChat.mock.calls[0][0].attachments[0];
@@ -673,7 +555,7 @@ describe('the custom apps page', () => {
     });
 
     it('is not offered when the assistant is not available', async () => {
-      setup({ path: '/view/app-1' });
+      setup({ path: '/view/app-1', agentBuilder: null });
       await screen.findByTestId('liveApp');
 
       expect(await queryMenuItem('customAppRefineWithAi')).not.toBeInTheDocument();
@@ -792,8 +674,7 @@ describe('the custom apps page', () => {
 
     it('asks first when a new app has changes that are not saved, and stays if told not to leave', async () => {
       const { history } = setup({ path: '/create', confirmLeave: false });
-      await userEvent.click(await screen.findByTestId('customAppEmptyBuild'));
-      await userEvent.click(await screen.findByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
 
       await userEvent.click(screen.getByRole('link', { name: 'Back to Custom apps' }));
 
@@ -837,7 +718,7 @@ describe('the custom apps page', () => {
       });
       await screen.findByText('Build your app');
 
-      expect(await queryMenuItem('customAppAddToDashboard')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('customAppAddToDashboard')).not.toBeInTheDocument();
     });
 
     it('is offered to someone who may only read apps, since it does not change the app', async () => {
@@ -854,8 +735,7 @@ describe('the custom apps page', () => {
 
     it('is disabled while there are changes that are not saved, as the dashboard shows the saved app', async () => {
       await open();
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
 
       await screen.findByTestId('customAppSave');
       expect(await findMenuItem('customAppAddToDashboard')).toBeDisabled();
@@ -914,37 +794,10 @@ describe('the custom apps page', () => {
       expect(screen.getByRole('heading', { name: 'Service explorer' })).toBeInTheDocument();
     });
 
-    it('shows a draft from the editor before it is saved, and the saved app again when it is left', async () => {
-      const { client } = setup({ path: '/view/app-1' });
-      await screen.findByTestId('liveApp');
-
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'preview draft' }));
-      expect(screen.getByTestId('liveApp')).toHaveTextContent('draft');
-
-      await userEvent.click(screen.getByRole('button', { name: 'cancel editor' }));
-      expect(screen.getByTestId('liveApp')).toHaveTextContent('title');
-      expect(client.update).not.toHaveBeenCalled();
-    });
-
-    it('applies what the editor applies to the page without saving it, and says it is not saved', async () => {
-      const { client } = setup({ path: '/view/app-1' });
-      await screen.findByTestId('liveApp');
-
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
-
-      await waitFor(() => expect(screen.queryByTestId('editor')).not.toBeInTheDocument());
-      expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
-      expect(screen.getByText('Unsaved')).toBeInTheDocument();
-      expect(client.update).not.toHaveBeenCalled();
-    });
-
     it('saves what was applied when Save is pressed, under the same name', async () => {
       const { client } = setup({ path: '/view/app-1' });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
 
       await userEvent.click(await screen.findByTestId('customAppSave'));
 
@@ -961,30 +814,11 @@ describe('the custom apps page', () => {
       expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
     });
 
-    it('does not count an apply that changed nothing as a change', async () => {
-      const { client } = setup({
-        path: '/view/app-1',
-        prepare: (c) =>
-          c.get.mockResolvedValue(
-            savedApp({ document: { state: {}, root: { type: 'text', id: 'edited', text: 'x' } } })
-          ),
-      });
-      await screen.findByTestId('liveApp');
-
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
-
-      await waitFor(() => expect(screen.queryByTestId('editor')).not.toBeInTheDocument());
-      expect(screen.queryByText('Unsaved')).not.toBeInTheDocument();
-      expect(client.update).not.toHaveBeenCalled();
-    });
-
     it('keeps the draft, with a reason, when saving fails', async () => {
       const { client, notifications } = setup({ path: '/view/app-1' });
       client.update.mockRejectedValue({ body: { message: 'Conflict' } });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
 
       await userEvent.click(await screen.findByTestId('customAppSave'));
 
@@ -996,12 +830,12 @@ describe('the custom apps page', () => {
     it('goes back to what is saved when the changes are discarded, after asking', async () => {
       setup({ path: '/view/app-1' });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
 
-      await userEvent.click(await findMenuItem('customAppDiscard'));
+      fireEvent.click(await findMenuItem('customAppDiscard'));
       expect(screen.getByTestId('liveApp')).toHaveTextContent('edited');
-      await userEvent.click(
+      // The menu that was opened to ask is still closing, and its style stops a pointer, not a click.
+      fireEvent.click(
         within(screen.getByRole('alertdialog')).getByRole('button', { name: 'Discard changes' })
       );
 
@@ -1020,8 +854,7 @@ describe('the custom apps page', () => {
     it('stays when asked about unsaved changes and the answer is no', async () => {
       const { history } = setup({ path: '/view/app-1', confirmLeave: false });
       await screen.findByTestId('liveApp');
-      await userEvent.click(screen.getByTestId('customAppEdit'));
-      await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+      await applyAgentDraft();
       await screen.findByTestId('customAppSave');
 
       act(() => history.push('/'));
@@ -1057,8 +890,7 @@ describe('the custom apps page', () => {
       it('keeps what was changed and is not saved yet as it is, and saves only the name', async () => {
         const { client } = setup({ path: '/view/app-1' });
         await screen.findByTestId('liveApp');
-        await userEvent.click(screen.getByTestId('customAppEdit'));
-        await userEvent.click(screen.getByRole('button', { name: 'save draft' }));
+        await applyAgentDraft();
         await screen.findByTestId('customAppSave');
 
         await rename('Renamed');
@@ -1115,13 +947,6 @@ describe('the custom apps page', () => {
       });
     });
 
-    it('cannot be edited by someone who may only read', async () => {
-      setup({ path: '/view/app-1', canSave: false });
-      await screen.findByTestId('liveApp');
-
-      expect(screen.queryByTestId('customAppEdit')).not.toBeInTheDocument();
-    });
-
     it('says what is wrong with an app that cannot be shown, instead of showing it broken', async () => {
       setup({
         path: '/view/app-1',
@@ -1133,8 +958,6 @@ describe('the custom apps page', () => {
 
       expect(await screen.findByText('This app cannot be shown')).toBeInTheDocument();
       expect(screen.queryByTestId('liveApp')).not.toBeInTheDocument();
-      // Nothing to edit: an editor would start from a document that is not one.
-      expect(screen.queryByTestId('customAppEdit')).not.toBeInTheDocument();
     });
 
     describe('that is empty', () => {
@@ -1149,8 +972,7 @@ describe('the custom apps page', () => {
         setup({ path: '/view/app-1', prepare: (client) => client.get.mockResolvedValue(empty) });
 
         expect(await screen.findByText('Build your app')).toBeInTheDocument();
-        await userEvent.click(screen.getByTestId('customAppEmptyBuild'));
-        expect(await screen.findByTestId('editor')).toHaveAttribute('data-starts-from', 'root:0');
+        expect(screen.getByTestId('customAppEmptyExample')).toBeInTheDocument();
       });
 
       it('only says it is empty, to those who may only read', async () => {
@@ -1161,7 +983,7 @@ describe('the custom apps page', () => {
         });
 
         expect(await screen.findByText('This app is empty')).toBeInTheDocument();
-        expect(screen.queryByTestId('customAppEmptyBuild')).not.toBeInTheDocument();
+        expect(screen.queryByTestId('customAppEmptyExample')).not.toBeInTheDocument();
       });
     });
 

@@ -16,6 +16,7 @@ import {
   type AppDocument,
   type StateDeclaration,
   type StateValue,
+  getCapability,
 } from '@kbn/custom-app-common';
 
 export type StateValues = Readonly<Record<string, StateValue>>;
@@ -120,7 +121,7 @@ const collectFlyoutIds = (root: AppDocument['root']): Set<string> => {
   const ids = new Set<string>();
   const pending = [root];
   for (let node = pending.pop(); node; node = pending.pop()) {
-    if (node.type === 'flyout') ids.add(node.id);
+    if (getCapability(node.type)?.overlay === true) ids.add(node.id);
     pending.push(...getNodeChildren(node));
   }
   return ids;

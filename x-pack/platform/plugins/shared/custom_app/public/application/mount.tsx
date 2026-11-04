@@ -29,7 +29,6 @@ export const renderApp = (
         stateTransfer={embeddable.getStateTransfer()}
         canWriteDashboards={core.application.capabilities.dashboard_v2?.showWriteControls === true}
         canSave={core.application.capabilities.customApp?.save === true}
-        featureFlags={core.featureFlags}
         agentBuilder={agentBuilder}
       />
     )

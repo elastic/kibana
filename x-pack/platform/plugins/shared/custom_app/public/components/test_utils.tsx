@@ -12,7 +12,6 @@ import { appDocumentSchema, collectSources, type AppDocument } from '@kbn/custom
 import { createDataLayer, type DataLayer, type RunCases, type RunQuery } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
-import { InlineEditContext, type ChangeNodeWords } from '../runtime/inline_edit_context';
 import { AppRuntimeContext } from '../runtime/app_runtime_context';
 import { AppFrame } from './app_frame';
 import { NodeRenderer } from './node_renderer';
@@ -50,11 +49,8 @@ export const renderApp = async (
   /** Shows the app in the frame of a page, with its theme, as a page does. */
   {
     framed = false,
-    changeWords,
   }: {
     framed?: boolean;
-    /** Lets the words of the app be changed where they are shown, as the page of an app does. */
-    changeWords?: ChangeNodeWords;
   } = {}
 ): Promise<{ runtime: AppRuntime; layer: DataLayer } & RenderResult> => {
   const runtime = createAppRuntime(document);
@@ -63,19 +59,17 @@ export const renderApp = async (
   runtime.state$.subscribe(layer.setState);
 
   const view = render(
-    <InlineEditContext.Provider value={changeWords}>
-      <AppRuntimeContext.Provider value={runtime}>
-        <DataLayerContext.Provider value={layer}>
-          {framed ? (
-            <AppFrame theme={document.theme}>
-              <NodeRenderer node={document.root} />
-            </AppFrame>
-          ) : (
+    <AppRuntimeContext.Provider value={runtime}>
+      <DataLayerContext.Provider value={layer}>
+        {framed ? (
+          <AppFrame theme={document.theme}>
             <NodeRenderer node={document.root} />
-          )}
-        </DataLayerContext.Provider>
-      </AppRuntimeContext.Provider>
-    </InlineEditContext.Provider>
+          </AppFrame>
+        ) : (
+          <NodeRenderer node={document.root} />
+        )}
+      </DataLayerContext.Provider>
+    </AppRuntimeContext.Provider>
   );
   await act(async () => layer.refresh(TEST_CONTEXT));
 

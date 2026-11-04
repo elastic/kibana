@@ -9,7 +9,6 @@ import React from 'react';
 import { act, render, screen } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { ChatEventType } from '@kbn/agent-builder-common';
-import { openLazyFlyout } from '@kbn/presentation-util';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
 import type { CustomAppByReferenceState, CustomAppByValueState } from '../server';
 import { customAppEmbeddableFactory } from './custom_app_embeddable';
@@ -44,7 +43,6 @@ jest.mock('./services', () => ({
 jest.mock('./data/run_esql_query', () => ({
   createRunEsqlQuery: () => async () => ({ columns: [], rows: [] }),
 }));
-jest.mock('@kbn/presentation-util', () => ({ openLazyFlyout: jest.fn() }));
 
 const documentWith = (heading: string): AppDocument =>
   appDocumentSchema.parse({
@@ -70,7 +68,6 @@ const libraryItem = (overrides = {}) => ({
 interface Api {
   serializeState: () => CustomAppByValueState | CustomAppByReferenceState;
   getDocument: () => AppDocument;
-  onEdit: () => Promise<void>;
   anyStateChange$: { subscribe: (next: () => void) => { unsubscribe: () => void } };
   defaultTitle$: BehaviorSubject<string | undefined>;
   defaultDescription$: BehaviorSubject<string | undefined>;
@@ -96,16 +93,6 @@ const build = async (initialState: object) => {
 
 const buildLinked = () => build({ ref_id: 'lib-1', title: 'Panel title' });
 const buildOwn = () => build({ version: 1, document: OWN_DOCUMENT });
-
-/** Opens the editor of a panel, and gives what it was given. */
-const openEditor = async (api: Api) => {
-  const closeFlyout = jest.fn();
-  (openLazyFlyout as jest.Mock).mockReturnValue({ onClose: new Promise<void>(() => {}) });
-  await api.onEdit();
-  const { loadContent } = (openLazyFlyout as jest.Mock).mock.calls[0][0];
-  const element = await loadContent({ closeFlyout, ariaLabelledBy: 'title-id' });
-  return { editorProps: element.props, closeFlyout };
-};
 
 describe('the custom app panel and the library', () => {
   beforeEach(() => {
@@ -145,14 +132,6 @@ describe('the custom app panel and the library', () => {
       expect(api.getLibraryId()).toBe('lib-1');
     });
 
-    it('tells the editor that the app is shared, so that the author knows what applying does', async () => {
-      const api = await buildLinked();
-
-      const { editorProps } = await openEditor(api);
-
-      expect(editorProps.isShared).toBe(true);
-    });
-
     it('can be unlinked and not linked again', async () => {
       const api = await buildLinked();
 
@@ -167,51 +146,6 @@ describe('the custom app panel and the library', () => {
 
       expect(state).toMatchObject({ version: 1, document: LIBRARY_DOCUMENT });
       expect(state).not.toHaveProperty('ref_id');
-    });
-
-    it('does not make the dashboard unsaved when the app it links to changes', async () => {
-      const api = await buildLinked();
-      const changed = jest.fn();
-      api.anyStateChange$.subscribe(changed);
-      mockSavedApps.update.mockResolvedValue({});
-      const { editorProps } = await openEditor(api);
-
-      await act(async () => editorProps.onSave(documentWith('Edited heading')));
-
-      expect(changed).not.toHaveBeenCalled();
-    });
-
-    describe('editing', () => {
-      it('saves the change to the app in the library, under its own title, and shows it', async () => {
-        const api = await buildLinked();
-        mockSavedApps.update.mockResolvedValue({});
-        const { editorProps, closeFlyout } = await openEditor(api);
-        const edited = documentWith('Edited heading');
-
-        await act(async () => editorProps.onSave(edited));
-
-        expect(mockSavedApps.update).toHaveBeenCalledWith('lib-1', {
-          title: 'Library app',
-          description: 'About it',
-          document: edited,
-        });
-        expect(closeFlyout).toHaveBeenCalled();
-        expect(await screen.findByRole('heading', { name: 'Edited heading' })).toBeInTheDocument();
-      });
-
-      it('says why, keeps the editor open and leaves the panel as it was, when it cannot be saved', async () => {
-        const api = await buildLinked();
-        mockSavedApps.update.mockRejectedValue({ body: { message: 'Not allowed' } });
-        const { editorProps, closeFlyout } = await openEditor(api);
-
-        await act(async () => editorProps.onSave(documentWith('Edited heading')));
-
-        expect(mockToasts.addDanger).toHaveBeenCalledWith(
-          expect.objectContaining({ text: 'Not allowed' })
-        );
-        expect(closeFlyout).not.toHaveBeenCalled();
-        expect(api.getDocument()).toEqual(LIBRARY_DOCUMENT);
-      });
     });
 
     describe('when the app cannot be loaded', () => {
@@ -287,14 +221,6 @@ describe('the custom app panel and the library', () => {
       expect(api.serializeState()).not.toHaveProperty('ref_id');
     });
 
-    it('links to nothing, and does not tell the editor that the app is shared', async () => {
-      const api = await buildOwn();
-      const { editorProps } = await openEditor(api);
-
-      expect(api.getLibraryId()).toBeUndefined();
-      expect(editorProps.isShared).toBe(false);
-    });
-
     it('can be linked and not unlinked', async () => {
       const api = await buildOwn();
 
@@ -321,18 +247,6 @@ describe('the custom app panel and the library', () => {
 
       expect(api.getSerializedStateByReference('new-lib')).toMatchObject({ ref_id: 'new-lib' });
       expect(api.getSerializedStateByReference('new-lib')).not.toHaveProperty('document');
-    });
-
-    it('applies the editor to the panel, saving nothing to the library', async () => {
-      const api = await buildOwn();
-      const changed = jest.fn();
-      api.anyStateChange$.subscribe(changed);
-      const { editorProps } = await openEditor(api);
-
-      await act(async () => editorProps.onSave(documentWith('Edited heading')));
-
-      expect(mockSavedApps.update).not.toHaveBeenCalled();
-      expect(changed).toHaveBeenCalled();
     });
 
     describe('checking whether the library has an app with a title', () => {

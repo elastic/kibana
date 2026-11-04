@@ -6,7 +6,6 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { CUSTOM_CONTENT_SCRIPT_PATTERN } from '@kbn/custom-content-common';
 import {
   CASES_FILTERS,
   CASES_SEVERITIES,
@@ -16,7 +15,9 @@ import {
   MAX_STATE_KEYS,
 } from './constants';
 import type { AppNode, AppTheme, StateDeclaration } from './document_schema';
-import { BOUND_PROPS, THEME_BOUND_PROPS, getPath, isStateRef, type StateRef } from './bindings';
+import { getCapability } from './capabilities/capability_registry';
+import type { CapabilityValidationContext } from './capabilities/define_capability';
+import { THEME_BOUND_PROPS, getBoundProps, getPath, isStateRef, type StateRef } from './bindings';
 import { findStateReferences, hasMalformedReference } from './interpolation';
 import {
   getInterpolatedText,
@@ -147,14 +148,9 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
     if (isStateRef(value)) checkReference('The theme', property, value, bound);
   });
 
-  // The sections that are held by what holds them, which is all they are for.
-  const sectionParents = new Set(
-    nodes
-      .filter(({ type }) => type === 'tabs' || type === 'accordion')
-      .flatMap((node) => getNodeChildren(node).map(({ id }) => id))
+  const flyoutIds = new Set(
+    nodes.filter(({ type }) => getCapability(type)?.overlay === true).map(({ id }) => id)
   );
-  const firstTimeRangeId = nodes.find(({ type }) => type === 'time_range')?.id;
-  const flyoutIds = new Set(nodes.filter(({ type }) => type === 'flyout').map(({ id }) => id));
 
   nodes.forEach((node) => {
     const bindings = getNodeBindings(node);
@@ -179,7 +175,7 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       }
     });
 
-    Object.entries(BOUND_PROPS[node.type] ?? {}).forEach(([path, bound]) => {
+    Object.entries(getBoundProps(node.type) ?? {}).forEach(([path, bound]) => {
       const value = getPath(node, path);
       if (isStateRef(value)) {
         checkReference(`Node "${node.id}"`, path, value, bound, node.id);
@@ -208,55 +204,9 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       }
     }
 
-    if (node.type === 'tabs' || node.type === 'accordion') {
-      node.children
-        .filter((child) => child.type !== 'section')
-        .forEach((child) =>
-          issue(
-            `Node "${node.id}" is ${
-              node.type === 'tabs' ? 'tabs' : 'an accordion'
-            } and holds only sections, not "${child.id}" (${child.type})`,
-            node.id
-          )
-        );
-    }
-    if (node.type === 'section' && !sectionParents.has(node.id)) {
-      issue(`Node "${node.id}" is a section, which is only part of tabs or an accordion`, node.id);
-    }
-
-    if (node.type === 'form') {
-      const seenKeys = new Set<string>();
-      node.fields.forEach((field) => {
-        if (seenKeys.has(field.bind)) {
-          issue(
-            `Node "${node.id}" has two fields that set "${field.bind}"; each needs a value of its own`,
-            node.id
-          );
-        }
-        seenKeys.add(field.bind);
-        if (field.kind === 'select') {
-          const seen = new Set<string>();
-          field.options.forEach(({ value }) => {
-            if (seen.has(value)) {
-              issue(
-                `Node "${node.id}" has the option "${value}" more than once in "${field.label}"`,
-                node.id
-              );
-            }
-            seen.add(value);
-          });
-        }
-      });
-    }
-
-    if (
-      node.type === 'stat' ||
-      node.type === 'metric' ||
-      node.type === 'progress' ||
-      node.type === 'table' ||
-      node.type === 'key_value'
-    ) {
-      if ((node.query === undefined) === (node.source === undefined)) {
+    if (getCapability(node.type)?.data === 'query_or_source') {
+      const shown = node as { query?: string; source?: unknown };
+      if ((shown.query === undefined) === (shown.source === undefined)) {
         issue(
           `Node "${node.id}" shows data and needs a query or a source, and one of them only`,
           node.id
@@ -289,57 +239,20 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       });
     }
 
-    if (node.type === 'link' && node.to.type === 'discover') {
-      const { from } = node.to;
-      const target = nodes.find(({ id }) => id === from);
-      const targetSource = target ? getNodeSource(target) : undefined;
-      if (!target) {
-        issue(`Node "${node.id}" opens "${from}" in Discover, which is not a component`, node.id);
-      } else if (targetSource?.type !== 'esql') {
-        issue(
-          `Node "${node.id}" opens "${from}" in Discover, which has no ES|QL query to open`,
-          node.id
-        );
-      }
-    }
-
-    if (node.type === 'time_range' && node.id !== firstTimeRangeId) {
-      issue(
-        `Node "${node.id}" is a second time range; an app has one, which sets the period of all of it`,
-        node.id
-      );
-    }
-
-    if (node.type === 'custom_content') {
-      if (!node.template?.trim()) {
-        issue(
-          `Node "${node.id}" has no template; describe what it should show in its "prompt"`,
-          node.id
-        );
-      } else if (CUSTOM_CONTENT_SCRIPT_PATTERN.test(node.template)) {
-        issue(
-          `Node "${node.id}" has a template with a script in it; it is shown with scripting off, so write it as plain HTML`,
-          node.id
-        );
-      }
-    }
-
-    if (node.type === 'select' && node.options.length === 0 && node.optionsQuery === undefined) {
-      issue(
-        `Node "${node.id}" has no options; give it some, or a query that returns them`,
-        node.id
-      );
-    }
-
-    if (node.type === 'select' || node.type === 'button_group') {
-      const seen = new Set<string>();
-      node.options.forEach(({ value }) => {
-        if (seen.has(value)) {
-          issue(`Node "${node.id}" has the option "${value}" more than once`, node.id);
-        }
-        seen.add(value);
-      });
-    }
+    (
+      getCapability(node.type)?.validate as
+        | ((node: AppNode, context: CapabilityValidationContext) => void)
+        | undefined
+    )?.(node, {
+      nodes,
+      sourceOf: (nodeId) => {
+        const target = nodes.find(({ id }) => id === nodeId);
+        return target ? getNodeSource(target) : undefined;
+      },
+      parentOf: (nodeId) =>
+        nodes.find((candidate) => getNodeChildren(candidate).some(({ id }) => id === nodeId)),
+      issue: (message) => issue(message, node.id),
+    });
 
     getInterpolatedText(node).forEach(({ prop, text }) => {
       if (hasMalformedReference(text)) {

@@ -14,7 +14,7 @@ import { renderWithRuntime } from './test_utils';
 const parseRoot = (root: unknown): AppNode => appDocumentSchema.parse({ root }).root;
 
 describe('NodeRenderer', () => {
-  it('renders nested nodes with their content', () => {
+  it('renders nested nodes with their content', async () => {
     const root = parseRoot({
       type: 'stack',
       id: 'root',
@@ -27,13 +27,13 @@ describe('NodeRenderer', () => {
 
     renderWithRuntime(<NodeRenderer node={root} />);
 
-    expect(screen.getByRole('heading', { name: 'Service health' })).toBeInTheDocument();
-    expect(screen.getByText('All systems nominal')).toBeInTheDocument();
-    expect(screen.getByText('Heads up')).toBeInTheDocument();
-    expect(screen.getByText('Maintenance tonight')).toBeInTheDocument();
+    expect(await screen.findByRole('heading', { name: 'Service health' })).toBeInTheDocument();
+    expect(await screen.findByText('All systems nominal')).toBeInTheDocument();
+    expect(await screen.findByText('Heads up')).toBeInTheDocument();
+    expect(await screen.findByText('Maintenance tonight')).toBeInTheDocument();
   });
 
-  it('tags every rendered node with its id so the editor can select it', () => {
+  it('tags every rendered node with its id so a walkthrough can find it', () => {
     const root = parseRoot({
       type: 'stack',
       id: 'root',
@@ -217,7 +217,7 @@ describe('NodeRenderer', () => {
       expect(screen.queryByTestId('customAppFilterBar')).not.toBeInTheDocument();
     });
 
-    it('keeps a status and a button together at the start of a row, and does not spread them', () => {
+    it('keeps a status and a button together at the start of a row, and does not spread them', async () => {
       renderLayout(
         stackOf('horizontal', [
           { type: 'badge', id: 'b', text: 'Country: US' },
@@ -227,7 +227,7 @@ describe('NodeRenderer', () => {
       );
 
       const itemOf = (element: HTMLElement) => element.closest('.euiFlexItem')?.className ?? '';
-      expect(itemOf(screen.getByText('Country: US'))).toMatch(/growZero/);
+      expect(itemOf(await screen.findByText('Country: US'))).toMatch(/growZero/);
       expect(itemOf(screen.getByText('Clear'))).toMatch(/growZero/);
       expect(itemOf(screen.getByRole('searchbox'))).not.toMatch(/growZero/);
     });
