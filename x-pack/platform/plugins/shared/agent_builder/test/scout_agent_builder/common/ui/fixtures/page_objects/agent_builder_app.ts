@@ -165,8 +165,11 @@ export class AgentBuilderApp {
 
   async deleteConversation(conversationId: string) {
     await this.page.testSubj.click(`agentBuilderSidebarConversation-${conversationId}`);
-    await this.page.testSubj.click('agentBuilderConversationTitleButton');
-    await this.page.testSubj.click('agentBuilderConversationDeleteButton');
+    await this.page.testSubj
+      .locator(`agentBuilderSidebarConversationRow-${conversationId}`)
+      .hover();
+    await this.page.testSubj.click(`agentBuilderSidebarConversationMenu-${conversationId}`);
+    await this.page.testSubj.click(`agentBuilderSidebarConversationDelete-${conversationId}`);
     await this.page.testSubj.click('confirmModalConfirmButton');
     await this.page.testSubj
       .locator(`agentBuilderSidebarConversation-${conversationId}`)
@@ -195,12 +198,12 @@ export class AgentBuilderApp {
 
   async renameConversation(newTitle: string): Promise<string> {
     await this.page.testSubj.click('agentBuilderConversationTitleButton');
-    await this.page.testSubj.click('agentBuilderConversationRenameButton');
-    const input = this.page.testSubj.locator('renameConversationModalInput');
+    await this.page.testSubj.click('agentBuilderConversationMetadataTitle');
+    const input = this.page.testSubj.locator('agentBuilderConversationMetadataTitleInput');
     await input.click();
-    await this.page.testSubj.clearInput('renameConversationModalInput');
+    await this.page.testSubj.clearInput('agentBuilderConversationMetadataTitleInput');
     await input.fill(newTitle);
-    await this.page.testSubj.click('renameConversationModalSave');
+    await this.page.testSubj.click('agentBuilderConversationMetadataTitleSave');
     await this.page.waitForFunction(
       (t) => {
         const btn = document.querySelector(
@@ -213,6 +216,7 @@ export class AgentBuilderApp {
       newTitle,
       { timeout: 60_000 }
     );
+    await this.page.testSubj.click('euiFlyoutCloseButton');
     return newTitle;
   }
 
