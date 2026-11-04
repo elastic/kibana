@@ -9,6 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-server';
+import { createConversationNotFoundError } from '@kbn/agent-builder-common';
 import { SANDBOX_BASH_TOOL_ID } from '../tools/sandbox_bash/tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
@@ -116,6 +117,69 @@ describe('server/investigation_round', () => {
           isError: false,
         },
       ]);
+    });
+
+    it('stops reading on the first attempt when the caller cannot read the conversation', async () => {
+      // A service-account-bound agent in a conversation its owner keeps private: the read is
+      // denied as not-found, and no amount of waiting makes it readable.
+      const getConversation = jest
+        .fn()
+        .mockRejectedValue(createConversationNotFoundError({ conversationId: 'conv-1' }));
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get: getConversation }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const loaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        fallbackToolCalls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'tc-1', params: {} }],
+        fallbackToolResults: [
+          { tool_call_id: 'tc-1', results: [{ type: 'other', data: { stdout: 'ok' } }] },
+        ],
+        logger,
+        retryDelaysMs: [1, 1],
+      });
+
+      expect(getConversation).toHaveBeenCalledTimes(1);
+      // No transcript at all: the caller must skip learning rather than use the hook's view.
+      expect(loaded).toEqual({
+        source: 'conversation_unreadable',
+        roundId: 'round-1',
+        steps: [],
+        toolCalls: [],
+      });
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('conversation not readable by this caller')
+      );
+    });
+
+    it('keeps retrying while the round itself is not saved yet', async () => {
+      const getConversation = jest.fn().mockResolvedValue({ id: 'conv-1', rounds: [] });
+      const agentBuilder = {
+        conversations: {
+          getScopedClient: jest.fn().mockResolvedValue({ get: getConversation }),
+        },
+      } as unknown as AgentBuilderPluginStart;
+
+      const loaded = await loadInvestigationRound({
+        agentBuilder,
+        request,
+        conversationId: 'conv-1',
+        roundId: 'round-1',
+        fallbackToolCalls: [{ tool_id: SANDBOX_BASH_TOOL_ID, tool_call_id: 'tc-1', params: {} }],
+        fallbackToolResults: [
+          { tool_call_id: 'tc-1', results: [{ type: 'other', data: { stdout: 'ok' } }] },
+        ],
+        logger,
+        retryDelaysMs: [1, 1],
+      });
+
+      expect(getConversation).toHaveBeenCalledTimes(3);
+      expect(loaded.source).toBe('hook_tool_calls');
     });
 
     it('falls back to hook tool_calls + tool_results when persisted round is unavailable', async () => {
