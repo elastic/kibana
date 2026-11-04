@@ -106,7 +106,10 @@ export const retry = {
   },
 } satisfies Record<string, Retry>;
 
-export const hyperdiskBalanced = { diskType: 'hyperdisk-balanced' } as const;
+export const withHyperdisk = (agent: AgentConfig): AgentConfig => ({
+  ...agent,
+  diskType: 'hyperdisk-balanced',
+});
 
 export const k8sMinimalAgent = (): AgentConfig => ({
   provider: 'k8s',

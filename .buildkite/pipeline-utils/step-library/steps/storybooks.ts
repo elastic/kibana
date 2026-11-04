@@ -8,17 +8,14 @@
  */
 
 import { commandStep } from '../helpers.ts';
-import { hyperdiskBalanced, retry, spotAgent, spotZones } from '../presets.ts';
+import { withHyperdisk, retry, spotAgent, spotZones } from '../presets.ts';
 import type { Step } from '../types.ts';
 
 export const storybooks = (): readonly Step[] => [
   commandStep({
     command: '.buildkite/scripts/steps/storybooks/build_and_upload.sh',
     label: 'Build Storybooks',
-    agents: {
-      ...spotAgent('n4-standard-16', spotZones.allUS),
-      ...hyperdiskBalanced,
-    },
+    agents: withHyperdisk(spotAgent('n4-standard-16', spotZones.allUS)),
     key: 'storybooks',
     timeout_in_minutes: 80,
     retry: retry.agentLoss,
