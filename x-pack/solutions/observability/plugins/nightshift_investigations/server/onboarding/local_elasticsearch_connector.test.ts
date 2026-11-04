@@ -102,7 +102,7 @@ describe('createLocalElasticsearchConnector', () => {
           cluster: [],
           indices: [
             {
-              names: ['logs-*', 'metrics-*', 'traces-*', 'apm-*'],
+              names: ['logs-*', 'metrics-*', 'traces-*'],
               privileges: ['read', 'view_index_metadata'],
               allow_restricted_indices: false,
             },
