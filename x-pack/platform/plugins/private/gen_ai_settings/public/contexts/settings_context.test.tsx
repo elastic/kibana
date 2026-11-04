@@ -283,7 +283,6 @@ describe('settings_context', () => {
 
       // We need to setup the context with a way to access the addSuccess mock
       const setupWithSuccessMock = () => {
-
         const rendered = renderHook(() => useSettingsContext(), {
           wrapper: ({ children }) => (
             <KibanaContextProvider
@@ -317,7 +316,7 @@ describe('settings_context', () => {
                 },
               }}
             >
-                <SettingsContextProvider>{children}</SettingsContextProvider>
+              <SettingsContextProvider>{children}</SettingsContextProvider>
             </KibanaContextProvider>
           ),
         });
@@ -375,7 +374,7 @@ describe('settings_context', () => {
                 },
               }}
             >
-                <SettingsContextProvider>{children}</SettingsContextProvider>
+              <SettingsContextProvider>{children}</SettingsContextProvider>
             </KibanaContextProvider>
           ),
         });
@@ -406,7 +405,7 @@ describe('settings_context', () => {
               },
             }}
           >
-              <SettingsContextProvider>{children}</SettingsContextProvider>
+            <SettingsContextProvider>{children}</SettingsContextProvider>
           </KibanaContextProvider>
         ),
       });
@@ -442,7 +441,7 @@ describe('settings_context', () => {
               },
             }}
           >
-              <SettingsContextProvider>{children}</SettingsContextProvider>
+            <SettingsContextProvider>{children}</SettingsContextProvider>
           </KibanaContextProvider>
         ),
       });

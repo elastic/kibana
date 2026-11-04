@@ -20,8 +20,18 @@ const RELOAD_SETTING = 'test:reload';
 const UNTRACKED_SETTING = 'test:untracked';
 
 const createRawSettings = (stringValue = 'saved'): RawSettings => ({
-  [STRING_SETTING]: { name: 'String setting', type: 'string', value: 'default', userValue: stringValue },
-  [RELOAD_SETTING]: { name: 'Reload setting', type: 'boolean', value: false, requiresPageReload: true },
+  [STRING_SETTING]: {
+    name: 'String setting',
+    type: 'string',
+    value: 'default',
+    userValue: stringValue,
+  },
+  [RELOAD_SETTING]: {
+    name: 'Reload setting',
+    type: 'boolean',
+    value: false,
+    requiresPageReload: true,
+  },
   [UNTRACKED_SETTING]: { name: 'Untracked setting', type: 'string', value: 'other' },
 });
 
@@ -37,9 +47,12 @@ const setup = (settingsKeys: string[] = [STRING_SETTING, RELOAD_SETTING]) => {
   settingsClient.getUpdateErrors$.mockReturnValue(updateErrors$);
   settingsClient.set.mockResolvedValue(true);
 
-  const rendered = renderHook((keys: string[]) => useEditableSettings({ settingsKeys: keys, settingsClient }), {
-    initialProps: settingsKeys,
-  });
+  const rendered = renderHook(
+    (keys: string[]) => useEditableSettings({ settingsKeys: keys, settingsClient }),
+    {
+      initialProps: settingsKeys,
+    }
+  );
 
   return { ...rendered, settingsClient, update$, updateErrors$ };
 };
