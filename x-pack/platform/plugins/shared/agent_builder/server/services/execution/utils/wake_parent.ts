@@ -96,6 +96,12 @@ export const wakeParent = async ({
   }
 
   const triggerMode = child.agentParams.parentTriggerMode ?? ChatTriggerMode.Always;
+  // The run that spawned the child carries the model the user chose; the service would otherwise
+  // fall back to the agent's default.
+  const parent = child.parentExecutionId
+    ? await executionClient.get(child.parentExecutionId)
+    : undefined;
+  const connectorId = parent?.agentParams.connectorId;
   try {
     await executionService.maybeExecuteAgent({
       mode: AgentExecutionMode.conversation,
@@ -105,6 +111,7 @@ export const wakeParent = async ({
       params: {
         // The service defaults a missing agent, it does not read the conversation's.
         agentId: conversation.agent_id,
+        ...(connectorId ? { connectorId } : {}),
         conversationId,
         nextInput: { message: describeFinishedChild(child) },
         actor: { type: EventActorType.agent, id: child.agentId, username: child.agentId },

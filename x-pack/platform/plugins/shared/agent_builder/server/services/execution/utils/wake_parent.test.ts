@@ -70,6 +70,12 @@ describe('describeFinishedChild', () => {
   });
 });
 
+const parentRun = {
+  executionId: 'parent-1',
+  agentId: 'parent-agent',
+  agentParams: { nextInput: { message: 'start' }, connectorId: 'connector-9' },
+} as unknown as AgentExecution;
+
 describe('wakeParent', () => {
   let maybeExecuteAgent: jest.Mock;
   let get: jest.Mock;
@@ -92,7 +98,9 @@ describe('wakeParent', () => {
     jest.clearAllMocks();
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
-    get = jest.fn().mockResolvedValue(finishedChild);
+    get = jest
+      .fn()
+      .mockImplementation(async (id: string) => (id === 'parent-1' ? parentRun : finishedChild));
     getScopedClientAsUser = jest.fn().mockImplementation(async () => conversationClient);
     conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue({
@@ -102,7 +110,7 @@ describe('wakeParent', () => {
     } as never);
   });
 
-  it("reads the conversation as the owner and starts a run on the parent's agent that carries the result", async () => {
+  it("reads the conversation as the owner and starts a run on the parent's agent and model that carries the result", async () => {
     await expect(wake()).resolves.toBe('woken');
 
     expect(getScopedClientAsUser).toHaveBeenCalledWith({
@@ -116,6 +124,7 @@ describe('wakeParent', () => {
       requestImmediateClaim: true,
       params: {
         agentId: 'parent-agent',
+        connectorId: 'connector-9',
         conversationId: 'conversation-1',
         nextInput: { message: describeFinishedChild(finishedChild) },
         actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
@@ -123,6 +132,22 @@ describe('wakeParent', () => {
         triggerMode: ChatTriggerMode.Always,
       },
     });
+  });
+
+  it('leaves the model to the agent when the run that spawned the child is gone or chose none', async () => {
+    get.mockImplementation(async (id: string) => (id === 'parent-1' ? undefined : finishedChild));
+    await expect(wake()).resolves.toBe('woken');
+
+    get.mockImplementation(async (id: string) =>
+      id === 'parent-1'
+        ? { ...parentRun, agentParams: { nextInput: { message: 'start' } } }
+        : finishedChild
+    );
+    await expect(wake()).resolves.toBe('woken');
+
+    for (const [{ params }] of maybeExecuteAgent.mock.calls) {
+      expect(params).not.toHaveProperty('connectorId');
+    }
   });
 
   it('leaves the message for the next run when the sub-agent asked for never', async () => {
