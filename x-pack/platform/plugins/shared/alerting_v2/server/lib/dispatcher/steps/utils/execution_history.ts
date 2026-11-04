@@ -18,11 +18,11 @@ import type {
   DispatchFailure,
   RuleId,
 } from '../../types';
+import { type DispatchFailureReason } from '../constants';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   type ActionPolicyEventAction,
-  type DispatchFailureReason,
-} from '../constants';
+} from '../../../services/event_log_service/constants';
 import { alertSubject } from './subject';
 
 const RULE_REF_CAP = 50;

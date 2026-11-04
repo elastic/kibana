@@ -12,7 +12,7 @@ import type { ContainerModuleLoadOptions } from 'inversify';
 import { ArtifactTypeRegistry } from '../lib/artifact_types';
 import { getKibanaBaseUrl } from '../lib/dispatcher/kibana_base_url';
 import { KibanaBaseUrlToken } from '../lib/dispatcher/tokens';
-import { ACTION_POLICY_EVENT_PROVIDER } from '../lib/dispatcher/steps/constants';
+import { ACTION_POLICY_EVENT_PROVIDER } from '../lib/services/event_log_service/constants';
 import { WorkflowsManagementApiToken } from '../lib/dispatcher/steps/dispatch_step_tokens';
 import { ApiKeyService } from '../lib/services/api_key_service/api_key_service';
 import { ConfigService } from '../lib/services/config_service/config_service';

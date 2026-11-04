@@ -14,7 +14,7 @@ import type { DispatchFailureReason } from '@kbn/alerting-v2-schemas';
 import {
   ACTION_POLICY_EVENT_ACTIONS,
   ACTION_POLICY_EVENT_PROVIDER,
-} from '../../dispatcher/steps/constants';
+} from '../../services/event_log_service/constants';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../../../saved_objects';
 import { EVENT_LOG_INDEX, TERMS_SIZE, bucketsToRecord } from './constants';
 import type {

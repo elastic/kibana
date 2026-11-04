@@ -6,10 +6,7 @@
  */
 
 import type { IEvent } from '@kbn/event-log-plugin/server';
-import {
-  ACTION_POLICY_EVENT_ACTIONS,
-  ACTION_POLICY_EVENT_PROVIDER,
-} from '../../dispatcher/steps/constants';
+import { ACTION_POLICY_EVENT_ACTIONS, ACTION_POLICY_EVENT_PROVIDER } from './constants';
 import { createEventLogService } from './event_log_service.mock';
 import type { FindRuleExecutionsQuery } from './types';
 

@@ -10,7 +10,7 @@ import type {
   GroupingMode,
   ThrottleStrategy,
 } from '@kbn/alerting-v2-schemas';
-import type { ActionPolicyEventAction } from '../dispatcher/steps/constants';
+import type { ActionPolicyEventAction } from '../services/event_log_service/constants';
 
 export interface NameValuePair {
   name: string;
