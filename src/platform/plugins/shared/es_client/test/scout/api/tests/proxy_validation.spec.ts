@@ -14,6 +14,7 @@ import { apiTest, testData } from '../fixtures';
 const { COMMON_HEADERS, PROXY_PATH, TEST_INDEX, INDEX_SCOPED_ROLE } = testData;
 
 const MAX_PATH_LENGTH = 4096;
+const UNSUPPORTED_API_VERSION = '2';
 
 apiTest.describe('Elasticsearch proxy request validation', { tag: tags.deploymentAgnostic }, () => {
   let headers: Record<string, string>;
@@ -23,15 +24,13 @@ apiTest.describe('Elasticsearch proxy request validation', { tag: tags.deploymen
     headers = { ...COMMON_HEADERS, ...cookieHeader };
   });
 
-  apiTest('requires the API version header', async ({ apiClient }) => {
-    const { 'elastic-api-version': _version, ...headersWithoutVersion } = headers;
-
+  apiTest('rejects unsupported API versions', async ({ apiClient }) => {
     const response = await apiClient.get(`${PROXY_PATH}/${TEST_INDEX}/_count`, {
-      headers: headersWithoutVersion,
+      headers: { ...headers, 'elastic-api-version': UNSUPPORTED_API_VERSION },
       responseType: 'json',
     });
     expect(response).toHaveStatusCode(400);
-    expect(response.body.message).toContain('elastic-api-version');
+    expect(response.body.message).toContain(`No version "${UNSUPPORTED_API_VERSION}" available`);
   });
 
   apiTest('requires the xsrf header for writes', async ({ apiClient }) => {

@@ -38,7 +38,7 @@ apiTest.describe('Elasticsearch proxy authorization', { tag: tags.deploymentAgno
   apiTest(
     'returns the Elasticsearch 403 for cluster APIs outside the role',
     async ({ apiClient }) => {
-      const response = await apiClient.get(`${PROXY_PATH}/_cluster/settings`, {
+      const response = await apiClient.get(`${PROXY_PATH}/_ingest/pipeline`, {
         headers,
         responseType: 'json',
       });
