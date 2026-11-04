@@ -14,7 +14,7 @@ import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getAlertEpisodeNotFoundMessage } from '../../errors/alert_error_messages';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 import type { AlertEventRecord, RawAlertEventRow } from '../types';
-import { parseDataJson } from '../utils/parse_data_json';
+import { parseDataJson } from '../../parse_data_json';
 import { getSeriesNotFoundError } from '../utils/series_id';
 
 /**
