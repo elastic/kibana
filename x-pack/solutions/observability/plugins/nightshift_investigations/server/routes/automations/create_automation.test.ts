@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { parse } from 'yaml';
 import { createAutomationRoute } from './create_automation';
-import { createRouteContext } from './test_helpers';
+import { createRouteContext, createServiceAccountService } from './test_helpers';
 
 const { handler, params } = createAutomationRoute['POST /internal/nightshift/automations'];
 
@@ -27,17 +27,21 @@ const body = {
   runtime: { dailyDispatchLimit: 20 },
 };
 
-const call = (overrides: Record<string, unknown> = {}) =>
+const call = (overrides: Record<string, unknown> = {}, user?: Record<string, string>) =>
   handler({
     request: httpServerMock.createKibanaRequest(),
     params: params.parse({ body: { ...body, ...overrides } }),
     getAutomationsSoClient,
     getWorkflowsManagement,
-    context: createRouteContext(),
+    getInvestigatorServiceAccountService: () => serviceAccountService,
+    context: createRouteContext(user),
   } as never);
+
+let serviceAccountService = createServiceAccountService();
 
 beforeEach(() => {
   jest.clearAllMocks();
+  serviceAccountService = createServiceAccountService();
   soClient.create.mockResolvedValue({ id: 'automation-1' });
   createWorkflow.mockResolvedValue({ id: 'workflow-1' });
 });
@@ -61,6 +65,15 @@ it('stores the current user as the author', async () => {
   expect(soClient.create).toHaveBeenCalledWith(
     'nightshift-automation',
     expect.objectContaining({ author: 'alice' })
+  );
+});
+
+it('stores the full name instead of an opaque username as the author', async () => {
+  await call({}, { username: '8675309', full_name: 'Foo Bar', email: 'foo@example.com' });
+
+  expect(soClient.create).toHaveBeenCalledWith(
+    'nightshift-automation',
+    expect.objectContaining({ author: 'Foo Bar' })
   );
 });
 
@@ -201,6 +214,22 @@ it.each([
   await expect(
     call({ execution: { promptTemplate: 'Review health.' }, ...overrides })
   ).rejects.toMatchObject({ output: { statusCode: 400 } });
+  expect(soClient.create).not.toHaveBeenCalled();
+  expect(createWorkflow).not.toHaveBeenCalled();
+});
+
+it('runs the automation as the automations service account', async () => {
+  await call();
+
+  expect(parse(createWorkflow.mock.calls[0][0].yaml).settings.run_as).toBe(
+    'kibana/nightshift_automations'
+  );
+});
+
+it('refuses callers who cannot write a bound workflow before writing anything', async () => {
+  serviceAccountService.resolveAutomationRunAs.mockRejectedValue(new Error('manage_security'));
+
+  await expect(call()).rejects.toThrow('manage_security');
   expect(soClient.create).not.toHaveBeenCalled();
   expect(createWorkflow).not.toHaveBeenCalled();
 });

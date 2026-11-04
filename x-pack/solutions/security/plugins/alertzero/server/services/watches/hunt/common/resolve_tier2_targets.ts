@@ -20,6 +20,12 @@ import { fitsRequestPath } from './scope_bounds';
 /** Which signal put a pattern in `tier2_targets`. */
 export type Tier2TargetSource = 'report_match' | 'tier1_hits' | 'model' | 'actionable';
 
+/** What the model dataset-match call did; absent on `Tier2Targets` when it was never asked. */
+export type Tier2DatasetMatch =
+  | { status: 'matched' }
+  | { status: 'empty' }
+  | { status: 'failed'; message?: string };
+
 export interface Tier2Targets {
   /** What Tier 2 may read, target, and count as a hit. Bounded to fit a request path. */
   tier2_targets: string[];
@@ -38,6 +44,12 @@ export interface Tier2Targets {
    * or dropped.
    */
   degraded: boolean;
+  /**
+   * The outcome of the model dataset-match call. Absent when the call was not made, which is
+   * not the same as `empty`: only a call that answered and found nothing means "no dataset".
+   * Internal to the coordinator; never copied onto the wire result.
+   */
+  dataset_match?: Tier2DatasetMatch;
 }
 
 const uniq = (values: string[]): string[] => Array.from(new Set(values));
@@ -205,6 +217,7 @@ export const resolveTier2Targets = async ({
   const tier1Hits = uniq(tier1.per_index.map(({ index }) => collapseIndexName(index)));
 
   let modelMatches: string[] = [];
+  let datasetMatch: Tier2DatasetMatch | undefined;
   if (model && report && needsModelDatasetMatch({ scope, tier1, report })) {
     const matched = await matchDatasetsWithModel({
       model,
@@ -213,10 +226,16 @@ export const resolveTier2Targets = async ({
       report,
       logger,
     });
-    modelMatches = uniq(matched?.matches.flatMap((dataset) => dataset.search_patterns) ?? []);
-    if (matched) {
+    if (matched.status === 'matched') {
+      modelMatches = uniq(matched.matches.flatMap((dataset) => dataset.search_patterns));
+    }
+    datasetMatch =
+      matched.status === 'failed'
+        ? { status: 'failed', ...(matched.message ? { message: matched.message } : {}) }
+        : { status: matched.status };
+    if (matched.status === 'matched') {
       logger?.debug(
-        `Hunt Tier 2 targets matched by the model: ${matched.scored
+        `Behavior Hunt targets matched by the model: ${matched.scored
           .map(({ dataset, confidence }) => `${dataset} (${confidence})`)
           .join(', ')}`
       );
@@ -236,7 +255,7 @@ export const resolveTier2Targets = async ({
           staysInsideUniverse(candidate, scope.index_patterns)
         );
         logger?.warn(
-          `Hunt Tier 2 target "${pattern}" reaches outside the hunt universe; ${
+          `Behavior Hunt target "${pattern}" reaches outside the hunt universe; ${
             allowed.length > 0 ? `narrowed to ${allowed.join(', ')}` : 'dropping it from this run'
           }`
         );
@@ -281,6 +300,7 @@ export const resolveTier2Targets = async ({
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: universeNarrowed,
     };
   }
@@ -288,18 +308,19 @@ export const resolveTier2Targets = async ({
   const bounded = boundTargetPatterns(union);
   if (!bounded.fits) {
     logger?.warn(
-      `Hunt Tier 2 targets named ${union.length} index pattern(s), more than a request may carry even as vendor wildcards; Tier 2 gets no targets this run`
+      `Behavior Hunt targets named ${union.length} index pattern(s), more than a request may carry even as vendor wildcards; Behavior Hunt gets no targets this run`
     );
     return {
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: true,
     };
   }
   if (bounded.collapsed) {
     logger?.warn(
-      `Hunt Tier 2 targets named ${union.length} index pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
+      `Behavior Hunt targets named ${union.length} index pattern(s), more than a request may carry; collapsed to ${bounded.patterns.length}`
     );
   }
 
@@ -320,12 +341,13 @@ export const resolveTier2Targets = async ({
   // `!bounded.fits` above already makes.
   if (bounded.collapsed && !fitsRequestPath(finalTargets)) {
     logger?.warn(
-      `Hunt Tier 2 targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Tier 2 gets no targets this run`
+      `Behavior Hunt targets narrowed back to ${finalTargets.length} backing stream pattern(s) after the universe check, more than a request may carry; Behavior Hunt gets no targets this run`
     );
     return {
       tier2_targets: [],
       tier2_target_sources: [],
       report_intent_targets: reportIntentTargets,
+      ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
       degraded: true,
     };
   }
@@ -334,6 +356,7 @@ export const resolveTier2Targets = async ({
     tier2_targets: finalTargets,
     tier2_target_sources: contributing.map(([source]) => source),
     report_intent_targets: reportIntentTargets,
+    ...(datasetMatch ? { dataset_match: datasetMatch } : {}),
     degraded: modelMatches.length > 0 || bounded.collapsed || universeNarrowed,
   };
 };

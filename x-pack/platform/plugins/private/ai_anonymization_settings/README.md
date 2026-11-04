@@ -26,6 +26,80 @@ Named-entity-recognition (NER) rule support still exists in the underlying schem
 (`@kbn/ai-anonymization-server`) but is intentionally not surfaced anywhere on
 this page.
 
+## Default configuration
+
+The value the `ai:anonymizationSettings` setting ships with. Masking is off (`maskingEnabled:
+false`), so nothing is anonymized until a user turns it on. The enabled state of each rule only
+says which rules take effect once masking is on: the built-in email, IPv4, IPv6 and host-name rules
+are enabled, the account rule and the NER rule are not. `onFailure` is `block`. `ui_settings_docs.test.ts` in `@kbn/ai-anonymization-server` checks that this block matches the
+code, so update it whenever a built-in pattern changes: paste the registered `value` from
+`getAnonymizationUiSettings()` in `@kbn/ai-anonymization-server` (it is already a pretty-printed JSON string).
+
+```json
+{
+  "maskingEnabled": false,
+  "onFailure": "block",
+  "rules": [
+    {
+      "id": "builtin-email",
+      "name": "Email addresses",
+      "entityClass": "EMAIL",
+      "type": "RegExp",
+      "pattern": "[\\w.%+'À-ſΑ-я-]{1,64}@(?:[A-Za-z0-9À-ſΑ-я](?:[A-Za-z0-9À-ſΑ-я-]{0,61}[A-Za-z0-9À-ſΑ-я])?\\.){1,8}[A-Za-zÀ-ſΑ-я]{2,24}",
+      "enabled": true,
+      "builtIn": true
+    },
+    {
+      "id": "builtin-ipv4",
+      "name": "IPv4 addresses",
+      "entityClass": "IP",
+      "type": "RegExp",
+      "pattern": "\\b(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)(?:\\.[0-9]{1,3}){0,4}\\b",
+      "enabled": true,
+      "builtIn": true
+    },
+    {
+      "id": "builtin-ipv6",
+      "name": "IPv6 addresses",
+      "entityClass": "IP",
+      "type": "RegExp",
+      "pattern": "(?:::(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:(?:[0-9A-Fa-f]{1,4}:){0,5}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){6}(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?))|(?:(?:[0-9A-Fa-f]{1,4}:){7}[0-9A-Fa-f]{1,4})|(?:[0-9A-Fa-f]{1,4}:(?::[0-9A-Fa-f]{1,4}){1,6})|(?:(?:[0-9A-Fa-f]{1,4}:){1,2}(?::[0-9A-Fa-f]{1,4}){1,5})|(?:(?:[0-9A-Fa-f]{1,4}:){1,3}(?::[0-9A-Fa-f]{1,4}){1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,4}(?::[0-9A-Fa-f]{1,4}){1,3})|(?:(?:[0-9A-Fa-f]{1,4}:){1,5}(?::[0-9A-Fa-f]{1,4}){1,2})|(?:(?:[0-9A-Fa-f]{1,4}:){1,6}:[0-9A-Fa-f]{1,4})|(?:(?:[0-9A-Fa-f]{1,4}:){1,7}:)|(?::(?::[0-9A-Fa-f]{1,4}){1,7})",
+      "enabled": true,
+      "builtIn": true
+    },
+    {
+      "id": "builtin-host-name",
+      "name": "Host and machine names",
+      "entityClass": "HOST_NAME",
+      "type": "RegExp",
+      "pattern": "\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.){1,10}(?:[cC][oO][mM]|[nN][eE][tT]|[oO][rR][gG]|[iI][oO]|[cC][oO]|[eE][dD][uU]|[gG][oO][vV]|[mM][iI][lL]|[bB][iI][zZ]|[xX][yY][zZ])(?:(?:\\.[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?){0,8}\\.(?:[cC][lL][oO][uU][dD]|[dD][eE][vV]|[aA][pP][pP]|[aA][iI]|[iI][nN][tT]|[lL][oO][cC][aA][lL]|[iI][nN][tT][eE][rR][nN][aA][lL]|[cC][oO][rR][pP]|[lL][aA][nN]|[hH][oO][mM][eE]|[sS][vV][cC]|[cC][lL][uU][sS][tT][eE][rR]|[tT][eE][cC][hH]|[oO][nN][lL][iI][nN][eE]|[sS][iI][tT][eE]|[lL][iI][vV][eE]|[lL][iI][nN][kK]|[cC][lL][iI][cC][kK]|[wW][oO][rR][lL][dD]|[sS][yY][sS][tT][eE][mM][sS]|[sS][oO][lL][uU][tT][iI][oO][nN][sS]|[sS][eE][rR][vV][iI][cC][eE][sS]|[eE][uU]|[uU][sS]|[uU][kK]|[dD][eE]|[fF][rR]|[jJ][pP]|[cC][nN]|[rR][uU]|[nN][lL]|[sS][eE]|[dD][kK]|[fF][iI]|[cC][hH]|[nN][zZ]|[sS][gG]|[kK][rR]|[mM][xX]|[hH][kK]|[tT][wW]|[cC][aA]|[aA][uU]|[bB][rR]|[eE][sS]|[iI][tT]|[bB][eE]|[aA][tT]|[nN][oO]|[iI][eE]|[pP][tT]|[gG][rR]|[cC][zZ]|[hH][uU]|[rR][oO]|[bB][gG]|[sS][kK]|[sS][iI]|[hH][rR]|[rR][sS]|[uU][aA]|[tT][rR]|[iI][lL]|[iI][nN]|[pP][hH]|[tT][hH]|[vV][nN]|[pP][kK]|[bB][dD]|[aA][eE]|[sS][aA]|[zZ][aA]|[nN][gG]|[kK][eE]|[eE][gG]|[aA][rR]|[cC][lL]|[pP][eE]|[vV][eE]|[pP][lL]|[mM][eE]|[tT][vV]))?\\b|\\b(?:[a-zA-Z0-9](?:[a-zA-Z0-9-]{0,61}[a-zA-Z0-9])?\\.){2,10}(?:[cC][lL][oO][uU][dD]|[dD][eE][vV]|[aA][pP][pP]|[aA][iI]|[iI][nN][tT]|[lL][oO][cC][aA][lL]|[iI][nN][tT][eE][rR][nN][aA][lL]|[cC][oO][rR][pP]|[lL][aA][nN]|[hH][oO][mM][eE]|[sS][vV][cC]|[cC][lL][uU][sS][tT][eE][rR]|[tT][eE][cC][hH]|[oO][nN][lL][iI][nN][eE]|[sS][iI][tT][eE]|[lL][iI][vV][eE]|[lL][iI][nN][kK]|[cC][lL][iI][cC][kK]|[wW][oO][rR][lL][dD]|[sS][yY][sS][tT][eE][mM][sS]|[sS][oO][lL][uU][tT][iI][oO][nN][sS]|[sS][eE][rR][vV][iI][cC][eE][sS]|[eE][uU]|[uU][sS]|[uU][kK]|[dD][eE]|[fF][rR]|[jJ][pP]|[cC][nN]|[rR][uU]|[nN][lL]|[sS][eE]|[dD][kK]|[fF][iI]|[cC][hH]|[nN][zZ]|[sS][gG]|[kK][rR]|[mM][xX]|[hH][kK]|[tT][wW]|[cC][aA]|[aA][uU]|[bB][rR]|[eE][sS]|[iI][tT]|[bB][eE]|[aA][tT]|[nN][oO]|[iI][eE]|[pP][tT]|[gG][rR]|[cC][zZ]|[hH][uU]|[rR][oO]|[bB][gG]|[sS][kK]|[sS][iI]|[hH][rR]|[rR][sS]|[uU][aA]|[tT][rR]|[iI][lL]|[iI][nN]|[pP][hH]|[tT][hH]|[vV][nN]|[pP][kK]|[bB][dD]|[aA][eE]|[sS][aA]|[zZ][aA]|[nN][gG]|[kK][eE]|[eE][gG]|[aA][rR]|[cC][lL]|[pP][eE]|[vV][eE]|[pP][lL]|[mM][eE]|[tT][vV])\\b",
+      "enabled": true,
+      "builtIn": true
+    },
+    {
+      "id": "builtin-account-login",
+      "name": "Account and login names",
+      "entityClass": "USER_NAME",
+      "type": "RegExp",
+      "pattern": "\\b[A-Z][A-Z0-9-]{1,14}\\\\{1,16}(?:[A-Zac-eg-mo-qsw-z1-9][A-Za-z0-9._$-]{0,63}|[nrtbfuv0][a-z0-9][A-Za-z0-9._$-]{0,62})",
+      "enabled": false,
+      "builtIn": true
+    },
+    {
+      "type": "NER",
+      "modelId": "elastic__distilbert-base-uncased-finetuned-conll03-english",
+      "enabled": false,
+      "allowedEntityClasses": [
+        "PER",
+        "ORG",
+        "LOC"
+      ],
+      "timeoutSeconds": 30
+    }
+  ]
+}
+```
+
 ## Access
 
 The page is offered only to users who can change what it shows, so a user who cannot use it gets

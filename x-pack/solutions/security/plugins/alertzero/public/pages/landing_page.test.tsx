@@ -24,6 +24,10 @@ import {
 import { queryKeys } from '../query_keys';
 import { useWorkers } from '../hooks/use_workers_api';
 import { useInvestigationsCount } from '../hooks/use_investigations_api';
+import { of } from 'rxjs';
+import { MockChromeContextProvider } from '@kbn/core-chrome-browser-context-mocks';
+import { chromeServiceMock } from '@kbn/core-chrome-browser-mocks';
+import { AppChromeLayout } from '../components/app_chrome';
 import { LandingPage } from './landing_page';
 
 jest.mock('../hooks/use_workers_api', () => ({
@@ -329,7 +333,7 @@ describe('LandingPage', () => {
 
     expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
 
     // Start the save — this calls onSavingChange(true) in LandingPage.
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
@@ -353,7 +357,7 @@ describe('LandingPage', () => {
 
     // LandingPage must not unmount OnboardingPage while savingInProgress=true, even
     // though showQueue would otherwise be true.
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
 
     // Settle the fan-out with a mixed outcome: 4 succeed, 1 fails.
@@ -370,7 +374,7 @@ describe('LandingPage', () => {
     // Partial failure must keep onboarding mounted: the parent save lock is not
     // released, so the partially-committed server state (one enabled worker) cannot
     // transition the page to the queue.
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
     expect(screen.queryByTestId('conversations-page')).not.toBeInTheDocument();
   });
 
@@ -431,7 +435,7 @@ describe('LandingPage', () => {
     const { rerender } = render(makeUI());
     expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('alertZeroOnboardingContinueButton'));
-    expect(screen.getByText("Let's turn on the Watches?")).toBeInTheDocument();
+    expect(screen.getByText("Let's get AlertZero working for you!")).toBeInTheDocument();
 
     fireEvent.click(screen.getByRole('button', { name: 'Enable and run' }));
 
@@ -500,5 +504,26 @@ describe('LandingPage', () => {
     renderPage();
 
     expect(screen.getByTestId('conversations-page')).toBeInTheDocument();
+  });
+});
+
+describe('LandingPage app heading', () => {
+  it('keeps the AlertZero heading on onboarding', () => {
+    // The app heading's menu subscribes to the feedback handler, which the chrome mock leaves unset.
+    const chrome = chromeServiceMock.createStartContract();
+    (chrome.help.getFeedbackHandler$ as unknown as jest.Mock) = jest.fn(() => of(undefined));
+
+    render(
+      wrap(
+        <MockChromeContextProvider chrome={chrome as never}>
+          <AppChromeLayout>
+            <LandingPage />
+          </AppChromeLayout>
+        </MockChromeContextProvider>
+      )
+    );
+
+    expect(screen.getByTestId('alertZeroOnboardingIntroPromo')).toBeInTheDocument();
+    expect(screen.getByTestId('appHeaderTitle')).toHaveTextContent('AlertZero');
   });
 });

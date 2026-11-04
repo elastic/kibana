@@ -20,8 +20,8 @@ const mockRefreshEvents = jest.fn();
 const mockTimeRangeChange = jest.fn();
 const mockAddWarning = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/significant_event/event_flyout', () => ({

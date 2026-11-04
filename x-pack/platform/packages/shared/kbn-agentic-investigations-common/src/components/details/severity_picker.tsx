@@ -17,11 +17,14 @@ import { i18n } from '@kbn/i18n';
 import { getEmptyValue } from '../helpers';
 import { SEVERITY_COLORS, SEVERITY_LABELS, type InvestigationSeverityLevel } from './severity';
 
-const CHANGE_SEVERITY_LABEL = i18n.translate('xpack.alertzero.severityPicker.changeSeverity', {
-  defaultMessage: 'Change severity',
-});
+const CHANGE_SEVERITY_LABEL = i18n.translate(
+  'xpack.agenticInvestigations.severityPicker.changeSeverity',
+  {
+    defaultMessage: 'Change severity',
+  }
+);
 
-const NOT_SET_LABEL = i18n.translate('xpack.alertzero.severityPicker.notSet', {
+const NOT_SET_LABEL = i18n.translate('xpack.agenticInvestigations.severityPicker.notSet', {
   defaultMessage: 'Not set',
 });
 

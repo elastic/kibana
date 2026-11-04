@@ -13,11 +13,11 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
-import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import type { InvestigationSectionState } from '../data/investigations/use_investigation_sections';
+import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
 
-jest.mock('../hooks/use_investigation_sections');
+jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
 
@@ -110,19 +110,16 @@ function setSections({
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
-  areSeverityCountsFetching = false,
 }: {
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
-  areSeverityCountsFetching?: boolean;
 }) {
   const sectionTotal = (id: InvestigationSectionState['id']) =>
     sections.find((section) => section.id === id)?.total ?? 0;
-  // Mirrors the hook: the severity counts cover running investigations too, so they plus the
-  // unrated section count every matching investigation exactly once.
+  // Mirrors the hook: the counts cover the finished investigations the tier sections hold.
   const severityCounts = {
     critical: sectionTotal('critical'),
     high: sectionTotal('high'),
@@ -133,17 +130,10 @@ function setSections({
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    matchedCount:
-      severityCounts.critical +
-      severityCounts.high +
-      severityCounts.medium +
-      severityCounts.low +
-      sectionTotal('not-rated'),
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
@@ -554,12 +544,9 @@ describe('NightshiftApp', () => {
   });
 
   it('reports a search by length and result count, never by term', async () => {
-    // The running investigation is also listed in its severity section, so the section totals
-    // add up to two while only one investigation matches.
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
-        critical: { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
     });

@@ -114,6 +114,24 @@ apiTest.describe('Rule event fields suggestions API', { tag: tags.stateful.all }
     }
   );
 
+  apiTest(
+    'narrows the field names to the matching alerts when a valid matcher is given',
+    async ({ apiClient }) => {
+      // Scopes to rule B, whose only event carries data.service and data.latency.
+      // If the handler stopped forwarding the matcher, rule A's fields would leak in.
+      const response = await apiClient.get(
+        ruleEventFieldsUrl({ matcher: `rule.id : "${RULE_ID_B}"` }),
+        {
+          headers: adminHeaders,
+          responseType: 'json',
+        }
+      );
+
+      expect(response).toHaveStatusCode(200);
+      expect(response.body).toStrictEqual(['data.latency', 'data.service']);
+    }
+  );
+
   apiTest('validation: rejects empty matcher with a 400', async ({ apiClient }) => {
     const response = await apiClient.get(`${RULE_EVENT_FIELDS_PATH}?matcher=`, {
       headers: adminHeaders,

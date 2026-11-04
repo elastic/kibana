@@ -1,5 +1,5 @@
 {
-  "sha1": "c6bebff579d3a7648f31eb8e93a931f931c58e7a",
+  "sha1": "327bb88933ad90f488104b4c935e1ed3672fefbb",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -80,8 +80,21 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 22,
-        "column": 10
+        "line": 25,
+        "column": 7
+      }
+    },
+    {
+      "id": "1d69dfa1eb90431-7dc05b6717354f5",
+      "title": "Digital Experience application overview keeps the EDOT Browser Overview headings in order",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
+        "line": 32,
+        "column": 13
       }
     },
     {
@@ -93,8 +106,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 27,
-        "column": 22
+        "line": 49,
+        "column": 17
       }
     },
     {
@@ -106,8 +119,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/application_overview.spec.ts",
-        "line": 37,
-        "column": 10
+        "line": 58,
+        "column": 14
       }
     },
     {
@@ -163,8 +176,50 @@
       }
     },
     {
-      "id": "c43b695191ca032-8d02a0fbae70808",
-      "title": "Delete the mock OTel RUM data",
+      "id": "ad8ceb6a0ebceff-96350a6b008ca98",
+      "title": "Digital Experience sessions opens the Sessions tab of an EDOT Browser application, keeping the time range",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 21,
+        "column": 8
+      }
+    },
+    {
+      "id": "ad8ceb6a0ebceff-ea5b43cb056c788",
+      "title": "Digital Experience sessions filters, searches and pages through the sessions",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 27,
+        "column": 38
+      }
+    },
+    {
+      "id": "ad8ceb6a0ebceff-155b7df5e6f48b6",
+      "title": "Digital Experience sessions opens a session with its waterfall and journey, then goes back to the same list",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@local-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/sessions.spec.ts",
+        "line": 62,
+        "column": 7
+      }
+    },
+    {
+      "id": "c43b695191ca032-8e492a8059f7505",
+      "title": "Delete the mock OTel RUM data and sessions",
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
@@ -172,7 +227,7 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/digital_experience/test/scout_digital_experience/ui/tests/global.teardown.ts",
-        "line": 12,
+        "line": 13,
         "column": 35
       }
     }

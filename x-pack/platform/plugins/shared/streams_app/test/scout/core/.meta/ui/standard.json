@@ -1,5 +1,5 @@
 {
-  "sha1": "4c8d01e48d26fa84b09dcfbdc4e24b941647f65a",
+  "sha1": "c3417125b6c53aec9cf4154631baa3310f23f868",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -91,7 +91,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
-        "line": 129,
+        "line": 146,
         "column": 19
       }
     },
@@ -107,8 +107,40 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
-        "line": 172,
+        "line": 189,
         "column": 14
+      }
+    },
+    {
+      "id": "9639991af5c40c2-8717f8c74a90eaf",
+      "title": "Stream canvas - processing keeps the editor open when the distributor rejects the processor",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 267,
+        "column": 24
+      }
+    },
+    {
+      "id": "9639991af5c40c2-e7590a8c2febb60",
+      "title": "Stream canvas - processing shows processing read-only when the catalogue shape is newer than Kibana",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_processing.spec.ts",
+        "line": 288,
+        "column": 24
       }
     },
     {
@@ -123,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 116,
+        "line": 127,
         "column": 21
       }
     },
@@ -139,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 138,
+        "line": 149,
         "column": 70
       }
     },
@@ -155,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 148,
+        "line": 159,
         "column": 13
       }
     },
@@ -171,7 +203,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas_search.spec.ts",
-        "line": 152,
+        "line": 163,
         "column": 75
       }
     },
@@ -187,7 +219,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 103,
+        "line": 114,
         "column": 13
       }
     },
@@ -203,7 +235,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 108,
+        "line": 119,
         "column": 90
       }
     },
@@ -219,7 +251,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 117,
+        "line": 128,
         "column": 7
       }
     },
@@ -235,7 +267,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 128,
+        "line": 139,
         "column": 13
       }
     },
@@ -251,7 +283,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 137,
+        "line": 148,
         "column": 22
       }
     },
@@ -267,7 +299,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 146,
+        "line": 157,
         "column": 14
       }
     },
@@ -283,7 +315,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 153,
+        "line": 164,
         "column": 21
       }
     },
@@ -299,7 +331,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/canvas.spec.ts",
-        "line": 171,
+        "line": 182,
         "column": 13
       }
     },
@@ -411,8 +443,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/core/ui/tests/enable_wired_streams_flow.spec.ts",
-        "line": 112,
-        "column": 13
+        "line": 109,
+        "column": 25
       }
     },
     {
