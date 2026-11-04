@@ -31,11 +31,6 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
     before(loadLogstash);
     after(unloadLogstash);
 
-    if (config.get('esTestCluster.ccs')) {
-      loadTestFile(require.resolve('./dashboard_time_picker'));
-    } else {
-      loadTestFile(require.resolve('./dashboard_time_picker'));
-      loadTestFile(require.resolve('./dashboard_state'));
-    }
+    loadTestFile(require.resolve('./dashboard_time_picker'));
   });
 }
