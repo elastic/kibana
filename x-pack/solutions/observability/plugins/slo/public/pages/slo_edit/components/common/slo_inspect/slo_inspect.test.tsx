@@ -9,7 +9,7 @@ import React from 'react';
 import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
-import { render } from '../../../../../utils/test_helper';
+import { core, render } from '../../../../../utils/test_helper';
 import { SLO_EDIT_FORM_DEFAULT_VALUES } from '../../../constants';
 import type { CreateSLOForm } from '../../../types';
 import { SLOInspect } from './slo_inspect';
@@ -17,6 +17,7 @@ import { SLOInspect } from './slo_inspect';
 jest.mock('../../../../../hooks/use_fetch_slo_inspect');
 jest.mock('../../../../../hooks/use_kibana', () => {
   const services = {
+    application: { navigateToUrl: () => {} },
     share: { url: { locators: { get: () => undefined } } },
     http: { basePath: { prepend: (path: string) => path } },
   };
@@ -112,5 +113,52 @@ describe('<SLOInspect />', () => {
     await waitFor(() =>
       expect(lastInspectCall()).toEqual([expect.objectContaining({ name: 'Renamed SLO' }), true])
     );
+  });
+
+  describe('with the real inspect query', () => {
+    const inspectResponse = (name: string) => ({
+      slo: { name },
+      rollUpTransform: {},
+      summaryTransform: {},
+      rollUpPipeline: {},
+      summaryPipeline: {},
+      temporaryDoc: {},
+      rollUpTransformCompositeQuery: '',
+      summaryTransformCompositeQuery: '',
+    });
+
+    const queryResponseText = (text: string) =>
+      screen.queryAllByText(
+        (_, element) => element?.tagName === 'CODE' && (element.textContent ?? '').includes(text)
+      );
+
+    beforeEach(() => {
+      const actual = jest.requireActual<
+        typeof import('../../../../../hooks/use_fetch_slo_inspect')
+      >('../../../../../hooks/use_fetch_slo_inspect');
+      useFetchSloInspectMock.mockImplementation(actual.useFetchSloInspect);
+      core.http.fetch.mockReset();
+    });
+
+    it('does not show the previous response while the edited values are inspected', async () => {
+      core.http.fetch
+        .mockResolvedValueOnce(inspectResponse('First response'))
+        .mockReturnValueOnce(new Promise(() => {}));
+      render(<Wrapper />);
+
+      openFlyout();
+      await waitFor(() => expect(queryResponseText('First response')).not.toHaveLength(0));
+      closeFlyout();
+      await waitFor(() =>
+        expect(screen.queryByTestId('syntheticsMonitorInspectCloseButton')).not.toBeInTheDocument()
+      );
+
+      setName('Renamed SLO');
+      openFlyout();
+      await screen.findByTestId('syntheticsMonitorInspectCloseButton');
+      await waitFor(() => expect(core.http.fetch).toHaveBeenCalledTimes(2));
+
+      expect(queryResponseText('First response')).toHaveLength(0);
+    });
   });
 });
