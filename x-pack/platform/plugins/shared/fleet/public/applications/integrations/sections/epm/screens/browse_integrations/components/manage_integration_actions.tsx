@@ -129,9 +129,25 @@ export const ManageIntegrationActions: React.FC<{
     );
   }, [automaticImport, integration.integrationId, integration.version]);
 
+  // Read-only users open the same dialog to browse data streams and their results.
+  const openResultsModal = useCallback(() => {
+    setIsPopoverOpen(false);
+    setShowReviewModal(true);
+  }, []);
+
   const closeReviewModal = useCallback(() => {
     setShowReviewModal(false);
   }, []);
+
+  const viewResultsLabel = i18n.translate(
+    'xpack.fleet.epmList.manageIntegrations.actions.viewResults',
+    { defaultMessage: 'View results' }
+  );
+  const viewResultsDisabledTooltip = !isPackageReady
+    ? i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.viewResultsDisabledHelp', {
+        defaultMessage: 'Results are available only when all data streams are successful.',
+      })
+    : undefined;
 
   const isSameVersionInstalled =
     installedVersion !== undefined && installedVersion === integration.version;
@@ -192,6 +208,19 @@ export const ManageIntegrationActions: React.FC<{
           />
         </EuiButtonEmpty>
       )}
+      {inlineActionType === 'reviewApprove' && !canApprove && (
+        <EuiButtonEmpty
+          size="xs"
+          color="primary"
+          iconType="inspect"
+          iconSide="left"
+          onClick={openResultsModal}
+          isDisabled={!isPackageReady}
+          data-test-subj="manageIntegrationViewResultsInlineBtn"
+        >
+          {viewResultsLabel}
+        </EuiButtonEmpty>
+      )}
       {inlineActionType === 'editIntegration' && canEdit && (
         <EuiButtonEmpty size="s" onClick={() => onEdit(integration.integrationId)}>
           <FormattedMessage
@@ -247,6 +276,18 @@ export const ManageIntegrationActions: React.FC<{
                     id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
                     defaultMessage="Review & Approve"
                   />
+                </EuiContextMenuItem>
+              ),
+              !canApprove && (
+                <EuiContextMenuItem
+                  key="viewResults"
+                  icon="inspect"
+                  disabled={!isPackageReady}
+                  toolTipContent={viewResultsDisabledTooltip}
+                  onClick={openResultsModal}
+                  data-test-subj="manageIntegrationViewResultsMenuItem"
+                >
+                  {viewResultsLabel}
                 </EuiContextMenuItem>
               ),
               <EuiContextMenuItem
@@ -361,6 +402,7 @@ export const ManageIntegrationActions: React.FC<{
       )}
       <ReviewApproveModal
         isOpen={showReviewModal}
+        readOnly={!canApprove}
         integrationId={integration.integrationId}
         onClose={closeReviewModal}
         onEdit={onEdit}

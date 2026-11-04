@@ -92,6 +92,14 @@ describe('ManageIntegrationActions privilege gating', () => {
 
       expect(screen.getByTestId('manageIntegrationReviewApproveInlineBtn')).toBeInTheDocument();
     });
+
+    it('does not offer the read-only View results entries', () => {
+      renderActions({ inlineActionType: 'reviewApprove' });
+      openMenu();
+
+      expect(screen.queryByTestId('manageIntegrationViewResultsMenuItem')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageIntegrationViewResultsInlineBtn')).not.toBeInTheDocument();
+    });
   });
 
   describe('with the Automatic Import "read" privilege', () => {
@@ -129,6 +137,19 @@ describe('ManageIntegrationActions privilege gating', () => {
       expect(
         screen.queryByTestId('manageIntegrationReviewApproveInlineBtn')
       ).not.toBeInTheDocument();
+    });
+
+    it('offers a View results menu item instead of Review & Approve', () => {
+      renderActions();
+      openMenu();
+
+      expect(screen.getByTestId('manageIntegrationViewResultsMenuItem')).toBeInTheDocument();
+    });
+
+    it('offers an inline View results button instead of Review & approve', () => {
+      renderActions({ inlineActionType: 'reviewApprove', showMenuButton: false });
+
+      expect(screen.getByTestId('manageIntegrationViewResultsInlineBtn')).toBeInTheDocument();
     });
 
     it('hides the inline Edit Integration button', () => {

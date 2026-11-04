@@ -255,6 +255,7 @@ export const BrowseIntegrationsPage: React.FC<{ prereleaseIntegrationsEnabled: b
           categories={mainCategories}
           selectedCategories={selectedCategories}
           onCategoryChange={onCategoryChange}
+          showCreatedIntegrations={canReadAutomaticImportIntegrations}
           CreateIntegrationCardButton={
             canCreateAutomaticImport
               ? automaticImport?.components.CreateIntegrationSideCardButton

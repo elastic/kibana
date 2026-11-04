@@ -50,9 +50,15 @@ jest.mock('./components/responsive_package_grid', () => ({
 }));
 jest.mock('./components/search_and_filters_bar', () => ({ SearchAndFiltersBar: () => null }));
 // Capture the sidebar props so tests can assert which create entry point is offered.
-let capturedSidebarProps: { CreateIntegrationCardButton?: unknown } = {};
+let capturedSidebarProps: {
+  CreateIntegrationCardButton?: unknown;
+  showCreatedIntegrations?: boolean;
+} = {};
 jest.mock('./components/side_bar', () => ({
-  Sidebar: (props: { CreateIntegrationCardButton?: unknown }) => {
+  Sidebar: (props: {
+    CreateIntegrationCardButton?: unknown;
+    showCreatedIntegrations?: boolean;
+  }) => {
     capturedSidebarProps = props;
     return null;
   },
@@ -409,6 +415,25 @@ describe('BrowseIntegrationsPage', () => {
         expect(capturedSidebarProps).toHaveProperty('CreateIntegrationCardButton');
       });
       expect(capturedSidebarProps.CreateIntegrationCardButton).toBeUndefined();
+    });
+
+    it('still lets a read-only user reach Manage my integrations', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue({ ...NO_AUTHZ, canView: true });
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps.showCreatedIntegrations).toBe(true);
+      });
+    });
+
+    it('hides created integrations entirely without the view capability', async () => {
+      mockUseAutomaticImportAuthz.mockReturnValue(NO_AUTHZ);
+      renderPage();
+
+      await waitFor(() => {
+        expect(capturedSidebarProps).toHaveProperty('showCreatedIntegrations');
+      });
+      expect(capturedSidebarProps.showCreatedIntegrations).toBe(false);
     });
   });
 });

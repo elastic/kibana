@@ -155,6 +155,8 @@ export const ReviewApproveModal: React.FC<{
     options?: { skipSuccessToast?: boolean }
   ) => Promise<void>;
   DataStreamResultsFlyoutComponent?: DataStreamResultsFlyoutComponent;
+  /** View-only mode for users without the approve privilege: lists data streams and their results only. */
+  readOnly?: boolean;
 }> = ({
   isOpen,
   integrationId,
@@ -164,6 +166,7 @@ export const ReviewApproveModal: React.FC<{
   onApproveAndInstall,
   onInstallToCluster,
   DataStreamResultsFlyoutComponent,
+  readOnly = false,
 }) => {
   const { automaticImport } = useStartServices();
   const [isLoadingReviewDetails, setIsLoadingReviewDetails] = useState(false);
@@ -423,9 +426,12 @@ export const ReviewApproveModal: React.FC<{
           defaultMessage="Title"
         />
       ),
-      render: (item: ReviewTableRow) => (
-        <EuiLink onClick={() => onEdit(integrationId)}>{item.dataStream.title}</EuiLink>
-      ),
+      render: (item: ReviewTableRow) =>
+        readOnly ? (
+          <EuiText size="s">{item.dataStream.title}</EuiText>
+        ) : (
+          <EuiLink onClick={() => onEdit(integrationId)}>{item.dataStream.title}</EuiLink>
+        ),
     },
     {
       name: (
@@ -459,18 +465,31 @@ export const ReviewApproveModal: React.FC<{
     <EuiModal
       onClose={closeModal}
       style={{ minWidth: 760 }}
-      aria-label={i18n.translate(
-        'xpack.fleet.epmList.manageIntegrations.actions.reviewModalAriaLabel',
-        { defaultMessage: 'Review and approve data streams dialog' }
-      )}
+      aria-label={
+        readOnly
+          ? i18n.translate(
+              'xpack.fleet.epmList.manageIntegrations.actions.reviewModalReadOnlyAriaLabel',
+              { defaultMessage: 'Data streams dialog' }
+            )
+          : i18n.translate('xpack.fleet.epmList.manageIntegrations.actions.reviewModalAriaLabel', {
+              defaultMessage: 'Review and approve data streams dialog',
+            })
+      }
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle>
           <h2>
-            <FormattedMessage
-              id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalTitle"
-              defaultMessage="Review and approve data streams"
-            />
+            {readOnly ? (
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalReadOnlyTitle"
+                defaultMessage="Data streams"
+              />
+            ) : (
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalTitle"
+                defaultMessage="Review and approve data streams"
+              />
+            )}
           </h2>
         </EuiModalHeaderTitle>
       </EuiModalHeader>
@@ -480,11 +499,19 @@ export const ReviewApproveModal: React.FC<{
         ) : (
           <>
             <EuiText size="s">
-              <FormattedMessage
-                id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalDescription"
-                defaultMessage="This integration contains {count} data stream(s). Click one to view and edit its field mappings."
-                values={{ count: reviewDetails?.dataStreams.length ?? 0 }}
-              />
+              {readOnly ? (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalReadOnlyDescription"
+                  defaultMessage="This integration contains {count} data stream(s). Open one to view its results."
+                  values={{ count: reviewDetails?.dataStreams.length ?? 0 }}
+                />
+              ) : (
+                <FormattedMessage
+                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalDescription"
+                  defaultMessage="This integration contains {count} data stream(s). Click one to view and edit its field mappings."
+                  values={{ count: reviewDetails?.dataStreams.length ?? 0 }}
+                />
+              )}
             </EuiText>
             <EuiSpacer size="m" />
             <EuiText size="s">
@@ -507,75 +534,79 @@ export const ReviewApproveModal: React.FC<{
                 }
               )}
             />
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalVersionLabel"
-                  defaultMessage="Version"
-                />
-              }
-              isInvalid={isVersionInputInvalid}
-              error={isVersionInputInvalid ? versionValidationMessage : undefined}
-            >
-              <EuiFieldText
-                value={reviewVersion}
-                placeholder="1.0.0"
-                onChange={(event) => {
-                  setReviewVersion(event.target.value);
-                  if (!isVersionTouched) {
-                    return;
+            {!readOnly && (
+              <>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalVersionLabel"
+                      defaultMessage="Version"
+                    />
                   }
-                  setReviewError(null);
-                }}
-                onBlur={() => setIsVersionTouched(true)}
-                isInvalid={isVersionInputInvalid}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiFormRow
-              label={
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryLabel"
-                  defaultMessage="Category"
+                  isInvalid={isVersionInputInvalid}
+                  error={isVersionInputInvalid ? versionValidationMessage : undefined}
+                >
+                  <EuiFieldText
+                    value={reviewVersion}
+                    placeholder="1.0.0"
+                    onChange={(event) => {
+                      setReviewVersion(event.target.value);
+                      if (!isVersionTouched) {
+                        return;
+                      }
+                      setReviewError(null);
+                    }}
+                    onBlur={() => setIsVersionTouched(true)}
+                    isInvalid={isVersionInputInvalid}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                <EuiFormRow
+                  label={
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryLabel"
+                      defaultMessage="Category"
+                    />
+                  }
+                  helpText={
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryHelp"
+                      defaultMessage="Select at least one category."
+                    />
+                  }
+                >
+                  <EuiComboBox
+                    data-test-subj="manageIntegrationReviewModalCategories"
+                    aria-label={i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryAriaLabel',
+                      { defaultMessage: 'Select categories' }
+                    )}
+                    placeholder={i18n.translate(
+                      'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryPlaceholder',
+                      { defaultMessage: 'Select categories' }
+                    )}
+                    selectedOptions={selectedCategories}
+                    options={categoryOptions}
+                    onChange={(options) => setSelectedCategories(options)}
+                  />
+                </EuiFormRow>
+                <EuiSpacer size="m" />
+                <EuiCheckbox
+                  id={autoInstallCheckboxId}
+                  data-test-subj="manageIntegrationReviewAutoInstallCheckbox"
+                  label={i18n.translate(
+                    'xpack.fleet.epmList.manageIntegrations.actions.reviewModalAutoInstallLabel',
+                    {
+                      defaultMessage: 'Automatically install integration after approval',
+                    }
+                  )}
+                  checked={autoInstallAfterApproval}
+                  onChange={(event) => setAutoInstallAfterApproval(event.target.checked)}
+                  disabled={isApproving}
                 />
-              }
-              helpText={
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryHelp"
-                  defaultMessage="Select at least one category."
-                />
-              }
-            >
-              <EuiComboBox
-                data-test-subj="manageIntegrationReviewModalCategories"
-                aria-label={i18n.translate(
-                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryAriaLabel',
-                  { defaultMessage: 'Select categories' }
-                )}
-                placeholder={i18n.translate(
-                  'xpack.fleet.epmList.manageIntegrations.actions.reviewModalCategoryPlaceholder',
-                  { defaultMessage: 'Select categories' }
-                )}
-                selectedOptions={selectedCategories}
-                options={categoryOptions}
-                onChange={(options) => setSelectedCategories(options)}
-              />
-            </EuiFormRow>
-            <EuiSpacer size="m" />
-            <EuiCheckbox
-              id={autoInstallCheckboxId}
-              data-test-subj="manageIntegrationReviewAutoInstallCheckbox"
-              label={i18n.translate(
-                'xpack.fleet.epmList.manageIntegrations.actions.reviewModalAutoInstallLabel',
-                {
-                  defaultMessage: 'Automatically install integration after approval',
-                }
-              )}
-              checked={autoInstallAfterApproval}
-              onChange={(event) => setAutoInstallAfterApproval(event.target.checked)}
-              disabled={isApproving}
-            />
+              </>
+            )}
           </>
         )}
         {reviewError && (
@@ -588,27 +619,38 @@ export const ReviewApproveModal: React.FC<{
         )}
       </EuiModalBody>
       <EuiModalFooter>
-        <EuiButtonEmpty
-          onClick={handleCancelClick}
-          data-test-subj="manageIntegrationReviewModalCancel"
-        >
-          <FormattedMessage
-            id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCancel"
-            defaultMessage="Cancel"
-          />
-        </EuiButtonEmpty>
-        <EuiButton
-          onClick={handleApproveAndInstall}
-          fill
-          isLoading={isApproving}
-          isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
-          data-test-subj="manageIntegrationReviewApproveInstallButton"
-        >
-          <FormattedMessage
-            id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"
-            defaultMessage="Approve"
-          />
-        </EuiButton>
+        {readOnly ? (
+          <EuiButton onClick={closeModal} fill data-test-subj="manageIntegrationReviewModalClose">
+            <FormattedMessage
+              id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalClose"
+              defaultMessage="Close"
+            />
+          </EuiButton>
+        ) : (
+          <>
+            <EuiButtonEmpty
+              onClick={handleCancelClick}
+              data-test-subj="manageIntegrationReviewModalCancel"
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalCancel"
+                defaultMessage="Cancel"
+              />
+            </EuiButtonEmpty>
+            <EuiButton
+              onClick={handleApproveAndInstall}
+              fill
+              isLoading={isApproving}
+              isDisabled={isLoadingReviewDetails || !isVersionValid || !hasAtLeastOneCategory}
+              data-test-subj="manageIntegrationReviewApproveInstallButton"
+            >
+              <FormattedMessage
+                id="xpack.fleet.epmList.manageIntegrations.actions.reviewModalApprove"
+                defaultMessage="Approve"
+              />
+            </EuiButton>
+          </>
+        )}
       </EuiModalFooter>
     </EuiModal>
   );
