@@ -252,6 +252,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           defaultMessage: 'Delete',
         }),
         buttonColor: 'danger',
+        defaultFocusedButton: 'confirm',
       }
     );
   const tabs = useMemo<TabItem[]>(
