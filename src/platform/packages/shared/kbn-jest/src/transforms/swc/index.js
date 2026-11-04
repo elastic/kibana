@@ -949,7 +949,9 @@ const LAZY_OBJECT_CALL = /\blazyObject\s*\(/;
 const DEFAULT_EXPORT = /\bexport\s+default\b|\bas\s+default\b|\bexport\s*\{[^}]*\bdefault\b/;
 
 function prepareSource(sourceText, sourcePath) {
-  const normalizeJsx = JSX_MULTILINE_STRING_ATTRIBUTE.test(sourceText);
+  // .ts files can't contain JSX
+  const normalizeJsx =
+    Path.extname(sourcePath) !== '.ts' && JSX_MULTILINE_STRING_ATTRIBUTE.test(sourceText);
   const inlineEnums = ENUM_KEYWORD.test(sourceText);
   const rewriteMocks = JEST_MOCK_CALL.test(sourceText);
   const rewriteLazy = sourceText.includes(LAZY_OBJECT_MODULE) && LAZY_OBJECT_CALL.test(sourceText);
@@ -1216,10 +1218,6 @@ function getExportName(rawName) {
   return rawName.startsWith('"') ? JSON.parse(rawName) : rawName;
 }
 
-function escapeRegExp(value) {
-  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-}
-
 function republishMutableLocalExports(code, mutableLocalExports) {
   if (mutableLocalExports.length === 0) {
     return { code };
@@ -1385,10 +1383,13 @@ function makeExportsReplaceable(code) {
   // Babel exposed local bindings as data properties. Materialize the immutable ones once the
   // module has initialized so Sinon can wrap them, keeping `let`/`var` exports as live getters.
   // SWC prints class declarations as `let Name = class Name`, which are still immutable.
-  const isMutableBinding = (binding) =>
-    new RegExp(String.raw`^(?:let|var) ${escapeRegExp(binding)}(?![\w$])(?! = class\b)`, 'm').test(
-      rewritten
-    );
+  const mutableBindings = new Set(
+    Array.from(
+      rewritten.matchAll(/^(?:let|var) ([\w$]+)(?![\w$])(?! = class\b)/gm),
+      (match) => match[1]
+    )
+  );
+  const isMutableBinding = (binding) => mutableBindings.has(binding);
   const mutableLocalExports = localExports.filter(({ binding }) => isMutableBinding(binding));
   const localExportNames = localExports
     .filter(({ name, binding }) => name !== 'default' && !isMutableBinding(binding))
