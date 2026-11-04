@@ -1,0 +1,270 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React, { useEffect, useState } from 'react';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFlyout,
+  EuiFlyoutBody,
+  EuiHorizontalRule,
+  EuiIcon,
+  EuiInlineEditText,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedDate } from '@kbn/i18n-react';
+import {
+  isPrivatelySharedConversation,
+  isPublicConversation,
+  normalizeConversationAccessControl,
+  type Conversation,
+  type ConversationAccessControl,
+} from '@kbn/agent-builder-common';
+import { formatAgentBuilderErrorMessage } from '@kbn/agent-builder-browser';
+import { useConversationContext } from '../../../context/conversation/conversation_context';
+import { useConversationPermissions } from '../../../hooks/use_conversation';
+import { useConversationFlyoutSessionProps } from '../../../hooks/use_conversation_flyout_session_props';
+import {
+  DEFAULT_CONVERSATION_ICON,
+  useConversationTemplateDisplay,
+} from '../../../hooks/use_conversation_template_display';
+import { useToasts } from '../../../hooks/use_toasts';
+
+const FLYOUT_WIDTH = 500;
+
+const labels = {
+  flyoutTitle: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.title', {
+    defaultMessage: 'Chat details',
+  }),
+  close: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.close', {
+    defaultMessage: 'Close chat details',
+  }),
+  title: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.chatTitle', {
+    defaultMessage: 'Title',
+  }),
+  titleInput: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.chatTitleInput', {
+    defaultMessage: 'Chat title',
+  }),
+  renameError: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.renameError', {
+    defaultMessage: 'Failed to rename chat',
+  }),
+  author: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.author', {
+    defaultMessage: 'Author',
+  }),
+  created: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.created', {
+    defaultMessage: 'Created',
+  }),
+  lastEdited: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.lastEdited', {
+    defaultMessage: 'Last edited',
+  }),
+  visibility: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.visibility', {
+    defaultMessage: 'Visibility',
+  }),
+  members: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.members', {
+    defaultMessage: 'Members',
+  }),
+  type: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.type', {
+    defaultMessage: 'Type',
+  }),
+  public: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.public', {
+    defaultMessage: 'Public',
+  }),
+  private: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.private', {
+    defaultMessage: 'Private',
+  }),
+  restricted: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.restricted', {
+    defaultMessage: 'Restricted',
+  }),
+  defaultType: i18n.translate('xpack.agentBuilder.conversationMetadataFlyout.defaultType', {
+    defaultMessage: 'Default',
+  }),
+};
+
+const getVisibilityLabel = (accessControl: ConversationAccessControl | undefined): string => {
+  if (isPublicConversation(accessControl)) {
+    return labels.public;
+  }
+
+  return isPrivatelySharedConversation(accessControl) ? labels.restricted : labels.private;
+};
+
+interface MetadataRowProps {
+  label: string;
+  children: React.ReactNode;
+}
+
+const MetadataRow: React.FC<MetadataRowProps> = ({ label, children }) => (
+  <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+    <EuiFlexItem grow={1}>
+      <EuiText size="xs" color="subdued">
+        {label}
+      </EuiText>
+    </EuiFlexItem>
+    <EuiFlexItem grow={4}>{children}</EuiFlexItem>
+  </EuiFlexGroup>
+);
+
+const MetadataDate: React.FC<{ value: string }> = ({ value }) => (
+  <EuiText size="s">
+    <FormattedDate
+      value={value}
+      year="numeric"
+      month="short"
+      day="numeric"
+      hour="numeric"
+      minute="2-digit"
+    />
+  </EuiText>
+);
+
+interface ConversationMetadataFlyoutProps {
+  conversation: Conversation;
+  onClose: () => void;
+}
+
+export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProps> = ({
+  conversation,
+  onClose,
+}) => {
+  const flyoutSessionProps = useConversationFlyoutSessionProps(labels.flyoutTitle);
+  const { rename: canRename } = useConversationPermissions();
+  const { conversationActions } = useConversationContext();
+  const { addErrorToast } = useToasts();
+  const templateDisplay = useConversationTemplateDisplay();
+  const [isTitleInvalid, setIsTitleInvalid] = useState(false);
+  const [draftTitle, setDraftTitle] = useState(conversation.title);
+
+  useEffect(() => {
+    setDraftTitle(conversation.title);
+  }, [conversation.title]);
+
+  const accessControl = normalizeConversationAccessControl(conversation.access_control);
+  const isPublic = isPublicConversation(conversation.access_control);
+
+  const onTitleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+    setDraftTitle(event.target.value);
+  };
+
+  const onSaveTitle = async (value: string): Promise<boolean> => {
+    const nextTitle = value.trim();
+
+    if (!nextTitle) {
+      setIsTitleInvalid(true);
+      return false;
+    }
+
+    setIsTitleInvalid(false);
+    setDraftTitle(nextTitle);
+
+    if (nextTitle === conversation.title) {
+      return true;
+    }
+
+    try {
+      await conversationActions.renameConversation(conversation.id, nextTitle);
+      return true;
+    } catch (error) {
+      addErrorToast({ title: labels.renameError, text: formatAgentBuilderErrorMessage(error) });
+      return false;
+    }
+  };
+
+  const rows = [
+    {
+      label: labels.title,
+      value: (
+        <EuiInlineEditText
+          size="s"
+          value={draftTitle}
+          onChange={onTitleChange}
+          inputAriaLabel={labels.titleInput}
+          isReadOnly={!canRename}
+          isInvalid={isTitleInvalid}
+          onSave={onSaveTitle}
+          // EUI's previous value doesn't follow title changes made elsewhere, so reset to the saved title.
+          onCancel={() => {
+            setIsTitleInvalid(false);
+            setDraftTitle(conversation.title);
+          }}
+          // An `xs` button keeps the title row as tall as the text rows; EuiText keeps the text at `s`.
+          readModeProps={{ size: 'xs', 'data-test-subj': 'agentBuilderConversationMetadataTitle' }}
+          editModeProps={{
+            inputProps: { 'data-test-subj': 'agentBuilderConversationMetadataTitleInput' },
+            saveButtonProps: { 'data-test-subj': 'agentBuilderConversationMetadataTitleSave' },
+          }}
+        />
+      ),
+    },
+    {
+      label: labels.author,
+      value: <EuiText size="s">{conversation.user.username}</EuiText>,
+    },
+    { label: labels.created, value: <MetadataDate value={conversation.created_at} /> },
+    { label: labels.lastEdited, value: <MetadataDate value={conversation.updated_at} /> },
+    {
+      label: labels.visibility,
+      value: <EuiText size="s">{getVisibilityLabel(conversation.access_control)}</EuiText>,
+    },
+    // Public chats have no member list, so a count would be misleading.
+    ...(isPublic
+      ? []
+      : [
+          {
+            label: labels.members,
+            value: <EuiText size="s">{accessControl.entries.length + 1}</EuiText>,
+          },
+        ]),
+    {
+      label: labels.type,
+      value: (
+        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiIcon
+              type={templateDisplay?.icon || DEFAULT_CONVERSATION_ICON}
+              size="s"
+              aria-hidden={true}
+            />
+          </EuiFlexItem>
+          <EuiFlexItem grow={false}>
+            <EuiText size="s">{templateDisplay?.name || labels.defaultType}</EuiText>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      ),
+    },
+  ];
+
+  return (
+    <EuiFlyout
+      type="push"
+      size={FLYOUT_WIDTH}
+      ownFocus={false}
+      onClose={onClose}
+      closeButtonProps={{ 'aria-label': labels.close }}
+      flyoutMenuDisplayMode="always"
+      role="region"
+      aria-label={labels.flyoutTitle}
+      data-test-subj="agentBuilderConversationMetadataFlyout"
+      {...flyoutSessionProps}
+    >
+      <EuiFlyoutBody>
+        <EuiTitle size="s">
+          <h3>{labels.flyoutTitle}</h3>
+        </EuiTitle>
+        <EuiSpacer size="m" />
+        {rows.map(({ label, value }, index) => (
+          <React.Fragment key={label}>
+            {index > 0 ? <EuiHorizontalRule margin="xs" /> : null}
+            <MetadataRow label={label}>{value}</MetadataRow>
+          </React.Fragment>
+        ))}
+      </EuiFlyoutBody>
+    </EuiFlyout>
+  );
+};
