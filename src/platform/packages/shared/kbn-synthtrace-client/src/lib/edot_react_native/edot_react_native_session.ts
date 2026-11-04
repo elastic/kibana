@@ -21,7 +21,7 @@ export interface EdotReactNativeRequest {
   url: string;
   /** Overrides the health profile's failure rate for this endpoint. */
   failureRate?: number;
-  /** Status codes to pick from when the request fails. */
+  /** Status codes to pick from when the request fails. Empty or unset, 5xx server errors. */
   failureStatusCodes?: readonly number[];
   /** Multiplies the health profile's HTTP latency. */
   latencyFactor?: number;
@@ -314,7 +314,7 @@ const sendRequest = (
     method,
     url,
     failureRate = health.httpFailureRate,
-    failureStatusCodes = DEFAULT_FAILURE_STATUS_CODES,
+    failureStatusCodes = [],
     latencyFactor = 1,
     bodySizeBytes,
     errorLog,
@@ -327,7 +327,7 @@ const sendRequest = (
   const statusCode = isNetworkError
     ? undefined
     : random() < failureRate
-    ? pick(random, failureStatusCodes)
+    ? pick(random, failureStatusCodes.length ? failureStatusCodes : DEFAULT_FAILURE_STATUS_CODES)
     : method === 'POST'
     ? 201
     : 200;

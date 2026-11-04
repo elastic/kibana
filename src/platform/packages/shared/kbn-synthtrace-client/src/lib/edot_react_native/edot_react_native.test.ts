@@ -732,6 +732,36 @@ describe('edotReactNative', () => {
       );
     });
 
+    it('fails requests with a 5xx status code when they have no failure status codes', () => {
+      const request = { method: 'GET', url: 'https://api.example.com/v1/forecast' };
+      const docs = serialize(
+        edotReactNative.session({
+          client: android(),
+          app: {
+            screens: [
+              {
+                name: 'Forecast',
+                requests: [{ ...request, failureStatusCodes: [], errorLog: 'Forecast failed' }],
+              },
+            ],
+          },
+          health: withHealth({ httpFailureRate: 1 }),
+          screenViews: 4,
+          start: TIMESTAMP,
+          random: seededRandom('no-failure-status-codes'),
+        })
+      );
+      const requestSpans = docs.filter(isSpan).filter(({ kind }) => kind === 'Client');
+      expect(requestSpans).toHaveLength(4);
+      requestSpans.forEach(({ status, attributes }) => {
+        expect(status.code).toBe('Error');
+        expect(attributes['http.response.status_code']).toBeGreaterThanOrEqual(500);
+      });
+      const errorLogs = logs(docs).filter(({ severity_text: severity }) => severity === 'ERROR');
+      expect(errorLogs).toHaveLength(4);
+      errorLogs.forEach(({ body }) => expect(body?.text).toMatch(/^Forecast failed: HTTP 50\d$/));
+    });
+
     it('writes an Android crash when it happens and ends the session with it', () => {
       const docs = simulate({ platform: 'android', health: withHealth({ crashRate: 1 }) });
       const crashes = logs(docs).filter(({ event_name: eventName }) => eventName === 'app.crash');
