@@ -269,6 +269,20 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
     store.addApp(next);
     activeAppId$.next(next.id);
   };
+  const applyTabs = async (items: TabItem[], selectedId: string | undefined) => {
+    const kept = new Set(items.map(({ id }) => id));
+    const deleted = apps.filter(({ id, panels }) => !kept.has(id) && panels.length > 0);
+    if (deleted.length > 0 && !(await confirmDelete(deleted))) return;
+    store.setApps(reconcileApps(apps, items));
+    activeAppId$.next(selectedId);
+  };
+  const deleteTab = (item: TabItem) => {
+    const index = tabs.findIndex(({ id }) => id === item.id);
+    const remaining = tabs.filter(({ id }) => id !== item.id);
+    const selectedId =
+      item.id === app.id ? remaining[Math.min(index, remaining.length - 1)]?.id : app.id;
+    return applyTabs(remaining, selectedId);
+  };
   const newAppLabel = i18n.translate('xpack.notebook.app.newApp', { defaultMessage: 'New app' });
   const generateAppLabel = i18n.translate('xpack.notebook.app.generateAnother', {
     defaultMessage: 'Generate app',
@@ -316,13 +330,15 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
               </EuiToolTip>
             </EuiFlexGroup>
           }
-          onChanged={async ({ items, selectedItem }) => {
-            const kept = new Set(items.map(({ id }) => id));
-            const deleted = apps.filter(({ id, panels }) => !kept.has(id) && panels.length > 0);
-            if (deleted.length > 0 && !(await confirmDelete(deleted))) return;
-            store.setApps(reconcileApps(apps, items));
-            activeAppId$.next(selectedItem?.id);
-          }}
+          onChanged={({ items, selectedItem }) => applyTabs(items, selectedItem?.id)}
+          getAdditionalTabMenuItems={(item) => [
+            {
+              'data-test-subj': 'notebookAppDelete',
+              name: 'deleteApp',
+              label: i18n.translate('xpack.notebook.app.deleteApp', { defaultMessage: 'Delete' }),
+              onClick: () => deleteTab(item),
+            },
+          ]}
           onEBTEvent={() => {}}
           disableTabsBarMenu
           data-test-subj="notebookAppTabs"
