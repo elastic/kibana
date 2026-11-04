@@ -7,13 +7,13 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
-import type { InferenceClient } from '@kbn/inference-common';
 import type { InferenceServerClient } from '@kbn/inference-plugin/server';
-import { MessageRole, isInferenceError } from '@kbn/inference-common';
+import { MessageRole, ToolChoiceType, isInferenceError } from '@kbn/inference-common';
 import type {
   TestEndpointFailureCause,
   TestEndpointResponse,
   TestEndpointResult,
+  TestEndpointToolCheck,
   TestableTaskType,
 } from '../../common/types';
 
@@ -21,6 +21,19 @@ export const TEST_TIMEOUT_MS = 30_000;
 
 const EMBEDDING_PREVIEW_SIZE = 8;
 const SPARSE_TOP_TOKENS_SIZE = 5;
+
+const TEST_TOOL_NAME = 'get_weather';
+
+const TEST_TOOLS = {
+  [TEST_TOOL_NAME]: {
+    description: 'Get the current weather for a city',
+    schema: {
+      type: 'object',
+      properties: { city: { type: 'string', description: 'City name' } },
+      required: ['city'],
+    },
+  },
+} as const;
 
 const NO_FEATURE_ENDPOINT_MESSAGE = 'No endpoint is available for feature';
 const NO_CONNECTOR_MESSAGE = 'No connector or inference endpoint found';
@@ -61,13 +74,68 @@ const getCause = (statusCode: number | undefined, timedOut: boolean): TestEndpoi
   }
 };
 
+interface TestOutput {
+  result: TestEndpointResult;
+  raw: unknown;
+  toolCheck?: TestEndpointToolCheck;
+}
+
+interface RunChatOptions {
+  inferenceClient: Pick<InferenceServerClient, 'chatComplete'>;
+  target: { featureId: string } | { connectorId: string };
+  message: string;
+  checkToolCalling?: boolean;
+  signal: AbortSignal;
+}
+
+const runChat = async ({
+  inferenceClient,
+  target,
+  message,
+  checkToolCalling,
+  signal,
+}: RunChatOptions): Promise<TestOutput> => {
+  const response =
+    'featureId' in target
+      ? await inferenceClient.chatComplete({
+          featureId: target.featureId,
+          messages: [{ role: MessageRole.User, content: message }],
+          tools: checkToolCalling ? TEST_TOOLS : undefined,
+          toolChoice: checkToolCalling ? ToolChoiceType.required : undefined,
+          maxRetries: 0,
+          abortSignal: signal,
+        })
+      : await inferenceClient.chatComplete({
+          connectorId: target.connectorId,
+          messages: [{ role: MessageRole.User, content: message }],
+          tools: checkToolCalling ? TEST_TOOLS : undefined,
+          toolChoice: checkToolCalling ? ToolChoiceType.required : undefined,
+          maxRetries: 0,
+          abortSignal: signal,
+        });
+  const toolCall = response.toolCalls.find(({ function: { name } }) => name === TEST_TOOL_NAME);
+
+  return {
+    result: { type: 'text', content: response.content },
+    raw: response,
+    ...(checkToolCalling && {
+      toolCheck: {
+        passed: toolCall !== undefined,
+        toolName: TEST_TOOL_NAME,
+        arguments: toolCall?.function.arguments,
+      },
+    }),
+  };
+};
+
 interface TestInferenceEndpointOptions {
-  inferenceClient: Pick<InferenceClient, 'chatComplete'>;
+  inferenceClient: Pick<InferenceServerClient, 'chatComplete'>;
   esClient: ElasticsearchClient;
   taskType: TestableTaskType;
   inferenceId: string;
   message: string;
   documents?: string[];
+  checkToolCalling?: boolean;
 }
 
 const runTest = async (
@@ -78,22 +146,22 @@ const runTest = async (
     inferenceId,
     message,
     documents = [],
+    checkToolCalling,
   }: TestInferenceEndpointOptions,
   signal: AbortSignal
-): Promise<{ result: TestEndpointResult; raw: unknown }> => {
+): Promise<TestOutput> => {
   const requestOptions = { signal };
   const timeout = `${TEST_TIMEOUT_MS / 1000}s`;
 
   switch (taskType) {
-    case 'chat_completion': {
-      const response = await inferenceClient.chatComplete({
-        connectorId: inferenceId,
-        messages: [{ role: MessageRole.User, content: message }],
-        maxRetries: 0,
-        abortSignal: signal,
+    case 'chat_completion':
+      return runChat({
+        inferenceClient,
+        target: { connectorId: inferenceId },
+        message,
+        checkToolCalling,
+        signal,
       });
-      return { result: { type: 'text', content: response.content }, raw: response };
-    }
     case 'completion': {
       const response = await esClient.inference.inference(
         { task_type: taskType, inference_id: inferenceId, input: message, timeout },
@@ -186,15 +254,15 @@ const getFailureCause = (
 };
 
 const runWithTimeout = async (
-  run: (signal: AbortSignal) => Promise<{ result: TestEndpointResult; raw: unknown }>
+  run: (signal: AbortSignal) => Promise<TestOutput>
 ): Promise<TestEndpointResponse> => {
   const abortController = new AbortController();
   const timeout = setTimeout(() => abortController.abort(), TEST_TIMEOUT_MS);
   const startedAt = performance.now();
 
   try {
-    const { result, raw } = await run(abortController.signal);
-    return { ok: true, latencyMs: Math.round(performance.now() - startedAt), result, raw };
+    const output = await run(abortController.signal);
+    return { ok: true, latencyMs: Math.round(performance.now() - startedAt), ...output };
   } catch (error) {
     const statusCode = getStatusCode(error);
     const reason = error instanceof Error ? error.message : String(error);
@@ -220,25 +288,13 @@ export const testChat = ({
   inferenceClient,
   target,
   message,
+  checkToolCalling,
 }: {
   inferenceClient: Pick<InferenceServerClient, 'chatComplete'>;
   target: { featureId: string } | { connectorId: string };
   message: string;
+  checkToolCalling?: boolean;
 }): Promise<TestEndpointResponse> =>
-  runWithTimeout(async (signal) => {
-    const response =
-      'featureId' in target
-        ? await inferenceClient.chatComplete({
-            featureId: target.featureId,
-            messages: [{ role: MessageRole.User, content: message }],
-            maxRetries: 0,
-            abortSignal: signal,
-          })
-        : await inferenceClient.chatComplete({
-            connectorId: target.connectorId,
-            messages: [{ role: MessageRole.User, content: message }],
-            maxRetries: 0,
-            abortSignal: signal,
-          });
-    return { result: { type: 'text', content: response.content }, raw: response };
-  });
+  runWithTimeout((signal) =>
+    runChat({ inferenceClient, target, message, checkToolCalling, signal })
+  );

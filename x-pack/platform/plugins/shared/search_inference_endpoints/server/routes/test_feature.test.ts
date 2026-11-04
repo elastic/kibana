@@ -86,6 +86,24 @@ describe('Test feature route', () => {
     );
   });
 
+  it('checks tool calling when asked to', async () => {
+    chatComplete.mockResolvedValue({ content: 'It is sunny.', toolCalls: [] });
+
+    await mockRouter.callRoute({
+      params: { featureId: 'agent_builder' },
+      body: { message: 'hello', checkToolCalling: true },
+    });
+
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ toolChoice: 'required', tools: expect.any(Object) })
+    );
+    expect(mockRouter.response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ toolCheck: expect.objectContaining({ passed: false }) }),
+      })
+    );
+  });
+
   it('requires a feature id', () => {
     mockRouter.shouldThrow({ params: { featureId: '' }, body: { message: 'hello' } });
   });

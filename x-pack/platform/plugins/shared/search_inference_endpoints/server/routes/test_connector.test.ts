@@ -81,6 +81,24 @@ describe('Test connector route', () => {
     );
   });
 
+  it('checks tool calling when asked to', async () => {
+    chatComplete.mockResolvedValue({ content: 'It is sunny.', toolCalls: [] });
+
+    await mockRouter.callRoute({
+      params: { connectorId: 'my-connector' },
+      body: { message: 'hello', checkToolCalling: true },
+    });
+
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ toolChoice: 'required', tools: expect.any(Object) })
+    );
+    expect(mockRouter.response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ toolCheck: expect.objectContaining({ passed: false }) }),
+      })
+    );
+  });
+
   it('requires a connector id', () => {
     mockRouter.shouldThrow({ params: { connectorId: '' }, body: { message: 'hello' } });
   });

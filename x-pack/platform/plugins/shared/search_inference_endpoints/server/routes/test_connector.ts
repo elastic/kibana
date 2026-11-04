@@ -50,6 +50,7 @@ export const defineTestConnectorRoute = ({
             }),
             body: schema.object({
               message: schema.string({ minLength: 1, maxLength: 2000 }),
+              checkToolCalling: schema.maybe(schema.boolean()),
             }),
           },
         },
@@ -59,6 +60,7 @@ export const defineTestConnectorRoute = ({
           inferenceClient: await getInferenceClient(request),
           target: { connectorId: request.params.connectorId },
           message: request.body.message,
+          checkToolCalling: request.body.checkToolCalling,
         });
 
         return response.ok({ body: result, headers: { 'content-type': 'application/json' } });

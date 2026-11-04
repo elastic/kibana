@@ -50,6 +50,7 @@ export const defineTestFeatureRoute = ({
             }),
             body: schema.object({
               message: schema.string({ minLength: 1, maxLength: 2000 }),
+              checkToolCalling: schema.maybe(schema.boolean()),
             }),
           },
         },
@@ -59,6 +60,7 @@ export const defineTestFeatureRoute = ({
           inferenceClient: await getInferenceClient(request),
           target: { featureId: request.params.featureId },
           message: request.body.message,
+          checkToolCalling: request.body.checkToolCalling,
         });
 
         return response.ok({ body: result, headers: { 'content-type': 'application/json' } });

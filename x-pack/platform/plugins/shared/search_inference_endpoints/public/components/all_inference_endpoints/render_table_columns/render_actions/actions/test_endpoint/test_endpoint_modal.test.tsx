@@ -174,6 +174,68 @@ describe('TestEndpointModal', () => {
     expect(screen.getByTestId('testEndpointRequestFailure')).toHaveTextContent('Forbidden');
   });
 
+  describe('tool calling check', () => {
+    it('is offered for chat completion endpoints and off by default', () => {
+      mockHookState();
+      renderModal('chat_completion');
+
+      expect(screen.getByTestId('testEndpointToolCheckbox')).not.toBeChecked();
+    });
+
+    it.each(['completion', 'text_embedding', 'sparse_embedding', 'rerank'])(
+      'is not offered for %s endpoints',
+      (taskType) => {
+        mockHookState();
+        renderModal(taskType);
+
+        expect(screen.queryByTestId('testEndpointToolCheckbox')).not.toBeInTheDocument();
+      }
+    );
+
+    it('is sent only when the box is ticked', () => {
+      mockHookState();
+      renderModal('chat_completion');
+
+      fireEvent.click(screen.getByTestId('testEndpointRunButton'));
+      expect(mockMutate).toHaveBeenLastCalledWith({
+        inferenceId: 'my-endpoint',
+        message: 'Reply "Hello world"',
+      });
+
+      fireEvent.click(screen.getByTestId('testEndpointToolCheckbox'));
+      fireEvent.click(screen.getByTestId('testEndpointRunButton'));
+      expect(mockMutate).toHaveBeenLastCalledWith({
+        inferenceId: 'my-endpoint',
+        message: 'Reply "Hello world"',
+        checkToolCalling: true,
+      });
+    });
+
+    it('shows the tool check result next to the answer', () => {
+      mockHookState({
+        data: {
+          ok: true,
+          latencyMs: 245,
+          result: { type: 'text', content: '' },
+          toolCheck: { passed: true, toolName: 'get_weather', arguments: { city: 'Paris' } },
+        },
+      });
+      renderModal('chat_completion');
+
+      expect(screen.getByTestId('testEndpointToolCheckPassed')).toBeInTheDocument();
+    });
+
+    it('does not show a tool check result when none was requested', () => {
+      mockHookState({
+        data: { ok: true, latencyMs: 245, result: { type: 'text', content: 'Hi' } },
+      });
+      renderModal('chat_completion');
+
+      expect(screen.queryByTestId('testEndpointToolCheckPassed')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('testEndpointToolCheckFailed')).not.toBeInTheDocument();
+    });
+  });
+
   it('does not ask for documents unless testing a rerank endpoint', () => {
     mockHookState();
     renderModal('text_embedding');

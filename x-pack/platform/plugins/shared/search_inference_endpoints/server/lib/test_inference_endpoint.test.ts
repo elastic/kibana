@@ -46,7 +46,8 @@ describe('testInferenceEndpoint', () => {
           messages: [{ role: 'user', content: 'What is Elasticsearch?' }],
         })
       );
-      expect(chatComplete.mock.calls[0][0]).not.toHaveProperty('tools');
+      expect(chatComplete.mock.calls[0][0].tools).toBeUndefined();
+      expect(chatComplete.mock.calls[0][0].toolChoice).toBeUndefined();
     });
 
     it('returns the answer and the latency', async () => {
@@ -60,6 +61,92 @@ describe('testInferenceEndpoint', () => {
         result: { type: 'text', content: 'A search engine.' },
         raw: { content: 'A search engine.', toolCalls: [] },
       });
+    });
+  });
+
+  describe('chat_completion tool calling check', () => {
+    const runToolCheck = () =>
+      testInferenceEndpoint({
+        inferenceClient,
+        esClient,
+        taskType: 'chat_completion',
+        inferenceId: 'my-endpoint',
+        message: 'hi',
+        checkToolCalling: true,
+      } as unknown as Parameters<typeof testInferenceEndpoint>[0]);
+
+    it('sends a made-up tool and forces the model to call a tool', async () => {
+      chatComplete.mockResolvedValue({ content: '', toolCalls: [] });
+
+      await runToolCheck();
+
+      expect(chatComplete).toHaveBeenCalledWith(
+        expect.objectContaining({
+          tools: { get_weather: expect.objectContaining({ description: expect.any(String) }) },
+          toolChoice: 'required',
+        })
+      );
+    });
+
+    it('passes when the model called the tool', async () => {
+      chatComplete.mockResolvedValue({
+        content: '',
+        toolCalls: [
+          { toolCallId: '1', function: { name: 'get_weather', arguments: { city: 'Paris' } } },
+        ],
+      });
+
+      const result = await runToolCheck();
+
+      expect(result.toolCheck).toEqual({
+        passed: true,
+        toolName: 'get_weather',
+        arguments: { city: 'Paris' },
+      });
+    });
+
+    it('does not pass when the model answered without calling the tool', async () => {
+      chatComplete.mockResolvedValue({ content: 'It is sunny.', toolCalls: [] });
+
+      const result = await runToolCheck();
+
+      expect(result.ok).toBe(true);
+      expect(result.toolCheck).toEqual({
+        passed: false,
+        toolName: 'get_weather',
+        arguments: undefined,
+      });
+    });
+
+    it('does not pass when the model called a different tool', async () => {
+      chatComplete.mockResolvedValue({
+        content: '',
+        toolCalls: [{ toolCallId: '1', function: { name: 'other_tool', arguments: {} } }],
+      });
+
+      const result = await runToolCheck();
+
+      expect(result.toolCheck?.passed).toBe(false);
+    });
+
+    it('reports a provider rejection of the tool as a failure', async () => {
+      chatComplete.mockRejectedValue(
+        createInferenceProviderError("Invalid schema for function 'get_weather'", { status: 400 })
+      );
+
+      const result = await runToolCheck();
+
+      expect(result.ok).toBe(false);
+      expect(result.error).toEqual(expect.objectContaining({ cause: 'bad_request' }));
+      expect(result).not.toHaveProperty('toolCheck');
+    });
+
+    it('is not part of the result unless it was requested', async () => {
+      chatComplete.mockResolvedValue({ content: 'Hi', toolCalls: [] });
+
+      const result = await runTest('chat_completion');
+
+      expect(result).not.toHaveProperty('toolCheck');
     });
   });
 

@@ -90,4 +90,18 @@ describe('useTestEndpoint', () => {
       )
     );
   });
+
+  it('sends the tool calling check flag', async () => {
+    mockPost.mockResolvedValue({ ok: true, latencyMs: 120 });
+    const { result } = renderHook(() => useTestEndpoint(), { wrapper });
+
+    result.current.mutate({ inferenceId: 'my-endpoint', message: 'hello', checkToolCalling: true });
+
+    await waitFor(() =>
+      expect(mockPost).toHaveBeenCalledWith(
+        '/internal/search_inference_endpoints/endpoints/my-endpoint/_test',
+        { body: JSON.stringify({ message: 'hello', checkToolCalling: true }), version: '1' }
+      )
+    );
+  });
 });

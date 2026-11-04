@@ -51,6 +51,7 @@ export const defineTestInferenceEndpointRoute = ({
             }),
             body: schema.object({
               message: schema.string({ minLength: 1, maxLength: 2000 }),
+              checkToolCalling: schema.maybe(schema.boolean()),
               documents: schema.maybe(
                 schema.arrayOf(schema.string({ minLength: 1, maxLength: 2000 }), {
                   minSize: 1,
@@ -76,7 +77,7 @@ export const defineTestInferenceEndpointRoute = ({
           });
         }
 
-        const { message, documents } = request.body;
+        const { message, documents, checkToolCalling } = request.body;
         if (taskType === 'rerank' && !documents) {
           return response.badRequest({
             body: { message: 'Documents are required to test a rerank endpoint' },
@@ -90,6 +91,7 @@ export const defineTestInferenceEndpointRoute = ({
           inferenceId: request.params.id,
           message,
           documents,
+          checkToolCalling,
         });
 
         return response.ok({ body: result, headers: { 'content-type': 'application/json' } });

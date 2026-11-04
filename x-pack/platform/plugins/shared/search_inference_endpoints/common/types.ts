@@ -63,10 +63,17 @@ export type TestEndpointResult =
     }
   | { type: 'rerank'; ranking: Array<{ index: number; text: string; score: number }> };
 
+export interface TestEndpointToolCheck {
+  passed: boolean;
+  toolName: string;
+  arguments?: unknown;
+}
+
 export interface TestEndpointResponse {
   ok: boolean;
   latencyMs: number;
   result?: TestEndpointResult;
+  toolCheck?: TestEndpointToolCheck;
   raw?: unknown;
   error?: {
     cause: TestEndpointFailureCause;

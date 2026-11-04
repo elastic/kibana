@@ -32,6 +32,7 @@ const getPath = (variables: TestTargetVariables) => {
 type TestEndpointVariables = TestTargetVariables & {
   message: string;
   documents?: string[];
+  checkToolCalling?: boolean;
 };
 
 export const useTestEndpoint = () => {
@@ -46,7 +47,11 @@ export const useTestEndpoint = () => {
       const path = getPath(variables);
 
       return services.http.post<TestEndpointResponse>(path, {
-        body: JSON.stringify({ message: variables.message, documents: variables.documents }),
+        body: JSON.stringify({
+          message: variables.message,
+          documents: variables.documents,
+          checkToolCalling: variables.checkToolCalling,
+        }),
         version: ROUTE_VERSIONS.v1,
       });
     },

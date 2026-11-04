@@ -84,6 +84,27 @@ describe('Test inference endpoint route', () => {
     );
   });
 
+  it('checks tool calling for a chat endpoint when asked to', async () => {
+    chatComplete.mockResolvedValue({
+      content: '',
+      toolCalls: [{ toolCallId: '1', function: { name: 'get_weather', arguments: {} } }],
+    });
+
+    await mockRouter.callRoute({
+      params: { id: 'my-endpoint' },
+      body: { message: 'hello', checkToolCalling: true },
+    });
+
+    expect(chatComplete).toHaveBeenCalledWith(
+      expect.objectContaining({ toolChoice: 'required', tools: expect.any(Object) })
+    );
+    expect(mockRouter.response.ok).toHaveBeenCalledWith(
+      expect.objectContaining({
+        body: expect.objectContaining({ toolCheck: expect.objectContaining({ passed: true }) }),
+      })
+    );
+  });
+
   it('looks up the endpoint with the current user before testing it', async () => {
     chatComplete.mockResolvedValue({ content: 'pong', toolCalls: [] });
 

@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
+  EuiCheckbox,
   EuiCodeBlock,
   EuiFormRow,
   EuiLoadingSpinner,
@@ -26,6 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { TestEndpointResultView } from './test_endpoint_result';
+import { TestToolCheckResult } from './test_tool_check_result';
 import { useTestEndpoint } from '../../../../../../hooks/use_test_endpoint';
 import type { TestTarget } from '../../../../../../utils/test_target';
 import { getTestTargetName, getTestTargetVariables } from '../../../../../../utils/test_target';
@@ -62,6 +64,8 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
   });
   const [documents, setDocuments] = useState(() => ['toronto', 'ottawa', 'calgary'].join('\n'));
   const [showRaw, setShowRaw] = useState(false);
+  const [checkToolCalling, setCheckToolCalling] = useState(false);
+  const toolCheckId = useGeneratedHtmlId();
   const { mutate: testEndpoint, data, error, isLoading } = useTestEndpoint();
 
   const documentList = documents
@@ -105,6 +109,23 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
             data-test-subj="testEndpointMessageInput"
           />
         </EuiFormRow>
+        {taskType === 'chat_completion' && (
+          <>
+            <EuiSpacer size="s" />
+            <EuiCheckbox
+              id={toolCheckId}
+              label={i18n.translate(
+                'xpack.searchInferenceEndpoints.testEndpoint.checkToolCalling',
+                {
+                  defaultMessage: 'Check tool calling (sends a made-up get_weather tool)',
+                }
+              )}
+              checked={checkToolCalling}
+              onChange={(event) => setCheckToolCalling(event.target.checked)}
+              data-test-subj="testEndpointToolCheckbox"
+            />
+          </>
+        )}
         {isRerank && (
           <>
             <EuiSpacer size="m" />
@@ -137,6 +158,12 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
         {data?.ok && (
           <>
             {data.result && <TestEndpointResultView result={data.result} />}
+            {data.toolCheck && (
+              <>
+                <EuiSpacer size="s" />
+                <TestToolCheckResult toolCheck={data.toolCheck} />
+              </>
+            )}
             <EuiSpacer size="s" />
             <EuiText size="xs" color="subdued" data-test-subj="testEndpointLatency">
               {i18n.translate('xpack.searchInferenceEndpoints.testEndpoint.latency', {
@@ -204,6 +231,7 @@ export const TestEndpointModal: React.FC<TestEndpointModalProps> = ({
               ...targetVariables,
               message,
               ...(isRerank && { documents: documentList }),
+              ...(checkToolCalling && { checkToolCalling }),
             })
           }
           data-test-subj="testEndpointRunButton"
