@@ -38,24 +38,6 @@ export const LOOKUP_INDEX_RECREATE_ROUTE = `${LOOKUP_INDEX_ROUTE}/recreate`;
 export const LOOKUP_INDEX_PRIVILEGES_ROUTE = `${LOOKUP_INDEX_ROUTE}/privileges`;
 export const LOOKUP_INDEX_UPDATE_MAPPINGS_ROUTE = `${LOOKUP_INDEX_ROUTE}/update_mappings`;
 
-/**
- * System named param, like `?_tstart`/`?_tend`, that consumers with a map context (e.g. Maps)
- * populate with the geotile precision (0-29) matching the current zoom level.
- */
-export const GEOTILE_PRECISION_PARAM = '_geotile_precision';
-
-/**
- * System named param, like `?_geotile_precision`, that consumers with a map context (e.g. Maps)
- * populate with the H3 resolution (0-15) matching the current zoom level.
- */
-export const GEOHEX_PRECISION_PARAM = '_geohex_precision';
-
-/**
- * System named param, like `?_geotile_precision`, that consumers with a map context (e.g. Maps)
- * populate with the geohash precision (1-12) matching the current zoom level.
- */
-export const GEOHASH_PRECISION_PARAM = '_geohash_precision';
-
 export enum SOURCES_TYPES {
   INDEX = 'Index',
   TIMESERIES = 'Timeseries',

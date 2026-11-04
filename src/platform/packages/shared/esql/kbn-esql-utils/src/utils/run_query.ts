@@ -23,12 +23,12 @@ import {
   getGeotilePrecision,
   type GRID_RESOLUTION,
 } from '@kbn/geo-precision';
+import type { ESQLControlVariable } from '@kbn/esql-types';
 import {
-  type ESQLControlVariable,
   GEOHASH_PRECISION_PARAM,
   GEOHEX_PRECISION_PARAM,
   GEOTILE_PRECISION_PARAM,
-} from '@kbn/esql-types';
+} from '@kbn/esql-language';
 import { getESQLQueryVariables } from './query_parsing_helpers';
 
 const hasNamedParam = (query: string, name: string) => new RegExp(`\\?${name}\\b`, 'i').test(query);

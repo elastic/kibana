@@ -9,9 +9,6 @@
 import {
   ControlTriggerSource,
   ESQLVariableType,
-  GEOHASH_PRECISION_PARAM,
-  GEOHEX_PRECISION_PARAM,
-  GEOTILE_PRECISION_PARAM,
   type ESQLControlVariable,
 } from '@kbn/esql-types';
 import { i18n } from '@kbn/i18n';
@@ -22,6 +19,27 @@ import { getControlSuggestion } from './autocomplete/helpers';
 import type { FunctionParameterType, SupportedDataType } from '../types';
 import { commaCompleteItem } from '../../registry/complete_items';
 import { SuggestionCategory } from '../../../language/autocomplete/utils/sorting/types';
+
+/**
+ * System named param populated with a geotile precision (0-29) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOTILE`.
+ */
+export const GEOTILE_PRECISION_PARAM = '_geotile_precision';
+
+/**
+ * System named param populated with an H3 resolution (0-15) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOHEX`.
+ */
+export const GEOHEX_PRECISION_PARAM = '_geohex_precision';
+
+/**
+ * System named param populated with a geohash precision (1-12) derived from the current
+ * geospatial map zoom level.
+ * Intended for the `precision` argument of `ST_GEOHASH`.
+ */
+export const GEOHASH_PRECISION_PARAM = '_geohash_precision';
 
 export const TIME_SYSTEM_PARAMS = ['?_tstart', '?_tend'];
 export const GEOTILE_PRECISION_SYSTEM_PARAM = `?${GEOTILE_PRECISION_PARAM}`;

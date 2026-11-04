@@ -26,6 +26,9 @@ export { getRecommendedQueriesTemplates } from './registry/options/recommended_q
 export type { QueryTemplate } from './registry/options/recommended_queries';
 export {
   TIME_SYSTEM_PARAMS,
+  GEOTILE_PRECISION_PARAM,
+  GEOHEX_PRECISION_PARAM,
+  GEOHASH_PRECISION_PARAM,
   GEOTILE_PRECISION_SYSTEM_PARAM,
   GEOHEX_PRECISION_SYSTEM_PARAM,
   GEOHASH_PRECISION_SYSTEM_PARAM,
