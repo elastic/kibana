@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { ExpressionSpecification, Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from '../dynamic_style_property';
 import { MarkerSizeLegend, OrdinalLegend } from '../../components/legend/size';
 import { makeMbClampedNumberExpression } from '../../style_util';
@@ -73,21 +73,31 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
     mbMap.setLayoutProperty(mbLayerId, 'text-size', this.getMbSizeExpression());
   }
 
+  getMbSizeExpression(): number | ExpressionSpecification | undefined {
+    const interpolateExpression = this.getMbInterpolateSizeExpression();
+    if (interpolateExpression) {
+      return interpolateExpression;
+    }
+
+    // return min of size to avoid flashing
+    // returning minimum allows "growing" of the symbols when the meta comes in
+    // A grow effect us less visually jarring as shrinking.
+    // especially relevant when displaying fine-grained grids using mvt
+    return this._options.minSize >= 0 ? this._options.minSize : undefined;
+  }
+
   /*
    * Returns interpolation expression linearly translating domain values [minValue, maxValue] to display range [minSize, maxSize]
+   * Returns undefined when size config or field meta is not available
    */
-  getMbSizeExpression(options?: {
+  getMbInterpolateSizeExpression(options?: {
     forceFeatureProperties?: boolean;
-    maxStopOutput?: unknown;
-    minStopOutput?: unknown;
-  }) {
+    maxStopOutput?: number | ExpressionSpecification;
+    minStopOutput?: number | ExpressionSpecification;
+  }): ExpressionSpecification | undefined {
     const rangeFieldMeta = this.getRangeFieldMeta();
     if (!this.isSizeDynamicConfigComplete() || !rangeFieldMeta) {
-      // return min of size to avoid flashing
-      // returning minimum allows "growing" of the symbols when the meta comes in
-      // A grow effect us less visually jarring as shrinking.
-      // especially relevant when displaying fine-grained grids using mvt
-      return this._options.minSize >= 0 ? this._options.minSize : null;
+      return undefined;
     }
 
     const isArea = this.getStyleName() === VECTOR_STYLES.ICON_SIZE;
@@ -127,9 +137,9 @@ export class DynamicSizeProperty extends DynamicStyleProperty<SizeDynamicOptions
       fieldName: this.getMbFieldName(),
       fallback: invert ? rangeFieldMeta.max : rangeFieldMeta.min,
     });
-    const valueShiftExpression =
+    const valueShiftExpression: ExpressionSpecification =
       rangeFieldMeta.min < 1 ? ['+', valueExpression, valueShift] : valueExpression;
-    const sqrtValueExpression = ['sqrt', valueShiftExpression];
+    const sqrtValueExpression: ExpressionSpecification = ['sqrt', valueShiftExpression];
     const inputExpression = isArea ? sqrtValueExpression : valueExpression;
 
     return ['interpolate', ['linear'], inputExpression, ...stops];

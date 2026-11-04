@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiTextColor } from '@elastic/eui';
-import type { Map as MbMap } from '@kbn/mapbox-gl';
+import type { ExpressionSpecification, Map as MbMap } from '@kbn/mapbox-gl';
 import { DynamicStyleProperty } from './dynamic_style_property';
 import type { IVectorStyle } from '../vector_style';
 import { getIconPalette, getMakiSymbolAnchor } from '../symbol_utils';
@@ -35,8 +35,8 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
       mbMap.setLayoutProperty(symbolLayerId, 'icon-image', this._getMbIconImageExpression());
       mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', this._getMbIconAnchorExpression());
     } else {
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', null);
-      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', null);
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-image', undefined);
+      mbMap.setLayoutProperty(symbolLayerId, 'icon-anchor', undefined);
     }
   }
 
@@ -65,15 +65,15 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     });
   }
 
-  _getMbIconImageExpression() {
+  _getMbIconImageExpression(): ExpressionSpecification | undefined {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
-      return null;
+      return undefined;
     }
 
-    const mbStops = [];
+    const mbStops: string[] = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
       mbStops.push(style);
@@ -82,18 +82,22 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       mbStops.push(fallbackSymbolId); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return [
+      'match',
+      ['to-string', ['get', this.getMbFieldName()]],
+      ...mbStops,
+    ] as ExpressionSpecification;
   }
 
-  _getMbIconAnchorExpression() {
+  _getMbIconAnchorExpression(): ExpressionSpecification | undefined {
     const { stops, fallbackSymbolId } = this._getPaletteStops();
 
     if (stops.length < 1 || !fallbackSymbolId) {
       // occurs when no data
-      return null;
+      return undefined;
     }
 
-    const mbStops = [];
+    const mbStops: string[] = [];
     stops.forEach(({ stop, style }) => {
       mbStops.push(`${stop}`);
       mbStops.push(getMakiSymbolAnchor(style));
@@ -102,7 +106,11 @@ export class DynamicIconProperty extends DynamicStyleProperty<IconDynamicOptions
     if (fallbackSymbolId) {
       mbStops.push(getMakiSymbolAnchor(fallbackSymbolId)); // last item is fallback style for anything that does not match provided stops
     }
-    return ['match', ['to-string', ['get', this.getMbFieldName()]], ...mbStops];
+    return [
+      'match',
+      ['to-string', ['get', this.getMbFieldName()]],
+      ...mbStops,
+    ] as ExpressionSpecification;
   }
 
   _isIconDynamicConfigComplete() {

@@ -9,7 +9,12 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { asyncForEach } from '@kbn/std';
-import type { FilterSpecification, Map as MbMap, LayerSpecification } from '@kbn/mapbox-gl';
+import type {
+  ExpressionSpecification,
+  FilterSpecification,
+  Map as MbMap,
+  LayerSpecification,
+} from '@kbn/mapbox-gl';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { Query } from '@kbn/data-plugin/common';
 import type { Feature, FeatureCollection, GeoJsonProperties, Geometry, Position } from 'geojson';
@@ -862,7 +867,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
   // feature-state is not supported in filter expressions
   // https://github.com/mapbox/mapbox-gl-js/issues/8487
   // therefore, masking must be accomplished via setting opacity paint property (hack)
-  _getAlphaExpression() {
+  _getAlphaExpression(): number | ExpressionSpecification {
     const maskCaseExpressions: unknown[] = [];
     this.getMasks().forEach((mask) => {
       // case expressions require 2 parts
@@ -873,7 +878,7 @@ export class AbstractVectorLayer extends AbstractLayer implements IVectorLayer {
     });
 
     return maskCaseExpressions.length
-      ? ['case', ...maskCaseExpressions, this.getAlpha()]
+      ? (['case', ...maskCaseExpressions, this.getAlpha()] as ExpressionSpecification)
       : this.getAlpha();
   }
 

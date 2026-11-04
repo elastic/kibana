@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type { ExpressionSpecification } from '@kbn/mapbox-gl';
 import type { MB_LOOKUP_FUNCTION, VECTOR_STYLES } from '../../../../common/constants';
 import { ICON_SOURCE } from '../../../../common/constants';
 import type { Category } from '../../../../common/descriptor_types';
@@ -84,13 +85,18 @@ export function makeMbClampedNumberExpression({
   minValue: number;
   maxValue: number;
   fallback: number;
-}) {
-  const clamp = ['max', ['min', ['to-number', [lookupFunction, fieldName]], maxValue], minValue];
+}): ExpressionSpecification {
+  const lookup: ExpressionSpecification = [lookupFunction, fieldName];
+  const clamp: ExpressionSpecification = [
+    'max',
+    ['min', ['to-number', lookup], maxValue],
+    minValue,
+  ];
   return [
     'coalesce',
     [
       'case',
-      ['==', [lookupFunction, fieldName], null],
+      ['==', lookup, null],
       fallback, // == does a JS-y like check where returns true for null and undefined
       clamp,
     ],

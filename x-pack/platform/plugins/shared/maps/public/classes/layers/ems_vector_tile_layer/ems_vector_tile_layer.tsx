@@ -379,7 +379,16 @@ export class EmsVectorTileLayer extends AbstractLayer {
     this._setTileLayerProperties(mbMap);
   }
 
-  _getOpacityProps(layerType: string): string[] {
+  _getOpacityProps(
+    layerType: string
+  ): Array<
+    | 'fill-opacity'
+    | 'line-opacity'
+    | 'circle-opacity'
+    | 'background-opacity'
+    | 'icon-opacity'
+    | 'text-opacity'
+  > {
     if (layerType === 'fill') {
       return ['fill-opacity'];
     }

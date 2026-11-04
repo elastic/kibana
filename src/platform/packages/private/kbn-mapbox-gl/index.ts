@@ -32,20 +32,13 @@ import type {
   CustomLayerInterface,
   FilterSpecification,
   FeatureIdentifier,
+  ExpressionSpecification,
 } from 'maplibre-gl';
 
 import mbRtlPlugin from '@mapbox/mapbox-gl-rtl-text/mapbox-gl-rtl-text.min.js?asUrl';
 import mbWorkerUrl from 'maplibre-gl/dist/maplibre-gl-worker.mjs?asUrl';
 import 'maplibre-gl/dist/maplibre-gl-shared.mjs?asUrl';
 import 'maplibre-gl/dist/maplibre-gl.css';
-
-// Kibana builds style expressions at runtime and clears properties with null.
-declare module 'maplibre-gl' {
-  interface Map {
-    setPaintProperty<Value>(layerId: string, name: string, value: Value): this;
-    setLayoutProperty<Value>(layerId: string, name: string, value: Value): this;
-  }
-}
 
 maplibregl.setWorkerUrl(mbWorkerUrl);
 maplibregl.setRTLTextPlugin(mbRtlPlugin, true);
@@ -76,4 +69,5 @@ export type {
   CustomLayerInterface,
   FilterSpecification,
   FeatureIdentifier,
+  ExpressionSpecification,
 };
