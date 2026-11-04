@@ -23,8 +23,26 @@ export const toPathSegment = (value: string): string => {
   return segment;
 };
 
-/** Pretty JSON with a trailing newline, so captured files diff cleanly. */
-export const toStableJson = (value: unknown): string => `${JSON.stringify(value, null, 2)}\n`;
+const sortKeys = (value: unknown): unknown => {
+  if (Array.isArray(value)) {
+    return value.map(sortKeys);
+  }
+  if (typeof value === 'object' && value !== null) {
+    return Object.fromEntries(
+      Object.keys(value)
+        .sort()
+        .map((key) => [key, sortKeys((value as Record<string, unknown>)[key])])
+    );
+  }
+  return value;
+};
+
+/**
+ * Pretty JSON with sorted keys and a trailing newline, so captured files diff cleanly: key order
+ * in Elasticsearch responses and Kibana state is not stable, and carries no meaning.
+ */
+export const toStableJson = (value: unknown): string =>
+  `${JSON.stringify(sortKeys(value), null, 2)}\n`;
 
 /**
  * The capture layout, relative to the output root:
@@ -36,6 +54,8 @@ export const toStableJson = (value: unknown): string => `${JSON.stringify(value,
  * <dashboard>/visualizations/<ref_id>.json
  * <dashboard>/panels/<panel>/config.json
  * <dashboard>/panels/<panel>/<theme>/{capture.json,screenshot.png}
+ * round_trip/<dashboard>.json
+ * round_trip/report.md
  * ```
  */
 export const capturePaths = {
@@ -49,6 +69,8 @@ export const capturePaths = {
     Path.join(toPathSegment(dashboard), 'panels', toPathSegment(panel), 'config.json'),
   panelCapture: (dashboard: string, panel: string, theme: Theme) =>
     Path.join(toPathSegment(dashboard), 'panels', toPathSegment(panel), theme, 'capture.json'),
+  roundTrip: (dashboard: string) => Path.join('round_trip', `${toPathSegment(dashboard)}.json`),
+  roundTripReport: () => Path.join('round_trip', 'report.md'),
   panelScreenshot: (dashboard: string, panel: string, theme: Theme) =>
     Path.join(toPathSegment(dashboard), 'panels', toPathSegment(panel), theme, 'screenshot.png'),
 };
@@ -57,6 +79,7 @@ export interface CaptureWriter {
   root: string;
   writeJson: (relativePath: string, value: unknown) => void;
   writeBinary: (relativePath: string, contents: Buffer) => void;
+  writeText: (relativePath: string, contents: string) => void;
 }
 
 export const createCaptureWriter = (root: string): CaptureWriter => {
@@ -74,5 +97,6 @@ export const createCaptureWriter = (root: string): CaptureWriter => {
     writeJson: (relativePath, value) =>
       Fs.writeFileSync(resolve(relativePath), toStableJson(value)),
     writeBinary: (relativePath, contents) => Fs.writeFileSync(resolve(relativePath), contents),
+    writeText: (relativePath, contents) => Fs.writeFileSync(resolve(relativePath), contents),
   };
 };

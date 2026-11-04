@@ -54,7 +54,8 @@ export interface ChartReading {
 
 export interface PanelReading {
   found: boolean;
-  rect: { x: number; y: number; width: number; height: number } | null;
+  /** The panel's size. Its position is the grid position in the as-code config. */
+  rect: { width: number; height: number } | null;
   title: string | null;
   renderComplete: boolean;
   errorText: string | null;
@@ -172,7 +173,7 @@ export function readPanel(panelId: string): string {
 
   const reading: PanelReading = {
     found: true,
-    rect: { x: panelRect.x, y: panelRect.y, width: panelRect.width, height: panelRect.height },
+    rect: { width: panelRect.width, height: panelRect.height },
     title: titleElement ? (titleElement.textContent || '').trim() : null,
     renderComplete: renderElement
       ? renderElement.getAttribute('data-render-complete') === 'true'

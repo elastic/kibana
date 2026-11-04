@@ -32,7 +32,36 @@ Each dashboard also has `dashboard.json` (the as-code response, `warnings` inclu
 
 Panels the as-code API can't express (Maps and legacy visualizations, reported as `dropped_panel` warnings) still render, so they're captured too, with `in_as_code: false` and no config.
 
-Saved object bookkeeping (`meta.created_at`, `meta.updated_at`, `meta.version`) and FTR's URL cache buster are left out, so recapturing unchanged content changes no file. The screenshots are not committed: they're binary and only for review. Each run writes them next to the JSON.
+Saved object bookkeeping (`meta.created_at`, `meta.updated_at`, `meta.version`) and FTR's URL cache buster are left out, and JSON keys are sorted, so recapturing unchanged content changes no file. One known exception: two ES|QL panels on the Logs dashboard (`[Logs] Errors by host`, `[Logs] Bytes distribution`) sort with ties, so Elasticsearch returns tied rows in any order, and their inspector rows and drawn order can change between runs. That comes from the sample dashboard's own queries. The screenshots are not committed: they're binary and only for review. Each run writes them next to the JSON.
+
+## Round trip (P0 verify)
+
+The `round trip` tests write `captures/round_trip/report.md` and one JSON file per sample dashboard. For every Lens panel they compare the migrated stored state the dashboard app reads (`GET /internal/dashboards/app/{id}`) with the stored state after a trip through the API format (`GET /api/dashboards/{id}`, then `PUT` of a copy, then the same read). Generated layer and column IDs are aliased before comparing, so only real differences remain. The report also checks that the API config itself is stable across the trip.
+
+From the current report (Kibana 9.7.0), all 31 Lens panels on the three sample dashboards convert, the API config is stable on every one, and the stored state differs on every one. The differences that change what a panel can draw, checked against the panel's API config in `captures/sample-*/panels/*/config.json`:
+
+- **Custom axis bounds become `full`.** `[Flights] Delays & Cancellations` stores a custom y extent (upper bound `1`); its API config has `axis.y.domain.type: "full"`.
+- **Custom palette stops are dropped.** Metric and datatable panels with custom color stops (`Sold Products per Day`, `Daily comparison`, `[Flights] Most delayed cities`, `[Logs] Errors by host`) lose `palette.params.stops`, and some flip `reverse`.
+- **XY color mapping is dropped.** `[Logs] Bytes distribution` loses its `colorMapping` (`eui_amsterdam_color_blind`).
+- **Datatable row height** changes from `single` to `custom`.
+- **The attributes' `title`** becomes empty. The panel keeps its title at panel level, so this only matters for by-reference reuse.
+
+Most other rows are representation, not loss: formula helper columns (`math`, and the `count` columns a formula references, including their `timeShift` and `filter`) aren't stored, because Lens rebuilds them from the formula text. Filters are stored in a different form with renamed references, and defaults are filled in (listed under "Added"). Gate A should confirm the palette and axis differences against the captured `DebugState`.
+
+## Agent Builder's Lens config (P0 verify)
+
+Read from `x-pack/platform/plugins/shared/agent_builder_visualizations` and `x-pack/platform/packages/shared/agent_builder_visualizations`; nothing there was changed.
+
+- **Format:** the Lens API format, **ES|QL variant only**. Each authored config is validated with that chart's `*ConfigSchemaESQL` from `@kbn/lens-embeddable-utils` (`agent-builder-visualizations-server/lens/chart_type_registry.ts:91`, `graph_lens.ts:115`).
+- **Chart types:** `metric`, `gauge`, `tag_cloud`, `xy`, `region_map`, `heatmap`, `data_table`, `pie`, `treemap`, `waffle`, `mosaic` (`SupportedChartType`, `agent-builder-common/tools/tool_result.ts:115`). No `legacy_metric`.
+- **Data source:** the model writes the config without `data_source`. The tool generates or validates one ES|QL query and injects `{ type: 'esql', query }` on the config, or on every layer for `xy` (`graph_lens.ts:127`, `graph_lens.ts:399`). Dimensions bind to result columns with `column`.
+- **Time:** queries bucket with `BUCKET(field, n, ?_tstart, ?_tend)` or `TBUCKET(n, ?_tstart, ?_tend)`, which Kibana binds when the chart renders (`shared/esql_instructions.ts:52`). The attachment's `time_range` comes from probing the data's min and max: relative (`now-Nh`, `now-Nd/d`) when the data is current, absolute otherwise (`time_range/select_time_range.ts:94`).
+- **Presentation defaults from the prompt rules:** for example `xy` hides axis titles and puts the legend at the bottom with `visibility: "auto"`; `metric` uses `background_chart: { type: "trend" }` and colors only bounded measures, with `@kbn/palettes` status steps (`chart_type_registry.ts`, `lens/config_examples.ts`).
+- **Attachment payload:** `{ renderer: 'lens', query, visualization: <Lens API config>, chart_type, esql, time_range? }` (`agent-builder-visualizations-common/visualization_types.ts:26`).
+- **By reference:** an attachment that points at a Lens saved object is converted with `LensConfigBuilder.toAPIFormat` (`server/attachment_types/visualization.ts:87`), so that path can carry data-view configs, not only ES|QL.
+- **Datasets:** whatever index the agent grounds and passes as `index` (`server/tools/create_visualization/create_visualization.ts:177`); there is no fixed dataset. The evals use `kibana_sample_data_logs`, `kibana_sample_data_ecommerce` and `kibana_sample_data_flights`.
+
+The ES|QL panels in the edge-case dashboards cover this shape. They don't use the prompt's presentation defaults, which a future Agent Builder-style corpus dashboard could add.
 
 ## Capturing
 
@@ -42,8 +71,11 @@ Run on demand: when the corpus changes, when Kibana's rendering changes, or befo
 # Elasticsearch and Kibana, the way FTR runs them
 node scripts/functional_tests_server --config x-pack/platform/test/isomer_corpus/config.ts
 
-# In another shell: capture every dashboard into ./captures
+# In another shell: capture every dashboard and run the round trip, into ./captures
 node scripts/functional_test_runner --config x-pack/platform/test/isomer_corpus/config.ts
+
+# Only the round trip (no browser screenshots, a few seconds)
+node scripts/functional_test_runner --config x-pack/platform/test/isomer_corpus/config.ts --grep "round trip"
 ```
 
 | Variable | Default | Effect |

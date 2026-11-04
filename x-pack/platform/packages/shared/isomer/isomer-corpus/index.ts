@@ -52,3 +52,13 @@ export type {
   PanelReading,
   RenderContextReading,
 } from './src/browser_readers';
+export {
+  diffJson,
+  diffLensAttributes,
+  getLensIdAliases,
+  replaceIds,
+  toFieldPattern,
+} from './src/round_trip';
+export type { JsonDifference } from './src/round_trip';
+export { renderRoundTripReport } from './src/round_trip_report';
+export type { RoundTripDashboardResult, RoundTripPanelResult } from './src/round_trip_report';

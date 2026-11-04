@@ -26,6 +26,16 @@ describe('toPathSegment', () => {
   });
 });
 
+describe('toStableJson', () => {
+  it('sorts object keys at every depth and keeps array order', () => {
+    expect(toStableJson({ b: { d: 1, c: 2 }, a: [{ z: 1, y: 2 }, 3] })).toBe(
+      toStableJson({ a: [{ y: 2, z: 1 }, 3], b: { c: 2, d: 1 } })
+    );
+    expect(JSON.parse(toStableJson({ b: 1, a: 2 }))).toEqual({ a: 2, b: 1 });
+    expect(Object.keys(JSON.parse(toStableJson({ b: 1, a: 2 })))).toEqual(['a', 'b']);
+  });
+});
+
 describe('capturePaths', () => {
   it('lays out panel captures per dashboard, panel and theme', () => {
     expect(capturePaths.panelCapture('sample-flights', 'abc', 'dark')).toBe(
@@ -52,7 +62,7 @@ describe('createCaptureWriter', () => {
     const writer = createCaptureWriter(root);
     writer.writeJson('a/b/c.json', { b: 1, a: [1, 2] });
     expect(Fs.readFileSync(Path.join(root, 'a/b/c.json'), 'utf8')).toBe(
-      toStableJson({ b: 1, a: [1, 2] })
+      '{\n  "a": [\n    1,\n    2\n  ],\n  "b": 1\n}\n'
     );
   });
 

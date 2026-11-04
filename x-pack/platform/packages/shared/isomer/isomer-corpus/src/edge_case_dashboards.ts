@@ -143,7 +143,7 @@ const valuesDashboard: EdgeCaseDashboard = {
           {
             type: 'area',
             data_source: esql(
-              `FROM ${EDGE_CASE_INDEX} | STATS total = SUM(huge) BY day = BUCKET(${EDGE_CASE_TIME_FIELD}, 1 day)`
+              `FROM ${EDGE_CASE_INDEX} | STATS total = SUM(huge) BY day = BUCKET(${EDGE_CASE_TIME_FIELD}, 1 day) | SORT day`
             ),
             x: { column: 'day' },
             y: [{ column: 'total' }],
@@ -262,7 +262,7 @@ const bucketsDashboard: EdgeCaseDashboard = {
           {
             type: 'bar_horizontal',
             data_source: esql(
-              `FROM ${EDGE_CASE_INDEX} | MV_EXPAND tags | STATS count = COUNT(*) BY tags | SORT count DESC`
+              `FROM ${EDGE_CASE_INDEX} | MV_EXPAND tags | STATS count = COUNT(*) BY tags | SORT count DESC, tags`
             ),
             x: { column: 'tags' },
             y: [{ column: 'count' }],
@@ -277,7 +277,7 @@ const bucketsDashboard: EdgeCaseDashboard = {
         type: 'data_table',
         title: 'Counts per category, including the missing value (ES|QL)',
         data_source: esql(
-          `FROM ${EDGE_CASE_INDEX} | STATS count = COUNT(*), signed = SUM(signed) BY category | SORT count DESC`
+          `FROM ${EDGE_CASE_INDEX} | STATS count = COUNT(*), signed = SUM(signed) BY category | SORT count DESC, category`
         ),
         rows: [{ column: 'category' }],
         metrics: [{ column: 'count' }, { column: 'signed' }],
