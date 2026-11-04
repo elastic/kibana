@@ -440,4 +440,74 @@ describe('collectWorkerArtifacts', () => {
     expect(artifacts.insights[0]).toMatchObject({ id: 'a', alertIds: ['gold-1'], title: 'Chain' });
     expect(search).toHaveBeenCalledTimes(1);
   });
+
+  const evictedRun = (extra: unknown[]) =>
+    ({
+      id: 'run-3',
+      status: 'completed',
+      stepExecutions: [
+        { id: 'g', stepId: 'run_generation', status: 'completed' },
+        step('match_fingerprints', 'completed', {
+          reviews: [{ attack_discovery_id: 'a' }],
+          attachments: [],
+        }),
+        ...extra,
+      ],
+    } as unknown as WorkflowExecutionDto);
+
+  const collectEvicted = async (run: WorkflowExecutionDto, count: jest.Mock) =>
+    collectWorkerArtifacts({
+      client: { track: jest.fn() } as unknown as AttackDiscoveryWorkerClient,
+      esClient: {
+        search: jest.fn().mockResolvedValue({
+          hits: {
+            hits: [
+              {
+                _source: {
+                  'kibana.alert.uuid': 'a',
+                  'kibana.alert.rule.execution.uuid': 'u-doc',
+                },
+              },
+            ],
+          },
+        }),
+        count,
+      } as unknown as Client,
+      run,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log: { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog,
+    });
+
+  it('scopes the indexed count by the emit_result uuids when run_generation output was evicted', async () => {
+    const count = jest.fn().mockResolvedValue({ count: 1 });
+    const artifacts = await collectEvicted(
+      evictedRun([step('emit_result', 'completed', { execution_uuids: 'u1, u2' })]),
+      count
+    );
+    expect(artifacts.indexedAttackCount).toBe(1);
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { terms: { 'kibana.alert.rule.execution.uuid': ['u1', 'u2'] } },
+      })
+    );
+  });
+
+  it('falls back to the uuids the persisted documents carry when no runner output has them', async () => {
+    const count = jest.fn().mockResolvedValue({ count: 1 });
+    const artifacts = await collectEvicted(evictedRun([]), count);
+    expect(artifacts.indexedAttackCount).toBe(1);
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { terms: { 'kibana.alert.rule.execution.uuid': ['u-doc'] } },
+      })
+    );
+  });
 });

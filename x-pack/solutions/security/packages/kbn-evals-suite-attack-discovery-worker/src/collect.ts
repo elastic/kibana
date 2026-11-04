@@ -465,6 +465,18 @@ export const countIndexedAttacks = async ({
   }
 };
 
+/**
+ * Last-resort scope for the indexed count when neither runner output reported the generation
+ * uuids: the uuids the persisted documents carry themselves. Undefined when none was read, so
+ * the count stays unreadable instead of reporting a false zero.
+ */
+const persistedExecutionUuids = (
+  docs: readonly Record<string, unknown>[]
+): string[] | undefined => {
+  const uuids = distinct(docs.map((doc) => asString(readField(doc, EXECUTION_UUID_FIELD))));
+  return uuids.length > 0 ? uuids : undefined;
+};
+
 /** Every attack id `match_fingerprints` handed back, as a review or an attachment. */
 const attackIdsOf = (matchOutput: Record<string, unknown> | undefined): string[] =>
   distinct(
@@ -582,6 +594,9 @@ export const collectWorkerArtifacts = async ({
   const emit = outputOf(firstStep(run, 'emit_result'));
   const match = firstStep(run, MATCH_FINGERPRINTS_STEP_ID);
   const matchOutput = outputOf(match);
+  // `run_generation` carries the discovery documents, so the engine can evict its whole output;
+  // `emit_result` repeats the generation uuids as a small string and survives.
+  const generationUuids = generation?.execution_uuids ?? emit?.execution_uuids;
   const reported = (
     Array.isArray(generation?.attack_discoveries) ? generation.attack_discoveries : []
   )
@@ -594,7 +609,7 @@ export const collectWorkerArtifacts = async ({
           esClient,
           spaceId,
           attackIds: attackIdsOf(matchOutput),
-          executionUuids: generation?.execution_uuids,
+          executionUuids: generationUuids,
           log,
         });
   if (reported.length === 0) {
@@ -641,7 +656,7 @@ export const collectWorkerArtifacts = async ({
   const indexedAttackCount = await countIndexedAttacks({
     esClient,
     spaceId,
-    executionUuids: generation?.execution_uuids,
+    executionUuids: generationUuids ?? persistedExecutionUuids(docs),
     log,
   });
   log.info(
