@@ -6,6 +6,7 @@
  */
 
 import { entitySchema } from '@kbn/entity-store/common';
+import { resolveIdentityPlan } from '../inventory/generator';
 import { MANAGED_BY } from './constants';
 import { k8sDeploymentDefinition } from './kubernetes/k8s_deployment';
 import { ENTITY_DEFINITIONS } from '.';
@@ -35,5 +36,9 @@ describe('registered entity definitions', () => {
 
   it.each(cases)('%s carries no extraction block', (_type, definition) => {
     expect(definition.extraction).toBeUndefined();
+  });
+
+  it.each(cases)('%s identity compiles to a stable plan', (_type, definition) => {
+    expect(resolveIdentityPlan(definition)).toMatchSnapshot();
   });
 });
