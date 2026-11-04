@@ -12,54 +12,57 @@ import path from 'path';
 import { parse } from 'yaml';
 import { renderSteps } from './render.ts';
 import { normalizeSemantics } from './semantic_normalization.ts';
-import { prBaseEnv, prBaseSteps } from './steps/pull_request_base.ts';
-import { apiContracts } from './steps/api_contracts.ts';
-import { codeQuality } from './steps/code_quality.ts';
-import { kbnHandlebars } from './steps/kbn_handlebars.ts';
-import { promptChanges } from './steps/prompt_changes.ts';
-import { syncModelLabels } from './steps/sync_model_labels.ts';
-import { buildFipsImage } from './steps/build_fips_image.ts';
-import { buildCloudFipsImageSteps } from './steps/build_cloud_fips_image.ts';
-import { buildCloudImageSteps, deployCloudSteps } from './steps/cloud.ts';
-import { buildProjectSteps, deployProjectSteps } from './steps/project.ts';
-import { checkNextDocs } from './steps/check_next_docs.ts';
-import { checkOasSnapshot } from './steps/check_oas_snapshot.ts';
-import { checkSavedObjects } from './steps/check_saved_objects.ts';
-import { cpsTests } from './steps/cps_testing.ts';
-import { entityStorePerformanceSteps as entityStoreSteps } from './steps/trigger_entity_store_performance.ts';
-import { agentBuilderSmokeTestsSteps } from './steps/agent_builder_smoke_tests.ts';
-import { aiInfraGenAiSteps } from './steps/ai_infra_gen_ai.ts';
 import {
+  prBaseEnv,
+  prBaseSteps,
+  apiContracts,
+  codeQuality,
+  kbnHandlebars,
+  promptChanges,
+  syncModelLabels,
+  buildFipsImage,
+  buildCloudFipsImageSteps,
+  buildCloudImageSteps,
+  deployCloudSteps,
+  buildProjectSteps,
+  deployProjectSteps,
+  checkNextDocs,
+  checkOasSnapshot,
+  checkSavedObjects,
+  cpsTests,
+  entityStorePerformanceSteps as entityStoreSteps,
+  agentBuilderSmokeTestsSteps,
+  aiInfraGenAiSteps,
   ftrBenchSteps,
   jestBenchSteps,
   pageLoadBenchSteps,
   warmStartMemoryBenchSteps,
-} from './steps/benchmarks.ts';
-import { fleetCypressSteps } from './steps/fleet_cypress.ts';
-import { localCheck } from './steps/local_check.ts';
-import { postBuildSteps } from './steps/post_build.ts';
-import { renovateValidation } from './steps/renovate.ts';
-import { responseOpsCasesSteps } from './steps/response_ops_cases.ts';
-import { responseOpsSteps } from './steps/response_ops.ts';
-import { scoutFleetRealAgentSteps } from './steps/scout_fleet_real_agent.ts';
-import { storybooks } from './steps/storybooks.ts';
-import { verifyFipsEnabled } from './steps/verify_fips_enabled.ts';
-import { workflowsOomTestingSteps } from './steps/workflows_oom_testing.ts';
-import { ai4dsocSteps } from './steps/security_solution/ai4dsoc.ts';
-import { aiAssistantSteps } from './steps/security_solution/ai_assistant.ts';
-import { assetInventorySteps } from './steps/security_solution/asset_inventory.ts';
-import { cloudSecurityPostureSteps } from './steps/security_solution/cloud_security_posture.ts';
-import { cspmAgentlessScoutSteps } from './steps/security_solution/cspm_agentless_scout.ts';
-import { cypressBurnSteps } from './steps/security_solution/cypress_burn.ts';
-import { defendWorkflowsSteps } from './steps/security_solution/defend_workflows.ts';
-import { detectionEngineSteps } from './steps/security_solution/detection_engine.ts';
-import { entityAnalyticsSteps } from './steps/security_solution/entity_analytics.ts';
-import { exploreSteps } from './steps/security_solution/explore.ts';
-import { securitySolutionGenAiEvalsSteps } from './steps/security_solution/gen_ai_evals.ts';
-import { investigationsSteps } from './steps/security_solution/investigations.ts';
-import { osqueryCypressSteps } from './steps/security_solution/osquery_cypress.ts';
-import { ruleManagementSteps } from './steps/security_solution/rule_management.ts';
-import { scoutEdrRealFleetSteps } from './steps/security_solution/scout_edr_real_fleet.ts';
+  fleetCypressSteps,
+  localCheck,
+  postBuildSteps,
+  renovateValidation,
+  responseOpsCasesSteps,
+  responseOpsSteps,
+  scoutFleetRealAgentSteps,
+  storybooks,
+  verifyFipsEnabled,
+  workflowsOomTestingSteps,
+  ai4dsocSteps,
+  aiAssistantSteps,
+  assetInventorySteps,
+  cloudSecurityPostureSteps,
+  cspmAgentlessScoutSteps,
+  cypressBurnSteps,
+  defendWorkflowsSteps,
+  detectionEngineSteps,
+  entityAnalyticsSteps,
+  exploreSteps,
+  securitySolutionGenAiEvalsSteps,
+  investigationsSteps,
+  osqueryCypressSteps,
+  ruleManagementSteps,
+  scoutEdrRealFleetSteps,
+} from './index.ts';
 import type { Step } from './types.ts';
 import { getKibanaDir } from '#pipeline-utils/get_kibana_dir';
 
