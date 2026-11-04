@@ -8,6 +8,7 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
+  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
@@ -160,14 +161,6 @@ export const NotebookHeader = ({
       itemLimit: 4,
       items: [
         {
-          id: 'runAll',
-          order: 1,
-          label: i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' }),
-          iconType: 'play',
-          testId: 'notebookRunAll',
-          run: () => scheduler.runAll(),
-        },
-        {
           id: 'graph',
           order: 2,
           label: i18n.translate('xpack.notebook.header.graph', { defaultMessage: 'Graph' }),
@@ -208,7 +201,7 @@ export const NotebookHeader = ({
           }
         : {}),
     }),
-    [scheduler, onSave, isSaving, isDirty, sidePanel, onToggleSidePanel]
+    [onSave, isSaving, isDirty, sidePanel, onToggleSidePanel]
   );
 
   return (
@@ -242,6 +235,16 @@ export const NotebookHeader = ({
             <PinnedTimePicker cell={pinnedTime} />
           </EuiFlexItem>
         )}
+        <EuiFlexItem grow={false}>
+          <EuiButton
+            size="s"
+            iconType="play"
+            onClick={() => scheduler.runAll()}
+            data-test-subj="notebookRunAll"
+          >
+            {i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' })}
+          </EuiButton>
+        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <NotebookDescription />
