@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useLayoutEffect, useRef } from 'react';
+import React, { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { createRoot } from 'react-dom/client';
 import { flushSync } from 'react-dom';
 import type { OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -19,6 +19,9 @@ import {
   FlagsFlyout,
   type FeatureFlagsHelperHttp,
 } from './flags_flyout';
+
+/** Dispatched by the developer toolbar when its feature flags helper setting changes. */
+const FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE = 'feature-flags-helper-toolbar-change';
 export interface MountFeatureFlagsHelperDeps {
   http: FeatureFlagsHelperHttp;
   overlays: Pick<OverlayStart, 'openFlyout'>;
@@ -70,6 +73,12 @@ function FeatureFlagsHelper({
   bindOpen,
 }: MountFeatureFlagsHelperDeps & { bindOpen: (open: () => void) => void }) {
   const flyoutRef = useRef<OverlayRef | undefined>(undefined);
+  const [inToolbar, setInToolbar] = useState(() => globalThis.featureFlagsHelperInToolbar === true);
+  useEffect(() => {
+    const sync = () => setInToolbar(globalThis.featureFlagsHelperInToolbar === true);
+    window.addEventListener(FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE, sync);
+    return () => window.removeEventListener(FEATURE_FLAGS_HELPER_TOOLBAR_CHANGE, sync);
+  }, []);
 
   const toggleFlyout = () => {
     if (flyoutRef.current) {
@@ -120,8 +129,8 @@ function FeatureFlagsHelper({
     bindOpen(() => toggleRef.current());
   }, [bindOpen]);
 
-  // The developer toolbar pill is the button when that toolbar is running.
-  if (globalThis.featureFlagsHelperInToolbar) {
+  // The toolbar pill is the button while that toolbar item stays enabled.
+  if (inToolbar) {
     return null;
   }
   return <FeatureFlagsFloatingButton onClick={toggleFlyout} />;

@@ -8,4 +8,9 @@
  */
 
 export { useMinimized } from './use_minimized';
-export { useToolbarState, type DeveloperToolbarState } from './use_toolbar_state';
+export {
+  isDeveloperToolbarItemEnabled,
+  subscribeToDeveloperToolbarState,
+  useToolbarState,
+  type DeveloperToolbarState,
+} from './use_toolbar_state';
