@@ -61,7 +61,8 @@ export interface ServiceAccountDirectoryEntry {
    * and it's absent when the count failed. The count isn't verified, so it's for display only.
    */
   workloadCount?: number;
-  // No creation time. UIAM reports no timestamp of any kind, so only Elasticsearch could fill it.
+  // No creation time. Elasticsearch reports `created_at`, but UIAM reports no timestamp of any
+  // kind, so the field would be missing on every UIAM account.
 }
 
 /**

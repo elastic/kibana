@@ -56,6 +56,9 @@ interface DirectoryCreator {
   username?: string;
   userProfileId?: string;
   displayName?: string;
+  variant?: string;
+  apiKeyId?: string;
+  apiKeyName?: string;
 }
 
 /** What this suite expects back. No creation time, which neither backend reports. */
@@ -90,6 +93,10 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
   let adminCreator: DirectoryCreator;
   /** The Elasticsearch user `foreign` is created as. */
   let esClientUsername: string;
+  /** How the directory names the admin as the owner of an API key: full name, else username. */
+  let adminOwnerName: string;
+  /** API keys this suite created, invalidated on the way out. */
+  const createdApiKeyIds: string[] = [];
 
   const idOf = ({ namespace, name }: ServiceAccountPrincipal) => `${namespace}/${name}`;
 
@@ -133,6 +140,7 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
       profile_uid: string;
     };
     const fullName = (profile.body as { user: { full_name?: string } }).user.full_name;
+    adminOwnerName = fullName ?? username;
     adminCreator = {
       type: 'user',
       username,
@@ -165,6 +173,11 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     const failures: Error[] = [];
     const cleanup = [
       async () => unbindWorkloads(kbnClient, boundWorkloads),
+      async () => {
+        if (createdApiKeyIds.length) {
+          await esClient.security.invalidateApiKey({ ids: createdApiKeyIds });
+        }
+      },
       async () => {
         for (const spaceId of createdSpaces) {
           await kbnClient.spaces.delete(spaceId);
@@ -290,6 +303,48 @@ apiTest.describe('List and get Elasticsearch service accounts', { tag: LOCAL_ONL
     expect(response.statusCode).toBe(200);
     expectKibanaManagedEntry(response.body as DirectoryEntry, { listed: false });
   });
+
+  apiTest(
+    'names an account created with an API key by the key and its owner',
+    async ({ apiClient }) => {
+      // No role descriptors, so the key carries the admin's own privileges.
+      const keyName = uniqueName('creator-key');
+      const keyResponse = await apiClient.post('internal/security/api_key', {
+        headers: adminHeaders,
+        responseType: 'json',
+        body: { name: keyName, role_descriptors: {} },
+      });
+      expect(keyResponse.statusCode).toBe(200);
+      const { id: apiKeyId, encoded } = keyResponse.body as { id: string; encoded: string };
+      createdApiKeyIds.push(apiKeyId);
+
+      const viaKey = { namespace: ES_SERVICE_ACCOUNT_NAMESPACE, name: uniqueName('via-key') };
+      created.push(viaKey);
+      const createResponse = await apiClient.post(SERVICE_ACCOUNT_ENDPOINT, {
+        headers: { ...REQUEST_HEADERS, authorization: `ApiKey ${encoded}` },
+        responseType: 'json',
+        body: { name: viaKey.name, roles: ['viewer'] },
+      });
+      expect(createResponse.statusCode).toBe(200);
+
+      const response = await apiClient.get(getPath(idOf(viaKey)), {
+        headers: adminHeaders,
+        responseType: 'json',
+      });
+
+      expect(response.statusCode).toBe(200);
+      // Elasticsearch records the key and resolves its owner's profile, so the directory names
+      // both the key and the person behind it.
+      expect((response.body as DirectoryEntry).createdBy).toStrictEqual({
+        type: 'api_key',
+        variant: 'stack',
+        apiKeyId,
+        apiKeyName: keyName,
+        userProfileId: adminCreator.userProfileId,
+        displayName: adminOwnerName,
+      });
+    }
+  );
 
   apiTest('gets an account this Kibana cannot assume', async ({ apiClient }) => {
     const response = await apiClient.get(getPath(idOf(foreign)), {

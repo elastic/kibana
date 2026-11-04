@@ -1158,6 +1158,33 @@ describe('EsServiceAccounts', () => {
         ]);
       });
 
+      it('reports an API key that a service account owns as the key, named by the account', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: [
+            queried('kibana/a', {
+              created_by: {
+                username: 'elastic/fleet-server',
+                realm: '_service_account',
+                realm_type: '_service_account',
+                api_key: { id: 'key-1', name: 'agent-enrollment' },
+              },
+            }),
+          ],
+        });
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        // A write made with an API key is that key, as a workload binder records it, so the key
+        // is kept rather than collapsed into the service account behind it.
+        expect(entry.createdBy).toEqual({
+          type: 'api_key',
+          variant: 'stack',
+          apiKeyId: 'key-1',
+          apiKeyName: 'agent-enrollment',
+          displayName: 'elastic/fleet-server',
+        });
+      });
+
       it('names a service account by its principal', async () => {
         esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
           service_accounts: [
@@ -1180,7 +1207,7 @@ describe('EsServiceAccounts', () => {
         expect(getUserProfiles).not.toHaveBeenCalled();
       });
 
-      it('falls back to usernames and warns when the profiles cannot be read', async () => {
+      it('falls back to usernames when the profiles cannot be read', async () => {
         esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
           service_accounts: [
             queried('kibana/a', { created_by: user, created_by_profile_uid: 'u_ada' }),
@@ -1191,10 +1218,10 @@ describe('EsServiceAccounts', () => {
         const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
 
         expect(entry.createdBy).toEqual({ type: 'user', username: 'ada', userProfileId: 'u_ada' });
-        expect(logger.warn).toHaveBeenCalledWith(
-          expect.stringContaining(
-            'Unable to read the user profiles of 1 service account creator(s)'
-          )
+        // The profile service logs the failure itself, so the fallback adds no second warning.
+        expect(logger.warn).not.toHaveBeenCalled();
+        expect(logger.debug).toHaveBeenCalledWith(
+          expect.stringContaining('Naming 1 service account creator(s) by username')
         );
       });
 
@@ -1216,6 +1243,29 @@ describe('EsServiceAccounts', () => {
         expect(entries[0]).not.toHaveProperty('createdBy');
         expect(entries[1]).not.toHaveProperty('createdBy');
         expect(getUserProfiles).not.toHaveBeenCalled();
+        // Only the unreadable one is worth a warning. A missing creator is expected.
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Elasticsearch reported the creator of 1 service account(s) in an unrecognized shape, so they are reported without one: [kibana/b]. First error:'
+          )
+        );
+      });
+
+      it('warns once per page about unreadable creators, naming only the first ten', async () => {
+        esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
+          service_accounts: Array.from({ length: 12 }, (_, i) =>
+            queried(`kibana/a${String(i).padStart(2, '0')}`, { created_by: 'not an object' })
+          ),
+        });
+
+        await serviceAccounts.list(request);
+
+        expect(logger.warn).toHaveBeenCalledTimes(1);
+        const [[message]] = logger.warn.mock.calls;
+        expect(message).toContain('creator of 12 service account(s)');
+        expect(message).toContain('kibana/a09] and 2 more.');
+        expect(message).not.toContain('kibana/a10');
       });
     });
 
@@ -1407,6 +1457,19 @@ describe('EsServiceAccounts', () => {
         },
       });
       expect(getUserProfiles).toHaveBeenCalledWith(new Set(['u_ada']));
+    });
+
+    it('reads an account whose creator it cannot read, and warns about the creator', async () => {
+      esClient.asCurrentUser.transport.request.mockResolvedValueOnce(
+        accountEntry({ created_by: { username: 42 } })
+      );
+
+      const entry = await serviceAccounts.get(request, ACCOUNT_ID);
+
+      expect(entry).not.toHaveProperty('createdBy');
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('so they are reported without one: [kibana/nightshift-relay]')
+      );
     });
 
     it('reports an account Kibana cannot assume without asking for its tokens', async () => {

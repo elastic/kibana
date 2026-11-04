@@ -163,10 +163,11 @@ interface ElasticsearchServiceAccount {
 }
 
 /**
- * Maps a recorded creator onto the directory's creator. A service account is named by its
- * principal. A user or an API key is named by its owner's full name from the user profile,
- * found in `fullNames`. An API key falls back to the owner's username, because nothing else on
- * the key names the person behind it.
+ * Maps a recorded creator onto the directory's creator, the way `resolveWorkloadBinder` records a
+ * binder: a write made with an API key is that key, whoever owns it. Its `displayName` names the
+ * owner, by the full name on their user profile or else their username, so a key that a service
+ * account owns is named by that account's principal. Without a key, a service account is named by
+ * its principal, and a user by the full name on their profile.
  */
 const toCreatedBy = (
   {
@@ -175,10 +176,6 @@ const toCreatedBy = (
   }: ElasticsearchServiceAccountCreator,
   fullNames: ReadonlyMap<string, string>
 ): ServiceAccountDirectoryCreator => {
-  if (realmType === SERVICE_ACCOUNT_REALM_TYPE) {
-    return { type: 'service_account', serviceAccountId: username };
-  }
-
   const fullName = userProfileId ? fullNames.get(userProfileId) : undefined;
   const profile = userProfileId ? { userProfileId } : {};
 
@@ -193,8 +190,21 @@ const toCreatedBy = (
     };
   }
 
+  if (realmType === SERVICE_ACCOUNT_REALM_TYPE) {
+    return { type: 'service_account', serviceAccountId: username };
+  }
+
   return { type: 'user', username, ...profile, ...(fullName ? { displayName: fullName } : {}) };
 };
+
+/** A creator Kibana could not read, so its account is reported without one. */
+interface UnreadableCreator {
+  principal: string;
+  error: string;
+}
+
+/** How many accounts a warning about unreadable creators names before it stops listing them. */
+const UNREADABLE_CREATORS_LOGGED = 10;
 
 /** Narrows an account to the directory entry. */
 const toDirectoryEntry = (
@@ -518,6 +528,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
     // refuse the page: an oddity in one account must not make the whole directory unreadable.
+    const unreadableCreators: UnreadableCreator[] = [];
     const accounts = rawAccounts
       .slice(0, limit)
       .flatMap((rawAccount): ElasticsearchServiceAccount[] => {
@@ -530,7 +541,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           return [];
         }
 
-        const createdBy = this.readCreator(username, rawAccount);
+        const createdBy = this.readCreator(username, rawAccount, unreadableCreators);
         return [
           {
             id: username,
@@ -542,6 +553,8 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
           },
         ];
       });
+
+    this.warnUnreadableCreators(unreadableCreators);
 
     const [credentialled, fullNames] = await Promise.all([
       this.credentialStore.findExisting(accounts.map(({ id }) => id)),
@@ -588,7 +601,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
     // Built-in accounts resolve to `undefined` here too, so `elastic/kibana` is a 404 rather
     // than a directory entry: they are not Kibana's to list or bind.
     const account = await this.readAccount(esClient, principal.namespace, principal.name, {
-      withProfileUid: true,
+      withCreator: true,
     });
     if (!account) {
       throw Boom.notFound(`Service account [${id}] was not found`);
@@ -607,25 +620,48 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
   /**
    * Reads the creator Elasticsearch recorded for an account. A creator Kibana cannot read is
-   * dropped rather than failing the read: it only names who made the account.
+   * dropped rather than failing the read, because it only names who made the account. It is
+   * added to `unreadable`, so the caller can warn about every one in a single line.
    */
   private readCreator(
     principal: string,
-    entry: unknown
+    entry: unknown,
+    unreadable: UnreadableCreator[]
   ): ElasticsearchServiceAccountCreator | undefined {
     const parsed = creatorEntrySchema.safeParse(entry);
-    if (!parsed.success) {
-      // An account with no recorded creator is expected, and not worth a log line.
-      if (typeof entry !== 'object' || entry === null || !('created_by' in entry)) {
-        return undefined;
-      }
-      this.logger.debug(
-        `Elasticsearch reported the creator of service account [${principal}] in an unrecognized shape: ${parsed.error.message}`
-      );
-      return undefined;
+    if (parsed.success) {
+      return parsed.data;
     }
 
-    return parsed.data;
+    // An account with no recorded creator is expected, and not worth a log line.
+    if (typeof entry === 'object' && entry !== null && 'created_by' in entry) {
+      unreadable.push({ principal, error: parsed.error.message });
+    }
+    return undefined;
+  }
+
+  /**
+   * Warns about creators Kibana could not read. One that Elasticsearch changed the shape of would
+   * otherwise leave every account showing an unknown creator with nothing in the logs to say why.
+   */
+  private warnUnreadableCreators(unreadable: UnreadableCreator[]) {
+    if (unreadable.length === 0) {
+      return;
+    }
+
+    const principals = unreadable
+      .slice(0, UNREADABLE_CREATORS_LOGGED)
+      .map(({ principal }) => principal)
+      .join(', ');
+    const more =
+      unreadable.length > UNREADABLE_CREATORS_LOGGED
+        ? ` and ${unreadable.length - UNREADABLE_CREATORS_LOGGED} more`
+        : '';
+    this.logger.warn(
+      `Elasticsearch reported the creator of ${unreadable.length} service account(s) in an ` +
+        `unrecognized shape, so they are reported without one: [${principals}]${more}. ` +
+        `First error: ${unreadable[0].error}`
+    );
   }
 
   /**
@@ -652,10 +688,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         )
       );
     } catch (error) {
-      this.logger.warn(
-        `Unable to read the user profiles of ${
-          uids.size
-        } service account creator(s): ${getDetailedErrorMessage(error)}`
+      // The profile service has already logged the failure as an error. This only records that
+      // the accounts fell back to usernames.
+      this.logger.debug(
+        `Naming ${uids.size} service account creator(s) by username, because their user ` +
+          `profiles could not be read: ${getDetailedErrorMessage(error)}`
       );
       return new Map();
     }
@@ -1053,14 +1090,14 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
    * taken name on the strength of this, and the Elasticsearch PUT behind it is a full
    * replacement, so "I cannot parse this" must never read as "the name is free".
    *
-   * `withProfileUid` asks Elasticsearch for the creator's user profile too, which costs it a
-   * profile lookup. Only reads that show the creator ask for it.
+   * `withCreator` reads the account's creator too, and asks Elasticsearch for the creator's user
+   * profile, which costs it a profile lookup. Only reads that show the creator ask for it.
    */
   private async readAccount(
     esClient: ElasticsearchClient,
     namespace: string,
     name: string,
-    { withProfileUid = false }: { withProfileUid?: boolean } = {}
+    { withCreator = false }: { withCreator?: boolean } = {}
   ): Promise<ElasticsearchServiceAccount | undefined> {
     const principal = `${namespace}/${name}`;
 
@@ -1070,7 +1107,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
         // Asked for explicitly, because the API's default depends on the shape of the path.
         // Kibana only ever manages user-managed accounts.
-        querystring: { type: 'user_managed', ...(withProfileUid && { with_profile_uid: true }) },
+        querystring: { type: 'user_managed', ...(withCreator && { with_profile_uid: true }) },
       },
       // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
       // tightening upstream does not turn "no such account" into an error.
@@ -1102,7 +1139,12 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
     }
 
-    const createdBy = this.readCreator(principal, entry);
+    let createdBy: ElasticsearchServiceAccountCreator | undefined;
+    if (withCreator) {
+      const unreadableCreators: UnreadableCreator[] = [];
+      createdBy = this.readCreator(principal, entry, unreadableCreators);
+      this.warnUnreadableCreators(unreadableCreators);
+    }
     return {
       id: principal,
       name,
