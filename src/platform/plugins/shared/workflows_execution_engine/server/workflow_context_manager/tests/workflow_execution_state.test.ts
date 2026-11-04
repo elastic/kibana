@@ -458,6 +458,71 @@ describe('WorkflowExecutionState', () => {
       ]);
     });
 
+    it('writes step rows before the workflow document when the status is terminal', async () => {
+      let resolveSteps: () => void = () => {};
+      stepExecutionRepository.bulkUpsert = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSteps = resolve;
+          })
+      );
+
+      underTest.updateWorkflowExecution({ status: ExecutionStatus.COMPLETED });
+      underTest.upsertStep({
+        id: 'fake-uuid',
+        stepId: 'last-step',
+        status: ExecutionStatus.COMPLETED,
+      });
+
+      const flushed = underTest.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).not.toHaveBeenCalled();
+
+      resolveSteps();
+      await flushed;
+
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalledWith(
+        expect.objectContaining({ status: ExecutionStatus.COMPLETED }),
+        {}
+      );
+    });
+
+    it('writes the workflow document and step rows together while the run is still going', async () => {
+      let resolveSteps: () => void = () => {};
+      let resolveDoc: () => void = () => {};
+      stepExecutionRepository.bulkUpsert = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveSteps = resolve;
+          })
+      );
+      workflowExecutionRepository.updateWorkflowExecution = jest.fn(
+        () =>
+          new Promise<void>((resolve) => {
+            resolveDoc = resolve;
+          })
+      );
+
+      underTest.updateWorkflowExecution({ currentNodeId: 'node-1' });
+      underTest.upsertStep({
+        id: 'fake-uuid',
+        stepId: 'running-step',
+        status: ExecutionStatus.RUNNING,
+      });
+
+      const flushed = underTest.flush();
+      await Promise.resolve();
+
+      expect(stepExecutionRepository.bulkUpsert).toHaveBeenCalled();
+      expect(workflowExecutionRepository.updateWorkflowExecution).toHaveBeenCalled();
+
+      resolveSteps();
+      resolveDoc();
+      await flushed;
+    });
+
     it('should not flush if there are no changes', async () => {
       await underTest.flush();
 

@@ -296,12 +296,20 @@ export class WorkflowExecutionState {
   /** Writes pending workflow document changes and step metadata. Step payloads stay on the IO stream. */
   public async flush(): Promise<void> {
     const stepChanges = this.drainPendingStepChanges();
-    await Promise.all([
-      this.flushWorkflowDoc(),
+    const flushSteps =
       stepChanges.size > 0
         ? this.stepExecutionRepository.bulkUpsert(Array.from(stepChanges.values()))
-        : Promise.resolve(),
-    ]);
+        : Promise.resolve();
+
+    // A reader that stops on a terminal status loads steps from this document.
+    // Those rows have to exist before the document is visible.
+    if (isTerminalStatus(this.workflowExecution.status)) {
+      await flushSteps;
+      await this.flushWorkflowDoc();
+      return;
+    }
+
+    await Promise.all([this.flushWorkflowDoc(), flushSteps]);
   }
 
   public async flushWorkflowDoc(): Promise<void> {
