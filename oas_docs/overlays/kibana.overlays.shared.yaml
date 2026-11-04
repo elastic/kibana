@@ -33,6 +33,9 @@ actions:
         Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
         Use these endpoints to create and manage detection rules, act on alerts, and control when and how
         notifications are delivered.
+      externalDocs:
+        description: Kibana Universal Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
       x-displayName: 'Kibana Universal Alerting'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
