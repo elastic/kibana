@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import AxeBuilder from '@axe-core/playwright';
 import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
@@ -32,6 +33,29 @@ test.describe(
       await expect(digitalExperience.breadcrumbs).toContainText('Overview');
       await expect(digitalExperience.classicRumPageLoadMetric).toBeVisible();
       await expect(digitalExperience.classicRumServiceSelect).toBeHidden();
+    });
+
+    test('keeps the EDOT Browser Overview headings in order', async ({
+      page,
+      pageObjects: { digitalExperience },
+    }) => {
+      await digitalExperience.gotoApplication(testData.OTEL_APPS.shop, {
+        ...testData.TIME_RANGE,
+        source: 'otel',
+      });
+      await expect(
+        digitalExperience.otelOverviewVitals.getByRole('heading', {
+          level: 2,
+          name: 'Core web vitals',
+        })
+      ).toBeVisible();
+
+      // `page.checkA11y` only reports serious and critical violations, and heading-order is moderate.
+      const { violations } = await new AxeBuilder({ page })
+        .include('main')
+        .withRules(['heading-order'])
+        .analyze();
+      expect(violations).toStrictEqual([]);
     });
 
     test('leaves the Overview for another app without leaving its search session open', async ({

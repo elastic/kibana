@@ -15,7 +15,7 @@ export type LegacyCustomFieldType = 'text' | 'toggle' | 'number';
 
 // One entry registered on the cases-configure saved object's `customFields`
 // array per owner when --legacyCustomFields is set. Mirrors
-// CustomFieldConfigurationRt from common/types/domain/configure/v1.ts.
+// CustomFieldConfigurationSchema from common/types/domain/configure/v1.ts.
 export interface LegacyCustomFieldConfig {
   key: string;
   label: string;
@@ -25,7 +25,7 @@ export interface LegacyCustomFieldConfig {
 }
 
 // Value the script attaches to a generated case for one configured customField.
-// Shape matches CaseCustomFieldRt from common/types/domain/custom_field/v1.ts.
+// Shape matches CaseCustomFieldSchema from common/types/domain/custom_field/v1.ts.
 export interface LegacyCaseCustomFieldValue {
   key: string;
   type: LegacyCustomFieldType;
@@ -161,7 +161,7 @@ function staticValueForField(field: LegacyCustomFieldConfig): LegacyCaseCustomFi
 }
 
 // One entry registered on the cases-configure SO's `templates` array per
-// owner when --legacyTemplates is set. Mirrors TemplateConfigurationRt from
+// owner when --legacyTemplates is set. Mirrors TemplateConfigurationSchema from
 // common/types/domain/configure/v1.ts. caseFields is the partial case body
 // the UI pre-fills when the user clicks "Create from template" — including
 // typed customFields when the script also has --legacyCustomFields enabled.

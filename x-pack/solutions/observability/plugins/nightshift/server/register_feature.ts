@@ -7,7 +7,7 @@
 
 import { SIGNIFICANT_EVENT_KI_TYPE } from '@kbn/agent-builder-elastic-ai-index-ki-types';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
-import { NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID } from '@kbn/deeplinks-observability';
+import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
@@ -38,10 +38,10 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
     order: 8700,
     category: DEFAULT_APP_CATEGORIES.observability,
     minimumLicense: 'enterprise',
-    app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+    app: [NIGHTSHIFT_APP_ID],
     privileges: {
       all: {
-        app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+        app: [NIGHTSHIFT_APP_ID],
         api: [
           NIGHTSHIFT_API_PRIVILEGES.read,
           NIGHTSHIFT_API_PRIVILEGES.manage,
@@ -61,7 +61,7 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         },
       },
       read: {
-        app: [NIGHTSHIFT_APP_ID, SIGNIFICANT_EVENTS_APP_ID],
+        app: [NIGHTSHIFT_APP_ID],
         // Read-only Nightshift users can read investigations through the shared query API.
         api: [
           NIGHTSHIFT_API_PRIVILEGES.read,

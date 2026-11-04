@@ -21,6 +21,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SignificantEventsPublicPluginStart } from '@kbn/significant-events-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 
 export interface NightshiftSetupDependencies {
@@ -46,6 +47,8 @@ export interface NightshiftStartDependencies {
   cps?: CPSPluginStart;
   serverless?: ServerlessPluginStart;
   spaces?: SpacesPluginStart;
+  /** The connector flyout and the connector type registry for the sandbox connectors UI. */
+  triggersActionsUi?: TriggersAndActionsUIPublicPluginStart;
 }
 
 /* eslint-disable-next-line @typescript-eslint/no-empty-interface */

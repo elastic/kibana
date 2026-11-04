@@ -270,7 +270,8 @@ export const buildTestMetadataQuery = (
   [
     `FROM ${SCOUT_TEST_EVENTS_INDEX_PATTERN}`,
     `WHERE ${[...scopeClauses(scope), anyFailureFilter(frameworks)].join(' AND ')}`,
-    'STATS title = MAX(test.title.keyword),' +
+    // The text field: not every index has the `.keyword` sub-field
+    'STATS title = MAX(test.title),' +
       ' suite_title = MAX(suite.title.keyword),' +
       ' file_path = MAX(test.file.path),' +
       ' config_path = MAX(test_run.config.file.path),' +
@@ -639,11 +640,12 @@ const errorHeadExpression = (): string => {
 /**
  * The distinct errors of the given tests, per pipeline, across every pipeline and branch in the
  * window. Failures are attempt-level `test-end` documents with a message, for every framework
- * (Playwright attempts carry the error, its per-run outcome documents do not), so a Playwright
- * run that failed twice before passing counts two failures. Grouped by pipeline in the query and
+ * (Playwright attempts carry the error, its per-run outcome documents do not), counted as distinct
+ * builds so that a retry that failed again counts once. Grouped by pipeline in the query and
  * folded per error afterwards; a build belongs to one pipeline, so the distinct build counts add
- * up. The representative message is the newest failure's, cut to a bounded length as text cannot
- * be aggregated whole.
+ * up. The build ids let a consumer count the builds of an error shared by several tests. The
+ * representative message is the newest failure's, cut to a bounded length as text cannot be
+ * aggregated whole.
  */
 export const buildTestErrorsQuery = (
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -664,8 +666,8 @@ export const buildTestErrorsQuery = (
     'EVAL lines = SPLIT(event.error.message, "\\n"),' +
       ` head = ${errorHeadExpression()},` +
       ` message = LEFT(event.error.message, ${ERROR_MESSAGE_CHARACTERS})`,
-    'STATS failures = COUNT(*),' +
-      ' builds = COUNT_DISTINCT(buildkite.build.id),' +
+    'STATS builds = COUNT_DISTINCT(buildkite.build.id),' +
+      ' build_ids = VALUES(buildkite.build.id),' +
       ' branches = VALUES(buildkite.branch),' +
       ' targets = VALUES(test_run.target.mode),' +
       ' first_failed_at = MIN(@timestamp),' +
@@ -682,8 +684,8 @@ interface TestErrorRow extends Record<string, unknown> {
   test_id: string;
   head: string | null;
   pipeline: string | null;
-  failures: number;
   builds: number;
+  build_ids: string | string[] | null;
   branches: string | string[] | null;
   targets: string | string[] | null;
   first_failed_at: string;
@@ -698,13 +700,20 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   const newest = [...rows].sort((a, b) => b.last_failed_at.localeCompare(a.last_failed_at))[0];
   const byPipeline = rows
     .flatMap((row) =>
-      row.pipeline ? [{ pipeline: row.pipeline, failuresCount: row.failures }] : []
+      row.pipeline
+        ? [
+            {
+              pipeline: row.pipeline,
+              buildsCount: row.builds,
+              buildIds: [...asArray(row.build_ids)].sort(),
+            },
+          ]
+        : []
     )
-    .sort((a, b) => b.failuresCount - a.failuresCount || a.pipeline.localeCompare(b.pipeline));
+    .sort((a, b) => b.buildsCount - a.buildsCount || a.pipeline.localeCompare(b.pipeline));
   return {
     key,
     message: newest.message ?? '',
-    failuresCount: rows.reduce((sum, row) => sum + row.failures, 0),
     buildsCount: rows.reduce((sum, row) => sum + row.builds, 0),
     byPipeline,
     branches: [...new Set(rows.flatMap((row) => asArray(row.branches)))].sort(),
@@ -718,7 +727,7 @@ const foldErrorRows = (key: string, rows: readonly TestErrorRow[]): FlakyTestErr
   };
 };
 
-/** Distinct errors keyed by test id, most failures first. */
+/** Distinct errors keyed by test id, most builds first. */
 export const fetchTestErrors = async (
   es: ESClient,
   window: Pick<FlakyTestQueryScope, 'from' | 'to'>,
@@ -757,7 +766,7 @@ export const fetchTestErrors = async (
       testId,
       [...byKey.entries()]
         .map(([key, rows]) => foldErrorRows(key, rows))
-        .sort((a, b) => b.failuresCount - a.failuresCount || b.buildsCount - a.buildsCount)
+        .sort((a, b) => b.buildsCount - a.buildsCount || a.key.localeCompare(b.key))
     );
   }
   return byTest;

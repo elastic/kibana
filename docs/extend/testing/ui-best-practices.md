@@ -90,6 +90,31 @@ await page.testSubj.waitForSelector('mainContent', { state: 'visible' });
 
 :::::
 
+## Gate app navigation on the app's own ready element [gate-app-navigation-on-ready-element]
+
+By default, `page.gotoApp()` resolves on the browser `load` event, which waits for Kibana's whole bundle graph to download under Scout's 20s `navigationTimeout`. That event doesn't mean the app is usable, and on a cold Cloud deployment it can time out before your own readiness check runs.
+
+When a page object knows which element proves the app has rendered, pass it as `readyWhen`. Navigation then resolves as soon as the document starts loading (`commit`), and that element becomes the single readiness gate, with one budget (`readyTimeout`, 30s by default) covering bundle download, plugin start and first render.
+
+Which option to use:
+
+- **Page object `goto()`**: pass `readyWhen` with the app's own container or `-loaded` subject, not the chrome or a spinner.
+- **Test asserts a redirect or the URL, or no single element proves readiness**: keep the default `gotoApp()`, then assert the destination.
+- **App boots slowly**: raise `readyTimeout`, not the timeout of a later assertion, and add a short comment explaining why.
+- **Avoid** `waitUntil: 'commit'` or `'domcontentloaded'` followed by a separate wait; `readyWhen` replaces that pattern. Never pass `'commit'` with no wait at all (the next step runs before Kibana's scripts execute), and never use `'networkidle'`.
+
+:::::{dropdown} Example
+
+```ts
+async goto() {
+  await this.page.gotoApp('discover', {
+    readyWhen: this.page.testSubj.locator('dscPage'),
+  });
+}
+```
+
+:::::
+
 ## Don't use manual retry loops [dont-use-manual-retry-loops]
 
 If an action fails, don't wrap it in a retry loop. Playwright already waits for actionability; repeated failures usually point to an app issue (unstable DOM, non-unique selectors, re-render bugs). Fix the component or make your waiting/locators explicit and stable.

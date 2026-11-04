@@ -86,6 +86,11 @@ async function checkConsistentFailures({
   }
 }
 
+// Whether a failure no issue tracks yet gets a per-test issue (the legacy behaviour, default).
+// 'false' leaves new issues to the daily flaky suite reporter and `--report-failing-suites`.
+// Tracked issues are updated either way. Set in the pipeline env, flip back to fall back.
+const PER_TEST_ISSUES = process.env.REPORT_FAILED_TESTS_PER_TEST_ISSUES !== 'false';
+
 export function runFailedTestsReporterCli() {
   run(
     async ({ log, flags }) => {
@@ -153,6 +158,11 @@ export function runFailedTestsReporterCli() {
 
         if (reportPaths.length) {
           log.info('found', reportPaths.length, 'reports', reportPaths);
+          if (!PER_TEST_ISSUES) {
+            log.info(
+              'REPORT_FAILED_TESTS_PER_TEST_ISSUES=false: no per-test issues will be opened, only existing ones updated'
+            );
+          }
 
           // Separate JUnit and Scout reports
           const junitReports = reportPaths.filter((p) => p.endsWith('.xml'));
@@ -177,6 +187,7 @@ export function runFailedTestsReporterCli() {
             pipeline,
             prependTitle,
             updateGithub,
+            perTestIssues: PER_TEST_ISSUES,
             indexInEs,
             reportUpdate,
             bkMeta,

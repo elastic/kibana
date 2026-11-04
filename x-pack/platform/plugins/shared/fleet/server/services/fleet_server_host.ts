@@ -35,6 +35,7 @@ import type {
 import {
   FleetServerHostUnauthorizedError,
   FleetServerHostNotFoundError,
+  FleetServerHostInvalidError,
   FleetEncryptedSavedObjectEncryptionKeyRequired,
 } from '../errors';
 
@@ -50,11 +51,39 @@ import {
   extractAndWriteFleetServerHostsSecrets,
   isSecretStorageEnabled,
 } from './secrets';
+import { FLEET_SERVER_HOST_SECRET_FIELDS } from './secrets/fleet_server_hosts';
+import { omitNullSecrets, withSavedSecrets } from './secrets/preserve';
+
+/** The SSL credentials of a Fleet Server host that can be stored as a secret. */
+const FLEET_SERVER_HOST_SSL_SECRET_KEYS = ['key', 'es_key', 'agent_key'] as const;
+
+/**
+ * A credential is sent either in plain text or as a secret, never both: the two would disagree,
+ * and the agent policy only ever carries the secret. As for an output, a preconfigured host only
+ * warns, so that a mistake in the Kibana config file does not abort Fleet setup.
+ */
+function ensureNoDuplicateSecrets(
+  fleetServerHost: Partial<NewFleetServerHost>,
+  isPreconfigured: boolean
+): void {
+  for (const key of FLEET_SERVER_HOST_SSL_SECRET_KEYS) {
+    if (fleetServerHost.ssl?.[key] && fleetServerHost.secrets?.ssl?.[key]) {
+      const message = `Cannot specify both ssl.${key} and secrets.ssl.${key}`;
+      if (!isPreconfigured) {
+        throw new FleetServerHostInvalidError(message);
+      }
+      appContextService
+        .getLogger()
+        .warn(`Preconfigured Fleet Server host failed validation: ${message}`);
+    }
+  }
+}
 
 function savedObjectToFleetServerHost(
   so: SavedObject<FleetServerHostSOAttributes>
 ): FleetServerHost {
-  const { ssl, proxy_id: proxyId, ...attributes } = so.attributes;
+  // the references of the secrets an update removed are kept as `null` by the saved object update
+  const { ssl, proxy_id: proxyId, ...attributes } = omitNullSecrets(so.attributes);
 
   return {
     id: so.id,
@@ -88,6 +117,10 @@ class FleetServerHostService {
     const data: FleetServerHostSOAttributes = { ...omit(fleetServerHost, ['ssl', 'secrets']) };
 
     validateFleetSavedObjectId(options?.id);
+    ensureNoDuplicateSecrets(
+      fleetServerHost,
+      (options?.fromPreconfiguration || fleetServerHost.is_preconfigured) ?? false
+    );
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
@@ -162,6 +195,13 @@ class FleetServerHostService {
     options?: { fromPreconfiguration?: boolean }
   ): Promise<void> {
     if (hosts.length === 0) return;
+
+    hosts.forEach((host) =>
+      ensureNoDuplicateSecrets(
+        host,
+        (options?.fromPreconfiguration || host.is_preconfigured) ?? false
+      )
+    );
 
     if (!appContextService.getEncryptedSavedObjectsSetup()?.canEncrypt) {
       throw new FleetEncryptedSavedObjectEncryptionKeyRequired(
@@ -359,7 +399,15 @@ class FleetServerHostService {
     esClient: ElasticsearchClient,
     id: string,
     data: Partial<FleetServerHost>,
-    options?: { fromPreconfiguration?: boolean; secretHashes?: Record<string, any> }
+    options?: {
+      fromPreconfiguration?: boolean;
+      secretHashes?: Record<string, any>;
+      /**
+       * The payload declares the whole host, so the secrets it leaves out are removed rather than
+       * kept. Set by preconfiguration, for which the Kibana config file is authoritative.
+       */
+      declaresAllSecrets?: boolean;
+    }
   ) {
     let secretsToDelete: SecretReference[] = [];
 
@@ -367,6 +415,11 @@ class FleetServerHostService {
     logger.debug(`Updating fleet server host ${id}`);
 
     const originalItem = await this.get(id);
+    ensureNoDuplicateSecrets(
+      data,
+      (options?.fromPreconfiguration || originalItem.is_preconfigured) ?? false
+    );
+
     const updateData: Partial<FleetServerHostSOAttributes> = {
       ...omit(data, ['ssl', 'secrets']),
     };
@@ -416,6 +469,18 @@ class FleetServerHostService {
       updateData.host_urls = data.host_urls.map(normalizeHostsForAgents);
     }
 
+    const secretStorageEnabled = await isSecretStorageEnabled(esClient, soClient);
+    if (secretStorageEnabled && !options?.declaresAllSecrets) {
+      // an update that does not touch a credential kept as a secret keeps it, and a plain text
+      // value for such a credential is stored as a secret too. Applied after the checks above, so
+      // that they still see the payload the caller sent.
+      data = withSavedSecrets({
+        fields: FLEET_SERVER_HOST_SECRET_FIELDS,
+        original: originalItem,
+        update: data,
+      });
+    }
+
     if (data.ssl) {
       updateData.ssl = JSON.stringify(data.ssl);
     } else if (data.ssl === null) {
@@ -424,19 +489,17 @@ class FleetServerHostService {
     }
 
     // Store secret values if enabled; if not, store plain text values
-    if (await isSecretStorageEnabled(esClient, soClient)) {
-      if (data.secrets !== undefined) {
-        const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
-          oldFleetServerHost: originalItem,
-          fleetServerHostUpdate: data,
-          esClient,
-          secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
-        });
+    if (secretStorageEnabled) {
+      const secretsRes = await extractAndUpdateFleetServerHostsSecrets({
+        oldFleetServerHost: originalItem,
+        fleetServerHostUpdate: data,
+        esClient,
+        secretHashes: data.is_preconfigured ? options?.secretHashes : undefined,
+      });
 
-        updateData.secrets = secretsRes.fleetServerHostUpdate
-          .secrets as FleetServerHostSOAttributes['secrets'];
-        secretsToDelete = secretsRes.secretsToDelete;
-      }
+      updateData.secrets = secretsRes.fleetServerHostUpdate
+        .secrets as FleetServerHostSOAttributes['secrets'];
+      secretsToDelete = secretsRes.secretsToDelete;
     } else {
       if (
         (!data.ssl?.key && data.secrets?.ssl?.key) ||
@@ -462,10 +525,11 @@ class FleetServerHostService {
     }
 
     logger.debug(`Updated fleet server host ${id}`);
-    return {
+    // the secrets the update removed are `null`, as they are in the saved object
+    return omitNullSecrets({
       ...originalItem,
       ...updateData,
-    };
+    });
   }
 
   public async bulkGet(ids: string[], { ignoreNotFound = false } = { ignoreNotFound: true }) {

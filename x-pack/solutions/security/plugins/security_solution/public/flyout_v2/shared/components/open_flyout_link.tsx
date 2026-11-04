@@ -7,7 +7,6 @@
 
 import type { FC, ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import { useHistory } from 'react-router-dom';
 import { EuiLink } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { useDefaultDocumentFlyoutProperties } from '../hooks/use_default_flyout_properties';
@@ -23,7 +22,7 @@ import { buildFlyoutNavTitle } from '../utils/build_flyout_nav_title';
 import { useFlyoutSessionContext } from '../../session_context';
 import { FLYOUT_ORIGIN, FLYOUT_SESSION_KIND, FLYOUT_SURFACE } from '../../../common/lib/telemetry';
 import { useFlyoutV2UrlWriter } from '../url_state/flyout_v2_url_writer';
-import { urlParamKeyForHistoryKey, decodeFlyoutV2UrlParam } from '../url_state/flyout_v2_url_param';
+import { urlParamKeyForHistoryKey } from '../url_state/flyout_v2_url_param';
 
 export interface OpenFlyoutLinkProps {
   /**
@@ -83,7 +82,6 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
   'data-test-subj': dataTestSubj = OPEN_FLYOUT_LINK_TEST_ID,
 }) => {
   const open = useOpenFlyout();
-  const history = useHistory();
   const defaultDocumentFlyoutProperties = useDefaultDocumentFlyoutProperties();
   const { historyKey, session: sessionMode } = useFlyoutSessionContext();
 
@@ -99,7 +97,10 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     [field, titleValue]
   );
   const urlParamKey = urlParamKeyForHistoryKey(historyKey);
-  const { writeOnOpen, buildOnClose } = useFlyoutV2UrlWriter(urlParamKey, historyKey);
+  const { writeOnOpen, buildOnClose, readRootDescriptor } = useFlyoutV2UrlWriter(
+    urlParamKey,
+    historyKey
+  );
 
   const onClick = useCallback(() => {
     if (flyoutContent) {
@@ -110,12 +111,7 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
         // For a child ('inherit') open, closing it must revert to the parent (the session-start
         // root), NOT clear the whole flyoutV2 param — otherwise the still-open parent tool flyout is
         // lost on refresh. Read the current root before writeOnOpen mutates the stack.
-        const parentDescriptor =
-          mode === 'inherit'
-            ? decodeFlyoutV2UrlParam(
-                new URLSearchParams(history?.location?.search ?? '').get(urlParamKey)
-              )?.[0] ?? null
-            : null;
+        const parentDescriptor = mode === 'inherit' ? readRootDescriptor() : null;
         writeOnOpen(flyoutDescriptor, mode);
         onClose = buildOnClose(parentDescriptor);
       }
@@ -149,9 +145,8 @@ export const OpenFlyoutLink: FC<OpenFlyoutLinkProps> = ({
     flyoutContent,
     flyoutType,
     flyoutDescriptor,
-    history,
+    readRootDescriptor,
     historyKey,
-    urlParamKey,
     writeOnOpen,
     buildOnClose,
     asParent,

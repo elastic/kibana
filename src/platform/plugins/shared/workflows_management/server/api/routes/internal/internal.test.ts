@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import Boom from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import { KQLSyntaxError } from '@kbn/es-query';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { SearchTriggerEventLogResult } from '@kbn/workflows-ui';
 import { WorkflowConflictError } from '@kbn/workflows-yaml';
@@ -50,6 +52,7 @@ describe('Internal Routes', () => {
       (spaceId: string, request: unknown) => Promise<unknown>
     >;
     getHistoryForWorkflow: jest.Mock;
+    getReadableWorkflowIds: jest.Mock;
     restoreWorkflowVersion: jest.Mock;
   };
   let mockAudit: {
@@ -63,8 +66,12 @@ describe('Internal Routes', () => {
     Promise<SearchTriggerEventLogResult>,
     [TriggerEventLogSearchCall]
   >();
+  const mockRulesFind = jest.fn();
 
   const mockContext = {
+    alerting: Promise.resolve({
+      getRulesClient: jest.fn().mockResolvedValue({ find: mockRulesFind }),
+    }),
     workflows: Promise.resolve({
       isWorkflowsAvailable: true,
       emitEvent: jest.fn(),
@@ -102,6 +109,7 @@ describe('Internal Routes', () => {
     mockApi = {
       disableAllWorkflows: jest.fn(),
       getHistoryForWorkflow: jest.fn(),
+      getReadableWorkflowIds: jest.fn(),
       restoreWorkflowVersion: jest.fn(),
     };
     mockAudit = {
@@ -204,6 +212,46 @@ describe('Internal Routes', () => {
 
     expect(response.ok).toHaveBeenCalledWith({
       body: { eventDrivenExecutionEnabled: false },
+    });
+  });
+
+  it('returns the workflow ids readable in the request space', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a', 'b']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest();
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: false,
+    });
+    expect(response.ok).toHaveBeenCalledWith({ body: { workflowIds: ['a', 'b'] } });
+  });
+
+  it('includes managed workflows for callers who can read managed executions', async () => {
+    mockApi.getReadableWorkflowIds.mockResolvedValue(['a']);
+
+    const response = httpServerMock.createResponseFactory();
+    const request = Object.assign(httpServerMock.createKibanaRequest(), {
+      authzResult: {
+        [WorkflowsManagementApiActions.readExecution]: true,
+        [WorkflowsManagementApiActions.readManagedExecution]: true,
+      },
+    });
+
+    await routeHandlers['GET:/internal/workflows/readable_workflow_ids'].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockApi.getReadableWorkflowIds).toHaveBeenCalledWith('default', request, {
+      includeManaged: true,
     });
   });
 
@@ -573,6 +621,56 @@ describe('Internal Routes', () => {
     expect(mockApi.disableAllWorkflows).toHaveBeenCalledWith('default', request);
     expect(response.ok).toHaveBeenCalledWith({
       body: { total: 3, disabled: 3, failures: [] },
+    });
+  });
+
+  it('should return the rules that run the given workflows', async () => {
+    mockRulesFind.mockResolvedValue({
+      total: 12,
+      data: [{ id: 'rule-1', name: 'Rule 1', alertTypeId: 'siem.queryRule' }],
+    });
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1', 'wf-"2'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(mockRulesFind).toHaveBeenCalledWith({
+      options: {
+        filter:
+          'alert.attributes.actions:{ actionRef: "system_action:system-connector-.workflows" and params.subActionParams.workflowId: ("wf-1" or "wf-\\"2") }',
+        page: 1,
+        perPage: 10,
+        sortField: 'name',
+        sortOrder: 'asc',
+      },
+    });
+    expect(response.ok).toHaveBeenCalledWith({
+      body: { total: 12, rules: [{ id: 'rule-1', name: 'Rule 1', ruleTypeId: 'siem.queryRule' }] },
+    });
+  });
+
+  it('should return forbidden when the user cannot read any rule types', async () => {
+    mockRulesFind.mockRejectedValue(
+      Boom.forbidden('Unauthorized to find rules for any rule types.')
+    );
+
+    const response = httpServerMock.createResponseFactory();
+    const request = httpServerMock.createKibanaRequest({ body: { ids: ['wf-1'] } });
+
+    await routeHandlers[`POST:/internal/workflows/_linked_rules`].handler(
+      mockContext,
+      request,
+      response
+    );
+
+    expect(response.customError).toHaveBeenCalledWith({
+      statusCode: 403,
+      body: { message: 'Unauthorized to find rules for any rule types.' },
     });
   });
 

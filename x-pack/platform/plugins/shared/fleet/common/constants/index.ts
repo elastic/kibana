@@ -15,6 +15,7 @@ export {
   CLOUD_ONBOARDING_DEPLOYMENT_SAVED_OBJECT_TYPE,
   CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH,
 } from './saved_objects';
+export { AWS_ONBOARDING_PACKAGE_NAMES } from './aws_onboarding';
 export * from './routes';
 export * from './agent';
 export * from './agent_policy';
@@ -36,6 +37,7 @@ export * from './uninstall_token';
 export * from './space_awareness';
 export * from './security_search_ai_lake';
 export * from './cloud_connector';
+export * from './schema_field_limits';
 export * from './feature_flags';
 
 // TODO: This is the default `index.max_result_window` ES setting, which dictates

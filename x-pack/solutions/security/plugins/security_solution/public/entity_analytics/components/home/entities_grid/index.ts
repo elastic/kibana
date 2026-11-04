@@ -18,6 +18,12 @@ export type { CellHandlers } from './components/entities_cell_renderer';
 export type { RowActions } from './components/cells/row_actions_cell';
 export { RESOLVED_ROWS_COLUMNS, INDIVIDUAL_ROWS_COLUMNS } from './grid_columns';
 export type { ReadAccess } from './grid_columns';
-export { ENTITY_TYPE_FIELD, getEntityId, getString } from './common';
+export {
+  ENTITY_TYPE_FIELD,
+  RISK_SCORE_NORM_FIELD,
+  getEntityId,
+  getNumber,
+  getString,
+} from './common';
 export { buildEntityFilterClauses } from './queries/entity_filters';
 export { useSearchBarExpression } from './hooks/use_search_bar_expression';

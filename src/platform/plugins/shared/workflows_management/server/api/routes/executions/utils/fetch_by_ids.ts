@@ -50,20 +50,21 @@ export const fetchAlertSourcesByIds = async ({
   selections,
   esClient,
   logger,
+  sourceIncludes,
 }: {
   selections: DocumentSelection[];
   esClient: ElasticsearchClient;
   logger: Logger;
+  sourceIncludes?: readonly string[];
 }): Promise<FetchedSource[]> => {
   if (selections.length === 0) {
     return [];
   }
 
-  assertWithinRunLimit(selections.length, 'alerts');
-
   try {
     const response = await esClient.mget<Record<string, unknown>>({
       docs: selections.map(({ _id, _index }) => ({ _id, _index })),
+      ...(sourceIncludes ? { _source_includes: [...sourceIncludes] } : {}),
     });
 
     const alerts: FetchedSource[] = [];

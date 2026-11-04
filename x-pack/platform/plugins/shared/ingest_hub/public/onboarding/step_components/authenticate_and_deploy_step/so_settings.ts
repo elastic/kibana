@@ -5,20 +5,52 @@
  * 2.0.
  */
 
+import type { ServiceInstance } from '../service_settings_step/use_service_settings';
+
 interface SOSettingsSource {
   integrationName?: string;
   description?: string;
   namespace?: string;
+  instances?: ServiceInstance[];
 }
 
 /**
- * The integration name, description and global namespace for a saved-object write. Spread into
- * every create and update that carries the service selection, so resume sees the settings the last
- * deploy used (the name can change between deploys while it still follows the selection).
+ * The service instances as the saved object stores them: only the fields a resume needs to rebuild
+ * the Service settings rows. Left out when there are none, so a write never clears a stored list
+ * with an empty one. The list is empty only when nothing could be reconciled yet: on a resume of a
+ * record saved without instances, while the services map is still loading, no service has a base
+ * row. Clearing the stored list then would lose its duplicates, while leaving it can at worst keep
+ * a stale one, and the deploy write also sends `services`, so a resume drops the instances of any
+ * service that is no longer selected.
+ */
+const toSOInstances = (
+  instances: ServiceInstance[] | undefined
+): { instances?: ServiceInstance[] } =>
+  instances?.length
+    ? {
+        instances: instances.map(({ instanceId, serviceId, name, isDuplicate }) => ({
+          instanceId,
+          serviceId,
+          name,
+          isDuplicate,
+        })),
+      }
+    : {};
+
+/**
+ * The integration name, description, global namespace and service instances for a saved-object
+ * write. Spread into every create and update that carries the service selection, so resume sees
+ * what the last deploy used (the name can change between deploys while it still follows the
+ * selection).
  */
 export const toSOSettings = (
   serviceSettings: SOSettingsSource | null | undefined
-): { integrationName?: string; description?: string; namespace?: string } => {
+): {
+  integrationName?: string;
+  description?: string;
+  namespace?: string;
+  instances?: ServiceInstance[];
+} => {
   const integrationName = serviceSettings?.integrationName?.trim();
   const description = serviceSettings?.description?.trim();
   const namespace = serviceSettings?.namespace?.trim();
@@ -26,6 +58,7 @@ export const toSOSettings = (
     ...(integrationName ? { integrationName } : {}),
     ...(description ? { description } : {}),
     ...(namespace ? { namespace } : {}),
+    ...toSOInstances(serviceSettings?.instances),
   };
 };
 
@@ -35,23 +68,30 @@ export const toSOSettings = (
  */
 export const toSOSettingsUpdate = (
   serviceSettings: SOSettingsSource | null | undefined
-): { integrationName?: string; description: string | null; namespace: string | null } => {
-  const { integrationName, description, namespace } = toSOSettings(serviceSettings);
+): {
+  integrationName?: string;
+  description: string | null;
+  namespace: string | null;
+  instances?: ServiceInstance[];
+} => {
+  const { integrationName, description, namespace, instances } = toSOSettings(serviceSettings);
   return {
     ...(integrationName ? { integrationName } : {}),
     description: description ?? null,
     namespace: namespace ?? null,
+    ...(instances ? { instances } : {}),
   };
 };
 
 /**
- * The update for settings that need no deploy: the name and description. The namespace is left
- * out on purpose. It is the last deployed value that drift detection compares the current one
- * against, so it is saved only together with the policy changes that apply it.
+ * The update for settings that need no deploy: the name and description. The namespace and the
+ * instances are left out on purpose. They describe what was last deployed: the namespace is the
+ * value drift detection compares the current one against, and a duplicate added in Step 2 but not
+ * deployed yet must not come back on resume. Both are saved only together with a deploy.
  */
 export const toSOMetadataUpdate = (
   serviceSettings: SOSettingsSource | null | undefined
 ): { integrationName?: string; description: string | null } => {
-  const { namespace, ...metadata } = toSOSettingsUpdate(serviceSettings);
+  const { namespace, instances, ...metadata } = toSOSettingsUpdate(serviceSettings);
   return metadata;
 };

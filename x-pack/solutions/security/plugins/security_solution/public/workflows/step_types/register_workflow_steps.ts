@@ -102,4 +102,10 @@ export const registerWorkflowSteps = (
       (m) => m.getAlertEntitiesStepDefinition
     )
   );
+
+  workflowsExtensions.registerStepDefinition(() =>
+    import('./match_attack_fingerprints/match_attack_fingerprints_step').then(
+      (m) => m.matchAttackFingerprintsStepDefinition
+    )
+  );
 };

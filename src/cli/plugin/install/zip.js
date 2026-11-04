@@ -122,16 +122,20 @@ export function extractArchive(archive, targetDir, stripPrefix) {
                 return reject(error2);
               }
 
-              readStream.pipe(
-                createWriteStream(fileName, {
-                  // eslint-disable-next-line no-bitwise
-                  mode: entry.externalFileAttributes >>> 16,
-                })
-              );
+              const writeStream = createWriteStream(fileName, {
+                // eslint-disable-next-line no-bitwise
+                mode: entry.externalFileAttributes >>> 16,
+              });
 
-              readStream.on('end', function () {
+              readStream.on('error', reject);
+              writeStream.on('error', reject);
+
+              // 'close' fires once the fd is closed, so the entry is fully on disk before we resolve.
+              writeStream.on('close', function () {
                 zipfile.readEntry();
               });
+
+              readStream.pipe(writeStream);
             });
           });
         }
