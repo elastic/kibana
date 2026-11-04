@@ -133,7 +133,7 @@ export class IsomerPlugin
     });
   };
 
-  private readonly validateNode = createNodeValidator(() => this.getRuntime());
+  private readonly validateNode = createNodeValidator();
 
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(

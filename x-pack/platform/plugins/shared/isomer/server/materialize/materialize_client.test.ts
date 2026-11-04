@@ -253,6 +253,7 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Materializing this note failed: mapping failed',
       });
       expect(logger.warn).toHaveBeenCalledWith(
@@ -280,6 +281,7 @@ describe('createScopedMaterializeClient', () => {
 
       await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
         type: 'unsupported',
+        title: 'Content not available',
         reason: 'Materializing this note failed: mapping failed',
       });
       expect(logger.warn).toHaveBeenCalledWith(
@@ -303,6 +305,7 @@ describe('createScopedMaterializeClient', () => {
         type: 'unsupported',
         title: 'Open alerts',
         reason: 'The note materialized into an invalid node: text is too small',
+        source: expect.objectContaining({ kind: 'kibana', materializer: 'note' }),
       });
       expect(validate).toHaveBeenCalledTimes(2);
     });
