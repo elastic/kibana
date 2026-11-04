@@ -12,22 +12,30 @@ import {
   useFieldSettingsContext,
 } from './settings_context';
 import React from 'react';
-import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Subject } from 'rxjs';
 
+type RawSettings = Record<string, PublicUiSettingsParams & UserProvidedValues<any>>;
+
+const createRawSettings = (defaultConnector = 'pmeClaudeV37SonnetUsEast1'): RawSettings => ({
+  'genAiSettings:defaultAIConnector': {
+    readonlyMode: 'ui',
+    value: 'NO_DEFAULT_CONNECTOR',
+    userValue: defaultConnector,
+  },
+  'genAiSettings:defaultAIConnectorOnly': {
+    readonlyMode: 'ui',
+    value: false,
+    userValue: true,
+  },
+});
+
 describe('settings_context', () => {
   const setupSettingsContext = () => {
-    const queryClient = new QueryClient({
-      logger: {
-        log: () => {},
-        warn: () => {},
-        error: () => {},
-      },
-    });
     const updateSubject = new Subject<{ key: string }>();
     const set = jest.fn().mockResolvedValue(undefined);
+    const getAll = jest.fn().mockReturnValue(createRawSettings());
 
     const rendered = renderHook(() => useSettingsContext(), {
       wrapper: ({ children }) => (
@@ -46,30 +54,17 @@ describe('settings_context', () => {
                 isOverridden: () => false,
                 isCustom: () => false,
                 set,
-                getAll: jest.fn().mockReturnValue({
-                  'genAiSettings:defaultAIConnector': {
-                    readonlyMode: 'ui',
-                    value: 'NO_DEFAULT_CONNECTOR',
-                    userValue: 'pmeClaudeV37SonnetUsEast1',
-                  },
-                  'genAiSettings:defaultAIConnectorOnly': {
-                    readonlyMode: 'ui',
-                    value: false,
-                    userValue: true,
-                  },
-                } as Record<string, PublicUiSettingsParams & UserProvidedValues<any>>),
+                getAll,
               },
             },
           }}
         >
-          <QueryClientProvider client={queryClient}>
-            <SettingsContextProvider>{children}</SettingsContextProvider>
-          </QueryClientProvider>
+          <SettingsContextProvider>{children}</SettingsContextProvider>
         </KibanaContextProvider>
       ),
     });
 
-    return { result: rendered.result, set, queryClient, updateSubject };
+    return { result: rendered.result, set, getAll, updateSubject };
   };
 
   it('should provide the correct initial state', async () => {
@@ -88,43 +83,32 @@ describe('settings_context', () => {
     expect(result.current.handleFieldChange).toBeInstanceOf(Function);
     expect(result.current.saveAll).toBeInstanceOf(Function);
     expect(result.current.cleanUnsavedChanges).toBeInstanceOf(Function);
-    expect(result.current.saveSingleSetting).toBeInstanceOf(Function);
     expect(result.current.setValidationErrors).toBeInstanceOf(Function);
   });
 
-  it('should subscribe to settings updates and invalidate queries for tracked settings', async () => {
-    const { result, queryClient, updateSubject } = setupSettingsContext();
-    const invalidateQueriesSpy = jest.spyOn(queryClient, 'invalidateQueries');
+  it('should subscribe to settings updates and refresh fields for tracked settings', async () => {
+    const { result, getAll, updateSubject } = setupSettingsContext();
 
     await waitFor(() => {
-      expect(result.current.fields).toBeDefined();
+      expect(result.current.fields['genAiSettings:defaultAIConnector']).toBeDefined();
     });
 
-    invalidateQueriesSpy.mockClear();
-
-    act(() => {
-      updateSubject.next({ key: 'genAiSettings:defaultAIConnector' });
-    });
-
-    expect(invalidateQueriesSpy).toHaveBeenCalledWith({
-      queryKey: [
-        'settingsFields',
-        expect.arrayContaining([
-          'genAiSettings:defaultAIConnector',
-          'genAiSettings:defaultAIConnectorOnly',
-        ]),
-      ],
-    });
-
-    invalidateQueriesSpy.mockClear();
+    getAll.mockReturnValue(createRawSettings('otherConnector'));
+    const fieldsBeforeUntrackedUpdate = result.current.fields;
 
     act(() => {
       updateSubject.next({ key: 'some:otherSetting' });
     });
 
-    expect(invalidateQueriesSpy).not.toHaveBeenCalled();
+    expect(result.current.fields).toBe(fieldsBeforeUntrackedUpdate);
 
-    invalidateQueriesSpy.mockRestore();
+    act(() => {
+      updateSubject.next({ key: 'genAiSettings:defaultAIConnector' });
+    });
+
+    expect(result.current.fields['genAiSettings:defaultAIConnector'].savedValue).toBe(
+      'otherConnector'
+    );
   });
 
   it('should handle updating unsaved changes', async () => {
@@ -176,25 +160,6 @@ describe('settings_context', () => {
     await waitFor(() => {
       expect(result.current.unsavedChanges).toEqual({});
     });
-  });
-
-  it('should save single setting', async () => {
-    const { result, set } = setupSettingsContext();
-
-    await waitFor(() => {
-      expect(result.current.fields).toBeDefined();
-    });
-
-    expect(set).toHaveBeenCalledTimes(0);
-
-    await act(async () => {
-      await result.current.saveSingleSetting({
-        id: 'foo',
-        change: 'bar',
-      });
-    });
-
-    expect(set).toHaveBeenCalledTimes(1);
   });
 
   it('should revert unsaved changes', async () => {
@@ -318,7 +283,6 @@ describe('settings_context', () => {
 
       // We need to setup the context with a way to access the addSuccess mock
       const setupWithSuccessMock = () => {
-        const queryClient = new QueryClient();
 
         const rendered = renderHook(() => useSettingsContext(), {
           wrapper: ({ children }) => (
@@ -353,9 +317,7 @@ describe('settings_context', () => {
                 },
               }}
             >
-              <QueryClientProvider client={queryClient}>
                 <SettingsContextProvider>{children}</SettingsContextProvider>
-              </QueryClientProvider>
             </KibanaContextProvider>
           ),
         });
@@ -413,9 +375,7 @@ describe('settings_context', () => {
                 },
               }}
             >
-              <QueryClientProvider client={new QueryClient()}>
                 <SettingsContextProvider>{children}</SettingsContextProvider>
-              </QueryClientProvider>
             </KibanaContextProvider>
           ),
         });
@@ -446,9 +406,7 @@ describe('settings_context', () => {
               },
             }}
           >
-            <QueryClientProvider client={new QueryClient()}>
               <SettingsContextProvider>{children}</SettingsContextProvider>
-            </QueryClientProvider>
           </KibanaContextProvider>
         ),
       });
@@ -484,9 +442,7 @@ describe('settings_context', () => {
               },
             }}
           >
-            <QueryClientProvider client={new QueryClient()}>
               <SettingsContextProvider>{children}</SettingsContextProvider>
-            </QueryClientProvider>
           </KibanaContextProvider>
         ),
       });

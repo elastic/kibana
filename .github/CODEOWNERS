@@ -668,6 +668,7 @@ src/platform/packages/shared/kbn-management/settings/components/field_input @ela
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/form @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/field_definition @elastic/kibana-management
+src/platform/packages/shared/kbn-management/settings/hooks @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/section_registry @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/setting_ids @elastic/appex-sharedux @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/types @elastic/kibana-management
