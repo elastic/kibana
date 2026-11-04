@@ -10,13 +10,7 @@ import type {
   MetricCustomIndicator,
   TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
-import {
-  is,
-  metricCustomBasicMetric,
-  metricCustomDocCountMetric,
-  timesliceMetricBasicMetricWithField,
-  timesliceMetricPercentileMetric,
-} from '@kbn/slo-schema';
+import { is, metricCustomBasicMetric, metricCustomDocCountMetric } from '@kbn/slo-schema';
 import { isEmpty, isObject } from 'lodash';
 import type { FieldPath, UseFormGetValues } from 'react-hook-form';
 import type { CreateSLOForm } from '../types';
@@ -49,13 +43,14 @@ const areCustomMetricsComplete = (getValues: GetValues, side: 'good' | 'total'):
 const isTimesliceMetricComplete = (
   metric: TimesliceMetricIndicator['params']['metric']['metrics'][number]
 ): boolean => {
-  if (is(timesliceMetricBasicMetricWithField, metric)) {
-    return Boolean(metric.field);
+  switch (metric.aggregation) {
+    case 'doc_count':
+      return true;
+    case 'percentile':
+      return Boolean(metric.field) && Boolean(metric.percentile);
+    default:
+      return Boolean(metric.field);
   }
-  if (is(timesliceMetricPercentileMetric, metric)) {
-    return Boolean(metric.field) && Boolean(metric.percentile);
-  }
-  return true;
 };
 
 const areTimesliceMetricsComplete = (getValues: GetValues): boolean => {
