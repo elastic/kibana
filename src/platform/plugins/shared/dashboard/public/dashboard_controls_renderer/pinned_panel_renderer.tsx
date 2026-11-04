@@ -8,21 +8,30 @@
  */
 
 import classNames from 'classnames';
-import React, { useRef, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 
 import {
   EuiFlexItem,
   EuiFormControlLayout,
+  EuiFormLabel,
   EuiFormRow,
-  transparentize,
   type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { ControlLabelTooltip } from '@kbn/controls-renderer';
+import { apiPublishesLabel } from '@kbn/controls-renderer/src/utils';
+import { HasCustomPrepend } from '@kbn/controls-schemas';
+import { PublishesTooltipLabel } from '@kbn/controls-schemas/src/types';
 import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
-import { DashboardApi } from '../dashboard_api/types';
-import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { DefaultEmbeddableApi, EmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import { DEFAULT_DASHBOARD_DRAG_TOP_OFFSET } from '../dashboard_renderer/grid/constants';
+import { i18n } from '@kbn/i18n';
+import {
+  apiCanCancelRequests,
+  apiPublishesTitle,
+  useBatchedPublishingSubjects,
+} from '@kbn/presentation-publishing';
+import { combineLatest, of, Subscription } from 'rxjs';
+import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { DragHandle } from './pinned_panel_drag_handle';
 
 export const PinnedPanelRenderer = ({
@@ -37,126 +46,68 @@ export const PinnedPanelRenderer = ({
   const styles = useMemoCss(controlPanelStyles);
   const dashboardApi = useDashboardApi();
 
-  const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
+  const [api, setApi] = useState<
+    (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
+  >(null);
 
-  // const [api, setApi] = useState<
-  //   (DefaultEmbeddableApi & Partial<HasCustomPrepend> & Partial<PublishesTooltipLabel>) | null
-  // >(null);
+  const [viewMode] = useBatchedPublishingSubjects(dashboardApi.viewMode$);
+  const [panelLabel, setPanelLabel] = useState<string>('');
 
-  // const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({
-  //   id,
-  // });
+  useEffect(() => {
+    return () => {
+      if (api && apiCanCancelRequests(api)) {
+        api.cancelRequests();
+      }
+    };
+  }, [api]);
 
-  // const [viewMode, disabledActionIds, relatedPanelsIndicatorId] = useBatchedPublishingSubjects(
-  //   parentApi.viewMode$,
-  //   parentApi.disabledActionIds$ ?? (of([] as string[]) as PublishingSubject<string[]>),
-  //   parentApi.relatedPanelsIndicatorId$ ?? (of(undefined) as PublishingSubject<undefined>)
-  // );
+  useEffect(() => {
+    if (!api) return;
 
-  // const [panelLabel, setPanelLabel] = useState<string | undefined>();
-  // const [panelTooltipLabel, setPanelTooltipLabel] = useState<string | undefined>();
-  // const [selectedPanelRelatedPanels, setSelectedPanelRelatedPanels] = useState<string[]>([]);
+    /** Setup subscriptions for necessary state once API is available */
+    const subscriptions = new Subscription();
+    subscriptions.add(
+      combineLatest([
+        ...(apiPublishesTitle(api)
+          ? [api.title$, api.defaultTitle$ ?? of(undefined)]
+          : [of(undefined), of(undefined)]),
+        apiPublishesLabel(api) ? api.label$ : of(undefined),
+      ]).subscribe(([title = '', defaultTitle = '', label = '']) => {
+        setPanelLabel(title || label || defaultTitle);
+      })
+    );
+    return () => {
+      subscriptions.unsubscribe();
+    };
+  }, [api]);
 
-  // const prependWrapperRef = useRef<HTMLDivElement>(null);
+  const onApiAvailable = useCallback(
+    (controlApi: DefaultEmbeddableApi) => {
+      setApi(controlApi);
+      dashboardApi.registerChildApi(controlApi);
+    },
+    [dashboardApi]
+  );
 
-  // useEffect(() => {
-  //   return () => {
-  //     if (api && apiCanCancelRequests(api)) {
-  //       api.cancelRequests();
-  //     }
-  //   };
-  // }, [api]);
+  const isEditable = viewMode === 'edit';
 
-  // const selectedPanel = useMemo(
-  //   () =>
-  //     relatedPanelsIndicatorId &&
-  //     Object.entries(parentApi.children$.value).find(
-  //       ([key]) => key === relatedPanelsIndicatorId
-  //     )?.[1],
-  //   [parentApi.children$.value, relatedPanelsIndicatorId]
-  // );
-  // const indicateControl = useMemo(
-  //   () =>
-  //     Boolean(
-  //       api && // Check to make sure onApiAvailable has returned; control panels initialize their own apis internally
-  //         selectedPanel &&
-  //         apiPublishesRelatedPanels(selectedPanel) &&
-  //         selectedPanelRelatedPanels.includes(id)
-  //     ),
-  //   [api, selectedPanel, selectedPanelRelatedPanels, id]
-  // );
-  // const {
-  //   canIndicateRelatedPanels,
-  //   isIndicatingRelatedPanels,
-  //   onToggleIndicateRelatedPanels,
-  //   numberOfRelatedPanels,
-  // } = useIndicateRelatedPanelsSelector(api);
-
-  // useEffect(() => {
-  //   if (!api) return;
-
-  //   /** Setup subscriptions for necessary state once API is available */
-  //   const subscriptions = new Subscription();
-  //   if (apiPublishesLabel(api)) {
-  //     subscriptions.add(
-  //       api.label$.subscribe((result) => {
-  //         setPanelLabel(result);
-  //       })
-  //     );
-  //   }
-  //   if (apiPublishesTooltipLabel(api)) {
-  //     subscriptions.add(
-  //       api.tooltipLabel$.subscribe((result) => {
-  //         setPanelTooltipLabel(result);
-  //       })
-  //     );
-  //   }
-  //   if (apiPublishesRelatedPanels(selectedPanel)) {
-  //     subscriptions.add(selectedPanel.relatedPanels$.subscribe(setSelectedPanelRelatedPanels));
-  //   } else {
-  //     setSelectedPanelRelatedPanels([]);
-  //   }
-  //   return () => {
-  //     subscriptions.unsubscribe();
-  //   };
-  // }, [api, selectedPanel]);
-
-  // const setRefs = useCallback(
-  //   (ref: HTMLElement | null) => {
-  //     setNodeRef(ref);
-  //     setControlPanelRef(id, ref);
-  //   },
-  //   [id, setNodeRef, setControlPanelRef]
-  // );
-
-  // const onApiAvailable = useCallback(
-  //   (controlApi: DefaultEmbeddableApi) => {
-  //     setApi(controlApi);
-  //     parentApi.registerChildApi(controlApi);
-  //   },
-  //   [parentApi]
-  // );
-
-  // const isEditable = viewMode === 'edit';
-  // const enableIndicateRelatedPanels = Boolean(canIndicateRelatedPanels && numberOfRelatedPanels);
-  // const handleToggleIndicateRelated = useCallback(
-  //   () => (enableIndicateRelatedPanels ? onToggleIndicateRelatedPanels() : null),
-  //   [enableIndicateRelatedPanels, onToggleIndicateRelatedPanels]
-  // );
+  const controlLabel = (
+    <ControlLabelTooltip
+      panelLabel={panelLabel}
+      anchorProps={{ className: 'eui-textTruncate', css: styles.tooltipStyles }}
+    >
+      <EuiFormLabel className="controlPanel--label">
+        <span css={styles.prependWrapperStyles}>{panelLabel}</span>
+      </EuiFormLabel>
+    </ControlLabelTooltip>
+  );
 
   return (
     <EuiFlexItem
       component="li"
-      // ref={setRefs}
-      // style={{
-      //   transition,
-      //   transform: CSS.Translate.toString(transform),
-      // }}
       grow={false}
       data-test-subj="control-frame"
       // css={css([isDragging && styles.draggingItem, styles.controlWidthStyles])}
-      // className={`controlFrameWrapper--${width}`}
     >
       {/* <FloatingActions
         data-test-subj="control-frame-floating-actions"
@@ -170,59 +121,41 @@ export const PinnedPanelRenderer = ({
         data-test-subj="control-frame-title"
         fullWidth
         id={`control-title-${id}`}
-        // aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
-        //   defaultMessage: 'Control for ${controlTitle}',
-        //   values: { controlTitle: panelLabel },
-        // })}
+        aria-label={i18n.translate('controls.controlGroup.controlFrameAriaLabel', {
+          defaultMessage: 'Control for ${controlTitle}',
+          values: { controlTitle: panelLabel },
+        })}
       >
         <EuiFormControlLayout
           compressed={true}
           fullWidth
           className={classNames('controlFrame__formControlLayout', {
-            // 'controlFrame__formControlLayout--edit': isEditable,
-            // 'controlFrame__formControlLayout--focused': indicateControl,
-            // 'controlFrame__formControlLayout--selected': isIndicatingRelatedPanels,
-            // type,
+            'controlFrame__formControlLayout--edit': isEditable,
+            type,
           })}
           css={styles.formControl}
           prepend={
             <>
-              <DragHandle
-                isEditable={true}
-                controlTitle={'Test'}
-                className="controlFrame__dragHandle"
-                // highContrast={isIndicatingRelatedPanels}
-                setDragHandles={setDragHandles}
-              >
-                Test
-              </DragHandle>
-
-              {/* {api?.CustomPrependComponent ? (
+              {api?.CustomPrependComponent ? (
                 <>
                   <DragHandle
-                    isEditable={isEditable}
-                    controlTitle={panelLabel}
-                    className="controlFrame__dragHandle"
-                    {...attributes}
-                    {...listeners}
+                    isEditable={true}
+                    controlTitle={'Test'}
+                    setDragHandles={setDragHandles}
                   />
                   <api.CustomPrependComponent />
                 </>
               ) : (
                 <>
                   <DragHandle
-                    isEditable={isEditable}
+                    isEditable={true}
                     controlTitle={panelLabel}
-                    className="controlFrame__dragHandle"
-                    highContrast={isIndicatingRelatedPanels}
-                    {...attributes}
-                    {...listeners}
+                    setDragHandles={setDragHandles}
                   >
-                    {!enableIndicateRelatedPanels && controlLabel}
+                    {controlLabel}
                   </DragHandle>
-                  {enableIndicateRelatedPanels && controlLabel}
                 </>
-              )} */}
+              )}
             </>
           }
         >
@@ -237,10 +170,7 @@ export const PinnedPanelRenderer = ({
               showBorder: true,
               showShadow: false,
             }}
-            onApiAvailable={(api) => {
-              embeddableApiRef.current = api;
-              dashboardApi.registerChildApi(api);
-            }}
+            onApiAvailable={onApiAvailable}
             hidePanelChrome={true}
           />
         </EuiFormControlLayout>
@@ -284,16 +214,6 @@ const controlPanelStyles = {
           paddingInlineStart: `${euiTheme.size.xxs} !important`, // corrected syntax for skinny icon
         },
       },
-      '&.controlFrame__formControlLayout--focused': {
-        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
-      },
-      '&.controlFrame__formControlLayout--selected': {
-        outline: `${euiTheme.border.width.thick} solid ${euiTheme.colors.vis.euiColorVis0}`,
-        backgroundColor: transparentize(euiTheme.colors.vis.euiColorVis0, 0.1),
-        '& div, & button': {
-          backgroundColor: 'transparent',
-        },
-      },
       '.controlPanel--label': {
         padding: '0 !important',
         height: '100%',
@@ -310,3 +230,6 @@ const controlPanelStyles = {
       },
     }),
 };
+function setPanelTooltipLabel(result: string) {
+  throw new Error('Function not implemented.');
+}

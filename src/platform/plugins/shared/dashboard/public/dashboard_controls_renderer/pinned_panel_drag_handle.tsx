@@ -15,7 +15,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 
 interface DragHandleProps {
   isEditable: boolean;
-  children: React.ReactNode;
+  children?: React.ReactNode;
   controlTitle?: string;
   highContrast?: boolean; // If true, set the icon color to higher contrast instead of subdued
   setDragHandles: (refs: Array<HTMLElement | null>) => void;
@@ -76,6 +76,7 @@ export const DragHandle = ({
       ref={(ref) => {
         setDragHandle('pinnedPanel', ref);
       }}
+      className="controlFrame__dragHandle"
       css={[styles.dragHandle, highContrast ? styles.dragHandleHighContrast : null]}
     >
       <EuiIcon type="dragHorizontal" aria-hidden={true} />
