@@ -41,3 +41,4 @@ export { WORKFLOWS_CANVAS_CHROME_INSET, WORKFLOWS_SURFACE_RADIUS } from './surfa
 // Opt-in: sync-warm EUI icons (accordion arrows / node menus). Not run on import;
 // the canvas calls it on first render and workflows_management panels call it themselves.
 export { ensureWorkflowGraphEuiIcons } from './ensure_eui_icons';
+export { loadTypeIconMasks } from './type_icon_masks';

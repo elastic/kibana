@@ -85,7 +85,14 @@ export function ReferenceChip({
     </span>
   );
   return hint ? (
-    <EuiToolTip content={hint} disableScreenReaderOutput display="inlineBlock">
+    // The anchor must be able to shrink with the chip, or a long path can never truncate.
+    <EuiToolTip
+      content={hint}
+      disableScreenReaderOutput
+      anchorProps={{
+        css: { display: 'inline-flex', minInlineSize: 0, maxInlineSize: '100%' },
+      }}
+    >
       {chip}
     </EuiToolTip>
   ) : (

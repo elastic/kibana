@@ -41,13 +41,17 @@ export interface ReferenceCapableBind {
   readonly reportChange: (next: string, caret: number) => void;
   readonly togglePicker: () => void;
   readonly closePicker: () => void;
+  /** Open the picker so the pick replaces [start, end), e.g. to swap an existing chip. */
+  readonly openPickerAtRange: (start: number, end: number) => void;
   readonly attachInputRef: (el: HTMLInputElement | HTMLTextAreaElement | null) => void;
-  readonly registerSelection: (bridge: ReferenceSelectionBridge) => void;
+  /** Pass `null` when the editor behind the bridge goes away. */
+  readonly registerSelection: (bridge: ReferenceSelectionBridge | null) => void;
 }
 
 /**
- * Shared reference affordance for every templatable field control: @ button,
- * typed `@` / `{{` triggers, teaching placeholder, and picker chrome.
+ * Shared reference affordance for every templatable field control: `{}` button,
+ * typed `@` / `{{` triggers (plus a single `{` for plain text), teaching placeholder,
+ * and picker chrome.
  */
 export function ReferenceCapableField({
   catalog,
@@ -55,6 +59,7 @@ export function ReferenceCapableField({
   onChange,
   onExpand,
   fillHeight = false,
+  openOnBrace = false,
   children,
   'data-test-subj': dataTestSubj = 'workflowStepConfigDataReference',
 }: {
@@ -65,6 +70,11 @@ export function ReferenceCapableField({
   readonly onExpand?: () => void;
   /** Stretch the anchor to fill the parent (expanded field-editor pane). */
   readonly fillHeight?: boolean;
+  /**
+   * Also open the picker on a single typed `{`. For plain text only: in JSON, KQL and ES|QL
+   * `{` is syntax.
+   */
+  readonly openOnBrace?: boolean;
   readonly children: (bind: ReferenceCapableBind) => React.ReactElement;
   readonly 'data-test-subj'?: string;
 }) {
@@ -79,9 +89,14 @@ export function ReferenceCapableField({
   const insertLabel = i18n.translate('workflows.stepConfigPanel.insertDataReference', {
     defaultMessage: 'Insert data from a prior step',
   });
-  const teachingPlaceholder = i18n.translate('workflows.stepConfigPanel.typeAtToInsert', {
-    defaultMessage: 'Type @ to insert data',
-  });
+  const teachingPlaceholder = openOnBrace
+    ? i18n.translate('workflows.stepConfigPanel.typeBraceToInsert', {
+        defaultMessage: 'Type {brace} to insert data',
+        values: { brace: '{' },
+      })
+    : i18n.translate('workflows.stepConfigPanel.typeAtToInsert', {
+        defaultMessage: 'Type @ to insert data',
+      });
 
   const focusAndSetCaret = useCallback((offset: number) => {
     const bridge = selectionBridgeRef.current;
@@ -164,11 +179,11 @@ export function ReferenceCapableField({
       const before = next.slice(0, caret);
       if (before.endsWith('{{')) {
         openPicker({ start: caret - 2, end: caret });
-      } else if (before.endsWith('@')) {
+      } else if (before.endsWith('@') || (openOnBrace && before.endsWith('{'))) {
         openPicker({ start: caret - 1, end: caret });
       }
     },
-    [onChange, openPicker]
+    [onChange, openOnBrace, openPicker]
   );
 
   const togglePicker = useCallback(() => {
@@ -181,10 +196,15 @@ export function ReferenceCapableField({
     openPicker({ start: caret, end: caret });
   }, [closePicker, isOpen, openPicker, value.length]);
 
+  const openPickerAtRange = useCallback(
+    (start: number, end: number) => openPicker({ start, end }),
+    [openPicker]
+  );
+
   const atButton = (
     <EuiToolTip content={insertLabel} disableScreenReaderOutput>
       <EuiButtonIcon
-        iconType="at"
+        iconType="tokenObject"
         color={isOpen ? 'primary' : 'text'}
         size="xs"
         aria-label={insertLabel}
@@ -229,6 +249,7 @@ export function ReferenceCapableField({
     reportChange,
     togglePicker,
     closePicker,
+    openPickerAtRange,
     attachInputRef: (el) => {
       inputRef.current = el;
     },

@@ -10,7 +10,7 @@
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { ConnectorContractUnion } from '@kbn/workflows';
+import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
@@ -30,6 +30,10 @@ jest.mock('@kbn/code-editor', () => {
       placeholder?: string;
       editorDidMount?: (editor: {
         focus: () => void;
+        onKeyDown: (cb: (event: unknown) => void) => void;
+        onDidBlurEditorText: (cb: () => void) => void;
+        setSelection: (range: unknown) => void;
+        executeEdits: (source: string, edits: unknown[]) => void;
         getModel: () => {
           getOffsetAt: (pos: { lineNumber: number; column: number }) => number;
           getPositionAt: (offset: number) => { lineNumber: number; column: number };
@@ -44,9 +48,18 @@ jest.mock('@kbn/code-editor', () => {
       const textareaRef = (
         MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>
       )<HTMLTextAreaElement>(null);
+      const blurRef = (MockReact.useRef as <T>(val: T | null) => React.MutableRefObject<T | null>)<
+        () => void
+      >(null);
       MockReact.useEffect(() => {
         props.editorDidMount?.({
           focus: () => textareaRef.current?.focus(),
+          onKeyDown: () => undefined,
+          onDidBlurEditorText: (cb: () => void) => {
+            blurRef.current = cb;
+          },
+          setSelection: () => undefined,
+          executeEdits: () => undefined,
           getValue: () => props.value,
           getModel: () => ({
             getOffsetAt: () => textareaRef.current?.selectionStart ?? props.value.length,
@@ -72,6 +85,7 @@ jest.mock('@kbn/code-editor', () => {
           aria-label={props['aria-label']}
           placeholder={props.placeholder}
           value={props.value}
+          onBlur={() => blurRef.current?.()}
           onChange={(e) => {
             const next = e.target.value;
             const caret = e.target.selectionStart ?? next.length;
@@ -118,6 +132,7 @@ jest.mock('@kbn/esql-editor', () => {
 jest.mock('@kbn/workflows-ui', () => ({
   workflowsEditorChromeOverrides: {},
   ensureWorkflowGraphEuiIcons: jest.fn(),
+  loadTypeIconMasks: () => Promise.resolve({}),
   resolveNodeChipStyle: () => ({
     background: 'bg',
     border: 'border',
@@ -191,6 +206,16 @@ const renderPanel = (overrides: Partial<React.ComponentProps<typeof StepConfigPa
   return { onClose, onRevert, onFragmentChange, unmount: view.unmount };
 };
 
+/**
+ * Text fields are a read view (chips) until focused; focusing mounts the single-line editor,
+ * mocked here as a textarea carrying the same test id. Returns the element to type into.
+ */
+const activateField = (testId: string): HTMLElement => {
+  const element = screen.getByTestId(testId);
+  if (element.getAttribute('data-mode') === 'read') fireEvent.focusIn(element);
+  return screen.getByTestId(testId);
+};
+
 const expandSettingsAccordion = () => {
   const accordion = screen.getByTestId('workflowStepConfigPanelAccordion-settings');
   const trigger = accordion.querySelector('button');
@@ -212,7 +237,7 @@ describe('StepConfigPanel', () => {
     expect(screen.queryByTestId('workflowStepConfigPanelType')).not.toBeInTheDocument();
     expect(screen.queryByText(/Configure/)).not.toBeInTheDocument();
     expect(screen.queryByTestId('workflowStepConfigField-name')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
+    expect(activateField('workflowStepConfigField-with.message')).toHaveValue(
       'Hi {{ inputs.user }}'
     );
     // Humanized labels — not raw YAML keys. Name lives in the header only.
@@ -521,7 +546,7 @@ with:
 
   it('round-trips Form → YAML preserving comments, unknown keys and Liquid; live-applies via onFragmentChange', () => {
     const { onFragmentChange } = renderPanel();
-    fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
+    fireEvent.change(activateField('workflowStepConfigField-with.message'), {
       target: { value: 'Changed {{ inputs.user }}' },
     });
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-yaml'));
@@ -551,28 +576,33 @@ with:
     const { onFragmentChange } = renderPanel({
       initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith: {}\n',
     });
-    const messageInput = screen.getByTestId('workflowStepConfigField-with.message');
-    expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
+    const messageField = () => screen.getByTestId('workflowStepConfigField-with.message');
+    expect(messageField()).not.toHaveAttribute('aria-invalid', 'true');
 
     // Mid-typing an empty required field does not accuse, and still live-applies
     // (incomplete state is apply-able — the canvas badge reflects it).
-    fireEvent.change(messageInput, { target: { value: '' } });
-    expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
+    fireEvent.change(activateField('workflowStepConfigField-with.message'), {
+      target: { value: '' },
+    });
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
     expect(onFragmentChange).toHaveBeenCalled();
 
-    fireEvent.blur(messageInput);
-    expect(messageInput).toHaveAttribute('aria-invalid', 'true');
+    // Leaving the field (the editor unmounts back to the read view) accuses.
+    fireEvent.blur(messageField());
+    expect(messageField()).toHaveAttribute('aria-invalid', 'true');
     expect(screen.getByText('Message is required')).toBeInTheDocument();
 
     // Fast forgiveness once already invalid.
-    fireEvent.change(messageInput, { target: { value: 'hello' } });
-    expect(messageInput).not.toHaveAttribute('aria-invalid', 'true');
+    fireEvent.change(activateField('workflowStepConfigField-with.message'), {
+      target: { value: 'hello' },
+    });
     expect(screen.queryByText('Message is required')).not.toBeInTheDocument();
 
     // Misconfigured values (e.g. unclosed template) still live-apply — the
     // canvas badge reflects them; the panel never gates on advisory errors.
-    fireEvent.change(messageInput, { target: { value: 'Hi {{ inputs.x' } });
+    fireEvent.change(activateField('workflowStepConfigField-with.message'), {
+      target: { value: 'Hi {{ inputs.x' },
+    });
     expect(onFragmentChange).toHaveBeenLastCalledWith(expect.stringContaining('Hi {{ inputs.x'));
   });
 
@@ -657,7 +687,7 @@ with:
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelView-form'));
     expect(screen.getByTestId('workflowStepConfigPanelAccordion-inputs')).toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelTitle')).toHaveTextContent('renamed');
-    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue('yo');
+    expect(activateField('workflowStepConfigField-with.message')).toHaveValue('yo');
     fireEvent.click(screen.getByTestId('workflowStepConfigPanelClose'));
     // The draft is valid — already live in the YAML via onFragmentChange — so
     // ✕ just closes; nothing to discard.
@@ -675,7 +705,7 @@ with:
     const { onRevert: onRevertEdit } = renderPanel();
     expect(screen.queryByTestId('workflowStepConfigPanelRemoveNode')).not.toBeInTheDocument();
     expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeDisabled();
-    fireEvent.change(screen.getByTestId('workflowStepConfigField-with.message'), {
+    fireEvent.change(activateField('workflowStepConfigField-with.message'), {
       target: { value: 'Edited locally' },
     });
     expect(screen.getByTestId('workflowStepConfigPanelResetNode')).toBeEnabled();
@@ -843,7 +873,7 @@ with:
 
   it('opens the picker from a Slack message body on typed @', () => {
     renderPanel();
-    const message = screen.getByTestId('workflowStepConfigField-with.message') as HTMLInputElement;
+    const message = activateField('workflowStepConfigField-with.message') as HTMLTextAreaElement;
     const affordance = message
       .closest('.euiFormRow')
       ?.querySelector('[data-test-subj="workflowStepConfigDataReference"]');
@@ -933,13 +963,13 @@ with:
     });
 
     // Live write-through into the step working state (inline field stays in sync).
-    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
+    expect(activateField('workflowStepConfigField-with.message')).toHaveValue(
       'Hello {{ consts.name }}'
     );
 
     fireEvent.click(screen.getByTestId('workflowFieldEditorSubFlyoutBack'));
     expect(screen.queryByTestId('workflowFieldEditorSubFlyout')).not.toBeInTheDocument();
-    expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveValue(
+    expect(activateField('workflowStepConfigField-with.message')).toHaveValue(
       'Hello {{ consts.name }}'
     );
 
@@ -996,11 +1026,13 @@ with:
 `,
     });
 
-    const body = screen.getByTestId('workflowStepConfigField-with.body') as HTMLInputElement;
-    expect(body.tagName).toBe('INPUT');
+    const body = screen.getByTestId('workflowStepConfigField-with.body');
+    expect(body).toHaveAttribute('data-language', 'json');
     // Pretty JSON collapsed to a single line for display.
-    expect(body.value).toBe('{ "fields": null, "id": "none" }');
-    expect(body.value).not.toMatch(/\n/);
+    expect(body).toHaveTextContent('{ "fields": null, "id": "none" }');
+    expect(activateField('workflowStepConfigField-with.body')).toHaveValue(
+      '{ "fields": null, "id": "none" }'
+    );
 
     fireEvent.click(
       within(body.closest('.euiFormRow') as HTMLElement).getByTestId(
@@ -1123,6 +1155,108 @@ with:
       expect(
         within(row).queryByTestId('workflowStepConfigField-max-iterations-source-data')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('reference chips in text controls', () => {
+    const listDefinition = {
+      version: '1',
+      name: 'demo',
+      enabled: true,
+      triggers: [{ type: 'manual' }],
+      consts: { tags: ['a', 'b'] },
+      steps: [{ name: 'notify', type: 'slack', with: { message: 'x' } }],
+    } as unknown as WorkflowYaml;
+
+    it('draws references as chips with accessible names, and edits as plain text', () => {
+      renderPanel();
+      const readView = screen.getByTestId('workflowStepConfigField-with.message');
+      expect(readView).toHaveAttribute('data-mode', 'read');
+      const chip = within(readView).getByTestId('workflowReferenceChip');
+      expect(chip).toHaveAttribute('aria-label', 'Reference inputs.user, unknown');
+      expect(chip).toHaveTextContent('inputs.user');
+      expect(readView).toHaveTextContent('Hi');
+      // Focusing swaps in the editor, which holds the real text (braces included).
+      expect(activateField('workflowStepConfigField-with.message')).toHaveValue(
+        'Hi {{ inputs.user }}'
+      );
+    });
+
+    it('opens the picker on the chip to swap it when a chip is clicked', () => {
+      renderPanel();
+      const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(
+        'workflowReferenceChip'
+      );
+      fireEvent.click(chip);
+      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+    });
+
+    it('teaches { as the trigger in an empty plain text field', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: ""\n',
+      });
+      expect(screen.getByTestId('workflowStepConfigField-with.message')).toHaveTextContent(
+        'Type { to insert data'
+      );
+    });
+
+    it('opens the picker on a single typed { in plain text', () => {
+      renderPanel({
+        initialFragment: 'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: "Hi "\n',
+      });
+      fireEvent.change(activateField('workflowStepConfigField-with.message'), {
+        target: { value: 'Hi {', selectionStart: 4, selectionEnd: 4 },
+      });
+      expect(screen.getByTestId('workflowDataReferenceSearch')).toBeInTheDocument();
+    });
+
+    it('does not treat { as a trigger inside a JSON field', () => {
+      renderPanel({
+        initialFragment:
+          'name: n\ntype: slack\nconnector-id: abc\nwith:\n  message: hi\n  query:\n    a: 1\n',
+      });
+      fireEvent.change(activateField('workflowStepConfigField-with.query'), {
+        target: { value: '{ "a": 1 }{', selectionStart: 11, selectionEnd: 11 },
+      });
+      expect(screen.queryByTestId('workflowDataReferenceSearch')).not.toBeInTheDocument();
+    });
+
+    it('warns about a list inside a sentence and rewrites it as JSON text', () => {
+      const { onFragmentChange } = renderPanel({
+        workflowDefinition: listDefinition,
+        initialFragment:
+          'name: notify\ntype: slack\nconnector-id: abc\nwith:\n  message: "Tags {{ consts.tags }} done"\n',
+      });
+      const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(
+        'workflowReferenceChip'
+      );
+      expect(chip).toHaveAttribute('data-tone', 'warning');
+      expect(
+        screen.getByTestId('workflowStepConfigField-with.message-containerCallout')
+      ).toBeVisible();
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.message-insertAsJson'));
+      const saved = onFragmentChange.mock.calls[
+        onFragmentChange.mock.calls.length - 1
+      ][0] as string;
+      expect(saved).toContain('Tags {{ consts.tags | json }} done');
+      expect(
+        screen.queryByTestId('workflowStepConfigField-with.message-containerCallout')
+      ).not.toBeInTheDocument();
+    });
+
+    it('dismisses the warning with "Keep as is" without changing the text', () => {
+      const { onFragmentChange } = renderPanel({
+        workflowDefinition: listDefinition,
+        initialFragment:
+          'name: notify\ntype: slack\nconnector-id: abc\nwith:\n  message: "Tags {{ consts.tags }} done"\n',
+      });
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-with.message-keepAsIs'));
+      expect(
+        screen.queryByTestId('workflowStepConfigField-with.message-containerCallout')
+      ).not.toBeInTheDocument();
+      const writes = onFragmentChange.mock.calls.map(([fragment]) => fragment as string);
+      expect(writes.every((fragment) => !fragment.includes('| json'))).toBe(true);
     });
   });
 });

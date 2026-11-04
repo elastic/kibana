@@ -12,9 +12,26 @@ import type { UseEuiTheme } from '@elastic/eui';
 /** Chips stay neutral; only "needs attention" turns amber. */
 export type ReferenceChipTone = 'neutral' | 'warning';
 
-/** Box styling shared by every reference chip (the editing view reuses it for decorations). */
+/** Colours of a chip box, shared by the React chip and the pills drawn inside Monaco. */
+export const getReferenceChipColors = (
+  euiTheme: UseEuiTheme['euiTheme'],
+  tone: ReferenceChipTone
+) =>
+  tone === 'warning'
+    ? {
+        background: euiTheme.colors.backgroundBaseWarning,
+        border: euiTheme.colors.borderBaseWarning,
+        text: euiTheme.colors.textWarning,
+      }
+    : {
+        background: euiTheme.colors.backgroundBaseNeutral,
+        border: euiTheme.colors.borderBaseNeutral,
+        text: euiTheme.colors.textParagraph,
+      };
+
+/** Box styling shared by every reference chip. */
 export const getReferenceChipCss = (euiTheme: UseEuiTheme['euiTheme'], tone: ReferenceChipTone) => {
-  const isWarning = tone === 'warning';
+  const colors = getReferenceChipColors(euiTheme, tone);
   return {
     display: 'inline-flex',
     alignItems: 'center',
@@ -22,14 +39,10 @@ export const getReferenceChipCss = (euiTheme: UseEuiTheme['euiTheme'], tone: Ref
     maxInlineSize: '100%',
     minInlineSize: 0,
     padding: `0 ${euiTheme.size.xs}`,
-    border: `${euiTheme.border.width.thin} solid ${
-      isWarning ? euiTheme.colors.borderBaseWarning : euiTheme.colors.borderBaseNeutral
-    }`,
+    border: `${euiTheme.border.width.thin} solid ${colors.border}`,
     borderRadius: euiTheme.border.radius.small,
-    backgroundColor: isWarning
-      ? euiTheme.colors.backgroundBaseWarning
-      : euiTheme.colors.backgroundBaseNeutral,
-    color: isWarning ? euiTheme.colors.textWarning : euiTheme.colors.textParagraph,
+    backgroundColor: colors.background,
+    color: colors.text,
     fontFamily: euiTheme.font.familyCode,
   } as const;
 };

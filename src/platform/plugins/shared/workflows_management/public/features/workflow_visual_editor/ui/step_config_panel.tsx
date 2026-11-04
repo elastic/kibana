@@ -53,15 +53,22 @@ import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { ReferenceCapableField } from './reference_capable_field';
+import { ReferenceTextInput } from './reference_text_input';
 import { ReferenceValueBox } from './reference_value_box';
 import { StepErrorHandlingSection } from './step_error_handling_section';
 import { SwitchCasesField } from './switch_cases_field';
+import {
+  getReferenceChipEditorCss,
+  useReferenceDecorations,
+  useReferenceIconMasks,
+} from './use_reference_decorations';
 import type { ValueSource } from './value_source_toggle';
 import { ValueSourceToggle } from './value_source_toggle';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import type { ReferenceForm } from '../lib/reference_value';
+import { findReferenceTokens } from '../lib/reference_tokens';
 import {
   fieldLabelDivergesFromKey,
   getStepFormSchema,
@@ -1865,31 +1872,18 @@ function StepFieldRow({
             value={value === undefined || value === null ? '' : String(value)}
             onChange={onChange}
             onExpand={onExpand}
+            openOnBrace
           >
-            {({
-              value: textValue,
-              teachingPlaceholder,
-              appendControls,
-              reportChange,
-              attachInputRef,
-              isOpen,
-            }) => (
-              <EuiFieldText
-                compressed
-                fullWidth
+            {(bind) => (
+              <ReferenceTextInput
+                bind={bind}
+                catalog={referenceCatalog}
+                ariaLabel={field.label}
                 isInvalid={isInvalid}
-                value={textValue}
-                placeholder={textValue.length === 0 ? teachingPlaceholder : undefined}
-                inputRef={attachInputRef}
-                onChange={(e) => {
-                  const next = e.target.value;
-                  const caret = e.target.selectionStart ?? next.length;
-                  reportChange(next, caret);
-                }}
                 onBlur={accuseIfInvalid}
-                append={appendControls}
-                data-test-subj={testSubj}
-                aria-expanded={isOpen}
+                onChange={bind.reportChange}
+                testSubj={testSubj}
+                warnContainersInSentence
               />
             )}
           </ReferenceCapableField>
@@ -1939,6 +1933,8 @@ function CodeField({
     setCaret: (offset: number) => void;
   } | null>(null);
   const [editorHeight, setEditorHeight] = useState(CODE_EDITOR_HEIGHT);
+  const [esqlEditor, setEsqlEditor] = useState<monaco.editor.IStandaloneCodeEditor | null>(null);
+  const iconMasks = useReferenceIconMasks();
 
   const external = useMemo(() => {
     if (value === undefined || value === null) return '';
@@ -1957,6 +1953,12 @@ function CodeField({
     onDraftErrorChange(undefined);
     // eslint-disable-next-line react-hooks/exhaustive-deps -- onDraftErrorChange is intentionally omitted
   }, [external, isEsql]);
+
+  const esqlTokens = useMemo(
+    () => (isEsql ? findReferenceTokens(draft, { catalog }) : []),
+    [catalog, draft, isEsql]
+  );
+  useReferenceDecorations(esqlEditor, draft, esqlTokens);
 
   useEffect(() => {
     if (!isEsql) return;
@@ -2024,6 +2026,7 @@ function CodeField({
               borderRadius: euiTheme.border.radius.small,
               background: euiTheme.colors.backgroundBaseSubdued,
               boxSizing: 'border-box',
+              ...getReferenceChipEditorCss(euiTheme, iconMasks),
             }}
             data-test-subj={testSubj}
             data-language={field.language}
@@ -2095,6 +2098,7 @@ function CodeField({
                 };
                 editorRef.current = bridge;
                 registerSelection(bridge);
+                setEsqlEditor((current) => current ?? editor);
               }}
               options={{
                 automaticLayout: true,
@@ -2139,31 +2143,19 @@ function CodeField({
       value={draft}
       onChange={applyDraft}
       onExpand={onExpand}
+      openOnBrace={field.language === 'plaintext'}
     >
-      {({ teachingPlaceholder, appendControls, reportChange, attachInputRef, isOpen }) => (
-        <EuiFieldText
-          compressed
-          fullWidth
+      {(bind) => (
+        <ReferenceTextInput
+          bind={bind}
+          catalog={catalog}
+          ariaLabel={field.label}
           isInvalid={isInvalid}
-          value={draft}
-          placeholder={draft.length === 0 ? teachingPlaceholder : undefined}
-          inputRef={attachInputRef}
-          onChange={(e) => {
-            const next = e.target.value;
-            const caret = e.target.selectionStart ?? next.length;
-            reportChange(next, caret);
-          }}
           onBlur={onBlur}
-          append={appendControls}
-          data-test-subj={testSubj}
-          data-language={field.language}
-          aria-expanded={isOpen}
-          css={{
-            // Ellipsis when collapsed JSON / multi-line values overflow the row.
-            '.euiFieldText': {
-              textOverflow: 'ellipsis',
-            },
-          }}
+          onChange={bind.reportChange}
+          testSubj={testSubj}
+          warnContainersInSentence={field.language === 'plaintext'}
+          language={field.language}
         />
       )}
     </ReferenceCapableField>
