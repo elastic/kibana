@@ -11,7 +11,7 @@ import Path from 'path';
 import chalk from 'chalk';
 import { ScoutTestTarget } from '@kbn/scout-info';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { PickableConfig } from './configs';
+import type { ChangedConfig, PickableConfig } from './configs';
 import { getChangedConfigs, getChangedFiles, getConfigs, getSpecs } from './configs';
 import { describeRun, describeServerSet, formatConfig, plural } from './labels';
 import type { PinnedConfig } from './pins';
@@ -115,6 +115,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
   let module = '';
   let config: PinnedConfig | undefined;
   let configSpecs: string[] = [];
+  let changedConfig: ChangedConfig | undefined;
   let specs: string[] = [];
   let target: ScoutTestTarget | undefined;
   let pin = false;
@@ -169,7 +170,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         pins = picked.map(toPinned);
         return undefined;
       }
-      config = choices.length === 1 ? choices[0].value : await select('Config', choices);
+      config = await select('Config', choices);
       return 'pin';
     },
     pin: async () => {
@@ -201,6 +202,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
       ]);
 
       pin = false;
+      changedConfig = undefined;
       if (choice === 'last') {
         runLast = true;
         return undefined;
@@ -229,29 +231,45 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         return 'start';
       }
 
-      const choices = changed.map((entry) => ({
-        label: formatConfig(entry.config),
-        value: entry,
-        hint: `${
-          entry.helpers.length
-            ? `all specs, ${plural(entry.helpers.length, 'changed file')}`
-            : plural(entry.specs.length, 'spec')
-        } · ${serversHint(entry.config, running)}`,
-      }));
-      const picked = choices.length === 1 ? choices[0].value : await select('Config', choices);
-      config = picked.config;
-      // page objects and fixtures may be used by any spec of the config
-      specs = picked.helpers.length ? [] : picked.specs;
-      return 'target';
+      changedConfig = await select(
+        'Config',
+        changed.map((entry) => ({
+          label: formatConfig(entry.config),
+          value: entry,
+          hint: `${plural(
+            entry.specs.length + entry.helpers.length,
+            'changed file'
+          )} · ${serversHint(entry.config, running)}`,
+        }))
+      );
+      config = changedConfig.config;
+      return 'scope';
     },
     scope: async () => {
-      configSpecs = getSpecs(getConfig().path);
-      const whole = await select('Run', [
-        { label: 'Whole config', value: true, hint: plural(configSpecs.length, 'spec') },
-        { label: 'Pick specs', value: false },
+      const { path } = getConfig();
+      configSpecs = getSpecs(path);
+      const configDir = Path.dirname(path);
+      const names = (files: string[]) =>
+        files.map((file) => Path.relative(configDir, file)).join(', ');
+      const { specs: changedSpecs = [], helpers = [] } = changedConfig ?? {};
+
+      const changedChoices = changedSpecs.length
+        ? [{ label: 'Changed specs', value: 'changed', hint: names(changedSpecs) }]
+        : [];
+      const wholeChoice = {
+        label: 'Whole config',
+        value: 'whole',
+        hint: `${plural(configSpecs.length, 'spec')}${
+          helpers.length ? ` · uses changed ${names(helpers)}` : ''
+        }`,
+      };
+      // page objects and fixtures may be used by any spec, so the whole config comes first then
+      const scope = await select('Run', [
+        ...(helpers.length ? [wholeChoice, ...changedChoices] : [...changedChoices, wholeChoice]),
+        { label: 'Pick specs', value: 'pick' },
       ]);
-      specs = [];
-      return whole ? 'target' : 'specs';
+      specs = scope === 'changed' ? changedSpecs : [];
+      return scope === 'pick' ? 'specs' : 'target';
     },
     specs: async () => {
       const configDir = Path.dirname(getConfig().path);
@@ -266,7 +284,7 @@ export const pickTests = async (log: ToolingLog): Promise<Selection> => {
         const value = ScoutTestTarget.fromTag(tag);
         return { label: `${value.arch} · ${value.domain}`, value };
       });
-      target = choices.length === 1 ? choices[0].value : await select('Target', choices);
+      target = await select('Target', choices);
       return 'output';
     },
     output: async () => {

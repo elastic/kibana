@@ -50,6 +50,14 @@ const truncate = (text: string, width: number) => {
   return visible.length > width ? `${visible.slice(0, Math.max(width - 1, 0))}…` : text;
 };
 
+const printAnswer = (message: string, picked: Array<Choice<unknown>>) => {
+  const answer =
+    picked.length > 3
+      ? `${picked.length} selected`
+      : picked.map(({ label }) => plain(label)).join(', ');
+  process.stdout.write(`${chalk.green('✔')} ${chalk.bold(message)} ${chalk.cyan(answer)}\n`);
+};
+
 /** A list that filters as you type, resolving with one value or with the selected ones */
 const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Promise<T[]> => {
   const { stdin, stdout } = process;
@@ -124,11 +132,8 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
 
     const finish = (picked: Array<Choice<T>>) => {
       close();
-      const answer =
-        picked.length > 3
-          ? `${picked.length} selected`
-          : picked.map(({ label }) => plain(label)).join(', ');
-      stdout.write(`${chalk.green('✔')} ${chalk.bold(message)} ${chalk.cyan(answer)}\n\x1b[?25h`);
+      printAnswer(message, picked);
+      stdout.write('\x1b[?25h');
       resolve(picked.map(({ value }) => value));
     };
 
@@ -183,7 +188,12 @@ const prompt = <T>({ message, choices, multiple = false }: PromptOptions<T>): Pr
   });
 };
 
+/** A single choice is picked without asking, but still shown */
 export const select = async <T>(message: string, choices: Array<Choice<T>>): Promise<T> => {
+  if (choices.length === 1) {
+    printAnswer(message, choices);
+    return choices[0].value;
+  }
   const [value] = await prompt({ message, choices });
   return value;
 };
