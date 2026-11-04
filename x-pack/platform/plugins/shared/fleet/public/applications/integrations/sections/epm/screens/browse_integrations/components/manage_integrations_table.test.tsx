@@ -105,6 +105,12 @@ describe('ManageIntegrationsTable privilege gating', () => {
 
       expect(screen.getByTestId('manageIntegrationsBulkDeleteBtn')).toBeInTheDocument();
     });
+
+    it('links the integration title to the edit page', () => {
+      renderTable();
+
+      expect(screen.getByRole('link', { name: 'My integration' })).toBeInTheDocument();
+    });
   });
 
   describe('with the Automatic Import "read" privilege', () => {
@@ -123,6 +129,13 @@ describe('ManageIntegrationsTable privilege gating', () => {
       selectFirstRow();
 
       expect(screen.queryByTestId('manageIntegrationsBulkDeleteBtn')).not.toBeInTheDocument();
+    });
+
+    it('renders the integration title as plain text instead of an edit link', () => {
+      renderTable();
+
+      expect(screen.getByText('My integration')).toBeInTheDocument();
+      expect(screen.queryByRole('link', { name: 'My integration' })).not.toBeInTheDocument();
     });
 
     it('keeps the bulk Install button once rows are selected', () => {

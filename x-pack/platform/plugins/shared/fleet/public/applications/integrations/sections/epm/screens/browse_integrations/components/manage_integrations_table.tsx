@@ -130,7 +130,7 @@ export const ManageIntegrationsTable: React.FC<{
     notifications,
     userProfile: userProfileService,
   } = useStartServices();
-  const { canCreate, canDelete } = useAutomaticImportAuthz();
+  const { canCreate, canEdit, canDelete } = useAutomaticImportAuthz();
 
   const hasReportedView = useRef(false);
   useEffect(() => {
@@ -471,7 +471,11 @@ export const ManageIntegrationsTable: React.FC<{
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
+              {canEdit ? (
+                <EuiLink href={getEditIntegrationHref(item.integrationId)}>{title}</EuiLink>
+              ) : (
+                <EuiText size="s">{title}</EuiText>
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         ),
@@ -661,6 +665,7 @@ export const ManageIntegrationsTable: React.FC<{
     ],
     [
       getEditIntegrationHref,
+      canEdit,
       goToEditIntegration,
       deleteIntegration,
       fetchIntegrationReviewDetails,
