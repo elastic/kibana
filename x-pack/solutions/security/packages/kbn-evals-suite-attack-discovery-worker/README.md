@@ -30,11 +30,13 @@ in `CODE_PASS_THRESHOLDS` (`run_summary.ts`): `PositiveControlRecall` passes at 
 more, the same threshold behind its `recalled`/`missed` label.
 
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
-removes what it already wrote before it throws, so the next row starts in a clean space.
+removes the alerts it already wrote (matched by its run marker) before it throws, so the next row
+starts in a clean space. Fingerprints and discoveries are left alone: the workflow has not started,
+so there are none from this seed. After a row has run, `cleanupSeed` also clears those.
 
-`src/config_load_path.test.ts` keeps `playwright.config.ts` and what it imports at config time free
-of `@kbn/workflows/managed`, whose `.yaml` imports Jest transforms but the Playwright loader cannot
-parse.
+`src/config_load_path.test.ts` loads `playwright.config.ts` and fails if any `.yaml` module ends up
+loaded at config time (the `@kbn/workflows/managed` barrel and deep imports of its definitions
+both do). Jest transforms `.yaml` but the Playwright loader cannot parse it.
 
 `StageModelResolved` reads what each stage actually ran on and fails on a mismatch or when it
 cannot be read. Generation is read from `api_config.connector_id` on the persisted discoveries;

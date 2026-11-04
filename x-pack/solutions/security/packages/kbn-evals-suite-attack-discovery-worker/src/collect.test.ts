@@ -241,6 +241,21 @@ describe('countIndexedAttacks', () => {
     });
   });
 
+  it('trims the comma-separated uuids it queries with and drops blank ones', async () => {
+    const count = jest.fn(async () => ({ count: 2 }));
+    await countIndexedAttacks({
+      esClient: esCounting(count),
+      spaceId: 's',
+      executionUuids: 'a, b, ,',
+      log,
+    });
+    expect(count).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: { terms: { 'kibana.alert.rule.execution.uuid': ['a', 'b'] } },
+      })
+    );
+  });
+
   it('is zero without searching when the runner reported an empty uuid list', async () => {
     const count = jest.fn();
     await expect(

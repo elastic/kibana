@@ -438,7 +438,10 @@ export const countIndexedAttacks = async ({
 }): Promise<number | undefined> => {
   const uuids =
     typeof executionUuids === 'string'
-      ? executionUuids.split(',').filter((uuid) => uuid.trim() !== '')
+      ? executionUuids
+          .split(',')
+          .map((uuid) => uuid.trim())
+          .filter((uuid) => uuid !== '')
       : Array.isArray(executionUuids)
       ? strings(executionUuids)
       : undefined;

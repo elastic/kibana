@@ -5,38 +5,61 @@
  * 2.0.
  */
 
-const MANAGED_BARREL_ERROR = '@kbn/workflows/managed was loaded on the Playwright config load path';
-
 /**
- * `@kbn/workflows/managed` requires `.yaml` files. Jest transforms them, so the rest of this suite
- * cannot notice the import, but the Playwright loader fails the whole config with a parse error.
- * The mock makes the barrel throw when it is required, which turns that CI-only failure into a
- * local one.
+ * The Playwright loader cannot parse `.yaml`, which Jest transforms. So a `.yaml` file reached at
+ * config time fails the whole config in CI while every Jest suite stays green. The
+ * `@kbn/workflows/managed` barrel and a deep import of a definition that imports its workflow both
+ * do it. This test loads the config through Jest's module registry and fails on the cause, a loaded
+ * `.yaml`, instead of on one import specifier. Plain `.ts` modules under `kbn-workflows/managed/`
+ * are fine and are loaded today through `@kbn/alertzero-common`.
  */
-jest.mock('@kbn/workflows/managed', () => {
-  throw new Error(MANAGED_BARREL_ERROR);
-});
 
-/** The config's own `@kbn/evals` import is loaded by Playwright from outside this package. */
+// The real `@kbn/evals` is loaded by Playwright from outside this package; this assumes it loads
+// no `.yaml` of its own, so it is replaced rather than walked.
 jest.mock('@kbn/evals', () => ({
   createPlaywrightEvalsConfig: (config: Record<string, unknown>) => config,
 }));
 
-const requireIsolated = (path: string): void => {
-  jest.isolateModules(() => {
-    jest.requireActual(path);
-  });
+const YAML_MODULE = /\.ya?ml$/;
+
+/** Every module path that loading `entry` pulls in, from a registry emptied beforehand. */
+const loadedBy = (entry: string): string[] => {
+  jest.resetModules();
+  jest.requireActual(entry);
+  return Object.keys(require.cache);
 };
 
+const yamlIn = (paths: string[]): string[] => paths.filter((path) => YAML_MODULE.test(path));
+
 describe('Playwright config load path', () => {
-  it('has a live guard: requiring the managed barrel throws', () => {
-    expect(() => jest.requireMock('@kbn/workflows/managed')).toThrow(MANAGED_BARREL_ERROR);
+  it('loads no .yaml module at config time', () => {
+    const loaded = loadedBy('../playwright.config');
+
+    expect(yamlIn(loaded)).toEqual([]);
   });
 
-  it.each(['../playwright.config', '../datasets/worker_rows', './constants'])(
-    'loads %s without the managed workflows barrel',
-    (path) => {
-      expect(() => requireIsolated(path)).not.toThrow();
-    }
-  );
+  it('walks the whole chain the config loads', () => {
+    const loaded = loadedBy('../playwright.config');
+
+    expect(loaded.some((path) => path.endsWith('/datasets/worker_rows.ts'))).toBe(true);
+    expect(loaded.some((path) => path.endsWith('/src/constants.ts'))).toBe(true);
+  });
+
+  describe('guard liveness', () => {
+    it('reports a deep import of a managed workflow definition', () => {
+      const found = yamlIn(loadedBy('./config_load_path_fixtures/deep_managed_import'));
+
+      expect(found.map((path) => path.split('/').pop())).toContain('alert_analysis_workflow.yaml');
+    });
+
+    it('reports a direct .yaml import', () => {
+      const found = yamlIn(loadedBy('./config_load_path_fixtures/sample.yaml'));
+
+      expect(found.map((path) => path.split('/').pop())).toEqual(['sample.yaml']);
+    });
+
+    it('reports the managed barrel', () => {
+      expect(yamlIn(loadedBy('@kbn/workflows/managed')).length).toBeGreaterThan(0);
+    });
+  });
 });

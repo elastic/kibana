@@ -1,0 +1,2 @@
+# Planted by config_load_path.test.ts to prove its guard detects a loaded .yaml; never loaded by the suite itself.
+name: planted

@@ -437,6 +437,22 @@ export const buildSeededAlert = ({
   };
 };
 
+/** Deletes the alerts written under one run marker; a missing index or an empty match is fine. */
+const removeSeededAlerts = ({
+  esClient,
+  seeded: { spaceId, runMarker },
+}: {
+  esClient: Client;
+  seeded: SeededScenario;
+}): Promise<unknown> =>
+  esClient.deleteByQuery({
+    index: alertsIndexForSpace(spaceId),
+    query: { term: { tags: runMarker } },
+    conflicts: 'proceed',
+    refresh: true,
+    ignore_unavailable: true,
+  });
+
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
 export const seedScenario = async ({
   esClient,
@@ -478,7 +494,8 @@ export const seedScenario = async ({
   };
   // The caller only receives `seeded` when this resolves, so it cannot clean up a seed that fails
   // midway. A bulk with some rejected items, or a failed read, has already left alerts behind and
-  // the next row would fail `assertCleanSpace`.
+  // the next row would fail `assertCleanSpace`. Only this seed's alerts are removed: the workflow
+  // has not started, so there are no fingerprints or discoveries of this row to delete.
   try {
     const response = await esClient.bulk({ refresh: 'wait_for', operations });
     if (response.errors) {
@@ -496,13 +513,13 @@ export const seedScenario = async ({
     );
   } catch (seedError) {
     try {
-      await cleanupSeed({ esClient, seeded });
+      await removeSeededAlerts({ esClient, seeded });
     } catch (cleanupError) {
       throw new AggregateError(
         [seedError, cleanupError],
         `Seeding "${scenario.id}" failed (${errorMessage(
           seedError
-        )}) and the partial seed could not be removed`
+        )}) and the partial seed could not be removed (${errorMessage(cleanupError)})`
       );
     }
     throw seedError;
@@ -546,10 +563,9 @@ export const assertCleanSpace = async ({
 
 /**
  * Removes a seed's alerts, the space's fingerprints so the next row cannot match an attack from
- * this one, and the space's persisted discoveries. Safe on a partly written seed: each delete is a
- * query that matches nothing when its target is absent, and a missing index is ignored. Every
- * delete is attempted; any that fails is thrown, because a space left dirty would poison the next
- * row.
+ * this one, and the space's persisted discoveries. Every delete is attempted; any that fails is
+ * thrown, because a space left dirty would poison the next row. For a seed that failed before the
+ * workflow ran, only the alerts are removed (see `seedScenario`).
  */
 export const cleanupSeed = async ({
   esClient,
@@ -558,18 +574,11 @@ export const cleanupSeed = async ({
   esClient: Client;
   seeded: SeededScenario;
 }): Promise<void> => {
-  const { spaceId, runMarker } = seeded;
+  const { spaceId } = seeded;
   const deletions: Array<{ what: string; run: () => Promise<unknown> }> = [
     {
       what: 'seeded alerts',
-      run: () =>
-        esClient.deleteByQuery({
-          index: alertsIndexForSpace(spaceId),
-          query: { prefix: { tags: runMarker } },
-          conflicts: 'proceed',
-          refresh: true,
-          ignore_unavailable: true,
-        }),
+      run: () => removeSeededAlerts({ esClient, seeded }),
     },
     {
       what: 'fingerprints',
