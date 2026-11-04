@@ -60,7 +60,7 @@ describe('getContextVariables', () => {
         path: 'grouping_fields',
         detail: 'string[]',
         documentation:
-          'Fields the rule groups its alerts by (the rule `grouping.fields`). Empty when the rule has no grouping. Dotted names are nested under `alert.data` (`host.name` is `alert.data.host.name`).',
+          'Fields the rule groups its alerts by (the rule `grouping.fields`). Empty when the rule has no grouping. Dotted names are nested under `alert.data` (`host.name` is `alert.data.host.name`). (optional)',
       },
     ]);
   });

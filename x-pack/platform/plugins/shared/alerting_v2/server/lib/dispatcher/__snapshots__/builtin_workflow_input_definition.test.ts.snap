@@ -115,7 +115,6 @@ Object {
         },
         "required": Array [
           "name",
-          "grouping_fields",
         ],
         "type": "object",
       },

@@ -177,7 +177,7 @@ describe('WorkflowExecuteManualForm built-in kibana input refs', () => {
               },
             ],
             rules: {
-              'rule-1': { name: 'Test Rule', grouping_fields: [] },
+              'rule-1': { name: 'Test Rule' },
             },
           },
         },

@@ -30,14 +30,14 @@ describe('builtinWorkflowInputDefinitions', () => {
     expect(schema.properties?.rules?.type).toBe('object');
   });
 
-  it('requires name and grouping_fields on every alertingV2NotificationGroup rule value', () => {
+  it('requires only name on alertingV2NotificationGroup rule values, so payloads without grouping_fields stay valid', () => {
     const ruleValue =
       builtinWorkflowInputDefinitions.alertingV2NotificationGroup.properties?.rules
         ?.additionalProperties;
     if (ruleValue == null || typeof ruleValue === 'boolean') {
       throw new Error('expected rules.additionalProperties to be a value schema');
     }
-    expect(ruleValue.required).toEqual(['name', 'grouping_fields']);
+    expect(ruleValue.required).toEqual(['name']);
     expect(ruleValue.properties?.grouping_fields).toMatchObject({
       type: 'array',
       items: { type: 'string' },

@@ -137,10 +137,8 @@ describe('alertingV2NotificationGroup builtin workflow input definition', () => 
     );
   });
 
-  it('requires every ActionPolicyWorkflowPayloadRule field on rules values', () => {
-    expect([...(ruleValueSchema(schema).required ?? [])].sort()).toEqual(
-      Object.keys(exampleRuleValue).sort()
-    );
+  it('requires only name on rules values, so payloads built before grouping_fields stay valid', () => {
+    expect(ruleValueSchema(schema).required).toEqual(['name']);
   });
 
   it('allows null rule_id on alert items (ActionPolicyWorkflowPayloadAlert.rule_id is RuleId | null)', () => {
