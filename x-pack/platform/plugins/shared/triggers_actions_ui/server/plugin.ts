@@ -25,7 +25,12 @@ import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { getService, register as registerDataService } from './data';
 import type { ConnectorBuilderInferenceEndpoints } from './register_inference_feature';
 import { registerConnectorBuilderInferenceFeature } from './register_inference_feature';
-import { createHealthRoute, createConfigRoute, createGenerateConnectorTypeRoute } from './routes';
+import {
+  createHealthRoute,
+  createConfigRoute,
+  createGenerateConnectorTypeRoute,
+  createConnectorTypeLogoRoute,
+} from './routes';
 import { generateFromDocumentation } from './routes/generate_connector_type/generate_from_documentation';
 import { authorizeDraftGeneration } from './routes/generate_connector_type/authorize_draft_generation';
 
@@ -104,6 +109,12 @@ export class TriggersActionsPlugin implements Plugin<void, PluginStartContract> 
       baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
       getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
       getInference: async () => (await core.getStartServices())[1].inference,
+    });
+    createConnectorTypeLogoRoute({
+      logger: this.logger,
+      router,
+      baseRoute: BASE_TRIGGERS_ACTIONS_UI_API_PATH,
+      getActionsConfigurationUtilities: () => plugins.actions.getActionsConfigurationUtilities(),
     });
     this.generateConnectorTypeDraft = async (url, request) => {
       const [, { security }] = await core.getStartServices();

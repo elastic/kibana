@@ -22,6 +22,7 @@ interface DocumentationResponse {
   status: number;
   headers: { get?: (name: string) => string | null } | Record<string, unknown>;
   text?: () => Promise<string>;
+  arrayBuffer?: () => Promise<ArrayBuffer>;
   data?: unknown;
 }
 
@@ -252,14 +253,29 @@ const createDispatcher = (
   return new Agent(limits);
 };
 
-/** Fetches a documentation URL with host, redirect, size and content-type guards. */
-export const fetchDocumentation = async ({
+/** Details of an accepted response, handed to the reader of a fetched resource. */
+export interface FetchedResourceContext {
+  url: string;
+  mediaType: string;
+  /** Largest body, in bytes, the caller is willing to read. */
+  maxContentLength: number;
+}
+
+/**
+ * Fetches a user-supplied URL with host, redirect, size and content-type guards, and lets the
+ * caller turn the accepted response into a result. Shared by every route that fetches for a user.
+ */
+export const fetchPublicResource = async <Result>({
   url,
   configurationUtilities,
   logger,
   fetch: fetchImpl = undiciFetch as unknown as DocumentationFetch,
   lookup = dns.lookup,
   maxRedirects = 3,
+  accept,
+  allowedContentTypes,
+  maxContentLength: maxContentLengthCap,
+  read,
 }: {
   url: string;
   configurationUtilities: ActionsConfigurationUtilities;
@@ -267,9 +283,21 @@ export const fetchDocumentation = async ({
   fetch?: DocumentationFetch;
   lookup?: typeof dns.lookup;
   maxRedirects?: number;
-}): Promise<FetchedDocument> => {
+  accept: string;
+  allowedContentTypes: ReadonlySet<string>;
+  /** Lowers the configured response limit for resources that must stay small. */
+  maxContentLength?: number;
+  read: (response: DocumentationResponse, context: FetchedResourceContext) => Promise<Result>;
+}): Promise<Result> => {
   let currentUrl = parseHttpUrl(url);
-  const { maxContentLength, timeout } = configurationUtilities.getResponseSettings();
+  const { maxContentLength: configuredMaxContentLength, timeout } =
+    configurationUtilities.getResponseSettings();
+  const maxContentLength =
+    maxContentLengthCap === undefined
+      ? configuredMaxContentLength
+      : configuredMaxContentLength > 0
+      ? Math.min(configuredMaxContentLength, maxContentLengthCap)
+      : maxContentLengthCap;
 
   for (let followed = 0; ; followed++) {
     await assertPublicDestination(currentUrl, lookup);
@@ -286,11 +314,11 @@ export const fetchDocumentation = async ({
     try {
       let response: DocumentationResponse;
       try {
-        logger.debug(`Fetching connector documentation from ${current}`);
+        logger.debug(`Fetching connector builder resource from ${current}`);
         response = await fetchImpl(current, {
           method: 'GET',
           redirect: 'manual',
-          headers: { accept: ACCEPT_HEADER },
+          headers: { accept },
           signal: abort.signal,
           dispatcher,
         });
@@ -316,7 +344,7 @@ export const fetchDocumentation = async ({
 
       const contentType = readHeader(response.headers, 'content-type') ?? '';
       const mediaType = mediaTypeOf(contentType);
-      if (!ALLOWED_CONTENT_TYPES.has(mediaType)) {
+      if (!allowedContentTypes.has(mediaType)) {
         throw new GenerateConnectorTypeError(
           'unsupported_content',
           `Unsupported content type "${mediaType || 'unknown'}".`,
@@ -324,20 +352,49 @@ export const fetchDocumentation = async ({
         );
       }
 
-      let body: string;
       try {
-        body = await readBody(response, maxContentLength);
+        return await read(response, { url: current, mediaType, maxContentLength });
       } catch (error) {
         throw mapFetchError(error);
       }
-      return {
-        url: current,
-        contentType: mediaType,
-        text: extractText({ contentType: mediaType, body }),
-      };
     } finally {
       abort.cancel();
       await dispatcher.destroy();
     }
   }
 };
+
+/** Fetches a documentation URL with host, redirect, size and content-type guards. */
+export const fetchDocumentation = async ({
+  url,
+  configurationUtilities,
+  logger,
+  fetch,
+  lookup,
+  maxRedirects,
+}: {
+  url: string;
+  configurationUtilities: ActionsConfigurationUtilities;
+  logger: Logger;
+  fetch?: DocumentationFetch;
+  lookup?: typeof dns.lookup;
+  maxRedirects?: number;
+}): Promise<FetchedDocument> =>
+  fetchPublicResource({
+    url,
+    configurationUtilities,
+    logger,
+    fetch,
+    lookup,
+    maxRedirects,
+    accept: ACCEPT_HEADER,
+    allowedContentTypes: ALLOWED_CONTENT_TYPES,
+    read: async (response, { url: fetchedUrl, mediaType, maxContentLength }) => ({
+      url: fetchedUrl,
+      contentType: mediaType,
+      text: extractText({
+        contentType: mediaType,
+        body: await readBody(response, maxContentLength),
+      }),
+    }),
+  });
