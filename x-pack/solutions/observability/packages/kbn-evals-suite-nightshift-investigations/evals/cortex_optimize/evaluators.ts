@@ -24,7 +24,10 @@ export const hasTerm = (text: string, term: string): boolean => {
   return term.split('|').some((alternative) => lowered.includes(alternative.trim().toLowerCase()));
 };
 
-const matchesPage = (page: CortexPageSnapshot, { entity_type: entityType, terms }: CortexPageMatch) =>
+const matchesPage = (
+  page: CortexPageSnapshot,
+  { entity_type: entityType, terms }: CortexPageMatch
+) =>
   (entityType === undefined || page.entity_type === entityType) &&
   terms.every((term) => hasTerm(pageText(page), term));
 
@@ -97,7 +100,9 @@ const effectHolds = (
     case 'archived':
       return matching.some((page) => {
         const previous = beforeById.get(page.id);
-        return page.status === 'archived' && previous !== undefined && previous.status !== 'archived';
+        return (
+          page.status === 'archived' && previous !== undefined && previous.status !== 'archived'
+        );
       });
     case 'revised':
       return before
@@ -145,11 +150,10 @@ export const captureRecallEvaluator: CortexOptimizeEvaluator = {
             return false;
           }
           const scope =
-            capture.section === undefined ? page.content : sectionBody(page.content, capture.section);
-          return (
-            scope !== undefined &&
-            capture.terms.every((term) => hasTerm(scope, term))
-          );
+            capture.section === undefined
+              ? page.content
+              : sectionBody(page.content, capture.section);
+          return scope !== undefined && capture.terms.every((term) => hasTerm(scope, term));
         })
     );
     const met = captures.length - missing.length;
@@ -248,7 +252,9 @@ export const effectsMetEvaluator: CortexOptimizeEvaluator = {
     }
     const unmet = effects.filter(({ round, match, effect }) => {
       const result = output.rounds[round];
-      return result === undefined || !effectHolds(effect, match, result.pages_before, result.pages_after);
+      return (
+        result === undefined || !effectHolds(effect, match, result.pages_before, result.pages_after)
+      );
     });
     return {
       score: ratio(effects.length - unmet.length, effects.length),
@@ -256,7 +262,9 @@ export const effectsMetEvaluator: CortexOptimizeEvaluator = {
         unmet.length === 0
           ? `All ${effects.length} expected effect(s) happened.`
           : `Not met: ${unmet
-              .map(({ round, match, effect }) => `${effect} ${describeMatch(match)} in round ${round}`)
+              .map(
+                ({ round, match, effect }) => `${effect} ${describeMatch(match)} in round ${round}`
+              )
               .join('; ')}.`,
       metadata: { met: effects.length - unmet.length, total: effects.length },
     };

@@ -170,7 +170,9 @@ const renderToolResultData = (data: unknown): string => {
 const renderToolCallResult = (result: unknown): string => {
   const isObject = typeof result === 'object' && result !== null;
   const rendered = renderToolResultData(isObject && 'data' in result ? result.data : result);
-  return isObject && (result as { type?: unknown }).type === 'error' ? `error: ${rendered}` : rendered;
+  return isObject && (result as { type?: unknown }).type === 'error'
+    ? `error: ${rendered}`
+    : rendered;
 };
 
 const renderToolCallResults = (results: unknown[]): string =>
@@ -227,7 +229,9 @@ const ENTITY_TYPE_GUIDE: Record<CortexEntityType, string> = {
 const ENTITY_TYPE_GUIDE_LINES = CORTEX_ENTITY_TYPES.map((entityType) => {
   const sections = CORTEX_SECTIONS_BY_TYPE[entityType];
   const sectionList =
-    sections.length > 0 ? ` Sections: ${sections.map((section) => `## ${section}`).join(', ')}.` : '';
+    sections.length > 0
+      ? ` Sections: ${sections.map((section) => `## ${section}`).join(', ')}.`
+      : '';
   return `- ${entityType} — ${ENTITY_TYPE_GUIDE[entityType]}${sectionList}`;
 }).join('\n');
 
@@ -247,7 +251,8 @@ export const createLlmProposeCortexEdits = ({
                 slugFromCortexId(page.id, page.entity_type)
               );
               const fromThisInvestigation =
-                currentConversationId !== undefined && page.conversation_id === currentConversationId
+                currentConversationId !== undefined &&
+                page.conversation_id === currentConversationId
                   ? ' [this investigation]'
                   : '';
               return `- slug=${slug} | ${page.entity_type} | ${page.status} | ${page.title} (${page.corroborations}x)${fromThisInvestigation}`;

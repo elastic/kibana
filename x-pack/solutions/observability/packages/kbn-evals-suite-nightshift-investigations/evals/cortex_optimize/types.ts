@@ -39,73 +39,87 @@ export const CORTEX_PAGE_EFFECTS = [
 ] as const;
 export type CortexPageEffect = (typeof CORTEX_PAGE_EFFECTS)[number];
 
-const entityTypeSchema = z.enum(CORTEX_ENTITY_TYPES);
+const entityTypeSchema = lazySchema(() => z.enum(CORTEX_ENTITY_TYPES));
 
-const replayToolCallSchema = z.object({
-  tool_id: z.string().min(1).max(200),
-  params: z.record(z.string(), z.json()).default({}),
-  /** The call's result as the optimizer would have seen it; absent for a call with no result. */
-  result: z.string().max(MAX_MESSAGE_LENGTH).optional(),
-});
+const replayToolCallSchema = lazySchema(() =>
+  z.object({
+    tool_id: z.string().min(1).max(200),
+    params: z.record(z.string(), z.json()).default({}),
+    /** The call's result as the optimizer would have seen it; absent for a call with no result. */
+    result: z.string().max(MAX_MESSAGE_LENGTH).optional(),
+  })
+);
 
-const replayRoundSchema = z.object({
-  kind: z.enum(CORTEX_REPLAY_ROUND_KINDS),
-  /** The round's user turn: the question, a follow-up correction or the recovery message. */
-  user_message: z.string().min(1).max(MAX_MESSAGE_LENGTH),
-  assistant_message: z.string().max(MAX_MESSAGE_LENGTH),
-  /** The previous round's final answer, which a follow-up or recovery round refers to. */
-  previous_assistant_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
-  tool_calls: z.array(replayToolCallSchema).max(500).default([]),
-});
+const replayRoundSchema = lazySchema(() =>
+  z.object({
+    kind: z.enum(CORTEX_REPLAY_ROUND_KINDS),
+    /** The round's user turn: the question, a follow-up correction or the recovery message. */
+    user_message: z.string().min(1).max(MAX_MESSAGE_LENGTH),
+    assistant_message: z.string().max(MAX_MESSAGE_LENGTH),
+    /** The previous round's final answer, which a follow-up or recovery round refers to. */
+    previous_assistant_message: z.string().max(MAX_MESSAGE_LENGTH).optional(),
+    tool_calls: z.array(replayToolCallSchema).max(500).default([]),
+  })
+);
 
-const seedPageSchema = z.object({
-  entity_type: entityTypeSchema,
-  slug: z.string().min(1).max(80),
-  title: z.string().min(1).max(512),
-  description: z.string().max(2_048).optional(),
-  content: z.string().max(65_536),
-  status: z.enum(CORTEX_PAGE_STATUSES).default('tentative'),
-  corroborations: z.number().int().min(0).default(0),
-  /** Conversation the page's provenance names, so a recovery round can find it. */
-  conversation_id: z.string().max(200).optional(),
-});
+const seedPageSchema = lazySchema(() =>
+  z.object({
+    entity_type: entityTypeSchema,
+    slug: z.string().min(1).max(80),
+    title: z.string().min(1).max(512),
+    description: z.string().max(2_048).optional(),
+    content: z.string().max(65_536),
+    status: z.enum(CORTEX_PAGE_STATUSES).default('tentative'),
+    corroborations: z.number().int().min(0).default(0),
+    /** Conversation the page's provenance names, so a recovery round can find it. */
+    conversation_id: z.string().max(200).optional(),
+  })
+);
 
 /**
  * A page matches when its type fits and every term appears in its slug, title or content. A term may
  * list alternatives separated by `|`, any of which satisfies it.
  */
-const pageMatchSchema = z.object({
-  entity_type: entityTypeSchema.optional(),
-  terms: z.array(z.string().min(1).max(200)).min(1).max(10),
-});
+const pageMatchSchema = lazySchema(() =>
+  z.object({
+    entity_type: entityTypeSchema.optional(),
+    terms: z.array(z.string().min(1).max(200)).min(1).max(10),
+  })
+);
 
-const captureSchema = pageMatchSchema.extend({
-  /** When set, the terms must appear under this `##` heading rather than anywhere on the page. */
-  section: z.string().min(1).max(100).optional(),
-});
+const captureSchema = lazySchema(() =>
+  pageMatchSchema.extend({
+    /** When set, the terms must appear under this `##` heading rather than anywhere on the page. */
+    section: z.string().min(1).max(100).optional(),
+  })
+);
 
-const effectSchema = z.object({
-  match: pageMatchSchema,
-  /** Zero-based round after which the effect is checked. */
-  round: z.number().int().min(0).max(9),
-  effect: z.enum(CORTEX_PAGE_EFFECTS),
-});
+const effectSchema = lazySchema(() =>
+  z.object({
+    match: pageMatchSchema,
+    /** Zero-based round after which the effect is checked. */
+    round: z.number().int().min(0).max(9),
+    effect: z.enum(CORTEX_PAGE_EFFECTS),
+  })
+);
 
-const expectedSchema = z.object({
-  /** Durable knowledge the pages must end up holding, per type and section. */
-  must_capture: z.array(captureSchema).max(20).default([]),
-  /** Case-specific details no page may contain (a cause, an id, a count), as plain substrings. */
-  must_not: z.array(z.string().min(1).max(500)).max(50).default([]),
-  /** What each round must do to matching pages. */
-  effects: z.array(effectSchema).max(20).default([]),
-  /** Upper bound on pages the optimizer may write; 0 asserts a round that learns nothing. */
-  max_pages_written: z.number().int().min(0).max(100).optional(),
-  /** Upper bound on pages matching a description, which catches near-duplicate pages. */
-  max_pages_matching: z
-    .array(z.object({ match: pageMatchSchema, max: z.number().int().min(0).max(100) }))
-    .max(20)
-    .default([]),
-});
+const expectedSchema = lazySchema(() =>
+  z.object({
+    /** Durable knowledge the pages must end up holding, per type and section. */
+    must_capture: z.array(captureSchema).max(20).default([]),
+    /** Case-specific details no page may contain (a cause, an id, a count), as plain substrings. */
+    must_not: z.array(z.string().min(1).max(500)).max(50).default([]),
+    /** What each round must do to matching pages. */
+    effects: z.array(effectSchema).max(20).default([]),
+    /** Upper bound on pages the optimizer may write; 0 asserts a round that learns nothing. */
+    max_pages_written: z.number().int().min(0).max(100).optional(),
+    /** Upper bound on pages matching a description, which catches near-duplicate pages. */
+    max_pages_matching: z
+      .array(z.object({ match: pageMatchSchema, max: z.number().int().min(0).max(100) }))
+      .max(20)
+      .default([]),
+  })
+);
 
 export const cortexReplayExampleSchema = lazySchema(() =>
   z.object({

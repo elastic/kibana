@@ -13,7 +13,9 @@ import { CORTEX_REPLAY_EXAMPLE_KINDS } from './types';
 
 const example = (caseId: string) => ({
   input: {
-    rounds: [{ kind: 'initial', user_message: 'Why?', assistant_message: 'Unknown.', tool_calls: [] }],
+    rounds: [
+      { kind: 'initial', user_message: 'Why?', assistant_message: 'Unknown.', tool_calls: [] },
+    ],
   },
   output: {},
   metadata: { case_id: caseId, kind: 'noop' },
@@ -52,7 +54,12 @@ describe('readCortexReplayDataset', () => {
     ).examples;
 
     expect(loaded.input.seed_pages).toEqual([]);
-    expect(loaded.output).toEqual({ must_capture: [], must_not: [], effects: [], max_pages_matching: [] });
+    expect(loaded.output).toEqual({
+      must_capture: [],
+      must_not: [],
+      effects: [],
+      max_pages_matching: [],
+    });
   });
 
   it('rejects a dataset name outside the nightshift namespace', () => {

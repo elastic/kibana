@@ -7,21 +7,23 @@
 
 import { readFileSync } from 'fs';
 import { join } from 'path';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { EvaluationDataset } from '@kbn/evals';
 import { DatasetTags } from '@kbn/evals-common';
 import { cortexReplayExampleSchema, type CortexReplayExample } from './types';
 
-const cortexReplayFileSchema = z.object({
-  dataset: z
-    .string()
-    .min('nightshift/'.length + 1)
-    .max(200)
-    .startsWith('nightshift/'),
-  description: z.string().max(2_000).optional(),
-  tags: DatasetTags.default([]),
-  examples: z.array(cortexReplayExampleSchema).min(1).max(1_000),
-});
+const cortexReplayFileSchema = lazySchema(() =>
+  z.object({
+    dataset: z
+      .string()
+      .min('nightshift/'.length + 1)
+      .max(200)
+      .startsWith('nightshift/'),
+    description: z.string().max(2_000).optional(),
+    tags: DatasetTags.default([]),
+    examples: z.array(cortexReplayExampleSchema).min(1).max(1_000),
+  })
+);
 
 const assertDistinctCaseIds = (examples: CortexReplayExample[]) => {
   const caseIds = new Set<string>();

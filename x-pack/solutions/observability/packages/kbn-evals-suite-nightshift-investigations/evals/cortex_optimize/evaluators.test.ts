@@ -118,7 +118,11 @@ describe('writtenPages', () => {
 
 describe('captureRecallEvaluator', () => {
   it('is not applicable when nothing is expected', async () => {
-    const result = await run(captureRecallEvaluator, outputOf([{ before: [], after: [] }]), expectedOf());
+    const result = await run(
+      captureRecallEvaluator,
+      outputOf([{ before: [], after: [] }]),
+      expectedOf()
+    );
 
     expect(result.score).toBeNull();
   });
@@ -148,7 +152,9 @@ describe('captureRecallEvaluator', () => {
       captureRecallEvaluator,
       output,
       expectedOf({
-        must_capture: [{ entity_type: 'service', section: 'dependencies', terms: ['cache is cold'] }],
+        must_capture: [
+          { entity_type: 'service', section: 'dependencies', terms: ['cache is cold'] },
+        ],
       })
     );
 
@@ -196,7 +202,11 @@ describe('nonTemporalEvaluator', () => {
   });
 
   it('is not applicable when the optimizer wrote nothing', async () => {
-    const result = await run(nonTemporalEvaluator, outputOf([{ before: [], after: [] }]), expectedOf());
+    const result = await run(
+      nonTemporalEvaluator,
+      outputOf([{ before: [], after: [] }]),
+      expectedOf()
+    );
 
     expect(result.score).toBeNull();
   });

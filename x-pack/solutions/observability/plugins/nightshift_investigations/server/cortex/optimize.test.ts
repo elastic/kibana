@@ -823,7 +823,9 @@ describe('createLlmProposeCortexEdits prompt', () => {
 
     for (const entityType of CORTEX_ENTITY_TYPES) {
       const sections = CORTEX_SECTIONS_BY_TYPE[entityType];
-      const line = system.split('\n').find((candidate) => candidate.startsWith(`- ${entityType} —`));
+      const line = system
+        .split('\n')
+        .find((candidate) => candidate.startsWith(`- ${entityType} —`));
       expect(line).toBeDefined();
       for (const section of sections) {
         expect(line).toContain(`## ${section}`);
@@ -868,7 +870,9 @@ describe('createLlmProposeCortexEdits prompt', () => {
       ],
     });
 
-    expect(input).toContain('slug=orders-consumer | service | tentative | orders-consumer (0x) [this investigation]');
+    expect(input).toContain(
+      'slug=orders-consumer | service | tentative | orders-consumer (0x) [this investigation]'
+    );
     expect(input).toContain('slug=payments | service | tentative | payments (0x)\n');
     expect(input).not.toContain('payments (0x) [this investigation]');
   });

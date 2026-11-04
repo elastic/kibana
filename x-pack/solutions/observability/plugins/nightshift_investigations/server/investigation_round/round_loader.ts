@@ -412,7 +412,9 @@ export const loadInvestigationRound = async ({
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
           const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
           const previousAssistantMessage =
-            resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.response?.message : undefined;
+            resolvedIndex > 0
+              ? conversation.rounds[resolvedIndex - 1]?.response?.message
+              : undefined;
           return {
             source: 'persisted_round',
             roundId: round.id,

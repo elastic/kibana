@@ -265,7 +265,9 @@ describe('runCortexOptimize', () => {
     getAgentBuilder.mockReturnValue({
       runtime: { createModelProvider },
       conversations: {
-        getScopedClient: jest.fn().mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) }),
+        getScopedClient: jest
+          .fn()
+          .mockResolvedValue({ get: jest.fn().mockResolvedValue(conversation) }),
       },
     });
 

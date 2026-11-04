@@ -131,9 +131,9 @@ describe('resolveEvalSelection', () => {
 
   it('never selects the Cortex optimizer replay for all or unset', () => {
     for (const value of [undefined, 'all']) {
-      expect(
-        resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })
-      ).toMatchObject({ runCortexOptimize: false });
+      expect(resolveEvalSelection({ ...WITH_SANDBOX, NIGHTSHIFT_DATASETS: value })).toMatchObject({
+        runCortexOptimize: false,
+      });
     }
   });
 
