@@ -6,18 +6,16 @@
  */
 
 import { mockLogger } from '../test_utils';
-import {
-  coreMock,
-  savedObjectsRepositoryMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
-import { CLEANUP_INTERVAL, taskRunner } from './delete_inactive_nodes_task';
+import { elasticsearchServiceMock, savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
+import type { RunContext } from '../task';
+import type { TaskHost } from '../task_type_module';
+import { CLEANUP_INTERVAL, taskType } from './delete_inactive_nodes.task';
 import type { BackgroundTaskNode } from '../saved_objects/schemas/background_task_node';
 import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
 } from '@kbn/core-saved-objects-api-server';
-import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects';
+import { BACKGROUND_TASK_NODE_SO_NAME } from '../saved_objects/background_task_node_type';
 
 const currentNode = 'current-node-id';
 const now = '2024-08-10T10:00:00.000Z';
@@ -51,22 +49,20 @@ const createFindResponse = (
 });
 
 describe('Delete inactive background task nodes', () => {
+  it('declares the saved object type it uses, for a task process to register', () => {
+    expect(taskType.savedObjectTypes?.map(({ name }) => name)).toEqual([
+      BACKGROUND_TASK_NODE_SO_NAME,
+    ]);
+  });
+
   const logger = mockLogger();
-  const coreSetup = coreMock.createSetup();
-
   const savedObjectsRepository = savedObjectsRepositoryMock.create();
-
-  coreSetup.getStartServices.mockResolvedValue([
-    {
-      ...coreMock.createStart(),
-      savedObjects: {
-        ...savedObjectsServiceMock.createStartContract(),
-        createInternalRepository: () => savedObjectsRepository,
-      },
-    },
-    coreMock.createSetup(),
-    {},
-  ]);
+  const host: TaskHost = {
+    logger,
+    elasticsearch: elasticsearchServiceMock.createStart().client,
+    savedObjects: { createInternalRepository: () => savedObjectsRepository },
+  };
+  const createRunner = () => taskType.createTaskRunner({} as RunContext, host);
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -81,7 +77,7 @@ describe('Delete inactive background task nodes', () => {
       ])
     );
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = createRunner();
     const result = await runner.run();
 
     expect(savedObjectsRepository.bulkDelete).toHaveBeenCalledWith(
@@ -108,7 +104,7 @@ describe('Delete inactive background task nodes', () => {
   it("skips delete when there isn't any inactive node", async () => {
     savedObjectsRepository.find.mockResolvedValue(createFindResponse([]));
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = createRunner();
     const result = await runner.run();
 
     expect(savedObjectsRepository.bulkDelete).not.toHaveBeenCalled();
@@ -126,7 +122,7 @@ describe('Delete inactive background task nodes', () => {
   it('schedules the next run even when there is an error', async () => {
     savedObjectsRepository.find.mockRejectedValueOnce(new Error('foo'));
 
-    const runner = taskRunner(logger, coreSetup.getStartServices)();
+    const runner = createRunner();
     const result = await runner.run();
 
     expect(savedObjectsRepository.bulkDelete).not.toHaveBeenCalled();

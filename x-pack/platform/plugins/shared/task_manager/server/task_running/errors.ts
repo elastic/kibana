@@ -80,3 +80,72 @@ export function getErrorSource(error: Error | DecoratedError): TaskErrorSource |
 export function isUserError(error: Error | DecoratedError) {
   return getErrorSource(error) === TaskErrorSource.USER;
 }
+
+/**
+ * JSON-safe form of a {@link DecoratedError}. The metadata lives under private Symbols, which
+ * `JSON.stringify` drops, so errors crossing a process boundary (task pods) are carried explicitly.
+ */
+export interface SerializedTaskRunError {
+  name: string;
+  message: string;
+  stack?: string;
+  code?: string;
+  retry?: string | boolean;
+  source?: TaskErrorSource;
+  /** HTTP status of a Boom (`output.statusCode`) or Elasticsearch (`meta.statusCode`) error. */
+  statusCode?: number;
+}
+
+const getStatusCode = (error: unknown): number | undefined => {
+  const e = error as {
+    statusCode?: unknown;
+    output?: { statusCode?: unknown };
+    meta?: { statusCode?: unknown };
+  };
+  const value = e.output?.statusCode ?? e.meta?.statusCode ?? e.statusCode;
+  return typeof value === 'number' ? value : undefined;
+};
+
+export function serializeTaskRunError(error: unknown): SerializedTaskRunError {
+  const err = error instanceof Error ? error : new Error(String(error));
+  const decorated = err as DecoratedError;
+  const retryValue = decorated[retry];
+  return {
+    name: err.name,
+    message: err.message,
+    stack: err.stack,
+    ...(decorated[code] ? { code: decorated[code] } : {}),
+    ...(retryValue !== undefined
+      ? { retry: retryValue instanceof Date ? retryValue.toISOString() : retryValue }
+      : {}),
+    // `getErrorSource` also classifies ES 401s as user errors, which the original error object
+    // would otherwise lose once it is no longer an ES `ResponseError`.
+    ...(getErrorSource(err) ? { source: getErrorSource(err) } : {}),
+    ...(getStatusCode(err) !== undefined ? { statusCode: getStatusCode(err) } : {}),
+  };
+}
+
+export function deserializeTaskRunError(serialized: SerializedTaskRunError): DecoratedError {
+  const error = new Error(serialized.message) as DecoratedError;
+  error.name = serialized.name;
+  if (serialized.stack) error.stack = serialized.stack;
+  if (serialized.code === CODE_UNRECOVERABLE) {
+    error[code] = CODE_UNRECOVERABLE;
+  } else if (serialized.code === CODE_RETRYABLE) {
+    createRetryableError(
+      error,
+      typeof serialized.retry === 'string' ? new Date(serialized.retry) : Boolean(serialized.retry)
+    );
+  }
+  if (serialized.source) error[source] = serialized.source;
+  if (serialized.statusCode !== undefined) {
+    // Shaped so status checks written against Boom and Elasticsearch errors keep working on callers
+    // that only see the rebuilt error.
+    Object.assign(error, {
+      statusCode: serialized.statusCode,
+      output: { statusCode: serialized.statusCode, payload: { message: serialized.message } },
+      meta: { statusCode: serialized.statusCode },
+    });
+  }
+  return error;
+}
