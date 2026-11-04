@@ -42,8 +42,8 @@ const createActionRow = (overrides: Partial<EpisodeActionRow> = {}): EpisodeActi
   last_ack_action: null,
   last_assignee_uid: null,
   last_ack_actor: null,
-  last_deactivate_action: null,
-  last_deactivate_actor: null,
+  last_lifecycle_action: null,
+  last_lifecycle_actor: null,
   last_tags: null,
   ...overrides,
 });

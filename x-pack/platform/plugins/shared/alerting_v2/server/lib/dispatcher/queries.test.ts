@@ -537,7 +537,7 @@ describe('getSeriesSuppressionsQueries', () => {
     expect(query).toContain('LAST(_snooze_action, @timestamp)');
     expect(query).toContain('EVAL should_suppress = last_snooze_action == "snooze"');
     expect(query).not.toContain('last_ack_action');
-    expect(query).not.toContain('last_deactivate_action');
+    expect(query).not.toContain('last_lifecycle_action');
   });
 
   it('projects rule_id via LAST aggregation in STATS', () => {
@@ -863,7 +863,7 @@ describe('getAlertSuppressionsQueries', () => {
       'last_ack_action = LAST(action_type, @timestamp) WHERE (action_type IN ("ack", "unack"))'
     );
     expect(query).toContain(
-      'last_deactivate_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
+      'last_lifecycle_action = LAST(action_type, @timestamp) WHERE (action_type IN ("deactivate", "activate"))'
     );
     expect(query).toContain('source = LAST(source, @timestamp)');
     expect(query).toContain('space_id = LAST(space_id, @timestamp)');
@@ -875,14 +875,14 @@ describe('getAlertSuppressionsQueries', () => {
 
     expect(query).toContain('EVAL should_suppress = CASE(');
     expect(query).toContain('last_ack_action == "ack", TRUE');
-    expect(query).toContain('last_deactivate_action == "deactivate", TRUE');
+    expect(query).toContain('last_lifecycle_action == "deactivate", TRUE');
   });
 
   it('keeps the expected output columns', () => {
     const { query } = getAlertSuppressionsQueries([createAlert()])[0];
 
     expect(query).toContain(
-      'KEEP rule_id, group_hash, alert_id, should_suppress, last_ack_action, last_deactivate_action, source, space_id'
+      'KEEP rule_id, group_hash, alert_id, should_suppress, last_ack_action, last_lifecycle_action, source, space_id'
     );
   });
 

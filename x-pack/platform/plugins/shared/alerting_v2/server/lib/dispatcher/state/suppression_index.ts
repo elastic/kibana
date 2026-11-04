@@ -68,7 +68,7 @@ function toSuppression(suppression: SuppressionRow): Suppression {
   if (suppression.last_ack_action === 'ack') {
     return { reason: 'ack', action_subtype: alertActionSubtype.ack };
   }
-  if (suppression.last_deactivate_action === 'deactivate') {
+  if (suppression.last_lifecycle_action === 'deactivate') {
     return { reason: 'deactivate', action_subtype: alertActionSubtype.deactivate };
   }
   return { reason: 'unknown suppression reason', action_subtype: alertActionSubtype.unknown };

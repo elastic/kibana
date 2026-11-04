@@ -624,7 +624,7 @@ describe('DispatcherService', () => {
           group_hash: 'rule-005-series-1',
           alert_id: 'rule-005-series-1-alert-1',
           should_suppress: true,
-          last_deactivate_action: 'deactivate',
+          last_lifecycle_action: 'deactivate',
         },
       ];
 
