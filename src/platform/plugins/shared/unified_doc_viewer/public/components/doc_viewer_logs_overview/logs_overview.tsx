@@ -18,6 +18,7 @@ import {
   getLogDocumentOverview,
 } from '@kbn/discover-utils';
 import type {
+  ObservabilityInvestigationFeature,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
@@ -51,6 +52,7 @@ export type LogsOverviewProps = DocViewRenderProps &
   RestorableStateProviderProps<TraceWaterfallRestorableState> & {
     renderAIAssistant?: ObservabilityLogsAIAssistantFeature['render'];
     renderAIInsight?: ObservabilityLogsAIInsightFeature['render'];
+    renderInvestigationAction?: ObservabilityInvestigationFeature['renderLogDocumentAction'];
     renderFlyoutStreamField?: ObservabilityStreamsFeature['renderFlyoutStreamField'];
     renderFlyoutStreamProcessingLink?: ObservabilityStreamsFeature['renderFlyoutStreamProcessingLink'];
     cpsHasLinkedProjects?: boolean;
@@ -76,6 +78,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
       onRemoveColumn,
       renderAIAssistant,
       renderAIInsight,
+      renderInvestigationAction,
       renderFlyoutStreamField,
       renderFlyoutStreamProcessingLink,
       cpsHasLinkedProjects,
@@ -92,6 +95,7 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
     const parsedDoc = getLogDocumentOverview(hit, { dataView, fieldFormats });
     const LogsOverviewAIAssistant = renderAIAssistant;
     const LogsOverviewAIInsight = renderAIInsight;
+    const LogsOverviewInvestigationAction = renderInvestigationAction;
     const stacktraceFields = getStacktraceFields(hit as LogDocument);
     const isStacktraceAvailable = Object.values(stacktraceFields).some(Boolean);
     const traceId = parsedDoc[TRACE_ID_FIELD];
@@ -181,6 +185,9 @@ export const LogsOverview = forwardRef<LogsOverviewApi, LogsOverviewProps>(
           </DataSourcesProvider>
           {LogsOverviewAIAssistant && <LogsOverviewAIAssistant doc={hit} />}
           <EuiSpacer size="m" />
+          {LogsOverviewInvestigationAction && (
+            <LogsOverviewInvestigationAction doc={hit} dataView={dataView} />
+          )}
           {LogsOverviewAIInsight && <LogsOverviewAIInsight doc={hit} />}
         </div>
       </FieldActionsProvider>

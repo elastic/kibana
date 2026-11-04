@@ -11,6 +11,7 @@ plugins.allowlistPluginGroups: ['platform', 'observability']
 
 # Nightshift and Significant Events plugins are re-enabled only for Observability Complete
 xpack.significantEvents.enabled: false
+xpack.signalInvestigation.enabled: false
 xpack.nightshiftSources.enabled: false
 xpack.nightshift_investigations.enabled: false
 

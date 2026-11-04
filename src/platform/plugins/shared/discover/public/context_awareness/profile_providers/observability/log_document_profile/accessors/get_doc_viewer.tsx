@@ -8,6 +8,7 @@
  */
 
 import type {
+  ObservabilityInvestigationFeature,
   ObservabilityLogsAIAssistantFeature,
   ObservabilityLogsAIInsightFeature,
   ObservabilityStreamsFeature,
@@ -67,6 +68,10 @@ export const createGetDocViewer =
       'observability-logs-ai-insight'
     );
 
+    const investigationFeature = services.discoverShared.features.registry.getById(
+      'observability-investigation'
+    );
+
     const streamsFeature = services.discoverShared.features.registry.getById('streams');
 
     const indexes = {
@@ -92,6 +97,7 @@ export const createGetDocViewer =
               logOverviewContext$={context.logOverviewContext$}
               logsAIAssistantFeature={logsAIAssistantFeature}
               logsAIInsightFeature={logsAIInsightFeature}
+              investigationFeature={investigationFeature}
               streamsFeature={streamsFeature}
               cpsManager={services.cps?.cpsManager}
               indexes={indexes}
@@ -110,6 +116,7 @@ interface LogOverviewTabProps extends DocViewRenderProps {
   logOverviewContext$: BehaviorSubject<LogOverviewContext | undefined>;
   logsAIAssistantFeature: ObservabilityLogsAIAssistantFeature | undefined;
   logsAIInsightFeature: ObservabilityLogsAIInsightFeature | undefined;
+  investigationFeature?: ObservabilityInvestigationFeature;
   streamsFeature: ObservabilityStreamsFeature | undefined;
   cpsManager?: ICPSManager;
   indexes: ObservabilityIndexes;
@@ -120,6 +127,7 @@ const LogOverviewTab = ({
   logOverviewContext$,
   logsAIAssistantFeature,
   logsAIInsightFeature,
+  investigationFeature,
   streamsFeature,
   cpsManager,
   indexes,
@@ -148,6 +156,7 @@ const LogOverviewTab = ({
       ref={setLogsOverviewApi}
       renderAIAssistant={logsAIAssistantFeature?.render}
       renderAIInsight={logsAIInsightFeature?.render}
+      renderInvestigationAction={investigationFeature?.renderLogDocumentAction}
       renderFlyoutStreamField={streamsFeature?.renderFlyoutStreamField}
       renderFlyoutStreamProcessingLink={streamsFeature?.renderFlyoutStreamProcessingLink}
       cpsHasLinkedProjects={cpsHasLinkedProjects}

@@ -4,6 +4,7 @@
 plugins.allowlistPluginGroups: ['platform', 'search']
 
 xpack.search.enabled: false
+xpack.signalInvestigation.enabled: false
 xpack.osquery.enabled: false
 xpack.alerting_v2.enabled: false
 

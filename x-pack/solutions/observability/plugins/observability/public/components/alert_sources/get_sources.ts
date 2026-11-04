@@ -5,33 +5,26 @@
  * 2.0.
  */
 
-import { ALERT_GROUP_FIELD, ALERT_GROUP_VALUE, ALERT_GROUP } from '@kbn/rule-data-utils';
+import { ALERT_GROUP } from '@kbn/rule-data-utils';
+import { getGroupsFromAlertFields } from '../../../common/custom_threshold_rule/helpers/get_group';
+import type { Group } from '../../../common/typings';
 import type { TopAlert } from '../../typings/alerts';
 import { apmSources, infraSources } from './get_alert_source_links';
-import type { Group } from '../../../common/typings';
 
 interface AlertFields {
   [key: string]: any;
 }
 
-const isGroup = (item: Group | undefined): item is Group => {
-  return !!item;
-};
-
 export const getSources = (alert: TopAlert): Group[] => {
-  // when `kibana.alert.group` is not flattened (for alert detail pages)
-  if (alert.fields[ALERT_GROUP]) return alert.fields[ALERT_GROUP] as Group[];
+  // A nested group, even one that yields no valid pairs, skips the entity-field fallback.
+  if (alert.fields[ALERT_GROUP]) {
+    return getGroupsFromAlertFields(alert.fields);
+  }
 
-  // when `kibana.alert.group` is flattened (for alert flyout)
-  const groupsFromGroupFields = alert.fields[ALERT_GROUP_FIELD]?.map((field, index) => {
-    const values = alert.fields[ALERT_GROUP_VALUE];
-    if (values?.length && values[index]) {
-      const group: Group = { field, value: values[index] };
-      return group;
-    }
-  }).filter(isGroup);
-
-  if (groupsFromGroupFields?.length) return groupsFromGroupFields;
+  const groupsFromGroupFields = getGroupsFromAlertFields(alert.fields);
+  if (groupsFromGroupFields.length) {
+    return groupsFromGroupFields;
+  }
 
   // Not all rules has group.fields, in that case we search in the alert fields.
   const matchedSources: Group[] = [];

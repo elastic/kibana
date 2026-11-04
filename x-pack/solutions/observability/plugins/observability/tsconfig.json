@@ -174,7 +174,9 @@
     "@kbn/alerting-v2-constants",
     "@kbn/agentic-investigations-plugin",
     "@kbn/shared-ux-ai-components",
-    "@kbn/slo-constants"
+    "@kbn/slo-constants",
+    "@kbn/signal-investigation-plugin",
+    "@kbn/investigation-seed"
   ],
   "exclude": ["target/**/*"]
 }

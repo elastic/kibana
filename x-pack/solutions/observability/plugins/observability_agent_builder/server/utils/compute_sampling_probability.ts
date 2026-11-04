@@ -5,14 +5,4 @@
  * 2.0.
  */
 
-// ES constraint: probability must be in (0, 0.5] or exactly 1
-export function computeSamplingProbability({
-  totalHits,
-  targetSampleSize,
-}: {
-  totalHits: number;
-  targetSampleSize: number;
-}): number {
-  const rawProbability = targetSampleSize / totalHits;
-  return rawProbability < 0.5 ? rawProbability : 1;
-}
+export { computeSamplingProbability } from '@kbn/observability-signals-server';

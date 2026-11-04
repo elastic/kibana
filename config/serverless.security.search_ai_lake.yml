@@ -4,6 +4,7 @@
 xpack.cloud.serverless.product_tier: search_ai_lake
 
 ## Disable plugins
+xpack.signalInvestigation.enabled: false
 xpack.osquery.enabled: false
 xpack.ml.ad.enabled: false
 xpack.ml.dfa.enabled: false

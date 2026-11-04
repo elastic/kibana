@@ -5,6 +5,7 @@ xpack.cloud.serverless.product_tier: essentials
 
 ### Agent Builder should not be enabled in this tier
 xpack.agentBuilder.enabled: false
+xpack.signalInvestigation.enabled: false
 
 ### Workflows Management plugin is not available in this tier
 workflowsManagement.available: false

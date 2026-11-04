@@ -2520,6 +2520,9 @@ importers:
       '@kbn/investigation-output':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/kbn-investigation-output
+      '@kbn/investigation-seed':
+        specifier: workspace:*
+        version: link:src/platform/packages/shared/kbn-investigation-seed
       '@kbn/io-ts-utils':
         specifier: workspace:*
         version: link:src/platform/packages/shared/kbn-io-ts-utils
@@ -2952,6 +2955,9 @@ importers:
       '@kbn/observability-shared-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/observability_shared
+      '@kbn/observability-signals-server':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/packages/signals-server
       '@kbn/observability-utils-browser':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/packages/utils-browser
@@ -3735,6 +3741,12 @@ importers:
       '@kbn/siem-readiness':
         specifier: workspace:*
         version: link:x-pack/solutions/security/packages/siem-readiness
+      '@kbn/signal-investigation-contract':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/kbn-signal-investigation-contract
+      '@kbn/signal-investigation-plugin':
+        specifier: workspace:*
+        version: link:x-pack/solutions/observability/plugins/signal_investigation
       '@kbn/significant-events-plugin':
         specifier: workspace:*
         version: link:x-pack/solutions/observability/plugins/significant_events
@@ -8188,6 +8200,8 @@ importers:
 
   src/platform/packages/shared/kbn-interpreter: {}
 
+  src/platform/packages/shared/kbn-investigation-seed: {}
+
   src/platform/packages/shared/kbn-io-ts-utils: {}
 
   src/platform/packages/shared/kbn-jest: {}
@@ -9190,6 +9204,8 @@ importers:
 
   x-pack/platform/packages/shared/kbn-shared-components: {}
 
+  x-pack/platform/packages/shared/kbn-signal-investigation-contract: {}
+
   x-pack/platform/packages/shared/kbn-significant-events-schema: {}
 
   x-pack/platform/packages/shared/kbn-slo-constants: {}
@@ -9678,6 +9694,8 @@ importers:
 
   x-pack/solutions/observability/packages/nav-icons: {}
 
+  x-pack/solutions/observability/packages/signals-server: {}
+
   x-pack/solutions/observability/packages/synthetics-test-data: {}
 
   x-pack/solutions/observability/packages/utils-browser: {}
@@ -9729,6 +9747,8 @@ importers:
   x-pack/solutions/observability/plugins/profiling_data_access: {}
 
   x-pack/solutions/observability/plugins/serverless_observability: {}
+
+  x-pack/solutions/observability/plugins/signal_investigation: {}
 
   x-pack/solutions/observability/plugins/significant_events: {}
 

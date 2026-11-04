@@ -7,6 +7,7 @@ plugins.allowlistPluginGroups: ['platform', 'security']
 xpack.securitySolutionEss.enabled: false
 
 ## Disable plugins
+xpack.signalInvestigation.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.alerting_v2.enabled: false
 

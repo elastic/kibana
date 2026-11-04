@@ -40,6 +40,7 @@ import { withClient } from '../../../../lib/utils/with_client';
 import type { ScenarioReturnType } from '../../../../lib/utils/with_client';
 
 export const TRACE_CHANGE_POINTS_SERVICE_NAME = 'test-service';
+export const TRACE_CHANGE_POINTS_DEPENDENCY_RESOURCE = 'postgres';
 export const TRACE_CHANGE_POINTS_ANALYSIS_WINDOW = {
   start: 'now-60m',
   end: 'now',
@@ -91,7 +92,8 @@ export function generateTraceChangePointsData({
             .duration(txDurationUs)
             .children(
               instance
-                .span({ spanName: 'db.query', spanType: 'db' })
+                .span({ spanName: 'db.query', spanType: 'db', spanSubtype: 'postgresql' })
+                .destination(TRACE_CHANGE_POINTS_DEPENDENCY_RESOURCE)
                 .timestamp(timestamp)
                 .duration(spanDurationUs)
                 .success()

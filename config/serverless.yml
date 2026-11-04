@@ -127,6 +127,9 @@ migrations.zdt:
 # for better visibility into stuck or failing migrations.
 migrations.useCumulativeLogger: true
 
+# Find related changes is self-managed and hosted only for the POC.
+xpack.signalInvestigation.enabled: false
+
 # Management team plugins
 xpack.upgrade_assistant.enabled: false
 xpack.rollup.enabled: false

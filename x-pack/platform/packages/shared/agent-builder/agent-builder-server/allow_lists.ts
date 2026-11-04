@@ -459,6 +459,9 @@ export const AGENT_BUILDER_BUILTIN_ATTACHMENTS = [
   'investigation_subject',
   'investigation_hypotheses',
 
+  // Platform – Signal Investigation
+  'platform.signal_investigation.findings',
+
   // Observability – Nightshift
   'nightshift.notification_routing',
 ] as const;

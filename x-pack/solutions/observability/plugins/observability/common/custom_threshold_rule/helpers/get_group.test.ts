@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { getGroupQueries, getGroupFilters, getGroups } from './get_group';
+import { ALERT_GROUP, ALERT_GROUP_FIELD, ALERT_GROUP_VALUE } from '@kbn/rule-data-utils';
+import { getGroupQueries, getGroupFilters, getGroups, getGroupsFromAlertFields } from './get_group';
 
 describe('getGroup', () => {
   describe('getGroupQueries', () => {
@@ -104,6 +105,62 @@ describe('getGroup', () => {
 
     it('should return empty array if fields and values are undefined', () => {
       expect(getGroups()).toEqual([]);
+    });
+  });
+
+  describe('getGroupsFromAlertFields', () => {
+    it('reads nested alert groups and converts a finite numeric value', () => {
+      expect(
+        getGroupsFromAlertFields({
+          [ALERT_GROUP]: [
+            { field: 'service.name', value: 'checkout' },
+            { field: 'host.name', value: 1 },
+            { field: 'container.id', value: '' },
+            { field: '', value: 'web-1' },
+            { field: 'host.name', value: true },
+            { field: 2, value: 'web-1' },
+          ],
+        })
+      ).toEqual([
+        { field: 'service.name', value: 'checkout' },
+        { field: 'host.name', value: '1' },
+      ]);
+    });
+
+    it('zips flattened alert group fields and values', () => {
+      expect(
+        getGroupsFromAlertFields({
+          [ALERT_GROUP_FIELD]: ['service.name', 'host.name'],
+          [ALERT_GROUP_VALUE]: ['checkout', 'web-1'],
+        })
+      ).toEqual([
+        { field: 'service.name', value: 'checkout' },
+        { field: 'host.name', value: 'web-1' },
+      ]);
+    });
+
+    it('returns no groups when flattened fields and values have different lengths', () => {
+      expect(
+        getGroupsFromAlertFields({
+          [ALERT_GROUP_FIELD]: ['service.name', 'host.name'],
+          [ALERT_GROUP_VALUE]: ['checkout'],
+        })
+      ).toEqual([]);
+    });
+
+    it('rejects an empty string or boolean group value', () => {
+      expect(
+        getGroupsFromAlertFields({
+          [ALERT_GROUP_FIELD]: ['service.name'],
+          [ALERT_GROUP_VALUE]: [''],
+        })
+      ).toEqual([]);
+      expect(
+        getGroupsFromAlertFields({
+          [ALERT_GROUP_FIELD]: ['service.name'],
+          [ALERT_GROUP_VALUE]: [true],
+        })
+      ).toEqual([]);
     });
   });
 });

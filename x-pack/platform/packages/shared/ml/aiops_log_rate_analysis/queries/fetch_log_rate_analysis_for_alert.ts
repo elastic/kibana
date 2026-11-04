@@ -154,6 +154,7 @@ export async function runLogRateAnalysis({
   if (keywordFieldCandidates.length === 0 && textFieldCandidates.length === 0) {
     return {
       logRateAnalysisType,
+      zeroDocsFallback: indexInfo.zeroDocsFallback,
       significantItems: [],
     };
   }
@@ -198,31 +199,35 @@ export async function runLogRateAnalysis({
 
   // Push the actual items to the queue. We don't need to chunk the text fields
   // since they are just `message` and `error.message`.
-  significantItemsQueue.push(
-    [
-      { fn: fetchSignificantCategories, fieldNames: textFieldCandidates },
-      ...chunk(keywordFieldCandidates, CHUNK_SIZE).map((fieldNames) => ({
-        fn: fetchSignificantTermPValues,
-        fieldNames,
-      })),
-    ],
-    (err) => {
-      if (err) significantItemsQueue.kill();
-    }
-  );
+  const tasks = [
+    { fn: fetchSignificantCategories, fieldNames: textFieldCandidates },
+    ...chunk(keywordFieldCandidates, CHUNK_SIZE).map((fieldNames) => ({
+      fn: fetchSignificantTermPValues,
+      fieldNames,
+    })),
+  ];
 
-  // Wait for the queue to finish.
-  await withSpan(
-    { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis-for-alert' },
-    () => significantItemsQueue.drain()
-  );
+  try {
+    await withSpan(
+      { name: 'fetch_significant_items', type: 'aiops-log-rate-analysis-for-alert' },
+      async () => {
+        const pending = significantItemsQueue.pushAsync(tasks);
+        const queued = Array.isArray(pending) ? pending : [pending];
+        await Promise.all(queued);
+      }
+    );
+  } catch (error) {
+    significantItemsQueue.kill();
+    throw error;
+  }
 
   // RETURN DATA
   // Adapt the raw significant items data for contextual insights.
   return {
     logRateAnalysisType,
+    zeroDocsFallback: indexInfo.zeroDocsFallback,
     significantItems: significantItems
-      .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount }) => {
+      .map(({ fieldName, fieldValue, type, doc_count: docCount, bg_count: bgCount, pValue }) => {
         const { baselineBucketRate, deviationBucketRate } = getBaselineAndDeviationRates(
           logRateAnalysisType,
           // Normalize the amount of baseline buckets based on treating the
@@ -246,6 +251,7 @@ export async function runLogRateAnalysis({
 
         return {
           score,
+          pValue,
           fieldType,
           fieldName,
           fieldValue: String(fieldValue).substring(0, 140),

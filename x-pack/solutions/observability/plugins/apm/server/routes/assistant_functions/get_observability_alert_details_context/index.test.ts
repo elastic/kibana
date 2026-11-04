@@ -45,7 +45,11 @@ function buildMocks() {
   (getServiceChangePoints as jest.Mock).mockResolvedValue([]);
   (getAnomalies as jest.Mock).mockResolvedValue([]);
 
-  mockLogRateAnalysis.mockResolvedValue({ logRateAnalysisType: 'spike', significantItems: [] });
+  mockLogRateAnalysis.mockResolvedValue({
+    logRateAnalysisType: 'spike',
+    zeroDocsFallback: false,
+    significantItems: [],
+  });
   mockLogCategories.mockResolvedValue({ logCategories: [], entities: [] });
 }
 

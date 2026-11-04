@@ -184,7 +184,10 @@
     "@kbn/lens-common",
     "@kbn/core-http-browser-mocks",
     "@kbn/genai-common",
-    "@kbn/slo-constants"
+    "@kbn/slo-constants",
+    "@kbn/signal-investigation-plugin",
+    "@kbn/signal-investigation-contract",
+    "@kbn/observability-signals-server"
   ],
   "exclude": ["target/**/*"]
 }

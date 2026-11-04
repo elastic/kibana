@@ -99,6 +99,7 @@ plugins:
     - serverless_observability
     - serverless_vectordb
     - share
+    - signal_investigation
     - significant_events
     - slo
     - snapshot_restore
@@ -121,9 +122,9 @@ plugins:
     - vis_types/timeseries
     - vis_types/vega
     - watcher
+    - workflowsExtensionsExample
     - workflows_extensions
     - workflows_management
-    - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
 

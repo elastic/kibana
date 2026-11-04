@@ -16,7 +16,7 @@ import type {
 import type { FunctionComponent } from 'react';
 import type React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { Query, TimeRange } from '@kbn/es-query';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 import type {
   ErrorsByTraceId,
@@ -84,6 +84,26 @@ export interface ObservabilityCreateSLOFeature {
     initialValues: Record<string, unknown>;
     formSettings?: { isEditMode?: boolean; allowedIndicatorTypes?: IndicatorType[] };
   }) => React.ReactNode;
+}
+
+export interface ObservabilityInvestigationAppMenuParams {
+  timeRange: TimeRange;
+  filters?: Filter[];
+  query?: Query | AggregateQuery;
+  dataViewId?: string;
+  indexPattern?: string;
+}
+
+export interface ObservabilityInvestigationDocumentDeps {
+  doc: DataTableRecord;
+  dataView?: DataView;
+}
+
+export interface ObservabilityInvestigationFeature {
+  id: 'observability-investigation';
+  isAvailable: () => boolean;
+  openFromAppMenu: (params: ObservabilityInvestigationAppMenuParams) => void;
+  renderLogDocumentAction: (deps: ObservabilityInvestigationDocumentDeps) => JSX.Element | null;
 }
 
 export interface ObservabilityServiceFlyoutFeatureRenderDeps {
@@ -338,6 +358,7 @@ export type DiscoverFeature =
   | ObservabilityLogsAIAssistantFeature
   | ObservabilityLogsAIInsightFeature
   | ObservabilityCreateSLOFeature
+  | ObservabilityInvestigationFeature
   | ObservabilityServiceFlyoutFeature
   | ObservabilityLogEventsFeature
   | ObservabilityTracesFeature

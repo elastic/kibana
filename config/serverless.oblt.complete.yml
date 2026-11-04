@@ -8,6 +8,7 @@ xpack.infra.enabled: true
 xpack.slo.enabled: true
 xpack.uptime.enabled: true
 xpack.significantEvents.enabled: true
+xpack.signalInvestigation.enabled: false
 xpack.nightshiftSources.enabled: true
 xpack.nightshift_investigations.enabled: true
 xpack.agenticInvestigations.enabled: true

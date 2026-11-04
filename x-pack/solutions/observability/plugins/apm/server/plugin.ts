@@ -34,6 +34,7 @@ import { getGlobalApmServerRouteRepository } from './routes/apm_routes/get_globa
 import type { APMRouteHandlerResources } from './routes/apm_routes/register_apm_server_routes';
 import { registerRoutes } from './routes/apm_routes/register_apm_server_routes';
 import { getAlertDetailsContextHandler } from './routes/assistant_functions/get_observability_alert_details_context';
+import { registerApmSignalAnalyzers } from './routes/assistant_functions/signal_investigation/register_analyzers';
 import { addApiKeysToEveryPackagePolicyIfMissing } from './routes/fleet/api_keys/add_api_keys_to_policies_if_missing';
 import { registerFleetPolicyCallbacks } from './routes/fleet/register_fleet_policy_callbacks';
 import { createApmAgentConfigurationIndex } from './routes/settings/agent_configuration/create_agent_config_index';
@@ -270,6 +271,14 @@ export class APMPlugin
         logger: this.logger,
         security: plugins.security,
       },
+    });
+
+    registerApmSignalAnalyzers({
+      signalInvestigation: plugins.signalInvestigation,
+      core: { setup: core, start: getCoreStart },
+      getApmIndices: plugins.apmDataAccess.getApmIndices,
+      plugins: resourcePlugins,
+      logger: this.logger,
     });
 
     return { config$ };

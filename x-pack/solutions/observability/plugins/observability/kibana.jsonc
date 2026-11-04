@@ -60,6 +60,7 @@
       "cps",
       "ingestHub",
       "significantEvents",
+      "signalInvestigation",
       "nightshiftInvestigations",
       "entityInventoryApp",
     ],

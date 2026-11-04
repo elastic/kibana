@@ -16,6 +16,7 @@ import {
 
 import React, { useMemo, useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
+import { getEbtProps } from '@kbn/ebt-click';
 import { useRouteMatch } from 'react-router-dom';
 import { SLO_ALERTS_TABLE_ID } from '@kbn/observability-shared-plugin/common';
 import { ALERT_UUID, getRulesAppDetailsRoute, rulesAppRoute } from '@kbn/rule-data-utils';
@@ -24,6 +25,11 @@ import { useCaseAlertActionItems } from '@kbn/response-ops-alerts-table/hooks/us
 import { ExpandableContextMenuPanel } from '@kbn/response-ops-alerts-table/components/expandable_context_menu_panel';
 import { useKibana } from '../../utils/kibana_react';
 import { useInvestigateAlert } from '../../hooks/use_investigate_alert';
+import {
+  findRelatedChangesLabel,
+  useSignalInvestigation,
+} from '../../hooks/use_signal_investigation';
+import { investigationSeedFromAlert } from '../../services/investigation_seed_from_alert';
 import { useCanModifyAlerts } from '../../hooks/use_can_modify_alerts';
 import { useAuthorizedToReadRuleType } from '../../hooks/use_authorized_to_read_rule_type';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';
@@ -31,6 +37,38 @@ import { SLO_DETAIL_PATH } from '../../../common/locators/paths';
 import { parseAlert } from '../../pages/alerts/helpers/parse_alert';
 import type { GetObservabilityAlertsTableProp, ObservabilityAlertsTableContext } from '../..';
 import { observabilityFeatureId } from '../..';
+
+function FindRelatedChangesActionItem({
+  alert,
+  onActionExecuted,
+}: {
+  alert: ReturnType<ReturnType<typeof parseAlert>>;
+  onActionExecuted: () => void;
+}) {
+  const seed = investigationSeedFromAlert(alert);
+  const { open } = useSignalInvestigation('alertsTable', Boolean(seed));
+  if (!open || !seed) {
+    return null;
+  }
+
+  return (
+    <EuiContextMenuItem
+      key="findRelatedChanges"
+      icon="magnify"
+      data-test-subj="findRelatedChanges"
+      {...getEbtProps({
+        action: 'findRelatedChanges',
+        element: 'alertsTableRowActions',
+      })}
+      onClick={() => {
+        onActionExecuted();
+        open(seed);
+      }}
+    >
+      {findRelatedChangesLabel()}
+    </EuiContextMenuItem>
+  );
+}
 
 function InvestigateAlertActionItem({
   alertId,
@@ -207,6 +245,12 @@ export function AlertActions(
           </EuiContextMenuItem>,
         ]
       : []),
+
+    <FindRelatedChangesActionItem
+      key="findRelatedChanges"
+      alert={observabilityAlert}
+      onActionExecuted={closeActionsPopover}
+    />,
 
     <InvestigateAlertActionItem
       key="investigateAlert"

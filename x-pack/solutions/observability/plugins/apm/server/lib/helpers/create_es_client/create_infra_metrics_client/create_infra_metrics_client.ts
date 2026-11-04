@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import type { ESSearchRequest, InferSearchResponseOf } from '@kbn/es-types';
+import type { MetricsDataPluginSetup } from '@kbn/metrics-data-access-plugin/server';
 import type { APMRouteHandlerResources } from '../../../../routes/apm_routes/register_apm_server_routes';
 
 type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
@@ -13,30 +15,54 @@ type InfraMetricsSearchParams = Omit<ESSearchRequest, 'index'> & {
   track_total_hits: boolean | number;
 };
 
-export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClient>;
+export type InfraMetricsClient = ReturnType<typeof createInfraMetricsClientWith>;
 
-export function createInfraMetricsClient(resources: APMRouteHandlerResources) {
-  const metricsClient = resources.plugins.metricsDataAccess.setup.client;
-
+/** Builds an infrastructure metrics client from an explicit saved-objects lookup and Elasticsearch client. */
+export function createInfraMetricsClientWith({
+  metricsClient,
+  getSavedObjectsClient,
+  esClient,
+}: {
+  metricsClient: MetricsDataPluginSetup['client'];
+  getSavedObjectsClient: () => Promise<SavedObjectsClientContract>;
+  esClient: ElasticsearchClient;
+}): {
+  search: <TDocument, TParams extends InfraMetricsSearchParams>(
+    opts: TParams
+  ) => Promise<InferSearchResponseOf<TDocument, TParams>>;
+} {
   return {
     async search<TDocument, TParams extends InfraMetricsSearchParams>(
       opts: TParams
     ): Promise<InferSearchResponseOf<TDocument, TParams>> {
+      const savedObjectsClient = await getSavedObjectsClient();
+      const indexName = await metricsClient.getMetricIndices({
+        savedObjectsClient,
+      });
+
+      return esClient.search<TDocument>({
+        index: [indexName],
+        ...opts,
+      }) as Promise<InferSearchResponseOf<TDocument, TParams>>;
+    },
+  };
+}
+
+export function createInfraMetricsClient(resources: APMRouteHandlerResources): InfraMetricsClient {
+  const metricsClient = resources.plugins.metricsDataAccess.setup.client;
+
+  return {
+    async search(opts) {
       const {
         savedObjects: { client: savedObjectsClient },
         elasticsearch: { client: esClient },
       } = await resources.context.core;
 
-      const indexName = await metricsClient.getMetricIndices({
-        savedObjectsClient,
-      });
-
-      const searchParams = {
-        index: [indexName],
-        ...opts,
-      };
-
-      return esClient.asCurrentUser.search<TDocument>(searchParams) as Promise<any>;
+      return createInfraMetricsClientWith({
+        metricsClient,
+        getSavedObjectsClient: async () => savedObjectsClient,
+        esClient: esClient.asCurrentUser,
+      }).search(opts);
     },
   };
 }

@@ -179,6 +179,8 @@ dependsOn:
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/shared-ux-ai-components'
   - '@kbn/slo-constants'
+  - '@kbn/signal-investigation-plugin'
+  - '@kbn/investigation-seed'
 tags:
   - plugin
   - prod

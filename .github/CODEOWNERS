@@ -646,6 +646,7 @@ src/platform/packages/shared/kbn-human-readable-id @elastic/workflows-eng
 src/platform/packages/shared/kbn-i18n @elastic/kibana-core
 src/platform/packages/shared/kbn-i18n-react @elastic/kibana-core
 src/platform/packages/shared/kbn-interpreter @elastic/kibana-dashboards
+src/platform/packages/shared/kbn-investigation-seed @elastic/search-ml-ux
 src/platform/packages/shared/kbn-io-ts-utils @elastic/observability-ui
 src/platform/packages/shared/kbn-jest @elastic/kibana-operations
 src/platform/packages/shared/kbn-jest-benchmarks @elastic/observability-ui
@@ -1147,6 +1148,7 @@ x-pack/platform/packages/shared/kbn-proposals-ui @elastic/security-solution
 x-pack/platform/packages/shared/kbn-sample-parser @elastic/streams-ui @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-search-index-documents @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-shared-components @elastic/search-ml-ux
+x-pack/platform/packages/shared/kbn-signal-investigation-contract @elastic/search-ml-ux
 x-pack/platform/packages/shared/kbn-significant-events-schema @elastic/nightshift
 x-pack/platform/packages/shared/kbn-slo-constants @elastic/nightshift-sre-agent-team
 x-pack/platform/packages/shared/kbn-slo-schema @elastic/nightshift-sre-agent-team
@@ -1391,6 +1393,7 @@ x-pack/solutions/observability/packages/kbn-scout-oblt @elastic/appex-qa
 x-pack/solutions/observability/packages/kbn-synthetics-forge @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/kbn-ts-type-check-oblt-cli @elastic/observability-ui
 x-pack/solutions/observability/packages/nav-icons @elastic/obs-signals-logs-team
+x-pack/solutions/observability/packages/signals-server @elastic/search-ml-ux
 x-pack/solutions/observability/packages/synthetics-test-data @elastic/obs-signals-logs-team
 x-pack/solutions/observability/packages/utils-browser @elastic/observability-ui
 x-pack/solutions/observability/packages/utils-common @elastic/observability-ui
@@ -1417,6 +1420,7 @@ x-pack/solutions/observability/plugins/observability_shared @elastic/observabili
 x-pack/solutions/observability/plugins/profiling @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/profiling_data_access @elastic/obs-signals-logs-team
 x-pack/solutions/observability/plugins/serverless_observability @elastic/observability-ui
+x-pack/solutions/observability/plugins/signal_investigation @elastic/search-ml-ux
 x-pack/solutions/observability/plugins/significant_events @elastic/nightshift
 x-pack/solutions/observability/plugins/slo @elastic/nightshift-sre-agent-team
 x-pack/solutions/observability/plugins/synthetics @elastic/obs-signals-logs-team

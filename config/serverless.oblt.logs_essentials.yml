@@ -4,6 +4,7 @@
 xpack.cloud.serverless.product_tier: logs_essentials
 
 ## Disable xpack plugins
+xpack.signalInvestigation.enabled: false
 xpack.infra.enabled: false
 xpack.slo.enabled: false
 xpack.observabilityAIAssistant.enabled: false

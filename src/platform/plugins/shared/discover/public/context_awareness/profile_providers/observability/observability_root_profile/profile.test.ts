@@ -11,7 +11,7 @@ import { SolutionType } from '../../../profiles';
 import { createProfileProviderSharedServicesMock } from '../../../__mocks__';
 import { createObservabilityRootProfileProvider } from './profile';
 import { EMPTY_CONTEXT_AWARENESS_TOOLKIT } from '../../../toolkit';
-import { buildDataTableRecord } from '@kbn/discover-utils';
+import { AppMenuRegistry, buildDataTableRecord } from '@kbn/discover-utils';
 import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 
 const mockServices = createProfileProviderSharedServicesMock();
@@ -280,6 +280,76 @@ describe('observabilityRootProfileProvider', () => {
           render: expect.any(Function),
         })
       );
+    });
+  });
+
+  describe('getAppMenu', () => {
+    it('registers Find related changes when the investigation feature is available', () => {
+      const openFromAppMenu = jest.fn();
+      const servicesWithFeature = {
+        ...mockServices,
+        triggersActionsUi: {
+          ruleTypeRegistry: {},
+          actionTypeRegistry: {},
+        } as never,
+      };
+      jest
+        .spyOn(servicesWithFeature.discoverShared.features.registry, 'getById')
+        .mockImplementation((id) => {
+          if (id === 'observability-investigation') {
+            return {
+              id: 'observability-investigation',
+              isAvailable: () => true,
+              openFromAppMenu,
+              renderLogDocumentAction: () => null,
+            };
+          }
+          return undefined;
+        });
+
+      const appMenuRegistry = new AppMenuRegistry();
+      const provider = createObservabilityRootProfileProvider(servicesWithFeature);
+      const getAppMenu = provider.profile.getAppMenu!(
+        () => ({ appMenuRegistry: (registry) => registry }),
+        {
+          context: {
+            solutionType: SolutionType.Observability,
+            allLogsIndexPattern: 'logs-*',
+          },
+          toolkit: EMPTY_CONTEXT_AWARENESS_TOOLKIT,
+        }
+      );
+
+      getAppMenu({
+        isEsqlMode: false,
+        dataView: { id: 'logs-view', title: 'logs-*', getIndexPattern: () => 'logs-*' } as never,
+        adHocDataViews: [],
+        authorizedRuleTypeIds: [],
+      }).appMenuRegistry(appMenuRegistry);
+
+      const item = appMenuRegistry.getItem('find-related-changes');
+      expect(item).toEqual(
+        expect.objectContaining({
+          id: 'find-related-changes',
+          label: 'Find related changes',
+          testId: 'discoverAppMenuFindRelatedChanges',
+        })
+      );
+
+      const onFinishAction = jest.fn();
+      item?.run?.({
+        triggerElement: document.createElement('button'),
+        returnFocus: jest.fn(),
+        context: { onFinishAction },
+      });
+
+      expect(openFromAppMenu).toHaveBeenCalledWith(
+        expect.objectContaining({
+          dataViewId: 'logs-view',
+          indexPattern: 'logs-*',
+        })
+      );
+      expect(onFinishAction).toHaveBeenCalled();
     });
   });
 });

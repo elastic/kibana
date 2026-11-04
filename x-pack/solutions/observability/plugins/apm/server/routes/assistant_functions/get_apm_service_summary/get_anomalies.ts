@@ -6,7 +6,7 @@
  */
 import type { Logger } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { compact, keyBy } from 'lodash';
+import { compact, keyBy, omit } from 'lodash';
 import {
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
@@ -24,17 +24,21 @@ import { apmMlJobsQuery } from '../../../lib/anomaly_detection/apm_ml_jobs_query
 import { getMlJobsWithAPMGroup } from '../../../lib/anomaly_detection/get_ml_jobs_with_apm_group';
 import type { MlClient } from '../../../lib/helpers/get_ml_client';
 
-export type ApmAnomalies = Awaited<ReturnType<typeof getAnomalies>>;
+export interface ApmAnomalyWithContext {
+  '@timestamp': string;
+  metricName: string;
+  'service.name': string;
+  'service.environment': string;
+  'transaction.type': string;
+  anomalyScore: string | number | null;
+  actualValue: number;
+  expectedBoundsLower: number;
+  expectedBoundsUpper: number;
+  jobId: string;
+  detectorIndex: number;
+}
 
-export async function getAnomalies({
-  serviceName,
-  transactionType,
-  environment,
-  start,
-  end,
-  mlClient,
-  logger,
-}: {
+interface GetAnomaliesParams {
   serviceName?: string;
   transactionType?: string;
   environment?: string;
@@ -42,7 +46,29 @@ export async function getAnomalies({
   end: number;
   mlClient?: MlClient;
   logger: Logger;
-}) {
+}
+
+export type ApmAnomaly = Omit<ApmAnomalyWithContext, 'jobId' | 'detectorIndex'>;
+export type ApmAnomalies = ApmAnomaly[];
+
+const toPublicAnomaly = (anomaly: ApmAnomalyWithContext): ApmAnomaly =>
+  omit(anomaly, ['jobId', 'detectorIndex']);
+
+export async function getAnomalies(params: GetAnomaliesParams): Promise<ApmAnomalies> {
+  const anomalies = await getAnomaliesWithContext(params);
+  return anomalies.map(toPublicAnomaly);
+}
+
+/** Returns the same anomaly records as getAnomalies, plus the ML job and detector that produced each one. */
+export async function getAnomaliesWithContext({
+  serviceName,
+  transactionType,
+  environment,
+  start,
+  end,
+  mlClient,
+  logger,
+}: GetAnomaliesParams): Promise<ApmAnomalyWithContext[]> {
   if (!mlClient) {
     return [];
   }
@@ -171,6 +197,8 @@ export async function getAnomalies({
       actualValue: Number(metrics.actual) / divider,
       expectedBoundsLower: Number(bucket.model_lower.value) / divider,
       expectedBoundsUpper: Number(bucket.model_upper.value) / divider,
+      jobId,
+      detectorIndex: Number(bucket.key.detectorIndex),
     };
   });
 

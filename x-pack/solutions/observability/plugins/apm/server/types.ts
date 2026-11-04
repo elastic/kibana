@@ -29,6 +29,10 @@ import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plu
 import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { MlPluginSetup, MlPluginStart } from '@kbn/ml-plugin/server';
 import type { ObservabilityPluginSetup } from '@kbn/observability-plugin/server';
+import type {
+  SignalInvestigationServerSetup,
+  SignalInvestigationServerStart,
+} from '@kbn/signal-investigation-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
 import type {
   FleetSetupContract as FleetPluginSetup,
@@ -99,6 +103,7 @@ export interface APMPluginSetupDependencies {
   usageCollection?: UsageCollectionSetup;
   customIntegrations?: CustomIntegrationsPluginSetup;
   profilingDataAccess?: ProfilingDataAccessPluginSetup;
+  signalInvestigation?: SignalInvestigationServerSetup;
 }
 export interface APMPluginStartDependencies {
   // required dependencies
@@ -130,4 +135,5 @@ export interface APMPluginStartDependencies {
   usageCollection?: undefined;
   customIntegrations?: CustomIntegrationsPluginStart;
   profilingDataAccess?: ProfilingDataAccessPluginStart;
+  signalInvestigation?: SignalInvestigationServerStart;
 }

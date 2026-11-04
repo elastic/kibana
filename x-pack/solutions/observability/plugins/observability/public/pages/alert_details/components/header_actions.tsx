@@ -37,6 +37,11 @@ import { useAlertFieldNames } from '@kbn/alerts-ui-shared/src/common/hooks/use_a
 
 import { useKibana } from '../../../utils/kibana_react';
 import { useInvestigateAlert } from '../../../hooks/use_investigate_alert';
+import {
+  findRelatedChangesLabel,
+  useSignalInvestigation,
+} from '../../../hooks/use_signal_investigation';
+import { investigationSeedFromAlert } from '../../../services/investigation_seed_from_alert';
 import type { TopAlert } from '../../../typings/alerts';
 import { useAuthorizedToReadRuleType } from '../../../hooks/use_authorized_to_read_rule_type';
 import { observabilityFeatureId } from '../../../../common';
@@ -193,6 +198,11 @@ export function HeaderActions({
     onInvestigate: () => setIsPopoverOpen(false),
   });
 
+  const investigationSeed = alert ? investigationSeedFromAlert(alert) : undefined;
+  const { open: openSignalInvestigation } = useSignalInvestigation(
+    'alertDetails',
+    Boolean(investigationSeed)
+  );
   const showViewButton = Boolean(viewInvestigationUrl) && !isStarting;
   const showHeaderButton =
     alertId &&
@@ -215,6 +225,22 @@ export function HeaderActions({
   return (
     <ObsCasesContext>
       <EuiFlexGroup direction="row" gutterSize="s" justifyContent="flexEnd">
+        {openSignalInvestigation && investigationSeed && (
+          <EuiFlexItem grow={false}>
+            <EuiButtonEmpty
+              size="m"
+              iconType="magnify"
+              data-test-subj="alertDetailsFindRelatedChanges"
+              onClick={() => openSignalInvestigation(investigationSeed)}
+              {...getEbtProps({
+                action: 'findRelatedChanges',
+                element: 'alertDetailsPageActions',
+              })}
+            >
+              {findRelatedChangesLabel()}
+            </EuiButtonEmpty>
+          </EuiFlexItem>
+        )}
         {showHeaderButton && (
           <EuiFlexItem grow={false}>
             <AiButton

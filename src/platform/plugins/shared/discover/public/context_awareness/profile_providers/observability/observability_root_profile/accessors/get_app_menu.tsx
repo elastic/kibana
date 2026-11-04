@@ -31,6 +31,7 @@ export const createGetAppMenu =
       appMenuRegistry: (registry) => {
         // Register custom link actions
         registerDatasetQualityLink(registry, services);
+        registerFindRelatedChangesAction(registry, services, params);
         // Register alerts sub menu actions
         registerCreateSLOAction(registry, services, params);
         registerCustomThresholdRuleAction(registry, services, params);
@@ -74,6 +75,43 @@ const registerDatasetQualityLink = (
       },
     });
   }
+};
+
+const registerFindRelatedChangesAction = (
+  registry: AppMenuRegistry,
+  { data, discoverShared, timefilter }: ProfileProviderServices,
+  { dataView }: AppMenuExtensionParams
+): void => {
+  const investigationFeature = discoverShared.features.registry.getById(
+    'observability-investigation'
+  );
+  if (!investigationFeature?.isAvailable()) {
+    return;
+  }
+
+  registry.registerItem({
+    id: 'find-related-changes',
+    label: i18n.translate('discover.observabilitySolution.appMenu.findRelatedChanges', {
+      defaultMessage: 'Find related changes',
+    }),
+    order: 6,
+    iconType: 'magnify',
+    testId: 'discoverAppMenuFindRelatedChanges',
+    run: ({ context: { onFinishAction } }) => {
+      const { from, to } = timefilter.getTime();
+      const { filters, query } = data.query.getState();
+
+      investigationFeature.openFromAppMenu({
+        timeRange: { from, to },
+        filters,
+        query,
+        dataViewId: dataView?.id,
+        indexPattern: dataView?.getIndexPattern(),
+      });
+
+      onFinishAction();
+    },
+  });
 };
 
 const registerCustomThresholdRuleAction = (

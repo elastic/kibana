@@ -1,0 +1,7 @@
+{
+  "name": "@kbn/signal-investigation-contract",
+  "description": "Analyzer contract for Find related changes. Types only, so any solution plugin can depend on it.",
+  "private": true,
+  "version": "1.0.0",
+  "license": "Elastic License 2.0"
+}
