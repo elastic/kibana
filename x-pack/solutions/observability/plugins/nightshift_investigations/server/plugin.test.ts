@@ -134,7 +134,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers the reference-free judges with the evals plugin', () => {
+  it('registers the reference-free and alert-outcome judges with the evals plugin', () => {
     const registerEvaluator = jest.fn();
 
     createPlugin().setup(coreMock.createSetup(), {
@@ -147,6 +147,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_rca_reward@1.0.0',
         'nightshift_investigation_process@1.0.0',
         'nightshift_conclusion_quality@1.0.0',
+        'nightshift_alert_outcome_rca_accuracy@1.0.0',
       ]
     );
   });
