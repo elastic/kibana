@@ -26,9 +26,9 @@ const IO_INDEX = 'workflows-executions-io';
 
 /**
  * In-memory executions IO client for integration tests.
- * Create is once-only, matching the data stream. Stored values are also copied
- * onto the step execution record so existing assertions can keep reading
- * `input` and `output` from there.
+ * An existing id is overwritten, matching {@link ExecutionsIoClient.bulkCreate}.
+ * Stored values are also copied onto the step execution record so existing
+ * assertions can keep reading `input` and `output` from there.
  */
 export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
   private readonly documents = new Map<string, EsExecutionIo>();
@@ -75,14 +75,9 @@ export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
   private createOne(document: ExecutionIoCreateDocument, timestamp: string): BulkItemResponse {
     const id = executionIoId(document.type, document.executionId);
     if (this.documents.has(id)) {
-      return {
-        id,
-        index: '',
-        error: {
-          type: 'version_conflict_engine_exception',
-          reason: 'document already exists',
-        },
-      };
+      // Same overwrite as ExecutionsIoDataClient.bulkCreate.
+      // https://github.com/elastic/security-team/issues/20687
+      return this.updateOne(document);
     }
 
     const stored: EsExecutionIo = {
@@ -91,11 +86,35 @@ export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
       '@timestamp': document['@timestamp'] || timestamp,
     };
     this.documents.set(id, stored);
-    const step = this.stepExecutions.stepExecutions.get(document.executionId);
+    this.projectStep(document.executionId);
+    return { id, index: IO_INDEX, seqNo: 1, primaryTerm: 1, result: 'created' };
+  }
+
+  private updateOne(document: ExecutionIoCreateDocument): BulkItemResponse {
+    const id = executionIoId(document.type, document.executionId);
+    const existing = this.documents.get(id);
+    if (!existing) {
+      return {
+        id,
+        index: '',
+        error: { type: 'document_missing_exception', reason: 'document not found' },
+      };
+    }
+
+    this.documents.set(id, {
+      ...existing,
+      value: document.value,
+      size: document.size,
+    });
+    this.projectStep(document.executionId);
+    return { id, index: IO_INDEX, seqNo: 1, primaryTerm: 1, result: 'updated' };
+  }
+
+  private projectStep(executionId: string): void {
+    const step = this.stepExecutions.stepExecutions.get(executionId);
     if (step) {
       this.project(step);
     }
-    return { id, index: IO_INDEX, seqNo: 1, primaryTerm: 1, result: 'created' };
   }
 
   private project(step: EsWorkflowStepExecution): void {

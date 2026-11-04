@@ -36,6 +36,8 @@ export interface ExecutionsIoBulkCreateRequest {
   documents: ExecutionIoCreateDocument[];
 }
 
+type IdentifiedExecutionIoDocument = ExecutionIoCreateDocument & { id: string };
+
 export interface ExecutionsIoDataClientDeps {
   esClient: ElasticsearchClient;
   metadataManager: DataStreamMetadataManager;
@@ -62,7 +64,8 @@ type IoHit = GetExecutionsByIdsResponse<EsExecutionIo>['items'][number];
 /**
  * Reads and writes workflow and step IO on the executions IO data stream.
  * `getByIds` checks the two newest backing indexes, searches the IO data stream
- * for anything older, then the legacy plain execution indexes. Each id is created once.
+ * for anything older, then the legacy plain execution indexes. A create the write
+ * index rejects because the id already exists updates `value` and `size` there.
  */
 export class ExecutionsIoDataClient implements ExecutionsIoClient {
   constructor(private readonly deps: ExecutionsIoDataClientDeps) {}
@@ -91,9 +94,9 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
   }
 
   /**
-   * Creates an IO document on the data stream.
-   * An id is written once. Conflicts, including ids in older backing indexes, are reported
-   * per item with `errors: true`; the other documents are still written.
+   * Creates IO documents on the data stream.
+   * A write-index conflict is updated in the backing index that holds the id.
+   * Other documents in the request are still created. Per-item errors stay on the response.
    */
   public async bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse> {
     if (request.documents.length === 0) {
@@ -106,53 +109,114 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       id: executionIoId(document.type, document.executionId),
       '@timestamp': document['@timestamp'] || timestamp,
     }));
-    // A data stream only enforces `_id` uniqueness in the write index, so ids that already
-    // exist in older backing indexes are detected here and reported as conflicts.
-    const existingIds = await this.findExistingIds(documents.map(({ id }) => id));
-    const writable = documents.filter(({ id }) => !existingIds.has(id));
+
+    const response = await this.deps.esClient.bulk<EsExecutionIo>({
+      refresh: request.refresh,
+      operations: documents.flatMap((document) => [
+        {
+          create: {
+            _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+            _id: document.id,
+          },
+        },
+        document,
+      ]),
+    });
 
     const writtenById = new Map<string, BulkItemResponse>();
-    if (writable.length > 0) {
-      const response = await this.deps.esClient.bulk<EsExecutionIo>({
-        refresh: request.refresh,
-        operations: writable.flatMap((document) => [
-          {
-            create: {
-              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-              _id: document.id,
-            },
-          },
-          document,
-        ]),
-      });
-      writable.forEach((document, index) => {
-        writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
-      });
-    }
+    documents.forEach((document, index) => {
+      writtenById.set(document.id, toBulkItemResponse(document.id, response.items[index]));
+    });
+
+    // Step inputs are still rewritten after the first write. Overwrite the
+    // existing IO document until those writes move to step state.
+    // https://github.com/elastic/security-team/issues/20687
+    await this.updateConflictingDocs(documents, writtenById, request.refresh);
 
     const items = documents.map(
       (document): BulkItemResponse =>
         writtenById.get(document.id) ?? {
           id: document.id,
           index: '',
-          error: {
-            type: 'version_conflict_engine_exception',
-            reason: 'document already exists',
-          },
+          error: { type: 'unknown_error', reason: 'Missing bulk response item' },
         }
     );
     return { items, errors: items.some((item) => item.error !== undefined) };
   }
 
-  private async findExistingIds(ids: string[]): Promise<Set<string>> {
-    const response = await this.deps.esClient.search({
-      index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
-      ignore_unavailable: true,
-      size: ids.length,
-      _source: false,
-      query: { ids: { values: ids } },
+  private async updateConflictingDocs(
+    documents: IdentifiedExecutionIoDocument[],
+    writtenById: Map<string, BulkItemResponse>,
+    refresh: ExecutionsIoBulkCreateRequest['refresh']
+  ): Promise<void> {
+    const conflicts = documents.filter(
+      (document) =>
+        writtenById.get(document.id)?.error?.type === 'version_conflict_engine_exception'
+    );
+    if (conflicts.length === 0) {
+      return;
+    }
+
+    const existing = await this.getByIds(conflicts.map((document) => document.id));
+    const located = new Map(existing.items.map((item) => [item.document.id, item.index]));
+    const updated = await this.updateDocuments(conflicts, located, refresh);
+    conflicts.forEach((document, index) => {
+      const item = updated[index];
+      if (item) {
+        writtenById.set(document.id, item);
+      }
     });
-    return new Set(response.hits.hits.flatMap((hit) => (hit._id ? [hit._id] : [])));
+  }
+
+  private async updateDocuments(
+    documents: IdentifiedExecutionIoDocument[],
+    indexById: ReadonlyMap<string, string>,
+    refresh: ExecutionsIoBulkCreateRequest['refresh']
+  ): Promise<BulkItemResponse[]> {
+    const items = new Array<BulkItemResponse>(documents.length);
+    const targets: Array<{
+      position: number;
+      document: IdentifiedExecutionIoDocument;
+      index: string;
+    }> = [];
+    documents.forEach((document, position) => {
+      const index = indexById.get(document.id);
+      if (!index) {
+        items[position] = {
+          id: document.id,
+          index: '',
+          error: { type: 'document_missing_exception', reason: 'document not found' },
+        };
+        return;
+      }
+      targets.push({ position, document, index });
+    });
+
+    if (targets.length === 0) {
+      return items;
+    }
+
+    const response = await this.deps.esClient.bulk<
+      EsExecutionIo,
+      { value?: EsExecutionIo['value']; size?: number }
+    >({
+      refresh,
+      operations: targets.flatMap(({ document, index }) => [
+        {
+          update: {
+            _index: index,
+            _id: document.id,
+            retry_on_conflict: 3,
+          },
+        },
+        { doc: { value: document.value, size: document.size } },
+      ]),
+    });
+
+    targets.forEach(({ position, document }, index) => {
+      items[position] = toBulkItemResponse(document.id, response.items[index]);
+    });
+    return items;
   }
 
   /** mget the two newest IO backing indexes, then search the data stream for the rest. */

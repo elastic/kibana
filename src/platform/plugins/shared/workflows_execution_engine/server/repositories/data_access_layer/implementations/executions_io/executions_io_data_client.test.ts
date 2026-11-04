@@ -34,6 +34,15 @@ describe('ExecutionsIoDataClient', () => {
     } as unknown as DataStreamMetadataManager;
     client = new ExecutionsIoDataClient({ esClient, metadataManager, logger });
     esClient.search.mockResolvedValue({ hits: { hits: [] } } as never);
+    esClient.mget.mockImplementation((params) =>
+      Promise.resolve({
+        docs: (params?.docs ?? []).map((doc) => ({
+          _index: doc._index ?? '',
+          _id: doc._id ?? '',
+          found: false as const,
+        })),
+      })
+    );
   });
 
   it('returns an empty result without reading Elasticsearch', async () => {
@@ -356,6 +365,8 @@ describe('ExecutionsIoDataClient', () => {
       ],
     });
 
+    expect(esClient.mget).not.toHaveBeenCalled();
+    expect(esClient.search).not.toHaveBeenCalled();
     expect(esClient.bulk).toHaveBeenCalledWith({
       refresh: 'wait_for',
       operations: [
@@ -390,10 +401,48 @@ describe('ExecutionsIoDataClient', () => {
     });
   });
 
-  it('reports a conflict for an id that exists in an older backing index without writing it', async () => {
-    esClient.search.mockResolvedValueOnce({
-      hits: { hits: [{ _id: 'output:step-1', _index: OLDER_INDEX }] },
+  it('updates a document after the write index rejects the create', async () => {
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          _index: NEWER_INDEX,
+          _id: 'output:step-1',
+          found: true,
+          _source: { type: 'output', value: { done: false }, size: 1 },
+        },
+        { _index: OLDER_INDEX, _id: 'output:step-1', found: false },
+      ],
     } as never);
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: 'output:step-1',
+              _index: NEWER_INDEX,
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists',
+              },
+            },
+          },
+        ],
+      } as never)
+      .mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            update: {
+              _id: 'output:step-1',
+              _index: NEWER_INDEX,
+              result: 'updated',
+              status: 200,
+            },
+          },
+        ],
+      } as never);
 
     const result = await client.bulkCreate({
       documents: [
@@ -407,17 +456,136 @@ describe('ExecutionsIoDataClient', () => {
       ],
     });
 
-    expect(esClient.bulk).not.toHaveBeenCalled();
-    expect(result.errors).toBe(true);
+    expect(esClient.bulk).toHaveBeenCalledTimes(2);
+    expect(esClient.bulk).toHaveBeenNthCalledWith(2, {
+      refresh: undefined,
+      operations: [
+        {
+          update: {
+            _index: NEWER_INDEX,
+            _id: 'output:step-1',
+            retry_on_conflict: 3,
+          },
+        },
+        { doc: { value: { done: true }, size: 2 } },
+      ],
+    });
+    expect(result.errors).toBe(false);
     expect(result.items[0]).toEqual(
-      expect.objectContaining({
-        id: 'output:step-1',
-        error: expect.objectContaining({ type: 'version_conflict_engine_exception' }),
-      })
+      expect.objectContaining({ id: 'output:step-1', index: NEWER_INDEX, result: 'updated' })
     );
   });
 
-  it('reports a write-index conflict per item instead of throwing', async () => {
+  it('creates a new document and updates one the write index rejected', async () => {
+    esClient.mget.mockResolvedValueOnce({
+      docs: [
+        {
+          _index: NEWER_INDEX,
+          _id: 'output:step-1',
+          found: true,
+          _source: { type: 'output', value: { done: false }, size: 1 },
+        },
+        { _index: OLDER_INDEX, _id: 'output:step-1', found: false },
+      ],
+    } as never);
+    esClient.bulk
+      .mockResolvedValueOnce({
+        errors: true,
+        items: [
+          {
+            create: {
+              _id: 'output:step-1',
+              _index: NEWER_INDEX,
+              status: 409,
+              error: {
+                type: 'version_conflict_engine_exception',
+                reason: 'document already exists',
+              },
+            },
+          },
+          {
+            create: {
+              _id: 'input:step-2',
+              _index: NEWER_INDEX,
+              result: 'created',
+              status: 201,
+              _seq_no: 1,
+              _primary_term: 1,
+            },
+          },
+        ],
+      } as never)
+      .mockResolvedValueOnce({
+        errors: false,
+        items: [
+          {
+            update: {
+              _id: 'output:step-1',
+              _index: NEWER_INDEX,
+              result: 'updated',
+              status: 200,
+              _seq_no: 9,
+              _primary_term: 1,
+            },
+          },
+        ],
+      } as never);
+
+    const result = await client.bulkCreate({
+      documents: [
+        {
+          executionId: 'step-1',
+          type: 'output',
+          value: { done: true },
+          size: 2,
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+        {
+          executionId: 'step-2',
+          type: 'input',
+          value: { a: 1 },
+          size: 4,
+          '@timestamp': '2026-01-01T00:00:00.000Z',
+        },
+      ],
+    });
+
+    expect(esClient.mget).toHaveBeenCalledTimes(1);
+    expect(esClient.mget).toHaveBeenCalledWith({
+      docs: [
+        { _index: NEWER_INDEX, _id: 'output:step-1' },
+        { _index: OLDER_INDEX, _id: 'output:step-1' },
+      ],
+    });
+    expect(esClient.bulk).toHaveBeenNthCalledWith(
+      1,
+      expect.objectContaining({
+        operations: [
+          {
+            create: {
+              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+              _id: 'output:step-1',
+            },
+          },
+          expect.objectContaining({ id: 'output:step-1', type: 'output' }),
+          {
+            create: {
+              _index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+              _id: 'input:step-2',
+            },
+          },
+          expect.objectContaining({ id: 'input:step-2', type: 'input', value: { a: 1 } }),
+        ],
+      })
+    );
+    expect(result.errors).toBe(false);
+    expect(result.items).toEqual([
+      expect.objectContaining({ id: 'output:step-1', result: 'updated', index: NEWER_INDEX }),
+      expect.objectContaining({ id: 'input:step-2', result: 'created', index: NEWER_INDEX }),
+    ]);
+  });
+
+  it('keeps a non-conflict create error instead of updating', async () => {
     esClient.bulk.mockResolvedValue({
       errors: true,
       items: [
@@ -425,11 +593,8 @@ describe('ExecutionsIoDataClient', () => {
           create: {
             _id: 'output:step-1',
             _index: NEWER_INDEX,
-            status: 409,
-            error: {
-              type: 'version_conflict_engine_exception',
-              reason: 'document already exists',
-            },
+            status: 400,
+            error: { type: 'mapper_parsing_exception', reason: 'failed to parse' },
           },
         },
       ],
@@ -446,9 +611,11 @@ describe('ExecutionsIoDataClient', () => {
         },
       ],
     });
-    expect(result.errors).toBe(true);
-    expect(result.items[0].error?.type).toBe('version_conflict_engine_exception');
+
     expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    expect(esClient.mget).not.toHaveBeenCalled();
+    expect(result.errors).toBe(true);
+    expect(result.items[0].error?.type).toBe('mapper_parsing_exception');
   });
 
   it('stamps @timestamp when the document does not have one', async () => {
