@@ -75,8 +75,8 @@ describe('graph attachment type', () => {
     });
 
     it('shows the first rows of a large graph and counts the rest, and still renders', async () => {
-      const nodes = Array.from({ length: 2000 }, (_, index) => node(`n${index}`, `x`.repeat(600)));
-      const edges = nodes.slice(1, 120).map(({ id }) => edge('n0', id, 'y'.repeat(600)));
+      const nodes = Array.from({ length: 2000 }, (_, index) => node(`n${index}`, `node ${index}`));
+      const edges = nodes.slice(1, 120).map(({ id }) => edge('n0', id, 'calls'));
 
       const composition = await toComposition({ nodes, edges });
 

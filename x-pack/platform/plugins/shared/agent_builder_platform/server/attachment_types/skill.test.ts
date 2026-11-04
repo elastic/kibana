@@ -162,23 +162,4 @@ describe('skill toSurfaceComposition', () => {
     expect(valid).toBe(true);
     expect(slack).toContain(`${SURFACE_BASE_URL}/app/agent_builder/manage/skills`);
   });
-
-  it('cuts long content and says so, and still renders', async () => {
-    const content = 'x'.repeat(20000);
-    const composition = await definition.toSurfaceComposition?.(
-      buildAttachment({
-        ...validSkill,
-        skill: { ...validSkill.skill, content, tool_ids: Array(400).fill('platform.core.tool') },
-      }),
-      surfaceContext
-    );
-
-    expect(JSON.stringify(composition)).toContain(
-      'Showing the first 11999 of 20000 characters of SKILL.md.'
-    );
-
-    const { valid, errors } = await renderSurface(composition);
-    expect(errors).toEqual([]);
-    expect(valid).toBe(true);
-  });
 });

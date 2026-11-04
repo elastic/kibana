@@ -23,7 +23,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, toLine } from '@kbn/agent-builder-server/attachments';
+import { hasText } from '@kbn/agent-builder-server/attachments';
 import type { KibanaIsomerRuntime } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
@@ -75,15 +75,10 @@ const toMessageNodes = (message: string): MessageNode[] =>
  * `context` line, placed before the body. Returns nothing when the mapping sets neither, so it's
  * `toSurfaceComposition` that decides whether an attachment has a heading.
  */
-const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): SurfaceNode[] => {
-  const titleLine = title ? toLine(title, SURFACE_LIMITS.headerText) : '';
-  const subtitleLine = subtitle ? toLine(subtitle, SURFACE_LIMITS.contextText) : '';
-
-  return [
-    ...(titleLine ? [{ type: 'header' as const, text: titleLine, level: 2 as const }] : []),
-    ...(subtitleLine ? [{ type: 'context' as const, items: [{ text: subtitleLine }] }] : []),
-  ];
-};
+const toHeadingNodes = ({ title, subtitle }: SurfaceComposition): SurfaceNode[] => [
+  ...(hasText(title) ? [{ type: 'header' as const, text: title, level: 2 as const }] : []),
+  ...(hasText(subtitle) ? [{ type: 'context' as const, items: [{ text: subtitle }] }] : []),
+];
 
 /**
  * Replaces an attachment node with what its type's `toSurfaceComposition` returns. Attachments

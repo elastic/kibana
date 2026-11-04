@@ -15,7 +15,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, clampText, hasText } from '@kbn/agent-builder-server/attachments';
+import { SURFACE_LIMITS, hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -120,7 +120,7 @@ export const createEsqlAttachmentType = ({
               {
                 type: 'code' as const,
                 language: 'esql',
-                text: clampText(query, SURFACE_LIMITS.codeText),
+                text: query,
               },
               ...(await toDiscoverLink(query)),
             ]

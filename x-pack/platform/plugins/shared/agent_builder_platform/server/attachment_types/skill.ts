@@ -10,7 +10,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, clampText, hasText } from '@kbn/agent-builder-server/attachments';
+import { hasText } from '@kbn/agent-builder-server/attachments';
 import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import {
@@ -107,18 +107,15 @@ const toSkillSurfaceComposition = ({
       label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.surface.tools', {
         defaultMessage: 'Tools',
       }),
-      value: clampText(toolIds.join(', '), SURFACE_LIMITS.fieldValue),
+      value: toolIds.join(', '),
     },
     files.length > 0 && {
       label: i18n.translate('xpack.agentBuilderPlatform.attachments.skill.surface.files', {
         defaultMessage: 'Files',
       }),
-      value: clampText(files.join(', '), SURFACE_LIMITS.fieldValue),
+      value: files.join(', '),
     },
   ].filter((item): item is { label: string; value: string } => Boolean(item));
-
-  const shownContent = clampText(content, SURFACE_LIMITS.codeText);
-  const isContentCut = shownContent !== content;
 
   const body: SurfaceNode[] = [
     ...(hasText(description) ? [{ type: 'markdown' as const, text: description }] : []),
@@ -128,26 +125,7 @@ const toSkillSurfaceComposition = ({
           {
             type: 'code' as const,
             language: 'markdown',
-            text: shownContent,
-          },
-        ]
-      : []),
-    ...(isContentCut
-      ? [
-          {
-            type: 'context' as const,
-            items: [
-              {
-                text: i18n.translate(
-                  'xpack.agentBuilderPlatform.attachments.skill.surface.contentCut',
-                  {
-                    defaultMessage: 'Showing the first {shown} of {total} characters of SKILL.md.',
-                    // Without the ellipsis `clampText` ends the cut content with.
-                    values: { shown: shownContent.length - 1, total: content.length },
-                  }
-                ),
-              },
-            ],
+            text: content,
           },
         ]
       : []),

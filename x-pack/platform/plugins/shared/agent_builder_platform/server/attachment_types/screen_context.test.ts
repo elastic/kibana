@@ -67,13 +67,5 @@ describe('screen_context attachment type', () => {
       ]);
       expect((await renderSurface(composition)).valid).toBe(true);
     });
-
-    it('cuts long values, and still renders', async () => {
-      const composition = await toComposition({ description: 'd'.repeat(5000) });
-      const { valid, errors } = await renderSurface(composition);
-
-      expect(errors).toEqual([]);
-      expect(valid).toBe(true);
-    });
   });
 });

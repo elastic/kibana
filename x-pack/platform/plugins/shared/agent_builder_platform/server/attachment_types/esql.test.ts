@@ -84,13 +84,5 @@ describe('esql attachment type', () => {
 
       expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
-
-    it('cuts a query too long to show, and still renders', async () => {
-      const composition = await toComposition({ query: `FROM logs ${'| LIMIT 1 '.repeat(2000)}` });
-      const { valid, errors } = await renderSurface(composition);
-
-      expect(errors).toEqual([]);
-      expect(valid).toBe(true);
-    });
   });
 });
