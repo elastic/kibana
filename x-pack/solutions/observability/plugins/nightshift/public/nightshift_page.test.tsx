@@ -111,8 +111,8 @@ jest.mock('./hooks/use_developer_mode', () => ({
 }));
 jest.mock('./data/availability/use_significant_events_availability');
 let mockServiceAccount: { isLoading: boolean; isSuccess: boolean; data?: Record<string, unknown> };
-jest.mock('./service_account/use_investigator_service_account', () => ({
-  ...jest.requireActual('./service_account/use_investigator_service_account'),
+jest.mock('./data/service_accounts/use_investigator_service_account', () => ({
+  ...jest.requireActual('./data/service_accounts/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
 

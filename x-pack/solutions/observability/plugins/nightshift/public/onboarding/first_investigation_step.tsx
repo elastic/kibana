@@ -28,7 +28,7 @@ import type {
   OnboardingSuggestionsExecution,
 } from '@kbn/nightshift-investigations-plugin/common';
 import { useStartInvestigation } from '../data/investigations/use_start_investigation';
-import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
+import { ConnectSourcesGrid } from '../components/entities/sandbox_connector/connect_sources_grid';
 import { useStartOnboardingSuggestions } from './use_onboarding';
 
 /** Generic prompts offered when the suggestion run failed; they work on any cluster. */

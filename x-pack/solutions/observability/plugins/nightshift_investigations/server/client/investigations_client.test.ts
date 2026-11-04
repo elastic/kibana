@@ -70,6 +70,7 @@ const startFromApi = (client: NightshiftInvestigationsClient, request: StartInve
 
 const mockManagement = {
   getWorkflowExecution: jest.fn(),
+  getWorkflowExecutions: jest.fn(),
   getWorkflow: jest.fn(),
   runWorkflow: jest.fn(),
 };
@@ -79,6 +80,7 @@ const mockWorkflowsManagement = {
 } as unknown as WorkflowsServerPluginSetup;
 
 const conversations = {
+  get: jest.fn().mockResolvedValue({ events: [] }),
   bulkGet: jest.fn(),
   create: jest.fn(),
   patchMetadata: jest.fn(),
@@ -243,6 +245,7 @@ beforeEach(() => {
       })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
+  conversations.get.mockResolvedValue({ events: [] });
   conversations.addEvents.mockResolvedValue([]);
   subjectsClient.upsertSubjects.mockResolvedValue([]);
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
@@ -1370,6 +1373,7 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
         })
       );
       mockManagement.getWorkflowExecution.mockResolvedValue({
+        spaceId: SPACE_ID,
         effectiveIdentity: INVESTIGATOR_IDENTITY,
         id: 'exec-1',
         workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
@@ -1891,6 +1895,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     workflowId?: string;
   } = {}) =>
     mockManagement.getWorkflowExecution.mockResolvedValue({
+      spaceId: SPACE_ID,
       effectiveIdentity: INVESTIGATOR_IDENTITY,
       id: 'exec-1',
       workflowId,
@@ -1903,8 +1908,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     ['as another service account', { type: 'service_account', id: 'kibana/other' }],
     ['without an identity', undefined],
   ])('rejects a run that executes %s before touching the investigation', async (_, identity) => {
+    mockManagement.getWorkflow.mockResolvedValue({ definition: BOUND_DEFINITION });
     mockManagement.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',
+      spaceId: SPACE_ID,
       workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       effectiveIdentity: identity,
       status: ExecutionStatus.RUNNING,
@@ -1923,6 +1930,95 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     default_telemetry_target: 'orca',
     telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
   };
+
+  it('records a timeout once and preserves closed conversation state on replay', async () => {
+    withExecution({ status: ExecutionStatus.TIMED_OUT });
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded');
+    const event = conversations.addEvents.mock.calls[0][0].events[0];
+    expect(event).toMatchObject({
+      type: 'investigation_run_timed_out',
+      data: { execution_id: 'exec-1', reason: 'Deadline exceeded' },
+    });
+    conversations.get.mockResolvedValue({ events: [event] });
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded');
+    expect(conversations.addEvents).toHaveBeenCalledTimes(1);
+    expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'open' })
+    );
+  });
+
+  it('does not recreate a deleted accepted investigation during reconciliation', async () => {
+    withExecution({
+      status: ExecutionStatus.TIMED_OUT,
+      inputs: { investigation_id: 'inv-1', context: { is_follow_up: false } },
+    });
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded')
+    ).rejects.toThrow(InvestigationNotFoundError);
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.QUEUED,
+    ExecutionStatus.WAITING,
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.CANCELLED,
+  ])('rejects %s as an unsuccessful terminal run', async (status) => {
+    withExecution({ status });
+    await expect(makeClient().getUnsuccessfulRun('exec-1')).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+  });
+
+  it.each([ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT])(
+    'validates the original execution and binding for %s',
+    async (status) => {
+      withExecution({ status });
+      await expect(makeClient().getUnsuccessfulRun('exec-1')).resolves.toMatchObject({
+        investigationId: 'inv-1',
+        execution: { id: 'exec-1', status },
+      });
+    }
+  );
+
+  it('rejects a terminal run from another space', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    const execution = await mockManagement.getWorkflowExecution();
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      ...execution,
+      spaceId: 'another-space',
+    });
+    await expect(makeClient().getUnsuccessfulRun('exec-1')).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+    expect(conversations.create).not.toHaveBeenCalled();
+  });
+
+  it('defers an older lifecycle outcome to a newer queued follow-up', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    const execution = await mockManagement.getWorkflowExecution();
+    mockManagement.getWorkflowExecutions.mockResolvedValue({
+      results: [{ id: 'newer-queued-run' }],
+    });
+    await expect(
+      makeClient().isLatestInvestigationRun({
+        ...execution,
+        concurrencyGroupKey: 'investigation:inv-1',
+      })
+    ).resolves.toBe(false);
+    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        concurrencyGroupKey: 'investigation:inv-1',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        size: 1,
+      }),
+      SPACE_ID
+    );
+  });
 
   it.each(['c0', 'orca', 'none'])(
     'binds the %s target to a new shared investigation conversation',
@@ -2233,20 +2329,25 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.addEvents).toHaveBeenCalledTimes(1);
   });
 
-  it('logs a rejected timeline write and still records subjects and execution association', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
-    conversations.addEvents.mockRejectedValueOnce(new Error('Timeline access denied'));
+  it.each(['get', 'addEvents'] as const)(
+    'surfaces a rejected timeline %s after recording subjects and execution association',
+    async (operation) => {
+      withExecution();
+      withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+      conversations[operation].mockRejectedValueOnce(new Error('Timeline access denied'));
 
-    await expect(
-      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
-    ).resolves.toBe('inv-1');
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Timeline access denied'));
-  });
+      await expect(
+        makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+      ).rejects.toThrow('Timeline access denied');
+      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-1'],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Timeline access denied')
+      );
+    }
+  );
 
   it.each([undefined, '', ' \n '])(
     'omits an unavailable request (%p) and defaults an empty reason',
@@ -2336,9 +2437,20 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
   });
 
   it.each([ExecutionStatus.COMPLETED, ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
-    'does not materialize failure for an execution already %s',
+    'recovers timed-out runs while rejecting other terminal outcomes (%s)',
     async (status) => {
       withExecution({ status });
+      if (status === ExecutionStatus.TIMED_OUT) {
+        await expect(
+          makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded')
+        ).resolves.toBe('inv-1');
+        expect(conversations.addEvents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            events: [expect.objectContaining({ type: 'investigation_run_timed_out' })],
+          })
+        );
+        return;
+      }
       await expect(
         makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
       ).rejects.toThrow(InvestigationNotFoundError);
@@ -2933,6 +3045,7 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
       workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
     ) =>
       mockManagement.getWorkflowExecution.mockResolvedValue({
+        spaceId: SPACE_ID,
         effectiveIdentity: INVESTIGATOR_IDENTITY,
         id: 'exec-1',
         workflowId,
