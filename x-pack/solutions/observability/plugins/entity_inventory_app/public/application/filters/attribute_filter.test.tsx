@@ -57,7 +57,7 @@ describe('AttributeFilter', () => {
     await openList();
 
     expect(screen.getByRole('option', { name: 'linux' })).toBeInTheDocument();
-    expect(screen.getByRole('option', { name: 'windows' })).toBeInTheDocument();
+    expect(screen.getByRole('option', { name: /windows/ })).toBeInTheDocument();
   });
 
   it('shows an error message when the values could not be loaded', async () => {

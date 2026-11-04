@@ -67,7 +67,6 @@ describe('getFilterControls', () => {
           { name: 'kubernetes', label: 'Kubernetes' },
         ],
         types: [],
-        sources: [],
         attributes: [],
       });
     });

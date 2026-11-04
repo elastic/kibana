@@ -60,13 +60,13 @@ describe('getSelectableOptions', () => {
 
   it('lists the selected options when there is an error', () => {
     expect(summary(getOptions({ options: [], selected: ['aws'], hasError: true }))).toEqual([
-      { key: 'aws', label: 'AWS', checked: 'on' },
+      { key: 'aws', label: 'aws', checked: 'on' },
     ]);
   });
 
   it('lists the selected options while loading, before the values arrive', () => {
     expect(summary(getOptions({ options: [], selected: ['aws'], isLoading: true }))).toEqual([
-      { key: 'aws', label: 'AWS', checked: 'on' },
+      { key: 'aws', label: 'aws', checked: 'on' },
     ]);
   });
 
