@@ -1531,7 +1531,7 @@ export const FIELD = (readOnly?: boolean): FieldMap => ({
     }),
     helpText: (
       <FormattedMessage
-        id="xpack.synthetics.monitorConfig.params.helpText"
+        id="xpack.synthetics.monitorConfig.params.keyValueHelpText"
         defaultMessage="Add key-value parameters that can be referenced in your script with {paramsValue}"
         values={{
           paramsValue: <EuiCode>{'params.value'}</EuiCode>,

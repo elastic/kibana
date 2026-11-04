@@ -15,6 +15,7 @@ import {
   EuiFlexItem,
   EuiFormFieldset,
   EuiSpacer,
+  EuiTextArea,
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -109,7 +110,7 @@ export const canUseParameterPairs = (params?: string): boolean => {
       parsed !== null &&
       typeof parsed === 'object' &&
       !Array.isArray(parsed) &&
-      Object.values(parsed).every((value) => typeof value === 'string' && !value.includes('\n')) &&
+      Object.values(parsed).every((value) => typeof value === 'string') &&
       !hasDuplicateKeys(getTopLevelKeys(params))
     );
   } catch {
@@ -128,6 +129,13 @@ export const pairsToParamsJson = (pairs: Pair[]): string => {
 
 const getEmptyValueRowIds = (rows: ParameterRow[]): ReadonlySet<string> =>
   new Set(rows.filter(({ value }) => !value).map(({ id }) => id));
+
+type FocusTarget = { rowId: string; field: 'key' | 'value' } | 'add';
+
+const MAX_VALUE_ROWS = 6;
+
+const getValueRows = (value: string): number =>
+  Math.min(Math.max(value.split('\n').length, 1), MAX_VALUE_ROWS);
 
 export const ParameterValuesEditor = ({
   onBlur,
@@ -151,7 +159,7 @@ export const ParameterValuesEditor = ({
   const [editingIds, setEditingIds] = useState<ReadonlySet<string>>(() =>
     getEmptyValueRowIds(rows)
   );
-  const [focusId, setFocusId] = useState<string>();
+  const [focusTarget, setFocusTarget] = useState<FocusTarget>();
   const loadRows = useCallback(
     (params?: string) => {
       const nextRows = createRows(params);
@@ -160,7 +168,8 @@ export const ParameterValuesEditor = ({
     },
     [createRows]
   );
-  const inputRefs = useRef<Record<string, HTMLInputElement | null>>({});
+  const fieldRefs = useRef<Record<string, HTMLInputElement | HTMLTextAreaElement | null>>({});
+  const addButtonRef = useRef<HTMLButtonElement | null>(null);
   const knownValue = useRef(value ?? '');
   // The form can hand values back late or batched, so values we emitted must not look external.
   const emittedValues = useRef<string[]>([]);
@@ -213,12 +222,16 @@ export const ParameterValuesEditor = ({
   }, [rows]);
 
   useEffect(() => {
-    if (focusId === undefined) {
+    if (focusTarget === undefined) {
       return;
     }
-    inputRefs.current[focusId]?.focus();
-    setFocusId(undefined);
-  }, [focusId]);
+    if (focusTarget === 'add') {
+      addButtonRef.current?.focus();
+    } else {
+      fieldRefs.current[`${focusTarget.rowId}:${focusTarget.field}`]?.focus();
+    }
+    setFocusTarget(undefined);
+  }, [focusTarget]);
 
   const startEditing = useCallback((id: string) => {
     setEditingIds((ids) => new Set(ids).add(id));
@@ -236,7 +249,7 @@ export const ParameterValuesEditor = ({
     <EuiToolTip content={canUsePairs ? undefined : PAIRS_UNAVAILABLE_LABEL}>
       <EuiButtonEmpty
         data-test-subj="syntheticsParamsEditorModeToggle"
-        iconType="list"
+        iconType="listBullet"
         isDisabled={!canUsePairs}
         onClick={() => {
           loadRows(value);
@@ -268,11 +281,13 @@ export const ParameterValuesEditor = ({
             <EuiButton
               data-test-subj="syntheticsMonitorConfigParams__button"
               iconType="plus"
+              buttonRef={addButtonRef}
               isDisabled={readOnly}
               onClick={() => {
                 const newRow = createRow(['', '']);
                 startEditing(newRow.id);
                 updateRows([newRow, ...rows]);
+                setFocusTarget({ rowId: newRow.id, field: 'key' });
               }}
               size="s"
             >
@@ -338,17 +353,26 @@ export const ParameterValuesEditor = ({
               const updateRow = (nextRow: Partial<ParameterRow>) => {
                 updateRows(rows.map((row) => (row.id === id ? { ...row, ...nextRow } : row)));
               };
+              const handleValueBlur = () => {
+                if (paramValue) {
+                  stopEditing(id);
+                }
+                onBlur?.();
+              };
 
               return (
                 <Fragment key={id}>
                   <EuiSpacer size="xs" />
-                  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexGroup alignItems="flexStart" gutterSize="s" responsive={false}>
                     <EuiFlexItem>
                       <EuiFieldText
                         aria-label={keyInputLabel}
                         compressed
                         data-test-subj={`keyValuePairsKey${index}`}
                         fullWidth
+                        inputRef={(node) => {
+                          fieldRefs.current[`${id}:key`] = node;
+                        }}
                         isInvalid={invalidRowIds.has(id)}
                         onBlur={onBlur}
                         onChange={(event) => updateRow({ key: event.target.value })}
@@ -357,12 +381,49 @@ export const ParameterValuesEditor = ({
                       />
                     </EuiFlexItem>
                     <EuiFlexItem>
-                      <EuiFieldText
-                        append={
+                      {showValue ? (
+                        <EuiTextArea
+                          aria-label={valueInputLabel}
+                          compressed
+                          data-test-subj={`keyValuePairsValue${index}`}
+                          fullWidth
+                          inputRef={(node) => {
+                            fieldRefs.current[`${id}:value`] = node;
+                          }}
+                          onBlur={handleValueBlur}
+                          onChange={(event) => updateRow({ value: event.target.value })}
+                          readOnly={readOnly || !isEditing}
+                          resize="vertical"
+                          rows={getValueRows(paramValue)}
+                          value={paramValue}
+                          wrap="off"
+                        />
+                      ) : (
+                        <EuiFieldText
+                          aria-label={valueInputLabel}
+                          autoComplete="new-password"
+                          compressed
+                          data-test-subj={`keyValuePairsValue${index}`}
+                          fullWidth
+                          icon="lock"
+                          inputRef={(node) => {
+                            fieldRefs.current[`${id}:value`] = node;
+                          }}
+                          onBlur={handleValueBlur}
+                          readOnly
+                          type="password"
+                          value={paramValue}
+                        />
+                      )}
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiFlexGroup gutterSize="xs" responsive={false}>
+                        <EuiFlexItem grow={false}>
                           <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
                               aria-label={visibilityLabel}
                               data-test-subj={`syntheticsParamValueVisibility${index}`}
+                              display="empty"
                               iconType={isValueVisible ? 'eyeSlash' : 'eye'}
                               size="s"
                               onClick={() => {
@@ -370,30 +431,7 @@ export const ParameterValuesEditor = ({
                               }}
                             />
                           </EuiToolTip>
-                        }
-                        aria-label={valueInputLabel}
-                        autoComplete="new-password"
-                        compressed
-                        data-test-subj={`keyValuePairsValue${index}`}
-                        fullWidth
-                        icon="lock"
-                        inputRef={(node) => {
-                          inputRefs.current[id] = node;
-                        }}
-                        onBlur={() => {
-                          if (paramValue) {
-                            stopEditing(id);
-                          }
-                          onBlur?.();
-                        }}
-                        onChange={(event) => updateRow({ value: event.target.value })}
-                        readOnly={readOnly || !isEditing}
-                        type={showValue ? 'text' : 'password'}
-                        value={paramValue}
-                      />
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="xs" responsive={false}>
+                        </EuiFlexItem>
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={editLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
@@ -405,7 +443,7 @@ export const ParameterValuesEditor = ({
                               size="s"
                               onClick={() => {
                                 startEditing(id);
-                                setFocusId(id);
+                                setFocusTarget({ rowId: id, field: 'value' });
                               }}
                             />
                           </EuiToolTip>
@@ -421,7 +459,11 @@ export const ParameterValuesEditor = ({
                               isDisabled={readOnly}
                               size="s"
                               onClick={() => {
+                                const neighbor = rows[index + 1] ?? rows[index - 1];
                                 updateRows(rows.filter((row) => row.id !== id));
+                                setFocusTarget(
+                                  neighbor ? { rowId: neighbor.id, field: 'key' } : 'add'
+                                );
                               }}
                             />
                           </EuiToolTip>
@@ -457,8 +499,7 @@ const EDIT_AS_PAIRS_LABEL = i18n.translate('xpack.synthetics.monitorConfig.param
 const PAIRS_UNAVAILABLE_LABEL = i18n.translate(
   'xpack.synthetics.monitorConfig.params.pairsUnavailable',
   {
-    defaultMessage:
-      'Key-value editing needs a JSON object with unique names and single-line text values.',
+    defaultMessage: 'Key-value editing needs a JSON object with unique names and text values.',
   }
 );
 

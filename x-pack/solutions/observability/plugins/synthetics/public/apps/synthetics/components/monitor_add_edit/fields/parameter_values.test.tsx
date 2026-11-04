@@ -73,7 +73,7 @@ describe('params JSON helpers', () => {
     expect(paramsJsonToPairs('{"__proto__":"c"}')).toEqual([['__proto__', 'c']]);
   });
 
-  it.each(['', '{}', '{"token":"abc"}', '{"":"orphan"}'])(
+  it.each(['', '{}', '{"token":"abc"}', '{"":"orphan"}', '{"certificate":"first\\nsecond"}'])(
     'uses pairs for flat string params: %s',
     (params) => {
       expect(canUseParameterPairs(params)).toBe(true);
@@ -84,7 +84,6 @@ describe('params JSON helpers', () => {
     '{"retries":3}',
     '{"options":{"mode":"x"}}',
     '["first"]',
-    '{"certificate":"first line\\nsecond line"}',
     '{"token":"a","token":"b"}',
     '{invalid',
   ])('falls back to JSON for other params: %s', (params) => {
@@ -122,7 +121,9 @@ describe('ParameterValuesEditor', () => {
     const { getByTestId } = render(<ParameterValuesEditorForm />);
 
     fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
-    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('changeme');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
 
     fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
@@ -134,7 +135,8 @@ describe('ParameterValuesEditor', () => {
     fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
 
     expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
-    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'text');
+    expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('type', 'password');
+    expect(getByTestId('keyValuePairsValue0')).toHaveFocus();
 
     fireEvent.change(getByTestId('keyValuePairsValue0'), { target: { value: 'replacement' } });
     expect(getByTestId('parameterValuesValue')).toHaveTextContent('{"password":"replacement"}');
@@ -196,6 +198,46 @@ describe('ParameterValuesEditor', () => {
 
     expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('readonly');
     expect(getByTestId('keyValuePairsValue1')).not.toHaveAttribute('readonly');
+  });
+
+  it('keeps multi-line values in key-value rows', () => {
+    const { getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"certificate":"first\\nsecond"}'} />
+    );
+
+    expect(getByTestId('syntheticsParamsEditorModeToggle')).toHaveTextContent('Edit as JSON');
+    fireEvent.click(getByTestId('syntheticsParamValueVisibility0'));
+    expect(getByTestId('keyValuePairsValue0')).toHaveValue('first\nsecond');
+    expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('rows', '2');
+
+    fireEvent.click(getByTestId('syntheticsParamValueEdit0'));
+    fireEvent.change(getByTestId('keyValuePairsValue0'), {
+      target: { value: 'first\nsecond\nthird' },
+    });
+    expect(getByTestId('parameterValuesValue')).toHaveTextContent(
+      '{"certificate":"first\\nsecond\\nthird"}'
+    );
+  });
+
+  it('moves focus to the new row key when adding a parameter', () => {
+    const { getByTestId } = render(<ParameterValuesEditorForm defaultParams="" />);
+
+    fireEvent.click(getByTestId('syntheticsMonitorConfigParams__button'));
+
+    expect(getByTestId('keyValuePairsKey0')).toHaveFocus();
+  });
+
+  it('keeps focus in the list after deleting a row', () => {
+    const { getAllByTestId, getByTestId } = render(
+      <ParameterValuesEditorForm defaultParams={'{"first":"one","second":"two"}'} />
+    );
+
+    fireEvent.click(getAllByTestId('syntheticsKeyValuePairsFieldButton')[0]);
+    expect(getByTestId('keyValuePairsKey0')).toHaveValue('second');
+    expect(getByTestId('keyValuePairsKey0')).toHaveFocus();
+
+    fireEvent.click(getByTestId('syntheticsKeyValuePairsFieldButton'));
+    expect(getByTestId('syntheticsMonitorConfigParams__button')).toHaveFocus();
   });
 
   it('hides the next value after deleting a visible row', () => {
