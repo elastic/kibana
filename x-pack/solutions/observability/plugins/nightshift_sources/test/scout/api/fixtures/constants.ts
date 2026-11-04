@@ -37,10 +37,22 @@ const TEST_DATA_READ_PRIVILEGES = {
   privileges: ['read', 'view_index_metadata'],
 };
 
+// The All logs recommendation is `FROM logs*`. The read check asks for that pattern by name.
+// Read on `logsnightshift-sources-recommendation-test-*` does not cover it: the narrower grant
+// still lets the ES|QL probe succeed and hide every other index under `logs*`.
+const ALL_LOGS_RECOMMENDATION_READ_PRIVILEGES = {
+  names: ['logs*'],
+  privileges: ['read', 'view_index_metadata'],
+};
+
 export const NIGHTSHIFT_MANAGER_ROLE: KibanaRole = {
   elasticsearch: {
     cluster: [],
-    indices: [VIEW_MANAGE_PRIVILEGES, TEST_DATA_READ_PRIVILEGES],
+    indices: [
+      VIEW_MANAGE_PRIVILEGES,
+      TEST_DATA_READ_PRIVILEGES,
+      ALL_LOGS_RECOMMENDATION_READ_PRIVILEGES,
+    ],
   },
   kibana: [{ base: [], feature: { [NIGHTSHIFT_FEATURE_ID]: ['all'] }, spaces: ['*'] }],
 };

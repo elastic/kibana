@@ -69,6 +69,17 @@ const mockUnitDefinition = async (page: ScoutPage) => {
       body: JSON.stringify({ destinations: {} }),
     });
   });
+  // The unit is only a mock, so the real stats route would answer 404 for it and raise a toast.
+  await page.route('**/internal/streams/unit/*/_stats', async (route) => {
+    await route.fulfill({
+      status: 200,
+      contentType: 'application/json',
+      body: JSON.stringify({
+        components: { destinations: {}, processors: {} },
+        meta: { window: { start: '2026-01-01T00:00:00.000Z', end: '2026-01-01T00:15:00.000Z' } },
+      }),
+    });
+  });
 };
 
 test.describe(

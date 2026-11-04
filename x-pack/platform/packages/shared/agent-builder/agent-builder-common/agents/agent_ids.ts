@@ -14,6 +14,8 @@ export const agentIdRegexp =
   /^(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?)(?:\.(?:[a-z0-9](?:[a-z0-9_-]*[a-z0-9])?))*$/;
 
 export const agentIdMaxLength = 64;
+export const AGENT_NAME_MAX_LENGTH = 256;
+export const AGENT_DESCRIPTION_MAX_LENGTH = 2000;
 
 export const validateAgentId = ({
   agentId,
