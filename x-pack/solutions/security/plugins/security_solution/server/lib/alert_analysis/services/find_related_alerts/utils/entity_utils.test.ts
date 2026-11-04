@@ -171,5 +171,143 @@ describe('entity_utils', () => {
       expect(result['process.command_line']).toEqual(['c1', 'c2', 'c3', 'c4', 'c5']);
       expect(result['host.name']).toHaveLength(7);
     });
+
+    describe('MITRE threat reference stripping', () => {
+      const threatEntries = () => [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            id: 'TA0002',
+            name: 'Execution',
+            reference: 'https://attack.mitre.org/tactics/TA0002/',
+          },
+          technique: [
+            {
+              id: 'T1059',
+              name: 'Command and Scripting Interpreter',
+              reference: 'https://attack.mitre.org/techniques/T1059/',
+              subtechnique: [
+                {
+                  id: 'T1059.001',
+                  name: 'PowerShell',
+                  reference: 'https://attack.mitre.org/techniques/T1059/001/',
+                },
+                {
+                  id: 'T1059.003',
+                  name: 'Windows Command Shell',
+                  reference: 'https://attack.mitre.org/techniques/T1059/003/',
+                },
+              ],
+            },
+            {
+              id: 'T1204',
+              name: 'User Execution',
+              reference: 'https://attack.mitre.org/techniques/T1204/',
+            },
+          ],
+        },
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: {
+            id: 'TA0005',
+            name: 'Defense Evasion',
+            reference: 'https://attack.mitre.org/tactics/TA0005/',
+          },
+          technique: [
+            {
+              id: 'T1027',
+              name: 'Obfuscated Files or Information',
+              reference: 'https://attack.mitre.org/techniques/T1027/',
+              subtechnique: [
+                {
+                  id: 'T1027.010',
+                  name: 'Command Obfuscation',
+                  reference: 'https://attack.mitre.org/techniques/T1027/010/',
+                },
+              ],
+            },
+          ],
+        },
+      ];
+
+      const expectedThreat = [
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0002', name: 'Execution' },
+          technique: [
+            {
+              id: 'T1059',
+              name: 'Command and Scripting Interpreter',
+              subtechnique: [
+                { id: 'T1059.001', name: 'PowerShell' },
+                { id: 'T1059.003', name: 'Windows Command Shell' },
+              ],
+            },
+            { id: 'T1204', name: 'User Execution' },
+          ],
+        },
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0005', name: 'Defense Evasion' },
+          technique: [
+            {
+              id: 'T1027',
+              name: 'Obfuscated Files or Information',
+              subtechnique: [{ id: 'T1027.010', name: 'Command Obfuscation' }],
+            },
+          ],
+        },
+      ];
+
+      it('strips references from the dotted-key shape and keeps ids and names', () => {
+        const result = truncateRelatedAlertLongFields({
+          'kibana.alert.rule.threat': threatEntries(),
+        });
+
+        expect(result['kibana.alert.rule.threat']).toEqual(expectedThreat);
+        expect(JSON.stringify(result)).not.toContain('reference');
+      });
+
+      it('strips references from the nested shape', () => {
+        const result = truncateRelatedAlertLongFields({
+          kibana: { alert: { rule: { threat: threatEntries() } } },
+        });
+
+        expect(
+          (result.kibana as { alert: { rule: { threat: unknown } } }).alert.rule.threat
+        ).toEqual(expectedThreat);
+        expect(JSON.stringify(result)).not.toContain('reference');
+      });
+
+      it('strips references from the mixed shape', () => {
+        const result = truncateRelatedAlertLongFields({
+          'kibana.alert.rule': { threat: threatEntries() },
+        });
+
+        expect((result['kibana.alert.rule'] as { threat: unknown }).threat).toEqual(expectedThreat);
+        expect(JSON.stringify(result)).not.toContain('reference');
+      });
+
+      it('does not strip reference keys outside the threat path', () => {
+        const result = truncateRelatedAlertLongFields({
+          'kibana.alert.rule.threat': threatEntries(),
+          'kibana.alert.rule.references': ['https://example.com'],
+          file: { reference: 'keep-file', path: '/tmp/a' },
+          'kibana.alert.rule': { reference: 'keep-rule' },
+        }) as Record<string, unknown>;
+
+        expect(result['kibana.alert.rule.references']).toEqual(['https://example.com']);
+        expect(result.file).toEqual({ reference: 'keep-file', path: '/tmp/a' });
+        expect(result['kibana.alert.rule']).toEqual({ reference: 'keep-rule' });
+      });
+
+      it('shrinks the serialized threat payload', () => {
+        const source = { 'kibana.alert.rule.threat': threatEntries() };
+        const before = JSON.stringify(source).length;
+        const after = JSON.stringify(truncateRelatedAlertLongFields(source)).length;
+
+        expect(after).toBeLessThan(before * 0.75);
+      });
+    });
   });
 });

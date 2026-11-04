@@ -274,4 +274,62 @@ describe('findRelatedAlerts', () => {
       expect(processDoc.command_line).toContain('[truncated]');
     }
   });
+
+  it('strips MITRE references from threat in returned related alerts but keeps ids and names', async () => {
+    mockSourceAlert({ 'host.name': 'host-a' });
+    (esClient.search as jest.Mock).mockResolvedValueOnce({
+      hits: {
+        total: { value: 1, relation: 'eq' },
+        hits: [
+          {
+            _id: 'related-1',
+            _index: '.alerts-security.alerts-default',
+            _source: {
+              'kibana.alert.rule.threat': [
+                {
+                  framework: 'MITRE ATT&CK',
+                  tactic: { id: 'TA0002', name: 'Execution', reference: 'https://t' },
+                  technique: [
+                    {
+                      id: 'T1059',
+                      name: 'Command and Scripting Interpreter',
+                      reference: 'https://t/1059',
+                      subtechnique: [
+                        { id: 'T1059.001', name: 'PowerShell', reference: 'https://s' },
+                      ],
+                    },
+                  ],
+                },
+              ],
+            },
+          },
+        ],
+      },
+    });
+
+    const result = await findRelatedAlerts(esClient, {
+      alertId: 'alert-1',
+      alertsIndex: '.alerts-security.alerts-default',
+      timeWindowHours: 24,
+      hostNames: ['host-a'],
+    });
+
+    expect(result.ok).toBe(true);
+    if (result.ok) {
+      expect(result.relatedAlerts[0]._id).toBe('related-1');
+      expect(result.relatedAlerts[0]['kibana.alert.rule.threat']).toEqual([
+        {
+          framework: 'MITRE ATT&CK',
+          tactic: { id: 'TA0002', name: 'Execution' },
+          technique: [
+            {
+              id: 'T1059',
+              name: 'Command and Scripting Interpreter',
+              subtechnique: [{ id: 'T1059.001', name: 'PowerShell' }],
+            },
+          ],
+        },
+      ]);
+    }
+  });
 });

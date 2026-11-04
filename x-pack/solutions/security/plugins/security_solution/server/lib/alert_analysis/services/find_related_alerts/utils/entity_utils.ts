@@ -121,6 +121,11 @@ const truncateString = (value: string, maxLength: number): string => {
 const isPlainObject = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null && !Array.isArray(value);
 
+// MITRE `reference` URLs are ~29% of a typical related-alerts payload and add nothing the model needs.
+const THREAT_PATH = 'kibana.alert.rule.threat';
+const isThreatReferencePath = (path: string): boolean =>
+  path.startsWith(`${THREAT_PATH}.`) && path.endsWith('.reference');
+
 const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
   const truncateValue = (value: unknown, path: string): unknown => {
     const isCapped = Object.hasOwn(RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS, path);
@@ -140,11 +145,16 @@ const truncateNode = (node: Record<string, unknown>, prefix: string): void => {
   };
 
   for (const [key, value] of Object.entries(node)) {
-    node[key] = truncateValue(value, prefix ? `${prefix}.${key}` : key);
+    const path = prefix ? `${prefix}.${key}` : key;
+    if (isThreatReferencePath(path)) {
+      delete node[key];
+    } else {
+      node[key] = truncateValue(value, path);
+    }
   }
 };
 
-// Matches the joined path of each leaf, so dotted, nested and mixed `_source` shapes all work.
+// Matches the joined path of each leaf (and drops threat `reference` keys), so dotted, nested and mixed `_source` shapes all work.
 export const truncateRelatedAlertLongFields = (
   source: Record<string, unknown>
 ): Record<string, unknown> => {

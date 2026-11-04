@@ -106,9 +106,9 @@ describe('Security Skills', () => {
       expect(alertAnalysisSkill.description.length).toBeLessThanOrEqual(1024);
     });
 
-    it('returns 3 registry tools', () => {
+    it('returns 4 registry tools', () => {
       const tools = alertAnalysisSkill.getRegistryTools!();
-      expect(tools).toHaveLength(3);
+      expect(tools).toHaveLength(4);
     });
 
     it('returns 1 inline tool (get-related-alerts)', async () => {
@@ -117,7 +117,7 @@ describe('Security Skills', () => {
       expect(inlineTools[0].id).toBe('security.alert-analysis.get-related-alerts');
     });
 
-    it('has total tool count under 7 limit (3 registry + 1 inline = 4)', async () => {
+    it('has total tool count under 7 limit (4 registry + 1 inline = 5)', async () => {
       const registryTools = await alertAnalysisSkill.getRegistryTools!();
       const inlineTools = await alertAnalysisSkill.getInlineTools!();
       expect(registryTools.length + inlineTools.length).toBeLessThanOrEqual(7);
