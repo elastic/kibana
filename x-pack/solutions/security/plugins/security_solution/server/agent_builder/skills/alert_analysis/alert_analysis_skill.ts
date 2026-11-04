@@ -86,7 +86,7 @@ Use this skill when:
 - For Security Labs intel questions (e.g. "Lazarus Group techniques"), use only 'security.security_labs_search'.
 - For risk score questions (e.g. "risk score for host DC01"), use only 'security.entity_risk_score', or 'security.get_entity' / the entity-analytics skill when that tool is not available.
 - For correlation requests that include an alertId, call 'security.alert-analysis.get-related-alerts' directly.
-- Prefer this skill's tools for alert inventory, count, and related-alert correlation. Use platform.core.* or workflow tools only as a fallback when they return no data, and keep any such query on the current space's alerts index (they can otherwise cross Kibana spaces; 'security.alerts' stays space-scoped).
+- Do NOT use platform.core.* tools for speculative index discovery or raw search; use this skill's tools for alert inventory, count, and related-alert correlation. Use platform.core.* only as a fallback when the skill's own tools returned no data for the needed field, and keep any such query on the current space's alerts index ('security.alerts' stays space-scoped).
 
 ## Best Practices
 - Always start with the alert details before expanding investigation scope

@@ -38,10 +38,7 @@ export const RELATED_ALERT_SOURCE_ALLOWLIST = [
   'message',
 ] as const;
 
-/**
- * Long free-text fields included in related alerts. `_source` filtering cannot truncate, so these
- * are capped after the search to keep up to RELATED_ALERTS_INLINE_MAX_RESULTS alerts bounded.
- */
+// `_source` filtering cannot truncate, so these long fields are capped after the search.
 export const RELATED_ALERT_TRUNCATED_FIELD_MAX_LENGTHS: Readonly<Record<string, number>> = {
   'process.command_line': 300,
   'process.parent.command_line': 300,

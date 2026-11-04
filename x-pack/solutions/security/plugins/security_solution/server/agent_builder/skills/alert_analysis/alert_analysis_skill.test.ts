@@ -73,9 +73,12 @@ describe('alertAnalysisSkill', () => {
       expect(alertAnalysisSkill.content).toContain("'totalMatched' and 'isTruncated'");
     });
 
-    it('only falls back to platform.core tools when the skill tools return no data', () => {
-      expect(alertAnalysisSkill.content).toContain('only as a fallback when they return no data');
-      expect(alertAnalysisSkill.content).not.toMatch(/Do NOT use platform\.core/);
+    it('prohibits speculative platform.core use but allows a no-data fallback', () => {
+      expect(alertAnalysisSkill.content).toContain('Do NOT use platform.core.* tools');
+      expect(alertAnalysisSkill.content).toContain('speculative index discovery or raw search');
+      expect(alertAnalysisSkill.content).toContain(
+        "only as a fallback when the skill's own tools returned no data"
+      );
     });
   });
 
