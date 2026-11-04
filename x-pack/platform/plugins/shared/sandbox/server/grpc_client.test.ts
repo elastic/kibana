@@ -42,4 +42,18 @@ describe('serializeRunCommandRequest', () => {
       ])
     );
   });
+  it('encodes session-level allowed_hosts / egress rules in field 7', () => {
+    const buffer = serializeRunCommandRequest({
+      ...baseRequest,
+      allowed_hosts: ['api.github.com', 'deny api.github.com POST /gists'],
+    });
+
+    expect(buffer).toEqual(
+      Buffer.concat([
+        Buffer.from('0a026c73', 'hex'),
+        Buffer.from('3a0e6170692e6769746875622e636f6d', 'hex'),
+        Buffer.from('3a1f64656e79206170692e6769746875622e636f6d20504f5354202f6769737473', 'hex'),
+      ])
+    );
+  });
 });

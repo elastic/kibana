@@ -127,6 +127,35 @@ export class ServiceAccountsTestPlugin
         return response.ok({ body: { principal: coreSecurity.authc.getPrincipal() } });
       }
     );
+    router.get(
+      {
+        path: '/internal/service_accounts_test/_hold',
+        options: { access: 'internal' },
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'Test endpoint authenticating the caller through scoped Elasticsearch calls',
+          },
+        },
+        validate: {
+          query: schema.object({ waitMs: schema.number({ min: 0, max: 30000 }) }),
+        },
+      },
+      async (context, request, response) => {
+        const { elasticsearch } = await context.core;
+        const client = elasticsearch.client.asCurrentUser;
+        const initial = await client.security.authenticate();
+        await setTimeout(request.query.waitMs);
+        const completed = await client.security.authenticate();
+        return response.ok({
+          body: {
+            username: initial.username,
+            completedUsername: completed.username,
+            isFakeRequest: request.isFakeRequest,
+          },
+        });
+      }
+    );
     router.post(
       {
         path: '/internal/service_accounts_test/{workloadId}',
@@ -151,6 +180,7 @@ export class ServiceAccountsTestPlugin
             // renewal. UIAM exchange tokens live at least one minute (PT1M, plus 2s of clock skew),
             // and the stateful config set expires Elasticsearch tokens after 15s.
             waitMs: schema.number({ min: 0, max: 70000, defaultValue: 0 }),
+            holdMs: schema.number({ min: 0, max: 30000, defaultValue: 0 }),
             action: schema.oneOf(
               [
                 schema.literal('authenticate'),
@@ -158,6 +188,7 @@ export class ServiceAccountsTestPlugin
                 schema.literal('get_saved_object'),
                 schema.literal('create_rule'),
                 schema.literal('schedule_task'),
+                schema.literal('self_call'),
               ],
               { defaultValue: 'authenticate' }
             ),
@@ -186,7 +217,7 @@ export class ServiceAccountsTestPlugin
         const [start] = await core.getStartServices();
         const api = start.security.serviceAccounts;
         const workload = { workloadType: 'job', workloadId: request.params.workloadId };
-        const { operation, serviceAccountId, waitMs, action, revoke, savedObjectId, rule } =
+        const { operation, serviceAccountId, waitMs, holdMs, action, revoke, savedObjectId, rule } =
           request.body;
         try {
           if (operation === 'bind') {
@@ -201,6 +232,28 @@ export class ServiceAccountsTestPlugin
           const result = await api.withScopedRequestForWorkload(
             { ...workload, spaceId: request.spaceId ?? 'default' },
             async (fakeRequest) => {
+              if (action === 'self_call') {
+                const initialAuthorization = fakeRequest.headers.authorization;
+                await setTimeout(waitMs);
+                const { username } = await start.elasticsearch.client
+                  .asScoped(fakeRequest)
+                  .asCurrentUser.security.authenticate();
+                const tokenChangedBeforeCall =
+                  initialAuthorization !== fakeRequest.headers.authorization;
+                const handler = await start.http.selfClient
+                  .asScoped(fakeRequest)
+                  .fetch('/internal/service_accounts_test/_hold', {
+                    query: { waitMs: holdMs },
+                    access: 'internal',
+                    timeout: 60_000,
+                  });
+                return {
+                  username,
+                  tokenChangedBeforeCall,
+                  tokenChanged: initialAuthorization !== fakeRequest.headers.authorization,
+                  handler,
+                };
+              }
               if (action === 'get_saved_object') {
                 if (!savedObjectId) throw Boom.badRequest();
                 try {
