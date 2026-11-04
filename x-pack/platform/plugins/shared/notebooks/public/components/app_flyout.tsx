@@ -236,6 +236,24 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
   const { store, activeAppId$ } = useNotebook();
   const { core } = useNotebookServices();
   const { euiTheme } = useEuiTheme();
+  const confirmDelete = (deleted: readonly NotebookApp[]): Promise<boolean> =>
+    core.overlays.openConfirm(
+      i18n.translate('xpack.notebook.app.deleteConfirmBody', {
+        defaultMessage:
+          '{count, plural, one {"{title}" has} other {These apps have}} panels. Deleting {count, plural, one {it} other {them}} removes the layout but keeps the cells in the notebook.',
+        values: { count: deleted.length, title: deleted[0]?.title },
+      }),
+      {
+        title: i18n.translate('xpack.notebook.app.deleteConfirmTitle', {
+          defaultMessage: 'Delete {count, plural, one {app} other {# apps}}?',
+          values: { count: deleted.length },
+        }),
+        confirmButtonText: i18n.translate('xpack.notebook.app.deleteConfirmButton', {
+          defaultMessage: 'Delete',
+        }),
+        buttonColor: 'danger',
+      }
+    );
   const tabs = useMemo<TabItem[]>(
     () => apps.map(({ id, title }) => ({ id, label: title })),
     [apps]
@@ -263,7 +281,10 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           maxItemsCount={MAX_APPS}
           services={{ core: { chrome: core.chrome } }}
           createItem={() => ({ id: uuidv4(), label: getNewAppTitle(apps) })}
-          onChanged={({ items, selectedItem }) => {
+          onChanged={async ({ items, selectedItem }) => {
+            const kept = new Set(items.map(({ id }) => id));
+            const deleted = apps.filter(({ id, panels }) => !kept.has(id) && panels.length > 0);
+            if (deleted.length > 0 && !(await confirmDelete(deleted))) return;
             store.setApps(reconcileApps(apps, items));
             activeAppId$.next(selectedItem?.id);
           }}
