@@ -8,8 +8,12 @@
  */
 
 import { mockFlagEvaluationCounterAdd } from './feature_flags_service.test.mocks';
+import { ReservedPrivilegesSet } from '@kbn/core-http-server';
 import { httpServiceMock } from '@kbn/core-http-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
+import { savedObjectsRepositoryMock } from '@kbn/core-saved-objects-api-server-mocks';
+import { savedObjectsServiceMock } from '@kbn/core-saved-objects-server-mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';
 import apm from 'elastic-apm-node';
 import {
@@ -22,6 +26,11 @@ import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
 import { FeatureFlagsService, type InternalFeatureFlagsStart } from '..';
 import type { FeatureFlagsConfig } from './feature_flags_config';
+import {
+  FEATURE_FLAGS_OVERRIDES_API_PATH,
+  FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID,
+  FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+} from './overrides_saved_object';
 
 describe('FeatureFlagsService Server', () => {
   let featureFlagsService: FeatureFlagsService;
@@ -60,6 +69,7 @@ describe('FeatureFlagsService Server', () => {
       expect.assertions(1);
       const { setProvider } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const spy = jest.spyOn(OpenFeature, 'setProviderAndWait');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
@@ -70,6 +80,7 @@ describe('FeatureFlagsService Server', () => {
     test('throws an error if called twice', () => {
       const { setProvider } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
       setProvider(fakeProvider);
@@ -81,6 +92,7 @@ describe('FeatureFlagsService Server', () => {
     test('registers a handler to reevaluate flags when the provider is ready', () => {
       const { setProvider } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const addHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
       const fakeProvider = { metadata: { name: 'fake provider' } } as Provider;
@@ -100,6 +112,7 @@ describe('FeatureFlagsService Server', () => {
     test('appends context to the provider', () => {
       const { appendContext } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
@@ -108,8 +121,11 @@ describe('FeatureFlagsService Server', () => {
     test('appends context to the provider (start method)', () => {
       featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
-      const { appendContext } = featureFlagsService.start();
+      const { appendContext } = featureFlagsService.start({
+        savedObjects: savedObjectsServiceMock.createInternalStartContract(),
+      });
       appendContext({ kind: 'multi' });
       expect(setContextSpy).toHaveBeenCalledWith({ kind: 'multi' });
     });
@@ -117,6 +133,7 @@ describe('FeatureFlagsService Server', () => {
     test('full multi context pass-through', () => {
       const { appendContext } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const context = {
         kind: 'multi' as const,
@@ -134,6 +151,7 @@ describe('FeatureFlagsService Server', () => {
     test('appends to the existing context', () => {
       const { appendContext } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const initialContext = {
         kind: 'multi' as const,
@@ -160,6 +178,7 @@ describe('FeatureFlagsService Server', () => {
     test('converts single-contexts to multi-context', () => {
       const { appendContext } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       appendContext({ kind: 'organization', key: 'organization-1' });
       expect(setContextSpy).toHaveBeenCalledWith({
@@ -173,6 +192,7 @@ describe('FeatureFlagsService Server', () => {
     test('if no `kind` provided, it defaults to the kibana context', () => {
       const { appendContext } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       appendContext({ key: 'key-1', has_data: false });
       expect(setContextSpy).toHaveBeenCalledWith({
@@ -195,8 +215,11 @@ describe('FeatureFlagsService Server', () => {
       addHandlerSpy = jest.spyOn(featureFlagsClient, 'addHandler');
       featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
-      startContract = featureFlagsService.start();
+      startContract = featureFlagsService.start({
+        savedObjects: savedObjectsServiceMock.createInternalStartContract(),
+      });
       apmSpy = jest.spyOn(apm, 'addLabels');
     });
 
@@ -503,6 +526,7 @@ describe('FeatureFlagsService Server', () => {
       const openFeatureAddHandlerSpy = jest.spyOn(OpenFeature, 'addHandler');
       const { setProvider } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       jest.spyOn(OpenFeature, 'setProviderAndWait').mockResolvedValue();
       setProvider({ metadata: { name: 'fake provider' } } as Provider);
@@ -533,6 +557,7 @@ describe('FeatureFlagsService Server', () => {
   test('returns overrides', () => {
     const { getOverrides } = featureFlagsService.setup({
       http: httpServiceMock.createInternalSetupContract(),
+      savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
     });
     expect(getOverrides()).toStrictEqual({
       'my-overridden-flag': true,
@@ -551,7 +576,10 @@ describe('FeatureFlagsService Server', () => {
       const router = mockRouter.create();
       http.createRouter.mockReturnValue(router);
 
-      featureFlagsService.setup({ http });
+      featureFlagsService.setup({
+        http,
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+      });
 
       expect(http.createRouter).toHaveBeenCalledWith('');
       expect(router.post).toHaveBeenCalledWith(
@@ -577,7 +605,10 @@ describe('FeatureFlagsService Server', () => {
       const router = mockRouter.create();
       http.createRouter.mockReturnValue(router);
 
-      featureFlagsService.setup({ http });
+      featureFlagsService.setup({
+        http,
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+      });
 
       const handler = (router.post as jest.Mock).mock.calls[0][1];
       const response = mockRouter.createResponseFactory();
@@ -601,6 +632,7 @@ describe('FeatureFlagsService Server', () => {
     test('return empty initial feature flags if no getter registered', async () => {
       const { getInitialFeatureFlags } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       await expect(getInitialFeatureFlags()).resolves.toEqual({});
     });
@@ -608,11 +640,178 @@ describe('FeatureFlagsService Server', () => {
     test('calls the getter when registered', async () => {
       const { setInitialFeatureFlagsGetter, getInitialFeatureFlags } = featureFlagsService.setup({
         http: httpServiceMock.createInternalSetupContract(),
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
       });
       const mockGetter = jest.fn().mockResolvedValue({ myFlag: true });
       setInitialFeatureFlagsGetter(mockGetter);
       await expect(getInitialFeatureFlags()).resolves.toEqual({ myFlag: true });
       expect(mockGetter).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('runtime overrides', () => {
+    const savedObject = (overrides: Record<string, unknown>, version: string) => ({
+      id: FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID,
+      type: FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+      attributes: { overrides },
+      references: [],
+      version,
+    });
+
+    const startWithRepository = () => {
+      const repository = savedObjectsRepositoryMock.create();
+      const http = httpServiceMock.createInternalSetupContract();
+      const router = mockRouter.create();
+      http.createRouter.mockReturnValue(router);
+      const savedObjects = savedObjectsServiceMock.createInternalStartContract();
+      savedObjects.createInternalRepository.mockReturnValue(repository);
+      const setup = featureFlagsService.setup({
+        http,
+        savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
+      });
+      const start = featureFlagsService.start({ savedObjects });
+      return { repository, router, setup, start };
+    };
+
+    const findRoute = (
+      router: ReturnType<typeof mockRouter.create>,
+      method: 'get' | 'put' | 'delete',
+      path: string
+    ) => {
+      const call = (router[method] as jest.Mock).mock.calls.find(
+        ([options]) => options.path === path
+      );
+      if (!call) {
+        throw new Error(`${method.toUpperCase()} ${path} was not registered`);
+      }
+      return { options: call[0], handler: call[1] as Function };
+    };
+
+    test('registers the saved object type and superuser routes', () => {
+      const savedObjects = savedObjectsServiceMock.createInternalSetupContract();
+      const http = httpServiceMock.createInternalSetupContract();
+      const router = mockRouter.create();
+      http.createRouter.mockReturnValue(router);
+      featureFlagsService.setup({ http, savedObjects });
+
+      expect(savedObjects.registerType).toHaveBeenCalledWith(
+        expect.objectContaining({
+          name: FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          hidden: true,
+          namespaceType: 'agnostic',
+        })
+      );
+      const { options } = findRoute(router, 'put', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      expect(options.security.authz.requiredPrivileges).toEqual([ReservedPrivilegesSet.superuser]);
+      expect(options.options.access).toBe('internal');
+    });
+
+    test('records evaluated flags for the helper', async () => {
+      jest.useFakeTimers();
+      const { router, start } = startWithRepository();
+      await start.getBooleanValue('my-flag', false);
+
+      const { handler } = findRoute(router, 'get', FEATURE_FLAGS_OVERRIDES_API_PATH);
+      const response = mockRouter.createResponseFactory();
+      await handler({}, mockRouter.createKibanaRequest({ method: 'get' }), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          evaluatedFlags: expect.arrayContaining([{ key: 'my-flag', value: false }]),
+        }),
+      });
+    });
+
+    test('lets a runtime override win over config and notifies subscribers', async () => {
+      jest.useFakeTimers();
+      const { repository, setup, start } = startWithRepository();
+      repository.get.mockResolvedValue(
+        savedObject({ 'my-overridden-flag': false, 'runtime-only': 'on' }, 'v1')
+      );
+
+      const observed: boolean[] = [];
+      start.getBooleanValue$('my-overridden-flag', true).subscribe((value) => observed.push(value));
+      await Promise.resolve();
+
+      await jest.advanceTimersByTimeAsync(0);
+
+      expect(setup.getOverrides()).toEqual({
+        'my-overridden-flag': false,
+        'myPlugin.myOverriddenFlag': true,
+        'myDestructuredObjPlugin.myOverriddenFlag': true,
+        'runtime-only': 'on',
+      });
+      expect(observed.at(-1)).toBe(false);
+      await expect(start.getBooleanValue('my-overridden-flag', true)).resolves.toBe(false);
+      await expect(start.getStringValue('runtime-only', 'off')).resolves.toBe('on');
+    });
+
+    test('ignores a polled document when its version did not change', async () => {
+      jest.useFakeTimers();
+      const { repository, setup } = startWithRepository();
+      repository.get.mockResolvedValue(savedObject({ 'runtime-only': 'on' }, 'v1'));
+      await jest.advanceTimersByTimeAsync(0);
+      expect(setup.getOverrides()).toEqual(
+        expect.objectContaining({ 'runtime-only': 'on', 'my-overridden-flag': true })
+      );
+
+      repository.get.mockResolvedValue(savedObject({ sneaky: true }, 'v1'));
+      await jest.advanceTimersByTimeAsync(10_000);
+
+      expect(setup.getOverrides()).not.toHaveProperty('sneaky');
+      expect(setup.getOverrides()).toEqual(expect.objectContaining({ 'runtime-only': 'on' }));
+    });
+
+    test('does not apply a stale poll that finishes after a local write', async () => {
+      jest.useFakeTimers();
+      const { repository, router, setup } = startWithRepository();
+      const pending: Array<{
+        resolve: (value: unknown) => void;
+        reject: (error: unknown) => void;
+      }> = [];
+      repository.get.mockImplementation(
+        () =>
+          new Promise((resolve, reject) => {
+            pending.push({
+              resolve: (value) => {
+                resolve(value as never);
+              },
+              reject,
+            });
+          })
+      );
+      repository.create.mockResolvedValue(savedObject({ 'runtime-only': 'pinned' }, 'v2'));
+
+      await jest.advanceTimersByTimeAsync(0);
+      expect(pending).toHaveLength(1);
+
+      const { handler } = findRoute(router, 'put', `${FEATURE_FLAGS_OVERRIDES_API_PATH}/{flagKey}`);
+      const response = mockRouter.createResponseFactory();
+      const write = handler(
+        {},
+        mockRouter.createKibanaRequest({
+          method: 'put',
+          params: { flagKey: 'runtime-only' },
+          body: { value: 'pinned' },
+        }),
+        response
+      );
+      await Promise.resolve();
+      expect(pending).toHaveLength(2);
+      pending[1].reject(
+        SavedObjectsErrorHelpers.createGenericNotFoundError(
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_TYPE,
+          FEATURE_FLAGS_OVERRIDES_SAVED_OBJECT_ID
+        )
+      );
+      await write;
+      expect(response.ok).toHaveBeenCalledWith({ body: { ok: true } });
+
+      pending[0].resolve(savedObject({ 'runtime-only': 'stale' }, 'v0'));
+      await Promise.resolve();
+
+      expect(setup.getOverrides()).toEqual(expect.objectContaining({ 'runtime-only': 'pinned' }));
+      expect(setup.getOverrides()['runtime-only']).not.toBe('stale');
     });
   });
 });

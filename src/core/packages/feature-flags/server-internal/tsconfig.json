@@ -27,5 +27,9 @@
     "@kbn/core-http-server-mocks",
     "@kbn/core-http-router-server-mocks",
     "@kbn/core-http-server",
+    "@kbn/core-saved-objects-api-server",
+    "@kbn/core-saved-objects-server",
+    "@kbn/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-server-mocks",
   ]
 }

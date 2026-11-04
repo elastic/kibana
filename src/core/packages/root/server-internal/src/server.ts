@@ -456,6 +456,7 @@ export class Server {
     const userSettingsServiceSetup = this.userSettingsService.setup();
     const featureFlagsSetup = this.featureFlags.setup({
       http: httpSetup,
+      savedObjects: savedObjectsSetup,
     });
 
     const renderingSetup = await this.rendering.setup({
@@ -661,7 +662,7 @@ export class Server {
       exposedConfigsToUsage: this.plugins.getExposedPluginConfigsToUsage(),
     });
 
-    const featureFlagsStart = this.featureFlags.start();
+    const featureFlagsStart = this.featureFlags.start({ savedObjects: savedObjectsStart });
     this.eventLoopWatchdog.start({ featureFlags: featureFlagsStart });
     const pubsubStart = this.pubsub.start();
 

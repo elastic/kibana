@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { ReactElement, ReactNode } from 'react';
 import { firstValueFrom } from 'rxjs';
 import { act, renderHook } from '@testing-library/react';
 import { apm } from '@elastic/apm-rum';
@@ -24,10 +25,22 @@ import type { HttpSetupMock } from '@kbn/core-http-browser-mocks';
 import { injectedMetadataServiceMock } from '@kbn/core-injected-metadata-browser-mocks';
 import type { InternalInjectedMetadataSetup } from '@kbn/core-injected-metadata-browser-internal';
 import { FeatureFlagsService } from '..';
+import { mountFeatureFlagsHelper } from './helper';
 
 jest.mock('@openfeature/ofrep-web-provider', () => ({
   OFREPWebProvider: jest.fn(),
 }));
+
+jest.mock('./helper', () => ({
+  mountFeatureFlagsHelper: jest.fn(() => ({ unmount: jest.fn(), open: jest.fn() })),
+}));
+
+/** Dynamic `import()` settles across more than one microtask. */
+async function flushAsyncWork() {
+  await act(async () => {
+    await new Promise((resolve) => setImmediate(resolve));
+  });
+}
 
 async function isSettledPromise(p: Promise<unknown>) {
   const immediateValue = {};
@@ -580,6 +593,76 @@ describe('FeatureFlagsService Browser', () => {
       expect(observedValues).toEqual([false, true]);
 
       openFeatureAddHandlerSpy.mockRestore();
+    });
+
+    test('records evaluations for the helper', async () => {
+      const flag$ = startContract.getBooleanValue$('my-flag', false);
+      flag$.subscribe(() => {});
+      await expect(firstValueFrom(flag$)).resolves.toEqual(false);
+
+      expect(featureFlagsService.getEvaluatedFlags()).toEqual([{ key: 'my-flag', value: false }]);
+    });
+  });
+
+  describe('helper registration', () => {
+    const helperDeps = () => ({
+      http,
+      overlays: { openFlyout: jest.fn() },
+      rendering: {
+        addContext: (element: ReactNode) => element as ReactElement,
+      },
+    });
+
+    beforeEach(() => {
+      localStorage.clear();
+      delete globalThis.toggleFeatureFlagsHelper;
+      delete globalThis.openFeatureFlagsHelper;
+      delete globalThis.featureFlagsHelperInToolbar;
+      jest.mocked(mountFeatureFlagsHelper).mockClear();
+    });
+
+    test('exposes a console toggle that mounts and unmounts the helper', async () => {
+      featureFlagsService.registerHelper(helperDeps());
+      expect(globalThis.toggleFeatureFlagsHelper).toEqual(expect.any(Function));
+      expect(mountFeatureFlagsHelper).not.toHaveBeenCalled();
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+      const unmount = jest.mocked(mountFeatureFlagsHelper).mock.results[0]?.value.unmount;
+
+      globalThis.toggleFeatureFlagsHelper?.();
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('false');
+      expect(unmount).toHaveBeenCalledTimes(1);
+    });
+
+    test('opens the helper flyout from the developer toolbar', async () => {
+      const open = jest.fn();
+      jest.mocked(mountFeatureFlagsHelper).mockReturnValue({ unmount: jest.fn(), open });
+      featureFlagsService.registerHelper(helperDeps());
+
+      globalThis.openFeatureFlagsHelper?.();
+      await flushAsyncWork();
+
+      expect(localStorage.getItem('core.featureFlags.helper.enabled')).toBe('true');
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+      expect(open).toHaveBeenCalledTimes(1);
+    });
+
+    test('restores the helper when it was left enabled', async () => {
+      localStorage.setItem('core.featureFlags.helper.enabled', 'true');
+      featureFlagsService.registerHelper(helperDeps());
+      await flushAsyncWork();
+      expect(mountFeatureFlagsHelper).toHaveBeenCalledTimes(1);
+    });
+
+    test('refresh asks the provider to load the current context again', async () => {
+      const setContext = jest.spyOn(OpenFeature, 'setContext').mockResolvedValue(undefined);
+      featureFlagsService.setup(createSetupDeps());
+      await featureFlagsService.refresh();
+      expect(setContext).toHaveBeenCalledWith({ kind: 'multi' });
     });
   });
 });
