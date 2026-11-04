@@ -13,6 +13,7 @@ import {
   EuiInlineEditTitle,
   EuiSpacer,
   EuiSuperDatePicker,
+  EuiSuperUpdateButton,
   EuiText,
   EuiTextArea,
 } from '@elastic/eui';
@@ -24,6 +25,7 @@ import useObservable from 'react-use/lib/useObservable';
 import { MAX_DESCRIPTION_LENGTH } from '../../common/constants';
 import type { InputCellDefinition } from '../../common/types';
 import { findPinnedTimeCell } from '../model/cell_factory';
+import { buildGraph, getDescendants } from '../model/graph';
 import { useNotebookServices } from '../services';
 import { useNotebook, type SidePanel } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
@@ -32,26 +34,48 @@ const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
   defaultMessage: 'Run all cells that use the global time range',
 });
 
+const NO_DEPENDENTS_TOOLTIP = i18n.translate('xpack.notebook.header.refreshNoDependentsTooltip', {
+  defaultMessage: 'No cells use the global time range',
+});
+
 export const PinnedTimePicker = ({ cell }: { cell: InputCellDefinition }) => {
   const { store, scheduler } = useNotebook();
   const inputValues = useStateFromPublishingSubject(store.inputValues$);
+  const cells = useStateFromPublishingSubject(store.cells$);
+  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
+  const hasDependents = useMemo(
+    () => getDescendants(buildGraph(cells, cellOrder), [cell.id]).size > 0,
+    [cells, cellOrder, cell.id]
+  );
   const value = inputValues[cell.id];
   if (value?.kind !== 'time') return null;
 
   return (
-    <EuiSuperDatePicker
-      compressed
-      width="auto"
-      start={value.range.from}
-      end={value.range.to}
-      onTimeChange={({ start, end }) =>
-        store.setInputValue(cell.id, { kind: 'time', range: { from: start, to: end } })
-      }
-      onRefresh={() => scheduler.refresh([cell.id])}
-      showUpdateButton="iconOnly"
-      updateButtonProps={{ toolTipProps: { content: REFRESH_TOOLTIP } }}
-      data-test-subj="notebookTimePicker"
-    />
+    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap={false}>
+      <EuiFlexItem grow={false}>
+        <EuiSuperDatePicker
+          compressed
+          width="auto"
+          start={value.range.from}
+          end={value.range.to}
+          onTimeChange={({ start, end }) =>
+            store.setInputValue(cell.id, { kind: 'time', range: { from: start, to: end } })
+          }
+          showUpdateButton={false}
+          data-test-subj="notebookTimePicker"
+        />
+      </EuiFlexItem>
+      <EuiFlexItem grow={false}>
+        <EuiSuperUpdateButton
+          iconOnly
+          size="s"
+          isDisabled={!hasDependents}
+          onClick={() => scheduler.refresh([cell.id])}
+          toolTipProps={{ content: hasDependents ? REFRESH_TOOLTIP : NO_DEPENDENTS_TOOLTIP }}
+          data-test-subj="notebookTimePickerRefresh"
+        />
+      </EuiFlexItem>
+    </EuiFlexGroup>
   );
 };
 
