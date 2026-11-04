@@ -13,6 +13,19 @@ import { schema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import buffer from 'buffer';
 
+/**
+ * `true` always discards, a semver only discards when it matches the running Kibana version.
+ */
+const discardObjectsFlagSchema = schema.maybe(
+  schema.oneOf([
+    schema.boolean(),
+    schema.string({
+      validate: (value: string) =>
+        valid(value) ? undefined : 'The value is not a valid semantic version',
+    }),
+  ])
+);
+
 const migrationSchema = schema.object({
   algorithm: schema.oneOf([schema.literal('v2'), schema.literal('zdt')], {
     defaultValue: 'v2',
@@ -23,18 +36,8 @@ const migrationSchema = schema.object({
     defaultValue: buffer.constants.MAX_STRING_LENGTH,
     max: buffer.constants.MAX_STRING_LENGTH,
   }),
-  discardUnknownObjects: schema.maybe(
-    schema.string({
-      validate: (value: string) =>
-        valid(value) ? undefined : 'The value is not a valid semantic version',
-    })
-  ),
-  discardCorruptObjects: schema.maybe(
-    schema.string({
-      validate: (value: string) =>
-        valid(value) ? undefined : 'The value is not a valid semantic version',
-    })
-  ),
+  discardUnknownObjects: discardObjectsFlagSchema,
+  discardCorruptObjects: discardObjectsFlagSchema,
   scrollDuration: schema.string({ defaultValue: '15m' }),
   pollInterval: schema.number({ defaultValue: 1_500 }),
   skip: schema.boolean({ defaultValue: false }),
@@ -80,6 +83,8 @@ const migrationSchema = schema.object({
 });
 
 export type SavedObjectsMigrationConfigType = TypeOf<typeof migrationSchema>;
+
+export type DiscardObjectsFlag = SavedObjectsMigrationConfigType['discardUnknownObjects'];
 
 export const savedObjectsMigrationConfig: ServiceConfigDescriptor<SavedObjectsMigrationConfigType> =
   {
