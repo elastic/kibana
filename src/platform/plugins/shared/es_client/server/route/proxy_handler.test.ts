@@ -184,28 +184,27 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(headers['content-type']).toBe('application/json');
   });
 
-  describe('WHEN the client sends a product origin', () => {
-    it('SHOULD pass it through to Elasticsearch', async () => {
-      const { run, transportRequest } = setup({
-        headers: { 'x-elastic-product-origin': 'kibana' },
-      });
+  it.each([
+    [
+      'pass a client product origin through',
+      { 'x-elastic-product-origin': 'kibana' },
+      'x-elastic-product-origin',
+      'kibana',
+    ],
+    [
+      "clear the scoped client's Kibana origin WHEN the client sends none",
+      {},
+      'x-elastic-product-origin',
+      '',
+    ],
+    ['forward the accept header', { accept: 'text/csv' }, 'accept', 'text/csv'],
+    ['default the content type to JSON', {}, 'content-type', 'application/json'],
+  ])('SHOULD %s', async (_name, headers, headerName, expected) => {
+    const { run, transportRequest } = setup({ headers });
 
-      await run();
+    await run();
 
-      const [, options] = transportRequest.mock.calls[0];
-      expect(options?.headers?.['x-elastic-product-origin']).toBe('kibana');
-    });
-  });
-
-  describe('WHEN the client sends no product origin', () => {
-    it("SHOULD clear the scoped client's Kibana origin", async () => {
-      const { run, transportRequest } = setup();
-
-      await run();
-
-      const [, options] = transportRequest.mock.calls[0];
-      expect(options?.headers?.['x-elastic-product-origin']).toBe('');
-    });
+    expect(transportRequest.mock.calls[0][1]?.headers?.[headerName]).toBe(expected);
   });
 
   it('SHOULD stream the Elasticsearch response back with its status and selected headers', async () => {
@@ -221,27 +220,48 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     });
   });
 
-  it('SHOULD forward async query and body length headers', async () => {
+  const ASYNC_HEADERS = {
+    'content-type': 'text/csv',
+    'content-length': '42',
+    'x-elasticsearch-async-id': 'FmNJRUZ1YWZCU3dHY1BIOUhaenVSRkEaaXF',
+    'x-elasticsearch-async-is-running': '?1',
+  };
+
+  it.each([
+    ['forward async query and body length headers', 200, ASYNC_HEADERS, ASYNC_HEADERS],
+    [
+      'disable compression WHEN Elasticsearch returns server-sent events',
+      200,
+      { 'content-type': 'text/event-stream; charset=utf-8' },
+      { 'content-type': 'text/event-stream; charset=utf-8', 'content-encoding': 'identity' },
+    ],
+    [
+      'forward retry-after WHEN Elasticsearch rejects a request with 429',
+      429,
+      { 'content-type': 'application/json', 'retry-after': '30' },
+      { 'content-type': 'application/json', 'retry-after': '30' },
+    ],
+    [
+      'rewrite location to point back through the proxy',
+      201,
+      { 'content-type': 'application/json', location: '/my-index/_doc/1' },
+      {
+        'content-type': 'application/json',
+        location: '/mock-server-basepath/internal/es_client/my-index/_doc/1',
+      },
+    ],
+  ])('SHOULD %s', async (_name, statusCode, esHeaders, expectedHeaders) => {
     const { run, transportRequest } = setup({ method: 'post' });
     transportRequest.mockResolvedValue({
-      statusCode: 200,
-      headers: {
-        'content-type': 'text/csv',
-        'content-length': '42',
-        'x-elasticsearch-async-id': 'FmNJRUZ1YWZCU3dHY1BIOUhaenVSRkEaaXF',
-        'x-elasticsearch-async-is-running': '?1',
-      },
-      body: Readable.from(['a,b\n1,2\n']),
+      statusCode,
+      headers: esHeaders,
+      body: Readable.from(['{}']),
     });
 
     const response = await run();
 
-    expect(response.options.headers).toEqual({
-      'content-type': 'text/csv',
-      'content-length': '42',
-      'x-elasticsearch-async-id': 'FmNJRUZ1YWZCU3dHY1BIOUhaenVSRkEaaXF',
-      'x-elasticsearch-async-is-running': '?1',
-    });
+    expect(response.status).toBe(statusCode);
+    expect(response.options.headers).toEqual(expectedHeaders);
   });
 
   it('SHOULD drop body length and encoding WHEN the transport rebuilt the error body', async () => {
@@ -266,58 +286,12 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(response.options.headers).toEqual({ 'content-type': 'application/json' });
   });
 
-  it('SHOULD disable compression WHEN Elasticsearch returns server-sent events', async () => {
-    const { run, transportRequest } = setup({ method: 'post' });
-    transportRequest.mockResolvedValue({
-      statusCode: 200,
-      headers: { 'content-type': 'text/event-stream; charset=utf-8' },
-      body: Readable.from(['data: {}\n\n']),
-    });
-
-    const response = await run();
-
-    expect(response.options.headers).toEqual({
-      'content-type': 'text/event-stream; charset=utf-8',
-      'content-encoding': 'identity',
-    });
-  });
-
   it('SHOULD leave compression enabled for other content types', async () => {
     const { run } = setup();
 
     const response = await run();
 
     expect(response.options.headers).not.toHaveProperty('content-encoding');
-  });
-
-  it('SHOULD forward retry-after WHEN Elasticsearch rejects a request with 429', async () => {
-    const { run, transportRequest } = setup({ method: 'post' });
-    transportRequest.mockResolvedValue({
-      statusCode: 429,
-      headers: { 'content-type': 'application/json', 'retry-after': '30' },
-      body: Readable.from(['{"error":"es_rejected_execution_exception"}']),
-    });
-
-    const response = await run();
-
-    expect(response.status).toBe(429);
-    expect(response.options.headers).toHaveProperty('retry-after', '30');
-  });
-
-  it('SHOULD rewrite location to point back through the proxy', async () => {
-    const { run, transportRequest } = setup({ method: 'put' });
-    transportRequest.mockResolvedValue({
-      statusCode: 201,
-      headers: { 'content-type': 'application/json', location: '/my-index/_doc/1' },
-      body: Readable.from(['{"result":"created"}']),
-    });
-
-    const response = await run();
-
-    expect(response.options.headers).toHaveProperty(
-      'location',
-      '/mock-server-basepath/internal/es_client/my-index/_doc/1'
-    );
   });
 
   it('SHOULD pass Elasticsearch error statuses through unchanged', async () => {
@@ -331,32 +305,23 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(response.payload).toBe(errorBody);
   });
 
-  it('SHOULD return 504 WHEN Elasticsearch times out', async () => {
+  it.each([
+    [
+      '504 and log a warning WHEN Elasticsearch times out',
+      new errors.TimeoutError('timed out'),
+      504,
+      1,
+    ],
+    ['502 WHEN Elasticsearch is unreachable', new errors.ConnectionError('ECONNREFUSED'), 502, 0],
+    ['499 WHEN the request is aborted', new errors.RequestAbortedError('aborted'), 499, 0],
+  ])('SHOULD return %s', async (_name, error, status, warnings) => {
     const { run, transportRequest, log } = setup();
-    transportRequest.mockRejectedValue(new errors.TimeoutError('Request timed out'));
+    transportRequest.mockRejectedValue(error);
 
     const response = await run();
 
-    expect(response.status).toBe(504);
-    expect(log.warn).toHaveBeenCalled();
-  });
-
-  it('SHOULD return 502 WHEN Elasticsearch is unreachable', async () => {
-    const { run, transportRequest } = setup();
-    transportRequest.mockRejectedValue(new errors.ConnectionError('ECONNREFUSED'));
-
-    const response = await run();
-
-    expect(response.status).toBe(502);
-  });
-
-  it('SHOULD return 499 WHEN the request is aborted', async () => {
-    const { run, transportRequest } = setup();
-    transportRequest.mockRejectedValue(new errors.RequestAbortedError('aborted'));
-
-    const response = await run();
-
-    expect(response.status).toBe(499);
+    expect(response.status).toBe(status);
+    expect(log.warn).toHaveBeenCalledTimes(warnings);
   });
 
   it('SHOULD rethrow unexpected errors', async () => {
@@ -391,14 +356,6 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     expect(response.options.headers).toEqual({});
   });
 
-  it('SHOULD forward the first accept header value', async () => {
-    const { run, transportRequest } = setup({ headers: { accept: 'text/csv' } });
-
-    await run();
-
-    expect(transportRequest.mock.calls[0][1]?.headers?.accept).toBe('text/csv');
-  });
-
   it('SHOULD use the first value of a repeated request header', async () => {
     const { run, transportRequest, request } = setup();
     const rawRequest = ensureRawRequest(request);
@@ -407,14 +364,6 @@ describe('WHEN proxying a request to Elasticsearch', () => {
     await run(CoreKibanaRequest.from<ProxyParams, unknown, ProxyBody>(rawRequest));
 
     expect(transportRequest.mock.calls[0][1]?.headers?.['content-type']).toBe('text/plain');
-  });
-
-  it('SHOULD default the content type to JSON', async () => {
-    const { run, transportRequest } = setup({ headers: {} });
-
-    await run();
-
-    expect(transportRequest.mock.calls[0][1]?.headers?.['content-type']).toBe('application/json');
   });
 
   it('SHOULD send x-forwarded headers WHEN the client address is known', async () => {

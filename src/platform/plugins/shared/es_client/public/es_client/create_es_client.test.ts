@@ -10,9 +10,11 @@
 import API from '@elastic/elasticsearch/lib/api/index';
 import { coreMock } from '@kbn/core/public/mocks';
 import { EsClientPlugin } from '../plugin';
+import type { EsClient } from './types';
 
 const ELASTICSEARCH_WARNING = '299 Elasticsearch-9.0.0 "this request accesses system indices"';
 const KIBANA_ORIGIN = { 'x-elastic-product-origin': 'kibana' } as const;
+const NDJSON = { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' } as const;
 
 const setup = async () => {
   const coreSetup = coreMock.createSetup();
@@ -39,6 +41,8 @@ const fetchError = (status: number, body?: object) => {
     body,
   });
 };
+
+const { signal } = new AbortController();
 
 describe('WHEN using the elasticsearch-js client through the proxy', () => {
   it('SHOULD expose every elasticsearch-js API', async () => {
@@ -70,39 +74,6 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     );
   });
 
-  it('SHOULD keep reserved characters in path parameters encoded', async () => {
-    const { client, fetch } = await setup();
-
-    await client.get({ index: 'my-index', id: 'a/b c' });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_doc/a%2Fb%20c',
-      expect.objectContaining({ method: 'GET' })
-    );
-  });
-
-  it('SHOULD send list query parameters as comma-separated values', async () => {
-    const { client, fetch } = await setup();
-
-    await client.search({ index: 'my-index', _source_includes: ['a', 'b'] });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_search',
-      expect.objectContaining({ query: { _source_includes: 'a,b' } })
-    );
-  });
-
-  it('SHOULD call namespaced APIs', async () => {
-    const { client, fetch } = await setup();
-
-    await client.indices.getMapping({ index: 'my-index' });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_mapping',
-      expect.objectContaining({ method: 'GET' })
-    );
-  });
-
   it('SHOULD send raw requests through transport.request', async () => {
     const { client, fetch } = await setup();
     fetch.mockResolvedValue(okResponse({ acknowledged: true }));
@@ -117,6 +88,199 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
     expect(fetch).toHaveBeenCalledWith(
       '/internal/es_client/my-index/_forcemerge',
       expect.objectContaining({ method: 'POST', query: { max_num_segments: 1 } })
+    );
+  });
+
+  it.each<[string, (client: EsClient) => Promise<unknown>, string, object]>([
+    [
+      'keep reserved characters in path parameters encoded',
+      (client) => client.get({ index: 'my-index', id: 'a/b c' }),
+      '/my-index/_doc/a%2Fb%20c',
+      { method: 'GET' },
+    ],
+    [
+      'send list query parameters as comma-separated values',
+      (client) => client.search({ index: 'my-index', _source_includes: ['a', 'b'] }),
+      '/my-index/_search',
+      { query: { _source_includes: 'a,b' } },
+    ],
+    [
+      'call namespaced APIs',
+      (client) => client.indices.getMapping({ index: 'my-index' }),
+      '/my-index/_mapping',
+      { method: 'GET' },
+    ],
+    [
+      'mark requests as coming from Kibana',
+      (client) => client.indices.stats({ index: '*' }),
+      '/*/_stats',
+      { headers: KIBANA_ORIGIN },
+    ],
+    [
+      'let the caller replace the product origin regardless of header case',
+      (client) =>
+        client.search({ index: 'my-index' }, { headers: { 'X-Elastic-Product-Origin': '' } }),
+      '/my-index/_search',
+      { headers: { 'x-elastic-product-origin': '' } },
+    ],
+    [
+      'pass abort signals and normalize the content type header',
+      (client) =>
+        client.search(
+          { index: 'my-index' },
+          { signal, headers: { 'content-type': 'application/vnd.elasticsearch+json' } }
+        ),
+      '/my-index/_search',
+      {
+        signal,
+        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+json' },
+      },
+    ],
+    [
+      'send bulk operations as ndjson',
+      (client) =>
+        client.bulk({
+          index: 'my-index',
+          refresh: true,
+          operations: [{ index: { _id: '1' } }, { message: 'hello' }],
+        }),
+      '/my-index/_bulk',
+      {
+        method: 'POST',
+        query: { refresh: true },
+        body: '{"index":{"_id":"1"}}\n{"message":"hello"}\n',
+        headers: NDJSON,
+      },
+    ],
+    [
+      'send a string bulk body as is to the root bulk API',
+      (client) => client.bulk({ body: '{"delete":{"_index":"my-index","_id":"1"}}\n' }),
+      '/_bulk',
+      { body: '{"delete":{"_index":"my-index","_id":"1"}}\n', query: {} },
+    ],
+    [
+      'send string bulk lines as is',
+      (client) =>
+        client.bulk<string>({
+          operations: ['{"delete":{"_id":"1"}}', { delete: { _id: '2' } }],
+        }),
+      '/_bulk',
+      { body: '{"delete":{"_id":"1"}}\n{"delete":{"_id":"2"}}\n' },
+    ],
+    [
+      'send multi-search bodies as ndjson',
+      (client) =>
+        client.msearch({ searches: [{ index: 'my-index' }, { query: { match_all: {} } }] }),
+      '/_msearch',
+      { body: '{"index":"my-index"}\n{"query":{"match_all":{}}}\n', headers: NDJSON },
+    ],
+    [
+      'merge string and object query strings of raw requests, skipping undefined values',
+      (client) =>
+        client.transport.request(
+          { method: 'GET', path: '/_cat/indices', querystring: 'format=json&h=index' },
+          { querystring: { bytes: 'b', s: undefined } }
+        ),
+      '/_cat/indices',
+      { query: { format: 'json', h: 'index', bytes: 'b' } },
+    ],
+    [
+      'join list headers of raw requests and skip undefined headers',
+      (client) =>
+        client.transport.request(
+          { method: 'GET', path: '/' },
+          { headers: { 'x-list': ['a', 'b'], 'x-skipped': undefined } }
+        ),
+      '/',
+      { headers: { ...KIBANA_ORIGIN, 'x-list': 'a, b' } },
+    ],
+    [
+      'keep an explicit content type for raw bulk bodies',
+      (client) =>
+        client.transport.request(
+          { method: 'POST', path: '/_bulk', bulkBody: [{ delete: { _id: '1' } }] },
+          { headers: { 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' } }
+        ),
+      '/_bulk',
+      {
+        body: '{"delete":{"_id":"1"}}\n',
+        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' },
+      },
+    ],
+    [
+      'send a raw string body as is',
+      (client) =>
+        client.transport.request({ method: 'POST', path: '/_sql', body: '{"query":"x"}' }),
+      '/_sql',
+      { body: '{"query":"x"}' },
+    ],
+  ])('SHOULD %s', async (_name, call, esPath, expectedOptions) => {
+    const { client, fetch } = await setup();
+
+    await call(client);
+
+    expect(fetch).toHaveBeenCalledWith(
+      `/internal/es_client${esPath}`,
+      expect.objectContaining(expectedOptions)
+    );
+  });
+
+  it.each<[string, (client: EsClient) => Promise<unknown>, string]>([
+    [
+      'a buffer body',
+      (client) =>
+        client.transport.request({ method: 'POST', path: '/_bulk', body: Buffer.from([1]) }),
+      'only sends string and JSON bodies',
+    ],
+    [
+      'a stream body',
+      (client) =>
+        client.transport.request({
+          method: 'POST',
+          path: '/_bulk',
+          body: { pipe: () => undefined },
+        }),
+      'only sends string and JSON bodies',
+    ],
+    [
+      'a web stream body',
+      (client) =>
+        client.transport.request({
+          method: 'POST',
+          path: '/_bulk',
+          body: { getReader: () => undefined },
+        }),
+      'only sends string and JSON bodies',
+    ],
+    [
+      'a buffer bulk body',
+      (client) =>
+        client.transport.request({ method: 'POST', path: '/_bulk', bulkBody: Buffer.from([1]) }),
+      'only sends string and JSON bodies',
+    ],
+    [
+      'bulk calls without operations',
+      (client) => client.bulk({ index: 'my-index' }),
+      'Missing required parameter [operations]',
+    ],
+    [
+      'methods the proxy does not support',
+      (client) => client.transport.request({ method: 'PATCH', path: '/' }),
+      'does not support the PATCH method',
+    ],
+  ])('SHOULD reject %s without sending a request', async (_name, call, message) => {
+    const { client, fetch } = await setup();
+
+    await expect(call(client)).rejects.toThrow(message);
+    expect(fetch).not.toHaveBeenCalled();
+  });
+
+  it('SHOULD reject WHEN no response is received', async () => {
+    const { client, fetch } = await setup();
+    fetch.mockResolvedValue({ body: {} });
+
+    await expect(client.transport.request({ method: 'GET', path: '/' })).rejects.toThrow(
+      'No response received for GET /'
     );
   });
 
@@ -158,6 +322,15 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       const { warnings } = await client.count({}, { meta: true });
 
       expect(warnings).toBeNull();
+    });
+
+    it('SHOULD resolve bulk calls with the result', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue(okResponse({ errors: false, items: [], took: 1 }));
+
+      const result = await client.bulk({ operations: [{ delete: { _id: '1' } }] }, { meta: true });
+
+      expect(result).toMatchObject({ statusCode: 200, body: { errors: false } });
     });
   });
 
@@ -205,6 +378,26 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
 
       expect(response).toEqual({ error: { type: 'parse_exception' }, status: 400 });
     });
+
+    it('SHOULD resolve with the text of an ignored, unparsable error body', async () => {
+      const { client, fetch } = await setup();
+      const response = new Response('Bad Gateway', { status: 502 });
+      fetch.mockRejectedValue(
+        Object.assign(new Error('Bad Gateway'), {
+          name: 'HttpFetchError',
+          request: {},
+          response,
+          body: null,
+        })
+      );
+
+      const body = await client.transport.request(
+        { method: 'GET', path: '/_stream' },
+        { asStream: true, ignore: [502] }
+      );
+
+      expect(body).toBe('Bad Gateway');
+    });
   });
 
   describe('WHEN calling an exists API', () => {
@@ -224,6 +417,15 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       fetch.mockRejectedValue(fetchError(404));
 
       expect(await client.indices.exists({ index: 'missing' })).toBe(false);
+    });
+
+    it('SHOULD resolve with a true body WHEN meta is set', async () => {
+      const { client, fetch } = await setup();
+      fetch.mockResolvedValue(okResponse(''));
+
+      const result = await client.indices.exists({ index: 'my-index' }, { meta: true });
+
+      expect(result).toMatchObject({ body: true, statusCode: 200 });
     });
 
     it('SHOULD resolve with a false body and the status WHEN meta is set', async () => {
@@ -263,246 +465,6 @@ describe('WHEN using the elasticsearch-js client through the proxy', () => {
       fetch.mockRejectedValue(error);
 
       await expect(client.search({ index: 'my-index' })).rejects.toBe(error);
-    });
-  });
-
-  it('SHOULD send bulk operations as ndjson', async () => {
-    const { client, fetch } = await setup();
-
-    await client.bulk({
-      index: 'my-index',
-      refresh: true,
-      operations: [{ index: { _id: '1' } }, { message: 'hello' }],
-    });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_bulk',
-      expect.objectContaining({
-        method: 'POST',
-        query: { refresh: true },
-        body: '{"index":{"_id":"1"}}\n{"message":"hello"}\n',
-        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' },
-      })
-    );
-  });
-
-  it('SHOULD resolve bulk calls with the result WHEN meta is set', async () => {
-    const { client, fetch } = await setup();
-    fetch.mockResolvedValue(okResponse({ errors: false, items: [], took: 1 }));
-
-    const result = await client.bulk({ operations: [{ delete: { _id: '1' } }] }, { meta: true });
-
-    expect(result).toMatchObject({ statusCode: 200, body: { errors: false } });
-  });
-
-  it('SHOULD send multi-search bodies as ndjson', async () => {
-    const { client, fetch } = await setup();
-
-    await client.msearch({ searches: [{ index: 'my-index' }, { query: { match_all: {} } }] });
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/_msearch',
-      expect.objectContaining({
-        body: '{"index":"my-index"}\n{"query":{"match_all":{}}}\n',
-        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/x-ndjson' },
-      })
-    );
-  });
-
-  it('SHOULD pass abort signals and normalize the content type header', async () => {
-    const { client, fetch } = await setup();
-    const { signal } = new AbortController();
-
-    await client.search(
-      { index: 'my-index' },
-      { signal, headers: { 'content-type': 'application/vnd.elasticsearch+json' } }
-    );
-
-    expect(fetch).toHaveBeenCalledWith(
-      '/internal/es_client/my-index/_search',
-      expect.objectContaining({
-        signal,
-        headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+json' },
-      })
-    );
-  });
-
-  describe('WHEN sending the product origin', () => {
-    it('SHOULD mark requests as coming from Kibana', async () => {
-      const { client, fetch } = await setup();
-
-      await client.indices.stats({ index: '*' });
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/*/_stats',
-        expect.objectContaining({ headers: KIBANA_ORIGIN })
-      );
-    });
-
-    it('SHOULD let the caller replace it regardless of header case', async () => {
-      const { client, fetch } = await setup();
-
-      await client.search({ index: 'my-index' }, { headers: { 'X-Elastic-Product-Origin': '' } });
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/my-index/_search',
-        expect.objectContaining({ headers: { 'x-elastic-product-origin': '' } })
-      );
-    });
-  });
-
-  describe('WHEN sending bulk requests', () => {
-    it('SHOULD send a string body as is to the root bulk API', async () => {
-      const { client, fetch } = await setup();
-      const body = '{"delete":{"_index":"my-index","_id":"1"}}\n';
-
-      await client.bulk({ body });
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/_bulk',
-        expect.objectContaining({ body, query: {} })
-      );
-    });
-
-    it('SHOULD reject WHEN there are no operations', async () => {
-      const { client, fetch } = await setup();
-
-      await expect(client.bulk({ index: 'my-index' })).rejects.toThrow(
-        'Missing required parameter [operations]'
-      );
-      expect(fetch).not.toHaveBeenCalled();
-    });
-  });
-
-  describe('WHEN sending raw requests through transport.request', () => {
-    it('SHOULD merge string and object query strings, skipping undefined values', async () => {
-      const { client, fetch } = await setup();
-
-      await client.transport.request(
-        { method: 'GET', path: '/_cat/indices', querystring: 'format=json&h=index' },
-        { querystring: { bytes: 'b', s: undefined } }
-      );
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/_cat/indices',
-        expect.objectContaining({ query: { format: 'json', h: 'index', bytes: 'b' } })
-      );
-    });
-
-    it('SHOULD join list headers and skip undefined headers', async () => {
-      const { client, fetch } = await setup();
-
-      await client.transport.request(
-        { method: 'GET', path: '/' },
-        { headers: { 'x-list': ['a', 'b'], 'x-skipped': undefined } }
-      );
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/',
-        expect.objectContaining({ headers: { ...KIBANA_ORIGIN, 'x-list': 'a, b' } })
-      );
-    });
-
-    it('SHOULD keep an explicit content type for bulk bodies', async () => {
-      const { client, fetch } = await setup();
-
-      await client.transport.request(
-        { method: 'POST', path: '/_bulk', bulkBody: [{ delete: { _id: '1' } }] },
-        { headers: { 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' } }
-      );
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/_bulk',
-        expect.objectContaining({
-          body: '{"delete":{"_id":"1"}}\n',
-          headers: { ...KIBANA_ORIGIN, 'Content-Type': 'application/vnd.elasticsearch+x-ndjson' },
-        })
-      );
-    });
-
-    it('SHOULD send string bulk lines as is', async () => {
-      const { client, fetch } = await setup();
-
-      await client.bulk<string>({
-        operations: ['{"delete":{"_id":"1"}}', { delete: { _id: '2' } }],
-      });
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/_bulk',
-        expect.objectContaining({ body: '{"delete":{"_id":"1"}}\n{"delete":{"_id":"2"}}\n' })
-      );
-    });
-
-    it('SHOULD send a string body as is', async () => {
-      const { client, fetch } = await setup();
-
-      await client.transport.request({ method: 'POST', path: '/_sql', body: '{"query":"x"}' });
-
-      expect(fetch).toHaveBeenCalledWith(
-        '/internal/es_client/_sql',
-        expect.objectContaining({ body: '{"query":"x"}' })
-      );
-    });
-
-    it.each([
-      ['a buffer body', { body: Buffer.from([1]) }],
-      ['a stream body', { body: { pipe: () => undefined } }],
-      ['a web stream body', { body: { getReader: () => undefined } }],
-      ['a buffer bulk body', { bulkBody: Buffer.from([1]) }],
-    ])('SHOULD reject %s', async (_name, bodyParams) => {
-      const { client, fetch } = await setup();
-
-      await expect(
-        client.transport.request({ method: 'POST', path: '/_bulk', ...bodyParams })
-      ).rejects.toThrow('only sends string and JSON bodies');
-      expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('SHOULD reject methods the proxy does not support', async () => {
-      const { client, fetch } = await setup();
-
-      await expect(client.transport.request({ method: 'PATCH', path: '/' })).rejects.toThrow(
-        'does not support the PATCH method'
-      );
-      expect(fetch).not.toHaveBeenCalled();
-    });
-
-    it('SHOULD reject WHEN no response is received', async () => {
-      const { client, fetch } = await setup();
-      fetch.mockResolvedValue({ body: {} });
-
-      await expect(client.transport.request({ method: 'GET', path: '/' })).rejects.toThrow(
-        'No response received for GET /'
-      );
-    });
-
-    it('SHOULD resolve with the text of an ignored, unparsable streamed error body', async () => {
-      const { client, fetch } = await setup();
-      const response = new Response('Bad Gateway', { status: 502 });
-      fetch.mockRejectedValue(
-        Object.assign(new Error('Bad Gateway'), {
-          name: 'HttpFetchError',
-          request: {},
-          response,
-          body: null,
-        })
-      );
-
-      const body = await client.transport.request(
-        { method: 'GET', path: '/_stream' },
-        { asStream: true, ignore: [502] }
-      );
-
-      expect(body).toBe('Bad Gateway');
-    });
-
-    it('SHOULD resolve a HEAD request with a true body WHEN meta is set', async () => {
-      const { client, fetch } = await setup();
-      fetch.mockResolvedValue(okResponse(''));
-
-      const result = await client.indices.exists({ index: 'my-index' }, { meta: true });
-
-      expect(result).toMatchObject({ body: true, statusCode: 200 });
     });
   });
 });
