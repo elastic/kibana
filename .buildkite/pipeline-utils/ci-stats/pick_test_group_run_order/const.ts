@@ -71,7 +71,7 @@ export const RETRIES = {
  * (`JEST_MAX_PARALLEL`). ci-stats sizes the groups for the same number of processes.
  */
 export const JEST_AGENTS = {
-  UNIT: { queue: 'n2-8-spot', maxParallel: 7 },
+  UNIT: { queue: 'n2-8-spot', maxParallel: 6 },
   INTEGRATION: { queue: 'n2-4-spot', maxParallel: 1 },
 } as const;
 
