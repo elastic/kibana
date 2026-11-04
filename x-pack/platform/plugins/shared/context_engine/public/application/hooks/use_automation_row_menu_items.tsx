@@ -15,10 +15,7 @@ export interface UseAutomationRowMenuItemsParams {
   editHref: string;
   isReadOnly: boolean;
   isBusy: boolean;
-  canRun: boolean;
-  isRunDisabled: boolean;
   onCloseMenu: () => void;
-  onRun: () => void;
   onPreview: () => void;
   onDelete: () => void;
 }
@@ -27,38 +24,12 @@ export const useAutomationRowMenuItems = ({
   editHref,
   isReadOnly,
   isBusy,
-  canRun,
-  isRunDisabled,
   onCloseMenu,
-  onRun,
   onPreview,
   onDelete,
 }: UseAutomationRowMenuItemsParams): React.ReactElement[] => {
   return useMemo(() => {
     const items: React.ReactElement[] = [];
-
-    if (canRun) {
-      items.push(
-        <EuiContextMenuItem
-          key="run"
-          icon="play"
-          disabled={isRunDisabled}
-          data-test-subj="contextRunAutomationButton"
-          {...getEbtProps({
-            element: CONTEXT_ENGINE_UI_EBT.element.aiIndexDetailPageAutomationsPanel,
-            action: CONTEXT_ENGINE_UI_EBT.action.automations.RUN_WORKFLOW,
-          })}
-          onClick={() => {
-            onCloseMenu();
-            onRun();
-          }}
-        >
-          {i18n.translate('xpack.contextEngine.aiIndexDetail.automations.runAction', {
-            defaultMessage: 'Run',
-          })}
-        </EuiContextMenuItem>
-      );
-    }
 
     items.push(
       <EuiContextMenuItem
@@ -120,15 +91,5 @@ export const useAutomationRowMenuItems = ({
     }
 
     return items;
-  }, [
-    canRun,
-    editHref,
-    isBusy,
-    isReadOnly,
-    isRunDisabled,
-    onCloseMenu,
-    onDelete,
-    onPreview,
-    onRun,
-  ]);
+  }, [editHref, isBusy, isReadOnly, onCloseMenu, onDelete, onPreview]);
 };
