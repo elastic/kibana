@@ -31,6 +31,7 @@ const seeded: SeededScenario = {
 const esWith = (overrides: Record<string, unknown>): Client =>
   ({
     deleteByQuery: jest.fn(async () => ({})),
+    indices: { exists: jest.fn(async () => true), create: jest.fn(async () => ({})) },
     count: jest.fn(async () => ({ count: 0 })),
     mget: jest.fn(async ({ ids }: { ids: string[] }) => ({
       docs: ids.map((_id) => ({ _id, found: false })),
@@ -159,8 +160,21 @@ describe('seedScenario world documents', () => {
   const seedWith = async (id: string) => {
     const bulk = jest.fn(async () => ({ errors: false, items: [] }));
     const search = jest.fn(async () => ({ hits: { hits: [] } }));
+    // A world that is searchable: a count by ids finds every id, and the host.id filter keeps them.
+    const count = jest.fn(
+      async ({
+        query,
+      }: {
+        query?: {
+          ids?: { values: string[] };
+          bool?: { filter: Array<{ ids?: { values: string[] } }> };
+        };
+      }) => ({
+        count: (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0,
+      })
+    );
     const seededScenario = await seedScenario({
-      esClient: esWith({ bulk, search }),
+      esClient: esWith({ bulk, search, count }),
       log,
       scenario: scenarioById(id),
       spaceId: 's',
@@ -713,5 +727,78 @@ describe('eval space solution view', () => {
     });
     await prepareWorkerSpace({ request, esClient, log, spaceId: 'eval' });
     expect(spaceWrites(sent)).toEqual([]);
+  });
+});
+
+describe('seedScenario world verification', () => {
+  const log = { info: jest.fn() } as unknown as ToolingLog;
+  const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+  const seed = (esOverrides: Record<string, unknown>) => {
+    if (!scenario) throw new Error('no scenario');
+    return seedScenario({
+      esClient: esWith({ search: jest.fn(async () => ({ hits: { hits: [] } })), ...esOverrides }),
+      log,
+      scenario,
+      spaceId: 's',
+    });
+  };
+
+  it('fails when a rejected create item is the only error', async () => {
+    const bulk = jest.fn(async () => ({
+      errors: true,
+      items: [{ create: { error: { type: 'mapper_parsing_exception' } } }],
+    }));
+    await expect(seed({ bulk })).rejects.toThrow(/mapper_parsing_exception/);
+  });
+
+  it('fails when the world is accepted but not searchable by host.id', async () => {
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    await expect(seed({ bulk })).rejects.toThrow(/the review would read an empty world/);
+  });
+});
+
+describe('seedScenario world indices', () => {
+  it('creates a missing world index with keyword host.id, and leaves an existing one alone', async () => {
+    const scenario = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    if (!scenario) throw new Error('no scenario');
+    const create = jest.fn(async (_args: { index: string; mappings?: unknown }) => ({}));
+    const exists = jest.fn(async ({ index }: { index: string }) =>
+      index.startsWith('entities-latest-')
+    );
+    const bulk = jest.fn(async () => ({ errors: false, items: [] }));
+    // The clean-space check counts 0; the world check finds every id it asks for.
+    const count = jest.fn(
+      async ({
+        index,
+        query,
+      }: {
+        index: string;
+        query?: {
+          ids?: { values: string[] };
+          bool?: { filter: Array<{ ids?: { values: string[] } }> };
+        };
+      }) => ({
+        count:
+          index.startsWith('.alerts') || index.startsWith('ai-index')
+            ? 0
+            : (query?.ids ?? query?.bool?.filter[0]?.ids)?.values.length ?? 0,
+      })
+    );
+    await seedScenario({
+      esClient: esWith({
+        indices: { exists, create },
+        bulk,
+        count,
+        search: jest.fn(async () => ({ hits: { hits: [] } })),
+      }),
+      log: { info: jest.fn() } as unknown as ToolingLog,
+      scenario,
+      spaceId: 's',
+    });
+    const created = create.mock.calls.map(([{ index }]) => index).sort();
+    expect(created).toEqual(['logs-endpoint.events.network-s', 'logs-endpoint.events.process-s']);
+    expect(JSON.stringify(create.mock.calls[0][0].mappings)).toContain(
+      '"host.id":{"type":"keyword"}'
+    );
   });
 });

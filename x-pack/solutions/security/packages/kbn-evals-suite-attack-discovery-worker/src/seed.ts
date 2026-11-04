@@ -648,6 +648,84 @@ const removeWorldDocs = async ({
   );
 };
 
+/**
+ * The review filters the world with `terms` on `host.id` and `user.name`. A plain index that the bulk
+ * auto-creates maps those strings as analysed `text`, where a `terms` query for `ws-fin-214-id` never
+ * matches its tokens, so the world would be written yet invisible. An index that already exists (the
+ * endpoint data stream or the entity store alias) keeps its own mapping.
+ */
+const ensureWorldIndices = async ({
+  esClient,
+  log,
+  worldDocs,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  worldDocs: WorldDoc[];
+}): Promise<void> => {
+  for (const index of new Set(worldDocs.map((doc) => doc.index))) {
+    if (!(await esClient.indices.exists({ index }))) {
+      log.info(`[ad-worker] creating world index ${index} with keyword host and user fields`);
+      await esClient.indices.create({
+        index,
+        mappings: {
+          properties: {
+            '@timestamp': { type: 'date' },
+            'host.id': { type: 'keyword' },
+            'host.name': { type: 'keyword' },
+            'user.name': { type: 'keyword' },
+          },
+        },
+      });
+    }
+  }
+};
+
+/**
+ * The review reads the world by `host.id` over `entities-latest-<space>` and `logs-endpoint.events.*`.
+ * A world that was accepted by the bulk but is not searchable by those keys makes every verdict
+ * `inconclusive`, so the seed proves it: each world document must be found by id, and each host id
+ * must match through the same field the review filters on.
+ */
+const assertWorldSearchable = async ({
+  esClient,
+  log,
+  scenarioId,
+  worldDocs,
+}: {
+  esClient: Client;
+  log: ToolingLog;
+  scenarioId: string;
+  worldDocs: WorldDoc[];
+}): Promise<void> => {
+  if (worldDocs.length === 0) return;
+  const idsByIndex = new Map<string, string[]>();
+  for (const { index, id } of worldDocs) {
+    idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
+  }
+  const hostIds = [
+    ...new Set(
+      worldDocs.map(({ body }) => String(body['host.id'])).filter((id) => id !== 'undefined')
+    ),
+  ];
+  for (const [index, ids] of idsByIndex) {
+    const { count } = await esClient.count({ index, query: { ids: { values: ids } } });
+    const byHostId = await esClient.count({
+      index,
+      query: { bool: { filter: [{ ids: { values: ids } }, { terms: { 'host.id': hostIds } }] } },
+    });
+    log.info(
+      `[ad-worker] world ${index}: ${count}/${ids.length} documents found, ${byHostId.count} matched by host.id`
+    );
+    if (count !== ids.length || byHostId.count !== ids.length) {
+      throw new Error(
+        `Seeding "${scenarioId}": ${index} holds ${count}/${ids.length} world documents and ` +
+          `${byHostId.count} match by host.id; the review would read an empty world`
+      );
+    }
+  }
+};
+
 /** Writes one scenario's alerts into the space's alerts index under a fresh run marker. */
 export const seedScenario = async ({
   esClient,
@@ -716,6 +794,7 @@ export const seedScenario = async ({
   // before the 4xx), the case where it may still be running in Elasticsearch.
   let bulkSettled = false;
   try {
+    await ensureWorldIndices({ esClient, log, worldDocs: world });
     let response: Awaited<ReturnType<Client['bulk']>>;
     try {
       response = await esClient.bulk({
@@ -729,9 +808,13 @@ export const seedScenario = async ({
     }
     bulkSettled = true;
     if (response.errors) {
-      const failed = response.items.find((item) => item.index?.error)?.index?.error;
+      // Events go in with `create`, so a rejected item carries its error under `create`, not `index`.
+      const failed = response.items
+        .map((item) => item.index?.error ?? item.create?.error)
+        .find((error) => error !== undefined);
       throw new Error(`Seeding "${scenario.id}" failed: ${JSON.stringify(failed)}`);
     }
+    await assertWorldSearchable({ esClient, log, scenarioId: scenario.id, worldDocs: world });
     const open = await esClient.search({
       index: alertsIndexForSpace(spaceId),
       query: { term: { 'kibana.alert.workflow_status': 'open' } },
