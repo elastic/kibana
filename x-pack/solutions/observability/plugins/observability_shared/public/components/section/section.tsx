@@ -13,10 +13,7 @@ import {
   EuiListGroupItem,
   EuiFlexGroup,
   EuiFlexItem,
-  useEuiFontSize,
-  useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
 import type { ReactNode } from 'react';
 import React from 'react';
 import styled from 'styled-components';
@@ -24,23 +21,10 @@ import type { EuiListGroupProps } from '@elastic/eui';
 
 // Not a heading: popovers sit outside the page outline. Reference `id` from SectionLinks' aria-labelledby.
 export function SectionTitle({ children, id }: { children?: ReactNode; id?: string }) {
-  const { euiTheme } = useEuiTheme();
-  const { fontSize, lineHeight } = useEuiFontSize('s', { customScale: 's' });
-
   return (
     <>
-      <EuiText size={'s'} grow={false}>
-        <div
-          id={id}
-          css={css`
-            font-size: ${fontSize};
-            line-height: ${lineHeight};
-            font-weight: ${euiTheme.font.weight[euiTheme.font.title.weight]};
-            letter-spacing: ${euiTheme.font.title.letterSpacing};
-          `}
-        >
-          {children}
-        </div>
+      <EuiText size={'xs'} grow={false}>
+        <strong id={id}>{children}</strong>
       </EuiText>
       <EuiSpacer size={'xs'} />
     </>
