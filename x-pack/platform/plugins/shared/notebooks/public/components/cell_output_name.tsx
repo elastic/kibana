@@ -21,7 +21,7 @@ import type { CellDefinition } from '../../common/types';
 import { renameOutput, type CellOutput } from '../model/references';
 import { useNotebook } from './notebook_context';
 
-const getDescription = ({ key, name, isFixed }: CellOutput): string => {
+const getDescription = ({ key, isFixed }: CellOutput): string => {
   switch (key) {
     case 'table':
       return i18n.translate('xpack.notebook.output.tableDescription', {
@@ -29,38 +29,31 @@ const getDescription = ({ key, name, isFixed }: CellOutput): string => {
       });
     case 'value':
       return i18n.translate('xpack.notebook.output.valueDescription', {
-        defaultMessage: 'The selected value. In ES|QL, use it as ?{name}.',
-        values: { name },
+        defaultMessage: 'The selected value.',
       });
     case 'start':
       return isFixed
         ? i18n.translate('xpack.notebook.output.globalStartDescription', {
-            defaultMessage: 'The start of the global time range. In ES|QL, use it as ?{name}.',
-            values: { name },
+            defaultMessage: 'The start of the global time range.',
           })
         : i18n.translate('xpack.notebook.output.startDescription', {
-            defaultMessage: 'The start of the time range. In ES|QL, use it as ?{name}.',
-            values: { name },
+            defaultMessage: 'The start of the time range.',
           });
     case 'end':
       return isFixed
         ? i18n.translate('xpack.notebook.output.globalEndDescription', {
-            defaultMessage: 'The end of the global time range. In ES|QL, use it as ?{name}.',
-            values: { name },
+            defaultMessage: 'The end of the global time range.',
           })
         : i18n.translate('xpack.notebook.output.endDescription', {
-            defaultMessage: 'The end of the time range. In ES|QL, use it as ?{name}.',
-            values: { name },
+            defaultMessage: 'The end of the time range.',
           });
     case 'min':
       return i18n.translate('xpack.notebook.output.minDescription', {
-        defaultMessage: 'The lower bound of the selected range. In ES|QL, use it as ?{name}.',
-        values: { name },
+        defaultMessage: 'The lower bound of the selected range.',
       });
     case 'max':
       return i18n.translate('xpack.notebook.output.maxDescription', {
-        defaultMessage: 'The upper bound of the selected range. In ES|QL, use it as ?{name}.',
-        values: { name },
+        defaultMessage: 'The upper bound of the selected range.',
       });
   }
 };
