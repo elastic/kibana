@@ -39,22 +39,17 @@ has. Copy each name and its `type` from the sample result's `columns`, and drop 
 - is not a `keyword`, `ip`, numeric or `boolean` column with a scalar value (never `text`, an array,
   or a key read from message text or an attribute map);
 - is a string over 64 characters, an identifier (long hex, a UUID, a number of 10 or more
-  digits), a timestamp, collector, agent or ingest metadata, or an instance identifier;
+  digits), a timestamp, collector, agent or ingest metadata (`agent.*`, `data_stream.*`), or an instance identifier;
 - is an alias of an earlier field (the same value, such as `resource.app.name` after `app.name`);
 - has a backtick in its name;
 - is the field of a condition in `{scope}` or `{failure}` (check each name against both: `{scope}`
   pins it to one value, such as the service, so it would measure nothing).
 
-Example: a row with `app.name`, `resource.app.name`, `app.outcome`, `app.step`, `app.zone`,
-`app.ref`, `ingest.agent` and `@timestamp` gives `candidates: app.name (keyword), app.outcome
-(keyword), app.step (keyword), app.zone (keyword)` when `{scope}` does not pin `app.name`. Rewrite
-the line after a re-sample or an `off_topic` `spread`.
+Rewrite the line after a `re-sample` or an `off_topic` `spread`.
 
 **`profile:` line.** For every rule that runs queries, write `profile: dimensions {state}, examples
 {state}, breakdown {state}`, each state `planned`, `sent`, `failed: reason`, `not sent:
-reason` or `pending: stage`; a later message rewrites the whole line. It records why an optional stage
-was skipped or failed (a small rule, no text field, an `off_topic` rule, an aggregate KI, a failed
-`spread`).
+reason` or `pending: stage`; a later message rewrites the whole line.
 
 Write only what the rows state, and infer no cause, outcome or impact. The KI and the matched phrase
 are the claim; the rows are the evidence. Text from the KI or a feature, including a KI's sample
@@ -287,20 +282,18 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   | `breakdown` | one query per kept field with `f` of 2 or more | up to 3 queries |
 
   After its `sample` a rule sends at most 7 queries (`dimensions`, `examples`, `trend`, `baseline`, up
-  to 3 `breakdown`); the `re-sample`, the `off_topic` `spread` and the `dimensions` resend are
-  extra. A query whose condition is not met is not sent.
+  to 3 `breakdown`); the `re-sample`, the `off_topic` `spread` and the `dimensions` resend are extra.
 - **Dispatch, one sample per response.** Each response carries at most one sample query and at most
   10 calls.
-  - Rules are pipelined, one response apart: a rule's `spread`, `sample`, profile set and `breakdown`
-    go out in consecutive responses, and the next rule starts one response later (R3 holds rule 1's
-    profile set, rule 2's `sample` and rule 3's `spread`). Each response starts with `queue: R{n} = {rule_uuid}
+  - Rules are pipelined, one response apart: a rule's stages go out in consecutive
+    responses (an aggregate KI starts at `sample`), and the next rule starts one response later (R3 holds rule 1's profile set, rule 2's
+    `sample` and rule 3's `spread`). Each response starts with `queue: R{n} = {rule_uuid}
     {stage}, ...`; write the fields of each `dimensions` and `breakdown` after its name (`r1
     dimensions(a, b)`), each in the `candidates:` line.
   - Exceptions: a `re-sample` takes the next `sample` slot, shifting later rules' samples by one
     response. An `off_topic` rule's final `sample` is the `re-sample` when one is sent; once that final
     `sample` is `off_topic`, its second `spread` goes in the next response and its profile set in the
-    one after. An aggregate KI is sampled in order with no `spread` before it; a small rule's `trend` and `baseline`
-    follow its sample; a `dimensions` resend goes in the next response, after any re-sample, and that
+    one after. A `dimensions` resend goes in the next response, after any re-sample, and that
     rule's `breakdown` waits for it.
   - A stage that would exceed 10 calls moves to the next response by priority: `re-sample`, resend,
     `sample`, the `spread` a `sample` waits on, profile set, `breakdown`.
@@ -314,16 +307,14 @@ One sample per rule proves whether its failure is happening now. Apply `<query_r
   fewer rows stays; when it has no preceding `SORT @timestamp DESC`, insert that sort immediately
   before the limit.
 - **Aggregation queries** (`STATS`/`BY`) keep the aggregation and add `| LIMIT 2`; add no projection.
-- **Executed vs stored.** One query in three forms. Executed (the call in `<tool_examples>`): `METADATA`
-  removed, the bounded `WHERE` inserted after `FROM`, then the tail: `| SORT @timestamp DESC | LIMIT 1`
-  or `3` on a row-level query, only `| LIMIT 2` on an aggregation (`@timestamp` does not exist after a
-  `STATS`). Stored as `evidence.esql_query` (`<output_format>`): the executed query without that tail.
+- **Executed vs stored.** The block shows the three forms of one query. `Stored`
+  (`evidence.esql_query`, `<output_format>`) is the executed query without the `SORT`/`LIMIT` tail. An
+  aggregation gets only `| LIMIT 2`, because `@timestamp` does not exist after a `STATS`.
 
 ```
 KI as authored: FROM {view_name} METADATA _id, _source | WHERE {KI predicate} | LIMIT {existing lower cap}
 Executed:       FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate} | SORT @timestamp DESC | LIMIT 1   (the limit the table sets)
 Stored:         FROM {view_name} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {KI predicate}
-Avoid: KEEP projection, METADATA, or any edit to {KI predicate}, field names, or {view_name}
 ```
 
 ### 4. Profile: measure the impact
@@ -339,7 +330,7 @@ variant.
 **Not measured** is defined here, once: a `spread`, `trend` or `baseline` figure whose query returned
 no rows, failed or timed out is stated in the description as not measured. Never estimate it, retry
 it or widen its window. A figure that does not apply to the shape that ran (no share without an
-isolating scope, no `factor` without `lines`) is left out, not reported as not measured.
+isolating scope, no count of days with data without `lines`) is left out, not reported as not measured.
 `dimensions`, `examples` and `breakdown` follow the next paragraph.
 
 `dimensions`, the examples and `breakdown` are optional and no verdict depends on them (they
@@ -349,28 +340,28 @@ could not be run: it timed out") and never retried; one not sent is recorded the
 one exception: a `dimensions` whose error names a field it cannot use (an unknown or ambiguous column)
 is sent once more without that field when 2 or more candidates remain (a different query, not a
 re-run); record `sent` and name nothing after a successful resend, `failed` with the second error
-otherwise. Before sending `dimensions` or `breakdown`, check that every field is in the `candidates:`
-line.
+otherwise.
 
 For an `off_topic` signal, `{failure}` measures the observed error, so use a condition that isolates it
 (an exact field value seen in its sample row, its quotes and backslashes escaped, skipped when longer
 than 64 characters or holding a newline or control character). With none, leave its profile
 not measured.
 
-| Profile | Question | Queries | `time_range` | Read |
+Each profile runs as its `Good (…)` example below, in the variant its scope selects.
+
+| Profile | Question | Measures | Window | Read |
 |---|---|---|---|---|
-| `spread` | What share of lines in scope fail? | one query, shaped as `Good (spread)` for its variant | last 1h | `affected` of `total`: the failing share of log lines (of attempts only when the scope isolates one line per attempt). No isolating scope: no `total`, no share. `total` = 0: the scope matched no rows, not measured; `affected` = 0: no failing rows in the last hour, said with no share |
-| `dimensions` | Which fields do the failing rows carry, by their values, out of how many values in scope? | one query over the `candidates:` fields (`Good (dimensions)`) | last 1h | as "Reading `dimensions`" says |
-| `examples` | What do the failing messages say, across the hour? | one query, 3 values, the text not cut (`Good (examples)`) | last 1h | as "Reading `examples`" says |
-| `trend` | Still happening? | `{failure}` counted per hour with `BUCKET(@timestamp, 1 hour)` (about 24 rows; the current hour is partial) | 24h | the latest bucket against now: steady, rising, or ended (a stream that went silent shows as no recent buckets) |
-| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day: `count`, `lines` (isolating scope only) and the `earliest` failure of each day, all before `BY day = BUCKET(@timestamp, 1 day)`; shaped as `Good (baseline)` for its variant | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below; the no-isolating shape has its own reading |
-| `breakdown` | Which values does a kept field take in the failing rows, how often, and since when? | one query per kept field, top 8 (`Good (breakdown)`) | last 1h | as "Reading `breakdown`" says |
+| `spread` | What share of lines in scope fail? | `affected` (failing lines); `total` (all lines in scope, isolating scope only) | last 1h (`now-1h`) | `affected` of `total`: the failing share of log lines (of attempts when the scope isolates one line per attempt). `total` = 0: not measured. `affected` = 0: no failing rows, said with no share |
+| `dimensions` | Which fields do the failing rows carry, by value? | the `candidates:` fields | last 1h (`now-1h`) | Reading `dimensions` |
+| `examples` | What do the failing messages say? | 3 messages, not cut | last 1h (`now-1h`) | Reading `examples` |
+| `trend` | Still happening? | failing lines per hour (about 24 buckets; the current hour is partial) | last 24h (`now-24h`) | Reading `trend` |
+| `baseline` | How long has it been going on? Since when? | per day: `count`, `lines` (isolating scope only) and the `earliest` failure, all as aggregates before `BY day = BUCKET(@timestamp, 1 day)`; with an isolating scope the query also gives `share`, the failing percent of `lines` | last 7 days (`now-7d`) | isolating scope: the days with a failure out of the days with data, the last complete day's `share` against the earlier days' range, and the onset; no isolating scope: the days with a failure, the lowest and highest `count` across its complete days, and the onset (Reading `baseline`) |
+| `breakdown` | Which values does a kept field take in the failing rows, how often, since when? | top 8 per kept field | last 1h (`now-1h`) | Reading `breakdown` |
 
 Reading `dimensions`, with `affected` from `spread`:
 - A field is informative when `1 <= f < a`, `a <= 50` and `f <= 0.5 × affected` (an identifier or a
   timestamp fails the second or third test). Without an isolating scope there is no `a`: a field is
-  informative when `2 <= f <= 50` and `f <= 0.5 × affected`. The test checks your picks; it does not
-  rank them.
+  informative when `2 <= f <= 50` and `f <= 0.5 × affected`.
 - `rows` is the `dimensions` query's count of failing rows. `present_{field}` is the number of those
   rows with a non-null value for the field. Only when it equals `rows` can a value describe every
   failing row; otherwise state it only for the
@@ -382,12 +373,12 @@ Reading `dimensions`, with `affected` from `spread`:
   only when `present_{field} = rows`, say the failing rows carry it; with `f` of 2 or more, by
   the values of its `breakdown` (Reading
   `breakdown`), which the first 3 such fields get. A count (`f` of `a`) goes only next to the values,
-  or alone when its `breakdown` was not sent or failed (a failure is named, Profile step); it never
-  says the failure is contained there.
+  or alone when its `breakdown` was not sent or failed (a failure is named, Profile step). It states
+  how many values the failing rows carry, never that the failure is confined to them.
 - A field that is not informative is left out, except one with `f = 1`: state it as `field = value`
   (Returned text and field names) under the same rule, never as "span 1 of 1 `{field}`" (a value that says how the operation ended or
   was absorbed matters most). When none is informative, say the failing rows are uniform only in the
-  `f = 1` fields stated that way; never that the failure "is confined" or "spans" anything.
+  `f = 1` fields stated that way.
 
 Reading `examples`:
 - Up to 3 random failing messages from the whole hour, uncut (`SAMPLE` returns one scalar for a
@@ -402,37 +393,53 @@ Reading `breakdown`:
 - The rows are the top groups, not all of them: say so when the result has as many rows as its limit.
 - For each group that matters, give the kept field's value (only as the returned-text bullet allows),
   its count and `last_seen`, and compare groups: which `first_seen` is later. The window is one hour,
-  so these are bounds "within the last hour". Relate a group to the `baseline` onset only when that
+  so these are bounds within the window stated in sentence 2. Relate a group to the `baseline` onset only when that
   onset falls inside the window; otherwise do not infer group presence from the baseline. A
   `first_seen` is never worded as the onset. This goes in sentence 3 of the description.
 
-Reading `baseline`:
-- (Isolating shape) `days_active` of `days`: the days with a failure, out of the days with any
-  `lines`. A day with no lines is no data, not a quiet day.
-- (Isolating shape) `factor`: the last complete day's `count` over the median of the complete days before it. The day
-  that holds the window's start and the day that holds its end (today) are partial and never
-  compared; find them by each row's `day` against the query's `time_range`, since a day with no
-  lines has no row. Work it out in your message, in order:
-  1. Drop the row whose `day` holds the window's start and the row whose `day` holds its end, where
-     they exist; the last row left is the last complete day.
-  2. Write its `count` and the earlier complete days' counts, sorted, then their median (the middle
-     value, or the mean of the two middle values).
-  3. `factor` is the first count over that median, never over a single earlier day.
+Reading `trend`:
+- Hours are clock hours. The current hour is partial, and so is the first bucket when the window
+  start cuts it; neither is a complete hour. The latest complete hour is the hour before the current
+  one. The query keeps only failing lines, so an hour with no row had no failing lines, not no data:
+  treat every missing hour as 0, the current partial hour included. A `trend` with no rows at all is
+  not measured, not all zeros.
+- State the latest complete hour's count, by its time (09:00; `0 at 09:00` when its row is missing),
+  next to the lowest and highest counts of the earlier complete hours with a failure (compact, per
+  Numbers), as a count range (380–455) over the hours it covers (03-06 11:00 to 03-07 08:00). Always
+  add how many of the M earlier complete hours had a failure ("on 18 of 22 hours"), even when all
+  did (`22 of 22`), where M counts every complete hour from the window's first complete hour through
+  the hour before the latest complete one, not only the failing hours. When none had a failure, say
+  "no failing line in the M earlier hours" instead of a range. Leave the direction to the reader.
+  With no earlier complete hour, state only the latest counts.
+- State the current hour's count separately (`0` when its row is missing), with its time span (10:00
+  to 10:41), marked partial.
 
-  Report how many earlier days it rests on. Near 1 is steady, far above 1 a surge, far below 1 a
-  fall. It is not measured when no earlier complete day exists. When the median of the earlier complete
-  days is 0, `factor` is undefined: the failure is new since its first failing day; say so instead of
-  giving a ratio.
-- (Both shapes) Onset: `earliest` of the first day with a failure. It is a lower bound, worded "at
-  least as long as the data shows", in the no-isolating shape and in the isolating shape when no
-  earlier day with `lines` is in the window.
-- (Isolating shape) A failure on every day at a steady `factor` is long-standing: do not word it as
-  new.
+Reading `baseline`:
+- (Isolating shape) The days with a failure, out of the days with any `lines`. A day with no lines is
+  no data, not a quiet day.
+- (Isolating shape) The last complete day: the partial days are the row whose `day` holds the window's
+  start and the row whose `day` holds its end (today), where they exist, found by each row's `day`
+  against the query's `time_range`. State the last complete day's `share`, by its date, next to the
+  lowest and highest `share` of the earlier complete days, as a span of dates (03-06 against 03-01 to
+  03-05), and leave the comparison to the reader. With no earlier complete day, state only its
+  `share`.
+- (Both shapes) Onset: `earliest` of the first day with a failure (MM-DD HH:MM). Use the qualified
+  wording "the first failing line in the 7-day window from {window start} is at {earliest}" whenever
+  no earlier day with data is in the window: always when the scope has no total, and in the isolating
+  shape when the failure starts on the first day with data. Use the bare "its first failing line is
+  at {earliest}" only when earlier complete days with data had no failure; it is the only form that
+  implies the failure started then. Write the year only when it differs from the window's. The
+  qualified form claims nothing about earlier data, which the window may not hold.
+- (Isolating shape) Say "failure on N of N days with data" when every day with data has a failing
+  line, otherwise "failure on N of M days with data"; when the earlier days with data have no failing
+  line, say so. When `trend` shows no failing line or is not measured, say only "N days with a
+  failure".
 - **No isolating scope (`baseline`):** the shape carries no total, so there is no `lines` to say
-  which days have data. Report "N days with a failure in the window, earliest at least as long as
-  the data shows ({earliest})", never "of M days with data". A day without a row is not a quiet
-  day. The allowed statements are that sentence and the latest `trend` bucket: no per-day count
-  comparison, no `factor`, no "new since" or long-standing wording.
+  which days have data, and a day without a row may be quiet or have no data. Report "N days with a
+  failure in the window, then the onset per the Onset bullet", never "of M days
+  with data", and state the lowest and highest `count` across its complete days with a failure. The
+  allowed statements are those and the `trend` reading (Reading `trend`): no "new since", no
+  claim about days without a row.
 
 - **Aggregate, never rows.** Every profile query returns at most 100 rows and follows the `Good`
   shape of its variant; an unscoped variant has no `total` or `a_{field}`.
@@ -468,15 +475,15 @@ Good (dimensions, no isolating scope; one set of f_ and present_ columns per can
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS rows = COUNT(*), `f_{field1}` = COUNT_DISTINCT(`{field1}`), `present_{field1}` = COUNT(*) WHERE `{field1}` IS NOT NULL, `f_{field2}` = COUNT_DISTINCT(`{field2}`), `present_{field2}` = COUNT(*) WHERE `{field2}` IS NOT NULL
 
 Good (baseline, isolating):
-  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day) | SORT day ASC
+  FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS count = COUNT(*) WHERE {failure}, lines = COUNT(*), earliest = MIN(@timestamp) WHERE {failure} BY day = BUCKET(@timestamp, 1 day) | EVAL share = ROUND(count * 100.0 / lines, 1) | SORT day ASC
 Good (baseline, no isolating scope):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {failure} | STATS count = COUNT(*), earliest = MIN(@timestamp) BY day = BUCKET(@timestamp, 1 day) | SORT day ASC
 
-Good (trend; no WHERE {scope} without an isolating scope):
+Good (trend):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS count = COUNT(*) BY bucket = BUCKET(@timestamp, 1 hour) | SORT bucket ASC
-Good (examples; no WHERE {scope} without an isolating scope):
+Good (examples):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS examples = SAMPLE(`{text}`, 3)
-Good (breakdown; no WHERE {scope} without an isolating scope):
+Good (breakdown):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS n = COUNT(*), first_seen = MIN(@timestamp), last_seen = MAX(@timestamp) BY `{field}` | SORT n DESC | LIMIT 8
 
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets
@@ -555,60 +562,74 @@ Each entry:
 - `type`: always `"detection"`.
 - `source_id`: the detection's batch `source_id`, copied as is. Not the title and not the view name.
   Quiet-rule entries carry it too.
-- `description`: three sentences, in this order, in plain prose. Observations only: it neither
-  states nor depends on the verdict. It is rendered as markdown: write every field name, and every
-  `field = value` pair, in backticks, and no other text in backticks.
-  1. **What the rows state.** The signature and the target, then, for each dimension the rows carry,
-     `field = value`, any row that differs, and the correlations, all from your
-     `<reading_log_lines>` findings. The reader cannot see the rows. Quote the fields that state what the
-     rows record (signature, operation, target, service, endpoint, status, level, counts). Name a field
-     whose value only identifies an instance (trace, span, request, session, user, host, pod, container
-     or node ID), and any sensitive datum (the list in the Profile step's "Returned text and field
-     names" bullet), by field and what it distinguishes, for example `host.name`: one pod; never quote
-     its value.
-     Open with the signature and the target, never with the sample's size. Claim "repeated" or "the only
+- `description`: the factual account of what happened, as an operator reads it first. A reader who
+  sees only this text can say what is failing and where, how much and how widely in a stated window,
+  since when, and whether it is still happening. Three sentences, in this order, in plain prose.
+  Observations only: it neither states nor depends on the verdict, and it infers no cause, outcome or
+  impact. The reader cannot see the rows and may read it later, so give each figure with its unit,
+  scope and period. It is rendered as markdown: write every field name, and every `field = value`
+  pair, in backticks, and no other text in backticks.
+  - **Quoting.** Quote the fields that state what the rows record (signature, operation, target,
+    service, endpoint, status, level, counts). Name a field whose value only identifies an instance
+    (trace, span, request, session, user, host, pod, container or node ID), and any sensitive datum
+    (the list in the Profile step's "Returned text and field names" bullet), by field and what it
+    distinguishes, for example `host.name`: one pod; never quote its value. Examples and `breakdown`
+    values follow the same bullet.
+  - **Numbers.** In sentence 2 give a share as `N of M (P%)`, with P = N/M × 100 to one decimal
+    (`0.1%`, `37.5%`, `100.0%`), so downstream fields can copy P; in sentence 3 write a share as a
+    percent to one decimal, as a range when it spans days (5.4–5.6%). Also in sentence 3, write a count of 1,000 or more with
+    `k` or `M` and one decimal (2,512 as 2.5k, 8,052 as 8.1k, 1,400,000 as 1.4M), a smaller count
+    exactly, and a pair that would round to the same figure exactly (1,435 and 1,436). Write a range
+    with an en dash and one suffix (2.5–8.1k, 380–455). Compact formatting applies to counts only: every `field = value`
+    pair, its value and every identifier stays exact.
+  - **Time.** Give the period once, at the start of sentence 2, as a window with its date and zone
+    ("Between 09:41 and 10:41 UTC on 2026-03-07"). After that write times as HH:MM and days as
+    MM-DD (all UTC), and name each hour or day by its own time or date. Never write "last hour",
+    "current hour", "last complete day" or "so far": the description is read later. A time in
+    sentence 1, or the period in the nothing-matched sentence, is written the same way.
+  - **Not measured.** Close sentence 3 with one clause naming each figure that applies to the shape
+    but was not measured because its query returned no rows, failed or timed out ("not measured:
+    duration"), and name a failed `dimensions`, `examples` or `breakdown` with why (Profile step).
+  1. **What the rows state.** Open with the signature and the target, never with the sample's size.
+     Then, for each dimension the rows carry, `field = value`, any row that differs, and the
+     correlations, all from your `<reading_log_lines>` findings. Claim "repeated" or "the only
      failure" only from rows that show it:
-     - a single-row sample: introduce its values as "a sampled row shows" (not "one sampled row has"),
-       with no claim of repetition from that row alone;
-     - a row-level sample that returned fewer rows than the limit we appended (not an aggregation, not a
-       stricter authored limit): give the number of sampled rows; the sample window (`<query_rules>`
+     - a single-row sample: introduce its values as "a sampled row shows" (not "one sampled row
+       has"), with no claim of repetition from that row alone;
+     - a row-level sample that returned fewer rows than the limit we appended (not an aggregation, not
+       a stricter authored limit): give the number of sampled rows; the sample window (`<query_rules>`
        rule 3) holds only those, which says nothing about the profile windows;
      - a value `dimensions` found constant across the failing rows (`f` is 1 and `present_{field} =
-       rows`) is stated for the failing rows with no caveat. Values that every `examples` result
-       shows remain sampled observations; the profile numbers in sentences 2 and 3 show the failure
-       is widespread.
-  2. **How much and how widely**, from the Profile step's numbers. Give each count as `N of M (P%)` with its
-     unit (log lines, or attempts when the scope isolates one line per attempt), scope and period,
-     where P is N/M × 100 rounded to one decimal place (for example `0.1%`, `37.5%`, `100.0%`), so
-     downstream fields can copy P. Give the dimensions the failing rows carry, by their values (Reading `dimensions`)
-     and, from the examples, how many failure messages differ (Reading `examples`). Services: when `{scope}` pins the service, say the rule is
-     scoped to it (never "the number of services is not measured"); otherwise follow Reading
-     `dimensions`. A service field with `f = a` and `present_{field} = rows` is an exception:
-     state that the failure reaches `f` of `a` measured services even when the field is otherwise
-     non-informative, and list values only from its `breakdown` or the `f = 1` rule. When
-     `present_{field} < rows`, state that coverage and do not make an all-failing-rows claim.
-
-     A figure that was not measured is stated as such, and one that does not apply is left out
-     (Profile step).
-  3. **How long and whether it continues**, from `baseline` as "Reading `baseline`" words it for the
-     shape that ran, and from the latest `trend` bucket. Add,
-     from `breakdown`, the first and last seen of each group that matters, compared with each other
-     (Reading `breakdown`). A `baseline` or `trend` that was not measured is stated here as not
-     measured; a `dimensions`, `examples` or `breakdown` query that failed is named here with why
-     (Profile step).
-
-     Profile text in sentences 2 and 3 follows the Profile step's "Returned text and field names"
-     bullet.
-  - No dependency chains or upstream causes in the description; those go in `causal_features` and
-    `blast_radius`. Name a dependency or target only when the query filtered on it or the rows show
-    it.
+       rows`) is stated for the failing rows with no caveat; values that every `examples` result shows
+       remain sampled observations, and breadth comes from the profile numbers in sentences 2 and 3.
+  2. **How much and how widely**, from the Profile step's numbers, starting with the window: the share (in log lines, or
+     attempts when the scope isolates one line per attempt), the dimensions the failing rows carry by
+     their values (Reading `dimensions`), and how many failure messages differ (Reading `examples`).
+     Services: when `{scope}` pins the service, say the rule is scoped to it (not "the number of
+     services is not measured"); otherwise follow Reading `dimensions`. A service field with `f = a`
+     and `present_{field} = rows` is an exception: state that the failure reaches `f` of `a` measured
+     services even when the field is otherwise non-informative, and list values only from its
+     `breakdown` or the `f = 1` rule. When `present_{field} < rows`, state that coverage and make no
+     all-failing-rows claim.
+  3. **How long and whether it continues**, in this order: the `trend` clause (Reading `trend`), the
+     `baseline` clause, the days with a failure and then the onset (Reading `baseline`), the
+     `breakdown` clause, the first and last seen of each group that matters, compared with each other
+     (Reading `breakdown`), and the not-measured clause.
+  - Causes belong elsewhere: no dependency chains or upstream causes in the description; those go in
+    `causal_features` and `blast_radius`. Name a dependency or target only when the query filtered on
+    it or the rows show it.
   - Quiet-rule entries use the single sentence defined in the Map step.
   - When nothing matched, say what was looked for and what was found instead, never only that rows
-    were returned: `"No {signature} rows for {target} matched in the {period observed}; <what was
+    were returned: `"No {signature} rows for {target} matched {window, as in sentence 2}; <what was
     found instead>."`
   - Example of a match, with illustrative values (the value is the text between the double quotes):
     ```
-    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1`, `retries = 0` and `duration_ms = 30,100`. In the last hour 412 of 6,880 log lines (6.0%) in the export-renderer scope failed; the failing rows all carry `retries = 0` and reach 2 of 9 `region` and 3 of 12 `zone`, and the sampled failing messages were the same timeout message. The failure appears on 4 of 4 days with data, the last complete day at 1.4× the median of 1 earlier complete day, the onset is at least as long as the data shows (2026-03-02T09:14:00Z), and the latest bucket still contains failures; within the last hour the breakdown by `region` shows `region = eu-1` (301 rows, last seen 10:41Z) and `region = us-2` (111 rows, last seen 10:12Z), and the breakdown by `zone` could not be run: it timed out."
+    "The export-renderer job fails with `status = 504` on the `endpoint` field; a sampled row shows `region = eu-1`, `retries = 0` and `duration_ms = 30,100`. Between 09:41 and 10:41 UTC on 2026-03-07, 412 of 6,880 log lines (6.0%) in the export-renderer scope failed; the failing rows all carry `retries = 0` and reach 2 of 9 `region` and 3 of 12 `zone`, and the sampled failing messages were the same timeout message. Failing lines ran 380–455 an hour, on 18 of the 22 hours from 03-06 11:00 to 03-07 08:00 (396 at 09:00, 290 from 10:00 to 10:41, partial) and 5.4–5.6% of lines a day on 03-01 to 03-05 (5.5% on 03-06), with a failure on 8 of 8 days with data, the first failing line in the 7-day window from 02-28 10:41 at 02-28 11:20; within 09:41 to 10:41 `region = eu-1` had 301 rows (last seen 10:41) and `region = us-2` 111 (last seen 10:12); not measured: the breakdown by `zone` (it timed out)."
+    ```
+  - Sentence 3 for a rule with no isolating scope (no totals, so no share and no count of days with
+    data), after a sentence 2 that gave the window and its date:
+    ```
+    "Failing lines ran 2.5–4.1k an hour, on 20 of the 22 hours from 11-03 10:00 to 11-04 07:00 (3.9k at 08:00, 1.2k from 09:00 to 09:20, partial) and 89.0–96.0k a day on 10-29 to 11-03, on 8 days in the 7-day window from 10-28 09:20 (10-28 and 11-04 are partial), the first failing line in that window at 10-28 11:05."
     ```
 - `verdict`: `confirms` | `refutes` | `off_topic` | `inconclusive` | `not_checked`, per `<verdicts>`.
 - `collected_at`: ISO-8601 query timestamp. Omit for quiet-rule entries.
