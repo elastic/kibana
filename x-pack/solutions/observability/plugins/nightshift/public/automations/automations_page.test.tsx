@@ -20,12 +20,12 @@ import {
   useFetchAutomations,
   useToggleAutomation,
   useUpdateAutomation,
-} from './hooks/use_automations';
+} from '../data/automations/use_automations';
 import { useRunQuotas } from '../data/run_quotas/use_significant_events_run_quotas';
 import { useKibana } from '../hooks/use_kibana';
-import type { Automation } from './hooks/use_automations';
+import type { Automation } from '../data/automations/use_automations';
 
-jest.mock('./hooks/use_automations', () => ({
+jest.mock('../data/automations/use_automations', () => ({
   AUTOMATIONS_LOAD_ERROR_TITLE: 'Failed to load automations',
   useAutomationRunsInRange: jest.fn(),
   useAutomationsRunsInRange: jest.fn(),
@@ -39,15 +39,15 @@ jest.mock('./hooks/use_automations', () => ({
 }));
 jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 let mockServiceAccount: { data?: Record<string, unknown> } = {};
-jest.mock('../service_account/use_investigator_service_account', () => ({
+jest.mock('../data/service_accounts/use_investigator_service_account', () => ({
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
 jest.mock('../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),
 }));
 jest.mock('../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
-jest.mock('../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [],
     isLoading: false,
