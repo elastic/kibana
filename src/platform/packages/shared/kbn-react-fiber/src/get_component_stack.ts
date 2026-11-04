@@ -9,13 +9,25 @@
 
 import { getFiberName } from './get_fiber_name';
 import { getOwnerChain } from './get_owner_chain';
-import { hasDebugSource, isSourceComponent } from './predicates';
+import { hasDebugSource, isComponentFiber, isSourceComponent } from './predicates';
 import type { ComponentStackFrame, ReactFiberNode } from './types';
+
+export const ANONYMOUS_COMPONENT_NAME = 'Anonymous';
+
+/**
+ * Application components own frames whether they have a name or not. EUI components and
+ * other wrappers only run JSX written elsewhere (render props, children functions), so the
+ * frame belongs to the component above them.
+ */
+const ownsFrame = (fiber: ReactFiberNode): boolean =>
+  isSourceComponent(fiber) || (isComponentFiber(fiber) && getFiberName(fiber) === null);
 
 /**
  * Builds the component stack of a fiber, closest first. A fiber's source points into the render
  * of its owner, so every fiber with source information is paired with the closest application
- * component above it. Fibers without source information (compiled dependencies) are skipped.
+ * component among the fibers that rendered it. Unnamed components and JSX created outside of a
+ * render are reported as {@link ANONYMOUS_COMPONENT_NAME} rather than attributed to a component
+ * further up. Fibers without source information (compiled dependencies) are skipped.
  */
 export const getComponentStack = (fiber: ReactFiberNode): ComponentStackFrame[] => {
   const chain = getOwnerChain(fiber);
@@ -23,9 +35,9 @@ export const getComponentStack = (fiber: ReactFiberNode): ComponentStackFrame[] 
   return chain.flatMap((current, index) => {
     if (!hasDebugSource(current)) return [];
 
-    const owner = chain.slice(index + 1).find(isSourceComponent);
-    const name = owner ? getFiberName(owner) : null;
+    const owner = current._debugOwner ? chain.slice(index + 1).find(ownsFrame) : null;
+    const name = (owner && getFiberName(owner)) ?? ANONYMOUS_COMPONENT_NAME;
 
-    return name ? [{ name, source: current._debugSource }] : [];
+    return [{ name, source: current._debugSource }];
   });
 };

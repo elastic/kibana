@@ -7,7 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { hasDebugSource, isSourceComponent } from './predicates';
+import { hasDebugSource, isComponentFiber, isSourceComponent } from './predicates';
+
+describe('isComponentFiber', () => {
+  it('should accept function components and the `forwardRef` and `memo` objects wrapping them', () => {
+    expect(isComponentFiber({ type: () => null })).toBe(true);
+    expect(isComponentFiber({ type: { render: () => null } })).toBe(true);
+    expect(isComponentFiber({ type: { type: { render: () => null } } })).toBe(true);
+  });
+
+  it('should reject host elements, context providers and fibers without a type', () => {
+    expect(isComponentFiber({ type: 'div' })).toBe(false);
+    expect(isComponentFiber({ type: {} })).toBe(false);
+    expect(isComponentFiber({ type: null })).toBe(false);
+  });
+});
 
 describe('isSourceComponent', () => {
   it('should reject host elements, EUI components, ignored wrappers and nameless fibers', () => {

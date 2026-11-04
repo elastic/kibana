@@ -13,7 +13,11 @@ import type { CoreStart } from '@kbn/core/public';
 import { screen, createEvent, fireEvent, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import { copyToClipboard } from '@elastic/eui';
-import { findFiberWithDebugSource, findSourceComponentName } from '@kbn/react-fiber';
+import {
+  findFiberWithDebugSource,
+  findSourceComponentName,
+  getComponentStack,
+} from '@kbn/react-fiber';
 import { InspectOverlay } from './inspect_overlay';
 import { getElementFromPoint } from '../../../lib/dom/get_element_from_point';
 import { getInspectedElementData } from '../../../lib/get_inspected_element_data';
@@ -28,6 +32,7 @@ jest.mock('@elastic/eui', () => ({
 jest.mock('@kbn/react-fiber', () => ({
   findFiberWithDebugSource: jest.fn(),
   findSourceComponentName: jest.fn(),
+  getComponentStack: jest.fn(),
 }));
 
 jest.mock('../../../lib/dom/get_element_from_point', () => ({
@@ -126,12 +131,25 @@ describe('InspectOverlay', () => {
   describe('grab mode', () => {
     const setFlyoutOverlayRef = jest.fn();
     const setIsInspecting = jest.fn();
+    const fakeSource = { fileName: '/repo/src/save_button.tsx', lineNumber: 1, columnNumber: 1 };
+    const fakeFiber = { type: 'button', _debugSource: fakeSource };
+    const expectedContext = '<div>Save</div>\n  in SaveButton (/repo/src/save_button.tsx:42:7)';
     let fakeTarget: HTMLElement;
+
+    const hoverTarget = () => fireEvent.pointerMove(window, { clientX: 30, clientY: 20 });
 
     beforeEach(() => {
       fakeTarget = document.createElement('div');
       fakeTarget.textContent = 'Save';
       (getElementFromPoint as jest.Mock).mockReturnValue(fakeTarget);
+      (findFiberWithDebugSource as jest.Mock).mockReturnValue({
+        element: fakeTarget,
+        fiber: fakeFiber,
+      });
+      (findSourceComponentName as jest.Mock).mockReturnValue('SaveButton');
+      (getComponentStack as jest.Mock).mockReturnValue([
+        { name: 'SaveButton', source: { ...fakeSource, lineNumber: 42, columnNumber: 7 } },
+      ]);
 
       renderWithI18n(
         <InspectOverlay
@@ -145,31 +163,28 @@ describe('InspectOverlay', () => {
     });
 
     it('should highlight the hovered element without a label', () => {
-      (findFiberWithDebugSource as jest.Mock).mockReturnValue({
-        element: fakeTarget,
-        fiber: { type: 'div', _debugSource: { fileName: 'a.tsx', lineNumber: 1, columnNumber: 1 } },
-      });
-      (findSourceComponentName as jest.Mock).mockReturnValue('FakeComponent');
-
-      fireEvent.pointerMove(window, { clientX: 30, clientY: 20 });
+      hoverTarget();
 
       expect(screen.getByTestId('inspectHighlightBox')).toBeInTheDocument();
       expect(screen.queryByTestId('inspectHighlightBadge')).not.toBeInTheDocument();
     });
 
-    it('should copy the element context on click, show feedback and stay in grab mode', async () => {
+    it('should copy the hovered element context on click, show feedback and stay in grab mode', async () => {
+      hoverTarget();
       fireEvent.click(document, { target: fakeTarget });
 
       await waitFor(() => {
-        expect(copyToClipboard).toHaveBeenCalledWith('<div>Save</div>');
+        expect(copyToClipboard).toHaveBeenCalledWith(expectedContext);
       });
+      expect(getComponentStack).toHaveBeenCalledWith(fakeFiber);
       expect(screen.getByText('Copied to clipboard')).toBeInTheDocument();
       expect(mockCoreStart.overlays.openFlyout).not.toHaveBeenCalled();
       expect(setFlyoutOverlayRef).not.toHaveBeenCalled();
       expect(setIsInspecting).not.toHaveBeenCalled();
     });
 
-    it('should carry the element context on drag start without showing feedback', () => {
+    it('should carry the hovered element context on drag start without showing feedback', () => {
+      hoverTarget();
       const dataTransfer = { setData: jest.fn(), setDragImage: jest.fn(), effectAllowed: 'none' };
       const highlightBox = screen.getByTestId('inspectHighlightBox');
       // jsdom has no DragEvent, so pointer coordinates have to be defined on the plain event
@@ -179,9 +194,9 @@ describe('InspectOverlay', () => {
       fireEvent(highlightBox, dragStartEvent);
 
       expect(dataTransfer.effectAllowed).toBe('copy');
-      expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', '<div>Save</div>');
+      expect(dataTransfer.setData).toHaveBeenCalledWith('text/plain', expectedContext);
       expect(dataTransfer.setDragImage).toHaveBeenCalledWith(fakeTarget, 15, 25);
-      expect(copyToClipboard).toHaveBeenCalledWith('<div>Save</div>');
+      expect(copyToClipboard).toHaveBeenCalledWith(expectedContext);
       expect(screen.queryByTestId('inspectHighlightBadge')).not.toBeInTheDocument();
     });
   });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import type { MouseEvent } from 'react';
 import type { CoreStart, OverlayRef } from '@kbn/core/public';
 import { css } from '@emotion/react';
@@ -24,8 +24,9 @@ import {
   isGrabKeyboardShortcut,
   isKeyboardShortcut,
 } from '../../lib/keyboard_shortcut/keyboard_shortcut';
+import { activeMode$, toggleActiveMode, useActiveMode } from '../../lib/active_mode';
+import type { InspectMode } from '../../lib/types';
 import { InspectOverlay } from './overlay/inspect_overlay';
-import type { InspectMode } from './overlay/inspect_overlay';
 
 const ARIA_LABEL = i18n.translate('kbnInspectComponent.inspectButton.ariaLabel', {
   defaultMessage: 'Inspect component',
@@ -78,7 +79,7 @@ interface Props {
 }
 
 /**
- * The entry point for the plugin. Toggles inspect or grab mode.
+ * The entry point for the plugin. Toggles inspect or grab mode, only one of them can be active.
  */
 export const InspectButton = ({
   core,
@@ -86,9 +87,14 @@ export const InspectButton = ({
   buttonLocation = 'header',
   mode = 'inspect',
 }: Props) => {
-  const [isInspecting, setIsInspecting] = useState(false);
+  const isInspecting = useActiveMode() === mode;
   const [flyoutOverlayRef, setFlyoutOverlayRef] = useState<OverlayRef | null>(null);
   const { ariaLabel, tooltipContent, iconType, testSubj, isShortcut } = MODE_CONFIG[mode];
+
+  const setIsInspecting = useCallback(
+    (value: boolean) => activeMode$.next(value ? mode : null),
+    [mode]
+  );
 
   const buttonStyle = css`
     & > .euiButtonEmpty__content > svg {
@@ -99,7 +105,7 @@ export const InspectButton = ({
   const handleKeydown = (event: KeyboardEvent) => {
     if (isShortcut(event)) {
       event.preventDefault();
-      setIsInspecting((prev) => !prev);
+      toggleActiveMode(mode);
     }
   };
 
@@ -108,7 +114,7 @@ export const InspectButton = ({
       flyoutOverlayRef.close();
       setFlyoutOverlayRef(null);
     }
-    setIsInspecting((prev) => !prev);
+    toggleActiveMode(mode);
   };
 
   /**

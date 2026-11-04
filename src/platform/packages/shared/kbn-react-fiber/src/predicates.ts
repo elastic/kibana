@@ -14,6 +14,19 @@ import type { FiberWithDebugSource, ReactFiberNode } from './types';
 /** Host fibers back DOM elements, their type is the tag name. */
 export const isHostFiber = (fiber: ReactFiberNode): boolean => typeof fiber.type === 'string';
 
+const isComponentType = (type: ReactFiberNode['type'] | undefined): boolean => {
+  if (!type || typeof type === 'string') return false;
+  if (typeof type === 'function') return true;
+
+  return isComponentType(type.render) || isComponentType(type.type);
+};
+
+/**
+ * Whether the fiber backs a function or class component, named or not, including the ones
+ * wrapped in `memo` or `forwardRef`. Context providers, fragments and other built-ins are not.
+ */
+export const isComponentFiber = (fiber: ReactFiberNode): boolean => isComponentType(fiber.type);
+
 export const hasDebugSource = (fiber: ReactFiberNode): fiber is FiberWithDebugSource =>
   Boolean(fiber._debugSource);
 

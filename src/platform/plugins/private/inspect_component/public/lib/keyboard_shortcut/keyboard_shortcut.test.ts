@@ -18,6 +18,19 @@ describe('keyboard_shortcut', () => {
       expect(isKeyboardShortcut({ ...event, shiftKey: true } as KeyboardEvent)).toBe(false);
       expect(isGrabKeyboardShortcut({ ...event, shiftKey: false } as KeyboardEvent)).toBe(false);
     });
+
+    it('should leave the inspect shortcut to layouts where typing a single quote needs shift', () => {
+      const event = {
+        metaKey: true,
+        ctrlKey: false,
+        shiftKey: true,
+        code: 'Backslash',
+        key: "'",
+      } as KeyboardEvent;
+
+      expect(isGrabKeyboardShortcut(event)).toBe(false);
+      expect(isKeyboardShortcut(event)).toBe(true);
+    });
   });
 
   describe('isKeyboardShortcut', () => {

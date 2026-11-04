@@ -22,13 +22,16 @@ const isSingleQuote = (event: KeyboardEvent): boolean =>
  */
 const isModifierKey = (event: KeyboardEvent): boolean => event.metaKey || event.ctrlKey;
 
+/**
+ * ⌘ + Shift + ' or Ctrl + Shift + ' toggles grab mode.
+ * Matched on the physical key only, as on some layouts (e.g. German) typing ' itself needs Shift.
+ */
+export const isGrabKeyboardShortcut = (event: KeyboardEvent) =>
+  isModifierKey(event) && event.shiftKey && event.code === 'Quote';
+
 /** ⌘ + ' or Ctrl + ' toggles inspect mode. */
 export const isKeyboardShortcut = (event: KeyboardEvent) =>
-  isModifierKey(event) && !event.shiftKey && isSingleQuote(event);
-
-/** ⌘ + Shift + ' or Ctrl + Shift + ' toggles grab mode. */
-export const isGrabKeyboardShortcut = (event: KeyboardEvent) =>
-  isModifierKey(event) && event.shiftKey && isSingleQuote(event);
+  isModifierKey(event) && isSingleQuote(event) && !isGrabKeyboardShortcut(event);
 
 /**
  * Check if Escape key was pressed.

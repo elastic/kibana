@@ -16,6 +16,9 @@ const createSource = (fileName: string, lineNumber: number): DebugSource => ({
   columnNumber: 5,
 });
 
+// Functions passed inline, e.g. to `memo`, have no name unlike the ones assigned to a variable
+const createAnonymousComponent = () => () => null;
+
 describe('getComponentStack', () => {
   it('should pair each sourced fiber with the closest application component above it', () => {
     const app: ReactFiberNode = { type: { name: 'App' } };
@@ -60,6 +63,46 @@ describe('getComponentStack', () => {
 
     expect(getComponentStack(cell)).toEqual([
       { name: 'MyTable', source: createSource('my_table.tsx', 55) },
+    ]);
+  });
+
+  it('should report unnamed components as Anonymous instead of a component further up', () => {
+    const app: ReactFiberNode = { type: { name: 'App' } };
+    const layout: ReactFiberNode = {
+      type: { type: createAnonymousComponent() },
+      _debugSource: createSource('application.tsx', 30),
+      _debugOwner: app,
+    };
+    const header: ReactFiberNode = {
+      type: { name: 'Header' },
+      _debugSource: createSource('layout.tsx', 116),
+      _debugOwner: layout,
+    };
+
+    expect(getComponentStack(header)).toEqual([
+      { name: 'Anonymous', source: createSource('layout.tsx', 116) },
+      { name: 'App', source: createSource('application.tsx', 30) },
+    ]);
+  });
+
+  it('should report JSX created outside of a render as Anonymous instead of its tree parent', () => {
+    const sidebarProvider: ReactFiberNode = { type: { name: 'SidebarProvider' } };
+    // a context provider is neither a component nor a frame owner
+    const contextProvider: ReactFiberNode = {
+      type: {},
+      _debugSource: createSource('sidebar_provider.tsx', 27),
+      _debugOwner: sidebarProvider,
+    };
+    const layout: ReactFiberNode = {
+      type: { name: 'Layout' },
+      _debugSource: createSource('rendering_service.tsx', 106),
+      _debugOwner: null,
+      return: contextProvider,
+    };
+
+    expect(getComponentStack(layout)).toEqual([
+      { name: 'Anonymous', source: createSource('rendering_service.tsx', 106) },
+      { name: 'SidebarProvider', source: createSource('sidebar_provider.tsx', 27) },
     ]);
   });
 });

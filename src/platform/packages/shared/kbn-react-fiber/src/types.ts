@@ -22,7 +22,7 @@ export interface DebugSource {
  * Shape shared by function components, class components and the objects
  * `memo` and `forwardRef` wrap them in.
  */
-export interface FiberComponentType {
+interface FiberComponentShape {
   displayName?: string;
   name?: string;
   /** Wrapped component of a `forwardRef` type. */
@@ -30,6 +30,11 @@ export interface FiberComponentType {
   /** Wrapped component of a `memo` type. */
   type?: FiberComponentType;
 }
+
+/** The component behind a fiber: a function or class, or the object `memo` / `forwardRef` wrap it in. */
+export type FiberComponentType =
+  | FiberComponentShape
+  | (FiberComponentShape & (((...args: never[]) => unknown) | (new (...args: never[]) => unknown)));
 
 /**
  * Subset of the React Fiber node properties used by this package.

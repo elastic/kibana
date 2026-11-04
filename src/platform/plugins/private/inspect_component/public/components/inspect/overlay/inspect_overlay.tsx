@@ -32,15 +32,11 @@ import { fetchComponentData } from '../../../api/fetch_component_data';
 import { InspectFlyout, flyoutOptions } from '../flyout/inspect_flyout';
 import { InspectHighlight } from './inspect_highlight';
 import { GRAB_FEEDBACK_DURATION_MS, INSPECT_OVERLAY_ID } from '../../../lib/constants';
-import type { SourceComponent } from '../../../lib/types';
-
-/**
- * 'inspect' opens a flyout with component details,
- * 'grab' lets the element be dragged into a coding agent and copies its context to the clipboard.
- */
-export type InspectMode = 'inspect' | 'grab';
+import type { InspectMode, SourceComponent } from '../../../lib/types';
 
 type GrabStatus = 'idle' | 'copied' | 'failed';
+
+const INTERCEPTED_EVENTS = ['pointerdown', 'mousedown', 'mouseup', 'click'] as const;
 
 const GRAB_STATUS_LABELS: Record<Exclude<GrabStatus, 'idle'>, string> = {
   copied: i18n.translate('kbnInspectComponent.grab.copiedLabel', {
@@ -56,7 +52,7 @@ interface Props {
   branch: string;
   mode?: InspectMode;
   setFlyoutOverlayRef: Dispatch<SetStateAction<OverlayRef | null>>;
-  setIsInspecting: Dispatch<SetStateAction<boolean>>;
+  setIsInspecting: (isInspecting: boolean) => void;
 }
 
 /**
@@ -255,17 +251,19 @@ export const InspectOverlay = ({
     /**
      * Capture all click events on the document and stop them from propagating.
      * 'EuiWindowEvent' can't be used here as it doesn't allow for setting 'capture: true'.
+     * The mouse events only reach the listener from the overlay, elsewhere the cancelled
+     * 'pointerdown' already suppresses them.
      */
     const handleMouseEvent = (event: MouseEvent) => {
       handleEventPropagation({ event, callback: handleClickAtPositionOfInspectedElement });
     };
 
-    document.addEventListener('pointerdown', handleMouseEvent, true);
-    document.addEventListener('click', handleMouseEvent, true);
+    INTERCEPTED_EVENTS.forEach((type) => document.addEventListener(type, handleMouseEvent, true));
 
     return () => {
-      document.removeEventListener('pointerdown', handleMouseEvent, true);
-      document.removeEventListener('click', handleMouseEvent, true);
+      INTERCEPTED_EVENTS.forEach((type) =>
+        document.removeEventListener(type, handleMouseEvent, true)
+      );
     };
   }, [handleClickAtPositionOfInspectedElement]);
 

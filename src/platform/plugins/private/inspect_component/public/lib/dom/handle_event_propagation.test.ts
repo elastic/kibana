@@ -8,7 +8,7 @@
  */
 
 import { handleEventPropagation } from './handle_event_propagation';
-import { INSPECT_OVERLAY_ID } from '../constants';
+import { DEVELOPER_TOOLBAR_ID, INSPECT_OVERLAY_ID } from '../constants';
 
 describe('handleEventPropagation', () => {
   let callbackMock: jest.Mock;
@@ -63,13 +63,13 @@ describe('handleEventPropagation', () => {
     expect(callbackMock).toHaveBeenCalledWith(eventMock);
   });
 
-  it('should leave pointerdown events originating from the overlay untouched', () => {
-    const overlay = document.createElement('div');
-    overlay.id = INSPECT_OVERLAY_ID;
-    const highlightBox = document.createElement('div');
-    overlay.appendChild(highlightBox);
+  it('should leave events originating from the developer toolbar untouched', () => {
+    const toolbar = document.createElement('div');
+    toolbar.id = DEVELOPER_TOOLBAR_ID;
+    const modeButton = document.createElement('button');
+    toolbar.appendChild(modeButton);
 
-    eventMock = { ...eventMock, target: highlightBox } as unknown as MouseEvent;
+    eventMock = { ...eventMock, target: modeButton, type: 'click' } as unknown as MouseEvent;
 
     handleEventPropagation({ event: eventMock, callback: callbackMock });
 
@@ -77,6 +77,24 @@ describe('handleEventPropagation', () => {
     expect(eventMock.preventDefault).not.toHaveBeenCalled();
     expect(callbackMock).not.toHaveBeenCalled();
   });
+
+  it.each(['pointerdown', 'mousedown', 'mouseup'])(
+    'should stop but not cancel %s events originating from the overlay',
+    (type) => {
+      const overlay = document.createElement('div');
+      overlay.id = INSPECT_OVERLAY_ID;
+      const highlightBox = document.createElement('div');
+      overlay.appendChild(highlightBox);
+
+      eventMock = { ...eventMock, target: highlightBox, type } as unknown as MouseEvent;
+
+      handleEventPropagation({ event: eventMock, callback: callbackMock });
+
+      expect(eventMock.stopPropagation).toHaveBeenCalledTimes(1);
+      expect(eventMock.preventDefault).not.toHaveBeenCalled();
+      expect(callbackMock).not.toHaveBeenCalled();
+    }
+  );
 
   it('should not call callback when event is not click and element is not disabled', () => {
     eventMock = {

@@ -8,7 +8,7 @@
  */
 
 import { getElementFromPoint } from './get_element_from_point';
-import { INSPECT_OVERLAY_ID } from '../constants';
+import { DEVELOPER_TOOLBAR_ID, INSPECT_OVERLAY_ID } from '../constants';
 
 describe('getElementFromPoint', () => {
   let originalElementsFromPoint: typeof document.elementsFromPoint;
@@ -60,6 +60,20 @@ describe('getElementFromPoint', () => {
     const result = getElementFromPoint(mockEvent);
 
     expect(result).toBe(mockValidElement);
+  });
+
+  it('should return null for the developer toolbar instead of what it covers', () => {
+    const mockToolbar = document.createElement('div');
+    mockToolbar.id = DEVELOPER_TOOLBAR_ID;
+    const mockToolbarButton = document.createElement('button');
+    mockToolbar.appendChild(mockToolbarButton);
+    const mockCoveredElement = document.createElement('div');
+
+    document.elementsFromPoint = jest.fn().mockReturnValue([mockToolbarButton, mockCoveredElement]);
+
+    const result = getElementFromPoint(mockEvent);
+
+    expect(result).toBeNull();
   });
 
   it('skips SVG path elements', () => {

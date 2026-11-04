@@ -21,6 +21,7 @@ export { getFiberName } from './src/get_fiber_name';
 export { getOwnerChain } from './src/get_owner_chain';
 export {
   hasDebugSource,
+  isComponentFiber,
   isEuiComponentName,
   isHostFiber,
   isIgnoredComponentName,
@@ -30,4 +31,4 @@ export {
 export { findFiberWithDebugSource } from './src/find_fiber_with_debug_source';
 export { findSourceComponentName } from './src/find_source_component_name';
 export { findEuiComponentName } from './src/find_eui_component_name';
-export { getComponentStack } from './src/get_component_stack';
+export { ANONYMOUS_COMPONENT_NAME, getComponentStack } from './src/get_component_stack';

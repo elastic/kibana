@@ -8,6 +8,12 @@
  */
 
 /**
+ * 'inspect' opens a flyout with component details,
+ * 'grab' lets the element be dragged into a coding agent and copies its context to the clipboard.
+ */
+export type InspectMode = 'inspect' | 'grab';
+
+/**
  * The display name of the closest user-defined React component and the associated HTML element.
  */
 export interface SourceComponent {
