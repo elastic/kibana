@@ -39,7 +39,6 @@ export const RunLimitsSection = ({
   form,
   description,
   exhaustionCallouts,
-  sharedSwitch = false,
   onSave,
   onConfirmSave,
 }: {
@@ -47,8 +46,6 @@ export const RunLimitsSection = ({
   form: RunLimitsForm;
   description?: ReactNode;
   exhaustionCallouts: 'automations' | 'groups';
-  /** One switch turns every limit of the section on or off, instead of one switch per limit. */
-  sharedSwitch?: boolean;
   onSave: () => Promise<void>;
   onConfirmSave: () => Promise<void>;
 }) => {
@@ -65,6 +62,7 @@ export const RunLimitsSection = ({
     confirmationButtonText,
     warnings,
     closeConfirmation,
+    sharedSwitch,
   } = form;
   const confirmationModalTitleId = useGeneratedHtmlId({
     prefix: 'saveRunLimitsConfirmationModalTitle',

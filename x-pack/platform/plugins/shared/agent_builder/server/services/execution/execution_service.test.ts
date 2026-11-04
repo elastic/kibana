@@ -1830,15 +1830,20 @@ describe('AgentExecutionService', () => {
         expect(admitNewConversation).not.toHaveBeenCalled();
       });
 
-      it('gives the admission back when the opening message is not written', async () => {
+      it.each([
+        ['gives the admission back when the opening message is refused', true],
+        ['keeps the admission when the opening message write may have landed', false],
+      ])('%s', async (_name, refused) => {
         const release = jest.fn().mockResolvedValue(undefined);
         admitNewConversation.mockResolvedValueOnce(release);
-        conversationClient.create.mockRejectedValueOnce(new Error('write failed'));
-
-        await expect(converse({ conversationId: undefined, origin })).rejects.toThrow(
-          'write failed'
+        conversationClient.create.mockRejectedValueOnce(
+          refused
+            ? createConversationWriteConflictError({ conversationId: 'conversation-1' })
+            : new Error('read after write failed')
         );
-        expect(release).toHaveBeenCalledTimes(1);
+
+        await expect(converse({ conversationId: undefined, origin })).rejects.toBeDefined();
+        expect(release).toHaveBeenCalledTimes(refused ? 1 : 0);
       });
 
       it('keeps the admission once the opening message is written', async () => {

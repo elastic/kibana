@@ -75,8 +75,8 @@ interface RunLimitRowProps {
   disabled: boolean;
   onChange: (limit: RunLimitDraft) => void;
   /**
-   * Without it the row has no switch of its own: a section-wide switch shows its input, in which
-   * an empty value means no limit.
+   * Without it the row has no switch of its own: a section-wide switch shows its input, and the
+   * form reads an empty value as no limit.
    */
   onEnabledChange?: (enabled: boolean) => void;
   /** Whether the section-wide switch is on, for a row without a switch of its own. */
@@ -95,7 +95,8 @@ export const RunLimitRow = ({
   const hasOwnSwitch = onEnabledChange !== undefined;
   const limitEnabled = limit !== 0;
   const showInput = hasOwnSwitch ? limitEnabled : sectionEnabled;
-  const invalid = limitEnabled && !isValidLimitedRunLimitDraft(limit);
+  const invalid =
+    limitEnabled && (hasOwnSwitch || limit !== '') && !isValidLimitedRunLimitDraft(limit);
   const dailyLimitLabel = i18n.translate(
     'xpack.nightshift.settings.runLimits.dailyLimitInputLabel',
     {
@@ -190,9 +191,7 @@ export const RunLimitRow = ({
             disabled={disabled}
             onChange={(event) => {
               const nextLimit = parseRunLimitDraft(event.target.value);
-              if (nextLimit === '' && !hasOwnSwitch) {
-                onChange(0);
-              } else if (nextLimit !== 0) {
+              if (nextLimit !== 0) {
                 onChange(nextLimit);
               }
             }}

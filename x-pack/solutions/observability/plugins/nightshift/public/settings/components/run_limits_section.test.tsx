@@ -81,7 +81,7 @@ const TestRunLimits = ({
   exhaustionCallouts?: 'automations' | 'groups';
   sharedSwitch?: boolean;
 }) => {
-  const form = useRunLimitsForm({ groups });
+  const form = useRunLimitsForm({ groups, sharedSwitch });
   const onSave = async () => {
     await form.requestSave();
   };
@@ -95,7 +95,6 @@ const TestRunLimits = ({
         groups={groups}
         form={form}
         exhaustionCallouts={exhaustionCallouts}
-        sharedSwitch={sharedSwitch}
         onSave={onSave}
         onConfirmSave={onConfirmSave}
       />
@@ -305,6 +304,34 @@ describe('RunLimitsSection', () => {
         limits: { investigation: 7, manual_investigation: null },
       })
     );
+  });
+
+  it('keeps the inputs while the last finite limit is cleared under the shared switch', () => {
+    setup(
+      response({
+        limits: {
+          detection: 100,
+          investigation: 4,
+          manual_investigation: 0,
+          total_investigation: 0,
+          ki_extraction: 20,
+        },
+      }),
+      ['investigation', 'manual_investigation', 'total_investigation'],
+      'automations',
+      true
+    );
+
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '' },
+    });
+
+    expect(screen.getByTestId('nightshiftRunLimitsEnabledSwitch')).toBeChecked();
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(null);
+    fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-investigation'), {
+      target: { value: '6' },
+    });
+    expect(screen.getByTestId('nightshiftRunLimitInput-investigation')).toHaveValue(6);
   });
 
   it('cancels run-limit changes through the shared save bar', () => {

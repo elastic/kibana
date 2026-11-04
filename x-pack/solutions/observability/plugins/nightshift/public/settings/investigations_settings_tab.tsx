@@ -32,7 +32,10 @@ export const InvestigationsSettingsTab = ({
   canManageSandboxAllowlist?: boolean;
 }) => {
   const { appParams, application, http, overlays } = useKibana().services;
-  const runLimits = useRunLimitsForm({ groups: INVESTIGATION_RUN_LIMIT_GROUPS });
+  const runLimits = useRunLimitsForm({
+    groups: INVESTIGATION_RUN_LIMIT_GROUPS,
+    sharedSwitch: true,
+  });
 
   useUnsavedChangesPrompt({
     hasUnsavedChanges: runLimits.isDirty,
@@ -63,7 +66,6 @@ export const InvestigationsSettingsTab = ({
           groups={INVESTIGATION_RUN_LIMIT_GROUPS}
           form={runLimits}
           exhaustionCallouts="automations"
-          sharedSwitch
           description={i18n.translate(
             'xpack.nightshift.settings.investigationRunLimitsDescription',
             {

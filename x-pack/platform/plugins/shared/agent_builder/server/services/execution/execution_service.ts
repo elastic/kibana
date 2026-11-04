@@ -291,10 +291,12 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
 
         activeConversationId = conversation.id;
       } catch (err) {
-        await releaseAdmission?.();
         // A refused run never started, so it leaves no execution record behind: a keyed
         // redelivery then starts afresh instead of replaying the refusal.
         if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+          // Only a refusal is known to have written nothing; any other failure may follow a
+          // write that landed, so the admission stays taken.
+          await releaseAdmission?.();
           try {
             await executionClient.delete(executionId);
           } catch (deleteErr) {
@@ -445,7 +447,9 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
         mergeAttachments: true,
       });
     } catch (err) {
-      await releaseAdmission?.();
+      if (isConversationBusyError(err) || isConversationWriteConflictError(err)) {
+        await releaseAdmission?.();
+      }
       throw err;
     }
 

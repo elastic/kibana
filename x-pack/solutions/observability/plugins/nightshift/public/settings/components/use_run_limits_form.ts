@@ -19,6 +19,7 @@ import {
   isLowerFiniteLimit,
   keepRestoreLimits,
   setRunLimitEnabled,
+  withEmptyLimitsAsUnlimited,
   type RunLimitDraft,
   type RunQuotaDraftState,
 } from './run_limit_draft';
@@ -33,7 +34,14 @@ export type RunLimitConfirmedSaveResult = 'saved' | 'failed';
 const hasSaveWarnings = ({ loweringGroups }: RunLimitSaveWarnings): boolean =>
   loweringGroups.length > 0;
 
-export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] }) => {
+export const useRunLimitsForm = ({
+  groups,
+  sharedSwitch = false,
+}: {
+  groups: readonly RunQuotaGroup[];
+  /** One switch turns every limit on or off, and an empty limit input means no limit. */
+  sharedSwitch?: boolean;
+}) => {
   const quotas = useRunQuotas();
   const { save, isSaving } = useUpdateRunQuotas();
   const [draftState, setDraftState] = useState<RunQuotaDraftState>();
@@ -51,23 +59,29 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
     );
   }, [quotas.data]);
 
+  // What a save sends: with the shared switch, an input left empty is a limit turned off.
+  const effectiveDraftState = useMemo(
+    () => (draftState && sharedSwitch ? withEmptyLimitsAsUnlimited(draftState) : draftState),
+    [draftState, sharedSwitch]
+  );
+
   const update = useMemo(
-    () => (draftState ? buildRunQuotaSettingsUpdate(draftState) : undefined),
-    [draftState]
+    () => (effectiveDraftState ? buildRunQuotaSettingsUpdate(effectiveDraftState) : undefined),
+    [effectiveDraftState]
   );
 
   const warnings = useMemo<RunLimitSaveWarnings>(() => {
-    if (!draftState || !quotas.data) {
+    if (!effectiveDraftState || !quotas.data) {
       return {
         loweringGroups: [],
       };
     }
     const response = quotas.data;
     const loweringGroups = groups.filter((group) => {
-      const next = draftState.draft.limits[group];
+      const next = effectiveDraftState.draft.limits[group];
       return (
-        next !== draftState.saved.limits[group] &&
-        isLowerFiniteLimit(draftState.saved.limits[group], next) &&
+        next !== effectiveDraftState.saved.limits[group] &&
+        isLowerFiniteLimit(effectiveDraftState.saved.limits[group], next) &&
         response.counts[group] >= next
       );
     });
@@ -75,7 +89,7 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
     return {
       loweringGroups,
     };
-  }, [draftState, groups, quotas.data]);
+  }, [effectiveDraftState, groups, quotas.data]);
 
   const performSave = useCallback(async (): Promise<RunLimitConfirmedSaveResult> => {
     if (!update) {
@@ -161,7 +175,8 @@ export const useRunLimitsForm = ({ groups }: { groups: readonly RunQuotaGroup[] 
     quotas,
     draftState,
     update,
-    isDirty: draftState ? hasRunQuotaDraftChanges(draftState) : false,
+    isDirty: effectiveDraftState ? hasRunQuotaDraftChanges(effectiveDraftState) : false,
+    sharedSwitch,
     isSaving,
     canManage: quotas.data?.canManage === true,
     saveError,

@@ -118,6 +118,20 @@ export const keepRestoreLimits = (
       }
     : next;
 
+/** Reads every empty draft limit as unlimited, for a form in which an empty input means no limit. */
+export const withEmptyLimitsAsUnlimited = (state: RunQuotaDraftState): RunQuotaDraftState => ({
+  ...state,
+  draft: {
+    ...state.draft,
+    limits: Object.fromEntries(
+      RUN_QUOTA_GROUPS.map((group) => {
+        const limit = state.draft.limits[group];
+        return [group, limit === '' ? MIN_RUN_LIMIT : limit];
+      })
+    ) as Record<RunQuotaGroup, RunLimitDraft>,
+  },
+});
+
 export const hasRunQuotaDraftChanges = ({ saved, draft }: RunQuotaDraftState): boolean =>
   saved.enabled !== draft.enabled ||
   RUN_QUOTA_GROUPS.some((group) => saved.limits[group] !== draft.limits[group]);
