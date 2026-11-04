@@ -990,6 +990,7 @@ describe('AutomaticImportSetupService', () => {
         attributes: {
           data_stream_id: 'test-datastream',
           integration_id: 'test-integration',
+          description: 'Test data stream description',
           job_info: { status: 'pending', jobId: 'task-123', jobType: 'autoImport-dataStream-task' },
         },
       });
@@ -998,6 +999,9 @@ describe('AutomaticImportSetupService', () => {
       asPrivate(service).savedObjectService = {
         updateDataStreamSavedObjectAttributes: mockUpdateDataStream,
         updateDataStreamPhase: jest.fn().mockResolvedValue(undefined),
+        getIntegration: jest
+          .fn()
+          .mockResolvedValue({ metadata: { description: 'Test integration description' } }),
         getDataStream: mockGetDataStream,
       } as unknown as AutomaticImportSavedObjectService;
 

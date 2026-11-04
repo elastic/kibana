@@ -31,7 +31,7 @@ export const createRuleAttachmentDefinition = ({
   container,
 }: RuleAttachmentDefinitionServices): AttachmentUIDefinition<RuleAttachment> => ({
   getLabel: (attachment) => attachment.data.metadata.name,
-  getIcon: () => 'watchesApp',
+  getIcon: () => 'if',
   getHeader: ({ attachment }) => ({ icon: RULE_KIND_ICONS[attachment.data.kind] }),
 
   canvasWidth: '40vw',

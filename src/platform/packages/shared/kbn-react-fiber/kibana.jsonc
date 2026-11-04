@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/react-fiber",
+  "owner": "@elastic/appex-sharedux",
+  "group": "platform",
+  "visibility": "shared",
+  "description": "Helpers for reading React Fiber nodes and their development-only source information from DOM elements.",
+  "devOnly": true
+}

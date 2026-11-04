@@ -6,56 +6,31 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import {
-  lensEditPanelRequestSchema,
-  lensPanelRequestSchema,
-  vegaEditPanelRequestSchema,
-  vegaPanelRequestSchema,
-} from '.';
+import { lensPanelContentSchema, vegaPanelContentSchema } from '.';
 
-const baseCreateRequest = {
+const baseRequest = {
   source: 'request' as const,
   query: 'show total requests',
-  grid: { x: 0, y: 0, w: 12, h: 5 },
 };
 
-describe('visualization panel request schemas', () => {
-  it('requires chartType when creating a Lens panel', () => {
-    expect(
-      lensPanelRequestSchema.safeParse({
-        ...baseCreateRequest,
-        chartType: SupportedChartType.Metric,
-      }).success
-    ).toBe(true);
-
-    expect(lensPanelRequestSchema.safeParse(baseCreateRequest).success).toBe(false);
+describe('visualization panel content schemas', () => {
+  it.each([
+    ['with', { chartType: SupportedChartType.Metric }],
+    ['without', {}],
+  ])('accepts Lens content %s chartType', (_, fields) => {
+    expect(lensPanelContentSchema.safeParse({ ...baseRequest, ...fields }).success).toBe(true);
   });
 
-  it('allows a Vega panel without a chartType hint', () => {
-    expect(
-      vegaPanelRequestSchema.safeParse({
-        ...baseCreateRequest,
-        renderer: 'vega',
-      }).success
-    ).toBe(true);
+  it('allows Vega content without a chartType hint', () => {
+    expect(vegaPanelContentSchema.safeParse({ ...baseRequest, renderer: 'vega' }).success).toBe(
+      true
+    );
   });
 
-  it('allows a Lens edit without chartType because the existing panel provides context', () => {
-    expect(
-      lensEditPanelRequestSchema.safeParse({
-        source: 'request',
-        panelId: 'panel-1',
-        query: 'use a clearer title',
-      }).success
-    ).toBe(true);
-  });
-
-  it('does not accept applyChartRules on a Vega edit', () => {
-    const result = vegaEditPanelRequestSchema.safeParse({
-      source: 'request',
+  it('does not accept applyChartRules on Vega content', () => {
+    const result = vegaPanelContentSchema.safeParse({
+      ...baseRequest,
       renderer: 'vega',
-      panelId: 'panel-1',
-      query: 'use a clearer title',
       applyChartRules: true,
     });
 

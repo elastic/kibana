@@ -12,7 +12,7 @@ import { StreamListView } from '../stream_list_view';
 import { DEFAULT_STREAMS_LAYOUT_TAB } from '../streams_layout/tabs';
 
 /**
- * Renders the landing view for the app root, which is the tabbed layout when Canvas is enabled and
+ * Renders the landing view for the app root, which is the tabbed layout when Map is enabled and
  * the stream list otherwise.
  */
 export function StreamsRootRedirect() {

@@ -119,7 +119,7 @@ export {
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
 
-export { MAX_STRING_LENGTH } from './constants';
+export { MAX_STRING_LENGTH, MAX_USER_CONTEXT_DESCRIPTION_LENGTH } from './constants';
 
 export { getDataStreamEditState } from './data_stream_edit_state';
 export type { DataStreamEditState } from './data_stream_edit_state';

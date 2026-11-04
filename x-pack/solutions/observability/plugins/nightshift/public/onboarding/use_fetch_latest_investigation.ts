@@ -14,8 +14,8 @@ import { isHttpClientError } from '../common/http_error';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_URL,
-} from '../common/shared_investigations_api';
-import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../hooks/use_fetch_investigations';
+} from '../data/investigations/shared_investigations_api';
+import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../data/investigations/use_fetch_investigations';
 import { useKibana } from '../hooks/use_kibana';
 
 export interface FetchLatestInvestigationResult {

@@ -168,15 +168,21 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
         const authModeBadge =
           authMode === 'per-user' ? (
             <EuiBadge color="hollow" iconType="user">
-              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.perUserAuthLabel', {
-                defaultMessage: 'Personal credentials',
-              })}
+              {i18n.translate(
+                'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.perUserAuthLabel',
+                {
+                  defaultMessage: 'Personal credentials',
+                }
+              )}
             </EuiBadge>
           ) : authMode === 'shared' ? (
             <EuiBadge color="hollow" iconType="users">
-              {i18n.translate('responseOps.formGenerator.multiOptionUnionWidget.sharedAuthLabel', {
-                defaultMessage: 'Service account',
-              })}
+              {i18n.translate(
+                'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.sharedAuthLabel',
+                {
+                  defaultMessage: 'Service account',
+                }
+              )}
             </EuiBadge>
           ) : null;
 
@@ -188,7 +194,7 @@ export const MultiOptionUnionWidget: React.FC<DiscriminatedUnionWidgetProps> = (
                 <EuiFlexItem grow={false}>
                   <EuiBadge color="success">
                     {i18n.translate(
-                      'responseOps.formGenerator.multiOptionUnionWidget.recommendedLabel',
+                      'responseOpsFormGenerator.formGenerator.multiOptionUnionWidget.recommendedLabel',
                       { defaultMessage: 'Recommended' }
                     )}
                   </EuiBadge>

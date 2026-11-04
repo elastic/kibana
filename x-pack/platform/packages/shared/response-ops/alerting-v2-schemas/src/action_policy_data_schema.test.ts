@@ -17,6 +17,9 @@ import {
 import { FIND_MAX_RESULT_WINDOW, MAX_BULK_ITEMS, MAX_KQL_LENGTH } from './constants';
 
 const DESTINATIONS = [{ type: 'workflow' as const, id: 'wf-1' }];
+// A snooze must expire in the future; computed from now so the fixture never rots.
+const FUTURE_SNOOZE = new Date(Date.now() + 86_400_000).toISOString();
+const PAST_SNOOZE = '2020-01-01T00:00:00.000Z';
 
 describe('createActionPolicyDataSchema', () => {
   const base = { name: 'Test', description: 'Desc', destinations: DESTINATIONS };
@@ -780,13 +783,19 @@ describe('bulkSnoozeActionPoliciesBodySchema', () => {
   it('accepts ids plus snoozed_until', () => {
     const result = bulkSnoozeActionPoliciesBodySchema.parse({
       ids: ['policy-1', 'policy-2'],
-      snoozed_until: '2026-04-01T10:00:00Z',
+      snoozed_until: FUTURE_SNOOZE,
     });
 
     expect(result).toEqual({
       ids: ['policy-1', 'policy-2'],
-      snoozed_until: '2026-04-01T10:00:00Z',
+      snoozed_until: FUTURE_SNOOZE,
     });
+  });
+
+  it('rejects a snoozed_until in the past', () => {
+    expect(() =>
+      bulkSnoozeActionPoliciesBodySchema.parse({ ids: ['policy-1'], snoozed_until: PAST_SNOOZE })
+    ).toThrow();
   });
 
   it('rejects a missing snoozed_until', () => {
@@ -836,10 +845,20 @@ describe('bulkSnoozeActionPoliciesBodySchema', () => {
 });
 
 describe('snoozeActionPolicyBodySchema', () => {
+  it('accepts a snoozed_until in the future', () => {
+    expect(snoozeActionPolicyBodySchema.parse({ snoozed_until: FUTURE_SNOOZE })).toEqual({
+      snoozed_until: FUTURE_SNOOZE,
+    });
+  });
+
+  it('rejects a snoozed_until in the past', () => {
+    expect(() => snoozeActionPolicyBodySchema.parse({ snoozed_until: PAST_SNOOZE })).toThrow();
+  });
+
   it('rejects unknown top-level fields (strict)', () => {
     expect(() =>
       snoozeActionPolicyBodySchema.parse({
-        snoozed_until: '2026-04-01T10:00:00Z',
+        snoozed_until: FUTURE_SNOOZE,
         unknownField: 'x',
       })
     ).toThrow();
@@ -855,5 +874,56 @@ describe('actionPolicyDestinationSchema', () => {
         unknownField: 'x',
       })
     ).toThrow();
+  });
+});
+
+describe('destinations uniqueness', () => {
+  const duplicate = [
+    { type: 'workflow' as const, id: 'wf-1' },
+    { type: 'workflow' as const, id: 'wf-1' },
+  ];
+  const base = { name: 'Test', description: 'Desc' };
+
+  it('rejects a repeated destination on create and points at its position', () => {
+    const result = createActionPolicyDataSchema.safeParse({ ...base, destinations: duplicate });
+    expect(result.success).toBe(false);
+  });
+
+  it('rejects a repeated destination on replace', () => {
+    expect(putActionPolicyDataSchema.safeParse({ ...base, destinations: duplicate }).success).toBe(
+      false
+    );
+  });
+
+  it('rejects a repeated destination on patch', () => {
+    expect(updateActionPolicyDataSchema.safeParse({ destinations: duplicate }).success).toBe(false);
+  });
+
+  it('accepts distinct destinations', () => {
+    const destinations = [
+      { type: 'workflow' as const, id: 'wf-1' },
+      { type: 'workflow' as const, id: 'wf-2' },
+    ];
+    expect(createActionPolicyDataSchema.parse({ ...base, destinations }).destinations).toEqual(
+      destinations
+    );
+  });
+});
+
+describe('findActionPoliciesRequestSchema text inputs', () => {
+  it('trims search', () => {
+    expect(findActionPoliciesRequestSchema.parse({ search: '  cpu  ' }).search).toBe('cpu');
+  });
+
+  it('rejects a blank search', () => {
+    expect(findActionPoliciesRequestSchema.safeParse({ search: '   ' }).success).toBe(false);
+  });
+
+  it('trims filter and rejects a blank one', () => {
+    expect(findActionPoliciesRequestSchema.parse({ filter: ' enabled: true ' }).filter).toBe(
+      'enabled: true'
+    );
+    expect(findActionPoliciesRequestSchema.safeParse({ filter: '' }).success).toBe(false);
+    expect(findActionPoliciesRequestSchema.safeParse({ filter: '   ' }).success).toBe(false);
   });
 });

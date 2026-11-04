@@ -13,7 +13,6 @@ export const reactRules: DummyRuleMap = {
   'react/no-multi-comp': ['error', { ignoreStateless: true }],
   'react/no-unknown-property': ['error', { ignore: ['css'] }],
   'react/prefer-es6-class': ['error', 'always'],
-  // 'jsx-a11y/accessible-emoji': 'error',
   'jsx-a11y/alt-text': 'error',
   'jsx-a11y/anchor-has-content': 'error',
   'jsx-a11y/aria-activedescendant-has-tabindex': 'error',
@@ -43,8 +42,7 @@ export const reactRules: DummyRuleMap = {
 
   // 'react-hooks/exhaustive-deps': 'error',
   // 'react-hooks/rules-of-hooks': 'error',
-  // oxlint has no `ignoreCase` option and ESLint enforces `{ ignoreCase: true }`; keep it in ESLint.
-  // 'react/jsx-no-duplicate-props': ['error', { 'ignoreCase': true }],
+  'react/jsx-no-duplicate-props': 'error',
   'react/jsx-no-undef': 'error',
   'react/jsx-pascal-case': 'error',
   // 'react/jsx-uses-react': 'error',
@@ -53,7 +51,7 @@ export const reactRules: DummyRuleMap = {
   'react/no-is-mounted': 'error',
   'react/no-unescaped-entities': 'error',
   'react/no-will-update-set-state': 'error',
-  // 'react/prefer-stateless-function': ['error', { 'ignorePureComponents': true }],
+  '@kbn/compat/react-prefer-stateless-function': ['error', { ignorePureComponents: true }],
   'react/react-in-jsx-scope': 'error',
   'react/self-closing-comp': 'error',
 };
@@ -75,6 +73,11 @@ const strictReactRules: DummyRuleMap = {
   'react/jsx-no-comment-textnodes': 'error',
   'react/jsx-no-target-blank': 'error',
   'react/jsx-fragments': 'error',
+  '@kbn/compat/react-boolean-prop-naming': 'error',
+  '@kbn/compat/react-no-deprecated': 'error',
+  '@kbn/compat/react-no-typos': 'error',
+  '@kbn/compat/react-no-unused-prop-types': 'error',
+  '@kbn/compat/react-sort-default-props': 'error',
 };
 
 export const reactOverrides: OxlintOverride[] = [
@@ -182,6 +185,7 @@ export const reactOverrides: OxlintOverride[] = [
       'react/no-render-return-value': 'error',
       'react/no-string-refs': 'error',
       'react/require-render-return': 'error',
+      '@kbn/compat/react-no-deprecated': 'error',
     },
   },
 ];

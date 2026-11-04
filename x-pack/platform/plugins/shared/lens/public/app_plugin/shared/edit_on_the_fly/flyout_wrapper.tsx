@@ -24,7 +24,7 @@ import {
   EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, Global } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DRAG_DROP_EXTRA_TARGETS_WIDTH, DRAG_DROP_EXTRA_TARGETS_PADDING } from '@kbn/lens-common';
@@ -54,8 +54,26 @@ export const FlyoutWrapper = ({
   applyButtonDisabledTooltip,
 }: FlyoutWrapperProps) => {
   const { euiTheme } = useEuiTheme();
+  /**
+   * EUI clips right flyouts at -50% of their width, and project chrome replaces
+   * it with a rounded inset(0 0 0 -50%). On narrow flyouts that cuts the
+   * drag-drop extras, so extend the left edge by the extra-target gutter and
+   * keep chrome's rounded right corners.
+   */
+  const customizeLensClipPathFix = css`
+    body
+      .euiFlyout[class*='right'][data-test-subj='customizeLens']:not(
+        [data-managed-flyout-layout-mode='side-by-side'][data-managed-flyout-level='child']
+      ) {
+      clip-path: inset(
+        0 0 0 -${DRAG_DROP_EXTRA_TARGETS_PADDING}px round 0 ${euiTheme.border.radius.frame} ${euiTheme
+            .border.radius.frame} 0
+      ) !important;
+    }
+  `;
   return (
     <>
+      <Global styles={customizeLensClipPathFix} />
       {isInlineFlyoutVisible && displayFlyoutHeader && (
         <EuiFlyoutHeader
           hasBorder={false}

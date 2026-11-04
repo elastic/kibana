@@ -14,9 +14,13 @@ import type {
 } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { isAgentNotFoundError, isAgentUnavailableError } from '@kbn/agent-builder-common';
+import type { AgentRegistry } from '@kbn/agent-builder-server';
 import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/server';
+import {
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+} from '@kbn/nightshift-investigations-plugin/server';
 import {
   RelayRequestError,
   type InMemoryConnector,
@@ -57,6 +61,9 @@ const ELASTIC_APPS_SLACK_CONNECTOR_NAME = 'Slack (Elastic app)';
 const RELAY_SERVICE_ACCOUNT_NAME_PREFIX = 'nightshift-relay-agent-builder';
 
 const RELAY_SERVICE_ACCOUNT_ROLES = ['_nightshift_agent'];
+
+/** Agents that answer Slack turns, in order of preference. */
+const SLACK_AGENT_IDS = [NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID] as const;
 
 /**
  * Selects the server-owned Relay platform assumer. The id (`relay-service`) is
@@ -401,8 +408,14 @@ export class SlackAppService {
       installAuth: { uiam_service_account_id: serviceAccountId },
       stored: { apiKeyId: null, serviceAccountId },
       // TODO: use resolveSlackAgentId once Relay is space aware
-      resolveAgentId: async () =>
-        this.server.agentBuilder ? NIGHTSHIFT_INVESTIGATION_AGENT_ID : undefined,
+      resolveAgentId: async () => {
+        if (!this.server.agentBuilder) {
+          return undefined;
+        }
+        return this.server.nightshiftInvestigations?.isAssistantEnabled()
+          ? NIGHTSHIFT_ASSISTANT_AGENT_ID
+          : NIGHTSHIFT_INVESTIGATION_AGENT_ID;
+      },
       revoke: (context) => this.revokeServiceAccount(request, serviceAccountId, context),
     };
   }
@@ -429,8 +442,8 @@ export class SlackAppService {
   /**
    * Relay posts every turn to `kibana_url`, which has no space prefix, so turns run in the default
    * space whatever space Connect was clicked from. Agent Builder accepts an unknown agent id and
-   * only fails the run, so the agent is declared only when it exists and is available, checked with the minted key
-   * because that is the credential Relay presents.
+   * only fails the run, so the first of `SLACK_AGENT_IDS` that exists and is available is declared,
+   * checked with the minted key because that is the credential Relay presents.
    */
   private async resolveSlackAgentId(encodedApiKey: string): Promise<string | undefined> {
     const { agentBuilder } = this.server;
@@ -444,24 +457,41 @@ export class SlackAppService {
     });
     try {
       const registry = await agentBuilder.agents.getRegistry({ request });
-      // `get` rather than `has`: only `get` runs the agent's availability gate, which rejects runs
-      // the same way Relay's turns would be rejected.
-      await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-      return NIGHTSHIFT_INVESTIGATION_AGENT_ID;
-    } catch (error) {
-      if (isAgentNotFoundError(error) || isAgentUnavailableError(error)) {
-        this.logger.debug(
-          `${NIGHTSHIFT_INVESTIGATION_AGENT_ID} is not installed in the default space, Slack turns will use the default agent`
-        );
-        return undefined;
+      const isAssistantEnabled =
+        this.server.nightshiftInvestigations?.isAssistantEnabled() ?? false;
+      for (const agentId of SLACK_AGENT_IDS) {
+        // A persisted assistant outlives its disabled type, and `get` accepts it without a gate.
+        if (agentId === NIGHTSHIFT_ASSISTANT_AGENT_ID && !isAssistantEnabled) {
+          continue;
+        }
+        if (await this.isAgentAvailable(registry, agentId)) {
+          return agentId;
+        }
       }
+      this.logger.debug('No Nightshift agent is available, Slack turns will use the default agent');
+    } catch (error) {
       this.logger.warn(
-        `Failed to look up ${NIGHTSHIFT_INVESTIGATION_AGENT_ID}, Slack turns will use the default agent: ${this.toErrorMessage(
+        `Failed to look up the Nightshift agents, Slack turns will use the default agent: ${this.toErrorMessage(
           error
         )}`
       );
     }
     return undefined;
+  }
+
+  private async isAgentAvailable(registry: AgentRegistry, agentId: string): Promise<boolean> {
+    try {
+      // `get` rather than `has`: only `get` runs the agent's availability gate, which rejects runs
+      // the same way Relay's turns would be rejected.
+      await registry.get(agentId);
+      return true;
+    } catch (error) {
+      if (isAgentNotFoundError(error) || isAgentUnavailableError(error)) {
+        this.logger.debug(`${agentId} is not available in the default space for Slack turns`);
+        return false;
+      }
+      throw error;
+    }
   }
 
   async connect(request: KibanaRequest): Promise<SlackAppConnectResponse> {
@@ -709,6 +739,9 @@ export class SlackAppService {
       };
       if (entry.display_name != null) {
         binding.displayName = entry.display_name;
+      }
+      if (entry.visibility != null) {
+        binding.visibility = entry.visibility;
       }
       bindings.push(binding);
     }

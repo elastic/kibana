@@ -6,7 +6,6 @@
  */
 
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
-import { encode } from '@kbn/rison';
 import { capitalize } from 'lodash';
 import type { Criteria, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
@@ -35,10 +34,10 @@ import {
   OPEN_IN_ALERTS_TITLE_STATUS,
   OPEN_IN_ALERTS_TITLE_USERNAME,
 } from '../../../overview/components/detection_response/translations';
-import { URL_PARAM_KEY } from '../../../common/hooks/use_url_state';
 import { useNavigateToAlertsPageWithFilters } from '../../../common/hooks/use_navigate_to_alerts_page_with_filters';
 import type { ESBoolQuery } from '../../../../common/typed_json';
 import { useAlertTimeRange } from '../../../entity_analytics/hooks/use_alert_time_range';
+import { encodeGlobalTimerangeUrlParam } from '../../../common/utils/global_timerange_url_param';
 import { useUiSetting } from '../../../common/lib/kibana';
 import { useQueryAlerts } from '../../../detections/containers/detection_engine/alerts/use_query';
 import { ALERTS_QUERY_NAMES } from '../../../detections/containers/detection_engine/alerts/constants';
@@ -60,6 +59,13 @@ enum KIBANA_ALERTS {
   RULE_NAME = 'kibana.alert.rule.name',
   WORKFLOW_STATUS = 'kibana.alert.workflow_status',
 }
+
+const LOADING_ALERTS_MESSAGE = i18n.translate(
+  'xpack.securitySolution.flyout.left.insights.alerts.table.loadingMessage',
+  {
+    defaultMessage: 'Loading alerts…',
+  }
+);
 
 type AlertSeverity = 'low' | 'medium' | 'high' | 'critical';
 
@@ -157,15 +163,6 @@ export const AlertsDetailsTable = memo(
     };
 
     const { from, to } = useAlertTimeRange(scopeId);
-    const timerange = encode({
-      global: {
-        [URL_PARAM_KEY.timerange]: {
-          kind: 'absolute',
-          from,
-          to,
-        },
-      },
-    });
 
     const entityStoreV2Enabled = useUiSetting<boolean>(FF_ENABLE_ENTITY_STORE_V2);
     const entityTypeResolved: 'host' | 'user' =
@@ -240,12 +237,21 @@ export const AlertsDetailsTable = memo(
     );
 
     const { signalIndexName } = useSignalIndex();
-    const { data, setQuery } = useQueryAlerts({
+    const {
+      data,
+      loading: alertsListLoading,
+      refetch: alertsListRefetch,
+      setQuery,
+    } = useQueryAlerts({
       query: alertsListQuery,
       queryName: ALERTS_QUERY_NAMES.BY_RULE_BY_STATUS,
       indexName: signalIndexName,
       skip: skipEntityResolution,
     });
+    // `useQueryAlerts` reports `loading: false` until its first request starts and only sets
+    // `refetch` once a request settles, so a null `refetch` means no result has arrived yet.
+    const isAlertsListLoading =
+      skipEntityResolution || alertsListLoading || alertsListRefetch == null;
 
     useEffect(() => {
       setQuery(alertsListQuery);
@@ -428,9 +434,10 @@ export const AlertsDetailsTable = memo(
             },
           ],
           true,
-          timerange
+          // Encoded on click so relative bounds (e.g. `now-30d`) resolve against the current time.
+          encodeGlobalTimerangeUrlParam({ from, to })
         ),
-      [field, openAlertsPageWithFilters, timerange, value]
+      [field, from, openAlertsPageWithFilters, to, value]
     );
 
     return (
@@ -454,6 +461,8 @@ export const AlertsDetailsTable = memo(
             columns={columns}
             pagination={pagination}
             onChange={onTableChange}
+            loading={isAlertsListLoading}
+            noItemsMessage={isAlertsListLoading ? LOADING_ALERTS_MESSAGE : undefined}
             data-test-subj={'securitySolutionFlyoutAlertsFindingsTable'}
             sorting={sorting}
             tableCaption={i18n.translate(

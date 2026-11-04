@@ -11,9 +11,9 @@ import type { RunContextStackEntry, ToolHandlerContext } from '@kbn/agent-builde
 import type { ResolvedSandboxCredentials } from './connector_credentials';
 
 export const getConversationId = (context: {
-  runContext: { stack: unknown[] };
+  runContext: { stack: readonly unknown[] };
 }): string | undefined =>
-  (context.runContext.stack as RunContextStackEntry[])
+  (context.runContext.stack as readonly RunContextStackEntry[])
     .filter((e) => e.type === 'agent')
     .map((e) => (e as Extract<RunContextStackEntry, { type: 'agent' }>).conversationId)
     .find(Boolean);
@@ -57,6 +57,8 @@ export const resolveAbsolutePath = (filePath: string): string => {
 };
 
 export interface SandboxCallContext {
+  agentId?: string;
+  conversationId?: string;
   request: KibanaRequest;
   /** Per-agent connector allow-list; credentials are never injected for connectors outside it. */
   allowedConnectorIds: readonly string[];
@@ -77,10 +79,15 @@ export type SandboxToolHandlerContext = ToolHandlerContext & {
 export const getSandboxCallContext = (
   context: Pick<SandboxToolHandlerContext, 'request' | 'sandboxCallContext'> & {
     agentConfiguration?: AgentConfiguration;
+    runContext?: { stack: readonly RunContextStackEntry[] };
   }
 ): SandboxCallContext =>
   context.sandboxCallContext ?? {
     request: context.request,
+    agentId: context.runContext?.stack.findLast((entry) => entry.type === 'agent')?.agentId,
+    conversationId: context.runContext
+      ? getConversationId({ runContext: context.runContext })
+      : undefined,
     allowedConnectorIds: context.agentConfiguration?.connector_ids ?? [],
     resolvedCredentials: new Map(),
   };

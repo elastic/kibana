@@ -5,12 +5,14 @@
  * 2.0.
  */
 
+import { STREAMS_DEFAULT_UNIT_ID } from '@kbn/streams-plugin/common';
 import type { StreamsAppStartDependencies } from '../../../types';
 import { getSourceTypeSlug } from './source_helpers';
 import type { ConfiguredSource, RevealedApiKey, SourceApiKey } from './types';
 
 export interface SourceApiKeyServicesDeps {
   streamsRepositoryClient: StreamsAppStartDependencies['streams']['streamsRepositoryClient'];
+  unitId?: string;
 }
 
 export type SourceApiKeyGenerationDeps = SourceApiKeyServicesDeps;
@@ -34,11 +36,12 @@ export interface SourceApiKeyServices {
 
 export const createSourceApiKeyServices = ({
   streamsRepositoryClient,
+  unitId = STREAMS_DEFAULT_UNIT_ID,
 }: SourceApiKeyServicesDeps): SourceApiKeyServices => ({
   load: async (sourceId) => {
     const response = await streamsRepositoryClient.fetch('GET /internal/streams/sources/api_keys', {
       params: {
-        query: { sourceId },
+        query: { sourceId, unitId },
       },
       signal: null,
     });
@@ -71,6 +74,7 @@ export const createSourceApiKeyServices = ({
         body: {
           sourceId: source.id,
           sourceTypeSlug: getSourceTypeSlug(source.type),
+          unitId,
         },
       },
       signal: null,
@@ -86,7 +90,7 @@ export const createSourceApiKeyServices = ({
   delete: async (sourceId, apiKeyId) => {
     await streamsRepositoryClient.fetch('DELETE /internal/streams/sources/api_key', {
       params: {
-        body: { sourceId, apiKeyId },
+        body: { sourceId, apiKeyId, unitId },
       },
       signal: null,
     });

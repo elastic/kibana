@@ -10,10 +10,14 @@
 import { parse } from 'yaml';
 import { ALERTZERO_CREATE_PROPOSAL_WORKFLOW_ID } from './create_proposal';
 import {
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW,
+  ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID,
+} from './forensics_close_investigation_gate';
+import {
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW,
   ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW_ID,
 } from './forensics_proposal_gate';
-import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt_proposal_gate';
+import { ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW } from './hunt';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
 interface YamlStep {
@@ -40,6 +44,7 @@ interface YamlWorkflow {
 
 const gate = parse(ALERTZERO_FORENSICS_PROPOSAL_GATE_WORKFLOW.yaml) as YamlWorkflow;
 const huntGate = parse(ALERTZERO_HUNT_PROPOSAL_GATE_WORKFLOW.yaml) as YamlWorkflow;
+const closeGate = parse(ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW.yaml) as YamlWorkflow;
 const stepIn = (steps: YamlStep[], name: string) => steps.find((step) => step.name === name);
 
 const evaluateExpression = (expression: string, context: Record<string, unknown>): unknown => {
@@ -206,6 +211,7 @@ describe('Forensics proposal gate', () => {
         'workflow-id': 'system-alertzero-journal-note',
         'run-as-mode': 'inherit',
         inputs: {
+          author_name: '{{ consts.author_name }}',
           conversation_id: '{{ inputs.investigationConversationId }}',
           message: '{{ variables.lost_race_note }}',
         },
@@ -252,15 +258,31 @@ describe('Forensics proposal gate', () => {
   describe('trigger schema', () => {
     const inputs = gate.triggers?.[0]?.inputs;
 
-    it('requires what the settlement check and the bridge need, and nothing else', () => {
+    it('requires what the settlement check, the bridge and the close question need, and nothing else', () => {
       expect(gate.triggers?.[0]?.type).toBe('manual');
       expect(inputs?.required).toEqual([
         'conversationId',
         'comment',
         'investigationConversationId',
         'expectedProposalCount',
+        'attackDiscoveryId',
+        'closeReason',
+        'attackReason',
       ]);
       expect(inputs?.additionalProperties).toBe(false);
+    });
+
+    // The reasons are forwarded to the close gate, whose action writes them on the
+    // Investigation and the attack, so both ends must accept the same vocabulary.
+    it('accepts the same close and attack reasons the close gate does', () => {
+      const closeInputs = closeGate.triggers?.[0]?.inputs?.properties as Record<
+        string,
+        { enum?: string[]; maxLength?: number }
+      >;
+      const ours = inputs?.properties as Record<string, { enum?: string[]; maxLength?: number }>;
+      expect(ours.closeReason.enum).toEqual(closeInputs.closeReason.enum);
+      expect(ours.attackReason.enum).toEqual(closeInputs.attackReason.enum);
+      expect(ours.assessment.maxLength).toBe(closeInputs.assessment.maxLength);
     });
 
     it('types autoApprove as a boolean and expectedProposalCount as a number', () => {
@@ -379,46 +401,73 @@ describe('Forensics proposal gate', () => {
     });
   });
 
-  describe('close', () => {
-    const close = stepIn(gate.steps, 'close_if_settled');
+  // Settlement used to close the Investigation here, with no reason and without
+  // touching the attack. Closing is now the analyst's decision: the gate asks by
+  // dispatching the close gate, which raises an always-gated Close Investigation
+  // Proposal, and closes nothing itself.
+  describe('the close question', () => {
+    const dispatch = stepIn(gate.steps, 'dispatch_close_gate');
 
-    // The investigation is opened by whoever handed the host off, not by the Forensics
-    // Worker, so an owner-only `ai.conversation.metadata.patch` reads as "not found" here.
-    // The status route closes with converse access, which the investigation's public
-    // access mode grants.
-    it('closes over the investigations status route, not the owner-only metadata patch', () => {
-      expect(close?.type).toBe('kibana.request');
-      expect(close?.with).toEqual({
-        method: 'PUT',
-        path: '/s/{{ workflow.spaceId }}/internal/investigations/investigations/{{ inputs.investigationConversationId }}/status',
-        headers: {
-          'kbn-xsrf': 'true',
-          'elastic-api-version': '1',
-          'Content-Type': 'application/json',
-        },
-        body: { status: 'closed', expected_proposal_ids: [] },
-      });
-      expect(JSON.stringify(gate)).not.toContain('ai.conversation.metadata.patch');
+    it('asks through the close gate instead of closing the Investigation', () => {
+      expect(dispatch?.type).toBe('workflow.executeAsync');
+      expect(dispatch?.with?.['workflow-id']).toBe(
+        ALERTZERO_FORENSICS_CLOSE_INVESTIGATION_GATE_WORKFLOW_ID
+      );
+      expect(dispatch?.with?.['run-as-mode']).toBe('inherit');
+
+      const yaml = JSON.stringify(gate);
+      expect(yaml).not.toContain('ai.conversation.metadata.patch');
+      expect(yaml).not.toContain('/status');
+      expect(yaml).not.toContain('setAttackStatus');
+      expect(yaml).not.toContain('SetAlertsStatus');
     });
 
+    // Async, so this gate does not park a second time on the close decision.
     it('runs only once settled and never fails the gate', () => {
-      expect(evaluateExpression(close!.if!, { variables: { settled: true } })).toBe(true);
-      expect(evaluateExpression(close!.if!, { variables: { settled: false } })).toBe(false);
-      expect(close?.['on-failure']).toEqual({ continue: true });
+      expect(evaluateExpression(dispatch!.if!, { variables: { settled: true } })).toBe(true);
+      expect(evaluateExpression(dispatch!.if!, { variables: { settled: false } })).toBe(false);
+      expect(dispatch?.['on-failure']).toEqual({ continue: true });
     });
 
-    it('renders the investigation id into the route path', () => {
-      const path = createWorkflowLiquidEngine().parseAndRenderSync(String(close?.with?.path), {
-        workflow: { spaceId: 'default' },
-        inputs: { investigationConversationId: 'inv-1' },
+    // The close gate's own declared trigger schema is what the dispatch is checked
+    // against, so a change to either side fails here rather than at runtime.
+    it('satisfies the close gate trigger schema with the inputs it was given', () => {
+      const closeInputs = closeGate.triggers?.[0]?.inputs;
+      const provided = (dispatch?.with?.inputs ?? {}) as Record<string, string>;
+      const declared = Object.keys(closeInputs?.properties ?? {});
+
+      expect((closeInputs?.required ?? []).filter((key) => !(key in provided))).toEqual([]);
+      expect(closeInputs?.additionalProperties).toBe(false);
+      expect(Object.keys(provided).filter((key) => !declared.includes(key))).toEqual([]);
+
+      expect(provided).toEqual({
+        investigationConversationId: '{{ inputs.investigationConversationId }}',
+        attackDiscoveryId: '{{ inputs.attackDiscoveryId }}',
+        closeReason: '{{ inputs.closeReason }}',
+        attackReason: '{{ inputs.attackReason }}',
+        // `${{ }}` so an assessment the caller did not set reaches the close gate as
+        // undefined rather than `''`.
+        assessment: '${{ inputs.assessment }}',
+        // A count the caller did not set is `0`, which the close gate reads as "no count".
+        attackAlertCount: '${{ inputs.attackAlertCount | default: 0 }}',
       });
-      expect(path).toBe('/s/default/internal/investigations/investigations/inv-1/status');
+    });
+
+    it('passes the alert count through as a number, never as a blank', () => {
+      const count = String(
+        (dispatch?.with?.inputs as Record<string, string> | undefined)?.attackAlertCount
+      );
+      expect(evaluateExpression(count, { inputs: { attackAlertCount: 4 } })).toBe(4);
+      expect(evaluateExpression(count, { inputs: {} })).toBe(0);
     });
 
     it('runs after settlement is resolved and before the output', () => {
       const names = gate.steps.map(({ name }) => name);
-      expect(names.indexOf('close_if_settled')).toBeGreaterThan(names.indexOf('resolve_settled'));
-      expect(names.indexOf('close_if_settled')).toBeLessThan(names.indexOf('emit_result'));
+      expect(names.indexOf('dispatch_close_gate')).toBeGreaterThan(
+        names.indexOf('resolve_settled')
+      );
+      expect(names.indexOf('dispatch_close_gate')).toBeLessThan(names.indexOf('emit_result'));
+      expect(names).not.toContain('close_if_settled');
     });
   });
 });
