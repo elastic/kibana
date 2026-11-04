@@ -241,9 +241,8 @@ export class InspectorService extends FtrService {
 
   public async getTableDataWithId(tableTestSubj: string): Promise<string[][]> {
     const chooserDataTestId = 'inspectorTableChooser';
-    if (!(await this.testSubjects.exists(chooserDataTestId))) {
-      return [];
-    }
+    // open() only waits for the panel; the lazy Data view shows the chooser once 2+ tables arrive.
+    await this.testSubjects.existOrFail(chooserDataTestId, { timeout: 20_000 });
 
     return await this.retry.try(async () => {
       await this.testSubjects.click(chooserDataTestId);
