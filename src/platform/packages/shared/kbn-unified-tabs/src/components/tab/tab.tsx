@@ -210,7 +210,16 @@ export const Tab: React.FC<TabProps> = (props) => {
   const isLoading = previewData?.status === TabStatus.RUNNING;
 
   const mainTabContent = (
-    <div css={getTabContainerCss(euiTheme, tabsSizeConfig, isSelected, fontWeight, isDragging)}>
+    <div
+      css={getTabContainerCss(
+        euiTheme,
+        tabsSizeConfig,
+        isSelected,
+        fontWeight,
+        isDragging,
+        Number(!!getTabMenuItems) + Number(!disableCloseButton && !!onClose)
+      )}
+    >
       <div
         ref={tabInteractiveElementRef}
         {...(!disableDragAndDrop ? dragHandleProps : {})}
@@ -377,7 +386,8 @@ function getTabContainerCss(
   tabsSizeConfig: TabsSizeConfig,
   isSelected: boolean,
   fontWeight: CSSProperties['fontWeight'],
-  isDragging?: boolean
+  isDragging?: boolean,
+  actionsCount: number = 2
 ) {
   // TODO: remove the usage of deprecated colors
 
@@ -418,7 +428,7 @@ function getTabContainerCss(
       }
 
       .unifiedTabs__tabLabel {
-        width: calc(100% - ${euiTheme.size.l} * 2 - ${euiTheme.size.xs});
+        width: calc(100% - ${euiTheme.size.l} * ${actionsCount} - ${euiTheme.size.xs});
         mask-image: linear-gradient(
           to right,
           rgb(255, 0, 0) calc(100% - ${euiTheme.size.s}),
