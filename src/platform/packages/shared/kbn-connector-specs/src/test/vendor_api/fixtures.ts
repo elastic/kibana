@@ -21,13 +21,17 @@ const responseOverrideSchema = z
   })
   .strict();
 
-const queryOperationSchema = z
-  .object({
-    source: z.string().optional(),
-    method: z.string(),
-    path: z.string(),
-  })
-  .strict();
+const queryOperationSchema = z.union([
+  z
+    .object({
+      source: z.string().optional(),
+      method: z.string(),
+      path: z.string(),
+    })
+    .strict(),
+  // A GraphQL root field or MCP tool, which the emulator can't tell is read-only.
+  z.object({ source: z.string().optional(), name: z.string() }).strict(),
+]);
 
 const actionFixtureSchema = z
   .object({

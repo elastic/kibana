@@ -104,15 +104,16 @@ describe('fixedHttpsOrigins', () => {
     ).toEqual([]);
   });
 
-  it('reads the root servers of a spec without operations by path', () => {
+  it('reads the endpoints of GraphQL and MCP specs, which have no operations by path', () => {
     expect(
       fixedHttpsOrigins({
-        mcp: {
-          format: 'mcp',
-          servers: [{ url: 'https://mcp.example.com/sse' }],
-          tools: [],
+        mcp: { format: 'mcp', endpoints: ['https://mcp.example.com/sse'], tools: [] },
+        graphql: {
+          format: 'graphql',
+          endpoints: ['https://api.example.com/graphql'],
+          sdl: 'type Query { hello: String }',
         },
       })
-    ).toEqual(['https://mcp.example.com']);
+    ).toEqual(['https://api.example.com', 'https://mcp.example.com']);
   });
 });
