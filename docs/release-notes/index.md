@@ -67,6 +67,12 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Improve the Cases UI. The cases list moves its filters to a second row, you can collapse and expand comments and attachments, the attributes panel stays in place and you can resize it as you scroll the activity, and template fields share one edit mode with a single **Save** [#282197]({{kib-pull}}282197).
 * Add limits to case templates: up to 200 templates per owner, 200 fields per template, and 30,000 characters per template definition. The field library editor also validates field definitions and default values before you save [#281650]({{kib-pull}}281650).
 * Store the username, full name, and email of case assignees on the case and in the cases analytics index. {{kib}} fills them in when you create or update a case and does not backfill existing cases. To turn this off, set `xpack.cases.assigneeIdentity.enabled` to `false` [#281579]({{kib-pull}}281579).
+* Run workflows without leaving Cases. Select **Run workflow** from the case view, from the cases list for up to 10 cases at once, or from attachments and observables in a case. The case activity records each run [#287993]({{kib-pull}}287993), [#287999]({{kib-pull}}287999), [#296254]({{kib-pull}}296254).
+* Remove several attachments at once from the case **Attachments** tab. Select files, visualizations, dashboards, Discover sessions, maps, events, or alerts, then remove them in one step. The case activity gets one entry per attachment type [#298949]({{kib-pull}}298949), [#298950]({{kib-pull}}298950), [#299266]({{kib-pull}}299266).
+* Delete several observables at once from the observables table [#295408]({{kib-pull}}295408).
+* Choose which columns the **Similar cases** table shows, as you can in the cases list [#295985]({{kib-pull}}295985).
+* Show where each case action came from, such as an agent, a workflow, a rule, an attack, or the API, in the case activity, and filter the activity by source. Select an agent or workflow name to open the conversation or the workflow execution. Actions recorded before this release show **Not recorded** [#287149]({{kib-pull}}287149), [#291285]({{kib-pull}}291285).
+* Add public Cases attachments APIs under `/api/cases/{caseId}/attachments` in technical preview. They cover the legacy `/comments` APIs and return a single attachment format for all attachment types [#294886]({{kib-pull}}294886).
 * Prefix the subject of emails that Elastic Cloud trial deployments send through the built-in Elastic email service with `[Elastic Cloud Trial]` [#276705]({{kib-pull}}276705).
 * Use fixed subject and message content when you test the email connector with an HTTP request, to check that {{kib}} can send an email to a recipient [#288664]({{kib-pull}}288664).
 * Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
@@ -250,6 +256,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * See more about each model on the Elastic {{infer-cap}} Service page. Model cards show the provider, model name, and end-of-life date, and the models table adds the release date and the end-of-life date. The model flyout has a new header with the provider icon, model name, provider, and a link to the documentation. It also shows data retention, the regions where the model is available, and a banner when the model is in preview or at end of life. Deprecation and end-of-life notices are shorter and use consistent `YYYY-MM-DD` dates [#293692]({{kib-pull}}293692), [#293357]({{kib-pull}}293357), [#296909]({{kib-pull}}296909), [#295238]({{kib-pull}}295238), [#293331]({{kib-pull}}293331), [#292471]({{kib-pull}}292471), [#298474]({{kib-pull}}298474).
 * Review and change the geographies and regions that your region preferences allow for Elastic {{infer-cap}} Service models. The **Region preferences** modal is redesigned, and before you save, the **Confirm region selection** modal lists the selected locations and the indexes and pipelines that still use endpoints that the policy would block, so you can review the conflict and save anyway. A new toggle removes a custom region policy and returns to the default of allowing all regions. The page header shows a **Restricted regions** badge when a policy is set. Models that your policy blocks are hidden by default, get a **Blocked** badge when you show them, and trigger a warning that you can dismiss in the model flyout. Region names now come from {{es}} [#287605]({{kib-pull}}287605), [#285264]({{kib-pull}}285264), [#289906]({{kib-pull}}289906), [#282769]({{kib-pull}}282769), [#290635]({{kib-pull}}290635), [#292471]({{kib-pull}}292471), [#286932]({{kib-pull}}286932), [#287211]({{kib-pull}}287211).
 * Add the `genAiSettings:inferenceStreaming` setting, which is space-aware and defaults to `true`. Set it to `false` to make {{kib}} use non-streaming requests with {{infer}} endpoints that support them [#297712]({{kib-pull}}297712).
+* Choose which sensitive values {{kib}} masks before it sends data to an AI model, on the new **Anonymization** page under **{{stack-manage-app}}** → **AI**. The page is available in every solution with an Enterprise license. You can turn masking on or off, turn on built-in rules for values such as email addresses, IP addresses, and host and account names, add your own patterns, and test a pattern before you save it. The page replaces the `ai:anonymizationSettings` advanced setting, which no longer appears in **Advanced Settings** [#295895]({{kib-pull}}295895), [#295894]({{kib-pull}}295894), [#297148]({{kib-pull}}297148), [#293633]({{kib-pull}}293633).
 * Install the Elastic product documentation when the server starts, and add the product documentation tool to the default Elastic agent tools, when the Elastic {{infer-cap}} Service is available [#275476]({{kib-pull}}275476).
 * Add reasoning effort controls (**Low**, **Medium**, and **High**) to the **Add endpoint** modal of the Elastic {{infer-cap}} Service for chat completion endpoints [#270869]({{kib-pull}}270869).
 * Support multi-value fields, which you enter as tags, when you create an {{infer}} endpoint. For example, you can now enter OAuth2 scopes for OpenAI and Azure OpenAI endpoints [#290352]({{kib-pull}}290352).
@@ -272,6 +279,8 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Show each `foreach` item as its own step in the execution history, so you can open an item to see the value that iteration used and open the `foreach` step to see the list it looped over [#290950]({{kib-pull}}290950).
 * Deliver human-in-the-loop requests through HTTP, Microsoft Teams, ServiceNow comments, Slack, and email [#296205]({{kib-pull}}296205), [#296204]({{kib-pull}}296204), [#296203]({{kib-pull}}296203), [#294500]({{kib-pull}}294500), [#294498]({{kib-pull}}294498).
 * Add a post-execution workflow hook (`configuration.post_execution_workflow_ids`) to agents, so a workflow can react when an agent finishes an execution [#289635]({{kib-pull}}289635).
+* Add the `cases.attachmentsDeleted`, `cases.observablesAdded`, and `cases.extendedFieldsUpdated` workflow triggers, so workflows can react when attachments are removed from a case, observables are added to it, or its template field values change [#295254]({{kib-pull}}295254), [#288224]({{kib-pull}}288224), [#287043]({{kib-pull}}287043).
+* Add the `cases.deleteAttachments` workflow step, and let the Agent Builder cases tools delete case attachments. If any attachment ID isn't on the case, the step fails and deletes nothing [#298188]({{kib-pull}}298188).
 ### Fixes [kibana-9.6.0-fixes]
 
 **Elastic Agent Builder**:
@@ -328,6 +337,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix templates losing a field when the template refers to the field with different capitalization than its stored name. Looking up and deleting fields now ignore capitalization [#282450]({{kib-pull}}282450).
 * Prevent deleting a field from the cases field library while an active template uses it. The error lists the templates that block the deletion [#280493]({{kib-pull}}280493).
 * Fix the case header showing the reporter's username instead of their email address when the reporter has no full name. The header now matches the names shown elsewhere in Cases [#282504]({{kib-pull}}282504).
+* Fix case attachment deletion behaving differently depending on how you delete. Deleting all attachments no longer reports success for attachments it didn't delete, and deleting a file attachment now also deletes the file [#297885]({{kib-pull}}297885).
+* Fix pushing a case to an external system repeating the alerts summary. The summary now reports only the alerts added or removed since the last push to that connector, and {{kib}} sends it only when alerts changed [#295571]({{kib-pull}}295571).
+* Fix checkbox group template fields accepting values that aren't a list, such as a comma-separated string. The cases API now returns a validation error instead of saving the value [#299407]({{kib-pull}}299407).
 
 **Connectivity**:
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
@@ -572,6 +584,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix chat requests failing through OpenAI-compatible gateways, such as LiteLLM, that reject a conversation containing earlier tool calls when no tools are listed. This affected Agent Builder after a tool had already run [#284017]({{kib-pull}}284017).
 * Fix the cursor jumping when you edit an {{infer}} endpoint ID [#280894]({{kib-pull}}280894).
 * Fix the region count text in the **Manage region preferences** modal not expanding or collapsing the zone when you select it, and the modal shrinking when you dismiss the model availability notice [#280253]({{kib-pull}}280253), [#280242]({{kib-pull}}280242).
+* Fix gaps in AI anonymization. The built-in account rule no longer lets account names in JSON or SPL reach the model unmasked, and no longer corrupts {{esql}} text. Custom patterns now use RE2 syntax, so a slow pattern can no longer turn masking off for a request. Patterns that you saved earlier keep working. A regex timeout no longer fails other requests in progress. A new built-in rule masks IPv6 addresses, and well-known public sites are no longer masked as host names [#300154]({{kib-pull}}300154).
 * Fix the model list on the **Elastic Inference Service** page showing outdated models after you save region preferences, until you refresh the browser [#300999]({{kib-pull}}300999).
 % #300999 carries the nonstandard label release_note:bug, so the generator does not pick it up. Consider changing it to release_note:fix.
 
@@ -668,31 +681,9 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 % * Teach the workflow authoring skill about knowledge indicator steps [#287154]({{kib-pull}}287154).
 
 % Removed from 9.6.0: Team:Security Investigations owns these. They belong in the Security solution notes.
-% * Enable agents to find case templates by name [#287744]({{kib-pull}}287744).
-% (partial: 279680,287638) * Add a case attachments tool to Agent Builder, and document template fields in the cases-analytics skill [#279680]({{kib-pull}}279680), [#291716]({{kib-pull}}291716), [#287638]({{kib-pull}}287638).
+% The other Cases and Anonymization entries from this block are listed in 9.6.0 or 9.5.5, or shipped in earlier 9.5 patch releases, following review on #300810.
 % * Fix **Run workflow** on **Select all** alerts running the workflow on only the loaded page of about 100 alerts. It now runs on every matching alert, up to 500 [#292151]({{kib-pull}}292151). Team:Security Investigations, label release_note:bug.
-% * Add the `cases.deleteAttachments` workflow step, and enable the cases agent in Agent Builder to delete case attachments [#298188]({{kib-pull}}298188).
-% * Add the `cases.attachmentsDeleted`, `cases.observablesAdded`, and `cases.extendedFieldsUpdated` workflow triggers [#295254]({{kib-pull}}295254), [#288224]({{kib-pull}}288224), [#287043]({{kib-pull}}287043).
-% * Remove alerts from a case in the case **Attachments** tab [#299266]({{kib-pull}}299266).
-% * Select and remove several attachments at once from the case **Attachments** tab, or delete case attachments in bulk by attachment ID [#298949]({{kib-pull}}298949), [#298950]({{kib-pull}}298950).
-% * Delete several observables at once from the observables table [#295408]({{kib-pull}}295408).
-% * Add column customization to the **Similar cases** table [#295985]({{kib-pull}}295985).
-% * Add a source filter to the case activity feed, and record the source of case user actions [#291285]({{kib-pull}}291285), [#287149]({{kib-pull}}287149).
-% * Add an **Anonymization** page under **{{stack-manage-app}}** → **AI** to choose which sensitive values, such as email addresses, IP addresses, host and account names, and custom patterns, {{kib}} anonymizes before it sends AI requests. The page adds a master switch, built-in rules, and a pattern tester, and replaces the `ai:anonymizationSettings` advanced setting [#295895]({{kib-pull}}295895), [#295894]({{kib-pull}}295894), [#297148]({{kib-pull}}297148), [#293633]({{kib-pull}}293633).
-% Consider restoring the Anonymization entries (#295895, #295894, #297148, #293633, #300154). The page lives under **Stack Management** → **AI**, replaces the `ai:anonymizationSettings` advanced setting, and applies to every solution, so it is not Security-only. It stays out because Team:Security Investigations owns it and the feature might not be announced yet.
-% (partial: 283072,288636,287308,283922,287306,287327) * Fix the cases **Settings** page, case views, and templates after changes to global fields, including default values of global fields not being applied to cases created through the API or workflow steps [#283185]({{kib-pull}}283185), [#283072]({{kib-pull}}283072), [#288636]({{kib-pull}}288636), [#287308]({{kib-pull}}287308), [#283922]({{kib-pull}}283922), [#287306]({{kib-pull}}287306), [#287327]({{kib-pull}}287327).
-% (partial: 287945,283645,284940,284475) * Fix the **All cases** list and case activity, including column and template activity, user activity, and the case list metrics bar [#282870]({{kib-pull}}282870), [#282129]({{kib-pull}}282129), [#280576]({{kib-pull}}280576), [#287945]({{kib-pull}}287945), [#283645]({{kib-pull}}283645), [#284940]({{kib-pull}}284940), [#284475]({{kib-pull}}284475).
-% (partial: 284310,284035) * Fix duplicate and wrong case activity when you set, link, or change legacy custom fields, templates, and assignees [#282813]({{kib-pull}}282813), [#282772]({{kib-pull}}282772), [#284310]({{kib-pull}}284310), [#284035]({{kib-pull}}284035).
-% * Fix case attachment deletion, including file attachments that couldn't be deleted, and the attachment UI in the case **Attachments** tab [#297885]({{kib-pull}}297885), [#285456]({{kib-pull}}285456).
-% * Fix a push to an external connector handling comments twice [#295571]({{kib-pull}}295571).
-% * Fix cases created from v2 templates not inheriting the template's external connector, sync and observables settings, and assignees through the cases system action [#284854]({{kib-pull}}284854).
-% * Fix the create case modal appearing for users without permission to create cases [#292761]({{kib-pull}}292761).
 % * Fix **Associated users** and **Associated hosts** metrics not including entity attachments [#283036]({{kib-pull}}283036).
-% * Fix saved visualizations not appearing in case attachments, and add helper text to the case Markdown editor [#286164]({{kib-pull}}286164).
-% * Fix the case feature settings so non-security owners don't get alert sync turned on by default when you create a case through a workflow or from a v2 template [#286670]({{kib-pull}}286670).
-% * Flip the Cases attachments API to public and add OpenAPI docs [#294886]({{kib-pull}}294886).
-% * Reject non-array values for multi-select extended fields in cases [#299407]({{kib-pull}}299407).
-% * Fix the gaps that anonymization QA found, including the built-in account rule, RE2 custom patterns, and a new IPv6 rule [#300154]({{kib-pull}}300154).
 
 % Removed from 9.6.0: Serverless-only. The CPS (cpsEnabled) and UIAM (xpack.security.uiam) settings exist only for the serverless offering, and 284524 only changes config/serverless.es.yml.
 % * Restore anomaly detection and data frame analytics in Serverless Search [#284524]({{kib-pull}}284524).
@@ -899,12 +890,18 @@ For the {{elastic-sec}} 9.5.6 release information, refer to [{{elastic-sec}} Sol
 The 9.5.5 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/t/kibana-9-4-8-9-5-5-security-update-esa-2026-193/390866) for more details.
 :::
 
+### Features and enhancements [kibana-9.5.5-features-enhancements]
+
+**Elastic Agent Builder**:
+* Enable agents to find case templates by name, so you can ask an agent to create a case from a template without knowing its ID. If the name matches more than one template, the agent asks you which one to use [#287744]({{kib-pull}}287744).
+
 ### Fixes [kibana-9.5.5-fixes]
 
 **Elastic Agent Builder**:
 * Fix Agent Builder tools hanging or timing out on data streams that span the frozen tier. Tools now skip frozen tier indices [#292349]({{kib-pull}}292349).
 * Fix Agent Builder tracing applying the default space's GenAI privacy settings in every space. Each conversation now uses the privacy settings of its own space [#290750]({{kib-pull}}290750).
 * Add the case template ID and version fields to the Agent Builder `cases-analytics` skill so agents can filter and group cases by template [#291716]({{kib-pull}}291716).
+* Fix agents being unable to update template fields on a case. The `cases-management` skill now describes how to set them [#287638]({{kib-pull}}287638).
 
 **Alerting and cases**:
 * Fix forced rule runs and schedule changes being silently dropped when you request them while the rule is finishing a run [#293492]({{kib-pull}}293492).
@@ -913,6 +910,7 @@ The 9.5.5 release contains fixes for potential security vulnerabilities. Check o
 * Fix Jira Service Management and Opsgenie connector actions failing when the rendered alert message exceeds 130 characters. The connectors now truncate the message instead [#291698]({{kib-pull}}291698).
 * Fix the email connector HTTP test sending caller-supplied subject and message content. The test now sends fixed content [#288664]({{kib-pull}}288664).
 * Fix the **Auto-push case to connected external system** option missing from the Cases rule action when case templates are enabled [#292187]({{kib-pull}}292187).
+* Fix the **Create case** button in the **Add to case** selector being available to users who can't create cases [#292761]({{kib-pull}}292761).
 
 **Dashboards and Visualizations**:
 * Increase the TinyMath expression length limit so longer visualization formulas don't fail [#290314]({{kib-pull}}290314).
