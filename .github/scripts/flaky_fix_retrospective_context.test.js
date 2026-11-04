@@ -357,3 +357,49 @@ test('classifyDidNotHoldIssue finds the prior fix through the issue history alon
   assert.equal(result.outcome, OUTCOMES.didNotHold);
   assert.deepEqual(result.labelTargets, [100]);
 });
+
+test('classifyDidNotHoldIssue takes the label time from the timeline on a manual run', async () => {
+  const { github } = createGithub({ pr: fixerPr(), commits: [] });
+  github.rest.issues.get = async () => ({
+    data: {
+      number: 42,
+      title: 'Failing test: renders',
+      html_url: 'https://github.com/elastic/kibana/issues/42',
+      labels: [{ name: 'failed-test' }, { name: 'failure:fix-did-not-hold' }],
+      body: '',
+      user: { login: 'kibanamachine' },
+    },
+  });
+  const mergedFixer = (number, mergedAt) => ({
+    number,
+    merged: true,
+    mergedAt,
+    author: { login: 'kibanamachine' },
+    labels: { nodes: [{ name: 'flaky-test-fixer' }] },
+  });
+  github.graphql = async () => ({
+    repository: {
+      issue: {
+        closedByPullRequestsReferences: {
+          // The replacement merged after the label went on: it is not the fix that failed.
+          nodes: [
+            mergedFixer(100, '2026-10-05T00:00:00Z'),
+            mergedFixer(200, '2026-10-20T00:00:00Z'),
+          ],
+        },
+        timelineItems: {
+          nodes: [
+            {
+              __typename: 'LabeledEvent',
+              createdAt: '2026-10-10T00:00:00Z',
+              label: { name: 'failure:fix-did-not-hold' },
+            },
+          ],
+        },
+      },
+    },
+  });
+  const result = await classifyDidNotHoldIssue({ github, core, issueNumber: 42 });
+  assert.equal(result.outcome, OUTCOMES.didNotHold);
+  assert.deepEqual(result.labelTargets, [100]);
+});

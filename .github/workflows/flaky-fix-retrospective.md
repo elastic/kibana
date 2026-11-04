@@ -176,6 +176,8 @@ safe-outputs:
       version: '2.1.165'
   activation-comments: false
   report-failure-as-issue: false
+  # Findings link the Buildkite builds that showed the recurrence.
+  allowed-domains: [buildkite.com]
   # The only write the agent has: one finding on the monthly tracking issue. `required-labels`
   # keeps it from commenting anywhere else.
   add-comment:

@@ -37,6 +37,7 @@ const REPO = 'kibana';
 const FIXER_LABEL = 'flaky-test-fixer';
 const FIXER_AUTHOR = 'kibanamachine';
 const FAILED_TEST_LABEL = 'failed-test';
+const DID_NOT_HOLD_LABEL = 'failure:fix-did-not-hold';
 const RETROSPECTIVE_LABEL = 'flaky-fix-retrospective';
 const TRACKING_ISSUE_TITLE_PREFIX = '[Flaky Test Fixer] Retrospective findings for ';
 const OUTCOME_LABEL_PREFIX = 'flaky-fix-outcome:';
@@ -841,7 +842,14 @@ const classifyDidNotHoldIssue = async ({ github, core, issueNumber, labeledAt })
   if (!issue.labels.includes(FAILED_TEST_LABEL)) {
     return { skip: `#${issueNumber} is not a ${FAILED_TEST_LABEL} issue` };
   }
-  const priorFixes = await findPriorFixPrs({ github, core, issue, labeledAt });
+  // The fix that did not hold is the newest one merged before the label went on. The
+  // timeline knows when that was, which matters on a manual run (no event payload) and
+  // when a later fix has merged since.
+  const labelEvents = (issue.timeline ?? []).filter(
+    (entry) => entry.event === 'labeled' && entry.label === DID_NOT_HOLD_LABEL && entry.at
+  );
+  const cutoffAt = labelEvents.length ? labelEvents[labelEvents.length - 1].at : labeledAt;
+  const priorFixes = await findPriorFixPrs({ github, core, issue, labeledAt: cutoffAt });
   if (priorFixes.length === 0) {
     return {
       skip: `no merged ${FIXER_LABEL} PR found for #${issueNumber} (the fix that did not hold was not the fixer's)`,
@@ -857,7 +865,7 @@ const classifyDidNotHoldIssue = async ({ github, core, issueNumber, labeledAt })
   return {
     outcome: OUTCOMES.didNotHold,
     needsAnalysis: true,
-    context: { issue, priorFixPrs, labeledAt: labeledAt ?? new Date().toISOString() },
+    context: { issue, priorFixPrs, labeledAt: cutoffAt ?? new Date().toISOString() },
     reason: `prior fix #${priorFixPrs[0].number} did not hold`,
     labelTargets: [priorFixPrs[0].number],
   };
