@@ -5,13 +5,15 @@
  * 2.0.
  */
 
+import '@kbn/code-editor-mock/jest_helper';
 import React, { type ComponentProps } from 'react';
-import { act, render, screen, within } from '@testing-library/react';
+import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import type {
   ActionPolicyResponse,
   ActionPolicyTestPreviewResponse,
   ActionPolicyTestSendResponse,
+  ActionPolicyWorkflowPayloadInput,
 } from '@kbn/alerting-v2-schemas';
 import { ExecutionStatus } from '@kbn/workflows';
 import { createTestQueryClient, TestProviders } from '../../../test_utils/test_providers';
@@ -105,9 +107,29 @@ const policy: ActionPolicyResponse = {
   updated_at: '2026-03-02T11:00:00.000Z',
 };
 
-const createPreview = (): ActionPolicyTestPreviewResponse => ({
-  seed: 42,
-  groups: [{ id: 'group-1' }],
+const createPayload = (id = 'test-group-1'): ActionPolicyWorkflowPayloadInput => ({
+  id,
+  policyId: 'policy-1',
+  groupKey: { 'host.name': 'test-host' },
+  alerts: [
+    {
+      last_event_timestamp: '2026-03-02T11:00:00.000Z',
+      rule_id: 'test-rule-1',
+      source: 'internal',
+      space_id: 'default',
+      group_hash: 'test-group-hash-1',
+      alert_id: 'test-alert-1',
+      alert_status: 'active',
+      severity: 'high',
+      alert_url: 'http://localhost:5601/app/observability/alerts/test-alert-1',
+    },
+  ],
+  rules: { 'test-rule-1': { name: 'Test rule 1' } },
+});
+
+const createPreview = (seed = 42, payload = createPayload()): ActionPolicyTestPreviewResponse => ({
+  seed,
+  groups: [payload],
   destinations: [
     { id: 'wf-1', name: 'Pager', enabled: true, executable: true },
     { id: 'wf-2', name: 'Slack', enabled: true, executable: true },
@@ -130,6 +152,13 @@ const renderFlyout = (onClose = jest.fn()) => {
 
 const getCheckbox = (id: string) => screen.getByTestId(`sendTestNotificationDestination-${id}`);
 
+const getEditor = (): HTMLTextAreaElement => screen.getByTestId('mockedCodeEditor');
+
+const editPayload = (value: object | string) =>
+  fireEvent.change(getEditor(), {
+    target: { value: typeof value === 'string' ? value : JSON.stringify(value, null, 2) },
+  });
+
 describe('SendTestNotificationFlyout', () => {
   beforeEach(() => {
     jest.clearAllMocks();
@@ -148,13 +177,79 @@ describe('SendTestNotificationFlyout', () => {
       expect(screen.queryByTestId('sendTestNotificationResultsFlyout')).not.toBeInTheDocument();
     });
 
-    it('sends the previewed seed to the selected destinations', async () => {
+    it('sends the previewed payload to the selected destinations', async () => {
       renderFlyout();
 
       await userEvent.click(getCheckbox('wf-3'));
       await userEvent.click(screen.getByTestId('sendTestNotificationSendButton'));
 
-      expect(mockSend).toHaveBeenCalledWith({ seed: 42, destinationIds: ['wf-1', 'wf-2'] });
+      expect(mockSend).toHaveBeenCalledWith({
+        payload: createPayload(),
+        destinationIds: ['wf-1', 'wf-2'],
+      });
+    });
+  });
+
+  describe('payload editor', () => {
+    it('shows the previewed payload', () => {
+      renderFlyout();
+
+      expect(JSON.parse(getEditor().value)).toEqual(createPayload());
+      expect(screen.getByTestId('sendTestNotificationResetPayloadButton')).toBeDisabled();
+    });
+
+    it('sends the edited payload', async () => {
+      renderFlyout();
+      const payload = createPayload();
+      const edited = { ...payload, alerts: [{ ...payload.alerts[0], severity: 'critical' }] };
+
+      editPayload(edited);
+      await userEvent.click(screen.getByTestId('sendTestNotificationSendButton'));
+
+      expect(mockSend).toHaveBeenCalledWith({
+        payload: edited,
+        destinationIds: ['wf-1', 'wf-2', 'wf-3'],
+      });
+    });
+
+    it('shows an unknown key inline and blocks sending', () => {
+      renderFlyout();
+
+      editPayload({ ...createPayload(), unknownKey: true });
+
+      expect(screen.getByText(/Unrecognized key.*"unknownKey"/)).toBeInTheDocument();
+      expect(screen.getByTestId('sendTestNotificationSendButton')).toBeDisabled();
+    });
+
+    it('shows invalid JSON inline and blocks sending', () => {
+      renderFlyout();
+
+      editPayload('{');
+
+      expect(screen.getByText(/^Invalid JSON: /)).toBeInTheDocument();
+      expect(screen.getByTestId('sendTestNotificationSendButton')).toBeDisabled();
+    });
+
+    it('resets the payload to the previewed one', async () => {
+      renderFlyout();
+      editPayload({ ...createPayload(), unknownKey: true });
+
+      await userEvent.click(screen.getByTestId('sendTestNotificationResetPayloadButton'));
+
+      expect(JSON.parse(getEditor().value)).toEqual(createPayload());
+      expect(screen.queryByText(/Unrecognized key.*"unknownKey"/)).not.toBeInTheDocument();
+      expect(screen.getByTestId('sendTestNotificationResetPayloadButton')).toBeDisabled();
+      expect(screen.getByTestId('sendTestNotificationSendButton')).toBeEnabled();
+    });
+
+    it('shows the payload of a new preview in place of the edited one', () => {
+      const { rerender } = renderFlyout();
+      editPayload({ ...createPayload(), unknownKey: true });
+
+      mockPreview = createPreview(7, createPayload('test-group-7'));
+      rerender();
+
+      expect(JSON.parse(getEditor().value)).toEqual(createPayload('test-group-7'));
     });
   });
 

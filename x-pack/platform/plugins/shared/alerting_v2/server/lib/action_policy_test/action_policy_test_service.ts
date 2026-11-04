@@ -14,6 +14,7 @@ import {
   type ActionPolicyTestPreviewResponse,
   type ActionPolicyTestSendResponse,
   type ActionPolicyTestSendResult,
+  type ActionPolicyWorkflowPayloadInput,
 } from '@kbn/alerting-v2-schemas';
 import { Request } from '@kbn/core-di-server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -49,14 +50,15 @@ const createSeed = (): number => Math.floor(Math.random() * (ACTION_POLICY_TEST_
 
 export interface SendTestNotificationParams {
   policyId: string;
-  seed: number;
+  payload: ActionPolicyWorkflowPayloadInput;
   destinationIds: readonly string[];
 }
 
 /**
- * Builds test notifications of a saved action policy from synthetic alerts, and sends them to the
- * policy destinations as workflow test runs of the current user. Reads only the policy and its
- * destination workflows. Writes nothing to `.alert-actions` and emits no dispatcher events.
+ * Builds test notifications of a saved action policy from synthetic alerts, and sends a test
+ * payload to the policy destinations as workflow test runs of the current user. Reads only the
+ * policy and its destination workflows. Writes nothing to `.alert-actions` and emits no
+ * dispatcher events.
  */
 @injectable()
 export class ActionPolicyTestService {
@@ -94,7 +96,7 @@ export class ActionPolicyTestService {
 
   public async send({
     policyId,
-    seed,
+    payload,
     destinationIds,
   }: SendTestNotificationParams): Promise<ActionPolicyTestSendResponse> {
     await this.licenseService.assertActionPoliciesLicense();
@@ -113,7 +115,6 @@ export class ActionPolicyTestService {
       );
     }
 
-    const [payload] = this.buildScenario(policy, seed);
     const results = await Promise.all(
       workflowIds.map((workflowId) => this.runWorkflowTest(policyId, workflowId, payload))
     );
@@ -197,7 +198,7 @@ export class ActionPolicyTestService {
   private async runWorkflowTest(
     policyId: string,
     workflowId: string,
-    payload: ActionPolicyWorkflowPayload
+    payload: ActionPolicyWorkflowPayloadInput
   ): Promise<ActionPolicyTestSendResult> {
     try {
       const workflowExecutionId = await this.workflowsManagement.testWorkflow({
@@ -220,7 +221,7 @@ export class ActionPolicyTestService {
 
   private reportSent(
     policy: ActionPolicyResponse,
-    payload: ActionPolicyWorkflowPayload,
+    payload: ActionPolicyWorkflowPayloadInput,
     results: ActionPolicyTestSendResult[]
   ): void {
     const failedCount = results.filter((result) => 'error' in result).length;
