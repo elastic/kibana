@@ -9,6 +9,7 @@
 
 import {
   ClientProviderEvents,
+  ErrorCode,
   OpenFeatureEventEmitter,
   ProviderFatalError,
   type EvaluationContext,
@@ -107,6 +108,46 @@ describe('SeededOfrepWebProvider', () => {
     await starting;
     provider.resolveBooleanEvaluation('my.flag', false, {});
     expect(delegate.resolveBooleanEvaluation).toHaveBeenCalledWith('my.flag', false, {}, undefined);
+  });
+
+  test('treats string config overrides as booleans', async () => {
+    const { delegate, resolveInit } = createDelegate();
+    delegate.resolveBooleanEvaluation.mockReturnValue({
+      value: false,
+      reason: 'ERROR',
+      errorCode: ErrorCode.TYPE_MISMATCH,
+    });
+    const provider = new SeededOfrepWebProvider({
+      ofrep,
+      initialFlags: { enabled: 'true', disabled: 'false' },
+      createProvider: () => delegate,
+    });
+
+    expect(provider.resolveBooleanEvaluation('enabled', false, {})).toEqual({
+      value: true,
+      reason: 'CACHED',
+    });
+    expect(provider.resolveBooleanEvaluation('disabled', true, {})).toEqual({
+      value: false,
+      reason: 'CACHED',
+    });
+
+    delegate.flagCache = {
+      enabled: { value: 'true' },
+      disabled: { value: 'false' },
+    };
+    const starting = provider.initialize();
+    resolveInit();
+    await starting;
+
+    expect(provider.resolveBooleanEvaluation('enabled', false, {})).toEqual({
+      value: true,
+      reason: 'CACHED',
+    });
+    expect(provider.resolveBooleanEvaluation('disabled', true, {})).toEqual({
+      value: false,
+      reason: 'CACHED',
+    });
   });
 
   test('reports only flags that differ from the injected values', async () => {

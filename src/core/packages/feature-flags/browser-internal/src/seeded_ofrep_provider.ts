@@ -88,6 +88,23 @@ export interface SeededOfrepWebProviderOptions {
   createProvider?: (options: OFREPWebProviderOptions) => OfrepWebDelegate;
 }
 
+/**
+ * Config overrides are often the strings `"true"` and `"false"`.
+ * Boolean evaluation used to return that raw string, which callers treat as truthy.
+ */
+const booleanOverride = (value: unknown): boolean | undefined => {
+  if (typeof value === 'boolean') {
+    return value;
+  }
+  if (value === 'true') {
+    return true;
+  }
+  if (value === 'false') {
+    return false;
+  }
+  return undefined;
+};
+
 const valueMatchesType = (value: unknown, type: FlagValueType): boolean => {
   if (type === 'object') {
     return typeof value === 'object' && value !== null;
@@ -179,9 +196,23 @@ export class SeededOfrepWebProvider implements Provider {
     context: EvaluationContext,
     logger?: OpenFeatureLogger
   ): ResolutionDetails<boolean> {
-    return this.delegating
-      ? this.inner.resolveBooleanEvaluation(flagKey, defaultValue, context, logger)
-      : this.fromSeed(flagKey, defaultValue, 'boolean');
+    if (!this.delegating) {
+      return this.fromSeed(flagKey, defaultValue, 'boolean');
+    }
+
+    const resolved = this.inner.resolveBooleanEvaluation(flagKey, defaultValue, context, logger);
+    if (resolved.errorCode !== ErrorCode.TYPE_MISMATCH) {
+      return resolved;
+    }
+
+    const coerced = booleanOverride(readFlagValue(this.inner.flagCache[flagKey]));
+    if (coerced === undefined) {
+      return resolved;
+    }
+    return {
+      value: coerced,
+      reason: StandardResolutionReasons.CACHED,
+    };
   }
 
   resolveStringEvaluation(
@@ -331,6 +362,15 @@ export class SeededOfrepWebProvider implements Provider {
     }
 
     const value = this.initialFlags[flagKey];
+    if (type === 'boolean') {
+      const coerced = booleanOverride(value);
+      if (coerced !== undefined) {
+        return {
+          value: coerced as T,
+          reason: StandardResolutionReasons.CACHED,
+        };
+      }
+    }
     if (!valueMatchesType(value, type)) {
       return {
         value: defaultValue,
