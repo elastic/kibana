@@ -30,6 +30,28 @@ export const SLO_SCOUT_HOSTS_DATA_FORGE_CONFIG: PartialConfig = {
   indexing: { dataset: 'fake_hosts', eventsPerCycle: 1 },
 };
 
+/** `fake_stack` config matching what `sloData.generateSloData()` installs. */
+const SLO_SCOUT_STACK_DATA_FORGE_CONFIG: PartialConfig = {
+  indexing: { dataset: 'fake_stack' },
+};
+
+const SLO_SCOUT_HOSTS_INDEX_PATTERN = 'kbn-data-forge-fake_hosts.*';
+const SLO_SCOUT_STACK_INDEX_PATTERN = 'kbn-data-forge-fake_stack.*';
+
+/**
+ * Deletes the concrete indices matching `pattern`. data-forge `cleanup()` only removes templates,
+ * and Elasticsearch rejects wildcard deletes by default (`action.destructive_requires_name`).
+ */
+const deleteIndicesMatching = async (esClient: Client, pattern: string): Promise<void> => {
+  const indices = Object.keys(
+    await esClient.indices.get({ index: pattern, allow_no_indices: true, ignore_unavailable: true })
+  );
+  if (indices.length === 0) {
+    return;
+  }
+  await esClient.indices.delete({ index: indices });
+};
+
 export async function installSloScoutHostsDataForge(
   esClient: Client,
   log: ScoutLogger
@@ -41,5 +63,12 @@ export async function removeSloScoutHostsDataForge(
   esClient: Client,
   log: ScoutLogger
 ): Promise<void> {
+  await deleteIndicesMatching(esClient, SLO_SCOUT_HOSTS_INDEX_PATTERN);
   await cleanup({ client: esClient, config: SLO_SCOUT_HOSTS_DATA_FORGE_CONFIG, logger: log });
+}
+
+/** Removes the `fake_stack` indices and templates installed by `sloData.generateSloData()`. */
+export async function removeSloScoutStackData(esClient: Client, log: ScoutLogger): Promise<void> {
+  await deleteIndicesMatching(esClient, SLO_SCOUT_STACK_INDEX_PATTERN);
+  await cleanup({ client: esClient, config: SLO_SCOUT_STACK_DATA_FORGE_CONFIG, logger: log });
 }
