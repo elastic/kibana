@@ -12,12 +12,13 @@ import { PolicyWatcher } from './license_watch';
 import type { ILicense } from '@kbn/licensing-types';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import type { PackagePolicy } from '@kbn/fleet-plugin/common';
+import type { ListResult, PackagePolicy } from '@kbn/fleet-plugin/common';
 import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 import { policyFactory } from '../../../../common/endpoint/models/policy_config';
 import { ProtectionModes } from '../../../../common/endpoint/types';
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { createMockEndpointAppContextService } from '../../mocks';
+import { EndpointAppContentServicesNotStartedError } from '../../errors';
 
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
@@ -147,6 +148,40 @@ describe('Policy-Changing license watcher', () => {
       packagePolicySvcMock.update.mock.calls[0][3].inputs[0].config?.policy.value.windows.popup
         .malware.message
     ).not.toEqual(CustomMessage);
+  });
+
+  it('abandons an in-flight check without using endpoint services once stopped', async () => {
+    const logger = endpointServiceMock.createLogger('PolicyWatcher');
+    const firstPage = Promise.withResolvers<ListResult<PackagePolicy>>();
+    packagePolicySvcMock.list.mockReturnValueOnce(firstPage.promise);
+
+    const pw = new PolicyWatcher(endpointServiceMock);
+    const watching = pw.watch(Basic);
+
+    // Plugin shutdown: watcher stops, then `EndpointAppContextService.stop()` drops its start dependencies
+    pw.stop();
+    Object.defineProperty(endpointServiceMock, 'savedObjects', {
+      get: () => {
+        throw new EndpointAppContentServicesNotStartedError();
+      },
+    });
+
+    firstPage.resolve({
+      items: [
+        MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+          pc.windows.popup.malware.message = 'Custom string';
+          return pc;
+        }),
+      ],
+      total: 150,
+      page: 1,
+      perPage: 100,
+    });
+    await watching;
+
+    expect(packagePolicySvcMock.list).toHaveBeenCalledTimes(1);
+    expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   describe('Enterprise -> Platinum license downgrade', () => {
