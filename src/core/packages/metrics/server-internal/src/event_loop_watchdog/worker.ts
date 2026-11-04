@@ -31,11 +31,6 @@ export interface WatchdogWorkerDeps {
 const toMs = (us: number): number => Math.floor(us / 1000);
 const blocks = (count: number): string => `${count} ${count === 1 ? 'block' : 'blocks'}`;
 
-const blockMessage = ({ blockedMs, ongoing, suppressedBlocks }: DetectedBlock): string =>
-  `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
-    suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
-  }`;
-
 /** Starts detection; returns a function that stops it (for tests: the worker never stops itself). */
 export const runWatchdogWorker = (
   { shared: sharedBuffer, thresholdsMs, statsIntervalMs }: WatchdogWorkerData,
@@ -49,27 +44,11 @@ export const runWatchdogWorker = (
   const detector = new BlockDetector();
   const stats = new BlockStats(thresholdsMs, toMs(nowUs()));
   let reportedDroppedLogLines = logger.getDroppedLogLineCount();
-  /** Wall-clock start of the last block logged, keyed by its heartbeat in milliseconds. */
-  let loggedBlockStart: { heartbeatMs: number; startedAt: string } | undefined;
 
   /** Phase of a heartbeat: running once the main thread has marked it. */
   const phaseAt = (heartbeatUs: number): Phase => {
     const runningSince = Number(Atomics.load(shared, Slot.runningSince));
     return runningSince > 0 && heartbeatUs >= runningSince ? 'running' : 'starting';
-  };
-
-  /**
-   * Measured back from now, so a wall-clock step can't shift it, and only once per block, so every
-   * log line of one block carries the same value.
-   */
-  const startedAtOf = ({ startedAt }: DetectedBlock, nowMs: number): string => {
-    if (loggedBlockStart?.heartbeatMs !== startedAt) {
-      loggedBlockStart = {
-        heartbeatMs: startedAt,
-        startedAt: new Date(Date.now() - (nowMs - startedAt)).toISOString(),
-      };
-    }
-    return loggedBlockStart.startedAt;
   };
 
   const onBlock = (block: DetectedBlock, nowMs: number) => {
@@ -80,19 +59,25 @@ export const runWatchdogWorker = (
     if (!block.report) {
       return;
     }
-    const { blockedMs, phase, suppressedBlocks, ongoing } = block;
-    logger.warn<BlockLogMeta>(blockMessage(block), {
-      tags: ['event-loop-watchdog'],
-      kibana: {
-        event_loop_watchdog: {
-          blockedMs,
-          startedAt: startedAtOf(block, nowMs),
-          phase,
-          suppressedBlocks,
-          ongoing,
+    const { blockedMs, startedAt, phase, suppressedBlocks, ongoing } = block;
+    logger.warn<BlockLogMeta>(
+      `Event loop blocked for ~${blockedMs}ms${ongoing ? ' so far' : ''}${
+        suppressedBlocks ? `; ${blocks(suppressedBlocks)} before it not reported` : ''
+      }`,
+      {
+        tags: ['event-loop-watchdog'],
+        kibana: {
+          event_loop_watchdog: {
+            blockedMs,
+            // Measured back from now, so a wall-clock step can't shift it.
+            startedAt: new Date(Date.now() - (nowMs - startedAt)).toISOString(),
+            phase,
+            suppressedBlocks,
+            ongoing,
+          },
         },
-      },
-    });
+      }
+    );
   };
 
   const poll = () => {

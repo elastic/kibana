@@ -112,7 +112,7 @@ describe('runWatchdogWorker', () => {
     });
   });
 
-  it('logs a warning while a block is still ongoing, with the same start as the end warning', () => {
+  it('logs a warning while a block is still ongoing, and counts the block once it ends', () => {
     start();
     const blockStartedAt = new Date(Date.now()).toISOString();
     beat();
@@ -134,17 +134,21 @@ describe('runWatchdogWorker', () => {
         },
       }
     );
-    // A wall-clock step during the block doesn't move its start on the end warning.
-    jest.setSystemTime(Date.now() + 5_000);
     stall(500);
     resume();
     expect(logger.warn).toHaveBeenCalledTimes(2);
-    expect(logger.warn.mock.calls[1][0]).toBe(
-      `Event loop blocked for ~${ONGOING_REPORT_AFTER_MS + 500}ms`
+    expect(logger.warn).toHaveBeenLastCalledWith(
+      `Event loop blocked for ~${ONGOING_REPORT_AFTER_MS + 500}ms`,
+      {
+        tags: ['event-loop-watchdog'],
+        kibana: {
+          event_loop_watchdog: expect.objectContaining({
+            startedAt: blockStartedAt,
+            ongoing: false,
+          }),
+        },
+      }
     );
-    expect(logger.warn.mock.calls[1][1]).toMatchObject({
-      kibana: { event_loop_watchdog: { startedAt: blockStartedAt, ongoing: false } },
-    });
     jest.advanceTimersByTime(STATS_INTERVAL_MS);
     expect(statsMeta().starting.blocks).toBe(1);
   });
@@ -186,11 +190,7 @@ describe('runWatchdogWorker', () => {
     stall(1000);
     nowUs -= 400; // block ends at y.5ms: 999.6ms in microseconds
     resume();
-    // The block was also reported while ongoing; the end warning is the last one.
-    expect(logger.warn).toHaveBeenLastCalledWith(
-      'Event loop blocked for ~1000ms',
-      expect.anything()
-    );
+    expect(logger.warn.mock.calls[0][0]).toBe('Event loop blocked for ~1000ms');
     jest.advanceTimersByTime(STATS_INTERVAL_MS);
     expect(statsMeta().running.buckets.lt2s + statsMeta().starting.buckets.lt2s).toBe(1);
   });

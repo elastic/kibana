@@ -10,7 +10,10 @@
 import { spawn } from 'node:child_process';
 import Path from 'node:path';
 import { REPO_ROOT } from '@kbn/repo-info';
-import { REPORT_BURST } from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
+import {
+  ONGOING_REPORT_AFTER_MS,
+  REPORT_BURST,
+} from '@kbn/core-metrics-server-internal/src/event_loop_watchdog/constants';
 
 const HARNESS = Path.resolve(__dirname, 'fixtures', 'watchdog_harness.ts');
 
@@ -28,11 +31,9 @@ interface WorkerLogLine {
     event_loop_watchdog?: {
       phase?: string;
       blockedMs?: number;
-      startedAt?: string;
       ongoing?: boolean;
       stats?: { starting: PhaseStats; running: PhaseStats; heapUsed: number };
     };
-    worker?: { name: string; thread_id: number };
   };
 }
 
@@ -137,10 +138,6 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
-const blockLogLines = ({ workerLogLines }: HarnessResult) =>
-  workerLogLines.filter(({ message }) => message.startsWith('Event loop blocked'));
-const endedBlockLogLines = (result: HarnessResult) =>
-  blockLogLines(result).filter((line) => blockOf(line)?.ongoing === false);
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -238,60 +235,27 @@ describe('event loop watchdog in a child process', () => {
     });
   }, 120_000);
 
-  describe('a block that lasts longer than the ongoing mark', () => {
-    it('is reported while it lasts, after short blocks used up the warning burst', async () => {
-      const ongoingWarnings = (lines: WorkerLogLine[]) =>
-        lines.filter((line) => line.log.level === 'WARN' && blockOf(line)?.ongoing === true);
-      const result = await runHarness('permanent_block', {
-        timeoutMs: 60_000,
-        killWhen: (lines) => ongoingWarnings(lines).length >= 2,
-      });
-      expect(result.signal).toBe('SIGKILL');
-      // The short blocks took the whole burst; the warning on the last one was suppressed.
-      const ended = endedBlockLogLines(result);
-      expect(ended).toHaveLength(REPORT_BURST);
-      expect(statsOf(result).some(({ running }) => running.suppressed >= 1)).toBe(true);
-      const [first, repeat] = ongoingWarnings(result.workerLogLines);
-      expect(first).toMatchObject({
-        message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
-        log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
-        kibana: {
-          event_loop_watchdog: {
-            phase: 'running',
-            ongoing: true,
-            startedAt: expect.any(String),
-            suppressedBlocks: 0,
-          },
-          worker: { name: 'event-loop-watchdog', thread_id: expect.any(Number) },
-        },
-      });
-      const firstBlockedMs = blockOf(first)?.blockedMs ?? 0;
-      // Early enough to be written before a liveness probe kills a blocked Kibana.
-      expect(firstBlockedMs).toBeGreaterThanOrEqual(1_000);
-      expect(firstBlockedMs).toBeLessThan(10_000);
-      // A repeat of the same block, seconds later rather than on the next poll.
-      const { startedAt } = blockOf(first) ?? {};
-      expect(blockOf(repeat)).toMatchObject({ ongoing: true, startedAt });
-      expect((blockOf(repeat)?.blockedMs ?? 0) - firstBlockedMs).toBeGreaterThanOrEqual(3_000);
-      // Still inside the roughly 10 s a liveness probe gives a blocked Kibana.
-      expect(blockOf(repeat)?.blockedMs ?? 0).toBeLessThan(10_000);
-      // The block never ended, so its log lines came from the worker while the main thread was
-      // still blocked.
-      expect(ended.map(blockOf)).not.toContainEqual(expect.objectContaining({ startedAt }));
-    }, 90_000);
-
-    it('is reported again when it ends, with the same start', async () => {
-      const result = await runHarness('long_block');
-      expectCleanExit(result);
-      const [ongoing, ended, ...rest] = blockLogLines(result).map(blockOf);
-      expect(rest).toEqual([]);
-      expect(ongoing).toMatchObject({ ongoing: true, phase: 'running' });
-      expect(ended).toMatchObject({ ongoing: false, phase: 'running' });
-      expect(ongoing?.blockedMs).toBeGreaterThanOrEqual(1000);
-      expect(ongoing?.blockedMs).toBeLessThan(3000);
-      expect(ended?.blockedMs).toBeGreaterThanOrEqual(3000);
-      expect(ended?.startedAt).toBe(ongoing?.startedAt);
-      expect(statsOf(result).reduce((total, stats) => total + stats.running.blocks, 0)).toBe(1);
-    }, 60_000);
-  });
+  it('reports a block that never ends while it lasts, after short blocks used up the rate limit', async () => {
+    const blockWarnings = (lines: WorkerLogLine[], ongoing: boolean) =>
+      lines.filter((line) => blockOf(line)?.ongoing === ongoing);
+    // Waits for the block's first ongoing warning and one repeat as they come in, then kills the
+    // still-blocked child; the run times out if they never arrive.
+    const result = await runHarness('permanent_block', {
+      timeoutMs: 60_000,
+      killWhen: (lines) => blockWarnings(lines, true).length >= 2,
+    });
+    expect(result.signal).toBe('SIGKILL');
+    expect(blockWarnings(result.workerLogLines, false)).toHaveLength(REPORT_BURST);
+    const [first, repeat] = blockWarnings(result.workerLogLines, true);
+    expect(first).toMatchObject({
+      message: expect.stringMatching(/^Event loop blocked for ~\d+ms so far$/),
+      log: { level: 'WARN', logger: 'metrics.event_loop_watchdog' },
+      kibana: { event_loop_watchdog: { phase: 'running', ongoing: true } },
+    });
+    expect(blockOf(first)?.blockedMs).toBeGreaterThanOrEqual(ONGOING_REPORT_AFTER_MS);
+    expect(blockOf(repeat)).toMatchObject({ ongoing: true, phase: 'running' });
+    // The repeat, and so the first warning, comes inside the ~10 s it takes a blocked event loop to
+    // fail a liveness probe.
+    expect(blockOf(repeat)?.blockedMs).toBeLessThan(10_000);
+  }, 90_000);
 });

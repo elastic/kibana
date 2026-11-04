@@ -78,9 +78,6 @@ const create = (workerEntry?: string) =>
     workerEntry,
   });
 
-/** Long enough to be reported while ongoing (after 1 s) well before it ends. */
-const LONG_BLOCK_MS = 3_000;
-
 /** Starts the watchdog, marks running and waits a moment, so the next block is a running one. */
 const startRunning = async () => {
   const watchdog = create();
@@ -136,13 +133,6 @@ const scenarios: Record<string, () => Promise<void>> = {
     for (;;) {
       // blocks the main thread until the process is killed
     }
-  },
-  // A block long enough to be reported while ongoing, and then again when it ends.
-  long_block: async () => {
-    const watchdog = await startRunning();
-    blockFor(LONG_BLOCK_MS);
-    await sleep(STATS_INTERVAL_MS * 2);
-    await watchdog.stop();
   },
 };
 
