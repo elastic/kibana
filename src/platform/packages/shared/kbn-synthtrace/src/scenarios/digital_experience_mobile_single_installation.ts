@@ -10,7 +10,9 @@
 /**
  * Generates EDOT React Native sessions of a single installation of a single app, so all
  * sessions share one `app.installation.id`, device and app version. The installation opens the
- * app every 45 minutes (`scale` shortens the gap), so use a range of a few hours.
+ * app every 90 minutes, so use a range of a few hours. Both SDKs keep a session until it has been
+ * idle for 30 minutes, which a two-visit session or an iOS crash report can come close to, so
+ * `scale` can lengthen the gap but not shorten it.
  *
  * The device is a Pixel 8 or an iPhone 15 Pro, picked by the seed; `platform` forces one.
  *
@@ -28,6 +30,7 @@ import { withClient } from '../lib/utils/with_client';
 import { SEED_LOG_HINT } from './helpers/digital_experience_apps';
 import {
   generateEdotReactNativeSessions,
+  MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION,
   parseDigitalExperienceMobileScenarioOpts,
   type DigitalExperienceMobileApp,
 } from './helpers/digital_experience_mobile_apps';
@@ -40,7 +43,7 @@ const APP: DigitalExperienceMobileApp = {
   versions: [{ serviceVersion: '1.2.0', buildNumber: 120, share: 1 }],
   appId: 'com.example.notes',
   health: 'healthy',
-  sessionsPerMinute: 1 / 45,
+  sessionsPerMinute: 1 / MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION,
   installations: 1,
   deviceWeights: {
     pixel8Android15: 1,
@@ -76,7 +79,14 @@ const APP: DigitalExperienceMobileApp = {
 };
 
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
-  const opts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts, from);
+  const parsedOpts = parseDigitalExperienceMobileScenarioOpts(scenarioOpts, from);
+  // More sessions would follow each other within 30 minutes, which the SDKs make one session
+  const opts = { ...parsedOpts, scale: Math.min(parsedOpts.scale, 1) };
+  if (opts.scale < parsedOpts.scale) {
+    logger.warning(
+      `scale=${parsedOpts.scale} would open the app within 30 minutes of the last session; using scale=1`
+    );
+  }
   logger.info(
     `Generating EDOT React Native data of a single installation with ${JSON.stringify(
       opts

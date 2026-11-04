@@ -395,9 +395,11 @@ export const parseDigitalExperienceMobileScenarioOpts = (
   };
 };
 
-// How often each installation opens the app. Both SDKs keep a session until it has been idle
-// for 30 minutes, so this leaves more than 30 minutes between the sessions of an installation.
-const MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION = 90;
+/**
+ * How often an installation opens the app. Both SDKs keep a session until it has been idle for 30
+ * minutes, so this leaves more than 30 minutes between the sessions of an installation.
+ */
+export const MINUTES_BETWEEN_SESSIONS_OF_AN_INSTALLATION = 90;
 const MIN_SCREEN_VIEWS = 2;
 const MAX_SCREEN_VIEWS = 6;
 // Share of sessions in which the user leaves the app and comes back within 30 minutes

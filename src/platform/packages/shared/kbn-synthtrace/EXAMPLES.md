@@ -994,7 +994,7 @@ These generate the same kind of EDOT React Native data for a single app, which m
 | Scenario | Generates |
 | -------- | --------- |
 | `digital_experience_mobile_single_app` | `weather-demo-react-native` alone, with its three versions on both platforms |
-| `digital_experience_mobile_single_installation` | one installation of `notes-mobile`, so every session shares one `app.installation.id`, device and app version. It opens the app every 45 minutes, so use a range of a few hours. |
+| `digital_experience_mobile_single_installation` | one installation of `notes-mobile`, so every session shares one `app.installation.id`, device and app version. It opens the app every 90 minutes, so that its sessions stay more than 30 minutes apart, and `scale` can't shorten that. Use a range of a few hours. |
 | `digital_experience_mobile_single_session` | one session of `notes-mobile`, starting at `--from`. Not meant for `--live`. |
 | `digital_experience_mobile_minimal_app` | one session per minute of `minimal-mobile`, which has one screen with one request, no widgets and no spans of its own |
 
