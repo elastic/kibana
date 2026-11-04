@@ -38,7 +38,12 @@ export {
 } from './src/alert_row_ids';
 export { EntityFlyoutServicesProvider, useEntityFlyoutServices } from './src/services_context';
 export type { EntityFlyoutServices, EntityDashboardRenderContext } from './src/services_context';
-
+export type {
+  K8sFlyoutRelatedResource,
+  K8sFlyoutInventoryFilterApply,
+  K8sInventoryEntitySnapshot,
+} from './src/k8s_flyout_inventory';
+export { k8sFlyoutFilterMatchBadgePresentation } from './src/k8s_flyout_inventory';
 export { buildFakeEntityOverview, formatGoldenSignalValue } from './src/fake_entity_overview';
 export type {
   EntityOverview,

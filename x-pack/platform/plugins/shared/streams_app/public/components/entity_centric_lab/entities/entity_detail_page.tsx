@@ -98,6 +98,10 @@ import { useTimeRangeUpdate } from '../../../hooks/use_time_range_update';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
 import { podPhaseBadgeForEntity } from './bucket_metrics';
+import {
+  buildK8sFlyoutRelatedResources,
+  enrichK8sFlyoutOverviewDetails,
+} from './flyout_k8s_related_resources';
 import { buildFakeEntities, getCategoryDescriptor } from './fake_entities';
 import { VariationProvider, useVariation } from './variation_context';
 import { VariationSwitcher } from './variation_switcher';
@@ -237,7 +241,17 @@ const PageTabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} metrics={tabsData.metrics} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} hideEvents={hideEvents} />;
+      return (
+        <OverviewTab
+          overview={overview}
+          entityName={entityName}
+          onSelectEntity={onSelectEntity}
+          metrics={tabsData.metrics}
+          hideAiSummary={hideAiSummary}
+          hideOwnership={hideOwnership}
+          hideEvents={hideEvents}
+        />
+      );
     case 'metrics':
       return <MetricsTab metrics={tabsData.metrics} hideEvents={hideEvents} />;
     case 'logs':
@@ -371,6 +385,11 @@ const EntityDetailPageInner = () => {
     }
     return map;
   }, [dataset]);
+
+  const k8sRelatedInventory = useMemo(
+    () => dataset.entities.filter((candidate) => candidate.category === 'kubernetes'),
+    [dataset]
+  );
 
   const entity = entityByName.get(entityName);
   const entityType = entity?.type;
@@ -646,6 +665,25 @@ const EntityDetailPageInner = () => {
     setChildEntityContext(null);
   }, []);
 
+  const handleK8sFlyoutSelectRelatedEntity = useCallback(
+    (sourceEntityName: string, targetEntityName: string, context?: EntitySelectionContext) => {
+      const matched = entityByName.get(targetEntityName);
+      const resolvedTypeId = resolveEntityTypeIdForName(targetEntityName, matched?.type);
+      if (!isEntityTypeEnabled(resolvedTypeId)) return;
+      if (childEntityName && sourceEntityName === childEntityName) {
+        closeChildEntity();
+        const params = new URLSearchParams(history.location.search);
+        history.push({
+          pathname: `/entities/detail/${encodeURIComponent(targetEntityName)}`,
+          search: params.toString() ? `?${params.toString()}` : '',
+        });
+        return;
+      }
+      openChildEntity(targetEntityName, context);
+    },
+    [childEntityName, closeChildEntity, entityByName, history, openChildEntity]
+  );
+
   const childEntity = childEntityName ? entityByName.get(childEntityName) : undefined;
   const childEntityType = childEntityContext?.entityType ?? childEntity?.type;
   const childEntityHealth = childEntityContext?.health ?? childEntity?.health;
@@ -658,9 +696,10 @@ const EntityDetailPageInner = () => {
     return resolveHostedApmServiceNames(childKind, childEntity.attributes);
   }, [childEntity, childEntityType, childEntityName]);
 
-  const detailPushActive =
-    flyoutPresentation === 'push' && Boolean(childEntityName || dashboardPreview);
-  const detailPushInsetPx = useInventoryPushInsetPx(detailPushActive);
+  const detailPushRequested =
+    flyoutPresentation === 'push' && Boolean(dashboardPreview);
+  const detailPushInsetPx = useInventoryPushInsetPx(detailPushRequested);
+  const detailPushActive = detailPushRequested && detailPushInsetPx > 0;
   const detailPushShellCss = getInventoryPushShellCss(detailPushActive, detailPushInsetPx);
 
   const { rangeFrom, rangeTo } = useTimeRange();
@@ -767,6 +806,30 @@ const EntityDetailPageInner = () => {
           }
         />
       ),
+      enrichK8sFlyoutOverviewDetails: (name: string, rows) => {
+        const matched = entityByName.get(name);
+        return enrichK8sFlyoutOverviewDetails(matched, rows);
+      },
+      getK8sFlyoutRelatedResources: (name: string) => {
+        const matched = entityByName.get(name);
+        if (!matched || matched.category !== 'kubernetes') {
+          return [];
+        }
+        return buildK8sFlyoutRelatedResources(matched, k8sRelatedInventory);
+      },
+      getK8sInventoryEntity: (name: string) => {
+        const matched = entityByName.get(name);
+        if (!matched) {
+          return undefined;
+        }
+        return {
+          name: matched.name,
+          subType: matched.subType,
+          attributes: matched.attributes,
+          alerts: matched.alerts,
+        };
+      },
+      onK8sFlyoutSelectRelatedEntity: handleK8sFlyoutSelectRelatedEntity,
     }),
     [
       agentBuilder,
@@ -777,6 +840,9 @@ const EntityDetailPageInner = () => {
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
+      entityByName,
+      k8sRelatedInventory,
+      handleK8sFlyoutSelectRelatedEntity,
     ]
   );
 
@@ -1248,8 +1314,8 @@ const EntityDetailPageInner = () => {
       {childEntityName ? (
         <EntityFlyout
           session="never"
-          size="m"
-          flyoutType={flyoutPresentation}
+          size="l"
+          flyoutType="overlay"
           entityName={childEntityName}
           entityType={childEntityType}
           entityHealth={childEntityHealth}

@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.19';
+export const PROTOTYPE_VERSION = '1.20';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -48,6 +48,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly summary: string;
   readonly details?: string;
 }[] = [
+  {
+    date: '2026-11-04',
+    summary:
+      'K8s related resources, hex flyout actions, child dashboard preview stack, and push width fallback.',
+    details:
+      'Flyout Overview adds a Related resources panel (entity pivots vs count rows that apply inventory filters). Hex tooltips gain inventory-style actions and See details; related filters respect node names and full K8s inventory. Child flyouts dock beside the parent without double page push; opening a dashboard from the child closes the stack into a standalone preview flyout—Back restores parent, child, and each flyout tab. Push presentation disables page inset when flyouts reach size-l width (768px). Related count clicks keep a lone parent flyout open but close parent+child when stacked. Denser summary and golden-signal cards follow Display options density. Bump to v1.20.',
+  },
   {
     date: '2026-11-03',
     summary: 'Pod Kubernetes Events table: newest-first order, column layout, and wrapped messages.',

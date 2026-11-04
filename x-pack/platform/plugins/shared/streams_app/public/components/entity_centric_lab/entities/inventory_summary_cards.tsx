@@ -94,16 +94,16 @@ const buildNeutralMetricDatum = ({
 const tileLayout = (density: ListDensity | undefined) => {
   switch (density) {
     case 'expanded':
-      return { height: 88, minWidth: 160, titlePx: 15, valuePx: 24, extraPx: 12, padPx: 6 };
+      return { height: 76, minWidth: 148, titlePx: 14, valuePx: 22, extraPx: 11, padPx: 5 };
     case 'normal':
-      return { height: 80, minWidth: 148, titlePx: 14, valuePx: 22, extraPx: 11, padPx: 5 };
+      return { height: 68, minWidth: 136, titlePx: 13, valuePx: 20, extraPx: 10, padPx: 4 };
     case 'compact':
     default:
-      return { height: 72, minWidth: 132, titlePx: 14, valuePx: 20, extraPx: 11, padPx: 4 };
+      return { height: 60, minWidth: 120, titlePx: 12, valuePx: 18, extraPx: 10, padPx: 3 };
   }
 };
 
-const titleRowHeight = (layout: ReturnType<typeof tileLayout>) => layout.titlePx + layout.padPx + 2;
+const titleRowHeight = (layout: ReturnType<typeof tileLayout>) => layout.titlePx + layout.padPx + 1;
 
 const metricTileStyles = (
   layout: ReturnType<typeof tileLayout>,
@@ -142,7 +142,7 @@ const metricTileStyles = (
     : ''}
 
   .echMetricText {
-    padding: ${layout.padPx}px ${layout.padPx + 2}px !important;
+    padding: ${layout.padPx}px ${layout.padPx + 1}px !important;
     padding-top: ${titleRowHeight(layout)}px !important;
   }
   .echMetricText__title {
@@ -244,7 +244,7 @@ const SummaryMetricCard = ({
           position: absolute;
           top: ${layout.padPx}px;
           left: ${layout.padPx + 2}px;
-          right: calc(${euiTheme.size.l} + ${euiTheme.size.xxs});
+          right: calc(${euiTheme.size.m} + ${euiTheme.size.xxs});
           z-index: 1;
           display: flex;
           align-items: baseline;
@@ -258,7 +258,7 @@ const SummaryMetricCard = ({
           css={css`
             font-size: ${layout.titlePx}px;
             font-weight: ${euiTheme.font.weight.semiBold};
-            line-height: 1.2;
+            line-height: 1.15;
             color: ${euiTheme.colors.text};
             overflow: hidden;
             text-overflow: ellipsis;
@@ -299,8 +299,8 @@ const SummaryMetricCard = ({
       <span
         css={css`
           position: absolute;
-          top: ${euiTheme.size.xs};
-          right: ${euiTheme.size.xs};
+          top: ${euiTheme.size.xxs};
+          right: ${euiTheme.size.xxs};
           z-index: 2;
           pointer-events: auto;
         `}

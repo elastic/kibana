@@ -21,7 +21,7 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiComboBox, EuiSelect } from '@elastic/eui';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Entity } from './fake_entities';
+import { getCategoryDescriptor, type Entity } from './fake_entities';
 import { labThings, useIsElasticOn } from '../lab_terminology';
 
 export const KUBERNETES_FILTER_ALL = '__all__';
@@ -829,6 +829,21 @@ export const getEntityTypeLabels = (entities: readonly Entity[]): string[] => {
     if (entity.type) types.add(entity.type);
   }
   return [...types].sort();
+};
+
+/** Entity type line in inventory UI (grid, flyout tags, hex tooltip) — uses `entity.type` when set. */
+export const inventoryEntityTypeLabel = (entity: Entity): string => {
+  if (entity.type) {
+    return entity.type;
+  }
+  if (entity.category === 'kubernetes' && entity.subType) {
+    return kubernetesSubTypeDisplayLabel(entity.subType);
+  }
+  return (
+    entity.subType ??
+    getCategoryDescriptor(entity.category)?.label ??
+    entity.category
+  );
 };
 
 /**

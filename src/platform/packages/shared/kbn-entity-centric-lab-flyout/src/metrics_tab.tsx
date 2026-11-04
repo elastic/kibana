@@ -94,19 +94,19 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsGoldenSignals"
       >
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
           {primaryA ? (
-            <EuiFlexItem style={{ minWidth: 220 }}>
+            <EuiFlexItem style={{ minWidth: 200 }}>
               <MetricChartCard series={primaryA} events={events} />
             </EuiFlexItem>
           ) : null}
           {primaryB ? (
-            <EuiFlexItem style={{ minWidth: 220 }}>
+            <EuiFlexItem style={{ minWidth: 200 }}>
               <MetricChartCard series={primaryB} events={events} />
             </EuiFlexItem>
           ) : null}
         </EuiFlexGroup>
-        <EuiSpacer size="s" />
+        <EuiSpacer size="xs" />
         {primaryC ? <MetricChartCard series={primaryC} events={events} /> : null}
       </EuiAccordion>
 
@@ -127,14 +127,14 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
         paddingSize="s"
         data-test-subj="entityCentricLabMetricsOtherSection"
       >
-        <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+        <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
           {otherA ? (
-            <EuiFlexItem style={{ minWidth: 220 }}>
+            <EuiFlexItem style={{ minWidth: 200 }}>
               <MetricChartCard series={otherA} events={events} />
             </EuiFlexItem>
           ) : null}
           {otherB ? (
-            <EuiFlexItem style={{ minWidth: 220 }}>
+            <EuiFlexItem style={{ minWidth: 200 }}>
               <MetricChartCard series={otherB} events={events} />
             </EuiFlexItem>
           ) : null}
@@ -144,7 +144,19 @@ export const MetricsTab = ({ metrics, hideEvents = false }: MetricsTabProps) => 
   );
 };
 
-const CHART_HEIGHT = 200;
+type FlyoutChartDensity = 'compact' | 'normal' | 'expanded';
+
+const metricChartHeight = (density: FlyoutChartDensity | undefined): number => {
+  switch (density) {
+    case 'expanded':
+      return 188;
+    case 'normal':
+      return 168;
+    case 'compact':
+    default:
+      return 152;
+  }
+};
 
 export const MetricChartCard = ({
   series,
@@ -154,7 +166,8 @@ export const MetricChartCard = ({
   readonly events: readonly MetricEvent[];
 }) => {
   const { euiTheme } = useEuiTheme();
-  const { charts } = useEntityFlyoutServices();
+  const { charts, density } = useEntityFlyoutServices();
+  const chartHeight = metricChartHeight(density);
   const chartBaseTheme = charts.theme.useChartsBaseTheme();
   // Shared cursor so hovering one chart draws a synced vertical guide on
   // every other chart in the tab (and any other chart in Kibana that
@@ -167,7 +180,7 @@ export const MetricChartCard = ({
     isDateHistogram: true,
   });
   return (
-    <EuiPanel hasBorder hasShadow={false} paddingSize="s">
+    <EuiPanel hasBorder hasShadow={false} paddingSize="xs">
       <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
         <EuiFlexItem>
           <EuiTitle size="xxs">
@@ -194,9 +207,9 @@ export const MetricChartCard = ({
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      <EuiSpacer size="s" />
+      <EuiSpacer size="xs" />
       <div
-        style={{ height: CHART_HEIGHT }}
+        style={{ height: chartHeight }}
         data-test-subj={`entityCentricLabMetricsChart-${series.id}`}
       >
         <Chart ref={chartRef}>

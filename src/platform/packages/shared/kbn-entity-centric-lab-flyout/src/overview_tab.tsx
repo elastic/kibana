@@ -39,6 +39,8 @@ import type {
 import { formatGoldenSignalValue } from './fake_entity_overview';
 import type { MetricsTabData, MetricEvent } from './fake_entity_tabs';
 import { explainFlyoutMetric, MetricChartCard } from './metrics_tab';
+import type { OnSelectEntity } from './fake_entity_tabs';
+import { K8sFlyoutRelatedSection } from './k8s_flyout_related_section';
 
 /** Identity fields that duplicate the flyout / full-page title. */
 const IDENTITY_DETAIL_IDS: ReadonlySet<string> = new Set([
@@ -59,8 +61,22 @@ const withoutRedundantName = (
 ): readonly EntityDetailRow[] =>
   rows.filter((row) => row.value !== displayName && !IDENTITY_DETAIL_IDS.has(row.id));
 
+/** Shown in Related resources instead of the metadata grid when pivots exist. */
+const K8S_RELATED_DETAIL_ROW_IDS: ReadonlySet<string> = new Set([
+  'namespace',
+  'node',
+  'cluster',
+  'deployment',
+  'pod',
+  'clusterName',
+  'nodeName',
+  'podName',
+]);
+
 interface OverviewTabProps {
   readonly overview: EntityOverview;
+  readonly entityName?: string;
+  readonly onSelectEntity?: OnSelectEntity;
   /** Metrics data relocated from the (now removed) Metrics tab. */
   readonly metrics?: MetricsTabData;
   /** When true the AI-generated summary section is hidden (e.g. Phase 1). */
@@ -73,21 +89,53 @@ interface OverviewTabProps {
 
 export const OverviewTab = ({
   overview,
+  entityName,
+  onSelectEntity,
   metrics,
   hideAiSummary = false,
   hideOwnership = false,
   hideEvents = false,
 }: OverviewTabProps) => {
-  const { resourceCopy = false } = useEntityFlyoutServices();
+  const {
+    resourceCopy = false,
+    enrichK8sFlyoutOverviewDetails,
+    getK8sFlyoutRelatedResources,
+    getK8sInventoryEntity,
+    onK8sFlyoutApplyInventoryFilter,
+    onK8sFlyoutSelectRelatedEntity,
+  } = useEntityFlyoutServices();
   const summaryAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSummary' });
   const signalsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabSignals' });
   const detailsAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabDetails' });
+  const relatedResourcesAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabRelated' });
   const ownershipAccordionId = useGeneratedHtmlId({ prefix: 'entityCentricLabOwnership' });
 
   const noEvents: readonly MetricEvent[] = [];
   const events = hideEvents || !metrics ? noEvents : metrics.events;
   const [primaryA, primaryB, primaryC] = metrics?.goldenSignals ?? [];
   const [otherA, otherB] = metrics?.otherMetrics ?? [];
+
+  const k8sRelatedResources =
+    entityName && getK8sFlyoutRelatedResources
+      ? getK8sFlyoutRelatedResources(entityName)
+      : [];
+
+  const detailRows = React.useMemo(() => {
+    let rows = withoutRedundantName(overview.details, overview.displayName);
+    if (entityName && enrichK8sFlyoutOverviewDetails) {
+      rows = enrichK8sFlyoutOverviewDetails(entityName, rows);
+    }
+    if (k8sRelatedResources.length > 0) {
+      rows = rows.filter((row) => !K8S_RELATED_DETAIL_ROW_IDS.has(row.id));
+    }
+    return rows;
+  }, [
+    overview.details,
+    overview.displayName,
+    entityName,
+    enrichK8sFlyoutOverviewDetails,
+    k8sRelatedResources.length,
+  ]);
 
   return (
     <>
@@ -138,7 +186,7 @@ export const OverviewTab = ({
         data-test-subj="entityCentricLabOverviewEntityDetails"
       >
         <KeyValueGrid
-          rows={withoutRedundantName(overview.details, overview.displayName)}
+          rows={detailRows}
           ariaLabel={i18n.translate(
             'entityCentricLabFlyout.flyout.overview.entityDetailsAriaLabel',
             {
@@ -167,22 +215,22 @@ export const OverviewTab = ({
       >
         {metrics && (primaryA || primaryB || primaryC) ? (
           <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {primaryA ? (
-                <EuiFlexItem style={{ minWidth: 220 }}>
+                <EuiFlexItem style={{ minWidth: 200 }}>
                   <MetricChartCard series={primaryA} events={events} />
                 </EuiFlexItem>
               ) : null}
               {primaryB ? (
-                <EuiFlexItem style={{ minWidth: 220 }}>
+                <EuiFlexItem style={{ minWidth: 200 }}>
                   <MetricChartCard series={primaryB} events={events} />
                 </EuiFlexItem>
               ) : null}
             </EuiFlexGroup>
             {primaryC ? (
               <>
-                <EuiSpacer size="s" />
+                <EuiSpacer size="xs" />
                 <MetricChartCard series={primaryC} events={events} />
               </>
             ) : null}
@@ -191,15 +239,15 @@ export const OverviewTab = ({
 
         {metrics && (otherA || otherB) ? (
           <>
-            <EuiSpacer size="s" />
-            <EuiFlexGroup gutterSize="s" responsive={false} wrap>
+            <EuiSpacer size="xs" />
+            <EuiFlexGroup gutterSize="xs" responsive={false} wrap>
               {otherA ? (
-                <EuiFlexItem style={{ minWidth: 220 }}>
+                <EuiFlexItem style={{ minWidth: 200 }}>
                   <MetricChartCard series={otherA} events={events} />
                 </EuiFlexItem>
               ) : null}
               {otherB ? (
-                <EuiFlexItem style={{ minWidth: 220 }}>
+                <EuiFlexItem style={{ minWidth: 200 }}>
                   <MetricChartCard series={otherB} events={events} />
                 </EuiFlexItem>
               ) : null}
@@ -207,6 +255,34 @@ export const OverviewTab = ({
           </>
         ) : null}
       </EuiAccordion>
+
+      {k8sRelatedResources.length > 0 ? (
+        <>
+          <EuiSpacer size="s" />
+          <EuiAccordion
+            id={relatedResourcesAccordionId}
+            initialIsOpen
+            buttonContent={
+              <SectionTitle
+                title={i18n.translate('entityCentricLabFlyout.flyout.overview.relatedResourcesTitle', {
+                  defaultMessage: 'Related resources',
+                })}
+              />
+            }
+            paddingSize="s"
+            data-test-subj="entityCentricLabOverviewRelatedResources"
+          >
+            <K8sFlyoutRelatedSection
+              sourceEntityName={entityName}
+              resources={k8sRelatedResources}
+              resolveInventoryEntity={getK8sInventoryEntity}
+              onSelectEntity={onSelectEntity}
+              onSelectRelatedEntity={onK8sFlyoutSelectRelatedEntity}
+              onApplyInventoryFilter={onK8sFlyoutApplyInventoryFilter}
+            />
+          </EuiAccordion>
+        </>
+      ) : null}
 
       {!hideOwnership && (
         <>
@@ -379,12 +455,12 @@ type FlyoutDensity = 'compact' | 'normal' | 'expanded';
 const goldenSignalTileLayout = (density: FlyoutDensity | undefined) => {
   switch (density) {
     case 'expanded':
-      return { height: 88, minWidth: 160, titlePx: 12, valuePx: 20, extraPx: 11, padPx: 6 };
+      return { height: 76, minWidth: 148, titlePx: 12, valuePx: 20, extraPx: 10, padPx: 5 };
     case 'normal':
-      return { height: 80, minWidth: 148, titlePx: 11, valuePx: 18, extraPx: 10, padPx: 5 };
+      return { height: 68, minWidth: 136, titlePx: 11, valuePx: 18, extraPx: 9, padPx: 4 };
     case 'compact':
     default:
-      return { height: 72, minWidth: 132, titlePx: 11, valuePx: 16, extraPx: 10, padPx: 4 };
+      return { height: 60, minWidth: 120, titlePx: 11, valuePx: 16, extraPx: 9, padPx: 3 };
   }
 };
 
@@ -455,12 +531,12 @@ const GoldenSignalCard = ({
         overflow: hidden;
 
         .echMetricText {
-          padding: ${layout.padPx}px ${layout.padPx + 2}px !important;
+          padding: ${layout.padPx}px ${layout.padPx + 1}px !important;
         }
         .echMetricText__title {
           font-size: ${layout.titlePx}px !important;
           font-weight: ${euiTheme.font.weight.semiBold} !important;
-          line-height: 1.2 !important;
+          line-height: 1.15 !important;
         }
         .echMetricText__value {
           font-size: ${layout.valuePx}px !important;
@@ -489,8 +565,8 @@ const GoldenSignalCard = ({
       <span
         css={css`
           position: absolute;
-          top: ${euiTheme.size.xs};
-          right: ${euiTheme.size.xs};
+          top: ${euiTheme.size.xxs};
+          right: ${euiTheme.size.xxs};
           z-index: 1;
         `}
       >

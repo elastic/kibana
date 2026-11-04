@@ -83,15 +83,74 @@ export const getK8sContextColumnIds = (
 export const getK8sContextValue = (entity: Entity, key: K8sContextKey): string =>
   entity.attributes?.[key] ?? '';
 
-export const getK8sPopoverLines = (
-  entity: Entity
-): ReadonlyArray<{ readonly label: string; readonly value: string }> => {
+export interface K8sPopoverContextEntry {
+  readonly key: K8sContextKey;
+  readonly label: string;
+  readonly value: string;
+}
+
+export const getK8sPopoverContext = (entity: Entity): readonly K8sPopoverContextEntry[] => {
   if (entity.category !== 'kubernetes') return [];
   const keys = POPOVER_KEYS_BY_SUBTYPE[entity.subType ?? ''] ?? [];
   return keys.flatMap((key) => {
     const value = getK8sContextValue(entity, key);
-    return value ? [{ label: K8S_CONTEXT_LABEL[key], value }] : [];
+    return value ? [{ key, label: K8S_CONTEXT_LABEL[key], value }] : [];
   });
+};
+
+export const getK8sPopoverLines = (
+  entity: Entity
+): ReadonlyArray<{ readonly label: string; readonly value: string }> => {
+  return getK8sPopoverContext(entity).map(({ label, value }) => ({ label, value }));
+};
+
+const CONTEXT_INVENTORY_SUBTYPE: Record<K8sContextKey, string> = {
+  cluster: 'Clusters',
+  namespace: 'Namespaces',
+  node: 'Nodes',
+  deployment: 'Deployments',
+  pod: 'Pods',
+};
+
+/** Resolve the inventoried row for a parent context value (namespace, node, …). */
+export const findK8sInventoryEntityByContext = (
+  inventory: readonly Entity[],
+  key: K8sContextKey,
+  value: string,
+  anchorEntity: Entity
+): Entity | undefined => {
+  const subType = CONTEXT_INVENTORY_SUBTYPE[key];
+  const matches = inventory.filter(
+    (candidate) =>
+      candidate.category === 'kubernetes' &&
+      candidate.subType === subType &&
+      candidate.name === value
+  );
+  if (matches.length === 0) {
+    return undefined;
+  }
+  if (matches.length === 1) {
+    return matches[0];
+  }
+  const clusterNames = getKubernetesClusterNames(
+    inventory.filter((candidate) => candidate.category === 'kubernetes')
+  );
+  const scopeCluster =
+    anchorEntity.subType === 'Clusters'
+      ? anchorEntity.name
+      : getK8sContextValue(anchorEntity, 'cluster') ||
+        assignClusterForEntity(anchorEntity, clusterNames);
+  if (!scopeCluster) {
+    return matches[0];
+  }
+  return (
+    matches.find((candidate) => {
+      if (candidate.subType === 'Clusters') {
+        return candidate.name === value;
+      }
+      return getK8sContextValue(candidate, 'cluster') === scopeCluster;
+    }) ?? matches[0]
+  );
 };
 
 const STORY_EU_CLUSTER = 'k8s-eu-prod';

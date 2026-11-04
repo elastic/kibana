@@ -142,7 +142,10 @@ interface EntityFlyoutProps {
    * Opt into EUI's managed flyout session so a host can stack a parent
    * and child flyout side by side. Pass `'start'` for the primary
    * (parent) flyout — it opens a session — and `'inherit'` for a
-   * secondary flyout that should dock next to it as the child. Left
+   * secondary flyout that should dock next to it as the child. Pass
+   * `'never'` for a standalone overlay child (e.g. full-page detail). Child
+   * flyouts with `'inherit'` dock to the left of the parent session without
+   * adding a second page push (see inventory push inset). Left
    * undefined (the default) the flyout renders as a plain, unmanaged
    * flyout, which is what single-flyout hosts like Discover want.
    */
@@ -392,10 +395,17 @@ const resolveEntityIcon = (kind: EntityKind | undefined, entityType?: string): s
 
 const DASHBOARD_PREVIEW_KEY = 'entityCentricLab_dashboardPreviewId';
 
-const persistDashboardPreviewId = (id: string | null): void => {
+const dashboardPreviewStorageKey = (entityName: string): string =>
+  `${DASHBOARD_PREVIEW_KEY}:${entityName}`;
+
+const persistDashboardPreviewId = (entityName: string, id: string | null): void => {
   try {
-    if (id) sessionStorage.setItem(DASHBOARD_PREVIEW_KEY, id);
-    else sessionStorage.removeItem(DASHBOARD_PREVIEW_KEY);
+    const key = dashboardPreviewStorageKey(entityName);
+    if (id) {
+      sessionStorage.setItem(key, id);
+    } else {
+      sessionStorage.removeItem(key);
+    }
   } catch {
     // sessionStorage unavailable
   }
@@ -408,26 +418,27 @@ const scopedDashboardPreview = (
 ): DashboardPreviewRequest | null => {
   const storedId = (() => {
     try {
-      return sessionStorage.getItem(DASHBOARD_PREVIEW_KEY);
+      return sessionStorage.getItem(dashboardPreviewStorageKey(entityName));
     } catch {
       return null;
     }
   })();
   const nextDashboards = getOotbDashboards(entityName, entityType);
-  const preferredId = current?.dashboard.id ?? storedId;
+  const preferredId = current?.dashboard.id ?? storedId ?? undefined;
   const matching = preferredId
     ? nextDashboards.find((dashboard) => dashboard.id === preferredId)
     : undefined;
-  const nextDashboard =
-    matching ??
-    (current?.dashboard.savedObjectId ? current.dashboard : undefined) ??
-    (preferredId ? nextDashboards[0] : undefined);
-  if (!nextDashboard) return null;
-  return {
-    title: nextDashboard.title,
-    href: buildDashboardHref(nextDashboard, entityName),
-    dashboard: nextDashboard,
-  };
+  if (matching) {
+    return {
+      title: matching.title,
+      href: buildDashboardHref(matching, entityName),
+      dashboard: matching,
+    };
+  }
+  if (current && preferredId && current.dashboard.id === preferredId) {
+    return current;
+  }
+  return null;
 };
 
 // ---------------------------------------------------------------------------
@@ -536,14 +547,17 @@ export const EntityFlyout = ({
   const [dashboardPreview, setDashboardPreview] = useState<DashboardPreviewRequest | null>(() =>
     scopedDashboardPreview(null, entityName, entityType)
   );
-  const updateDashboardPreview = useCallback((preview: DashboardPreviewRequest | null) => {
-    setDashboardPreview(preview);
-    persistDashboardPreviewId(preview?.dashboard.id ?? null);
-  }, []);
+  const updateDashboardPreview = useCallback(
+    (preview: DashboardPreviewRequest | null) => {
+      setDashboardPreview(preview);
+      persistDashboardPreviewId(entityName, preview?.dashboard.id ?? null);
+    },
+    [entityName]
+  );
   const handleCloseFlyout = useCallback(() => {
-    persistDashboardPreviewId(null);
+    persistDashboardPreviewId(entityName, null);
     onClose();
-  }, [onClose]);
+  }, [entityName, onClose]);
 
   const [dateStart, setDateStart] = useState(timeRange?.from ?? 'now-15m');
   const [dateEnd, setDateEnd] = useState(timeRange?.to ?? 'now');
@@ -565,7 +579,28 @@ export const EntityFlyout = ({
     agentBuilder,
     notifications,
     resourceCopy = false,
+    onOpenInventoryDashboardPreview,
   } = useEntityFlyoutServices();
+
+  const handlePreviewDashboard = useCallback(
+    (request: DashboardPreviewRequest) => {
+      if (session === 'inherit' && onOpenInventoryDashboardPreview) {
+        onOpenInventoryDashboardPreview(request, {
+          sourceEntityName: entityName,
+          sourceEntityType: entityType,
+        });
+        return;
+      }
+      updateDashboardPreview(request);
+    },
+    [
+      session,
+      onOpenInventoryDashboardPreview,
+      entityName,
+      entityType,
+      updateDashboardPreview,
+    ]
+  );
 
   // Note: the back/forward history toolbar that used to live in the
   // header was removed. `onNavigateEntity` is still accepted as a prop
@@ -1094,7 +1129,7 @@ export const EntityFlyout = ({
     // that kind's first managed dashboard. Only dismiss when there is none.
     setDashboardPreview((current) => {
       const next = scopedDashboardPreview(current, entityName, entityType);
-      persistDashboardPreviewId(next?.dashboard.id ?? null);
+      persistDashboardPreviewId(entityName, next?.dashboard.id ?? null);
       return next;
     });
 
@@ -1209,6 +1244,11 @@ export const EntityFlyout = ({
   // host; keep the flyout on overlay + managed session so close/header work.
   const euiFlyoutType = flyoutType === 'push' ? 'overlay' : flyoutType;
 
+  // Docked child flyouts (`session="inherit"`) must keep a stable named size;
+  // switching to `l` for preview breaks the managed session layout.
+  const resolvedFlyoutSize =
+    dashboardPreview && session !== 'inherit' && session !== 'never' ? 'l' : size;
+
   return (
     <EuiFlyoutResizable
       // No overlay mask: the flyout stays non-modal so the page behind it
@@ -1223,9 +1263,12 @@ export const EntityFlyout = ({
       session={session}
       onClose={handleCloseFlyout}
       hideCloseButton
-      size={dashboardPreview ? 'l' : size}
+      size={resolvedFlyoutSize}
       aria-labelledby={titleId}
       data-test-subj={dashboardPreview ? 'entityCentricLabFlyoutDashboardPreview' : 'entityCentricLabFlyout'}
+      {...(session === 'inherit' || session === 'never'
+        ? { 'data-entity-lab-flyout-exclude-push-inset': 'true' }
+        : {})}
     >
       {dashboardPreview ? (
         <>
@@ -1469,7 +1512,9 @@ export const EntityFlyout = ({
           hideEvents={hideEvents}
           dashboardStyle={dashboardStyle}
           showDashboardThumbnails={showDashboardThumbnails}
-          onPreviewDashboard={dashboardStyle === 'listWithPreview' ? updateDashboardPreview : undefined}
+          onPreviewDashboard={
+            dashboardStyle === 'listWithPreview' ? handlePreviewDashboard : undefined
+          }
           flyoutType={flyoutType}
           hostedApmServiceNames={hostedApmServiceNames}
         />
@@ -1589,7 +1634,17 @@ const TabContent = ({
 
   switch (activeTab) {
     case 'overview':
-      return <OverviewTab overview={overview} metrics={tabsData.metrics} hideAiSummary={hideAiSummary} hideOwnership={hideOwnership} hideEvents={hideEvents} />;
+      return (
+        <OverviewTab
+          overview={overview}
+          entityName={entityName}
+          onSelectEntity={onSelectEntity}
+          metrics={tabsData.metrics}
+          hideAiSummary={hideAiSummary}
+          hideOwnership={hideOwnership}
+          hideEvents={hideEvents}
+        />
+      );
     case 'logs':
       return (
         <LogsTab entityName={entityName} logs={tabsData.logs} flyoutType={flyoutType} />

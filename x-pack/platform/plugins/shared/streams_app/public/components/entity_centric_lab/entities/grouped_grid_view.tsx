@@ -15,6 +15,8 @@ import React, {
   useRef,
   useState,
 } from 'react';
+import { createPortal } from 'react-dom';
+import { APP_MAIN_SCROLL_CONTAINER_ID } from '@kbn/core-chrome-layout-constants';
 import {
   EuiBadge,
   EuiButton,
@@ -24,6 +26,7 @@ import {
   EuiColorPalettePicker,
   EuiColorPicker,
   EuiColorPickerSwatch,
+  EuiCopy,
   EuiEmptyPrompt,
   EuiFieldNumber,
   EuiFieldText,
@@ -158,11 +161,29 @@ import {
   getKubernetesClusterNames,
   filterKubernetesEntities,
   groupKubernetesEntities,
+  inventoryEntityTypeLabel,
   kubernetesSubTypeDisplayLabel,
   type KubernetesGroupBy,
   type KubernetesResourceType,
 } from './kubernetes_cluster_filter';
-import { getK8sPopoverLines } from './kubernetes_hierarchy';
+import { measureInventoryPushInsetPx } from './inventory_push_inset';
+import {
+  formatInventoryAlertRatioLabel,
+  formatInventoryNavCount,
+} from './inventory_nav_count_format';
+import {
+  resolveHexTileRelatedFilterActions,
+  type HexTileRelatedFilterApplyArgs,
+} from './hex_tile_related_filters';
+import {
+  computeHexTileTooltipTransitRect,
+  HEX_TILE_TOOLTIP_BRIDGE_PX,
+  HEX_TILE_TOOLTIP_GAP_PX,
+  HEX_TILE_TOOLTIP_WIDTH,
+  rectsIntersect,
+} from './hex_tile_tooltip_geometry';
+import { HexTileK8sContextActions } from './hex_tile_k8s_context_badges';
+import { getK8sPopoverContext } from './kubernetes_hierarchy';
 
 interface Props {
   readonly entities: readonly Entity[];
@@ -223,7 +244,19 @@ interface Props {
   };
   /** Page-level density — only changes hex card panel padding. */
   readonly density?: ListDensity;
+  /** Hex tile tooltip “Filter for” (entity name or K8s facet when scoped). */
+  readonly onHexTileFilterFor?: (entity: Entity, bucketKey: BucketKey | undefined) => void;
+  /** Hex tile “See related resources” footer (K8s facet + resource type). */
+  readonly onHexTileRelatedFilter?: (
+    entity: Entity,
+    apply: HexTileRelatedFilterApplyArgs
+  ) => void;
+  /** Full K8s inventory for related-action counts (unfiltered base set). */
+  readonly k8sRelatedInventory?: readonly Entity[];
 }
+
+export type HexTileFilterForHandler = NonNullable<Props['onHexTileFilterFor']>;
+export type HexTileRelatedFilterHandler = NonNullable<Props['onHexTileRelatedFilter']>;
 
 /**
  * Canonical name of the currently-selected entity, shared down the deeply
@@ -253,6 +286,15 @@ const PaletteColoringEnabledContext = createContext<boolean>(false);
  * page is already scoped to a single category. Sub-type rows still render.
  */
 const HideCategoryHeaderContext = createContext<boolean>(false);
+
+const HexTileFilterForContext = createContext<HexTileFilterForHandler | undefined>(undefined);
+const HexTileRelatedFilterContext = createContext<HexTileRelatedFilterHandler | undefined>(
+  undefined
+);
+const HexTileRelatedInventoryContext = createContext<readonly Entity[]>([]);
+const HexTileOpenEntityContext = createContext<((entityName: string) => void) | undefined>(
+  undefined
+);
 
 /**
  * Auto-refresh cache-buster (see {@link setMetricRefreshSalt}). Threaded so
@@ -446,17 +488,87 @@ const TONE_RANK: Record<MetricTone, number> = {
   good: 6,
 };
 
+/** Base tooltip height for flip-above placement (footer actions add more). */
+const TILE_TOOLTIP_HEIGHT_BASE = 260;
+const TILE_TOOLTIP_HIDE_DELAY_MS = 550;
+/** When crossing the tile→tooltip path, wait briefly before swapping hex tooltips. */
+const TILE_TOOLTIP_TILE_SWITCH_DEFER_MS = 48;
+
+const HEX_TILE_TOOLTIP_CORRIDOR_SELECTOR =
+  '[data-test-subj="entityCentricLabHealthTileTooltipCorridor"]';
+const HEX_TILE_TOOLTIP_CARD_SELECTOR = '[data-test-subj="entityCentricLabHealthTileTooltip"]';
+const HEX_TILE_BUTTON_SELECTOR = '[data-test-subj^="entityCentricLabHealthTile-"]';
+
+const estimateHexTileTooltipHeight = (
+  entity: Entity,
+  k8sRelatedInventory: readonly Entity[]
+): number => {
+  const relatedActionCount = resolveHexTileRelatedFilterActions(entity, k8sRelatedInventory).length;
+  return TILE_TOOLTIP_HEIGHT_BASE + relatedActionCount * 44;
+};
+
+const isPointerOnHexTileTooltipSurface = (x: number, y: number): boolean => {
+  const topEl = document.elementFromPoint(x, y);
+  if (!topEl) {
+    return false;
+  }
+  return Boolean(
+    topEl.closest(HEX_TILE_TOOLTIP_CORRIDOR_SELECTOR) ||
+      topEl.closest(HEX_TILE_TOOLTIP_CARD_SELECTOR)
+  );
+};
+
+/** Left-nav-style hollow total or danger alerting/total for related-resource rows. */
+const RelatedActionInventoryBadge = ({
+  total,
+  alerting,
+}: {
+  readonly total: number;
+  readonly alerting: number;
+}) => {
+  if (alerting > 0) {
+    const label = formatInventoryAlertRatioLabel(alerting, total);
+    const tooltip = i18n.translate(
+      'xpack.streams.entityCentricLab.entities.tileTooltip.related.alertRatioTooltip',
+      {
+        defaultMessage:
+          '{alerting, plural, one {# resource} other {# resources}} with active alerts out of {total, number}',
+        values: { alerting, total },
+      }
+    );
+    return (
+      <EuiToolTip content={tooltip} disableScreenReaderOutput>
+        <EuiBadge color="danger">{label}</EuiBadge>
+      </EuiToolTip>
+    );
+  }
+  const tooltip = i18n.translate(
+    'xpack.streams.entityCentricLab.entities.tileTooltip.related.inventoryTooltip',
+    {
+      defaultMessage: '{count, plural, one {# related resource} other {# related resources}}',
+      values: { count: total },
+    }
+  );
+  return (
+    <EuiToolTip content={tooltip} disableScreenReaderOutput>
+      <EuiBadge color="hollow">{formatInventoryNavCount(total)}</EuiBadge>
+    </EuiToolTip>
+  );
+};
+
 /**
- * Hover-card state for the tile grid. Position is in wrapper-local
- * pixels; `placeLeft` / `placeAbove` flip the card away from the
- * nearest edge so it never spills outside the bucket row.
+ * Hover-card state for the tile grid. Anchored to the hovered tile in
+ * viewport coordinates so the card can portal above push-flyout clipping.
  */
 interface TileHover {
   readonly entity: Entity;
   readonly reading: MetricReading;
-  readonly x: number;
-  readonly y: number;
-  readonly placeLeft: boolean;
+  /** Tile center X (viewport px), clamped to the visible inventory band. */
+  readonly anchorCenterX: number;
+  /** Actual tile center X before clamping (for hover corridor). */
+  readonly tileCenterX: number;
+  readonly anchorTop: number;
+  readonly anchorBottom: number;
   readonly placeAbove: boolean;
 }
 
@@ -517,6 +629,8 @@ interface MetricTileProps {
   readonly onHover: TileHoverHandler;
   readonly onFocusHover: TileFocusHandler;
   readonly onHoverEnd: () => void;
+  /** True while this tile’s tooltip card is open (includes pointer on the card). */
+  readonly isTooltipTarget?: boolean;
 }
 
 const MetricTile = ({
@@ -530,6 +644,7 @@ const MetricTile = ({
   onHover,
   onFocusHover,
   onHoverEnd,
+  isTooltipTarget = false,
 }: MetricTileProps) => {
   // Resolve through the shared store so a wizard `displayField` change
   // re-labels the hover card immediately. Stable hash-derived values keep
@@ -537,6 +652,7 @@ const MetricTile = ({
   // like `kubernetes.pod.uid` for the entire kind.
   const displayName = useEntityDisplayName(entity.name, entity.type);
   const isSelected = useContext(SelectedEntityContext) === entity.name;
+  const showHexHighlight = isSelected || isTooltipTarget;
   // Palette mode supplies an opaque concrete colour; severity mode uses
   // the semi-transparent tone (composited over the light page).
   const fill = fillColor ?? toneColor(reading.tone, euiTheme);
@@ -566,17 +682,18 @@ const MetricTile = ({
         corners so the shape reads unambiguously as a single hexagon.
       */
       transition: transform 120ms ease;
-      ${isSelected
+      ${showHexHighlight
         ? `
         z-index: 2;
         position: relative;
         /*
-          Selected hex keeps its fill exactly as-is — same colour AND size
-          as its neighbours. A \`clip-path\` clips \`border\`/\`box-shadow\`, so
-          the stroke is drawn by growing a dark-grey hexagon outward to the
-          full slot (overriding the ${HEX_GAP_SCALE} gap scale) and laying
-          the fill back on top at the normal gap size via \`::after\`.
-          The dark ring only shows in the surrounding gap.
+          Selected / tooltip-target hex keeps its fill exactly as-is — same
+          colour AND size as its neighbours. A \`clip-path\` clips
+          \`border\`/\`box-shadow\`, so the stroke is drawn by growing a
+          dark-grey hexagon outward to the full slot (overriding the
+          ${HEX_GAP_SCALE} gap scale) and laying the fill back on top at
+          the normal gap size via \`::after\`. The dark ring only shows in
+          the surrounding gap.
         */
         transform: scale(1);
         background-color: ${euiTheme.colors.darkShade};
@@ -596,7 +713,7 @@ const MetricTile = ({
         transform: scale(${Math.min(1, HEX_GAP_SCALE + 0.06)});
       }
     `,
-    [fill, euiTheme, isSelected]
+    [fill, euiTheme, showHexHighlight]
   );
   // Accessible summary — the visual hover card is decorative, so the
   // full reading still needs to be reachable by screen readers.
@@ -619,9 +736,9 @@ const MetricTile = ({
       // selectors keep working even when the user re-labels via the
       // wizard or swaps the bucket metric.
       data-test-subj={`entityCentricLabHealthTile-${entity.name}`}
+      data-tooltip-open={isTooltipTarget ? 'true' : undefined}
       onClick={() => onSelectEntity(entity.name)}
       onMouseEnter={(event) => onHover(entity, reading, event)}
-      onMouseMove={(event) => onHover(entity, reading, event)}
       onMouseLeave={onHoverEnd}
       onFocus={(event) => onFocusHover(entity, reading, event)}
       onBlur={onHoverEnd}
@@ -637,9 +754,17 @@ const MetricTile = ({
  * Tiny inline sparkline for the numeric hover cards. Draws a faint filled
  * area under a solid trend line; auto-scales to the series min/max.
  */
-const TileSparkline = ({ values, color }: { values: readonly number[]; color: string }) => {
-  const width = 200;
-  const height = 40;
+const TileSparkline = ({
+  values,
+  color,
+  width = 200,
+  height = 40,
+}: {
+  values: readonly number[];
+  color: string;
+  width?: number;
+  height?: number;
+}) => {
   if (values.length < 2) return null;
   const min = Math.min(...values);
   const max = Math.max(...values);
@@ -656,7 +781,7 @@ const TileSparkline = ({ values, color }: { values: readonly number[]; color: st
     <svg
       viewBox={`0 0 ${width} ${height}`}
       preserveAspectRatio="none"
-      style={{ display: 'block', width: '100%', height, marginTop: 8 }}
+      style={{ display: 'block', width: '100%', height }}
       aria-hidden
     >
       <polygon points={`${points} ${width},${height} 0,${height}`} fill={color} opacity={0.18} />
@@ -666,10 +791,8 @@ const TileSparkline = ({ values, color }: { values: readonly number[]; color: st
 };
 
 /**
- * Styled dark hover card for a tile — consistent with the Geomap view's
- * region card. Shows the entity name + type, the current Color-by value
- * (with a tone swatch) and, for numeric metrics, a trend sparkline.
- * Rendered once per bucket row and positioned over the hovered tile.
+ * Light inventory-style hover card for a hex tile: header, filter/copy
+ * actions, and the current Color-by reading with an optional sparkline.
  */
 const MetricTileTooltip = ({
   hover,
@@ -677,91 +800,460 @@ const MetricTileTooltip = ({
   statId,
   euiTheme,
   fillColor,
+  bucketKey,
+  onDismiss,
+  onPointerEnter,
+  onPointerLeave,
 }: {
   hover: TileHover;
   metric: MetricDescriptor;
   statId: StatId;
   euiTheme: EuiThemeComputed;
   fillColor?: string;
+  bucketKey?: BucketKey;
+  onDismiss: () => void;
+  onPointerEnter: () => void;
+  onPointerLeave: () => void;
 }) => {
-  const { entity, reading, x, y, placeLeft, placeAbove } = hover;
+  const { entity, reading, anchorCenterX, tileCenterX, anchorTop, anchorBottom, placeAbove } =
+    hover;
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const [measuredTooltipHeight, setMeasuredTooltipHeight] = useState(TILE_TOOLTIP_HEIGHT_BASE);
   const displayName = useEntityDisplayName(entity.name, entity.type);
+  const onFilterFor = useContext(HexTileFilterForContext);
+  const onRelatedFilter = useContext(HexTileRelatedFilterContext);
+  const k8sRelatedInventory = useContext(HexTileRelatedInventoryContext);
+  const onOpenEntity = useContext(HexTileOpenEntityContext);
+  const relatedFilterActions = useMemo(
+    () => resolveHexTileRelatedFilterActions(entity, k8sRelatedInventory),
+    [entity, k8sRelatedInventory]
+  );
+
   const showK8sContext = useContext(PaletteColoringEnabledContext);
-  const contextLines = showK8sContext ? getK8sPopoverLines(entity) : [];
-  // Categorical metrics (Status, Phase, …) get no sparkline — a trend
-  // line over an enum is meaningless.
+  const contextEntryCount = showK8sContext ? getK8sPopoverContext(entity).length : 0;
+  const effectiveStat = effectiveStatForMetric(metric, statId);
+  const metricTitle = hexMapLegendMetricLabel(metric, effectiveStat);
+  const categoryIcon = getCategoryDescriptor(entity.category)?.icon ?? 'package';
+  const lineColor = fillColor ?? solidToneColor(reading.tone, euiTheme);
   const sparkline =
     metric.kind === 'categorical'
       ? null
       : resolveMetricSparkline(entity.name, metric, statId, entity.health);
-  const OFFSET = 12;
-  return (
+  const copyValue = entity.name;
+  const CARD_WIDTH = HEX_TILE_TOOLTIP_WIDTH;
+  const gap = HEX_TILE_TOOLTIP_GAP_PX;
+
+  useLayoutEffect(() => {
+    const el = tooltipRef.current;
+    if (!el || typeof ResizeObserver === 'undefined') {
+      return undefined;
+    }
+    const syncHeight = () => {
+      const nextHeight = el.getBoundingClientRect().height;
+      if (nextHeight > 0) {
+        setMeasuredTooltipHeight(nextHeight);
+      }
+    };
+    syncHeight();
+    const observer = new ResizeObserver(syncHeight);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, [entity.name, relatedFilterActions.length, contextEntryCount, Boolean(sparkline)]);
+
+  const handleOpenContextEntity = useCallback(
+    (entityName: string) => {
+      onOpenEntity?.(entityName);
+      onDismiss();
+    },
+    [onDismiss, onOpenEntity]
+  );
+
+  const handleFilterFor = () => {
+    onFilterFor?.(entity, bucketKey);
+    onDismiss();
+  };
+
+  const handleRelatedFilter = (apply: HexTileRelatedFilterApplyArgs) => {
+    onRelatedFilter?.(entity, apply);
+    onDismiss();
+  };
+
+  const tooltipTextColor = euiTheme.colors.text;
+  const tooltipSubduedColor = euiTheme.colors.darkShade;
+
+  const relatedLinkStyle: React.CSSProperties = {
+    display: 'flex',
+    alignItems: 'center',
+    gap: 8,
+    width: '100%',
+    padding: '10px 14px',
+    border: 'none',
+    background: 'transparent',
+    cursor: 'pointer',
+    color: tooltipTextColor,
+    fontSize: 13,
+    lineHeight: 1.3,
+    textAlign: 'left',
+    boxSizing: 'border-box',
+    justifyContent: 'space-between',
+  };
+
+  const actionButtonStyle: React.CSSProperties = {
+    width: '100%',
+    display: 'flex',
+    flexDirection: 'column',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: 4,
+    padding: '10px 8px',
+    border: 'none',
+    background: 'transparent',
+    cursor: onFilterFor ? 'pointer' : 'not-allowed',
+    color: tooltipTextColor,
+    fontSize: 12,
+    lineHeight: 1.25,
+    minWidth: 0,
+    boxSizing: 'border-box',
+  };
+
+  const transitRect = computeHexTileTooltipTransitRect(
+    { anchorCenterX, tileCenterX, anchorTop, anchorBottom, placeAbove },
+    measuredTooltipHeight
+  );
+
+  const tooltipBridgeClassName = css({
+    '&::before': {
+      content: '""',
+      position: 'absolute',
+      left: 0,
+      width: '100%',
+      height: HEX_TILE_TOOLTIP_BRIDGE_PX,
+      pointerEvents: 'auto',
+      ...(placeAbove
+        ? { bottom: -HEX_TILE_TOOLTIP_BRIDGE_PX }
+        : { top: -HEX_TILE_TOOLTIP_BRIDGE_PX }),
+    },
+  });
+
+  const tooltipClassName = css({
+    color: tooltipTextColor,
+    '[data-test-subj="entityCentricLabHealthTileTooltipActions"] button': {
+      color: `${tooltipTextColor} !important`,
+    },
+    '[data-test-subj="entityCentricLabHealthTileTooltipActions"] .euiIcon': {
+      color: `${tooltipTextColor} !important`,
+    },
+    '[data-test-subj="entityCentricLabHealthTileTooltipActions"] .euiIcon svg, [data-test-subj="entityCentricLabHealthTileTooltipActions"] .euiIcon svg *':
+      {
+        fill: `${tooltipTextColor} !important`,
+        stroke: `${tooltipTextColor} !important`,
+      },
+    '[data-test-subj="entityCentricLabHealthTileTooltipActions"] .euiCopy': {
+      display: 'flex',
+      minWidth: 0,
+      width: '100%',
+    },
+  });
+
+  const tooltipLayerZ = euiTheme.levels.flyout + 1;
+
+  const hoverCorridor = (
     <div
+      aria-hidden
+      data-test-subj="entityCentricLabHealthTileTooltipCorridor"
+      onMouseEnter={onPointerEnter}
+      onMouseLeave={onPointerLeave}
       style={{
-        position: 'absolute',
-        left: x,
-        top: y,
-        transform: `translate(${placeLeft ? `calc(-100% - ${OFFSET}px)` : `${OFFSET}px`}, ${
-          placeAbove ? `calc(-100% - ${OFFSET}px)` : `${OFFSET}px`
-        })`,
-        pointerEvents: 'none',
-        zIndex: 3,
-        width: 224,
-        padding: '8px 12px',
+        position: 'fixed',
+        left: transitRect.left,
+        top: transitRect.top,
+        width: transitRect.width,
+        height: transitRect.height,
+        pointerEvents: 'auto',
+        zIndex: tooltipLayerZ,
+      }}
+    />
+  );
+
+  const tooltip = (
+    <div
+      ref={tooltipRef}
+      role="dialog"
+      aria-label={displayName}
+      className={`${tooltipClassName} ${tooltipBridgeClassName}`}
+      onMouseEnter={onPointerEnter}
+      onMouseLeave={onPointerLeave}
+      style={{
+        position: 'fixed',
+        left: anchorCenterX,
+        top: placeAbove ? anchorTop : anchorBottom,
+        transform: placeAbove
+          ? `translate(-50%, calc(-100% - ${gap}px))`
+          : `translate(-50%, ${gap}px)`,
+        pointerEvents: 'auto',
+        zIndex: tooltipLayerZ,
+        width: CARD_WIDTH,
         borderRadius: euiTheme.border.radius.medium,
-        background: euiTheme.components.tooltipBackground,
-        color: euiTheme.colors.textGhost,
-        boxShadow: `0 4px 12px ${euiTheme.colors.shadow}40`,
+        background: euiTheme.colors.emptyShade,
+        color: tooltipTextColor,
+        border: `${euiTheme.border.width.thin} solid ${euiTheme.border.color}`,
+        boxShadow: `0 4px 16px ${euiTheme.colors.shadow}55`,
         fontSize: 12,
         lineHeight: 1.4,
+        overflow: 'hidden',
       }}
       data-test-subj="entityCentricLabHealthTileTooltip"
     >
-      <div style={{ fontWeight: 700, overflow: 'hidden', textOverflow: 'ellipsis' }}>
-        {displayName}
-      </div>
-      <div style={{ opacity: 0.7, marginBottom: contextLines.length > 0 ? 4 : 6 }}>
-        {entity.type}
-      </div>
-      {contextLines.map((line) => (
-        <div key={line.label} style={{ opacity: 0.7, fontSize: 11 }}>
-          {line.label} {line.value}
+      <div
+        style={{
+          display: 'flex',
+          alignItems: 'flex-start',
+          gap: 10,
+          padding: '12px 12px 10px',
+        }}
+      >
+        <div style={{ marginTop: 2, flexShrink: 0 }}>
+          <EuiIcon type={categoryIcon} size="l" color="text" />
         </div>
-      ))}
-      <div style={{ height: 1, background: `${euiTheme.colors.textGhost}26`, margin: '6px 0' }} />
-      <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-        <span
-          aria-hidden
-          style={{
-            width: 8,
-            height: 8,
-            borderRadius: 2,
-            background: fillColor ?? toneColor(reading.tone, euiTheme),
-            display: 'inline-block',
-            flexShrink: 0,
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 11,
+              color: tooltipSubduedColor,
+            }}
+          >
+            {inventoryEntityTypeLabel(entity)}
+          </div>
+          <div
+            style={{
+              fontWeight: 600,
+              fontSize: 14,
+              color: tooltipTextColor,
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}
+          >
+            {displayName}
+          </div>
+        </div>
+        <EuiButtonIcon
+          iconType="cross"
+          size="s"
+          color="text"
+          aria-label={i18n.translate(
+            'xpack.streams.entityCentricLab.entities.tileTooltip.close',
+            { defaultMessage: 'Close' }
+          )}
+          data-test-subj="entityCentricLabHealthTileTooltipClose"
+          onClick={(event) => {
+            event.stopPropagation();
+            onDismiss();
           }}
+          onMouseDown={(event) => event.preventDefault()}
+          style={{ flexShrink: 0, marginTop: -2, marginRight: -4 }}
         />
-        {metric.id === ENTITY_ALERTS_METRIC_ID ? (
-          <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
-        ) : (
-          <>
-            <span style={{ flex: 1, opacity: 0.85 }}>
-              {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.metricLine', {
-                defaultMessage: '{metricLabel} ({stat})',
-                values: { metricLabel: metric.label, stat: getStatLabel(statId) },
-              })}
-            </span>
-            <span style={{ fontWeight: 600 }}>{reading.displayValue}</span>
-          </>
-        )}
       </div>
-      {sparkline ? (
-        <TileSparkline
-          values={sparkline}
-          color={fillColor ?? solidToneColor(reading.tone, euiTheme)}
-        />
+
+      <div style={{ height: 1, background: euiTheme.border.color }} />
+      <div
+        style={{
+          display: 'grid',
+          gridTemplateColumns: '1fr 1px 1fr 1px 1fr',
+          alignItems: 'stretch',
+        }}
+        data-test-subj="entityCentricLabHealthTileTooltipActions"
+        onMouseDown={(event) => event.preventDefault()}
+      >
+        <button
+          type="button"
+          style={{
+            ...actionButtonStyle,
+            cursor: onOpenEntity ? 'pointer' : 'not-allowed',
+            opacity: onOpenEntity ? 1 : 0.5,
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (onOpenEntity) handleOpenContextEntity(entity.name);
+          }}
+          disabled={!onOpenEntity}
+          data-test-subj="entityCentricLabHealthTileTooltipOpenFlyout"
+        >
+          <EuiIcon type="expand" size="m" color="text" aria-hidden />
+          {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.openFlyout', {
+            defaultMessage: 'See details',
+          })}
+        </button>
+        <div style={{ background: euiTheme.border.color }} />
+        <button
+          type="button"
+          style={{
+            ...actionButtonStyle,
+            cursor: onFilterFor ? 'pointer' : 'not-allowed',
+            opacity: onFilterFor ? 1 : 0.5,
+          }}
+          onClick={(event) => {
+            event.stopPropagation();
+            if (onFilterFor) handleFilterFor();
+          }}
+          disabled={!onFilterFor}
+          data-test-subj="entityCentricLabHealthTileTooltipFilterFor"
+        >
+          <EuiIcon type="plusInCircle" size="m" color="text" aria-hidden />
+          {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.filterFor', {
+            defaultMessage: 'Filter for',
+          })}
+        </button>
+        <div style={{ background: euiTheme.border.color }} />
+        <EuiCopy textToCopy={copyValue}>
+          {(copy) => (
+            <button
+              type="button"
+              style={{ ...actionButtonStyle, cursor: 'pointer' }}
+              onClick={(event) => {
+                event.stopPropagation();
+                copy();
+              }}
+              data-test-subj="entityCentricLabHealthTileTooltipCopy"
+            >
+              <EuiIcon type="copy" size="m" color="text" aria-hidden />
+              {i18n.translate('xpack.streams.entityCentricLab.entities.tileTooltip.copyValue', {
+                defaultMessage: 'Copy value',
+              })}
+            </button>
+          )}
+        </EuiCopy>
+      </div>
+
+      <div style={{ height: 1, background: euiTheme.border.color }} />
+      <div style={{ display: 'flex', gap: 12, padding: '12px 14px 14px', alignItems: 'center' }}>
+        <div style={{ flex: 1, minWidth: 0 }}>
+          <div
+            style={{
+              fontSize: 12,
+              fontWeight: 400,
+              color: tooltipSubduedColor,
+            }}
+          >
+            {metricTitle}
+          </div>
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              gap: 6,
+              marginTop: 4,
+              flexWrap: 'wrap',
+            }}
+          >
+            <span
+              aria-hidden
+              style={{
+                width: 8,
+                height: 8,
+                borderRadius: 2,
+                background: fillColor ?? toneColor(reading.tone, euiTheme),
+                display: 'inline-block',
+                flexShrink: 0,
+              }}
+            />
+            <span
+              style={{
+                fontWeight: 700,
+                fontSize: 18,
+                lineHeight: 1.2,
+                color: tooltipTextColor,
+              }}
+            >
+              {reading.displayValue}
+            </span>
+          </div>
+        </div>
+        {sparkline ? (
+          <div style={{ width: 112, flexShrink: 0 }}>
+            <TileSparkline values={sparkline} color={lineColor} width={112} height={44} />
+          </div>
+        ) : null}
+      </div>
+
+      {showK8sContext && onOpenEntity ? (
+        <>
+          <div style={{ height: 1, background: euiTheme.border.color }} />
+          <HexTileK8sContextActions
+            entity={entity}
+            inventory={k8sRelatedInventory}
+            onOpenEntity={handleOpenContextEntity}
+            textColor={tooltipTextColor}
+            borderColor={euiTheme.border.color}
+            borderWidth={euiTheme.border.width.thin}
+          />
+        </>
+      ) : null}
+
+      {onRelatedFilter && relatedFilterActions.length > 0 ? (
+        <>
+          <div style={{ height: 1, background: euiTheme.border.color }} />
+          <div data-test-subj="entityCentricLabHealthTileTooltipRelated">
+            {relatedFilterActions.map((action, index) => (
+              <button
+                key={action.id}
+                type="button"
+                style={{
+                  ...relatedLinkStyle,
+                  borderTop:
+                    index > 0 ? `${euiTheme.border.width.thin} solid ${euiTheme.border.color}` : undefined,
+                }}
+                onClick={(event) => {
+                  event.stopPropagation();
+                  handleRelatedFilter(action.apply);
+                }}
+                data-test-subj={`entityCentricLabHealthTileTooltipRelated-${action.id}`}
+                aria-label={
+                  action.alerting > 0
+                    ? i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.tileTooltip.related.actionAriaLabelWithAlerts',
+                        {
+                          defaultMessage:
+                            '{label}, {alerting, number} with active alerts out of {total, number}',
+                          values: {
+                            label: action.label,
+                            alerting: action.alerting,
+                            total: action.total,
+                          },
+                        }
+                      )
+                    : i18n.translate(
+                        'xpack.streams.entityCentricLab.entities.tileTooltip.related.actionAriaLabel',
+                        {
+                          defaultMessage:
+                            '{label}, {total, number} {total, plural, one {related resource} other {related resources}}',
+                          values: { label: action.label, total: action.total },
+                        }
+                      )
+                }
+              >
+                <span style={{ display: 'flex', alignItems: 'center', gap: 8, minWidth: 0, flex: 1 }}>
+                  <EuiIcon type="arrowRight" size="m" color="text" aria-hidden />
+                  <span style={{ flex: 1, minWidth: 0 }}>{action.label}</span>
+                </span>
+                <RelatedActionInventoryBadge total={action.total} alerting={action.alerting} />
+              </button>
+            ))}
+          </div>
+        </>
       ) : null}
     </div>
+  );
+
+  if (typeof document === 'undefined') {
+    return null;
+  }
+  return createPortal(
+    <>
+      {hoverCorridor}
+      {tooltip}
+    </>,
+    document.body
   );
 };
 
@@ -774,6 +1266,7 @@ interface BucketTileRowProps {
   readonly metric: MetricDescriptor;
   readonly statId: StatId;
   readonly onSelectEntity: (entityName: string) => void;
+  readonly bucketKey?: BucketKey;
   /**
    * Active palette config + resolved range when palette coloring is on.
    * Null (the common case) keeps tiles on their severity tone.
@@ -794,11 +1287,14 @@ const BucketTileRow = ({
   metric,
   statId,
   onSelectEntity,
+  bucketKey,
   coloring = null,
   paletteRange = null,
   sortReverse = false,
 }: BucketTileRowProps) => {
   const { euiTheme } = useEuiTheme();
+  const hideHoverTimerRef = useRef<number | null>(null);
+  const k8sRelatedInventory = useContext(HexTileRelatedInventoryContext);
   // Auto-refresh cache-buster: listed in the `ordered` memo deps so tiles
   // recompute their (salted) readings when the Inventory refreshes.
   const refreshTick = useContext(RefreshTickContext);
@@ -912,6 +1408,22 @@ const BucketTileRow = ({
 
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [hover, setHover] = useState<TileHover | null>(null);
+  const hoverRef = useRef<TileHover | null>(null);
+  hoverRef.current = hover;
+  const pointerRef = useRef({ x: 0, y: 0 });
+  const transitGuardRef = useRef<ReturnType<typeof computeHexTileTooltipTransitRect> | null>(null);
+  const tileSwitchDeferRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    if (!hover) {
+      return undefined;
+    }
+    const trackPointer = (event: MouseEvent) => {
+      pointerRef.current = { x: event.clientX, y: event.clientY };
+    };
+    window.addEventListener('mousemove', trackPointer);
+    return () => window.removeEventListener('mousemove', trackPointer);
+  }, [hover]);
 
   // How many hexagons fit in one row at the current container width.
   // Measured with a ResizeObserver so the layout stays responsive when
@@ -946,44 +1458,166 @@ const BucketTileRow = ({
     return chunks;
   }, [ordered, tilesPerRow]);
 
-  // Enough vertical room above the pointer for the card (~1 title + type
-  // + metric line + sparkline); flip below when hovering near the top.
-  const CARD_FLIP_ABOVE_PX = 230;
-  const CARD_FLIP_LEFT_PX = 240;
+  const anchorHoverFromTile = useCallback(
+    (
+      entity: Entity,
+      reading: MetricReading,
+      tileEl: HTMLElement
+    ): void => {
+      const tileRect = tileEl.getBoundingClientRect();
+      const scrollEl = document.getElementById(APP_MAIN_SCROLL_CONTAINER_ID);
+      const scrollRect = scrollEl?.getBoundingClientRect();
+      const usableLeft = scrollRect?.left ?? 0;
+      const pushInset = measureInventoryPushInsetPx();
+      const usableRight = scrollRect ? scrollRect.right - pushInset : window.innerWidth;
+      const halfCard = HEX_TILE_TOOLTIP_WIDTH / 2;
+      const edgePad = 8;
+      const centerX = tileRect.left + tileRect.width / 2;
+      const minCenter = usableLeft + halfCard + edgePad;
+      const maxCenter = Math.max(minCenter, usableRight - halfCard - edgePad);
+      const anchorCenterX = Math.min(Math.max(centerX, minCenter), maxCenter);
+
+      const viewportBottom = scrollRect?.bottom ?? window.innerHeight;
+      const spaceBelow = viewportBottom - tileRect.bottom;
+      const spaceAbove = tileRect.top - (scrollRect?.top ?? 0);
+      const tooltipHeightEst = estimateHexTileTooltipHeight(entity, k8sRelatedInventory);
+      const placeAbove =
+        spaceBelow < tooltipHeightEst + HEX_TILE_TOOLTIP_GAP_PX && spaceAbove > spaceBelow;
+
+      setHover({
+        entity,
+        reading,
+        anchorCenterX,
+        tileCenterX: centerX,
+        anchorTop: tileRect.top,
+        anchorBottom: tileRect.bottom,
+        placeAbove,
+      });
+    },
+    [k8sRelatedInventory]
+  );
+
+  const clearTileSwitchDefer = useCallback(() => {
+    if (tileSwitchDeferRef.current !== null) {
+      window.clearTimeout(tileSwitchDeferRef.current);
+      tileSwitchDeferRef.current = null;
+    }
+  }, []);
+
+  const clearHideHoverTimer = useCallback(() => {
+    if (hideHoverTimerRef.current !== null) {
+      window.clearTimeout(hideHoverTimerRef.current);
+      hideHoverTimerRef.current = null;
+    }
+  }, []);
+
+  const hideHover = useCallback(() => {
+    clearTileSwitchDefer();
+    transitGuardRef.current = null;
+    clearHideHoverTimer();
+    setHover(null);
+  }, [clearHideHoverTimer, clearTileSwitchDefer]);
+
+  const commitHoverFromTile = useCallback(
+    (entity: Entity, reading: MetricReading, tileEl: HTMLElement) => {
+      clearTileSwitchDefer();
+      transitGuardRef.current = null;
+      clearHideHoverTimer();
+      anchorHoverFromTile(entity, reading, tileEl);
+    },
+    [anchorHoverFromTile, clearHideHoverTimer, clearTileSwitchDefer]
+  );
+
+  const resolveTileUnderPointer = useCallback((): {
+    entity: Entity;
+    reading: MetricReading;
+    tileEl: HTMLElement;
+  } | null => {
+    const { x, y } = pointerRef.current;
+    const topEl = document.elementFromPoint(x, y);
+    const tileButton = topEl?.closest(HEX_TILE_BUTTON_SELECTOR);
+    if (!(tileButton instanceof HTMLElement)) {
+      return null;
+    }
+    const testSubj = tileButton.getAttribute('data-test-subj') ?? '';
+    const name = testSubj.replace('entityCentricLabHealthTile-', '');
+    const match = ordered.find(({ entity }) => entity.name === name);
+    if (!match) {
+      return null;
+    }
+    return { entity: match.entity, reading: match.reading, tileEl: tileButton };
+  }, [ordered]);
+
+  const trySwitchTileAfterTransit = useCallback(() => {
+    const { x, y } = pointerRef.current;
+    if (isPointerOnHexTileTooltipSurface(x, y)) {
+      clearHideHoverTimer();
+      return;
+    }
+    const underPointer = resolveTileUnderPointer();
+    if (underPointer) {
+      commitHoverFromTile(
+        underPointer.entity,
+        underPointer.reading,
+        underPointer.tileEl
+      );
+    }
+  }, [clearHideHoverTimer, commitHoverFromTile, resolveTileUnderPointer]);
+
+  const scheduleHideHover = useCallback(() => {
+    clearTileSwitchDefer();
+    const current = hoverRef.current;
+    if (current) {
+      const tooltipHeightEst = estimateHexTileTooltipHeight(
+        current.entity,
+        k8sRelatedInventory
+      );
+      transitGuardRef.current = computeHexTileTooltipTransitRect(
+        current,
+        tooltipHeightEst
+      );
+    }
+    clearHideHoverTimer();
+    hideHoverTimerRef.current = window.setTimeout(() => {
+      transitGuardRef.current = null;
+      setHover(null);
+    }, TILE_TOOLTIP_HIDE_DELAY_MS);
+  }, [clearHideHoverTimer, clearTileSwitchDefer, k8sRelatedInventory]);
 
   const showFromEvent: TileHoverHandler = (entity, reading, event) => {
-    const rect = wrapperRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const localX = event.clientX - rect.left;
-    const localY = event.clientY - rect.top;
-    setHover({
-      entity,
-      reading,
-      x: localX,
-      y: localY,
-      placeLeft: localX > rect.width - CARD_FLIP_LEFT_PX,
-      placeAbove: localY > CARD_FLIP_ABOVE_PX,
-    });
+    pointerRef.current = { x: event.clientX, y: event.clientY };
+    const tileEl = event.currentTarget;
+    clearTileSwitchDefer();
+
+    const currentHover = hoverRef.current;
+    if (
+      hideHoverTimerRef.current !== null &&
+      currentHover !== null &&
+      currentHover.entity.name !== entity.name
+    ) {
+      const guard = transitGuardRef.current;
+      const tileRect = tileEl.getBoundingClientRect();
+      if (guard && rectsIntersect(guard, tileRect)) {
+        tileSwitchDeferRef.current = window.setTimeout(() => {
+          tileSwitchDeferRef.current = null;
+          trySwitchTileAfterTransit();
+        }, TILE_TOOLTIP_TILE_SWITCH_DEFER_MS);
+        return;
+      }
+    }
+
+    commitHoverFromTile(entity, reading, tileEl);
   };
 
-  // Keyboard focus has no pointer — anchor the card on the focused tile.
   const showFromFocus: TileFocusHandler = (entity, reading, event) => {
-    const rect = wrapperRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    const tileRect = event.currentTarget.getBoundingClientRect();
-    const localX = tileRect.left - rect.left + tileRect.width / 2;
-    const localY = tileRect.top - rect.top;
-    setHover({
-      entity,
-      reading,
-      x: localX,
-      y: localY,
-      placeLeft: localX > rect.width - CARD_FLIP_LEFT_PX,
-      placeAbove: localY > CARD_FLIP_ABOVE_PX,
-    });
+    commitHoverFromTile(entity, reading, event.currentTarget);
   };
 
-  const hideHover = () => setHover(null);
+  const keepTooltipHover = useCallback(() => {
+    clearTileSwitchDefer();
+    transitGuardRef.current = null;
+    clearHideHoverTimer();
+  }, [clearHideHoverTimer, clearTileSwitchDefer]);
 
   return (
     <div ref={wrapperRef} className={containerClass} role="list">
@@ -1010,9 +1644,10 @@ const BucketTileRow = ({
               euiTheme={euiTheme}
               fillColor={fillFor(reading)}
               onSelectEntity={onSelectEntity}
+              isTooltipTarget={hover?.entity.name === entity.name}
               onHover={showFromEvent}
               onFocusHover={showFromFocus}
-              onHoverEnd={hideHover}
+              onHoverEnd={scheduleHideHover}
             />
           ))}
         </div>
@@ -1024,6 +1659,10 @@ const BucketTileRow = ({
           statId={effectiveStat}
           euiTheme={euiTheme}
           fillColor={fillFor(hover.reading)}
+          bucketKey={bucketKey}
+          onDismiss={hideHover}
+          onPointerEnter={keepTooltipHover}
+          onPointerLeave={scheduleHideHover}
         />
       ) : null}
     </div>
@@ -2779,6 +3418,7 @@ const SubTypeRow = ({ bucketKey, label, entities, onSelectEntity }: SubTypeRowPr
             metric={metric}
             statId={selection.statId}
             onSelectEntity={onSelectEntity}
+            bucketKey={bucketKey}
             coloring={coloringForRender}
             paletteRange={paletteRange}
             sortReverse={selection.coloring.sortReverse}
@@ -3562,6 +4202,7 @@ const CategoryCardInner = ({
         metric={metric}
         statId={selection.statId}
         onSelectEntity={onSelectEntity}
+        bucketKey={bucketKey}
         coloring={coloringForRender}
         paletteRange={paletteRange}
         sortReverse={selection.coloring.sortReverse}
@@ -3861,6 +4502,7 @@ const CustomGroupBucketWithControls = ({
         paletteRange={paletteRange}
         sortReverse={sortReverse}
         onSelectEntity={onSelectEntity}
+        bucketKey={bucketKey}
       />
     </>
   );
@@ -4054,6 +4696,9 @@ export const GroupedGridView = ({
   hideCategoryHeader = false,
   colorByTourStep,
   density = DEFAULT_LIST_DENSITY,
+  onHexTileFilterFor,
+  onHexTileRelatedFilter,
+  k8sRelatedInventory = [],
 }: Props) => {
   const tourClaimedRef = useRef(false);
   // Reset the claim flag when the tour step changes so it re-anchors
@@ -4146,6 +4791,10 @@ export const GroupedGridView = ({
 
   return (
     <SelectedEntityContext.Provider value={selectedEntityName}>
+      <HexTileFilterForContext.Provider value={onHexTileFilterFor}>
+      <HexTileOpenEntityContext.Provider value={onSelectEntity}>
+      <HexTileRelatedInventoryContext.Provider value={k8sRelatedInventory}>
+      <HexTileRelatedFilterContext.Provider value={onHexTileRelatedFilter}>
       <PaletteColoringEnabledContext.Provider value={enablePaletteColoring}>
         <HideCategoryHeaderContext.Provider value={hideCategoryHeader}>
         <RefreshTickContext.Provider value={refreshTick}>
@@ -4187,6 +4836,10 @@ export const GroupedGridView = ({
         </RefreshTickContext.Provider>
         </HideCategoryHeaderContext.Provider>
       </PaletteColoringEnabledContext.Provider>
+      </HexTileRelatedFilterContext.Provider>
+      </HexTileRelatedInventoryContext.Provider>
+      </HexTileOpenEntityContext.Provider>
+      </HexTileFilterForContext.Provider>
     </SelectedEntityContext.Provider>
   );
 };

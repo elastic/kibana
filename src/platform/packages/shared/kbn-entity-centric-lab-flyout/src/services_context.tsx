@@ -12,7 +12,14 @@ import type { PropsWithChildren, ReactNode } from 'react';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-browser';
-import type { AlertRow, AlertsTabData } from './fake_entity_tabs';
+import type { AlertRow, AlertsTabData, EntitySelectionContext } from './fake_entity_tabs';
+import type { EntityDetailRow } from './fake_entity_overview';
+import type {
+  K8sFlyoutRelatedResource,
+  K8sFlyoutInventoryFilterApply,
+  K8sInventoryEntitySnapshot,
+} from './k8s_flyout_inventory';
+import type { DashboardPreviewRequest } from './dashboards_list_tab';
 
 /**
  * Context handed to {@link EntityFlyoutServices.renderEntityDashboard} so the
@@ -113,6 +120,48 @@ export interface EntityFlyoutServices {
    * When `'compact'`, tables render with `compressed` and tighter spacing.
    */
   readonly density?: 'compact' | 'normal' | 'expanded';
+  /**
+   * Hosting plugin (Streams ElasticOn inventory): patch overview detail rows
+   * from live K8s attributes on the open entity.
+   */
+  readonly enrichK8sFlyoutOverviewDetails?: (
+    entityName: string,
+    rows: readonly EntityDetailRow[]
+  ) => readonly EntityDetailRow[];
+  /** Related K8s resources the user can pivot to from the Overview tab. */
+  readonly getK8sFlyoutRelatedResources?: (
+    entityName: string
+  ) => readonly K8sFlyoutRelatedResource[];
+  /** Resolve a target row for alert-colored badges in the related panel. */
+  readonly getK8sInventoryEntity?: (
+    entityName: string
+  ) => K8sInventoryEntitySnapshot | undefined;
+  /**
+   * Count-based related rows: close flyouts and apply K8s inventory filters
+   * (resource type + cluster/namespace/node/…) on the list/hex view.
+   */
+  readonly onK8sFlyoutApplyInventoryFilter?: (
+    sourceEntityName: string,
+    apply: K8sFlyoutInventoryFilterApply
+  ) => void;
+  /**
+   * Related-resource entity pivots (not count/filter rows). Host decides
+   * child vs replace-parent from {@link sourceEntityName}.
+   */
+  readonly onK8sFlyoutSelectRelatedEntity?: (
+    sourceEntityName: string,
+    targetEntityName: string,
+    context?: EntitySelectionContext
+  ) => void;
+  /**
+   * Inventory (Streams): when the child flyout previews a dashboard, the host
+   * closes the entity stack and opens a standalone dashboard flyout. Back
+   * should restore the saved parent + child flyouts.
+   */
+  readonly onOpenInventoryDashboardPreview?: (
+    request: DashboardPreviewRequest,
+    meta: { readonly sourceEntityName: string; readonly sourceEntityType?: string }
+  ) => void;
 }
 
 const EntityFlyoutServicesContext = createContext<EntityFlyoutServices | null>(null);

@@ -21,6 +21,7 @@ export const ENTITY_LAB_FLYOUT_MARKERS = [
   '[data-test-subj="entityCentricLabFlyoutDashboardPreview"]',
   '[data-test-subj="entityCentricLabLogDocumentFlyout"]',
   '[data-test-subj="entityDetailPageDashboardPreview"]',
+  '[data-test-subj="entityCentricLabInventoryDashboardPreview"]',
 ].join(', ');
 
 const PUSH_OFFSET_CSS_VAR = '--euiPushFlyoutOffsetInlineEnd';
@@ -33,12 +34,23 @@ const flyoutPanelForMarker = (marker: Element): Element => {
   return marker.closest('.euiFlyout') ?? marker;
 };
 
-const collectLabFlyoutPanels = (): Element[] => {
-  const panels = new Set<Element>();
-  for (const marker of document.querySelectorAll(ENTITY_LAB_FLYOUT_MARKERS)) {
-    panels.add(flyoutPanelForMarker(marker));
+/**
+ * EUI flyout named size `l` — at this width (or wider), shrinking the inventory
+ * page via push inset looks broken, so we fall back to overlay (no inset).
+ */
+export const INVENTORY_PUSH_OVERLAY_FALLBACK_WIDTH_PX = 768;
+
+const isFlyoutPanelVisibleInScroll = (rect: DOMRect, scrollRect: DOMRect): boolean => {
+  if (rect.width <= 0 || rect.height <= 0) {
+    return false;
   }
-  return [...panels];
+  if (rect.bottom <= scrollRect.top || rect.top >= scrollRect.bottom) {
+    return false;
+  }
+  if (rect.right <= scrollRect.left || rect.left >= scrollRect.right) {
+    return false;
+  }
+  return true;
 };
 
 export const measureInventoryPushInsetPx = (): number => {
@@ -47,27 +59,43 @@ export const measureInventoryPushInsetPx = (): number => {
     return 0;
   }
   const scrollRect = scrollEl.getBoundingClientRect();
-  let minFlyoutLeft = scrollRect.right;
+  let minFlyoutLeftForInset = scrollRect.right;
+  let minFlyoutLeftOverall = scrollRect.right;
+  let maxPanelWidth = 0;
 
-  for (const panel of collectLabFlyoutPanels()) {
+  for (const marker of document.querySelectorAll(ENTITY_LAB_FLYOUT_MARKERS)) {
+    const panel = flyoutPanelForMarker(marker);
     const rect = panel.getBoundingClientRect();
-    if (rect.width <= 0 || rect.height <= 0) {
+    if (!isFlyoutPanelVisibleInScroll(rect, scrollRect)) {
       continue;
     }
-    if (rect.bottom <= scrollRect.top || rect.top >= scrollRect.bottom) {
+
+    maxPanelWidth = Math.max(maxPanelWidth, rect.width);
+    minFlyoutLeftOverall = Math.min(minFlyoutLeftOverall, rect.left);
+
+    if (marker.hasAttribute('data-entity-lab-flyout-exclude-push-inset')) {
       continue;
     }
-    if (rect.right <= scrollRect.left || rect.left >= scrollRect.right) {
-      continue;
-    }
-    minFlyoutLeft = Math.min(minFlyoutLeft, rect.left);
+    minFlyoutLeftForInset = Math.min(minFlyoutLeftForInset, rect.left);
   }
 
-  if (minFlyoutLeft >= scrollRect.right) {
+  if (minFlyoutLeftOverall >= scrollRect.right) {
     return 0;
   }
 
-  const inset = scrollRect.right - minFlyoutLeft;
+  const totalFlyoutSpanPx = scrollRect.right - minFlyoutLeftOverall;
+  if (
+    maxPanelWidth >= INVENTORY_PUSH_OVERLAY_FALLBACK_WIDTH_PX ||
+    totalFlyoutSpanPx >= INVENTORY_PUSH_OVERLAY_FALLBACK_WIDTH_PX
+  ) {
+    return 0;
+  }
+
+  if (minFlyoutLeftForInset >= scrollRect.right) {
+    return 0;
+  }
+
+  const inset = scrollRect.right - minFlyoutLeftForInset;
   return Math.max(0, Math.round(Math.min(inset, scrollRect.width)));
 };
 

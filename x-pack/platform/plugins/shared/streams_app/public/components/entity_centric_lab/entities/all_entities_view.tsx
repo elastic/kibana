@@ -75,7 +75,9 @@ import {
   resolveHostedApmServiceNames,
   type EntityKind,
   type EntitySelectionContext,
+  type DashboardPreviewRequest,
 } from '@kbn/entity-centric-lab-flyout';
+import { InventoryDashboardPreviewFlyout } from './inventory_dashboard_preview_flyout';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
 
@@ -142,7 +144,16 @@ import {
   matchesTagFilters,
 } from './fake_entities';
 import { podPhaseBadgeForEntity } from './bucket_metrics';
-import { GroupedGridView } from './grouped_grid_view';
+import {
+  GroupedGridView,
+  type HexTileFilterForHandler,
+  type HexTileRelatedFilterHandler,
+} from './grouped_grid_view';
+import type { HexTileRelatedFilterApplyArgs } from './hex_tile_related_filters';
+import {
+  buildK8sFlyoutRelatedResources,
+  enrichK8sFlyoutOverviewDetails,
+} from './flyout_k8s_related_resources';
 // CloudSideNav removed — cloud entities now live under functional categories.
 import { EntitiesListView } from './entities_list_view';
 import { GeomapView } from './geomap_view';
@@ -217,7 +228,11 @@ import { MonitoringAssetsView } from './monitoring_assets_view';
 import { SavedViewsBar } from './saved_views_bar';
 import { SaveViewButton } from './save_view_button';
 import { compileEntityKql, entityMatchesFilters } from './entity_kql';
-import { applyK8sInventoryCellFilter } from './k8s_inventory_cell_filter';
+import {
+  applyK8sInventoryCellFilter,
+  resolveK8sCellFilterTarget,
+} from './k8s_inventory_cell_filter';
+import type { BucketKey } from './bucket_metrics';
 import { useEntityLabDataView } from './use_entity_lab_data_view';
 import { useEntityValueSuggestions } from './use_entity_value_suggestions';
 import { EntityErrorBoundary } from './entity_error_boundary';
@@ -1541,6 +1556,10 @@ const AllEntitiesViewInner = ({
   // When the K8s filters are driven by the top-level category filter
   // (cross-category page), scope them to category-filtered entities.
   const k8sBaseEntities = effectiveInventoryEntities;
+  const k8sRelatedInventory = useMemo(
+    () => k8sBaseEntities.filter((entity) => entity.category === 'kubernetes'),
+    [k8sBaseEntities]
+  );
   const k8sEntitiesForFilters = useMemo(
     () => (showK8sFilters ? filterEntitiesByResourceType(k8sBaseEntities, k8sResourceType) : k8sBaseEntities),
     [showK8sFilters, k8sBaseEntities, k8sResourceType]
@@ -1552,9 +1571,9 @@ const AllEntitiesViewInner = ({
   );
   const k8sNamespaceNames = useMemo(
     () => (showK8sFilters && k8sFilterVisibility.showNamespace
-      ? getKubernetesNamespaceNames(k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames)
+      ? getKubernetesNamespaceNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
       : []),
-    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNamespace]
+    [showK8sFilters, k8sBaseEntities, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNamespace]
   );
   const effectiveK8sNamespaceFilter =
     k8sNamespaceFilter !== KUBERNETES_FILTER_ALL && !k8sNamespaceNames.includes(k8sNamespaceFilter)
@@ -1562,9 +1581,21 @@ const AllEntitiesViewInner = ({
       : k8sNamespaceFilter;
   const k8sDeploymentNames = useMemo(
     () => (showK8sFilters && k8sFilterVisibility.showDeployment
-      ? getKubernetesDeploymentNames(k8sEntitiesForFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, k8sClusterNames)
+      ? getKubernetesDeploymentNames(
+          k8sBaseEntities,
+          k8sClusterFilter,
+          effectiveK8sNamespaceFilter,
+          k8sClusterNames
+        )
       : []),
-    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, k8sClusterNames, k8sFilterVisibility.showDeployment]
+    [
+      showK8sFilters,
+      k8sBaseEntities,
+      k8sClusterFilter,
+      effectiveK8sNamespaceFilter,
+      k8sClusterNames,
+      k8sFilterVisibility.showDeployment,
+    ]
   );
   const effectiveK8sDeploymentFilter =
     k8sDeploymentFilter !== KUBERNETES_FILTER_ALL && !k8sDeploymentNames.includes(k8sDeploymentFilter)
@@ -1572,14 +1603,30 @@ const AllEntitiesViewInner = ({
       : k8sDeploymentFilter;
   const k8sNodeNames = useMemo(
     () => (showK8sFilters && k8sFilterVisibility.showNode
-      ? getKubernetesNodeNames(k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames)
+      ? getKubernetesNodeNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
       : []),
-    [showK8sFilters, k8sEntitiesForFilters, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNode]
+    [showK8sFilters, k8sBaseEntities, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNode]
   );
-  const effectiveK8sNodeFilter =
-    k8sNodeFilter !== KUBERNETES_FILTER_ALL && !k8sNodeNames.includes(k8sNodeFilter)
-      ? KUBERNETES_FILTER_ALL
-      : k8sNodeFilter;
+  const effectiveK8sNodeFilter = useMemo(() => {
+    if (k8sNodeFilter === KUBERNETES_FILTER_ALL) {
+      return k8sNodeFilter;
+    }
+    if (k8sNodeNames.includes(k8sNodeFilter)) {
+      return k8sNodeFilter;
+    }
+    const nodeRow = k8sBaseEntities.find(
+      (candidate) => candidate.subType === 'Nodes' && candidate.name === k8sNodeFilter
+    );
+    if (!nodeRow) {
+      return KUBERNETES_FILTER_ALL;
+    }
+    if (k8sClusterFilter === KUBERNETES_FILTER_ALL) {
+      return k8sNodeFilter;
+    }
+    return assignClusterForEntity(nodeRow, k8sClusterNames) === k8sClusterFilter
+      ? k8sNodeFilter
+      : KUBERNETES_FILTER_ALL;
+  }, [k8sNodeFilter, k8sNodeNames, k8sBaseEntities, k8sClusterFilter, k8sClusterNames]);
   const handleK8sResourceTypeChange = useCallback(
     (next: KubernetesResourceType) => {
       setK8sResourceType(next);
@@ -1737,6 +1784,30 @@ const AllEntitiesViewInner = ({
   // dataset lookup below can't resolve their health — the context carries
   // exactly what the map/table showed so the child stays coherent with it.
   const [childEntityContext, setChildEntityContext] = useState<EntitySelectionContext | null>(null);
+
+  interface InventoryFlyoutDashboardReturnStack {
+    readonly parentEntityName: string;
+    readonly childEntityName: string;
+    readonly childEntityContext: EntitySelectionContext | null;
+    readonly parentTab: string | null;
+    readonly childTab: string | null;
+  }
+
+  const inventoryFlyoutDashboardReturnStackRef = useRef<InventoryFlyoutDashboardReturnStack | null>(
+    null
+  );
+  const [inventoryDashboardPreview, setInventoryDashboardPreview] = useState<{
+    readonly preview: DashboardPreviewRequest;
+    readonly entityName: string;
+    readonly entityType?: string;
+  } | null>(null);
+  /** Last active tab per flyout layer — used to restore the stack after dashboard preview. */
+  const [parentFlyoutActiveTab, setParentFlyoutActiveTab] = useState<string | null>(null);
+  const [childFlyoutActiveTab, setChildFlyoutActiveTab] = useState<string | null>(null);
+  const [childFlyoutTabIntent, setChildFlyoutTabIntent] = useState<{
+    readonly tab: string;
+    readonly requestId: number;
+  } | null>(null);
   // Category pages get an Overview / Inventory tab strip; the
   // cross-category page shows the same pair on top of the aggregated
   // overview. Overview is the default landing tab (first-time visit)
@@ -2209,9 +2280,12 @@ const AllEntitiesViewInner = ({
     return resolveHostedApmServiceNames(kind, childEntity.attributes);
   }, [childEntity, childEntityType, childEntityName]);
 
-  const inventoryPushActive =
-    flyoutPresentation === 'push' && Boolean(selectedEntityName || childEntityName);
-  const inventoryPushInsetPx = useInventoryPushInsetPx(inventoryPushActive);
+  const inventoryPushRequested =
+    flyoutPresentation === 'push' &&
+    Boolean(selectedEntityName || inventoryDashboardPreview);
+  const inventoryPushInsetPx = useInventoryPushInsetPx(inventoryPushRequested);
+  // Wide flyouts (e.g. size `l` dashboard preview) fall back to overlay — no page inset.
+  const inventoryPushActive = inventoryPushRequested && inventoryPushInsetPx > 0;
   const inventoryPushShellCss = getInventoryPushShellCss(
     inventoryPushActive,
     inventoryPushInsetPx
@@ -2380,13 +2454,18 @@ const AllEntitiesViewInner = ({
     [openEntity]
   );
 
-  const handleFlyoutTabChange = useCallback(
+  const handleParentFlyoutTabChange = useCallback(
     (tab: string) => {
+      setParentFlyoutActiveTab(tab);
       writePreferredFlyoutTab(tab);
       syncFlyoutShareParams({ tab });
     },
     [writePreferredFlyoutTab, syncFlyoutShareParams]
   );
+
+  const handleChildFlyoutTabChange = useCallback((tab: string) => {
+    setChildFlyoutActiveTab(tab);
+  }, []);
 
   const handleFlyoutTimeRangeChange = useCallback(
     (range: { from: string; to: string }) => {
@@ -2406,6 +2485,32 @@ const AllEntitiesViewInner = ({
       setChildEntityContext(context ?? null);
     },
     [isEntityOpenable]
+  );
+
+  /** Related pivot from child flyout: collapse to a single parent flyout on the target. */
+  const replaceFlyoutParentEntity = useCallback(
+    (entityName: string) => {
+      if (!isEntityOpenable(entityName)) return;
+      setSelectedEntityName(entityName);
+      setChildEntityName(null);
+      setChildEntityContext(null);
+      setAlertDetailRequest(null);
+      setRuleDetailRequest(null);
+      syncFlyoutShareParams({ entity: entityName });
+    },
+    [isEntityOpenable, syncFlyoutShareParams]
+  );
+
+  const handleK8sFlyoutSelectRelatedEntity = useCallback(
+    (sourceEntityName: string, targetEntityName: string, context?: EntitySelectionContext) => {
+      if (!isEntityOpenable(targetEntityName)) return;
+      if (childEntityName && sourceEntityName === childEntityName) {
+        replaceFlyoutParentEntity(targetEntityName);
+        return;
+      }
+      openChildEntity(targetEntityName, context);
+    },
+    [childEntityName, isEntityOpenable, openChildEntity, replaceFlyoutParentEntity]
   );
 
   // Expand flyout to full page — closes the flyout and navigates to the
@@ -2461,6 +2566,9 @@ const AllEntitiesViewInner = ({
     setSelectedEntityName(null);
     setChildEntityName(null);
     setChildEntityContext(null);
+    setParentFlyoutActiveTab(null);
+    setChildFlyoutActiveTab(null);
+    setChildFlyoutTabIntent(null);
     setAlertDetailRequest(null);
     setRuleDetailRequest(null);
     setFlyoutTabIntent(null);
@@ -2475,7 +2583,83 @@ const AllEntitiesViewInner = ({
   const closeChildEntity = useCallback(() => {
     setChildEntityName(null);
     setChildEntityContext(null);
+    setChildFlyoutActiveTab(null);
+    setChildFlyoutTabIntent(null);
   }, []);
+
+  const openInventoryDashboardPreview = useCallback(
+    (
+      request: DashboardPreviewRequest,
+      meta: { readonly sourceEntityName: string; readonly sourceEntityType?: string }
+    ) => {
+      if (!selectedEntityName || !childEntityName) {
+        return;
+      }
+      inventoryFlyoutDashboardReturnStackRef.current = {
+        parentEntityName: selectedEntityName,
+        childEntityName,
+        childEntityContext,
+        parentTab: parentFlyoutActiveTab,
+        childTab: childFlyoutActiveTab ?? 'dashboards',
+      };
+      setInventoryDashboardPreview({
+        preview: request,
+        entityName: meta.sourceEntityName,
+        entityType: meta.sourceEntityType,
+      });
+      closeEntity();
+    },
+    [
+      selectedEntityName,
+      childEntityName,
+      childEntityContext,
+      parentFlyoutActiveTab,
+      childFlyoutActiveTab,
+      closeEntity,
+    ]
+  );
+
+  const dismissInventoryDashboardPreview = useCallback(() => {
+    inventoryFlyoutDashboardReturnStackRef.current = null;
+    setInventoryDashboardPreview(null);
+  }, []);
+
+  const restoreInventoryFlyoutsFromDashboardPreview = useCallback(() => {
+    const stack = inventoryFlyoutDashboardReturnStackRef.current;
+    inventoryFlyoutDashboardReturnStackRef.current = null;
+    setInventoryDashboardPreview(null);
+    if (!stack) {
+      return;
+    }
+    setSelectedEntityName(stack.parentEntityName);
+    setChildEntityName(stack.childEntityName);
+    setChildEntityContext(stack.childEntityContext);
+    const restoreRequestId = Date.now();
+    if (stack.parentTab) {
+      setParentFlyoutActiveTab(stack.parentTab);
+      writePreferredFlyoutTab(stack.parentTab);
+      setFlyoutTabIntent({ tab: stack.parentTab, requestId: restoreRequestId });
+    } else {
+      setFlyoutTabIntent(null);
+    }
+    if (stack.childTab) {
+      setChildFlyoutActiveTab(stack.childTab);
+      setChildFlyoutTabIntent({ tab: stack.childTab, requestId: restoreRequestId + 1 });
+    } else {
+      setChildFlyoutTabIntent(null);
+    }
+    syncFlyoutShareParams({
+      entity: stack.parentEntityName,
+      tab: stack.parentTab ?? null,
+      flyoutFrom: flyoutTimeRange.from,
+      flyoutTo: flyoutTimeRange.to,
+    });
+  }, [
+    syncFlyoutShareParams,
+    flyoutTimeRange.from,
+    flyoutTimeRange.to,
+    writePreferredFlyoutTab,
+  ]);
 
   // "Add to filter" from the K8s flyout: keep "All resource types" but fill
   // in the contextual cascade filters (cluster, namespace, node) based on
@@ -2534,6 +2718,56 @@ const AllEntitiesViewInner = ({
         setNode: setK8sNodeFilter,
         filterAll: KUBERNETES_FILTER_ALL,
       });
+    },
+    [k8sClusterNames]
+  );
+
+  const handleHexTileFilterFor = useCallback<HexTileFilterForHandler>(
+    (entity, bucketKey: BucketKey | undefined) => {
+      if (enableK8sAddToFilterActions && entity.category === 'kubernetes' && bucketKey) {
+        const target = resolveK8sCellFilterTarget('name', entity, bucketKey);
+        if (target) {
+          handleK8sInventoryCellFilter({
+            entity,
+            target,
+          } as Parameters<typeof applyK8sInventoryCellFilter>[0]);
+          return;
+        }
+      }
+      setSearch(entity.name);
+    },
+    [enableK8sAddToFilterActions, handleK8sInventoryCellFilter]
+  );
+
+  const handleHexTileRelatedFilter = useCallback<HexTileRelatedFilterHandler>(
+    (entity, apply: HexTileRelatedFilterApplyArgs) => {
+      const clusterFromApply =
+        apply.cluster ??
+        (entity.subType === 'Clusters'
+          ? entity.name
+          : assignClusterForEntity(entity, k8sClusterNames));
+
+      // Always use the hovered Node row’s canonical `name` (e.g. `node-012`).
+      const nodeFromApply =
+        entity.subType === 'Nodes' && apply.resourceType === 'Pods'
+          ? entity.name
+          : apply.node;
+
+      const namespaceFromApply =
+        entity.subType === 'Namespaces' && apply.resourceType === 'Pods'
+          ? entity.name
+          : apply.namespace;
+
+      const deploymentFromApply =
+        entity.subType === 'Deployments' && apply.resourceType === 'Pods'
+          ? entity.name
+          : apply.deployment;
+
+      setK8sResourceType(apply.resourceType);
+      setK8sClusterFilter(clusterFromApply ?? KUBERNETES_FILTER_ALL);
+      setK8sNamespaceFilter(namespaceFromApply ?? KUBERNETES_FILTER_ALL);
+      setK8sDeploymentFilter(deploymentFromApply ?? KUBERNETES_FILTER_ALL);
+      setK8sNodeFilter(nodeFromApply ?? KUBERNETES_FILTER_ALL);
     },
     [k8sClusterNames]
   );
@@ -2643,6 +2877,53 @@ const AllEntitiesViewInner = ({
       renderTabDashboard,
       resourceCopy: isElasticOn,
       density: listDensity,
+      enrichK8sFlyoutOverviewDetails: isElasticOn
+        ? (entityName: string, rows: import('@kbn/entity-centric-lab-flyout').EntityDetailRow[]) => {
+            const matched = entityByName.get(entityName);
+            return enrichK8sFlyoutOverviewDetails(matched, rows);
+          }
+        : undefined,
+      getK8sFlyoutRelatedResources: isElasticOn
+        ? (entityName: string) => {
+            const matched = entityByName.get(entityName);
+            if (!matched || matched.category !== 'kubernetes') {
+              return [];
+            }
+            return buildK8sFlyoutRelatedResources(matched, k8sRelatedInventory);
+          }
+        : undefined,
+      getK8sInventoryEntity: isElasticOn
+        ? (entityName: string) => {
+            const matched = entityByName.get(entityName);
+            if (!matched) {
+              return undefined;
+            }
+            return {
+              name: matched.name,
+              subType: matched.subType,
+              attributes: matched.attributes,
+              alerts: matched.alerts,
+            };
+          }
+        : undefined,
+      onK8sFlyoutApplyInventoryFilter: isElasticOn
+        ? (sourceEntityName, apply) => {
+            const matched = entityByName.get(sourceEntityName);
+            if (!matched) {
+              return;
+            }
+            handleHexTileRelatedFilter(matched, apply as HexTileRelatedFilterApplyArgs);
+            // Parent-only: keep the flyout open so filters update in context. When a
+            // child is docked, close the whole stack so the narrowed inventory is visible.
+            if (childEntityName) {
+              closeEntity();
+            }
+          }
+        : undefined,
+      onK8sFlyoutSelectRelatedEntity: isElasticOn
+        ? handleK8sFlyoutSelectRelatedEntity
+        : undefined,
+      onOpenInventoryDashboardPreview: isElasticOn ? openInventoryDashboardPreview : undefined,
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
@@ -2680,6 +2961,13 @@ const AllEntitiesViewInner = ({
       renderAlertDetailFlyout,
       onOpenAlertDetail,
       onOpenRuleDetail,
+      entityByName,
+      k8sRelatedInventory,
+      handleHexTileRelatedFilter,
+      handleK8sFlyoutSelectRelatedEntity,
+      closeEntity,
+      childEntityName,
+      openInventoryDashboardPreview,
     ]
   );
 
@@ -3618,6 +3906,13 @@ const AllEntitiesViewInner = ({
                     customGroupBy={customGroupBy}
                     hideCategoryHeader={!!categoryScope}
                     density={listDensity}
+                    onHexTileFilterFor={handleHexTileFilterFor}
+                    onHexTileRelatedFilter={
+                      enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
+                    }
+                    k8sRelatedInventory={
+                      enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
+                    }
                     colorByTourStep={
                       isTourActive && tourStep === 3
                         ? {
@@ -3849,6 +4144,13 @@ const AllEntitiesViewInner = ({
                     enablePaletteColoring={isElasticOn}
                     refreshTick={refreshTick}
                     density={listDensity}
+                    onHexTileFilterFor={handleHexTileFilterFor}
+                    onHexTileRelatedFilter={
+                      enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
+                    }
+                    k8sRelatedInventory={
+                      enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
+                    }
                   />
                 ) : effectiveViewMode === 'geomap' ? (
                   <GeomapView
@@ -3875,9 +4177,11 @@ const AllEntitiesViewInner = ({
         </EuiFlexGroup>
       </StreamsAppPageTemplate.Body>
       </div>
-      {selectedEntityName ? (
+      {selectedEntityName || inventoryDashboardPreview ? (
         <EntityErrorBoundary section="Entity detail">
         <EntityFlyoutServicesProvider services={flyoutServices}>
+          {selectedEntityName ? (
+          <>
           <EntityFlyout
             key={flyoutPresentation}
             session="start"
@@ -3911,7 +4215,7 @@ const AllEntitiesViewInner = ({
             dashboardStyle={dashboardStyleVariation}
             showDashboardThumbnails={showDashboardThumbnails}
             tabIntent={flyoutTabIntent}
-            onTabChange={handleFlyoutTabChange}
+            onTabChange={handleParentFlyoutTabChange}
             onTimeRangeChange={handleFlyoutTimeRangeChange}
             onAddToFilter={
               enableK8sAddToFilterActions && selectedEntity?.category === 'kubernetes'
@@ -3951,23 +4255,36 @@ const AllEntitiesViewInner = ({
               hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
               dashboardStyle={dashboardStyleVariation}
               showDashboardThumbnails={showDashboardThumbnails}
+              tabIntent={childFlyoutTabIntent}
+              onTabChange={handleChildFlyoutTabChange}
             />
           ) : null}
-          {alertDetailRequest && renderAlertDetailFlyout ? (
+          </>
+          ) : null}
+          {inventoryDashboardPreview ? (
+            <InventoryDashboardPreviewFlyout
+              preview={inventoryDashboardPreview.preview}
+              entityName={inventoryDashboardPreview.entityName}
+              entityType={inventoryDashboardPreview.entityType}
+              onBack={restoreInventoryFlyoutsFromDashboardPreview}
+              onClose={dismissInventoryDashboardPreview}
+            />
+          ) : null}
+          {selectedEntityName && alertDetailRequest && renderAlertDetailFlyout ? (
             <EntityLabAlertDetailFlyoutHost
               request={alertDetailRequest}
               onClose={closeAlertDetail}
               renderAlertDetailFlyout={renderAlertDetailFlyout}
             />
           ) : null}
-          {alertDetailRequest && !renderAlertDetailFlyout ? (
+          {selectedEntityName && alertDetailRequest && !renderAlertDetailFlyout ? (
             <EntityLabAlertDetailMockFlyout
               alertRow={alertDetailRequest.alertRow}
               entityName={alertDetailRequest.entityName}
               onClose={closeAlertDetail}
             />
           ) : null}
-          {ruleDetailRequest ? (
+          {selectedEntityName && ruleDetailRequest ? (
             <EntityLabRuleSummaryFlyout
               key={ruleDetailRequest.ruleId}
               request={ruleDetailRequest}
