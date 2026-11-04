@@ -17,6 +17,7 @@ jest.mock('../../common/use_cases_features');
 describe('ObservablesUtilityBar', () => {
   const props = {
     caseData: { ...mockCase, observables: mockObservables },
+    totalObservables: mockObservables.length,
     isLoading: false,
     isEnabled: true,
     onExtractObservablesChanged: jest.fn(),
