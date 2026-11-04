@@ -2,6 +2,9 @@
 name: Flaky Fix Retrospective
 description: Learn from flaky-test-fixer PRs that developers revised, replaced or closed, and from merged fixes that did not hold. Records one finding per case on a monthly tracking issue.
 on:
+  # TEST ONLY: registers the workflow on this branch so workflow_dispatch can target it.
+  push:
+    branches: [stelios/flaky-fix-retrospective-test]
   pull_request_target:
     types: [closed]
   issues:
