@@ -180,6 +180,13 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       agentId,
       configurationOverrides: params.configurationOverrides,
     });
+    // A bound run carries no caller credential to report back with, so it never runs in the
+    // background; the tool error sends the parent's model to the foreground.
+    if (params.parentTriggerMode && runAs) {
+      throw createBadRequestError(
+        `Agent "${agentId}" runs as a service account and cannot report back to its parent, so it cannot run in the background: run it in the foreground instead.`
+      );
+    }
 
     if (
       params.reasoningLevel !== undefined &&

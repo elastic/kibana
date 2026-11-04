@@ -194,8 +194,22 @@ describe('wakeParent', () => {
 describe('reportToParent', () => {
   let maybeExecuteAgent: jest.Mock;
   let peek: jest.Mock;
-  let schedule: jest.Mock;
+  let ensureScheduled: jest.Mock;
+  let removeIfExists: jest.Mock;
   let conversationClient: ReturnType<typeof createConversationClientMock>;
+
+  const retryTask = [
+    {
+      id: 'agent-wake-child-1',
+      taskType: 'agent-builder:wake-parent',
+      params: { conversationId: 'conversation-1', childExecutionId: 'child-1' },
+      state: {},
+      scope: ['agent-builder'],
+      enabled: true,
+      runAt: new Date('2026-01-01T00:00:05.000Z'),
+    },
+    { request, cloneApiKey: true },
+  ];
 
   const report = (execution: AgentExecution = finishedChild) =>
     reportToParent({
@@ -209,7 +223,7 @@ describe('reportToParent', () => {
         getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
       } as unknown as ConversationService,
       executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
-      taskManager: { schedule } as unknown as TaskManagerStartContract,
+      taskManager: { ensureScheduled, removeIfExists } as unknown as TaskManagerStartContract,
       logger: loggingSystemMock.createLogger(),
     });
 
@@ -219,7 +233,8 @@ describe('reportToParent', () => {
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
     peek = jest.fn().mockResolvedValue({ conversationId: 'conversation-1' });
-    schedule = jest.fn().mockResolvedValue({});
+    ensureScheduled = jest.fn().mockResolvedValue({});
+    removeIfExists = jest.fn().mockResolvedValue(undefined);
     conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue({
       id: 'conversation-1',
@@ -231,7 +246,7 @@ describe('reportToParent', () => {
     jest.useRealTimers();
   });
 
-  it('wakes the parent of a background sub-agent and schedules nothing', async () => {
+  it('does nothing for a child that is not reporting or whose parent is gone', async () => {
     await report({
       ...finishedChild,
       agentParams: { nextInput: { message: 'go' } },
@@ -240,14 +255,25 @@ describe('reportToParent', () => {
 
     peek.mockResolvedValueOnce({});
     await report();
-    expect(maybeExecuteAgent).not.toHaveBeenCalled();
 
-    await report();
-    expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
-    expect(schedule).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(ensureScheduled).not.toHaveBeenCalled();
   });
 
-  it('leaves a retry task on its own credential when the parent is busy or the attempt fails', async () => {
+  it('holds a retry task on its own credential across the wake and removes it once the report settled', async () => {
+    await report();
+
+    expect(ensureScheduled).toHaveBeenCalledWith(...retryTask);
+    expect(ensureScheduled.mock.invocationCallOrder[0]).toBeLessThan(
+      maybeExecuteAgent.mock.invocationCallOrder[0]
+    );
+    expect(removeIfExists).toHaveBeenCalledWith('agent-wake-child-1');
+
+    removeIfExists.mockRejectedValueOnce(new Error('gone'));
+    await expect(report()).resolves.toBeUndefined();
+  });
+
+  it('leaves the retry task when the parent is busy or the attempt fails', async () => {
     maybeExecuteAgent.mockRejectedValueOnce(
       createConversationBusyError({ conversationId: 'conversation-1', activeExecutionId: 'x' })
     );
@@ -256,18 +282,16 @@ describe('reportToParent', () => {
     conversationClient.get.mockRejectedValueOnce(new Error('ES timeout'));
     await report();
 
-    const retryTask = [
-      {
-        id: 'agent-wake-child-1',
-        taskType: 'agent-builder:wake-parent',
-        params: { conversationId: 'conversation-1', childExecutionId: 'child-1' },
-        state: {},
-        scope: ['agent-builder'],
-        enabled: true,
-        runAt: new Date('2026-01-01T00:00:05.000Z'),
-      },
-      { request, cloneApiKey: true },
-    ];
-    expect(schedule.mock.calls).toEqual([retryTask, retryTask]);
+    expect(ensureScheduled.mock.calls).toEqual([retryTask, retryTask]);
+    expect(removeIfExists).not.toHaveBeenCalled();
+  });
+
+  it('still attempts the wake when the retry task cannot be scheduled', async () => {
+    ensureScheduled.mockRejectedValueOnce(new Error('task manager down'));
+
+    await expect(report()).resolves.toBeUndefined();
+
+    expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
+    expect(removeIfExists).not.toHaveBeenCalled();
   });
 });

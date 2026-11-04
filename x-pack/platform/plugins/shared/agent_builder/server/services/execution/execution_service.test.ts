@@ -99,6 +99,8 @@ jest.mock('./task/heartbeat_reporter', () => ({
 }));
 
 const mockTaskManagerSchedule = jest.fn();
+const mockTaskManagerEnsureScheduled = jest.fn();
+const mockTaskManagerRemoveIfExists = jest.fn();
 const mockTaskManagerRunSoon = jest.fn();
 
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -111,6 +113,8 @@ describe('AgentExecutionService', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const taskManager = {
     schedule: mockTaskManagerSchedule,
+    ensureScheduled: mockTaskManagerEnsureScheduled,
+    removeIfExists: mockTaskManagerRemoveIfExists,
     runSoon: mockTaskManagerRunSoon,
   } as any;
 
@@ -285,7 +289,7 @@ describe('AgentExecutionService', () => {
           }),
         })
       );
-      expect(mockTaskManagerSchedule).toHaveBeenCalledWith(
+      expect(mockTaskManagerEnsureScheduled).toHaveBeenCalledWith(
         expect.objectContaining({
           id: 'agent-wake-child-1',
           taskType: 'agent-builder:wake-parent',
@@ -293,6 +297,7 @@ describe('AgentExecutionService', () => {
         }),
         { request, cloneApiKey: true }
       );
+      expect(mockTaskManagerRemoveIfExists).not.toHaveBeenCalled();
     });
   });
 
@@ -420,6 +425,28 @@ describe('AgentExecutionService', () => {
       expect(conversationClient.create).not.toHaveBeenCalled();
       expect(conversationClient.appendEvents).not.toHaveBeenCalled();
       expect(mockExecutionClient.create).not.toHaveBeenCalled();
+    });
+
+    it('refuses to run a bound agent in the background before creating anything', async () => {
+      await expect(
+        createBoundService().executeAgent({
+          mode: AgentExecutionMode.standalone,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            agentId: 'agent-1',
+            parentExecutionId: 'parent-1',
+            parentTriggerMode: ChatTriggerMode.Always,
+            nextInput: { message: 'hello' },
+          },
+          useTaskManager: true,
+        })
+      ).rejects.toMatchObject({
+        meta: { statusCode: 400 },
+        message: expect.stringContaining('cannot run in the background'),
+      });
+
+      expect(mockExecutionClient.create).not.toHaveBeenCalled();
+      expect(mockTaskManagerSchedule).not.toHaveBeenCalled();
     });
 
     it('refuses to run a bound agent while service accounts are disabled', async () => {

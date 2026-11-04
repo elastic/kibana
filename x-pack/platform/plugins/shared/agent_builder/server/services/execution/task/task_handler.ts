@@ -223,7 +223,8 @@ class TaskHandlerImpl implements TaskHandler {
       heartbeatReporter.stop();
     }
 
-    // A bound execution has no caller credential to wake its parent with.
+    // A bound execution has no caller credential to wake its parent with; the execution service
+    // refuses a background run of a bound agent, so none has a parent to report to.
     if (fakeRequest) {
       await reportToParent({
         execution,

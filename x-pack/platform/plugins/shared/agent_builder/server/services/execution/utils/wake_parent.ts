@@ -133,8 +133,9 @@ export interface ReportToParentParams
 }
 
 /**
- * Wakes the parent of a finished background sub-agent; a busy parent or a failed attempt is
- * retried from a task with its own credential. Never throws.
+ * Wakes the parent of a finished background sub-agent. The retry task is scheduled first, so a
+ * failed attempt or a busy parent is retried from a task with its own credential; an attempt that
+ * settles the report removes it, and a task that outlives one finds nothing left to do. Never throws.
  */
 export const reportToParent = async ({
   execution,
@@ -152,27 +153,12 @@ export const reportToParent = async ({
     return;
   }
 
-  let retry = false;
+  const taskId = wakeParentTaskId(childExecutionId);
+  let scheduled = false;
   try {
-    const result = await wakeParent({ ...wake, conversationId, childExecutionId });
-    logger.debug(
-      `Wake of conversation ${conversationId} for background execution ${childExecutionId}: ${result}`
-    );
-    retry = result === 'busy';
-  } catch (error) {
-    logger.warn(
-      `Wake of conversation ${conversationId} for background execution ${childExecutionId} failed, retrying from a task: ${error.message}`
-    );
-    retry = true;
-  }
-  if (!retry) {
-    return;
-  }
-
-  try {
-    await taskManager.schedule(
+    await taskManager.ensureScheduled(
       {
-        id: wakeParentTaskId(childExecutionId),
+        id: taskId,
         taskType: taskTypes.wakeParent,
         params: { conversationId, childExecutionId },
         state: {},
@@ -182,9 +168,36 @@ export const reportToParent = async ({
       },
       { request: wake.request, cloneApiKey: true }
     );
+    scheduled = true;
   } catch (error) {
     logger.warn(
-      `Failed to wake the parent of background execution ${childExecutionId}: ${error.message}`
+      `Failed to schedule the wake retry for background execution ${childExecutionId}: ${error.message}`
+    );
+  }
+
+  let settled = false;
+  try {
+    const result = await wakeParent({ ...wake, conversationId, childExecutionId });
+    logger.debug(
+      `Wake of conversation ${conversationId} for background execution ${childExecutionId}: ${result}`
+    );
+    settled = result !== 'busy';
+  } catch (error) {
+    logger.warn(
+      `Wake of conversation ${conversationId} for background execution ${childExecutionId} failed${
+        scheduled ? ', retrying from a task' : ''
+      }: ${error.message}`
+    );
+  }
+  if (!settled || !scheduled) {
+    return;
+  }
+
+  try {
+    await taskManager.removeIfExists(taskId);
+  } catch (error) {
+    logger.debug(
+      `Failed to remove the wake retry for background execution ${childExecutionId}, which will find the parent reported: ${error.message}`
     );
   }
 };
