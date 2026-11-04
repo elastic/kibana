@@ -15,7 +15,6 @@ import {
   readUnitDestinationSignals,
 } from '@kbn/streams-schema';
 import type { UnitDestination } from '@kbn/streams-schema';
-import { MAX_RESOLVE_INDEX_PATTERN_LENGTH } from '@kbn/streams-plugin/common';
 import type { Unit } from '../../../services/unit_repository';
 import type {
   AutoWritePatternValidationError,
@@ -44,14 +43,8 @@ export const PREFIXED_DESTINATION_SIGNALS: PrefixedDestinationSignal[] = [
   'traces',
 ];
 
-export const isPrefixedDestinationSignal = (
-  signal: DestinationSignal
-): signal is PrefixedDestinationSignal =>
-  PREFIXED_DESTINATION_SIGNALS.some((candidate) => candidate === signal);
-
 const AUTO_WRITE_PATTERN_INVALID_CHARS = /[\\/?"<>|,#:\s]/;
 const WHITESPACE_OR_CONTROL_CHARS = /[\s\p{Cc}]/u;
-const CONTROL_CHARS = /\p{Cc}/u;
 /** The managed bulk receiver only accepts an `_index` under these prefixes. */
 const DOCS_INDEX_PREFIX = /^(logs|metrics|traces)-/;
 
@@ -118,28 +111,25 @@ export const getFormDestinationSignals = (
       : [...DESTINATION_SIGNALS];
   }
   return DESTINATION_SIGNALS.filter((signal) =>
-    isPrefixedDestinationSignal(signal)
+    signal !== 'docs'
       ? elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim()
       : elasticsearch.docsIndex.trim()
   );
 };
-
-const getDocsWritePatterns = (elasticsearch: ElasticsearchDestinationFormData): string[] =>
-  elasticsearch.docsWritePatterns.map((pattern) => pattern.trim()).filter(Boolean);
 
 /** Per-signal targets of the single destination the form creates. */
 export const getDestinationCreateSpec = (
   elasticsearch: ElasticsearchDestinationFormData
 ): DestinationSignalTargets => {
   const signals = getFormDestinationSignals(elasticsearch);
-  const valueBySignal = signals.filter(isPrefixedDestinationSignal).flatMap((signal) => {
-    const value = elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim();
-    return value ? [[signal, value] as const] : [];
-  });
-  const hasDocs = signals.includes('docs');
+  const valueBySignal = signals
+    .filter((signal) => signal !== 'docs')
+    .flatMap((signal) => {
+      const value = elasticsearch[SIGNAL_INDEX_FIELDS[signal]].trim();
+      return value ? [[signal, value] as const] : [];
+    });
   if (elasticsearch.auto) {
-    const docsWritePatterns =
-      elasticsearch.useCustomWritePatterns && hasDocs ? getDocsWritePatterns(elasticsearch) : [];
+    const { docsWritePatterns } = elasticsearch;
     return {
       signals,
       indexBySignal: {},
@@ -154,7 +144,7 @@ export const getDestinationCreateSpec = (
     signals,
     indexBySignal: {
       ...Object.fromEntries(valueBySignal),
-      ...(hasDocs && docsIndex ? { docs: docsIndex } : {}),
+      ...(docsIndex ? { docs: docsIndex } : {}),
     },
     writePatternsBySignal: {},
   };
@@ -278,9 +268,6 @@ export const validateAutoWritePattern = (
   if (!value) {
     return undefined;
   }
-  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
-    return 'tooLong';
-  }
   if (value !== value.toLowerCase()) {
     return 'uppercase';
   }
@@ -344,16 +331,13 @@ export const validateDocsWritePattern = (
   if (!value) {
     return undefined;
   }
-  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
-    return 'tooLong';
-  }
   if (indexUsesTemplate(value)) {
     return 'template';
   }
   if (value !== value.toLowerCase()) {
     return 'uppercase';
   }
-  if (AUTO_WRITE_PATTERN_INVALID_CHARS.test(value) || CONTROL_CHARS.test(value)) {
+  if (AUTO_WRITE_PATTERN_INVALID_CHARS.test(value) || WHITESPACE_OR_CONTROL_CHARS.test(value)) {
     return 'invalidCharacter';
   }
   return DOCS_INDEX_PREFIX.test(value) ? undefined : 'docsPrefix';

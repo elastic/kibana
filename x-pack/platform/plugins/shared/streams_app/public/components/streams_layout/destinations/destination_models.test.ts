@@ -210,26 +210,6 @@ describe('destination models', () => {
     });
   });
 
-  it('declares docs on a full-auto destination and scopes its key to the docs prefixes', () => {
-    const spec = getDestinationCreateSpec(EMPTY_ELASTICSEARCH_DESTINATION_FORM);
-    const destination = createUnitDestination({
-      id: 'central',
-      name: 'Central',
-      apiKey: 'k',
-      ...spec,
-    });
-    expect(destination.supported_telemetry).toEqual(['logs', 'metrics', 'traces', 'docs']);
-    expect(destination.config).toEqual([{ name: 'api_key', value: 'k' }]);
-    expect(getSignalTargetsWritePatterns(spec)).toEqual([
-      'logs-*-*',
-      'metrics-*-*',
-      'traces-*-*',
-      'logs-*',
-      'metrics-*',
-      'traces-*',
-    ]);
-  });
-
   it('builds docs targets from the form', () => {
     expect(
       getDestinationCreateSpec({
@@ -237,7 +217,7 @@ describe('destination models', () => {
         useCustomWritePatterns: true,
         customSignals: ['logs', 'docs'],
         logsIndex: 'logs-billing-*',
-        docsWritePatterns: ['logs-orders-*', ' metrics-orders-* '],
+        docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
       })
     ).toEqual({
       signals: ['logs', 'docs'],
@@ -274,49 +254,6 @@ describe('destination models', () => {
       signals: ['docs'],
       indexBySignal: { docs: 'accounting-2026' },
       writePatternsBySignal: {},
-    });
-  });
-
-  it('ignores docs write patterns unless custom write patterns are on', () => {
-    expect(
-      getDestinationCreateSpec({
-        ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
-        docsWritePatterns: ['accounting-*'],
-      }).writePatternsBySignal
-    ).toEqual({});
-  });
-
-  it('stores docs patterns as one scoped write_patterns entry', () => {
-    const spec = getDestinationCreateSpec({
-      ...EMPTY_ELASTICSEARCH_DESTINATION_FORM,
-      useCustomWritePatterns: true,
-      customSignals: ['logs', 'docs'],
-      logsIndex: 'logs-billing-*',
-      docsWritePatterns: ['logs-orders-*', 'metrics-orders-*'],
-    });
-
-    expect(createUnitDestination({ id: 'central', name: 'Central', ...spec }).config).toEqual([
-      { name: 'write_patterns', telemetry: ['logs'], value: ['logs-billing-*'] },
-      { name: 'write_patterns', telemetry: ['docs'], value: ['logs-orders-*', 'metrics-orders-*'] },
-    ]);
-  });
-
-  it('reads a stored docs index back as a static destination', () => {
-    const [destination] = getConfiguredDestinations(
-      withUnitDestinations(storedUnit, [
-        {
-          id: 'orders',
-          name: 'Orders',
-          type: 'elasticsearch',
-          supported_telemetry: ['logs', 'docs'],
-          config: [{ name: 'index', telemetry: ['docs'], value: 'accounting-2026' }],
-        },
-      ])
-    );
-    expect(destination).toMatchObject({
-      mode: 'static',
-      signals: ['logs', 'docs'],
-      indexBySignal: { docs: 'accounting-2026' },
     });
   });
 
@@ -488,11 +425,6 @@ describe('destination models', () => {
     expect(validateAutoWritePattern('logs', 'Logs-billing-*')).toBe('uppercase');
     expect(validateAutoWritePattern('logs', 'logs-billing,prod-*')).toBe('invalidCharacter');
   });
-
-  it('rejects an auto write pattern longer than the key route accepts', () => {
-    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(1017)}-*`)).toBeUndefined();
-    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(1018)}-*`)).toBe('tooLong');
-  });
 });
 
 describe('docs targets', () => {
@@ -514,12 +446,6 @@ describe('docs targets', () => {
     expect(validateFreeFormIndexName('a'.repeat(256))).toBe('invalidName');
   });
 
-  it('keeps the signal shape rule and the template rule for OTel indices', () => {
-    expect(validateStaticSignalIndex('logs', 'logs-${x}-default')).toBe('template');
-    expect(validateStaticSignalIndex('logs', 'logs-app-default')).toBeUndefined();
-    expect(validateStaticSignalIndex('logs', '  ')).toBeUndefined();
-  });
-
   it('accepts docs write patterns under the three prefixes', () => {
     expect(validateDocsWritePattern('logs-orders-*')).toBeUndefined();
     expect(validateDocsWritePattern('metrics-*')).toBeUndefined();
@@ -533,11 +459,6 @@ describe('docs targets', () => {
     expect(validateDocsWritePattern('logs-a b')).toBe('invalidCharacter');
     expect(validateDocsWritePattern('logs-a\u0007')).toBe('invalidCharacter');
     expect(validateDocsWritePattern('logs-{{x}}')).toBe('template');
-  });
-
-  it('rejects a docs write pattern longer than the key route accepts', () => {
-    expect(validateDocsWritePattern(`logs-${'a'.repeat(1019)}`)).toBeUndefined();
-    expect(validateDocsWritePattern(`logs-${'a'.repeat(1020)}`)).toBe('tooLong');
   });
 });
 

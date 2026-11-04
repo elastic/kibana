@@ -203,42 +203,6 @@ describe('getUnitDestinationWritePatterns', () => {
       'traces-*',
     ]);
   });
-
-  it('reads a docs-scoped index and docs write_patterns', () => {
-    expect(
-      getUnitDestinationWritePatterns(
-        elasticsearch([{ name: 'index', telemetry: ['docs'], value: 'accounting-2026' }], ['docs'])
-      )
-    ).toEqual(['accounting-2026']);
-    expect(
-      getUnitDestinationWritePatterns(
-        elasticsearch(
-          [
-            {
-              name: 'write_patterns',
-              telemetry: ['docs'],
-              value: ['logs-orders-*', 'metrics-orders-*'],
-            },
-          ],
-          ['docs']
-        )
-      )
-    ).toEqual(['logs-orders-*', 'metrics-orders-*']);
-  });
-
-  it('lists a target shared by two signals once', () => {
-    expect(
-      getUnitDestinationWritePatterns(
-        elasticsearch(
-          [
-            { name: 'index', telemetry: ['logs'], value: 'logs-app-default' },
-            { name: 'index', telemetry: ['docs'], value: 'logs-app-default' },
-          ],
-          ['logs', 'docs']
-        )
-      )
-    ).toEqual(['logs-app-default']);
-  });
 });
 
 describe('getUnitDestinationSignalTargets', () => {

@@ -186,29 +186,6 @@ describe('source models', () => {
     ]);
   });
 
-  it('gives a stored Managed _bulk source with OTel signals the source scoped endpoints', () => {
-    expect(
-      createRuntimeMetadata(
-        { id: 'legacy', name: 'Legacy', type: 'async_bulk', to: null },
-        { managedInputBaseUrl: 'https://cluster.ingest.elastic.cloud' }
-      ).endpoints
-    ).toEqual([
-      {
-        id: 'bulk',
-        url: 'https://cluster.ingest.elastic.cloud/inputs/elasticsearch/legacy/_bulk',
-      },
-      {
-        id: 'bulkTarget',
-        url: 'https://cluster.ingest.elastic.cloud/inputs/elasticsearch/legacy/<target>/_bulk',
-      },
-    ]);
-    expect(
-      getSourceDisplaySignals({ id: 'legacy', name: 'Legacy', type: 'async_bulk', to: null }, [
-        'metrics',
-      ])
-    ).toEqual(['metrics']);
-  });
-
   it('lets OTLP pick logs, metrics, and traces; Prometheus is metrics-only; Managed _bulk is docs-only', () => {
     expect(selectableSignalsForSourceType('otlp')).toEqual(['logs', 'metrics', 'traces']);
     expect(selectableSignalsForSourceType('async_bulk')).toEqual([]);

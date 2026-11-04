@@ -214,36 +214,30 @@ export function IngestRateChartContent({
       >
         <EuiFlexItem grow css={chartColumnCss}>
           <div data-test-subj="streamsAppStreamOverviewChartPlotColumn">
-            {histogramLoading && !histogramResult.value ? (
+            {(histogramLoading && !histogramResult.value) || histogramUnavailable ? (
               <EuiFlexGroup
                 justifyContent="center"
                 alignItems="center"
                 style={{ height: CHART_HEIGHT }}
               >
                 <EuiFlexItem grow={false}>
-                  <EuiLoadingChart size="l" />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            ) : histogramUnavailable ? (
-              <EuiFlexGroup
-                justifyContent="center"
-                alignItems="center"
-                style={{ height: CHART_HEIGHT }}
-              >
-                <EuiFlexItem grow={false}>
-                  <EuiText
-                    size="s"
-                    color="subdued"
-                    textAlign="center"
-                    data-test-subj="streamsAppIngestRateChartError"
-                  >
-                    <p>
-                      {i18n.translate('xpack.streams.ingestRateChart.histogramErrorMessage', {
-                        defaultMessage:
-                          'No ingest rate to show. This index may not have a @timestamp field.',
-                      })}
-                    </p>
-                  </EuiText>
+                  {histogramUnavailable ? (
+                    <EuiText
+                      size="s"
+                      color="subdued"
+                      textAlign="center"
+                      data-test-subj="streamsAppIngestRateChartError"
+                    >
+                      <p>
+                        {i18n.translate('xpack.streams.ingestRateChart.histogramErrorMessage', {
+                          defaultMessage:
+                            'No ingest rate to show. This index may not have a @timestamp field.',
+                        })}
+                      </p>
+                    </EuiText>
+                  ) : (
+                    <EuiLoadingChart size="l" />
+                  )}
                 </EuiFlexItem>
               </EuiFlexGroup>
             ) : (

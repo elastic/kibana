@@ -14,7 +14,6 @@ import { CreateDestinationModal } from './create_destination_modal';
 
 const NAME_REQUIRED = 'Enter a destination name.';
 const LOGS_PATTERN_REQUIRED = 'Enter a write pattern for logs.';
-const DOCS_HELP_AUTO = "Documents from _bulk sources go to the index in each request's _index";
 
 const renderModal = () => {
   const createDestination = jest.fn();
@@ -47,9 +46,6 @@ const docsPills = () =>
   within(screen.getByTestId('streamsCreateDestination-docs-writePatterns'))
     .queryAllByTestId('euiComboBoxPill')
     .map((pill) => pill.textContent);
-
-/** The prepend and append text around an input. */
-const layoutText = (input: HTMLElement) => input.closest('.euiFormControlLayout')?.textContent;
 
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
@@ -87,12 +83,6 @@ describe('CreateDestinationModal', () => {
   });
 
   describe('Documents', () => {
-    it('explains where documents go in Auto mode', () => {
-      renderModal();
-
-      expect(screen.getByText(DOCS_HELP_AUTO, { exact: false })).toBeInTheDocument();
-    });
-
     it('splits a pasted list into one entry per pattern and marks only the invalid one', async () => {
       renderModal();
       const input = await docsPatternsInput();
@@ -108,61 +98,15 @@ describe('CreateDestinationModal', () => {
       expect(screen.queryByText('logs-a-*:', { exact: false })).not.toBeInTheDocument();
     });
 
-    it('says how many write patterns a destination can have', async () => {
-      renderModal();
-      const input = await docsPatternsInput();
-
-      await userEvent.click(input);
-      await userEvent.paste(
-        Array.from({ length: 33 }, (_, index) => `logs-orders${index}-*`).join(',')
-      );
-      await userEvent.keyboard('{Enter}');
-
-      expect(
-        screen.getByText('A destination can have at most 32 write patterns across all signals.')
-      ).toBeInTheDocument();
-    });
-
-    it('saves every pasted pattern', async () => {
-      const { createDestination } = renderModal();
-      const input = await docsPatternsInput();
-
-      await userEvent.click(input);
-      await userEvent.paste('logs-a-*, metrics-b-*');
-      await userEvent.keyboard('{Enter}');
-      await userEvent.type(screen.getByTestId('streamsCreateDestinationName'), 'Central');
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
-
-      await waitFor(() =>
-        expect(createDestination).toHaveBeenCalledWith(
-          expect.objectContaining({
-            elasticsearch: expect.objectContaining({
-              docsWritePatterns: ['logs-a-*', 'metrics-b-*'],
-            }),
-          }),
-          expect.anything()
-        )
-      );
-    });
-
-    it('adds the lowercase fix of an uppercase docs write pattern', async () => {
+    it('adds each docs write pattern once, keeping the lowercase fix of an uppercase one', async () => {
       renderModal();
       const input = await docsPatternsInput();
 
       await userEvent.type(input, 'Logs-a-*{Enter}');
       await userEvent.type(input, 'logs-a-*{Enter}');
+      await userEvent.type(input, 'logs-a-*{Enter}');
 
       expect(docsPills()).toEqual(['Logs-a-*', 'logs-a-*']);
-    });
-
-    it('does not add a docs write pattern twice', async () => {
-      renderModal();
-      const input = await docsPatternsInput();
-
-      await userEvent.type(input, 'logs-a-*{Enter}');
-      await userEvent.type(input, 'logs-a-*{Enter}');
-
-      expect(docsPills()).toEqual(['logs-a-*']);
     });
 
     it('keeps the docs index out of the shared Fixed name', async () => {
@@ -222,35 +166,6 @@ describe('CreateDestinationModal', () => {
       await userEvent.click(screen.getByLabelText('Auto (default)'));
       await userEvent.click(screen.getByLabelText('Fixed index per signal'));
       expect(screen.getByTestId('streamsCreateDestination-docs-index')).toHaveValue('');
-    });
-
-    it('shows the Documents badge and docs fields without a prepend', async () => {
-      renderModal();
-      await docsPatternsInput();
-
-      expect(screen.getByTestId('streamsCreateDestinationCustomSignal-docs')).toHaveTextContent(
-        'Documents'
-      );
-      expect(screen.getByText('Documents write patterns')).toBeInTheDocument();
-      expect(screen.getByText('Must start with logs-, metrics- or traces-.')).toBeInTheDocument();
-
-      await userEvent.click(screen.getByLabelText('Fixed index per signal'));
-      expect(screen.getByTestId('streamsCreateDestinationIndex')).toHaveAttribute(
-        'aria-label',
-        'Index name for all OTel signals'
-      );
-      await userEvent.click(screen.getByTestId('streamsCreateDestinationIndexNaming-perSignal'));
-
-      expect(layoutText(screen.getByTestId('streamsCreateDestination-logs-index'))).toContain(
-        'logs'
-      );
-      expect(layoutText(screen.getByTestId('streamsCreateDestination-docs-index'))).toBe('');
-      expect(screen.getByText('Documents index')).toBeInTheDocument();
-      expect(
-        screen.getByText('Any index or data stream name. It is used as entered, with no signal', {
-          exact: false,
-        })
-      ).toBeInTheDocument();
     });
   });
 });

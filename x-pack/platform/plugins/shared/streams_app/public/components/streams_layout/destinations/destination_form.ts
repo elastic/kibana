@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import { collectUnitComponentIds, getSignalTargetsWritePatterns } from '@kbn/streams-schema';
-import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
+import { collectUnitComponentIds } from '@kbn/streams-schema';
 import { createDestinationId, getDestinationNameValidationError } from './destination_helpers';
 import {
   DESTINATION_SIGNALS,
-  getDestinationCreateSpec,
   getFormDestinationSignals,
-  isPrefixedDestinationSignal,
   PREFIXED_DESTINATION_SIGNALS,
   SIGNAL_INDEX_FIELDS,
   validateAutoWritePattern,
@@ -105,20 +102,15 @@ type LocalElasticsearchErrors = Pick<
 const getDocsWritePatternsError = (
   elasticsearch: ElasticsearchDestinationFormData
 ): LocalElasticsearchErrors['docsWritePatterns'] => {
-  const patterns = elasticsearch.docsWritePatterns.map((pattern) => pattern.trim()).filter(Boolean);
-  if (patterns.length === 0) {
+  const { docsWritePatterns } = elasticsearch;
+  if (docsWritePatterns.length === 0) {
     return 'required';
   }
-  const entryErrors = patterns.flatMap((pattern) => {
+  const entryErrors = docsWritePatterns.flatMap((pattern) => {
     const error = validateDocsWritePattern(pattern);
     return error ? [{ pattern, error }] : [];
   });
-  if (entryErrors.length > 0) {
-    return entryErrors;
-  }
-  // Only docs can overflow the API key route's pattern cap (OTel adds at most three).
-  const keyScope = getSignalTargetsWritePatterns(getDestinationCreateSpec(elasticsearch));
-  return keyScope.length > MAX_RESOLVE_INDEX_PATTERNS ? 'tooMany' : undefined;
+  return entryErrors.length ? entryErrors : undefined;
 };
 
 const getLocalElasticsearchErrors = (
@@ -132,7 +124,7 @@ const getLocalElasticsearchErrors = (
     if (elasticsearch.customSignals.length === 0) {
       errors.customSignals = 'required';
     }
-    for (const signal of elasticsearch.customSignals.filter(isPrefixedDestinationSignal)) {
+    for (const signal of elasticsearch.customSignals.filter((candidate) => candidate !== 'docs')) {
       const field = SIGNAL_INDEX_FIELDS[signal];
       const error = elasticsearch[field].trim()
         ? validateAutoWritePattern(signal, elasticsearch[field])
@@ -149,10 +141,7 @@ const getLocalElasticsearchErrors = (
     }
     return errors;
   }
-  const hasIndex =
-    Object.values(SIGNAL_INDEX_FIELDS).some((field) => elasticsearch[field].trim().length > 0) ||
-    elasticsearch.docsIndex.trim().length > 0;
-  if (!hasIndex) {
+  if (getFormDestinationSignals(elasticsearch).length === 0) {
     errors.staticIndexes = 'required';
   }
   for (const signal of PREFIXED_DESTINATION_SIGNALS) {

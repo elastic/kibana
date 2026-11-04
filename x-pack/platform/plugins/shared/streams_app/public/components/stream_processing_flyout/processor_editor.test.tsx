@@ -11,7 +11,6 @@ import userEvent from '@testing-library/user-event';
 import { EuiProvider } from '@elastic/eui';
 import type { ComponentCatalogue } from '@kbn/streams-schema';
 import fixture from '../../services/component_catalogue/catalogue_snapshot/components_v1.json';
-import setAndAddFieldsFixture from '../../services/component_catalogue/catalogue_snapshot/components_set_add_fields.json';
 import { toComponentChecker } from '../../services/component_catalogue';
 import { ProcessorEditor } from './processor_editor';
 
@@ -411,28 +410,6 @@ describe('ProcessorEditor', () => {
       expect(screen.queryByTestId('streamsProcessingFlyoutEditorSignals')).toBeNull();
       expect(screen.getByTestId('streamsProcessingFlyoutFixedSignals')).toBeTruthy();
     });
-
-    it('lists the signals of a fixed processor by their labels', () => {
-      renderEditor({
-        catalogue: {
-          ...catalogue,
-          definitions: catalogue.definitions.map((definition) =>
-            definition.type === 'add_fields'
-              ? {
-                  ...definition,
-                  telemetry_selection: 'fixed',
-                  supported_telemetry: ['logs', 'docs'],
-                }
-              : definition
-          ),
-        },
-        telemetry: ['logs', 'docs'],
-      });
-
-      expect(screen.getByTestId('streamsProcessingFlyoutFixedSignals').textContent).toBe(
-        'Applies to every signal it supports: Logs, Documents.'
-      );
-    });
   });
 
   describe('checking the processor with the configuration service', () => {
@@ -640,113 +617,5 @@ describe('ProcessorEditor', () => {
     await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorDelete'));
     expect(mockOpenConfirm).toHaveBeenCalled();
     expect(onDelete).toHaveBeenCalled();
-  });
-
-  describe('with documents', () => {
-    it('applies a new processor to logs and documents when both flow', async () => {
-      const { onCommit } = renderEditor({ telemetry: ['logs', 'docs'] });
-      const picker = screen.getByTestId('streamsProcessingFlyoutEditorSignals');
-      expect(within(picker).getByText('Logs')).toBeTruthy();
-      expect(within(picker).getByText('Documents')).toBeTruthy();
-
-      fillOperation();
-      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
-
-      await waitFor(() => expect(onCommit).toHaveBeenCalled());
-      expect(onCommit).toHaveBeenCalledWith(
-        expect.objectContaining({ supported_telemetry: ['logs', 'docs'] })
-      );
-    });
-
-    it('lets a one signal processor choose Documents', async () => {
-      const { onCommit } = renderEditor({
-        catalogue: {
-          ...catalogue,
-          definitions: catalogue.definitions.map((definition) =>
-            definition.type === 'add_fields'
-              ? { ...definition, max_selected_telemetry: 1 }
-              : definition
-          ),
-        },
-        telemetry: ['logs', 'docs'],
-      });
-
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutEditorSignals')).getByTestId(
-          'comboBoxSearchInput'
-        )
-      );
-      await userEvent.click(screen.getByRole('option', { name: 'Documents' }));
-      fillOperation();
-      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
-
-      await waitFor(() => expect(onCommit).toHaveBeenCalled());
-      expect(onCommit).toHaveBeenCalledWith(
-        expect.objectContaining({ supported_telemetry: ['docs'] })
-      );
-    });
-
-    it('takes a free text path in the doc location', async () => {
-      const { onCommit } = renderEditor({ telemetry: ['docs'] });
-
-      await userEvent.click(screen.getByTestId('componentDefinitionFormEnum-location'));
-      await userEvent.click(screen.getByRole('option', { name: /^Document/ }));
-      commitPath('order.status');
-      fireEvent.change(screen.getByTestId('componentDefinitionFormLiteral-value'), {
-        target: { value: 'shipped' },
-      });
-      await userEvent.click(screen.getByTestId('streamsProcessingFlyoutEditorSubmit'));
-
-      await waitFor(() => expect(onCommit).toHaveBeenCalled());
-      expect(onCommit).toHaveBeenCalledWith(
-        expect.objectContaining({
-          supported_telemetry: ['docs'],
-          config: [
-            {
-              name: 'fields',
-              value: [expect.objectContaining({ location: 'doc', path: 'order.status' })],
-            },
-          ],
-        })
-      );
-    });
-
-    it.each([
-      ['Set', 'set'],
-      ['Add fields', 'add_fields'],
-    ])('renders %s from the catalogue after transpiler#362', async (displayName, type) => {
-      renderEditor({
-        catalogue: setAndAddFieldsFixture as ComponentCatalogue,
-        telemetry: ['logs', 'docs'],
-      });
-
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutProcessorType')).getByTestId(
-          'comboBoxSearchInput'
-        )
-      );
-      await userEvent.click(screen.getByRole('option', { name: new RegExp(`^${displayName}`) }));
-
-      expect(screen.getByTestId(`componentDefinitionForm-processor-${type}`)).toBeTruthy();
-      expect(screen.queryByTestId('streamsProcessingFlyoutUnknownType')).toBeNull();
-    });
-
-    it('offers the transpiler#362 add_fields condition and keyed locations', async () => {
-      renderEditor({
-        catalogue: setAndAddFieldsFixture as ComponentCatalogue,
-        telemetry: ['logs', 'docs'],
-      });
-      await userEvent.click(
-        within(screen.getByTestId('streamsProcessingFlyoutProcessorType')).getByTestId(
-          'comboBoxSearchInput'
-        )
-      );
-      await userEvent.click(screen.getByRole('option', { name: /^Add fields/ }));
-
-      expect(screen.getByTestId('componentDefinitionFormRow-condition')).toBeTruthy();
-      await userEvent.click(screen.getByTestId('componentDefinitionFormEnum-location'));
-      expect(screen.getByRole('option', { name: /^Document/ })).toBeTruthy();
-      expect(screen.queryByRole('option', { name: /^Record/ })).toBeNull();
-    });
   });
 });

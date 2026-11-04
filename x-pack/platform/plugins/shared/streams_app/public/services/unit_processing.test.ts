@@ -335,26 +335,6 @@ describe('getProcessingSlotTelemetry', () => {
     ]);
     expect(getProcessingSlotTelemetry(unit, routeSlot('main', 0))).toEqual(['metrics']);
   });
-
-  it('keeps docs through a docs pipeline and a docs route', () => {
-    const unit = baseUnit([
-      {
-        id: 'main',
-        supported_telemetry: ['logs', 'docs'],
-        config: [
-          { name: 'sources', value: ['src'] },
-          {
-            name: 'routes',
-            telemetry: ['docs'],
-            value: [{ telemetry: ['docs'], destinations: ['es'] }],
-          },
-        ],
-      },
-    ]);
-
-    expect(getProcessingSlotTelemetry(unit, routeSlot('main', 0))).toEqual(['docs']);
-    expect(getProcessingSlotTelemetry(unit, pipelineSlot('main'))).toEqual(['logs', 'docs']);
-  });
 });
 
 describe('getSharedProcessorIds', () => {

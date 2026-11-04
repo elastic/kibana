@@ -34,14 +34,12 @@ export type FreeFormIndexValidationError = Exclude<StaticIndexValidationError, '
 
 export type DocsWritePatternValidationError =
   | 'template'
-  | 'tooLong'
   | 'uppercase'
   | 'invalidCharacter'
   | 'docsPrefix';
 
 export type AutoWritePatternValidationError =
   | 'required'
-  | 'tooLong'
   | 'uppercase'
   | 'invalidCharacter'
   | 'signalPattern';
@@ -126,7 +124,7 @@ export interface DestinationCreationFormErrors {
   tracesIndex?: StaticIndexValidationError | AutoWritePatternValidationError;
   docsIndex?: FreeFormIndexValidationError;
   /** Undefined when no entry fails, never an empty list. */
-  docsWritePatterns?: 'required' | 'tooMany' | DocsWritePatternEntryError[];
+  docsWritePatterns?: 'required' | DocsWritePatternEntryError[];
   region?: 'required';
   bucket?: S3BucketValidationError;
   accessKeyId?: 'required';

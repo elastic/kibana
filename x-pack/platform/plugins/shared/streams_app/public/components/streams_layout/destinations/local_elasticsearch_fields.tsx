@@ -37,7 +37,6 @@ import {
   composeStaticIndex,
   composeStaticIndexesForAll,
   getStaticIndexRemainder,
-  isPrefixedDestinationSignal,
   SIGNAL_INDEX_FIELDS,
 } from './destination_models';
 import {
@@ -165,11 +164,7 @@ const AutoFields = ({
 
   const toggleSignal = (signal: DestinationSignal) => {
     if (customSignals.includes(signal)) {
-      resetField(
-        isPrefixedDestinationSignal(signal)
-          ? getIndexFieldPath(signal)
-          : 'elasticsearch.docsWritePatterns'
-      );
+      resetField(signal !== 'docs' ? getIndexFieldPath(signal) : 'elasticsearch.docsWritePatterns');
       customSignalsField.onChange(customSignals.filter((candidate) => candidate !== signal));
     } else {
       customSignalsField.onChange([...customSignals, signal]);

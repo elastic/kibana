@@ -300,50 +300,6 @@ describe('destination form', () => {
       ]);
     });
 
-    const docsPatterns = (count: number) =>
-      Array.from({ length: count }, (_, index) => `logs-orders${index}-*`);
-
-    it('accepts 32 write patterns across OTel and docs', () => {
-      const formData = elasticsearchForm({
-        useCustomWritePatterns: true,
-        customSignals: ['logs', 'docs'],
-        logsIndex: 'logs-billing-*',
-        docsWritePatterns: docsPatterns(31),
-      });
-
-      expect(
-        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
-      ).toBeUndefined();
-      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(true);
-    });
-
-    it('rejects 33 write patterns across OTel and docs', () => {
-      const formData = elasticsearchForm({
-        useCustomWritePatterns: true,
-        customSignals: ['logs', 'docs'],
-        logsIndex: 'logs-billing-*',
-        docsWritePatterns: docsPatterns(32),
-      });
-
-      expect(getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns).toBe(
-        'tooMany'
-      );
-      expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
-    });
-
-    it('marks a docs write pattern longer than 1024 characters', () => {
-      const longPattern = `logs-${'a'.repeat(1020)}`;
-      const formData = elasticsearchForm({
-        useCustomWritePatterns: true,
-        customSignals: ['docs'],
-        docsWritePatterns: [`logs-${'a'.repeat(1019)}`, longPattern],
-      });
-
-      expect(
-        getDestinationCreationFormErrors({ formData, unitDefinition }).docsWritePatterns
-      ).toEqual([{ pattern: longPattern, error: 'tooLong' }]);
-    });
-
     it('accepts a fixed destination with only a docs index', () => {
       const formData = elasticsearchForm({ auto: false, docsIndex: 'accounting-2026' });
       const errors = getDestinationCreationFormErrors({ formData, unitDefinition });

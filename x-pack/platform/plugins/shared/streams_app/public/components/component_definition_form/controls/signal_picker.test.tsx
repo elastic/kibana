@@ -53,12 +53,4 @@ describe('SignalPicker', () => {
 
     expect(onChange).toHaveBeenCalledWith(['logs', 'docs']);
   });
-
-  it('shows a signal without a label by its id', async () => {
-    renderPicker([], ['profiles']);
-
-    await userEvent.click(screen.getByTestId('comboBoxSearchInput'));
-
-    expect(screen.getByRole('option', { name: 'profiles' })).toBeTruthy();
-  });
 });

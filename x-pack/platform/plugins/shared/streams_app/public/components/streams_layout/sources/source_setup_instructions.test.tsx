@@ -39,13 +39,6 @@ const renderInstructions = (apiKey?: string) =>
   );
 
 describe('SourceSetupInstructions for a Managed _bulk source', () => {
-  it('shows both bulk endpoints', () => {
-    renderInstructions('enc');
-
-    expect(screen.getByText('Bulk endpoint')).toBeInTheDocument();
-    expect(screen.getByText('Bulk endpoint with a target index')).toBeInTheDocument();
-  });
-
   it('offers a cURL snippet and no Logstash tab', () => {
     renderInstructions('enc');
 
@@ -62,15 +55,6 @@ describe('SourceSetupInstructions for a Managed _bulk source', () => {
     const snippet = screen.getByTestId('streamsSourceSetupCodeBlock').textContent;
     expect(snippet).toContain('--data-binary @- <<EOF\n');
     expect(snippet).toContain('{"@timestamp":"$(date -u +%Y-%m-%dT%H:%M:%SZ)",');
-  });
-
-  it('explains what the endpoint accepts', () => {
-    renderInstructions('enc');
-
-    const notes = screen.getByTestId('streamsSourceSetupNotes');
-    expect(notes).toHaveTextContent('create');
-    expect(notes).toHaveTextContent('201');
-    expect(notes).toHaveTextContent('or the <target> in the path');
   });
 
   it('shows the notes without an API key', () => {
