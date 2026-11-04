@@ -6,17 +6,22 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { globalLimitLabels } from './translations';
 
-export const GlobalLimitCallout = ({ settingsHref }: { settingsHref?: string }) => (
-  <EuiCallOut
+export const GlobalLimitCallout = ({
+  limit,
+  settingsHref,
+}: {
+  limit: number;
+  settingsHref?: string;
+}) => (
+  <KbnWarningCallout
     announceOnMount
     size="s"
-    color="warning"
-    title={globalLimitLabels.title}
+    title={globalLimitLabels.getTitle(limit)}
     text={globalLimitLabels.body}
     actionProps={
       settingsHref

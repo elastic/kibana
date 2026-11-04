@@ -70,6 +70,10 @@ export const HUNT_INTERNAL_ROUTE_BASE = '/internal/alertzero/hunt' as const;
 /** The hunt scope for the space: the default data view Tier 1 searches and what resolved in it. */
 export const HUNT_INDEX_SCOPE_URL = `${HUNT_INTERNAL_ROUTE_BASE}/index_scope` as const;
 
+/** Which default data view patterns the Hunt worker's service account cannot read. */
+export const HUNT_WORKER_INDEX_COVERAGE_URL =
+  `${HUNT_INTERNAL_ROUTE_BASE}/index_scope/worker_coverage` as const;
+
 /** Candidate report selection for the tagged Worker's scheduled sweep and manual trigger. */
 export const CANDIDATES_URL = `${HUNT_INTERNAL_ROUTE_BASE}/candidates` as const;
 
@@ -400,6 +404,15 @@ export const ALERTZERO_THREAT_INTEL_ENRICH_TAXONOMY_TELEMETRY_PLUGIN_ID =
   'alertzero_threat_intel_enrich_taxonomy' as const;
 export const ALERTZERO_THREAT_INTEL_EXTRACT_DIAMOND_TELEMETRY_PLUGIN_ID =
   'alertzero_threat_intel_extract_diamond' as const;
+
+/**
+ * `plugin_id` for the Attack Discovery generation calls the batched-generation workflow makes.
+ * AlertZero turns the ground-truth gate off, so generation is where its Attack Discovery tokens
+ * are spent. The YAML definition carries this as a literal (`@kbn/workflows` cannot import this
+ * package); a test in the alertzero plugin keeps the two in sync. Sent with
+ * `aggregate_by: ALERTZERO_INFERENCE_PARENT_FEATURE_ID`.
+ */
+export const ALERTZERO_AD_GENERATION_TELEMETRY_PLUGIN_ID = 'alertzero_ad_generation' as const;
 
 /** Agent Builder conversation template ids. A proposal is an attachment, not a template. */
 export const TEMPLATE_ID_INVESTIGATION = 'investigation' as const;

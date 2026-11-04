@@ -16,6 +16,7 @@ import { BuildkiteClient, type BuildkiteCommandStep } from '../buildkite/index.t
 import { getKibanaDir } from '../utils.ts';
 import { expandAgentQueue } from '../agent_images.ts';
 import { collectEnvFromLabels } from '../pr_labels.ts';
+import { SCOUT_STEP_KEYS } from './step_keys.ts';
 
 function envVarsIfSet(envVarNames: string[]): Record<string, string> {
   const collectedVars: Record<string, string> = {};
@@ -120,7 +121,7 @@ async function distributeScoutTestsOnLanes() {
         ...collectEnvFromLabels(),
       };
 
-      const stepKey = `scout_test_lane_${effectiveLaneNumber}`;
+      const stepKey = `${SCOUT_STEP_KEYS.LANE_PREFIX}${effectiveLaneNumber}`;
       const configSets = loadGroups.map(({ configSet }) => configSet).join(', ');
       const stepLabel = `Scout Lane #${effectiveLaneNumber} - ${testTarget.arch}-${testTarget.domain} / ${configSets}`;
 
@@ -163,7 +164,7 @@ async function distributeScoutTestsOnLanes() {
       .forEach((stepKey) => lanesGroupStepDependencies.push(stepKey));
   } else {
     // Default dependencies
-    lanesGroupStepDependencies.push('build_scout_tests');
+    lanesGroupStepDependencies.push(SCOUT_STEP_KEYS.BUILDER);
   }
 
   bk.setMetadata(

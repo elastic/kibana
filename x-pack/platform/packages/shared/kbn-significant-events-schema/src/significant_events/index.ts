@@ -58,6 +58,9 @@ export {
   significantEventStatusSchema,
   significantEventManualStatusSchema,
   SIGNIFICANT_EVENT_MANUAL_STATUS_OPTIONS,
+  operatorFallbackAssessmentNote,
+  MAX_DEACTIVATION_REASON_LENGTH,
+  INACTIVE_SERIES_LOOKBACK_HOURS,
 } from './events';
 export {
   MAX_SHORT_STRING_LENGTH,

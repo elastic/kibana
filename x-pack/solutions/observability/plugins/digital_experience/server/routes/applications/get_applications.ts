@@ -5,10 +5,8 @@
  * 2.0.
  */
 
-import { forbidden, internal, isBoom } from '@hapi/boom';
-import { ENVIRONMENT_NOT_DEFINED_VALUE } from '@kbn/apm-types';
+import { forbidden, internal } from '@hapi/boom';
 import type { Logger } from '@kbn/core/server';
-import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 import { APPLICATION_SOURCE } from '../../../common/application_source';
 import type {
@@ -17,7 +15,8 @@ import type {
   ApplicationsResponse,
   PageLoadsOverTime,
 } from '../../../common/types/applications';
-import { MAX_ENVIRONMENT_LENGTH } from './constants';
+import { sortEnvironments } from '../../lib/helpers/environment';
+import { describeError, isAccessDenied } from '../../lib/helpers/errors';
 import type { SourceApplications } from './types';
 
 type ApplicationsFetcher = () => Promise<SourceApplications>;
@@ -30,27 +29,13 @@ const LOAD_FAILED_MESSAGE = i18n.translate('xpack.digitalExperience.applications
   defaultMessage: 'Could not load the applications. Check the Kibana server logs for details.',
 });
 
-/**
- * Whether access was denied: by Elasticsearch (`APMEventClient` wraps its errors in
- * `originalError`) or by Kibana, e.g. reading the APM index settings without APM access.
- */
-const isAccessDenied = (error: unknown): boolean => {
-  if (isBoom(error)) {
-    return error.output.statusCode === 403;
-  }
-  const esError = error instanceof Error && 'originalError' in error ? error.originalError : error;
-  return isResponseError(esError) && esError.statusCode === 403;
-};
-
 interface SourceFailure {
   source: ApplicationSource;
   error: unknown;
 }
 
 const describeFailure = ({ source, error }: SourceFailure): string =>
-  `Could not load the ${source} applications: ${
-    error instanceof Error ? error.message : String(error)
-  }`;
+  `Could not load the ${source} applications: ${describeError(error)}`;
 
 /** The client error hides the Elasticsearch details, which name the user, roles and indices. */
 const toClientError = (failures: SourceFailure[]) =>
@@ -60,17 +45,6 @@ const toClientError = (failures: SourceFailure[]) =>
 
 const byPageLoadsThenName = (a: ApplicationSummary, b: ApplicationSummary): number =>
   b.pageLoads.count - a.pageLoads.count || a.serviceName.localeCompare(b.serviceName);
-
-/** "Not defined" first, then the environment names the route accepts, alphabetically. */
-const sortEnvironments = (environments: Set<string>): string[] => {
-  const names = [...environments]
-    .filter((name) => name !== ENVIRONMENT_NOT_DEFINED_VALUE)
-    .filter((name) => name.length <= MAX_ENVIRONMENT_LENGTH)
-    .sort();
-  return environments.has(ENVIRONMENT_NOT_DEFINED_VALUE)
-    ? [ENVIRONMENT_NOT_DEFINED_VALUE, ...names]
-    : names;
-};
 
 /**
  * Merges the applications of each source; a source whose search fails is left out and listed in
@@ -116,7 +90,7 @@ export const getApplications = async ({
 
   return {
     applications: loaded.flatMap(({ applications }) => applications).sort(byPageLoadsThenName),
-    environments: sortEnvironments(new Set(loaded.flatMap(({ environments }) => environments))),
+    environments: sortEnvironments(loaded.flatMap(({ environments }) => environments)),
     pageLoadsOverTime,
     unavailableSources: failures.map(({ source }) => source),
   };

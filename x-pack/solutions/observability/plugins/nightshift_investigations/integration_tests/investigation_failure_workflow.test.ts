@@ -52,6 +52,9 @@ type Failure =
   | 'handler'
   | 'step_timeout';
 
+/** The account the space's investigation entry point is bound to. */
+const AGENT_SERVICE_ACCOUNT_ID = 'nightshift-agent-account';
+
 const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = false) => {
   jest
     .mocked(resolveNightshiftModelForRequest)
@@ -121,10 +124,20 @@ const setup = (failure?: Failure, persistenceFailures = 0, eventWriteFailure = f
         getWorkflowExecution: async (id: string, spaceId: string) => {
           const execution = engine.workflowExecutionRepositoryMock.workflowExecutions.get(id);
           // The engine fixture uses a synthetic workflow id; retain its real execution and inputs.
+          // In a set-up space the run executes as the agent account its entry point is bound to.
           return execution?.spaceId === spaceId
-            ? { ...execution, originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID }
+            ? {
+                ...execution,
+                originManagedWorkflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+                effectiveIdentity: { type: 'service_account', id: AGENT_SERVICE_ACCOUNT_ID },
+              }
             : null;
         },
+        // The space's investigation entry point, bound to the agent account.
+        getWorkflow: async () => ({
+          enabled: true,
+          definition: { settings: { run_as: AGENT_SERVICE_ACCOUNT_ID } },
+        }),
       },
     } as never,
     agentBuilder: {

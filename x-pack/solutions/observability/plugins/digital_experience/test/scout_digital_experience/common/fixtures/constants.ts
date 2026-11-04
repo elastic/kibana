@@ -32,6 +32,9 @@ export const OTEL_APPS = {
   blog: 'otel-blog',
 } as const;
 
+/** The page loads of `OTEL_APPS.shop` inside `TIME_RANGE`, as its Overview KPI shows them. */
+export const OTEL_SHOP_PAGE_LOADS = '4';
+
 export const STAGING_ENVIRONMENT = 'staging';
 
 export const createRole = (feature: KibanaRole['kibana'][number]['feature']): KibanaRole => ({

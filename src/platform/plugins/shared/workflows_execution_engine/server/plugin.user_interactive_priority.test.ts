@@ -131,6 +131,7 @@ describe('user-interactive task priority', () => {
     taskManager.bulkSchedule.mockImplementation(async (tasks) => tasks as any);
     taskManager.ensureScheduled.mockResolvedValue({ id: 'scheduled-task' } as any);
     taskManager.runSoon.mockResolvedValue({ id: 'scheduled-task', conflict: false } as any);
+    taskManager.bulkGet.mockResolvedValue([]);
     pluginStart = plugin.start(coreStart, {
       taskManager,
       actions: {} as any,
@@ -247,7 +248,7 @@ describe('user-interactive task priority', () => {
           taskType: 'workflow:resume',
           priority: TaskPriority.UserInteractive,
         }),
-        expect.objectContaining({ request, cloneApiKey: true })
+        expect.objectContaining({ request, cloneApiKey: true, regenerateApiKey: true })
       );
       expect(taskManager.runSoon).toHaveBeenCalled();
       expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(

@@ -167,9 +167,10 @@ actions:
         as-code data view definition.
       x-displayName: "Data views v2"
   - target: '$.tags[?(@.name=="slo")]'
-    description: Change displayName
+    description: Change displayName and description
     update:
       x-displayName: "Service level objectives"
+      description: SLO APIs enable you to define, manage and track service-level objectives
   - target: '$.tags[?(@.name=="spaces")]'
     description: Change displayName
     update:

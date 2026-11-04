@@ -132,6 +132,7 @@ export const YamlRuleForm = ({
     application: services.application,
     http: services.http,
     search: services.data.search.search,
+    cps: services.cps,
   });
 
   const handleSubmit = useCallback(

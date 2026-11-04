@@ -100,8 +100,6 @@ dependsOn:
   - '@kbn/flyout-template'
   - '@kbn/charts-plugin'
   - '@kbn/unified-data-table'
-  - '@kbn/unified-histogram'
-  - '@kbn/data-source'
   - '@kbn/cell-actions'
   - '@kbn/discover-utils'
   - '@kbn/shared-ux-page-kibana-template'
@@ -165,8 +163,6 @@ dependsOn:
   - '@kbn/tooling-log'
   - '@kbn/test'
   - '@kbn/cloud-plugin'
-  - '@kbn/core-overlays-browser-mocks'
-  - '@kbn/core-rendering-browser-mocks'
   - '@kbn/announcement-banner'
   - '@kbn/ftr-llm-proxy'
 tags:

@@ -9,11 +9,14 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import { z } from '@kbn/zod/v4';
 import { createEvaluatorRegistryMock } from '../evaluators/registry.mock';
+import { latencyEvaluatorDef } from '../evaluators/trace_metrics';
 import { awaitTraceReady } from '../evaluators/trace_readiness';
 import type { EvaluatorDefinition } from '../evaluators/types';
 import { EvaluationExecutionError } from './evaluation_execution_error';
 import { createEvaluationService, type EvaluateOptions } from './evaluation_service';
+import type { InMemoryEvidence } from './execute_evaluators';
 
 jest.mock('../evaluators/trace_readiness', () => ({
   ...jest.requireActual('../evaluators/trace_readiness'),
@@ -66,16 +69,24 @@ describe('createEvaluationService', () => {
       logger,
       getInferenceStart: async () => ({ getClient } as unknown as InferenceServerStart),
     });
-    const evaluate = (options: Partial<EvaluateOptions> & Pick<EvaluateOptions, 'evaluators'>) =>
+    const evaluate = ({
+      evaluators,
+      spaceId = 'default',
+    }: Pick<EvaluateOptions, 'evaluators'> & { spaceId?: string }) =>
       service.evaluate({
         request,
-        spaceId: 'default',
+        spaceId,
         subject: { mode: 'single-turn', traces: [{ trace_id: TRACE_ID }] },
         traceReader,
-        ...options,
+        evaluators,
       });
+    const evaluateEvidence = ({
+      evaluators,
+      evidence,
+    }: Pick<EvaluateOptions, 'evaluators'> & { evidence: InMemoryEvidence }) =>
+      service.evaluate({ request, spaceId: 'default', evaluators, evidence });
 
-    return { evaluate, logger, asScoped, getClient };
+    return { evaluate, evaluateEvidence, logger, asScoped, getClient };
   };
 
   beforeEach(() => {
@@ -213,5 +224,110 @@ describe('createEvaluationService', () => {
       responseType: 'badRequest',
     });
     expect(latency.evaluate).not.toHaveBeenCalled();
+  });
+
+  describe('in-memory evidence', () => {
+    const EVIDENCE_ROUND = {
+      input: { message: 'Why did the checkout alert fire?' },
+      response: { message: 'A bad deploy of the payments service.' },
+      steps: [{ tool_id: 'search_logs', arguments: { service: 'payments' }, result: { hits: 12 } }],
+    };
+
+    it('grades the round it is given without reading a trace', async () => {
+      const groundedness = buildEvaluator({ name: 'groundedness', kind: 'llm' });
+      const { evaluateEvidence, getClient } = setup([groundedness]);
+
+      const results = await evaluateEvidence({
+        evaluators: [{ name: 'groundedness', connector_id: 'judge-connector' }],
+        evidence: { round: EVIDENCE_ROUND, referenceData: { expected: 'A bad deploy' } },
+      });
+
+      expect(results).toEqual([expect.objectContaining({ status: 'ok' })]);
+      expect(awaitTraceReadyMock).not.toHaveBeenCalled();
+      expect(traceReader.search).not.toHaveBeenCalled();
+      expect(getClient).toHaveBeenCalledWith({
+        request,
+        bindTo: { connectorId: 'judge-connector' },
+      });
+      const [context] = (groundedness.evaluate as jest.Mock).mock.calls[0];
+      expect(context.round).toBe(EVIDENCE_ROUND);
+      expect(context.referenceData).toEqual({ expected: 'A bad deploy' });
+      expect(context.trace).toBeUndefined();
+    });
+
+    it('fails an evaluator that reads the trace, without failing the others', async () => {
+      const groundedness = buildEvaluator({ name: 'groundedness' });
+      const { evaluateEvidence } = setup([latencyEvaluatorDef, groundedness]);
+
+      const results = await evaluateEvidence({
+        evaluators: [{ name: 'latency' }, { name: 'groundedness' }],
+        evidence: { round: EVIDENCE_ROUND },
+      });
+
+      expect(results).toEqual([
+        expect.objectContaining({
+          status: 'error',
+          evaluator: expect.objectContaining({ name: 'latency' }),
+          error: {
+            message:
+              'Evaluator "latency" reads its metric from the trace, so it cannot grade in-memory evidence',
+          },
+        }),
+        expect.objectContaining({
+          status: 'ok',
+          evaluator: expect.objectContaining({ name: 'groundedness' }),
+        }),
+      ]);
+      expect(traceReader.search).not.toHaveBeenCalled();
+    });
+
+    it('gives each evaluator the part of the reference data its schema reads', async () => {
+      const treeCoverage: EvaluatorDefinition = {
+        ...buildEvaluator({ name: 'tree_coverage' }),
+        referenceDataSchema: z.object({
+          decision_tree: z.string().min(1),
+          transcript: z.array(z.object({ role: z.string(), content: z.string() })),
+        }),
+      };
+      const conclusionQuality = buildEvaluator({ name: 'conclusion_quality' });
+      const { evaluateEvidence } = setup([treeCoverage, conclusionQuality]);
+      const transcript = [
+        { role: 'user', content: 'Why did the checkout alert fire?' },
+        { role: 'assistant', content: 'A bad deploy of the payments service.' },
+      ];
+      const referenceData = { decision_tree: 'graph TD; A-->B', transcript, verified_cause: 'x' };
+
+      await evaluateEvidence({
+        evaluators: [{ name: 'tree_coverage' }, { name: 'conclusion_quality' }],
+        evidence: { round: EVIDENCE_ROUND, referenceData },
+      });
+
+      const [treeCoverageContext] = (treeCoverage.evaluate as jest.Mock).mock.calls[0];
+      expect(treeCoverageContext.referenceData).toEqual({
+        decision_tree: 'graph TD; A-->B',
+        transcript,
+      });
+      const [conclusionQualityContext] = (conclusionQuality.evaluate as jest.Mock).mock.calls[0];
+      expect(conclusionQualityContext.referenceData).toEqual(referenceData);
+    });
+
+    it('validates reference data against the evaluator schema', async () => {
+      const correctness: EvaluatorDefinition = {
+        ...buildEvaluator({ name: 'correctness' }),
+        referenceDataSchema: z.object({ expected: z.string().min(1) }),
+      };
+      const { evaluateEvidence } = setup([correctness]);
+
+      await expect(
+        evaluateEvidence({
+          evaluators: [{ name: 'correctness' }],
+          evidence: { round: EVIDENCE_ROUND },
+        })
+      ).rejects.toMatchObject({
+        message: expect.stringContaining('Invalid reference_data for evaluator "correctness"'),
+        responseType: 'badRequest',
+      });
+      expect(correctness.evaluate).not.toHaveBeenCalled();
+    });
   });
 });

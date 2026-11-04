@@ -9,7 +9,7 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test, testData } from '../fixtures';
 import { DIGITAL_EXPERIENCE_WITH_UX_TAGS } from '../../tags';
 
-const { SERVICE_NAME, OTEL_APPS, TIME_RANGE } = testData;
+const { SERVICE_NAME, OTEL_APPS, OTEL_SHOP_PAGE_LOADS, TIME_RANGE } = testData;
 
 const hasTimeRange = (url: URL): boolean =>
   url.searchParams.get('rangeFrom') === TIME_RANGE.rangeFrom &&
@@ -36,7 +36,7 @@ test.describe(
         await expect(page).toHaveURL(hasTimeRange);
         await expect(page).toHaveURL(/source=classic/);
         await expect(digitalExperience.breadcrumbs).toContainText(SERVICE_NAME);
-        await expect(digitalExperience.otelOverviewPlaceholder).toBeHidden();
+        await expect(digitalExperience.otelOverviewKpis).toBeHidden();
       });
 
       await test.step('goes back to the list with the same time range and filters', async () => {
@@ -47,12 +47,13 @@ test.describe(
         await expect(page).toHaveURL(/sourceFilter=classic/);
       });
 
-      await test.step('opens the placeholder from an EDOT Browser row', async () => {
+      await test.step('opens the EDOT Browser Overview from an EDOT Browser row', async () => {
         await digitalExperience.selectSource('All sources');
         await digitalExperience.applicationLink(OTEL_APPS.shop).click();
 
         await expect(page).toHaveURL(/source=otel/);
-        await expect(digitalExperience.otelOverviewPlaceholder).toBeVisible();
+        await expect(page).toHaveURL(hasTimeRange);
+        await expect(digitalExperience.otelOverviewPageLoads).toContainText(OTEL_SHOP_PAGE_LOADS);
       });
     });
   }

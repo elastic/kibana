@@ -5,21 +5,29 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React from 'react';
 import { css } from '@emotion/react';
-import type { EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
+  useController,
+  useFormContext,
+  useWatch,
+  type ControllerRenderProps,
+} from 'react-hook-form';
+import {
+  EuiBadge,
   EuiButtonGroup,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFormPrepend,
   EuiFormRow,
+  EuiHorizontalRule,
   EuiRadio,
   EuiSpacer,
   EuiSwitch,
   EuiText,
   EuiTitle,
+  useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
@@ -28,7 +36,6 @@ import {
   composeStaticIndex,
   composeStaticIndexesForAll,
   getStaticIndexRemainder,
-  haveStaticIndexRemaindersDiverged,
   SIGNAL_INDEX_FIELDS,
 } from './destination_models';
 import {
@@ -38,80 +45,84 @@ import {
 } from './destination_type_config';
 import type {
   AutoWritePatternValidationError,
+  DestinationCreationFormData,
   DestinationCreationFormErrors,
   DestinationSignal,
   ElasticsearchDestinationFormData,
+  StaticIndexNaming,
   StaticIndexValidationError,
 } from './types';
 
-type IndexScope = 'all' | DestinationSignal;
 type WriteTargetError = StaticIndexValidationError | AutoWritePatternValidationError | undefined;
 
 interface LocalElasticsearchFieldsProps {
-  auto: boolean;
-  logsIndex: string;
-  metricsIndex: string;
-  tracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: WriteTargetError;
-  metricsIndexError?: WriteTargetError;
-  tracesIndexError?: WriteTargetError;
+  errors: DestinationCreationFormErrors;
   disabled: boolean;
-  onAutoChange: (auto: boolean) => void;
-  onIndexesChange: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  onBlur: () => void;
 }
 
-const ALL_SCOPE: IndexScope = 'all';
+type IndexFieldPath = `elasticsearch.${(typeof SIGNAL_INDEX_FIELDS)[DestinationSignal]}`;
 
-/** Spacer + signal group + field + help/error, so the dialog does not jump. */
-const STATIC_INDEX_FIELDS_MIN_HEIGHT = 196;
+const getIndexFieldPath = (signal: DestinationSignal): IndexFieldPath =>
+  `elasticsearch.${SIGNAL_INDEX_FIELDS[signal]}`;
+
+type IndexFields = Record<
+  DestinationSignal,
+  ControllerRenderProps<DestinationCreationFormData, IndexFieldPath>
+>;
+
+interface WriteTargetFieldsProps extends LocalElasticsearchFieldsProps {
+  elasticsearch: ElasticsearchDestinationFormData;
+  indexFields: IndexFields;
+  customSignalsField: ControllerRenderProps<
+    DestinationCreationFormData,
+    'elasticsearch.customSignals'
+  >;
+  /** Empties the signals and indices of the previous choice, and forgets they were touched. */
+  resetWriteTargets: () => void;
+}
 
 const ALL_PREPEND = i18n.translate('xpack.streams.destinations.allSignalsPrependLabel', {
   defaultMessage: 'logs / metrics / traces',
 });
 
-const ALL_DISABLED_TOOLTIP = i18n.translate(
-  'xpack.streams.destinations.allSignalsDisabledTooltip',
-  {
-    defaultMessage: 'All is unavailable after a signal-specific index is set.',
-  }
-);
-
 const INDEX_PLACEHOLDER = i18n.translate('xpack.streams.destinations.staticIndexPlaceholder', {
   defaultMessage: 'dataset-namespace',
 });
 
-const INDEX_FIELD_TEST_SUBJ: Record<IndexScope, string> = {
-  all: 'streamsCreateDestinationIndex',
-  logs: 'streamsCreateDestinationLogsIndex',
-  metrics: 'streamsCreateDestinationMetricsIndex',
-  traces: 'streamsCreateDestinationTracesIndex',
-};
+const WRITE_PATTERN_PLACEHOLDER = i18n.translate(
+  'xpack.streams.destinations.writePatternPlaceholder',
+  { defaultMessage: 'dataset-*' }
+);
 
 const writeTargetErrorText = (
   signal: DestinationSignal,
   error: WriteTargetError,
   allowWildcard: boolean
 ): string | undefined => {
+  if (error === 'required') {
+    return i18n.translate('xpack.streams.destinations.writePatternRequiredErrorMessage', {
+      defaultMessage: 'Enter a write pattern for {signal}.',
+      values: { signal: DESTINATION_SIGNAL_LABELS[signal].toLowerCase() },
+    });
+  }
   if (error === 'template') {
     return i18n.translate('xpack.streams.destinations.indexTemplateNotSupportedErrorMessage', {
       defaultMessage: 'Templated index names are not supported yet.',
     });
   }
   if (error === 'uppercase') {
-    return i18n.translate('xpack.streams.destinations.indexUppercaseErrorMessage', {
-      defaultMessage: 'Index names must be lowercase.',
-    });
+    return allowWildcard
+      ? i18n.translate('xpack.streams.destinations.writePatternUppercaseErrorMessage', {
+          defaultMessage: 'Write patterns must be lowercase.',
+        })
+      : i18n.translate('xpack.streams.destinations.indexUppercaseErrorMessage', {
+          defaultMessage: 'Index names must be lowercase.',
+        });
   }
   if (error === 'invalidCharacter') {
     return allowWildcard
-      ? i18n.translate('xpack.streams.destinations.writeTargetInvalidCharacterErrorMessage', {
-          defaultMessage: 'Write targets cannot contain \\ / ? " < > | , # : or spaces.',
+      ? i18n.translate('xpack.streams.destinations.writePatternInvalidCharacterErrorMessage', {
+          defaultMessage: 'Write patterns cannot contain \\ / ? " < > | , # : or spaces.',
         })
       : i18n.translate('xpack.streams.destinations.indexInvalidCharacterErrorMessage', {
           defaultMessage: 'Index names cannot contain \\ / * ? " < > | , # : or spaces.',
@@ -131,166 +142,361 @@ const writeTargetErrorText = (
   return undefined;
 };
 
-/** Fields for a local Elasticsearch destination (`elasticsearch.schema.yaml`). */
-export const LocalElasticsearchFields = ({
-  auto,
-  logsIndex,
-  metricsIndex,
-  tracesIndex,
-  staticIndexesError,
-  logsIndexError,
-  metricsIndexError,
-  tracesIndexError,
+const SignalIndexField = ({
+  signal,
+  value,
+  error,
+  allowWildcard,
   disabled,
-  onAutoChange,
-  onIndexesChange,
+  onChange,
   onBlur,
-}: LocalElasticsearchFieldsProps) => {
-  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingAuto' });
-  const staticRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingStatic' });
-  const [indexScope, setIndexScope] = useState<IndexScope>(ALL_SCOPE);
-  const [showWriteTargets, setShowWriteTargets] = useState(false);
+}: {
+  signal: DestinationSignal;
+  value: string;
+  error: WriteTargetError;
+  allowWildcard: boolean;
+  disabled: boolean;
+  onChange: (index: string) => void;
+  onBlur: () => void;
+}) => {
+  const { euiTheme } = useEuiTheme();
+  const errorText = writeTargetErrorText(signal, error, allowWildcard);
+  // Same width for every signal, so the index inputs line up.
+  const prependStyles = css`
+    inline-size: ${euiTheme.base * 5}px;
+  `;
+  return (
+    <EuiFormRow fullWidth isInvalid={Boolean(errorText)} error={errorText}>
+      <EuiFieldText
+        fullWidth
+        value={getStaticIndexRemainder(signal, value)}
+        disabled={disabled}
+        isInvalid={Boolean(errorText)}
+        prepend={<EuiFormPrepend label={signal} css={prependStyles} />}
+        onChange={(event) => onChange(composeStaticIndex(signal, event.target.value))}
+        onBlur={onBlur}
+        placeholder={allowWildcard ? WRITE_PATTERN_PLACEHOLDER : INDEX_PLACEHOLDER}
+        aria-label={
+          allowWildcard
+            ? i18n.translate('xpack.streams.destinations.signalWritePatternAriaLabel', {
+                defaultMessage: '{signal} write pattern',
+                values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
+              })
+            : i18n.translate('xpack.streams.destinations.signalIndexAriaLabel', {
+                defaultMessage: '{signal} index name',
+                values: { signal: DESTINATION_SIGNAL_LABELS[signal] },
+              })
+        }
+        data-test-subj={`streamsCreateDestination-${signal}-index`}
+      />
+    </EuiFormRow>
+  );
+};
 
-  const indexesBySignal: Record<DestinationSignal, string> = {
-    logs: logsIndex,
-    metrics: metricsIndex,
-    traces: tracesIndex,
-  };
-  const errorsBySignal: Record<DestinationSignal, WriteTargetError> = {
-    logs: logsIndexError,
-    metrics: metricsIndexError,
-    traces: tracesIndexError,
+const AutoFields = ({
+  elasticsearch,
+  errors,
+  disabled,
+  indexFields,
+  customSignalsField,
+  resetWriteTargets,
+}: WriteTargetFieldsProps) => {
+  const { setValue, resetField } = useFormContext<DestinationCreationFormData>();
+  const { useCustomWritePatterns, customSignals } = elasticsearch;
+
+  const toggleSignal = (signal: DestinationSignal) => {
+    if (customSignals.includes(signal)) {
+      resetField(getIndexFieldPath(signal));
+      customSignalsField.onChange(customSignals.filter((candidate) => candidate !== signal));
+    } else {
+      customSignalsField.onChange([...customSignals, signal]);
+    }
+    customSignalsField.onBlur();
   };
 
-  const remainder =
-    indexScope === ALL_SCOPE
-      ? getStaticIndexRemainder('logs', logsIndex)
-      : getStaticIndexRemainder(indexScope, indexesBySignal[indexScope]);
-  const visibleSignal: DestinationSignal = indexScope === ALL_SCOPE ? 'logs' : indexScope;
-  const fieldError = writeTargetErrorText(visibleSignal, errorsBySignal[visibleSignal], auto);
+  return (
+    <>
+      <EuiSwitch
+        compressed
+        label={i18n.translate('xpack.streams.destinations.customWritePatternsSwitchLabel', {
+          defaultMessage: 'Use custom write patterns',
+        })}
+        checked={useCustomWritePatterns}
+        disabled={disabled}
+        onChange={(event) => {
+          resetWriteTargets();
+          setValue('elasticsearch.useCustomWritePatterns', event.target.checked, {
+            shouldDirty: true,
+          });
+        }}
+        data-test-subj="streamsCreateDestinationCustomWritePatterns"
+      />
+      {useCustomWritePatterns && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            <p>
+              {i18n.translate('xpack.streams.destinations.customWritePatternsHelpDescription', {
+                defaultMessage:
+                  "Selected signals use your write pattern. Signals you don't select aren't sent to this destination. Use * as a wildcard.",
+              })}
+            </p>
+          </EuiText>
+          <EuiSpacer size="s" />
+          <EuiFlexGroup
+            gutterSize="xs"
+            responsive={false}
+            wrap
+            role="group"
+            aria-label={i18n.translate('xpack.streams.destinations.customSignalsAriaLabel', {
+              defaultMessage: 'Signals with a custom write pattern',
+            })}
+          >
+            {DESTINATION_SIGNALS.map((signal) => {
+              const isSelected = customSignals.includes(signal);
+              return (
+                <EuiFlexItem key={signal} grow={false}>
+                  <EuiBadge
+                    color={isSelected ? 'primary' : 'hollow'}
+                    iconType={isSelected ? 'check' : 'cross'}
+                    isDisabled={disabled}
+                    onClick={(event) => {
+                      // EuiBadge renders a button without `type`, which would submit the form.
+                      event.preventDefault();
+                      toggleSignal(signal);
+                    }}
+                    onClickAriaLabel={DESTINATION_SIGNAL_LABELS[signal]}
+                    aria-pressed={isSelected}
+                    data-test-subj={`streamsCreateDestinationCustomSignal-${signal}`}
+                  >
+                    {DESTINATION_SIGNAL_LABELS[signal]}
+                  </EuiBadge>
+                </EuiFlexItem>
+              );
+            })}
+          </EuiFlexGroup>
+          {errors.customSignals === 'required' && (
+            <EuiText size="xs" color="danger">
+              <p>
+                {i18n.translate('xpack.streams.destinations.customSignalsRequiredErrorMessage', {
+                  defaultMessage: 'Select at least one signal.',
+                })}
+              </p>
+            </EuiText>
+          )}
+          {DESTINATION_SIGNALS.filter((signal) => customSignals.includes(signal)).map((signal) => (
+            <React.Fragment key={signal}>
+              <EuiSpacer size="s" />
+              <SignalIndexField
+                signal={signal}
+                value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
+                error={errors[SIGNAL_INDEX_FIELDS[signal]]}
+                allowWildcard
+                disabled={disabled}
+                onChange={indexFields[signal].onChange}
+                onBlur={indexFields[signal].onBlur}
+              />
+            </React.Fragment>
+          ))}
+        </>
+      )}
+    </>
+  );
+};
+
+const StaticFields = ({ elasticsearch, errors, disabled, indexFields }: WriteTargetFieldsProps) => {
+  const { setValue } = useFormContext<DestinationCreationFormData>();
+  const { staticNaming } = elasticsearch;
   const requiredError =
-    !auto && staticIndexesError === 'required'
+    errors.staticIndexes === 'required'
       ? i18n.translate('xpack.streams.destinations.staticIndexRequiredErrorMessage', {
           defaultMessage: 'Enter at least one index.',
         })
       : undefined;
-  const otherInvalidSignals = DESTINATION_SIGNALS.filter(
-    (signal) =>
-      signal !== visibleSignal && writeTargetErrorText(signal, errorsBySignal[signal], auto)
+
+  const namingOptions = [
+    {
+      id: 'shared',
+      label: i18n.translate('xpack.streams.destinations.sharedIndexNamingLabel', {
+        defaultMessage: 'Enter a name for all signals',
+      }),
+      'data-test-subj': 'streamsCreateDestinationIndexNaming-shared',
+    },
+    {
+      id: 'perSignal',
+      label: i18n.translate('xpack.streams.destinations.perSignalIndexNamingLabel', {
+        defaultMessage: 'Name signals individually',
+      }),
+      'data-test-subj': 'streamsCreateDestinationIndexNaming-perSignal',
+    },
+  ];
+
+  const setSharedIndex = (remainder: string) => {
+    const indexes = composeStaticIndexesForAll(remainder);
+    for (const signal of DESTINATION_SIGNALS) {
+      indexFields[signal].onChange(indexes[SIGNAL_INDEX_FIELDS[signal]]);
+    }
+  };
+
+  const onNamingChange = (nextNaming: string) => {
+    const naming = nextNaming as StaticIndexNaming;
+    setValue('elasticsearch.staticNaming', naming, { shouldDirty: true });
+    if (naming === 'shared') {
+      setSharedIndex(
+        DESTINATION_SIGNALS.map((signal) =>
+          getStaticIndexRemainder(signal, elasticsearch[SIGNAL_INDEX_FIELDS[signal]])
+        ).find(Boolean) ?? ''
+      );
+    }
+  };
+
+  const sharedError =
+    writeTargetErrorText('logs', errors.logsIndex, false) ??
+    writeTargetErrorText('metrics', errors.metricsIndex, false) ??
+    writeTargetErrorText('traces', errors.tracesIndex, false) ??
+    requiredError;
+
+  return (
+    <>
+      <EuiTitle size="xxs">
+        <h4>
+          {i18n.translate('xpack.streams.destinations.fixedIndexNameTitle', {
+            defaultMessage: 'Fixed index name',
+          })}
+        </h4>
+      </EuiTitle>
+      <EuiSpacer size="s" />
+      <EuiButtonGroup
+        legend={i18n.translate('xpack.streams.destinations.indexNamingLegend', {
+          defaultMessage: 'Fixed index naming',
+        })}
+        buttonSize="compressed"
+        isFullWidth
+        isDisabled={disabled}
+        options={namingOptions}
+        idSelected={staticNaming}
+        onChange={onNamingChange}
+        data-test-subj="streamsCreateDestinationIndexNaming"
+      />
+      <EuiSpacer size="s" />
+      {staticNaming === 'shared' ? (
+        <EuiFormRow
+          fullWidth
+          helpText={i18n.translate('xpack.streams.destinations.allSignalsIndexHelpDescription', {
+            defaultMessage:
+              'The same name is applied to logs, metrics, and traces as type-dataset-namespace.',
+          })}
+          isInvalid={Boolean(sharedError)}
+          error={sharedError}
+        >
+          <EuiFieldText
+            fullWidth
+            value={getStaticIndexRemainder('logs', elasticsearch.logsIndex)}
+            disabled={disabled}
+            isInvalid={Boolean(sharedError)}
+            prepend={<EuiFormPrepend label={ALL_PREPEND} />}
+            onChange={(event) => setSharedIndex(event.target.value)}
+            onBlur={() => {
+              for (const signal of DESTINATION_SIGNALS) {
+                indexFields[signal].onBlur();
+              }
+            }}
+            placeholder={INDEX_PLACEHOLDER}
+            aria-label={i18n.translate('xpack.streams.destinations.sharedIndexAriaLabel', {
+              defaultMessage: 'Index name for all signals',
+            })}
+            data-test-subj="streamsCreateDestinationIndex"
+          />
+        </EuiFormRow>
+      ) : (
+        <>
+          {DESTINATION_SIGNALS.map((signal, position) => (
+            <React.Fragment key={signal}>
+              {position > 0 && <EuiSpacer size="s" />}
+              <SignalIndexField
+                signal={signal}
+                value={elasticsearch[SIGNAL_INDEX_FIELDS[signal]]}
+                error={errors[SIGNAL_INDEX_FIELDS[signal]]}
+                allowWildcard={false}
+                disabled={disabled}
+                onChange={indexFields[signal].onChange}
+                onBlur={indexFields[signal].onBlur}
+              />
+            </React.Fragment>
+          ))}
+          <EuiText size="xs" color={requiredError ? 'danger' : 'subdued'}>
+            <p>
+              {requiredError ??
+                i18n.translate('xpack.streams.destinations.perSignalIndexHelpDescription', {
+                  defaultMessage: 'Leave a signal blank to not send it to this destination.',
+                })}
+            </p>
+          </EuiText>
+        </>
+      )}
+    </>
   );
-  const otherSignalsError =
-    otherInvalidSignals.length > 0
-      ? i18n.translate('xpack.streams.destinations.otherSignalWriteTargetErrorMessage', {
-          defaultMessage: 'Fix the {signals} {count, plural, one {value} other {values}}.',
-          values: {
-            signals: otherInvalidSignals
-              .map((signal) => DESTINATION_SIGNAL_LABELS[signal])
-              .join(', '),
-            count: otherInvalidSignals.length,
-          },
-        })
-      : undefined;
-  const errorMessage = fieldError ?? requiredError ?? otherSignalsError;
-  const isAllDisabled = haveStaticIndexRemaindersDiverged({
-    logsIndex,
-    metricsIndex,
-    tracesIndex,
+};
+
+/** Fields for a local Elasticsearch destination (`elasticsearch.schema.yaml`). */
+export const LocalElasticsearchFields = (props: LocalElasticsearchFieldsProps) => {
+  const { disabled } = props;
+  const { control, setValue, resetField } = useFormContext<DestinationCreationFormData>();
+  const elasticsearch = useWatch({ control, name: 'elasticsearch' });
+  // Registered here rather than in the inputs, so `resetField` also clears hidden ones.
+  const indexFields: IndexFields = {
+    logs: useController({ control, name: getIndexFieldPath('logs') }).field,
+    metrics: useController({ control, name: getIndexFieldPath('metrics') }).field,
+    traces: useController({ control, name: getIndexFieldPath('traces') }).field,
+  };
+  const { field: customSignalsField } = useController({
+    control,
+    name: 'elasticsearch.customSignals',
   });
+  const autoRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingAuto' });
+  const staticRadioId = useGeneratedHtmlId({ prefix: 'streamsCreateDestinationRoutingStatic' });
 
-  const scopeOptions: EuiButtonGroupOptionProps[] = useMemo(
-    () => [
-      {
-        id: ALL_SCOPE,
-        label: i18n.translate('xpack.streams.destinations.allSignalsButtonLabel', {
-          defaultMessage: 'All',
-        }),
-        isDisabled: isAllDisabled,
-        title: '',
-        toolTipContent: isAllDisabled ? ALL_DISABLED_TOOLTIP : undefined,
-        'data-test-subj': 'streamsCreateDestinationIndexScope-all',
-      },
-      ...DESTINATION_SIGNALS.map((signal) => ({
-        id: signal,
-        label: DESTINATION_SIGNAL_LABELS[signal],
-        'data-test-subj': `streamsCreateDestinationIndexScope-${signal}`,
-      })),
-    ],
-    [isAllDisabled]
-  );
+  const resetWriteTargets = () => {
+    resetField('elasticsearch.customSignals');
+    for (const signal of DESTINATION_SIGNALS) {
+      resetField(getIndexFieldPath(signal));
+    }
+  };
 
-  const onScopeChange = (nextScope: string) => {
-    if (nextScope === ALL_SCOPE && isAllDisabled) {
+  const onModeChange = (auto: boolean) => {
+    if (auto === elasticsearch.auto) {
       return;
     }
-    setIndexScope(nextScope as IndexScope);
+    resetWriteTargets();
+    resetField('elasticsearch.useCustomWritePatterns');
+    resetField('elasticsearch.staticNaming');
+    setValue('elasticsearch.auto', auto, { shouldDirty: true });
   };
 
-  const onIndexBlur = () => {
-    onBlur();
+  const writeTargetFieldsProps: WriteTargetFieldsProps = {
+    ...props,
+    elasticsearch,
+    indexFields,
+    customSignalsField,
+    resetWriteTargets,
   };
-
-  const onRemainderChange = (nextRemainder: string) => {
-    if (indexScope === ALL_SCOPE) {
-      onIndexesChange(composeStaticIndexesForAll(nextRemainder));
-      return;
-    }
-    onIndexesChange({
-      [SIGNAL_INDEX_FIELDS[indexScope]]: composeStaticIndex(indexScope, nextRemainder),
-    });
-  };
-
-  const clearWriteTargets = () => {
-    setIndexScope(ALL_SCOPE);
-    onIndexesChange({ logsIndex: '', metricsIndex: '', tracesIndex: '' });
-  };
-
-  const onRoutingChange = (nextAuto: boolean) => {
-    onAutoChange(nextAuto);
-    if (nextAuto) {
-      setShowWriteTargets(false);
-      clearWriteTargets();
-    }
-  };
-
-  const onShowWriteTargetsChange = (checked: boolean) => {
-    setShowWriteTargets(checked);
-    if (!checked) {
-      clearWriteTargets();
-    }
-  };
-
-  const showIndexFields = !auto || showWriteTargets;
-
-  const indexHelpText = auto
-    ? indexScope === ALL_SCOPE
-      ? i18n.translate('xpack.streams.destinations.autoAllWriteTargetHelpDescription', {
-          defaultMessage:
-            'Optional. Leave blank to write to logs-*-*, metrics-*-*, and traces-*-*. Use * as a wildcard.',
-        })
-      : i18n.translate('xpack.streams.destinations.autoSignalWriteTargetHelpDescription', {
-          defaultMessage:
-            'Optional. Leave blank to skip this signal. Use * as a wildcard. Must match {pattern}.',
-          values: { pattern: `${indexScope}-*-*` },
-        })
-    : indexScope === ALL_SCOPE
-    ? i18n.translate('xpack.streams.destinations.allSignalsIndexHelpDescription', {
-        defaultMessage:
-          'The same name is applied to logs, metrics, and traces as type-dataset-namespace.',
-      })
-    : i18n.translate('xpack.streams.destinations.signalIndexHelpDescription', {
-        defaultMessage: 'Optional. Leave blank to skip this signal. Must match {pattern}.',
-        values: { pattern: `${indexScope}-*-*` },
-      });
 
   return (
     <>
       <EuiTitle size="xxs">
         <h3>
-          {i18n.translate('xpack.streams.destinations.routingTitle', {
-            defaultMessage: 'Routing',
+          {i18n.translate('xpack.streams.destinations.indexModeTitle', {
+            defaultMessage: 'Index mode',
           })}
         </h3>
       </EuiTitle>
+      <EuiText size="xs" color="subdued">
+        <p>
+          {i18n.translate('xpack.streams.destinations.indexModeDescription', {
+            defaultMessage: 'Let document metadata derive an index name, or set a fixed one.',
+          })}
+        </p>
+      </EuiText>
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="l" responsive={false} alignItems="center">
         <EuiFlexItem grow={false}>
@@ -298,9 +504,9 @@ export const LocalElasticsearchFields = ({
             id={autoRadioId}
             name="streamsCreateDestinationRouting"
             label={DESTINATION_AUTO_MODE_LABEL}
-            checked={auto}
+            checked={elasticsearch.auto}
             disabled={disabled}
-            onChange={() => onRoutingChange(true)}
+            onChange={() => onModeChange(true)}
             data-test-subj="streamsCreateDestinationAuto"
           />
         </EuiFlexItem>
@@ -309,86 +515,18 @@ export const LocalElasticsearchFields = ({
             id={staticRadioId}
             name="streamsCreateDestinationRouting"
             label={DESTINATION_FIXED_INDEX_MODE_LABEL}
-            checked={!auto}
+            checked={!elasticsearch.auto}
             disabled={disabled}
-            onChange={() => onRoutingChange(false)}
+            onChange={() => onModeChange(false)}
             data-test-subj="streamsCreateDestinationFixedIndex"
           />
         </EuiFlexItem>
       </EuiFlexGroup>
-      {auto && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.streams.destinations.autoRoutingHelpDescription', {
-                defaultMessage:
-                  "Use each document's target, or derive a data stream name from its metadata.",
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="s" />
-          <EuiSwitch
-            label={i18n.translate('xpack.streams.destinations.setWriteTargetsSwitchLabel', {
-              defaultMessage: 'Set write targets',
-            })}
-            checked={showWriteTargets}
-            disabled={disabled}
-            onChange={(event) => onShowWriteTargetsChange(event.target.checked)}
-            data-test-subj="streamsCreateDestinationSetWriteTargets"
-          />
-        </>
-      )}
-      {showIndexFields && (
-        <div
-          css={css`
-            min-block-size: ${STATIC_INDEX_FIELDS_MIN_HEIGHT}px;
-          `}
-        >
-          <EuiSpacer size="s" />
-          <EuiButtonGroup
-            legend={i18n.translate('xpack.streams.destinations.indexScopeLegend', {
-              defaultMessage: 'Index signals',
-            })}
-            buttonSize="compressed"
-            isFullWidth
-            isDisabled={disabled}
-            options={scopeOptions}
-            idSelected={indexScope}
-            onChange={onScopeChange}
-            data-test-subj="streamsCreateDestinationIndexScope"
-          />
-          <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            label={
-              auto
-                ? i18n.translate('xpack.streams.destinations.writeTargetLabel', {
-                    defaultMessage: 'Write target',
-                  })
-                : i18n.translate('xpack.streams.destinations.staticIndexLabel', {
-                    defaultMessage: 'Index',
-                  })
-            }
-            helpText={indexHelpText}
-            isInvalid={Boolean(errorMessage)}
-            error={errorMessage}
-          >
-            <EuiFieldText
-              fullWidth
-              value={remainder}
-              disabled={disabled}
-              isInvalid={Boolean(errorMessage)}
-              prepend={
-                <EuiFormPrepend label={indexScope === ALL_SCOPE ? ALL_PREPEND : `${indexScope}-`} />
-              }
-              onChange={(event) => onRemainderChange(event.target.value)}
-              onBlur={onIndexBlur}
-              placeholder={INDEX_PLACEHOLDER}
-              data-test-subj={INDEX_FIELD_TEST_SUBJ[indexScope]}
-            />
-          </EuiFormRow>
-        </div>
+      <EuiHorizontalRule margin="s" />
+      {elasticsearch.auto ? (
+        <AutoFields {...writeTargetFieldsProps} />
+      ) : (
+        <StaticFields {...writeTargetFieldsProps} />
       )}
     </>
   );

@@ -2,6 +2,27 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Automation instructions
+
+After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
+Alert and Slack triggers accept optional **Additional Instructions**. Scheduled triggers require
+**Instructions**, which define the task for each tick. Clearing optional instructions restores the
+default investigation behavior. The form and automation API enforce the same limit.
+
+Instructions are operator guidance for the current round, below agent and system rules. Alert
+snapshots and, in the new Slack workflow format, the triggering Slack message are untrusted
+evidence. Each automation that joins an open investigation supplies its own round's guidance;
+previous instructions remain in conversation history rather than being concatenated into a new
+configuration. The saved conversation input includes the effective instructions, so later edits
+to the automation do not change the record of earlier rounds.
+
+Automation configuration still stores `execution.promptTemplate`. New workflows send alert and
+Slack guidance separately as `instructions` to `nightshift.triggerInvestigation`; schedules keep
+using `message` as the task. Existing alert workflows that send guidance as `message` are supported.
+Legacy combined Slack messages retain their existing interpretation. New formatting takes effect
+on create or the next save; no bulk workflow regeneration or historical rewrite is performed.
+The stored `reasoningMode` remains compatible but is not exposed as an Investigate / Ask control.
+
 ## Scheduled automations
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and
@@ -29,11 +50,15 @@ creates no investigation and appears as skipped in automation history: with reas
 when the automation limit denies it, and with reason `investigation_limit` when the global quota
 denies it. The automation limit is checked first, so `daily_limit` wins when both are reached. When
 the global quota denies an attempt, the client gives back the automation slot. The client also gives
-it back when the attempt loses the subject claim to a concurrent start and continues that
-investigation instead; the global quota has no refund, so that case still counts against it. An
+back both slots when the attempt loses the subject claim to a concurrent start and continues that
+investigation instead. The global quota check fails closed:
+a missing callback, a timeout after ten seconds, or an error denies the attempt. An
 attempt that fails after claiming its subjects keeps its slot: the claim stays live for two minutes,
 and an attempt that joins it in that window continues the claimed investigation and gives back only
-its own slot, so the investigation counts once. A failure while the investigation runs does not give
+its own slot, so the investigation counts once. An attempt whose claim fails part way also keeps
+both slots. The claims it wrote are removed, but a concurrent start can join them before the
+removal, and a failed removal leaves them live. Keeping the slots means the count never falls below
+the number of investigations; a retry after such a failure is charged again. A failure while the investigation runs does not give
 back either slot. The limit is at least 1, and an omitted limit allows unlimited new investigations.
 To stop an automation from opening investigations, disable it. Changing the limit takes effect on
 the next attempt.
@@ -75,9 +100,9 @@ Starting an investigation also needs Agent Builder `all` (the start route's own 
 
 `read_investigations` lets a user with Nightshift `read` get, list, and count investigations through the shared query API; every write still needs `manage_investigations`. UI capabilities are scoped to the feature that owns them, so capabilities like `agenticInvestigations.showInvestigations` and `proposals.showProposals` still need the `agenticInvestigations` and `proposals` features. Opening the investigation conversation in Agent Builder still needs the Agent Builder feature privileges.
 
-## Service accounts (in progress)
+## Service accounts
 
-Nightshift is moving to running investigations and automations as service accounts rather than as the user who starts them. The plan and the PRs are tracked in elastic/obs-execution#570. Investigations do not depend on any of this yet.
+Nightshift runs investigations only as the agent service account, `nightshift_agent`. There is no fallback that runs them as the user who starts them, so a space can use Nightshift only after an admin sets it up. Until then, every Nightshift page shows the onboarding with "Enable Elastic Nightshift" as its first step: users with `manage_security` get the button, others are told to ask an administrator, and the step says so when service accounts are turned off. The plan and the remaining PRs are tracked in elastic/obs-execution#570.
 
 ### Accounts and roles
 
@@ -113,7 +138,7 @@ xpack.encryptedSavedObjects.encryptionKey: '<32+ characters>'
 
 ```
 POST /internal/nightshift/investigations/service_account/_enable   # needs manage_security
-GET  /internal/nightshift/investigations/service_account           # status, agentBuilder:read
+GET  /internal/nightshift/investigations/service_account           # status, read_nightshift
 POST /internal/nightshift/investigations/service_account/_disable  # teardown
 ```
 
@@ -124,23 +149,40 @@ Every space does that: the account directory is the one source of which account 
 `_enable`:
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
-2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-3. Turns bound workflows an admin disabled back on.
-4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
+2. Installs the investigation agent if the space does not have it yet, and binds it to the agent account, so every run of it - a workflow's, a hook's or a user's chat - executes as that account. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
+3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+4. Turns bound workflows an admin disabled back on.
+5. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation agent and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agent goes first, so a space never reads as removed while its agent still runs as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
+
+### What setup changes
+
+- Starting an investigation, automatic significant-event investigations, and the investigation agent's Agent Builder availability require `xpack.security.serviceAccounts.enabled` and the space's bound entry point.
+- The investigations client starts the entry point with `triggeredBy: nightshift-investigations` (`NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE`). The entry point fails any other run, so the generic workflow run API cannot start an investigation as the agent account.
+- The entry point calls the global `system-nightshift-investigation` with `run-as-mode: inherit`. A change to the investigation YAML updates that one global copy on the next boot.
+- `_ensure` rejects any run that does not execute as the agent account. Anyone allowed to run workflows can start the global investigation directly, but such a run executes as them and fails before it touches an investigation.
+- The Slack thread workflow is installed per space, bound to the agent account (`system-nightshift-slack-thread-bound-<space>`), and no longer globally. It only runs when a `slack2.message` event starts it.
+
+### Automations
+
+An automation's workflow runs as the space's automations account (`settings.run_as`), the one kept on its entry point when the space was set up, so it keeps working whoever created it. Its `nightshift.triggerInvestigation` step starts the investigation through the space's entry point, which runs it as the agent account.
+
+The workflows plugin requires `manage_security` for every create, update and delete of a workflow bound to a service account. Creating, changing (including enabling or disabling) and deleting automations therefore requires `manage_security` in addition to Nightshift manage, and the routes refuse other callers before writing anything. The Automations page shows the edit actions disabled for them, with a callout that says why. Creating or changing an automation also requires the space to be set up. `_enable` binds automations that already exist. When service accounts are off, automations keep running as their authors.
 
 ### Agent Builder hooks
 
-Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. In a set-up space, the investigation agent and the decision-tree reinforcement agent therefore name the space's bound hook entry points instead of the global hooks, so hooks run as the agent account:
+Agent Builder starts hook workflows with the request of the agent run, and the workflows engine runs a workflow started that way as the original caller. The investigation agent and the decision-tree reinforcement agent therefore always name the space's bound hook entry points, so hooks run as the agent account:
 
 - `system-nightshift-sandbox-materialize-workspace-bound-<space>`
 - `system-nightshift-agent-optimize-bound-<space>`
 - `system-nightshift-decision-tree-hydrate-bound-<space>`
 
-Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account. Spaces that are not set up, and spaces whose setup cannot be read, keep running the global hooks.
+Each calls its global hook with `run-as-mode: inherit`. A hook entry point only runs when Agent Builder starts it as a hook (`triggeredBy: agent-builder-hook`, which only server code sets), so nobody can run it directly with made-up round content and plant knowledge as the agent account.
+
+There is no fallback to the global hooks. Setup installs the three entry points, and a space without them cannot run Nightshift at all: availability requires the bound investigation entry point, so a run that reaches a hook is always in a set-up space.
 
 The decision-tree reinforcement agent is shared: everyone can run it, so agent optimize can run it as the agent account, and only admins can change it. Agent Builder still hides it from UI listings, and its submit tool writes decision trees as the caller.
 

@@ -116,6 +116,7 @@ export const RunLimitsSection = ({
                   exhaustionCallouts === 'groups' &&
                   isDetectionRunQuotaGroup(group) &&
                   isRunQuotaReached({
+                    group,
                     enabled: response.enabled,
                     limit: response.limits[group],
                     count: response.counts[group],
@@ -126,7 +127,7 @@ export const RunLimitsSection = ({
                     {showGroupCallout ? (
                       <>
                         <EuiSpacer size="m" />
-                        <RunQuotaReachedCallout group={group} />
+                        <RunQuotaReachedCallout group={group} limit={response.limits[group]} />
                         <EuiSpacer size="m" />
                       </>
                     ) : null}

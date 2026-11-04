@@ -92,8 +92,29 @@ interface ResolveEpisodeIdResult {
   readonly isNew: boolean;
 }
 
+/** A genuine change of an episode's status, recorded while computing the next state. */
+export interface AlertStatusTransition {
+  readonly groupHash: string;
+  readonly episodeId: string;
+  /** The series' last episode status, or `null` when it has none yet. */
+  readonly previousStatus: AlertEpisodeStatus | null;
+  readonly status: AlertEpisodeStatus;
+}
+
+interface NextEpisodeResult {
+  readonly alertEvent: AlertEventDocument;
+  readonly isNewEpisode: boolean;
+  readonly transition: AlertStatusTransition | null;
+}
+
 export interface DirectorRunStats {
   readonly newEpisodeIds: readonly string[];
+  /**
+   * One entry per episode whose status changed in this batch. Sibling rows of
+   * one group share an episode and collapse to a single entry. User-locked
+   * episodes are left out, since the strategy does not own their status.
+   */
+  readonly statusTransitions: readonly AlertStatusTransition[];
 }
 
 export interface DirectorRunResult {
@@ -125,7 +146,7 @@ export class DirectorService {
     if (alertEvents.length === 0) {
       return {
         alertEvents: [],
-        stats: { newEpisodeIds: [] },
+        stats: { newEpisodeIds: [], statusTransitions: [] },
         previousAlertStateByGroupHash: new Map(),
       };
     }
@@ -158,9 +179,10 @@ export class DirectorService {
     executionContext.throwIfAborted();
 
     const newEpisodeIds: string[] = [];
+    const statusTransitions = new Map<string, AlertStatusTransition>();
     const evaluatedAt = new Date().toISOString();
     const processed = alertEvents.map((currentAlertEvent) => {
-      const { alertEvent, isNewEpisode } = this.getAlertEventWithNextEpisode({
+      const { alertEvent, isNewEpisode, transition } = this.getAlertEventWithNextEpisode({
         rule,
         currentAlertEvent,
         previousAlertEvent: previousAlertStateByGroupHash.get(currentAlertEvent.group_hash),
@@ -173,10 +195,18 @@ export class DirectorService {
         newEpisodeIds.push(alertEvent.alert.id);
       }
 
+      if (transition && !statusTransitions.has(transition.episodeId)) {
+        statusTransitions.set(transition.episodeId, transition);
+      }
+
       return alertEvent;
     });
 
-    return { alertEvents: processed, stats: { newEpisodeIds }, previousAlertStateByGroupHash };
+    return {
+      alertEvents: processed,
+      stats: { newEpisodeIds, statusTransitions: [...statusTransitions.values()] },
+      previousAlertStateByGroupHash,
+    };
   }
 
   private async fetchLatestAlertStateByGroupHash(
@@ -204,7 +234,7 @@ export class DirectorService {
     strategy,
     evaluatedAt,
     logger,
-  }: CalculateNextStateParams): { alertEvent: AlertEventDocument; isNewEpisode: boolean } {
+  }: CalculateNextStateParams): NextEpisodeResult {
     // User lock: once a user hits `activate` on a group, the episode
     // stays `active` regardless of what the strategy computes, until
     // the user hits `deactivate` (which flips the lifecycle marker
@@ -224,6 +254,7 @@ export class DirectorService {
           },
         },
         isNewEpisode: false,
+        transition: null,
       };
     }
 
@@ -246,7 +277,17 @@ export class DirectorService {
       scheduledTimestamp: currentAlertEvent.scheduled_timestamp ?? evaluatedAt,
     });
 
-    if (currentStatus !== result.status) {
+    const transition: AlertStatusTransition | null =
+      currentStatus !== result.status
+        ? {
+            groupHash: currentAlertEvent.group_hash,
+            episodeId,
+            previousStatus: currentStatus ?? null,
+            status: result.status,
+          }
+        : null;
+
+    if (transition) {
       logger.debug({
         message: 'Episode status transition',
         labels: {
@@ -267,6 +308,7 @@ export class DirectorService {
         },
       },
       isNewEpisode: isNew,
+      transition,
     };
   }
 
