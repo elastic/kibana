@@ -178,5 +178,36 @@ apiTest.describe(
       expect(body.locations).toStrictEqual([{ label: privateLocation.id, count: 4 }]);
       expect(body.schedules).toStrictEqual([{ label: '3m', count: 4 }]);
     });
+
+    apiTest('keeps equal-number seconds and minutes schedules in separate buckets', async ({
+      apiClient,
+    }) => {
+      await addMonitor(apiClient, editorHeaders, {
+        name: 'Every 10 seconds',
+        type: 'http',
+        urls: 'https://seconds.elastic.co',
+        schedule: { number: '10', unit: 's' },
+        locations: [privateLocation],
+      });
+      await addMonitor(apiClient, editorHeaders, {
+        name: 'Every 10 minutes',
+        type: 'http',
+        urls: 'https://minutes.elastic.co',
+        schedule: { number: '10', unit: 'm' },
+        locations: [privateLocation],
+      });
+
+      const res = await apiClient.get('internal/synthetics/monitor/filters', {
+        headers: editorHeaders,
+        responseType: 'json',
+      });
+      expect(res).toHaveStatusCode(200);
+      const body = res.body as { schedules: LabelCount[] };
+      expect([...body.schedules].sort(byLabel)).toStrictEqual([
+        { label: '10m', count: 1 },
+        { label: '10s', count: 1 },
+        { label: '3m', count: 4 },
+      ]);
+    });
   }
 );
