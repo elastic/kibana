@@ -143,6 +143,8 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       agentIds={agentIds}
                       isIcon={false}
                       size="m"
+                      scheduleId={scheduleId}
+                      executionCount={executionCount}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
@@ -226,6 +228,8 @@ export const PackResultsHeader = React.memo<PackResultsHeadersProps>(
                       agentIds={agentIds}
                       isIcon={true}
                       iconProps={iconProps}
+                      scheduleId={scheduleId}
+                      executionCount={executionCount}
                     />
                   </EuiFlexItem>
                   <EuiFlexItem>
