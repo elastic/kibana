@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { isEqual, omit } from 'lodash';
 import type { Unit } from './unit_repository';
 import {
   PROCESSING_SLOT_KIND,
+  getSlotProcessorIds,
   isProcessingSlotEditable,
   type ProcessingNodeRef,
 } from './unit_graph';
@@ -53,11 +55,6 @@ export type ProcessingDraftResult =
 
 const findPipeline = (unit: Unit, pipelineId: string): UnitPipeline | undefined =>
   unit.unit.pipelines.find((pipeline) => pipeline.id === pipelineId);
-
-const slotProcessorIds = (pipeline: UnitPipeline, ref: ProcessingNodeRef): string[] =>
-  ref.kind === PROCESSING_SLOT_KIND.pipeline
-    ? readEntryIds(pipeline.config, PIPELINE_ENTRY.processors)
-    : readRoutes(pipeline.config)[ref.routeIndex]?.processors ?? [];
 
 /** The route at a slot's `routeIndex`, with the selector of the `routes` entry it sits in. */
 const findRoute = (
@@ -106,7 +103,7 @@ export const getProcessingNodeProcessors = (
     return [];
   }
   const byId = new Map((unit.unit.processors ?? []).map((processor) => [processor.id, processor]));
-  return slotProcessorIds(pipeline, ref).flatMap((id) => {
+  return getSlotProcessorIds(unit, ref).flatMap((id) => {
     const processor = byId.get(id);
     return processor ? [processor] : [];
   });
@@ -118,7 +115,7 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
   if (!pipeline) {
     return new Set();
   }
-  const own = new Set(slotProcessorIds(pipeline, ref));
+  const own = new Set(getSlotProcessorIds(unit, ref));
   const isOwnSlot = (pipelineId: string, routeIndex?: number) =>
     pipelineId === ref.pipelineId &&
     (ref.kind === PROCESSING_SLOT_KIND.pipeline
@@ -131,6 +128,30 @@ export const getSharedProcessorIds = (unit: Unit, ref: ProcessingNodeRef): Set<s
     ),
   ]);
   return new Set(elsewhere.filter((id) => own.has(id)));
+};
+
+/**
+ * Whether a slot of the staged graph is the same slot in the saved unit. Stats describe the saved
+ * unit by position, so a route that unsaved edits moved to another position would show the stats
+ * of the route that is saved there. Routes have no ids, so a route is what it matches and where it
+ * sends records. Its processors are left out, because those are read from the saved unit.
+ * A pipeline slot has no position, so it is always the same slot.
+ */
+export const isSlotSaved = (saved: Unit, staged: Unit, ref: ProcessingNodeRef): boolean => {
+  if (ref.kind === PROCESSING_SLOT_KIND.pipeline) {
+    return true;
+  }
+  const routeIn = (unit: Unit) => {
+    const pipeline = findPipeline(unit, ref.pipelineId);
+    return pipeline ? findRoute(pipeline, ref.routeIndex)?.route : undefined;
+  };
+  const savedRoute = routeIn(saved);
+  const stagedRoute = routeIn(staged);
+  return (
+    savedRoute !== undefined &&
+    stagedRoute !== undefined &&
+    isEqual(omit(savedRoute, 'processors'), omit(stagedRoute, 'processors'))
+  );
 };
 
 const updatePipeline = (

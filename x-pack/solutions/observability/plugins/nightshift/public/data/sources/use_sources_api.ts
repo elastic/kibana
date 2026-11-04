@@ -132,7 +132,7 @@ const getSourceCreatedToastTitle = (title: string) =>
     values: { title },
   });
 
-const ONBOARDING_PAUSED_TOAST_TEXT = i18n.translate(
+export const ONBOARDING_PAUSED_TOAST_TEXT = i18n.translate(
   'xpack.nightshift.sources.onboardingPausedToastText',
   {
     defaultMessage:

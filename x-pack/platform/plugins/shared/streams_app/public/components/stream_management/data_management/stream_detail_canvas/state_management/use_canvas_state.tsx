@@ -66,6 +66,11 @@ export const useCanvasUnitDefinition = () => {
   return useCanvasStateSelector((state) => state.context.nextUnit);
 };
 
+/** The unit as it was last loaded or saved, without unsaved edits. Stats describe this one. */
+export const useCanvasPersistedUnit = () => {
+  return useCanvasStateSelector((state) => state.context.unit);
+};
+
 export const useCanvasHasUnsavedChanges = () => {
   return useCanvasStateSelector((state) => state.context.unit !== state.context.nextUnit);
 };

@@ -260,6 +260,7 @@ describe('matchDatasetsWithModel', () => {
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
     ).resolves.toEqual({
+      status: 'matched',
       matches: [fortigate, okta],
       confidence: 0.7,
       scored: [
@@ -289,6 +290,7 @@ describe('matchDatasetsWithModel', () => {
         logger,
       })
     ).resolves.toEqual({
+      status: 'matched',
       matches: [ciscoAsa, panos],
       confidence: 0.6,
       scored: [
@@ -316,6 +318,7 @@ describe('matchDatasetsWithModel', () => {
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { text: 'Okta session hijack' }, logger })
     ).resolves.toEqual({
+      status: 'matched',
       matches: [okta],
       confidence: 0.8,
       scored: [{ dataset: 'okta.system', confidence: 0.8 }],
@@ -323,7 +326,7 @@ describe('matchDatasetsWithModel', () => {
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('3 not in the option list'));
   });
 
-  it('returns undefined when only hallucinated names come back', async () => {
+  it('returns empty when only hallucinated names come back', async () => {
     const logger = loggerMock.create();
     const invoke = jest
       .fn()
@@ -332,23 +335,23 @@ describe('matchDatasetsWithModel', () => {
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { text: 'x' }, logger })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'empty' });
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('1 not in the option list'));
   });
 
-  it('returns undefined when the model picks nothing', async () => {
+  it('returns empty when the model picks nothing', async () => {
     const logger = loggerMock.create();
     const invoke = jest.fn().mockResolvedValue({ datasets: [] });
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { text: 'unrelated' }, logger })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'empty' });
     expect(logger.debug).toHaveBeenCalledTimes(1);
   });
 
-  it('returns undefined when every dataset is below the confidence threshold and logs at debug', async () => {
+  it('returns empty when every dataset is below the confidence threshold and logs at debug', async () => {
     const logger = loggerMock.create();
     const invoke = jest.fn().mockResolvedValue({
       datasets: [
@@ -360,7 +363,7 @@ describe('matchDatasetsWithModel', () => {
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'empty' });
     expect(logger.debug).toHaveBeenCalledTimes(1);
     expect(logger.debug).toHaveBeenCalledWith(
       expect.stringContaining(`2 below confidence threshold ${HUNT_DATASET_MATCH_MIN_CONFIDENCE}`)
@@ -376,6 +379,7 @@ describe('matchDatasetsWithModel', () => {
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
     ).resolves.toEqual({
+      status: 'matched',
       matches: [okta],
       confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE,
       scored: [{ dataset: 'okta.system', confidence: HUNT_DATASET_MATCH_MIN_CONFIDENCE }],
@@ -394,31 +398,64 @@ describe('matchDatasetsWithModel', () => {
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' } })
     ).resolves.toEqual({
+      status: 'matched',
       matches: [okta],
       confidence: 0.9,
       scored: [{ dataset: 'okta.system', confidence: 0.9 }],
     });
   });
 
-  it('returns undefined and warns when the model call throws', async () => {
+  it('returns failed with the error message and warns when the model call throws', async () => {
     const logger = loggerMock.create();
     const invoke = jest.fn().mockRejectedValue(new Error('connector down'));
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'failed', message: 'connector down' });
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('connector down'));
   });
 
-  it('returns undefined and warns when structured output parsing fails', async () => {
+  it('truncates the failure message but logs it in full', async () => {
+    const logger = loggerMock.create();
+    const longMessage = 'x'.repeat(500);
+    const invoke = jest.fn().mockRejectedValue(new Error(longMessage));
+    const { model } = buildModel(invoke);
+
+    await expect(
+      matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
+    ).resolves.toEqual({ status: 'failed', message: 'x'.repeat(200) });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(longMessage));
+  });
+
+  it.each([
+    ['no output', undefined],
+    ['a null output', null],
+    ['output without a datasets array', {}],
+  ])('returns failed and warns when the model returns %s', async (_name, response) => {
+    const logger = loggerMock.create();
+    const invoke = jest.fn().mockResolvedValue(response);
+    const { model } = buildModel(invoke);
+
+    await expect(
+      matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
+    ).resolves.toEqual({ status: 'failed', message: expect.any(String) });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('no usable structured output')
+    );
+  });
+
+  it('returns failed and warns when structured output parsing fails', async () => {
     const logger = loggerMock.create();
     const invoke = jest.fn().mockRejectedValue(new Error('Failed to parse structured output'));
     const { model } = buildModel(invoke);
 
     await expect(
       matchDatasetsWithModel({ model, datasets, report: { vendor: 'Okta' }, logger })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({
+      status: 'failed',
+      message: 'Failed to parse structured output',
+    });
     expect(logger.warn).toHaveBeenCalledWith(
       expect.stringContaining('Failed to parse structured output')
     );
@@ -485,7 +522,7 @@ describe('matchDatasetsWithModel', () => {
 
     await expect(
       matchDatasetsWithModel({ model, datasets: [], report: { vendor: 'Okta' } })
-    ).resolves.toBeUndefined();
+    ).resolves.toEqual({ status: 'empty' });
     expect(withStructuredOutput).not.toHaveBeenCalled();
     expect(invoke).not.toHaveBeenCalled();
   });

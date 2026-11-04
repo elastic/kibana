@@ -249,7 +249,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
         },
       });
 
-      expect(value).toContain('Confirmed by: tier2');
+      expect(value).toContain('Confirmed by: Behavior Hunt');
       expect(value).toContain('hit — executed, hit (3 row(s) in required indices)');
       expect(value).toContain('clean — executed, no rows in required indices (clean)');
       expect(value).toContain(
@@ -295,7 +295,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       expect(value).toContain('Per index (truncated by the producer: not the complete set):');
       expect(value).toContain('Resolved IOCs (truncated by the producer: not the complete set):');
       expect(value).toContain(
-        'Tier 2: behaviors_proposed (truncated by the producer: not the complete set)'
+        'Behavior Hunt: behaviors_proposed (truncated by the producer: not the complete set)'
       );
     });
   });
@@ -398,7 +398,7 @@ describe('createSignificantSecurityEventAttachmentType', () => {
       // Including the sections that come last, which a single cut would take first.
       for (const section of [
         'Hunt result:',
-        'Confirmed by: tier1, tier2',
+        'Confirmed by: IOC Hunt, Behavior Hunt',
         'Security knowledge indicators',
         'Entities:',
         'Alerts:',
