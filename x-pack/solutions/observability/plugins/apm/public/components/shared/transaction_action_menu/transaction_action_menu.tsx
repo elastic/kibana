@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiButton } from '@elastic/eui';
+import { EuiButton, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
   ActionMenu,
@@ -134,6 +134,7 @@ function ActionMenuSections({
 }) {
   const { uiActions } = useApmPluginContext();
   const sections = useTransactionActionMenuSections(transaction, profilingLocators);
+  const titleIdPrefix = useGeneratedHtmlId({ prefix: 'transactionActionMenuSection' });
 
   const externalMenuItems = useAsync(() => {
     return transaction
@@ -170,9 +171,13 @@ function ActionMenuSections({
           <div key={idx}>
             {section.map((item) => (
               <Section key={item.key}>
-                {item.title && <SectionTitle>{item.title}</SectionTitle>}
+                {item.title && (
+                  <SectionTitle id={`${titleIdPrefix}-${item.key}`}>{item.title}</SectionTitle>
+                )}
                 {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
-                <SectionLinks>
+                <SectionLinks
+                  aria-labelledby={item.title ? `${titleIdPrefix}-${item.key}` : undefined}
+                >
                   {item.actions.map((action) => (
                     <SectionLink
                       key={action.key}

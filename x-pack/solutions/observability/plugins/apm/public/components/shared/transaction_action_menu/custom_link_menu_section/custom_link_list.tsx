@@ -15,12 +15,17 @@ import { getEncodedCustomLinkUrl } from '../../../../../common/custom_link';
 export function CustomLinkList({
   customLinks,
   transaction,
+  'aria-labelledby': ariaLabelledBy,
 }: {
   customLinks: CustomLink[];
   transaction?: Transaction;
+  'aria-labelledby'?: string;
 }) {
   return (
-    <SectionLinks style={{ maxHeight: unit * 10, overflowY: 'auto' }}>
+    <SectionLinks
+      aria-labelledby={ariaLabelledBy}
+      style={{ maxHeight: unit * 10, overflowY: 'auto' }}
+    >
       {customLinks.map((link) => {
         const href = getEncodedCustomLinkUrl(link.url, transaction);
         return <SectionLink key={link.id} label={link.label} href={href} target="_blank" />;

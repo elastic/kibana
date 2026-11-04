@@ -238,4 +238,14 @@ describe('NodeContextMenu', () => {
       })
     );
   });
+
+  it('labels the links list with the menu title instead of rendering a heading', () => {
+    mockPreferredSchema('semconv');
+    renderMenu(HOST_NODE, 'host');
+
+    expect(screen.queryByRole('heading')).not.toBeInTheDocument();
+    expect(screen.getByRole('list', { name: 'Host details' })).toContainElement(
+      screen.getByTestId('viewLogsContextMenuItem')
+    );
+  });
 });
