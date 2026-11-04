@@ -21,7 +21,7 @@ type AssignableTo<T extends U, U> = T;
 
 // The agent attributes the library uses, so a misspelled key or value fails to compile. Add a key
 // here when a step first uses it. The SDK's own `agents` is `Record<string, any>`.
-type AgentAttributes = {
+interface AgentAttributes {
   readonly provider?: 'gcp' | 'k8s';
   readonly image?: string;
   readonly imageProject?: string;
@@ -34,7 +34,7 @@ type AgentAttributes = {
   readonly diskSizeGb?: number;
   readonly enableNestedVirtualization?: boolean;
   readonly buildDirectory?: string;
-};
+}
 
 export type AgentConfig = AssignableTo<AgentAttributes, AgentsObject>;
 

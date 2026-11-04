@@ -20,9 +20,7 @@ const buildProjectImage = commandStep({
   retry: retry.agentLoss,
 });
 
-export const buildProjectSteps = (): readonly Step[] => [
-  { ...buildProjectImage, soft_fail: true },
-];
+export const buildProjectSteps = (): readonly Step[] => [{ ...buildProjectImage, soft_fail: true }];
 
 export const deployProjectSteps = (): readonly Step[] => [
   buildProjectImage,
