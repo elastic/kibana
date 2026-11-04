@@ -370,7 +370,12 @@ const IndicatorList: React.FC<{
               ? buildMitreTechniqueUrl(indicator.technique_id)
               : undefined;
             const linkProps = mitreUrl
-              ? { href: mitreUrl, target: '_blank', rel: 'noopener noreferrer', iconType: 'popout' }
+              ? {
+                  href: mitreUrl,
+                  target: '_blank',
+                  rel: 'noopener noreferrer',
+                  iconType: 'external',
+                }
               : {};
             const showId =
               indicator.technique_id && !indicator.value.includes(indicator.technique_id);
@@ -501,7 +506,7 @@ const EvidenceColumn: React.FC<{
           <EuiButtonEmpty
             size="xs"
             flush="left"
-            iconType={isExpanded ? 'arrowUp' : 'arrowDown'}
+            iconType={isExpanded ? 'chevronSingleUp' : 'chevronSingleDown'}
             onClick={() => setIsExpanded((expanded) => !expanded)}
             data-test-subj="alertzeroSignificantSecurityEventEvidenceOverflow"
           >
