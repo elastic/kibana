@@ -21,14 +21,22 @@ import {
 const LOCATION = { id: 'location-id', label: 'Location label' };
 const MINUTE = 60 * 1000;
 const FROM = new Date('2026-01-01T00:00:00.000Z').getTime();
+const toMs = (minutes: number) => FROM + minutes * MINUTE;
 
 describe('parseSyntheticsOverviewOpts', () => {
   const required = { privateLocationId: 'location-id', privateLocationLabel: 'Location label' };
 
-  it('requires the private location id and label', () => {
-    expect(() => parseSyntheticsOverviewOpts(undefined)).toThrow('privateLocationId');
+  it('leaves the private location out when the options do not name one', () => {
+    expect(parseSyntheticsOverviewOpts(undefined).privateLocation).toBeUndefined();
+    expect(parseSyntheticsOverviewOpts({}).privateLocation).toBeUndefined();
+  });
+
+  it('needs both the private location id and label, or neither', () => {
     expect(() => parseSyntheticsOverviewOpts({ privateLocationId: 'id' })).toThrow(
-      'privateLocationLabel'
+      'both --scenarioOpts.privateLocationId and --scenarioOpts.privateLocationLabel'
+    );
+    expect(() => parseSyntheticsOverviewOpts({ privateLocationLabel: 'label' })).toThrow(
+      'both --scenarioOpts.privateLocationId and --scenarioOpts.privateLocationLabel'
     );
   });
 

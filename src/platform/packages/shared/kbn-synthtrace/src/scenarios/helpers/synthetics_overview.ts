@@ -150,33 +150,37 @@ export const getStreakIndexes = (outcomes: CheckOutcome[]): number[] => {
 };
 
 /**
- * Returns the timestamp of the check that a range has to generate, or undefined if none is due.
+ * Returns the timestamp of the check that a range has to generate for its `index`-th timestamp,
+ * or undefined if none is due.
  *
- * A range as long as the schedule or longer (historical runs) generates a check at every
- * timestamp it is given. A shorter one (live runs generate 1 s buckets) generates the check
- * whose schedule point, `from` plus a multiple of the schedule, falls inside it. Without this,
- * a live run would generate a check per bucket instead of one per schedule interval.
+ * The checks of a monitor are on one schedule for the whole run: `from` plus a multiple of the
+ * schedule interval. A range generates the schedule points that fall inside it, whatever its
+ * size, and does not use the timestamps it is given, which start at the start of the range.
+ * Historical runs split the run into one range per worker, and live runs generate 1 s ranges.
+ * Using those timestamps would put checks off the schedule at the start of every range, and
+ * would generate a check per range instead of one per schedule interval.
+ *
+ * A range of a given length yields at least as many timestamps as it has schedule points, so
+ * the index of a timestamp is enough to find the schedule point it stands for.
  */
 export const getCheckTimestamp = ({
-  timestamp,
+  index,
   rangeFrom,
   rangeTo,
   from,
   scheduleMinutes,
 }: {
-  timestamp: number;
+  index: number;
   rangeFrom: number;
   rangeTo: number;
   from: number;
   scheduleMinutes: number;
 }): number | undefined => {
   const intervalMs = scheduleMinutes * 60 * 1000;
-  if (rangeTo - rangeFrom >= intervalMs) {
-    return timestamp;
-  }
+  const firstPointIndex = Math.max(0, Math.ceil((rangeFrom - from) / intervalMs));
+  const timestamp = from + (firstPointIndex + index) * intervalMs;
 
-  const schedulePoint = from + Math.ceil((rangeFrom - from) / intervalMs) * intervalMs;
-  return schedulePoint < rangeTo ? schedulePoint : undefined;
+  return timestamp < rangeTo ? timestamp : undefined;
 };
 
 /**

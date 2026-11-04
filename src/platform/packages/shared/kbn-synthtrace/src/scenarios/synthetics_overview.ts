@@ -77,9 +77,9 @@ const scenario: Scenario<SyntheticsMonitorDocument> = async ({ scenarioOpts, fro
           return range
             .interval(`${scheduleMinutes}m`)
             .rate(1)
-            .generator((rangeTimestamp) => {
+            .generator((_rangeTimestamp, rangeIndex) => {
               const timestamp = getCheckTimestamp({
-                timestamp: rangeTimestamp,
+                index: rangeIndex,
                 rangeFrom: range.from.getTime(),
                 rangeTo: range.to.getTime(),
                 from,
