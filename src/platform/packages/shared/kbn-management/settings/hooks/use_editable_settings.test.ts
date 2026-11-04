@@ -184,6 +184,29 @@ describe('useEditableSettings', () => {
     });
   });
 
+  it('does not expose or save changes to keys that are no longer tracked', async () => {
+    const { result, rerender, settingsClient } = setup();
+
+    act(() => {
+      result.current.handleFieldChange(STRING_SETTING, { type: 'string', unsavedValue: 'a' });
+      result.current.handleFieldChange(RELOAD_SETTING, { type: 'boolean', unsavedValue: true });
+    });
+    rerender([STRING_SETTING]);
+
+    expect(result.current.unsavedChanges).toEqual({
+      [STRING_SETTING]: { type: 'string', unsavedValue: 'a' },
+    });
+
+    let saveResult;
+    await act(async () => {
+      saveResult = await result.current.saveAll();
+    });
+
+    expect(settingsClient.set).toHaveBeenCalledTimes(1);
+    expect(settingsClient.set).toHaveBeenCalledWith(STRING_SETTING, 'a');
+    expect(saveResult).toEqual({ requiresReload: false });
+  });
+
   it('does not call the client when there are no unsaved changes', async () => {
     const { result, settingsClient } = setup();
 

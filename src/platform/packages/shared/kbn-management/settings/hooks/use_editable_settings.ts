@@ -8,7 +8,7 @@
  */
 
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, pickBy } from 'lodash';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import type {
@@ -78,7 +78,9 @@ export const useEditableSettings = ({
   const trackedKeys = useMemo<string[]>(() => JSON.parse(settingsKeysJson), [settingsKeysJson]);
 
   const [settingsVersion, setSettingsVersion] = useState(0);
-  const [unsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
+  const [allUnsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>(
+    {}
+  );
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
@@ -96,6 +98,12 @@ export const useEditableSettings = ({
     // The client is mutable, so `settingsVersion` stands in for its tracked values changing.
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [trackedKeys, settingsClient, settingsVersion]
+  );
+
+  // A change to a key that is no longer tracked is hidden from the form, so it must not be saved.
+  const unsavedChanges = useMemo(
+    () => pickBy(allUnsavedChanges, (_change, id) => trackedKeys.includes(id)),
+    [allUnsavedChanges, trackedKeys]
   );
 
   const handleFieldChange = useCallback<OnFieldChangeFn>((id, change) => {
