@@ -11,6 +11,7 @@ import {
   AI_INDEX_API_VERSION,
   AI_INDEX_INTERNAL_API_VERSION,
   AI_INDEX_BY_ID_PATH,
+  AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_PATH,
 } from '../../../common/constants';
@@ -24,6 +25,7 @@ import type {
   PutAiIndexFeedbackAnalysisResponse,
   PutAiIndexResponse,
 } from '../../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig, GetAiIndexDreamingResponse } from '../../../common/dreaming';
 
 interface ListAiIndicesArgs {
   signal?: AbortSignal;
@@ -53,6 +55,16 @@ export const getAiIndex = (
   http.get<GetAiIndexResponse>(buildPath(AI_INDEX_BY_ID_PATH, { aiIndexId }), {
     version: AI_INDEX_API_VERSION,
     ...(signal ? { signal } : {}),
+  });
+
+/** Replaces an AI index's dreaming config. Works on managed AI indices too. */
+export const setAiIndexDreaming = (
+  http: HttpStart,
+  { aiIndexId, config }: { aiIndexId: string; config: AiIndexDreamingConfig }
+): Promise<GetAiIndexDreamingResponse> =>
+  http.put<GetAiIndexDreamingResponse>(buildPath(AI_INDEX_DREAMING_PATH, { aiIndexId }), {
+    version: AI_INDEX_API_VERSION,
+    body: JSON.stringify(config),
   });
 
 interface CreateAiIndexArgs {

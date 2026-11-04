@@ -1,0 +1,92 @@
+{
+  "summary": "Healthcare knowledge. Content includes clinical guidelines and patient education. The assistant uses it to answer questions about protocols, drugs, dosages and screening.",
+  "rationale": "Clinical knowledge links treatments to conditions and to the people they suit. Recording which drugs treat or are contraindicated in which conditions, who a drug is recommended for and who approved it lets the assistant answer with the guidance behind it. It records clinical knowledge only, never patient data.",
+  "dreaming": {
+    "instructions": "Record guidance from authoritative sources: clinical protocols, drug information, guidelines, dosages, and approvals or updates. Keep exact doses, units, thresholds, age ranges and dates, and the issuing body. When a guideline replaces an earlier one, record the new one and what it supersedes.\n\nSkip:\n- Anecdotal patient outcomes or uncontrolled case reports.\n- Unapproved or experimental treatments without trial data.\n- Outdated guidelines that have been formally superseded.\n- Anything that identifies a patient. Never record it.",
+    "facts": [
+      {
+        "type": "protocol",
+        "description": "A screening, diagnostic or treatment protocol, such as \"Type 2 diabetes screening recommended annually for BMI >25\"."
+      },
+      {
+        "type": "drug_info",
+        "description": "An indication, contraindication or interaction, such as \"metformin contraindicated with eGFR below 30 mL/min\"."
+      },
+      {
+        "type": "guideline",
+        "description": "A recommendation from an issuing body, such as \"CDC recommends RSV vaccine for adults 60+\"."
+      },
+      {
+        "type": "dosage",
+        "description": "A dose, with units, frequency and population, such as \"amoxicillin pediatric dose is 25mg/kg/day divided q12h\"."
+      },
+      {
+        "type": "update",
+        "description": "An approval or change with its date, such as \"FDA approved semaglutide for obesity treatment in June 2024\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "condition",
+          "description": "A disease, condition or risk factor.",
+          "attributes": [
+            "code"
+          ]
+        },
+        {
+          "type": "drug",
+          "description": "A medication or vaccine, by generic name.",
+          "attributes": [
+            "drug_class",
+            "brand_names"
+          ]
+        },
+        {
+          "type": "population",
+          "description": "A group a recommendation applies to, such as adults 60+ or children.",
+          "attributes": [
+            "age_range",
+            "criteria"
+          ]
+        },
+        {
+          "type": "organization",
+          "description": "An issuing or approving body, such as the CDC or FDA."
+        }
+      ],
+      "edges": [
+        {
+          "type": "treats",
+          "source": "drug",
+          "target": "condition",
+          "description": "The drug is indicated for the condition."
+        },
+        {
+          "type": "contraindicated_in",
+          "source": "drug",
+          "target": "condition",
+          "description": "The drug must not be used with the condition."
+        },
+        {
+          "type": "recommended_for",
+          "source": "drug",
+          "target": "population",
+          "description": "A guideline recommends the drug for the population."
+        },
+        {
+          "type": "approved_by",
+          "source": "drug",
+          "target": "organization",
+          "description": "The body approved the drug, with the indication in the fact."
+        },
+        {
+          "type": "screened_for",
+          "source": "population",
+          "target": "condition",
+          "description": "A protocol recommends screening the population for the condition."
+        }
+      ]
+    }
+  }
+}

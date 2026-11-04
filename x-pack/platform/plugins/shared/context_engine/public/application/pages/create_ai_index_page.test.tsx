@@ -147,6 +147,40 @@ describe('CreateAiIndexPage', () => {
     });
   });
 
+  it('continues to the dreaming setup after creating an AI index with memory', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
+        path: '/ai_index/support-ticket-triage/dreaming_template',
+      });
+    });
+  });
+
+  it('continues to the AI index when it is created without memory', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexMemoryToggle'));
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
+        path: '/ai_index/support-ticket-triage',
+        state: AI_INDEX_CREATED_LOCATION_STATE,
+      });
+    });
+  });
+
   it('does not show memory settings when the global memory feature is disabled', () => {
     renderWithProviders(coreMock.createStart());
 

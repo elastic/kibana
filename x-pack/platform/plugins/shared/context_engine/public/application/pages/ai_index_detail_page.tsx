@@ -19,6 +19,7 @@ import {
   AiIndexCreatedCallout,
   AutomationsPanel,
   DescriptionPanel,
+  DreamingPanel,
   LockedSectionPanel,
   MemoryPanel,
   SignalsPanel,
@@ -45,6 +46,7 @@ import {
   getAiIndexDetailPath,
   getAiIndexSourcesPath,
   getAiIndexKnowledgeIndicatorsPath,
+  getAiIndexSettingsPath,
 } from '../paths';
 import type { AiIndexCreatedLocationState } from '../ai_index_created_location_state';
 
@@ -66,6 +68,10 @@ const knowledgeIndicatorsTabLabel = i18n.translate(
     defaultMessage: 'Knowledge Indicators',
   }
 );
+
+const settingsTabLabel = i18n.translate('xpack.contextEngine.aiIndexDetail.tabs.settings', {
+  defaultMessage: 'Settings',
+});
 
 const automationsLockedAriaLabel = i18n.translate(
   'xpack.contextEngine.aiIndexDetail.automations.lockedAriaLabel',
@@ -104,6 +110,10 @@ export const AiIndexDetailPage = () => {
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSources, exact: true }) !== null;
   const isKnowledgeIndicatorsTab =
     useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators, exact: true }) !== null;
+  const isSettingsTab =
+    useRouteMatch({ path: CONTEXT_ENGINE_PATHS.detailSettings, exact: true }) !== null;
+  // Dreaming, the only setting so far, builds long-term memory, so it needs the memory feature.
+  const showSettingsTab = isMemoryEnabled || isSettingsTab;
   const resolvedAiIndexId = aiIndex?.id ?? id ?? '';
 
   const [showCreatedCallout, setShowCreatedCallout] = useState(
@@ -212,7 +222,7 @@ export const AiIndexDetailPage = () => {
     const overviewTab: AppHeaderTab = {
       id: 'overview',
       label: overviewTabLabel,
-      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab,
+      isSelected: !isSourcesTab && !isKnowledgeIndicatorsTab && !isSettingsTab,
       onClick: () => navigateToContextEngine(getAiIndexDetailPath(resolvedAiIndexId)),
       'data-test-subj': 'contextAiIndexDetailTab-overview',
     };
@@ -241,15 +251,27 @@ export const AiIndexDetailPage = () => {
       });
     }
 
+    if (showSettingsTab) {
+      tabs.push({
+        id: 'settings',
+        label: settingsTabLabel,
+        isSelected: isSettingsTab,
+        onClick: () => navigateToContextEngine(getAiIndexSettingsPath(resolvedAiIndexId)),
+        'data-test-subj': 'contextAiIndexDetailTab-settings',
+      });
+    }
+
     return tabs;
   }, [
     error,
     hasKnowledgeIndicators,
     isKnowledgeIndicatorsTab,
+    isSettingsTab,
     isSourcesTab,
     navigateToContextEngine,
     resolvedAiIndexId,
     showKnowledgeIndicatorsTabInHeader,
+    showSettingsTab,
     sources.length,
     summary.total,
   ]);
@@ -356,6 +378,9 @@ export const AiIndexDetailPage = () => {
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators} exact>
         {aiIndex ? <ListKiPanel aiIndex={aiIndex} discoverHref={discoverHref} /> : null}
+      </Route>
+      <Route path={CONTEXT_ENGINE_PATHS.detailSettings} exact>
+        {aiIndex ? <DreamingPanel aiIndex={aiIndex} /> : null}
       </Route>
       <Route path={CONTEXT_ENGINE_PATHS.detail} exact>
         {overviewTabContent}

@@ -1,0 +1,113 @@
+{
+  "summary": "Legal knowledge. Content includes contracts, regulations, and compliance docs. The assistant uses it to find obligations and deadlines, and how rules apply to the company.",
+  "rationale": "Legal knowledge is a web of rules and the documents that apply them. Connecting contracts, policies and rulings to the regulations they follow or interpret, and organizations to the contracts they are party to, lets the assistant trace an obligation back to its source and notice when a policy is superseded.",
+  "dreaming": {
+    "instructions": "Record what is in force: the obligations that apply, standard clauses, precedents, deadlines, and policy changes. Keep exact periods, dates, jurisdictions and section references, and record when each applies from. When something replaces an earlier rule, record what it supersedes.\n\nSkip:\n- Superseded regulations or expired contract terms.\n- Informal legal opinions from non-authoritative sources.\n- Draft language not yet approved or finalized.",
+    "facts": [
+      {
+        "type": "obligation",
+        "description": "Something the organization must do, with its source, such as \"GDPR requires data deletion within 30 days of request\"."
+      },
+      {
+        "type": "clause",
+        "description": "What a standard contract clause says, such as \"standard NDA includes 2-year non-disclosure period\"."
+      },
+      {
+        "type": "precedent",
+        "description": "What a ruling established, with the year, such as \"2023 ruling established liability for AI-generated content\"."
+      },
+      {
+        "type": "deadline",
+        "description": "A recurring or one-off due date, such as \"SOC 2 audit filing due annually by March 31\"."
+      },
+      {
+        "type": "policy_change",
+        "description": "A change to a policy and when it takes effect, such as \"updated privacy policy effective January 2025\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "regulation",
+          "description": "A law, regulation or standard, such as GDPR or SOC 2.",
+          "attributes": [
+            "jurisdiction",
+            "effective_date"
+          ]
+        },
+        {
+          "type": "contract",
+          "description": "A contract or contract template, such as the standard NDA.",
+          "attributes": [
+            "kind",
+            "counterparty",
+            "effective_date",
+            "expiry_date"
+          ]
+        },
+        {
+          "type": "ruling",
+          "description": "A court or regulator decision.",
+          "attributes": [
+            "court",
+            "year",
+            "citation"
+          ]
+        },
+        {
+          "type": "policy",
+          "description": "An internal policy, such as the privacy policy.",
+          "attributes": [
+            "version",
+            "effective_date"
+          ]
+        },
+        {
+          "type": "organization",
+          "description": "A party to a contract, a regulator or a court.",
+          "attributes": [
+            "kind"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "type": "governed_by",
+          "source": "contract",
+          "target": "regulation",
+          "description": "The contract must comply with the regulation."
+        },
+        {
+          "type": "party_to",
+          "source": "organization",
+          "target": "contract",
+          "description": "The organization signed the contract."
+        },
+        {
+          "type": "enforces",
+          "source": "organization",
+          "target": "regulation",
+          "description": "The regulator enforces the regulation."
+        },
+        {
+          "type": "interprets",
+          "source": "ruling",
+          "target": "regulation",
+          "description": "The ruling interprets or applies the regulation."
+        },
+        {
+          "type": "implements",
+          "source": "policy",
+          "target": "regulation",
+          "description": "The policy exists to comply with the regulation."
+        },
+        {
+          "type": "supersedes",
+          "source": "policy",
+          "target": "policy",
+          "description": "The policy version replaces an earlier one."
+        }
+      ]
+    }
+  }
+}

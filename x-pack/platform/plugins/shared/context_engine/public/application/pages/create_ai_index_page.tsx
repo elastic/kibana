@@ -37,7 +37,11 @@ import {
   ContextEnginePageTemplate,
 } from '../layout/context_engine_page_template';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
-import { CONTEXT_ENGINE_PATHS, getAiIndexDetailPath } from '../paths';
+import {
+  CONTEXT_ENGINE_PATHS,
+  getAiIndexDetailPath,
+  getAiIndexDreamingTemplatePath,
+} from '../paths';
 import { validateAiIndexId } from '../utils/ai_index_dest';
 import { validateTextInput } from '../utils/validate_text_input';
 
@@ -68,13 +72,17 @@ export const CreateAiIndexPage = () => {
   });
 
   const createAndContinue = async () => {
+    const withMemory = isMemoryFeatureEnabled && memoryEnabled;
     const created = await createAiIndex({
       id,
       description,
       memoryEnabled: isMemoryFeatureEnabled ? memoryEnabled : undefined,
       sources: [],
     });
-    if (created) {
+    // Dreaming needs memory, so only an AI index with memory gets to pick what it learns.
+    if (created && withMemory) {
+      navigateToContextEngine(getAiIndexDreamingTemplatePath(created.id));
+    } else if (created) {
       navigateToContextEngine(
         getAiIndexDetailPath(created.id),
         undefined,

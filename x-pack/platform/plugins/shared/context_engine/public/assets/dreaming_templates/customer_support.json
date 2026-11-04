@@ -1,0 +1,90 @@
+{
+  "summary": "Customer support knowledge base. Content includes resolved tickets and docs. Support agents use it to answer customers with confirmed fixes, known issues and policies.",
+  "rationale": "Support knowledge centers on issues: which part of the product they hit, which platforms they happen on and whether they repeat an earlier one. Linking issues to product areas and plans lets the agent answer “is this known, and is there a fix?” from confirmed tickets rather than guesses.",
+  "dreaming": {
+    "instructions": "Record what is confirmed by a resolved ticket, a doc, or a support engineer: how problems are solved, which issues are known, the policies support applies, and patterns across customers. Link each issue to the product areas and platforms it affects. When a ticket repeats a known issue, add to that issue instead of recording a new one.\n\nSkip:\n- Unverified workarounds from individual tickets.\n- Internal team discussions and opinions.\n- Duplicate ticket descriptions for the same known issue.",
+    "facts": [
+      {
+        "type": "solution",
+        "description": "A confirmed fix for a problem, such as \"reset OAuth token by clearing browser cookies\"."
+      },
+      {
+        "type": "known_issue",
+        "description": "A problem confirmed to affect customers, with where it happens, such as \"billing page crashes on Safari 16.x\"."
+      },
+      {
+        "type": "policy",
+        "description": "A rule support applies, such as \"refund window is 30 days for annual plans\"."
+      },
+      {
+        "type": "workaround",
+        "description": "A confirmed way around a problem until it is fixed, such as \"use CSV export as fallback when PDF export fails\"."
+      },
+      {
+        "type": "customer_pattern",
+        "description": "A trend across many customers, such as \"most cancellations cite pricing in first month\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "issue",
+          "description": "A known problem customers run into.",
+          "attributes": [
+            "status",
+            "severity",
+            "fixed_in"
+          ]
+        },
+        {
+          "type": "product_area",
+          "description": "A feature or part of the product, such as billing, login or export.",
+          "attributes": [
+            "owner"
+          ]
+        },
+        {
+          "type": "platform",
+          "description": "A browser, operating system or device, with its version.",
+          "attributes": [
+            "version"
+          ]
+        },
+        {
+          "type": "plan",
+          "description": "A subscription plan or tier.",
+          "attributes": [
+            "billing_period",
+            "price"
+          ]
+        }
+      ],
+      "edges": [
+        {
+          "type": "affects",
+          "source": "issue",
+          "target": "product_area",
+          "description": "The issue happens in this part of the product."
+        },
+        {
+          "type": "occurs_on",
+          "source": "issue",
+          "target": "platform",
+          "description": "The issue happens only on this platform or version."
+        },
+        {
+          "type": "duplicate_of",
+          "source": "issue",
+          "target": "issue",
+          "description": "The issue is the same as another, earlier one."
+        },
+        {
+          "type": "includes",
+          "source": "plan",
+          "target": "product_area",
+          "description": "The plan gives access to this part of the product."
+        }
+      ]
+    }
+  }
+}
