@@ -7,6 +7,7 @@
 
 import { defer, of, throwError, concat } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { IBasePath } from '@kbn/core/server';
 import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
@@ -34,7 +35,8 @@ const surfacesDeps = {
     attachmentsService: { getTypeDefinition } as unknown as AttachmentServiceStart,
     logger: loggerMock.create(),
     isomer: isomerPluginMock.createStartContract(),
-    getBaseUrl: () => 'https://kibana.example.com',
+    basePath: { publicBaseUrl: 'https://kibana.example.com' } as IBasePath,
+    cloud: undefined,
   }),
   request,
 };

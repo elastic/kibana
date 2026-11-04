@@ -131,11 +131,7 @@ export interface ServicesStartDeps {
   licensing: LicensingPluginStart;
   deploymentInfo: DeploymentInfo;
   isomer: IsomerPluginStart;
-  /**
-   * The space's Kibana URL, from `server.publicBaseUrl` or Cloud's Kibana URL, that surfaces such as
-   * Slack resolve Kibana app links against. Undefined when neither is set.
-   */
-  getSurfaceBaseUrl: (spaceId: string) => string | undefined;
+  cloud: CloudSetup | undefined;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

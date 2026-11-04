@@ -14,6 +14,7 @@ import {
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
+import type { IBasePath } from '@kbn/core/server';
 import { isomerPluginMock } from '@kbn/isomer-plugin/server/mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { AttachmentServiceStart } from '../attachments';
@@ -66,18 +67,19 @@ const unmappedAttachmentsService = {
 
 const context = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-1' };
 
-const getBaseUrl = (spaceId: string) => `https://kibana.example.com/s/${spaceId}`;
+const basePath = { publicBaseUrl: 'https://kibana.example.com' } as IBasePath;
 
 const renderPayload = (
   event: RoundCompleteEvent,
   attachmentsService: AttachmentServiceStart = unmappedAttachmentsService,
-  baseUrlFor: (spaceId: string) => string | undefined = getBaseUrl
+  kibanaBasePath: IBasePath = basePath
 ) =>
   new SurfacesServiceImpl({
     attachmentsService,
     logger: loggerMock.create(),
     isomer: isomerPluginMock.createStartContract(),
-    getBaseUrl: baseUrlFor,
+    basePath: kibanaBasePath,
+    cloud: undefined,
   }).renderPayload(event, { originType: ConversationOriginType.Slack, ...context });
 
 describe('renderPayload', () => {
@@ -125,7 +127,7 @@ describe('renderPayload', () => {
     });
 
     it('are left out when no Kibana URL resolves', async () => {
-      const slack = JSON.stringify(await renderPayload(event, attachmentsService, () => undefined));
+      const slack = JSON.stringify(await renderPayload(event, attachmentsService, {} as IBasePath));
 
       expect(slack).toContain('See:');
       expect(slack).not.toContain('Open in Discover');
@@ -158,7 +160,8 @@ describe('renderPayload', () => {
       attachmentsService: unmappedAttachmentsService,
       logger,
       isomer,
-      getBaseUrl,
+      basePath,
+      cloud: undefined,
     });
     const event = createRoundCompleteEvent('Hello');
     const options = { originType: ConversationOriginType.Slack, ...context };
@@ -188,7 +191,8 @@ describe('renderPayload', () => {
       attachmentsService: unmappedAttachmentsService,
       logger: loggerMock.create(),
       isomer,
-      getBaseUrl,
+      basePath,
+      cloud: undefined,
     });
 
     await expect(

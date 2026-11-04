@@ -11,9 +11,12 @@ import type {
   SurfacePayload,
 } from '@kbn/agent-builder-common';
 import type { AttachmentSurfaceCompositionContext } from '@kbn/agent-builder-server/attachments';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { IBasePath } from '@kbn/core/server';
 import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AttachmentServiceStart } from '../attachments';
+import { getPublicKibanaUrl } from '../../utils/get_kibana_url';
 import { buildComposition } from './composition';
 import { slackSurface } from './slack';
 import type { SurfaceRenderer } from './types';
@@ -30,25 +33,28 @@ export class SurfacesServiceImpl implements SurfacesService {
   private readonly attachmentsService: AttachmentServiceStart;
   private readonly logger: Logger;
   private readonly isomer: IsomerPluginStart;
-  private readonly getBaseUrl: (spaceId: string) => string | undefined;
+  private readonly basePath: IBasePath;
+  private readonly cloud: CloudSetup | undefined;
   private readonly surfaceRenderers: SurfaceRenderer[] = [slackSurface];
 
   constructor({
     attachmentsService,
     logger,
     isomer,
-    getBaseUrl,
+    basePath,
+    cloud,
   }: {
     attachmentsService: AttachmentServiceStart;
     logger: Logger;
     isomer: IsomerPluginStart;
-    /** The space's Kibana URL, which Kibana app links resolve against on the surface. */
-    getBaseUrl: (spaceId: string) => string | undefined;
+    basePath: IBasePath;
+    cloud: CloudSetup | undefined;
   }) {
     this.attachmentsService = attachmentsService;
     this.logger = logger;
     this.isomer = isomer;
-    this.getBaseUrl = getBaseUrl;
+    this.basePath = basePath;
+    this.cloud = cloud;
   }
 
   async renderPayload(
@@ -77,8 +83,10 @@ export class SurfacesServiceImpl implements SurfacesService {
         runtime,
       });
 
+      const baseUrl = getPublicKibanaUrl(this.basePath, this.cloud, spaceId);
+
       return composition.body.length > 0
-        ? renderer.render(composition, runtime, { baseUrl: this.getBaseUrl(spaceId) })
+        ? renderer.render(composition, runtime, { baseUrl })
         : undefined;
     } catch (error) {
       this.logger.error(`Failed to render the ${renderer.id} surface payload: ${error.message}`);

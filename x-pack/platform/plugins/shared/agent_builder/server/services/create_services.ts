@@ -139,7 +139,7 @@ export class ServiceManager {
     deploymentInfo,
     deductiveRegister,
     isomer,
-    getSurfaceBaseUrl,
+    cloud,
     conversationEventBus,
   }: ServicesStartDeps & { conversationEventBus?: ConversationEventBus }): InternalStartServices {
     if (!this.services) {
@@ -272,7 +272,8 @@ export class ServiceManager {
     const surfaces = new SurfacesServiceImpl({
       attachmentsService: attachments,
       isomer,
-      getBaseUrl: getSurfaceBaseUrl,
+      basePath: http.basePath,
+      cloud,
       logger: logger.get('surfaces'),
     });
 
