@@ -137,6 +137,21 @@ describe('runtime fixtures', () => {
     ]);
   });
 
+  it.each([700, 150])('reject the status %d, which no response can have', async (status) => {
+    const { runtimeFixtures, fetch } = createEmulatorFetch({ specs: [spec] });
+
+    const rejected = runtimeFixtures.set([{ operation: listUsers, response: { status } }]);
+
+    expect(rejected).toEqual([
+      expect.objectContaining({
+        operation: 'GET /users',
+        violations: [expect.objectContaining({ path: ['response', 'status'], code: 'status' })],
+      }),
+    ]);
+    expect(runtimeFixtures.list()).toEqual([]);
+    expect((await fetch('https://api.example.com/users')).status).toBe(200);
+  });
+
   it('reject operations the spec lacks, path parameters it lacks, and named operations', () => {
     const { runtimeFixtures } = setup();
 

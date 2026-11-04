@@ -288,6 +288,9 @@ export const createResponseEngine = (
     { readonly fixtures: readonly ResponseFixture[]; readonly candidates: readonly Candidate[] }
   >();
 
+  // Answering with any other status would throw when the response is built.
+  const isResponseStatus = (status: number) => status >= 200 && status <= 599;
+
   // Runtime fixtures must conform to the spec, but may answer with an undeclared error status.
   const checkRuntimeFixture = (fixture: ResponseFixture) => {
     const { operation: ref, response, when } = fixture;
@@ -317,9 +320,17 @@ export const createResponseEngine = (
     const rejectedHere = matched.flatMap((operation): RejectedResponse[] => {
       const violations = [
         ...unknownPathParameters(operation, when),
-        ...validateResponse(operation, contractResponse).filter(
-          (violation) => !isUndeclaredError(violation, response)
-        ),
+        ...(isResponseStatus(response.status)
+          ? validateResponse(operation, contractResponse).filter(
+              (violation) => !isUndeclaredError(violation, response)
+            )
+          : [
+              {
+                path: ['response', 'status'],
+                code: 'status',
+                message: `A response can't have the status ${response.status}; it must be from 200 to 599`,
+              },
+            ]),
       ];
       const { source } = operation.spec;
       return violations.length === 0
