@@ -22,8 +22,8 @@ export interface MaterializeContextOverride extends MaterializeContext {
   ignoreGlobalFilters?: boolean;
 }
 
-/** A named ES|QL param's value. */
-export type EsqlParamValue = string | number | boolean | null;
+/** A named ES|QL param's value, as Kibana's ES|QL search takes it. */
+export type EsqlParamValue = string | number | Array<string | number>;
 
 /** An ES|QL query, run as the user with the context's time range, filters, query and controls. */
 export interface EsqlDataRequest {
