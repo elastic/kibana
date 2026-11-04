@@ -530,9 +530,12 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls the generate-workflow tool with a natural-language description of the manual trigger, ' +
-        "'message' input, and http step targeting the given Slack connector ID, then validates and renders " +
-        'the resulting workflow attachment — it does not hand-write the YAML directly.',
+        'Shows the complete workflow YAML to the user: version "1", a manual trigger, a \'message\' input, ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
+        "/chat.postMessage to channel '#general' with the message text taken from the 'message' input. " +
+        'The workflow passes validation (validate_workflow reports it valid). The response may also note ' +
+        'that the Slack connector id could not be confirmed or is unknown, and may suggest connector steps ' +
+        'instead of a raw http step; that does not contradict the reference.',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
@@ -559,8 +562,13 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        'Calls generate-workflow with the fixed message text and target Slack channel described in natural ' +
-        'language, and validates the resulting workflow before rendering it inline.',
+        'Shows the complete workflow YAML to the user: version "1", an enabled workflow with a manual trigger ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 ' +
+        "that sends POST /chat.postMessage to channel '#general' with the fixed text " +
+        "'Chrysalis hunt complete - see case for details'. The workflow passes validation " +
+        '(validate_workflow reports it valid). The response may also note that the Slack connector id could ' +
+        'not be confirmed or is unknown, and may suggest connector steps instead of a raw http step; that ' +
+        'does not contradict the reference.',
     },
     metadata: {
       // No expectedSkill: the prompt does not ask for the skill, and
@@ -588,8 +596,12 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
     },
     output: {
       reference:
-        "Calls generate-workflow with the manual trigger, 'summary' string input, and http step against the " +
-        'given connector ID described in natural language, then validates and renders the workflow.',
+        'Shows the final workflow YAML to the user: version "1", a manual trigger, a \'summary\' string input, ' +
+        'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
+        "/chat.postMessage to channel '#general' with the message text taken from the 'summary' input. " +
+        'The workflow passes validation (validate_workflow reports it valid). The response may also note ' +
+        'that the Slack connector id could not be confirmed or is unknown, and may suggest connector steps ' +
+        'instead of a raw http step; that does not contradict the reference.',
     },
     metadata: {
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask
