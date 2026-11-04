@@ -31,6 +31,8 @@ dependsOn:
   - '@kbn/field-formats-plugin'
   - '@kbn/palettes'
   - '@kbn/core-ui-settings-server-internal'
+  - '@kbn/data-views-plugin'
+  - '@kbn/field-formats-common'
 tags:
   - plugin
   - prod

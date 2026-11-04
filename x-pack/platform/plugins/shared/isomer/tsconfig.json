@@ -19,6 +19,8 @@
     "@kbn/esql-utils",
     "@kbn/field-formats-plugin",
     "@kbn/palettes",
-    "@kbn/core-ui-settings-server-internal"
+    "@kbn/core-ui-settings-server-internal",
+    "@kbn/data-views-plugin",
+    "@kbn/field-formats-common"
   ]
 }
