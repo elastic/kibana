@@ -19,12 +19,11 @@ import React from 'react';
 import styled from 'styled-components';
 import type { EuiListGroupProps } from '@elastic/eui';
 
-// Not a heading: popovers sit outside the page outline. Reference `id` from SectionLinks' aria-labelledby.
-export function SectionTitle({ children, id }: { children?: ReactNode; id?: string }) {
+export function SectionTitle({ children }: { children?: ReactNode }) {
   return (
     <>
       <EuiText size={'xs'} grow={false}>
-        <strong id={id}>{children}</strong>
+        <strong>{children}</strong>
       </EuiText>
       <EuiSpacer size={'xs'} />
     </>

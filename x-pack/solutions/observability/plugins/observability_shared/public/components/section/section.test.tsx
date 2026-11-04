@@ -7,22 +7,13 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import { Section, SectionLink, SectionLinks, SectionTitle } from './section';
+import { SectionTitle } from './section';
 
-describe('Section', () => {
-  it('renders SectionTitle as a non-heading label for its links list', () => {
-    render(
-      <Section>
-        <SectionTitle id="sectionTitle">Host details</SectionTitle>
-        <SectionLinks aria-labelledby="sectionTitle">
-          <SectionLink label="Open in Logs" href="/app/logs" />
-        </SectionLinks>
-      </Section>
-    );
+describe('SectionTitle', () => {
+  it('renders the title as text, not as a heading', () => {
+    render(<SectionTitle>Host details</SectionTitle>);
 
     expect(screen.queryByRole('heading')).not.toBeInTheDocument();
-    expect(screen.getByRole('list', { name: 'Host details' })).toContainElement(
-      screen.getByRole('link', { name: 'Open in Logs' })
-    );
+    expect(screen.getByText('Host details')).toBeInTheDocument();
   });
 });

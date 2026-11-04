@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiCode, type WithEuiThemeProps, useGeneratedHtmlId, withEuiTheme } from '@elastic/eui';
+import { EuiCode, type WithEuiThemeProps, withEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
@@ -55,7 +55,6 @@ export const NodeContextMenu = withEuiTheme(
   ({ options, currentTime, node, nodeType }: PropsWithTheme) => {
     const { getAssetDetailUrl } = useAssetDetailsRedirect();
     const [flyoutVisible, setFlyoutVisible] = useState(false);
-    const titleId = useGeneratedHtmlId({ prefix: 'nodeContextMenuTitle' });
     const { preferredSchema } = useWaffleOptionsContext();
     const effectiveSchema = getInventoryRequestSchema(preferredSchema);
     const inventoryModel = findInventoryModel(nodeType);
@@ -180,7 +179,7 @@ export const NodeContextMenu = withEuiTheme(
       <>
         <div style={{ maxWidth: 300 }} data-test-subj="nodeContextMenu">
           <Section>
-            <SectionTitle id={titleId}>
+            <SectionTitle>
               <FormattedMessage
                 id="xpack.infra.nodeContextMenu.title"
                 defaultMessage="{inventoryName} details"
@@ -198,7 +197,7 @@ export const NodeContextMenu = withEuiTheme(
                 </div>
               </SectionSubtitle>
             )}
-            <SectionLinks aria-labelledby={titleId}>
+            <SectionLinks>
               {showLogsLink && (
                 <SectionLink data-test-subj="viewLogsContextMenuItem" {...nodeLogsMenuItem} />
               )}

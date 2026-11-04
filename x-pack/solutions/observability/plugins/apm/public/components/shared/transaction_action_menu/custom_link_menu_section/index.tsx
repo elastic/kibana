@@ -12,7 +12,6 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
-  useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
@@ -43,7 +42,6 @@ export function CustomLinkMenuSection({
   openCreateCustomLinkFlyout: () => void;
 }) {
   const [showAllLinks, setShowAllLinks] = useState(false);
-  const titleId = useGeneratedHtmlId({ prefix: 'customLinkMenuSectionTitle' });
 
   const filters = useMemo(
     () =>
@@ -74,7 +72,7 @@ export function CustomLinkMenuSection({
       <Section>
         <EuiFlexGroup>
           <EuiFlexItem>
-            <SectionTitle id={titleId}>
+            <SectionTitle>
               {i18n.translate('xpack.apm.transactionActionMenu.customLink.section', {
                 defaultMessage: 'Custom Links',
               })}
@@ -94,7 +92,6 @@ export function CustomLinkMenuSection({
           })}
         </SectionSubtitle>
         <CustomLinkList
-          aria-labelledby={titleId}
           customLinks={showAllLinks ? customLinks : customLinks.slice(0, DEFAULT_LINKS_TO_SHOW)}
           transaction={transaction}
         />

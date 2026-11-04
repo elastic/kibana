@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiLoadingSpinner, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import { useHistory } from 'react-router-dom';
@@ -66,7 +66,6 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
     share?.url?.locators?.get<AssetDetailsLocatorParams>(ASSET_DETAILS_LOCATOR_ID);
   const discoverLocator = share?.url?.locators?.get(DISCOVER_APP_LOCATOR);
   const infraLinksAvailable = useApmFeatureFlag(ApmFeatureFlagName.InfraUiAvailable);
-  const titleIdPrefix = useGeneratedHtmlId({ prefix: 'instanceActionsMenuSection' });
 
   if (isPending(status)) {
     return (
@@ -120,13 +119,9 @@ export function InstanceActionsMenu({ serviceName, serviceNodeName, kuery, onClo
           <div key={idx}>
             {section.map((item) => (
               <Section key={item.key}>
-                {item.title && (
-                  <SectionTitle id={`${titleIdPrefix}-${item.key}`}>{item.title}</SectionTitle>
-                )}
+                {item.title && <SectionTitle>{item.title}</SectionTitle>}
                 {item.subtitle && <SectionSubtitle>{item.subtitle}</SectionSubtitle>}
-                <SectionLinks
-                  aria-labelledby={item.title ? `${titleIdPrefix}-${item.key}` : undefined}
-                >
+                <SectionLinks>
                   {item.actions.map((action) => (
                     <SectionLink
                       key={action.key}

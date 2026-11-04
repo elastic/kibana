@@ -248,17 +248,6 @@ describe('TransactionActionMenu ', () => {
         'http://localhost/node-mock/host/227453131a17?receivedParams=(dateRange:(from:%272018-12-18T00:09:30.952Z%27,to:%272018-12-18T00:19:30.952Z%27))'
       );
     });
-
-    it('labels the Host links list with its section title instead of rendering a heading', async () => {
-      const { getByRole, getByText, queryByRole } = await renderTransaction(
-        Transactions.transactionWithHostData
-      );
-
-      expect(queryByRole('heading')).not.toBeInTheDocument();
-      expect(getByRole('list', { name: 'Host details' })).toContainElement(
-        getByText('Host metrics')
-      );
-    });
   });
 
   it('should not render the uptime link if there is no url available', async () => {
