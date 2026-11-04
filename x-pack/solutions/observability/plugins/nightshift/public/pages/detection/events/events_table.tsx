@@ -31,7 +31,7 @@ import {
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
 } from '../../../common/ebt_constants';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import {
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_INVESTIGATION_STATE_LABELS,

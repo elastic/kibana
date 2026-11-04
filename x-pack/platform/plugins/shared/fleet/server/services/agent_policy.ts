@@ -1720,22 +1720,37 @@ class AgentPolicyService {
         this.packagePoliciesWithSingleAndMultiplePolicies(packagePolicies);
 
       if (policiesWithMultipleAP.length > 0) {
-        const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdate(
+        // Only the agent policy reference changes, so skip the full update path: it needs the
+        // package info, which may not be available for the package policy's version.
+        const { updatedPolicies, failedPolicies } = await packagePolicyService.bulkUpdatePartial(
           soClient,
-          esClient,
-          policiesWithMultipleAP.map((policy) => {
-            const newPolicyIds = policy.policy_ids.filter((policyId) => policyId !== id);
+          policiesWithMultipleAP.map(({ id: packagePolicyId, version, policy_ids: policyIds }) => {
+            // Without a version the saved objects client skips the version check and could
+            // overwrite concurrent changes.
+            if (!version) {
+              throw new FleetError(
+                `Cannot delete agent policy [${id}]: shared package policy [${packagePolicyId}] has no version`
+              );
+            }
+            const newPolicyIds = policyIds.filter((policyId) => policyId !== id);
             return {
-              ...policy,
-              policy_id: newPolicyIds[0],
-              policy_ids: newPolicyIds,
+              id: packagePolicyId,
+              version,
+              attributes: {
+                policy_id: newPolicyIds[0],
+                policy_ids: newPolicyIds,
+                updated_at: new Date().toISOString(),
+                updated_by: options?.user?.username ?? 'system',
+              },
             };
           })
         );
 
+        // Successful updates stay applied when others fail. That's safe: a retry only finds the
+        // package policies that still reference this agent policy.
         if (failedPolicies.length > 0) {
           const failures = failedPolicies
-            .map(({ packagePolicy, error }) => `[${packagePolicy.id}]: ${error.message}`)
+            .map(({ update, error }) => `[${update.id}]: ${error.message}`)
             .join(', ');
           logger.error(
             `Failed to remove agent policy [${id}] from shared package policies ${failures}`
@@ -1746,7 +1761,7 @@ class AgentPolicyService {
         }
 
         logger.debug(
-          `Updated package policies with multiple agent policies with ids ${(updatedPolicies ?? [])
+          `Updated package policies with multiple agent policies with ids ${updatedPolicies
             .map((policy) => policy.id)
             .join(', ')}`
         );

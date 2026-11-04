@@ -126,7 +126,7 @@ const allowlistBaseEventFields: AllowlistFields = {
     id: true,
   },
   Persistence: true,
-  /* eslint-disable @typescript-eslint/naming-convention */
+  /* eslint-disable @kbn/compat/typescript-naming-convention */
   Effective_process: true,
 };
 
@@ -139,7 +139,7 @@ export const endpointAllowlistFields: AllowlistFields = {
   signal_id: true,
   agent: true,
   Endpoint: true,
-  /* eslint-disable @typescript-eslint/naming-convention */
+  /* eslint-disable @kbn/compat/typescript-naming-convention */
   Memory_protection: true,
   Ransomware: true,
   data_stream: true,

@@ -23,10 +23,10 @@ export const ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID =
  * triage parallelism of a space and is pinned to the planner's in-flight ceiling by a test.
  */
 export const ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW = {
-  billable: false,
+  billable: true,
   id: ALERTZERO_FLOOR_ALERT_TRIAGE_BATCH_WORKFLOW_ID,
   management: ALERTZERO_INTERNAL_WORKFLOW_MANAGEMENT,
   pluginId: ALERTZERO_MANAGED_WORKFLOW_PLUGIN_ID,
-  version: 9,
+  version: 12,
   yaml: FLOOR_ALERT_TRIAGE_BATCH_YAML,
 } as const satisfies ManagedWorkflowDefinition;

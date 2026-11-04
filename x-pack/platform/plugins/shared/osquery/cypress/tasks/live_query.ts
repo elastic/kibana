@@ -151,9 +151,8 @@ export const loadRuleAlerts = (ruleName: string) => {
     });
 };
 
-// Single-query results pages (saved-query results, live query details) render the
-// page-level header, where `AddToCaseButton` is a direct `EuiButtonEmpty` with
-// `aria-label="Add to Case"`.
+// Run-query form results render `PackResultsHeader`, where `AddToCaseButton` is a direct
+// `EuiButtonEmpty` with `aria-label="Add to Case"`.
 const ADD_TO_CASE_HEADER_BUTTON = '[aria-label="Add to Case"]';
 // Per-row kebab menu (pack_queries_status_table and history details flyout)
 // renders `AddToCaseButton` as an `EuiContextMenuItem` inside a popover opened by the kebab.
@@ -169,6 +168,23 @@ export const addToCaseFromResultsHeader = (caseId: string) => {
   selectCaseRow(caseId);
 };
 
+// Live query and scheduled execution details pages expose result actions in the AppHeader menu;
+// "Add to Case" and "View in" live in its overflow ("More") popover.
+export const openResultsAppMenuOverflow = () => {
+  cy.getBySel('app-menu-overflow-button').click();
+};
+
+export const addToCaseFromResultsAppMenu = (caseId: string) => {
+  openResultsAppMenuOverflow();
+  cy.getBySel('query-details-add-to-case').click();
+  selectCaseRow(caseId);
+};
+
+export const openResultsViewInMenu = () => {
+  openResultsAppMenuOverflow();
+  cy.getBySel('query-details-view-in').click();
+};
+
 export const addToCaseFromRowKebab = (caseId: string) => {
   cy.get(ADD_TO_CASE_ROW_KEBAB).first().click();
   cy.get('.euiContextMenuPanel').contains('Add to Case').click();
@@ -180,10 +196,8 @@ export const addLiveQueryToCase = (actionId: string, caseId: string) => {
     cy.get('[aria-label="Details"]').click();
   });
   cy.getBySel('appHeaderBack');
-  // A single ad-hoc query renders the page-level query header (no results
-  // table), so `Add to Case` lives in the header actions rather than a row kebab.
-  cy.getBySel('query-details-header');
-  addToCaseFromResultsHeader(caseId);
+  cy.getBySel('appHeaderTitle');
+  addToCaseFromResultsAppMenu(caseId);
 };
 
 const casesOsqueryResultRegex = /attached Osquery results[\s]?[\d]+[\s]?second(?:s)? ago/;

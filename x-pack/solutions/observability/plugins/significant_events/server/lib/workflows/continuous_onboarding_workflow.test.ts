@@ -129,9 +129,6 @@ describe('createContinuousOnboardingWorkflowService', () => {
 
   let logger: Logger;
   let getWorkflow: jest.Mock;
-  // The legacy unsuffixed document is read through the management API, the space document
-  // through the request-scoped client.
-  let getLegacyWorkflow: jest.Mock;
   let managementApi: jest.Mocked<WorkflowsServerPluginSetup['management']>;
   let managedWorkflowsClient: { install: jest.Mock; uninstall: jest.Mock };
 
@@ -144,10 +141,9 @@ describe('createContinuousOnboardingWorkflowService', () => {
     } as unknown as Logger;
     (logger.get as jest.Mock).mockReturnValue(logger);
     getWorkflow = jest.fn();
-    getLegacyWorkflow = jest.fn().mockResolvedValue(null);
     managementApi = {
       getClient: jest.fn(() => ({ getWorkflow })),
-      getWorkflow: getLegacyWorkflow,
+      getWorkflow: jest.fn(),
       updateWorkflow: jest.fn().mockResolvedValue(undefined),
       getWorkflowExecutions: jest.fn().mockResolvedValue({ results: [], total: 0 }),
       cancelWorkflowExecution: jest.fn().mockResolvedValue(undefined),
@@ -226,77 +222,22 @@ describe('createContinuousOnboardingWorkflowService', () => {
     expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
   });
 
-  it('leaves the legacy default-space document alone outside the default space', async () => {
-    getWorkflow.mockResolvedValue({ enabled: false });
+  it('can disable future schedules without draining executions', async () => {
+    getWorkflow.mockResolvedValue({ enabled: true });
 
-    await createService().ensureWorkflow({ enabled: true, request, spaceId });
+    await createService().ensureWorkflow({
+      enabled: false,
+      request,
+      spaceId,
+      skipExecutionDrain: true,
+    });
 
-    expect(getLegacyWorkflow).not.toHaveBeenCalled();
-    expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-  });
-
-  describe('in the default space', () => {
-    const defaultSpaceId = 'default';
-
-    it.each([
-      { label: 'on', enabled: true, current: false },
-      { label: 'off', enabled: false, current: true },
-    ])(
-      'stops and removes the legacy unsuffixed document when turned $label',
-      async ({ enabled, current }) => {
-        getWorkflow.mockResolvedValue({ enabled: current });
-        getLegacyWorkflow.mockResolvedValue({ enabled: true });
-
-        await createService().ensureWorkflow({ enabled, request, spaceId: defaultSpaceId });
-
-        expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          { enabled: false },
-          defaultSpaceId,
-          request
-        );
-        expect(managementApi.cancelAllActiveWorkflowExecutions).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          defaultSpaceId,
-          request
-        );
-        expect(managedWorkflowsClient.uninstall).toHaveBeenCalledWith(
-          SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID,
-          { spaceId: defaultSpaceId }
-        );
-        expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-          `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${defaultSpaceId}`,
-          { enabled },
-          defaultSpaceId,
-          request
-        );
-      }
+    expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
+      workflowDocumentId,
+      { enabled: false },
+      spaceId,
+      request
     );
-
-    it('skips the removal when the legacy document is already gone', async () => {
-      getWorkflow.mockResolvedValue({ enabled: false });
-
-      await createService().ensureWorkflow({ enabled: true, request, spaceId: defaultSpaceId });
-
-      expect(managementApi.cancelAllActiveWorkflowExecutions).not.toHaveBeenCalled();
-      expect(managedWorkflowsClient.uninstall).not.toHaveBeenCalled();
-      expect(logger.warn).not.toHaveBeenCalled();
-    });
-
-    it('enables the space document with a warning when the legacy removal fails', async () => {
-      getWorkflow.mockResolvedValue({ enabled: false });
-      getLegacyWorkflow.mockResolvedValue({ enabled: false });
-      managedWorkflowsClient.uninstall.mockRejectedValue(new Error('uninstall failed'));
-
-      await createService().ensureWorkflow({ enabled: true, request, spaceId: defaultSpaceId });
-
-      expect(managementApi.updateWorkflow).toHaveBeenCalledWith(
-        `${SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID}-${defaultSpaceId}`,
-        { enabled: true },
-        defaultSpaceId,
-        request
-      );
-      expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('uninstall failed'));
-    });
+    expect(managementApi.getWorkflowExecutions).not.toHaveBeenCalled();
   });
 });

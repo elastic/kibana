@@ -67,7 +67,10 @@ describe('FetchPoliciesStep', () => {
     expect(policy?.throttle).toBeUndefined();
     expect(policy?.snoozedUntil).toBeNull();
 
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
   });
 
   it('skips the lookup and returns an empty catalog when no alert is dispatchable', async () => {
@@ -77,6 +80,23 @@ describe('FetchPoliciesStep', () => {
     if (result.type !== 'continue') return;
     expect(result.data?.policies?.size).toBe(0);
     expect(mockFindAllDecrypted).not.toHaveBeenCalled();
+  });
+
+  it('fetches policies only in the spaces of the dispatchable alerts', async () => {
+    const state = createDispatcherPipelineState({
+      dispatchable: [
+        createAlert(),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-2' }),
+        createAlert({ space_id: 'space-a', alert_id: 'alert-3' }),
+      ],
+    });
+
+    await buildStep().execute(state, logger);
+
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default', 'space-a'],
+    });
   });
 
   it('returns empty map when no policies exist', async () => {
@@ -179,6 +199,9 @@ describe('FetchPoliciesStep', () => {
     expect(result.data?.policies?.size).toBe(2);
     expect(result.data?.policies?.get('p1')?.apiKey).toBe('key-1');
     expect(result.data?.policies?.get('p2')?.apiKey).toBe('key-2');
-    expect(mockFindAllDecrypted).toHaveBeenCalledWith({ filter: { enabled: true } });
+    expect(mockFindAllDecrypted).toHaveBeenCalledWith({
+      filter: { enabled: true },
+      spaceIds: ['default'],
+    });
   });
 });

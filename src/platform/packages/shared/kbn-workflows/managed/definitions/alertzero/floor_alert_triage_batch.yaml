@@ -132,16 +132,47 @@ steps:
   # 1b. Load the batch's alert documents. The sweep passes ids only, so the batch loads the
   #     documents Alert Analysis takes instead of the sweep pushing up to 100 documents through the
   #     engine. An alert deleted since planning is missing from the result; if none can be loaded the
-  #     run marks them failed and stops.
+  #     run marks them failed and stops. Only the fields Alert Analysis and the pattern keys read
+  #     are loaded. A size error is the same on every attempt, so it is not retried and its alerts
+  #     are marked failed. Any other error leaves the claim for the next sweep to reclaim.
   # ---------------------------------------------------------------------------
   - name: load_alerts
     type: alertzero.triage.loadAlerts
     on-failure:
       retry:
+        condition: "${{ error.type != 'StepSizeLimitExceeded' }}"
         max-attempts: 3
         delay: 5s
+      # Not a fallback: `error` is empty inside fallback steps, so the error is read from the step below.
+      continue: true
     with:
       alert_ids: "${{ inputs.alert_ids }}"
+
+  - name: guard_load_succeeded
+    type: if
+    condition: "${{ steps.load_alerts.error != blank }}"
+    steps:
+      - name: release_claims_load_failed
+        type: kibana.SetAlertTags
+        # Nothing removes `az:triage_failed`, so tagging on a transient error would take the
+        # alerts out of triage for good.
+        if: "${{ steps.load_alerts.error.type == 'StepSizeLimitExceeded' }}"
+        # shortcut: if this tagging fails the claim stays and a later sweep repeats the size error, upgrade if seen.
+        on-failure:
+          continue: true
+        with:
+          ids: "${{ inputs.alert_ids }}"
+          tags:
+            tags_to_add:
+              - "az:triage_failed"
+            tags_to_remove:
+              - "az:triage_pending"
+              - "az:triage_exec:{{ execution.id }}"
+
+      - name: abort_load_failed
+        type: workflow.fail
+        with:
+          message: "Alert Triage could not load the alerts of this batch: {{ steps.load_alerts.error.message }}"
 
   - name: guard_alerts_loaded
     type: if
@@ -263,8 +294,8 @@ steps:
                 - "az:triage_pending"
                 - "az:triage_exec:{{ execution.id }}"
 
-        # Fallback handles the comment and the tags only. Without this fail the parent continues
-        # into empty FP candidates and close_investigation_no_fp — a hollow "triage complete".
+        # Fallback handles the comment and the tags only. The run would fail after the fallback
+        # anyway (it re-throws the classify error); this fails it first with the likely causes.
         - name: abort_classify_failed
           type: workflow.fail
           with:
@@ -778,7 +809,8 @@ steps:
 
   # One Investigation per new proposal, seeded from the `investigation` template, with its alerts and
   # impacted entities attached. The alerts get `az:proposal:<root id>`, so an analyst can find
-  # the proposal from an alert. The tag is not a verdict tag, so the sweep ignores it.
+  # the proposal from an alert, and `az:triage_investigation:<conversation id>`, which the alerts
+  # attachment matches. Neither is a verdict tag, so the sweep ignores them.
   - name: process_mints
     type: foreach
     foreach: "${{ variables.group_mints | json }}"
@@ -830,36 +862,55 @@ steps:
         type: if
         condition: "${{ steps.create_proposal_investigation.error == blank }}"
         steps:
-          - name: init_mint_attach_tracking
+          - name: init_mint_tag_tracking
             type: data.set
             with:
-              failed_attach_chunk_count: 0
-              total_attach_chunk_count: "${{ steps.process_mints.item.alert_ids | chunk: 20 | size }}"
+              failed_tag_chunk_count: 0
 
-          - name: attach_mint_alerts
+          # `az:triage_investigation:<conversation id>` is what puts an alert in this Investigation,
+          # so the tags are written before the first message reports what failed.
+          - name: tag_mint_alerts
             type: foreach
-            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 20 | json }}"
+            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 500 | json }}"
             steps:
-              - name: attach_mint_alert_chunk
-                type: ai.attachment.add
+              - name: tag_mint_alert_chunk
+                type: kibana.SetAlertTags
                 on-failure:
                   retry:
                     max-attempts: 3
                     delay: 5s
                   continue: true
                 with:
-                  conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
-                  type: security.alerts
-                  render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
-                  data:
-                    alertIds: "${{ foreach.item }}"
-                  description: "Alerts in this closure proposal"
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_add:
+                      - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
+                      - "az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}"
+                    tags_to_remove: []
 
-              - name: record_attach_mint_alert_chunk_failure
+              - name: record_tag_mint_alert_chunk_failure
                 type: data.set
-                if: "${{ steps.attach_mint_alert_chunk.error != blank }}"
+                if: "${{ steps.tag_mint_alert_chunk.error != blank }}"
                 with:
-                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+                  failed_tag_chunk_count: "${{ variables.failed_tag_chunk_count | plus: 1 }}"
+
+          # The only alerts attachment of the Investigation. It references the alerts by tag, so the
+          # alerts later joins add and the alerts in no proposal routed here need no attachment.
+          - name: attach_mint_alerts
+            type: ai.attachment.add
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              conversation_id: "{{ steps.create_proposal_investigation.output.conversation_id }}"
+              type: security.alerts
+              render_inline: false  # security.alerts has no inline renderer: inline it draws an empty block
+              data:
+                tags:
+                  - "az:triage_investigation:{{ steps.create_proposal_investigation.output.conversation_id }}"
+              description: "Alerts in this Investigation"
 
           # First message of the Investigation. It describes only this proposal's alerts. The batch counts
           # and the model summary cover other alerts too, which made the numbers disagree.
@@ -886,7 +937,7 @@ steps:
 
                 {% if steps.process_mints.item.kind == 'keyed' %}If more alerts match this pattern while the proposal is open, they are added here and noted in a separate message.{% endif %}
 
-                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+                {% if steps.attach_mint_alerts.error != blank %}⚠️ The alerts failed to attach after retries; none of them are visible in this Investigation.{% elsif variables.failed_tag_chunk_count > 0 %}⚠️ Some alerts could not be tagged after retries; they are not visible in this Investigation.{% endif %}
 
                 [View execution]({{ execution.url }})
 
@@ -902,59 +953,16 @@ steps:
                   conversationId: "{{ steps.create_proposal_investigation.output.conversation_id }}"
                   entities: "${{ steps.process_mints.item.impacted_entities }}"
 
-          - name: tag_mint_alerts
-            type: foreach
-            foreach: "${{ steps.process_mints.item.alert_ids | chunk: 500 | json }}"
-            steps:
-              - name: tag_mint_alert_chunk
-                type: kibana.SetAlertTags
-                on-failure:
-                  retry:
-                    max-attempts: 3
-                    delay: 5s
-                  continue: true
-                with:
-                  ids: "${{ foreach.item }}"
-                  tags:
-                    tags_to_add:
-                      - "az:proposal:{{ steps.process_mints.item.proposal_id }}"
-                    tags_to_remove: []
-
-  # Alerts added to an open proposal go into its Investigation, which already has its review.
+  # Alerts added to an open proposal go into its Investigation, which already has its review. The
+  # owner's Investigation tag puts them there: its alerts attachment was added with the proposal.
   - name: process_joins
     type: foreach
     foreach: "${{ variables.group_joins | json }}"
     steps:
-      - name: init_joined_attach_tracking
+      - name: init_joined_tag_tracking
         type: data.set
         with:
-          failed_attach_chunk_count: 0
-          total_attach_chunk_count: "${{ steps.process_joins.item.alert_ids | chunk: 20 | size }}"
-
-      - name: attach_joined_alerts
-        type: foreach
-        foreach: "${{ steps.process_joins.item.alert_ids | chunk: 20 | json }}"
-        steps:
-          - name: attach_joined_alert_chunk
-            type: ai.attachment.add
-            on-failure:
-              retry:
-                max-attempts: 3
-                delay: 5s
-              continue: true
-            with:
-              conversation_id: "{{ steps.process_joins.item.conversation_id }}"
-              type: security.alerts
-              render_inline: false
-              data:
-                alertIds: "${{ foreach.item }}"
-              description: "Alerts added to this closure proposal"
-
-          - name: record_attach_joined_alert_chunk_failure
-            type: data.set
-            if: "${{ steps.attach_joined_alert_chunk.error != blank }}"
-            with:
-              failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+          failed_tag_chunk_count: 0
 
       - name: attach_joined_impact_gate
         type: if
@@ -984,7 +992,14 @@ steps:
               tags:
                 tags_to_add:
                   - "az:proposal:{{ steps.process_joins.item.owner_proposal_id }}"
+                  - "az:triage_investigation:{{ steps.process_joins.item.conversation_id }}"
                 tags_to_remove: []
+
+          - name: record_tag_joined_alert_chunk_failure
+            type: data.set
+            if: "${{ steps.tag_joined_alert_chunk.error != blank }}"
+            with:
+              failed_tag_chunk_count: "${{ variables.failed_tag_chunk_count | plus: 1 }}"
 
       - name: post_comment_joined_owner
         type: ai.conversation.add_user_message
@@ -1005,7 +1020,7 @@ steps:
 
             [View the added alert{% if steps.process_joins.item.alert_ids.size != 1 %}s{% endif %}](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.process_joins.item.alerts_page_query }})
 
-            {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+            {% if variables.failed_tag_chunk_count > 0 %}⚠️ Some alerts could not be tagged after retries; they are not visible in this Investigation.{% endif %}
 
   # ---------------------------------------------------------------------------
   # 7c. The alerts that are in no proposal (true positives, inconclusive verdicts, false positives
@@ -1073,36 +1088,53 @@ steps:
         type: if
         condition: "${{ variables.home_conversation_id != '' }}"
         steps:
-          - name: init_other_attach_tracking
+          - name: init_other_tag_tracking
             type: data.set
             with:
-              failed_attach_chunk_count: 0
-              total_attach_chunk_count: "${{ variables.other_alert_ids | chunk: 20 | size }}"
+              failed_tag_chunk_count: 0
 
-          - name: attach_other_alerts
+          - name: tag_other_alerts
             type: foreach
-            foreach: "${{ variables.other_alert_ids | chunk: 20 | json }}"
+            foreach: "${{ variables.other_alert_ids | chunk: 500 | json }}"
             steps:
-              - name: attach_other_alert_chunk
-                type: ai.attachment.add
+              - name: tag_other_alert_chunk
+                type: kibana.SetAlertTags
                 on-failure:
                   retry:
                     max-attempts: 3
                     delay: 5s
                   continue: true
                 with:
-                  conversation_id: "{{ variables.home_conversation_id }}"
-                  type: security.alerts
-                  render_inline: false
-                  data:
-                    alertIds: "${{ foreach.item }}"
-                  description: "Alerts analysed in this triage run that are not in a closure proposal"
+                  ids: "${{ foreach.item }}"
+                  tags:
+                    tags_to_add:
+                      - "az:triage_investigation:{{ variables.home_conversation_id }}"
+                    tags_to_remove: []
 
-              - name: record_attach_other_alert_chunk_failure
+              - name: record_tag_other_alert_chunk_failure
                 type: data.set
-                if: "${{ steps.attach_other_alert_chunk.error != blank }}"
+                if: "${{ steps.tag_other_alert_chunk.error != blank }}"
                 with:
-                  failed_attach_chunk_count: "${{ variables.failed_attach_chunk_count | plus: 1 }}"
+                  failed_tag_chunk_count: "${{ variables.failed_tag_chunk_count | plus: 1 }}"
+
+          # A proposal's Investigation got its alerts attachment with the proposal; only the batch's
+          # own Investigation needs one here.
+          - name: attach_other_alerts
+            type: ai.attachment.add
+            if: "${{ variables.batch_conversation_created }}"
+            on-failure:
+              retry:
+                max-attempts: 3
+                delay: 5s
+              continue: true
+            with:
+              conversation_id: "{{ variables.home_conversation_id }}"
+              type: security.alerts
+              render_inline: false
+              data:
+                tags:
+                  - "az:triage_investigation:{{ variables.home_conversation_id }}"
+              description: "Alerts in this Investigation"
 
           - name: count_other_entities
             type: data.set
@@ -1133,7 +1165,7 @@ steps:
 
                 {{ variables.other_alert_count }} of the {{ variables.alert_count }} analyzed alert{% if variables.alert_count != 1 %}s{% endif %} {% if variables.other_alert_count == 1 %}is{% else %}are{% endif %} in no closure proposal: {{ steps.classify_alerts.output.true_positive_count }} true positive, {{ steps.classify_alerts.output.inconclusive_count }} inconclusive, {{ variables.other_alert_count | minus: steps.classify_alerts.output.true_positive_count | minus: steps.classify_alerts.output.inconclusive_count | at_least: 0 }} false positive below the {{ inputs.confidence_floor }} confidence floor.{% if steps.classify_alerts.output.inconclusive_count > 0 and steps.group_fp_candidates_call.output.inconclusive_alerts_page_query != blank %} [View the inconclusive alerts](/s/{{ workflow.spaceId }}/app/security/alerts{{ steps.group_fp_candidates_call.output.inconclusive_alerts_page_query }}){% endif %}
 
-                {% if variables.failed_attach_chunk_count > 0 %}⚠️ {{ variables.failed_attach_chunk_count }} of {{ variables.total_attach_chunk_count }} alert chunk(s) failed to attach after retries; some alerts are not visible in this Investigation.{% endif %}
+                {% if steps.attach_other_alerts.error != blank %}⚠️ The alerts failed to attach after retries; none of them are visible in this Investigation.{% elsif variables.failed_tag_chunk_count > 0 %}⚠️ Some alerts could not be tagged after retries; they are not visible in this Investigation.{% endif %}
 
                 [View execution]({{ execution.url }})
 

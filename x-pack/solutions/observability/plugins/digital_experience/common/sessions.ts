@@ -43,6 +43,22 @@ export const SESSION_SORT_FIELDS = [
 ] as const;
 export type SessionSortField = (typeof SESSION_SORT_FIELDS)[number];
 
+// The sessions list API's limits, which the app also keeps its URL and inputs to.
+export const SESSIONS_LIST_DEFAULT_PER_PAGE = 25;
+export const SESSIONS_LIST_MAX_PER_PAGE = 100;
+/** The last page, counted from 0. */
+export const SESSIONS_LIST_MAX_PAGE = 1000;
+/** A week; longer sessions only match a lower bound. */
+export const SESSIONS_LIST_MAX_DURATION_MS = 7 * 24 * 60 * 60 * 1000;
+export const SESSIONS_LIST_MAX_SEARCH_LENGTH = 256;
+/** The longest value of each facet filter. */
+export const SESSIONS_LIST_MAX_FACET_LENGTHS = {
+  browser: 256,
+  os: 256,
+  country: 16,
+  entryPage: 1024,
+} as const;
+
 export type SessionWebVitals = Record<CoreWebVital, number | null>;
 
 export type SessionsTransformHealth = 'missing' | 'healthy' | 'lagging' | 'degraded' | 'outdated';

@@ -1,5 +1,5 @@
 {
-  "sha1": "67e1f9a73059e13afb31489bbded4ff8a6e68560",
+  "sha1": "86f09b9d67785b17e52a7699d8fb9ef8c3613f9c",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -499,6 +499,66 @@
         "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_expand_toggle.spec.ts",
         "line": 33,
         "column": 51
+      }
+    },
+    {
+      "id": "b1ebe5266675622-1cf72a6b62aef14",
+      "title": "Panel filtering (dashboard) saved filter can be applied and disabled",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_filtering.spec.ts",
+        "line": 79,
+        "column": 17
+      }
+    },
+    {
+      "id": "b1ebe5266675622-10d24cfc9b9db23",
+      "title": "Panel filtering (dashboard) a filter added in the UI is applied to a panel",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_filtering.spec.ts",
+        "line": 107,
+        "column": 63
+      }
+    },
+    {
+      "id": "b1ebe5266675622-90dfb7575414af7",
+      "title": "Panel filtering (dashboard) a pinned filter is applied to a panel the same as an unpinned filter",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-search",
+        "@cloud-serverless-search",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete",
+        "@local-serverless-security_complete",
+        "@cloud-serverless-security_complete"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/dashboard/test/scout/ui/parallel_tests/panel_filtering.spec.ts",
+        "line": 120,
+        "column": 26
       }
     },
     {

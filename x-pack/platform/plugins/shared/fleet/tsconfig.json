@@ -68,6 +68,7 @@
     "@kbn/es-query",
     "@kbn/ui-theme",
     "@kbn/config-schema",
+    "@kbn/schema-string-helpers",
     "@kbn/telemetry-plugin",
     "@kbn/task-manager-plugin",
     "@kbn/saved-objects-tagging-plugin",

@@ -109,6 +109,7 @@ export interface EpisodeDataSource {
   label: string;
   icon?: IconType;
   queryKeyPrefix: readonly unknown[];
+  ruleTypeIds?: string[];
   fetchEpisodes: (params: FetchSourceEpisodesParams) => Promise<AlertEpisode[]>;
   fetchKpis?: (params: FetchSourceKpisParams) => Promise<EpisodeSourceKpis>;
   fetchHistogram?: (params: FetchSourceHistogramParams) => Promise<EpisodeSourceHistogram>;

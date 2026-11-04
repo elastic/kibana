@@ -111,6 +111,15 @@ export const triggerLabels = {
   dailyLimit: i18n.translate('xpack.nightshift.automations.dailyLimitLabel', {
     defaultMessage: 'Daily trigger limit',
   }),
+  noLimit: i18n.translate('xpack.nightshift.automations.flyout.noLimit', {
+    defaultMessage: 'No limit',
+  }),
+  noDailyLimit: i18n.translate('xpack.nightshift.automations.flyout.noDailyLimit', {
+    defaultMessage: 'No daily limit',
+  }),
+  noDailyLimitHelp: i18n.translate('xpack.nightshift.automations.flyout.noDailyLimitHelp', {
+    defaultMessage: 'This automation can run as many times as it is triggered each day.',
+  }),
   perDay: i18n.translate('xpack.nightshift.automations.perDayAppend', {
     defaultMessage: 'per day',
   }),

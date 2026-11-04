@@ -7,6 +7,10 @@
 
 import type { Conversation } from '@kbn/agent-builder-common';
 import { getLatestVersion } from '@kbn/agent-builder-common/attachments';
+import {
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
+} from '@kbn/custom-content-common';
 import { DASHBOARD_ATTACHMENT_TYPE } from '@kbn/agent-builder-dashboards-common';
 import { VISUALIZATION_ATTACHMENT_TYPE } from '@kbn/agent-builder-visualizations-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
@@ -50,6 +54,8 @@ export interface CustomContentTaskOutput {
   toolIds: string[];
   /** Tool ids of the follow-up turn alone; undefined for a single-turn example. */
   followUpToolIds?: string[];
+  /** What the follow-up turn passed to the tools that build custom content, as short lines. */
+  followUpToolArgs?: string[];
   /** The stored panel in the shape the low-score log prints, whichever attachment holds it. */
   visualizations: ExtractedVisualization[];
   /** Renderers of other visualizations the agent created instead (`lens`, `vega`). */
@@ -108,7 +114,6 @@ export const readStoredCustomContent = (
   };
 };
 
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
 const CUSTOM_CONTENT_PANEL_TYPE = 'custom_content';
 
 /**
@@ -119,7 +124,7 @@ export const getLastWrittenDashboardId = (
   steps: Array<Record<string, unknown>> | undefined
 ): string | undefined => {
   for (const step of [...(steps ?? [])].reverse()) {
-    if (step.type !== 'tool_call' || step.tool_id !== GENERATE_DASHBOARD_TOOL_ID) {
+    if (step.type !== 'tool_call' || step.tool_id !== CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID) {
       continue;
     }
     for (const result of Array.isArray(step.results) ? step.results : []) {
@@ -250,6 +255,71 @@ export const findStoredPanel = (
   }
   return { versionCount: 0, storedIn: 'none' };
 };
+
+const CREATE_VISUALIZATION_TOOL_ID = 'platform.core.create_visualization';
+const PROMPT_EXCERPT_LENGTH = 80;
+
+const flag = (value: unknown): string =>
+  value === undefined || value === null ? 'unset' : String(value);
+
+const presence = (value: unknown): string =>
+  value === null ? 'null' : typeof value === 'string' && value.trim() !== '' ? 'yes' : 'no';
+
+const excerpt = (value: unknown): string =>
+  typeof value === 'string' ? JSON.stringify(value.slice(0, PROMPT_EXCERPT_LENGTH)) : 'unset';
+
+/**
+ * Summarizes what each tool call of these steps passed for a custom content panel: the data flags
+ * and whether a query was supplied, never the query itself. It tells an agent that left out
+ * `hasData` from one that passed it and still got no query.
+ */
+export const getCustomContentToolArgs = (
+  steps: Array<Record<string, unknown>> | undefined
+): string[] =>
+  (steps ?? []).flatMap((step) => {
+    if (step.type !== 'tool_call' || !isRecord(step.params)) {
+      return [];
+    }
+    const { params } = step;
+    const toolId = String(step.tool_id);
+
+    if (toolId === CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID && Array.isArray(params.panels)) {
+      return params.panels.flatMap((item: unknown) =>
+        isRecord(item) && isRecord(item.content) && item.content.renderer === 'custom_content'
+          ? [
+              `${toolId} panel ${String(item.id)}: hasData=${flag(
+                item.content.hasData
+              )} regenerateESQL=${flag(item.content.regenerateESQL)} esql=${presence(
+                item.content.esql
+              )} index=${presence(item.content.index)} query=${excerpt(item.content.query)}`,
+            ]
+          : []
+      );
+    }
+
+    if (toolId === CREATE_VISUALIZATION_TOOL_ID && isRecord(params.target)) {
+      const { target } = params;
+      return target.type === 'custom_content' || target.type === 'attachment'
+        ? [
+            `${toolId} ${String(target.type)}: has_data=${flag(
+              target.has_data
+            )} regenerate_esql=${flag(target.regenerate_esql)} esql=${presence(
+              target.esql
+            )} index=${presence(params.index)} query=${excerpt(params.query)}`,
+          ]
+        : [];
+    }
+
+    if (toolId.includes(CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID)) {
+      return [
+        `${toolId}: regenerateEsql=${flag(params.regenerateEsql)} esqlQuery=${presence(
+          params.esqlQuery
+        )} index=${presence(params.index)} prompt=${excerpt(params.prompt)}`,
+      ];
+    }
+
+    return [];
+  });
 
 const TEMPLATE_EXCERPT_LENGTH = 200;
 

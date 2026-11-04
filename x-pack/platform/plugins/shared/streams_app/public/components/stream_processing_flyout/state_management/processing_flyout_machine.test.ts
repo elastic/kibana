@@ -178,6 +178,18 @@ describe('processingFlyoutMachine', () => {
     expect(context.steps).toHaveLength(2);
   });
 
+  it('remembers a processor committed unchecked until the next save', () => {
+    const { flyout } = startFlyout();
+    flyout.send({ type: 'step.create' });
+    flyout.send({ type: 'step.commit', processor: processor('tier'), unchecked: true });
+    flyout.send({ type: 'step.edit', key: 'step-0' });
+    flyout.send({ type: 'step.commit', processor: processor('renamed') });
+    expect(flyout.getSnapshot().context.validationSkipped).toBe(true);
+
+    flyout.send({ type: 'flyout.save' });
+    expect(flyout.getSnapshot().context.validationSkipped).toBe(false);
+  });
+
   it('does not edit read-only nodes', () => {
     const { flyout } = startFlyout({ editable: false });
     flyout.send({ type: 'step.create' });
