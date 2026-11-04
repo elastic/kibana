@@ -359,7 +359,7 @@ not measured.
 | `dimensions` | Which fields do the failing rows carry, by their values, out of how many values in scope? | one query over the `candidates:` fields (`Good (dimensions)`) | last 1h | as "Reading `dimensions`" says |
 | `examples` | What do the failing messages say, across the hour? | one query, 3 values, the text not cut (`Good (examples)`) | last 1h | as "Reading `examples`" says |
 | `trend` | Still happening? | `{failure}` counted per hour with `BUCKET(@timestamp, 1 hour)` (about 24 rows; the current hour is partial) | 24h | the latest bucket against now: steady, rising, or ended (a stream that went silent shows as no recent buckets) |
-| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day (`BUCKET(@timestamp, 1 day)`), with the `earliest` failure of each day, shaped as `Good (baseline)` for its variant (no `lines` without an isolating scope) | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below; the no-isolating shape has its own reading |
+| `baseline` | Is it new, or has it been going on at this rate? Since when? | per day: `count`, `lines` (isolating scope only) and the `earliest` failure of each day, all before `BY day = BUCKET(@timestamp, 1 day)`; shaped as `Good (baseline)` for its variant | last 7 days (`now-7d` to `now`) | `days_active` of `days`, `factor`, and the onset, as read below; the no-isolating shape has its own reading |
 | `breakdown` | Which values does a kept field take in the failing rows, how often, and since when? | one query per kept field, top 8 (`Good (breakdown)`) | last 1h | as "Reading `breakdown`" says |
 
 Reading `dimensions`, with `affected` from `spread`:
@@ -450,6 +450,8 @@ Shape of every profile query, after FROM {from_target} | WHERE @timestamp >= ?_t
     before it. trend, examples and breakdown put WHERE {failure} before the STATS.
   - No isolating scope: no WHERE {scope}; WHERE {failure} before the STATS in every query; no total,
     a_{field} or lines.
+  - BY holds only the grouping key (day = BUCKET(...), bucket = BUCKET(...), a field). Every
+    aggregate, with its own WHERE, comes before BY; a per-aggregate WHERE after BY is a parse error.
 
 Good (spread, isolating):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | STATS affected = COUNT(*) WHERE {failure}, total = COUNT(*)
@@ -474,7 +476,7 @@ Good (breakdown; no WHERE {scope} without an isolating scope):
   FROM {from_target} | WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend | WHERE {scope} | WHERE {failure} | STATS n = COUNT(*), first_seen = MIN(@timestamp), last_seen = MAX(@timestamp) BY `{field}` | SORT n DESC | LIMIT 8
 
 Avoid: BY {function}({text field}) of unbounded output   -- millions of buckets
-Avoid: an aggregate after BY (BY day = ..., earliest = MIN(@timestamp))   -- "cannot use an aggregate for grouping"
+Avoid: an aggregate after BY (BY day = ..., earliest = MIN(@timestamp) WHERE {failure})   -- parse error; write the aggregate before BY
 ```
 
 `<output_format>` has these figures go into the signal's `description`.
