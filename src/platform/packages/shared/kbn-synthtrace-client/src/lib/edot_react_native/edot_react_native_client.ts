@@ -48,7 +48,15 @@ export interface HttpRequestOptions {
   statusCode?: number;
   /** The exception class on Android, the runtime class of the error on iOS (e.g. `NSURLError`). */
   errorType?: string;
+  /**
+   * Written as `http.request.body.size`. Only EDOT iOS writes it: EDOT Android turns off the
+   * experimental OkHttp telemetry that records body sizes.
+   */
   requestBodySize?: number;
+  /**
+   * Written as `http.response.body.size` for a request that got a response. Only EDOT iOS writes
+   * it: EDOT Android turns off the experimental OkHttp telemetry that records body sizes.
+   */
   responseBodySize?: number;
   traceId?: string;
   spanId?: string;
