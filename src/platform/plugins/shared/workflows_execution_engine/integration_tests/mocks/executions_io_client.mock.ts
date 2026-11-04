@@ -14,6 +14,7 @@ import type {
   ExecutionIoCreateDocument,
   ExecutionsIoBulkCreateRequest,
   ExecutionsIoClient,
+  GetExecutionsIoByIdsOptions,
 } from '../../server/repositories/data_access_layer/implementations/executions_io/executions_io_data_client';
 import type { EsExecutionIo } from '../../server/repositories/data_access_layer/implementations/executions_io/types';
 import type {
@@ -41,7 +42,10 @@ export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
     this.documents.clear();
   }
 
-  public async getByIds(ids: string[]): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
+  public async getByIds(
+    ids: string[],
+    options?: GetExecutionsIoByIdsOptions
+  ): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
@@ -49,7 +53,7 @@ export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
     const items: GetExecutionsByIdsResponse<EsExecutionIo>['items'] = [];
     const missing: string[] = [];
     for (const id of ids) {
-      const document = this.documents.get(id);
+      const document = projectSource(this.documents.get(id), options?.sourceIncludes);
       if (document) {
         items.push({ document, index: IO_INDEX, seqNo: 1, primaryTerm: 1 });
       } else {
@@ -127,4 +131,35 @@ export class InMemoryExecutionsIoClient implements ExecutionsIoClient {
       step.output = output.value ?? null;
     }
   }
+}
+
+/** Keeps only requested `value.*` fields, matching a `_source` include on the data stream. */
+function projectSource(
+  document: EsExecutionIo | undefined,
+  sourceIncludes?: string[]
+): EsExecutionIo | undefined {
+  if (!document || !sourceIncludes?.length) {
+    return document;
+  }
+  const valueFields = sourceIncludes
+    .filter((field) => field.startsWith('value.'))
+    .map((field) => field.slice('value.'.length))
+    .filter((field) => field.length > 0);
+  const { value } = document;
+  if (
+    valueFields.length === 0 ||
+    value == null ||
+    typeof value !== 'object' ||
+    Array.isArray(value)
+  ) {
+    return document;
+  }
+  const record = value as Record<string, unknown>;
+  const projected: Record<string, unknown> = {};
+  for (const field of valueFields) {
+    if (field in record) {
+      projected[field] = record[field];
+    }
+  }
+  return { ...document, value: projected };
 }

@@ -768,23 +768,30 @@ export class WorkflowExecutionQueryService {
 
     const hits = response?.hits?.hits ?? [];
     const completedByRun = new Map<string, Array<{ finishedAt?: string; outputId?: string }>>();
-    const outputIds = new Set<string>();
     for (const hit of hits) {
       const source = hit._source;
       if (source?.workflowRunId) {
         const forRun = completedByRun.get(source.workflowRunId) ?? [];
         forRun.push({ finishedAt: source.finishedAt, outputId: source.outputId });
         completedByRun.set(source.workflowRunId, forRun);
-        if (source.outputId) {
-          outputIds.add(source.outputId);
-        }
+      }
+    }
+
+    const predecessorOutputIdByStepId = new Map<string, string>();
+    for (const step of steps) {
+      const outputId = immediatePredecessorOutputId(step, completedByRun);
+      if (step.id && outputId) {
+        predecessorOutputIdByStepId.set(step.id, outputId);
       }
     }
 
     const reasoningByOutputId = new Map<string, Record<string, unknown>>();
-    if (outputIds.size > 0) {
+    const outputIds = [...new Set(predecessorOutputIdByStepId.values())];
+    if (outputIds.length > 0) {
       try {
-        const { items } = await this.deps.executionsIoDataClient.getByIds([...outputIds]);
+        const { items } = await this.deps.executionsIoDataClient.getByIds(outputIds, {
+          sourceIncludes: ['value.reasoning'],
+        });
         for (const item of items) {
           const reasoning = extractReasoning(item.document.value);
           if (reasoning) {
@@ -797,23 +804,10 @@ export class WorkflowExecutionQueryService {
       }
     }
 
-    for (const step of steps) {
-      const { id, workflowRunId, startedAt } = step;
-      const candidates =
-        id && workflowRunId && startedAt ? completedByRun.get(workflowRunId) : undefined;
-      if (candidates && id && startedAt) {
-        // Candidates are finishedAt-desc within a run; the first that finished
-        // at or before the wait step started is its immediate predecessor.
-        const predecessor = candidates.find(
-          (candidate) =>
-            typeof candidate.finishedAt === 'string' && candidate.finishedAt <= startedAt
-        );
-        const reasoning = predecessor?.outputId
-          ? reasoningByOutputId.get(predecessor.outputId)
-          : undefined;
-        if (reasoning) {
-          reasoningByStepId.set(id, reasoning);
-        }
+    for (const [stepId, outputId] of predecessorOutputIdByStepId) {
+      const reasoning = reasoningByOutputId.get(outputId);
+      if (reasoning) {
+        reasoningByStepId.set(stepId, reasoning);
       }
     }
 
@@ -1158,6 +1152,26 @@ function omitEmbeddedStepPayloads(steps: EsWorkflowStepExecution[]): void {
     delete step.input;
     delete step.output;
   }
+}
+
+/**
+ * The completed step that finished at or before `startedAt`. Candidates are
+ * already ordered finishedAt-desc within the run.
+ */
+function immediatePredecessorOutputId(
+  step: EsWorkflowStepExecution,
+  completedByRun: ReadonlyMap<string, Array<{ finishedAt?: string; outputId?: string }>>
+): string | undefined {
+  const { id, workflowRunId, startedAt } = step;
+  const candidates =
+    id && workflowRunId && startedAt ? completedByRun.get(workflowRunId) : undefined;
+  if (!candidates || !startedAt) {
+    return undefined;
+  }
+  const predecessor = candidates.find(
+    (candidate) => typeof candidate.finishedAt === 'string' && candidate.finishedAt <= startedAt
+  );
+  return predecessor?.outputId;
 }
 
 /**

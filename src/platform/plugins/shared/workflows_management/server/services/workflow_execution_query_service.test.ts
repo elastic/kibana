@@ -1371,10 +1371,9 @@ describe('WorkflowExecutionQueryService', () => {
           size: 1000,
           track_total_hits: false,
         });
-        expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith([
-          'output:pred-1',
-          'output:pred-0',
-        ]);
+        expect(mockExecutionsIoDataClient.getByIds).toHaveBeenCalledWith(['output:pred-1'], {
+          sourceIncludes: ['value.reasoning'],
+        });
         expect(reasoningArgs.query.bool.must).toEqual(
           expect.arrayContaining([
             { term: { spaceId: 'default' } },

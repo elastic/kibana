@@ -74,7 +74,7 @@ export class DeferredDataClientBundle implements DataClientBundle {
     const get = () =>
       startPromise.then(() => (resolved ??= this.dataClientBundle.createIoDataClient()));
     const client: ExecutionsIoClient = {
-      getByIds: (ids) => get().then((ioClient) => ioClient.getByIds(ids)),
+      getByIds: (ids, options) => get().then((ioClient) => ioClient.getByIds(ids, options)),
       bulkCreate: (request) => get().then((ioClient) => ioClient.bulkCreate(request)),
     };
 

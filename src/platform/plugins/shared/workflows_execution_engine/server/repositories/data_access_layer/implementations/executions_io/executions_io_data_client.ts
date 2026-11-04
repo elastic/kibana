@@ -44,9 +44,17 @@ export interface ExecutionsIoDataClientDeps {
   logger: Logger;
 }
 
+/** Optional `_source` filter for {@link ExecutionsIoClient.getByIds}. */
+export interface GetExecutionsIoByIdsOptions {
+  sourceIncludes?: string[];
+}
+
 /** Public IO client. Both storage bundles and the deferred wrapper implement this. */
 export interface ExecutionsIoClient {
-  getByIds(ids: string[]): Promise<GetExecutionsByIdsResponse<EsExecutionIo>>;
+  getByIds(
+    ids: string[],
+    options?: GetExecutionsIoByIdsOptions
+  ): Promise<GetExecutionsByIdsResponse<EsExecutionIo>>;
   bulkCreate(request: ExecutionsIoBulkCreateRequest): Promise<BulkResponse>;
 }
 
@@ -70,15 +78,19 @@ type IoHit = GetExecutionsByIdsResponse<EsExecutionIo>['items'][number];
 export class ExecutionsIoDataClient implements ExecutionsIoClient {
   constructor(private readonly deps: ExecutionsIoDataClientDeps) {}
 
-  public async getByIds(ids: string[]): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
+  public async getByIds(
+    ids: string[],
+    options?: GetExecutionsIoByIdsOptions
+  ): Promise<GetExecutionsByIdsResponse<EsExecutionIo>> {
     if (ids.length === 0) {
       return { items: [], missing: [] };
     }
 
-    const byId = await this.readRecentBackingIndexes(ids);
+    const sourceIncludes = options?.sourceIncludes?.filter((field) => field.length > 0);
+    const byId = await this.readRecentBackingIndexes(ids, sourceIncludes);
     const missingIds = ids.filter((id) => !byId.has(id));
     if (missingIds.length > 0) {
-      const fallback = await this.readPlainIndexes(missingIds);
+      const fallback = await this.readPlainIndexes(missingIds, sourceIncludes);
       for (const [id, item] of fallback) {
         byId.set(id, item);
       }
@@ -220,7 +232,10 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
   }
 
   /** mget the two newest IO backing indexes, then search the data stream for the rest. */
-  private async readRecentBackingIndexes(ids: string[]): Promise<Map<string, IoHit>> {
+  private async readRecentBackingIndexes(
+    ids: string[],
+    sourceIncludes?: string[]
+  ): Promise<Map<string, IoHit>> {
     const recentIndexes = [...this.deps.metadataManager.getMeta().backingIndexes]
       .slice(-2)
       .reverse();
@@ -230,8 +245,13 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
     }
 
     const lookups = ids.flatMap((id) => recentIndexes.map((index) => ({ id, index })));
+    const sourceFilter = sourceFilterFor(sourceIncludes);
     const response = await this.deps.esClient.mget<EsExecutionIo>({
-      docs: lookups.map(({ id, index }) => ({ _index: index, _id: id })),
+      docs: lookups.map(({ id, index }) => ({
+        _index: index,
+        _id: id,
+        ...(sourceFilter ? { _source: sourceFilter } : {}),
+      })),
     });
 
     response.docs.forEach((doc, index) => {
@@ -269,6 +289,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       ignore_unavailable: true,
       size: missingIds.length,
       seq_no_primary_term: true,
+      ...(sourceFilter ? { _source: sourceFilter } : {}),
       query: { ids: { values: missingIds } },
     });
 
@@ -306,7 +327,10 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
    * Each execution is fetched with only the input and output fields that were requested.
    * A missing index or a failed request leaves those ids unresolved.
    */
-  private async readPlainIndexes(ioIds: string[]): Promise<Map<string, IoHit>> {
+  private async readPlainIndexes(
+    ioIds: string[],
+    sourceIncludes?: string[]
+  ): Promise<Map<string, IoHit>> {
     const byId = new Map<string, IoHit>();
     const parsed = ioIds.flatMap((id) => {
       const parts = parseExecutionIoId(id);
@@ -327,7 +351,7 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
       EXECUTION_IO_FALLBACK_INDEXES.map((index) => ({
         executionId,
         index,
-        sourceIncludes: sourceIncludesFor(index, types),
+        sourceIncludes: sourceIncludesFor(index, types, sourceIncludes),
       }))
     );
 
@@ -388,14 +412,39 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
 const isWorkflowIndex = (index: string): boolean => index.includes(WORKFLOWS_EXECUTIONS_INDEX);
 
 // Step docs keep IO at the top level; workflow docs keep it under `context` (`inputs` is plural).
-function sourceIncludesFor(index: string, types: Set<ExecutionIoType>): string[] {
+function sourceFilterFor(sourceIncludes?: string[]): { includes: string[] } | undefined {
+  if (!sourceIncludes?.length) {
+    return undefined;
+  }
+  return { includes: sourceIncludes };
+}
+
+/**
+ * `value.*` on the data stream is `input` / `output` on a legacy step doc and
+ * `context.inputs` / `context.output` on a legacy workflow doc.
+ */
+function sourceIncludesFor(
+  index: string,
+  types: Set<ExecutionIoType>,
+  sourceIncludes?: string[]
+): string[] {
   const workflow = isWorkflowIndex(index);
+  const valueFields = (sourceIncludes ?? [])
+    .filter((field) => field.startsWith('value.'))
+    .map((field) => field.slice('value.'.length))
+    .filter((field) => field.length > 0);
   const includes: string[] = [];
   if (types.has('input')) {
-    includes.push(workflow ? 'context.inputs' : 'input');
+    const base = workflow ? 'context.inputs' : 'input';
+    includes.push(
+      ...(valueFields.length > 0 ? valueFields.map((field) => `${base}.${field}`) : [base])
+    );
   }
   if (types.has('output')) {
-    includes.push(workflow ? 'context.output' : 'output');
+    const base = workflow ? 'context.output' : 'output';
+    includes.push(
+      ...(valueFields.length > 0 ? valueFields.map((field) => `${base}.${field}`) : [base])
+    );
   }
   return includes;
 }

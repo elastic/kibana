@@ -237,6 +237,69 @@ describe('ExecutionsIoDataClient', () => {
     ]);
   });
 
+  it('reads only value.reasoning from the data stream and the legacy output field', async () => {
+    const [workflowIndex, stepIndex] = EXECUTION_IO_FALLBACK_INDEXES;
+    esClient.mget.mockImplementation((params) => {
+      const docs = params?.docs ?? [];
+      const legacy = docs.some((doc) => doc._source != null);
+      return Promise.resolve({
+        docs: docs.map((doc) => {
+          if (legacy && doc._index === stepIndex && doc._id === 'step-1') {
+            return {
+              _index: doc._index,
+              _id: doc._id,
+              found: true as const,
+              _source: { output: { reasoning: { summary: 'why' } } },
+            };
+          }
+          return {
+            _index: doc._index ?? '',
+            _id: doc._id ?? '',
+            found: false as const,
+          };
+        }),
+      });
+    });
+
+    const result = await client.getByIds(['output:step-1'], {
+      sourceIncludes: ['value.reasoning'],
+    });
+
+    expect(esClient.mget).toHaveBeenNthCalledWith(1, {
+      docs: [
+        {
+          _index: NEWER_INDEX,
+          _id: 'output:step-1',
+          _source: { includes: ['value.reasoning'] },
+        },
+        {
+          _index: OLDER_INDEX,
+          _id: 'output:step-1',
+          _source: { includes: ['value.reasoning'] },
+        },
+      ],
+    });
+    expect(esClient.search).toHaveBeenCalledWith({
+      index: WORKFLOWS_EXECUTIONS_IO_DATA_STREAM,
+      ignore_unavailable: true,
+      size: 1,
+      seq_no_primary_term: true,
+      _source: { includes: ['value.reasoning'] },
+      query: { ids: { values: ['output:step-1'] } },
+    });
+    expect(esClient.mget).toHaveBeenNthCalledWith(2, {
+      docs: [
+        {
+          _index: workflowIndex,
+          _id: 'step-1',
+          _source: { includes: ['context.output.reasoning'] },
+        },
+        { _index: stepIndex, _id: 'step-1', _source: { includes: ['output.reasoning'] } },
+      ],
+    });
+    expect(result.items[0]?.document.value).toEqual({ reasoning: { summary: 'why' } });
+  });
+
   it('requests both fields when one execution asks for input and output', async () => {
     const [workflowIndex, stepIndex] = EXECUTION_IO_FALLBACK_INDEXES;
     esClient.mget
