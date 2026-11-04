@@ -221,7 +221,14 @@ export class ExecutionsIoDataClient implements ExecutionsIoClient {
             retry_on_conflict: 3,
           },
         },
-        { doc: { value: document.value, size: document.size } },
+        // Assignment replaces `value`. A partial `doc` update would merge it and
+        // leave removed fields, such as a HITL token hash, in the stored payload.
+        {
+          script: {
+            source: 'ctx._source.value = params.value; ctx._source.size = params.size;',
+            params: { value: document.value, size: document.size },
+          },
+        },
       ]),
     });
 

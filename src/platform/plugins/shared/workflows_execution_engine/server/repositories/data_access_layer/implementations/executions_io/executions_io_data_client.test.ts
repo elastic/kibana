@@ -530,7 +530,12 @@ describe('ExecutionsIoDataClient', () => {
             retry_on_conflict: 3,
           },
         },
-        { doc: { value: { done: true }, size: 2 } },
+        {
+          script: {
+            source: 'ctx._source.value = params.value; ctx._source.size = params.size;',
+            params: { value: { done: true }, size: 2 },
+          },
+        },
       ],
     });
     expect(result.errors).toBe(false);
