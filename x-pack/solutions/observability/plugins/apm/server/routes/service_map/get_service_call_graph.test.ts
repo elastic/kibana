@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Logger } from '@kbn/core/server';
 import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ApmDocumentType, RollupInterval } from '@kbn/apm-data-access-plugin/common';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
@@ -16,13 +17,25 @@ type SearchMock = jest.Mock<Promise<unknown>>;
 
 const END = 1_700_000_900_000;
 
+function makeLogger() {
+  return {
+    debug: jest.fn(),
+    info: jest.fn(),
+    warn: jest.fn(),
+    error: jest.fn(),
+  } as unknown as Logger;
+}
+
 function makeOptions(
-  overrides: Partial<Pick<IEnvOptions, 'apmEventClient' | 'environment' | 'serviceGroupKuery'>> = {}
+  overrides: Partial<
+    Pick<IEnvOptions, 'apmEventClient' | 'environment' | 'logger' | 'serviceGroupKuery'>
+  > = {}
 ) {
   return {
     apmEventClient: {} as APMEventClient,
     environment: 'production',
     end: END,
+    logger: makeLogger(),
     serviceGroupKuery: undefined,
     ...overrides,
   };
@@ -30,7 +43,6 @@ function makeOptions(
 
 interface CallBucket {
   key: { service?: string; destination?: string };
-  doc_count: number;
   calls?: { value: number | null };
 }
 
@@ -45,10 +57,9 @@ function callResponse(buckets: CallBucket[], afterKey?: { service: string; desti
   };
 }
 
-function bucket(service: string, destination: string, calls: number, docCount = calls): CallBucket {
+function bucket(service: string, destination: string, calls: number): CallBucket {
   return {
     key: { service, destination },
-    doc_count: docCount,
     calls: { value: calls },
   };
 }
@@ -194,18 +205,13 @@ describe('getServiceCallGraph', () => {
     expect(graph).toEqual({});
   });
 
-  it('uses the summed call count, and the document count when the sum is missing', async () => {
+  it('uses the summed call count', async () => {
     const search: SearchMock = jest
       .fn()
       .mockResolvedValueOnce(
         callResponse([
-          bucket('cart', 'payment', 40, 2),
-          {
-            key: { service: 'cart', destination: 'shipping' },
-            doc_count: 7,
-            calls: { value: null },
-          },
-          { key: { service: 'cart' }, doc_count: 1, calls: { value: 1 } },
+          bucket('cart', 'payment', 40),
+          { key: { service: 'cart' }, calls: { value: 1 } },
         ])
       )
       .mockResolvedValue(callResponse([]));
@@ -213,10 +219,7 @@ describe('getServiceCallGraph', () => {
     const graph = await getServiceCallGraph(clientFor(search, { sixtyMinutes: true }).options);
 
     expect(graph).toEqual({
-      cart: [
-        { destination: 'payment', calls: 40 },
-        { destination: 'shipping', calls: 7 },
-      ],
+      cart: [{ destination: 'payment', calls: 40 }],
     });
   });
 

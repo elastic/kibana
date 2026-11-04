@@ -150,4 +150,26 @@ describe('getServiceMap call graph', () => {
     );
     expect(logger.info).not.toHaveBeenCalled();
   });
+
+  it('returns the map when matching the call graph fails', async () => {
+    getServiceCallGraphMock.mockResolvedValue({
+      gateway: [{ destination: 'cart', calls: 1 }],
+    });
+    matchCallGraphToServicesMock.mockImplementation(() => {
+      throw new Error('match failed');
+    });
+    const { options, logger } = makeOptions({ groupingEnabled: true });
+
+    const map = await getServiceMap(options);
+
+    expect(map).toEqual({
+      spans,
+      tracesCount: 1,
+      servicesData,
+      anomalies: DEFAULT_ANOMALIES,
+    });
+    expect(logger.debug).toHaveBeenCalledWith('Unable to match the call graph for service maps.', {
+      error: expect.any(Error),
+    });
+  });
 });

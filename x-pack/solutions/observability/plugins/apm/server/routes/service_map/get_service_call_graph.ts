@@ -40,12 +40,11 @@ export type ServiceCallGraph = Record<string, ServiceDestinationCall[]>;
 
 type ServiceCallGraphOptions = Pick<
   IEnvOptions,
-  'apmEventClient' | 'environment' | 'end' | 'serviceGroupKuery'
+  'apmEventClient' | 'environment' | 'end' | 'logger' | 'serviceGroupKuery'
 >;
 
 interface ServiceCallBucket {
   key: { service?: string | number | null; destination?: string | number | null };
-  doc_count: number;
   calls?: { value?: number | null };
 }
 
@@ -87,7 +86,8 @@ export async function getServiceCallGraph(
     await Promise.all([
       readServiceCalls({ ...options, rollupInterval }),
       ...readCallsNotYetInRollup(options, rollupInterval),
-    ])
+    ]),
+    options.logger
   );
 }
 
@@ -196,14 +196,22 @@ function readCallsNotYetInRollup(
 }
 
 /** Finer rollups only contribute pairs the coarser ones did not already count. */
-function mergeServiceCalls(graphs: readonly ServiceCallGraph[]): ServiceCallGraph {
+function mergeServiceCalls(
+  graphs: readonly ServiceCallGraph[],
+  logger: ServiceCallGraphOptions['logger']
+): ServiceCallGraph {
   const merged = new Map<string, Map<string, number>>();
+  const truncatedServices = new Set<string>();
 
   for (const graph of graphs) {
     for (const [service, destinations] of Object.entries(graph)) {
       const byDestination = merged.get(service) ?? new Map<string, number>();
       for (const { destination, calls } of destinations) {
-        if (byDestination.has(destination) || byDestination.size >= MAX_DESTINATIONS_PER_SERVICE) {
+        if (byDestination.has(destination)) {
+          continue;
+        }
+        if (byDestination.size >= MAX_DESTINATIONS_PER_SERVICE) {
+          truncatedServices.add(service);
           continue;
         }
         byDestination.set(destination, calls);
@@ -212,6 +220,12 @@ function mergeServiceCalls(graphs: readonly ServiceCallGraph[]): ServiceCallGrap
         merged.set(service, byDestination);
       }
     }
+  }
+
+  for (const service of truncatedServices) {
+    logger.debug(
+      `Service call graph kept ${MAX_DESTINATIONS_PER_SERVICE} destinations for ${service}.`
+    );
   }
 
   return recordByService(
@@ -226,6 +240,7 @@ async function readServiceCalls({
   apmEventClient,
   environment,
   end,
+  logger,
   serviceGroupKuery,
   rollupInterval,
   sinceMs = SERVICE_CALL_GRAPH_WINDOW_MS,
@@ -234,7 +249,9 @@ async function readServiceCalls({
   sinceMs?: number;
 }): Promise<ServiceCallGraph> {
   const graph = new Map<string, ServiceDestinationCall[]>();
+  const truncatedServices = new Set<string>();
   let after: Record<string, string | number | null> | undefined;
+  let stoppedAtPageLimit = false;
 
   for (let page = 0; page < MAX_PAGES; page++) {
     const response = await apmEventClient.search('get_service_call_graph_for_service_map', {
@@ -278,20 +295,35 @@ async function readServiceCalls({
       }
       const serviceName = String(service);
       const list = graph.get(serviceName) ?? [];
-      if (list.length < MAX_DESTINATIONS_PER_SERVICE) {
+      if (list.length >= MAX_DESTINATIONS_PER_SERVICE) {
+        truncatedServices.add(serviceName);
+      } else {
         list.push({
           destination: String(destination),
-          calls: bucket.calls?.value ?? bucket.doc_count,
+          calls: bucket.calls?.value ?? 0,
         });
+        graph.set(serviceName, list);
       }
-      graph.set(serviceName, list);
     }
 
     const buckets = calls?.buckets ?? [];
     if (buckets.length < PAGE_SIZE || !calls?.after_key) {
       break;
     }
+    if (page === MAX_PAGES - 1) {
+      stoppedAtPageLimit = true;
+      break;
+    }
     after = calls.after_key;
+  }
+
+  if (stoppedAtPageLimit) {
+    logger.debug(`Service call graph stopped after ${MAX_PAGES} pages.`);
+  }
+  for (const service of truncatedServices) {
+    logger.debug(
+      `Service call graph kept ${MAX_DESTINATIONS_PER_SERVICE} destinations for ${service}.`
+    );
   }
 
   return recordByService(graph);

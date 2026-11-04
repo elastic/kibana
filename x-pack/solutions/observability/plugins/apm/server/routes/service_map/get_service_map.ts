@@ -121,11 +121,15 @@ export function getServiceMap(
 
     // Group selection will use this list. It stays off the response until then.
     if (callGraph) {
-      matchCallGraphToServices({
-        callGraph,
-        spans: connectionData.spans,
-        serviceNames: servicesData.map((service) => service[SERVICE_NAME]),
-      });
+      try {
+        matchCallGraphToServices({
+          callGraph,
+          spans: connectionData.spans,
+          serviceNames: servicesData.map((service) => service[SERVICE_NAME]),
+        });
+      } catch (error) {
+        logger.debug(`Unable to match the call graph for service maps.`, { error });
+      }
     }
 
     logger.debug('Received and parsed all responses');
