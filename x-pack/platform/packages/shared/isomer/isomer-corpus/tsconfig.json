@@ -10,7 +10,9 @@
     "@kbn/as-code-dashboard-schema",
     "@kbn/as-code-shared-schemas",
     "@kbn/datemath",
+    "@kbn/dev-cli-runner",
     "@kbn/lens-embeddable-utils",
+    "@kbn/repo-info",
     "@kbn/zod"
   ]
 }

@@ -1,2 +1,4 @@
 # Screenshots are for review only; each capture run writes them locally.
 captures/**/*.png
+# The review export (scripts/export_review.js).
+review/

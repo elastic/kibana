@@ -34,6 +34,33 @@ Panels the as-code API can't express (Maps and legacy visualizations, reported a
 
 Saved object bookkeeping (`meta.created_at`, `meta.updated_at`, `meta.version`) and FTR's URL cache buster are left out, and JSON keys are sorted, so recapturing unchanged content changes no file. One known exception: two ES|QL panels on the Logs dashboard (`[Logs] Errors by host`, `[Logs] Bytes distribution`) sort with ties, so Elasticsearch returns tied rows in any order, and their inspector rows and drawn order can change between runs. That comes from the sample dashboard's own queries. The screenshots are not committed: they're binary and only for review. Each run writes them next to the JSON.
 
+## Exporting for Isomer's visual review
+
+`scripts/export_review.js` turns a capture run into what Isomer's review tool reads: the screenshot and the expected strings for every panel in both themes. It is not Gate A, which compares `DebugState` itself.
+
+```sh
+node x-pack/platform/packages/shared/isomer/isomer-corpus/scripts/export_review.js \
+  [--captures <capture dir>] [--out <export dir>]
+```
+
+By default it reads this package's `captures` and writes this package's `review/`, which is gitignored and replaced on every export. Screenshots aren't committed, so run the capture first on the same machine; any missing screenshot is listed in `index.json`, and its case has `screenshot: null`.
+
+```
+review/
+  index.json                       format, the run record, every case, missing screenshots
+  <dashboard>/<panel>/<theme>.png  the captured screenshot
+  <dashboard>/<panel>/<theme>.expected.json
+```
+
+Each `<theme>.expected.json` (format `isomer-corpus-review/1`) holds what a renderer must reproduce, taken from Kibana's own output and never from Isomer:
+
+- `title`, and the `context` it was drawn in: `now`, the absolute time range, `dateFormat:tz`, locale and panel size.
+- `charts`, one per Elastic Charts chart, from `DebugState`: axis titles and tick labels by position, legend names and colors, series names and colors, partition names and colors, heatmap cell text and colors, and the number of annotations.
+- `metrics`, from the page: each text with the metric part that drew it (`echMetricText__value`) and its color, plus the metric's background.
+- `tables`, from the page: headers, and rows of cells with their text, text color and background.
+
+Colors are lowercase hex (`#rrggbb`, `#rrggbbaa` when translucent), whether they came from `DebugState` or from the page. EUI's hidden clipboard markers in data grid text are removed.
+
 ## Round trip (P0 verify)
 
 The `round trip` tests write `captures/round_trip/report.md` and one JSON file per sample dashboard. For every Lens panel they compare the migrated stored state the dashboard app reads (`GET /internal/dashboards/app/{id}`) with the stored state after a trip through the API format (`GET /api/dashboards/{id}`, then `PUT` of a copy, then the same read). Generated layer and column IDs are aliased before comparing, so only real differences remain. The report also checks that the API config itself is stable across the trip.
