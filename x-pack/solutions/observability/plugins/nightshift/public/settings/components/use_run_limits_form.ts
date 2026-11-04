@@ -53,11 +53,12 @@ export const useRunLimitsForm = ({
       return;
     }
     setDraftState((current) =>
-      current && hasRunQuotaDraftChanges(current)
+      current &&
+      hasRunQuotaDraftChanges(sharedSwitch ? withEmptyLimitsAsUnlimited(current) : current)
         ? current
         : keepRestoreLimits(createRunQuotaDraftState(quotas.data), current)
     );
-  }, [quotas.data]);
+  }, [quotas.data, sharedSwitch]);
 
   // What a save sends: with the shared switch, an input left empty is a limit turned off.
   const effectiveDraftState = useMemo(

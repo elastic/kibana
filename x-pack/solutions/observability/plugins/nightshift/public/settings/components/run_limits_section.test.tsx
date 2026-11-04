@@ -616,6 +616,30 @@ describe('RunLimitsSection', () => {
     );
   });
 
+  it('takes a background update after an unlimited input was typed in and cleared again', () => {
+    const groups = ['investigation', 'manual_investigation', 'total_investigation'] as const;
+    const limits = {
+      detection: 100,
+      investigation: 4,
+      manual_investigation: 0,
+      total_investigation: 0,
+      ki_extraction: 20,
+    };
+    const { rerender } = setup(response({ limits }), groups, 'automations', true);
+    const manual = () => screen.getByTestId('nightshiftRunLimitInput-manual_investigation');
+    fireEvent.change(manual(), { target: { value: '3' } });
+    fireEvent.change(manual(), { target: { value: '' } });
+
+    setQueryResponse(response({ limits: { ...limits, manual_investigation: 7 } }));
+    rerender(
+      <I18nProvider>
+        <TestRunLimits groups={groups} sharedSwitch />
+      </I18nProvider>
+    );
+
+    expect(manual()).toHaveValue(7);
+  });
+
   it('retains a dirty draft when the query receives a background update', () => {
     const { rerender } = setup();
     fireEvent.change(screen.getByTestId('nightshiftRunLimitInput-detection'), {
