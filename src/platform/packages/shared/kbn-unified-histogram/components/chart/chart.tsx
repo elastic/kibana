@@ -10,7 +10,8 @@
 import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { IconButtonGroupProps } from '@kbn/shared-ux-button-toolbar';
-import { EuiDelayRender, EuiProgress, EuiSpacer } from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
+import { EuiDelayRender, EuiIcon, EuiProgress, EuiSpacer, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ApproximationBadge } from '@kbn/esql-browser';
 import type {
@@ -85,6 +86,24 @@ export interface UnifiedHistogramChartProps {
   lensActionsOptions?: UnifiedHistogramLensActionsOptions;
   onApiAvailable?: EmbeddableComponentProps['onApiAvailable'];
 }
+
+// The buttons of the toolbar all look the same, so the icon fills the button with the background
+const AnomaliesShownIcon = (props: Omit<EuiIconProps, 'type'>) => {
+  const { euiTheme } = useEuiTheme();
+  return (
+    <EuiIcon
+      {...props}
+      type="machineLearningApp"
+      css={{
+        boxSizing: 'content-box',
+        padding: euiTheme.size.xs,
+        borderRadius: euiTheme.border.radius.small,
+        backgroundColor: euiTheme.colors.backgroundLightPrimary,
+        color: euiTheme.colors.textPrimary,
+      }}
+    />
+  );
+};
 
 const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonLabel', {
   defaultMessage: 'Anomaly detection',
@@ -380,7 +399,8 @@ export function UnifiedHistogramChart({
     actions.push({
       label: suggestAdJobsLabel,
       toolTipContent: suggestAdJobsLabel,
-      iconType: 'machineLearningApp',
+      // Light blue while the chart shows anomalies
+      iconType: anomalyOverlay?.ranges.length ? AnomaliesShownIcon : 'machineLearningApp',
       'data-test-subj': 'unifiedHistogramSuggestAdJobs',
       onClick: onSuggestAdJobs,
     });
