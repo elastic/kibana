@@ -13,10 +13,12 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
-import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
+import type { KibanaIsomerRuntime, ValidationError } from '@kbn/isomer';
 import type { Subscription } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
+import type { MaterializedNode } from './materialize/nodes';
 import { MaterializerRegistry } from './materialize/registry';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
@@ -30,6 +32,10 @@ export interface IsomerPluginSetup {
 export interface AsScopedOptions {
   /** Cancels the user's queries. Defaults to the request's own abort. */
   abortSignal?: AbortSignal;
+}
+
+export interface IsomerPluginStartDependencies {
+  data: DataPluginStart;
 }
 
 export interface IsomerPluginStart {
@@ -49,8 +55,12 @@ const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
   return createKibanaIsomerRuntime({ packs: [componentsPack] });
 };
 
-export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
+export class IsomerPlugin
+  implements Plugin<IsomerPluginSetup, IsomerPluginStart, object, IsomerPluginStartDependencies>
+{
   private readonly logger: Logger;
+  private readonly kibanaVersion: string;
+  private data?: DataPluginStart;
   private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
   private materializeEnabled = false;
@@ -58,6 +68,7 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
+    this.kibanaVersion = initializerContext.env.packageInfo.version;
   }
 
   setup(core: CoreSetup): IsomerPluginSetup {
@@ -70,7 +81,8 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
     };
   }
 
-  start(core: CoreStart): IsomerPluginStart {
+  start(core: CoreStart, { data }: IsomerPluginStartDependencies): IsomerPluginStart {
+    this.data = data;
     this.materializeEnabledSubscription = core.featureFlags
       .getBooleanValue$(MATERIALIZE_FEATURE_FLAG, false)
       .subscribe((enabled) => {
@@ -94,13 +106,26 @@ export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart
 
   private readonly isMaterializeEnabled = async (): Promise<boolean> => this.materializeEnabled;
 
-  private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient =>
-    createScopedMaterializeClient({
+  private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient => {
+    if (!this.data) {
+      throw new Error('The isomer plugin materializes only after it starts.');
+    }
+    return createScopedMaterializeClient({
       registry: this.registry,
       scope,
       isEnabled: this.isMaterializeEnabled,
       logger: this.logger.get('materialize'),
+      search: this.data.search.asScoped(scope.request),
+      validate: this.validateNode,
+      kibanaVersion: this.kibanaVersion,
     });
+  };
+
+  private readonly validateNode = async (node: MaterializedNode): Promise<ValidationError[]> => {
+    const runtime = await this.getRuntime();
+    const { errors } = runtime.validate({ type: 'view', body: [node] });
+    return errors.map((error) => ({ ...error, path: error.path.replace(/^body\[0\]\.?/, '') }));
+  };
 
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(

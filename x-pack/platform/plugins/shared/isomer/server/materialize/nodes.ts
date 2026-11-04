@@ -43,6 +43,8 @@ export interface UnsupportedNode extends PrimitiveNode {
 
 /** A chart or layout node from the charts pack, with the provenance and losses its core carries. */
 export interface MaterializedChartNode extends PrimitiveNode {
+  /** Each primitive's own fields, which the charts pack's schemas define. */
+  [field: string]: unknown;
   title?: string;
   source?: MaterializedNodeSource;
   losses?: MaterializeLoss[];
@@ -76,3 +78,12 @@ export const UNSUPPORTED_NODE_TYPE = 'unsupported';
 
 export const isUnsupportedNode = (node: PrimitiveNode): node is UnsupportedNode =>
   node.type === UNSUPPORTED_NODE_TYPE;
+
+const COMPONENT_NODE_TYPES: ReadonlySet<string> = new Set<MaterializedComponentNode['type']>([
+  'markdown',
+  'link',
+]);
+
+/** Whether `node` is a charts pack node, which carries provenance and losses. */
+export const isChartNode = (node: MaterializedNode): node is MaterializedChartNode =>
+  !isUnsupportedNode(node) && !COMPONENT_NODE_TYPES.has(node.type);
