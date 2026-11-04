@@ -160,7 +160,8 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
       expect(isPathTraversalId(id)).toBe(false);
     });
 
-    it.each(traversalIds)('returns true for traversal id %p', (id) => {
+    // %j (JSON) escapes the NUL case in the title; a raw NUL makes the JUnit XML reporter throw
+    it.each(traversalIds)('returns true for traversal id %j', (id) => {
       expect(isPathTraversalId(id)).toBe(true);
     });
   });
@@ -178,7 +179,7 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
       expect(() => validateNoPathTraversalId(id)).not.toThrow();
     });
 
-    it.each(traversalIds)('throws for traversal id %p', (id) => {
+    it.each(traversalIds)('throws for traversal id %j', (id) => {
       expect(() => validateNoPathTraversalId(id)).toThrow('path traversal');
     });
 
@@ -197,7 +198,7 @@ describe('isPathTraversalId / validateNoPathTraversalId', () => {
       expect(validateNoPathTraversalIdSchema(id)).toBeUndefined();
     });
 
-    it.each(traversalIds)('returns an error message for traversal id %p', (id) => {
+    it.each(traversalIds)('returns an error message for traversal id %j', (id) => {
       expect(validateNoPathTraversalIdSchema(id)).toMatch(/path traversal/);
     });
   });
