@@ -152,8 +152,8 @@ steps:
   - name: prepare_turn
     type: nightshift.decisionTreePrepare
     with:
-      response: '{{ inputs.response }}'
       conversation_id: '{{ inputs.conversation_id }}'
+      round_id: '{{ inputs.round_id }}'
       agent_id: '{{ inputs.agent_id }}'
       background_trace_id: '{{ inputs.workflow_context["nightshift.semantic_memory.recall"].data.background_trace_id }}'
       # ${{ }} keeps the array. Liquid `{{ }}` stringifies it as "[object Object]…"
