@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { PackagePolicyOutputSelect, useOutputs } from '@kbn/fleet-plugin/public';
 
 export interface OutputFieldProps {
@@ -46,6 +46,15 @@ export function OutputField({
     packagePolicy,
     packageName
   );
+
+  // A chosen output the selected services no longer accept (an OTel service added after Logstash
+  // was picked, or an output deleted in Fleet) falls back to the inherited one, as Fleet would
+  // reject the deploy. Only once the outputs have loaded: an empty list means they have not.
+  useEffect(() => {
+    if (value && allowedOutputs.length > 0 && !allowedOutputs.some(({ id }) => id === value)) {
+      onChange('');
+    }
+  }, [value, allowedOutputs, onChange]);
 
   if (!canUseOutputPerIntegration) return null;
 

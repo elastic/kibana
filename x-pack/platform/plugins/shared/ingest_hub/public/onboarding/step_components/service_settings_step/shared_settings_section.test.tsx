@@ -232,6 +232,33 @@ describe('SharedSettingsSection', () => {
       );
     });
 
+    it('falls back to the inherited output when the chosen one is no longer allowed', () => {
+      const onChange = jest.fn();
+      // e.g. an OTel service was added after a Logstash output was chosen.
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [{ id: 'es-1', name: 'Elasticsearch' }],
+        inheritedOutputName: 'Default',
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).toHaveBeenCalledWith('');
+    });
+
+    it('keeps the chosen output while the outputs are loading', () => {
+      const onChange = jest.fn();
+      mockUseOutputs.mockReturnValue({
+        isLoading: true,
+        canUseOutputPerIntegration: true,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
     it('reports the chosen output', () => {
       const onChange = jest.fn();
       renderSection({ output: outputProps({ onChange }) });

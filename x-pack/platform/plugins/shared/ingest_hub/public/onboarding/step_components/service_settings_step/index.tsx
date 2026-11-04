@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiButton,
@@ -117,6 +117,11 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       ...new Set(instances.flatMap((inst) => awsServicesMap?.get(inst.serviceId)?.inputs ?? [])),
     ],
     [instances, awsServicesMap]
+  );
+
+  const setOutputId = useCallback(
+    (outputId: string) => setPolicySetting('output_id', outputId),
+    [setPolicySetting]
   );
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
@@ -466,7 +471,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
           supportsPolicySetting('output_id', deploymentMethod)
             ? {
                 value: policySettings.output_id ?? '',
-                onChange: (outputId) => setPolicySetting('output_id', outputId),
+                onChange: setOutputId,
                 packageName: bareNamePackage,
                 inputTypes: outputInputTypes,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',
