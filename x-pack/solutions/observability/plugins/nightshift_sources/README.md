@@ -215,6 +215,25 @@ in `config/serverless.oblt.yml` and back on for Observability Complete in
 - Views show up in the ES|QL editor's source suggestions under their
   `$.nightshift.sources.<spaceId>.<slug>` name.
 
+## Telemetry
+
+A Task Manager task (`nightshift-sources:source-volume-telemetry:1.0.0`) runs once a day and sends
+one `nightshift-sources-daily-volume` EBT event per run, with one entry per enabled source of
+every space (`space_id` is on the entry) holding `doc_count` and `bytes_estimated` over the past
+24 hours. `doc_count` runs the stored query (its `WHERE` included) as `kibana_system`, so it is
+the volume the source reads, not what was ingested; under cross-project search it fans out to
+every linked project, as the source's own reads do. `bytes_estimated` is `doc_count` times the
+average document size of the local indices behind the query, read from `indices.stats` on
+stateful and `_metering/stats` on serverless. Neither size API reaches linked projects or remote
+clusters, so that local average is extrapolated to their documents; `has_remote` marks the
+entries where a remote cluster contributed. A source with no local index gets no
+`bytes_estimated`. Each source is measured on its own, so overlapping sources (`logs*` and
+`logs-otel.generic-*`) count the same documents more than once; summing across sources can
+double count. A source whose query fails is reported with `status: error` (or `timeout`) and
+the Elasticsearch error type, without blocking the others. Nothing is sent when no source is
+enabled, or when Task Manager aborts the run. The event carries no title, slug, view name or
+query text.
+
 ## Development
 
 ```bash
