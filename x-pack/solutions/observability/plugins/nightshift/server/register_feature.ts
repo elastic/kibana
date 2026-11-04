@@ -28,6 +28,7 @@ const PROPOSALS_API_PRIVILEGE_MANAGE = 'manage_proposals';
 // Significant Events manages the Alerting v2 rules behind query knowledge indicators with the
 // current user's saved objects client.
 const ALERTING_V2_RULE_SAVED_OBJECT_TYPE = 'alerting_rule';
+const RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE = 'relay-app-connection';
 
 export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
   features.registerKibanaFeature({
@@ -56,7 +57,11 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         alerts: { read: true },
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: {
-          all: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SAVED_OBJECT_TYPE],
+          all: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
           read: [],
         },
       },
@@ -73,7 +78,11 @@ export function registerNightshiftFeature(features: FeaturesPluginSetup): void {
         aiIndex: { read: [SIGNIFICANT_EVENT_KI_TYPE] },
         savedObject: {
           all: [],
-          read: [NIGHTSHIFT_SOURCE_SO_TYPE, ALERTING_V2_RULE_SAVED_OBJECT_TYPE],
+          read: [
+            NIGHTSHIFT_SOURCE_SO_TYPE,
+            ALERTING_V2_RULE_SAVED_OBJECT_TYPE,
+            RELAY_APP_CONNECTION_SAVED_OBJECT_TYPE,
+          ],
         },
       },
     },
