@@ -721,19 +721,36 @@ export function Detail() {
                   ]
                 : []),
               ...(packageInfo.type === 'content' || isAssetOnlyPackage
-                ? !isInstalled && canInstallPackages
+                ? // Nothing to show when the package is installed or the user can't install it, so no divider either.
+                  // Uploaded asset-only packages keep their edit action.
+                  (!isInstalled && canInstallPackages) || (isAssetOnlyPackage && isCustomPackage)
                   ? [
                       { isDivider: true },
                       {
                         content: (
-                          <InstallButton
-                            {...packageInfo}
-                            variant={isAssetOnlyPackage ? 'assets' : 'package'}
-                          />
+                          <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+                            {isAssetOnlyPackage && isCustomPackage && (
+                              <EuiFlexItem grow={false}>
+                                <EditIntegrationButton
+                                  handleEditIntegrationClick={handleEditIntegrationClick}
+                                />
+                              </EuiFlexItem>
+                            )}
+                            {!isInstalled && canInstallPackages && (
+                              <EuiFlexItem grow={false}>
+                                <InstallButton
+                                  {...packageInfo}
+                                  variant={isAssetOnlyPackage ? 'assets' : 'package'}
+                                  // distinct from the one in the Settings tab, which shares the page
+                                  data-test-subj="installAssetsHeaderButton"
+                                />
+                              </EuiFlexItem>
+                            )}
+                          </EuiFlexGroup>
                         ),
                       },
                     ]
-                  : [] // if the package is already installed, or the user can't install it, don't show the install button (nor its divider) in the header
+                  : []
                 : [
                     { isDivider: true },
                     {

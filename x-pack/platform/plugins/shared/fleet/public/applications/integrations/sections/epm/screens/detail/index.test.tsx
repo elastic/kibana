@@ -7,7 +7,7 @@
 
 import React, { lazy, memo } from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { act } from '@testing-library/react';
+import { act, waitFor } from '@testing-library/react';
 
 import { INTEGRATIONS_ROUTING_PATHS, pagePathGetters } from '../../../../constants';
 import type {
@@ -583,17 +583,21 @@ describe('When on integration detail', () => {
   });
 
   describe('and the package has nothing to configure on an agent', () => {
-    const renderAssetOnlyDetail = async ({
-      name = 'corelight',
-      status = 'not_installed',
-      dataStreams = [],
-    }: {
+    interface AssetOnlyOptions {
       name?: string;
       status?: 'installed' | 'not_installed';
       dataStreams?: Array<{ name: string }>;
-    } = {}) => {
+      installSource?: string;
+    }
+
+    const buildAssetOnlyInfo = ({
+      name = 'corelight',
+      status = 'not_installed',
+      dataStreams = [],
+      installSource,
+    }: AssetOnlyOptions = {}) => {
       const baseResponse = mockedApi.responseProvider.epmGetInfo('nginx');
-      mockedApi.responseProvider.epmGetInfo.mockReturnValue({
+      return {
         ...baseResponse,
         item: {
           ...baseResponse.item,
@@ -603,8 +607,13 @@ describe('When on integration detail', () => {
           status: status as 'not_installed',
           policy_templates: [],
           data_streams: dataStreams as any,
+          ...(installSource ? { installationInfo: { install_source: installSource } as any } : {}),
         },
-      });
+      };
+    };
+
+    const renderAssetOnlyDetail = async (options: AssetOnlyOptions = {}) => {
+      mockedApi.responseProvider.epmGetInfo.mockReturnValue(buildAssetOnlyInfo(options));
 
       await render();
       // All those waitForApi call are needed to avoid flakyness because details conditionnaly refetch multiple time
@@ -619,8 +628,8 @@ describe('When on integration detail', () => {
       async () => {
         await renderAssetOnlyDetail();
 
-        const installButton = await renderResult.findByTestId('installAssetsButton');
-        expect(installButton).toHaveTextContent('Install assets');
+        const installButton = await renderResult.findByTestId('installAssetsHeaderButton');
+        expect(installButton).toHaveTextContent('Install corelight Assets');
         expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
         // the divider between the version and the button
         expect(renderResult.getAllByTestId('headerDivider')).toHaveLength(1);
@@ -633,7 +642,7 @@ describe('When on integration detail', () => {
       async () => {
         await renderAssetOnlyDetail();
 
-        await renderResult.findByTestId('installAssetsButton');
+        await renderResult.findByTestId('installAssetsHeaderButton');
         expect(renderResult.getByTestId('tab-overview')).toHaveAttribute('aria-selected', 'true');
       },
       TESTS_TIMEOUT
@@ -644,8 +653,8 @@ describe('When on integration detail', () => {
       async () => {
         await renderAssetOnlyDetail({ name: 'awsfirehose', dataStreams: [{ name: 'logs' }] });
 
-        expect(await renderResult.findByTestId('installAssetsButton')).toHaveTextContent(
-          'Install assets'
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toHaveTextContent(
+          'Install awsfirehose Assets'
         );
         expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
       },
@@ -658,7 +667,7 @@ describe('When on integration detail', () => {
         await renderAssetOnlyDetail({ status: 'installed' });
 
         await renderResult.findByTestId('tab-overview');
-        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
         expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
       },
       TESTS_TIMEOUT
@@ -674,7 +683,7 @@ describe('When on integration detail', () => {
           await renderAssetOnlyDetail();
 
           await renderResult.findByTestId('tab-overview');
-          expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
           expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
           // only the version is left in the header, no empty slot with a divider next to it
           expect(renderResult.queryByTestId('headerDivider')).toBeNull();
@@ -686,12 +695,70 @@ describe('When on integration detail', () => {
     );
 
     it(
+      'should install the assets without creating any policy, then remove the CTA',
+      async () => {
+        const { http, notifications } = testRenderer.startServices;
+        http.post.mockImplementation((async () => {
+          // the package info reflects the installation from now on
+          mockedApi.responseProvider.epmGetInfo.mockReturnValue(
+            buildAssetOnlyInfo({ status: 'installed' })
+          );
+          return { items: [], _meta: { install_source: 'registry' } };
+        }) as any);
+        await renderAssetOnlyDetail();
+
+        await act(async () => {
+          (await renderResult.findByTestId('installAssetsHeaderButton')).click();
+        });
+        await act(async () => {
+          (await renderResult.findByTestId('confirmModalConfirmButton')).click();
+        });
+
+        await waitFor(() =>
+          expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull()
+        );
+        // the package install is the only request sent: no agent policy, no package policy
+        expect(http.post).toHaveBeenCalledTimes(1);
+        expect(http.post).toHaveBeenCalledWith(
+          epmRouteService.getInstallPath('corelight', '0.3.7'),
+          expect.anything()
+        );
+        expect(notifications.toasts.addSuccess).toHaveBeenCalled();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action for an uploaded package once its assets are installed',
+      async () => {
+        await renderAssetOnlyDetail({ status: 'installed', installSource: 'upload' });
+
+        expect(await renderResult.findByLabelText('Edit')).toBeInTheDocument();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
+        expect(renderResult.queryByTestId('addIntegrationPolicyButton')).toBeNull();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
+      'should keep the edit action next to the install button for an uploaded package',
+      async () => {
+        await renderAssetOnlyDetail({ installSource: 'upload' });
+
+        expect(await renderResult.findByTestId('installAssetsHeaderButton')).toBeInTheDocument();
+        expect(renderResult.getByLabelText('Edit')).toBeInTheDocument();
+      },
+      TESTS_TIMEOUT
+    );
+
+    it(
       'should keep "Add integration" for an integration with data streams',
       async () => {
         await renderAssetOnlyDetail({ name: 'okta', dataStreams: [{ name: 'system' }] });
 
         expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
-        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
       },
       TESTS_TIMEOUT
     );
@@ -702,7 +769,7 @@ describe('When on integration detail', () => {
         await renderAssetOnlyDetail({ name: 'cribl' });
 
         expect(await renderResult.findByTestId('addIntegrationPolicyButton')).toBeInTheDocument();
-        expect(renderResult.queryByTestId('installAssetsButton')).toBeNull();
+        expect(renderResult.queryByTestId('installAssetsHeaderButton')).toBeNull();
       },
       TESTS_TIMEOUT
     );
