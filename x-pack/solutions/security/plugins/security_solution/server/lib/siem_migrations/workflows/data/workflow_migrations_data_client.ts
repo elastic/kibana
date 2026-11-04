@@ -54,6 +54,12 @@ export class WorkflowMigrationsDataClient {
         refresh: 'wait_for',
         operations: [...migrationDeleteOperations, ...migrationItemsDeleteOperations],
       })
+      .then((response) => {
+        if (response.errors) {
+          const reason = response.items.find((item) => item.delete?.error)?.delete?.error?.reason;
+          throw new Error(reason ?? 'Unknown error');
+        }
+      })
       .catch((error) => {
         this.logger.error(`Error deleting workflow migration ${migrationId}: ${error}`);
         throw error;

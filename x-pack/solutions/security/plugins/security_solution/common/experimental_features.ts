@@ -272,7 +272,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Tines workflows migration API (create, get, update, start, and stop).
    */
-  tinesWorkflowsMigration: true,
+  tinesWorkflowsMigration: false,
 
   /**
    * Enables Detection Engine Health UI
