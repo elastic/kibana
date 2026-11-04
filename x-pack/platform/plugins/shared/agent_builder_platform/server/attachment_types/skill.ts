@@ -10,16 +10,13 @@ import type {
   SurfaceComposition,
 } from '@kbn/agent-builder-server/attachments';
 import type { ComponentsNode } from '@kbn/isomer-components';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import { i18n } from '@kbn/i18n';
 import {
   SKILL_ATTACHMENT_TYPE,
   skillAttachmentDataSchema,
   type SkillAttachmentData,
 } from '../../common/attachments';
-
-/** Agent Builder's skills page in Management. */
-const SKILLS_MANAGE_PATH = '/manage/skills';
 
 /**
  * Server-side definition for the `skill` attachment type.
@@ -134,7 +131,7 @@ const toSkillSurfaceComposition = ({
         defaultMessage: 'Manage skills',
       }),
       app: AGENT_BUILDER_APP_ID,
-      path: SKILLS_MANAGE_PATH,
+      path: AGENT_BUILDER_MANAGE_PATHS.skills,
     },
   ];
 

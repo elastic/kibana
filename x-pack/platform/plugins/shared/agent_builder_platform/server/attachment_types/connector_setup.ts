@@ -10,7 +10,7 @@ import type { AgentsStart } from '@kbn/agent-builder-server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
-import { AGENT_BUILDER_APP_ID } from '@kbn/deeplinks-agent-builder';
+import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
 import { getConnectorSpec } from '@kbn/connector-specs';
 import {
   CONNECTOR_SETUP_ATTACHMENT_TYPE,
@@ -18,9 +18,6 @@ import {
   type ConnectorSetupAttachmentData,
 } from '../../common/attachments';
 import { isChatCallableConnectorType } from '../skills/connector_authoring/utils';
-
-/** Agent Builder's connectors page, which the browser card links to as well. */
-const CONNECTORS_MANAGE_PATH = '/manage/connectors';
 
 interface ConnectorSetupAttachmentTypeDeps {
   getAgentsStart: () => Promise<AgentsStart>;
@@ -135,7 +132,7 @@ export const createConnectorSetupAttachmentType = ({
             { defaultMessage: 'Configure in Kibana' }
           ),
           app: AGENT_BUILDER_APP_ID,
-          path: CONNECTORS_MANAGE_PATH,
+          path: AGENT_BUILDER_MANAGE_PATHS.connectors,
         },
       ],
     };
