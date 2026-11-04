@@ -331,7 +331,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
             </EuiFlexGroup>
           }
           onChanged={({ items, selectedItem }) => applyTabs(items, selectedItem?.id)}
-          getAdditionalTabMenuItems={(item) => [
+          getTopTabMenuItems={(item) => [
             {
               'data-test-subj': 'notebookAppDelete',
               name: 'deleteApp',
