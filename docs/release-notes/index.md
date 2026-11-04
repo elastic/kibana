@@ -28,7 +28,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ### Features and enhancements [kibana-9.6.0-features-enhancements]
 
-**Elastic Agent Builder**:
+#### Elastic Agent Builder [kibana-9.6.0-features-agent-builder]
 * Paste an image into the Agent Builder chat input to give an agent visual context, then ask follow-up questions about it [#293756]({{kib-pull}}293756).
 * Show attachments that an API call or workflow step adds to a conversation as inline cards in the conversation timeline [#293080]({{kib-pull}}293080).
 * Add a conversation sharing option that lets you manage private and public access to a conversation [#286645]({{kib-pull}}286645).
@@ -57,7 +57,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a guided anomaly detection job creation flow to Agent Builder chat [#286656]({{kib-pull}}286656).
 * Update the PagerDuty MCP connector to support the consolidated `browse_*` and `manage_*` tools that PagerDuty now provides [#295823]({{kib-pull}}295823).
 
-**Alerting and cases**:
+#### Alerting and cases [kibana-9.6.0-features-alerting-cases]
 * Make Kibana Universal Alerting generally available and turn it on by default. Universal Alerting is the {{esql}}-based alerting system. You can detect conditions in your data with {{esql}} rules, track them as alerts, and route notifications with action policies. Kibana Classic Alerting stays available next to it. Universal Alerting relies on Workflows [#296546]({{kib-pull}}296546), [#297284]({{kib-pull}}297284).
 * Add an `alert_url` field to each alert that Universal Alerting action policies pass to workflows. The field links to the alert details page [#300017]({{kib-pull}}300017).
 % The PR and its backport carry release_note:fix, but the release note in the PR says it adds a field. Listed as an enhancement.
@@ -78,7 +78,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Use the `event.ingested` field, when available, in anomaly detection alerting rule queries to avoid duplicate alerts [#279347]({{kib-pull}}279347).
 * Add a percentage threshold option to the delayed data check of the anomaly detection jobs health rule. You can now alert on a percentage of missed documents instead of a fixed count [#272076]({{kib-pull}}272076).
 
-**Connectivity**:
+#### Connectivity [kibana-9.6.0-features-connectivity]
 * Add the Microsoft Teams inbound event triggers, which start a workflow when a channel message or chat message is posted, when a channel or chat is created, or when a member is added to a team [#297619]({{kib-pull}}297619).
 * Add the ServiceNow inbound event triggers, which start a workflow when an incident is created, updated, or resolved, when a comment or work note is added, or when a change approval changes state [#296750]({{kib-pull}}296750).
 * Add send actions to the Microsoft Teams connector [#287946]({{kib-pull}}287946).
@@ -133,7 +133,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add the Google Docs connector, available in Agent Builder, so agents can read documents as Markdown and apply batch updates [#285260]({{kib-pull}}285260).
 * Add a **Display options** control to the **Connectors** list that hides deprecated connectors by default [#289130]({{kib-pull}}289130).
 
-**Dashboards and Visualizations**:
+#### Dashboards and Visualizations [kibana-9.6.0-features-dashboards-visualizations]
 * Add custom content panels with your own HTML and CSS to dashboards, and render them inside Agent Builder conversations [#286439]({{kib-pull}}286439), [#289506]({{kib-pull}}289506).
 * Add an **Enhance** action to dashboards in edit mode so an agent can improve the dashboard's text, layout, and chart presentation. The action appears when Agent Builder is available, you can edit the dashboard, and at least one panel uses an {{esql}} query [#292666]({{kib-pull}}292666), [#288432]({{kib-pull}}288432).
 * Add undo and redo capabilities to dashboards, available using the toolbar and keyboard shortcuts [#277103]({{kib-pull}}277103).
@@ -157,7 +157,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Add a **Cancel** button for loading dashboards, and cancel in-progress searches when you leave a dashboard or Discover, so {{es}} stops running them [#283781]({{kib-pull}}283781), [#281168]({{kib-pull}}281168), [#287949]({{kib-pull}}287949).
 * Show a notice in the options list popover when results are partial because of a timeout or a document limit, rename the **Ignore timeout for results** setting to **Always load all results**, and apply the document limit when you search inside a control [#283726]({{kib-pull}}283726).
 
-**Data ingestion and {{fleet}}**:
+#### Data ingestion and {{fleet}} [kibana-9.6.0-features-data-ingestion-fleet]
 * Add a **Restart agent** action for {{agent}}, available from the agent details page, the agent list, and the bulk actions menu, and through the {{fleet}} API [#293784]({{kib-pull}}293784).
 * Sort the policies in the **Assign new policy to agent** modal alphabetically, and preselect the first one [#296067]({{kib-pull}}296067).
 * Add a `policy_namespace` field to agent status change documents in the `logs-elastic_agent.status_change-default` data stream. The field holds the namespace of the agent's policy [#287194]({{kib-pull}}287194).
@@ -174,16 +174,16 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Validate the KQL query in the `agents` field of every {{fleet}} bulk agent action API, as the agent list API already does. The query can have up to 500,000 characters, and each agent ID up to 512 characters [#299837]({{kib-pull}}299837).
 % Consider whether #299837 needs a breaking change entry: bulk routes that skipped KQL validation before now return a validation error for fields outside the agent mappings. The PR is not labeled breaking and its API contracts check calls the schema diff a false positive, so it stays an enhancement.
 
-**Data management**:
+#### Data management [kibana-9.6.0-features-data-management]
 * Add an **{{esql}} Views** management page to create, edit, preview, and delete {{esql}} views. To use the page, you need the `read_view_metadata` index privilege [#297834]({{kib-pull}}297834).
 * Show lifecycle information in Index Management for hidden and system indices [#282137]({{kib-pull}}282137).
 
-**Developer tools**:
+#### Developer tools [kibana-9.6.0-features-developer-tools]
 * Add request body autocomplete suggestions in Console for more {{es}} endpoints, generated from the {{es}} specification [#278510]({{kib-pull}}278510).
 * Support auto-indenting requests that contain comments in Console [#284527]({{kib-pull}}284527).
 * Raise the limit for a string in a request body from `10000` to `100000` characters when you copy a request as a curl command in Console [#287526]({{kib-pull}}287526).
 
-**Discover**:
+#### Discover [kibana-9.6.0-features-discover]
 * Add the Discover sessions API, which is generally available. Use `/api/discover_sessions` to create, read, update, and delete Discover sessions, including {{esql}} and data view tabs, metrics tabs, and table settings [#297958]({{kib-pull}}297958).
 * Make {{esql}} the default query mode when you open Discover [#297980]({{kib-pull}}297980).
 * Add a **JSON** view mode to the Discover results table [#289802]({{kib-pull}}289802).
@@ -216,13 +216,13 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show layouts tailored to your Observability and Security data in Discover when you use Classic navigation. Turn this off with the **Contextual profiles in Classic navigation** advanced setting [#296406]({{kib-pull}}296406).
 * Allow renaming a Discover session from the header title [#295364]({{kib-pull}}295364).
 
-**{{product.observability}} solution**:
+#### {{product.observability}} solution [kibana-9.6.0-features-observability-solution]
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
-**{{elastic-sec}} solution**:
+#### {{elastic-sec}} solution [kibana-9.6.0-features-security-solution]
 For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-**{{es}} solution**:
+#### {{es}} solution [kibana-9.6.0-features-elasticsearch-solution]
 * Add the Exchange Server native connector for Microsoft Exchange Server (on-premises) content [#298385]({{kib-pull}}298385).
 * Add the **Maximum concurrent access control requests** advanced setting to SharePoint Online connectors in {{fleet}} to tune access control sync concurrency [#294250]({{kib-pull}}294250).
 * Add the **Index full raw email (including headers)** setting to the Gmail and Outlook content connectors [#291419]({{kib-pull}}291419).
@@ -233,14 +233,14 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
 * Return a `400` error when a query rule, ruleset, or synonyms set ID in an API path contains characters other than letters, numbers, `_`, and `-`, or is longer than 512 characters [#276710]({{kib-pull}}276710).
 
-**{{esql}} editor**:
+#### {{esql}} editor [kibana-9.6.0-features-esql-editor]
 * [{{esql}} Data Federation](elasticsearch://reference/query-languages/esql/esql-data-federation.md) (technical preview) is now [enabled by default](elasticsearch://reference/query-languages/esql/esql-data-federation.md#enable-the-feature) in {{es}} and {{kib}}. The management UI adds a wizard for creating datasets, federated identity authentication for Amazon S3 data sources on {{ech}}, and data source privileges in the role editor.
 * Redesign the {{esql}} editor. The time range selector moves next to the editor, the field where you filter with KQL or describe a query in natural language stays visible at the top in Discover, that field no longer shows the sources dropdown in KQL mode, and a **Stop** button appears while AI generates a query [#267922]({{kib-pull}}267922).
 * Add {{esql}} views to the data source browser in the {{esql}} editor, with a filter that shows only views [#292608]({{kib-pull}}292608).
 * Create an {{esql}} view from the {{esql}} editor in Discover and in dashboards. Find the option in the editor menu and in the query history [#294468]({{kib-pull}}294468).
 * Expand the {{esql}} editor to fit a long query when you paste one or when AI inserts one [#279712]({{kib-pull}}279712).
 
-**{{kib}} platform**:
+#### {{kib}} platform [kibana-9.6.0-features-kibana-platform]
 * Disallow code generation from strings in Node.js by default, which hardens {{kib}} against code injection. Code that builds functions from strings at run time, such as `eval`, now fails unless an administrator sets the `KBN_DISALLOW_CODE_GEN_FROM_STRINGS` environment variable to `false` [#278233]({{kib-pull}}278233).
 * Add the `frame-src` Content Security Policy (CSP) directive, with default allowed origins for Elastic-owned domains and embedded video providers, and the optional `csp.media_src` setting in `kibana.yml` [#281884]({{kib-pull}}281884), [#281412]({{kib-pull}}281412).
 * Add a certificate identity field, for strong identity verification, to cross-cluster API keys in API key management [#275610]({{kib-pull}}275610).
@@ -251,7 +251,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add the Brazilian Portuguese (`pt-BR`) locale, which you can set with `i18n.locale` [#291123]({{kib-pull}}291123).
 * Add a **Remember last selected space** option to the **Spaces preferences** modal, so {{kib}} opens the last space you visited when you log in on {{ech}} and Serverless [#281118]({{kib-pull}}281118).
 
-**Machine learning and {{infer}}**:
+#### Machine learning and {{infer}} [kibana-9.6.0-features-machine-learning-inference]
 * Find models faster on the Elastic {{infer-cap}} Service models page. You can sort models (**A to Z**, **Z to A**, **Newest**, or **Oldest**), see how many models match your search and filters, and filter by region. A **Model type** filter replaces the **LLM**, **Embedding**, and **Rerank** buttons. **Display options** show or hide preview, end-of-life, and region-blocked models, which are hidden by default [#296875]({{kib-pull}}296875), [#295536]({{kib-pull}}295536), [#292132]({{kib-pull}}292132), [#291222]({{kib-pull}}291222).
 * See more about each model on the Elastic {{infer-cap}} Service page. Model cards show the provider, model name, and end-of-life date, and the models table adds the release date and the end-of-life date. The model flyout has a new header with the provider icon, model name, provider, and a link to the documentation. It also shows data retention, the regions where the model is available, and a banner when the model is in preview or at end of life. Deprecation and end-of-life notices are shorter and use consistent `YYYY-MM-DD` dates [#293692]({{kib-pull}}293692), [#293357]({{kib-pull}}293357), [#296909]({{kib-pull}}296909), [#295238]({{kib-pull}}295238), [#293331]({{kib-pull}}293331), [#292471]({{kib-pull}}292471), [#298474]({{kib-pull}}298474).
 * Review and change the geographies and regions that your region preferences allow for Elastic {{infer-cap}} Service models. The **Region preferences** modal is redesigned, and before you save, the **Confirm region selection** modal lists the selected locations and the indexes and pipelines that still use endpoints that the policy would block, so you can review the conflict and save anyway. A new toggle removes a custom region policy and returns to the default of allowing all regions. The page header shows a **Restricted regions** badge when a policy is set. Models that your policy blocks are hidden by default, get a **Blocked** badge when you show them, and trigger a warning that you can dismiss in the model flyout. Region names now come from {{es}} [#287605]({{kib-pull}}287605), [#285264]({{kib-pull}}285264), [#289906]({{kib-pull}}289906), [#282769]({{kib-pull}}282769), [#290635]({{kib-pull}}290635), [#292471]({{kib-pull}}292471), [#286932]({{kib-pull}}286932), [#287211]({{kib-pull}}287211).
@@ -262,7 +262,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Support multi-value fields, which you enter as tags, when you create an {{infer}} endpoint. For example, you can now enter OAuth2 scopes for OpenAI and Azure OpenAI endpoints [#290352]({{kib-pull}}290352).
 * Show a sparkline, with a marker at the change point, in the **Summary** column of {{esql}} `CHANGE_POINT` results in Discover [#286173]({{kib-pull}}286173).
 
-**Workflows**:
+#### Workflows [kibana-9.6.0-features-workflows]
 * Enable the Workflow Template Library by default where Workflows is available [#294738]({{kib-pull}}294738).
 * Show an agent-first empty state on the **Workflows** list and the create page [#277119]({{kib-pull}}277119).
 * Make the read-only graph view generally available [#295453]({{kib-pull}}295453).
@@ -283,7 +283,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Add the `cases.deleteAttachments` workflow step, and let the Agent Builder cases tools delete case attachments. If any attachment ID isn't on the case, the step fails and deletes nothing [#298188]({{kib-pull}}298188).
 ### Fixes [kibana-9.6.0-fixes]
 
-**Elastic Agent Builder**:
+#### Elastic Agent Builder [kibana-9.6.0-fixes-agent-builder]
 * Fix tools hanging or timing out when they query data streams that span the frozen tier, by excluding frozen tier indices by default [#292349]({{kib-pull}}292349).
 * Fix {{esql}} query generation in Agent Builder failing with a `security_exception` error on clusters whose nodes lack the `remote_cluster_client` role. This included {{es}} 9.4 with cross-cluster search patterns configured, and cases where no remote cluster was requested [#281609]({{kib-pull}}281609), [#295560]({{kib-pull}}295560).
 * Fix {{esql}} query generation failing when you don't have permission to read the mappings of one of the target indices. Agent Builder now skips that index [#293286]({{kib-pull}}293286).
@@ -309,7 +309,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the Universal Alerting rule-authoring skill in Agent Builder not finding or editing existing rules unless `agentBuilder:experimentalFeatures` is on [#301256]({{kib-pull}}301256).
 % Consider #294871 (release_note:bug): {{kib}} now checks a model's structured answers against their schema, and rejects answers that fail limits such as `max`, `min`, or `enum` [#294871]({{kib-pull}}294871). It is left out because the reader impact is not clear from the PR. The one visible effect is on generated chat titles.
 
-**Alerting and cases**:
+#### Alerting and cases [kibana-9.6.0-fixes-alerting-cases]
 * Fix a recurring task running a second time for the same scheduled time when Task Manager starts it earlier than planned, for example because of clock skew [#297486]({{kib-pull}}297486).
 * Fix rules and background tasks silently stopping for several minutes when a concurrent update prevents a completed run from being recorded [#295415]({{kib-pull}}295415).
 * Fix a request to run a rule immediately, or a schedule change, being discarded when it arrives while the rule is finishing a run [#293492]({{kib-pull}}293492).
@@ -359,10 +359,10 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix pushing a case to an external system repeating the alerts summary. The summary now reports only the alerts added or removed since the last push to that connector, and {{kib}} sends it only when alerts changed [#295571]({{kib-pull}}295571).
 * Fix checkbox group template fields accepting values that aren't a list, such as a comma-separated string. The cases API now returns a validation error instead of saving the value [#299407]({{kib-pull}}299407).
 
-**Connectivity**:
+#### Connectivity [kibana-9.6.0-fixes-connectivity]
 * Fix the Jira Service Management and Opsgenie connectors failing when a rendered alert message is longer than 130 characters, by truncating the message [#291698]({{kib-pull}}291698).
 
-**Dashboards and Visualizations**:
+#### Dashboards and Visualizations [kibana-9.6.0-fixes-dashboards-visualizations]
 * Fix the Dashboards API dropping {{esql}} panels whose color mapping assigns colors to `boolean`, `null`, multi-value, or open-ended range values [#298850]({{kib-pull}}298850).
 * Fix visualizations that you create or update through the Visualizations API losing or changing settings when you save and read them back. The affected settings are the sort field of terms columns ranked by a custom `last_value` metric, the defaults of `showArrayValues` and `multi_value`, the metric that ranks trendline breakdowns, the target number of bars in a histogram `granularity`, the `decimals` and `compact` options of `duration` formats unless `to` is `auto-approximate`, the `parentFormat`, `format`, and numeric include and exclude values of terms columns, and the data view and custom name of annotation layers and ad hoc data views [#292378]({{kib-pull}}292378), [#292864]({{kib-pull}}292864), [#283159]({{kib-pull}}283159), [#283058]({{kib-pull}}283058), [#282815]({{kib-pull}}282815), [#282760]({{kib-pull}}282760), [#282752]({{kib-pull}}282752), [#281079]({{kib-pull}}281079), [#280546]({{kib-pull}}280546).
 * Fix range columns losing open bounds, which are ranges with no lower bound, no upper bound, or neither, when you create or update visualizations through the Visualizations API [#300099]({{kib-pull}}300099).
@@ -396,7 +396,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Allow converting date histograms that use **Drop partial intervals** to {{esql}}. The converted chart keeps the setting and still drops partial intervals [#296078]({{kib-pull}}296078).
 * Make Vega visualizations that use an {{esql}} data source follow the dashboard time range, the same way Lens and Discover do [#280070]({{kib-pull}}280070).
 
-**Data ingestion and {{fleet}}**:
+#### Data ingestion and {{fleet}} [kibana-9.6.0-fixes-data-ingestion-fleet]
 * Fix edits to an integration policy not reaching agents when the integration sets its required agent version at the package level, such as Active Directory Entity Analytics [#296354]({{kib-pull}}296354).
 * Fix editing an agent policy failing with a `Missing inputs_for_versions` error after a {{kib}} minor upgrade, for integrations with inputs that depend on the agent version, such as auditd logs [#284710]({{kib-pull}}284710).
 * Fix bulk integration upgrades keeping the old required agent version, which could make the agent policy advertise a wrong minimum agent version [#294439]({{kib-pull}}294439).
@@ -473,7 +473,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{fleet-server}} ignoring the certificate authorities that you set with the `ssl.certificate_authorities` key in an output's **Advanced YAML configuration** when the output uses a proxy that has a certificate authority and the {{fleet-server}} host has {{es}} SSL settings. {{fleet}} now combines them with the proxy's certificate authority [#301626]({{kib-pull}}301626).
 * Fix the **Error patterns** panel on the OpenTelemetry collector details page loading indefinitely when its request fails [#301922]({{kib-pull}}301922).
 
-**Data management**:
+#### Data management [kibana-9.6.0-fixes-data-management]
 * Prevent component templates listed in `ignore_missing_component_templates` from moving to the end of `composed_of` when you edit or clone an index template [#290171]({{kib-pull}}290171).
 * Show the correct index mode for time series data streams in the data streams list and details flyout. Before, they showed **Standard** [#290169]({{kib-pull}}290169).
 * Fix lifecycle settings in Index Management appearing as effective for lookup-mode indices and data streams [#292309]({{kib-pull}}292309).
@@ -485,7 +485,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Keep the script in the runtime field editor when you change the field type to or from `composite` [#299025]({{kib-pull}}299025).
 * Fix the runtime field editor ignoring **Save** when you edit the script while the preview is still updating [#294753]({{kib-pull}}294753).
 
-**Developer tools**:
+#### Developer tools [kibana-9.6.0-fixes-developer-tools]
 * Show a message in Console when an {{es}} request times out. The message explains that the request might still be running and advises you to check its status before you retry [#289481]({{kib-pull}}289481).
 * Fix Console treating request-like lines inside an unterminated triple-quoted string as separate requests [#287547]({{kib-pull}}287547).
 * Fix duplicated **Cut**, **Copy**, and **Paste** actions in the Console context menu [#286704]({{kib-pull}}286704).
@@ -495,7 +495,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Stop Console from showing autocomplete suggestions inside triple-quoted strings that aren't {{esql}} queries, such as scripts [#282424]({{kib-pull}}282424).
 * Make Console body autocomplete open automatically after `{`, `[`, `,`, or `:` in a request body. Also fix text corruption when you accept a suggestion in the middle of a string [#284530]({{kib-pull}}284530).
 
-**Discover**:
+#### Discover [kibana-9.6.0-fixes-discover]
 * Reset Discover to the default time range when the URL contains an invalid time range, instead of showing the invalid range [#290358]({{kib-pull}}290358).
 * Show the configured label for custom presets from the **Quick ranges** setting in the time range selector, instead of the time values. Add a `(rounded)` suffix to the label of rounded relative time ranges [#289066]({{kib-pull}}289066).
 * Prevent deleting quick ranges that you configure in **{{stack-manage-app}}** from the time range selector. You can still delete presets that you create [#283527]({{kib-pull}}283527).
@@ -522,13 +522,13 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix search highlighting showing stray `@kibana-highlighted-field@` tag text when you search a multi-value field for a term such as `field` or `kibana` [#283345]({{kib-pull}}283345).
 * Keep focus on a field when you pin or unpin it in the document viewer **Table** tab, so focus follows the field to its new position [#220097]({{kib-pull}}220097).
 
-**{{product.observability}} solution**:
+#### {{product.observability}} solution [kibana-9.6.0-fixes-observability-solution]
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
-**{{elastic-sec}} solution**:
+#### {{elastic-sec}} solution [kibana-9.6.0-fixes-security-solution]
 For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
-**{{es}} solution**:
+#### {{es}} solution [kibana-9.6.0-fixes-elasticsearch-solution]
 * Map the document `id` field of content connector indices as `keyword` instead of `long` when {{kib}} creates the index, so large numeric IDs don't fail to index [#297711]({{kib-pull}}297711).
 * Raise the size limits for connector configuration values, descriptions, and advanced snippets on the **Connectors** page in the {{es}} solution, so you can save large values such as custom SSL certificate chains [#297832]({{kib-pull}}297832).
 * Fix deleted connectors remaining in the content connectors list after a successful delete [#290859]({{kib-pull}}290859).
@@ -536,7 +536,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the query rule flyout tooltips not being announced by screen readers in Chrome with VoiceOver [#295021]({{kib-pull}}295021).
 * Fix the **View logs** button on an agentless connector's page opening Discover with filters that show `(null)` instead of the connector ID and agent ID [#281155]({{kib-pull}}281155).
 
-**{{esql}} editor**:
+#### {{esql}} editor [kibana-9.6.0-fixes-esql-editor]
 * Fix autocomplete for the second argument of `MV_CONTAINS` when the first argument is a variable, and enable the Type dropdown in the controls flyout for multi-value variables [#288972]({{kib-pull}}288972).
 * Fix the {{esql}} query that Discover builds when you filter on a value of a multi-value field, such as a `text` field. The query no longer adds an invalid cast like `::text` [#287416]({{kib-pull}}287416).
 * Fix {{esql}} autocomplete not suggesting functions after `NOT`, or arguments inside a nested function call, in expressions such as `AND NOT CONTAINS(...)` [#284277]({{kib-pull}}284277).
@@ -546,7 +546,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the {{esql}} editor validation and autocomplete for `STATS` aggregations in `TS` queries. For example, `TS my_ts_index | STATS AVG(requests_total)` no longer shows `Invalid input types for AVG` [#297978]({{kib-pull}}297978).
 * Accept columns that you create in the `BY` clause of `STATS` when you use them in the aggregations of the same command, for example `STATS COUNT() WHERE addr != null BY addr = address` [#295730]({{kib-pull}}295730).
 
-**{{kib}} platform**:
+#### {{kib}} platform [kibana-9.6.0-fixes-kibana-platform]
 * Fix the date range picker calendar ignoring the `dateFormat:tz` and `dateFormat:dow` advanced settings. It could apply a range in the browser time zone instead of the time zone you set, and it ignored your first day of the week [#299851]({{kib-pull}}299851).
 * Fix the date range picker rejecting {{es}} date math that combines rounding with a further offset, such as `now/y+3M` [#287010]({{kib-pull}}287010).
 * Fix the **Ingest your data** section appearing on the Analytics overview for roles that can't add data [#297717]({{kib-pull}}297717).
@@ -569,7 +569,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix {{kib}} failing to start with the error `APM is disabled, but context propagation is enabled` when OpenTelemetry tracing is on, `elastic.apm.active` is `false`, and `elastic.apm.contextPropagationOnly` isn't set [#300651]({{kib-pull}}300651).
 * Fix `bin/kibana-plugin install` finishing before the last file in the plugin archive is fully written, which could leave the installed plugin directory with that file missing or empty [#301845]({{kib-pull}}301845).
 
-**Machine learning and {{infer}}**:
+#### Machine learning and {{infer}} [kibana-9.6.0-fixes-machine-learning-inference]
 * Report token usage from the successful attempt, not from a failed attempt, when {{kib}} retries a chat completion [#282747]({{kib-pull}}282747).
 * Fix calls failing for legacy AI connector configurations when {{kib}} is restricted to the default LLM and the call uses the {{infer}} endpoint behind the default connector. Agent Builder now also uses feature-specific settings that an administrator configured before it uses the default connector [#293855]({{kib-pull}}293855).
 * Fix LLM model resolution failing when you don't have the Actions privilege and an {{infer}} endpoint is configured in model settings [#290533]({{kib-pull}}290533).
@@ -606,7 +606,7 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the model list on the **Elastic Inference Service** page showing outdated models after you save region preferences, until you refresh the browser [#300999]({{kib-pull}}300999).
 % #300999 carries the nonstandard label release_note:bug, so the generator does not pick it up. Consider changing it to release_note:fix.
 
-**Workflows**:
+#### Workflows [kibana-9.6.0-fixes-workflows]
 * Fix YAML comments and formatting being stripped when an agent edits a workflow [#288075]({{kib-pull}}288075).
 * Fix the `generate_workflow` tool timing out when it edits large workflows, and fix edits to steps nested in `if` or `foreach` steps failing [#299949]({{kib-pull}}299949).
 * Fix the `generate_workflow` tool writing `http` steps that fail at run time because they pass objects, such as query parameters, with `{{ }}`, which always renders a string. The tool now uses `${{ }}` for objects, arrays, numbers, and booleans [#301589]({{kib-pull}}301589).
