@@ -19,10 +19,8 @@ import {
 } from '@kbn/agent-builder-dashboards-common';
 
 import {
-  arrangeDashboardLayout,
   executeDashboardUpsert,
-  startEarlyLayout,
-  type EarlyLayout,
+  createDashboardLayout,
   getErrorMessage,
   hasValidNewDashboardMetadata,
   upsertDashboardSchema,
@@ -181,9 +179,12 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
         }
 
         const dashboardAttachmentId = previousAttachmentId ?? uuidv4();
-        const originalPanels = latestVersion?.data.panels ?? [];
-        const arrangeLayout = createLayoutArranger({ modelProvider });
-        const earlyLayoutRef: { current?: EarlyLayout } = {};
+        const dashboardLayout = createDashboardLayout({
+          originalPanels: latestVersion?.data.panels ?? [],
+          instructions: layout,
+          arrangeLayout: createLayoutArranger({ modelProvider }),
+          logger,
+        });
         const {
           dashboardData: validatedDashboardData,
           created,
@@ -209,28 +210,12 @@ Changes are applied one by one: failed ones are listed in \`failures\` with the 
             esClient: esClient.asCurrentUser,
           }),
           validator: await getDashboardValidator(),
-          onPlanned: (predictedDashboardData) => {
-            earlyLayoutRef.current = startEarlyLayout({
-              originalPanels,
-              predictedDashboardData,
-              instructions: layout,
-              arrangeLayout,
-              logger,
-            });
-          },
+          onPlanned: dashboardLayout.start,
         });
 
         // The arranger checks its own output and writes only grids, so the result is not validated again.
         const { dashboardData: generatedDashboardData, failure: layoutFailure } =
-          earlyLayoutRef.current
-            ? await earlyLayoutRef.current.finish(validatedDashboardData)
-            : await arrangeDashboardLayout({
-                originalPanels,
-                dashboardData: validatedDashboardData,
-                instructions: layout,
-                arrangeLayout,
-                logger,
-              });
+          await dashboardLayout.finish(validatedDashboardData);
         if (layoutFailure) {
           failures.push(layoutFailure);
         }
