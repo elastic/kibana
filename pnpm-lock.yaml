@@ -20153,8 +20153,8 @@ packages:
   joi-to-json@5.0.0:
     resolution: {integrity: sha512-G1pJKCtgRYwBRgMQt/wkZ2NsDY/Vsx339oN2qPwiIbAOysw1bnrNUWoTGTelIxXBGFOW4o4oH4GrRNBoWeFPfw==}
 
-  joi@17.13.8:
-    resolution: {integrity: sha512-iPKOGmiRw1jxf/JOPwxmCcUQAOdF359mdzYiP2DJ+TMX0YK2zjK3D+zYOaGjpumWxOFF/l2xVWjRVK5bGSLdEw==}
+  joi@17.13.9:
+    resolution: {integrity: sha512-llFCT2rVtfwgBCaIqxtjim+iHqrgss4ONiGSYiiGH9jnjWq90ppSRffqmqKvwpa8W+YfILyQV6XyGcegXX2T4g==}
 
   joi@18.3.1:
     resolution: {integrity: sha512-mV9M4Llh4va3NT90p7KBtQhoZqjs8xLX7EWYE4y/GG3yLF6REbIBEHSUb0UX1JXRht2w5tiLSsvmpYc5akiqIw==}
@@ -31654,7 +31654,7 @@ snapshots:
     dependencies:
       '@hapi/hapi': 21.4.10
       '@types/node': 24.10.13
-      joi: 17.13.8
+      joi: 17.13.9
 
   '@types/has-ansi@3.0.0': {}
 
@@ -37846,7 +37846,7 @@ snapshots:
       combinations: 1.0.0
       lodash: 4.18.1
 
-  joi@17.13.8:
+  joi@17.13.9:
     dependencies:
       '@hapi/hoek': 9.3.0
       '@hapi/topo': 5.1.0
