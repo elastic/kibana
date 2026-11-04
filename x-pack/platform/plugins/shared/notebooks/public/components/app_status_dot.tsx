@@ -5,15 +5,14 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 import { EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import { combineLatest, map } from 'rxjs';
 import type { NotebookApp } from '../../common/types';
 import { getAppStatusGroups, type AttentionStatus } from '../model/app_layout';
-import type { CellStatus } from '../model/types';
 import { useNotebook } from './notebook_context';
+import { useCellStatuses } from './use_cell_statuses';
 
 const DOT_COLORS: Record<AttentionStatus, string> = {
   error: 'danger',
@@ -27,22 +26,6 @@ const STATUS_LABELS: Record<AttentionStatus, string> = {
   blocked: i18n.translate('xpack.notebook.app.status.blocked', { defaultMessage: 'Blocked' }),
   stale: i18n.translate('xpack.notebook.app.status.stale', { defaultMessage: 'Stale' }),
   idle: i18n.translate('xpack.notebook.app.status.idle', { defaultMessage: 'Not run' }),
-};
-
-const useCellStatuses = (cellIds: readonly string[]): Readonly<Record<string, CellStatus>> => {
-  const { store } = useNotebook();
-  const [statuses, setStatuses] = useState<Readonly<Record<string, CellStatus>>>({});
-  useEffect(() => {
-    if (cellIds.length === 0) {
-      setStatuses({});
-      return;
-    }
-    const subscription = combineLatest(
-      cellIds.map((id) => store.getRuntime$(id).pipe(map(({ status }) => [id, status] as const)))
-    ).subscribe((entries) => setStatuses(Object.fromEntries(entries)));
-    return () => subscription.unsubscribe();
-  }, [store, cellIds]);
-  return statuses;
 };
 
 /** A dot coloured by the most severe status among the app's cells; nothing when all are fine. */

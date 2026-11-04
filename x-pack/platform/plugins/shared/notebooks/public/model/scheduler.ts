@@ -150,6 +150,12 @@ export class NotebookScheduler {
     return this.propagate(order, new Set(order));
   }
 
+  /** Runs every cell currently in one of the given statuses, manual ones included, and what they feed. */
+  runCellsWithStatus(statuses: readonly CellStatus[]): Promise<void> {
+    const ids = this.graph.order.filter((id) => statuses.includes(this.runtime(id).status));
+    return this.propagate(ids, new Set(ids));
+  }
+
   /** Re-resolves the relative ranges of the given time inputs and re-runs what they feed. */
   refresh(ids: readonly string[]): Promise<void> {
     const timeInputs = this.graph.order.filter((id) => {

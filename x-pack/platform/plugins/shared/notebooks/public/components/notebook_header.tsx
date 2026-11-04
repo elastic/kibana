@@ -8,7 +8,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
@@ -30,6 +29,7 @@ import { buildGraph, getDescendants } from '../model/graph';
 import { useNotebookServices } from '../services';
 import { useNotebook, type SidePanel } from './notebook_context';
 import { NotebookSettingsFlyout } from './notebook_settings_flyout';
+import { RunAllButton } from './run_all_button';
 
 const REFRESH_TOOLTIP = i18n.translate('xpack.notebook.header.refreshTooltip', {
   defaultMessage: 'Run all cells that use the global time range',
@@ -148,7 +148,7 @@ export const NotebookHeader = ({
   sidePanel: SidePanel | undefined;
   onToggleSidePanel: (panel: SidePanel) => void;
 }) => {
-  const { store, scheduler } = useNotebook();
+  const { store } = useNotebook();
   const { core } = useNotebookServices();
   const title = useStateFromPublishingSubject(store.title$);
   const cells = useStateFromPublishingSubject(store.cells$);
@@ -236,14 +236,7 @@ export const NotebookHeader = ({
           </EuiFlexItem>
         )}
         <EuiFlexItem grow={false}>
-          <EuiButton
-            size="s"
-            iconType="play"
-            onClick={() => scheduler.runAll()}
-            data-test-subj="notebookRunAll"
-          >
-            {i18n.translate('xpack.notebook.header.runAll', { defaultMessage: 'Run all' })}
-          </EuiButton>
+          <RunAllButton />
         </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />

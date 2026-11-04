@@ -67,6 +67,7 @@ const createFakeRunQuery = () => {
     },
     setRows: (query: string, rows: DatatableRow[]) => rowsByQuery.set(query, rows),
     failQuery: (query: string, message: string) => failures.set(query, message),
+    failures,
   };
 };
 
@@ -705,6 +706,37 @@ describe('NotebookScheduler', () => {
       ]);
       expect(env.runtime('b').status).toBe('done');
       expect(env.output('cb')).toBe(env.output('b'));
+    });
+
+    it('runCellsWithStatus runs only the stale cells and what they feed', async () => {
+      const env = track(
+        setup([
+          esql('fresh', 'FROM fresh'),
+          esql('stale', 'FROM stale', { runMode: 'manual' }),
+          chart('chart', 'stale', { runMode: 'manual' }),
+        ])
+      );
+      await env.open();
+      expect(env.runtime('stale').status).toBe('stale');
+
+      await env.scheduler.runCellsWithStatus(['stale']);
+
+      expect(env.fake.calls.map(({ query }) => query)).toEqual(['FROM fresh', 'FROM stale']);
+      expect(env.runtime('stale').status).toBe('done');
+      expect(env.output('chart')).toBe(env.output('stale'));
+    });
+
+    it('runCellsWithStatus retries failed cells without re-running healthy ones', async () => {
+      const env = track(setup([esql('a', 'FROM a'), esql('b', 'FROM b')]));
+      env.fake.failQuery('FROM a', 'boom');
+      await env.open();
+      expect(env.runtime('a').status).toBe('error');
+
+      env.fake.failures.delete('FROM a');
+      await env.scheduler.runCellsWithStatus(['error', 'blocked']);
+
+      expect(env.runtime('a').status).toBe('done');
+      expect(env.fake.callsFor('FROM b')).toHaveLength(1);
     });
 
     it('refresh re-resolves relative time and re-runs only time-bound cells', async () => {
