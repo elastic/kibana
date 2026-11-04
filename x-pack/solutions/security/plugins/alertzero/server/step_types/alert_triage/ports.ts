@@ -425,32 +425,33 @@ const updateAlertStatus = async (
 };
 
 /**
- * Writes the same note on each alert, `concurrency` at a time, because the notes route takes one
- * note per call. Never throws: returns the ids that did not get a note.
+ * Writes the given notes, `concurrency` at a time, because the notes route takes one note per call.
+ * It starts no note after `deadline`. Never throws: returns how many notes were not written, those
+ * that failed and those it did not start.
  */
 export const writeAlertNotes = async (
   { callKibanaApi }: KibanaApi,
-  alertIds: readonly string[],
-  note: string,
-  concurrency: number
-): Promise<string[]> => {
-  const failed: string[] = [];
-  for (let from = 0; from < alertIds.length; from += concurrency) {
-    const ids = alertIds.slice(from, from + concurrency);
-    const results = await Promise.allSettled(
-      ids.map((eventId) =>
-        callKibanaApi({
+  notes: ReadonlyArray<{ alertId: string; note: string }>,
+  { concurrency, deadline }: { concurrency: number; deadline: number }
+): Promise<number> => {
+  let next = 0;
+  let failed = 0;
+  const worker = async () => {
+    while (next < notes.length && Date.now() <= deadline) {
+      const { alertId, note } = notes[next++];
+      try {
+        await callKibanaApi({
           method: 'PATCH',
           path: NOTE_PATH,
-          body: { note: { eventId, timelineId: '', note } },
-        })
-      )
-    );
-    results.forEach((result, index) => {
-      if (result.status === 'rejected') failed.push(ids[index]);
-    });
-  }
-  return failed;
+          body: { note: { eventId: alertId, timelineId: '', note } },
+        });
+      } catch {
+        failed++;
+      }
+    }
+  };
+  await Promise.all(Array.from({ length: Math.min(concurrency, notes.length) }, worker));
+  return failed + (notes.length - next);
 };
 
 /**

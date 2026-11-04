@@ -9,7 +9,10 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
 import {
   ALERT_FETCH_LIMIT,
+  DECISION_MATCH_TOTAL_BUDGET_MS,
+  DECISION_MATCH_WORK_BUDGET_MS,
   DECISION_NOTES_PER_SWEEP,
+  NOTE_CONCURRENCY,
   type DecisionAutoCloseMode,
 } from '../../alert_triage/constants';
 import { decisionId, groupByStrictKey } from '../../alert_triage/fp_decisions';
@@ -621,5 +624,102 @@ describe('triage match decisions step in on mode', () => {
     expect(output).toEqual(
       expect.objectContaining({ skipped: DECISION_NOTES_PER_SWEEP + 5, notes_missing: 5 })
     );
+  });
+
+  describe('time and volume', () => {
+    const manyApproved = (count: number) => {
+      const executables = Array.from({ length: count }, (_unused, i) => `C:\\x${i}.exe`);
+      return {
+        alerts: executables.map((executable, i): [string, Record<string, unknown>] => [
+          `a${i}`,
+          source(executable),
+        ]),
+        decisions: Object.assign({}, ...executables.map(approved)),
+      };
+    };
+
+    it('writes the notes of all decisions in one pool, not one pool per decision', async () => {
+      const { run, callKibanaApi, notes } = setup({ mode: 'on', ...manyApproved(30) });
+      const original = callKibanaApi.getMockImplementation()!;
+      let inFlight = 0;
+      let peak = 0;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          if (!params.path.endsWith('/api/note')) return original(params);
+          inFlight++;
+          peak = Math.max(peak, inFlight);
+          await Promise.resolve();
+          await Promise.resolve();
+          inFlight--;
+          return original(params);
+        }
+      );
+
+      const { output } = await run();
+
+      expect(notes()).toHaveLength(30);
+      expect(output).toEqual(expect.objectContaining({ closed: 30, notes_missing: 0 }));
+      // Each decision has one alert, so only a shared pool can have more than one note in flight.
+      expect(peak).toBeGreaterThan(1);
+      expect(peak).toBeLessThanOrEqual(NOTE_CONCURRENCY);
+    });
+
+    it('starts no new decision once the work budget is spent, and leaves the rest for the next sweep', async () => {
+      const { run, callKibanaApi, closes } = setup({ mode: 'on', ...manyApproved(3) });
+      const original = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const response = await original(params);
+          if (params.path.endsWith('/signals/status')) {
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+          }
+          return response;
+        }
+      );
+
+      const { output } = await run();
+
+      expect(closes()).toHaveLength(1);
+      expect(output).toEqual(
+        expect.objectContaining({ status: 'ok', closed: 1, deferred: 2, out_of_time: true })
+      );
+    });
+
+    it('still writes the notes of what it closed within the total budget', async () => {
+      const { run, callKibanaApi, notes } = setup({ mode: 'on', ...manyApproved(3) });
+      const original = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const response = await original(params);
+          if (params.path.endsWith('/signals/status')) {
+            jest.setSystemTime(NOW + DECISION_MATCH_WORK_BUDGET_MS + 1);
+          }
+          return response;
+        }
+      );
+
+      await run();
+
+      expect(notes()).toHaveLength(1);
+    });
+
+    it('starts no note after the total budget, keeps what was closed, and counts the notes missing', async () => {
+      const { run, callKibanaApi, notes } = setup({ mode: 'on', ...manyApproved(3) });
+      const original = callKibanaApi.getMockImplementation()!;
+      callKibanaApi.mockImplementation(
+        async (params: { path: string; body?: Record<string, any> }) => {
+          const response = await original(params);
+          if (params.path.endsWith('/signals/status')) {
+            jest.setSystemTime(NOW + DECISION_MATCH_TOTAL_BUDGET_MS + 1);
+          }
+          return response;
+        }
+      );
+
+      const { output } = await run();
+
+      expect(notes()).toHaveLength(0);
+      expect(output).toEqual(expect.objectContaining({ closed: 1, notes_missing: 1, deferred: 2 }));
+    });
   });
 });

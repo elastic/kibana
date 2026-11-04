@@ -130,6 +130,13 @@ export const TRIAGE_SKIPPED_BY_DECISION_TAG_PREFIX = 'az:skipped_by_decision:';
  * this bounds the step to about a minute. Alerts past it are still closed or skipped, without a note.
  */
 export const DECISION_NOTES_PER_SWEEP = 1000;
+/**
+ * How long the match step works before it stops starting new decisions, and how long it may run in
+ * all, notes included. The alerts and notes it leaves wait for the next sweep. The sweep runs on a
+ * schedule of minutes, so one step must not hold it for an hour when many decisions match.
+ */
+export const DECISION_MATCH_WORK_BUDGET_MS = 2 * 60 * 1000;
+export const DECISION_MATCH_TOTAL_BUDGET_MS = 3 * 60 * 1000;
 /** Notes written in parallel. The batch workflow writes its verdict notes at the same width. */
 export const NOTE_CONCURRENCY = 20;
 /** Pages of 10,000 alerts a revoke puts back at most. Run it again for more. */

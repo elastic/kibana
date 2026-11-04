@@ -534,6 +534,12 @@ const matchFpDecisionsOutputSchema = lazySchema(() =>
       .describe(
         'Alerts a decision closed or skipped that have no note: a failed write, or past the sweep limit.'
       ),
+    deferred: z
+      .number()
+      .describe('Decisions left for the next sweep because the step ran out of time.'),
+    out_of_time: z
+      .boolean()
+      .describe('The step stopped starting decisions or reading pages because its time was spent.'),
     excluded_by_severity: z
       .number()
       .describe('Matches the severity guard keeps with a human, not tagged.'),
