@@ -15,8 +15,10 @@ import {
   ReactFlow,
   type Edge,
   type Node,
+  type NodeChange,
   type NodeProps,
   type NodeTypes,
+  type XYPosition,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -199,8 +201,19 @@ export const DependencyGraph = ({
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const [selectedId, setSelectedId] = useState<string>();
+  const [draggedPositions, setDraggedPositions] = useState<Readonly<Record<string, XYPosition>>>(
+    {}
+  );
 
   const view = useMemo(() => buildGraphView(cells, cellOrder), [cells, cellOrder]);
+
+  const onNodesChange = (changes: NodeChange<FlowNode>[]) => {
+    const moved = changes.flatMap((change) =>
+      change.type === 'position' && change.position ? [[change.id, change.position] as const] : []
+    );
+    if (moved.length === 0) return;
+    setDraggedPositions((current) => ({ ...current, ...Object.fromEntries(moved) }));
+  };
 
   const { nodes, edges } = useMemo(() => {
     const selected = view.nodes.some(({ id }) => id === selectedId) ? selectedId : undefined;
@@ -213,17 +226,20 @@ export const DependencyGraph = ({
     return {
       nodes: view.nodes.map((node): FlowNode => {
         const highlight = getHighlight(node.id);
+        const position = draggedPositions[node.id] ?? node.position;
         return node.kind === 'cell'
           ? {
               id: node.id,
               type: 'cell',
-              position: node.position,
+              position,
+              measured: CELL_NODE_SIZE,
               data: { cellId: node.cellId, highlight },
             }
           : {
               id: node.id,
               type: 'source',
-              position: node.position,
+              position,
+              measured: SOURCE_NODE_SIZE,
               data: { label: node.label, highlight },
             };
       }),
@@ -247,7 +263,7 @@ export const DependencyGraph = ({
         };
       }),
     };
-  }, [view, selectedId, euiTheme]);
+  }, [view, selectedId, draggedPositions, euiTheme]);
 
   return (
     <div
@@ -271,7 +287,7 @@ export const DependencyGraph = ({
           edges={edges}
           nodeTypes={NODE_TYPES}
           colorMode={colorMode === 'DARK' ? 'dark' : 'light'}
-          nodesDraggable={false}
+          onNodesChange={onNodesChange}
           nodesConnectable={false}
           elementsSelectable={false}
           onNodeClick={(_event, node) => {
