@@ -15,6 +15,7 @@ import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { PublicUiSettingsParams, UserProvidedValues } from '@kbn/core/public';
 import { Subject } from 'rxjs';
+import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR } from '@kbn/management-settings-ids';
 
 type RawSettings = Record<string, PublicUiSettingsParams & UserProvidedValues<any>>;
 
@@ -121,14 +122,14 @@ describe('settings_context', () => {
     expect(result.current.unsavedChanges).toEqual({});
 
     act(() => {
-      result.current.handleFieldChange('test', {
+      result.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
         type: 'string',
         unsavedValue: 'testValue',
       });
     });
 
     expect(result.current.unsavedChanges).toEqual({
-      test: {
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         type: 'string',
         unsavedValue: 'testValue',
       },
@@ -143,7 +144,7 @@ describe('settings_context', () => {
     });
 
     act(() => {
-      result.current.handleFieldChange('test', {
+      result.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
         type: 'string',
         unsavedValue: 'testValue',
       });
@@ -170,14 +171,14 @@ describe('settings_context', () => {
     });
 
     act(() => {
-      result.current.handleFieldChange('test', {
+      result.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
         type: 'string',
         unsavedValue: 'testValue',
       });
     });
 
     expect(result.current.unsavedChanges).toEqual({
-      test: {
+      [GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR]: {
         type: 'string',
         unsavedValue: 'testValue',
       },
@@ -227,14 +228,16 @@ describe('settings_context', () => {
 
       // Add unsaved changes
       act(() => {
-        result.current.handleFieldChange('test', {
+        result.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
           type: 'string',
           unsavedValue: 'testValue',
         });
       });
 
       // Set validation errors
-      const validationErrors = [{ message: 'Validation failed', field: 'test' }];
+      const validationErrors = [
+        { message: 'Validation failed', field: GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR },
+      ];
 
       act(() => {
         result.current.setValidationErrors(validationErrors);
@@ -262,7 +265,7 @@ describe('settings_context', () => {
 
       // Add unsaved changes
       act(() => {
-        result.current.handleFieldChange('test', {
+        result.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
           type: 'string',
           unsavedValue: 'testValue',
         });
@@ -274,7 +277,7 @@ describe('settings_context', () => {
       });
 
       expect(set).toHaveBeenCalledTimes(1);
-      expect(set).toHaveBeenCalledWith('test', 'testValue');
+      expect(set).toHaveBeenCalledWith(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, 'testValue');
     });
 
     it('should show success toast when settings are saved successfully', async () => {
@@ -332,7 +335,7 @@ describe('settings_context', () => {
 
       // Add unsaved changes
       act(() => {
-        successResult.current.handleFieldChange('test', {
+        successResult.current.handleFieldChange(GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR, {
           type: 'string',
           unsavedValue: 'testValue',
         });

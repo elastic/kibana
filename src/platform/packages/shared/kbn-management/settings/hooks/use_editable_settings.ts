@@ -78,9 +78,7 @@ export const useEditableSettings = ({
   const trackedKeys = useMemo<string[]>(() => JSON.parse(settingsKeysJson), [settingsKeysJson]);
 
   const [settingsVersion, setSettingsVersion] = useState(0);
-  const [allUnsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>(
-    {}
-  );
+  const [allUnsavedChanges, setUnsavedChanges] = useState<Record<string, UnsavedFieldChange>>({});
   const [isSaving, setIsSaving] = useState(false);
 
   useEffect(() => {
