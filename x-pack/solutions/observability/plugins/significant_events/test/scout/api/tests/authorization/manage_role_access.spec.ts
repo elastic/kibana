@@ -158,6 +158,22 @@ for (const { name, label, role, canChangeSources } of ROLES) {
           });
           expect(response).toHaveStatusCode(403);
         });
+
+        apiTest('refuses to create a source from Agent Builder', async ({ apiClient }) => {
+          const title = `${name}-tool-refused-${uuidv4()}`;
+
+          const response = await executeTool(apiClient, toolHeaders, SOURCE_CREATE_TOOL_ID, {
+            title,
+            esql: ACCESS_SOURCE_ESQL,
+          });
+          expect(response).toHaveStatusCode(400);
+
+          const listed = await apiClient.get(
+            `${SOURCES_ENDPOINT}?page=1&per_page=5&search=${encodeURIComponent(title)}`,
+            { headers, responseType: 'json' }
+          );
+          expect(listed.body.sources).toStrictEqual([]);
+        });
       }
 
       apiTest('closes a significant event', async ({ apiClient }) => {

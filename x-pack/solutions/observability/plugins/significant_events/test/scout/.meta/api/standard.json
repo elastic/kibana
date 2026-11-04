@@ -1,5 +1,5 @@
 {
-  "sha1": "c1422803f1998718a2771ca5307acaedb091d6ac",
+  "sha1": "fb32c657d9b94d16b9412303222fe6fbcb212358",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -37,6 +37,22 @@
       }
     },
     {
+      "id": "abeb9fe1f06530f-462fa0fce5e74c3",
+      "title": "Significant Events actions for the built-in editor role refuses to create a source from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 154,
+        "column": 49
+      }
+    },
+    {
       "id": "abeb9fe1f06530f-e5b21509e0a097b",
       "title": "Significant Events actions for the built-in editor role closes a significant event",
       "expectedStatus": "passed",
@@ -48,8 +64,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 155,
-        "column": 20
+        "line": 165,
+        "column": 34
       }
     },
     {
@@ -64,8 +80,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 177,
-        "column": 63
+        "line": 193,
+        "column": 12
       }
     },
     {
@@ -80,8 +96,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 210,
-        "column": 46
+        "line": 224,
+        "column": 15
       }
     },
     {
@@ -96,8 +112,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 233,
-        "column": 34
+        "line": 247,
+        "column": 11
       }
     },
     {
@@ -112,8 +128,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 271,
-        "column": 23
+        "line": 286,
+        "column": 39
       }
     },
     {
@@ -128,8 +144,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 290,
-        "column": 13
+        "line": 304,
+        "column": 21
       }
     },
     {
@@ -160,8 +176,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 155,
-        "column": 20
+        "line": 165,
+        "column": 34
       }
     },
     {
@@ -176,8 +192,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 177,
-        "column": 63
+        "line": 193,
+        "column": 12
       }
     },
     {
@@ -192,8 +208,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 210,
-        "column": 46
+        "line": 224,
+        "column": 15
       }
     },
     {
@@ -208,8 +224,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 233,
-        "column": 34
+        "line": 247,
+        "column": 11
       }
     },
     {
@@ -224,8 +240,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 271,
-        "column": 23
+        "line": 286,
+        "column": 39
       }
     },
     {
@@ -240,8 +256,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 290,
-        "column": 13
+        "line": 304,
+        "column": 21
       }
     },
     {
@@ -256,8 +272,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 309,
-        "column": 25
+        "line": 323,
+        "column": 77
       }
     },
     {
@@ -272,8 +288,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 378,
-        "column": 27
+        "line": 387,
+        "column": 16
       }
     },
     {
@@ -293,6 +309,22 @@
       }
     },
     {
+      "id": "abeb9fe1f06530f-842c7fbdd3eb40e",
+      "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read refuses to create a source from Agent Builder",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
+        "line": 154,
+        "column": 49
+      }
+    },
+    {
       "id": "abeb9fe1f06530f-89a1137af54d8c6",
       "title": "Significant Events actions for a role with only Nightshift all and Agent Builder read closes a significant event",
       "expectedStatus": "passed",
@@ -304,8 +336,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 155,
-        "column": 20
+        "line": 165,
+        "column": 34
       }
     },
     {
@@ -320,8 +352,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 177,
-        "column": 63
+        "line": 193,
+        "column": 12
       }
     },
     {
@@ -336,8 +368,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 210,
-        "column": 46
+        "line": 224,
+        "column": 15
       }
     },
     {
@@ -352,8 +384,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 233,
-        "column": 34
+        "line": 247,
+        "column": 11
       }
     },
     {
@@ -368,8 +400,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 271,
-        "column": 23
+        "line": 286,
+        "column": 39
       }
     },
     {
@@ -384,8 +416,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/observability/plugins/significant_events/test/scout/api/tests/authorization/manage_role_access.spec.ts",
-        "line": 290,
-        "column": 13
+        "line": 304,
+        "column": 21
       }
     },
     {

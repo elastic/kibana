@@ -128,8 +128,12 @@ Consequences to plan for:
   restricted that way is read in full.
 - A wildcard means whatever matches when engines read. `logs-*` includes `logs-restricted` the day
   it is created.
-- Results derived from the source (knowledge indicators, detections) are visible to everyone with
-  Nightshift read in the space, whatever their own access to the indices.
+- Reads of a source's knowledge indicators still check the reader's own index privileges. Routes
+  and Agent Builder tools call `SourcesClient.assertReadable`, which answers 403 (or leaves the
+  source out) when the reader cannot read the source's local indices. Remote cluster targets are
+  trusted, not checked.
+- Significant events and detections derived from the source have no such check. Everyone with
+  Nightshift read in the space sees them, whatever their own access to the indices.
 
 ## Health
 
