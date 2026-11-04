@@ -105,8 +105,13 @@ export const ContainerNameWidget = ({
     enableAllColumns: true,
   };
 
-  const { getFilterForValueButton, getFilterOutValueButton, getCopyButton, filterManager, addSuccess } =
-    useSetFilter();
+  const {
+    getFilterForValueButton,
+    getFilterOutValueButton,
+    getCopyButton,
+    filterManager,
+    addSuccess,
+  } = useSetFilter();
   const filterButtons = useMemo((): FilterButtons => {
     const result: FilterButtons = {
       filterForButtons:

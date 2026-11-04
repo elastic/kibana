@@ -25,18 +25,35 @@ export const WithCopyToClipboard = React.memo<{
   showTooltip?: boolean;
   text: string;
   titleSummary?: string;
-}>(({ addSuccess, isHoverAction, keyboardShortcut = '', showTooltip = true, text, titleSummary }) => {
-  return showTooltip ? (
-    <EuiToolTip
-      content={
-        <TooltipWithKeyboardShortcut
-          additionalScreenReaderOnlyContext={text}
-          content={COPY_TO_CLIPBOARD}
-          shortcut={keyboardShortcut}
-          showShortcut={keyboardShortcut !== ''}
+}>(
+  ({
+    addSuccess,
+    isHoverAction,
+    keyboardShortcut = '',
+    showTooltip = true,
+    text,
+    titleSummary,
+  }) => {
+    return showTooltip ? (
+      <EuiToolTip
+        content={
+          <TooltipWithKeyboardShortcut
+            additionalScreenReaderOnlyContext={text}
+            content={COPY_TO_CLIPBOARD}
+            shortcut={keyboardShortcut}
+            showShortcut={keyboardShortcut !== ''}
+          />
+        }
+      >
+        <Clipboard
+          addSuccess={addSuccess}
+          content={text}
+          isHoverAction={isHoverAction}
+          titleSummary={titleSummary}
+          toastLifeTimeMs={800}
         />
-      }
-    >
+      </EuiToolTip>
+    ) : (
       <Clipboard
         addSuccess={addSuccess}
         content={text}
@@ -44,16 +61,8 @@ export const WithCopyToClipboard = React.memo<{
         titleSummary={titleSummary}
         toastLifeTimeMs={800}
       />
-    </EuiToolTip>
-  ) : (
-    <Clipboard
-      addSuccess={addSuccess}
-      content={text}
-      isHoverAction={isHoverAction}
-      titleSummary={titleSummary}
-      toastLifeTimeMs={800}
-    />
-  );
-});
+    );
+  }
+);
 
 WithCopyToClipboard.displayName = 'WithCopyToClipboard';
