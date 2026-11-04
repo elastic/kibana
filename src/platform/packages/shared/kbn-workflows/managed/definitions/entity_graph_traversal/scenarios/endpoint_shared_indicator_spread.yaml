@@ -9,7 +9,9 @@ description: >
   the inbound leg reaches every host whose relationships point at an indicator.
 seed:
   type: host
-  description: The entity store id of the compromised host, for example host:WKSTN-RECV01
+  description: >-
+    The entity store id of the compromised host, which the host engine keys on host.id, for
+    example host:8f2c41e0-1d2b-4c6f-9a3e-5b7d8e9f0a11
 direction: both
 limits:
   max_hops: 6

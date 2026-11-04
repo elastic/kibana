@@ -253,6 +253,9 @@ describe('inferBlastRadiusNodeKind', () => {
         type: 'Indicator',
       })
     ).toBe('indicator');
+    expect(
+      inferBlastRadiusNodeKind('00g1awsdev7Xk2', 'group', { engine_type: 'generic', type: 'Group' })
+    ).toBe('group');
     expect(inferBlastRadiusNodeKind('some-id', 'asset', { sub_type: 'AWS IAM Role' })).toBe('role');
     expect(inferBlastRadiusNodeKind('some-id', 'asset', { sub_type: 'AWS EC2 Instance' })).toBe(
       'instance'

@@ -22,6 +22,7 @@ import type {
 
 export type BlastRadiusNodeKind =
   | 'user'
+  | 'group'
   | 'role'
   | 'policy'
   | 'indicator'
@@ -58,6 +59,7 @@ interface NodePresentation {
 
 const PRESENTATION: Record<BlastRadiusNodeKind, NodePresentation> = {
   user: { shape: 'ellipse', icon: 'user', tag: 'User' },
+  group: { shape: 'ellipse', icon: 'users', tag: 'Group' },
   role: { shape: 'pentagon', icon: 'key', tag: 'IAM role' },
   policy: { shape: 'pentagon', icon: 'document', tag: 'IAM policy' },
   instance: { shape: 'hexagon', icon: 'compute', tag: 'EC2 instance' },
@@ -101,6 +103,7 @@ const kindFromEntity = (entity?: GraphTraversalEntity): BlastRadiusNodeKind | un
     return entity.engine_type;
   }
   if (entity.type === 'Indicator') return 'indicator';
+  if (entity.type === 'Group') return 'group';
   const subType = entity.sub_type?.toLowerCase() ?? '';
   if (subType.endsWith(' role')) return 'role';
   if (subType.endsWith(' policy')) return 'policy';

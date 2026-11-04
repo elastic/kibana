@@ -34,6 +34,8 @@ describe('buildGraphExpandStatement', () => {
     it('walks the entity index on entity.id over the union of the scenario relationships', () => {
       expect(statement.direction).toBe('out');
       expect(statement.targets).toEqual([
+        { field: 'entity.relationships.member_of.ids', relation: 'member_of' },
+        { field: 'entity.relationships.sso_to_role.ids', relation: 'sso_to_role' },
         { field: 'entity.relationships.can_assume.ids', relation: 'can_assume' },
         { field: 'entity.relationships.can_connect.ids', relation: 'can_connect' },
         { field: 'entity.relationships.runs_as.ids', relation: 'runs_as' },
@@ -44,16 +46,16 @@ describe('buildGraphExpandStatement', () => {
           GRAPH_EXPAND_PREAMBLE,
           'ROW node_id = ?',
           `| GRAPH EXPAND ${INDEX} ON node_id == \`entity.id\``,
-          '    TO (`entity.relationships.can_assume.ids`, `entity.relationships.can_connect.ids`, `entity.relationships.runs_as.ids`, `entity.relationships.grants_access_to.ids`)',
+          '    TO (`entity.relationships.member_of.ids`, `entity.relationships.sso_to_role.ids`, `entity.relationships.can_assume.ids`, `entity.relationships.can_connect.ids`, `entity.relationships.runs_as.ids`, `entity.relationships.grants_access_to.ids`)',
           '    STATS __count = COUNT(*), __payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`entity.sub_type`)',
-          '    WITH {"max_hops":6,"max_nodes":2000,"max_frontier":500,"hub_degree":500,"direction":"out"}',
+          '    WITH {"max_hops":7,"max_nodes":2000,"max_frontier":500,"hub_degree":500,"direction":"out"}',
           '| RENAME node_reached AS `entity.id`',
           `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
         ].join('\n')
       );
       expect(statement.params).toEqual(['user:john.doe@acmecrm.com@okta']);
       expect(statement.payloadFields).toEqual(['entity.name', 'entity.sub_type']);
-      expect(statement.maxHops).toBe(6);
+      expect(statement.maxHops).toBe(7);
     });
 
     it('reads the reached node off the joined entity.id column', () => {

@@ -275,6 +275,16 @@ export const EntityField = lazySchema(() =>
            */
           supervises: EntityRelationship.optional().describe('Entities supervised by this entity.'),
           /**
+           * Groups this entity is a member of.
+           */
+          member_of: EntityRelationship.optional().describe('Groups this entity is a member of.'),
+          /**
+           * Roles this group maps to on a single sign-on application (for example, the AWS federation app).
+           */
+          sso_to_role: EntityRelationship.optional().describe(
+            'Roles this group maps to on a single sign-on application (for example, the AWS federation app).'
+          ),
+          /**
            * Roles this entity may assume (identity federation, trust policies).
            */
           can_assume: EntityRelationship.optional().describe(

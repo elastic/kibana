@@ -58,10 +58,11 @@ describe('entity graph traversal scenarios', () => {
   describe('okta-user-to-aws-resources plan', () => {
     const plan = loadEntityGraphTraversalPlan(OKTA_USER_TO_AWS_RESOURCES_SCENARIO_ID);
 
-    it('unrolls the repeated asset hop after the Okta hop and walks outward', () => {
+    it('unrolls the repeated asset hop after the two Okta hops and walks outward', () => {
       expect(plan).toBeDefined();
       expect(plan?.direction).toBe('out');
       expect(plan?.hops.map((h) => h.name)).toEqual([
+        'okta_groups',
         'okta_federation_roles',
         'aws_asset_relationships',
         'aws_asset_relationships',
@@ -69,16 +70,22 @@ describe('entity graph traversal scenarios', () => {
         'aws_asset_relationships',
         'aws_asset_relationships',
       ]);
-      expect(plan?.hops.map((h) => h.hop_number)).toEqual([1, 2, 3, 4, 5, 6]);
+      expect(plan?.hops.map((h) => h.hop_number)).toEqual([1, 2, 3, 4, 5, 6, 7]);
     });
 
     it('matches every hop on entity.id and reads each relationship from its ids field', () => {
-      const okta = plan?.hops[0];
-      expect(okta?.match_field).toBe('entity.id');
-      expect(okta?.target_fields).toEqual([
-        { field: 'entity.relationships.can_assume.ids', relation: 'can_assume' },
+      const groups = plan?.hops[0];
+      expect(groups?.match_field).toBe('entity.id');
+      expect(groups?.target_fields).toEqual([
+        { field: 'entity.relationships.member_of.ids', relation: 'member_of' },
       ]);
-      const assets = plan?.hops[1];
+      expect(groups).toMatchObject({ source_type: 'user', target_type: 'group' });
+      const federation = plan?.hops[1];
+      expect(federation?.target_fields).toEqual([
+        { field: 'entity.relationships.sso_to_role.ids', relation: 'sso_to_role' },
+      ]);
+      expect(federation).toMatchObject({ source_type: 'group', target_type: 'role' });
+      const assets = plan?.hops[2];
       expect(assets?.match_field).toBe('entity.id');
       expect(assets?.target_fields.map((t) => t.relation)).toEqual([
         'can_assume',

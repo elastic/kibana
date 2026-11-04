@@ -354,6 +354,27 @@ Object {
         "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.owns.ids": Object {
           "type": "keyword",
         },
@@ -427,6 +448,27 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
@@ -889,6 +931,27 @@ Object {
         "entity.relationships.grants_access_to.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.owns.entity.id": Object {
           "type": "keyword",
         },
@@ -962,6 +1025,27 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.supervises.entity.id": Object {
@@ -1482,6 +1566,27 @@ Object {
         "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.owns.ids": Object {
           "type": "keyword",
         },
@@ -1555,6 +1660,27 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
@@ -2126,6 +2252,27 @@ Object {
         "host.entity.relationships.grants_access_to.user.name": Object {
           "type": "keyword",
         },
+        "host.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.member_of.user.name": Object {
+          "type": "keyword",
+        },
         "host.entity.relationships.owns.entity.id": Object {
           "type": "keyword",
         },
@@ -2187,6 +2334,27 @@ Object {
           "type": "keyword",
         },
         "host.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "host.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "host.entity.relationships.supervises.entity.id": Object {
@@ -2713,6 +2881,27 @@ Object {
         "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.owns.ids": Object {
           "type": "keyword",
         },
@@ -2786,6 +2975,27 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
@@ -3245,6 +3455,27 @@ Object {
         "service.entity.relationships.grants_access_to.user.name": Object {
           "type": "keyword",
         },
+        "service.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.member_of.user.name": Object {
+          "type": "keyword",
+        },
         "service.entity.relationships.owns.entity.id": Object {
           "type": "keyword",
         },
@@ -3306,6 +3537,27 @@ Object {
           "type": "keyword",
         },
         "service.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "service.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "service.entity.relationships.supervises.entity.id": Object {
@@ -3711,6 +3963,27 @@ Object {
         "entity.relationships.grants_access_to.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
+        "entity.relationships.member_of.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.member_of.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
         "entity.relationships.owns.ids": Object {
           "type": "keyword",
         },
@@ -3784,6 +4057,27 @@ Object {
           "type": "keyword",
         },
         "entity.relationships.runs_as.raw_identifiers.user.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.ids": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.host.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.service.name": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.email": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.id": Object {
+          "type": "keyword",
+        },
+        "entity.relationships.sso_to_role.raw_identifiers.user.name": Object {
           "type": "keyword",
         },
         "entity.relationships.supervises.ids": Object {
@@ -4300,6 +4594,27 @@ Object {
         "user.entity.relationships.grants_access_to.user.name": Object {
           "type": "keyword",
         },
+        "user.entity.relationships.member_of.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.member_of.user.name": Object {
+          "type": "keyword",
+        },
         "user.entity.relationships.owns.entity.id": Object {
           "type": "keyword",
         },
@@ -4361,6 +4676,27 @@ Object {
           "type": "keyword",
         },
         "user.entity.relationships.runs_as.user.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.entity.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.host.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.host.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.service.name": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.email": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.id": Object {
+          "type": "keyword",
+        },
+        "user.entity.relationships.sso_to_role.user.name": Object {
           "type": "keyword",
         },
         "user.entity.relationships.supervises.entity.id": Object {

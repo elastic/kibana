@@ -3,29 +3,38 @@ id: okta-user-to-aws-resources
 name: Okta user to AWS resources
 description: >
   Blast radius of a compromised Okta user across AWS, from the entity store alone. The user
-  entity lists the IAM roles its Okta groups federate into; role, instance and bucket entities
-  list what they reach through configuration: roles they may assume (trust policies),
-  instances they may open a session on, the role an instance runs as (instance profile), and
-  the buckets a role may access (attached and bucket policies). The walk follows those
-  relationships until the hop budget or the frontier runs out.
+  entity lists the Okta groups it is a member of; each group entity lists the IAM roles it
+  maps to on the AWS federation app; role, instance and bucket entities list what they reach
+  through configuration: roles they may assume (trust policies), instances they may open a
+  session on, the role an instance runs as (instance profile), and the buckets a role may
+  access (attached and bucket policies). The walk follows those relationships until the hop
+  budget or the frontier runs out.
 seed:
   type: user
   description: The entity store id of the compromised user, for example user:john.doe@acmecrm.com@okta
 limits:
-  max_hops: 6
+  max_hops: 7
   max_nodes: 2000
   max_frontier: 500
   max_edges_per_hop: 5000
   max_edges_total: 5000
   hub_degree: 500
 hops:
-  - name: okta_federation_roles
-    description: IAM roles the user's Okta groups map to on the AWS federation app
+  - name: okta_groups
+    description: Okta groups the user is a member of
     relationships:
-      - can_assume
+      - member_of
     payload_fields:
       - entity.name
     source_type: user
+    target_type: group
+  - name: okta_federation_roles
+    description: IAM roles each group maps to on the AWS federation app
+    relationships:
+      - sso_to_role
+    payload_fields:
+      - entity.name
+    source_type: group
     target_type: role
   - name: aws_asset_relationships
     description: >
