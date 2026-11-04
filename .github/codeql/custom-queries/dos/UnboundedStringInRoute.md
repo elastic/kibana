@@ -166,7 +166,7 @@ unboundedString({ reason: 'Size is enforced upstream' });
 
 The query treats these library exports as intentional data-flow barriers, including
 aliased imports. Reporting helpers (`schema.savedObjectId.warn()`,
-`savedObjectId.warn()` or `boundedString.warn({ maxLength, label })`) are also intentional barriers: they report maximum
+`savedObjectId.warn()` or `boundedString.warn({ maxLength, label })`) are also intentional barriers: they report
 length violations without rejecting them during adoption. Unrelated functions
 with the same names do not suppress alerts.
 

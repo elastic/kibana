@@ -108,7 +108,9 @@ export const registerBoundedStringHelperRoutes = (
         body: z.object({
           url: zNs.urlString(),
           urlWarn: zNs.urlString.warn({ label: 'test.url' }),
+          certificate: zNs.pemCertificate(),
           certificateWarn: zNs.pemCertificate.warn({ label: 'test.certificate' }),
+          version: zNs.version(),
           versionWarn: zNs.version.warn({ label: 'test.version' }),
           bounded: zNs.boundedString({ maxLength: 4096 }),
           boundedWarn: zNs.boundedString.warn({ maxLength: 4096, label: 'test.bounded' }),

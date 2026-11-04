@@ -35,10 +35,29 @@ export const BOUNDED_STRING_HELPER = 'boundedString';
 export type ReportedStringHelperName = StringHelperName | typeof BOUNDED_STRING_HELPER;
 
 /**
- * Upper bound for `boundedString()`'s required `maxLength`. Matches the default
- * `server.maxPayload` (1 MiB) and the top bucket of the violation histogram.
+ * Upper bound for `boundedString()`'s required `maxLength`. A generic helper exists to keep
+ * request fields small enough that no single one dominates a payload; past this size the field
+ * deserves a reviewed decision, so larger inputs go through `unboundedString()` with a reason
+ * or a semantic helper with its own default.
  */
-export const BOUNDED_STRING_MAX_LENGTH = 1_048_576;
+export const BOUNDED_STRING_MAX_LENGTH = 65_536;
+
+/**
+ * Helpers whose `.warn()` requires a `label`. These bound a field *shape* rather than a
+ * Kibana-specific concept, so unrelated fields across plugins adopt the same helper and
+ * would otherwise report into a single, unreadable series.
+ */
+export const LABEL_REQUIRED_HELPERS = ['urlString', 'pemCertificate', 'version'] as const;
+
+export type LabelRequiredHelperName = (typeof LABEL_REQUIRED_HELPERS)[number];
+
+/**
+ * OpenAPI vendor extensions published by reporting-mode schemas. `.warn()` enforces no length
+ * bound, so the generated spec carries no `minLength` / `maxLength`; these advertise the bounds
+ * the field intends to enforce once it moves to the strict helper.
+ */
+export const X_KIBANA_PLANNED_MIN_LENGTH = 'x-kibana-planned-min-length' as const;
+export const X_KIBANA_PLANNED_MAX_LENGTH = 'x-kibana-planned-max-length' as const;
 
 export interface StringHelperLimits {
   readonly minLength: number;
@@ -109,9 +128,12 @@ export const getBoundedStringLimits = ({
   return { minLength, maxLength };
 };
 
-/** Requires a static metric label for `boundedString.warn()`. */
-export const assertBoundedStringLabel = (label: string): void => {
+/** Requires a static metric label for the reporting mode of helpers that share one series. */
+export const assertStringHelperLabel = (
+  helper: ReportedStringHelperName,
+  label: string | undefined
+): void => {
   if (typeof label !== 'string' || label.trim().length === 0) {
-    throw new Error('boundedString.warn() requires a non-empty label');
+    throw new Error(`${helper}.warn() requires a non-empty label`);
   }
 };

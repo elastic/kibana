@@ -8,7 +8,7 @@
  */
 
 import {
-  assertBoundedStringLabel,
+  assertStringHelperLabel,
   assertUnboundedStringReason,
   assertValidMinLength,
   BOUNDED_STRING_HELPER,
@@ -17,6 +17,7 @@ import {
   reportStringLengthViolation,
 } from '@kbn/schema-string-helpers';
 import type {
+  LabelRequiredHelperName,
   ReportedStringHelperName,
   StringHelperLimits,
   StringHelperName,
@@ -27,20 +28,31 @@ import type { Type } from '../types/type';
 
 export type StringWarnOptions = StringOptions & {
   /**
-   * Static field identifier for the violation metric, never derived from request.
-   * Convention only, not enforced.
+   * Static field identifier for the violation metric, never derived from request input. Optional
+   * here, required by the helpers that many unrelated fields share (see `LabeledSchemaHelper`)
+   * and by `boundedString.warn()`; that it is static is a convention, not enforced.
    *
    * @see https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas
    */
   label?: string;
 };
 
+export type LabeledStringWarnOptions = StringWarnOptions & { label: string };
+
 export interface SchemaHelper {
   (options?: StringOptions): Type<string>;
   warn(options?: StringWarnOptions): Type<string>;
 }
 
-// Accepts overlong input and records a violation instead of rejecting it.
+/** A helper whose reporting mode requires a `label`. */
+export interface LabeledSchemaHelper {
+  (options?: StringOptions): Type<string>;
+  warn(options: LabeledStringWarnOptions): Type<string>;
+}
+
+// Accepts out-of-bounds input and records a violation instead of rejecting it, so that adopting
+// reporting mode cannot change which requests a route accepts. Neither bound is enforced; both
+// are published as advisory OpenAPI extensions.
 const reportingString = (
   helper: ReportedStringHelperName,
   { minLength, maxLength }: StringHelperLimits,
@@ -48,14 +60,26 @@ const reportingString = (
 ): Type<string> =>
   new StringType({
     ...options,
-    minLength,
+    minLength: undefined,
     maxLength: undefined,
+    plannedMinLength: minLength > 0 ? minLength : undefined,
+    plannedMaxLength: maxLength,
     validate: (value) => {
-      if (value.length > maxLength) {
+      if (value.length < minLength) {
         reportStringLengthViolation({
           helper,
           library: 'config-schema',
-          maxLength,
+          bound: 'min',
+          limit: minLength,
+          length: value.length,
+          label,
+        });
+      } else if (value.length > maxLength) {
+        reportStringLengthViolation({
+          helper,
+          library: 'config-schema',
+          bound: 'max',
+          limit: maxLength,
           length: value.length,
           label,
         });
@@ -74,6 +98,19 @@ const makeHelper = (helper: StringHelperName): SchemaHelper => {
   return Object.assign(strict, { warn });
 };
 
+// Helpers that bound a field shape rather than a Kibana concept: unrelated fields across plugins
+// share them, so reporting mode needs a label to keep the violation metric readable.
+const makeLabeledHelper = (helper: LabelRequiredHelperName): LabeledSchemaHelper => {
+  const base = makeHelper(helper);
+
+  return Object.assign((options?: StringOptions) => base(options), {
+    warn: (options: LabeledStringWarnOptions): Type<string> => {
+      assertStringHelperLabel(helper, options.label);
+      return base.warn(options);
+    },
+  });
+};
+
 export const savedObjectId = makeHelper('savedObjectId');
 export const savedObjectType = makeHelper('savedObjectType');
 export const savedObjectVersion = makeHelper('savedObjectVersion');
@@ -83,9 +120,9 @@ export const description = makeHelper('description');
 export const searchFilter = makeHelper('searchFilter');
 export const aggregation = makeHelper('aggregation');
 export const querySortField = makeHelper('querySortField');
-export const urlString = makeHelper('urlString');
-export const pemCertificate = makeHelper('pemCertificate');
-export const version = makeHelper('version');
+export const urlString = makeLabeledHelper('urlString');
+export const pemCertificate = makeLabeledHelper('pemCertificate');
+export const version = makeLabeledHelper('version');
 
 export type BoundedStringOptions = StringOptions & { maxLength: number };
 
@@ -114,7 +151,7 @@ export const boundedString: BoundedStringHelper = Object.assign(
     new StringType({ ...options, ...getBoundedStringLimits(options) }),
   {
     warn: (options: BoundedStringWarnOptions): Type<string> => {
-      assertBoundedStringLabel(options.label);
+      assertStringHelperLabel(BOUNDED_STRING_HELPER, options.label);
       return reportingString(BOUNDED_STRING_HELPER, getBoundedStringLimits(options), options);
     },
   }

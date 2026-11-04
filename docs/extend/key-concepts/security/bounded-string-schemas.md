@@ -60,6 +60,10 @@ The saved object defaults follow [`saved_objects_length_limits.ts`](https://gith
 
 `urlString`, `pemCertificate` and `version` bound length only: `urlString` (any URL or URI, sized to the conventional 2,048 limit) does not check syntax or scheme, `pemCertificate` (PEM-encoded certificates, private keys and CA bundles, sized to fit a full public CA bundle) does not parse PEM, and `version` (semver and other version strings, matching node-semver's 256 limit) does not validate the format. Add a `validate` function, or Zod refinements, when the format matters. `version` is for software and package versions; use `savedObjectVersion` for a saved object's concurrency token. The URL helper is named `urlString` so that it does not shadow Zod's own `url()` format validator, which `@kbn/zod` re-exports.
 
+`pemCertificate` sizes a field that carries PEM **content**. A field that instead carries a path to a certificate on the host — Fleet's `ca_file`, `cert_file` and `key_file`, for example — is an ordinary path, so use `boundedString` with a path-appropriate limit.
+
+These three helpers describe a field's *shape* rather than a Kibana concept, so unrelated fields across plugins adopt the same one. Their `.warn()` therefore requires a `label`, as [`boundedString.warn()`](#fields-no-helper-fits) does; see [Telemetry](#telemetry).
+
 Helpers with a minimum of zero allow empty strings. To allow an *absent* field, use the library's optional wrapper (`schema.maybe()` / `.optional()`).
 
 ## Overriding limits
@@ -72,7 +76,7 @@ schema.object({ id: schema.savedObjectId({ maxLength: 250 }) });
 
 Undefined overrides retain the defaults. Limits must be finite, non-negative integers with minimum less than or equal to maximum; anything else throws at schema construction time. Use overrides to preserve an existing route contract when adopting a helper — do not loosen a bound that is already stricter than the default.
 
-In Zod, apply ordinary composition (`.optional()`, `.nullable()`, `.regex()`, `.refine()`) **after** selecting strict or reporting mode. Strict schemas emit their length limits in JSON Schema / OpenAPI output; reporting schemas omit the maximum they do not enforce.
+In Zod, apply ordinary composition (`.optional()`, `.nullable()`, `.regex()`, `.refine()`) **after** selecting strict or reporting mode. Strict schemas emit their length limits in JSON Schema / OpenAPI output; reporting schemas emit no length limits at all, because they enforce none — see [Generated OpenAPI output](#generated-openapi-output).
 
 ## Reporting mode
 
@@ -82,24 +86,30 @@ Adopting a bound on an existing route risks rejecting traffic that works today. 
 savedObjectId.warn({ label: 'dashboard.panelId' });
 ```
 
-`.warn()` accepts overlong input and records a violation instead of failing validation. Only maximum length enforcement is disabled — minimum length and every other validator stay active. A `maxLength` override changes the reporting threshold. Call `.warn()` on the factory, before composing the returned schema.
+`.warn()` enforces **neither** length bound. Input shorter than the minimum or longer than the maximum is accepted and recorded as a violation instead of failing validation, so adopting reporting mode on an existing route cannot change which requests that route accepts. `minLength` and `maxLength` overrides change the reported thresholds rather than enforcing them. Call `.warn()` on the factory, before composing the returned schema.
 
-Reporting mode preserves custom `validate`, `hostname`, coercion, defaults and metadata options. Default values retain config-schema's existing behavior: they are not validated.
+Every other validator stays active: reporting mode preserves custom `validate`, `hostname`, coercion, defaults and metadata options. Default values retain config-schema's existing behavior: they are not validated.
+
+Because the minimum is reported rather than enforced, the histogram shows up front whether a route receives empty strings that the strict helper would later reject.
 
 ### Telemetry
 
-Each overlong validation records the string's length in the histogram `kibana.schema.string_length_violation.length` on the `kibana.schema` OTel meter. The histogram measures UTF-16 code units (`{code_unit}`) and carries these attributes:
+Each out-of-bounds validation records the string's length in the histogram `kibana.schema.string_length_violation.length` on the `kibana.schema` OTel meter. The histogram measures UTF-16 code units (`{code_unit}`) and carries these attributes:
 
 | Attribute | Value |
 | --- | --- |
 | `schema.helper` | The helper name, for example `savedObjectId`, or `boundedString` for the generic helper |
 | `schema.library` | `config-schema` or `zod` |
-| `schema.max_length` | The threshold that was exceeded |
-| `schema.label` | Caller-supplied field identifier: optional for semantic helpers, required for `boundedString.warn()` |
+| `schema.bound` | `max` for input above the maximum, `min` for input below the minimum |
+| `schema.max_length` | The maximum that was exceeded, on `schema.bound: max` violations |
+| `schema.min_length` | The minimum that was undercut, on `schema.bound: min` violations |
+| `schema.label` | Caller-supplied field identifier: required for `boundedString.warn()`, `urlString.warn()`, `pemCertificate.warn()` and `version.warn()`, optional for the remaining helpers |
 
 :::{warning}
 `label` must be a **static field identifier** chosen by the route author — never a request value, user ID, or anything else derived from input. It becomes a metric attribute, so request-derived values would both explode cardinality and leak input into telemetry. This is a convention, not a runtime-enforced constraint.
 :::
+
+Give every `.warn()` call a label, including where the helper does not require one. Without it, unrelated fields that happen to share a helper collapse into a single series and the data cannot be traced back to a route.
 
 Neither input contents nor actual input lengths are recorded as attributes. The histogram count gives the number of violations; its sum, minimum, maximum and buckets describe the lengths of the violating strings. Suggested bucket boundaries cover lengths through 1,048,576 code units, with larger values landing in the overflow bucket; exporter or provider views may override these boundaries.
 
@@ -109,7 +119,26 @@ Counts represent validation *attempts* — including repeated validation and uns
 
 Reporting uses the existing OTel provider and exporters. Without a configured provider it is a no-op. Enable and configure `telemetry.metrics` as described in [`@kbn/metrics`](https://github.com/elastic/kibana/tree/main/src/platform/packages/private/opentelemetry/kbn-metrics). Where metrics ship to the serverless metrics cluster, query `serverless-metrics-*:metrics-*.otel-*` for `metrics.kibana.schema.string_length_violation.length:*` and group by the attributes above.
 
-Calling `.warn()` does not enable exporters and does not impose a maximum length. Switch to the strict helper once the observed bounds have been reviewed.
+Calling `.warn()` does not enable exporters and does not impose a length bound. Switch to the strict helper once the observed bounds have been reviewed.
+
+:::{warning} Moving from `.warn()` to the strict helper is a breaking HTTP API change
+The strict helper starts rejecting input the route accepted the day before, and adds `minLength` / `maxLength` to the published spec. Treat it like any other tightening of request validation: check the histogram for real traffic above the bound first, follow the stability and versioning rules in [Guidelines for HTTP API design](../../contributing/api-design/guidelines-for-http-api-design-in-kibana.md#breaking-changes-to-http-apis-include), and raise the limit for that route with a `maxLength` override rather than breaking existing clients.
+:::
+
+## Generated OpenAPI output
+
+Strict helpers publish their bounds as ordinary `minLength` and `maxLength` keywords.
+
+Reporting schemas enforce nothing, so they publish no `minLength` or `maxLength` — adopting `.warn()` never tells clients that input they send today has become invalid. Instead they advertise the bounds the field intends to enforce through two vendor extensions, which clients can read as advance notice:
+
+```yaml
+panelId:
+  type: string
+  x-kibana-planned-min-length: 1
+  x-kibana-planned-max-length: 512
+```
+
+A planned minimum of zero is omitted. Nothing validates these values; they change to real `minLength` / `maxLength` keywords when the route moves to the strict helper.
 
 ## Fields no helper fits
 
@@ -124,7 +153,7 @@ boundedString.warn({ maxLength: 4096, label: 'fleet.outputs.ssl.key_file' });
 boundedString({ maxLength: 4096 }).optional();
 ```
 
-- `maxLength` is required and has no default. It must be an integer no greater than 1,048,576; larger limits throw at schema definition time. Use `unboundedString` with a reason for fields that need more.
+- `maxLength` is required and has no default. It must be an integer no greater than 65,536; larger limits throw at schema definition time. A field that genuinely needs more deserves a reviewed decision, so use a semantic helper with its own default, or `unboundedString` with a reason.
 - `minLength` defaults to 0, so empty strings stay valid unless you set one.
 - `boundedString.warn()` requires a non-empty `label`. Every generic field reports under the same `schema.helper` value, so the label is the only way to tell them apart in the histogram.
 
@@ -147,4 +176,4 @@ CodeQL recognizes this escape hatch and the helpers' explicit `.warn()` mode, in
 - Adopt helpers in team-owned route changes, preserving stricter bounds and existing format validation as needed.
 - Pick a semantic helper first; fall back to `boundedString` only when none fits.
 - Replace justified `codeql[...]` string suppressions with `unboundedString({ reason: ... })`.
-- Reach for `.warn()` when an existing route's real-world bounds are unknown, and follow up with the strict helper once the histogram has data.
+- Reach for `.warn()` when an existing route's real-world bounds are unknown, and follow up with the strict helper once the histogram has data. Adopting `.warn()` is non-breaking; the follow-up to the strict helper is a breaking change to the route's request validation and published spec, so plan it as one.

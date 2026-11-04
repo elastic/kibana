@@ -26,6 +26,8 @@ export {
 } from './string_helpers';
 export type {
   SchemaHelper,
+  LabeledSchemaHelper,
+  LabeledStringWarnOptions,
   StringWarnOptions,
   UnboundedStringOptions,
   BoundedStringHelper,

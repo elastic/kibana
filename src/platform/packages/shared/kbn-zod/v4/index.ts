@@ -37,7 +37,9 @@ export {
 export type {
   ZodStringOptions,
   ZodStringWarnOptions,
+  LabeledZodStringWarnOptions,
   ZodStringHelper,
+  LabeledZodStringHelper,
   UnboundedStringOptions,
   ZodBoundedStringHelper,
   ZodBoundedStringOptions,

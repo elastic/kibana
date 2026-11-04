@@ -14,8 +14,17 @@ export {
   assertValidMinLength,
   BOUNDED_STRING_HELPER,
   BOUNDED_STRING_MAX_LENGTH,
+  LABEL_REQUIRED_HELPERS,
+  X_KIBANA_PLANNED_MIN_LENGTH,
+  X_KIBANA_PLANNED_MAX_LENGTH,
   getBoundedStringLimits,
-  assertBoundedStringLabel,
+  assertStringHelperLabel,
 } from './limits';
-export type { StringHelperName, StringHelperLimits, ReportedStringHelperName } from './limits';
+export type {
+  StringHelperName,
+  StringHelperLimits,
+  ReportedStringHelperName,
+  LabelRequiredHelperName,
+} from './limits';
 export { reportStringLengthViolation } from './report_string_length_violation';
+export type { StringLengthBound } from './report_string_length_violation';

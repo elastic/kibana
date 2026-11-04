@@ -62,7 +62,7 @@ describe.each([
     expect(reportStringLengthViolation).not.toHaveBeenCalled();
   });
 
-  test('reports only values above the limit and keeps minimum length validation', () => {
+  test('reports values above the maximum without rejecting them', () => {
     const reporting = helper.warn({ label: 'dashboard.panelId' });
     expect(reporting.parse('x'.repeat(maxLength))).toHaveLength(maxLength);
     expect(reportStringLengthViolation).not.toHaveBeenCalled();
@@ -71,23 +71,41 @@ describe.each([
     expect(reportStringLengthViolation).toHaveBeenCalledWith({
       helper: name,
       library: 'zod',
-      maxLength,
+      bound: 'max',
+      limit: maxLength,
       length: maxLength + 1,
       label: 'dashboard.panelId',
     });
     expect(() => reporting.parse(42)).toThrow();
+  });
+
+  test('reports values below the minimum without rejecting them', () => {
+    const reporting = helper.warn({ label: 'dashboard.panelId' });
+    expect(reporting.parse('')).toBe('');
     if (minLength > 0) {
-      expect(() => reporting.parse('')).toThrow();
+      expect(reportStringLengthViolation).toHaveBeenCalledWith({
+        helper: name,
+        library: 'zod',
+        bound: 'min',
+        limit: minLength,
+        length: 0,
+        label: 'dashboard.panelId',
+      });
+    } else {
+      expect(reportStringLengthViolation).not.toHaveBeenCalled();
     }
   });
 
   test('uses overrides in both enforcing and reporting modes', () => {
     expect(() => helper({ maxLength: 3 }).parse('four')).toThrow();
-    expect(helper.warn({ maxLength: 3 }).parse('four')).toBe('four');
+    expect(helper.warn({ maxLength: 3, label: 'test.field' }).parse('four')).toBe('four');
     expect(reportStringLengthViolation).toHaveBeenCalledWith(
-      expect.objectContaining({ maxLength: 3 })
+      expect.objectContaining({ bound: 'max', limit: 3 })
     );
-    expect(() => helper.warn({ minLength: 3 }).parse('ab')).toThrow();
+    expect(helper.warn({ minLength: 3, label: 'test.field' }).parse('ab')).toBe('ab');
+    expect(reportStringLengthViolation).toHaveBeenCalledWith(
+      expect.objectContaining({ bound: 'min', limit: 3 })
+    );
     expect(helper({ minLength: 0 }).parse('')).toBe('');
     expect(() => helper({ maxLength: undefined }).parse('x'.repeat(maxLength + 1))).toThrow();
   });
@@ -95,9 +113,21 @@ describe.each([
   test('creates reporting schemas without changing strict schemas or future defaults', () => {
     const strict = helper();
     expect(strict.parse('abc')).toBe('abc');
-    expect(helper.warn().parse('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
+    expect(helper.warn({ label: 'test.field' }).parse('x'.repeat(maxLength + 1))).toHaveLength(
+      maxLength + 1
+    );
     expect(() => strict.parse('x'.repeat(maxLength + 1))).toThrow();
     expect(() => helper().parse('x'.repeat(maxLength + 1))).toThrow();
+  });
+});
+
+describe.each([
+  ['urlString', urlString],
+  ['pemCertificate', pemCertificate],
+  ['version', version],
+] as const)('%s', (name, helper) => {
+  test.each(['', '  '])('requires a non-empty label %j in reporting mode', (label) => {
+    expect(() => helper.warn({ label })).toThrow(`${name}.warn() requires a non-empty label`);
   });
 });
 
@@ -129,7 +159,7 @@ describe('unboundedString', () => {
 
 test('supports composition, inference and refinement after warn()', () => {
   const requestSchema = z.object({
-    id: savedObjectId.warn().regex(/^a+$/).optional(),
+    id: savedObjectId.warn({ label: 'dashboard.panelId' }).regex(/^a+$/).optional(),
     description: description().nullable(),
   });
   type Request = z.infer<typeof requestSchema>;
@@ -153,8 +183,21 @@ test('exports accurate JSON Schema limits in both modes', () => {
     maxLength: 512,
   });
   const reporting = z.toJSONSchema(savedObjectId.warn());
-  expect(reporting).toMatchObject({ type: 'string', minLength: 1 });
+  expect(reporting).toMatchObject({ type: 'string' });
+  expect(reporting).not.toHaveProperty('minLength');
   expect(reporting).not.toHaveProperty('maxLength');
+});
+
+test('publishes the planned bounds of a reporting schema as OpenAPI extensions', () => {
+  expect(savedObjectId.warn().meta()).toEqual({
+    openapi: {
+      'x-kibana-planned-min-length': 1,
+      'x-kibana-planned-max-length': 512,
+    },
+  });
+  expect(description.warn().meta()).toEqual({
+    openapi: { 'x-kibana-planned-max-length': 10_000 },
+  });
 });
 
 test('returns ordinary Zod schemas for composition after selecting the mode', () => {
@@ -183,7 +226,8 @@ describe('boundedString', () => {
     expect(reportStringLengthViolation).toHaveBeenCalledWith({
       helper: 'boundedString',
       library: 'zod',
-      maxLength: 4,
+      bound: 'max',
+      limit: 4,
       length: 5,
       label: 'fleet.output.ca_file',
     });
@@ -199,10 +243,10 @@ describe('boundedString', () => {
   );
 
   test('rejects a maximum above the ceiling at definition time', () => {
-    expect(() => boundedString({ maxLength: 1_048_576 })).not.toThrow();
-    expect(() => boundedString({ maxLength: 1_048_577 })).toThrow('maxLength <= 1048576');
-    expect(() => boundedString.warn({ maxLength: 1_048_577, label: 'test' })).toThrow(
-      'maxLength <= 1048576'
+    expect(() => boundedString({ maxLength: 65_536 })).not.toThrow();
+    expect(() => boundedString({ maxLength: 65_537 })).toThrow('maxLength <= 65536');
+    expect(() => boundedString.warn({ maxLength: 65_537, label: 'test' })).toThrow(
+      'maxLength <= 65536'
     );
   });
 

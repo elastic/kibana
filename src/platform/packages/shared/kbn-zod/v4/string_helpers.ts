@@ -9,15 +9,18 @@
 
 import { z } from 'zod/v4';
 import {
-  assertBoundedStringLabel,
+  assertStringHelperLabel,
   assertUnboundedStringReason,
   assertValidMinLength,
   BOUNDED_STRING_HELPER,
   getBoundedStringLimits,
   getStringHelperLimits,
   reportStringLengthViolation,
+  X_KIBANA_PLANNED_MAX_LENGTH,
+  X_KIBANA_PLANNED_MIN_LENGTH,
 } from '@kbn/schema-string-helpers';
 import type {
+  LabelRequiredHelperName,
   ReportedStringHelperName,
   StringHelperLimits,
   StringHelperName,
@@ -28,17 +31,27 @@ export type ZodStringOptions = Exclude<NonNullable<Parameters<typeof z.string>[0
 
 export type ZodStringWarnOptions = ZodStringOptions & {
   /**
-   * Static field identifier for the violation metric. Never derive it from request
-   * input — it becomes a metric attribute. Convention only, not enforced.
+   * Static field identifier for the violation metric. Never derive it from request input — it
+   * becomes a metric attribute. Optional here, required by the helpers that many unrelated
+   * fields share (see `LabeledZodStringHelper`) and by `boundedString.warn()`; that it is
+   * static is a convention, not enforced.
    *
    * @see https://www.elastic.co/docs/extend/kibana/key-concepts/security/bounded-string-schemas
    */
   label?: string;
 };
 
+export type LabeledZodStringWarnOptions = ZodStringWarnOptions & { label: string };
+
 export interface ZodStringHelper {
   (options?: ZodStringOptions): z.ZodString;
   warn(options?: ZodStringWarnOptions): z.ZodString;
+}
+
+/** A helper whose reporting mode requires a `label`. */
+export interface LabeledZodStringHelper {
+  (options?: ZodStringOptions): z.ZodString;
+  warn(options: LabeledZodStringWarnOptions): z.ZodString;
 }
 
 const strictString = (
@@ -49,7 +62,9 @@ const strictString = (
   return z.string(params).min(minLength).max(maxLength);
 };
 
-// Accepts overlong input and records a violation instead of rejecting it.
+// Accepts out-of-bounds input and records a violation instead of rejecting it, so that adopting
+// reporting mode cannot change which requests a route accepts. Neither bound is enforced; both
+// are published as advisory OpenAPI extensions.
 const reportingString = (
   helper: ReportedStringHelperName,
   { minLength, maxLength }: StringHelperLimits,
@@ -58,17 +73,32 @@ const reportingString = (
   const { minLength: _min, maxLength: _max, ...params } = options;
   return z
     .string(params)
-    .min(minLength)
     .check(({ value }) => {
-      if (value.length > maxLength) {
+      if (value.length < minLength) {
         reportStringLengthViolation({
           helper,
           library: 'zod',
-          maxLength,
+          bound: 'min',
+          limit: minLength,
+          length: value.length,
+          label,
+        });
+      } else if (value.length > maxLength) {
+        reportStringLengthViolation({
+          helper,
+          library: 'zod',
+          bound: 'max',
+          limit: maxLength,
           length: value.length,
           label,
         });
       }
+    })
+    .meta({
+      openapi: {
+        ...(minLength > 0 ? { [X_KIBANA_PLANNED_MIN_LENGTH]: minLength } : {}),
+        [X_KIBANA_PLANNED_MAX_LENGTH]: maxLength,
+      },
     });
 };
 
@@ -82,6 +112,19 @@ const makeHelper = (helper: StringHelperName): ZodStringHelper => {
   return Object.assign(strict, { warn });
 };
 
+// Helpers that bound a field shape rather than a Kibana concept: unrelated fields across plugins
+// share them, so reporting mode needs a label to keep the violation metric readable.
+const makeLabeledHelper = (helper: LabelRequiredHelperName): LabeledZodStringHelper => {
+  const base = makeHelper(helper);
+
+  return Object.assign((options?: ZodStringOptions) => base(options), {
+    warn: (options: LabeledZodStringWarnOptions): z.ZodString => {
+      assertStringHelperLabel(helper, options.label);
+      return base.warn(options);
+    },
+  });
+};
+
 export const savedObjectId = makeHelper('savedObjectId');
 export const savedObjectType = makeHelper('savedObjectType');
 export const savedObjectVersion = makeHelper('savedObjectVersion');
@@ -91,9 +134,9 @@ export const description = makeHelper('description');
 export const searchFilter = makeHelper('searchFilter');
 export const aggregation = makeHelper('aggregation');
 export const querySortField = makeHelper('querySortField');
-export const urlString = makeHelper('urlString');
-export const pemCertificate = makeHelper('pemCertificate');
-export const version = makeHelper('version');
+export const urlString = makeLabeledHelper('urlString');
+export const pemCertificate = makeLabeledHelper('pemCertificate');
+export const version = makeLabeledHelper('version');
 
 export type ZodBoundedStringOptions = ZodStringOptions & { maxLength: number };
 
@@ -122,7 +165,7 @@ export const boundedString: ZodBoundedStringHelper = Object.assign(
     strictString(getBoundedStringLimits(options), options),
   {
     warn: (options: ZodBoundedStringWarnOptions): z.ZodString => {
-      assertBoundedStringLabel(options.label);
+      assertStringHelperLabel(BOUNDED_STRING_HELPER, options.label);
       return reportingString(BOUNDED_STRING_HELPER, getBoundedStringLimits(options), options);
     },
   }

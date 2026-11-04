@@ -62,7 +62,7 @@ describe.each([
     expect(reportStringLengthViolation).not.toHaveBeenCalled();
   });
 
-  test('reports only values above the limit and keeps minimum length validation', () => {
+  test('reports values above the maximum without rejecting them', () => {
     const reporting = helper.warn({ label: 'dashboard.panelId' });
     expect(reporting.validate('x'.repeat(maxLength))).toHaveLength(maxLength);
     expect(reportStringLengthViolation).not.toHaveBeenCalled();
@@ -71,23 +71,41 @@ describe.each([
     expect(reportStringLengthViolation).toHaveBeenCalledWith({
       helper: name,
       library: 'config-schema',
-      maxLength,
+      bound: 'max',
+      limit: maxLength,
       length: maxLength + 1,
       label: 'dashboard.panelId',
     });
     expect(() => reporting.validate(42)).toThrow();
+  });
+
+  test('reports values below the minimum without rejecting them', () => {
+    const reporting = helper.warn({ label: 'dashboard.panelId' });
+    expect(reporting.validate('')).toBe('');
     if (minLength > 0) {
-      expect(() => reporting.validate('')).toThrow();
+      expect(reportStringLengthViolation).toHaveBeenCalledWith({
+        helper: name,
+        library: 'config-schema',
+        bound: 'min',
+        limit: minLength,
+        length: 0,
+        label: 'dashboard.panelId',
+      });
+    } else {
+      expect(reportStringLengthViolation).not.toHaveBeenCalled();
     }
   });
 
   test('uses overrides in both enforcing and reporting modes', () => {
     expect(() => helper({ maxLength: 3 }).validate('four')).toThrow();
-    expect(helper.warn({ maxLength: 3 }).validate('four')).toBe('four');
+    expect(helper.warn({ maxLength: 3, label: 'test.field' }).validate('four')).toBe('four');
     expect(reportStringLengthViolation).toHaveBeenCalledWith(
-      expect.objectContaining({ maxLength: 3 })
+      expect.objectContaining({ bound: 'max', limit: 3 })
     );
-    expect(() => helper.warn({ minLength: 3 }).validate('ab')).toThrow();
+    expect(helper.warn({ minLength: 3, label: 'test.field' }).validate('ab')).toBe('ab');
+    expect(reportStringLengthViolation).toHaveBeenCalledWith(
+      expect.objectContaining({ bound: 'min', limit: 3 })
+    );
     expect(helper({ minLength: 0 }).validate('')).toBe('');
     expect(() => helper({ maxLength: undefined }).validate('x'.repeat(maxLength + 1))).toThrow();
   });
@@ -95,9 +113,21 @@ describe.each([
   test('creates reporting schemas without changing strict schemas or future defaults', () => {
     const strict = helper();
     expect(strict.validate('abc')).toBe('abc');
-    expect(helper.warn().validate('x'.repeat(maxLength + 1))).toHaveLength(maxLength + 1);
+    expect(helper.warn({ label: 'test.field' }).validate('x'.repeat(maxLength + 1))).toHaveLength(
+      maxLength + 1
+    );
     expect(() => strict.validate('x'.repeat(maxLength + 1))).toThrow();
     expect(() => helper().validate('x'.repeat(maxLength + 1))).toThrow();
+  });
+});
+
+describe.each([
+  ['urlString', urlString],
+  ['pemCertificate', pemCertificate],
+  ['version', version],
+] as const)('%s', (name, helper) => {
+  test.each(['', '  '])('requires a non-empty label %j in reporting mode', (label) => {
+    expect(() => helper.warn({ label })).toThrow(`${name}.warn() requires a non-empty label`);
   });
 });
 
@@ -164,7 +194,26 @@ test('exports accurate OpenAPI length metadata in both modes', () => {
   );
   const reporting = schema.savedObjectId.warn().getSchema().describe();
   expect(reporting.metas).not.toEqual(
-    expect.arrayContaining([{ [metaFields.META_FIELD_X_OAS_MAX_LENGTH]: 512 }])
+    expect.arrayContaining([
+      { [metaFields.META_FIELD_X_OAS_MIN_LENGTH]: 1 },
+      { [metaFields.META_FIELD_X_OAS_MAX_LENGTH]: 512 },
+    ])
+  );
+  expect(reporting.metas).toEqual(
+    expect.arrayContaining([
+      { [metaFields.META_FIELD_X_OAS_PLANNED_MIN_LENGTH]: 1 },
+      { [metaFields.META_FIELD_X_OAS_PLANNED_MAX_LENGTH]: 512 },
+    ])
+  );
+});
+
+test('omits a planned minimum of zero from OpenAPI metadata', () => {
+  const reporting = schema.description.warn().getSchema().describe();
+  expect(reporting.metas).toEqual(
+    expect.arrayContaining([{ [metaFields.META_FIELD_X_OAS_PLANNED_MAX_LENGTH]: 10_000 }])
+  );
+  expect(reporting.metas).not.toEqual(
+    expect.arrayContaining([{ [metaFields.META_FIELD_X_OAS_PLANNED_MIN_LENGTH]: 0 }])
   );
 });
 
@@ -186,7 +235,8 @@ describe('boundedString', () => {
     expect(reportStringLengthViolation).toHaveBeenCalledWith({
       helper: 'boundedString',
       library: 'config-schema',
-      maxLength: 4,
+      bound: 'max',
+      limit: 4,
       length: 5,
       label: 'fleet.output.ca_file',
     });
@@ -202,10 +252,10 @@ describe('boundedString', () => {
   );
 
   test('rejects a maximum above the ceiling at definition time', () => {
-    expect(() => boundedString({ maxLength: 1_048_576 })).not.toThrow();
-    expect(() => boundedString({ maxLength: 1_048_577 })).toThrow('maxLength <= 1048576');
-    expect(() => boundedString.warn({ maxLength: 1_048_577, label: 'test' })).toThrow(
-      'maxLength <= 1048576'
+    expect(() => boundedString({ maxLength: 65_536 })).not.toThrow();
+    expect(() => boundedString({ maxLength: 65_537 })).toThrow('maxLength <= 65536');
+    expect(() => boundedString.warn({ maxLength: 65_537, label: 'test' })).toThrow(
+      'maxLength <= 65536'
     );
   });
 

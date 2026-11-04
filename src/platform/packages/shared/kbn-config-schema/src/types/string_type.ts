@@ -12,13 +12,25 @@ import { internals } from '../internals';
 import type { TypeOptions } from './type';
 import { Type, convertValidationFunction } from './type';
 
-import { META_FIELD_X_OAS_MIN_LENGTH, META_FIELD_X_OAS_MAX_LENGTH } from '../oas_meta_fields';
+import {
+  META_FIELD_X_OAS_MIN_LENGTH,
+  META_FIELD_X_OAS_MAX_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MIN_LENGTH,
+  META_FIELD_X_OAS_PLANNED_MAX_LENGTH,
+} from '../oas_meta_fields';
 
 export type StringOptions = TypeOptions<string> & {
   minLength?: number;
   maxLength?: number;
   hostname?: boolean;
   coerceFromNumber?: boolean;
+  /**
+   * Length bounds this string intends to enforce later but does not validate, published as
+   * OpenAPI vendor extensions. Set by the string helpers' reporting mode; prefer `minLength` /
+   * `maxLength` to actually bound a field.
+   */
+  plannedMinLength?: number;
+  plannedMaxLength?: number;
 };
 
 export class StringType extends Type<string> {
@@ -71,6 +83,14 @@ export class StringType extends Type<string> {
           })
         )
         .meta({ [META_FIELD_X_OAS_MAX_LENGTH]: options.maxLength });
+    }
+
+    if (options.plannedMinLength !== undefined) {
+      schema = schema.meta({ [META_FIELD_X_OAS_PLANNED_MIN_LENGTH]: options.plannedMinLength });
+    }
+
+    if (options.plannedMaxLength !== undefined) {
+      schema = schema.meta({ [META_FIELD_X_OAS_PLANNED_MAX_LENGTH]: options.plannedMaxLength });
     }
 
     schema.type = 'string';

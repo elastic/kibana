@@ -83,6 +83,14 @@ export interface OasMetaExtensions {
    * });
    */
   availability?: OasMetaAvailability;
+  /**
+   * Length bounds a reporting-mode (`.warn()`) string helper plans to enforce. Reporting mode
+   * enforces no bound, so the generated spec carries no `minLength` / `maxLength`; these are
+   * emitted verbatim to give clients advance notice. Keys mirror `X_KIBANA_PLANNED_MIN_LENGTH`
+   * and `X_KIBANA_PLANNED_MAX_LENGTH` in `@kbn/schema-string-helpers`.
+   */
+  'x-kibana-planned-min-length'?: number;
+  'x-kibana-planned-max-length'?: number;
 }
 
 declare module 'zod/v4/core' {

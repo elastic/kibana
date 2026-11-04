@@ -8,12 +8,14 @@
  */
 
 import {
-  assertBoundedStringLabel,
+  assertStringHelperLabel,
   assertUnboundedStringReason,
   assertValidMinLength,
   BOUNDED_STRING_MAX_LENGTH,
   getBoundedStringLimits,
   getStringHelperLimits,
+  LABEL_REQUIRED_HELPERS,
+  STRING_HELPER_DEFAULTS,
 } from './limits';
 
 test.each([NaN, Infinity, -1, 1.5, Number.MAX_SAFE_INTEGER + 1])(
@@ -91,7 +93,18 @@ describe('getBoundedStringLimits', () => {
   });
 });
 
-test('requires a non-empty bounded string label', () => {
-  expect(() => assertBoundedStringLabel('  ')).toThrow();
-  expect(() => assertBoundedStringLabel('fleet.output.ca_file')).not.toThrow();
+test('requires a non-empty reporting label and names the helper', () => {
+  expect(() => assertStringHelperLabel('boundedString', '  ')).toThrow(
+    'boundedString.warn() requires a non-empty label'
+  );
+  expect(() => assertStringHelperLabel('urlString', undefined)).toThrow(
+    'urlString.warn() requires a non-empty label'
+  );
+  expect(() => assertStringHelperLabel('boundedString', 'fleet.output.ca_file')).not.toThrow();
+});
+
+test('every label-requiring helper is a real semantic helper', () => {
+  for (const helper of LABEL_REQUIRED_HELPERS) {
+    expect(STRING_HELPER_DEFAULTS).toHaveProperty(helper);
+  }
 });
