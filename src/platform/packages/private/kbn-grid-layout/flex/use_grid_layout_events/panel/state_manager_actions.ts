@@ -52,6 +52,7 @@ export const moveAction = (
     runtimeSettings$: { value: runtimeSettings },
     activePanelEvent$,
     gridLayout$,
+    panelRefs: { current: panelElements },
     layoutRef: { current: gridLayoutElement },
   } = gridLayoutStateManager;
   const activePanel = activePanelEvent$.value;
@@ -105,8 +106,7 @@ export const moveAction = (
 
   const requestedPanelData = { ...currentPanelData };
   if (isResize) {
-    const targetedGridLeft = gridLayoutRect?.left ?? 0;
-    const targetWidth = previewRect.right - targetedGridLeft;
+    const targetWidth = previewRect.right - previewRect.left;
     requestedPanelData.width = Math.max(targetWidth, 1);
   } else {
     // TODO: Determine order
@@ -137,7 +137,7 @@ export const moveAction = (
     // }
 
     // if (currentLayout && !isOrderedLayoutEqual(currentLayout, nextLayout)) {
-    console.log('!!!!!!!!!!!!!!!!!', { nextLayout });
+    console.log('!!!!!!!!!!!!!!!!!', { nextLayout, panelElements });
     gridLayout$.next(nextLayout);
     // }
   }
