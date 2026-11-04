@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import type { ProvidedType } from '@kbn/test';
-import type { DebugState } from '@elastic/charts';
-import type { DebugStateAxis } from '@elastic/charts/dist/state/types';
+import type { DebugState, DebugStateAxis } from '@elastic/charts';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
