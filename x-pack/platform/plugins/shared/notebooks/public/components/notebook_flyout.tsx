@@ -12,23 +12,17 @@ import { useNotebook } from './notebook_context';
 
 const FLYOUT_WIDTH_STORAGE_KEY = 'notebooks:flyoutWidth';
 
-type NotebookFlyoutProps = Omit<EuiFlyoutResizableProps, 'size' | 'onResize'> & {
-  /** Whether cell run buttons hide while the flyout is open; push flyouts leave room for them. */
-  hidesRunButtons?: boolean;
-};
-
 /** A resizable flyout whose width is shared by every notebook flyout and kept across sessions. */
-export const NotebookFlyout = ({ hidesRunButtons = true, ...props }: NotebookFlyoutProps) => {
+export const NotebookFlyout = (props: Omit<EuiFlyoutResizableProps, 'size' | 'onResize'>) => {
   const { openFlyouts$ } = useNotebook();
   const [storedWidth, setStoredWidth] = useLocalStorage<number>(FLYOUT_WIDTH_STORAGE_KEY);
   // A changing `size` resets the flyout's width, so the stored width only seeds the initial size.
   const [initialWidth] = useState(storedWidth);
 
   useEffect(() => {
-    if (!hidesRunButtons) return;
     openFlyouts$.next(openFlyouts$.getValue() + 1);
     return () => openFlyouts$.next(openFlyouts$.getValue() - 1);
-  }, [openFlyouts$, hidesRunButtons]);
+  }, [openFlyouts$]);
 
   return <EuiFlyoutResizable {...props} size={initialWidth ?? 's'} onResize={setStoredWidth} />;
 };

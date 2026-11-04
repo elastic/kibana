@@ -28,7 +28,6 @@ export const GraphFlyout = ({
     <NotebookFlyout
       type="push"
       ownFocus={false}
-      hidesRunButtons={false}
       paddingSize="none"
       onClose={onClose}
       aria-labelledby={titleId}
