@@ -14,7 +14,7 @@ import React from 'react';
 import { css } from '@emotion/react';
 import type { FieldSpec } from '@kbn/data-plugin/common';
 import { useEntityStoreEuidApi } from '@kbn/entity-store/public';
-import type { TimelineNonEcsData } from '@kbn/timelines-plugin/common';
+import type { TimelineNonEcsData } from '@kbn/securitysolution-timeline-common';
 import { EntityTypeToIdentifierField } from '../../../../../../common/entity_analytics/types';
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {

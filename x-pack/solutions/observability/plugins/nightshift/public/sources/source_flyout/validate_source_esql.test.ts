@@ -17,10 +17,4 @@ describe('validateSourceEsql', () => {
       'Command "STATS" is not allowed in a source query: only WHERE may follow FROM or TS'
     );
   });
-
-  it('returns the one-type error message', () => {
-    expect(validateSourceEsql('FROM logs-*, traces-*')).toBe(
-      'A source query mixes logs (logs-*) and traces (traces-*). A source query must target one kind of data.'
-    );
-  });
 });

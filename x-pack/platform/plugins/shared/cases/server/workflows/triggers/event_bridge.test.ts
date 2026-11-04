@@ -54,7 +54,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     );
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'alert',
       owner: 'securitySolution',
     });
@@ -75,6 +75,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     });
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(3, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'alert',
       owner: 'securitySolution',
@@ -116,7 +117,7 @@ describe('registerCasesWorkflowEventBridge', () => {
   it('changes the legacy `user` attachment type to `comment`', async () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'user',
       owner: 'securitySolution',
     });
@@ -125,6 +126,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
@@ -134,7 +136,7 @@ describe('registerCasesWorkflowEventBridge', () => {
   it('emits comment added triggers when comment attachments were emitted', async () => {
     eventBus.emitAttachmentsAdded(request, {
       caseId: 'case-1',
-      attachmentIds: ['attachment-1'],
+      ids: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
     });
@@ -143,6 +145,7 @@ describe('registerCasesWorkflowEventBridge', () => {
 
     expect(mockClient.emitEvent).toHaveBeenNthCalledWith(1, AttachmentsAddedTriggerId, {
       caseId: 'case-1',
+      ids: ['attachment-1'],
       attachmentIds: ['attachment-1'],
       attachmentType: 'comment',
       owner: 'securitySolution',
@@ -158,7 +161,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     it('forwards attachments deleted events with alert references', async () => {
       eventBus.emitAttachmentsDeleted(request, {
         caseId: 'case-1',
-        attachmentIds: ['attachment-1'],
+        ids: ['attachment-1'],
         attachmentType: 'alert',
         owner: 'securitySolution',
         alertIds: ['alert-1'],
@@ -170,6 +173,7 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
       expect(mockClient.emitEvent).toHaveBeenCalledWith(AttachmentsDeletedTriggerId, {
         caseId: 'case-1',
+        ids: ['attachment-1'],
         attachmentIds: ['attachment-1'],
         attachmentType: 'alert',
         owner: 'securitySolution',
@@ -181,7 +185,7 @@ describe('registerCasesWorkflowEventBridge', () => {
     it('changes the legacy `user` attachment type to `comment` without emitting comment triggers', async () => {
       eventBus.emitAttachmentsDeleted(request, {
         caseId: 'case-1',
-        attachmentIds: ['attachment-1'],
+        ids: ['attachment-1'],
         attachmentType: 'user',
         owner: 'securitySolution',
       });
@@ -191,6 +195,7 @@ describe('registerCasesWorkflowEventBridge', () => {
       expect(mockClient.emitEvent).toHaveBeenCalledTimes(1);
       expect(mockClient.emitEvent).toHaveBeenCalledWith(AttachmentsDeletedTriggerId, {
         caseId: 'case-1',
+        ids: ['attachment-1'],
         attachmentIds: ['attachment-1'],
         attachmentType: 'comment',
         owner: 'securitySolution',

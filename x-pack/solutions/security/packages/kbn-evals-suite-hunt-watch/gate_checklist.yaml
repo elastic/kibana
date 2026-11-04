@@ -66,7 +66,7 @@ gates:
     family: D
     name: investigation-containment
     status: tested
-    evidence: "One Investigation per report: its id is derived from the report id (buildHuntInvestigationConversationId, pinned to the plugin's namespace by seed_contract.test.ts) and every evaluator reads that single conversation. Contained to the triggering space: the \"keeps Investigations inside the triggering space\" case in evals/hunt_watch.spec.ts asserts space B has no Investigation and cannot read space A's. Append on repeat detection is not exercised because resetHuntReport deletes the Investigation between rows."
+    evidence: "One Investigation per report: its id is derived from the space and the report id (buildHuntInvestigationConversationId, pinned to the plugin's namespace by seed_contract.test.ts) and every evaluator reads that single conversation. Contained to the triggering space: the \"keeps Investigations inside the triggering space\" case in evals/hunt_watch.spec.ts asserts space B has no Investigation and cannot read space A's. Append on repeat detection is not exercised because resetHuntReport deletes the Investigation between rows."
   D4:
     family: D
     name: hitl-pause-fail-closed

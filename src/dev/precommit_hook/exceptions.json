@@ -231,10 +231,10 @@
   "@elastic/kibana-operations": {
     "packages/kbn-ts-projects/config-paths.json": "'config-paths.json' should be snake_case",
     "src/platform/packages/private/kbn-repo-packages/package-map.json": "'package-map.json' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_integration_node/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_integration/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest_node/jest-preset.js": "'jest-preset.js' should be snake_case",
-    "src/platform/packages/shared/kbn-test/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_integration_node/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_integration/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest_node/jest-preset.js": "'jest-preset.js' should be snake_case",
+    "src/platform/packages/shared/kbn-jest/jest-preset.js": "'jest-preset.js' should be snake_case",
     "src/platform/test/package/Vagrantfile": "'Vagrantfile' should be snake_case",
     "src/setup_node_env": "'setup_node_env' should be kebab-case",
     "x-pack/dev-tools": "'dev-tools' should be snake_case"

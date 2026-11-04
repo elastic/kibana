@@ -39,12 +39,12 @@ describe('useBulkDeleteAttachments', () => {
       result.current.mutate({ request, countLabel: '2 files' });
     });
 
-    await waitFor(() => expect(bulkDeleteAttachments).toHaveBeenCalledWith({ caseId, request }));
+    await waitFor(() => expect(refreshCaseViewPage).toHaveBeenCalled());
+    expect(bulkDeleteAttachments).toHaveBeenCalledWith({ caseId, request });
     expect(showSuccessToast).toHaveBeenCalledWith('Removed 2 files');
-    expect(refreshCaseViewPage).toHaveBeenCalled();
   });
 
-  it('shows an error toast on failure', async () => {
+  it('shows an error toast and refreshes on failure, since part of the ids may be removed', async () => {
     const error = new Error('Failed to delete attachments');
     (bulkDeleteAttachments as jest.Mock).mockRejectedValue(error);
 
@@ -56,9 +56,7 @@ describe('useBulkDeleteAttachments', () => {
       result.current.mutate({ request: { ids: ['attachment-1'] }, countLabel: '1 attachment' });
     });
 
-    await waitFor(() =>
-      expect(showErrorToast).toHaveBeenCalledWith(error, { title: expect.any(String) })
-    );
-    expect(refreshCaseViewPage).not.toHaveBeenCalled();
+    await waitFor(() => expect(refreshCaseViewPage).toHaveBeenCalled());
+    expect(showErrorToast).toHaveBeenCalledWith(error, { title: expect.any(String) });
   });
 });

@@ -118,9 +118,12 @@ export const interpretSourceApiKeyPrivileges = ({
 export const isOwnedBySource = ({
   metadata,
   sourceResource,
+  unitId,
 }: {
   metadata: Record<string, unknown> | undefined;
   sourceResource: string;
+  unitId?: string;
 }): boolean =>
   metadata?.managed_by === STREAMS_SOURCES_MANAGED_BY &&
-  metadata?.source_resource === sourceResource;
+  metadata?.source_resource === sourceResource &&
+  (unitId === undefined || metadata?.streams_unit_id === unitId);

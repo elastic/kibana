@@ -57,6 +57,7 @@ export const createCaseServiceMock = (): CaseServiceMock => {
     getAllCaseComments: jest.fn(),
     getCase: jest.fn(),
     getCases: jest.fn(),
+    getCaseStatuses: jest.fn(),
     getCaseIdsByAlertId: jest.fn(),
     getResolveCase: jest.fn(),
     getTags: jest.fn(),
@@ -160,6 +161,7 @@ export const createAlertServiceMock = (): AlertServiceMock => {
     ensureAlertsAuthorized: jest.fn(),
     ensureAttacksAuthorized: jest.fn(),
     ensureDocumentsExist: jest.fn(),
+    confirmAlertIndices: jest.fn(),
     removeCaseIdFromAlerts: jest.fn(),
     removeCaseIdsFromAllAlerts: jest.fn(),
   });
@@ -179,7 +181,9 @@ const createAttachmentGetterServiceMock = (): AttachmentGetterServiceMock => {
     getCaseAttatchmentStats: jest.fn(),
     getAttachmentIdsForCases: jest.fn(),
     getFileAttachmentsForDeletion: jest.fn(),
+    getCaseAttachmentsForDeletion: jest.fn(),
     getAllAlertIds: jest.fn(),
+    getCaseIdsByAttachmentIds: jest.fn(),
     getAttachedAttackIds: jest.fn().mockResolvedValue(new Set()),
     getAllEventIds: jest.fn(),
   });
@@ -202,7 +206,6 @@ export const createAttachmentServiceMock = (): AttachmentServiceMock => {
     find: jest.fn(),
     countAlertsAttachedToCase: jest.fn(),
     countAlertsWithinCase: jest.fn(),
-    executeCaseAggregations: jest.fn(),
     countPersistableStateAndExternalReferenceAttachments: jest.fn(),
   });
 

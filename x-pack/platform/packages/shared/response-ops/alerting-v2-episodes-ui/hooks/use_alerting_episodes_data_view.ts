@@ -73,10 +73,10 @@ const computedFields: Record<string, RuntimeField> = {
     script: { source: "emit('')" },
     customLabel: i18n.SOURCE_FIELD_LABEL,
   },
-  maintenance_windows: {
+  suppressed: {
     type: 'keyword',
     script: { source: "emit('')" },
-    customLabel: i18n.MAINTENANCE_WINDOWS_FIELD_LABEL,
+    customLabel: i18n.SUPPRESSED_FIELD_LABEL,
   },
 };
 

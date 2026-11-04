@@ -42,14 +42,24 @@ export {
 } from './kql_to_esql';
 export type { EpisodeKqlTranslationErrorReason } from './kql_to_esql';
 
-export { buildEpisodeQuery, buildEpisodeGroupHashQuery } from './episode_query';
-export type { EpisodeGroupHashEsqlRow } from './episode_query';
+export {
+  addEpisodeSummaryStats,
+  buildEpisodeQuery,
+  buildEpisodeDataRequest,
+  buildEpisodesDataRequest,
+  buildSeriesSnoozeQuery,
+  EPISODE_DATA_FILTER,
+  EPISODE_EVENTS_FIELDS,
+} from './episode_query';
+export type {
+  EpisodeDataEsqlRow,
+  EpisodeEventsEsqlRow,
+  EpisodesDataEsqlRow,
+  SeriesSnoozeEsqlRow,
+} from './episode_query';
 
 export { buildEpisodeEventsQuery, ALERT_EPISODE_EVENT_FIELDS } from './episode_events_query';
 export type { EpisodeEventRow, BuildEpisodeEventsQueryOptions } from './episode_events_query';
-
-export { buildEpisodeEventDataQuery } from './episode_event_data_query';
-export type { EpisodeEventDataRow } from './episode_event_data_query';
 
 export { buildEpisodeActionsQuery } from './episode_actions_query';
 export type { EpisodeActionRow } from './episode_actions_query';

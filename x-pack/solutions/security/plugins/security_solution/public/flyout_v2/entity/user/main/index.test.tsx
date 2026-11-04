@@ -8,6 +8,7 @@
 import { fireEvent, render } from '@testing-library/react';
 import React from 'react';
 import { TestProviders } from '../../../../common/mock';
+import { ENTITY_PANEL_TABLE_TAB_TEST_ID } from '../../../../flyout/entity_details/shared/components/right/test_ids';
 import {
   mockUserEntityRiskScores,
   mockUserEntityRiskScoresWithResolution,
@@ -297,6 +298,32 @@ describe('<User />', () => {
       expect(queryByTestId('asset-criticality-edit-chevron')).not.toBeInTheDocument();
     });
 
+    it('shows the Table tab when there are no aliases', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord);
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).toBeInTheDocument();
+    });
+
+    it('hides the Table tab in the group view', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+
+      const { queryByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(queryByTestId(ENTITY_PANEL_TABLE_TAB_TEST_ID)).not.toBeInTheDocument();
+    });
+
     it('shows the "Resolved from N records" badge counting the target and its aliases', () => {
       mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
       withStoreRecords(targetRecord, [aliasRecord]);
@@ -309,6 +336,25 @@ describe('<User />', () => {
 
       expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent(
         'Resolved from 2 records'
+      );
+    });
+
+    it('counts every group member in the badge even when the loaded aliases are capped', () => {
+      mockedUseNewEntityAnalyticsPage.mockReturnValue(true);
+      withStoreRecords(targetRecord, [aliasRecord]);
+      mockedUseEntityFromStore.mockReturnValue({
+        ...mockedUseEntityFromStore(),
+        aliasCount: 250,
+      });
+
+      const { getByTestId } = render(
+        <TestProviders>
+          <User {...mockProps} entityId={targetEntityId} mode="resolved" />
+        </TestProviders>
+      );
+
+      expect(getByTestId('user-panel-header-observed-badge')).toHaveTextContent(
+        'Resolved from 251 records'
       );
     });
 
@@ -415,9 +461,7 @@ describe('<User />', () => {
 
         expect(getByTestId('risk-summary-table')).toBeInTheDocument();
         expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
-        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent(
-          'Entity risk contributions'
-        );
+        expect(getByTestId('entityRiskInputsTitleLink')).toHaveTextContent('Risk contributions');
       });
 
       it('keeps showing the resolution group score next to the individual score when the feature flag is off', () => {
@@ -463,10 +507,10 @@ describe('<User />', () => {
         );
       };
 
-      it('passes the panel mode to the anomaly insights tool', () => {
+      it('passes the panel mode and scope to the anomaly insights tool', () => {
         fireEvent.click(renderResolved().getByTestId('openAnomalyInsights'));
         expect(mockFlyoutApi.openEntityAnomalyInsights).toHaveBeenCalledWith(
-          expect.objectContaining({ value: 'test', mode: 'resolved' })
+          expect.objectContaining({ value: 'test', mode: 'resolved', scopeId: 'test-scope-id' })
         );
       });
 

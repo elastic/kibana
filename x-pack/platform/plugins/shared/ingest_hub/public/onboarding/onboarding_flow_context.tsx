@@ -202,6 +202,8 @@ interface OnboardingFlowState {
   refetchAwsServiceMatrix: () => void;
   /** False while the default data format is being resolved (async spaces lookup). */
   isDataFormatResolved: boolean;
+  /** The data format derived from the solution (OTel for Observability, ECS otherwise), the recommended one. */
+  defaultDataFormat: DataFormat;
 }
 
 const OnboardingFlowContext = createContext<OnboardingFlowState | undefined>(undefined);
@@ -661,6 +663,7 @@ export function OnboardingFlowProvider({ children }: { children: React.ReactNode
         awsServiceMatrixError,
         refetchAwsServiceMatrix,
         isDataFormatResolved,
+        defaultDataFormat: defaultFormat,
       }}
     >
       {children}

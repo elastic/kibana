@@ -44,7 +44,7 @@ const affordanceIconType = (action: GroupedAttachmentRowAction): IconType => {
     case 'flyout':
       return 'maximize';
     case 'expand':
-      return action.isExpanded ? 'arrowUp' : 'arrowDown';
+      return action.isExpanded ? 'chevronSingleUp' : 'chevronSingleDown';
   }
 };
 

@@ -12,6 +12,9 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
+import { PrivateChannelIcon } from '../../../settings/components/apps_section/channel_label';
+import { parseSlackChannelInput } from '../../../settings/components/apps_section/parse_slack_channel_input';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import {
@@ -30,7 +33,15 @@ export const findUnconnectedChannels = (
     ? []
     : values.filter((value) => !bindings.some(({ channel }) => channel === value));
 
+// Private channels are never suggested; a user can still enter one by ID or link.
+const isSuggestedChannel = ({ visibility }: SlackChannelBinding): boolean =>
+  visibility !== 'private';
+
 const labels = {
+  customOption: i18n.translate('xpack.nightshift.automations.flyout.slackChannelsCustomOption', {
+    defaultMessage: 'Add {searchValue} by channel ID or link',
+    values: { searchValue: '{searchValue}' },
+  }),
   loadError: i18n.translate('xpack.nightshift.automations.flyout.slackChannelsLoadError', {
     defaultMessage: 'Unable to load connected Slack channels.',
   }),
@@ -92,14 +103,30 @@ export const SlackChannelComboBox = ({
   const connected = useAllRelayAppBindings();
   const { bindings, isLoading, isError, isComplete } = connected;
 
-  const options: Array<EuiComboBoxOptionOption<string>> = bindings.map((binding) => ({
-    label: formatChannelLabel(binding),
-    value: binding.channel,
-  }));
-  const selectedOptions = values.map((value) => ({
-    label: formatChannelValue(value, bindings),
-    value,
-  }));
+  const options: Array<EuiComboBoxOptionOption<string>> = bindings
+    .filter(isSuggestedChannel)
+    .map((binding) => ({
+      label: formatChannelLabel(binding),
+      value: binding.channel,
+    }));
+  const privateIds = new Set(
+    bindings.flatMap(({ channel, visibility }) =>
+      channel != null && visibility === 'private' ? [channel] : []
+    )
+  );
+  const selectedOptions: Array<EuiComboBoxOptionOption<string>> = values.map((value) =>
+    privateIds.has(value)
+      ? { label: value, value, prepend: <PrivateChannelIcon /> }
+      : { label: formatChannelValue(value, bindings), value }
+  );
+  const onCreateOption = (input: string): boolean => {
+    const channel = parseSlackChannelInput(input);
+    if (channel === undefined) return false;
+    onChange(
+      singleSelection ? [channel] : [...values.filter((value) => value !== channel), channel]
+    );
+    return true;
+  };
   const isEmpty = !isLoading && !isError && bindings.length === 0;
   const unconnected = warnUnconnected ? findUnconnectedChannels(values, connected) : [];
   const isTruncated = !isLoading && !isError && !isComplete;
@@ -118,6 +145,8 @@ export const SlackChannelComboBox = ({
         selectedOptions={selectedOptions}
         singleSelection={singleSelection ? { asPlainText: true } : false}
         onChange={(selected) => onChange(selected.map(({ label, value }) => value ?? label))}
+        onCreateOption={onCreateOption}
+        customOptionText={labels.customOption}
         data-test-subj={testSubject}
       />
       {(isError || isEmpty || isTruncated || unconnected.length > 0) && (

@@ -53,15 +53,15 @@ describe('Vega embeddable transforms', () => {
 
     expect(references).toEqual([
       {
-        name: 'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index',
+        name: 'filters[0].data_view_id',
         type: 'index-pattern',
         id: 'logs-data-view',
       },
     ]);
-    expect(storedState.filters?.[0].meta.index).toBeUndefined();
-    expect(storedState.filters?.[0].meta).toHaveProperty(
-      'indexRefName',
-      'kibanaSavedObjectMeta.searchSourceJSON.filter[0].meta.index'
+    expect(storedState.filters?.[0]).not.toHaveProperty('data_view_id');
+    expect(storedState.filters?.[0]).toHaveProperty(
+      'data_view_ref_name',
+      'filters[0].data_view_id'
     );
     expect(storedState.query).toEqual(query);
 
@@ -106,11 +106,12 @@ describe('Vega embeddable transforms', () => {
     const apiState = transformOut(storedState, []);
 
     expect(logger.warn).toHaveBeenCalledWith(
-      expect.stringContaining('Unable to inject Vega panel filter references')
+      expect.stringContaining('Unable to transform filter and query state on read')
     );
     expect(apiState.filters).toHaveLength(1);
     expect(apiState.filters?.[0]).toEqual(
       expect.objectContaining({ condition: panelFilter.condition })
     );
+    expect(apiState.filters?.[0]).not.toHaveProperty('data_view_ref_name');
   });
 });

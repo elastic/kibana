@@ -150,6 +150,11 @@ describe('SourceDocumentJsonMode', () => {
       const onFilter = jest.fn();
       renderCell({ _id: '1', _index: 'test', _source: { bytes: 100 } }, { onFilter });
 
+      // `bytes` has a custom label in the mock data view, which the action label should use.
+      expect(screen.getByTestId(filterForTestId('bytes'))).toHaveAccessibleName(
+        'Filter for this bytesDisplayName'
+      );
+
       await userEvent.click(screen.getByTestId(filterForTestId('bytes')));
       expect(onFilter).toHaveBeenCalledWith(dataViewMock.fields.getByName('bytes'), 100, '+');
 
