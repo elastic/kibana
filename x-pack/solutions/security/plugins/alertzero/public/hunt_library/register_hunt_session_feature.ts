@@ -6,6 +6,7 @@
  */
 
 import type { HttpStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import type {
   DiscoverSharedPublicSetup,
   HuntSessionFeature,
@@ -13,7 +14,11 @@ import type {
 } from '@kbn/discover-shared-plugin/public';
 import { API_VERSIONS } from '@kbn/alertzero-common';
 import { HUNT_LIBRARY_URL } from '../../common/constants';
-import type { HuntSessionVerification } from '../../common/hunt_library';
+import type { HuntPreserveResponse, HuntSessionVerification } from '../../common/hunt_library';
+
+const PRESERVE_FAILED = i18n.translate('xpack.alertzero.huntLibrary.preserveFailed', {
+  defaultMessage: 'The evidence could not be preserved. Try again.',
+});
 
 const toHuntSessionInfo = (verification: HuntSessionVerification): HuntSessionInfo => ({
   sessionId: verification.session_id,
@@ -46,6 +51,37 @@ export const registerHuntSessionFeature = ({
         return toHuntSessionInfo(verification);
       } catch {
         return undefined;
+      }
+    },
+    preserveEvidence: async (request) => {
+      const http = await getHttp();
+      try {
+        const result = await http.post<HuntPreserveResponse>(
+          `${HUNT_LIBRARY_URL}/session/preserve`,
+          {
+            version: API_VERSIONS.internal.v1,
+            body: JSON.stringify({
+              token: request.token,
+              preservation_id: request.preservationId,
+              query: request.query,
+              filters: request.filters,
+              time_range: request.timeRange,
+              columns: request.columns,
+              data_view_id: request.dataViewId,
+              rows: request.rows,
+            }),
+          }
+        );
+        return {
+          investigationId: result.investigation_id,
+          evidenceCount: result.evidence_count,
+          addedCount: result.added_count,
+          profileToken: result.profile_token,
+        };
+      } catch (error) {
+        // The server's message is written for analysts; anything else gets a generic one.
+        const message = (error as { body?: { message?: unknown } })?.body?.message;
+        throw new Error(typeof message === 'string' ? message : PRESERVE_FAILED);
       }
     },
   };

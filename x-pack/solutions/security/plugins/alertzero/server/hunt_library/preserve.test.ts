@@ -182,6 +182,7 @@ describe('preserveHuntEvidence', () => {
     };
     expect(stored).toMatchObject({
       revision: 1,
+      investigation_id: INVESTIGATION,
       trigger: 'manual',
       creation_operation_id: P1,
       resumeSnapshot: { query: context.query, columns: ['@timestamp'] },

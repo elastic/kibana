@@ -7,6 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+jest.mock('@kbn/react-kibana-mount', () => ({ toMountPoint: (element: unknown) => element }));
+
 import type { HuntSessionInfo } from '@kbn/discover-shared-plugin/public';
 import { AppMenuRegistry } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -25,6 +27,7 @@ const huntSession: HuntSessionInfo = {
     version: 1,
     name: 'Rare LSASS access',
     hypothesis: 'Credential dumping',
+    resultKind: 'raw_event',
     references: [],
     guidance: { analystNotes: [], expectedFalsePositives: [], suggestedPivots: [] },
   },
@@ -37,13 +40,16 @@ const CLASSIC_ROOT_CONTEXT = {
 };
 const state = (token?: unknown) => ({ huntSession: { token } } as never);
 
-const setup = (verifySession: jest.Mock = jest.fn().mockResolvedValue(huntSession)) => {
+const setup = (
+  verifySession: jest.Mock = jest.fn().mockResolvedValue(huntSession),
+  preserveEvidence: jest.Mock = jest.fn()
+) => {
   const services = createProfileProviderSharedServicesMock();
   const registry = services.discoverShared.features.registry;
   jest
     .spyOn(registry, 'getById')
     .mockImplementation((id: string) =>
-      id === 'hunt-session' ? ({ id, verifySession } as never) : undefined
+      id === 'hunt-session' ? ({ id, verifySession, preserveEvidence } as never) : undefined
     );
   return {
     services,
@@ -196,5 +202,111 @@ describe('createSecurityHuntDataSourceProfileProvider', () => {
         /at most 50 rows/
       );
     });
+  });
+});
+
+describe('preserving selected evidence', () => {
+  const context = { category: DataSourceCategory.Security, huntSession };
+  const rawRecord = (id: string) =>
+    ({ id, raw: { _index: 'logs-x', _id: id }, flattened: {} } as DataTableRecord);
+
+  const open = (
+    preserveEvidence: jest.Mock,
+    { huntSession: session = huntSession }: { huntSession?: HuntSessionInfo } = {}
+  ) => {
+    const { services, provider } = setup(undefined, preserveEvidence);
+    const close = jest.fn();
+    const openModal = jest
+      .spyOn(services.core.overlays, 'openModal')
+      .mockReturnValue({ close } as never);
+    jest.spyOn(services.timefilter, 'getTime').mockReturnValue({ from: 'now-7d', to: 'now' });
+    jest
+      .spyOn(services.data.query, 'getState')
+      .mockReturnValue({ filters: [{ meta: { key: 'a' } }] } as never);
+    const addSuccess = jest.spyOn(services.core.notifications.toasts, 'addSuccess');
+    const stateAdapter = { getState: () => ({ token: 'old-token' }), setState: jest.fn() };
+
+    const [hunt] = provider.profile.getBulkActions!(() => [], {
+      context: { ...context, huntSession: session },
+      toolkit: { actions: {}, getStateAdapter: () => stateAdapter },
+    } as never)({
+      dataView: { id: 'dv-1' },
+      query: { esql: 'FROM logs-x' },
+      columns: ['@timestamp'],
+    } as never) as unknown as Array<{
+      onClick: (arg: { selectedDocs: DataTableRecord[] }) => void;
+    }>;
+
+    return { hunt, openModal, close, addSuccess, stateAdapter };
+  };
+
+  const confirmElement = (openModal: jest.SpyInstance) =>
+    openModal.mock.calls[0][0] as { props: { onConfirm: () => Promise<void> } };
+
+  it('sends the selection and Discover state to the server only on confirm', async () => {
+    const preserveEvidence = jest.fn().mockResolvedValue({
+      investigationId: 'inv-1',
+      evidenceCount: 3,
+      addedCount: 2,
+      profileToken: 'new-token',
+    });
+    const { hunt, openModal, close, addSuccess, stateAdapter } = open(preserveEvidence);
+
+    hunt.onClick({ selectedDocs: [rawRecord('e1'), rawRecord('e2')] });
+    expect(preserveEvidence).not.toHaveBeenCalled();
+    await confirmElement(openModal).props.onConfirm();
+
+    expect(preserveEvidence).toHaveBeenCalledWith({
+      token: 'old-token',
+      preservationId: expect.stringMatching(/^[0-9a-f-]{36}$/),
+      query: 'FROM logs-x',
+      filters: [{ json: '{"meta":{"key":"a"}}' }],
+      timeRange: { from: 'now-7d', to: 'now' },
+      columns: ['@timestamp'],
+      dataViewId: 'dv-1',
+      rows: [
+        { kind: 'raw_event', index: 'logs-x', id: 'e1' },
+        { kind: 'raw_event', index: 'logs-x', id: 'e2' },
+      ],
+    });
+    expect(stateAdapter.setState).toHaveBeenCalledWith({ token: 'new-token' });
+    expect(addSuccess).toHaveBeenCalledWith(
+      expect.objectContaining({ title: 'Evidence preserved' })
+    );
+    expect(close).toHaveBeenCalledTimes(1);
+  });
+
+  it('reuses the preservation id when a failed save is retried', async () => {
+    const preserveEvidence = jest
+      .fn()
+      .mockRejectedValueOnce(new Error('try later'))
+      .mockResolvedValue({
+        investigationId: 'i',
+        evidenceCount: 1,
+        addedCount: 1,
+        profileToken: 't',
+      });
+    const { hunt, openModal, stateAdapter } = open(preserveEvidence);
+
+    hunt.onClick({ selectedDocs: [rawRecord('e1')] });
+    const { onConfirm } = confirmElement(openModal).props;
+    await expect(onConfirm()).rejects.toThrow('try later');
+    await onConfirm();
+
+    const [first, second] = preserveEvidence.mock.calls.map(([request]) => request.preservationId);
+    expect(second).toBe(first);
+    expect(stateAdapter.setState).toHaveBeenCalledTimes(1);
+  });
+
+  it('fails without calling the server when a selected event has no index and id', async () => {
+    const preserveEvidence = jest.fn();
+    const { hunt, openModal } = open(preserveEvidence);
+
+    hunt.onClick({ selectedDocs: [{ id: 'x', raw: {}, flattened: {} } as DataTableRecord] });
+
+    await expect(confirmElement(openModal).props.onConfirm()).rejects.toThrow(
+      'cannot be preserved'
+    );
+    expect(preserveEvidence).not.toHaveBeenCalled();
   });
 });

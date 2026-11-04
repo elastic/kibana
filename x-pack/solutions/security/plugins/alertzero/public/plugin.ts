@@ -240,6 +240,7 @@ export class AlertZeroPublicPlugin
       registerAlertZeroAttachmentTypesUI(agentBuilder.attachments, {
         AccessBoundary: AttachmentAccessBoundary,
         http: core.http,
+        notifications: core.notifications,
         navigation: {
           share: startDeps.share,
           spaceId,

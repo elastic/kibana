@@ -454,6 +454,7 @@ export const registerHuntLibraryRoutes = ({
             version: definition.version,
             name: definition.name,
             hypothesis: definition.hypothesis,
+            resultKind: definition.query.resultKind,
             references: [...definition.references],
             guidance: {
               analystNotes: [...definition.guidance.analystNotes],

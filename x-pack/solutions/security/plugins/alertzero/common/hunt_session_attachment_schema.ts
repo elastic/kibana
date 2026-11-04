@@ -77,6 +77,8 @@ export const huntSessionAttachmentSchema = lazySchema(() =>
       has_manual_append: z.boolean(),
       /** Counter owned by AlertZero: 1 on create, +1 on every successful write. */
       revision: z.number().int().min(1),
+      /** The Investigation this attachment belongs to, so a renderer can act on it. */
+      investigation_id: z.string().min(1).max(256).optional(),
       /** Set when the request that created the Investigation wrote this attachment first. */
       creation_operation_id: z.string().min(1).max(64).optional(),
       preservations: z

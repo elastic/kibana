@@ -24,6 +24,7 @@ const verification: HuntSessionVerification = {
     version: 1,
     name: 'Rare LSASS access',
     hypothesis: 'Credential dumping',
+    resultKind: 'raw_event',
     references: ['https://example.com'],
     guidance: { analystNotes: ['n'], expectedFalsePositives: ['f'], suggestedPivots: ['p'] },
   },
@@ -81,5 +82,69 @@ describe('registerHuntSessionFeature', () => {
     http.post.mockRejectedValue(new Error('400'));
 
     expect(await feature.verifySession('forged')).toBeUndefined();
+  });
+
+  describe('preserveEvidence', () => {
+    const request = {
+      token: 'signed',
+      preservationId: '11111111-1111-4111-8111-111111111111',
+      query: 'FROM logs-x',
+      filters: [{ json: '{}' }],
+      timeRange: { from: 'now-7d', to: 'now' },
+      columns: ['@timestamp'],
+      dataViewId: 'dv-1',
+      rows: [{ kind: 'raw_event' as const, index: 'logs-x', id: 'e1' }],
+    };
+
+    it('posts the selection and maps the response, including the refreshed token', async () => {
+      const { http, feature } = setup();
+      http.post.mockResolvedValue({
+        investigation_id: 'inv-1',
+        evidence_count: 3,
+        added_count: 2,
+        created: true,
+        profile_token: 'new-token',
+      });
+
+      const result = await feature.preserveEvidence(request);
+
+      expect(http.post).toHaveBeenCalledWith(`${HUNT_LIBRARY_URL}/session/preserve`, {
+        version: '1',
+        body: JSON.stringify({
+          token: 'signed',
+          preservation_id: request.preservationId,
+          query: 'FROM logs-x',
+          filters: [{ json: '{}' }],
+          time_range: { from: 'now-7d', to: 'now' },
+          columns: ['@timestamp'],
+          data_view_id: 'dv-1',
+          rows: request.rows,
+        }),
+      });
+      expect(result).toEqual({
+        investigationId: 'inv-1',
+        evidenceCount: 3,
+        addedCount: 2,
+        profileToken: 'new-token',
+      });
+    });
+
+    it("rejects with the server's message when it explains the failure", async () => {
+      const { http, feature } = setup();
+      http.post.mockRejectedValue({ body: { message: 'A selected document is missing.' } });
+
+      await expect(feature.preserveEvidence(request)).rejects.toThrow(
+        'A selected document is missing.'
+      );
+    });
+
+    it('rejects with a generic message when the failure has none', async () => {
+      const { http, feature } = setup();
+      http.post.mockRejectedValue(new Error('network'));
+
+      await expect(feature.preserveEvidence(request)).rejects.toThrow(
+        'The evidence could not be preserved. Try again.'
+      );
+    });
   });
 });

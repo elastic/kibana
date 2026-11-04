@@ -75,7 +75,11 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
 
     const getBulkActionsAccessor = useProfileAccessor('getBulkActions');
     const customBulkActions = useMemo(() => {
-      const profileBulkActions = getBulkActionsAccessor(() => [])({ dataView, query });
+      const profileBulkActions = getBulkActionsAccessor(() => [])({
+        dataView,
+        query,
+        columns: props.columns ?? [],
+      });
 
       if (!profileBulkActions.length) {
         return providedBulkActions;
@@ -85,7 +89,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         ...(providedBulkActions ?? []),
         ...toCustomBulkActions(profileBulkActions, props.rows ?? []),
       ];
-    }, [dataView, getBulkActionsAccessor, props.rows, providedBulkActions, query]);
+    }, [dataView, getBulkActionsAccessor, props.columns, props.rows, providedBulkActions, query]);
 
     const getPaginationConfigAccessor = useProfileAccessor('getPaginationConfig');
     const paginationModeConfig = useMemo(() => {

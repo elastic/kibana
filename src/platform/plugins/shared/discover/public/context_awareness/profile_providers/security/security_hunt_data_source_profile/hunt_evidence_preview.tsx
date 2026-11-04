@@ -7,15 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useCallback, useState } from 'react';
 import {
   EuiBasicTable,
   EuiButton,
+  EuiButtonEmpty,
+  EuiCallOut,
   EuiModal,
   EuiModalBody,
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
 } from '@elastic/eui';
 import type { DataTableRecord } from '@kbn/discover-utils';
@@ -29,43 +32,85 @@ interface EvidenceRow {
 interface HuntEvidencePreviewProps {
   title: string;
   selectedDocs: DataTableRecord[];
+  /** Saves the evidence. Rejects with a readable message; resolves once it is durable. */
+  onConfirm: () => Promise<void>;
   onClose: () => void;
 }
 
-/** Lists the selected rows an analyst is about to preserve. Nothing is stored from here. */
+/** Lists the selected rows and saves them only when the analyst confirms. */
 export const HuntEvidencePreview: React.FC<HuntEvidencePreviewProps> = ({
   title,
   selectedDocs,
+  onConfirm,
   onClose,
-}) => (
-  <EuiModal
-    onClose={onClose}
-    aria-label={i18n.EVIDENCE_PREVIEW_TITLE}
-    data-test-subj="discoverHuntEvidencePreview"
-  >
-    <EuiModalHeader>
-      <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
-    </EuiModalHeader>
-    <EuiModalBody>
-      <EuiText size="s">
-        <p data-test-subj="discoverHuntEvidenceSummary">
-          {i18n.EVIDENCE_PREVIEW_SUMMARY(selectedDocs.length)}
-        </p>
-      </EuiText>
-      <EuiBasicTable<EvidenceRow>
-        items={selectedDocs.map(({ id, raw }) => ({ id, index: raw._index ?? '' }))}
-        rowHeader="id"
-        tableCaption={i18n.EVIDENCE_PREVIEW_TITLE}
-        columns={[
-          { field: 'id', name: i18n.EVIDENCE_ID_COLUMN, truncateText: true },
-          { field: 'index', name: i18n.EVIDENCE_INDEX_COLUMN, truncateText: true },
-        ]}
-      />
-    </EuiModalBody>
-    <EuiModalFooter>
-      <EuiButton onClick={onClose} fill>
-        {i18n.EVIDENCE_PREVIEW_CLOSE}
-      </EuiButton>
-    </EuiModalFooter>
-  </EuiModal>
-);
+}) => {
+  const [isSaving, setIsSaving] = useState(false);
+  const [error, setError] = useState<string | undefined>();
+
+  const confirm = useCallback(async () => {
+    setIsSaving(true);
+    setError(undefined);
+    try {
+      await onConfirm();
+    } catch (e) {
+      setError(e instanceof Error ? e.message : i18n.SAVE_FAILED);
+      setIsSaving(false);
+    }
+  }, [onConfirm]);
+
+  return (
+    <EuiModal
+      onClose={onClose}
+      aria-label={i18n.EVIDENCE_PREVIEW_TITLE}
+      data-test-subj="discoverHuntEvidencePreview"
+    >
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>{title}</EuiModalHeaderTitle>
+      </EuiModalHeader>
+      <EuiModalBody>
+        <EuiText size="s">
+          <p data-test-subj="discoverHuntEvidenceSummary">
+            {i18n.EVIDENCE_PREVIEW_SUMMARY(selectedDocs.length)}
+          </p>
+        </EuiText>
+        <EuiBasicTable<EvidenceRow>
+          items={selectedDocs.map(({ id, raw, flattened }) => ({
+            id: String(flattened._id ?? id),
+            index: String(flattened._index ?? raw._index ?? ''),
+          }))}
+          rowHeader="id"
+          tableCaption={i18n.EVIDENCE_PREVIEW_TITLE}
+          columns={[
+            { field: 'id', name: i18n.EVIDENCE_ID_COLUMN, truncateText: true },
+            { field: 'index', name: i18n.EVIDENCE_INDEX_COLUMN, truncateText: true },
+          ]}
+        />
+        {error && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              announceOnMount
+              color="danger"
+              size="s"
+              title={error}
+              data-test-subj="discoverHuntEvidenceError"
+            />
+          </>
+        )}
+      </EuiModalBody>
+      <EuiModalFooter>
+        <EuiButtonEmpty onClick={onClose} isDisabled={isSaving}>
+          {i18n.EVIDENCE_PREVIEW_CANCEL}
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={confirm}
+          isLoading={isSaving}
+          data-test-subj="discoverHuntEvidenceConfirm"
+        >
+          {title}
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+};

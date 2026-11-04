@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import { screen } from '@testing-library/react';
+import { fireEvent, screen, waitFor } from '@testing-library/react';
 import { renderWithI18n } from '@kbn/test-jest-helpers';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { HuntEvidencePreview } from './hunt_evidence_preview';
@@ -20,6 +20,7 @@ describe('HuntGuidanceFlyout', () => {
     version: 1,
     name: 'Rare LSASS access',
     hypothesis: 'Credential dumping',
+    resultKind: 'raw_event' as const,
     references: ['https://example.com/ref'],
     guidance: {
       analystNotes: ['Check the parent process'],
@@ -56,6 +57,7 @@ describe('HuntEvidencePreview', () => {
       <HuntEvidencePreview
         title="Preserve as Investigation"
         selectedDocs={docs}
+        onConfirm={jest.fn()}
         onClose={jest.fn()}
       />
     );
@@ -63,5 +65,45 @@ describe('HuntEvidencePreview', () => {
     expect(screen.getByTestId('discoverHuntEvidenceSummary')).toHaveTextContent('2 rows selected.');
     expect(screen.getByText('logs-1')).toBeInTheDocument();
     expect(screen.getByText('logs-2')).toBeInTheDocument();
+  });
+
+  it('saves only when confirmed and keeps the dialog open to show a failure', async () => {
+    const onConfirm = jest.fn().mockRejectedValue(new Error('Forbidden document'));
+    renderWithI18n(
+      <HuntEvidencePreview
+        title="Preserve as Investigation"
+        selectedDocs={docs}
+        onConfirm={onConfirm}
+        onClose={jest.fn()}
+      />
+    );
+    expect(onConfirm).not.toHaveBeenCalled();
+
+    fireEvent.click(screen.getByTestId('discoverHuntEvidenceConfirm'));
+
+    await waitFor(() =>
+      expect(screen.getByTestId('discoverHuntEvidenceError')).toHaveTextContent(
+        'Forbidden document'
+      )
+    );
+    expect(screen.getByTestId('discoverHuntEvidenceConfirm')).toBeEnabled();
+  });
+
+  it('closes without saving on cancel', () => {
+    const onConfirm = jest.fn();
+    const onClose = jest.fn();
+    renderWithI18n(
+      <HuntEvidencePreview
+        title="Preserve as Investigation"
+        selectedDocs={docs}
+        onConfirm={onConfirm}
+        onClose={onClose}
+      />
+    );
+
+    fireEvent.click(screen.getByText('Cancel'));
+
+    expect(onClose).toHaveBeenCalledTimes(1);
+    expect(onConfirm).not.toHaveBeenCalled();
   });
 });

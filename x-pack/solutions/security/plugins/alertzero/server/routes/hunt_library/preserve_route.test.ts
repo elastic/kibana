@@ -153,8 +153,22 @@ describe('hunt preserve route', () => {
 
     const response = await call(deps);
 
-    expect(response.ok).toHaveBeenCalledWith({
-      body: { investigation_id: 'inv-1', evidence_count: 3, added_count: 1, created: true },
+    const { body: ok } = response.ok.mock.calls[0][0] as {
+      body: { profile_token: string } & Record<string, unknown>;
+    };
+    expect(ok).toMatchObject({
+      investigation_id: 'inv-1',
+      evidence_count: 3,
+      added_count: 1,
+      created: true,
+    });
+    const refreshed = createHuntProfileTokenSigner({ key: KEY }).verify(ok.profile_token, {
+      spaceId: 'default',
+    });
+    expect(refreshed.ok && refreshed.payload).toMatchObject({
+      investigationId: 'inv-1',
+      sessionId: SESSION,
+      sessionExecutionId: claims.sessionExecutionId,
     });
     expect(mockPreserve).toHaveBeenCalledWith(
       expect.objectContaining({

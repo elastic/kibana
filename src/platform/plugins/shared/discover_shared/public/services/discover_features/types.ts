@@ -347,6 +347,8 @@ export interface HuntSessionInfo {
     version: number;
     name: string;
     hypothesis: string;
+    /** Whether the hunt returns events (preserved by reference) or aggregate rows (preserved as shown). */
+    resultKind: 'raw_event' | 'aggregate';
     references: string[];
     guidance: {
       analystNotes: string[];
@@ -364,6 +366,36 @@ export interface HuntSessionInfo {
 export interface HuntSessionFeature {
   id: 'hunt-session';
   verifySession: (token: string) => Promise<HuntSessionInfo | undefined>;
+  /** Preserves selected rows as evidence on the session's Investigation. Rejects with a readable message. */
+  preserveEvidence: (request: HuntPreserveRequest) => Promise<HuntPreserveResult>;
+}
+
+/** A row an analyst selected: a reference to an event, or the values of an aggregate row. */
+export type HuntEvidenceSelection =
+  | { kind: 'raw_event'; index: string; id: string }
+  | { kind: 'aggregate'; values: Record<string, string | number | boolean | null> };
+
+export interface HuntPreserveRequest {
+  /** The signed state the tab was opened with. */
+  token: string;
+  /** Minted once per attempt and reused on retry, so a retry never adds evidence twice. */
+  preservationId: string;
+  query: string;
+  filters: Array<Record<string, string | number | boolean | null>>;
+  timeRange: { from: string; to: string };
+  columns: string[];
+  dataViewId: string;
+  rows: HuntEvidenceSelection[];
+}
+
+export interface HuntPreserveResult {
+  investigationId: string;
+  /** Unique evidence rows on the Investigation after this request. */
+  evidenceCount: number;
+  /** Rows this request added. Zero for a retry or a repeated selection. */
+  addedCount: number;
+  /** Signed state linked to the Investigation; later preservations append to it. */
+  profileToken: string;
 }
 
 /** ****************************************************************************************/

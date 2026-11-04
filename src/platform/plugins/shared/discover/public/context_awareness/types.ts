@@ -357,6 +357,10 @@ export interface BulkActionsExtensionParams {
    * The current query
    */
   query?: DiscoverAppState['query'];
+  /**
+   * The columns currently shown in the data grid
+   */
+  columns: string[];
 }
 
 /**

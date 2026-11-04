@@ -81,6 +81,7 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/core-elasticsearch-server-mocks",
     "@kbn/core-test-helpers-kbn-server",
-    "@kbn/discover-shared-plugin"
+    "@kbn/discover-shared-plugin",
+    "@kbn/core-notifications-browser"
   ]
 }

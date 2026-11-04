@@ -111,6 +111,8 @@ export interface HuntSessionVerification {
     version: number;
     name: string;
     hypothesis: string;
+    /** Whether the hunt returns events (preserved by reference) or aggregate rows (preserved as shown). */
+    resultKind: 'raw_event' | 'aggregate';
     references: string[];
     guidance: {
       analystNotes: string[];
@@ -129,6 +131,8 @@ export interface HuntPreserveResponse {
   added_count: number;
   /** True when this request created the Investigation. */
   created: boolean;
+  /** Signed state linked to the Investigation; later preservations from this tab append to it. */
+  profile_token: string;
 }
 
 /** Everything Discover needs to reopen a hunt from an Investigation. */

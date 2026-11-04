@@ -18,10 +18,6 @@ export const GUIDANCE_FLYOUT_TITLE = i18n.translate(
   { defaultMessage: 'Hunt guidance' }
 );
 
-export const GUIDANCE_CLOSE = i18n.translate('discover.profile.security.hunt.guidanceClose', {
-  defaultMessage: 'Close',
-});
-
 export const HYPOTHESIS_HEADING = i18n.translate('discover.profile.security.hunt.hypothesis', {
   defaultMessage: 'Hypothesis',
 });
@@ -78,7 +74,26 @@ export const EVIDENCE_INDEX_COLUMN = i18n.translate(
   { defaultMessage: 'Index' }
 );
 
-export const EVIDENCE_PREVIEW_CLOSE = i18n.translate(
-  'discover.profile.security.hunt.evidencePreviewClose',
-  { defaultMessage: 'Close' }
+export const EVIDENCE_PREVIEW_CANCEL = i18n.translate(
+  'discover.profile.security.hunt.evidencePreviewCancel',
+  { defaultMessage: 'Cancel' }
 );
+
+export const SAVE_FAILED = i18n.translate('discover.profile.security.hunt.saveFailed', {
+  defaultMessage: 'The evidence could not be preserved. Try again.',
+});
+
+export const SAVED_TITLE = i18n.translate('discover.profile.security.hunt.savedTitle', {
+  defaultMessage: 'Evidence preserved',
+});
+
+export const SAVED_TEXT = (added: number, total: number) =>
+  i18n.translate('discover.profile.security.hunt.savedText', {
+    defaultMessage:
+      '{added, plural, =0 {No new rows were added} one {# row added} other {# rows added}}. The Investigation now holds {total, plural, one {# row} other {# rows}}.',
+    values: { added, total },
+  });
+
+export const NOT_AVAILABLE = i18n.translate('discover.profile.security.hunt.notAvailable', {
+  defaultMessage: 'Hunt evidence cannot be preserved right now.',
+});

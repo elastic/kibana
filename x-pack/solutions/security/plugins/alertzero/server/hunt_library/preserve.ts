@@ -223,6 +223,7 @@ export const preserveHuntEvidence = async ({
             name: definition.name,
             hypothesis: definition.hypothesis,
           },
+          investigation_id: investigationId,
           trigger: current?.trigger ?? 'manual',
           has_manual_append: current
             ? current.trigger === 'automated' || current.has_manual_append

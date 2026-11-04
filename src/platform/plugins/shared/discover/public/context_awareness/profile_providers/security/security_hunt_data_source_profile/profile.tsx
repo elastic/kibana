@@ -8,6 +8,8 @@
  */
 
 import React from 'react';
+import { v4 as uuidv4 } from 'uuid';
+import { isOfAggregateQueryType } from '@kbn/es-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { HuntSessionInfo } from '@kbn/discover-shared-plugin/public';
 import type { DataSourceProfileProvider } from '../../../profiles';
@@ -19,6 +21,7 @@ import { createCellRendererAccessor } from '../accessors/get_cell_renderer_acces
 import { SECURITY_PROFILE_ID } from '../constants';
 import type { SecurityDataSourceContext } from '../security_data_source_profile';
 import { createSecurityDataSourceProfileProvider } from '../security_data_source_profile';
+import { toEvidenceSelection, toStoredFilters } from './hunt_evidence';
 import { HuntEvidencePreview } from './hunt_evidence_preview';
 import { HuntGuidanceFlyout } from './hunt_guidance_flyout';
 import * as i18n from './translations';
@@ -72,9 +75,9 @@ export const createSecurityHuntDataSourceProfileProvider = (
           };
         },
       getBulkActions:
-        (prev, { context }) =>
+        (prev, { context, toolkit }) =>
         (params) => {
-          const { investigationId } = context.huntSession;
+          const { investigationId, definition } = context.huntSession;
           const label = investigationId ? i18n.APPEND_ACTION_LABEL : i18n.PRESERVE_ACTION_LABEL;
 
           return [
@@ -89,11 +92,50 @@ export const createSecurityHuntDataSourceProfileProvider = (
                   ? i18n.TOO_MANY_ROWS(HUNT_MAX_SELECTED_ROWS)
                   : undefined,
               onClick: ({ selectedDocs }) => {
+                // One id per opened preview: a retry after a failure repeats it, so the server
+                // never adds the same evidence twice.
+                const preservationId = uuidv4();
+                const stateAdapter = toolkit.getStateAdapter(HUNT_SESSION_STATE_DEF);
+
+                const preserve = async () => {
+                  const feature = services.discoverShared.features.registry.getById('hunt-session');
+                  const rows = selectedDocs.flatMap((record) => {
+                    const selection = toEvidenceSelection(record, definition.resultKind);
+                    return selection ? [selection] : [];
+                  });
+                  if (!feature || rows.length !== selectedDocs.length) {
+                    throw new Error(i18n.NOT_AVAILABLE);
+                  }
+
+                  const { from, to } = services.timefilter.getTime();
+                  const result = await feature.preserveEvidence({
+                    token: stateAdapter.getState().token,
+                    preservationId,
+                    query: isOfAggregateQueryType(params.query) ? params.query.esql : '',
+                    filters: toStoredFilters(services.data.query.getState().filters ?? []),
+                    timeRange: { from: String(from), to: String(to) },
+                    columns: params.columns,
+                    dataViewId: params.dataView.id ?? '',
+                    rows,
+                  });
+
+                  // The new state is linked to the Investigation, so the next preservation appends.
+                  stateAdapter.setState({ token: result.profileToken });
+                  services.core.notifications.toasts.addSuccess({
+                    title: i18n.SAVED_TITLE,
+                    text: i18n.SAVED_TEXT(result.addedCount, result.evidenceCount),
+                  });
+                };
+
                 const modal = services.core.overlays.openModal(
                   toMountPoint(
                     <HuntEvidencePreview
                       title={label}
                       selectedDocs={selectedDocs}
+                      onConfirm={async () => {
+                        await preserve();
+                        modal.close();
+                      }}
                       onClose={() => modal.close()}
                     />,
                     services.core

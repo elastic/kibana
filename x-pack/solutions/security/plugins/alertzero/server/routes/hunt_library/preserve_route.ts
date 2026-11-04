@@ -164,6 +164,14 @@ export const registerHuntPreserveRoute = ({
             evidence_count: result.evidenceCount,
             added_count: result.addedCount,
             created: result.created,
+            profile_token: signer.issue({
+              spaceId: claims.spaceId,
+              definitionId: claims.definitionId,
+              definitionVersion: claims.definitionVersion,
+              sessionId: claims.sessionId,
+              sessionExecutionId: claims.sessionExecutionId,
+              investigationId: result.investigationId,
+            }),
           };
           return response.ok({ body: responseBody });
         } catch (err) {

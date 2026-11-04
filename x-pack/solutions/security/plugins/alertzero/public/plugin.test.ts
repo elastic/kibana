@@ -528,8 +528,9 @@ describe('AlertZeroPublicPlugin attachment UI registration', () => {
     const { attachments } = startPlugin();
     await flushRegistration();
 
-    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(2);
+    expect(attachments.addAttachmentType).toHaveBeenCalledTimes(3);
     expect(attachments.addAttachmentType.mock.calls.map(([type]) => type).sort()).toEqual([
+      'security.hunt_session',
       'security.significant_security_event',
       'security.threat',
     ]);
