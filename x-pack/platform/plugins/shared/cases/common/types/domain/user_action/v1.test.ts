@@ -9,11 +9,10 @@ import { AttachmentType } from '../attachment/v1';
 import {
   CaseUserActionWithoutReferenceIdsSchema,
   CaseUserActionWithoutReferenceIdsWriteSchema,
-  UserActionTypes } from './action/v1';
+  UserActionTypes,
+} from './action/v1';
 import { UserActionsRt } from './v1';
-import {
-  UserActionsSchema,
-} from '../../domain_zod/user_action/v1';
+import { UserActionsSchema } from '../../domain_zod/user_action/v1';
 
 describe('User actions', () => {
   describe('UserActionsRt', () => {
