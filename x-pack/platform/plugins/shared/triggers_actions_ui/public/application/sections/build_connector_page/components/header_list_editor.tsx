@@ -29,7 +29,7 @@ interface Props {
 
 const LABELS = {
   key: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.header.nameLabel', {
-    defaultMessage: 'Header',
+    defaultMessage: 'Name',
   }),
   value: i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.header.valueLabel', {
     defaultMessage: 'Value',
@@ -62,14 +62,18 @@ const HeaderListEditorComponent: React.FC<Props> = ({ requestPath, testSubjPrefi
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <EuiFormRow
-                    label={LABELS.key}
+                    label={index === 0 ? LABELS.key : undefined}
                     display="rowCompressed"
+                    fullWidth
                     isInvalid={!!error}
                     error={error?.message}
                   >
                     <EuiFieldText
                       compressed
+                      fullWidth
                       isInvalid={!!error}
+                      aria-label={LABELS.key}
+                      placeholder="Content-Type"
                       data-test-subj={`${testSubjPrefix}-${index}-key`}
                       value={field.value ?? ''}
                       onChange={(e) => field.onChange(e.target.value)}
@@ -86,14 +90,17 @@ const HeaderListEditorComponent: React.FC<Props> = ({ requestPath, testSubjPrefi
                 control={control}
                 render={({ field, fieldState: { error } }) => (
                   <EuiFormRow
-                    label={LABELS.value}
+                    label={index === 0 ? LABELS.value : undefined}
                     display="rowCompressed"
+                    fullWidth
                     isInvalid={!!error}
                     error={error?.message}
                   >
                     <EuiFieldText
                       compressed
+                      fullWidth
                       isInvalid={!!error}
+                      aria-label={LABELS.value}
                       data-test-subj={`${testSubjPrefix}-${index}-value`}
                       value={field.value ?? ''}
                       onChange={(e) => field.onChange(e.target.value)}
@@ -105,10 +112,10 @@ const HeaderListEditorComponent: React.FC<Props> = ({ requestPath, testSubjPrefi
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiFormRow hasEmptyLabelSpace display="rowCompressed">
+              <EuiFormRow hasEmptyLabelSpace={index === 0} display="rowCompressed">
                 <EuiToolTip content={LABELS.remove} disableScreenReaderOutput>
                   <EuiButtonIcon
-                    iconType="minusCircle"
+                    iconType="trash"
                     color="danger"
                     aria-label={LABELS.remove}
                     data-test-subj={`${testSubjPrefix}-${index}-remove`}

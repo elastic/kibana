@@ -84,17 +84,17 @@ const bodyEditor = (actionIndex: number) =>
 
 const authSelect = () => screen.getByTestId('buildConnectorAuthTypeSelect');
 
+const authCheckbox = (label: string) =>
+  within(authSelect()).getByRole('checkbox', { name: new RegExp(`^${label}`) });
+
 const selectAuthType = async (label: string) => {
-  await userEvent.click(within(authSelect()).getByTestId('comboBoxToggleListButton'));
-  await userEvent.click(await screen.findByRole('option', { name: label }));
+  expect(authCheckbox(label)).not.toBeChecked();
+  await userEvent.click(authCheckbox(label));
 };
 
 const removeAuthType = async (label: string) => {
-  await userEvent.click(
-    within(authSelect()).getByRole('button', {
-      name: `Remove ${label} from selection in this group`,
-    })
-  );
+  expect(authCheckbox(label)).toBeChecked();
+  await userEvent.click(authCheckbox(label));
 };
 
 const typeYaml = async (yaml: string) => {
@@ -295,7 +295,7 @@ describe('BuildConnectorPage', () => {
     expect(screen.getByTestId('buildConnectorNameInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorIdInput')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorDescriptionInput')).toBeInTheDocument();
-    expect(within(authSelect()).getByText('None')).toBeInTheDocument();
+    expect(authCheckbox('None')).toBeChecked();
     expect(screen.queryByTestId('buildConnectorAuthHeaderNameInput')).not.toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorConfigFields')).toBeInTheDocument();
     expect(screen.getByTestId('buildConnectorAction-0')).toBeInTheDocument();
@@ -487,7 +487,7 @@ describe('BuildConnectorPage', () => {
 
       expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
       expect(screen.getByTestId('buildConnectorDescriptionInput')).toHaveValue('Talks to Acme');
-      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
+      expect(authCheckbox('API key header')).toBeChecked();
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
       expect(screen.getByTestId('buildConnectorConfigFields-0-name')).toHaveValue('baseUrl');
       expect(screen.getByTestId('buildConnectorConfigFields-0-required')).toBeChecked();
@@ -828,7 +828,7 @@ describe('BuildConnectorPage', () => {
         expect(screen.getByTestId('buildConnectorNameInput')).toHaveValue('Acme')
       );
       expect(screen.getByTestId('buildConnectorIdInput')).toHaveValue('acme');
-      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
+      expect(authCheckbox('API key header')).toBeChecked();
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Api-Key');
       expect(screen.getByTestId('buildConnectorConfigFields-0-default')).toHaveValue(
         'https://api.acme.com'
@@ -1186,8 +1186,8 @@ config:`
         )
       );
 
-      expect(within(authSelect()).getByText('Bearer token')).toBeInTheDocument();
-      expect(within(authSelect()).getByText('API key header')).toBeInTheDocument();
+      expect(authCheckbox('Bearer token')).toBeChecked();
+      expect(authCheckbox('API key header')).toBeChecked();
       expect(screen.getByTestId('buildConnectorAuthHeaderNameInput')).toHaveValue('X-Key');
 
       await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
@@ -1461,5 +1461,59 @@ test:
     expect(
       await screen.findByText('Use only lowercase letters, numbers, "_" and "-".')
     ).toBeInTheDocument();
+  });
+
+  describe('layout', () => {
+    it('offers defined config fields and params as request variables', async () => {
+      renderPage();
+
+      await userEvent.click(await screen.findByTestId('buildConnectorConfigFields-add'));
+      await userEvent.type(screen.getByTestId('buildConnectorConfigFields-0-name'), 'baseUrl');
+      await userEvent.click(screen.getByTestId('buildConnectorAction-0-input-add'));
+      await userEvent.type(screen.getByTestId('buildConnectorAction-0-input-0-name'), 'title');
+
+      const variables = screen.getByTestId('buildConnectorAction-0-variables');
+      expect(variables).toHaveTextContent('{{config.baseUrl}}');
+      expect(variables).toHaveTextContent('{{input.title}}');
+      expect(screen.getByTestId('buildConnectorTest-variables')).toHaveTextContent(
+        '{{config.baseUrl}}'
+      );
+      expect(screen.getByTestId('buildConnectorTest-variables')).not.toHaveTextContent('input.');
+    });
+
+    it('summarizes an action in its header and collapses all actions', async () => {
+      renderPage();
+
+      expect(screen.queryByTestId('buildConnectorActions-toggleAll')).not.toBeInTheDocument();
+      await userEvent.type(await screen.findByTestId('buildConnectorAction-0-name'), 'create_post');
+      expect(screen.getByTestId('buildConnectorAction-0-toggle')).toHaveTextContent('create_post');
+      expect(screen.getByTestId('buildConnectorAction-0-toggle')).toHaveTextContent('POST');
+
+      await userEvent.click(screen.getByTestId('buildConnectorActions-add'));
+      const toggleAll = screen.getByTestId('buildConnectorActions-toggleAll');
+      expect(toggleAll).toHaveTextContent('Collapse all');
+
+      await userEvent.click(toggleAll);
+      expect(toggleAll).toHaveTextContent('Expand all');
+    });
+
+    it('opens collapsed actions with errors and sums up invalid steps on save', async () => {
+      renderPage();
+
+      await userEvent.click(await screen.findByTestId('buildConnectorActions-add'));
+      await userEvent.click(screen.getByTestId('buildConnectorActions-toggleAll'));
+      expect(screen.getByTestId('buildConnectorActions-toggleAll')).toHaveTextContent('Expand all');
+
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      await waitFor(() =>
+        expect(screen.getByTestId('buildConnectorActions-toggleAll')).toHaveTextContent(
+          'Collapse all'
+        )
+      );
+      expect(screen.getByTestId('build-connector-page-error-summary')).toHaveTextContent(
+        'need attention before saving'
+      );
+    });
   });
 });

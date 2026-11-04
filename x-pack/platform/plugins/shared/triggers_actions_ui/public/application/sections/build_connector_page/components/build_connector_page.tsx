@@ -17,7 +17,10 @@ import {
   EuiPageTemplate,
   EuiSpacer,
   EuiSteps,
+  EuiText,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import type { EuiStepsProps, EuiStepStatus } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -64,6 +67,7 @@ const STEP_TITLES = {
 export const BuildConnectorPage: React.FC = () => {
   const { chrome, setBreadcrumbs, overlays } = useKibana().services;
   const history = useHistory();
+  const { euiTheme } = useEuiTheme();
   const { state } = useLocation<BuildConnectorPageLocationState | undefined>();
   const [showEditor, setShowEditor] = useState(Boolean(state?.initialDefinition));
   const [hasPrefilledDefinition, setHasPrefilledDefinition] = useState(
@@ -129,12 +133,28 @@ export const BuildConnectorPage: React.FC = () => {
   const stepStatus = (hasErrors: boolean): EuiStepStatus | undefined =>
     isSubmitted && hasErrors ? 'danger' : undefined;
 
+  const stepErrors = [
+    Boolean(errors.displayName || errors.id || errors.description || errors.auth || errors.root),
+    Boolean(errors.config),
+    Boolean(errors.actions),
+    Boolean(errors.test),
+  ];
+  const invalidStepCount = isSubmitted ? stepErrors.filter(Boolean).length : 0;
+
+  const stickyFooterCss = css({
+    position: 'sticky',
+    bottom: 0,
+    zIndex: euiTheme.levels.header,
+    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    borderTop: euiTheme.border.thin,
+    padding: `${euiTheme.size.m} 0`,
+    marginTop: euiTheme.size.l,
+  });
+
   const steps: EuiStepsProps['steps'] = [
     {
       title: STEP_TITLES.details,
-      status: stepStatus(
-        Boolean(errors.displayName || errors.id || errors.description || errors.auth || errors.root)
-      ),
+      status: stepStatus(stepErrors[0]),
       'data-test-subj': 'build-connector-page-step-details',
       children: (
         <>
@@ -149,19 +169,19 @@ export const BuildConnectorPage: React.FC = () => {
     },
     {
       title: STEP_TITLES.config,
-      status: stepStatus(Boolean(errors.config)),
+      status: stepStatus(stepErrors[1]),
       'data-test-subj': 'build-connector-page-step-config',
       children: <ConfigFieldListEditor />,
     },
     {
       title: STEP_TITLES.actions,
-      status: stepStatus(Boolean(errors.actions)),
+      status: stepStatus(stepErrors[2]),
       'data-test-subj': 'build-connector-page-step-actions',
       children: <ActionListEditor />,
     },
     {
       title: STEP_TITLES.test,
-      status: stepStatus(Boolean(errors.test)),
+      status: stepStatus(stepErrors[3]),
       'data-test-subj': 'build-connector-page-step-test',
       children: <ConnectionTestEditor />,
     },
@@ -218,8 +238,34 @@ export const BuildConnectorPage: React.FC = () => {
               </EuiForm>
             </FormProvider>
           </EuiPageTemplate.Section>
-          <EuiPageTemplate.Section grow={false} paddingSize="none" restrictWidth>
-            <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
+          <EuiPageTemplate.Section
+            grow={false}
+            paddingSize="none"
+            restrictWidth
+            css={stickyFooterCss}
+            data-test-subj="build-connector-page-footer"
+          >
+            <EuiFlexGroup
+              justifyContent="flexEnd"
+              alignItems="center"
+              gutterSize="s"
+              responsive={false}
+            >
+              {invalidStepCount > 0 && (
+                <EuiFlexItem>
+                  <EuiText
+                    size="s"
+                    color="danger"
+                    data-test-subj="build-connector-page-error-summary"
+                  >
+                    <FormattedMessage
+                      id="xpack.triggersActionsUI.sections.buildConnectorPage.errorSummary"
+                      defaultMessage="{count, plural, one {# step needs} other {# steps need}} attention before saving."
+                      values={{ count: invalidStepCount }}
+                    />
+                  </EuiText>
+                </EuiFlexItem>
+              )}
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
                   onClick={goToConnectors}
