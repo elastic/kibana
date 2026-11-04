@@ -5,11 +5,43 @@
  * 2.0.
  */
 
-import React, { lazy } from 'react';
+import React, { lazy, Suspense } from 'react';
 
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import userEvent from '@testing-library/user-event';
-import { waitFor, screen, within } from '@testing-library/react';
+import { act, waitFor, screen, within } from '@testing-library/react';
+
+// Jest resolves @elastic/eui to test-env, whose EuiIcon ignores component types.
+// Production EuiIcon renders them, so a lazy icon suspends. Mirror that here.
+jest.mock('@elastic/eui', () => {
+  const actual = jest.requireActual('@elastic/eui');
+  const ReactActual = jest.requireActual('react');
+
+  const EuiIcon = ({
+    type,
+    className,
+    ...rest
+  }: {
+    type?: unknown;
+    className?: string;
+    [key: string]: unknown;
+  }) => {
+    const classes = ['euiIcon', className].filter(Boolean).join(' ');
+    if (typeof type === 'string' || type == null) {
+      return ReactActual.createElement('span', {
+        ...rest,
+        className: classes,
+        'data-euiicon-type': type,
+      });
+    }
+    return ReactActual.createElement(type as React.ElementType, { ...rest, className: classes });
+  };
+
+  return {
+    ...actual,
+    EuiIcon,
+  };
+});
 import CreateConnectorFlyout from '.';
 import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
@@ -478,6 +510,64 @@ describe('CreateConnectorFlyout', () => {
       expect(screen.getByTestId('create-connector-flyout-header-icon')).toBeInTheDocument();
       expect(screen.getByText('Test connector')).toBeInTheDocument();
       expect(screen.getByText(`selectMessage-${actionTypeModel.id}`)).toBeInTheDocument();
+    });
+
+    it('keeps the flyout mounted when the selected type icon is lazy', async () => {
+      let resolveIcon: (value: { default: React.FC<React.SVGProps<SVGSVGElement>> }) => void =
+        () => undefined;
+      const deferred = new Promise<{ default: React.FC<React.SVGProps<SVGSVGElement>> }>(
+        (resolve) => {
+          resolveIcon = resolve;
+        }
+      );
+      const ResolvedIcon = (props: React.SVGProps<SVGSVGElement>) => (
+        <svg {...props} data-test-subj="resolved-header-icon" />
+      );
+      const lazyActionTypeModel = actionTypeRegistryMock.createMockActionTypeModel({
+        id: 'lazy-icon-type',
+        iconClass: lazy(() => deferred),
+        actionConnectorFields: lazy(() => import('../connector_mock')),
+        validateParams: jest.fn().mockResolvedValue({ errors: {} }),
+      });
+      actionTypeRegistry.get.mockReturnValue(lazyActionTypeModel);
+      loadActionTypes.mockResolvedValue([
+        {
+          id: lazyActionTypeModel.id,
+          enabled: true,
+          name: 'Lazy icon',
+          enabledInConfig: true,
+          enabledInLicense: true,
+          minimumLicenseRequired: 'basic' as const,
+          supportedFeatureIds: ['alerting'],
+        },
+      ]);
+
+      appMockRenderer.render(
+        <Suspense fallback={<div data-test-subj="outer-fallback" />}>
+          <CreateConnectorFlyout
+            actionTypeRegistry={actionTypeRegistry}
+            onClose={onClose}
+            onConnectorCreated={onConnectorCreated}
+            onTestConnector={onTestConnector}
+          />
+        </Suspense>
+      );
+
+      await userEvent.click(await screen.findByTestId(`${lazyActionTypeModel.id}-card`));
+
+      // Footer swaps Close for Back once a type is selected. The flyout close button stays.
+      expect(await screen.findByTestId('create-connector-flyout-header-icon')).toBeInTheDocument();
+      expect(screen.getByTestId('create-connector-flyout-back-btn')).toBeInTheDocument();
+      expect(screen.getByTestId('euiFlyoutCloseButton')).toBeInTheDocument();
+      expect(screen.queryByTestId('outer-fallback')).not.toBeInTheDocument();
+
+      await act(async () => {
+        resolveIcon({ default: ResolvedIcon });
+      });
+
+      expect(await screen.findByTestId('resolved-header-icon')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('euiFlyoutCloseButton'));
+      expect(onClose).toHaveBeenCalledTimes(1);
     });
 
     it('does not show beta badge when isExperimental is undefined', async () => {
