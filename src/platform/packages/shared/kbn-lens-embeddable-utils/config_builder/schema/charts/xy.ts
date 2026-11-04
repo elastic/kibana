@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema, tfVariant, tfUnion } from '@kbn/zod';
+import { z, lazySchema, tfVariant, tfUnion, tfUnwrap } from '@kbn/zod';
 import {
   axisTitleSchema,
   collapseBySchema,
@@ -167,14 +167,14 @@ export const sharedAxisSchema = lazySchema(() =>
         })
         .strict()
         .optional()
-        .meta({ description: 'Axis tick marks configuration' }),
+        .meta({ description: 'Axis tick marks configuration', ...tfUnwrap() }),
       grid: z
         .object({
           visible: z.boolean().meta({ description: 'Show grid lines for this axis' }),
         })
         .strict()
         .optional()
-        .meta({ description: 'Axis grid lines configuration' }),
+        .meta({ description: 'Axis grid lines configuration', ...tfUnwrap() }),
       labels: z
         .object({
           /**

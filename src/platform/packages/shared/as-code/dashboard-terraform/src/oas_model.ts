@@ -41,6 +41,7 @@ export interface OasSchema {
   'x-tf-variant'?: TfVariantMeta;
   'x-tf-json-leaf'?: true | { attribute: string };
   'x-tf-flatten'?: true;
+  'x-tf-unwrap'?: true;
   'x-tf-omit'?: true;
   'x-tf-ref'?: TfRefMeta;
   /** Compiler-internal: the attribute name a `json_leaves` entry gives this property. */
@@ -75,6 +76,8 @@ export interface Prop {
   node: TNode;
   required: boolean;
   flatten?: boolean;
+  /** The API value is an object with this single property; the attribute holds that property's value (`node`). */
+  unwrap?: string;
 }
 
 export interface Variant {
@@ -409,12 +412,15 @@ export class Compiler {
       for (const [propName, pr] of Object.entries(s.properties)) {
         const p = this.resolve(pr);
         if (p['x-tf-omit']) continue;
+        const propAt = `${at}.${propName}`;
+        const unwrap = p['x-tf-unwrap'] ? this.unwrapProperty(p, propAt) : undefined;
+        const [unwrapName, unwrapSchema] = unwrap ?? [];
         // Arrays read their own override in the branch above.
         const node = this.compile(
-          pr,
-          p.type === 'array' ? undefined : p['x-tf-union-override'],
+          unwrapSchema ?? pr,
+          unwrap || p.type === 'array' ? undefined : p['x-tf-union-override'],
           nextStack,
-          `${at}.${propName}`
+          unwrap ? `${propAt}.${unwrapName}` : propAt
         );
         const isPropLeaf = node.k === 'json' && !node.attribute;
         props.push({
@@ -423,6 +429,7 @@ export class Compiler {
           node,
           required: (s.required ?? []).includes(propName),
           flatten: !!p['x-tf-flatten'],
+          ...(unwrapName !== undefined && { unwrap: unwrapName }),
         });
       }
       return { k: 'object', props };
@@ -430,6 +437,18 @@ export class Compiler {
     if (s.type === 'object') return { k: 'json' }; // free-form object
     const prim: TNode = { k: 'prim', type: this.primType(s) };
     return ref ? this.withRef(prim, ref, at) : prim;
+  }
+
+  /** The single, required property an `x-tf-unwrap` object holds; anything else is a mapping mistake. */
+  private unwrapProperty(raw: OasSchema, location: string): [string, OasSchema] {
+    const { properties = {}, required = [], 'x-tf-flatten': flatten } = this.normalize(raw);
+    const [entry, ...others] = Object.entries(properties);
+    if (!entry || others.length || !required.includes(entry[0]) || flatten) {
+      throw new Error(
+        `x-tf-unwrap at ${location} is not on an unflattened object with one required property`
+      );
+    }
+    return entry;
   }
 
   /** A value kept as a JSON string, with where references sit inside it. */

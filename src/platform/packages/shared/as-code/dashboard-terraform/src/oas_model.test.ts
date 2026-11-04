@@ -75,6 +75,39 @@ describe('Compiler', () => {
     ]);
   });
 
+  it('compiles an unwrapped one-property object as that property', () => {
+    expect(
+      compile(
+        obj({
+          grid: { ...obj({ visible: { type: 'boolean' } }, ['visible']), 'x-tf-unwrap': true },
+        })
+      )
+    ).toEqual({
+      k: 'object',
+      props: [
+        {
+          apiName: 'grid',
+          tfName: 'grid',
+          node: { k: 'prim', type: 'bool' },
+          required: false,
+          flatten: false,
+          unwrap: 'visible',
+        },
+      ],
+    });
+  });
+
+  it.each<[string, OasSchema]>([
+    ['two properties', obj({ a: str, b: str }, ['a', 'b'])],
+    ['an optional property', obj({ a: str })],
+    ['no object', str],
+    ['a flattened object', { ...obj({ a: str }, ['a']), 'x-tf-flatten': true }],
+  ])('throws on x-tf-unwrap on %s', (_, schema) => {
+    expect(() => compile(obj({ grid: { ...schema, 'x-tf-unwrap': true } }))).toThrow(
+      'x-tf-unwrap at .grid'
+    );
+  });
+
   it('compiles a single-part allOf wrapper as its part', () => {
     expect(
       compile(obj({ mode: { allOf: [{ $ref: '#/components/schemas/Mode' }] } }), {

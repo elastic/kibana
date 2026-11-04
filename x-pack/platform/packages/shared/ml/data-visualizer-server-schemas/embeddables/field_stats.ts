@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z, tfUnion, tfDataViewRef } from '@kbn/zod';
+import { z, tfUnion, tfDataViewRef, tfUnwrap } from '@kbn/zod';
 import {
   serializedTimeRangeSchema,
   serializedTitlesSchema,
@@ -38,7 +38,7 @@ const fieldStatsEsqlSchema = z
     query: z
       .object({ esql: z.string().max(1000).meta({ description: 'The ES|QL query string.' }) })
       .strict()
-      .meta({ description: 'ES|QL query.' }),
+      .meta({ description: 'ES|QL query.', ...tfUnwrap() }),
   })
   .strict();
 

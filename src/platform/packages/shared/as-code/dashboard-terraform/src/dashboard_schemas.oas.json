@@ -469,7 +469,8 @@
                 },
                 "required": [
                   "esql"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "show_distributions": {
                 "default": false,
@@ -8042,7 +8043,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "labels": {
                 "additionalProperties": false,
@@ -8090,7 +8092,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "title": {
                 "additionalProperties": false,
@@ -8152,7 +8155,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "labels": {
                 "additionalProperties": false,
@@ -8200,7 +8204,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "title": {
                 "additionalProperties": false,
@@ -8262,7 +8267,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "labels": {
                 "additionalProperties": false,
@@ -8310,7 +8316,8 @@
                 },
                 "required": [
                   "visible"
-                ]
+                ],
+                "x-tf-unwrap": true
               },
               "title": {
                 "additionalProperties": false,

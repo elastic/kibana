@@ -16,6 +16,9 @@ published OpenAPI file. This package reads only that document.
   `src/accepted_json_leaves.json`, and names what to add (or to remove, once a listed location is mapped). `--update` rewrites the list instead of failing;
   the list has its own CODEOWNERS entry, so each new JSON leaf is a reviewed decision. CI runs the check after
   regenerating the OpenAPI files.
+- `tfUnwrap()` (`x-tf-unwrap`) on an object with one required property makes the attribute that property's value,
+  as the provider holds it: the XY axis `grid` and `ticks` (`{ visible }`) are booleans, the field statistics table's
+  ES|QL `query` (`{ esql }`) is a string. Anything else under that mark is a mapping mistake and throws.
 - Sections are a documented special case in `compileDashboardRoot`: the API interleaves sections and panels in
   `panels[]`, while the provider keeps two lists.
 - `createDashboardConverter` turns a dashboard in the API's shape into the body of the resource in Terraform JSON

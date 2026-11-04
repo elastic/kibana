@@ -218,6 +218,50 @@ describe('createDashboardConverter', () => {
     expect(droppedFields).toEqual([]);
   });
 
+  it('writes XY axis grid and ticks as booleans, and an ES|QL field statistics query as a string', () => {
+    const { body, droppedFields, skippedPanels } = convert({
+      title: 'Unwrapped values',
+      panels: [
+        {
+          type: 'vis',
+          grid: { x: 0, y: 0, w: 24, h: 10 },
+          config: {
+            type: 'xy',
+            layers: [
+              {
+                type: 'line',
+                data_source: { type: 'esql', query: 'FROM logs | STATS count = COUNT() BY host' },
+                x: { column: 'host' },
+                y: [{ column: 'count' }],
+              },
+            ],
+            axis: {
+              x: { grid: { visible: false }, ticks: { visible: true } },
+              y: { grid: { visible: true }, ticks: { visible: false } },
+              y2: { grid: { visible: true }, ticks: { visible: true } },
+            },
+          },
+        },
+        {
+          type: 'field_stats_table',
+          grid: { x: 0, y: 10, w: 24, h: 10 },
+          config: { view_type: 'esql', query: { esql: 'FROM logs | LIMIT 10' } },
+        },
+      ],
+    });
+
+    expect(skippedPanels).toEqual([]);
+    expect(droppedFields).toEqual([]);
+    expect(at(body, 'panels', 0, 'vis_config', 'by_value', 'xy_chart_config', 'axis')).toEqual({
+      x: { grid: false, ticks: true },
+      y: { grid: true, ticks: false },
+      y2: { grid: true, ticks: true },
+    });
+    expect(at(body, 'panels', 1, 'field_stats_table_config', 'by_esql', 'query')).toBe(
+      'FROM logs | LIMIT 10'
+    );
+  });
+
   it('names skipped panels by title, and keeps converting the rest', () => {
     const { body, skippedPanels } = convert({
       title: 'With a panel the provider does not support',

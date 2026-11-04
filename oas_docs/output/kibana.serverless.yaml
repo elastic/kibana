@@ -158095,6 +158095,7 @@ components:
                   type: string
               required:
                 - esql
+              x-tf-unwrap: true
             show_distributions:
               default: false
               description: Whether to show the distribution mini-charts in the table.
@@ -183339,6 +183340,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             labels:
               additionalProperties: false
               description: Label configuration
@@ -183369,6 +183371,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             title:
               additionalProperties: false
               description: Axis title configuration
@@ -183410,6 +183413,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             labels:
               additionalProperties: false
               description: Label configuration
@@ -183440,6 +183444,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             title:
               additionalProperties: false
               description: Axis title configuration
@@ -183481,6 +183486,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             labels:
               additionalProperties: false
               description: Label configuration
@@ -183511,6 +183517,7 @@ components:
                   type: boolean
               required:
                 - visible
+              x-tf-unwrap: true
             title:
               additionalProperties: false
               description: Axis title configuration

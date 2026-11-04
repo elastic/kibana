@@ -23,6 +23,7 @@ export {
   tfVariant,
   tfJsonLeaf,
   tfFlatten,
+  tfUnwrap,
   tfOmit,
   tfRef,
   tfDataViewRef,

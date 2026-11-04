@@ -106,6 +106,7 @@ describe('published OpenAPI document', () => {
       'x-tf-ref',
       'x-tf-union',
       'x-tf-union-override',
+      'x-tf-unwrap',
       'x-tf-variant',
     ]);
   });

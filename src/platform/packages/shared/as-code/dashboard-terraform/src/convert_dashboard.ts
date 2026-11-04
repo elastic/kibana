@@ -239,10 +239,13 @@ const convertValue = (
           log.dropped.push(childPath(path, key));
           continue;
         }
+        const [apiValue, apiPath] = prop.unwrap
+          ? unwrapValue(prop.unwrap, child, childPath(path, key), log)
+          : [child, childPath(path, key)];
         const converted = convertValue(
           prop.node,
-          child,
-          childPath(path, key),
+          apiValue,
+          apiPath,
           prop.flatten ? tfPath : [...tfPath, prop.tfName],
           log
         );
@@ -254,6 +257,19 @@ const convertValue = (
     case 'keyed':
       return convertKeyed(node, value, path, tfPath, log);
   }
+};
+
+// The value of the API's one-property object, and its path; any other property is dropped.
+const unwrapValue = (
+  property: string,
+  apiValue: JsonValue,
+  path: string,
+  log: ConversionLog
+): [JsonValue, string] => {
+  const { [property]: value, ...rest } = expectObject(apiValue, path);
+  if (value === undefined) throw new Error(`${path}: expected ${property}`);
+  for (const key of Object.keys(rest)) log.dropped.push(childPath(path, key));
+  return [value, childPath(path, property)];
 };
 
 const convertKeyed = (
