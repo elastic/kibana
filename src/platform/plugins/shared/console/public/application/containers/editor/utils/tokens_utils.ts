@@ -139,6 +139,14 @@ export const parseBody = (value: string): string[] => {
       }
     }
   };
+  const skipWhitespaceAndComments = () => {
+    let previousIndex = -1;
+    while (index !== previousIndex) {
+      previousIndex = index;
+      skipWhitespace();
+      skipComments();
+    }
+  };
   const parseString = () => {
     // first check if it's a triple quote
     if (isTripleQuote(char, peek(1), peek(2))) {
@@ -283,8 +291,7 @@ export const parseBody = (value: string): string[] => {
       // the value in currentToken determines the state of the parser
       if (!currentToken) {
         // the start of the object
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         // look for opening curly bracket
         if (char === '{') {
           tokens.push(char);
@@ -297,8 +304,7 @@ export const parseBody = (value: string): string[] => {
         // inside an object
         currentToken === '{'
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         // inspect the current char
         if (isDoubleQuote(char)) {
           // property name: parse the string and add to tokens
@@ -336,8 +342,7 @@ export const parseBody = (value: string): string[] => {
         // inside an array
         currentToken === '['
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
 
         // inspect the current char
         if (char === ']') {
@@ -381,8 +386,7 @@ export const parseBody = (value: string): string[] => {
         // parsing property value after a property name was found
         isPropertyName(currentToken)
       ) {
-        skipWhitespace();
-        skipComments();
+        skipWhitespaceAndComments();
         if (char === '{' || char === '[') {
           // nested object or array
           tokens.push(char);
