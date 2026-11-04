@@ -154,13 +154,12 @@ describe('executeEsql', () => {
       expect(timeoutSpy).not.toHaveBeenCalled();
     });
 
-    it('sets a wall-clock deadline through a signal and disables retries', async () => {
+    it('sets a wall-clock deadline through a signal and keeps client retries enabled', async () => {
       await executeEsql({ query: 'FROM idx', timeoutMs: 5000, esClient });
 
       expect(timeoutSpy).toHaveBeenCalledWith(5000);
       expect(requestOptions()).toStrictEqual({
         maxResponseSize: MAX_ES_RESPONSE_SIZE_BYTES,
-        maxRetries: 0,
         signal: controller.signal,
       });
     });
