@@ -128,13 +128,14 @@ Every space does that: the account directory is the one source of which account 
 `_enable`:
 
 1. Refuses with 400 when service accounts are off, 403 without `manage_security`, and 404 when the space does not exist, before writing anything.
-2. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
-3. Turns bound workflows an admin disabled back on.
-4. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
+2. Installs the investigation agent if the space does not have it yet, and binds it to the agent account, so every run of it - a workflow's, a hook's or a user's chat - executes as that account. This happens before any workflow is installed, since installing the entry point is what makes the space read as set up: a failed binding cannot leave a setup that looks done. The decision-tree reinforcement agent stays unbound - only `nightshift.decisionTreeReinforce` runs it, through `agents.runAgent`, which runs it as that step's workflow and never consults a binding.
+3. Installs the space's bound workflows with `settings.run_as` set to the agent account, the entry point `system-nightshift-investigation-bound-<space>` last. The entry point also keeps the automations account's id, as its `automationsServiceAccountId` template value. A setup that fails part-way leaves the space reading as not set up. A failed install names the workflow.
+4. Turns bound workflows an admin disabled back on.
+5. Checks that every installed workflow is bound to the agent account and that the entry point is enabled, and fails otherwise.
 
 Setups of one space run one after another. `_enable` is idempotent: running it again repairs a space whose workflows were removed, disabled, or bound to another account. A workflow can only be bound from an authenticated request with `manage_security`, so setup cannot happen at startup. On later boots, the dynamic-workflow upgrade reuses the existing bindings.
 
-A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` uninstalls the space's bound workflows and keeps the accounts, which other spaces share.
+A space counts as set up when its entry point is installed, enabled and bound to an account; that account is the space's agent account, and every other bound workflow has to run as it too. Each space keeps its own ids, so spaces are set up independently. `_disable` unbinds the investigation agent and uninstalls the space's bound workflows, and keeps the accounts, which other spaces share. The agent goes first, so a space never reads as removed while its agent still runs as the account. Because Agent Builder refuses every binding change while service accounts are off, `_disable` refuses with 400 in that state whenever the agent is installed, and uninstalls nothing; a space whose agent was never installed is torn down normally.
 
 ### What setup changes
 

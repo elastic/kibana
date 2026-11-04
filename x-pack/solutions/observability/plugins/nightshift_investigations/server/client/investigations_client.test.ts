@@ -1856,6 +1856,31 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
+  it.each([
+    [
+      'a single configured target',
+      {
+        telemetry_connector_id: 'legacy',
+        telemetry_readable_indices: 'logs-*',
+        telemetry_targets: {},
+      },
+    ],
+    [
+      'a single named target and no default',
+      { telemetry_targets: { prod: { connector_id: 'prod-es', readable_indices: 'logs-*' } } },
+    ],
+    ['several targets', undefined],
+  ])(
+    'gives a conversation the caller cannot read no telemetry target, with %s',
+    async (_, config) => {
+      // A service-account-bound run cannot see a conversation its owner keeps private.
+      withConversations();
+      await expect(
+        makeClient({ telemetryConfig: config ?? telemetryConfig }).getTelemetryTarget('private-1')
+      ).resolves.toEqual({});
+    }
+  );
+
   it('keeps direct chats on the investigator working without an investigation template', async () => {
     withConversations(makeConversation({ id: 'chat-1', templateId: 'default' }));
     await expect(
