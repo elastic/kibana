@@ -71,6 +71,45 @@ for w in 1 2 3; do
   sleep 1
 done
 
+MEM_CSV=$(mktemp)
+echo "timestamp,process,rss_kb" > "$MEM_CSV"
+
+poll_memory() {
+  while true; do
+    local ts
+    ts=$(date +%s)
+
+    # Find Kibana node process (the main server, not workers)
+    local kbn_pid
+    kbn_pid=$(pgrep -f 'node.*scripts/kibana' 2>/dev/null | head -1 || true)
+    if [ -z "$kbn_pid" ]; then
+      kbn_pid=$(pgrep -f 'node.*kbn.*serve' 2>/dev/null | head -1 || true)
+    fi
+    if [ -n "$kbn_pid" ]; then
+      local rss
+      rss=$(ps -o rss= -p "$kbn_pid" 2>/dev/null | tr -d ' ')
+      [ -n "$rss" ] && echo "$ts,kibana,$rss" >> "$MEM_CSV"
+    fi
+
+    local sidecar_pid
+    sidecar_pid=$(pgrep -f 'kbn_sidecar' 2>/dev/null | head -1 || true)
+    if [ -n "$sidecar_pid" ]; then
+      local rss
+      rss=$(ps -o rss= -p "$sidecar_pid" 2>/dev/null | tr -d ' ')
+      [ -n "$rss" ] && echo "$ts,sidecar,$rss" >> "$MEM_CSV"
+    fi
+
+    sleep 1
+  done
+}
+
+# Take a baseline memory sample before load
+echo "Sampling baseline memory..."
+sleep 2
+poll_memory &
+POLL_PID=$!
+sleep 3
+
 echo ""
 echo "ESE Stresstest Scale Benchmark"
 echo "URL: $KIBANA_URL"
@@ -81,6 +120,30 @@ wrk -t"$THREADS" -c"$CONNECTIONS" -d"${DURATION}s" \
   -s "$LUA_SCRIPT" \
   -H "Cookie: $COOKIE" \
   "${KIBANA_URL}/internal/search/ese"
+
+# Let memory settle briefly after load
+sleep 3
+kill "$POLL_PID" 2>/dev/null || true
+wait "$POLL_PID" 2>/dev/null || true
+
+echo ""
+echo "--- Memory Usage During Test ---"
+awk -F, 'NR > 1 {
+  proc=$2; rss=$3
+  if (!(proc in min) || rss < min[proc]) min[proc] = rss
+  if (!(proc in max) || rss > max[proc]) max[proc] = rss
+  sum[proc] += rss; count[proc]++
+}
+END {
+  for (p in count) {
+    printf "  %-10s avg=%7d KB (%4.0f MB)  min=%7d KB (%4.0f MB)  max=%7d KB (%4.0f MB)\n",
+      p, sum[p]/count[p], (sum[p]/count[p])/1024,
+      min[p], min[p]/1024,
+      max[p], max[p]/1024
+  }
+}' "$MEM_CSV"
+
+rm -f "$MEM_CSV"
 
 echo ""
 echo "Done. Run again with/without sidecar to compare."
