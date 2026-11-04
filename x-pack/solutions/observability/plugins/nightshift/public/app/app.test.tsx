@@ -16,14 +16,17 @@ import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
+import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
+const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
 
 const makeInvestigation = (
   id: string,
@@ -72,6 +75,7 @@ const closeConversationDetails = jest.fn();
 const openConversationDetails = jest.fn();
 const reportEvent = jest.fn();
 const analytics = { reportEvent };
+const dismissDetectionSetupBanner = jest.fn();
 
 const refetchAll = jest.fn();
 
@@ -175,6 +179,11 @@ describe('NightshiftApp', () => {
     reportEvent.mockClear();
     scrollTo.mockClear();
     mockUsePageReady.mockClear();
+    dismissDetectionSetupBanner.mockClear();
+    mockUseDetectionSetupBanner.mockReturnValue({
+      isVisible: false,
+      dismiss: dismissDetectionSetupBanner,
+    });
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
@@ -223,6 +232,22 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('dismisses the detection setup banner from its dismiss button', () => {
+    mockUseDetectionSetupBanner.mockReturnValue({
+      isVisible: true,
+      dismiss: dismissDetectionSetupBanner,
+    });
+
+    renderApp();
+
+    expect(screen.getByTestId('nightshiftDetectionSetupBannerConfigureButton')).toHaveAttribute(
+      'href',
+      '/app/nightshift/detections/events'
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(dismissDetectionSetupBanner).toHaveBeenCalledTimes(1);
   });
 
   it('shows the unavailable callout and reports ready when the optional plugin is absent', () => {
