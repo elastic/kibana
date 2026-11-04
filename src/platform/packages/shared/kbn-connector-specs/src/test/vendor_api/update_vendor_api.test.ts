@@ -167,6 +167,39 @@ describe('updateVendorApi', () => {
     expect(snapshot.components.schemas.Item).toEqual(expect.objectContaining({ type: 'object' }));
   });
 
+  it('records the sources an inspection added to the manifest, as fetched then', async () => {
+    await fs.writeFile(
+      path.join(directory, 'manifest.json'),
+      JSON.stringify({
+        sources: {
+          main: {
+            format: 'openapi',
+            url: SPEC_URL,
+            apiVersion: '0.9',
+            fetchedAt: '2026-10-01T08:00:00.000Z',
+          },
+        },
+        operations: {},
+      })
+    );
+
+    const result = await update({ fetchedAt: () => new Date('2026-10-01T08:00:00.000Z') });
+
+    expect(result.problems).toEqual([]);
+    expect(fetched).toEqual([SPEC_URL, MODELS_URL]);
+    expect(await readJson('manifest.json')).toEqual({
+      sources: {
+        main: {
+          format: 'openapi',
+          url: SPEC_URL,
+          apiVersion: '1.0',
+          fetchedAt: '2026-10-01T08:00:00.000Z',
+        },
+      },
+      operations: { listItems: [itemsOperation] },
+    });
+  });
+
   it('records offline against the snapshots and changes nothing on a re-run', async () => {
     await update({ sources: { main: SPEC_URL } });
     fetched = [];

@@ -220,6 +220,7 @@ export type {
   SetInvestigationSeverityResponse,
   InvestigationSeverityChangedEventData,
 } from './investigations/severity_change';
+export { INVESTIGATION_SEVERITY_CHANGED_EVENT_TYPE } from './investigations/severity_change';
 
 export {
   assignConversationRequestBodySchema,

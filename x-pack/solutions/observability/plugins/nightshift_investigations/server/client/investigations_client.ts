@@ -116,6 +116,9 @@ function asString(v: unknown): string | undefined {
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
 export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
 
+/** How an investigation run started, recorded as `inputs.context.entry_point`. */
+export type InvestigationEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert_recovery';
+
 const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
   const context = inputs?.context;
   return isPlainObject(context) && context.follow_up === ALERT_RECOVERED_FOLLOW_UP;
@@ -493,7 +496,10 @@ export class NightshiftInvestigationsClient {
       notificationDestinations,
       slack_thread: slackThread,
     }: StartInvestigationRequest,
-    { automationBudget }: { automationBudget?: AutomationBudget } = {}
+    {
+      automationBudget,
+      entryPoint,
+    }: { automationBudget?: AutomationBudget; entryPoint: InvestigationEntryPoint }
   ): Promise<StartInvestigationResponse> {
     if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
       throw badRequest(
@@ -614,6 +620,7 @@ export class NightshiftInvestigationsClient {
         source: resolvedSubject.type,
         [`${resolvedSubject.type}_id`]: resolvedSubject.id,
         trigger_type,
+        entry_point: entryPoint,
         ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
     };
@@ -1370,7 +1377,11 @@ export class NightshiftInvestigationsClient {
     const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
       investigation_id: existing.id,
       message,
-      context: { source: 'alert', follow_up: ALERT_RECOVERED_FOLLOW_UP },
+      context: {
+        source: 'alert',
+        follow_up: ALERT_RECOVERED_FOLLOW_UP,
+        entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+      },
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`

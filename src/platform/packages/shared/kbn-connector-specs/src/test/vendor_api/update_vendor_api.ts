@@ -10,18 +10,11 @@
 import fs from 'fs/promises';
 import path from 'path';
 import type { OpenApiDocument, OverlayDocument } from '@kbn/connector-emulate';
-import {
-  applyOverlay,
-  convertDiscovery,
-  convertSwagger2,
-  isDiscoveryDocument,
-} from '@kbn/connector-emulate';
 import type { ConnectorSpec } from '../../connector_spec';
-import { bundleSpec } from './bundle_spec';
-import { forEachRef, isJsonObject } from './json_pointer';
+import { forEachRef } from './json_pointer';
+import { loadVendorSpec } from './load_vendor_spec';
 import type { VendorApiFixtures } from './fixtures';
 import { vendorApiFixturesSchema } from './fixtures';
-import { loadMarkdownReference } from './load_markdown_reference';
 import type {
   ManifestOperation,
   ManifestPagination,
@@ -31,11 +24,20 @@ import type {
   VendorApiManifest,
 } from './manifest';
 import {
-  markdownSourceFormatSchema,
+  isMarkdownFormat,
   matchesPathTemplate,
   parseManifest,
   serializeManifest,
 } from './manifest';
+import type { VendorApiLog } from './load_vendor_specs';
+import {
+  applyOverlayToSources,
+  FIXTURES,
+  MANIFEST,
+  OVERLAY,
+  readOptional,
+  snapshotFile,
+} from './load_vendor_specs';
 import { parseSpecText } from './parse_spec_text';
 import { projectSpec } from './project_spec';
 import { assessPagination } from './propose_pagination';
@@ -43,10 +45,7 @@ import type { RecordingFinding } from './record_actions';
 import { recordActions } from './record_actions';
 import { toStableJson } from './stable_json';
 
-export interface VendorApiLog {
-  readonly info: (message: string) => void;
-  readonly warning: (message: string) => void;
-}
+export type { VendorApiLog } from './load_vendor_specs';
 
 export interface UpdateVendorApiOptions {
   readonly connector: ConnectorSpec;
@@ -66,6 +65,8 @@ export interface UpdateVendorApiOptions {
   /** Reports what would change instead of writing it. */
   readonly check?: boolean;
   readonly fetchText: (url: string) => Promise<string>;
+  /** When the document `fetchText` returned for a URL was fetched, if not just now. */
+  readonly fetchedAt?: (url: string) => Date | undefined;
   readonly now: () => Date;
   readonly log: VendorApiLog;
 }
@@ -76,33 +77,6 @@ export interface UpdateVendorApiResult {
   /** What makes the artifacts untrustworthy; the script fails when there are any. */
   readonly problems: readonly string[];
 }
-
-const MANIFEST = 'manifest.json';
-const FIXTURES = 'fixtures.json';
-const OVERLAY = 'overlay.yaml';
-const snapshotFile = (source: string) => path.join('snapshots', `${source}.openapi.json`);
-
-const readOptional = async (file: string): Promise<string | undefined> => {
-  try {
-    return await fs.readFile(file, 'utf8');
-  } catch (error) {
-    if ((error as NodeJS.ErrnoException).code === 'ENOENT') {
-      return undefined;
-    }
-    throw error;
-  }
-};
-
-const isMarkdownFormat = (format: string | undefined): format is MarkdownSourceFormat =>
-  markdownSourceFormatSchema.safeParse(format).success;
-
-const formatOf = (document: OpenApiDocument): ManifestSource['format'] =>
-  document.swagger === '2.0' ? 'swagger' : 'openapi';
-
-const apiVersionOf = ({ info }: OpenApiDocument): string | undefined => {
-  const version = isJsonObject(info) ? info.version : undefined;
-  return typeof version === 'string' ? version : undefined;
-};
 
 const listSnapshots = async (directory: string): Promise<string[]> => {
   try {
@@ -168,6 +142,7 @@ export const updateVendorApi = async ({
   refresh = false,
   check = false,
   fetchText,
+  fetchedAt: fetchedAtOf,
   now,
   log,
 }: UpdateVendorApiOptions): Promise<UpdateVendorApiResult> => {
@@ -212,55 +187,31 @@ export const updateVendorApi = async ({
 
   const raw: Record<string, OpenApiDocument> = {};
   const formats: Record<string, ManifestSource['format']> = {};
+  // The `info.version` of each source loaded in full, rather than read from its snapshot.
+  const loaded = new Map<string, string | undefined>();
   for (const [name, url] of Object.entries(urls)) {
     const snapshot = fetchAll ? undefined : await read(snapshotFile(name));
-    const markdownFormat = markdownFormatOf(name);
-    if (snapshot !== undefined) {
-      raw[name] = JSON.parse(snapshot);
-      formats[name] = previous?.sources[name]?.format ?? 'openapi';
-    } else if (markdownFormat) {
-      log.info(`Fetching ${name} from the pages ${url} links to`);
-      formats[name] = markdownFormat;
-      raw[name] = await loadMarkdownReference({
-        format: markdownFormat,
-        url,
-        pages: pagesOf(name),
-        fetchText,
-      });
-    } else {
-      if (pagesOf(name) !== undefined) {
+    if (snapshot === undefined) {
+      const markdownFormat = markdownFormatOf(name);
+      const pages = pagesOf(name);
+      if (!markdownFormat && pages !== undefined) {
         throw new Error(`${name}: --pages only applies to Markdown references; pass --format`);
       }
-      log.info(`Fetching ${name} from ${url}`);
-      const parsed = parseSpecText(await fetchText(url)) as OpenApiDocument;
-      // Discovery `$ref`s are schema names, which bundling would take for relative URLs.
-      const discovery = isDiscoveryDocument(parsed);
-      const document = discovery ? convertDiscovery(parsed) : parsed;
-      const load = async (documentUrl: string) => parseSpecText(await fetchText(documentUrl));
-      const bundled = await bundleSpec(document, { url, load });
-      formats[name] = discovery ? 'discovery' : formatOf(bundled);
-      raw[name] = formats[name] === 'swagger' ? convertSwagger2(bundled) : bundled;
+      log.info(`Loading ${name} from ${url}`);
+      const { format, apiVersion, document } = await loadVendorSpec(url, fetchText, {
+        format: markdownFormat,
+        pages,
+      });
+      formats[name] = format;
+      raw[name] = document;
+      loaded.set(name, apiVersion);
+    } else {
+      raw[name] = JSON.parse(snapshot);
+      formats[name] = previous?.sources[name]?.format ?? 'openapi';
     }
   }
 
-  // One overlay corrects every source; an action only needs to match in one of them.
-  const specs: Record<string, OpenApiDocument> = {};
-  const matched = new Set<number>();
-  for (const [name, document] of Object.entries(raw)) {
-    const result = overlay ? applyOverlay(document, overlay) : { document, findings: [] };
-    specs[name] = result.document;
-    const missed = new Set(
-      result.findings.filter(({ problem }) => problem === 'no-match').map(({ index }) => index)
-    );
-    overlay?.actions.forEach((_, index) => !missed.has(index) && matched.add(index));
-  }
-  overlay?.actions.forEach((_, index) => {
-    if (!matched.has(index)) {
-      log.warning(
-        `${OVERLAY} action ${index} matches nothing in any source; the vendor may have fixed it`
-      );
-    }
-  });
+  const specs = applyOverlayToSources(raw, overlay, log);
 
   log.info(
     `Recording ${Object.keys(connector.actions).length} actions of ${connector.metadata.id}`
@@ -344,15 +295,11 @@ export const updateVendorApi = async ({
     const file = snapshotFile(name);
     files[file] = toStableJson(projectSpec(document, used, overlayRefs));
     const unchanged = (await read(file)) === files[file];
-    const markdown = isMarkdownFormat(formats[name]);
-    // Markdown references carry no version of the reference as a whole.
-    const apiVersion = markdown
-      ? undefined
-      : fetchAll
-      ? apiVersionOf(document)
-      : previous?.sources[name]?.apiVersion;
-    const pages = markdown ? pagesOf(name) : undefined;
-    const fetchedAt = unchanged ? previous?.sources[name]?.fetchedAt : undefined;
+    const apiVersion = loaded.has(name) ? loaded.get(name) : previous?.sources[name]?.apiVersion;
+    const pages = isMarkdownFormat(formats[name]) ? pagesOf(name) : undefined;
+    const fetchedAt = unchanged
+      ? previous?.sources[name]?.fetchedAt
+      : (fetchedAtOf?.(urls[name]) ?? now()).toISOString();
     const note = previous?.sources[name]?.note;
     sources[name] = {
       format: formats[name],
