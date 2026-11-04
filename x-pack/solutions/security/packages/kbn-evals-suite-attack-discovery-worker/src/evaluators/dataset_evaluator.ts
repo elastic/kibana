@@ -340,23 +340,19 @@ export const createEvaluateDataset =
     // Row failures are recorded here, not thrown, so `runExperiment` resolves and every check below
     // runs once all rows are done.
     const rowErrors: Error[] = [];
-    const recordRowError = (row: { scenarioId: string; spaceId: string }, error: unknown) =>
-      rowErrors.push(
-        new Error(`${row.spaceId}: ${row.scenarioId} failed: ${errorMessage(error)}`, {
-          cause: error,
-        })
-      );
+    const recordRowError = (rowLabel: string, error: unknown) =>
+      rowErrors.push(new Error(`${rowLabel} failed: ${errorMessage(error)}`, { cause: error }));
 
     const runRow = async (
       input: { scenarioId: string; spaceId: string } | undefined
     ): Promise<WorkerArtifacts> => {
-      const row = { scenarioId: input?.scenarioId ?? 'unknown', spaceId: input?.spaceId ?? '' };
+      const rowLabel = describeRow(input);
       const scenario = AUDIT_SCENARIOS.find(({ id }) => id === input?.scenarioId);
       if (!input || !scenario) {
         const error = new Error(
-          `Unknown scenario "${row.scenarioId}" in dataset "${dataset.name}"`
+          `Unknown scenario "${input?.scenarioId ?? 'unknown'}" in dataset "${dataset.name}"`
         );
-        recordRowError(row, error);
+        recordRowError(rowLabel, error);
         return failedRowArtifacts(error.message);
       }
       const { spaceId } = input;
@@ -408,10 +404,10 @@ export const createEvaluateDataset =
         // Collect worked but cancel or cleanup did not: the row still fails, and these are the
         // real artifacts it discards.
         log.warning(
-          `${row.spaceId}: ${row.scenarioId} discarded collected artifacts (runner ${artifacts.runnerExecutionId} ${artifacts.runnerStatus}, ${artifacts.reviews.length} reviews) because cleanup failed`
+          `${rowLabel} discarded collected artifacts (runner ${artifacts.runnerExecutionId} ${artifacts.runnerStatus}, ${artifacts.reviews.length} reviews) because cleanup failed`
         );
       }
-      errors.forEach((error) => recordRowError(row, error));
+      errors.forEach((error) => recordRowError(rowLabel, error));
       return failedRowArtifacts(errors.map((error) => errorMessage(error)).join('; '));
     };
 

@@ -33,6 +33,9 @@ evaluators and the judges report the same label instead of scoring an empty row.
 has resolved, `createEvaluateDataset` throws one error (an `AggregateError` when there are several)
 listing the row failures, an executor-level rejection, every dirty space and the failed code scores.
 
+Every row runs in its own space inside one shared experiment, and `runExperiment` has no
+repetitions option, so `playwright.config.ts` keeps `repetitions: 1` (the executor defaults to 3).
+
 An evaluator that throws (typically the LLM judge: `Missing scores for …` or an inference error)
 does not reject the experiment either. Every evaluator, including `evaluatorOverrides`, is wrapped:
 a throw becomes a `null` score labelled `EVALUATOR_FAILED` and a row error

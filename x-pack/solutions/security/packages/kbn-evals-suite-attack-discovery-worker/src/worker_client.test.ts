@@ -40,6 +40,47 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
   });
 });
 
+const cancelFailing = (failing: Record<string, number>) => {
+  const cancelled: string[] = [];
+  const fetch = jest.fn(async (path: string) => {
+    const id = /executions\/([^/]+)\/cancel/.exec(path)?.[1] ?? '';
+    cancelled.push(id);
+    if (failing[id])
+      throw Object.assign(new Error(`status ${failing[id]}`), { status: failing[id] });
+    return {};
+  });
+  const client = new AttackDiscoveryWorkerClient(fetch as unknown as HttpHandler, log);
+  ['a', 'b', 'c'].forEach((id) => client.track('s', id));
+  return { client, cancelled };
+};
+
+describe('AttackDiscoveryWorkerClient.cancelPending', () => {
+  it('rejects naming the execution and status, after cancelling every other one', async () => {
+    const { client, cancelled } = cancelFailing({ b: 500 });
+    await expect(client.cancelPending()).rejects.toThrow(
+      /Could not cancel execution b \(HTTP 500\)/
+    );
+    expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('ignores a 404', async () => {
+    const { client, cancelled } = cancelFailing({ b: 404 });
+    await expect(client.cancelPending()).resolves.toBeUndefined();
+    expect(cancelled.sort()).toEqual(['a', 'b', 'c']);
+  });
+
+  it('throws an AggregateError naming each failed execution', async () => {
+    const { client } = cancelFailing({ a: 500, c: 503 });
+    const error = await client.cancelPending().then(
+      () => undefined,
+      (e: unknown) => e
+    );
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as AggregateError).errors).toHaveLength(2);
+    expect((error as Error).message).toMatch(/execution a \(HTTP 500\).*execution c \(HTTP 503\)/);
+  });
+});
+
 describe('usingClient', () => {
   it('cancels pending executions after a normal run', async () => {
     const cancelPending = jest.fn(async () => undefined);
@@ -55,5 +96,28 @@ describe('usingClient', () => {
       })
     ).rejects.toThrow('spec failed');
     expect(cancelPending).toHaveBeenCalledTimes(1);
+  });
+
+  it('rejects with the cancel error when only the cancel fails', async () => {
+    const cancelPending = jest.fn(async () => {
+      throw new Error('cancel failed');
+    });
+    await expect(usingClient({ cancelPending }, async () => undefined)).rejects.toThrow(
+      'cancel failed'
+    );
+  });
+
+  it('reports both errors when the body and the cancel fail', async () => {
+    const cancelPending = jest.fn(async () => {
+      throw new Error('cancel failed');
+    });
+    const error = await usingClient({ cancelPending }, async () => {
+      throw new Error('spec failed');
+    }).then(
+      () => undefined,
+      (e: unknown) => e
+    );
+    expect(error).toBeInstanceOf(AggregateError);
+    expect((error as Error).message).toMatch(/spec failed.*cancel failed/);
   });
 });

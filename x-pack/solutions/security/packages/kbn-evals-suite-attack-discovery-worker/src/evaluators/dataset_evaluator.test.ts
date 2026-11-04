@@ -428,6 +428,17 @@ describe('createEvaluateDataset', () => {
     expect(cleanup).toHaveBeenCalledTimes(1);
   });
 
+  it('reports a cancel failure under the row, naming the execution', async () => {
+    collect.mockResolvedValue(quietArtifacts());
+    (client.cancelPending as jest.Mock).mockRejectedValueOnce(
+      new Error('Could not cancel execution review-1 (HTTP 500): boom')
+    );
+    const error = await rejectionOf(evaluateRows(['benign-batch']));
+    expect(error.message).toMatch(
+      new RegExp(`: benign-batch failed: Could not cancel execution review-1 \\(HTTP 500\\): boom`)
+    );
+  });
+
   describe('with an executor that rejects on the first thrown row, like the real one', () => {
     const LAST = 'positive-chain-with-noise';
     const FIRST = 'benign-batch';
@@ -529,9 +540,14 @@ describe('createEvaluateDataset', () => {
       const noInput = { ...rowFor(FIRST), input: undefined } as unknown as WorkerExample;
       const error = await rejectionOf(evaluateExamples([noInput]));
       expect(error).not.toBeInstanceOf(TypeError);
-      expect(error.message).toMatch(/unknown row evaluator|Unknown scenario "unknown"/);
+      expect(error.message).toContain(
+        'unknown row failed: Unknown scenario "unknown" in dataset "seam"'
+      );
+      expect(error.message).not.toMatch(/: unknown failed/);
       expect(error.message).toMatch(/CODE evaluator miss/);
-      expect(error.message).toMatch(/unknown row/);
+      expect(error.message).toMatch(
+        /unknown row.*(ROW_FAILED|miss)|(ROW_FAILED|miss).*unknown row/s
+      );
     });
 
     it('reports a collect error and a cleanup error from the same row', async () => {

@@ -131,7 +131,12 @@ export class AttackDiscoveryWorkerClient {
     this.pendingExecutions.push({ spaceId, executionId });
   }
 
-  /** Cancels what is still running, including reviews parked on the analyst gate. */
+  /**
+   * Cancels what is still running, including reviews parked on the analyst gate. Every execution
+   * is attempted. A 404 (already gone) is ignored; any other failure is thrown after all attempts
+   * finish, naming each execution id and HTTP status (an `AggregateError` when several failed),
+   * because a review that could not be cancelled stays parked.
+   */
   async cancelPending(): Promise<void> {
     const pending = this.pendingExecutions.splice(0);
     const results = await Promise.allSettled(
@@ -142,13 +147,19 @@ export class AttackDiscoveryWorkerClient {
         })
       )
     );
-    results.forEach((result, index) => {
-      if (result.status === 'rejected' && httpStatus(result.reason) !== 404) {
-        this.log.warning(
-          `Could not cancel ${pending[index].executionId}: ${errorMessage(result.reason)}`
-        );
-      }
+    const failures = results.flatMap((result, index) => {
+      if (result.status !== 'rejected' || httpStatus(result.reason) === 404) return [];
+      const { executionId } = pending[index];
+      const message = `Could not cancel execution ${executionId} (HTTP ${
+        httpStatus(result.reason) ?? 'unknown'
+      }): ${errorMessage(result.reason)}`;
+      this.log.warning(message);
+      return [new Error(message, { cause: result.reason })];
     });
+    if (failures.length === 1) throw failures[0];
+    if (failures.length > 1) {
+      throw new AggregateError(failures, failures.map((failure) => failure.message).join('; '));
+    }
   }
 }
 
@@ -157,14 +168,28 @@ export const stepsOf = (
   stepId: string
 ): WorkflowStepExecutionDto[] => execution.stepExecutions.filter((step) => step.stepId === stepId);
 
-/** Hands the client to `use`, and cancels whatever is still pending whether `use` ends or throws. */
+/**
+ * Hands the client to `use`, and cancels whatever is still pending whether `use` ends or throws.
+ * A failed cancel is reported too: alone when `use` succeeded, together with `use`'s error (as an
+ * `AggregateError`) when both failed, so neither masks the other.
+ */
 export const usingClient = async (
   client: Pick<AttackDiscoveryWorkerClient, 'cancelPending'>,
   use: () => Promise<void>
 ): Promise<void> => {
+  const errors: unknown[] = [];
   try {
     await use();
-  } finally {
+  } catch (error) {
+    errors.push(error);
+  }
+  try {
     await client.cancelPending();
+  } catch (error) {
+    errors.push(error);
+  }
+  if (errors.length === 1) throw errors[0];
+  if (errors.length > 1) {
+    throw new AggregateError(errors, errors.map((error) => errorMessage(error)).join('; '));
   }
 };

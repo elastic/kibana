@@ -537,8 +537,9 @@ const isRefusedOnFirstAttempt = (error: unknown): boolean => {
  * - `bulkSettled`: the seed bulk returned (with rejected items) or failed after it returned, so
  *   nothing of this seed is still in flight. One delete and one read-back; ids that remain throw.
  * - not settled: the bulk itself rejected (a transport failure, a 5xx, or a 4xx that followed a
- *   transport retry; only a 4xx on the first attempt counts as settled) and may still be running in Elasticsearch. A first empty
- *   read-back proves nothing, so the delete and read-back repeat for the whole
+ *   transport retry; only a 4xx on the first attempt counts as settled) and may still be running
+ *   in Elasticsearch. A first empty read-back proves nothing, so the delete and read-back repeat
+ *   for the whole
  *   `UNSETTLED_REMOVE_ROUNDS` window (3.5s), and the seed is called clean only if the read-back of
  *   the LAST round finds no id (a write that landed earlier was deleted by a later round). Ids
  *   found then throw. One last pass per window instead of consecutive clean reads keeps the total
