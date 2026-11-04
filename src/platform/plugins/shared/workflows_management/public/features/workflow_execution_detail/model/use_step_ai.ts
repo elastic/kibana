@@ -15,11 +15,12 @@ import {
 } from '../../../entities/connectors/model/use_available_connectors';
 import { findStepConnectorId } from '../lib/find_step_connector_id';
 import type { StepAiMetadata } from '../lib/normalize_step_ai';
-import { normalizeStepAi } from '../lib/normalize_step_ai';
+import { normalizeStepAi, shouldShowAiSection } from '../lib/normalize_step_ai';
 
 interface UseStepAiParams {
   workflowDefinition: WorkflowYaml | null;
   stepId: string;
+  stepType: string | undefined;
   activeStepExecution: WorkflowStepExecutionDto | null | undefined;
 }
 
@@ -33,6 +34,7 @@ interface StepAi {
 export const useStepAi = ({
   workflowDefinition,
   stepId,
+  stepType,
   activeStepExecution,
 }: UseStepAiParams): StepAi => {
   const definitionConnectorId = useMemo(
@@ -65,7 +67,7 @@ export const useStepAi = ({
 
   // LangChain often omits model from response_metadata; fall back to connector defaultModel.
   const stepAiWithModel = useMemo(() => {
-    if (!stepAi) return undefined;
+    if (!stepAi || !shouldShowAiSection(stepType, stepAi)) return undefined;
     if (stepAi.model) return stepAi;
     const config =
       fetchedConnector && 'config' in fetchedConnector ? fetchedConnector.config : undefined;
@@ -74,7 +76,7 @@ export const useStepAi = ({
         ? config.defaultModel
         : undefined;
     return defaultModel ? { ...stepAi, model: defaultModel } : stepAi;
-  }, [fetchedConnector, stepAi]);
+  }, [fetchedConnector, stepAi, stepType]);
 
   return { stepAiWithModel, aiConnectorName };
 };
