@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z } from '@kbn/zod';
 
 /**
  * Bump whenever a change to the schemas below would break a consumer reading a previously
@@ -39,41 +39,37 @@ export const FlakyTestSampleFailureSchema = z.object({
 export type FlakyTestSampleFailure = z.infer<typeof FlakyTestSampleFailureSchema>;
 
 /** Builds with one error on one pipeline. */
-export const FlakyTestErrorPipelineSchema = lazySchema(() =>
-  z.object({
-    pipeline: z.string(),
-    buildsCount: z.int(),
-    /** Buildkite build ids, sorted; lets a consumer count builds across several tests. */
-    buildIds: z.array(z.string()),
-  })
-);
+export const FlakyTestErrorPipelineSchema = z.object({
+  pipeline: z.string(),
+  buildsCount: z.number().int(),
+  /** Buildkite build ids, sorted; lets a consumer count builds across several tests. */
+  buildIds: z.array(z.string()),
+});
 
 /**
  * One distinct error of a test over the window, across every pipeline and branch, not just the
  * report scope. Errors are told apart by the first three lines of their message with ids, URLs
  * and numbers normalised away, so a diff that differs only in a count is one error.
  */
-export const FlakyTestErrorSchema = lazySchema(() =>
-  z.object({
-    /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
-    key: z.string(),
-    /** The newest failure's message, in full. */
-    message: z.string(),
-    /** Distinct builds with this error; retries in one build count once. */
-    buildsCount: z.int(),
-    /** Most builds first. */
-    byPipeline: z.array(FlakyTestErrorPipelineSchema),
-    /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
-    branches: z.array(z.string()),
-    /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
-    targets: z.array(z.string()),
-    firstFailedAt: z.coerce.date(),
-    lastFailedAt: z.coerce.date(),
-    /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
-    lastFailedBuildUrl: z.optional(z.string()),
-    lastFailedJobId: z.optional(z.string()),
-  })
-);
+export const FlakyTestErrorSchema = z.object({
+  /** The normalised head the failures were grouped on; lets a consumer merge errors across tests. */
+  key: z.string(),
+  /** The newest failure's message, in full. */
+  message: z.string(),
+  /** Distinct builds with this error; retries in one build count once. */
+  buildsCount: z.number().int(),
+  /** Most builds first. */
+  byPipeline: z.array(FlakyTestErrorPipelineSchema),
+  /** Distinct branches, sorted; pull request builds record the head ref as `owner:branch`. */
+  branches: z.array(z.string()),
+  /** Distinct target modes, sorted (`unknown` for frameworks without a Scout target). */
+  targets: z.array(z.string()),
+  firstFailedAt: z.coerce.date(),
+  lastFailedAt: z.coerce.date(),
+  /** The newest failure's build and Buildkite job; `<url>#<jobId>` opens the job's log. */
+  lastFailedBuildUrl: z.optional(z.string()),
+  lastFailedJobId: z.optional(z.string()),
+});
 export type FlakyTestError = z.infer<typeof FlakyTestErrorSchema>;
 
 /**
@@ -99,8 +95,8 @@ export type FlakyTestLatestRun = z.infer<typeof FlakyTestLatestRunSchema>;
 /** Build counts of one test on one branch; the entry-level counts are the sum over branches. */
 export const FlakyTestBranchStatsSchema = z.object({
   branch: z.string(),
-  builds: z.int(),
-  failedBuilds: z.int(),
+  builds: z.number().int(),
+  failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this branch. */
   buildFailRate: z.number(),
   /** Absent when the test never failed on this branch. */
@@ -126,8 +122,8 @@ export const FlakyTestTargetStatsSchema = z.object({
   mode: z.string(),
   /** Where the target ran: `local` or `cloud`. */
   type: z.string(),
-  builds: z.int(),
-  failedBuilds: z.int(),
+  builds: z.number().int(),
+  failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this target. */
   buildFailRate: z.number(),
   /** Absent when the test never failed on this target. */
@@ -145,8 +141,8 @@ export type FlakyTestTargetStats = z.infer<typeof FlakyTestTargetStatsSchema>;
  */
 export const FlakyTestFlakiestBranchSchema = z.object({
   branch: z.string(),
-  builds: z.int(),
-  failedBuilds: z.int(),
+  builds: z.number().int(),
+  failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this branch. */
   buildFailRate: z.number(),
 });
@@ -172,21 +168,21 @@ export const FlakyTestEntrySchema = z.object({
   owners: z.array(z.string()),
   areas: z.array(z.string()),
   /** Executions that were not skipped. */
-  runs: z.int(),
+  runs: z.number().int(),
   /** Executions with at least one failed attempt. */
-  fails: z.int(),
+  fails: z.number().int(),
   /** Executions that passed on the first attempt. */
-  passes: z.int(),
+  passes: z.number().int(),
   /** Executions that failed and then passed within the same run (Playwright retries only). */
-  retryFlakes: z.int(),
+  retryFlakes: z.number().int(),
   /** Distinct Buildkite builds the test ran in. */
-  builds: z.int(),
+  builds: z.number().int(),
   /** Distinct Buildkite builds with at least one failed execution. */
-  failedBuilds: z.int(),
+  failedBuilds: z.number().int(),
   /** `failedBuilds / builds`. */
   buildFailRate: z.number(),
   /** Distinct branches with at least one failed execution. */
-  failedBranches: z.int(),
+  failedBranches: z.number().int(),
   /** Per-branch breakdown of `builds` / `failedBuilds`, most failed builds first. */
   byBranch: z.array(FlakyTestBranchStatsSchema),
   /**
@@ -215,12 +211,12 @@ export type FlakyTestEntry = z.infer<typeof FlakyTestEntrySchema>;
 /** Build counts on one Buildkite pipeline, any branch, for the tests of one file. */
 export const FlakyTestPipelineStatsSchema = z.object({
   pipeline: z.string(),
-  builds: z.int(),
-  failedBuilds: z.int(),
+  builds: z.number().int(),
+  failedBuilds: z.number().int(),
   /** `failedBuilds / builds` on this pipeline. */
   buildFailRate: z.number(),
   /** Distinct branches with at least one failed execution. */
-  failedBranches: z.int(),
+  failedBranches: z.number().int(),
   /**
    * Names of those branches, sorted; pull request builds record the head ref as `owner:branch`.
    * Absent in reports written before the field existed.
@@ -256,9 +252,9 @@ export type FlakyTestFileStats = z.infer<typeof FlakyTestFileStatsSchema>;
  */
 export const FlakyTestReportThresholdsSchema = z.object({
   /** Branches on which the test was seen in fewer builds than this cannot qualify it. */
-  minBuilds: z.int().min(1),
+  minBuilds: z.number().int().min(1),
   /** Branches on which the test failed in fewer builds than this cannot qualify it. */
-  minFailedBuilds: z.int().min(1),
+  minFailedBuilds: z.number().int().min(1),
   /**
    * Branches on which `failedBuilds / builds` is below this fraction cannot qualify the test
    * (`0.03` for 3%); `0` keeps every test that clears the build counts. The schema default is
@@ -266,7 +262,7 @@ export const FlakyTestReportThresholdsSchema = z.object({
    */
   minFailRate: z.number().min(0).max(1).default(0),
   /** Maximum number of tests kept per list. */
-  maxTests: z.int().min(1),
+  maxTests: z.number().int().min(1),
 });
 export type FlakyTestReportThresholds = z.infer<typeof FlakyTestReportThresholdsSchema>;
 
@@ -302,7 +298,7 @@ export const FlakyTestReportSchema = z.object({
   schemaVersion: z.literal(FLAKY_TEST_REPORT_SCHEMA_VERSION),
   generatedAt: z.coerce.date(),
   window: z.object({
-    lookbackDays: z.int().min(1),
+    lookbackDays: z.number().int().min(1),
     from: z.coerce.date(),
     to: z.coerce.date(),
   }),
@@ -321,14 +317,14 @@ export const FlakyTestReportSchema = z.object({
   }),
   thresholds: FlakyTestReportThresholdsSchema,
   summary: z.object({
-    totalFlaky: z.int(),
-    totalConsistentlyFailing: z.int(),
-    flakyByFramework: z.partialRecord(TestFrameworkSchema, z.int()),
+    totalFlaky: z.number().int(),
+    totalConsistentlyFailing: z.number().int(),
+    flakyByFramework: z.record(TestFrameworkSchema, z.number().int()),
     /**
      * Flaky tests by the branch they qualified on (`flakiestBranch.branch`), largest count
      * first. Empty in reports written before thresholds applied per branch.
      */
-    flakyByBranch: z.record(z.string(), z.int()).default({}),
+    flakyByBranch: z.record(z.string(), z.number().int()).default({}),
   }),
   /** Tests that failed in some builds and passed in others, ranked by failed builds. */
   flaky: z.array(FlakyTestEntrySchema),

@@ -7,15 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getTeamByGithubHandle } from '@kbn/code-owners';
 import type { FlakyTestReport } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
-import {
-  DEFAULT_GITHUB_REPO,
-  type GithubApi,
-  type GithubIssue,
-  type GithubIssueState,
-} from '../failed_tests_reporter/github_api';
+import type { GithubApi, GithubIssue, GithubIssueState } from '../failed_tests_reporter/github_api';
 import {
   flakySuiteIssueTitle,
   lastPostedAt,
@@ -346,16 +340,11 @@ const fetchFailedTestIssues = async (
   return { issues: [...byNumber.values()], open: open.length, closed: closed.length };
 };
 
-/** `failed-test` plus the label of each owning team, the latter only in the Kibana repository. */
-export const issueLabels = (suite: Pick<FlakySuite, 'owners'>, githubRepo: string): string[] => {
-  if (githubRepo !== DEFAULT_GITHUB_REPO) {
-    return [FAILED_TEST_LABEL];
-  }
-  const teamLabels = suite.owners
-    .map((owner) => getTeamByGithubHandle(owner)?.github.label)
-    .filter((label): label is string => label !== undefined);
-  return [...new Set([FAILED_TEST_LABEL, ...teamLabels])];
-};
+/**
+ * `failed-test`. The owning teams' labels are added by the failed-test label workflow, as the team
+ * definitions they would be read from are not on this branch.
+ */
+export const issueLabels = (): string[] => [FAILED_TEST_LABEL];
 
 /**
  * Files a GitHub `failed-test` issue for every flaky suite of a report that no issue tracks yet,
@@ -452,7 +441,7 @@ export const reportFlakySuiteIssues = async (
       supersededIssues: supersededNumbers,
     });
     try {
-      const created = await github.createIssue(title, body, issueLabels(suite, githubRepo));
+      const created = await github.createIssue(title, body, issueLabels());
       log.info(
         `created #${created.number} ${created.html_url}: ${describeSuite(suite)}` +
           (superseded.length > 0

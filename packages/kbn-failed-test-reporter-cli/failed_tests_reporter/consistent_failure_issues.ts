@@ -286,7 +286,7 @@ export const reportConsistentFailureIssues = async (
     );
     const title = failingSuiteIssueTitle(suite);
     const body = renderFailingSuiteIssueBody(suite, { ...build, relatedIssues: related });
-    const created = await github.createIssue(title, body, issueLabels(suite, repo));
+    const created = await github.createIssue(title, body, issueLabels());
     log.info(
       `${dryRun ? 'Would create' : 'Created'} ${created.html_url} "${title}" for ` +
         `${plural(suite.tests.length, 'test')} in ${describeSuite(suite)}`

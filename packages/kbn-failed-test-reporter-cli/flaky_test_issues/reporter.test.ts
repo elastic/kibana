@@ -919,11 +919,7 @@ describe('reportFlakySuiteIssues', () => {
 });
 
 describe('issueLabels', () => {
-  const report = flakyReport([flakyTest({ owners: ['elastic/kibana-core', 'elastic/nobody'] })]);
-  const [suite] = groupIntoSuites(report.flaky);
-
-  it('adds the owning teams labels in the Kibana repository only', () => {
-    expect(issueLabels(suite, 'elastic/kibana')).toEqual(['failed-test', 'Team:Core']);
-    expect(issueLabels(suite, TARGET_REPO)).toEqual(['failed-test']);
+  it('labels the issue failed-test, leaving the team labels to the label workflow', () => {
+    expect(issueLabels()).toEqual(['failed-test']);
   });
 });

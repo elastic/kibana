@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Client, HttpConnection } from 'elasticsearch-8.x'; // Switch to `@elastic/elasticsearch` when the CI cluster is upgraded.
+import { Client, HttpConnection } from '@elastic/elasticsearch';
 import { createFailError } from '@kbn/dev-cli-errors';
 import type { ToolingLog } from '@kbn/tooling-log';
 

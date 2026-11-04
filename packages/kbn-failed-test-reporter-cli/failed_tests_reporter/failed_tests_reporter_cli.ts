@@ -20,7 +20,7 @@ import {
 } from '@kbn/scout-info';
 import { getValidatedESClient } from '@kbn/scout-reporting';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { globby } from 'globby';
+import globby from 'globby';
 import normalize from 'normalize-path';
 import { getBuildkiteMetadata } from './buildkite_metadata';
 import { reportConsistentFailureIssues } from './consistent_failure_issues';
