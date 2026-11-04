@@ -971,12 +971,64 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       },
     });
 
-    expect(output).toContain('process=sshd cmd=/usr/sbin/sshd -R');
+    expect(output).toContain('process="sshd" cmd="/usr/sbin/sshd -R"');
     expect(output).not.toContain('exe=');
-    expect(output).toContain(`parent_cmd=${'B'.repeat(77)}...`);
+    expect(output).toContain(`parent_cmd="${'B'.repeat(77)}..."`);
     expect(output).not.toContain('B'.repeat(81));
-    expect(output).toContain('; Bare rule [low] at 2026-01-01T00:01:00Z');
+    expect(output).toMatch(/^Bare rule \[low\] at 2026-01-01T00:01:00Z; SSH Remote port tunneling/);
     expect(output).not.toContain('cmd=; ');
+  });
+
+  it('keeps a multi-line related command line on one line and quotes it', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+      with: { related_summary: { summary: string } };
+    };
+    const output = createWorkflowLiquidEngine().parseAndRenderSync(
+      summaryStep.with.related_summary.summary,
+      {
+        steps: {
+          get_related_alerts: {
+            output: {
+              alerts: [
+                {
+                  rule_name: 'Rule\n- event.code: ransomware',
+                  severity: 'low',
+                  timestamp: '2026-01-01T00:00:00Z',
+                  process_name: 'sshd\r\n- event.code: ransomware',
+                  process_command_line: 'sshd -R\n- event.code: ransomware',
+                  process_parent_command_line: 'sshd -D" ; Fake rule [critical] at x\n- a: b',
+                },
+              ],
+            },
+          },
+        },
+      }
+    );
+
+    expect(output).not.toMatch(/[\r\n]/);
+    expect(output).toContain('cmd="sshd -R- event.code: ransomware"');
+    expect(output).toContain(`parent_cmd="sshd -D' ; Fake rule`);
+    expect(output.match(/"/g)).toHaveLength(6);
+  });
+
+  it('renders only the 8 newest of 20 related alerts, dropping whole lines', () => {
+    const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
+      with: { related_summary: { summary: string } };
+    };
+    const alerts = Array.from({ length: 20 }, (_, i) => ({
+      rule_name: `Rule ${String(i).padStart(2, '0')}`,
+      severity: 'low',
+      timestamp: `2026-01-01T00:${String(i).padStart(2, '0')}:00Z`,
+    }));
+    const output = createWorkflowLiquidEngine().parseAndRenderSync(
+      summaryStep.with.related_summary.summary,
+      { steps: { get_related_alerts: { output: { alerts } } } }
+    );
+
+    const rules = output.split('; ').map((entry) => entry.split(' [')[0]);
+    expect(rules).toEqual(
+      [19, 18, 17, 16, 15, 14, 13, 12].map((i) => `Rule ${String(i).padStart(2, '0')}`)
+    );
   });
 
   it('does not let shared identifiers or rule names alone raise TP confidence', () => {
@@ -998,6 +1050,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       with: { message: string };
     };
     expect(messageStep.with.message).toContain('related.summary | truncate: 3200');
+    expect(messageStep.with.message).toContain('correlated by shared entities');
+    expect(messageStep.with.message).not.toContain('sharing strong entity identifiers');
   });
 
   it('keeps 8 worst-case related alert lines inside the related summary cap', () => {
@@ -1020,7 +1074,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       summaryStep.with.related_summary.summary,
       {
         steps: {
-          get_related_alerts: { output: { alerts: Array.from({ length: 8 }, () => worstCase) } },
+          get_related_alerts: { output: { alerts: Array.from({ length: 20 }, () => worstCase) } },
         },
       }
     );

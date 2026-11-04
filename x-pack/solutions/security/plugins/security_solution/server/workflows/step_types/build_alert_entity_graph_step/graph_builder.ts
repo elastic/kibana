@@ -149,6 +149,10 @@ const ALERT_PROCESS_FIELDS = {
 const getFirstString = (source: Record<string, unknown> | undefined, field: string) => {
   const flat = source?.[field];
   if (typeof flat === 'string') return flat;
+  if (Array.isArray(flat)) {
+    const firstFlat = flat.find((value): value is string => typeof value === 'string');
+    if (firstFlat !== undefined) return firstFlat;
+  }
   return getValuesAtPath(source, field.split('.')).find(
     (value): value is string => typeof value === 'string'
   );
@@ -177,6 +181,8 @@ const extractAlertMeta = (id: string, hit: EsHit): AlertMeta => {
 };
 
 // ── Output formatting ───────────────────────────────────────────────────────
+
+const omitTsMs = ({ ts_ms: _tsMs, ...rest }: AlertMeta) => rest;
 
 const formatOutput = (params: {
   nodesInternal: Set<string>;
@@ -225,7 +231,7 @@ const formatOutput = (params: {
   return {
     nodes,
     edges,
-    alerts: alertsSorted.map(({ ts_ms: _tsMs, ...rest }) => rest),
+    alerts: alertsSorted.map(omitTsMs),
     stats: {
       depth_reached: depthReached,
       nodes: nodes.length,
@@ -273,11 +279,7 @@ export const buildRelatedAlertsGraph = async (
 
   // ── Step 1: Fetch the seed alert ────────────────────────────────────────
 
-  const { seedHit, seedSource, seedTimestamp, seedTsMs } = await fetchSeedAlert(
-    esClient,
-    seed,
-    sourceFields
-  );
+  const { seedHit, seedSource, seedTsMs } = await fetchSeedAlert(esClient, seed, sourceFields);
 
   // ── Step 2: Initialize traversal state ──────────────────────────────────
 
@@ -296,18 +298,8 @@ export const buildRelatedAlertsGraph = async (
     addEntitiesWithLimit({ known: knownEntitiesByField, field, values, maxEntitiesPerField });
   }
 
-  alertMetaById.set(seed.alertId, {
-    alert_id: seed.alertId,
-    alert_index: seedHit._index,
-    timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
-    rule_name: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.rule.name'] as
-      | string
-      | undefined,
-    severity: (seedSource as Record<string, unknown> | undefined)?.['kibana.alert.severity'] as
-      | string
-      | undefined,
-    ts_ms: seedTsMs,
-  });
+  const seedMeta = extractAlertMeta(seed.alertId, seedHit);
+  alertMetaById.set(seed.alertId, seedMeta);
 
   indexEntitiesForAlert({ entityToAlertIds, alertId: seed.alertId, entities: seedEntities });
 
@@ -319,15 +311,7 @@ export const buildRelatedAlertsGraph = async (
     return {
       nodes,
       edges: [],
-      alerts: includeSeed
-        ? [
-            {
-              alert_id: seed.alertId,
-              alert_index: seedHit._index,
-              timestamp: typeof seedTimestamp === 'string' ? seedTimestamp : undefined,
-            },
-          ]
-        : [],
+      alerts: includeSeed ? [omitTsMs(seedMeta)] : [],
       stats: {
         depth_reached: 0,
         nodes: nodes.length,

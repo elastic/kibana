@@ -311,6 +311,93 @@ describe('buildRelatedAlertsGraph', () => {
     );
   });
 
+  describe('process fields on the seed and array-valued fields', () => {
+    const t0 = Date.UTC(2026, 0, 1, 0, 0, 0);
+    const seedIndex = 'seed-index';
+    const searchIndex = 'alerts-index';
+    const run = (docs: Doc[], entityFields: string[]) =>
+      buildRelatedAlertsGraph({
+        esClient: makeEsClient({ seedIndex, seedId: 'A', docs }),
+        seed: { alertId: 'A', alertIndex: seedIndex },
+        searchIndex,
+        entityFields,
+        seedWindowMs: 60 * 60 * 1000,
+        expandWindowMs: 60 * 60 * 1000,
+        maxDepth: 1,
+        maxAlerts: 10,
+        pageSize: 100,
+        maxTermsPerQuery: 100,
+        maxEntitiesPerField: 100,
+        ignoreEntities: [],
+        entityFieldScores: { 'host.id': 4 },
+        minEntityScore: 4,
+        includeSeed: true,
+      });
+    const seedSource = {
+      '@timestamp': iso(t0),
+      'kibana.alert.rule.name': 'Seed rule',
+      process: { name: 'sshd', command_line: 'sshd -R', parent: { command_line: 'sshd -D' } },
+    };
+
+    it('includes process fields on the seed entry when the seed has entities', async () => {
+      const result = await run(
+        [{ _id: 'A', _index: seedIndex, _source: src({ ...seedSource, host: { id: 'h1' } }) }],
+        ['host.id']
+      );
+
+      expect(result.alerts).toEqual([
+        expect.objectContaining({
+          alert_id: 'A',
+          rule_name: 'Seed rule',
+          process_name: 'sshd',
+          process_command_line: 'sshd -R',
+          process_parent_command_line: 'sshd -D',
+        }),
+      ]);
+    });
+
+    it('includes process fields on the seed entry on the no-entity early exit', async () => {
+      const result = await run(
+        [{ _id: 'A', _index: seedIndex, _source: src(seedSource) }],
+        ['host.id']
+      );
+
+      expect(result.stats.depth_reached).toBe(0);
+      expect(result.alerts).toEqual([
+        expect.objectContaining({
+          alert_id: 'A',
+          rule_name: 'Seed rule',
+          process_name: 'sshd',
+          process_command_line: 'sshd -R',
+          process_parent_command_line: 'sshd -D',
+        }),
+      ]);
+      expect(result.alerts[0]).not.toHaveProperty('ts_ms');
+    });
+
+    it('takes the first string of a flat dotted array value', async () => {
+      const result = await run(
+        [
+          {
+            _id: 'A',
+            _index: seedIndex,
+            _source: src({
+              '@timestamp': iso(t0),
+              host: { id: 'h1' },
+              'process.command_line': ['sshd -R', 'other'],
+              'process.name': [42, 'sshd'],
+            }),
+          },
+        ],
+        ['host.id']
+      );
+
+      expect(result.alerts[0]).toEqual(
+        expect.objectContaining({ process_command_line: 'sshd -R', process_name: 'sshd' })
+      );
+    });
+  });
+
   it('links alerts via min_entity_score when configured', async () => {
     const t0 = Date.UTC(2026, 0, 1, 0, 0, 0);
     const seedIndex = 'seed-index';
