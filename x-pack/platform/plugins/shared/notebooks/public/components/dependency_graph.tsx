@@ -60,7 +60,9 @@ type Highlight = 'selected' | 'downstream' | 'dimmed' | 'none';
 type CellFlowNode = Node<{ cellId: string; width: number; highlight: Highlight }, 'cell'>;
 type SourceFlowNode = Node<{ label: string; width: number; highlight: Highlight }, 'source'>;
 type FlowNode = CellFlowNode | SourceFlowNode;
-type DependencyFlowEdge = Edge<{ params: readonly string[]; isHovered: boolean }, 'dependency'>;
+type DependencyFlowEdge = Edge<{ params: readonly string[] }, 'dependency'>;
+
+const EDGE_HOVER_WIDTH = 20;
 
 const hiddenHandleCss = css`
   visibility: hidden;
@@ -258,11 +260,24 @@ const DependencyEdgeView = ({
     sourcePosition,
     targetPosition,
   });
+  const [isHovered, setIsHovered] = useState(false);
   const params = data?.params ?? [];
   return (
     <>
-      <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} />
-      {data?.isHovered && params.length > 0 && (
+      <BaseEdge id={id} path={path} markerEnd={markerEnd} style={style} interactionWidth={0} />
+      {params.length > 0 && (
+        // Non-selectable edges get `pointer-events: none`; this path opts back in for hover.
+        <path
+          d={path}
+          fill="none"
+          stroke="transparent"
+          strokeWidth={EDGE_HOVER_WIDTH}
+          pointerEvents="stroke"
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+        />
+      )}
+      {isHovered && params.length > 0 && (
         <EdgeLabelRenderer>
           <div
             css={css`
@@ -308,7 +323,6 @@ export const DependencyGraph = ({
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const [selectedId, setSelectedId] = useState<string>();
-  const [hoveredEdgeId, setHoveredEdgeId] = useState<string>();
   const [draggedPositions, setDraggedPositions] = useState<Readonly<Record<string, XYPosition>>>(
     {}
   );
@@ -364,7 +378,7 @@ export const DependencyGraph = ({
           source,
           target,
           type: 'dependency',
-          data: { params, isHovered: id === hoveredEdgeId },
+          data: { params },
           markerEnd: { type: MarkerType.ArrowClosed, color },
           animated: isHighlighted,
           zIndex: isHighlighted ? 1 : 0,
@@ -376,7 +390,7 @@ export const DependencyGraph = ({
         };
       }),
     };
-  }, [view, selectedId, draggedPositions, hoveredEdgeId, euiTheme]);
+  }, [view, selectedId, draggedPositions, euiTheme]);
 
   return (
     <div
@@ -400,8 +414,6 @@ export const DependencyGraph = ({
           edges={edges}
           nodeTypes={NODE_TYPES}
           edgeTypes={EDGE_TYPES}
-          onEdgeMouseEnter={(_event, edge) => setHoveredEdgeId(edge.id)}
-          onEdgeMouseLeave={() => setHoveredEdgeId(undefined)}
           colorMode={colorMode === 'DARK' ? 'dark' : 'light'}
           onNodesChange={onNodesChange}
           nodesConnectable={false}
