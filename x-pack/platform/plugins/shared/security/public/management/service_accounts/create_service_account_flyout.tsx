@@ -53,6 +53,7 @@ interface Props {
   createRoleUrl?: string;
   onClose: () => void;
   onCreated: (account: ServiceAccount) => void;
+  onError: (error: Error, title: string) => void;
 }
 
 export const CreateServiceAccountFlyout = ({
@@ -62,6 +63,7 @@ export const CreateServiceAccountFlyout = ({
   createRoleUrl,
   onClose,
   onCreated,
+  onError,
 }: Props) => {
   const [nameTouched, setNameTouched] = useState(false);
   const titleId = useGeneratedHtmlId({ prefix: 'createServiceAccountTitle' });
@@ -135,6 +137,21 @@ export const CreateServiceAccountFlyout = ({
       });
     } catch (error) {
       if (!isMounted()) return;
+      if (
+        !isHttpFetchError(error) ||
+        !error.response ||
+        error.response.status < 400 ||
+        error.response.status >= 500
+      ) {
+        onError(
+          error,
+          i18n.translate('xpack.security.management.serviceAccounts.create.createErrorTitle', {
+            defaultMessage: 'Unable to create "{name}"',
+            values: { name: normalizedName },
+          })
+        );
+        return;
+      }
       const message =
         isHttpFetchError(error) &&
         error.body &&
