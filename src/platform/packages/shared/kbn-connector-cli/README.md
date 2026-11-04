@@ -104,6 +104,55 @@ Run `node scripts/create_connectors.js --dry-run` to verify IDs are correct befo
 5. If vault entries don't exist yet, set `enabled: false` and file a vault request
 6. Test with `--dry-run`, then without
 
+## Canary Testing (proof of concept)
+
+Canaries run known-good, read-only actions against the real vendor APIs through a running Kibana, to catch vendor API drift. Design doc: [Automated connector canary testing](https://docs.google.com/document/d/1bSYFR5ZelgV-GVqf__xlamqzQdPU4jgWBcKQ77_KxTI/edit). Tracking issue: [elastic/kibana#301679](https://github.com/elastic/kibana/issues/301679).
+
+```bash
+node scripts/run_canaries.js --dry-run       # validate fixtures against the specs, execute nothing
+node scripts/run_canaries.js                 # run everything
+node scripts/run_canaries.js --only .github  # one spec (repeatable, leading dot optional)
+```
+
+The runner needs the same prerequisites as `create_connectors` (`vault login`, ES and Kibana running). It exits non-zero if any case is not `ok`, or if no case ran at all.
+
+### Fixtures
+
+A fixture file in `src/canary/` pairs with the manifest that has the same `spec_id`. The fixture's existence opts that connector in. The runner creates the `(testing)` connector from the manifest if it doesn't exist yet. If it does, the runner reuses it and re-syncs its config and secrets from the manifest and Vault first, so a rotated credential is picked up (this needs Vault access on every run). Fixture files run concurrently, and their output is printed in fixture order.
+
+```yaml
+spec_id: .jira-cloud
+cases:
+  - action: getProjects
+    # Optional: name to tell cases apart, and enabled: false to skip one without deleting it
+    input:
+      maxResults: 1
+    expect: # paths into the response `data`; array indices are numeric segments
+      - path: values
+        type: array
+      - path: values.0.key
+        type: string
+```
+
+Types are `string`, `number`, `boolean`, `object`, `array` and `null`. The path `$` is the response itself. Paths split on `.`, so a response key that itself contains a dot can't be addressed, and only a response's own properties are matched. If the action declares an `output` schema, the response is also parsed with it. Most actions don't have one, so the `expect` list is the real assertion.
+
+The reserved `_test` action (a spec's connection check, when it enables one) is also allowed. It is the way to prove credentials are valid when no read action fails on bad credentials, as with Jira's `getProjects`, which succeeds anonymously.
+
+Only actions declared `scope: 'read'` are allowed. The scope is advisory and set by the spec author, but the runner refuses anything else.
+
+### Outcomes
+
+| Outcome | Meaning |
+| --- | --- |
+| `ok` | Executed and the response matched |
+| `auth` | HTTP 401/403 from the vendor, or a connector authorization error |
+| `test` | Executed, but the response no longer matches the fixture (the drift signal) |
+| `error` | Other 4xx or any 5xx from the vendor: drift or an outage |
+| `misc` | No HTTP status, timeout, network failure, 408/429, or the connector couldn't be set up |
+| `fixture` | The fixture doesn't fit the current spec (unknown action, wrong scope, input fails the action's schema), or Kibana rejected the params. Not vendor drift |
+
+The vendor status comes from `error_meta.statusCode` in the execute response. MCP-backed connectors such as `.github` may not set it. For errors with no status, the message is matched against common auth wording (401, 403, unauthorized, forbidden, bad credentials, invalid token) to still report `auth`; anything else is `misc`. That fallback is untested against a real MCP auth failure.
+
 ## Vault
 
 All secrets are fetched via the `vault` CLI at runtime. The default vault address is `https://secrets.elastic.co:8200` (override with `VAULT_ADDR` env var).
