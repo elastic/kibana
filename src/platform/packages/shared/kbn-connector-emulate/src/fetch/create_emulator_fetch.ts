@@ -326,7 +326,12 @@ export const createEmulatorFetch = ({
   // Paging applies to the default chain, so a responder that defers to `next()` pages too.
   const defaultChain = withPagination(
     operations,
-    { pagination, collectionSize, recordedExchanges: engine.recordedExchanges },
+    {
+      pagination,
+      collectionSize,
+      recordedExchanges: engine.recordedExchanges,
+      servedFrom: engine.servedFrom,
+    },
     engine.respond
   );
   const contract = createOpenApiAdapter(operations, respond ?? defaultChain, { checkScopes });

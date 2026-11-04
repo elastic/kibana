@@ -116,10 +116,7 @@ export interface ResponseEngine {
   ) => ResponseOrigin | undefined;
   readonly runtime: RuntimeFixtures;
   readonly rejected: readonly RejectedResponse[];
-  /**
-   * The recorded success exchanges that conform to the spec, in recording order; none for
-   * operations with a fixture, which overrides them.
-   */
+  /** The recorded success exchanges that conform to the spec, in recording order. */
   readonly recordedExchanges: (operation: ContractOperation) => readonly RecordedExchange[];
 }
 
@@ -233,7 +230,6 @@ export const createResponseEngine = (
   const findOperations = createOperationIndex(operations);
   const candidates = new Map<ContractOperation, Candidate[]>();
   const recorded = new Map<ContractOperation, RecordedExchange[]>();
-  const withFixture = new Set<ContractOperation>();
   const rejected: RejectedResponse[] = [];
 
   const add = (origin: RejectedResponse['source'], entry: ResponseFixture | RecordedExchange) => {
@@ -270,10 +266,7 @@ export const createResponseEngine = (
           violations,
         });
       } else {
-        // A fixture for every request overrides the recordings, which paging uses too.
-        if (origin === 'fixture' && when === undefined) {
-          withFixture.add(operation);
-        } else if (origin === 'recording' && !withFixture.has(operation)) {
+        if (origin === 'recording') {
           recorded.set(operation, [...(recorded.get(operation) ?? []), entry]);
         }
         const candidate = toCandidate(origin, when, contractResponse);
