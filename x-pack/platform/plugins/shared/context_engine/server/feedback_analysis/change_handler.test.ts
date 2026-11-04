@@ -13,7 +13,6 @@ import type { FeedbackAnalysisScheduleService } from './schedule';
 const aiIndex: AiIndexHttpItem = {
   id: 'support',
   managed: false,
-  memory_enabled: true,
   dest: { type: 'index', value: 'ai-index-support' },
   automations: [],
   sources: [],

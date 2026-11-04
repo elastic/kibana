@@ -24,7 +24,6 @@ const mockUseUpdate = jest.mocked(useUpdateFeedbackAgent);
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
-  memory_enabled: false,
   dest: { type: 'data_stream', value: 'ds' },
   automations: [],
   sources: [],
