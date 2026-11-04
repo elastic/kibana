@@ -644,6 +644,24 @@ describe('fetchDecisionCandidates', () => {
     expect(query).toContain('az:would_close:');
     expect(query).toContain('az:would_skip:');
   });
+
+  it('leaves out an alert a decision closed even in on mode, so a reopened alert stays open', async () => {
+    const callKibanaApi = jest
+      .fn()
+      .mockResolvedValue({ status: 200, headers: {}, body: { hits: { hits: [] } } });
+
+    await fetchDecisionCandidates(
+      { callKibanaApi },
+      'alert_analysis:',
+      Date.parse('2026-10-12'),
+      NO_FILTERS,
+      { includeTaggedByShadow: true }
+    );
+
+    const mustNot = JSON.stringify(callKibanaApi.mock.calls[0][0].body.query.bool.must_not);
+    expect(mustNot).toContain('az:closed_by_decision:');
+    expect(mustNot).not.toContain('az:would_close:');
+  });
 });
 
 describe('closeAlertsAsFalsePositive', () => {

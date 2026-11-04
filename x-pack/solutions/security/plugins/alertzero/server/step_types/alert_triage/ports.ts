@@ -359,6 +359,30 @@ export const openAlerts = async (api: KibanaApi, alertIds: readonly string[]): P
   }
 };
 
+/** Which of the given alerts are still open or acknowledged. Used to undo a tag after a failed close. */
+export const findOpenAlertIds = async (
+  { callKibanaApi }: KibanaApi,
+  alertIds: readonly string[]
+): Promise<string[]> => {
+  const { body } = await callKibanaApi<{ hits?: { hits?: AlertHit[] } }>({
+    method: 'POST',
+    path: SIGNALS_SEARCH_PATH,
+    body: {
+      size: alertIds.length,
+      _source: false,
+      query: {
+        bool: {
+          filter: [
+            { ids: { values: [...alertIds] } },
+            { terms: { [ALERT_FIELDS.status]: [...OPEN_ALERT_STATUSES] } },
+          ],
+        },
+      },
+    },
+  });
+  return (body.hits?.hits ?? []).map(({ _id }) => _id);
+};
+
 /** The ids of the alerts that carry a tag, up to one page. Used by revoke to find what to put back. */
 export const findAlertIdsByTag = async (
   { callKibanaApi }: KibanaApi,
@@ -673,6 +697,9 @@ export const fetchDecisionCandidates = async (
           ],
           must_not: [
             ...UNTRIAGED_MUST_NOT(analysisTagPrefix),
+            // An alert a decision closed and an analyst reopened keeps this tag. It must not be
+            // closed again: the analyst's act wins, and revoke still finds it by the tag.
+            { prefix: { [ALERT_FIELDS.tags]: TRIAGE_CLOSED_BY_DECISION_TAG_PREFIX } },
             // In `on` the alerts shadow tagged are the ones to close, so they stay in.
             ...(includeTaggedByShadow
               ? []

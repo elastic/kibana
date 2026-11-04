@@ -479,6 +479,23 @@ describe('triage match decisions step in on mode', () => {
     expect(output).toEqual(expect.objectContaining({ status: 'ok', closed: 0, close_failures: 1 }));
   });
 
+  it('takes the decision tag off alerts a failed close left open, so the next sweep retries them', async () => {
+    const { run, tags } = setup({
+      mode: 'on',
+      closeError: new Error('conflict'),
+      alerts: [['a', source('C:\\x.exe')]],
+      decisions: approved('C:\\x.exe'),
+    });
+
+    await run();
+
+    const tag = `az:closed_by_decision:${idOf('C:\\x.exe')}`;
+    expect(tags().map(({ tags: change }) => change)).toEqual([
+      { tags_to_add: [tag], tags_to_remove: [] },
+      { tags_to_add: [], tags_to_remove: [tag] },
+    ]);
+  });
+
   it('keeps the alerts of a dismissed pattern out of analysis and closes none', async () => {
     const id = decisionId('do_not_propose', hashOf('C:\\x.exe'));
     const { run, tags, closes } = setup({
