@@ -13,7 +13,6 @@ import {
   EuiFormRow,
   EuiFieldText,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
@@ -76,7 +75,6 @@ const getErrorGuidance = (reason?: GenerateConnectorTypeErrorReason): string | u
 
 const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = false }) => {
   const [url, setUrl] = useState('');
-  const [didApply, setDidApply] = useState(false);
   const { isLoading, generateConnectorTypeError, generateConnectorType } =
     useGenerateConnectorType();
   const trimmedUrl = url.trim();
@@ -85,11 +83,9 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
   const guidance = getErrorGuidance(generateConnectorTypeError?.reason);
 
   const onGenerate = useCallback(async () => {
-    setDidApply(false);
     const connectorType = await generateConnectorType(trimmedUrl);
     if (connectorType) {
       onApply(connectorType);
-      setDidApply(true);
     }
   }, [generateConnectorType, onApply, trimmedUrl]);
 
@@ -102,7 +98,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
         )}
         helpText={i18n.translate(
           'xpack.triggersActionsUI.sections.buildConnectorPage.aiUrlFieldHelpText',
-          { defaultMessage: 'Fills the form without saving.' }
+          { defaultMessage: 'Generates a draft that you can review before saving.' }
         )}
         fullWidth
         isInvalid={urlIsInvalid}
@@ -128,7 +124,8 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
       <EuiFlexGroup justifyContent="flexEnd" gutterSize="s" responsive={false}>
         <EuiFlexItem grow={false}>
           <EuiButton
-            size="s"
+            fill
+            color="primary"
             onClick={onGenerate}
             isLoading={isLoading}
             isDisabled={!canGenerate}
@@ -136,7 +133,7 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
           >
             {i18n.translate(
               'xpack.triggersActionsUI.sections.buildConnectorPage.aiGenerateButtonLabel',
-              { defaultMessage: 'Generate' }
+              { defaultMessage: 'Generate connector' }
             )}
           </EuiButton>
         </EuiFlexItem>
@@ -160,16 +157,6 @@ const AiAssistantPanelComponent: React.FC<Props> = ({ onApply, isDisabled = fals
               )
             }
           />
-        </>
-      )}
-      {didApply && (
-        <>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued" data-test-subj="build-connector-ai-success">
-            {i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.aiSuccessHint', {
-              defaultMessage: 'Review the draft before saving.',
-            })}
-          </EuiText>
         </>
       )}
     </>
