@@ -11,7 +11,9 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: () => ({
-    services: { docLinks: { links: { fleet: { datastreams: 'https://example.com/datastreams' } } } },
+    services: {
+      docLinks: { links: { fleet: { datastreams: 'https://example.com/datastreams' } } },
+    },
   }),
 }));
 jest.mock('@kbn/fleet-plugin/public', () => ({

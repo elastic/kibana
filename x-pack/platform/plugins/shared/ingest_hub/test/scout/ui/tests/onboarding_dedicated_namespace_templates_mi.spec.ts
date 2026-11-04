@@ -86,10 +86,7 @@ test.describe(
       });
     });
 
-    test('a deploy with the switch off leaves the package alone', async ({
-      browserAuth,
-      page,
-    }) => {
+    test('a deploy with the switch off leaves the package alone', async ({ browserAuth, page }) => {
       await mockManagedIntegrations(page);
       const packageRequests = await mockInstalledAwsPackage(page);
       await navigateToOnboardingStep(browserAuth, page, 'service-settings', {

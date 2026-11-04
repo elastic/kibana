@@ -78,11 +78,7 @@ export function SharedAdvancedSettings({
             defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"
             values={{
               learnMoreLink: (
-                <EuiLink
-                  href={services.docLinks.links.fleet.datastreams}
-                  external
-                  target="_blank"
-                >
+                <EuiLink href={services.docLinks.links.fleet.datastreams} external target="_blank">
                   <FormattedMessage
                     id="xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.learnMore"
                     defaultMessage="Learn more"

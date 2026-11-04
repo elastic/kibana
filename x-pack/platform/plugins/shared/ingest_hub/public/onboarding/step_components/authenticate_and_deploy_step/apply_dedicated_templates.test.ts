@@ -58,7 +58,10 @@ describe('getGlobalNamespacePackages', () => {
 
   it('leaves out groups in another namespace, such as a duplicate with its own', () => {
     expect(
-      getGlobalNamespacePackages([group('aws', 'prod'), group('aws_bedrock', 'staging', true)], 'prod')
+      getGlobalNamespacePackages(
+        [group('aws', 'prod'), group('aws_bedrock', 'staging', true)],
+        'prod'
+      )
     ).toEqual(['aws']);
   });
 
@@ -107,9 +110,7 @@ describe('applyDedicatedNamespaceTemplates', () => {
       error: name === 'aws' ? new Error('prefix not allowed') : null,
     }));
 
-    expect(await applyDedicatedNamespaceTemplates(['aws', 'aws_bedrock'], 'prod')).toEqual([
-      'aws',
-    ]);
+    expect(await applyDedicatedNamespaceTemplates(['aws', 'aws_bedrock'], 'prod')).toEqual(['aws']);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
   });
 
