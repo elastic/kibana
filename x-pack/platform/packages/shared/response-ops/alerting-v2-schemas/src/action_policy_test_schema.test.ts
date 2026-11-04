@@ -98,6 +98,10 @@ describe('actionPolicyWorkflowPayloadSchema', () => {
     ],
     ['an invalid alert url', { ...payload, alerts: [{ ...alert, alert_url: 'not a url' }] }],
     [
+      'a non-http alert url',
+      { ...payload, alerts: [{ ...alert, alert_url: 'ftp://example.com/alert' }] },
+    ],
+    [
       'too many group key fields',
       { ...payload, groupKey: manyKeys(MAX_ALERT_EVENT_DATA_KEYS + 1) },
     ],

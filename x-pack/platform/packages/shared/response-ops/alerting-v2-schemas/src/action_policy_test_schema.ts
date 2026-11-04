@@ -78,7 +78,7 @@ const actionPolicyWorkflowPayloadAlertSchema = lazySchema(() =>
         .describe('Hash identifying the alert series/group this alert belongs to'),
       alert_id: identifierSchema().describe('Unique identifier of the alert'),
       alert_url: z
-        .url()
+        .url({ protocol: /^https?$/ })
         .max(SERIES_ID_MAX_LENGTH)
         .describe('Absolute URL of the alert details page in Kibana, in the alert space'),
       alert_status: alertEpisodeStatusSchema.describe('Current lifecycle status of the alert'),
@@ -123,7 +123,7 @@ export const actionPolicyWorkflowPayloadSchema = lazySchema(() =>
     .meta({ id: 'alerting_action_policy_workflow_payload' })
 );
 
-export type ActionPolicyWorkflowPayloadInput = z.infer<typeof actionPolicyWorkflowPayloadSchema>;
+export type ActionPolicyWorkflowPayloadInput = z.input<typeof actionPolicyWorkflowPayloadSchema>;
 
 export const actionPolicyTestSendBodySchema = lazySchema(() =>
   z

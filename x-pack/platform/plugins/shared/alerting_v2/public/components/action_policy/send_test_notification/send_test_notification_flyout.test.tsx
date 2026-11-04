@@ -33,13 +33,11 @@ jest.mock('@kbn/core-di-browser', () => ({
 }));
 
 let mockPreview: ActionPolicyTestPreviewResponse | undefined;
-const mockReload = jest.fn();
 jest.mock('../../../hooks/use_preview_test_notification', () => ({
   usePreviewTestNotification: () => ({
     data: mockPreview,
     isLoading: false,
     error: null,
-    reload: mockReload,
   }),
 }));
 
@@ -107,8 +105,8 @@ const policy: ActionPolicyResponse = {
   updated_at: '2026-03-02T11:00:00.000Z',
 };
 
-const createPayload = (id = 'test-group-1'): ActionPolicyWorkflowPayloadInput => ({
-  id,
+const createPayload = (): ActionPolicyWorkflowPayloadInput => ({
+  id: 'test-group-1',
   policyId: 'policy-1',
   groupKey: { 'host.name': 'test-host' },
   alerts: [
@@ -127,9 +125,9 @@ const createPayload = (id = 'test-group-1'): ActionPolicyWorkflowPayloadInput =>
   rules: { 'test-rule-1': { name: 'Test rule 1' } },
 });
 
-const createPreview = (seed = 42, payload = createPayload()): ActionPolicyTestPreviewResponse => ({
-  seed,
-  groups: [payload],
+const createPreview = (): ActionPolicyTestPreviewResponse => ({
+  seed: 42,
+  groups: [createPayload()],
   destinations: [
     { id: 'wf-1', name: 'Pager', enabled: true, executable: true },
     { id: 'wf-2', name: 'Slack', enabled: true, executable: true },
@@ -242,14 +240,18 @@ describe('SendTestNotificationFlyout', () => {
       expect(screen.getByTestId('sendTestNotificationSendButton')).toBeEnabled();
     });
 
-    it('shows the payload of a new preview in place of the edited one', () => {
+    it('keeps the edited payload after the test runs flyout is closed', () => {
       const { rerender } = renderFlyout();
-      editPayload({ ...createPayload(), unknownKey: true });
-
-      mockPreview = createPreview(7, createPayload('test-group-7'));
+      const edited = { ...createPayload(), id: 'test-group-edited' };
+      editPayload(edited);
+      mockSendResponse = { results: [{ workflow_id: 'wf-1', workflow_execution_id: 'exec-1' }] };
       rerender();
 
-      expect(JSON.parse(getEditor().value)).toEqual(createPayload('test-group-7'));
+      closeResultsFlyout('close-button');
+      mockSendResponse = undefined;
+      rerender();
+
+      expect(JSON.parse(getEditor().value)).toEqual(edited);
     });
   });
 
@@ -317,25 +319,23 @@ describe('SendTestNotificationFlyout', () => {
       expect(screen.getByTestId('sendTestNotificationResult-wf-unknown')).toBeInTheDocument();
     });
 
-    it('builds a new preview when the test runs flyout is closed', () => {
+    it('resets the send when the test runs flyout is closed', () => {
       renderFlyout();
 
       closeResultsFlyout('close-button');
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
-      expect(mockReload).toHaveBeenCalledTimes(1);
     });
 
-    it('does not build a new preview when the form flyout closes the test runs flyout', () => {
+    it('resets the send when the form flyout closes the test runs flyout', () => {
       renderFlyout();
 
       closeResultsFlyout('navigation-cascade');
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
-      expect(mockReload).not.toHaveBeenCalled();
     });
 
-    it('goes back to the form with a new preview and every destination selected', async () => {
+    it('goes back to the form with the same payload and every destination selected', async () => {
       mockSendResponse = undefined;
       const { rerender } = renderFlyout();
       await userEvent.click(getCheckbox('wf-3'));
@@ -345,10 +345,10 @@ describe('SendTestNotificationFlyout', () => {
       closeResultsFlyout('navigation-back');
 
       expect(mockResetSend).toHaveBeenCalledTimes(1);
-      expect(mockReload).toHaveBeenCalledTimes(1);
       mockSendResponse = undefined;
       rerender();
       expect(screen.queryByTestId('sendTestNotificationResultsFlyout')).not.toBeInTheDocument();
+      expect(JSON.parse(getEditor().value)).toEqual(createPayload());
       expect(getCheckbox('wf-1')).toBeChecked();
       expect(getCheckbox('wf-2')).toBeChecked();
       expect(getCheckbox('wf-3')).toBeChecked();

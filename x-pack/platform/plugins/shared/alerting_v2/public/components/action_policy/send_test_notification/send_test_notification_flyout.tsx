@@ -29,12 +29,7 @@ interface Props {
 const { Header, Body, Footer } = FlyoutTemplate;
 
 export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Props) => {
-  const {
-    data: preview,
-    isLoading,
-    error,
-    reload: reloadPreview,
-  } = usePreviewTestNotification(policy.id);
+  const { data: preview, isLoading, error } = usePreviewTestNotification(policy.id);
   const {
     mutate: sendTestNotification,
     data: sendResponse,
@@ -42,7 +37,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     reset: resetSend,
   } = useSendTestNotification(policy.id);
   const [deselectedIds, setDeselectedIds] = useState<ReadonlySet<string>>(new Set());
-  const [editedPayload, setEditedPayload] = useState<{ seed: number; text: string }>();
+  const [editedPayload, setEditedPayload] = useState<string>();
   const [ownHistoryKey] = useState(() => Symbol('sendTestNotificationFlyout'));
   const flyoutHistoryKey = historyKey ?? ownHistoryKey;
 
@@ -52,10 +47,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
     .map(({ id }) => id);
   const generatedPayload = preview?.groups[0];
   const generatedPayloadText = generatedPayload ? JSON.stringify(generatedPayload, null, 2) : '';
-  const payloadText =
-    editedPayload && editedPayload.seed === preview?.seed
-      ? editedPayload.text
-      : generatedPayloadText;
+  const payloadText = editedPayload ?? generatedPayloadText;
   const { payload, errors: payloadErrors } = generatedPayload
     ? validatePayload(payloadText)
     : { payload: undefined, errors: [] };
@@ -70,12 +62,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
       return next;
     });
 
-  const editPayload = (text: string) => {
-    if (preview) {
-      setEditedPayload({ seed: preview.seed, text });
-    }
-  };
-
   const send = () => {
     if (!payload) {
       return;
@@ -89,7 +75,6 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
       return;
     }
     setDeselectedIds(new Set());
-    reloadPreview();
   };
 
   return (
@@ -140,7 +125,7 @@ export const SendTestNotificationFlyout = ({ policy, onClose, historyKey }: Prop
                 value={payloadText}
                 generatedValue={generatedPayloadText}
                 errors={payloadErrors}
-                onChange={editPayload}
+                onChange={setEditedPayload}
                 onReset={() => setEditedPayload(undefined)}
               />
             ) : (
