@@ -2,6 +2,27 @@
 
 This plugin provides the domain API for starting and reading investigations, independent of which entity (significant event, alert, etc.) triggers them.
 
+## Automation instructions
+
+After choosing a trigger, its panel shows an instructions field limited to 5,000 characters.
+Alert and Slack triggers accept optional **Additional Instructions**. Scheduled triggers require
+**Instructions**, which define the task for each tick. Clearing optional instructions restores the
+default investigation behavior. The form and automation API enforce the same limit.
+
+Instructions are operator guidance for the current round, below agent and system rules. Alert
+snapshots and, in the new Slack workflow format, the triggering Slack message are untrusted
+evidence. Each automation that joins an open investigation supplies its own round's guidance;
+previous instructions remain in conversation history rather than being concatenated into a new
+configuration. The saved conversation input includes the effective instructions, so later edits
+to the automation do not change the record of earlier rounds.
+
+Automation configuration still stores `execution.promptTemplate`. New workflows send alert and
+Slack guidance separately as `instructions` to `nightshift.triggerInvestigation`; schedules keep
+using `message` as the task. Existing alert workflows that send guidance as `message` are supported.
+Legacy combined Slack messages retain their existing interpretation. New formatting takes effect
+on create or the next save; no bulk workflow regeneration or historical rewrite is performed.
+The stored `reasoningMode` remains compatible but is not exposed as an Investigate / Ask control.
+
 ## Scheduled automations
 
 Hourly, daily and weekly automation presets generate calendar-based workflow triggers. Daily and

@@ -157,6 +157,45 @@ describe('AutomationDetailFlyout edit lifecycle', () => {
     expect(screen.getByTestId('automationName')).toHaveValue('Renamed');
   });
 
+  it('validates missing scheduled instructions on save and resets feedback on trigger changes', async () => {
+    renderFlyout();
+    startEditing();
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Every…'));
+    const instructions = screen.getByTestId('automationInstructions');
+    expect(instructions).toBeValid();
+    expect(screen.getByTestId('automationSaveButton')).toBeEnabled();
+
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).not.toHaveBeenCalled();
+    expect(instructions).toBeInvalid();
+    expect(
+      screen.getByText(
+        'Add instructions describing what this scheduled automation should investigate.'
+      )
+    ).toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Alert triggered'));
+    fireEvent.click(screen.getByTestId('automationChangeTrigger'));
+    fireEvent.click(await screen.findByText('Every…'));
+    expect(screen.getByTestId('automationInstructions')).toBeValid();
+
+    fireEvent.change(screen.getByTestId('automationInstructions'), {
+      target: { value: 'Check checkout health' },
+    });
+    fireEvent.click(screen.getByTestId('automationSaveButton'));
+    expect(mutate).toHaveBeenCalledWith(
+      {
+        id: automation.id,
+        body: expect.objectContaining({
+          execution: expect.objectContaining({ promptTemplate: 'Check checkout health' }),
+        }),
+      },
+      expect.any(Object)
+    );
+  });
+
   it('cancels editing without saving', () => {
     renderFlyout();
 
