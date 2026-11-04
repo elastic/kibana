@@ -181,10 +181,10 @@ export const toolToLangchain = async ({
     },
     {
       name: toolId ?? tool.id,
+      // safeExtend keeps the object-level config of the tool schema (strict, catchall, refinements)
       schema: addIntentParam
-        ? z.object({
+        ? schema.safeExtend({
             [INTENT_PARAM]: z.string().optional().describe(INTENT_PARAM_DESCRIPTION),
-            ...schema.shape,
           })
         : schema,
       description,

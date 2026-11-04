@@ -70,6 +70,12 @@ describe('ToolCallStep', () => {
     expect(intent.compareDocumentPosition(badge) & Node.DOCUMENT_POSITION_FOLLOWING).toBeTruthy();
   });
 
+  it('lets the headline shrink so a long intent can be truncated', () => {
+    renderWithProviders(<ToolCallStep step={makeStep([], 'A very long intent '.repeat(20))} />);
+    const labelItem = screen.getByRole('status').closest('.euiFlexItem')!;
+    expect(window.getComputedStyle(labelItem).minWidth).toBe('0');
+  });
+
   it('does not render an intent when the step has none', () => {
     renderWithProviders(<ToolCallStep step={makeStep([])} />);
     expect(screen.queryByTestId('agentBuilderToolCallIntent')).not.toBeInTheDocument();

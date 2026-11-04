@@ -70,6 +70,25 @@ describe('toolToLangchain', () => {
     expect(shape._intent.isOptional()).toBe(true);
   });
 
+  it('keeps the strictness of the tool schema when adding the intent param', async () => {
+    const tool = createTool('toolA', {
+      description: 'desc',
+      getSchema: () => z.object({ foo: z.string() }).strict(),
+    });
+
+    const langchainTool = await toolToLangchain({
+      tool,
+      toolId: tool.id,
+      logger,
+      addIntentParam: true,
+    });
+
+    await expect(
+      langchainTool.invoke({ foo: 'a', _intent: 'Doing a', unknown: 'b' })
+    ).rejects.toThrow();
+    expect(tool.execute).not.toHaveBeenCalled();
+  });
+
   it('does not add the intent param by default', async () => {
     const tool = createTool('toolA', {
       description: 'desc',
