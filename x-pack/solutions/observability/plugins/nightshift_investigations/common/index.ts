@@ -68,6 +68,8 @@ export interface StartInvestigationRequest {
   /** What initiated the investigation. */
   trigger_type: InvestigationTriggerType;
   message?: string;
+  /** Optional operator guidance for this round, limited to 5,000 characters. */
+  instructions?: string;
   /** Optional upper bound for this investigation workflow run, in seconds. */
   timeout_seconds?: number;
   /**

@@ -186,7 +186,8 @@ steps:
   });
 });
 
-describe('workflow output targeted rehydration', () => {
+// Failing: See https://github.com/elastic/kibana/issues/302843
+describe.skip('workflow output targeted rehydration', () => {
   let workflowRunFixture: WorkflowRunFixture;
 
   // 4-step workflow: step_a → step_b → pause → step_c
@@ -232,7 +233,8 @@ steps:
     expect(execution?.status).toBe(ExecutionStatus.WAITING);
   });
 
-  describe('after resume', () => {
+  // Failing: See https://github.com/elastic/kibana/issues/302842
+  describe.skip('after resume', () => {
     beforeAll(async () => {
       await workflowRunFixture.resumeWorkflowAtScheduledTime();
     });

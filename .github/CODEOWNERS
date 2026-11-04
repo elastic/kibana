@@ -689,6 +689,7 @@ src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
+src/platform/packages/shared/kbn-react-fiber @elastic/appex-sharedux
 src/platform/packages/shared/kbn-react-field @elastic/kibana-discover
 src/platform/packages/shared/kbn-react-hooks @elastic/streams-ui
 src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
@@ -3795,7 +3796,6 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/kbn-ui/* @elastic/appex-sharedux
 /src/platform/kbn-ui/_tooling @elastic/appex-sharedux
 /src/platform/test/api_integration/apis/short_url/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846654156
-/src/platform/test/api_integration/apis/unused_urls_task/**/*.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/220138
 /src/platform/test/functional/page_objects/share_page.ts @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files#r1846648444
 /src/platform/test/accessibility/apps/kibana_overview_* @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200209/files/cab99bce5ac2082fa77222beebe3b61ff836b94b#r1846659920
 /x-pack/platform/test/functional/services/sample_data @elastic/appex-sharedux # Assigned per https://github.com/elastic/kibana/pull/200142#discussion_r1846512756
@@ -3805,18 +3805,15 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /x-pack/platform/test/accessibility/apps/**/config.ts @elastic/appex-sharedux
 /x-pack/platform/test/accessibility/apps/**/index.ts @elastic/appex-sharedux
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
-/src/platform/test/api_integration/fixtures/unused_urls_task @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
-/x-pack/platform/test/api_integration_deployment_agnostic/apis/intercepts @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
 /x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
-/x-pack/solutions/observability/test/api_integration_deployment_agnostic/apis/intercepts/*.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/ski-docs
