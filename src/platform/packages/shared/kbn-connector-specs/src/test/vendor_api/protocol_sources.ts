@@ -170,7 +170,11 @@ const withoutDescriptions = (document: DocumentNode): DocumentNode =>
       'description' in node && node.description ? { ...node, description: undefined } : undefined,
   });
 
-const projectSdl = (sdl: string, names: readonly string[]): string => {
+const projectSdl = (
+  sdl: string,
+  names: readonly string[],
+  namedTypes: readonly string[]
+): string => {
   const normalized = normalizeSdl(sdl);
   const schema = buildSchema(normalized, { assumeValidSDL: true });
   const kept = keptRootFields(schema, names);
@@ -211,6 +215,14 @@ const projectSdl = (sdl: string, names: readonly string[]): string => {
         visitType(getNamedType(rootFields[field].type));
         rootFields[field].args.forEach((arg) => visitType(getNamedType(arg.type)));
       }
+    }
+  }
+  // A fragment can name a type the root fields don't reach, such as `... on Card` inside a fragment
+  // on `Node`. Naming an interface doesn't call for its implementers.
+  for (const name of namedTypes) {
+    const type = schema.getType(name);
+    if (type) {
+      visitType(type, false);
     }
   }
   const directives = new Set<string>();
@@ -322,10 +334,15 @@ const projectTools = (tools: readonly McpTool[], names: readonly string[]): stri
 
 /**
  * What a source's snapshot holds: the operations the connector calls, by name as the emulator names
- * them, and what they reference, without documentation.
+ * them, and what they reference, without documentation. `namedTypes` are the types GraphQL
+ * requests name, which they need to validate against the snapshot.
  */
-export const projectProtocolSpec = (spec: ProtocolSpec, names: readonly string[]): string =>
-  spec.format === 'mcp' ? projectTools(spec.tools, names) : projectSdl(spec.sdl, names);
+export const projectProtocolSpec = (
+  spec: ProtocolSpec,
+  names: readonly string[],
+  namedTypes: readonly string[] = []
+): string =>
+  spec.format === 'mcp' ? projectTools(spec.tools, names) : projectSdl(spec.sdl, names, namedTypes);
 
 // As with `oasdiff`'s levels, a response that widens is breaking, as a connector reading it may not
 // handle the new value. New optional input is the one dangerous change that can't affect it.

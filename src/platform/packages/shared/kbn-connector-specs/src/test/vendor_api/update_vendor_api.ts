@@ -354,7 +354,8 @@ export const updateVendorApi = async ({
       name in protocols
         ? projectProtocolSpec(
             protocols[name],
-            used.filter(isNamedCall).map((call) => call.name)
+            used.filter(isNamedCall).map((call) => call.name),
+            recording.namedTypes[name]
           )
         : toStableJson(
             projectSpec(

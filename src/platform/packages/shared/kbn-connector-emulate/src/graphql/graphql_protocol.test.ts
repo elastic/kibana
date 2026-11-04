@@ -134,6 +134,18 @@ describe('GraphQL specs', () => {
     expect(calls.map(({ operation }) => operation)).toEqual(['query boards', 'query node']);
   });
 
+  it('reports the types a request names, without the built-in scalars', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    await post(mockFetch, {
+      query: `query Named($id: ID!) { node(id: $id) { ... on Board { name } } }`,
+      variables: { id: '1' },
+    });
+    await post(mockFetch, { query: 'query { boards { id } }' });
+
+    expect(calls.map(({ namedTypes }) => namedTypes)).toEqual([['Board'], undefined]);
+  });
+
   it('leaves out root fields that @skip or @include drop', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 

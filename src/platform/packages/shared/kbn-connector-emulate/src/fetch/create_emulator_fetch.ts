@@ -57,6 +57,8 @@ export interface ContractCall {
   readonly matched?: OperationRef | NamedOperationRef;
   /** Set for named operations: whether the operation only reads, e.g. a GraphQL query. */
   readonly readOnly?: boolean;
+  /** Set for GraphQL: the types the request names, in fragments and variables. */
+  readonly namedTypes?: readonly string[];
   /**
    * Set for protocol messages that call no vendor operation, such as MCP's `initialize`;
    * `operation` names the message.
@@ -441,9 +443,15 @@ export const createEmulatorFetch = ({
       for (const message of messages) {
         calls.push({ ...base, operation: message, protocolMessage: true });
       }
-      for (const { name, source, readOnly } of called) {
+      for (const { name, source, readOnly, namedTypes } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
-        calls.push({ ...base, operation: name, matched, readOnly });
+        calls.push({
+          ...base,
+          operation: name,
+          matched,
+          readOnly,
+          ...(namedTypes === undefined ? {} : { namedTypes }),
+        });
       }
       return response;
     }

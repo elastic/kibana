@@ -64,6 +64,8 @@ export interface NamedOperationRef {
 /** An operation a protocol request called, and whether it only reads vendor state. */
 export interface NamedOperation extends NamedOperationRef {
   readonly readOnly: boolean;
+  /** The types a GraphQL request names, in fragments and variables, which it needs to validate. */
+  readonly namedTypes?: readonly string[];
 }
 
 export interface ProtocolExchange {

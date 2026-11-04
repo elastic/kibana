@@ -77,6 +77,8 @@ export interface ActionsRecording {
   readonly operations: Record<string, ManifestCall[]>;
   /** Per action, the requests that matched no operation, sorted by path and method. */
   readonly unmatched: Record<string, RequestedPath[]>;
+  /** Per source, the types GraphQL requests name, sorted, which its snapshot has to keep. */
+  readonly namedTypes: Record<string, string[]>;
   readonly findings: RecordingFinding[];
 }
 
@@ -206,6 +208,7 @@ export const recordActions = async ({
   const authTypes = authType === undefined ? authTypeIdsOf(connector) : [authType];
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
+  const namedTypes = new Map<string, Set<string>>();
   const findings: RecordingFinding[] = [];
   const brokenAuthTypes = new Map<string, string>();
 
@@ -331,6 +334,13 @@ export const recordActions = async ({
           ? `${call.source} ${call.path} ${call.method}`
           : `${call.source} ${call.name}`
     );
+    for (const { matched, namedTypes: named = [] } of calls) {
+      if (matched?.source !== undefined && named.length > 0) {
+        const types = namedTypes.get(matched.source) ?? new Set();
+        named.forEach((type) => types.add(type));
+        namedTypes.set(matched.source, types);
+      }
+    }
     const notFound = calls.filter(isUnmatched).map(toRequestedPath);
     if (notFound.length > 0) {
       unmatched[action] = uniqueSorted(notFound, ({ method, path }) => `${path} ${method}`);
@@ -347,6 +357,9 @@ export const recordActions = async ({
   return {
     operations,
     unmatched,
+    namedTypes: Object.fromEntries(
+      [...namedTypes].map(([source, types]) => [source, [...types].sort()])
+    ),
     findings: [...new Map(findings.map((finding) => [JSON.stringify(finding), finding])).values()],
   };
 };

@@ -21,7 +21,9 @@ import {
   experimentalExecuteIncrementally,
   getOperationAST,
   parse,
+  specifiedScalarTypes,
   validate,
+  visit,
 } from 'graphql';
 import type {
   ContractProtocol,
@@ -127,6 +129,21 @@ const rootFieldNames = (
     return rootFieldNames(fragment.selectionSet, fragments, visited);
   });
 
+const SPECIFIED_SCALARS = new Set(specifiedScalarTypes.map(({ name }) => name));
+
+// The types in fragments' conditions and variables' declarations.
+const namedTypesOf = (document: DocumentNode): string[] => {
+  const names = new Set<string>();
+  visit(document, {
+    NamedType: ({ name: { value } }) => {
+      if (!SPECIFIED_SCALARS.has(value)) {
+        names.add(value);
+      }
+    },
+  });
+  return [...names].sort();
+};
+
 const toOperations = (
   document: DocumentNode,
   operation: OperationDefinitionNode,
@@ -137,10 +154,12 @@ const toOperations = (
       definition.kind === 'FragmentDefinition' ? [[definition.name.value, definition]] : []
     )
   );
+  const namedTypes = namedTypesOf(document);
   return [...new Set(rootFieldNames(operation.selectionSet, fragments))].map((field) => ({
     name: `${operation.operation} ${field}`,
     ...(source === undefined ? {} : { source }),
     readOnly: operation.operation === 'query',
+    ...(namedTypes.length > 0 ? { namedTypes } : {}),
   }));
 };
 

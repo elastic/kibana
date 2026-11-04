@@ -883,6 +883,25 @@ describe('protocol sources', () => {
       expect(offline).toEqual({ changed: [], problems: [] });
     });
 
+    it('re-records offline a fragment that names a type the root field does not reach', async () => {
+      const { recorded, offline } = await recordQuery(
+        `
+        type Query { board: Board }
+        interface Node { id: ID! }
+        type Board implements Node { id: ID! }
+        type Card implements Node { id: ID!, title: String }
+        type Unused implements Node { id: ID! }
+      `,
+        'query { board { ...NodeFields } } fragment NodeFields on Node { id ... on Card { title } }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('type Card');
+      expect(snapshot).not.toContain('Unused');
+    });
+
     it('reports a source that serves something else as unreachable', async () => {
       await recordGraphQL();
       documents[GRAPHQL_SPEC_URL] = '{ "error": "unauthorized" }';
