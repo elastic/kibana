@@ -35,6 +35,15 @@ const serializePreviewParams = (getValues: UseFormGetValues<CreateSLOForm>): str
 
 const toCommitted = (key: string): CommittedPreviewParams => ({ key, params: JSON.parse(key) });
 
+const PREVIEW_FIELDS = ['indicator', 'groupBy', 'settings.projectRoutings'] as const;
+
+// A change without a name (reset, unregister) or on a path overlapping a preview field may change the params.
+const affectsPreviewParams = (name?: string): boolean =>
+  name === undefined ||
+  PREVIEW_FIELDS.some(
+    (field) => name === field || name.startsWith(`${field}.`) || field.startsWith(`${name}.`)
+  );
+
 export function useDebouncedGetPreviewData({
   isIndicatorValid,
   range,
@@ -56,7 +65,11 @@ export function useDebouncedGetPreviewData({
   useEffect(() => {
     // The callback form of `watch` subscribes to value changes without registering a global watch,
     // so it does not re-render the form root (react-hook-form 7.44.3).
-    const subscription = watch(() => commit());
+    const subscription = watch((_values, { name }) => {
+      if (affectsPreviewParams(name)) {
+        commit();
+      }
+    });
     // Values set by sibling effects during the first mount are emitted before this subscription exists.
     commit();
     return () => {

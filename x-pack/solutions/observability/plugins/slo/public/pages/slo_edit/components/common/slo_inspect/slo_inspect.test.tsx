@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { FormProvider, useForm } from 'react-hook-form';
 import { useFetchSloInspect } from '../../../../../hooks/use_fetch_slo_inspect';
 import { render } from '../../../../../utils/test_helper';
@@ -48,6 +48,10 @@ const closeFlyout = () =>
 const setName = (value: string) =>
   fireEvent.change(screen.getByTestId('nameInput'), { target: { value } });
 
+// Lets the async click handler settle: form validation resolves through microtasks only.
+const flushPendingValidation = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+
 const lastInspectCall = () => {
   const { calls } = useFetchSloInspectMock.mock;
   return calls[calls.length - 1];
@@ -76,7 +80,8 @@ describe('<SLOInspect />', () => {
     setName('');
     openFlyout();
 
-    await waitFor(() => expect(screen.getByTestId('nameInput')).toHaveValue(''));
+    await flushPendingValidation();
+
     expect(screen.queryByTestId('syntheticsMonitorInspectCloseButton')).not.toBeInTheDocument();
     expect(lastInspectCall()).toEqual([undefined, false]);
   });

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, screen, waitFor } from '@testing-library/react';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import type { Query, TimeRange } from '@kbn/es-query';
 import { FormProvider, useForm, useFormContext, useFormState } from 'react-hook-form';
@@ -105,6 +105,10 @@ const validate = () => fireEvent.click(screen.getByTestId('validate'));
 const typeQuery = (value: string) =>
   fireEvent.change(screen.getByTestId(TEST_SUBJ), { target: { value } });
 
+// Lets the triggered validation settle: it resolves through microtasks only.
+const flushPendingValidation = () =>
+  act(() => new Promise<void>((resolve) => setTimeout(resolve, 0)));
+
 const getErrorType = () => screen.getByTestId('goodQueryErrorType').textContent;
 
 describe('<QuerySearchBar />', () => {
@@ -138,8 +142,9 @@ describe('<QuerySearchBar />', () => {
 
     typeQuery('host.name: a');
     validate();
+    await flushPendingValidation();
 
-    await waitFor(() => expect(screen.getByTestId(TEST_SUBJ)).toHaveValue('host.name: a'));
+    expect(screen.getByTestId(TEST_SUBJ)).toHaveValue('host.name: a');
     expect(getErrorType()).toBe('');
   });
 });

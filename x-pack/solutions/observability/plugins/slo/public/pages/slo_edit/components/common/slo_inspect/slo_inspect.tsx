@@ -41,9 +41,9 @@ export function SLOInspect({ slo, disabled }: Props) {
   const { share, http } = useKibana().services;
   const getValidatedSloInput = useValidatedSloInput();
 
-  const [isFlyoutVisible, setIsFlyoutVisible] = useState(false);
   const [inspectInput, setInspectInput] = useState<CreateSLOInput>();
   const isFormValid = inspectInput !== undefined;
+  const isFlyoutVisible = isFormValid;
 
   const { data: inspectSloData, isLoading } = useFetchSloInspect(inspectInput, isFlyoutVisible);
 
@@ -70,19 +70,12 @@ export function SLOInspect({ slo, disabled }: Props) {
   }, [inspectSloData?.rollUpPipeline?.id, share.url.locators]);
 
   const closeFlyout = () => {
-    setIsFlyoutVisible(false);
     setInspectInput(undefined);
   };
 
   const handleInspectButtonClick = async () => {
     const input = await getValidatedSloInput();
-    if (!input) {
-      setInspectInput(undefined);
-      return;
-    }
-
-    setInspectInput({ ...input, id: slo?.id, revision: slo?.revision });
-    setIsFlyoutVisible(true);
+    setInspectInput(input && { ...input, id: slo?.id, revision: slo?.revision });
   };
 
   let flyout;

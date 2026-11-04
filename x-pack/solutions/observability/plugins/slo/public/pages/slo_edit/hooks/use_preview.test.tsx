@@ -131,6 +131,25 @@ describe('useDebouncedGetPreviewData', () => {
     expect(lastPreviewProps().indicator).toBe(committed);
   });
 
+  it('does not postpone the commit when an unrelated field changes', () => {
+    const formRef: { current?: UseFormReturn<CreateSLOForm> } = {};
+    render(<Harness formRef={formRef} />);
+    act(() => {
+      jest.advanceTimersByTime(800);
+    });
+
+    act(() => {
+      formRef.current?.setValue('indicator.params.good', 'host.name: a');
+      jest.advanceTimersByTime(500);
+      formRef.current?.setValue('name', 'My SLO');
+      jest.advanceTimersByTime(300);
+    });
+
+    expect(lastPreviewProps().indicator.params).toEqual(
+      expect.objectContaining({ good: 'host.name: a' })
+    );
+  });
+
   it('picks up a value set by a sibling effect during the first mount', () => {
     const formRef: { current?: UseFormReturn<CreateSLOForm> } = {};
     render(<Harness formRef={formRef} withMountSetter />);
