@@ -550,7 +550,7 @@ This is the layer that covers what a shape test cannot see: that the gate re-par
 
 Keeping the real `ProposalsService` rather than a stub is deliberate: the valid-pair table and the immutability guards are exactly what a workflow gets wrong, so stubbing them out would remove the point.
 
-**Real stack** — Scout API coverage for the HTTP surface is still to come ([#19347](https://github.com/elastic/security-team/issues/19347)): the `403` for a reader, the `409` on a concurrent decision, the asynchronous decision the UI has to refetch for, and the identity assertion that a created rule's `created_by` is the approver. Until then the runbook below covers those by hand.
+**Real stack** — `test/scout_alertzero/api/tests/approve_retry_identity.spec.ts` runs the retry loop end to end through the gate workflow: a user without `rules-all` approves and the action fails, the clone carries the original's `workflowExecutionId` and the `403` as `previousExecutionError`, and a second user who holds `rules-all` approves the clone, so the created rule's `created_by` is that second user. `revisions.spec.ts` covers the revisions route. Scout API coverage for the rest of the HTTP surface is still to come ([#19347](https://github.com/elastic/security-team/issues/19347)): the `403` for a reader on approve and dismiss, the `409` on a concurrent decision, and the asynchronous decision the UI has to refetch for. Until then the runbook below covers those by hand.
 
 Deliberately uncovered: the real deadline timing, see "Known limitations".
 
@@ -589,7 +589,7 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **First-actor-wins** — approve from two sessions at once. One `200`, one `409`; the action runs once.
 - **The asynchronous decision** — immediately after approving, the route's response body still shows no `decision`. Confirm the UI reflects the decision anyway, which means it refetched rather than trusting the response.
 - **An unprivileged resume** — resume the execution through the platform's resume API as a `read`-only user. The proposal should be untouched and the gate parked on a *new* step execution, so a privileged approver can still decide it.
-- **The retry loop** — approve as a user without `rules-all`. The first proposal settles at `approved` + `failed`, a clone appears at `pending` sharing the original's `expiresAt` and `workflowExecutionId`, and the original carries `supersededBy`. The queue should show only the clone.
+- **The retry loop** — approve as a user without `rules-all`. The first proposal settles at `approved` + `failed`, a clone appears at `pending` sharing the original's `expiresAt` and `workflowExecutionId`, and the original carries `supersededBy`. The queue should show only the clone. The Scout API suite covers the failure, the clone (including its inherited `expiresAt` and `workflowExecutionId`) and the retry, but not the queue view.
 
 ## Known limitations
 
@@ -599,7 +599,8 @@ The point of the exercise is the identity behaviour: a rule created by an approv
 - **A decision resumed past the deadline is accepted for a few seconds.** The engine schedules the gate's timeout task at the deadline, but it fires when Task Manager claims it, and `resume()` only checks expiry when the wake carries no input. A resume arriving in that gap is taken. The approve and dismiss routes are not affected — `releaseGate` refuses a proposal past its deadline — so this is reachable only through the platform's generic resume API or the Inbox. Not worth a step in the loop to catch at 72h deadlines.
 - **Deep paging stops at 10,000.** The list pages with `from`/`size` inside Elasticsearch's default result window. Going past that needs `search_after`, which the list does not expose yet.
 - **`.kibana-*` index naming** buys us out of a system index registration, at the cost of living in a namespace we do not own.
-- **No Scout API coverage yet.** The HTTP surface is covered by Jest only, as `anonymization` shipped.
+- **A proposal is listed as pending before its gate parks.** This holds for a retry clone as well. Approving in that window returns `409`.
+- **Little Scout API coverage.** Scout covers two things: the revisions route (`revisions.spec.ts`) and the approve-then-retry identity path end to end (`approve_retry_identity.spec.ts`). The rest of the HTTP surface is covered by Jest only, as `anonymization` shipped.
 - **Proposals without a conversation.** Every proposal points at a `conversationId` and a `workflowExecutionId`; a standalone execution cannot create one yet.
 
 ## Revising proposals with Elastic AI

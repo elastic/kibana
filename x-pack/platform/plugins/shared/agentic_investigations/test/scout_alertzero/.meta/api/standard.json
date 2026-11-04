@@ -1,5 +1,5 @@
 {
-  "sha1": "2f692e5cc8eaf34c5833c1af9716acc205a2a1a3",
+  "sha1": "97ef880fc01d11b81123db00b2088713020c47a7",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -296,6 +296,58 @@
         "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/escalations/create.spec.ts",
         "line": 250,
         "column": 25
+      }
+    },
+    {
+      "id": "c23aa1c3be0892e-395cd0ef963424a",
+      "title": "POST /internal/investigations/escalations/{id}/_link — only the owner or a participant can link the owner can link an investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/escalations/link_ownership.spec.ts",
+        "line": 154,
+        "column": 7
+      }
+    },
+    {
+      "id": "c23aa1c3be0892e-ec7afc7c537e9eb",
+      "title": "POST /internal/investigations/escalations/{id}/_link — only the owner or a participant can link an assignee of a private escalation, who does not own it, can link an investigation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/escalations/link_ownership.spec.ts",
+        "line": 166,
+        "column": 16
+      }
+    },
+    {
+      "id": "c23aa1c3be0892e-a75466ff2ce56db",
+      "title": "POST /internal/investigations/escalations/{id}/_link — only the owner or a participant can link a caller with the same role who is neither owner nor participant is refused and changes nothing",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/escalations/link_ownership.spec.ts",
+        "line": 173,
+        "column": 32
+      }
+    },
+    {
+      "id": "c23aa1c3be0892e-51ba913ed97df15",
+      "title": "POST /internal/investigations/escalations/{id}/_link — only the owner or a participant can link an assignee of a public escalation is refused (public escalations have no ACL entries)",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/agentic_investigations/test/scout_alertzero/api/tests/escalations/link_ownership.spec.ts",
+        "line": 195,
+        "column": 5
       }
     },
     {
