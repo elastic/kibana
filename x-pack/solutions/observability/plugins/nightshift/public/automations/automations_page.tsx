@@ -6,7 +6,7 @@
  */
 
 import React, { useEffect, useMemo, useState } from 'react';
-import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer } from '@elastic/eui';
+import { EuiConfirmModal, EuiLoadingSpinner, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
@@ -39,6 +39,7 @@ import { GlobalLimitCallout } from './list/global_limit_callout';
 import { RateLimitCallout } from './list/rate_limit_callout';
 import { getDeleteConfirmTitle, listLabels } from './list/translations';
 import { toCloneRequestBody } from './utils/clone_automation';
+import { AllRunsView } from './list/all_runs_view';
 import { AutomationDetailFlyout } from './detail_flyout/automation_detail_flyout';
 import {
   getAutomationFacets,
@@ -81,6 +82,7 @@ export const AutomationsPage = (): React.ReactElement => {
   const [range, setRange] = useState<TimeRange>({ start: 'now-48h', end: 'now' });
   const [rangeLabel, setRangeLabel] = useState(listLabels.last48Hours);
   const [refreshedAt, setRefreshedAt] = useState(() => Date.now());
+  const [tab, setTab] = useState<'automations' | 'runs'>('automations');
   const [order, setOrder] = useState<string[]>([]);
   const [page, setPage] = useState({ index: 0, size: DEFAULT_PAGE_SIZE });
   const automations = useMemo(() => data?.automations ?? [], [data?.automations]);
@@ -194,7 +196,26 @@ export const AutomationsPage = (): React.ReactElement => {
           <EuiSpacer size="m" />
         </>
       )}
-      {!isEmpty && (
+      <EuiTabs>
+        <EuiTab isSelected={tab === 'automations'} onClick={() => setTab('automations')}>
+          Automations
+        </EuiTab>
+        <EuiTab
+          isSelected={tab === 'runs'}
+          onClick={() => setTab('runs')}
+          data-test-subj="automationsAllRunsTab"
+        >
+          Run history
+        </EuiTab>
+      </EuiTabs>
+      <EuiSpacer size="m" />
+      {tab === 'runs' && (
+        <AllRunsView
+          automations={automations}
+          onOpenRun={(automationId) => navigate(`/automations/${automationId}/runs`)}
+        />
+      )}
+      {tab === 'automations' && !isEmpty && (
         <>
           {isGlobalLimitReached && quotas && (
             <>
@@ -244,7 +265,7 @@ export const AutomationsPage = (): React.ReactElement => {
           />
         </>
       )}
-      {renderContent()}
+      {tab === 'automations' && renderContent()}
       {isCreating && canManage && (
         <CreateAutomationFlyout
           tagSuggestions={options.tags.map(({ label }) => label)}

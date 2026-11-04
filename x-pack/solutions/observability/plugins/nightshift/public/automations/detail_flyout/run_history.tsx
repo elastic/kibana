@@ -49,6 +49,8 @@ export interface Run {
   investigationId?: string;
   skipReason?: string | null;
   dailyLimit?: number;
+  automationName?: string;
+  automationId?: string;
 }
 
 export const statusLabels: Record<RunStatus, string> = {
@@ -584,7 +586,7 @@ export const RunHistory = ({
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
                           ? getSkippedRunSummary(run, labels.trigger)
-                          : automationName}
+                          : run.automationName ?? automationName}
                       </EuiText>
                     </button>
                   ))}
