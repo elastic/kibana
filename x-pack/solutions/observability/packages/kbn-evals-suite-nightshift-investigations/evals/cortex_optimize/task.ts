@@ -116,6 +116,8 @@ export const runCortexReplay = async ({
         userMessage: round.user_message,
         assistantMessage: round.assistant_message,
         toolCalls: round.tool_calls.map(toInvestigationToolCall),
+        roundKind: round.kind,
+        previousAssistantMessage: round.previous_assistant_message,
         telemetry: noopTelemetry,
         provenance: {
           conversationId,

@@ -6,9 +6,31 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
+import type { BoundInferenceClient } from '@kbn/inference-common';
+import { CORTEX_ENTITY_TYPES, CORTEX_SECTIONS_BY_TYPE } from '../../common/cortex';
+import { CORTEX_RELATION_KINDS } from '../../common/cortex_relations';
 import type { CortexTelemetry } from '../telemetry';
-import { applyCortexEdits, optimizeCortex, renderToolCalls } from './optimize';
+import {
+  applyCortexEdits,
+  createLlmProposeCortexEdits,
+  optimizeCortex,
+  renderToolCalls,
+} from './optimize';
 import type { CortexPageStore } from './page_store';
+
+const createStore = (overrides: Partial<CortexPageStore> = {}): CortexPageStore => ({
+  list: jest.fn().mockResolvedValue({
+    pages: [],
+    stats: { total: 0, established: 0, total_corroborations: 0 },
+  }),
+  get: jest.fn().mockResolvedValue(undefined),
+  upsert: jest.fn().mockResolvedValue({}),
+  create: jest.fn(),
+  corroborate: jest.fn().mockResolvedValue({}),
+  archive: jest.fn().mockResolvedValue({}),
+  pruneDuplicates: jest.fn().mockResolvedValue(0),
+  ...overrides,
+});
 
 const createTelemetry = (): jest.Mocked<CortexTelemetry> => ({
   reportHydrated: jest.fn(),
@@ -608,5 +630,246 @@ describe('optimizeCortex', () => {
 
     expect(store.upsert).not.toHaveBeenCalled();
     expect(telemetry.reportEditsApplied).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['initial', 'Kind: initial'],
+    ['follow_up', 'Kind: follow_up'],
+    ['alert_recovery', 'Kind: alert_recovery'],
+  ] as const)('opens the transcript with the round kind (%s)', async (roundKind, line) => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+    await optimizeCortex({
+      store: createStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'You missed the cache.',
+      assistantMessage: 'Confirmed.',
+      toolCalls: [],
+      roundKind,
+      proposeEdits,
+    });
+
+    expect(proposeEdits.mock.calls[0][0].transcript.startsWith(`## Round\n${line}\n`)).toBe(true);
+  });
+
+  it('treats a round as initial when no kind is given', async () => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+    await optimizeCortex({
+      store: createStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'Why is checkout slow?',
+      assistantMessage: 'Unknown.',
+      toolCalls: [],
+      proposeEdits,
+    });
+
+    expect(proposeEdits.mock.calls[0][0].transcript).toContain('Kind: initial');
+  });
+
+  it.each(['follow_up', 'alert_recovery'] as const)(
+    'shows the previous answer to a %s round',
+    async (roundKind) => {
+      const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+      await optimizeCortex({
+        store: createStore(),
+        telemetry: createTelemetry(),
+        logger: loggerMock.create(),
+        userMessage: 'You missed the cache.',
+        assistantMessage: 'Confirmed.',
+        previousAssistantMessage: 'The gateway times out.',
+        toolCalls: [],
+        roundKind,
+        proposeEdits,
+      });
+
+      const { transcript } = proposeEdits.mock.calls[0][0];
+      expect(transcript).toContain('## Previous answer\nThe gateway times out.');
+      expect(transcript.indexOf('## Previous answer')).toBeLessThan(transcript.indexOf('## User'));
+    }
+  );
+
+  it('does not show a previous answer to an initial round', async () => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+    await optimizeCortex({
+      store: createStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'Why is checkout slow?',
+      assistantMessage: 'Unknown.',
+      previousAssistantMessage: 'Left over from elsewhere.',
+      toolCalls: [],
+      roundKind: 'initial',
+      proposeEdits,
+    });
+
+    expect(proposeEdits.mock.calls[0][0].transcript).not.toContain('## Previous answer');
+  });
+
+  it('tells the optimizer which conversation it is learning from', async () => {
+    const proposeEdits = jest.fn().mockResolvedValue({ edits: [] });
+
+    await optimizeCortex({
+      store: createStore(),
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      userMessage: 'hello',
+      assistantMessage: 'nothing durable',
+      toolCalls: [],
+      provenance: { conversationId: 'conversation-1', roundId: 'round-1' },
+      proposeEdits,
+    });
+
+    expect(proposeEdits).toHaveBeenCalledWith(
+      expect.objectContaining({ currentConversationId: 'conversation-1' })
+    );
+  });
+});
+
+describe('applyCortexEdits non-temporal check', () => {
+  it('skips an upsert that carries a date, an id or a count and applies the rest', async () => {
+    const logger = loggerMock.create();
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger,
+      edits: [
+        {
+          action: 'upsert',
+          entity_type: 'service',
+          slug: 'checkout-api',
+          title: 'checkout-api',
+          content: '## Failure modes\n- Failed on 2026-03-02 after 5,944 errors.',
+        },
+        {
+          action: 'upsert',
+          entity_type: 'service',
+          slug: 'session-cache',
+          title: 'session-cache',
+          content: '## Failure modes\n- Evicts sessions under memory pressure.',
+        },
+      ],
+    });
+
+    expect(store.upsert).toHaveBeenCalledTimes(1);
+    expect(store.upsert).toHaveBeenCalledWith(expect.objectContaining({ slug: 'session-cache' }));
+    const warning = logger.warn.mock.calls.flat().join('\n');
+    expect(warning).toContain('service/checkout-api');
+    expect(warning).toContain('iso_timestamp');
+    expect(warning).not.toContain('5,944');
+  });
+
+  it('still corroborates and archives, which carry no new content', async () => {
+    const store = createStore();
+
+    await applyCortexEdits({
+      store,
+      telemetry: createTelemetry(),
+      logger: loggerMock.create(),
+      edits: [
+        { action: 'corroborate', entity_type: 'service', slug: 'payments', title: 'Payments' },
+        { action: 'archive', entity_type: 'topic', slug: 'old-note', title: 'Old note' },
+      ],
+    });
+
+    expect(store.corroborate).toHaveBeenCalled();
+    expect(store.archive).toHaveBeenCalled();
+  });
+});
+
+describe('renderToolCalls errors', () => {
+  it('marks a result Agent Builder typed as an error', () => {
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_bash',
+        params: { command: 'q "FROM x"' },
+        results: [{ type: 'error', data: { message: 'no such remote cluster' } }],
+      },
+    ]);
+
+    expect(rendered).toContain('result: error: message: no such remote cluster');
+  });
+
+  it('leaves a successful result unmarked', () => {
+    const rendered = renderToolCalls([
+      {
+        tool_id: 'nightshift.sandbox_bash',
+        params: { command: 'q "FROM x"' },
+        results: [{ type: 'other', data: { stdout: 'ok' } }],
+      },
+    ]);
+
+    expect(rendered).not.toContain('error:');
+  });
+});
+
+describe('createLlmProposeCortexEdits prompt', () => {
+  const run = async (input: Parameters<ReturnType<typeof createLlmProposeCortexEdits>>[0]) => {
+    const output = jest.fn().mockResolvedValue({ output: { edits: [] } });
+    await createLlmProposeCortexEdits({
+      inferenceClient: { output } as unknown as BoundInferenceClient,
+    })(input);
+    return output.mock.calls[0][0] as { system: string; input: string };
+  };
+
+  it('asks for the sections the shared list defines, for every entity type', async () => {
+    const { system } = await run({ transcript: '## Round\nKind: initial', catalog: [] });
+
+    for (const entityType of CORTEX_ENTITY_TYPES) {
+      const sections = CORTEX_SECTIONS_BY_TYPE[entityType];
+      const line = system.split('\n').find((candidate) => candidate.startsWith(`- ${entityType} —`));
+      expect(line).toBeDefined();
+      for (const section of sections) {
+        expect(line).toContain(`## ${section}`);
+      }
+    }
+  });
+
+  it('describes the ontology relation format and its kinds', async () => {
+    const { system } = await run({ transcript: '', catalog: [] });
+
+    expect(system).toContain('`source -> target : kind`');
+    for (const kind of CORTEX_RELATION_KINDS) {
+      expect(system).toContain(kind);
+    }
+  });
+
+  it('explains how to treat each kind of round and how to record tool failures', async () => {
+    const { system } = await run({ transcript: '', catalog: [] });
+
+    expect(system).toContain('follow_up —');
+    expect(system).toContain('alert_recovery —');
+    expect(system).toContain('## Tool failures');
+    expect(system).toContain('A single typo is not a failure signature');
+  });
+
+  it('marks the catalog pages the current investigation wrote', async () => {
+    const page = {
+      id: 'cortex_service_orders-consumer',
+      title: 'orders-consumer',
+      entity_type: 'service' as const,
+      status: 'tentative' as const,
+      corroborations: 0,
+      updated_at: '2026-03-02T09:00:00.000Z',
+    };
+
+    const { input } = await run({
+      transcript: '',
+      currentConversationId: 'conversation-1',
+      catalog: [
+        { ...page, conversation_id: 'conversation-1' },
+        { ...page, id: 'cortex_service_payments', title: 'payments', conversation_id: 'other' },
+      ],
+    });
+
+    expect(input).toContain('slug=orders-consumer | service | tentative | orders-consumer (0x) [this investigation]');
+    expect(input).toContain('slug=payments | service | tentative | payments (0x)\n');
+    expect(input).not.toContain('payments (0x) [this investigation]');
   });
 });

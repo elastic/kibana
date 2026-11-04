@@ -10,10 +10,13 @@ import type { BoundInferenceClient } from '@kbn/inference-common';
 import {
   CORTEX_EDIT_ACTIONS,
   CORTEX_ENTITY_TYPES,
+  CORTEX_SECTIONS_BY_TYPE,
   type CortexEditAction,
   type CortexEntityType,
   type CortexPageSummary,
+  type CortexRoundKind,
 } from '../../common/cortex';
+import { CORTEX_RELATION_KINDS } from '../../common/cortex_relations';
 import type { AppliedCortexEdit, CortexTelemetry } from '../telemetry';
 import { isReinforcementOwnedSlug } from '../../common/decision_trees';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
@@ -22,6 +25,7 @@ import {
   type AppliedWriteRecord,
   type WriteProvenance,
 } from '../investigation_round';
+import { lintCortexContent } from './lint_content';
 import type { CortexPageStore } from './page_store';
 import {
   canonicalizeSlug,
@@ -49,6 +53,8 @@ export interface CortexEditProposal {
 export type ProposeCortexEdits = (input: {
   transcript: string;
   catalog: CortexPageSummary[];
+  /** The conversation being learned from, so the catalog can mark the pages it wrote. */
+  currentConversationId?: string;
 }) => Promise<{ edits: CortexEditProposal[] }>;
 
 const isEntityType = (value: unknown): value is CortexEntityType =>
@@ -159,15 +165,16 @@ const renderToolResultData = (data: unknown): string => {
     .join('\n');
 };
 
+// A result Agent Builder typed as an error is marked, so the model can tell a failed call from one
+// that returned data and learn how the call failed.
+const renderToolCallResult = (result: unknown): string => {
+  const isObject = typeof result === 'object' && result !== null;
+  const rendered = renderToolResultData(isObject && 'data' in result ? result.data : result);
+  return isObject && (result as { type?: unknown }).type === 'error' ? `error: ${rendered}` : rendered;
+};
+
 const renderToolCallResults = (results: unknown[]): string =>
-  results
-    .map((result) =>
-      renderToolResultData(
-        typeof result === 'object' && result !== null && 'data' in result ? result.data : result
-      )
-    )
-    .join('\n')
-    .slice(0, MAX_TOOL_CALL_RESULT_CHARS);
+  results.map(renderToolCallResult).join('\n').slice(0, MAX_TOOL_CALL_RESULT_CHARS);
 
 /**
  * Renders tool calls one per line, followed by a bounded result line when the call's results are
@@ -196,12 +203,40 @@ export const renderToolCalls = (toolCalls: InvestigationToolCall[]): string => {
   return lines.length === 0 ? '(none)' : lines.join('\n');
 };
 
+const ENTITY_TYPE_GUIDE: Record<CortexEntityType, string> = {
+  integration:
+    'one page per connector, data source, or external system the investigator reads from (an Elasticsearch cluster, a cross-cluster search remote, Kubernetes, GitHub, …). This includes the telemetry cluster the investigator queries: its index patterns and field conventions belong on its integration page, not on a service page. Query conventions records how to query it: stream and index naming, the fields that hold versions, images and deploys, and filters that work. Tool failures records the recurring ways calls to it fail.',
+  service:
+    'one page per logical or deployable service: what it does, what it depends on (name the upstream and downstream components), where its logs, metrics, and traces live (streams, fields, event and node sources, restart and termination state), and how it fails.',
+  alert:
+    'one page per alert rule. First-look checks name the dependencies and neighbouring components to check, where version and deploy changes show, and where restart and termination state lives, not only the component that raised the symptom.',
+  runbook: 'a symptom-triggered playbook; many alerts can share one.',
+  query: 'a reusable ES|QL or DSL query; put the query in a fenced code block under ## Query.',
+  dashboard: 'a canonical dashboard.',
+  postmortem:
+    'one page per incident mechanism; a later firing of the same mechanism corroborates it.',
+  topic: 'cross-cutting concepts that fit no other type.',
+  glossary: 'a one-paragraph definition of a term or acronym.',
+  ontology: `how services and integrations relate, one page per domain or area (for example one product flow). Nodes lists each component by the name its own page uses. Relations is a fenced block with one edge per line, \`source -> target : kind\`, where kind is one of ${CORTEX_RELATION_KINDS.join(
+    ', '
+  )}. Concepts defines terms the components share.`,
+};
+
+// Generated from the shared section list so the sections the model is asked for are the ones the
+// page checks and the UI read.
+const ENTITY_TYPE_GUIDE_LINES = CORTEX_ENTITY_TYPES.map((entityType) => {
+  const sections = CORTEX_SECTIONS_BY_TYPE[entityType];
+  const sectionList =
+    sections.length > 0 ? ` Sections: ${sections.map((section) => `## ${section}`).join(', ')}.` : '';
+  return `- ${entityType} — ${ENTITY_TYPE_GUIDE[entityType]}${sectionList}`;
+}).join('\n');
+
 export const createLlmProposeCortexEdits = ({
   inferenceClient,
 }: {
   inferenceClient: BoundInferenceClient;
 }): ProposeCortexEdits => {
-  return async ({ transcript, catalog }) => {
+  return async ({ transcript, catalog, currentConversationId }) => {
     const catalogLines =
       catalog.length === 0
         ? '(empty)'
@@ -211,35 +246,47 @@ export const createLlmProposeCortexEdits = ({
                 page.entity_type,
                 slugFromCortexId(page.id, page.entity_type)
               );
-              return `- slug=${slug} | ${page.entity_type} | ${page.status} | ${page.title} (${page.corroborations}x)`;
+              const fromThisInvestigation =
+                currentConversationId !== undefined && page.conversation_id === currentConversationId
+                  ? ' [this investigation]'
+                  : '';
+              return `- slug=${slug} | ${page.entity_type} | ${page.status} | ${page.title} (${page.corroborations}x)${fromThisInvestigation}`;
             })
             .join('\n');
 
     const response = await inferenceClient.output({
       id: 'nightshift_cortex_optimize',
-      system: `You maintain a team-wide wiki called Cortex. After an investigation, propose a small set of durable page edits.
+      system: `You maintain a team-wide wiki called Cortex. After a round of work, propose a small set of durable page edits.
 
 The wiki is read before every future task — investigations, alert triage, questions — so capture facts that help any of them understand the system faster, not only facts that would solve this exact investigation again.
 
 What each entity type holds (use these markdown sections; skip ones that would be empty):
-- integration — one page per connector, data source, or external system the investigator reads from (an Elasticsearch cluster, a cross-cluster search remote, Kubernetes, GitHub, …). This includes the telemetry cluster the investigator queries: its index patterns, field conventions and quirks, and query pitfalls belong on its integration page, not on a service page. Sections: ## Overview, ## Access, ## Capabilities, ## Common pitfalls.
-- service — one page per logical or deployable service: what it does, what it depends on, where its logs, metrics, and traces live, and how it fails. Sections: ## Overview, ## Dependencies, ## Telemetry, ## Failure modes.
-- alert — one page per alert rule. Sections: ## Symptom, ## Likely causes, ## First-look checks.
-- runbook — a symptom-triggered playbook; many alerts can share one. Sections: ## Trigger, ## Investigation steps, ## Resolution.
-- query — a reusable ES|QL or DSL query. Sections: ## Purpose, ## Query (fenced code block), ## Notes.
-- dashboard — a canonical dashboard. Sections: ## URL, ## What it shows.
-- postmortem — one page per incident mechanism; a later firing of the same mechanism corroborates it. Sections: ## Incident summary, ## Root cause, ## Detection signals, ## Remediation.
-- topic — cross-cutting concepts that fit no other type. Sections: ## Overview, ## Established facts, ## Open questions.
-- glossary — a one-paragraph definition of a term or acronym.
+${ENTITY_TYPE_GUIDE_LINES}
+
+Durable knowledge only:
+- Write what stays true while the system stays the same: how components depend on each other, where their telemetry lives, which queries work and which fail, and what to check for a kind of symptom. A page never records the outcome of one incident.
+- Keep single-run details out of page content: timestamps, alert ids, counts, durations, and the cause of one incident stated as if it were a general rule. Distil them into reusable claims, such as "when X slows down, check Y".
+- Name components, streams, indices and fields exactly as the transcript shows them.
+
+What this round is:
+The transcript opens with a "## Round" line that says which kind of round it is.
+- initial — an investigation. Learn the durable structure and tool behaviour it established.
+- follow_up — the user's turn follows an earlier answer, shown under "## Previous answer". It may correct that answer or point at something it missed. A correction from a person outranks a single investigation: turn it into durable knowledge — what to check for this kind of symptom, where it lives (only streams, indices, fields or components that appear in the user's text or the tool calls), and how components relate — and put it under the right type and section. If it shows that an existing page is wrong, rewrite or archive that page.
+- alert_recovery — the round checks whether an alert's recovery confirms or refutes the investigation's root cause, shown under "## Previous answer". Pages marked [this investigation] in the catalog hold claims from that investigation. When the assistant's answer says the cause was confirmed, corroborate the pages that state it. When it says the cause was contradicted, rewrite or archive the claims the recovery contradicts, and never add the refuted cause to any page. When it says the cause is only partly supported or unresolved, change nothing.
 
 Services and integrations:
 - When the transcript establishes a durable fact about a service or an integration — what it does, what it depends on, which indices or fields hold its telemetry, how to query it, how it fails — record it on that service or integration page, not only inside a postmortem, alert, or topic. Create the page when the catalog has none.
-- The tool calls show what the investigator ran and, on the "result:" line under a call, a truncated excerpt of what it returned. Use them to learn which services, indices, and integrations were queried, how, and what the data showed. A result is evidence, not a conclusion: treat a causal claim as established only when the assistant's answer confirms it.
+- The tool calls show what the investigator ran and, on the "result:" line under a call, a truncated excerpt of what it returned; a result marked "error:" failed. Use them to learn which services, indices, and integrations were queried, how, and what the data showed. A result is evidence, not a conclusion: treat a causal claim as established only when the assistant's answer confirms it.
+
+Tool failures:
+- A tool failure is a call that returned an error, timed out, or came back empty because of how the call was made. Record it only when the same failure signature recurs in the tool calls or already appears on the page. Put it on the integration page of the system the tool talks to, under ## Tool failures, as one bullet: the failure signature, its durable cause, and what works instead. A single typo is not a failure signature.
+
+Relations:
+- Record how components relate on ontology pages: name each component as its own page does, and add one relation line per edge. Also list a service's dependencies on its own page.
 
 Rules:
 - Only propose facts that the transcript actually established. No speculation.
 - Never include credentials, tokens, API keys, or personal data.
-- Keep single-run details — timestamps, alert ids, counts, uptime values — out of page content. Distil them into reusable claims.
 - Prefer corroborating an existing page over creating a near-duplicate.
 - New pages use action "upsert" with markdown content. Keep content short and reusable.
 - Use "corroborate" when the investigation confirms an existing page without changing it.
@@ -370,6 +417,20 @@ export const applyCortexEdits = async ({
         continue;
       }
 
+      // A page that names a date, an id or a count describes one occurrence, which is stale once it
+      // ends. The other edits in the run still apply.
+      const violations = lintCortexContent(
+        [slug, edit.title, edit.description ?? '', edit.content ?? ''].join('\n')
+      );
+      if (violations.length > 0) {
+        logger.warn(
+          `Skipped Cortex edit ${edit.entity_type}/${slug}: content is tied to one occurrence (${[
+            ...new Set(violations.map(({ rule }) => rule)),
+          ].join(', ')})`
+        );
+        continue;
+      }
+
       const existing = await store.get(id);
       // Rewriting a live page means this run re-established it, so it counts as a corroboration.
       // New pages start tentative, and rewriting an archived page revives it as tentative, so a
@@ -424,6 +485,8 @@ export const optimizeCortex = async ({
   userMessage,
   assistantMessage,
   toolCalls,
+  roundKind = 'initial',
+  previousAssistantMessage,
   telemetry,
   provenance,
   logger,
@@ -433,6 +496,10 @@ export const optimizeCortex = async ({
   userMessage: string;
   assistantMessage: string;
   toolCalls: InvestigationToolCall[];
+  /** What the round is: a follow-up or an alert recovery weighs more than a single investigation. */
+  roundKind?: CortexRoundKind;
+  /** The earlier round's final answer, which a follow-up or recovery round refers to. */
+  previousAssistantMessage?: string;
   telemetry: CortexTelemetry;
   provenance?: WriteProvenance;
   logger: Logger;
@@ -444,6 +511,12 @@ export const optimizeCortex = async ({
     (page) => !isReinforcementOwnedSlug(slugFromCortexId(page.id, page.entity_type))
   );
   const transcript = [
+    '## Round',
+    `Kind: ${roundKind}`,
+    '',
+    ...(roundKind !== 'initial' && previousAssistantMessage
+      ? ['## Previous answer', previousAssistantMessage.slice(0, MAX_TRANSCRIPT_CHARS), '']
+      : []),
     '## User',
     userMessage.slice(0, MAX_TRANSCRIPT_CHARS),
     '',
@@ -454,7 +527,11 @@ export const optimizeCortex = async ({
     assistantMessage.slice(0, MAX_TRANSCRIPT_CHARS),
   ].join('\n');
 
-  const { edits } = await proposeEdits({ transcript, catalog: pages });
+  const { edits } = await proposeEdits({
+    transcript,
+    catalog: pages,
+    currentConversationId: provenance?.conversationId,
+  });
   logger.info(`Cortex optimizer proposed ${edits.length} edit(s)`);
   if (edits.length === 0) {
     return [];

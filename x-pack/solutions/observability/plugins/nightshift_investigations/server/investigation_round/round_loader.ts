@@ -81,6 +81,8 @@ export interface LoadedInvestigationRound {
   roundIndex?: number;
   /** Total number of rounds in `conversation.rounds` when resolved from a conversation. */
   roundCount?: number;
+  /** The final answer of the round before this one, which a follow-up message refers to. */
+  previousAssistantMessage?: string;
   traceId?: string;
   startedAt?: string;
   /** Interleaved reasoning and tool-call steps normalized from the round or hook fallback. */
@@ -409,11 +411,14 @@ export const loadInvestigationRound = async ({
           const steps = stepsFromRound(rawRoundSteps);
           const roundToolCalls = toolCallsFromRoundSteps(rawRoundSteps);
           const traceId = Array.isArray(round.trace_id) ? round.trace_id[0] : round.trace_id;
+          const previousAssistantMessage =
+            resolvedIndex > 0 ? conversation.rounds[resolvedIndex - 1]?.response?.message : undefined;
           return {
             source: 'persisted_round',
             roundId: round.id,
             roundIndex: resolvedIndex,
             roundCount,
+            ...(previousAssistantMessage ? { previousAssistantMessage } : {}),
             traceId,
             startedAt: round.started_at,
             steps,

@@ -34,6 +34,7 @@ import { createCortexTelemetry } from '../telemetry';
 import { materializeCortex } from './materialize';
 import { createLlmProposeCortexEdits, optimizeCortex } from './optimize';
 import { createCortexPageStore, type CortexPageStore } from './page_store';
+import { classifyCortexRound } from './round_kind';
 
 export const createCortexStore = ({
   esClient,
@@ -194,10 +195,16 @@ export const runCortexOptimize = async ({
     return;
   }
 
+  const roundKind = classifyCortexRound({
+    userMessage,
+    roundIndex: loadedRound.roundIndex ?? roundIndex,
+  });
   const sandboxToolCalls = loadedRound.toolCalls.filter(
     ({ tool_id: toolId }) => toolId !== undefined && OPTIMIZER_TOOL_IDS.has(toolId)
   );
-  if (sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
+  // A correction or an alert-recovery check can say something durable in few tool calls, so only an
+  // initial round needs the minimum.
+  if (roundKind === 'initial' && sandboxToolCalls.length < MIN_OPTIMIZE_TOOL_CALLS) {
     logger.debug(
       `Cortex optimizer skipped — round made ${sandboxToolCalls.length} sandbox tool calls, below ${MIN_OPTIMIZE_TOOL_CALLS}`
     );
@@ -227,6 +234,8 @@ export const runCortexOptimize = async ({
     userMessage,
     assistantMessage,
     toolCalls: sandboxToolCalls,
+    roundKind,
+    previousAssistantMessage: loadedRound.previousAssistantMessage,
     telemetry: createCortexTelemetry({
       analytics,
       conversationId,
