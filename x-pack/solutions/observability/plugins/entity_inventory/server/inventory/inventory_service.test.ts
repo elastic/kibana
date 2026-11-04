@@ -9,7 +9,13 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EntityDefinitionsClient } from '@kbn/entity-store/server';
 import { k8sDeploymentDefinition } from '../definitions/kubernetes/k8s_deployment';
 import { hostLikeFixture, k8sNodeFixture } from './__fixtures__/definitions';
+import { buildColumns } from './generator';
 import { InventoryService } from './inventory_service';
+
+jest.mock('./generator', () => {
+  const actual = jest.requireActual('./generator');
+  return { ...actual, buildColumns: jest.fn(actual.buildColumns) };
+});
 
 type RegisteredDefinitions = Awaited<ReturnType<EntityDefinitionsClient['list']>>;
 
@@ -93,6 +99,16 @@ describe('InventoryService.getTypes', () => {
     expect(types.map(({ type }) => type)).toEqual([hostLikeFixture.type]);
     expect(logger.warn).toHaveBeenCalledTimes(1);
     expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining(`"${invalid.type}"`));
+  });
+
+  it('rethrows errors other than InventoryDefinitionError from column derivation', async () => {
+    jest.mocked(buildColumns).mockImplementationOnce(() => {
+      throw new Error('column derivation crashed');
+    });
+    const { service, logger } = createService([k8sDeploymentDefinition]);
+
+    await expect(service.getTypes()).rejects.toThrow('column derivation crashed');
+    expect(logger.warn).not.toHaveBeenCalled();
   });
 
   it('rethrows errors from the definitions client', async () => {

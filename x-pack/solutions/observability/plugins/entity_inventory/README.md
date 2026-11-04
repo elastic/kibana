@@ -22,7 +22,7 @@ No body and no parameters. It returns one entry per definition the entity store 
     {
       "type": "k8s.deployment",
       "name": "K8s Deployment",
-      "description": "A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.",
+      "description": "A Kubernetes deployment, identified by cluster/namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.",
       "identityFields": [
         "k8s.cluster.name",
         "k8s.namespace.name",
@@ -60,7 +60,7 @@ No body and no parameters. It returns one entry per definition the entity store 
 
 ### Access control (interim)
 
-The route sets `security.authz.enabled: false` with the reason: "Interim: this route is internal, reads only code-registered definitions, and the plugin is off by default. The privilege model is tracked in elastic/observability-dev#6244." Any authenticated user can call it until that issue defines the privileges.
+The route sets `security.authz.enabled: false` with the reason: "Interim: this route is internal, reads only code-registered definitions, and the plugin is off by default. The privilege model is tracked in elastic/observability-dev#6244." Any authenticated user can call it until that issue defines the privileges. Tracked in [elastic/observability-dev#6244](https://github.com/elastic/observability-dev/issues/6244).
 
 There is no UI yet.
 

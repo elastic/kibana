@@ -18,7 +18,7 @@ export const k8sDeploymentDefinition: RegistrableEntityDefinition = {
   type: 'k8s.deployment',
   name: 'K8s Deployment',
   description:
-    'A Kubernetes deployment, identified by namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.',
+    'A Kubernetes deployment, identified by cluster/namespace/name. Read from the Elastic Agent Kubernetes integration (state_deployment) and the OpenTelemetry k8sclusterreceiver.',
   managedBy: MANAGED_BY,
   identityField: {
     euidRanking: {
