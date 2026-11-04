@@ -9,8 +9,10 @@ import { Parser } from '@elastic/esql';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import {
   INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
   k8sDeploymentFixture,
   k8sNodeFixture,
+  rankedEntityIdFixture,
 } from '../__fixtures__/definitions';
 import { probeAllAs } from '../__fixtures__/source_probes';
 import { buildColumns, planColumnNames } from './columns';
@@ -129,20 +131,36 @@ describe('buildListQuery', () => {
     expect(keepLine).not.toContain('_present');
   });
 
-  it('keeps entity.id once when it is the identity field', () => {
-    const definition: EntityDefinitionWithoutId = {
-      ...k8sNodeFixture,
-      identityField: { singleField: 'entity.id' },
-    };
-    const [{ esql }] = generateListQueries(definition, plansOf(definition, false), window, LIMIT);
-    const lines = esql.split('\n');
-    const keepLine = lines.find((line) => line.startsWith('| KEEP '));
+  it.each([
+    [
+      entityIdFixture.type,
+      entityIdFixture,
+      'BY `entity.id`',
+      '| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`, `mapped:entity.id`',
+    ],
+    [
+      rankedEntityIdFixture.type,
+      rankedEntityIdFixture,
+      'BY `entity.id`, `host.hostname`',
+      '| KEEP `entity.id`, `host.hostname`, `os`, `last_seen`, `mapped:entity.id`',
+    ],
+  ] as const)(
+    'keeps entity.id once for %s, with its witness copied before the id evaluation',
+    (_type, definition, byLine, keepLine) => {
+      const [{ esql }] = generateListQueries(definition, plansOf(definition, false), window, LIMIT);
+      const lines = esql.split('\n');
 
-    expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe('BY `entity.id`');
-    expect(keepLine).toBe('| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`');
-    expect(keepLine?.match(/`entity\.id`/g)).toHaveLength(1);
-    expect(Parser.parse(esql).errors).toEqual([]);
-  });
+      expect(esql).toMatchSnapshot();
+      expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe(byLine);
+      expect(esql).toContain(
+        `\n| EVAL \`mapped:entity.id\` = \`entity.id\`, ${
+          resolveIdentityPlan(definition).idEvaluation
+        }\n`
+      );
+      expect(lines.find((line) => line.startsWith('| KEEP '))).toBe(keepLine);
+      expect(Parser.parse(esql).errors).toEqual([]);
+    }
+  );
 
   it('quotes reserved words and numeric path segments so the query parses', () => {
     const definition: EntityDefinitionWithoutId = {

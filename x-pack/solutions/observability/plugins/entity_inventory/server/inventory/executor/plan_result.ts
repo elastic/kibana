@@ -7,7 +7,7 @@
 
 import type { ESQLColumn } from '@kbn/es-types';
 import { LAST_SEEN_COLUMN } from '../generator';
-import type { OutputColumn } from '../generator';
+import type { IdentityPlan, OutputColumn } from '../generator';
 import type { PlanResult } from './types';
 
 // Reads what a plan's result says about the indices it reached, from column types alone. Every
@@ -21,8 +21,10 @@ import type { PlanResult } from './types';
 // - An identity field typed `null` in every composition means no identity can be formed. This
 //   costs no scan: the presence predicate folds to false at planning and no shard is opened. A
 //   ranking with one mapped composition runs for that composition. The grouping-field columns are
-//   read, not `entity.id`, which is typed `keyword` even then (`TO_STRING(null)` folds to a typed
-//   literal).
+//   read, not `entity.id`, which the id evaluation types `keyword` even then (`TO_STRING(null)`
+//   folds to a typed literal). For the same reason an identity field the evaluation overwrites,
+//   `entity.id` itself, is read from its witness column (`mapped:entity.id`), a copy the list
+//   query takes before the evaluation.
 // - An attribute typed `null` stays in the query and is reported as unavailable.
 //
 // ES|QL groups by keyword fields with `index: false` or `doc_values: false` and by `text` fields
@@ -63,7 +65,7 @@ const unavailableAttributeFields = (
  */
 export const interpretPlanResult = (
   result: PlanResult,
-  compositions: string[][],
+  { compositions, witnessColumns }: Pick<IdentityPlan, 'compositions' | 'witnessColumns'>,
   columns: OutputColumn[]
 ): PlanAvailability => {
   const {
@@ -81,7 +83,7 @@ export const interpretPlanResult = (
   }
 
   const usable = compositions.some((fields) =>
-    fields.every((field) => isMapped(resultColumns, field))
+    fields.every((field) => isMapped(resultColumns, witnessColumns.get(field) ?? field))
   );
   if (usable) {
     return { usable, unavailableFields };

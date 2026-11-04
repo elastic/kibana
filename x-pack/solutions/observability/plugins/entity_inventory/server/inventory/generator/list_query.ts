@@ -59,7 +59,7 @@ export const buildListQuery = ({
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
   const { engine, indexPattern, filter } = plan;
-  const { groupingFields, presenceFilter, idEvaluation } = identity;
+  const { groupingFields, presenceFilter, idEvaluation, witnessColumns } = identity;
 
   // One source becomes two plans that together read every index behind the pattern exactly once.
   // Both name the pattern as the author wrote it, so Elasticsearch applies index privileges, alias
@@ -83,6 +83,13 @@ export const buildListQuery = ({
     ...(filter !== undefined ? [`(${filter})`] : []),
     presenceFilter,
   ];
+  // The id evaluation assigns `entity.id`, so an identity on `entity.id` would lose its grouped
+  // column, and with it the `null` type that says no index maps the field: the evaluation always
+  // types it `keyword`. Each such field is copied first, in the same `EVAL`, into a witness column
+  // kept after the output columns; a copy of a `null`-typed column is itself typed `null`.
+  const witnesses = [...witnessColumns].map(
+    ([field, witness]) => `${quoteIdentifier(witness)} = ${quoteIdentifier(field)}`
+  );
   const aggregations = [
     ...attributeAggregations(columns, plan),
     `${quoteIdentifier(LAST_SEEN_COLUMN)} = MAX(${TIMESTAMP})`,
@@ -95,8 +102,10 @@ export const buildListQuery = ({
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)
       .join(', ')}`,
-    `| EVAL ${idEvaluation}`,
-    `| KEEP ${planColumnNames(columns, plan).map(quoteIdentifier).join(', ')}`,
+    `| EVAL ${[...witnesses, idEvaluation].join(', ')}`,
+    `| KEEP ${[...planColumnNames(columns, plan), ...witnessColumns.values()]
+      .map(quoteIdentifier)
+      .join(', ')}`,
     // Ties broken on `entity.id` as the merge does, so a cut plan returns a deterministic set of rows.
     `| SORT ${quoteIdentifier(LAST_SEEN_COLUMN)} DESC NULLS LAST, ${quoteIdentifier(
       ENTITY_ID_COLUMN

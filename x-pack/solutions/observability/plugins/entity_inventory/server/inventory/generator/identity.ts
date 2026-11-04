@@ -32,7 +32,17 @@ export interface IdentityPlan {
    * list per ranking entry otherwise. An index can serve the identity if it maps every field of one.
    */
   compositions: string[][];
+  /**
+   * Grouping field to witness column, for each grouping field the id evaluation overwrites (in
+   * practice an identity on `entity.id`). The witness copies the grouped column before the id
+   * evaluation so the executor can still read whether an index maps the field.
+   */
+  witnessColumns: ReadonlyMap<string, string>;
 }
+
+// A `:` is outside the store's field-path pattern (`^[A-Za-z0-9_@-]+(\.[A-Za-z0-9_@-]+)*$`) that
+// attribute, identity and helper column names follow, so a witness cannot collide with any of them.
+const witnessColumnOf = (field: string): string => `mapped:${field}`;
 
 // Reads the assignment targets from the generated text so the names never drift from the store.
 const assignedColumns = (idEvaluation: string): string[] => {
@@ -58,13 +68,21 @@ export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): Iden
   getDynamicBlock(definition);
   const { identityField } = definition;
   const idEvaluation = euid.esql.getEuidEvaluation(definition, ENTITY_ID_COLUMN);
+  const groupingFields = getIdentityFields(identityField);
+  const assigned = assignedColumns(idEvaluation);
+  const assignedNames = new Set(assigned);
   return {
-    groupingFields: getIdentityFields(identityField),
+    groupingFields,
     // The store leaves a composed filter unparenthesised (`a AND b OR c AND d`); wrap it so it can
     // be ANDed with other predicates.
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
     idEvaluation,
-    helperColumns: assignedColumns(idEvaluation).filter((name) => name !== ENTITY_ID_COLUMN),
+    helperColumns: assigned.filter((name) => name !== ENTITY_ID_COLUMN),
     compositions: getIdentityCompositions(identityField),
+    witnessColumns: new Map(
+      groupingFields
+        .filter((field) => assignedNames.has(field))
+        .map((field) => [field, witnessColumnOf(field)])
+    ),
   };
 };

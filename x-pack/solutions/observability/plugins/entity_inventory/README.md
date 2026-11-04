@@ -20,7 +20,7 @@ At start it logs the names of the entity definitions registered in the entity st
 | `esql_syntax.ts` | Backticks identifiers; checks an index pattern's character set and that it parses after `FROM`. |
 | `filters.ts` | Canonicalises an author's filter: parses it as one boolean expression without parameters and re-prints it from its syntax tree, checking the re-print parses back to itself. |
 | `parse_guard.ts` | Parses generated text before it is returned; a failure is a generator bug. |
-| `identity.ts` | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation and the identity compositions as field lists. The predicate and the evaluation come from the entity store's id compiler verbatim. |
+| `identity.ts` | The `BY` keys, the identity-presence predicate, the `entity.id` evaluation, the identity compositions as field lists, and a witness column for each `BY` key the evaluation overwrites. The predicate and the evaluation come from the entity store's id compiler verbatim. |
 | `source_plans.ts` | Query plans from the sources and their probe results: a `FROM` plan per source, and a `TS` plan before it when the probe found a time-series index, validated once. A later phase also splits a source by metric filter. |
 | `columns.ts` | The output columns in order: `entity.id`, identity fields, attributes (one column per name across sources), `last_seen`. |
 | `list_query.ts` | One list query per plan. |
@@ -43,13 +43,14 @@ FROM <index pattern> METADATA _index_mode     -- FROM plan
 | STATS `<attr>` = LAST(`<field>`, `@timestamp`) WHERE `<field>` IS NOT NULL, ...,
         `last_seen` = MAX(`@timestamp`)
     BY <identity fields>
-| EVAL <entity.id, from the store's id compiler>
-| KEEP <this plan's columns>
+| EVAL [`mapped:entity.id` = `entity.id`,]      -- identity on entity.id only
+    <entity.id, from the store's id compiler>
+| KEEP <this plan's columns>[, `mapped:entity.id`]
 | SORT `last_seen` DESC NULLS LAST, `entity.id` ASC
 | LIMIT <limit>
 ```
 
-The source keyword is the plan's engine and both name the pattern. `TS` reads only the time-series indices behind it and the `FROM` plan excludes them, a predicate resolved at planning, so no index is read twice and no time-series shard is opened by `FROM`. `METADATA _index_mode` is bare, since Elasticsearch rejects a quoted name there. Attributes are never `BY` keys. Identity is grouped on the raw fields and the id is computed on the aggregated rows.
+The source keyword is the plan's engine and both name the pattern. `TS` reads only the time-series indices behind it and the `FROM` plan excludes them, a predicate resolved at planning, so no index is read twice and no time-series shard is opened by `FROM`. `METADATA _index_mode` is bare, since Elasticsearch rejects a quoted name there. Attributes are never `BY` keys. Identity is grouped on the raw fields and the id is computed on the aggregated rows. When the identity includes `entity.id`, which the id evaluation overwrites, the grouped column is first copied into the witness `mapped:entity.id`, a name no author-supplied column can take since field paths contain no `:`.
 
 **Probe query**, one per distinct pattern, run by the executor:
 
@@ -64,7 +65,7 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 
 **Safety.** The window travels as the named parameters `?from` and `?to`. Every reference the generator writes is backticked. An index pattern may contain only letters, digits, `_`, `.`, `-`, `*`, `?` and `:`, may not start with `-`, and must parse. An author's filter is parsed as a single boolean expression without query parameters and re-printed from its syntax tree; only that canonical text reaches a query, so comments are dropped and string literals may contain anything. Every generated query is parsed before it leaves the generator. Anything a definition gets wrong throws `InventoryDefinitionError`; anything the generator gets wrong throws a plain `Error`.
 
-**Fixtures.** `server/inventory/__fixtures__/definitions.ts` holds test-only definitions (`k8s.deployment`, `k8s.node`, a host-like ranked identity) in the store's `dynamic` shape. Nothing registers them.
+**Fixtures.** `server/inventory/__fixtures__/definitions.ts` holds test-only definitions (`k8s.deployment`, `k8s.node`, a host-like ranked identity, and an `entity.id` identity alone and leading a ranking) in the store's `dynamic` shape. Nothing registers them.
 
 ### Execution
 
@@ -85,7 +86,7 @@ No metadata API is called and no concrete index is named: the executor learns ev
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; for `entity.id`, which the id evaluation always types `keyword`, the witness column `mapped:entity.id` is read instead, and the response does not carry it. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
 
 Nothing is cached yet.
 

@@ -8,9 +8,11 @@
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import {
   INVENTORY_DEFINITION_FIXTURES,
+  entityIdFixture,
   hostLikeFixture,
   k8sDeploymentFixture,
   k8sNodeFixture,
+  rankedEntityIdFixture,
 } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
 import { resolveIdentityPlan } from './identity';
@@ -86,6 +88,21 @@ describe('resolveIdentityPlan', () => {
     'reads the helper columns of %s from the id evaluation',
     (_type, definition, names) => {
       expect(resolveIdentityPlan(definition).helperColumns).toEqual(names);
+    }
+  );
+
+  it.each(
+    [entityIdFixture, rankedEntityIdFixture].map((definition) => [definition.type, definition])
+  )('gives %s a witness of entity.id, which the id evaluation overwrites', (_type, definition) => {
+    expect(resolveIdentityPlan(definition).witnessColumns).toEqual(
+      new Map([['entity.id', 'mapped:entity.id']])
+    );
+  });
+
+  it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
+    'gives %s no witness when the id evaluation overwrites no grouping field',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).witnessColumns.size).toBe(0);
     }
   );
 
