@@ -333,8 +333,9 @@ describe('nightshift-investigations scout hook', () => {
         ]);
         expect(xpack.actions.preconfigured.elasticsearch).toMatchObject({
           name: 'elasticsearch',
+          actionTypeId: '.elasticsearch',
           config: { url: 'https://remote.example.com' },
-          secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
+          secrets: { authType: 'api_key_header', Authorization: 'ApiKey remote-key' },
         });
         // Connectors are saved on the investigator by the eval, not configured on the plugin.
         expect(xpack.nightshift_investigations).toBeUndefined();

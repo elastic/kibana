@@ -16,11 +16,13 @@ Credentials are not stored here: for that single command only, the environment c
 Reference those variables directly and never hard-code their values. A command that omits
 `connector_id` gets no credentials and cannot reach Elasticsearch.
 
-Readable indices: `logs-*`, `metrics-*`, `traces-*`, unless the space's custom context says otherwise.
+Telemetry usually lives in `logs-*`, `metrics-*` and `traces-*`, locally or on remote clusters, but
+what a cluster holds depends on how it was set up. Start there and check what is available, as
+shown below, before querying.
 
 ## Query guidance
 
-- Use the readable patterns above, or those in the custom context, in place of `logs-*` in the example below.
+- Replace `logs-*` in the examples below with the indices you found, or those the custom context names.
 - Name each remote explicitly as `remote:index`; never use wildcard remote names in
   `_resolve/cluster`, `_cat/indices` or searches. Use `GET /_remote/info` only if remote names
   are not supplied by the space's custom context. To check many remotes, query them in parallel with a short

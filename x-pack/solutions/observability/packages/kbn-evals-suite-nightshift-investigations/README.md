@@ -277,10 +277,10 @@ the agent in `connectors.md`. There is no eval-only telemetry setting, start par
 hint; the agent finds the data through the connectors, as it must for a customer. A connector set
 is the group of preconfigured connectors one Scout stack starts with:
 
-| Set         | Kibana config                                                              | Connectors                | Credentials (Vault / profile JSON)  |
-| ----------- | -------------------------------------------------------------------------- | ------------------------- | ----------------------------------- |
-| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml)     | `elasticsearch` (`.http`) | `nightshift.telemetry.{url,apiKey}` |
-| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.http`)  | `nightshiftOrcaEs.{url,apiKey}`     |
+| Set         | Kibana config                                                              | Connectors                         | Credentials (Vault / profile JSON)  |
+| ----------- | -------------------------------------------------------------------------- | ---------------------------------- | ----------------------------------- |
+| `default`   | [`scout/connector_sets/default.yml`](scout/connector_sets/default.yml)     | `elasticsearch` (`.elasticsearch`) | `nightshift.telemetry.{url,apiKey}` |
+| `orcabench` | [`scout/connector_sets/orcabench.yml`](scout/connector_sets/orcabench.yml) | `orcabench-es` (`.elasticsearch`)  | `nightshiftOrcaEs.{url,apiKey}`     |
 
 To add a connector to a set, declare it in the set's YAML and add its id to `CONNECTOR_SETS`. The
 hook selects `orcabench` on the ORCA shard (or `NIGHTSHIFT_DATASETS=orcabench`), and `default`
@@ -303,10 +303,10 @@ The `default` set's credentials keep the Vault field name `nightshift.telemetry`
 Profile values take precedence over these shell fallbacks, which replace the former
 `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_URL` and `NIGHTSHIFT_SANDBOX_ELASTICSEARCH_API_KEY`:
 
-| Variable                | Purpose                                                                            |
-| ----------------------- | ---------------------------------------------------------------------------------- |
+| Variable                | Purpose                                                                           |
+| ----------------------- | --------------------------------------------------------------------------------- |
 | `NIGHTSHIFT_ES_URL`     | Elasticsearch endpoint, without embedded credentials. Requires the API key below. |
-| `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.   |
+| `NIGHTSHIFT_ES_API_KEY` | Encoded restricted API key, without the `ApiKey` prefix. Requires the URL above.  |
 
 A `readableIndices` field left in Vault is ignored.
 

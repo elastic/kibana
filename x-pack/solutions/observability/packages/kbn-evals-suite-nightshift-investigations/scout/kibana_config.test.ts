@@ -45,13 +45,9 @@ it('resolves credentials from the environment and preserves other preconfigured 
       existing: { name: 'Existing connector' },
       'orcabench-es': {
         name: 'orcabench_es',
-        actionTypeId: '.http',
-        config: {
-          url: 'https://orca.example.com',
-          hasAuth: false,
-          authType: null,
-        },
-        secrets: { secretHeaders: { Authorization: 'ApiKey remote-key' } },
+        actionTypeId: '.elasticsearch',
+        config: { url: 'https://orca.example.com' },
+        secrets: { authType: 'api_key_header', Authorization: 'ApiKey remote-key' },
       },
     });
     expect(config.xpack.sandbox.api_key).toBe('sandbox-key');
