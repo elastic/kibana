@@ -84,9 +84,6 @@
       "packagePolicyIds": ["pkg-policy-id-3"],
       "policyIdsByInstance": {
         "aws.cloudtrail": "pkg-policy-id-3"
-      },
-      "policySettings": {
-        "output_id": "logstash-output-id"
       }
     }
   ]
