@@ -12,6 +12,8 @@ import type { ValidationError } from '@kbn/isomer';
 import type { MaterializeContext, MaterializeInput } from '../../common';
 import { isMaterializeByReference } from '../../common';
 import { executeEsql } from './executors/esql';
+import type { KitServices } from './kit/create_kit';
+import { createMaterializeKit } from './kit/create_kit';
 import { DATA_REQUEST_TIMEOUT_MS, MAX_MATERIALIZE_DEPTH, MAX_ROWS_PER_REQUEST } from './limits';
 import type { MaterializeEvent } from '../instrumentation/events';
 import { measureInput } from '../instrumentation/measure';
@@ -38,6 +40,8 @@ export interface ScopedMaterializeClientDeps {
   search: Pick<IScopedSearchClient, 'esql'>;
   /** The node's validation errors against the runtime's packs. */
   validate: (node: MaterializedNode) => Promise<ValidationError[]>;
+  /** The user's field formats and settings, read on first use. */
+  getKitServices: () => Promise<KitServices>;
   kibanaVersion: string;
   now?: () => Date;
   limits?: Partial<MaterializeLimits>;
@@ -75,6 +79,7 @@ export const createScopedMaterializeClient = ({
   logger,
   search,
   validate,
+  getKitServices,
   kibanaVersion,
   now = () => new Date(),
   report,
@@ -84,6 +89,15 @@ export const createScopedMaterializeClient = ({
     maxDepth = MAX_MATERIALIZE_DEPTH,
   } = {},
 }: ScopedMaterializeClientDeps): ScopedMaterializeClient => {
+  let services: Promise<KitServices> | undefined;
+  const kitServices = () => {
+    services ??= getKitServices().catch((error) => {
+      services = undefined;
+      throw error;
+    });
+    return services;
+  };
+
   const bare = (node: MaterializedNode): PipelineResult => ({
     node,
     dataRequests: 0,
@@ -156,6 +170,7 @@ export const createScopedMaterializeClient = ({
           materialize: (nestedInput, nestedContext) =>
             materializeAt(nestedInput, nestedContext, depth + 1),
           validate,
+          createKit: async (kitContext) => createMaterializeKit(await kitServices(), kitContext),
           kibanaVersion,
           now,
         }

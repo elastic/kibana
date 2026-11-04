@@ -14,7 +14,8 @@ import { runPipeline } from './pipeline';
 
 const runNode = async (...args: Parameters<typeof runPipeline>) =>
   (await runPipeline(...args)).node;
-import type { DataRequest, Materializer } from './types';
+import type { MaterializeContext } from '../../common';
+import type { DataRequest, MaterializeKit, Materializer } from './types';
 
 interface ChartConfig {
   title: string;
@@ -60,6 +61,9 @@ const createDeps = (overrides: Partial<PipelineDeps> = {}) => ({
     ReturnType<PipelineDeps['materialize']>,
     Parameters<PipelineDeps['materialize']>
   >(async (input) => ({ type: 'markdown', text: input.type })),
+  createKit: jest.fn(
+    async (kitContext: MaterializeContext) => ({ context: kitContext } as MaterializeKit)
+  ),
   validate: jest.fn<ReturnType<PipelineDeps['validate']>, Parameters<PipelineDeps['validate']>>(
     async () => []
   ),
@@ -110,7 +114,7 @@ describe('runPipeline', () => {
     expect(materializer.map).toHaveBeenCalledWith(
       config,
       { tables: [table('FROM a'), table('FROM b')], nodes: [] },
-      { context: absoluteContext }
+      expect.objectContaining({ context: absoluteContext })
     );
     expect(node).toEqual({
       ...metricNode,
