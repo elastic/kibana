@@ -286,7 +286,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           services={{ core: { chrome: core.chrome } }}
           createItem={() => ({ id: uuidv4(), label: getNewAppTitle(apps) })}
           customNewTabButton={
-            <EuiFlexGroup gutterSize="xs" responsive={false}>
+            <EuiFlexGroup gutterSize="s" responsive={false}>
               <EuiToolTip content={newAppLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   iconType="plus"
