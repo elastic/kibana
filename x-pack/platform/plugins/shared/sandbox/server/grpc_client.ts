@@ -121,6 +121,7 @@ export interface RunCommandParams {
   env?: Record<string, string>;
   timeout_seconds?: number;
   secret_env_keys?: SecretEnvKey[];
+  allowed_hosts?: string[];
 }
 
 export interface RunCommandResult {
@@ -137,6 +138,7 @@ interface RunCommandRequestProto {
   timeout_seconds: number;
   task_group_id: string;
   secret_env_keys: SecretEnvKey[];
+  allowed_hosts?: string[];
 }
 
 function serializeSecretEnvKey({ key, allowed_hosts: allowedHosts }: SecretEnvKey): Buffer {
@@ -156,6 +158,7 @@ export function serializeRunCommandRequest(req: RunCommandRequestProto): Buffer 
     ...req.secret_env_keys.map((secretEnvKey) =>
       encodeNestedMessage(6, serializeSecretEnvKey(secretEnvKey))
     ),
+    ...(req.allowed_hosts ?? []).map((rule) => encodeStringField(7, rule)),
   ]);
 }
 
@@ -527,6 +530,7 @@ export class SandboxApiClient {
         timeout_seconds: params.timeout_seconds ?? 0,
         task_group_id: '',
         secret_env_keys: params.secret_env_keys ?? [],
+        allowed_hosts: params.allowed_hosts ?? [],
       },
       this.metadata(conversationId),
       this.callOptions(timeoutSeconds * 1_000 + COMMAND_DEADLINE_MARGIN_MS)

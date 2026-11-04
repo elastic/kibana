@@ -17,6 +17,7 @@ import { redactSecrets } from './connector_credentials';
 import { getConversationId, getSandboxCallContext } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
+import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
 
 export const SANDBOX_BASH_TOOL_ID = 'nightshift_sandbox_bash';
 
@@ -93,11 +94,13 @@ export const createSandboxBashTool = ({
   getSandboxStart,
   sandboxWorkspaceManager,
   resolveConnectorCredentials,
+  sandboxAllowlistClient,
   logger,
 }: {
   getSandboxStart: () => SandboxPluginStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
+  sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
   id: SANDBOX_BASH_TOOL_ID,
@@ -184,6 +187,27 @@ export const createSandboxBashTool = ({
       secretValues = resolved.secretValues;
     }
 
+    let spaceAllowedHosts: string[] = [];
+    if (sandboxAllowlistClient) {
+      try {
+        spaceAllowedHosts = await sandboxAllowlistClient.getHostsForCommand(context.request);
+      } catch (error) {
+        logger.error(
+          `Failed to load space sandbox egress allowlist: ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+        return {
+          results: [
+            {
+              type: ToolResultType.error,
+              data: { message: 'Space sandbox egress allowlist is invalid or unavailable.' },
+            },
+          ],
+        };
+      }
+    }
+
     logger.debug(`Executing sandbox bash command for session ${rawConversationId}: ${command}`);
 
     try {
@@ -200,6 +224,7 @@ export const createSandboxBashTool = ({
         directory: working_directory,
         env: mergedEnv,
         ...(secretEnvKeys.length > 0 ? { secret_env_keys: secretEnvKeys } : {}),
+        ...(spaceAllowedHosts.length > 0 ? { allowed_hosts: spaceAllowedHosts } : {}),
         timeout_seconds:
           timeout_seconds && timeout_seconds > 0
             ? Math.min(timeout_seconds, MAX_SANDBOX_COMMAND_TIMEOUT_SECONDS)
