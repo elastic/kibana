@@ -18,6 +18,7 @@ import { customAppSavedObjectType } from './saved_objects';
 import { customAppEmbeddableSchema } from './embeddable/schemas';
 import { getTransforms } from './embeddable/transforms/get_transforms';
 import { customAppCreationSkill } from './skills/custom_app_creation_skill';
+import { registerDocumentResolver } from './tools/document_resolvers';
 import { createCreateCustomAppTool } from './tools/create_custom_app_tool';
 import { createUpdateCustomAppTool } from './tools/update_custom_app_tool';
 
@@ -31,6 +32,8 @@ interface SetupDeps {
 export interface CustomAppServerSetup {
   /** Adds a capability, so that the apps that use it can be checked and saved. */
   registerCapability: typeof registerCapability;
+  /** Adds a step that finishes the document the agent wrote, before it is checked and kept. */
+  registerDocumentResolver: typeof registerDocumentResolver;
 }
 
 export class CustomAppPlugin implements Plugin<CustomAppServerSetup, void, SetupDeps> {
@@ -63,7 +66,7 @@ export class CustomAppPlugin implements Plugin<CustomAppServerSetup, void, Setup
       agentBuilder.skills.register(customAppCreationSkill);
     }
 
-    return { registerCapability };
+    return { registerCapability, registerDocumentResolver };
   }
 
   start() {}

@@ -7,6 +7,10 @@
 
 import { appDocumentSchema } from '@kbn/custom-app-common';
 import { customContentToDocument } from './custom_content_to_document';
+import { registerCapability } from '@kbn/custom-app-registry';
+import { customContentCapability } from '../../common/custom_app/custom_content_capability';
+
+beforeAll(() => registerCapability(customContentCapability));
 
 const children = (state: Parameters<typeof customContentToDocument>[0]) =>
   (customContentToDocument(state).root as { children: Array<Record<string, unknown>> }).children;

@@ -7,20 +7,21 @@
 
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { getSaveAsAppAction } from './save_as_app_action';
+import { registerCapability } from '@kbn/custom-app-registry';
+import { customContentCapability } from '../../common/custom_app/custom_content_capability';
 
-const create = jest.fn();
+beforeAll(() => registerCapability(customContentCapability));
+
+const post = jest.fn();
 const addSuccess = jest.fn();
 const addDanger = jest.fn();
 let mockCanSave = true;
 
-jest.mock('../application/saved_apps_client', () => ({
-  createSavedAppsClient: () => ({ create: (...args: unknown[]) => create(...args) }),
-}));
 jest.mock('@kbn/react-kibana-mount', () => ({ toMountPoint: (node: unknown) => node }));
 jest.mock('../services', () => ({
   getServices: () => ({
     core: {
-      http: {},
+      http: { post: (...args: unknown[]) => post(...args) },
       application: {
         capabilities: { customApp: { save: mockCanSave } },
         navigateToApp: jest.fn(),
@@ -49,7 +50,7 @@ const action = {
 
 describe('the save as custom app action', () => {
   beforeEach(() => {
-    create.mockReset().mockResolvedValue({ id: 'new-app' });
+    post.mockReset().mockResolvedValue({ id: 'new-app' });
     addSuccess.mockReset();
     addDanger.mockReset();
     mockCanSave = true;
@@ -76,8 +77,9 @@ describe('the save as custom app action', () => {
   it('saves an app with the content of the panel, named by its title, and says so', async () => {
     await action.execute({ embeddable: panel() });
 
-    expect(create).toHaveBeenCalledTimes(1);
-    const [input] = create.mock.calls[0];
+    expect(post).toHaveBeenCalledTimes(1);
+    const [, { body }] = post.mock.calls[0];
+    const input = JSON.parse(body);
     expect(input.title).toBe('Custom content');
     expect(JSON.stringify(input.document)).toContain('<p>hi</p>');
     expect(JSON.stringify(input.document)).toContain('FROM logs | LIMIT 3');
@@ -92,14 +94,14 @@ describe('the save as custom app action', () => {
       embeddable: panel({ serializeState: () => ({ esql_query: ['FROM logs'] }) }),
     });
 
-    expect(create).not.toHaveBeenCalled();
+    expect(post).not.toHaveBeenCalled();
     expect(addDanger).toHaveBeenCalledWith(
       expect.objectContaining({ text: 'This panel has no content yet.' })
     );
   });
 
   it('says why when the app could not be saved', async () => {
-    create.mockRejectedValue({ body: { message: 'Too much' } });
+    post.mockRejectedValue({ body: { message: 'Too much' } });
 
     await action.execute({ embeddable: panel() });
 

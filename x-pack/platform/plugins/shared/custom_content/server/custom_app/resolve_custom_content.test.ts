@@ -7,6 +7,10 @@
 
 import { appDocumentShapeSchema } from '@kbn/custom-app-common';
 import { MAX_TEMPLATES_PER_CALL, resolveCustomContent } from './resolve_custom_content';
+import { registerCapability } from '@kbn/custom-app-registry';
+import { customContentCapability } from '../../common/custom_app/custom_content_capability';
+
+beforeAll(() => registerCapability(customContentCapability));
 
 const resolver = jest.fn();
 

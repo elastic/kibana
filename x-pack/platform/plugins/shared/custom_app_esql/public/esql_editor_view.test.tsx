@@ -48,6 +48,8 @@ const setup = (
       state={{}}
       runQuery={runQuery}
       setValue={setValue}
+      source={undefined}
+      retry={jest.fn()}
       {...overrides}
     />
   );

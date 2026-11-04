@@ -22,12 +22,16 @@ import {
   CUSTOM_CONTENT_EMBEDDABLE_TYPE,
   customContentStateSchema,
 } from '@kbn/custom-content-common';
-import { CUSTOM_APP_APPLICATION_ID, SAVE_AS_CUSTOM_APP_ACTION_ID } from '../../common/constants';
-import { createSavedAppsClient } from '../application/saved_apps_client';
+import {
+  CUSTOM_APP_APPLICATION_ID,
+  SAVED_APPS_API_PATH,
+  SAVED_APPS_API_VERSION,
+} from '@kbn/custom-app-plugin/public';
+import { SAVE_AS_CUSTOM_APP_ACTION_ID } from '../../common/custom_app/constants';
 import { getServices } from '../services';
-import { customContentToDocument } from '../utils/custom_content_to_document';
+import { customContentToDocument } from './custom_content_to_document';
 
-const displayName = i18n.translate('xpack.customApp.saveAsApp.displayName', {
+const displayName = i18n.translate('xpack.customContent.saveAsApp.displayName', {
   defaultMessage: 'Save as custom app',
 });
 
@@ -60,7 +64,7 @@ export const getSaveAsAppAction = (): ActionDefinition<EmbeddableApiContext> => 
     const { toasts } = core.notifications;
     const failed = (error: unknown) =>
       toasts.addDanger({
-        title: i18n.translate('xpack.customApp.saveAsApp.failed', {
+        title: i18n.translate('xpack.customContent.saveAsApp.failed', {
           defaultMessage: 'The panel could not be saved as a custom app',
         }),
         text: toMessage(error),
@@ -68,19 +72,19 @@ export const getSaveAsAppAction = (): ActionDefinition<EmbeddableApiContext> => 
 
     const title =
       (apiPublishesTitle(embeddable) ? getTitle(embeddable) : undefined) ||
-      i18n.translate('xpack.customApp.saveAsApp.defaultTitle', {
+      i18n.translate('xpack.customContent.saveAsApp.defaultTitle', {
         defaultMessage: 'Custom content',
       });
 
     try {
       const state = customContentStateSchema.parse(embeddable.serializeState());
-      const { id } = await createSavedAppsClient(core.http).create({
-        title,
-        document: customContentToDocument(state),
+      const { id } = await core.http.post<{ id: string }>(SAVED_APPS_API_PATH, {
+        version: SAVED_APPS_API_VERSION,
+        body: JSON.stringify({ title, document: customContentToDocument(state) }),
       });
 
       toasts.addSuccess({
-        title: i18n.translate('xpack.customApp.saveAsApp.saved', {
+        title: i18n.translate('xpack.customContent.saveAsApp.saved', {
           defaultMessage: 'Saved as the custom app "{title}"',
           values: { title },
         }),
@@ -95,7 +99,7 @@ export const getSaveAsAppAction = (): ActionDefinition<EmbeddableApiContext> => 
               })
             }
           >
-            {i18n.translate('xpack.customApp.saveAsApp.open', { defaultMessage: 'Open app' })}
+            {i18n.translate('xpack.customContent.saveAsApp.open', { defaultMessage: 'Open app' })}
           </EuiButton>,
           core
         ),

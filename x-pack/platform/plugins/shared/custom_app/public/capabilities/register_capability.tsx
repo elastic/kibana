@@ -14,8 +14,9 @@ import {
   type CapabilityNodeOf,
 } from '@kbn/custom-app-registry';
 import { createRunEsqlQuery } from '../data/run_esql_query';
-import type { SourceData } from '../data/data_layer';
+import type { SourceData, SourceState } from '../data/data_layer';
 import { useDataLayer } from '../data/data_layer_context';
+import { useSource } from '../data/use_source';
 import { useAppRuntime, useStateValues } from '../runtime/app_runtime_context';
 import { getServices } from '../services';
 import { useSubjectValue } from '../utils/use_subject_value';
@@ -23,6 +24,9 @@ import { registerCapabilityView, type CapabilityViewProps, type View } from './c
 
 /** What a query returned: its columns and rows. */
 export type CustomAppQueryResult = SourceData;
+
+/** The data of a component, as the app fetches it: loading, what came back, or why it did not. */
+export type CustomAppSourceState = SourceState;
 
 /**
  * What the app gives the code that draws a capability that another plugin registered: its node, and
@@ -40,6 +44,10 @@ export interface CustomAppCapabilityViewProps<Node> {
   runQuery: (query: string, signal: AbortSignal) => Promise<CustomAppQueryResult>;
   /** Sets a text value of the app. */
   setValue: (key: string, value: string) => void;
+  /** The data of the component's own query or source, which the app fetches. Absent when it has none. */
+  source: CustomAppSourceState | undefined;
+  /** Fetches the data of the app again. */
+  retry: () => void;
 }
 
 /** A capability that a plugin adds: its manifest, and the code that draws it, loaded when it is first used. */
@@ -50,8 +58,10 @@ export interface CustomAppCapability<Manifest> {
   }>;
 }
 
+type Inner = ComponentType<CustomAppCapabilityViewProps<never>>;
+
 const withHostProps =
-  (Inner: ComponentType<CustomAppCapabilityViewProps<never>>): View =>
+  (Inner: Inner): View =>
   ({ node, text }: CapabilityViewProps<AppNode>) => {
     const { core, search } = getServices();
     const layer = useDataLayer();
@@ -71,17 +81,26 @@ const withHostProps =
         runtime.run([{ type: 'setState', key, value: { fromInput: true } }], { input: value }),
       [runtime]
     );
-    return (
-      <Inner
-        node={node as never}
-        text={text}
-        context={context}
-        state={state}
-        runQuery={runQuery}
-        setValue={setValue}
-      />
+    const host = { text, context, state, runQuery, setValue, retry: layer.retry };
+    return layer.getSourceDefinition(node.id) ? (
+      <WithSource Inner={Inner} node={node} host={host} />
+    ) : (
+      <Inner node={node as never} source={undefined} {...host} />
     );
   };
+
+const WithSource = ({
+  Inner,
+  node,
+  host,
+}: {
+  Inner: Inner;
+  node: AppNode;
+  host: Omit<CustomAppCapabilityViewProps<never>, 'node' | 'source'>;
+}) => {
+  const source = useSource(node.id);
+  return <Inner node={node as never} source={source} {...host} />;
+};
 
 /** Adds a capability that another plugin provides: its manifest, and how to draw it. */
 export const registerCustomAppCapability = <Manifest extends { id: string }>({

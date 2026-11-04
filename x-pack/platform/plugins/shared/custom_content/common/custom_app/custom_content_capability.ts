@@ -12,8 +12,7 @@ import {
   CUSTOM_CONTENT_SCRIPT_PATTERN,
 } from '@kbn/custom-content-common';
 import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
-import { MAX_PROMPT_LENGTH, MAX_TEMPLATE_LENGTH } from '../document/constants';
-import { querySchema } from '../document/data_fields';
+import { MAX_PROMPT_LENGTH, MAX_TEMPLATE_LENGTH, querySchema } from '@kbn/custom-app-common';
 
 export const customContentCapability = defineCapability({
   kind: 'component',
@@ -79,3 +78,6 @@ declare module '@kbn/custom-app-registry' {
     custom_content: CapabilityNodeOf<typeof customContentCapability>;
   }
 }
+
+/** What a custom content component of an app holds. */
+export type CustomContentNode = CapabilityNodeOf<typeof customContentCapability>;

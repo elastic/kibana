@@ -30,7 +30,6 @@ const CORE_LOADERS: Readonly<Record<string, Loader>> = {
   tabs: component(() => import('./sections_view'), 'TabsView'),
   accordion: component(() => import('./sections_view'), 'AccordionView'),
   chart: component(() => import('../components/chart_node'), 'ChartNode'),
-  custom_content: component(() => import('../components/custom_content_node'), 'CustomContentNode'),
   table: component(() => import('../components/table_node'), 'TableNode'),
   key_value: component(() => import('../components/key_value_node'), 'KeyValueNode'),
   select: component(() => import('../components/select_node'), 'SelectNode'),

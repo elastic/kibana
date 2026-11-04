@@ -16,7 +16,6 @@ import { tabsCapability } from './tabs';
 import { accordionCapability } from './accordion';
 import { keyValueCapability } from './key_value';
 import { tableCapability } from './table';
-import { customContentCapability } from './custom_content';
 import { chartCapability } from './chart';
 import { buttonCapability } from './button';
 import { linkCapability } from './link';
@@ -48,7 +47,6 @@ export const BUILTIN_CAPABILITIES = [
   badgeCapability,
   keyValueCapability,
   tableCapability,
-  customContentCapability,
   chartCapability,
   buttonCapability,
   linkCapability,

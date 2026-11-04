@@ -17,11 +17,13 @@ import {
   CUSTOM_CONTENT_MAX_HEIGHT,
 } from '@kbn/custom-content-common';
 import { applyHtmlTheme, fillTemplate, sanitizeHtml } from '@kbn/custom-content-renderer';
-import type { AppNodeOfType } from '@kbn/custom-app-common';
-import type { SourceData } from '../data/data_layer';
-import { useDataLayer } from '../data/data_layer_context';
-import { useSource } from '../data/use_source';
-import { DataState } from './data_state';
+import type {
+  CustomAppCapabilityViewProps,
+  CustomAppSourceState,
+} from '@kbn/custom-app-plugin/public';
+import type { CustomContentNode } from '../../common/custom_app/custom_content_capability';
+
+type SourceData = Extract<CustomAppSourceState, { status: 'success' }>['data'];
 
 const NO_DATA: SourceData = { columns: [], rows: [] };
 
@@ -111,7 +113,7 @@ const MeasuringFrame = ({
         sandbox="allow-same-origin"
         srcDoc={html}
         tabIndex={-1}
-        title={i18n.translate('xpack.customApp.customContent.measureFrameTitle', {
+        title={i18n.translate('xpack.customContent.customApp.measureFrameTitle', {
           defaultMessage: 'Size of the custom content',
         })}
         data-test-subj="customAppCustomContentMeasure"
@@ -121,13 +123,7 @@ const MeasuringFrame = ({
   );
 };
 
-const TemplateFrame = ({
-  node,
-  data,
-}: {
-  node: AppNodeOfType<'custom_content'>;
-  data: SourceData;
-}) => {
+const TemplateFrame = ({ node, data }: { node: CustomContentNode; data: SourceData }) => {
   const rendered = useRenderedTemplate(node.template ?? '', data);
   const [measured, setMeasured] = useState<number>();
 
@@ -137,7 +133,7 @@ const TemplateFrame = ({
       <KbnDangerCallout
         size="s"
         announceOnMount={false}
-        title={i18n.translate('xpack.customApp.customContent.errorTitle', {
+        title={i18n.translate('xpack.customContent.customApp.errorTitle', {
           defaultMessage: 'This template cannot be shown',
         })}
       >
@@ -153,7 +149,7 @@ const TemplateFrame = ({
         // No permissions at all: no scripts, no forms, no same-origin access.
         sandbox=""
         srcDoc={rendered.html}
-        title={i18n.translate('xpack.customApp.customContent.frameTitle', {
+        title={i18n.translate('xpack.customContent.customApp.frameTitle', {
           defaultMessage: 'Custom content',
         })}
         data-test-subj="customAppCustomContentFrame"
@@ -169,19 +165,53 @@ const TemplateFrame = ({
   );
 };
 
-const WithData = ({ node }: { node: AppNodeOfType<'custom_content'> }) => {
-  const layer = useDataLayer();
-  const state = useSource(node.id);
-
-  return (
-    <DataState state={state} onRetry={layer.retry} handlesEmpty>
-      {(data) => <TemplateFrame node={node} data={data} />}
-    </DataState>
-  );
+const WithData = ({
+  node,
+  source,
+  retry,
+}: {
+  node: CustomContentNode;
+  source: CustomAppSourceState;
+  retry: () => void;
+}) => {
+  switch (source.status) {
+    case 'loading':
+      return <EuiSkeletonText lines={2} isLoading />;
+    case 'error':
+      return (
+        <KbnDangerCallout
+          announceOnMount={false}
+          size="s"
+          title={i18n.translate('xpack.customContent.customApp.dataErrorTitle', {
+            defaultMessage: 'Unable to load data',
+          })}
+          actionProps={{
+            primary: {
+              children: i18n.translate('xpack.customContent.customApp.retry', {
+                defaultMessage: 'Retry',
+              }),
+              onClick: retry,
+            },
+          }}
+        >
+          <p>{source.message}</p>
+        </KbnDangerCallout>
+      );
+    case 'success':
+      return <TemplateFrame node={node} data={source.data} />;
+  }
 };
 
-export const CustomContentNode = ({ node }: { node: AppNodeOfType<'custom_content'> }) => (
+export const CustomContentView = ({
+  node,
+  source,
+  retry,
+}: CustomAppCapabilityViewProps<CustomContentNode>) => (
   <EuiPanel hasBorder hasShadow={false} paddingSize="none" data-node-id={node.id}>
-    {node.query ? <WithData node={node} /> : <TemplateFrame node={node} data={NO_DATA} />}
+    {node.query && source ? (
+      <WithData node={node} source={source} retry={retry} />
+    ) : (
+      <TemplateFrame node={node} data={NO_DATA} />
+    )}
   </EuiPanel>
 );

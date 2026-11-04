@@ -10,7 +10,6 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { getToolResultId } from '@kbn/agent-builder-server';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import { getDocumentIssues } from '@kbn/custom-app-common';
-import { createCustomContentTemplateResolver } from '@kbn/custom-content-server';
 import {
   CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   type CustomAppContextAttachmentData,
@@ -21,7 +20,7 @@ import {
   type CustomAppCreatedUiEventData,
 } from '../../common/ui_events';
 import { customAppCreateSchema } from '../../common/create_app_schema';
-import { resolveCustomContent } from './resolve_custom_content';
+import { resolveDocument } from './document_resolvers';
 import { CREATE_CUSTOM_APP_TOOL_ID, UPDATE_CUSTOM_APP_TOOL_ID } from './update_custom_app_tool';
 
 const error = (message: string) => ({
@@ -65,10 +64,7 @@ ${getAuthoringGuide()}`;
     { title, document: requested },
     { attachments, events, logger, modelProvider, esClient }
   ) => {
-    const resolved = await resolveCustomContent(
-      requested,
-      createCustomContentTemplateResolver({ modelProvider, esClient, logger })
-    );
+    const resolved = await resolveDocument(requested, { modelProvider, esClient, logger });
     if ('error' in resolved) return error(resolved.error);
     const { document } = resolved;
 

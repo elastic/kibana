@@ -28,12 +28,15 @@ export {
   MAX_CHART_ANNOTATIONS,
   OPTIONS_SOURCE_SUFFIX,
   MAX_HEADING_LENGTH,
+  MAX_PROMPT_LENGTH,
   MAX_QUERY_LENGTH,
   MAX_STATE_STRING_LENGTH,
+  MAX_TEMPLATE_LENGTH,
   MAX_TEXT_LENGTH,
   MAX_WORKFLOW_ID_LENGTH,
   MAX_WORKFLOW_INPUTS,
 } from './document/constants';
+export { querySchema } from './document/data_fields';
 export {
   bindable,
   getBoundSignature,

@@ -17,7 +17,6 @@ export { calloutCapability } from './callout';
 export { cardCapability } from './card';
 export { chartCapability } from './chart';
 export { columnsCapability } from './columns';
-export { customContentCapability } from './custom_content';
 export { flyoutCapability } from './flyout';
 export { formCapability } from './form';
 export { headingCapability } from './heading';

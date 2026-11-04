@@ -17,3 +17,8 @@ export const plugin = async () => {
 };
 
 export type { CustomAppServerSetup } from './plugin';
+export type {
+  DocumentResolver,
+  DocumentResolverContext,
+  DocumentResolution,
+} from './tools/document_resolvers';
