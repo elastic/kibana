@@ -47,7 +47,6 @@ describe('InventoryService.getTypes', () => {
           { name: 'orchestrator.cluster.name', kind: 'identity' },
           { name: 'kubernetes.namespace', kind: 'identity' },
           { name: 'kubernetes.deployment.name', kind: 'identity' },
-          { name: 'cluster', kind: 'attribute' },
           { name: 'available_replicas', kind: 'attribute' },
           { name: 'desired_replicas', kind: 'attribute' },
           { name: 'paused', kind: 'attribute' },
