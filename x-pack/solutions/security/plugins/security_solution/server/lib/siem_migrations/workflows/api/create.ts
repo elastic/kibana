@@ -11,7 +11,7 @@ import { SIEM_WORKFLOW_MIGRATIONS_PATH } from '../../../../../common/siem_migrat
 import {
   CreateWorkflowMigrationRequestBody,
   type CreateWorkflowMigrationResponse,
-} from '../../../../../common/siem_migrations/workflows/types';
+} from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';

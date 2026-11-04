@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TinesLinkSchema, TinesStoryExportSchema } from './tines';
+import { TinesLink, TinesStoryExport } from './tines.gen';
 
 describe('Tines story schemas', () => {
   const agent = {
@@ -15,7 +15,7 @@ describe('Tines story schemas', () => {
   };
 
   it('accepts a story export with agents and links', () => {
-    const parsed = TinesStoryExportSchema.safeParse({
+    const parsed = TinesStoryExport.safeParse({
       name: 'Simple story',
       description: null,
       agents: [agent],
@@ -26,10 +26,10 @@ describe('Tines story schemas', () => {
   });
 
   it('rejects a link with a negative source index', () => {
-    expect(TinesLinkSchema.safeParse({ source: -1, receiver: 0 }).success).toBe(false);
+    expect(TinesLink.safeParse({ source: -1, receiver: 0 }).success).toBe(false);
   });
 
   it('rejects a story without agents', () => {
-    expect(TinesStoryExportSchema.safeParse({ name: 'Empty', agents: [] }).success).toBe(false);
+    expect(TinesStoryExport.safeParse({ name: 'Empty', agents: [] }).success).toBe(false);
   });
 });

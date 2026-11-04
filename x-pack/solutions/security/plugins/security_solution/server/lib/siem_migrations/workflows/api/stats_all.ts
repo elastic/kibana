@@ -7,7 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { SIEM_WORKFLOW_MIGRATIONS_ALL_STATS_PATH } from '../../../../../common/siem_migrations/workflows/constants';
-import type { GetAllWorkflowMigrationStatsResponse } from '../../../../../common/siem_migrations/workflows/types';
+import type { GetAllWorkflowMigrationStatsResponse } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';

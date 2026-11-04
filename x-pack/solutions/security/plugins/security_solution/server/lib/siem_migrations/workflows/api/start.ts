@@ -10,9 +10,9 @@ import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_WORKFLOW_MIGRATION_START_PATH } from '../../../../../common/siem_migrations/workflows/constants';
 import {
   StartWorkflowMigrationRequestBody,
-  WorkflowMigrationIdParams,
+  StartWorkflowMigrationRequestParams,
   type StartWorkflowMigrationResponse,
-} from '../../../../../common/siem_migrations/workflows/types';
+} from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';
@@ -32,7 +32,7 @@ export const registerSiemWorkflowMigrationsStartRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(WorkflowMigrationIdParams),
+            params: buildRouteValidationWithZod(StartWorkflowMigrationRequestParams),
             body: buildRouteValidationWithZod(StartWorkflowMigrationRequestBody),
           },
         },

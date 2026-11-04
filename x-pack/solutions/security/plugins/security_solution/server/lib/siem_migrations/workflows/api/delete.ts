@@ -8,7 +8,7 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_WORKFLOW_MIGRATION_PATH } from '../../../../../common/siem_migrations/workflows/constants';
-import { WorkflowMigrationIdParams } from '../../../../../common/siem_migrations/workflows/types';
+import { DeleteWorkflowMigrationRequestParams } from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';
@@ -28,7 +28,7 @@ export const registerSiemWorkflowMigrationsDeleteRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(WorkflowMigrationIdParams),
+            params: buildRouteValidationWithZod(DeleteWorkflowMigrationRequestParams),
           },
         },
       },

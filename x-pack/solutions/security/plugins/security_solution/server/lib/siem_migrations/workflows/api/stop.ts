@@ -9,9 +9,9 @@ import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import { SIEM_WORKFLOW_MIGRATION_STOP_PATH } from '../../../../../common/siem_migrations/workflows/constants';
 import {
-  WorkflowMigrationIdParams,
+  StopWorkflowMigrationRequestParams,
   type StopWorkflowMigrationResponse,
-} from '../../../../../common/siem_migrations/workflows/types';
+} from '../../../../../common/siem_migrations/model/api/workflows/workflow_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import { withLicense } from '../../common/api/util/with_license';
 import { authz } from './util/authz';
@@ -31,7 +31,7 @@ export const registerSiemWorkflowMigrationsStopRoute = (
         version: '1',
         validate: {
           request: {
-            params: buildRouteValidationWithZod(WorkflowMigrationIdParams),
+            params: buildRouteValidationWithZod(StopWorkflowMigrationRequestParams),
           },
         },
       },
