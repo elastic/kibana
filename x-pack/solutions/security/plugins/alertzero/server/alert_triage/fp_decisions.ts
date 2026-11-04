@@ -317,8 +317,11 @@ export const matchDecisions = ({
     wouldSkip: new Map(),
     excludedBySeverity: 0,
   };
-  const add = (map: Map<string, string[]>, id_: string, alertId: string) =>
-    map.set(id_, [...(map.get(id_) ?? []), alertId]);
+  const add = (map: Map<string, string[]>, id_: string, alertId: string) => {
+    const alertIds = map.get(id_);
+    if (alertIds) alertIds.push(alertId);
+    else map.set(id_, [alertId]);
+  };
 
   for (const { id, severity } of candidates) {
     const hash = hashes.get(id);
