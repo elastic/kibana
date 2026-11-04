@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { coreMock } from '@kbn/core/server/mocks';
+import { coreMock, httpServerMock } from '@kbn/core/server/mocks';
 import { createKibanaIsomerRuntime } from '@kbn/isomer';
 import type { MarkdownNode } from '@kbn/isomer-components';
+import { of } from 'rxjs';
+import { MATERIALIZE_API_PATH, MATERIALIZE_FEATURE_FLAG } from '../common';
 import { IsomerPlugin } from './plugin';
 
 jest.mock('@kbn/isomer', () => {
@@ -15,10 +17,15 @@ jest.mock('@kbn/isomer', () => {
   return { ...actual, createKibanaIsomerRuntime: jest.fn(actual.createKibanaIsomerRuntime) };
 });
 
-const startPlugin = () => {
+const startPlugin = ({ enabled = true }: { enabled?: boolean } = {}) => {
   const plugin = new IsomerPlugin(coreMock.createPluginInitializerContext({}));
-  plugin.setup();
-  return plugin.start();
+  const coreSetup = coreMock.createSetup();
+  const { registerMaterializer } = plugin.setup(coreSetup);
+  const coreStart = coreMock.createStart();
+  coreStart.featureFlags.getBooleanValue$.mockImplementation((flag) =>
+    of(flag === MATERIALIZE_FEATURE_FLAG && enabled)
+  );
+  return { ...plugin.start(coreStart), registerMaterializer, coreSetup, coreStart };
 };
 
 const markdown: MarkdownNode = { type: 'markdown', text: 'There are **3** open alerts.' };
@@ -62,5 +69,47 @@ describe('IsomerPlugin', () => {
     expect(surfaces.text.render(composition)).toContain('There are **3** open alerts.');
     expect(surfaces.markdown.render(composition)).toContain('There are **3** open alerts.');
     expect(JSON.stringify(surfaces.slack.render(composition).blocks)).toContain('open alerts');
+  });
+
+  it('registers the materialize route', () => {
+    const { coreSetup } = startPlugin();
+    const [router] = coreSetup.http.createRouter.mock.results.map(({ value }) => value);
+    expect(router.versioned.post).toHaveBeenCalledWith(
+      expect.objectContaining({ path: MATERIALIZE_API_PATH })
+    );
+  });
+
+  it('materializes with a registered materializer as the requesting user', async () => {
+    const { registerMaterializer, asScoped, isMaterializeEnabled, coreStart } = startPlugin();
+    const load = jest.fn(async () => ({ text: 'There are **3** open alerts.' }));
+    registerMaterializer<{ text: string }>('note', {
+      version: 1,
+      parse: (config) => config as { text: string },
+      load,
+      plan: () => [],
+      map: ({ text }) => ({ type: 'markdown', text }),
+    });
+    const request = httpServerMock.createKibanaRequest();
+
+    expect(await isMaterializeEnabled()).toBe(true);
+    await expect(asScoped(request).materialize({ type: 'note', id: 'note-1' })).resolves.toEqual(
+      markdown
+    );
+    expect(coreStart.savedObjects.getScopedClient).toHaveBeenCalledWith(request);
+    expect(load).toHaveBeenCalledWith(
+      'note-1',
+      expect.objectContaining({
+        request,
+        savedObjectsClient: coreStart.savedObjects.getScopedClient.mock.results[0].value,
+      })
+    );
+  });
+
+  it('returns unsupported while materialization is off', async () => {
+    const { asScoped, isMaterializeEnabled } = startPlugin({ enabled: false });
+    expect(await isMaterializeEnabled()).toBe(false);
+    await expect(
+      asScoped(httpServerMock.createKibanaRequest()).materialize({ type: 'lens', id: 'abc' })
+    ).resolves.toEqual(expect.objectContaining({ type: 'unsupported' }));
   });
 });

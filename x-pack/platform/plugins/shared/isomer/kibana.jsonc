@@ -4,7 +4,7 @@
   "owner": ["@elastic/appex-sharedux"],
   "group": "platform",
   "visibility": "shared",
-  "description": "Hosts an Isomer runtime with Kibana's primitive packs, for features and tools built on Isomer.",
+  "description": "Hosts an Isomer runtime with Kibana's primitive packs, and materializes saved objects into Isomer nodes.",
   "plugin": {
     "id": "isomer",
     "browser": false,
