@@ -897,6 +897,19 @@ describe('AiIndexService', () => {
       );
     });
 
+    it('ignores the deprecated memory_enabled from callers and managed registrations', async () => {
+      await service.create('customer_support', DEFAULT_SPACE, {
+        ...properties,
+        memory_enabled: true,
+      });
+      await service.put('customer_support', DEFAULT_SPACE, { ...properties, memory_enabled: true });
+      await service.putManaged('elastic', DEFAULT_SPACE, { ...properties, memory_enabled: false });
+
+      for (const [indexArgs] of storageClient.index.mock.calls) {
+        expect(indexArgs.document).not.toHaveProperty('memory_enabled');
+      }
+    });
+
     it('drops the memory_enabled flag documents carried before the dreaming config replaced it', async () => {
       mockSearchHits(storedHit({ ...aiIndexDocument, memory_enabled: true }));
 
