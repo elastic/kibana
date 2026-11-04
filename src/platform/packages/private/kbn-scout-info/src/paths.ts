@@ -23,6 +23,7 @@ export const SCOUT_TEST_CONFIG_STATS_PATH = path.resolve(
   SCOUT_OUTPUT_ROOT,
   'test_config_stats.json'
 );
+export const SCOUT_FLAKY_TESTS_PATH = path.resolve(SCOUT_OUTPUT_ROOT, 'flaky_tests.json');
 
 // Scout definitions
 
