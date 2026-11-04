@@ -19,7 +19,7 @@ export const TYPE_ICONS: Record<CellType, string> = {
 };
 
 const TYPE_LABELS: Record<NewCellKind, string> = {
-  esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL query' }),
+  esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL' }),
   chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
   markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
   'input:time': i18n.translate('xpack.notebook.cell.type.time', {

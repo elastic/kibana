@@ -24,7 +24,7 @@ const CELL_KINDS: ReadonlyArray<{ kind: NewCellKind; icon: string; label: string
   {
     kind: 'esql',
     icon: 'database',
-    label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL query' }),
+    label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL' }),
   },
   {
     kind: 'chart',

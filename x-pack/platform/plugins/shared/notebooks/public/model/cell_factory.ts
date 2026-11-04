@@ -23,7 +23,7 @@ interface CellBlueprint {
 
 const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   esql: {
-    namePrefix: 'query',
+    namePrefix: 'esql',
     build: (base) => ({ ...base, type: 'esql', runMode: 'auto', query: '' }),
   },
   chart: {
