@@ -16,7 +16,9 @@ import {
   EuiFlyoutBody,
   EuiFlyoutHeader,
   EuiMarkdownFormat,
+  EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
@@ -150,6 +152,56 @@ const AppGridPanel = ({ app, panel }: { app: NotebookApp; panel: AppPanel }) => 
   );
 };
 
+/** The app's title and description from its settings, with the global time picker on the right. */
+const AppHeader = ({ app }: { app: NotebookApp }) => {
+  const { store } = useNotebook();
+  const cells = useStateFromPublishingSubject(store.cells$);
+  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
+  const pinnedTime = useMemo(() => {
+    if (app.hideTimePicker) return undefined;
+    const cell = findPinnedTimeCell(cells);
+    return cell && appDependsOn(app, cells, cellOrder, cell.id) ? cell : undefined;
+  }, [app, cells, cellOrder]);
+  const { heading, description } = app;
+  if (!heading && !description && !pinnedTime) return null;
+
+  return (
+    <>
+      <EuiFlexGroup
+        alignItems="flexStart"
+        justifyContent="spaceBetween"
+        gutterSize="m"
+        responsive={false}
+        data-test-subj="notebookAppHeader"
+      >
+        <EuiFlexItem>
+          {heading && (
+            <EuiTitle size="m">
+              <h2 data-test-subj="notebookAppHeading">{heading}</h2>
+            </EuiTitle>
+          )}
+          {description && (
+            <EuiText
+              size="s"
+              color="subdued"
+              css={{ whiteSpace: 'pre-wrap' }}
+              data-test-subj="notebookAppDescription"
+            >
+              {description}
+            </EuiText>
+          )}
+        </EuiFlexItem>
+        {pinnedTime && (
+          <EuiFlexItem grow={false}>
+            <PinnedTimePicker cell={pinnedTime} />
+          </EuiFlexItem>
+        )}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
+    </>
+  );
+};
+
 const AppGrid = ({ app }: { app: NotebookApp }) => {
   const { euiTheme } = useEuiTheme();
   if (app.panels.length === 0) {
@@ -266,14 +318,7 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
       })),
     [apps]
   );
-  const cells = useStateFromPublishingSubject(store.cells$);
-  const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const [settingsAppId, setSettingsAppId] = useState<string>();
-  const pinnedTime = useMemo(() => {
-    if (app.hideTimePicker) return undefined;
-    const cell = findPinnedTimeCell(cells);
-    return cell && appDependsOn(app, cells, cellOrder, cell.id) ? cell : undefined;
-  }, [app, cells, cellOrder]);
   const addApp = (next: NotebookApp) => {
     store.addApp(next);
     activeAppId$.next(next.id);
@@ -367,11 +412,6 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           data-test-subj="notebookAppTabs"
         />
       </EuiFlexItem>
-      {pinnedTime && (
-        <EuiFlexItem>
-          <PinnedTimePicker cell={pinnedTime} />
-        </EuiFlexItem>
-      )}
       {settingsAppId && (
         <AppSettingsFlyout appId={settingsAppId} onClose={() => setSettingsAppId(undefined)} />
       )}
@@ -401,6 +441,7 @@ export const AppFlyout = ({ onClose }: { onClose: () => void }) => {
             <AppToolbar app={app} apps={apps} />
           </EuiFlyoutHeader>
           <EuiFlyoutBody>
+            <AppHeader app={app} />
             <AppGrid app={app} />
           </EuiFlyoutBody>
         </>

@@ -5,13 +5,9 @@
  * 2.0.
  */
 
+import { MAX_TITLE_LENGTH } from '../common/constants';
 import type { CellDefinition, NotebookAttributes } from '../common/types';
-import {
-  MAX_CELLS,
-  MAX_LENS_ATTRIBUTES_LENGTH,
-  MAX_TITLE_LENGTH,
-  notebookAttributesSchema,
-} from './schema';
+import { MAX_CELLS, MAX_LENS_ATTRIBUTES_LENGTH, notebookAttributesSchema } from './schema';
 
 const toNotebook = (cells: CellDefinition[]): NotebookAttributes => ({
   title: 'Web traffic',
@@ -126,11 +122,16 @@ describe('notebookAttributesSchema', () => {
     expect(notebookAttributesSchema.validate(withApp('visits'))).toEqual(withApp('visits'));
   });
 
-  it('accepts the app hideTimePicker setting', () => {
+  it('accepts the app settings', () => {
     const notebook = withApp('visits');
     const withSetting = {
       ...notebook,
-      panels: notebook.panels.map((app) => ({ ...app, hideTimePicker: true })),
+      panels: notebook.panels.map((app) => ({
+        ...app,
+        hideTimePicker: true,
+        heading: 'Traffic overview',
+        description: 'Daily visits by host',
+      })),
     };
     expect(notebookAttributesSchema.validate(withSetting)).toEqual(withSetting);
   });

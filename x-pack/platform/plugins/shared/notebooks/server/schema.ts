@@ -6,10 +6,9 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
-import { MAX_DESCRIPTION_LENGTH } from '../common/constants';
+import { MAX_DESCRIPTION_LENGTH, MAX_TITLE_LENGTH } from '../common/constants';
 
 export const MAX_CELLS = 200;
-export const MAX_TITLE_LENGTH = 1024;
 export const MAX_QUERY_LENGTH = 20_000;
 export const MAX_MARKDOWN_LENGTH = 100_000;
 export const MAX_LENS_ATTRIBUTES_LENGTH = 200_000;
@@ -125,6 +124,8 @@ const appSchema = schema.object({
     { maxSize: MAX_CELLS }
   ),
   hideTimePicker: schema.maybe(schema.boolean()),
+  heading: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
+  description: schema.maybe(schema.string({ maxLength: MAX_DESCRIPTION_LENGTH })),
 });
 
 const validateCellReferences = ({
