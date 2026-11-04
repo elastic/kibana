@@ -132,7 +132,13 @@ describe('ensureLocalElasticsearchConnector', () => {
       role_descriptors: {
         nightshift_local_read: {
           cluster: [],
-          indices: [{ names: ['*'], privileges: ['read', 'view_index_metadata'] }],
+          indices: [
+            {
+              names: ['logs-*', 'metrics-*', 'traces-*', 'apm-*'],
+              privileges: ['read', 'view_index_metadata'],
+              allow_restricted_indices: false,
+            },
+          ],
         },
       },
       metadata: { managed: true, application: 'nightshift', space_id: 'space-1' },
