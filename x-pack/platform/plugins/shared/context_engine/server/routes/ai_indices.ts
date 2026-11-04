@@ -28,6 +28,7 @@ import {
   MAX_AI_INDICES,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
+  AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_RESTORE_PATH,
@@ -52,6 +53,7 @@ import type {
   RestoreKiResponse,
   UpdateKiResponse,
 } from '../../common/http_api/knowledge_indicators';
+import { DREAMING_DISABLED, type GetAiIndexDreamingResponse } from '../../common/dreaming';
 import { apiPrivileges } from '../../common/features';
 import {
   InvalidAiIndexDestError,
@@ -64,6 +66,7 @@ import {
   AiIndexIdConflictError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
+  InvalidDreamingConfigError,
   InvalidConnectorSourceError,
   InvalidEsqlSourceError,
   InvalidAiIndexTraceError,
@@ -114,6 +117,7 @@ import {
   deleteKiResponseSchema,
   restoreKiResponseSchema,
 } from './schemas/ai_indices_schema';
+import { dreamingConfigSchema, dreamingResponseSchema } from './schemas/dreaming_schema';
 import type { ContextEngineAnalyticsService } from '../telemetry';
 import { withKiWriteTelemetry } from '../step_types/helpers';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
@@ -172,7 +176,8 @@ const handleAiIndexError = (error: unknown, response: KibanaResponseFactory, log
     error instanceof InvalidAiIndexTraceError ||
     error instanceof AiIndexQueryResponseTooLargeError ||
     error instanceof AiIndexDescribeResponseTooLargeError ||
-    error instanceof InvalidAiIndexQueryError
+    error instanceof InvalidAiIndexQueryError ||
+    error instanceof InvalidDreamingConfigError
   ) {
     return response.badRequest({ body: { message: error.message } });
   }
@@ -1064,6 +1069,117 @@ export const registerAiIndexRoutes = ({
             saved: ['feedback_analysis'],
           });
           const body: PutAiIndexFeedbackAnalysisResponse = { feedback_analysis: feedbackAnalysis };
+          return response.ok({ body });
+        } catch (error) {
+          auditLogger.log(
+            aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId, error })
+          );
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  // Get the dreaming configuration of an AI Index
+  router.versioned
+    .get({
+      path: AI_INDEX_DREAMING_PATH,
+      security: READ_SECURITY,
+      access: 'public',
+      summary: 'Get the dreaming configuration of an AI Index',
+      description: [
+        'Returns what the AI Index learns from its memories: the fact types, entity types and relationship types dreaming builds, its instructions, and how often it runs. An AI Index that never configured dreaming returns `{ "enabled": false }`.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+      ].join('\n\n'),
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental', since: '9.7.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: { params: aiIndexIdParamsSchema },
+          response: {
+            200: {
+              body: dreamingResponseSchema,
+              description: 'The dreaming configuration of the AI Index.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const { dreaming } = await getAiIndexService().get(aiIndexId, spaceId);
+          const body: GetAiIndexDreamingResponse = { dreaming: dreaming ?? DREAMING_DISABLED };
+          return response.ok({ body });
+        } catch (error) {
+          return handleAiIndexError(error, response, logger);
+        }
+      })
+    );
+
+  // Update the dreaming configuration of an AI Index
+  router.versioned
+    .put({
+      path: AI_INDEX_DREAMING_PATH,
+      security: WRITE_SECURITY,
+      access: 'public',
+      summary: 'Configure dreaming for an AI Index',
+      description: [
+        'Replaces the dreaming configuration of an AI Index without touching the rest of the entry. Permitted on managed AI Indices, whose definition is otherwise immutable. Turning dreaming on requires the AI Index to have memory enabled.',
+        CONTEXT_ENGINE_DISABLED_NOTE,
+      ].join('\n\n'),
+      options: {
+        tags: ['oas-tag:context engine'],
+        availability: { stability: 'experimental', since: '9.7.0' },
+      },
+    })
+    .addVersion(
+      {
+        version: AI_INDEX_API_VERSION,
+        validate: {
+          request: { params: aiIndexIdParamsSchema, body: dreamingConfigSchema },
+          response: {
+            200: {
+              body: dreamingResponseSchema,
+              description: 'The stored dreaming configuration.',
+            },
+            400: {
+              body: errorResponseSchema,
+              description:
+                'The configuration is invalid, or turns dreaming on for an AI Index without memory.',
+            },
+            404: {
+              body: errorResponseSchema,
+              description:
+                'No AI Index with the given ID exists in the current space, or Context Engine is turned off in this space.',
+            },
+            409: {
+              body: errorResponseSchema,
+              description: 'The write conflicted with a concurrent update.',
+            },
+          },
+        },
+      },
+      withContextEngineFeatureFlag(async (ctx, request, response) => {
+        const auditLogger = (await ctx.core).security.audit.logger;
+        const { aiIndexId } = request.params;
+        const spaceId = resolveSpaceId(await getSpaces(), request);
+        try {
+          const aiIndexService = getAiIndexService();
+          const previous = await findAiIndex(aiIndexService, aiIndexId, spaceId);
+          const dreaming = await aiIndexService.setDreaming(aiIndexId, spaceId, request.body);
+          auditLogger.log(aiIndexAuditEvent({ action: AiIndexAuditAction.UPDATE, id: aiIndexId }));
+          await notifySaved({ aiIndexId, spaceId, request, previous, saved: ['dreaming'] });
+          const body: GetAiIndexDreamingResponse = { dreaming };
           return response.ok({ body });
         } catch (error) {
           auditLogger.log(

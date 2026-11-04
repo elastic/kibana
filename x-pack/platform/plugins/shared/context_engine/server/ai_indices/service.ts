@@ -22,6 +22,7 @@ import type {
   AiIndexHttpItem,
   AiIndexProperties,
 } from '../../common/http_api/ai_indices';
+import type { AiIndexDreamingConfig } from '../../common/dreaming';
 import { isIndexPattern } from '../../common/ai_index_dest';
 import { AI_INDEX_ID_PATTERN } from '../../common/validation';
 import { createSpaceDslFilter } from '../utils/space_filter';
@@ -32,6 +33,7 @@ import {
   AiIndexNotFoundError,
   AiIndexIdConflictError,
   AiIndexAlreadyExistsError,
+  InvalidDreamingConfigError,
 } from './errors';
 import type { AiIndexDocument, AiIndexStorageClient, StoredAiIndexDocument } from './storage';
 import { buildManagedAiIndexDocId, createAiIndexStorageClient } from './storage';
@@ -49,12 +51,26 @@ const resolveMemoryEnabled = (
   document: Pick<AiIndexDocument, 'managed' | 'memory_enabled'>
 ): boolean => document.memory_enabled ?? !document.managed;
 
+/** Dreaming builds long-term memory from the memories an AI index holds, so it needs memory on. */
+const assertCanDream = (
+  aiIndexId: string,
+  memoryEnabled: boolean,
+  dreaming: AiIndexDreamingConfig | undefined
+): void => {
+  if (dreaming?.enabled && !memoryEnabled) {
+    throw new InvalidDreamingConfigError(
+      `AI index '${aiIndexId}' does not have memory enabled, so it cannot dream.`
+    );
+  }
+};
+
 const toAiIndexItem = (document: AiIndexDocument): AiIndexHttpItem => ({
   id: document.id,
   ...(document.description !== undefined && { description: document.description }),
   ...(document.feedback_analysis !== undefined && {
     feedback_analysis: document.feedback_analysis,
   }),
+  ...(document.dreaming !== undefined && { dreaming: document.dreaming }),
   managed: document.managed ?? false,
   memory_enabled: resolveMemoryEnabled(document),
   dest: document.dest,
@@ -140,6 +156,7 @@ export class AiIndexService {
     if (this.managedBootstrap?.isManaged(aiIndexId)) {
       throw new AiIndexManagedError(aiIndexId);
     }
+    assertCanDream(aiIndexId, properties.memory_enabled ?? true, properties.dreaming);
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId, spaceId);
@@ -167,6 +184,7 @@ export class AiIndexService {
     spaceId: string,
     properties: AiIndexProperties
   ): Promise<'created' | 'updated'> {
+    assertCanDream(aiIndexId, properties.memory_enabled ?? true, properties.dreaming);
     await this.assertValidDest(properties.dest);
 
     const existing = await this.findDocument(aiIndexId, spaceId);
@@ -301,6 +319,33 @@ export class AiIndexService {
     );
 
     return feedbackAnalysis;
+  }
+
+  /**
+   * Replaces only the dreaming config, leaving the rest of the entry untouched. Like
+   * {@link setFeedbackAnalysis} this is permitted on managed entries: what an AI index learns from
+   * its memories is operator preference, not part of the definition its plugin owns.
+   */
+  async setDreaming(
+    aiIndexId: string,
+    spaceId: string,
+    dreaming: AiIndexDreamingConfig
+  ): Promise<AiIndexDreamingConfig> {
+    const existing = await this.findDocument(aiIndexId, spaceId);
+    if (!existing) {
+      throw new AiIndexNotFoundError(aiIndexId);
+    }
+    const memoryEnabled = resolveMemoryEnabled(existing.document);
+    assertCanDream(aiIndexId, memoryEnabled, dreaming);
+
+    await this.writeDocument(
+      aiIndexId,
+      spaceId,
+      { ...existing.document, memory_enabled: memoryEnabled, dreaming },
+      existing
+    );
+
+    return dreaming;
   }
 
   async get(aiIndexId: string, spaceId: string): Promise<AiIndexHttpItem> {

@@ -37,6 +37,7 @@ import {
   MAX_KI_SEARCH_QUERY_LENGTH,
   AI_INDEX_BY_ID_PATH,
   AI_INDEX_DESCRIBE_PATH,
+  AI_INDEX_DREAMING_PATH,
   AI_INDEX_FEEDBACK_ANALYSIS_PATH,
   AI_INDEX_KI_BY_ID_PATH,
   AI_INDEX_KI_RESTORE_PATH,
@@ -59,6 +60,7 @@ import {
   AiIndexAlreadyExistsError,
   AiIndexQueryResponseTooLargeError,
   InvalidAiIndexQueryError,
+  InvalidDreamingConfigError,
 } from '../ai_indices/errors';
 import type { AiIndexDataReadServiceApi } from '../ai_indices/data_read_service';
 import type { AiIndexService } from '../ai_indices/service';
@@ -130,7 +132,10 @@ const kiBackingIndex = '.ds-ai-index-ds-customer_support-2026.01.01-000001';
 describe('ai indices routes', () => {
   let routes: Record<string, RegisteredRoute>;
   let aiIndexService: jest.Mocked<
-    Pick<AiIndexService, 'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis'>
+    Pick<
+      AiIndexService,
+      'create' | 'put' | 'get' | 'list' | 'delete' | 'setFeedbackAnalysis' | 'setDreaming'
+    >
   >;
   let improvementsService: jest.Mocked<Pick<ImprovementsServiceApi, 'deleteByAiIndex'>>;
   let workflowsManagementApi: jest.Mocked<DeleteWorkflowsApi>;
@@ -239,6 +244,7 @@ describe('ai indices routes', () => {
       list: jest.fn(),
       delete: jest.fn(),
       setFeedbackAnalysis: jest.fn(),
+      setDreaming: jest.fn(),
     };
     improvementsService = { deleteByAiIndex: jest.fn().mockResolvedValue(undefined) };
     workflowsManagementApi = {
@@ -2539,6 +2545,153 @@ describe('ai indices routes', () => {
       expect(logger.warn).toHaveBeenCalledWith(
         expect.stringContaining('could not read it back to apply the change: cluster unavailable')
       );
+    });
+  });
+
+  describe('dreaming', () => {
+    const dreaming = {
+      enabled: true,
+      instructions: 'Remember what customers prefer.',
+      facts: [{ type: 'preference' }],
+    };
+
+    describe('GET /api/context_engine/ai_index/{aiIndexId}/_dreaming', () => {
+      it('returns the stored config', async () => {
+        aiIndexService.get.mockResolvedValue({ ...aiIndexItem, dreaming });
+
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming } });
+      });
+
+      it('returns dreaming switched off when it was never configured', async () => {
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+        });
+
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming: { enabled: false } } });
+      });
+
+      it('returns 404 when the AI index does not exist', async () => {
+        aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+        await callRoute('GET', AI_INDEX_DREAMING_PATH, { params: { aiIndexId: 'missing' } });
+
+        expect(response.notFound).toHaveBeenCalled();
+      });
+    });
+
+    describe('PUT /api/context_engine/ai_index/{aiIndexId}/_dreaming', () => {
+      it('stores the config in the request space and returns it', async () => {
+        const spaces = spacesMock.createStart();
+        spaces.spacesService.getSpaceId.mockReturnValue(asSpaceId('marketing'));
+        getSpaces.mockResolvedValue(spaces);
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(aiIndexService.setDreaming).toHaveBeenCalledWith(
+          'customer_support',
+          'marketing',
+          dreaming
+        );
+        expect(response.ok).toHaveBeenCalledWith({ body: { dreaming } });
+        expect(auditLogger.log).toHaveBeenCalledWith(
+          expect.objectContaining({
+            event: expect.objectContaining({ action: 'ai_index_update', outcome: 'success' }),
+          })
+        );
+      });
+
+      it('tells change handlers what changed, naming dreaming as the field it saved', async () => {
+        const updated = { ...aiIndexItem, dreaming };
+        aiIndexService.get.mockResolvedValueOnce(aiIndexItem).mockResolvedValueOnce(updated);
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(onAiIndexChange).toHaveBeenCalledWith(
+          expect.objectContaining({
+            previous: aiIndexItem,
+            current: updated,
+            changed: new Set(['dreaming']),
+            saved: new Set(['dreaming']),
+          })
+        );
+      });
+
+      it('does not reconcile the feedback analysis schedule', async () => {
+        aiIndexService.setDreaming.mockResolvedValue(dreaming);
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(scheduleService.reconcile).not.toHaveBeenCalled();
+      });
+
+      it('returns 400 when dreaming is turned on for an AI index without memory', async () => {
+        aiIndexService.setDreaming.mockRejectedValue(
+          new InvalidDreamingConfigError('no memory, cannot dream')
+        );
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'customer_support' },
+          body: dreaming,
+        });
+
+        expect(response.badRequest).toHaveBeenCalledWith({
+          body: { message: 'no memory, cannot dream' },
+        });
+        expect(onAiIndexChange).not.toHaveBeenCalled();
+      });
+
+      it('returns 404 when the AI index does not exist', async () => {
+        aiIndexService.get.mockRejectedValue(new AiIndexNotFoundError('missing'));
+        aiIndexService.setDreaming.mockRejectedValue(new AiIndexNotFoundError('missing'));
+
+        await callRoute('PUT', AI_INDEX_DREAMING_PATH, {
+          params: { aiIndexId: 'missing' },
+          body: dreaming,
+        });
+
+        expect(response.notFound).toHaveBeenCalled();
+      });
+
+      it('validates the body with the dreaming config schema', () => {
+        const { validate } = getRoute('PUT', AI_INDEX_DREAMING_PATH);
+        if (validate === false || !validate.request?.body) {
+          throw new Error('Expected a body schema');
+        }
+        const body = validate.request.body as Type<unknown>;
+
+        expect(() => body.validate({ enabled: true, facts: [{ type: 'Not Valid' }] })).toThrow();
+        expect(body.validate(dreaming)).toEqual(dreaming);
+      });
+    });
+
+    it('accepts the dreaming config when an AI index is created', async () => {
+      aiIndexService.create.mockResolvedValue(undefined);
+      const { validate } = getRoute('POST', AI_INDEX_PATH);
+      if (validate === false || !validate.request?.body) {
+        throw new Error('Expected a body schema');
+      }
+      const body = (validate.request.body as Type<Record<string, unknown>>).validate({
+        id: 'customer_support',
+        dest: { type: 'data_stream', value: 'ai-index-ds-customer_support' },
+        dreaming,
+      });
+
+      expect(body.dreaming).toEqual(dreaming);
     });
   });
 
