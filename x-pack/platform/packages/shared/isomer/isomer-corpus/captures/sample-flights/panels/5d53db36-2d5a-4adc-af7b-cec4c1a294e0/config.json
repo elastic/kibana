@@ -1,0 +1,89 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "in_as_code": true,
+  "panel": {
+    "id": "5d53db36-2d5a-4adc-af7b-cec4c1a294e0",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 58,
+      "w": 12,
+      "h": 11
+    },
+    "config": {
+      "type": "pie",
+      "title": "[Flights] Delay Type",
+      "filters": [
+        {
+          "disabled": false,
+          "negate": true,
+          "data_view_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "type": "condition",
+          "condition": {
+            "field": "FlightDelayType",
+            "negate": true,
+            "operator": "is",
+            "value": "No Delay"
+          }
+        }
+      ],
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_reference",
+        "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
+      },
+      "legend": {
+        "nested": false,
+        "truncate_after_lines": 1,
+        "visibility": "auto",
+        "size": "auto",
+        "position": "right"
+      },
+      "styling": {
+        "values": {
+          "visible": true,
+          "mode": "percentage",
+          "percent_decimals": 2
+        },
+        "labels": {
+          "visible": true,
+          "position": "outside"
+        }
+      },
+      "metrics": [
+        {
+          "empty_as_null": false,
+          "operation": "count",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ],
+      "group_by": [
+        {
+          "operation": "terms",
+          "fields": [
+            "FlightDelayType"
+          ],
+          "limit": 10,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          },
+          "color": {
+            "mode": "categorical",
+            "palette": "LEGACY_PALETTE_cool",
+            "mapping": []
+          }
+        }
+      ],
+      "hide_title": false
+    },
+    "inCollapsedSection": false
+  }
+}

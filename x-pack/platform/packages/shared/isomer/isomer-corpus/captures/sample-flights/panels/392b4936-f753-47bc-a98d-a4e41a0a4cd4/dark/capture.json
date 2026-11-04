@@ -1,0 +1,160 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "392b4936-f753-47bc-a98d-a4e41a0a4cd4",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "metric",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 8,
+      "h": 8
+    },
+    "size": {
+      "width": 255.4375,
+      "height": 216
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": -993,
+      "width": 255.4375,
+      "height": 216
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 16,
+        "rect": {
+          "width": 255.4375,
+          "height": 216
+        },
+        "debugState": null
+      }
+    ],
+    "metrics": [
+      {
+        "ariaLabel": null,
+        "inlineBackgroundColor": "rgb(17, 28, 44)",
+        "backgroundColor": "rgb(17, 28, 44)",
+        "texts": [
+          {
+            "text": "Total flights",
+            "tag": "span",
+            "className": "",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "2,235",
+            "tag": "p",
+            "className": "echMetricText__value",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "8fa993db-c147-4954-adf7-4ff264d42576": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "81124c45-6ab6-42f4-8859-495d55eb8065",
+            "name": "Total flights",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "0",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Metric"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "81124c45-6ab6-42f4-8859-495d55eb8065": 2235
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "statistics": {
+            "totalCount": 2235
+          }
+        }
+      }
+    }
+  }
+}

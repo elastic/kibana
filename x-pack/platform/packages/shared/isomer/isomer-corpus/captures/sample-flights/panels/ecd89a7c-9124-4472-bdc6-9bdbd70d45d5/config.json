@@ -1,0 +1,125 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "in_as_code": true,
+  "panel": {
+    "id": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
+    "type": "vis",
+    "grid": {
+      "x": 36,
+      "y": 58,
+      "w": 12,
+      "h": 11
+    },
+    "config": {
+      "type": "xy",
+      "legend": {
+        "visibility": "auto",
+        "placement": "outside",
+        "layout": {
+          "type": "grid",
+          "truncate": {
+            "max_lines": 1
+          }
+        },
+        "position": "right"
+      },
+      "axis": {
+        "x": {
+          "title": {
+            "visible": true
+          },
+          "ticks": {
+            "visible": true
+          },
+          "grid": {
+            "visible": true
+          },
+          "labels": {
+            "orientation": "horizontal"
+          },
+          "domain": {
+            "type": "fit",
+            "rounding": false
+          }
+        },
+        "y": {
+          "title": {
+            "visible": true
+          },
+          "ticks": {
+            "visible": true
+          },
+          "grid": {
+            "visible": true
+          },
+          "labels": {
+            "orientation": "horizontal"
+          },
+          "scale": "linear",
+          "domain": {
+            "type": "full",
+            "rounding": true
+          }
+        }
+      },
+      "styling": {
+        "overlays": {
+          "partial_buckets": {
+            "visible": false
+          },
+          "current_time_marker": {
+            "visible": false
+          }
+        },
+        "bars": {
+          "minimum_height": 1,
+          "data_labels": {
+            "visible": false
+          }
+        }
+      },
+      "layers": [
+        {
+          "sampling": 1,
+          "ignore_global_filters": false,
+          "data_source": {
+            "type": "data_view_reference",
+            "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
+          },
+          "type": "bar_horizontal",
+          "breakdown_by": {
+            "operation": "terms",
+            "fields": [
+              "DestWeather"
+            ],
+            "limit": 10,
+            "other_bucket": {
+              "include_documents_without_field": false
+            },
+            "rank_by": {
+              "type": "metric",
+              "metric_index": 0,
+              "direction": "desc"
+            },
+            "color": {
+              "mode": "categorical",
+              "palette": "LEGACY_PALETTE_temperature",
+              "mapping": []
+            }
+          },
+          "y": [
+            {
+              "empty_as_null": true,
+              "operation": "count",
+              "axis": "y",
+              "color": {
+                "type": "auto"
+              }
+            }
+          ]
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

@@ -1,0 +1,1664 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "panel_id": "cbca842c-b9fa-4523-9ce0-14e350866e33",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d/d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T00:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 00:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:%272025-01-08T00:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 47,
+      "w": 24,
+      "h": 13
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 356
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 603,
+      "width": 782.3125,
+      "height": 356
+    },
+    "title": "[Logs] Bytes distribution",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 14,
+        "rect": {
+          "width": 766.3125,
+          "height": 316
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{efaebb4b-6893-46a3-8fae-0eecef93cfab:643e21d0-c836-4041-b283-85805993cabb:percentage:-}yAccessor{percentage}splitAccessors{}",
+                "name": "percentage",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "bytes",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "2,000",
+                  "4,000",
+                  "6,000",
+                  "8,000",
+                  "10,000",
+                  "12,000",
+                  "14,000",
+                  "16,000",
+                  "18,000"
+                ],
+                "values": [
+                  0,
+                  2000,
+                  4000,
+                  6000,
+                  8000,
+                  10000,
+                  12000,
+                  14000,
+                  16000,
+                  18000
+                ],
+                "gridlines": [
+                  {
+                    "x": 1.6725063131313131,
+                    "y": 0
+                  },
+                  {
+                    "x": 68.57275883838383,
+                    "y": 0
+                  },
+                  {
+                    "x": 135.47301136363637,
+                    "y": 0
+                  },
+                  {
+                    "x": 202.3732638888889,
+                    "y": 0
+                  },
+                  {
+                    "x": 269.27351641414145,
+                    "y": 0
+                  },
+                  {
+                    "x": 336.173768939394,
+                    "y": 0
+                  },
+                  {
+                    "x": 403.07402146464653,
+                    "y": 0
+                  },
+                  {
+                    "x": 469.9742739898991,
+                    "y": 0
+                  },
+                  {
+                    "x": 536.8745265151515,
+                    "y": 0
+                  },
+                  {
+                    "x": 603.774779040404,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "percentage",
+                "position": "left",
+                "labels": [
+                  "0.0%",
+                  "0.5%",
+                  "1.0%",
+                  "1.5%",
+                  "2.0%",
+                  "2.5%",
+                  "3.0%",
+                  "3.5%"
+                ],
+                "values": [
+                  0,
+                  0.005,
+                  0.01,
+                  0.015,
+                  0.02,
+                  0.025,
+                  0.03,
+                  0.035
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 34.428571428571466
+                  },
+                  {
+                    "x": 0,
+                    "y": 68.85714285714285
+                  },
+                  {
+                    "x": 0,
+                    "y": 103.28571428571429
+                  },
+                  {
+                    "x": 0,
+                    "y": 137.71428571428572
+                  },
+                  {
+                    "x": 0,
+                    "y": 172.14285714285714
+                  },
+                  {
+                    "x": 0,
+                    "y": 206.57142857142858
+                  },
+                  {
+                    "x": 0,
+                    "y": 241
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{left}spec{efaebb4b-6893-46a3-8fae-0eecef93cfab:643e21d0-c836-4041-b283-85805993cabb:percentage:-}yAccessor{percentage}splitAccessors{}",
+              "name": "percentage",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": 0,
+                  "y": 0.032,
+                  "mark": null
+                },
+                {
+                  "x": 100,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 200,
+                  "y": 0.006,
+                  "mark": null
+                },
+                {
+                  "x": 300,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 400,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 500,
+                  "y": 0.003,
+                  "mark": null
+                },
+                {
+                  "x": 600,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 700,
+                  "y": 0.005,
+                  "mark": null
+                },
+                {
+                  "x": 800,
+                  "y": 0.005,
+                  "mark": null
+                },
+                {
+                  "x": 900,
+                  "y": 0.005,
+                  "mark": null
+                },
+                {
+                  "x": 1100,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 1200,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 1400,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 1500,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 1600,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 1700,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 1800,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 1900,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 2000,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 2100,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 2200,
+                  "y": 0.006,
+                  "mark": null
+                },
+                {
+                  "x": 2300,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 2400,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 2500,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 2600,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 2700,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 2800,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 2900,
+                  "y": 0.007,
+                  "mark": null
+                },
+                {
+                  "x": 3000,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 3100,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 3200,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 3300,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 3400,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 3500,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 3600,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 3700,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 3800,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 3900,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 4000,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 4100,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 4200,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 4300,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 4400,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 4500,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 4600,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 4700,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 4800,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 4900,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 5000,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 5100,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 5200,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 5300,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 5400,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 5500,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 5600,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 5700,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 5800,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 5900,
+                  "y": 0.011,
+                  "mark": null
+                },
+                {
+                  "x": 6000,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 6100,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 6200,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 6300,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 6400,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 6500,
+                  "y": 0.014,
+                  "mark": null
+                },
+                {
+                  "x": 6600,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 6700,
+                  "y": 0.014,
+                  "mark": null
+                },
+                {
+                  "x": 6800,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 6900,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 7000,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 7100,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 7200,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 7300,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 7400,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 7500,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 7600,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 7700,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 7800,
+                  "y": 0.006,
+                  "mark": null
+                },
+                {
+                  "x": 7900,
+                  "y": 0.005,
+                  "mark": null
+                },
+                {
+                  "x": 8000,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 8100,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 8200,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 8300,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 8400,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 8500,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 8600,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 8700,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 8800,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 8900,
+                  "y": 0.01,
+                  "mark": null
+                },
+                {
+                  "x": 9000,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 9100,
+                  "y": 0.009,
+                  "mark": null
+                },
+                {
+                  "x": 9200,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 9300,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 9400,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 9500,
+                  "y": 0.014,
+                  "mark": null
+                },
+                {
+                  "x": 9600,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 9700,
+                  "y": 0.008,
+                  "mark": null
+                },
+                {
+                  "x": 9800,
+                  "y": 0.013,
+                  "mark": null
+                },
+                {
+                  "x": 9900,
+                  "y": 0.012,
+                  "mark": null
+                },
+                {
+                  "x": 10100,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 10200,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 10400,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 10500,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 10800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 11000,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 11100,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 11200,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 11300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 11800,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 11900,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 12100,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12400,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12500,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12600,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 12900,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 13000,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 13300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 13600,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 13700,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 13800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 13900,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 14000,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 14300,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 14400,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 14500,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 14700,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 14800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 15000,
+                  "y": 0.005,
+                  "mark": null
+                },
+                {
+                  "x": 15300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 15400,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 15600,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 15700,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16100,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16200,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16600,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16700,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 16900,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 17000,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 17300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 17400,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 17500,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 18000,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 18500,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 18800,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 19300,
+                  "y": 0.001,
+                  "mark": null
+                },
+                {
+                  "x": 19500,
+                  "y": 0.002,
+                  "mark": null
+                },
+                {
+                  "x": 19700,
+                  "y": 0.001,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "efaebb4b-6893-46a3-8fae-0eecef93cfab": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM kibana_sample_data_logs\n| INLINESTATS total_visits = COUNT()\n| STATS visits = COUNT() by bytes = bucket(bytes, 1000, 0, 100000), total_visits\n| EVAL percentage = (TO_DOUBLE(visits) / total_visits)\n| EVAL percentage = ROUND(percentage, 3)\n| DROP total_visits, visits",
+          "statistics": {
+            "totalCount": 150
+          }
+        },
+        "columns": [
+          {
+            "id": "643e21d0-c836-4041-b283-85805993cabb",
+            "name": "bytes",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "bytes",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "esMeta": {
+                "bucket": {
+                  "interval": 100
+                }
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "percentage",
+            "name": "percentage",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "percentage",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0.0%",
+                  "formatOverride": true,
+                  "decimals": 1
+                }
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8400,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5300,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6100,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11100,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8500,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7300,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3300,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7000,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3800,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3100,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8900,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4600,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9600,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3600,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4100,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3200,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7900,
+            "percentage": 0.005
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7800,
+            "percentage": 0.006
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9400,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7500,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5700,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7700,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7100,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5000,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9300,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2400,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2000,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5600,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 600,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2100,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4200,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6500,
+            "percentage": 0.014
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4700,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 0,
+            "percentage": 0.032
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 400,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16200,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8800,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9000,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6700,
+            "percentage": 0.014
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5500,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6200,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4500,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6000,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9200,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 800,
+            "percentage": 0.005
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3700,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4000,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4400,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16700,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2300,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 700,
+            "percentage": 0.005
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6900,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1900,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8200,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1500,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5900,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9700,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5100,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11900,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6800,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8700,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5800,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 900,
+            "percentage": 0.005
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4900,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5400,
+            "percentage": 0.011
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8100,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9900,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 100,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6400,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9100,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7200,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7400,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6600,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2500,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2800,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2200,
+            "percentage": 0.006
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2700,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4800,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16100,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 6300,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3500,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8000,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 5200,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8600,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1800,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 4300,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11800,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 17500,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 15000,
+            "percentage": 0.005
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3000,
+            "percentage": 0.01
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1200,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 8300,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14000,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3900,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12900,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 7600,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1600,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1100,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 17400,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 300,
+            "percentage": 0.012
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9800,
+            "percentage": 0.013
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13600,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 10200,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 18800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 9500,
+            "percentage": 0.014
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2600,
+            "percentage": 0.009
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12400,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 2900,
+            "percentage": 0.007
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 200,
+            "percentage": 0.006
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13900,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1700,
+            "percentage": 0.008
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 17300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 1400,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 17000,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 15600,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14400,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12600,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14300,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14500,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 10400,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12500,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12100,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 10100,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 15300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 19700,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 18000,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 19500,
+            "percentage": 0.002
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13000,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 13700,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16900,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 19300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 15400,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11200,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11000,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16600,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 18500,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 12800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 500,
+            "percentage": 0.003
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 15700,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14700,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 16800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 10500,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 11300,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 10800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 14800,
+            "percentage": 0.001
+          },
+          {
+            "643e21d0-c836-4041-b283-85805993cabb": 3400,
+            "percentage": 0.012
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"Line 2:3: INLINESTATS is deprecated, use INLINE STATS instead\", 299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

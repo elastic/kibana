@@ -1,0 +1,94 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "in_as_code": true,
+  "panel": {
+    "id": "bda054f7-2d06-4936-b461-365d1be621fa",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 31,
+      "w": 24,
+      "h": 14
+    },
+    "config": {
+      "type": "data_table",
+      "title": "Daily comparison",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_reference",
+        "ref_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+      },
+      "styling": {
+        "density": {
+          "mode": "default",
+          "height": {
+            "value": {
+              "type": "custom",
+              "lines": 1
+            }
+          }
+        }
+      },
+      "metrics": [
+        {
+          "label": "This week",
+          "field": "taxful_total_price",
+          "empty_as_null": false,
+          "operation": "sum",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "left"
+        },
+        {
+          "label": "1 week ago",
+          "time_shift": "1w",
+          "field": "taxful_total_price",
+          "empty_as_null": false,
+          "operation": "sum",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "format": {
+            "type": "number",
+            "decimals": 2,
+            "compact": false
+          },
+          "label": "Difference",
+          "operation": "formula",
+          "formula": "sum(taxful_total_price) - sum(taxful_total_price, shift='1w')",
+          "apply_color_to": "value",
+          "visible": true,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "status"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "operation": "date_histogram",
+          "field": "order_date",
+          "suggested_interval": "1d",
+          "use_original_time_range": false,
+          "include_empty_rows": true,
+          "drop_partial_intervals": false,
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

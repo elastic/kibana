@@ -1,0 +1,111 @@
+{
+  "dashboard_id": "isomer-corpus-values",
+  "title": "Isomer corpus: values",
+  "theme": "dark",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 0,
+    "rendered": 0
+  },
+  "panels": [
+    {
+      "id": "values-metric-null",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-metric-negative",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-metric-huge",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-metric-tiny",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-xy-negative",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-xy-null-gaps",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-xy-huge-esql",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-table",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "values-metric-esql",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    }
+  ]
+}

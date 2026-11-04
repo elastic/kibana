@@ -1,0 +1,341 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "d68e91dd-1539-48b0-9279-b43bba2054fe",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 45,
+      "w": 24,
+      "h": 9
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 244
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 981,
+      "width": 782.3125,
+      "height": 244
+    },
+    "title": "Top products this week",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 18,
+        "rect": {
+          "width": 766.3125,
+          "height": 204
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{5ed846c2-a70b-4d9c-a244-f254bef763b8:d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46:7ac31901-277a-46e2-8128-8d684b2c1127:-}yAccessor{7ac31901-277a-46e2-8128-8d684b2c1127}splitAccessors{}",
+                "name": "Items",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "Product name",
+                "position": "left",
+                "labels": [
+                  "Print T-shirt - black",
+                  "Ankle boots - black",
+                  "Boots - black",
+                  "Sweatshirt - black",
+                  "Lace-up boots - black"
+                ],
+                "values": [
+                  "Print T-shirt - black",
+                  "Ankle boots - black",
+                  "Boots - black",
+                  "Sweatshirt - black",
+                  "Lace-up boots - black"
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 13.400000000000002
+                  },
+                  {
+                    "x": 0,
+                    "y": 40.2
+                  },
+                  {
+                    "x": 0,
+                    "y": 67
+                  },
+                  {
+                    "x": 0,
+                    "y": 93.8
+                  },
+                  {
+                    "x": 0,
+                    "y": 120.60000000000001
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "Items",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "5",
+                  "10",
+                  "15",
+                  "20",
+                  "25",
+                  "30"
+                ],
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 102.30208333333333,
+                    "y": 0
+                  },
+                  {
+                    "x": 204.60416666666666,
+                    "y": 0
+                  },
+                  {
+                    "x": 306.90625,
+                    "y": 0
+                  },
+                  {
+                    "x": 409.2083333333333,
+                    "y": 0
+                  },
+                  {
+                    "x": 511.5104166666667,
+                    "y": 0
+                  },
+                  {
+                    "x": 613.8125,
+                    "y": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{left}spec{5ed846c2-a70b-4d9c-a244-f254bef763b8:d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46:7ac31901-277a-46e2-8128-8d684b2c1127:-}yAccessor{7ac31901-277a-46e2-8128-8d684b2c1127}splitAccessors{}",
+              "name": "Items",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": "Print T-shirt - black",
+                  "y": 28,
+                  "mark": null
+                },
+                {
+                  "x": "Ankle boots - black",
+                  "y": 25,
+                  "mark": null
+                },
+                {
+                  "x": "Boots - black",
+                  "y": 24,
+                  "mark": null
+                },
+                {
+                  "x": "Sweatshirt - black",
+                  "y": 24,
+                  "mark": null
+                },
+                {
+                  "x": "Lace-up boots - black",
+                  "y": 22,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "28",
+                "25",
+                "24",
+                "24",
+                "22"
+              ],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "5ed846c2-a70b-4d9c-a244-f254bef763b8": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46",
+            "name": "Product name",
+            "meta": {
+              "type": "string",
+              "field": "products.product_name.keyword",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "products.product_name.keyword",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 5,
+                  "otherBucket": false,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "7ac31901-277a-46e2-8128-8d684b2c1127",
+            "name": "Items",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46": "Print T-shirt - black",
+            "7ac31901-277a-46e2-8128-8d684b2c1127": 28
+          },
+          {
+            "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46": "Ankle boots - black",
+            "7ac31901-277a-46e2-8128-8d684b2c1127": 25
+          },
+          {
+            "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46": "Boots - black",
+            "7ac31901-277a-46e2-8128-8d684b2c1127": 24
+          },
+          {
+            "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46": "Sweatshirt - black",
+            "7ac31901-277a-46e2-8128-8d684b2c1127": 24
+          },
+          {
+            "d77cdd24-dedc-48dd-9a4b-d34c6f1a6c46": "Lace-up boots - black",
+            "7ac31901-277a-46e2-8128-8d684b2c1127": 22
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,50 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "in_as_code": true,
+  "panel": {
+    "id": "58774330-b1b3-42dd-a04c-fbce9cc4d288",
+    "type": "vis",
+    "grid": {
+      "x": 36,
+      "y": 0,
+      "w": 12,
+      "h": 7
+    },
+    "config": {
+      "type": "metric",
+      "title": "Median spending",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_reference",
+        "ref_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+      },
+      "styling": {
+        "density": "compact",
+        "primary": {
+          "position": "bottom",
+          "labels": {
+            "alignment": "left"
+          },
+          "value": {
+            "alignment": "right",
+            "sizing": "auto"
+          }
+        }
+      },
+      "metrics": [
+        {
+          "label": "Median spending",
+          "field": "taxful_total_price",
+          "operation": "median",
+          "type": "primary",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ],
+      "hide_title": true
+    },
+    "inCollapsedSection": false
+  }
+}

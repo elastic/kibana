@@ -1,0 +1,47 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "in_as_code": true,
+  "panel": {
+    "id": "bb94016e-f4a6-49ca-87a9-296a2869d570",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 12,
+      "h": 7
+    },
+    "config": {
+      "type": "metric",
+      "title": "",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "esql",
+        "query": "FROM kibana_sample_data_logs | STATS COUNT(*) | RENAME `COUNT(*)` as `Visits`"
+      },
+      "styling": {
+        "density": "compact",
+        "primary": {
+          "position": "bottom",
+          "labels": {
+            "alignment": "left"
+          },
+          "value": {
+            "alignment": "right",
+            "sizing": "auto"
+          }
+        }
+      },
+      "metrics": [
+        {
+          "column": "Visits",
+          "type": "primary",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

@@ -1,0 +1,83 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "in_as_code": true,
+  "panel": {
+    "id": "21bb0939-ee09-4021-8848-6552b3a6a788",
+    "type": "vis",
+    "grid": {
+      "x": 0,
+      "y": 47,
+      "w": 24,
+      "h": 13
+    },
+    "config": {
+      "type": "data_table",
+      "title": "SUM(bytes) & Unique Visits (Total - MB) & Bytes(Total) of Type",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "esql",
+        "query": "FROM kibana_sample_data_logs\n| SORT @timestamp\n| EVAL t = now()\n| EVAL buckets = CASE(timestamp <= t AND timestamp >= t - 1 hour, \"Last hour\", \"Other\")\n| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) by buckets, extension.keyword\n| EVAL sum_last_hour = CASE(buckets == \"Last hour\", sum), sum_rest = CASE(buckets == \"Other\", sum), count_last_hour = CASE(buckets == \"Last hour\", count), count_rest = CASE(buckets == \"Other\", count)\n| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) by buckets, extension.keyword\n| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))\n| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))\n| KEEP count_last_hour, total_visits, total_bytes, sum_last_hour, extension.keyword\n| STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits), bytes_transform = SUM(total_bytes), bytes_transform_last_hour = SUM(sum_last_hour) BY extension.keyword\n| RENAME total_visits as `Unique Visits (Total)`, count_last_hour as `Unique Visits (Last hour)`, bytes_transform as `Bytes(Total)`, bytes_transform_last_hour as `Bytes(Last hour)`, extension.keyword as `Type`\n| SORT `Unique Visits (Total)` DESC"
+      },
+      "metrics": [
+        {
+          "column": "Bytes(Total)",
+          "format": {
+            "type": "bytes",
+            "decimals": 2
+          },
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "Bytes(Last hour)",
+          "format": {
+            "type": "bytes",
+            "decimals": 2
+          },
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "Unique Visits (Total)",
+          "apply_color_to": "value",
+          "visible": true,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "status"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "Unique Visits (Last hour)",
+          "apply_color_to": "value",
+          "visible": true,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "status"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "column": "Type",
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ],
+      "hide_title": true
+    },
+    "inCollapsedSection": false
+  }
+}

@@ -1,0 +1,789 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "panel_id": "buckets-xy-other-missing",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-buckets?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 0,
+      "w": 24,
+      "h": 12
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 153,
+      "width": 782.3125,
+      "height": 328
+    },
+    "title": "Top 5 categories per day, with Other and missing",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 2,
+        "rect": {
+          "width": 766.3125,
+          "height": 288
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-alpha}",
+                "name": "alpha",
+                "color": "#16c5c0"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-(null)}",
+                "name": "(null)",
+                "color": "#a6edea"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-bravo}",
+                "name": "bravo",
+                "color": "#61a2ff"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-delta}",
+                "name": "delta",
+                "color": "#bfdbff"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-echo}",
+                "name": "echo",
+                "color": "#ee72a6"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-charlie}",
+                "name": "charlie",
+                "color": "#ffc7db"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-india}",
+                "name": "india",
+                "color": "#f6726a"
+              },
+              {
+                "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-hotel}",
+                "name": "hotel",
+                "color": "#ffc9c2"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "@timestamp per day",
+                "position": "bottom",
+                "labels": [
+                  "1st",
+                  "January 2024",
+                  "2nd",
+                  "3rd",
+                  "4th",
+                  "5th",
+                  "6th",
+                  "7th"
+                ],
+                "values": [
+                  1704067200000,
+                  1704067200000,
+                  1704153600000,
+                  1704240000000,
+                  1704326400000,
+                  1704412800000,
+                  1704499200000,
+                  1704585600000
+                ],
+                "gridlines": [
+                  {
+                    "x": 8.881784197001252e-16,
+                    "y": 0
+                  },
+                  {
+                    "x": 99.04464285714286,
+                    "y": 0
+                  },
+                  {
+                    "x": 198.0892857142857,
+                    "y": 0
+                  },
+                  {
+                    "x": 297.13392857142856,
+                    "y": 0
+                  },
+                  {
+                    "x": 396.1785714285714,
+                    "y": 0
+                  },
+                  {
+                    "x": 495.2232142857143,
+                    "y": 0
+                  },
+                  {
+                    "x": 594.2678571428571,
+                    "y": 0
+                  },
+                  {
+                    "x": 693.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "Count of records",
+                "position": "left",
+                "labels": [
+                  "0",
+                  "5",
+                  "10",
+                  "15",
+                  "20"
+                ],
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 54.25
+                  },
+                  {
+                    "x": 0,
+                    "y": 108.5
+                  },
+                  {
+                    "x": 0,
+                    "y": 162.75
+                  },
+                  {
+                    "x": 0,
+                    "y": 217
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-alpha}",
+              "name": "alpha",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": 1704067200000,
+                  "y": 6,
+                  "mark": null
+                },
+                {
+                  "x": 1704153600000,
+                  "y": 7,
+                  "mark": null
+                },
+                {
+                  "x": 1704240000000,
+                  "y": 5,
+                  "mark": null
+                },
+                {
+                  "x": 1704326400000,
+                  "y": 7,
+                  "mark": null
+                },
+                {
+                  "x": 1704412800000,
+                  "y": 7,
+                  "mark": null
+                },
+                {
+                  "x": 1704499200000,
+                  "y": 5,
+                  "mark": null
+                },
+                {
+                  "x": 1704585600000,
+                  "y": 7,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-(null)}",
+              "name": "(null)",
+              "color": "#a6edea",
+              "bars": [
+                {
+                  "x": 1704067200000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704153600000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704240000000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704326400000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704412800000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704499200000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704585600000,
+                  "y": 2,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-bravo}",
+              "name": "bravo",
+              "color": "#61a2ff",
+              "bars": [
+                {
+                  "x": 1704067200000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704153600000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704240000000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704326400000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704412800000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704499200000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704585600000,
+                  "y": 2,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-delta}",
+              "name": "delta",
+              "color": "#bfdbff",
+              "bars": [
+                {
+                  "x": 1704067200000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704240000000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704326400000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704412800000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704499200000,
+                  "y": 2,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-echo}",
+              "name": "echo",
+              "color": "#ee72a6",
+              "bars": [
+                {
+                  "x": 1704067200000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704153600000,
+                  "y": 2,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-charlie}",
+              "name": "charlie",
+              "color": "#ffc7db",
+              "bars": [
+                {
+                  "x": 1704153600000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704240000000,
+                  "y": 3,
+                  "mark": null
+                },
+                {
+                  "x": 1704412800000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704499200000,
+                  "y": 2,
+                  "mark": null
+                },
+                {
+                  "x": 1704585600000,
+                  "y": 2,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-india}",
+              "name": "india",
+              "color": "#f6726a",
+              "bars": [
+                {
+                  "x": 1704326400000,
+                  "y": 3,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{axis-left}spec{bar_stacked_0:bar_stacked_0_x:bar_stacked_0_y_0:bar_stacked_0_breakdown}yAccessor{bar_stacked_0_y_0}splitAccessors{bar_stacked_0_breakdown-hotel}",
+              "name": "hotel",
+              "color": "#ffc9c2",
+              "bars": [
+                {
+                  "x": 1704585600000,
+                  "y": 3,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "bar_stacked_0": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "bar_stacked_0_x",
+            "name": "@timestamp per day",
+            "meta": {
+              "type": "date",
+              "field": "@timestamp",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "appliedTimeRange": {
+                  "from": "2024-01-01T00:00:00.000Z",
+                  "to": "2024-01-08T00:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "@timestamp",
+                  "timeRange": {
+                    "from": "2024-01-01T00:00:00.000Z",
+                    "to": "2024-01-08T00:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "1d",
+                  "used_interval": "1d",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "bar_stacked_0_breakdown",
+            "name": "Top 5 values of category",
+            "meta": {
+              "type": "string",
+              "field": "category",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "1",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "category",
+                  "orderBy": "2",
+                  "order": "desc",
+                  "size": 5,
+                  "otherBucket": true,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": true,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Break down by",
+              "dimensionType": "breakdown"
+            }
+          },
+          {
+            "id": "bar_stacked_0_y_0",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "2",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "bar_stacked_0_x": 1704067200000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 6
+          },
+          {
+            "bar_stacked_0_x": 1704067200000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704067200000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704067200000,
+            "bar_stacked_0_breakdown": "delta",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704067200000,
+            "bar_stacked_0_breakdown": "echo",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704153600000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 7
+          },
+          {
+            "bar_stacked_0_x": 1704153600000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704153600000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704153600000,
+            "bar_stacked_0_breakdown": "charlie",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704153600000,
+            "bar_stacked_0_breakdown": "echo",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704240000000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 5
+          },
+          {
+            "bar_stacked_0_x": 1704240000000,
+            "bar_stacked_0_breakdown": "charlie",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704240000000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704240000000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704240000000,
+            "bar_stacked_0_breakdown": "delta",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704326400000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 7
+          },
+          {
+            "bar_stacked_0_x": 1704326400000,
+            "bar_stacked_0_breakdown": "india",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704326400000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704326400000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704326400000,
+            "bar_stacked_0_breakdown": "delta",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704412800000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 7
+          },
+          {
+            "bar_stacked_0_x": 1704412800000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704412800000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704412800000,
+            "bar_stacked_0_breakdown": "charlie",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704412800000,
+            "bar_stacked_0_breakdown": "delta",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704499200000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 5
+          },
+          {
+            "bar_stacked_0_x": 1704499200000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704499200000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704499200000,
+            "bar_stacked_0_breakdown": "charlie",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704499200000,
+            "bar_stacked_0_breakdown": "delta",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704585600000,
+            "bar_stacked_0_breakdown": "alpha",
+            "bar_stacked_0_y_0": 7
+          },
+          {
+            "bar_stacked_0_x": 1704585600000,
+            "bar_stacked_0_breakdown": "hotel",
+            "bar_stacked_0_y_0": 3
+          },
+          {
+            "bar_stacked_0_x": 1704585600000,
+            "bar_stacked_0_breakdown": "__missing__",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704585600000,
+            "bar_stacked_0_breakdown": "bravo",
+            "bar_stacked_0_y_0": 2
+          },
+          {
+            "bar_stacked_0_x": 1704585600000,
+            "bar_stacked_0_breakdown": "charlie",
+            "bar_stacked_0_y_0": 2
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+          "statistics": {
+            "totalCount": 168
+          }
+        }
+      }
+    }
+  }
+}

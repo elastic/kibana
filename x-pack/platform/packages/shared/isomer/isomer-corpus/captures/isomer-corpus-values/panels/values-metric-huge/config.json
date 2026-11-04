@@ -1,0 +1,51 @@
+{
+  "dashboard_id": "isomer-corpus-values",
+  "in_as_code": true,
+  "panel": {
+    "id": "values-metric-huge",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 12,
+      "h": 6
+    },
+    "config": {
+      "type": "metric",
+      "title": "Sum of huge values",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_spec",
+        "name": "isomer-corpus-edge-cases",
+        "index_pattern": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp"
+      },
+      "styling": {
+        "density": "default",
+        "primary": {
+          "position": "bottom",
+          "labels": {
+            "alignment": "left"
+          },
+          "value": {
+            "alignment": "right",
+            "sizing": "auto"
+          }
+        }
+      },
+      "metrics": [
+        {
+          "field": "huge",
+          "empty_as_null": false,
+          "operation": "sum",
+          "type": "primary",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

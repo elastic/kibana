@@ -1,0 +1,72 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "31",
+  "in_as_code": false,
+  "panel_type": null,
+  "chart_type": null,
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": null,
+    "size": {
+      "width": 782.3125,
+      "height": 608
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 477,
+      "width": 782.3125,
+      "height": 608
+    },
+    "title": "[Flights] Airport Connections (Hover Over Airport)",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "no_tables_adapter",
+    "adapters": [
+      "requests",
+      "vega"
+    ],
+    "tables": {}
+  }
+}

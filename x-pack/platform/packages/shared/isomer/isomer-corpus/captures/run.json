@@ -1,0 +1,50 @@
+{
+  "now": "2025-01-15T12:00:00.000Z",
+  "kibana": {
+    "version": "9.7.0",
+    "build_hash": "XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+  },
+  "window_size": {
+    "width": 1600,
+    "height": 1200
+  },
+  "ui_settings": {
+    "dateFormat:tz": "UTC"
+  },
+  "themes": [
+    "light",
+    "dark"
+  ],
+  "dashboards": [
+    {
+      "name": "sample-flights",
+      "source": "sample_data",
+      "id": "7adfa750-4c81-11e8-b3d7-01146121b73d"
+    },
+    {
+      "name": "sample-logs",
+      "source": "sample_data",
+      "id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b"
+    },
+    {
+      "name": "sample-ecommerce",
+      "source": "sample_data",
+      "id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f"
+    },
+    {
+      "name": "isomer-corpus-values",
+      "source": "edge_case",
+      "id": "isomer-corpus-values"
+    },
+    {
+      "name": "isomer-corpus-buckets",
+      "source": "edge_case",
+      "id": "isomer-corpus-buckets"
+    },
+    {
+      "name": "isomer-corpus-long-titles",
+      "source": "edge_case",
+      "id": "isomer-corpus-long-titles"
+    }
+  ]
+}

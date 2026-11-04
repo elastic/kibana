@@ -1,0 +1,122 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "in_as_code": true,
+  "panel": {
+    "id": "1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+    "type": "vis",
+    "grid": {
+      "x": 0,
+      "y": 60,
+      "w": 48,
+      "h": 19
+    },
+    "config": {
+      "type": "data_table",
+      "title": "[Logs] Errors by host",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "esql",
+        "query": "FROM kibana_sample_data_logs\n| KEEP bytes, clientip, url.keyword, response.keyword\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \"4xx\", TO_INTEGER(response.keyword) >= 500, \"5xx\", \"Other\")\n| STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword\n| EVAL count_4xx = CASE(type == \"4xx\", Visits), count_5xx = CASE(type == \"5xx\", Visits), count_rest =  CASE(type == \"Other\", Visits)\n| STATS count_4xx = SUM(count_4xx), count_5xx  = SUM(count_5xx), count_rest = SUM(count_rest), Unique = SUM(Unique),`95th percentile of bytes` = MAX(p95), `Median of bytes` = MAX(median), Visits = SUM(Visits) BY url.keyword\n| EVAL count_4xx = COALESCE(count_4xx, 0::LONG), count_5xx = COALESCE(count_5xx, 0::LONG), count_rest = COALESCE(count_rest, 0::LONG)\n| EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)\n| EVAL percentage_4xx = count_4xx / total_records, percentage_5xx = count_5xx / total_records\n| EVAL percentage_4xx = ROUND(percentage_4xx, 3)\n| EVAL percentage_5xx = ROUND(percentage_5xx, 3)\n| DROP count_4xx, count_rest, total_records\n| SORT percentage_5xx DESC\n| RENAME percentage_4xx as `HTTP 4xx`, percentage_5xx as `HTTP 5xx`"
+      },
+      "styling": {
+        "sort_by": {
+          "column_type": "metric",
+          "index": 4,
+          "direction": "desc"
+        }
+      },
+      "metrics": [
+        {
+          "column": "Unique",
+          "visible": true,
+          "width": 140.42857142857144,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "Visits",
+          "visible": true,
+          "width": 158.9285714285714,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "95th percentile of bytes",
+          "format": {
+            "type": "bytes",
+            "decimals": 0
+          },
+          "visible": true,
+          "width": 226.5285714285714,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "Median of bytes",
+          "format": {
+            "type": "bytes",
+            "decimals": 0
+          },
+          "visible": true,
+          "width": 240.02857142857147,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "HTTP 5xx",
+          "format": {
+            "type": "percent",
+            "decimals": 1,
+            "compact": false
+          },
+          "apply_color_to": "background",
+          "visible": true,
+          "width": 249.36190476190478,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "warm"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "HTTP 4xx",
+          "format": {
+            "type": "percent",
+            "decimals": 1,
+            "compact": false
+          },
+          "apply_color_to": "background",
+          "visible": true,
+          "width": 277.3619047619047,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "warm"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "column": "url.keyword",
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ],
+      "hide_title": false
+    },
+    "inCollapsedSection": false
+  }
+}

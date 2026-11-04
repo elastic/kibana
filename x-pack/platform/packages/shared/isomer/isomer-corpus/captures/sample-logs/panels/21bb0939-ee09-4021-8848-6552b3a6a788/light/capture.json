@@ -1,0 +1,683 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "panel_id": "21bb0939-ee09-4021-8848-6552b3a6a788",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "data_table",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d/d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T00:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 00:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:%272025-01-08T00:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 47,
+      "w": 24,
+      "h": 13
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 356
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 1509,
+      "width": 782.3125,
+      "height": 356
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "Bytes(Total)↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-50616178-2ced-4297-9fd1-29ea50f788ab",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Bytes(Last hour)↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--b6472710-4099-44e4-9e7d-acdef5b10752 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-b6472710-4099-44e4-9e7d-acdef5b10752",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Type↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--ee182e52-c961-4eb3-837f-d67a7750d96a euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-ee182e52-c961-4eb3-837f-d67a7750d96a",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Unique Visits (Total)↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--Unique Visits (Total) euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-Unique Visits (Total)",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Unique Visits (Last hour)↵",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--Unique Visits (Last hour) euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-Unique Visits (Last hour)",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ],
+        "cells": [
+          {
+            "text": "3.23MB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "(blank)↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 2
+          },
+          {
+            "text": "477↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(246, 114, 106)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(246, 114, 106)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 4
+          },
+          {
+            "text": "1.75MB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 1
+          },
+          {
+            "text": "gz↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 2
+          },
+          {
+            "text": "275↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(252, 216, 131)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(252, 216, 131)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 4
+          },
+          {
+            "text": "1.45MB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 1
+          },
+          {
+            "text": "css↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 2
+          },
+          {
+            "text": "235↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 4
+          },
+          {
+            "text": "1.33MB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 1
+          },
+          {
+            "text": "zip↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 2
+          },
+          {
+            "text": "202↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 4
+          },
+          {
+            "text": "1.24MB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 1
+          },
+          {
+            "text": "deb↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 2
+          },
+          {
+            "text": "189↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 4
+          },
+          {
+            "text": "464.75KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--50616178-2ced-4297-9fd1-29ea50f788ab euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 0
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--b6472710-4099-44e4-9e7d-acdef5b10752 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 1
+          },
+          {
+            "text": "rpm↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ee182e52-c961-4eb3-837f-d67a7750d96a css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 2
+          },
+          {
+            "text": "77↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Total) css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(36, 194, 146)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(36, 194, 146)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 3
+          },
+          {
+            "text": "-↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique Visits (Last hour) euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 4
+          }
+        ],
+        "rowCount": 6,
+        "columnCount": null
+      }
+    ]
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM kibana_sample_data_logs\n| SORT @timestamp\n| EVAL t = now()\n| EVAL buckets = CASE(timestamp <= t AND timestamp >= t - 1 hour, \"Last hour\", \"Other\")\n| STATS sum = SUM(bytes), count = COUNT_DISTINCT(clientip) by buckets, extension.keyword\n| EVAL sum_last_hour = CASE(buckets == \"Last hour\", sum), sum_rest = CASE(buckets == \"Other\", sum), count_last_hour = CASE(buckets == \"Last hour\", count), count_rest = CASE(buckets == \"Other\", count)\n| STATS sum_last_hour = MAX(sum_last_hour), sum_rest = MAX(sum_rest), count_last_hour = MAX(count_last_hour), count_rest = MAX(count_rest) by buckets, extension.keyword\n| EVAL total_bytes = TO_DOUBLE(COALESCE(sum_last_hour, 0::LONG) + COALESCE(sum_rest, 0::LONG))\n| EVAL total_visits = TO_DOUBLE(COALESCE(count_last_hour, 0::LONG) + COALESCE(count_rest, 0::LONG))\n| KEEP count_last_hour, total_visits, total_bytes, sum_last_hour, extension.keyword\n| STATS count_last_hour = SUM(count_last_hour), total_visits  = SUM(total_visits), bytes_transform = SUM(total_bytes), bytes_transform_last_hour = SUM(sum_last_hour) BY extension.keyword\n| RENAME total_visits as `Unique Visits (Total)`, count_last_hour as `Unique Visits (Last hour)`, bytes_transform as `Bytes(Total)`, bytes_transform_last_hour as `Bytes(Last hour)`, extension.keyword as `Type`\n| SORT `Unique Visits (Total)` DESC",
+          "statistics": {
+            "totalCount": 6
+          }
+        },
+        "columns": [
+          {
+            "id": "50616178-2ced-4297-9fd1-29ea50f788ab",
+            "name": "Bytes(Total)",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Bytes(Total)",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "bytes",
+                "params": {
+                  "pattern": "0,0.00b",
+                  "formatOverride": true,
+                  "decimals": 2
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "b6472710-4099-44e4-9e7d-acdef5b10752",
+            "name": "Bytes(Last hour)",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Bytes(Last hour)",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "bytes",
+                "params": {
+                  "pattern": "0,0.00b",
+                  "formatOverride": true,
+                  "decimals": 2
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": true,
+            "isComputedColumn": true
+          },
+          {
+            "id": "ee182e52-c961-4eb3-837f-d67a7750d96a",
+            "name": "Type",
+            "meta": {
+              "type": "string",
+              "esType": "keyword",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "extension.keyword",
+                "isSourceFieldFilterable": true
+              },
+              "params": {
+                "id": "string"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "Unique Visits (Total)",
+            "name": "Unique Visits (Total)",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Unique Visits (Total)",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "Unique Visits (Last hour)",
+            "name": "Unique Visits (Last hour)",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Unique Visits (Last hour)",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": true,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "Unique Visits (Total)": 477,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 3389038,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": ""
+          },
+          {
+            "Unique Visits (Total)": 275,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 1839185,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": "gz"
+          },
+          {
+            "Unique Visits (Total)": 235,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 1520128,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": "css"
+          },
+          {
+            "Unique Visits (Total)": 202,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 1393897,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": "zip"
+          },
+          {
+            "Unique Visits (Total)": 189,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 1304028,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": "deb"
+          },
+          {
+            "Unique Visits (Total)": 77,
+            "50616178-2ced-4297-9fd1-29ea50f788ab": 475900,
+            "ee182e52-c961-4eb3-837f-d67a7750d96a": "rpm"
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

@@ -1,0 +1,47 @@
+{
+  "dashboard_id": "isomer-corpus-values",
+  "in_as_code": true,
+  "panel": {
+    "id": "values-metric-esql",
+    "type": "vis",
+    "grid": {
+      "x": 0,
+      "y": 30,
+      "w": 12,
+      "h": 6
+    },
+    "config": {
+      "type": "metric",
+      "title": "Signed average (ES|QL)",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "esql",
+        "query": "FROM isomer-corpus-edge-cases | STATS signed = AVG(signed)"
+      },
+      "styling": {
+        "density": "default",
+        "primary": {
+          "position": "bottom",
+          "labels": {
+            "alignment": "left"
+          },
+          "value": {
+            "alignment": "right",
+            "sizing": "auto"
+          }
+        }
+      },
+      "metrics": [
+        {
+          "column": "signed",
+          "type": "primary",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

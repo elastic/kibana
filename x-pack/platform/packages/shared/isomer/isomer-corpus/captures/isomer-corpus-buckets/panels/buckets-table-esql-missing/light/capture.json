@@ -1,0 +1,609 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "panel_id": "buckets-table-esql-missing",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "data_table",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-buckets?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 24,
+      "w": 48,
+      "h": 12
+    },
+    "size": {
+      "width": 1572.625,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 825,
+      "width": 1572.625,
+      "height": 328
+    },
+    "title": "Counts per category, including the missing value (ES|QL)",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "category↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--datatable_accessor_row_0 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-datatable_accessor_row_0",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "count↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--datatable_accessor_metric_0 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-datatable_accessor_metric_0",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "signed↵",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--datatable_accessor_metric_1 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-datatable_accessor_metric_1",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ],
+        "cells": [
+          {
+            "text": "alpha↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 0
+          },
+          {
+            "text": "44↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "-876.3↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 2
+          },
+          {
+            "text": "bravo↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 0
+          },
+          {
+            "text": "18↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 1
+          },
+          {
+            "text": "-205.6↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 2
+          },
+          {
+            "text": "-↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 0
+          },
+          {
+            "text": "16↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 1
+          },
+          {
+            "text": "-244.3↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 2
+          },
+          {
+            "text": "charlie↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 0
+          },
+          {
+            "text": "13↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 1
+          },
+          {
+            "text": "-106.3↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 2
+          },
+          {
+            "text": "delta↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 0
+          },
+          {
+            "text": "12↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 1
+          },
+          {
+            "text": "-230.1↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 2
+          },
+          {
+            "text": "echo↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 0
+          },
+          {
+            "text": "12↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 1
+          },
+          {
+            "text": "-111.8↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 2
+          },
+          {
+            "text": "golf↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 0
+          },
+          {
+            "text": "10↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 1
+          },
+          {
+            "text": "-69.6↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 2
+          },
+          {
+            "text": "hotel↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 0
+          },
+          {
+            "text": "8↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 1
+          },
+          {
+            "text": "-230.6↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 2
+          },
+          {
+            "text": "foxtrot↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 0
+          },
+          {
+            "text": "8↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 1
+          },
+          {
+            "text": "-148.3↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_1 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 2
+          }
+        ],
+        "rowCount": 13,
+        "columnCount": null
+      }
+    ]
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*), signed = SUM(signed) BY category | SORT count DESC",
+          "statistics": {
+            "totalCount": 13
+          }
+        },
+        "columns": [
+          {
+            "id": "datatable_accessor_row_0",
+            "name": "category",
+            "meta": {
+              "type": "string",
+              "esType": "keyword",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "category",
+                "isSourceFieldFilterable": true
+              },
+              "params": {
+                "id": "string"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": false
+          },
+          {
+            "id": "datatable_accessor_metric_0",
+            "name": "count",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "count",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "datatable_accessor_metric_1",
+            "name": "signed",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "signed",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "datatable_accessor_metric_0": 44,
+            "datatable_accessor_metric_1": -876.3,
+            "datatable_accessor_row_0": "alpha"
+          },
+          {
+            "datatable_accessor_metric_0": 18,
+            "datatable_accessor_metric_1": -205.60000000000002,
+            "datatable_accessor_row_0": "bravo"
+          },
+          {
+            "datatable_accessor_metric_0": 16,
+            "datatable_accessor_metric_1": -244.3,
+            "datatable_accessor_row_0": null
+          },
+          {
+            "datatable_accessor_metric_0": 13,
+            "datatable_accessor_metric_1": -106.30000000000001,
+            "datatable_accessor_row_0": "charlie"
+          },
+          {
+            "datatable_accessor_metric_0": 12,
+            "datatable_accessor_metric_1": -230.1,
+            "datatable_accessor_row_0": "delta"
+          },
+          {
+            "datatable_accessor_metric_0": 12,
+            "datatable_accessor_metric_1": -111.79999999999998,
+            "datatable_accessor_row_0": "echo"
+          },
+          {
+            "datatable_accessor_metric_0": 10,
+            "datatable_accessor_metric_1": -69.6,
+            "datatable_accessor_row_0": "golf"
+          },
+          {
+            "datatable_accessor_metric_0": 8,
+            "datatable_accessor_metric_1": -230.6,
+            "datatable_accessor_row_0": "hotel"
+          },
+          {
+            "datatable_accessor_metric_0": 8,
+            "datatable_accessor_metric_1": -148.3,
+            "datatable_accessor_row_0": "foxtrot"
+          },
+          {
+            "datatable_accessor_metric_0": 8,
+            "datatable_accessor_metric_1": -80.39999999999999,
+            "datatable_accessor_row_0": "juliett"
+          },
+          {
+            "datatable_accessor_metric_0": 7,
+            "datatable_accessor_metric_1": -7.70000000000001,
+            "datatable_accessor_row_0": "india"
+          },
+          {
+            "datatable_accessor_metric_0": 6,
+            "datatable_accessor_metric_1": -123.9,
+            "datatable_accessor_row_0": "lima"
+          },
+          {
+            "datatable_accessor_metric_0": 6,
+            "datatable_accessor_metric_1": -181.1,
+            "datatable_accessor_row_0": "kilo"
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

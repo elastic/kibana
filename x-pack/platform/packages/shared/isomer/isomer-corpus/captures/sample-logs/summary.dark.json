@@ -1,0 +1,144 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "title": "[Logs] Web Traffic",
+  "theme": "dark",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 4,
+    "rendered": 4
+  },
+  "panels": [
+    {
+      "id": "11",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "15",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "bb94016e-f4a6-49ca-87a9-296a2869d570",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "8c1456d4-1993-4ba2-b701-04aca02c9fef",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "01d8e435-91c0-484f-a11e-856747050b0a",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "21bb0939-ee09-4021-8848-6552b3a6a788",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "cbca842c-b9fa-4523-9ce0-14e350866e33",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "343f0bef-0b19-452e-b1c8-59beb18b6f0c",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "4",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    },
+    {
+      "id": "14",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    },
+    {
+      "id": "8e59c7cf-6e42-4343-a113-c4a255fcf2ce",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    }
+  ]
+}

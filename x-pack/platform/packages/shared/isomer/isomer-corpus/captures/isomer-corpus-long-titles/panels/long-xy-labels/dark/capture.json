@@ -1,0 +1,314 @@
+{
+  "dashboard_id": "isomer-corpus-long-titles",
+  "panel_id": "long-xy-labels",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-long-titles?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 0,
+      "w": 24,
+      "h": 12
+    },
+    "size": {
+      "width": 787.9375,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 153,
+      "width": 787.9375,
+      "height": 328
+    },
+    "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 2,
+        "rect": {
+          "width": 771.9375,
+          "height": 288
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{bar_horizontal_0:bar_horizontal_0_x:bar_horizontal_0_y_0:-}yAccessor{bar_horizontal_0_y_0}splitAccessors{}",
+                "name": "Count of records",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "Top 10 values of long_label",
+                "position": "left",
+                "labels": [
+                  "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+                  "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+                  "Short",
+                  "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement"
+                ],
+                "values": [
+                  "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+                  "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+                  "Short",
+                  "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement"
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 27.25
+                  },
+                  {
+                    "x": 0,
+                    "y": 81.75
+                  },
+                  {
+                    "x": 0,
+                    "y": 136.25
+                  },
+                  {
+                    "x": 0,
+                    "y": 190.75
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "Count of records",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "10",
+                  "20",
+                  "30",
+                  "40",
+                  "50"
+                ],
+                "values": [
+                  0,
+                  10,
+                  20,
+                  30,
+                  40,
+                  50
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 72.0875,
+                    "y": 0
+                  },
+                  {
+                    "x": 144.175,
+                    "y": 0
+                  },
+                  {
+                    "x": 216.2625,
+                    "y": 0
+                  },
+                  {
+                    "x": 288.35,
+                    "y": 0
+                  },
+                  {
+                    "x": 360.4375,
+                    "y": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{axis-left}spec{bar_horizontal_0:bar_horizontal_0_x:bar_horizontal_0_y_0:-}yAccessor{bar_horizontal_0_y_0}splitAccessors{}",
+              "name": "Count of records",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+                  "y": 42,
+                  "mark": null
+                },
+                {
+                  "x": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+                  "y": 42,
+                  "mark": null
+                },
+                {
+                  "x": "Short",
+                  "y": 42,
+                  "mark": null
+                },
+                {
+                  "x": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement",
+                  "y": 42,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "bar_horizontal_0": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "bar_horizontal_0_x",
+            "name": "Top 10 values of long_label",
+            "meta": {
+              "type": "string",
+              "field": "long_label",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "long_label",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": false,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "bar_horizontal_0_y_0",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "bar_horizontal_0_x": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+            "bar_horizontal_0_y_0": 42
+          },
+          {
+            "bar_horizontal_0_x": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+            "bar_horizontal_0_y_0": 42
+          },
+          {
+            "bar_horizontal_0_x": "Short",
+            "bar_horizontal_0_y_0": 42
+          },
+          {
+            "bar_horizontal_0_x": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement",
+            "bar_horizontal_0_y_0": 42
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+          "statistics": {
+            "totalCount": 168
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,172 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "panel_id": "01d8e435-91c0-484f-a11e-856747050b0a",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "metric",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d/d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T00:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 00:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:%272025-01-08T00:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 7,
+      "w": 12,
+      "h": 7
+    },
+    "size": {
+      "width": 387.15625,
+      "height": 188
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 389,
+      "width": 387.15625,
+      "height": 188
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 20,
+        "rect": {
+          "width": 387.15625,
+          "height": 188
+        },
+        "debugState": null
+      }
+    ],
+    "metrics": [
+      {
+        "ariaLabel": null,
+        "inlineBackgroundColor": "rgb(17, 28, 44)",
+        "backgroundColor": "rgb(17, 28, 44)",
+        "texts": [
+          {
+            "text": "HTTP 4xx (%)",
+            "tag": "span",
+            "className": "",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "4.60%",
+            "tag": "p",
+            "className": "echMetricText__value",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "%",
+            "tag": "span",
+            "className": "echMetricText__part",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "bc54f0c9-40ec-4082-92f5-3d6a6fdc4463": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM kibana_sample_data_logs\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \"4xx\", \"Other\")\n| STATS count = COUNT(*) by type\n| EVAL count_4xx = CASE(type == \"4xx\", count), count_rest = CASE(type == \"Other\", count)\n| DROP count, type\n| STATS count_4xx = MAX(count_4xx), count_rest = MAX(count_rest)\n| EVAL percentage = ROUND(count_4xx / TO_DOUBLE(count_4xx + count_rest), 3)\n| RENAME percentage as `HTTP 4xx (%)`\n| DROP count_4xx, count_rest",
+          "statistics": {
+            "totalCount": 1
+          }
+        },
+        "columns": [
+          {
+            "id": "HTTP 4xx (%)",
+            "name": "HTTP 4xx (%)",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "HTTP 4xx (%)",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0.00%",
+                  "formatOverride": true,
+                  "decimals": 2
+                }
+              },
+              "dimensionName": "Metric"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "HTTP 4xx (%)": 0.046
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

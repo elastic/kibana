@@ -1,0 +1,71 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "in_as_code": true,
+  "panel": {
+    "id": "buckets-table-multivalue",
+    "type": "vis",
+    "grid": {
+      "x": 0,
+      "y": 12,
+      "w": 24,
+      "h": 12
+    },
+    "config": {
+      "type": "data_table",
+      "title": "Documents per tag (multivalue field)",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_spec",
+        "name": "isomer-corpus-edge-cases",
+        "index_pattern": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp"
+      },
+      "metrics": [
+        {
+          "empty_as_null": false,
+          "operation": "count",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "field": "signed",
+          "empty_as_null": false,
+          "operation": "sum",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "operation": "terms",
+          "fields": [
+            "tags"
+          ],
+          "limit": 10,
+          "other_bucket": {
+            "include_documents_without_field": true
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          },
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

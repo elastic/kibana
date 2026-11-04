@@ -1,0 +1,73 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "panel_id": "4",
+  "in_as_code": false,
+  "panel_type": null,
+  "chart_type": null,
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d/d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T00:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 00:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:%272025-01-08T00:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": null,
+    "size": {
+      "width": 782.3125,
+      "height": 496
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 585,
+      "width": 782.3125,
+      "height": 496
+    },
+    "title": "[Logs] Total Requests and Bytes",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "no_tables_adapter",
+    "adapters": [
+      "requests",
+      "vectorTiles",
+      "map"
+    ],
+    "tables": {}
+  }
+}

@@ -1,0 +1,166 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "b63ec47d-aace-4980-b928-6be8adafa5a4",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "metric",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 7,
+      "w": 12,
+      "h": 7
+    },
+    "size": {
+      "width": 387.15625,
+      "height": 188
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 389,
+      "width": 387.15625,
+      "height": 188
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 24,
+        "rect": {
+          "width": 387.15625,
+          "height": 188
+        },
+        "debugState": null
+      }
+    ],
+    "metrics": [
+      {
+        "ariaLabel": null,
+        "inlineBackgroundColor": "rgb(255, 255, 255)",
+        "backgroundColor": "rgb(255, 255, 255)",
+        "texts": [
+          {
+            "text": "Avg. items sold",
+            "tag": "span",
+            "className": "",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(17, 28, 44)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "2.2",
+            "tag": "p",
+            "className": "echMetricText__value",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(17, 28, 44)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "667067a2-7cdf-4f0e-a9fe-eb4f4f1f2f17": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "c52c2003-ae58-4604-bae7-52ba0fb38a01",
+            "name": "Avg. items sold",
+            "meta": {
+              "type": "number",
+              "field": "total_quantity",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.0a",
+                  "formatOverride": true,
+                  "decimals": 1
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "0",
+                "enabled": true,
+                "type": "avg",
+                "params": {
+                  "field": "total_quantity"
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Metric"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "c52c2003-ae58-4604-bae7-52ba0fb38a01": 2.1627906976744184
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      }
+    }
+  }
+}

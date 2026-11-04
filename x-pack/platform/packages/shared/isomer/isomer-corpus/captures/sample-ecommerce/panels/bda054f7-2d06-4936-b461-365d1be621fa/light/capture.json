@@ -1,0 +1,753 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "bda054f7-2d06-4936-b461-365d1be621fa",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "data_table",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 31,
+      "w": 24,
+      "h": 14
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 384
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 1061,
+      "width": 782.3125,
+      "height": 384
+    },
+    "title": "Daily comparison",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "order_date per day↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-7bf8f089-1542-40bd-b349-45fdfc309ac6",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "This week↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--826b2f39-b616-40b2-a222-972fdc1d7596 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-826b2f39-b616-40b2-a222-972fdc1d7596",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "1 week ago↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-cfd45c47-fc41-430c-9e7a-b71dc0c916b0",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Difference↵",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-bf51c1af-443e-49f4-a21f-54c87bfc5677",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ],
+        "cells": [
+          {
+            "text": "2025-01-08↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 0
+          },
+          {
+            "text": "$5,420.61↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "$0↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 2
+          },
+          {
+            "text": "5,420.61↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(246, 114, 106)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(246, 114, 106)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 3
+          },
+          {
+            "text": "2025-01-09↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 0
+          },
+          {
+            "text": "$11,185.37↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 1
+          },
+          {
+            "text": "$10,578.53↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 2
+          },
+          {
+            "text": "606.84↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 3
+          },
+          {
+            "text": "2025-01-10↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 0
+          },
+          {
+            "text": "$13,560.14↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 1
+          },
+          {
+            "text": "$10,448↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 2
+          },
+          {
+            "text": "3,112.14↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(255, 201, 194)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(255, 201, 194)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 3
+          },
+          {
+            "text": "2025-01-11↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 0
+          },
+          {
+            "text": "$9,884.78↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 1
+          },
+          {
+            "text": "$10,283.48↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 2
+          },
+          {
+            "text": "-398.70↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(36, 194, 146)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(36, 194, 146)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 3
+          },
+          {
+            "text": "2025-01-12↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 0
+          },
+          {
+            "text": "$11,075.66↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 1
+          },
+          {
+            "text": "$10,145.52↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 2
+          },
+          {
+            "text": "930.13↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 3
+          },
+          {
+            "text": "2025-01-13↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 0
+          },
+          {
+            "text": "$10,323.85↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 1
+          },
+          {
+            "text": "$12,012.61↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 2
+          },
+          {
+            "text": "-1,688.76↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(36, 194, 146)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(36, 194, 146)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 3
+          },
+          {
+            "text": "2025-01-14↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 0
+          },
+          {
+            "text": "$10,369.55↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 1
+          },
+          {
+            "text": "$11,009.46↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 2
+          },
+          {
+            "text": "-639.91↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(36, 194, 146)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(36, 194, 146)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 3
+          },
+          {
+            "text": "2025-01-15↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--7bf8f089-1542-40bd-b349-45fdfc309ac6 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 0
+          },
+          {
+            "text": "$5,318.09↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--826b2f39-b616-40b2-a222-972fdc1d7596 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 1
+          },
+          {
+            "text": "$5,299.98↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--cfd45c47-fc41-430c-9e7a-b71dc0c916b0 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 2
+          },
+          {
+            "text": "18.11↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--bf51c1af-443e-49f4-a21f-54c87bfc5677 euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(174, 232, 210)",
+            "inlineBackgroundColor": "",
+            "color": "rgb(174, 232, 210)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 3
+          }
+        ],
+        "rowCount": 8,
+        "columnCount": null
+      }
+    ]
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "7bf8f089-1542-40bd-b349-45fdfc309ac6",
+            "name": "order_date per day",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "1d",
+                  "used_interval": "1d",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Datatable column"
+            }
+          },
+          {
+            "id": "826b2f39-b616-40b2-a222-972fdc1d7596",
+            "name": "This week",
+            "meta": {
+              "type": "number",
+              "field": "taxful_total_price",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "$0,0.[00]"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "sum",
+                "params": {
+                  "field": "taxful_total_price",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Datatable column"
+            }
+          },
+          {
+            "id": "cfd45c47-fc41-430c-9e7a-b71dc0c916b0",
+            "name": "1 week ago",
+            "meta": {
+              "type": "number",
+              "field": "taxful_total_price",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "$0,0.[00]"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "2",
+                "enabled": true,
+                "type": "sum",
+                "params": {
+                  "field": "taxful_total_price",
+                  "timeShift": "1w",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Datatable column"
+            }
+          },
+          {
+            "id": "bf51c1af-443e-49f4-a21f-54c87bfc5677",
+            "name": "Difference",
+            "meta": {
+              "type": "number",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.00",
+                  "formatOverride": true,
+                  "decimals": 2
+                }
+              },
+              "dimensionName": "Datatable column"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736294400000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 5420.609375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 5420.609375,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 0,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 0,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": 5420.609375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": 5420.609375
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736380800000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 11185.3671875,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 11185.3671875,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 10578.53125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 10578.53125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": 606.8359375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": 606.8359375
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736467200000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 13560.140625,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 13560.140625,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 10448,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 10448,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": 3112.140625,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": 3112.140625
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736553600000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 9884.78125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 9884.78125,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 10283.484375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 10283.484375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": -398.703125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": -398.703125
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736640000000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 11075.65625,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 11075.65625,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 10145.5234375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 10145.5234375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": 930.1328125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": 930.1328125
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736726400000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 10323.8515625,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 10323.8515625,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 12012.609375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 12012.609375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": -1688.7578125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": -1688.7578125
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736812800000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 10369.546875,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 10369.546875,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 11009.45703125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 11009.45703125,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": -639.91015625,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": -639.91015625
+          },
+          {
+            "7bf8f089-1542-40bd-b349-45fdfc309ac6": 1736899200000,
+            "826b2f39-b616-40b2-a222-972fdc1d7596": 5318.09375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X0": 5318.09375,
+            "cfd45c47-fc41-430c-9e7a-b71dc0c916b0": 5299.984375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X1": 5299.984375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677X2": 18.109375,
+            "bf51c1af-443e-49f4-a21f-54c87bfc5677": 18.109375
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1981
+          }
+        }
+      }
+    }
+  }
+}

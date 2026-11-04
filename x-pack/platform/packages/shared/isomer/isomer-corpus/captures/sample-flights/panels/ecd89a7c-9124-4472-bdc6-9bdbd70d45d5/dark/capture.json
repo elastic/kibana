@@ -1,0 +1,425 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 36,
+      "y": 58,
+      "w": 12,
+      "h": 11
+    },
+    "size": {
+      "width": 387.15625,
+      "height": 300
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 1193.46875,
+      "y": 631,
+      "width": 387.15625,
+      "height": 300
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 26,
+        "rect": {
+          "width": 371.15625,
+          "height": 284
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Cloudy}",
+                "name": "Cloudy",
+                "color": "#61a2ff"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Clear}",
+                "name": "Clear",
+                "color": "#9ac2ff"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Rain}",
+                "name": "Rain",
+                "color": "#cfe1ff"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Sunny}",
+                "name": "Sunny",
+                "color": "#f2f7fe"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Heavy Fog}",
+                "name": "Heavy Fog",
+                "color": "#fdf5f4"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Damaging Wind}",
+                "name": "Damaging Wind",
+                "color": "#ffd4cf"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Thunder & Lightning}",
+                "name": "Thunder & Lightning",
+                "color": "#fda49c"
+              },
+              {
+                "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Hail}",
+                "name": "Hail",
+                "color": "#f6726a"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "position": "left",
+                "labels": [],
+                "values": [],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 107
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "Count of records",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "100",
+                  "200",
+                  "300",
+                  "400",
+                  "500"
+                ],
+                "values": [
+                  0,
+                  100,
+                  200,
+                  300,
+                  400,
+                  500
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 33.93125,
+                    "y": 0
+                  },
+                  {
+                    "x": 67.8625,
+                    "y": 0
+                  },
+                  {
+                    "x": 101.79375,
+                    "y": 0
+                  },
+                  {
+                    "x": 135.725,
+                    "y": 0
+                  },
+                  {
+                    "x": 169.65625,
+                    "y": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Cloudy}",
+              "name": "Cloudy",
+              "color": "#61a2ff",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 420,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Clear}",
+              "name": "Clear",
+              "color": "#9ac2ff",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 408,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Rain}",
+              "name": "Rain",
+              "color": "#cfe1ff",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 401,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Sunny}",
+              "name": "Sunny",
+              "color": "#f2f7fe",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 389,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Heavy Fog}",
+              "name": "Heavy Fog",
+              "color": "#fdf5f4",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 166,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Damaging Wind}",
+              "name": "Damaging Wind",
+              "color": "#ffd4cf",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 165,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Thunder & Lightning}",
+              "name": "Thunder & Lightning",
+              "color": "#fda49c",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 145,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{dffd86e7-01a9-4990-b974-3706608b5532:-:9d212159-afac-41f5-9303-5fb62ff04ba3:d99ad4d7-26ff-4d65-a8ce-34656fdafa0a}yAccessor{9d212159-afac-41f5-9303-5fb62ff04ba3}splitAccessors{d99ad4d7-26ff-4d65-a8ce-34656fdafa0a-Hail}",
+              "name": "Hail",
+              "color": "#f6726a",
+              "bars": [
+                {
+                  "x": "",
+                  "y": 141,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "dffd86e7-01a9-4990-b974-3706608b5532": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a",
+            "name": "Top 10 values of DestWeather",
+            "meta": {
+              "type": "string",
+              "field": "DestWeather",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "DestWeather",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": true,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Break down by",
+              "dimensionType": "breakdown"
+            }
+          },
+          {
+            "id": "9d212159-afac-41f5-9303-5fb62ff04ba3",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": true
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Cloudy",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 420
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Clear",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 408
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Rain",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 401
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Sunny",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 389
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Heavy Fog",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 166
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Damaging Wind",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 165
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Thunder & Lightning",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 145
+          },
+          {
+            "d99ad4d7-26ff-4d65-a8ce-34656fdafa0a": "Hail",
+            "9d212159-afac-41f5-9303-5fb62ff04ba3": 141
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "statistics": {
+            "totalCount": 2235
+          }
+        }
+      }
+    }
+  }
+}

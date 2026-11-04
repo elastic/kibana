@@ -1,0 +1,166 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "2e33ade5-96e5-40b4-b460-493e5d4fa834",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "metric",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 40,
+      "y": 4,
+      "w": 8,
+      "h": 4
+    },
+    "size": {
+      "width": 255.4375,
+      "height": 104
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 1325.1875,
+      "y": 305,
+      "width": 255.4375,
+      "height": 104
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 32,
+        "rect": {
+          "width": 255.4375,
+          "height": 104
+        },
+        "debugState": null
+      }
+    ],
+    "metrics": [
+      {
+        "ariaLabel": null,
+        "inlineBackgroundColor": "rgb(17, 28, 44)",
+        "backgroundColor": "rgb(17, 28, 44)",
+        "texts": [
+          {
+            "text": "Cancelled vs 1 week earlier",
+            "tag": "span",
+            "className": "",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "211.0%",
+            "tag": "p",
+            "className": "echMetricText__value",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "%",
+            "tag": "span",
+            "className": "echMetricText__part",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "b4712d43-1e84-4f5b-878d-8e38ba748317": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "c7851241-5526-499a-960b-357af8c2ce5b",
+            "name": "Cancelled vs 1 week earlier",
+            "meta": {
+              "type": "number",
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0.0a%",
+                  "formatOverride": true,
+                  "decimals": 1
+                }
+              },
+              "dimensionName": "Metric"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "c7851241-5526-499a-960b-357af8c2ce5bX0": 283,
+            "c7851241-5526-499a-960b-357af8c2ce5bX1": 91,
+            "c7851241-5526-499a-960b-357af8c2ce5bX2": 2.10989010989011,
+            "c7851241-5526-499a-960b-357af8c2ce5b": 2.10989010989011
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "statistics": {
+            "totalCount": 374
+          }
+        }
+      }
+    }
+  }
+}

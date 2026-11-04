@@ -1,0 +1,188 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "title": "[Flights] Global Flight Dashboard",
+  "theme": "light",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 3,
+    "rendered": 3
+  },
+  "panels": [
+    {
+      "id": "4",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "no_tables_adapter",
+      "error": null
+    },
+    {
+      "id": "7",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "10",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "392b4936-f753-47bc-a98d-a4e41a0a4cd4",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "9271deff-5a61-4665-83fc-f9fdc6bf0c0b",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "aa591c29-1a31-4ee1-a71d-b829c06fd162",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "b766e3b8-4544-46ed-99e6-9ecc4847e2a2",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "2e33ade5-96e5-40b4-b460-493e5d4fa834",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "086ac2e9-dd16-4b45-92b8-1e43ff7e3f65",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "fb86b32f-fb7a-45cf-9511-f366fef51bbd",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "0cc42484-16f7-42ec-b38c-9bf8be69cde7",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "5d53db36-2d5a-4adc-af7b-cec4c1a294e0",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "ecd89a7c-9124-4472-bdc6-9bdbd70d45d5",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "6afc61f7-e2d5-45a3-9e7a-281160ad3eb9",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "23",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    },
+    {
+      "id": "31",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    }
+  ]
+}

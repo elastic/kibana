@@ -1,0 +1,328 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "panel_id": "buckets-xy-multivalue-esql",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-buckets?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 12,
+      "w": 24,
+      "h": 12
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 489,
+      "width": 782.3125,
+      "height": 328
+    },
+    "title": "Documents per tag (ES|QL, multivalue expanded)",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 8,
+        "rect": {
+          "width": 766.3125,
+          "height": 288
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{bar_horizontal_0:bar_horizontal_0_x:bar_horizontal_0_y_0:-}yAccessor{bar_horizontal_0_y_0}splitAccessors{}",
+                "name": "count",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "tags",
+                "position": "left",
+                "labels": [
+                  "blue",
+                  "green",
+                  "red",
+                  "cyan",
+                  "magenta",
+                  "(null)"
+                ],
+                "values": [
+                  "blue",
+                  "green",
+                  "red",
+                  "cyan",
+                  "magenta",
+                  "(null)"
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 18.166666666666657
+                  },
+                  {
+                    "x": 0,
+                    "y": 54.49999999999999
+                  },
+                  {
+                    "x": 0,
+                    "y": 90.83333333333333
+                  },
+                  {
+                    "x": 0,
+                    "y": 127.16666666666666
+                  },
+                  {
+                    "x": 0,
+                    "y": 163.5
+                  },
+                  {
+                    "x": 0,
+                    "y": 199.83333333333334
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "count",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "10",
+                  "20",
+                  "30",
+                  "40",
+                  "50",
+                  "60"
+                ],
+                "values": [
+                  0,
+                  10,
+                  20,
+                  30,
+                  40,
+                  50,
+                  60
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 109.63541666666666,
+                    "y": 0
+                  },
+                  {
+                    "x": 219.27083333333331,
+                    "y": 0
+                  },
+                  {
+                    "x": 328.90625,
+                    "y": 0
+                  },
+                  {
+                    "x": 438.54166666666663,
+                    "y": 0
+                  },
+                  {
+                    "x": 548.1770833333334,
+                    "y": 0
+                  },
+                  {
+                    "x": 657.8125,
+                    "y": 0
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{axis-left}spec{bar_horizontal_0:bar_horizontal_0_x:bar_horizontal_0_y_0:-}yAccessor{bar_horizontal_0_y_0}splitAccessors{}",
+              "name": "count",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": "blue",
+                  "y": 51,
+                  "mark": null
+                },
+                {
+                  "x": "green",
+                  "y": 51,
+                  "mark": null
+                },
+                {
+                  "x": "red",
+                  "y": 50,
+                  "mark": null
+                },
+                {
+                  "x": "cyan",
+                  "y": 50,
+                  "mark": null
+                },
+                {
+                  "x": "magenta",
+                  "y": 50,
+                  "mark": null
+                },
+                {
+                  "x": "(null)",
+                  "y": 42,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "bar_horizontal_0": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM isomer-corpus-edge-cases | MV_EXPAND tags | STATS count = COUNT(*) BY tags | SORT count DESC",
+          "statistics": {
+            "totalCount": 6
+          }
+        },
+        "columns": [
+          {
+            "id": "bar_horizontal_0_y_0",
+            "name": "count",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "count",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "bar_horizontal_0_x",
+            "name": "tags",
+            "meta": {
+              "type": "string",
+              "esType": "keyword",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "tags",
+                "isSourceFieldFilterable": true
+              },
+              "params": {
+                "id": "string"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            },
+            "isNull": false,
+            "isComputedColumn": false
+          }
+        ],
+        "rows": [
+          {
+            "bar_horizontal_0_y_0": 51,
+            "bar_horizontal_0_x": "blue"
+          },
+          {
+            "bar_horizontal_0_y_0": 51,
+            "bar_horizontal_0_x": "green"
+          },
+          {
+            "bar_horizontal_0_y_0": 50,
+            "bar_horizontal_0_x": "red"
+          },
+          {
+            "bar_horizontal_0_y_0": 50,
+            "bar_horizontal_0_x": "cyan"
+          },
+          {
+            "bar_horizontal_0_y_0": 50,
+            "bar_horizontal_0_x": "magenta"
+          },
+          {
+            "bar_horizontal_0_y_0": 42,
+            "bar_horizontal_0_x": null
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

@@ -1,0 +1,126 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "in_as_code": true,
+  "panel": {
+    "id": "39d96714-152f-414b-992c-ce2492fc69f3",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 45,
+      "w": 24,
+      "h": 9
+    },
+    "config": {
+      "type": "xy",
+      "title": "Top products last week",
+      "legend": {
+        "visibility": "auto",
+        "placement": "outside",
+        "layout": {
+          "type": "grid",
+          "truncate": {
+            "max_lines": 1
+          }
+        },
+        "position": "right",
+        "size": "auto"
+      },
+      "axis": {
+        "x": {
+          "title": {
+            "visible": false
+          },
+          "ticks": {
+            "visible": true
+          },
+          "grid": {
+            "visible": true
+          },
+          "labels": {
+            "orientation": "horizontal"
+          },
+          "domain": {
+            "type": "fit",
+            "rounding": false
+          }
+        },
+        "y": {
+          "title": {
+            "visible": true
+          },
+          "ticks": {
+            "visible": true
+          },
+          "grid": {
+            "visible": true
+          },
+          "labels": {
+            "orientation": "horizontal"
+          },
+          "scale": "linear",
+          "domain": {
+            "type": "full",
+            "rounding": true
+          }
+        }
+      },
+      "styling": {
+        "overlays": {
+          "partial_buckets": {
+            "visible": false
+          },
+          "current_time_marker": {
+            "visible": false
+          }
+        },
+        "bars": {
+          "minimum_height": 1,
+          "data_labels": {
+            "visible": true
+          }
+        }
+      },
+      "layers": [
+        {
+          "sampling": 1,
+          "ignore_global_filters": false,
+          "data_source": {
+            "type": "data_view_reference",
+            "ref_id": "ff959d40-b880-11e8-a6d9-e546fe2bba5f"
+          },
+          "type": "bar_horizontal",
+          "y": [
+            {
+              "label": "Items",
+              "empty_as_null": false,
+              "operation": "count",
+              "axis": "y",
+              "color": {
+                "type": "auto"
+              }
+            }
+          ],
+          "x": {
+            "operation": "terms",
+            "label": "Product name",
+            "fields": [
+              "products.product_name.keyword"
+            ],
+            "limit": 5,
+            "rank_by": {
+              "type": "metric",
+              "metric_index": 0,
+              "direction": "desc"
+            }
+          }
+        }
+      ],
+      "time_range": {
+        "from": "now-2w",
+        "to": "now-1w"
+      },
+      "hide_title": false
+    },
+    "inCollapsedSection": false
+  }
+}

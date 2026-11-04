@@ -1,0 +1,421 @@
+{
+  "dashboard_id": "isomer-corpus-values",
+  "panel_id": "values-xy-huge-esql",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-values?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 18,
+      "w": 24,
+      "h": 12
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 657,
+      "width": 782.3125,
+      "height": 328
+    },
+    "title": "Huge values per day (ES|QL)",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 14,
+        "rect": {
+          "width": 766.3125,
+          "height": 288
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
+                "name": "total",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "day",
+                "position": "bottom",
+                "labels": [
+                  "1st",
+                  "January 2024",
+                  "2nd",
+                  "3rd",
+                  "4th",
+                  "5th",
+                  "6th",
+                  "7th"
+                ],
+                "values": [
+                  1704067200000,
+                  1704067200000,
+                  1704153600000,
+                  1704240000000,
+                  1704326400000,
+                  1704412800000,
+                  1704499200000,
+                  1704585600000
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 80.04464285714285,
+                    "y": 0
+                  },
+                  {
+                    "x": 160.0892857142857,
+                    "y": 0
+                  },
+                  {
+                    "x": 240.13392857142856,
+                    "y": 0
+                  },
+                  {
+                    "x": 320.1785714285714,
+                    "y": 0
+                  },
+                  {
+                    "x": 400.2232142857143,
+                    "y": 0
+                  },
+                  {
+                    "x": 480.2678571428571,
+                    "y": 0
+                  },
+                  {
+                    "x": 560.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "total",
+                "position": "left",
+                "labels": [
+                  "0",
+                  "5,000,000,000,000,000,000",
+                  "10,000,000,000,000,000,000",
+                  "15,000,000,000,000,000,000",
+                  "20,000,000,000,000,000,000",
+                  "25,000,000,000,000,000,000",
+                  "30,000,000,000,000,000,000",
+                  "35,000,000,000,000,000,000"
+                ],
+                "values": [
+                  0,
+                  5000000000000000000,
+                  10000000000000000000,
+                  15000000000000000000,
+                  20000000000000000000,
+                  25000000000000000000,
+                  30000000000000000000,
+                  35000000000000000000
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 31.00000000000001
+                  },
+                  {
+                    "x": 0,
+                    "y": 62
+                  },
+                  {
+                    "x": 0,
+                    "y": 93
+                  },
+                  {
+                    "x": 0,
+                    "y": 124
+                  },
+                  {
+                    "x": 0,
+                    "y": 155
+                  },
+                  {
+                    "x": 0,
+                    "y": 186
+                  },
+                  {
+                    "x": 0,
+                    "y": 217
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [
+            {
+              "path": "M0,14.260000000000002L80.04464285714285,8.680000000000007L160.0892857142857,8.12200000000001L240.13392857142856,14.260000000000002L320.1785714285714,8.680000000000007L400.2232142857143,8.12200000000001L480.2678571428571,14.260000000000002L480.2678571428571,217L400.2232142857143,217L320.1785714285714,217L240.13392857142856,217L160.0892857142857,217L80.04464285714285,217L0,217Z",
+              "color": "#16c5c0",
+              "key": "groupId{axis-left}spec{area_0:area_0_x:area_0_y_0:-}yAccessor{area_0_y_0}splitAccessors{}",
+              "name": "total",
+              "visible": true,
+              "lines": {
+                "y1": {
+                  "visible": true,
+                  "path": "M0,14.260000000000002L80.04464285714285,8.680000000000007L160.0892857142857,8.12200000000001L240.13392857142856,14.260000000000002L320.1785714285714,8.680000000000007L400.2232142857143,8.12200000000001L480.2678571428571,14.260000000000002",
+                  "points": [
+                    {
+                      "x": 1704067200000,
+                      "y": 32700000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 32700000000000000000,
+                        "area_0_x": 1704067200000
+                      }
+                    },
+                    {
+                      "x": 1704153600000,
+                      "y": 33600000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 33600000000000000000,
+                        "area_0_x": 1704153600000
+                      }
+                    },
+                    {
+                      "x": 1704240000000,
+                      "y": 33690000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 33690000000000000000,
+                        "area_0_x": 1704240000000
+                      }
+                    },
+                    {
+                      "x": 1704326400000,
+                      "y": 32700000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 32700000000000000000,
+                        "area_0_x": 1704326400000
+                      }
+                    },
+                    {
+                      "x": 1704412800000,
+                      "y": 33600000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 33600000000000000000,
+                        "area_0_x": 1704412800000
+                      }
+                    },
+                    {
+                      "x": 1704499200000,
+                      "y": 33690000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 33690000000000000000,
+                        "area_0_x": 1704499200000
+                      }
+                    },
+                    {
+                      "x": 1704585600000,
+                      "y": 32700000000000000000,
+                      "mark": null,
+                      "datum": {
+                        "area_0_y_0": 32700000000000000000,
+                        "area_0_x": 1704585600000
+                      }
+                    }
+                  ],
+                  "visiblePoints": true
+                }
+              }
+            }
+          ],
+          "lines": [],
+          "bars": [],
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1704672000000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.6,
+                "fill": "#243147",
+                "stroke": "#243147"
+              },
+              "type": "rectangle"
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "area_0": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM isomer-corpus-edge-cases | STATS total = SUM(huge) BY day = BUCKET(@timestamp, 1 day)",
+          "statistics": {
+            "totalCount": 7
+          }
+        },
+        "columns": [
+          {
+            "id": "area_0_y_0",
+            "name": "total",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "total",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "area_0_x",
+            "name": "day",
+            "meta": {
+              "type": "date",
+              "esType": "date",
+              "sourceParams": {
+                "appliedTimeRange": {
+                  "from": "2024-01-01T00:00:00.000Z",
+                  "to": "2024-01-08T00:00:00.000Z"
+                },
+                "params": {},
+                "indexPattern": "isomer-corpus-edge-cases",
+                "sourceField": "day",
+                "isSourceFieldFilterable": false,
+                "computedDomain": {
+                  "min": 1704067200000,
+                  "max": 1704585600000
+                }
+              },
+              "params": {
+                "id": "date"
+              },
+              "esMeta": {
+                "bucket": {
+                  "interval": 1,
+                  "unit": "day"
+                }
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "area_0_y_0": 33600000000000000000,
+            "area_0_x": 1704153600000
+          },
+          {
+            "area_0_y_0": 33690000000000000000,
+            "area_0_x": 1704499200000
+          },
+          {
+            "area_0_y_0": 32700000000000000000,
+            "area_0_x": 1704326400000
+          },
+          {
+            "area_0_y_0": 33600000000000000000,
+            "area_0_x": 1704412800000
+          },
+          {
+            "area_0_y_0": 32700000000000000000,
+            "area_0_x": 1704585600000
+          },
+          {
+            "area_0_y_0": 32700000000000000000,
+            "area_0_x": 1704067200000
+          },
+          {
+            "area_0_y_0": 33690000000000000000,
+            "area_0_x": 1704240000000
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

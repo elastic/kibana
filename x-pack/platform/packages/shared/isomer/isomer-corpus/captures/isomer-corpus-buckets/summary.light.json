@@ -1,0 +1,67 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "title": "Isomer corpus: buckets",
+  "theme": "light",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 0,
+    "rendered": 0
+  },
+  "panels": [
+    {
+      "id": "buckets-xy-other-missing",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "buckets-pie-other",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "buckets-table-multivalue",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "buckets-xy-multivalue-esql",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "buckets-table-esql-missing",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,242 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "5d53db36-2d5a-4adc-af7b-cec4c1a294e0",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "pie",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 58,
+      "w": 12,
+      "h": 11
+    },
+    "size": {
+      "width": 387.15625,
+      "height": 300
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": 1555,
+      "width": 387.15625,
+      "height": 300
+    },
+    "title": "[Flights] Delay Type",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 25,
+        "rect": {
+          "width": 371.15625,
+          "height": 260
+        },
+        "debugState": {
+          "partition": [
+            {
+              "panelTitle": "",
+              "partitions": [
+                {
+                  "name": "Late Aircraft Delay",
+                  "depth": 1,
+                  "color": "#bad5ff",
+                  "value": 152,
+                  "coords": [
+                    234,
+                    87
+                  ]
+                },
+                {
+                  "name": "Carrier Delay",
+                  "depth": 1,
+                  "color": "#9fc4ff",
+                  "value": 146,
+                  "coords": [
+                    223,
+                    183
+                  ]
+                },
+                {
+                  "name": "Weather Delay",
+                  "depth": 1,
+                  "color": "#82b3ff",
+                  "value": 58,
+                  "coords": [
+                    153,
+                    186
+                  ]
+                },
+                {
+                  "name": "Security Delay",
+                  "depth": 1,
+                  "color": "#61a2ff",
+                  "value": 48,
+                  "coords": [
+                    128,
+                    158
+                  ]
+                },
+                {
+                  "name": "NAS Delay",
+                  "depth": 1,
+                  "color": "#d6e5ff",
+                  "value": 157,
+                  "coords": [
+                    136,
+                    89
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "d1cee8bf-34cf-4141-99d7-ff043ee77b56",
+            "name": "Top 10 values of FlightDelayType",
+            "meta": {
+              "type": "string",
+              "field": "FlightDelayType",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "FlightDelayType",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": true,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Slice"
+            }
+          },
+          {
+            "id": "aa152ace-ee2d-447b-b86d-459bef4d7880",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Slice size"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "d1cee8bf-34cf-4141-99d7-ff043ee77b56": "NAS Delay",
+            "aa152ace-ee2d-447b-b86d-459bef4d7880": 157
+          },
+          {
+            "d1cee8bf-34cf-4141-99d7-ff043ee77b56": "Late Aircraft Delay",
+            "aa152ace-ee2d-447b-b86d-459bef4d7880": 152
+          },
+          {
+            "d1cee8bf-34cf-4141-99d7-ff043ee77b56": "Carrier Delay",
+            "aa152ace-ee2d-447b-b86d-459bef4d7880": 146
+          },
+          {
+            "d1cee8bf-34cf-4141-99d7-ff043ee77b56": "Weather Delay",
+            "aa152ace-ee2d-447b-b86d-459bef4d7880": 58
+          },
+          {
+            "d1cee8bf-34cf-4141-99d7-ff043ee77b56": "Security Delay",
+            "aa152ace-ee2d-447b-b86d-459bef4d7880": 48
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "statistics": {
+            "totalCount": 561
+          }
+        }
+      }
+    }
+  }
+}

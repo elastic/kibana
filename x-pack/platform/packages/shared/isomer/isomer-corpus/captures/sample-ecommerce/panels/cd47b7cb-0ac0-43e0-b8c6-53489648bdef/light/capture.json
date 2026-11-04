@@ -1,0 +1,988 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "cd47b7cb-0ac0-43e0-b8c6-53489648bdef",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 14,
+      "w": 24,
+      "h": 17
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 468
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": -209,
+      "width": 782.3125,
+      "height": 468
+    },
+    "title": "Breakdown by category",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 22,
+        "rect": {
+          "width": 766.3125,
+          "height": 428
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Clothing}",
+                "name": "Men's Clothing",
+                "color": "#16c5c0"
+              },
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Clothing}",
+                "name": "Women's Clothing",
+                "color": "#a6edea"
+              },
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Shoes}",
+                "name": "Women's Shoes",
+                "color": "#61a2ff"
+              },
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Shoes}",
+                "name": "Men's Shoes",
+                "color": "#bfdbff"
+              },
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Accessories}",
+                "name": "Women's Accessories",
+                "color": "#ee72a6"
+              },
+              {
+                "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Accessories}",
+                "name": "Men's Accessories",
+                "color": "#ffc7db"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "order_date per day",
+                "position": "bottom",
+                "labels": [
+                  "January 2025",
+                  "8th",
+                  "9th",
+                  "10th",
+                  "11th",
+                  "12th",
+                  "13th",
+                  "14th",
+                  "15th"
+                ],
+                "values": [
+                  1735689600000,
+                  1736294400000,
+                  1736380800000,
+                  1736467200000,
+                  1736553600000,
+                  1736640000000,
+                  1736726400000,
+                  1736812800000,
+                  1736899200000
+                ],
+                "gridlines": [
+                  {
+                    "x": -6.661338147750939e-16,
+                    "y": 0
+                  },
+                  {
+                    "x": 65.1640625,
+                    "y": 0
+                  },
+                  {
+                    "x": 130.328125,
+                    "y": 0
+                  },
+                  {
+                    "x": 195.4921875,
+                    "y": 0
+                  },
+                  {
+                    "x": 260.65625,
+                    "y": 0
+                  },
+                  {
+                    "x": 325.8203125,
+                    "y": 0
+                  },
+                  {
+                    "x": 390.984375,
+                    "y": 0
+                  },
+                  {
+                    "x": 456.1484375,
+                    "y": 0
+                  },
+                  {
+                    "x": 521.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "Count of records",
+                "position": "left",
+                "labels": [
+                  "0%",
+                  "20%",
+                  "40%",
+                  "60%",
+                  "80%",
+                  "100%"
+                ],
+                "values": [
+                  0,
+                  0.2,
+                  0.4,
+                  0.6,
+                  0.8,
+                  1
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 75.79999999999998
+                  },
+                  {
+                    "x": 0,
+                    "y": 151.6
+                  },
+                  {
+                    "x": 0,
+                    "y": 227.4
+                  },
+                  {
+                    "x": 0,
+                    "y": 303.2
+                  },
+                  {
+                    "x": 0,
+                    "y": 379
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Clothing}",
+              "name": "Men's Clothing",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.3474576271186441,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.23790322580645162,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.2857142857142857,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.28699551569506726,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.2532188841201717,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.2818181818181818,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.29464285714285715,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.3469387755102041,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "34.75%",
+                "23.79%",
+                "28.57%",
+                "28.7%",
+                "25.32%",
+                "28.18%",
+                "29.46%",
+                "34.69%"
+              ],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Clothing}",
+              "name": "Women's Clothing",
+              "color": "#a6edea",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.21186440677966106,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.2620967741935484,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.2593984962406015,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.2556053811659193,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.2703862660944206,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.2772727272727273,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.26785714285714285,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.22448979591836732,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "21.19%",
+                "26.21%",
+                "25.94%",
+                "25.56%",
+                "27.04%",
+                "27.73%",
+                "26.79%",
+                "22.45%"
+              ],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Shoes}",
+              "name": "Women's Shoes",
+              "color": "#61a2ff",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.1271186440677966,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.16532258064516125,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.13533834586466165,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.13901345291479816,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.18884120171673824,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.15000000000000002,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.1473214285714286,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.11224489795918369,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "12.71%",
+                "16.53%",
+                "13.53%",
+                "13.9%",
+                "18.88%",
+                "15%",
+                "14.73%",
+                "11.22%"
+              ],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Shoes}",
+              "name": "Men's Shoes",
+              "color": "#bfdbff",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.14406779661016944,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.09677419354838712,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.1578947368421053,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.11659192825112108,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.12446351931330468,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.13181818181818183,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.125,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.12244897959183676,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "14.41%",
+                "9.68%",
+                "15.79%",
+                "11.66%",
+                "12.45%",
+                "13.18%",
+                "12.5%",
+                "12.24%"
+              ],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Women's Accessories}",
+              "name": "Women's Accessories",
+              "color": "#ee72a6",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.10169491525423724,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.15322580645161288,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.0864661654135338,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.1076233183856502,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.10300429184549353,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.09999999999999998,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.0848214285714286,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.11224489795918369,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "10.17%",
+                "15.32%",
+                "8.65%",
+                "10.76%",
+                "10.3%",
+                "10%",
+                "8.48%",
+                "11.22%"
+              ],
+              "visible": true
+            },
+            {
+              "key": "groupId{left}spec{97c63ea6-9305-4755-97d1-0f26817c6f9a:ebcb19af-0900-4439-949f-d8cd9bccde19:5575214b-7f21-4b6c-8bc1-34433c6a0c58:9f61a7df-198e-4754-b34c-81ed544136ba}yAccessor{5575214b-7f21-4b6c-8bc1-34433c6a0c58}splitAccessors{9f61a7df-198e-4754-b34c-81ed544136ba-Men's Accessories}",
+              "name": "Men's Accessories",
+              "color": "#ffc7db",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": 0.06779661016949157,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.08467741935483875,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.07518796992481203,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 0.094170403587444,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.06008583690987124,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.05909090909090908,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.0803571428571428,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 0.08163265306122447,
+                  "mark": null
+                }
+              ],
+              "labels": [
+                "6.78%",
+                "8.47%",
+                "7.52%",
+                "9.42%",
+                "6.01%",
+                "5.91%",
+                "8.04%",
+                "8.16%"
+              ],
+              "visible": true
+            }
+          ],
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x1": 1736337600000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            },
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1736942400000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "97c63ea6-9305-4755-97d1-0f26817c6f9a": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "9f61a7df-198e-4754-b34c-81ed544136ba",
+            "name": "Top 10 values of category.keyword",
+            "meta": {
+              "type": "string",
+              "field": "category.keyword",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "category.keyword",
+                  "orderBy": "2",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": true,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Break down by",
+              "dimensionType": "breakdown"
+            }
+          },
+          {
+            "id": "ebcb19af-0900-4439-949f-d8cd9bccde19",
+            "name": "order_date per day",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "1",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "1d",
+                  "used_interval": "1d",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "5575214b-7f21-4b6c-8bc1-34433c6a0c58",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "2",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 41
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 59
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 76
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 64
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 59
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 62
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 66
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 34
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 25
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 65
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 69
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 57
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 63
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 61
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 60
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Clothing",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 22
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 15
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 41
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 36
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 31
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 44
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 33
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 33
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 11
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 17
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 24
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 42
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 26
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 29
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 29
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 28
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Shoes",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 12
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 12
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 38
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 23
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 24
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 24
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 22
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 19
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Women's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 11
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736294400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 8
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736380800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 21
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736467200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 20
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736553600000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 21
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736640000000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 14
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736726400000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 13
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736812800000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 18
+          },
+          {
+            "9f61a7df-198e-4754-b34c-81ed544136ba": "Men's Accessories",
+            "ebcb19af-0900-4439-949f-d8cd9bccde19": 1736899200000,
+            "5575214b-7f21-4b6c-8bc1-34433c6a0c58": 8
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      }
+    }
+  }
+}

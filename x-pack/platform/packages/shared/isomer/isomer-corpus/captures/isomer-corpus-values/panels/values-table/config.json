@@ -1,0 +1,91 @@
+{
+  "dashboard_id": "isomer-corpus-values",
+  "in_as_code": true,
+  "panel": {
+    "id": "values-table",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 18,
+      "w": 24,
+      "h": 12
+    },
+    "config": {
+      "type": "data_table",
+      "title": "Every value kind per day",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_spec",
+        "name": "isomer-corpus-edge-cases",
+        "index_pattern": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp"
+      },
+      "metrics": [
+        {
+          "field": "value",
+          "operation": "average",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "field": "signed",
+          "empty_as_null": false,
+          "operation": "sum",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "field": "huge",
+          "operation": "max",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "field": "tiny",
+          "operation": "min",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "field": "always_null",
+          "operation": "average",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "operation": "date_histogram",
+          "field": "@timestamp",
+          "suggested_interval": "1d",
+          "use_original_time_range": false,
+          "include_empty_rows": true,
+          "drop_partial_intervals": false,
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

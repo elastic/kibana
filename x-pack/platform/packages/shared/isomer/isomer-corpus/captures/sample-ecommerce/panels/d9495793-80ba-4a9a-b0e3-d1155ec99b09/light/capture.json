@@ -1,0 +1,683 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "d9495793-80ba-4a9a-b0e3-d1155ec99b09",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 14,
+      "w": 24,
+      "h": 7
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 188
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 585,
+      "width": 782.3125,
+      "height": 188
+    },
+    "title": "Transactions per day",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 14,
+        "rect": {
+          "width": 766.3125,
+          "height": 148
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:2b41b3d8-2f62-407a-a866-960f254c679d:-}yAccessor{2b41b3d8-2f62-407a-a866-960f254c679d}splitAccessors{}",
+                "name": "Total items",
+                "color": "#16C5C0"
+              },
+              {
+                "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:eadae280-2da3-4d1d-a0e1-f9733f89c15b:-}yAccessor{eadae280-2da3-4d1d-a0e1-f9733f89c15b}splitAccessors{}",
+                "name": "Last week",
+                "color": "#61A2FF"
+              },
+              {
+                "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:ddc92e50-4d5c-413e-b91b-3e504889fa65:-}yAccessor{ddc92e50-4d5c-413e-b91b-3e504889fa65}splitAccessors{}",
+                "name": "Transactions",
+                "color": "#EE72A6"
+              },
+              {
+                "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:5e31e5d3-2aaa-4475-a130-3b69bf2f748a:-}yAccessor{5e31e5d3-2aaa-4475-a130-3b69bf2f748a}splitAccessors{}",
+                "name": "Tx. last week",
+                "color": "#EAAE01"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "order_date per day",
+                "position": "bottom",
+                "labels": [
+                  "January 2025",
+                  "8th",
+                  "9th",
+                  "10th",
+                  "11th",
+                  "12th",
+                  "13th",
+                  "14th",
+                  "15th"
+                ],
+                "values": [
+                  1735689600000,
+                  1736294400000,
+                  1736380800000,
+                  1736467200000,
+                  1736553600000,
+                  1736640000000,
+                  1736726400000,
+                  1736812800000,
+                  1736899200000
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 72.6640625,
+                    "y": 0
+                  },
+                  {
+                    "x": 145.328125,
+                    "y": 0
+                  },
+                  {
+                    "x": 217.9921875,
+                    "y": 0
+                  },
+                  {
+                    "x": 290.65625,
+                    "y": 0
+                  },
+                  {
+                    "x": 363.3203125,
+                    "y": 0
+                  },
+                  {
+                    "x": 435.984375,
+                    "y": 0
+                  },
+                  {
+                    "x": 508.6484375,
+                    "y": 0
+                  },
+                  {
+                    "x": 581.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "Total items",
+                "position": "left",
+                "labels": [
+                  "0",
+                  "100",
+                  "200",
+                  "300",
+                  "400"
+                ],
+                "values": [
+                  0,
+                  100,
+                  200,
+                  300,
+                  400
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 24.75
+                  },
+                  {
+                    "x": 0,
+                    "y": 49.5
+                  },
+                  {
+                    "x": 0,
+                    "y": 74.25
+                  },
+                  {
+                    "x": 0,
+                    "y": 99
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [
+            {
+              "path": "M0,58.904999999999994L72.6640625,17.325000000000003L145.328125,7.919999999999996L217.9921875,25.740000000000002L290.65625,20.789999999999996L363.3203125,22.275L435.984375,22.275L508.6484375,64.35000000000001",
+              "color": "#16C5C0",
+              "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:2b41b3d8-2f62-407a-a866-960f254c679d:-}yAccessor{2b41b3d8-2f62-407a-a866-960f254c679d}splitAccessors{}",
+              "name": "Total items",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736294400000,
+                  "y": 162,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 330,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 368,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 296,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 316,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 310,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 310,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 140,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,99L72.6640625,20.294999999999995L145.328125,16.335000000000004L217.9921875,24.255L290.65625,24.75L363.3203125,24.75L435.984375,17.572499999999998L508.6484375,60.885",
+              "color": "#61A2FF",
+              "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:eadae280-2da3-4d1d-a0e1-f9733f89c15b:-}yAccessor{eadae280-2da3-4d1d-a0e1-f9733f89c15b}splitAccessors{}",
+              "name": "Last week",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736294400000,
+                  "y": 0,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 318,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 334,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 302,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 300,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 300,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 329,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 154,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,80.68499999999999L72.6640625,61.38L145.328125,58.657500000000006L217.9921875,64.10249999999999L290.65625,61.627500000000005L363.3203125,63.60750000000001L435.984375,63.60750000000001L508.6484375,82.91250000000001",
+              "color": "#EE72A6",
+              "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:ddc92e50-4d5c-413e-b91b-3e504889fa65:-}yAccessor{ddc92e50-4d5c-413e-b91b-3e504889fa65}splitAccessors{}",
+              "name": "Transactions",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736294400000,
+                  "y": 74,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 152,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 163,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 141,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 151,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 143,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 143,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 65,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,99L72.6640625,62.865L145.328125,61.13249999999999L217.9921875,63.60750000000001L290.65625,64.35000000000001L363.3203125,64.59750000000001L435.984375,60.14249999999999L508.6484375,81.4275",
+              "color": "#EAAE01",
+              "key": "groupId{left}spec{b6093a53-884f-42c2-9fcc-ba56cfb66c53:15c45f89-a149-443a-a830-aa8c3a9317db:5e31e5d3-2aaa-4475-a130-3b69bf2f748a:-}yAccessor{5e31e5d3-2aaa-4475-a130-3b69bf2f748a}splitAccessors{}",
+              "name": "Tx. last week",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736294400000,
+                  "y": 0,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 146,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 153,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 143,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 140,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 139,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 157,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 71,
+                  "mark": null
+                }
+              ]
+            }
+          ],
+          "bars": [],
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x1": 1736337600000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            },
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1736942400000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "b6093a53-884f-42c2-9fcc-ba56cfb66c53": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "15c45f89-a149-443a-a830-aa8c3a9317db",
+            "name": "order_date per day",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "1d",
+                  "used_interval": "1d",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "2b41b3d8-2f62-407a-a866-960f254c679d",
+            "name": "Total items",
+            "meta": {
+              "type": "number",
+              "field": "products.quantity",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "sum",
+                "params": {
+                  "field": "products.quantity",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          },
+          {
+            "id": "eadae280-2da3-4d1d-a0e1-f9733f89c15b",
+            "name": "Last week",
+            "meta": {
+              "type": "number",
+              "field": "products.quantity",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "2",
+                "enabled": true,
+                "type": "sum",
+                "params": {
+                  "field": "products.quantity",
+                  "timeShift": "1w",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          },
+          {
+            "id": "ddc92e50-4d5c-413e-b91b-3e504889fa65",
+            "name": "Transactions",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "3",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          },
+          {
+            "id": "5e31e5d3-2aaa-4475-a130-3b69bf2f748a",
+            "name": "Tx. last week",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "4",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "timeShift": "1w",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736294400000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 162,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 0,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 74,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 0
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736380800000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 330,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 318,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 152,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 146
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736467200000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 368,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 334,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 163,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 153
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736553600000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 296,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 302,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 141,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 143
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736640000000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 316,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 300,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 151,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 140
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736726400000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 310,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 300,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 143,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 139
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736812800000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 310,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 329,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 143,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 157
+          },
+          {
+            "15c45f89-a149-443a-a830-aa8c3a9317db": 1736899200000,
+            "2b41b3d8-2f62-407a-a866-960f254c679d": 140,
+            "eadae280-2da3-4d1d-a0e1-f9733f89c15b": 154,
+            "ddc92e50-4d5c-413e-b91b-3e504889fa65": 65,
+            "5e31e5d3-2aaa-4475-a130-3b69bf2f748a": 71
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1981
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,426 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "bdb525ab-270b-46f1-a847-dd29be19aadb",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 7,
+      "w": 24,
+      "h": 7
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 188
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 351,
+      "width": 782.3125,
+      "height": 188
+    },
+    "title": "% of target revenue ($10k)",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 24,
+        "rect": {
+          "width": 766.3125,
+          "height": 148
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{left}spec{c7478794-6767-4286-9d65-1c0ecd909dd8:8289349e-6d1b-4abf-b164-0208183d2c34:041db33b-5c9c-47f3-a5d3-ef5e255d1663:-}yAccessor{041db33b-5c9c-47f3-a5d3-ef5e255d1663}splitAccessors{}",
+                "name": "% of target ($10k)",
+                "color": "#16c5c0"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "order_date per day",
+                "position": "bottom",
+                "labels": [
+                  "January 2025",
+                  "8th",
+                  "9th",
+                  "10th",
+                  "11th",
+                  "12th",
+                  "13th",
+                  "14th",
+                  "15th"
+                ],
+                "values": [
+                  1735689600000,
+                  1736294400000,
+                  1736380800000,
+                  1736467200000,
+                  1736553600000,
+                  1736640000000,
+                  1736726400000,
+                  1736812800000,
+                  1736899200000
+                ],
+                "gridlines": [
+                  {
+                    "x": 1.3322676295501878e-15,
+                    "y": 0
+                  },
+                  {
+                    "x": 87.2890625,
+                    "y": 0
+                  },
+                  {
+                    "x": 174.578125,
+                    "y": 0
+                  },
+                  {
+                    "x": 261.8671875,
+                    "y": 0
+                  },
+                  {
+                    "x": 349.15625,
+                    "y": 0
+                  },
+                  {
+                    "x": 436.4453125,
+                    "y": 0
+                  },
+                  {
+                    "x": 523.734375,
+                    "y": 0
+                  },
+                  {
+                    "x": 611.0234375,
+                    "y": 0
+                  },
+                  {
+                    "x": 698.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "left",
+                "title": "% of target ($10k)",
+                "position": "left",
+                "labels": [
+                  "-60%",
+                  "-40%",
+                  "-20%",
+                  "0%",
+                  "20%",
+                  "40%"
+                ],
+                "values": [
+                  -0.6,
+                  -0.4,
+                  -0.2,
+                  0,
+                  0.2,
+                  0.4
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 19.799999999999997
+                  },
+                  {
+                    "x": 0,
+                    "y": 39.6
+                  },
+                  {
+                    "x": 0,
+                    "y": 59.400000000000006
+                  },
+                  {
+                    "x": 0,
+                    "y": 79.2
+                  },
+                  {
+                    "x": 0,
+                    "y": 99
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{left}spec{c7478794-6767-4286-9d65-1c0ecd909dd8:8289349e-6d1b-4abf-b164-0208183d2c34:041db33b-5c9c-47f3-a5d3-ef5e255d1663:-}yAccessor{041db33b-5c9c-47f3-a5d3-ef5e255d1663}splitAccessors{}",
+              "name": "% of target ($10k)",
+              "color": "#16c5c0",
+              "bars": [
+                {
+                  "x": 1736294400000,
+                  "y": -0.45793906250000005,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 0.11853671874999994,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 0.3560140624999999,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": -0.011521875000000015,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 0.10756562500000011,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 0.032385156249999936,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 0.03695468749999997,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": -0.46819062499999997,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x1": 1736337600000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            },
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1736942400000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.2,
+                "fill": "#5A6D8C",
+                "stroke": "#5A6D8C"
+              },
+              "type": "rectangle"
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "c7478794-6767-4286-9d65-1c0ecd909dd8": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "8289349e-6d1b-4abf-b164-0208183d2c34",
+            "name": "order_date per day",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "1d",
+                  "used_interval": "1d",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "041db33b-5c9c-47f3-a5d3-ef5e255d1663",
+            "name": "% of target ($10k)",
+            "meta": {
+              "type": "number",
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0%",
+                  "formatOverride": true,
+                  "decimals": 0
+                }
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736294400000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 5420.609375,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": -0.45793906250000005,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": -0.45793906250000005
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736380800000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 11185.3671875,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": 0.11853671874999994,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 0.11853671874999994
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736467200000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 13560.140625,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": 0.3560140624999999,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 0.3560140624999999
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736553600000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 9884.78125,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": -0.011521875000000015,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": -0.011521875000000015
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736640000000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 11075.65625,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": 0.10756562500000011,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 0.10756562500000011
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736726400000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 10323.8515625,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": 0.032385156249999936,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 0.032385156249999936
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736812800000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 10369.546875,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": 0.03695468749999997,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 0.03695468749999997
+          },
+          {
+            "8289349e-6d1b-4abf-b164-0208183d2c34": 1736899200000,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X0": 5318.09375,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663X1": -0.46819062499999997,
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": -0.46819062499999997
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      }
+    }
+  }
+}

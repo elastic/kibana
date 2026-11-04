@@ -1,0 +1,1372 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "5",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 21,
+      "w": 24,
+      "h": 10
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 272
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 781,
+      "width": 782.3125,
+      "height": 272
+    },
+    "title": "[eCommerce] Promotion Tracking",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 2,
+        "rect": {
+          "width": 766.3125,
+          "height": 232
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{e3b3cb5c-e3b1-497f-a5d5-fddb0dabc94e:f3cc8168-6360-4727-a410-a57f5a325091:a69956c9-43cd-4756-a3c0-e93cb1502a0b:-}yAccessor{a69956c9-43cd-4756-a3c0-e93cb1502a0b}splitAccessors{}",
+                "name": "Revenue Trousers",
+                "color": "#16c5c0"
+              },
+              {
+                "key": "groupId{axis-left}spec{1d08a43c-8913-4692-a3e0-8d77902f6e46:644b06ea-73a3-47b1-9b40-3035844c4621:9a3d8abd-81a5-40ae-9616-020d5a5b2ee2:-}yAccessor{9a3d8abd-81a5-40ae-9616-020d5a5b2ee2}splitAccessors{}",
+                "name": "Revenue Watches",
+                "color": "#a6edea"
+              },
+              {
+                "key": "groupId{axis-left}spec{9725cdbd-a9f3-479f-a349-0f11244e5239:6749b404-4784-4fd6-8bf6-5712e84c7310:b5588228-9c46-4a4b-92ee-d140c327bca0:-}yAccessor{b5588228-9c46-4a4b-92ee-d140c327bca0}splitAccessors{}",
+                "name": "Revenue Bags",
+                "color": "#61a2ff"
+              },
+              {
+                "key": "groupId{axis-left}spec{2031d0f8-01fc-4009-b1ad-a7b7ca9266c0:1b199cb1-b47f-48e6-b209-74eb81b303f5:985e05c0-3a0b-4e55-84bb-1f02128388a9:-}yAccessor{985e05c0-3a0b-4e55-84bb-1f02128388a9}splitAccessors{}",
+                "name": "Revenue Cocktail Dresses",
+                "color": "#bfdbff"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "order_date per 12 hours",
+                "position": "bottom",
+                "labels": [
+                  "January 2025",
+                  "9th",
+                  "10th",
+                  "11th",
+                  "12th",
+                  "13th",
+                  "14th",
+                  "15th"
+                ],
+                "values": [
+                  1735689600000,
+                  1736380800000,
+                  1736467200000,
+                  1736553600000,
+                  1736640000000,
+                  1736726400000,
+                  1736812800000,
+                  1736899200000
+                ],
+                "gridlines": [
+                  {
+                    "x": 44.0875,
+                    "y": 0
+                  },
+                  {
+                    "x": 132.26250000000002,
+                    "y": 0
+                  },
+                  {
+                    "x": 220.4375,
+                    "y": 0
+                  },
+                  {
+                    "x": 308.6125,
+                    "y": 0
+                  },
+                  {
+                    "x": 396.78749999999997,
+                    "y": 0
+                  },
+                  {
+                    "x": 484.9625,
+                    "y": 0
+                  },
+                  {
+                    "x": 573.1375,
+                    "y": 0
+                  },
+                  {
+                    "x": 661.3125,
+                    "y": 0
+                  }
+                ]
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "Revenue Trousers",
+                "position": "left",
+                "labels": [
+                  "0.00",
+                  "200.00",
+                  "400.00",
+                  "600.00",
+                  "800.00",
+                  "1,000.00",
+                  "1,200.00"
+                ],
+                "values": [
+                  0,
+                  200,
+                  400,
+                  600,
+                  800,
+                  1000,
+                  1200
+                ],
+                "gridlines": [
+                  {
+                    "x": 0,
+                    "y": 0
+                  },
+                  {
+                    "x": 0,
+                    "y": 15.166666666666663
+                  },
+                  {
+                    "x": 0,
+                    "y": 30.333333333333336
+                  },
+                  {
+                    "x": 0,
+                    "y": 45.5
+                  },
+                  {
+                    "x": 0,
+                    "y": 60.66666666666667
+                  },
+                  {
+                    "x": 0,
+                    "y": 75.83333333333334
+                  },
+                  {
+                    "x": 0,
+                    "y": 91
+                  }
+                ]
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [
+            {
+              "path": "M0,78.26L44.0875,86.52820312499999M132.26250000000002,76.895L176.35,82.13223958333333M264.52500000000003,79.32403645833334ZM352.7,85.00916666666667L396.78749999999997,86.755703125L440.875,84.55416666666667L484.9625,79.78377604166667L529.0500000000001,76.6675L573.1375,70.461015625",
+              "color": "#16c5c0",
+              "key": "groupId{axis-left}spec{e3b3cb5c-e3b1-497f-a5d5-fddb0dabc94e:f3cc8168-6360-4727-a410-a57f5a325091:a69956c9-43cd-4756-a3c0-e93cb1502a0b:-}yAccessor{a69956c9-43cd-4756-a3c0-e93cb1502a0b}splitAccessors{}",
+              "name": "Revenue Trousers",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736337600000,
+                  "y": 168,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 58.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 186,
+                  "mark": null
+                },
+                {
+                  "x": 1736510400000,
+                  "y": 116.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736596800000,
+                  "y": 153.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736683200000,
+                  "y": 79,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 55.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736769600000,
+                  "y": 85,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 147.90625,
+                  "mark": null
+                },
+                {
+                  "x": 1736856000000,
+                  "y": 189,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 270.84375,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,82.96640625L44.0875,80.613203125L88.175,77.65807291666667L132.26250000000002,88.57451822916667L176.35,69.02018229166666L220.4375,84.17973958333333L264.52500000000003,75.37833333333333L308.6125,83.80057291666667M396.78749999999997,61.34916666666667ZM529.0500000000001,86.90736979166667L573.1375,66.209609375",
+              "color": "#a6edea",
+              "key": "groupId{axis-left}spec{1d08a43c-8913-4692-a3e0-8d77902f6e46:644b06ea-73a3-47b1-9b40-3035844c4621:9a3d8abd-81a5-40ae-9616-020d5a5b2ee2:-}yAccessor{9a3d8abd-81a5-40ae-9616-020d5a5b2ee2}splitAccessors{}",
+              "name": "Revenue Watches",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736337600000,
+                  "y": 105.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 136.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736424000000,
+                  "y": 175.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 31.984375,
+                  "mark": null
+                },
+                {
+                  "x": 1736510400000,
+                  "y": 289.84375,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 89.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736596800000,
+                  "y": 206,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 94.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 391,
+                  "mark": null
+                },
+                {
+                  "x": 1736856000000,
+                  "y": 53.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 326.90625,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,72.50140625L44.0875,46.808125000000004L88.175,50.89127604166667L132.26250000000002,34.13092447916667L176.35,11.988776041666664L220.4375,24.053385416666664L264.52500000000003,21.697812499999998L308.6125,54.14736979166666L352.7,29.578554687500002L396.78749999999997,49.83434895833333L440.875,47.78447916666667L484.9625,55.05855468749999L529.0500000000001,43.23921874999999L573.1375,41.564960937500004",
+              "color": "#61a2ff",
+              "key": "groupId{axis-left}spec{9725cdbd-a9f3-479f-a349-0f11244e5239:6749b404-4784-4fd6-8bf6-5712e84c7310:b5588228-9c46-4a4b-92ee-d140c327bca0:-}yAccessor{b5588228-9c46-4a4b-92ee-d140c327bca0}splitAccessors{}",
+              "name": "Revenue Bags",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736337600000,
+                  "y": 243.9375,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 582.75,
+                  "mark": null
+                },
+                {
+                  "x": 1736424000000,
+                  "y": 528.90625,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 749.921875,
+                  "mark": null
+                },
+                {
+                  "x": 1736510400000,
+                  "y": 1041.90625,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 882.8125,
+                  "mark": null
+                },
+                {
+                  "x": 1736596800000,
+                  "y": 913.875,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 485.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736683200000,
+                  "y": 809.953125,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 542.84375,
+                  "mark": null
+                },
+                {
+                  "x": 1736769600000,
+                  "y": 569.875,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 473.953125,
+                  "mark": null
+                },
+                {
+                  "x": 1736856000000,
+                  "y": 629.8125,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 651.890625,
+                  "mark": null
+                }
+              ]
+            },
+            {
+              "path": "M0,38.461718749999996L44.0875,24.126848958333333L88.175,31.101145833333334L132.26250000000002,10.033697916666664L176.35,29.425703125000002L220.4375,33.37496093749999L264.52500000000003,56.050312500000004L308.6125,41.18697916666667L352.7,2.1387369791666715L396.78749999999997,47.18255208333334L440.875,35.72934895833333L484.9625,22.54619791666667L529.0500000000001,41.33509114583333L573.1375,41.33509114583333",
+              "color": "#bfdbff",
+              "key": "groupId{axis-left}spec{2031d0f8-01fc-4009-b1ad-a7b7ca9266c0:1b199cb1-b47f-48e6-b209-74eb81b303f5:985e05c0-3a0b-4e55-84bb-1f02128388a9:-}yAccessor{985e05c0-3a0b-4e55-84bb-1f02128388a9}splitAccessors{}",
+              "name": "Revenue Cocktail Dresses",
+              "visible": true,
+              "visiblePoints": true,
+              "points": [
+                {
+                  "x": 1736337600000,
+                  "y": 692.8125,
+                  "mark": null
+                },
+                {
+                  "x": 1736380800000,
+                  "y": 881.84375,
+                  "mark": null
+                },
+                {
+                  "x": 1736424000000,
+                  "y": 789.875,
+                  "mark": null
+                },
+                {
+                  "x": 1736467200000,
+                  "y": 1067.6875,
+                  "mark": null
+                },
+                {
+                  "x": 1736510400000,
+                  "y": 811.96875,
+                  "mark": null
+                },
+                {
+                  "x": 1736553600000,
+                  "y": 759.890625,
+                  "mark": null
+                },
+                {
+                  "x": 1736596800000,
+                  "y": 460.875,
+                  "mark": null
+                },
+                {
+                  "x": 1736640000000,
+                  "y": 656.875,
+                  "mark": null
+                },
+                {
+                  "x": 1736683200000,
+                  "y": 1171.796875,
+                  "mark": null
+                },
+                {
+                  "x": 1736726400000,
+                  "y": 577.8125,
+                  "mark": null
+                },
+                {
+                  "x": 1736769600000,
+                  "y": 728.84375,
+                  "mark": null
+                },
+                {
+                  "x": 1736812800000,
+                  "y": 902.6875,
+                  "mark": null
+                },
+                {
+                  "x": 1736856000000,
+                  "y": 654.921875,
+                  "mark": null
+                },
+                {
+                  "x": 1736899200000,
+                  "y": 654.921875,
+                  "mark": null
+                }
+              ]
+            }
+          ],
+          "bars": [],
+          "annotations": [
+            {
+              "data": {
+                "coordinates": {
+                  "x0": 1736942400000
+                }
+              },
+              "id": "__endzones__",
+              "style": {
+                "strokeWidth": 0,
+                "opacity": 0.6,
+                "fill": "#243147",
+                "stroke": "#243147"
+              },
+              "type": "rectangle"
+            },
+            {
+              "data": {
+                "dataValue": 1736510400000,
+                "details": "2 event annotations"
+              },
+              "id": "c_8_c_30_be_0_b_88_f_11_e_8_a_451_f_37365_e_9_f_268_2025_01_10_t_17_16_48_000_z",
+              "style": {
+                "line": {
+                  "stroke": "#194D33",
+                  "strokeWidth": 1,
+                  "opacity": 1
+                }
+              },
+              "type": "line",
+              "domainType": "xDomain"
+            },
+            {
+              "data": {
+                "dataValue": 1736768304000,
+                "details": "Event"
+              },
+              "id": "c_8_c_30_be_0_b_88_f_11_e_8_a_451_f_37365_e_9_f_268_2025_01_13_t_11_38_24_000_z",
+              "style": {
+                "line": {
+                  "stroke": "#194D33",
+                  "strokeWidth": 1,
+                  "opacity": 1
+                }
+              },
+              "type": "line",
+              "domainType": "xDomain"
+            },
+            {
+              "data": {
+                "dataValue": 1736826624000,
+                "details": "Event"
+              },
+              "id": "c_8_c_30_be_0_b_88_f_11_e_8_a_451_f_37365_e_9_f_268_2025_01_14_t_03_50_24_000_z",
+              "style": {
+                "line": {
+                  "stroke": "#194D33",
+                  "strokeWidth": 1,
+                  "opacity": 1
+                }
+              },
+              "type": "line",
+              "domainType": "xDomain"
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "e3b3cb5c-e3b1-497f-a5d5-fddb0dabc94e": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "f3cc8168-6360-4727-a410-a57f5a325091",
+            "name": "order_date per 12 hours",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD HH:mm"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "12h",
+                  "used_interval": "12h",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "a69956c9-43cd-4756-a3c0-e93cb1502a0b",
+            "name": "Revenue Trousers",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.00",
+                  "formatOverride": true
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "filtered_metric",
+                "params": {
+                  "customBucket": {
+                    "id": "1-bucket",
+                    "enabled": true,
+                    "type": "filter",
+                    "params": {
+                      "filter": {
+                        "language": "lucene",
+                        "query": "products.product_name:*trouser*"
+                      }
+                    },
+                    "schema": "bucket"
+                  },
+                  "customMetric": {
+                    "id": "1-metric",
+                    "enabled": true,
+                    "type": "sum",
+                    "params": {
+                      "field": "taxful_total_price",
+                      "emptyAsNull": true
+                    },
+                    "schema": "metric"
+                  }
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736337600000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 168
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736380800000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 58.96875
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736424000000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": null
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736467200000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 186
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736510400000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 116.9375
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736553600000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": null
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736596800000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 153.96875
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736640000000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": null
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736683200000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 79
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736726400000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 55.96875
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736769600000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 85
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736812800000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 147.90625
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736856000000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 189
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736899200000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": 270.84375
+          },
+          {
+            "f3cc8168-6360-4727-a410-a57f5a325091": 1736942400000,
+            "a69956c9-43cd-4756-a3c0-e93cb1502a0b": null
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      },
+      "1d08a43c-8913-4692-a3e0-8d77902f6e46": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "644b06ea-73a3-47b1-9b40-3035844c4621",
+            "name": "order_date per 12 hours",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD HH:mm"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "12h",
+                  "used_interval": "12h",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2",
+            "name": "Revenue Watches",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.00",
+                  "formatOverride": true
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "filtered_metric",
+                "params": {
+                  "customBucket": {
+                    "id": "1-bucket",
+                    "enabled": true,
+                    "type": "filter",
+                    "params": {
+                      "filter": {
+                        "language": "lucene",
+                        "query": "products.product_name:*watch*"
+                      }
+                    },
+                    "schema": "bucket"
+                  },
+                  "customMetric": {
+                    "id": "1-metric",
+                    "enabled": true,
+                    "type": "sum",
+                    "params": {
+                      "field": "taxful_total_price",
+                      "emptyAsNull": true
+                    },
+                    "schema": "metric"
+                  }
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736337600000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 105.9375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736380800000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 136.96875
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736424000000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 175.9375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736467200000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 31.984375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736510400000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 289.84375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736553600000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 89.9375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736596800000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 206
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736640000000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 94.9375
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736683200000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": null
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736726400000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 391
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736769600000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": null
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736812800000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": null
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736856000000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 53.96875
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736899200000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": 326.90625
+          },
+          {
+            "644b06ea-73a3-47b1-9b40-3035844c4621": 1736942400000,
+            "9a3d8abd-81a5-40ae-9616-020d5a5b2ee2": null
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      },
+      "9725cdbd-a9f3-479f-a349-0f11244e5239": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "6749b404-4784-4fd6-8bf6-5712e84c7310",
+            "name": "order_date per 12 hours",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD HH:mm"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "12h",
+                  "used_interval": "12h",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "b5588228-9c46-4a4b-92ee-d140c327bca0",
+            "name": "Revenue Bags",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.00",
+                  "formatOverride": true
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "filtered_metric",
+                "params": {
+                  "customBucket": {
+                    "id": "1-bucket",
+                    "enabled": true,
+                    "type": "filter",
+                    "params": {
+                      "filter": {
+                        "language": "lucene",
+                        "query": "products.product_name:*bag*"
+                      }
+                    },
+                    "schema": "bucket"
+                  },
+                  "customMetric": {
+                    "id": "1-metric",
+                    "enabled": true,
+                    "type": "sum",
+                    "params": {
+                      "field": "taxful_total_price",
+                      "emptyAsNull": true
+                    },
+                    "schema": "metric"
+                  }
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736337600000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 243.9375
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736380800000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 582.75
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736424000000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 528.90625
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736467200000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 749.921875
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736510400000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 1041.90625
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736553600000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 882.8125
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736596800000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 913.875
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736640000000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 485.96875
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736683200000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 809.953125
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736726400000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 542.84375
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736769600000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 569.875
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736812800000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 473.953125
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736856000000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 629.8125
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736899200000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": 651.890625
+          },
+          {
+            "6749b404-4784-4fd6-8bf6-5712e84c7310": 1736942400000,
+            "b5588228-9c46-4a4b-92ee-d140c327bca0": null
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      },
+      "2031d0f8-01fc-4009-b1ad-a7b7ca9266c0": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "1b199cb1-b47f-48e6-b209-74eb81b303f5",
+            "name": "order_date per 12 hours",
+            "meta": {
+              "type": "date",
+              "field": "order_date",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "date",
+                "params": {
+                  "pattern": "YYYY-MM-DD HH:mm"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "appliedTimeRange": {
+                  "from": "2025-01-08T12:00:00.000Z",
+                  "to": "2025-01-15T12:00:00.000Z"
+                },
+                "id": "0",
+                "enabled": true,
+                "type": "date_histogram",
+                "params": {
+                  "field": "order_date",
+                  "timeRange": {
+                    "from": "2025-01-08T12:00:00.000Z",
+                    "to": "2025-01-15T12:00:00.000Z"
+                  },
+                  "useNormalizedEsInterval": true,
+                  "extendToTimeRange": true,
+                  "scaleMetricValues": false,
+                  "interval": "12h",
+                  "used_interval": "12h",
+                  "drop_partials": false,
+                  "min_doc_count": 0,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "985e05c0-3a0b-4e55-84bb-1f02128388a9",
+            "name": "Revenue Cocktail Dresses",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "0,0.00",
+                  "formatOverride": true
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "1",
+                "enabled": true,
+                "type": "filtered_metric",
+                "params": {
+                  "customBucket": {
+                    "id": "1-bucket",
+                    "enabled": true,
+                    "type": "filter",
+                    "params": {
+                      "filter": {
+                        "language": "lucene",
+                        "query": "products.product_name:*cocktail dress*"
+                      }
+                    },
+                    "schema": "bucket"
+                  },
+                  "customMetric": {
+                    "id": "1-metric",
+                    "enabled": true,
+                    "type": "sum",
+                    "params": {
+                      "field": "taxful_total_price",
+                      "emptyAsNull": true
+                    },
+                    "schema": "metric"
+                  }
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736337600000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 692.8125
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736380800000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 881.84375
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736424000000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 789.875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736467200000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 1067.6875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736510400000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 811.96875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736553600000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 759.890625
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736596800000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 460.875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736640000000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 656.875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736683200000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 1171.796875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736726400000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 577.8125
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736769600000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 728.84375
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736812800000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 902.6875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736856000000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 654.921875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736899200000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": 654.921875
+          },
+          {
+            "1b199cb1-b47f-48e6-b209-74eb81b303f5": 1736942400000,
+            "985e05c0-3a0b-4e55-84bb-1f02128388a9": null
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      },
+      "192ad2e4-2bb7-44a9-b345-e96045fa6ccd": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "field:taxful_total_price",
+            "name": "taxful_total_price",
+            "meta": {
+              "type": "number",
+              "field": "taxful_total_price",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "$0,0.[00]"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "5",
+                "enabled": true,
+                "type": "top_metrics",
+                "params": {
+                  "field": "taxful_total_price",
+                  "size": 10,
+                  "sortField": "order_date",
+                  "sortOrder": "asc"
+                }
+              },
+              "dimensionName": "taxful_total_price"
+            }
+          },
+          {
+            "id": "time",
+            "name": "time",
+            "meta": {
+              "type": "string",
+              "dimensionName": "Time"
+            }
+          },
+          {
+            "id": "label",
+            "name": "label",
+            "meta": {
+              "type": "string",
+              "dimensionName": "Label"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "label": "Event",
+            "color": "#194D33",
+            "icon": "bell",
+            "lineWidth": 1,
+            "lineStyle": "solid",
+            "textVisibility": false,
+            "id": "c8c30be0-b88f-11e8-a451-f37365e9f268",
+            "timebucket": "2025-01-10T12:00:00.000Z",
+            "time": "2025-01-10T17:16:48.000Z",
+            "type": "point",
+            "field:taxful_total_price": 310
+          },
+          {
+            "label": "Event",
+            "color": "#194D33",
+            "icon": "bell",
+            "lineWidth": 1,
+            "lineStyle": "solid",
+            "textVisibility": false,
+            "id": "c8c30be0-b88f-11e8-a451-f37365e9f268",
+            "timebucket": "2025-01-10T12:00:00.000Z",
+            "time": "2025-01-10T21:34:34.000Z",
+            "type": "point",
+            "field:taxful_total_price": 393
+          },
+          {
+            "label": "Event",
+            "color": "#194D33",
+            "icon": "bell",
+            "lineWidth": 1,
+            "lineStyle": "solid",
+            "textVisibility": false,
+            "id": "c8c30be0-b88f-11e8-a451-f37365e9f268",
+            "timebucket": "2025-01-13T00:00:00.000Z",
+            "time": "2025-01-13T11:38:24.000Z",
+            "type": "point",
+            "field:taxful_total_price": 283
+          },
+          {
+            "label": "Event",
+            "color": "#194D33",
+            "icon": "bell",
+            "lineWidth": 1,
+            "lineStyle": "solid",
+            "textVisibility": false,
+            "id": "c8c30be0-b88f-11e8-a451-f37365e9f268",
+            "timebucket": "2025-01-14T00:00:00.000Z",
+            "time": "2025-01-14T03:50:24.000Z",
+            "type": "point",
+            "field:taxful_total_price": 301
+          }
+        ]
+      }
+    }
+  }
+}

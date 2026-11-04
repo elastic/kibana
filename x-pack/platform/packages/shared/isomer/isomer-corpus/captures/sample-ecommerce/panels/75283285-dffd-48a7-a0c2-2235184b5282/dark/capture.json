@@ -1,0 +1,176 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "panel_id": "75283285-dffd-48a7-a0c2-2235184b5282",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "metric",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/722b74f0-b882-11e8-a6d9-e546fe2bba5f?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 12,
+      "h": 7
+    },
+    "size": {
+      "width": 387.15625,
+      "height": 188
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 798.3125,
+      "y": -903,
+      "width": 387.15625,
+      "height": 188
+    },
+    "title": null,
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 16,
+        "rect": {
+          "width": 387.15625,
+          "height": 188
+        },
+        "debugState": null
+      }
+    ],
+    "metrics": [
+      {
+        "ariaLabel": null,
+        "inlineBackgroundColor": "rgb(17, 28, 44)",
+        "backgroundColor": "rgb(17, 28, 44)",
+        "texts": [
+          {
+            "text": "Sum of revenue",
+            "tag": "span",
+            "className": "",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "$77,138.05",
+            "tag": "p",
+            "className": "echMetricText__value",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "$",
+            "tag": "span",
+            "className": "echMetricText__part",
+            "testSubj": null,
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(227, 232, 242)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ]
+      }
+    ],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "c7478794-6767-4286-9d65-1c0ecd909dd8": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "041db33b-5c9c-47f3-a5d3-ef5e255d1663",
+            "name": "Sum of revenue",
+            "meta": {
+              "type": "number",
+              "field": "taxful_total_price",
+              "index": "kibana_sample_data_ecommerce",
+              "params": {
+                "id": "number",
+                "params": {
+                  "pattern": "$0,0.[00]"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+                "id": "0",
+                "enabled": true,
+                "type": "sum",
+                "params": {
+                  "field": "taxful_total_price",
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Metric"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "041db33b-5c9c-47f3-a5d3-ef5e255d1663": 77138.046875
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "ff959d40-b880-11e8-a6d9-e546fe2bba5f",
+          "statistics": {
+            "totalCount": 1032
+          }
+        }
+      }
+    }
+  }
+}

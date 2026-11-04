@@ -1,0 +1,166 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "title": "[eCommerce] Revenue Dashboard",
+  "theme": "light",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 2,
+    "rendered": 2
+  },
+  "panels": [
+    {
+      "id": "5",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "7",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "10",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "no_tables_adapter",
+      "error": null
+    },
+    {
+      "id": "75283285-dffd-48a7-a0c2-2235184b5282",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "58774330-b1b3-42dd-a04c-fbce9cc4d288",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "b63ec47d-aace-4980-b928-6be8adafa5a4",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "d9495793-80ba-4a9a-b0e3-d1155ec99b09",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "bda054f7-2d06-4936-b461-365d1be621fa",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "d68e91dd-1539-48b0-9279-b43bba2054fe",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "39d96714-152f-414b-992c-ce2492fc69f3",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "cd47b7cb-0ac0-43e0-b8c6-53489648bdef",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "bdb525ab-270b-46f1-a847-dd29be19aadb",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "a71cf076-6895-491c-8878-63592e429ed5",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "11",
+      "in_as_code": false,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "no_tables_adapter",
+      "error": null
+    }
+  ]
+}

@@ -1,0 +1,75 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "in_as_code": true,
+  "panel": {
+    "id": "buckets-pie-other",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 24,
+      "h": 12
+    },
+    "config": {
+      "type": "pie",
+      "title": "Top 3 categories, with Other",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_spec",
+        "name": "isomer-corpus-edge-cases",
+        "index_pattern": "isomer-corpus-edge-cases",
+        "time_field": "@timestamp"
+      },
+      "legend": {
+        "nested": false,
+        "truncate_after_lines": 1,
+        "visibility": "auto",
+        "position": "right"
+      },
+      "styling": {
+        "values": {
+          "visible": true,
+          "mode": "percentage",
+          "percent_decimals": 2
+        },
+        "labels": {
+          "visible": true,
+          "position": "outside"
+        }
+      },
+      "metrics": [
+        {
+          "empty_as_null": false,
+          "operation": "count",
+          "color": {
+            "type": "auto"
+          }
+        }
+      ],
+      "group_by": [
+        {
+          "operation": "terms",
+          "fields": [
+            "category"
+          ],
+          "limit": 3,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "metric",
+            "metric_index": 0,
+            "direction": "desc"
+          },
+          "color": {
+            "mode": "categorical",
+            "palette": "default",
+            "mapping": []
+          }
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

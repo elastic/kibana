@@ -1,0 +1,56 @@
+{
+  "dashboard_id": "isomer-corpus-long-titles",
+  "title": "Isomer corpus: long titles, long labels and long legends, to check truncation in every surface",
+  "theme": "dark",
+  "debug_state_complete": true,
+  "dropped_from_as_code": {
+    "warnings": 0,
+    "rendered": 0
+  },
+  "panels": [
+    {
+      "id": "long-xy-labels",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "long-pie-legend",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 1,
+      "metrics": 0,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "long-metric",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 1,
+      "charts_with_debug_state": 0,
+      "metrics": 1,
+      "data_grids": 0,
+      "inspector": "ok",
+      "error": null
+    },
+    {
+      "id": "long-table",
+      "in_as_code": true,
+      "status": "captured",
+      "charts": 0,
+      "charts_with_debug_state": 0,
+      "metrics": 0,
+      "data_grids": 1,
+      "inspector": "ok",
+      "error": null
+    }
+  ]
+}

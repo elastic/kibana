@@ -1,0 +1,54 @@
+{
+  "dashboard_id": "isomer-corpus-buckets",
+  "in_as_code": true,
+  "panel": {
+    "id": "buckets-table-esql-missing",
+    "type": "vis",
+    "grid": {
+      "x": 0,
+      "y": 24,
+      "w": 48,
+      "h": 12
+    },
+    "config": {
+      "type": "data_table",
+      "title": "Counts per category, including the missing value (ES|QL)",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "esql",
+        "query": "FROM isomer-corpus-edge-cases | STATS count = COUNT(*), signed = SUM(signed) BY category | SORT count DESC"
+      },
+      "metrics": [
+        {
+          "column": "count",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        },
+        {
+          "column": "signed",
+          "visible": true,
+          "color": {
+            "type": "auto"
+          },
+          "alignment": "right"
+        }
+      ],
+      "rows": [
+        {
+          "column": "category",
+          "visible": true,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ]
+    },
+    "inCollapsedSection": false
+  }
+}

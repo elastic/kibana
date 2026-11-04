@@ -1,0 +1,2373 @@
+{
+  "dashboard_id": "edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b",
+  "panel_id": "1d5f0b3f-d9d2-4b26-997b-83bc5ca3090b",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "data_table",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d/d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T00:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 00:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/edf84fe0-e1a0-11e7-b6d5-4dc382ef7f5b?_g=(time:(from:%272025-01-08T00:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 60,
+      "w": 48,
+      "h": 19
+    },
+    "size": {
+      "width": 1572.625,
+      "height": 524
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 967,
+      "width": 1572.625,
+      "height": 524
+    },
+    "title": "[Logs] Errors by host",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "Visits↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-ae2c85ad-c1a3-4f4a-a1e2-761060ef1136",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "HTTP 4xx↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--0089839c-ab91-420e-bdec-9583ce4d6015 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-0089839c-ab91-420e-bdec-9583ce4d6015",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "url.keyword↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-fc9b8ff9-47dc-4a68-9028-583ecd4cb865",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Unique↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--Unique euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-Unique",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "95th percentile of bytes↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--95th percentile of bytes euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-95th percentile of bytes",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Median of bytes↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--Median of bytes euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-Median of bytes",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "HTTP 5xx↵",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--count_5xx euiDataGridHeaderCell--hasColumnActions css-6zrcnj-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-count_5xx",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ],
+        "cells": [
+          {
+            "text": "1↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 0
+          },
+          {
+            "text": "0.0%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "https://elastic-elastic-elastic.org/people/type:astronauts/name:klaus-dietrich-flade/profile↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 2
+          },
+          {
+            "text": "1↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 3
+          },
+          {
+            "text": "0B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 4
+          },
+          {
+            "text": "0B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 5
+          },
+          {
+            "text": "100.0%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(246, 114, 106)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(246, 114, 106)",
+            "row": 0,
+            "column": 6
+          },
+          {
+            "text": "10↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 0
+          },
+          {
+            "text": "0.0%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 1,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/solutions/enterprise-search↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 2
+          },
+          {
+            "text": "10↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 3
+          },
+          {
+            "text": "845B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 4
+          },
+          {
+            "text": "397B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 5
+          },
+          {
+            "text": "10.0%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 1,
+            "column": 6
+          },
+          {
+            "text": "11↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 0
+          },
+          {
+            "text": "0.0%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 2,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/products↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 2
+          },
+          {
+            "text": "11↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 3
+          },
+          {
+            "text": "900B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 4
+          },
+          {
+            "text": "678B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 5
+          },
+          {
+            "text": "9.1%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 2,
+            "column": 6
+          },
+          {
+            "text": "15↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 0
+          },
+          {
+            "text": "6.7%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(251, 141, 132)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(251, 141, 132)",
+            "row": 3,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/solutions/business-analytics↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 2
+          },
+          {
+            "text": "15↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 3
+          },
+          {
+            "text": "867B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 4
+          },
+          {
+            "text": "621B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 5
+          },
+          {
+            "text": "6.7%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 3,
+            "column": 6
+          },
+          {
+            "text": "81↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 0
+          },
+          {
+            "text": "3.7%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 168, 159)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 168, 159)",
+            "row": 4,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.2-i686.rpm↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 2
+          },
+          {
+            "text": "77↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 3
+          },
+          {
+            "text": "15KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 4
+          },
+          {
+            "text": "6KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 4,
+            "column": 5
+          },
+          {
+            "text": "6.2%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 4,
+            "column": 6
+          },
+          {
+            "text": "68↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 0
+          },
+          {
+            "text": "8.8%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(246, 114, 106)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(246, 114, 106)",
+            "row": 5,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/apm-server/apm-server-6.3.2-amd64.deb↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 2
+          },
+          {
+            "text": "67↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 3
+          },
+          {
+            "text": "10KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 4
+          },
+          {
+            "text": "7KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 5,
+            "column": 5
+          },
+          {
+            "text": "5.9%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 5,
+            "column": 6
+          },
+          {
+            "text": "17↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 0
+          },
+          {
+            "text": "0.0%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 6,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/solutions/metrics↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 2
+          },
+          {
+            "text": "17↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 3
+          },
+          {
+            "text": "837B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 4
+          },
+          {
+            "text": "523B↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 6,
+            "column": 5
+          },
+          {
+            "text": "5.9%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 6,
+            "column": 6
+          },
+          {
+            "text": "57↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 0
+          },
+          {
+            "text": "8.8%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(246, 114, 106)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(246, 114, 106)",
+            "row": 7,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/kibana/kibana-6.3.2-linux-x86_64.tar.gz↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 2
+          },
+          {
+            "text": "57↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 3
+          },
+          {
+            "text": "9KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 4
+          },
+          {
+            "text": "5KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 7,
+            "column": 5
+          },
+          {
+            "text": "5.3%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 7,
+            "column": 6
+          },
+          {
+            "text": "59↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 0
+          },
+          {
+            "text": "5.1%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 168, 159)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 168, 159)",
+            "row": 8,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/downloads/beats/filebeat↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 2
+          },
+          {
+            "text": "57↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 3
+          },
+          {
+            "text": "9KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 4
+          },
+          {
+            "text": "7KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 8,
+            "column": 5
+          },
+          {
+            "text": "5.1%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 8,
+            "column": 6
+          },
+          {
+            "text": "61↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 9,
+            "column": 0
+          },
+          {
+            "text": "6.6%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(251, 141, 132)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(251, 141, 132)",
+            "row": 9,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/downloads↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 9,
+            "column": 2
+          },
+          {
+            "text": "60↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 9,
+            "column": 3
+          },
+          {
+            "text": "10KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 9,
+            "column": 4
+          },
+          {
+            "text": "6KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 9,
+            "column": 5
+          },
+          {
+            "text": "4.9%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 9,
+            "column": 6
+          },
+          {
+            "text": "63↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 10,
+            "column": 0
+          },
+          {
+            "text": "7.9%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(246, 114, 106)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(246, 114, 106)",
+            "row": 10,
+            "column": 1
+          },
+          {
+            "text": "https://www.elastic.co/downloads/enterprise↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 10,
+            "column": 2
+          },
+          {
+            "text": "62↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 10,
+            "column": 3
+          },
+          {
+            "text": "12KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 10,
+            "column": 4
+          },
+          {
+            "text": "5KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 10,
+            "column": 5
+          },
+          {
+            "text": "4.8%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 10,
+            "column": 6
+          },
+          {
+            "text": "62↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 11,
+            "column": 0
+          },
+          {
+            "text": "4.8%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 168, 159)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 168, 159)",
+            "row": 11,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.2-amd64.deb↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 11,
+            "column": 2
+          },
+          {
+            "text": "61↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 11,
+            "column": 3
+          },
+          {
+            "text": "14KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 11,
+            "column": 4
+          },
+          {
+            "text": "8KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 11,
+            "column": 5
+          },
+          {
+            "text": "4.8%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 11,
+            "column": 6
+          },
+          {
+            "text": "76↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 12,
+            "column": 0
+          },
+          {
+            "text": "6.6%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(251, 141, 132)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(251, 141, 132)",
+            "row": 12,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/apm-server/apm-server-6.3.2-windows-x86.zip↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 12,
+            "column": 2
+          },
+          {
+            "text": "73↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 12,
+            "column": 3
+          },
+          {
+            "text": "10KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 12,
+            "column": 4
+          },
+          {
+            "text": "7KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 12,
+            "column": 5
+          },
+          {
+            "text": "3.9%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 12,
+            "column": 6
+          },
+          {
+            "text": "53↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 13,
+            "column": 0
+          },
+          {
+            "text": "5.7%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(251, 141, 132)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(251, 141, 132)",
+            "row": 13,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/kibana/kibana-6.3.2-darwin-x86_64.tar.gz↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 13,
+            "column": 2
+          },
+          {
+            "text": "52↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 13,
+            "column": 3
+          },
+          {
+            "text": "13KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 13,
+            "column": 4
+          },
+          {
+            "text": "6KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 13,
+            "column": 5
+          },
+          {
+            "text": "3.8%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 13,
+            "column": 6
+          },
+          {
+            "text": "90↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--ae2c85ad-c1a3-4f4a-a1e2-761060ef1136 euiDataGridRowCell--firstColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 14,
+            "column": 0
+          },
+          {
+            "text": "5.6%↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--0089839c-ab91-420e-bdec-9583ce4d6015 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(251, 141, 132)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(251, 141, 132)",
+            "row": 14,
+            "column": 1
+          },
+          {
+            "text": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.zip↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--fc9b8ff9-47dc-4a68-9028-583ecd4cb865 css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 14,
+            "column": 2
+          },
+          {
+            "text": "87↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Unique css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 14,
+            "column": 3
+          },
+          {
+            "text": "10KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--95th percentile of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 14,
+            "column": 4
+          },
+          {
+            "text": "6KB↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--Median of bytes css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(56, 72, 97)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 14,
+            "column": 5
+          },
+          {
+            "text": "3.3%↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--count_5xx euiDataGridRowCell--lastColumn css-i11zyv-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "rgb(7, 16, 31)",
+            "inlineBackgroundColor": "rgb(255, 219, 214)",
+            "color": "rgb(7, 16, 31)",
+            "backgroundColor": "rgb(255, 219, 214)",
+            "row": 14,
+            "column": 6
+          }
+        ],
+        "rowCount": 75,
+        "columnCount": null
+      }
+    ]
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "meta": {
+          "type": "es_ql",
+          "query": "FROM kibana_sample_data_logs\n| KEEP bytes, clientip, url.keyword, response.keyword\n| EVAL type = CASE(TO_INTEGER(response.keyword) >= 400 and TO_INTEGER(response.keyword) < 500, \"4xx\", TO_INTEGER(response.keyword) >= 500, \"5xx\", \"Other\")\n| STATS Visits = COUNT(), Unique = COUNT_DISTINCT(clientip), p95 = percentile(bytes, 95), median = median(bytes) by type, url.keyword\n| EVAL count_4xx = CASE(type == \"4xx\", Visits), count_5xx = CASE(type == \"5xx\", Visits), count_rest =  CASE(type == \"Other\", Visits)\n| STATS count_4xx = SUM(count_4xx), count_5xx  = SUM(count_5xx), count_rest = SUM(count_rest), Unique = SUM(Unique),`95th percentile of bytes` = MAX(p95), `Median of bytes` = MAX(median), Visits = SUM(Visits) BY url.keyword\n| EVAL count_4xx = COALESCE(count_4xx, 0::LONG), count_5xx = COALESCE(count_5xx, 0::LONG), count_rest = COALESCE(count_rest, 0::LONG)\n| EVAL total_records = TO_DOUBLE(count_4xx + count_5xx + count_rest)\n| EVAL percentage_4xx = count_4xx / total_records, percentage_5xx = count_5xx / total_records\n| EVAL percentage_4xx = ROUND(percentage_4xx, 3)\n| EVAL percentage_5xx = ROUND(percentage_5xx, 3)\n| DROP count_4xx, count_rest, total_records\n| SORT percentage_5xx DESC\n| RENAME percentage_4xx as `HTTP 4xx`, percentage_5xx as `HTTP 5xx`",
+          "statistics": {
+            "totalCount": 75
+          }
+        },
+        "columns": [
+          {
+            "id": "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136",
+            "name": "Visits",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Visits",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "0089839c-ab91-420e-bdec-9583ce4d6015",
+            "name": "HTTP 4xx",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "HTTP 4xx",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0.0%",
+                  "formatOverride": true,
+                  "decimals": 1
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "fc9b8ff9-47dc-4a68-9028-583ecd4cb865",
+            "name": "url.keyword",
+            "meta": {
+              "type": "string",
+              "esType": "keyword",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "url.keyword",
+                "isSourceFieldFilterable": true
+              },
+              "params": {
+                "id": "string"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": false
+          },
+          {
+            "id": "Unique",
+            "name": "Unique",
+            "meta": {
+              "type": "number",
+              "esType": "long",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Unique",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "number"
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "95th percentile of bytes",
+            "name": "95th percentile of bytes",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "95th percentile of bytes",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "bytes",
+                "params": {
+                  "pattern": "0,0b",
+                  "formatOverride": true,
+                  "decimals": 0
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "Median of bytes",
+            "name": "Median of bytes",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "Median of bytes",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "bytes",
+                "params": {
+                  "pattern": "0,0b",
+                  "formatOverride": true,
+                  "decimals": 0
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          },
+          {
+            "id": "count_5xx",
+            "name": "HTTP 5xx",
+            "meta": {
+              "type": "number",
+              "esType": "double",
+              "sourceParams": {
+                "indexPattern": "kibana_sample_data_logs",
+                "sourceField": "HTTP 5xx",
+                "isSourceFieldFilterable": false
+              },
+              "params": {
+                "id": "percent",
+                "params": {
+                  "pattern": "0,0.0%",
+                  "formatOverride": true,
+                  "decimals": 1
+                }
+              },
+              "dimensionName": "Datatable column"
+            },
+            "isNull": false,
+            "isComputedColumn": true
+          }
+        ],
+        "rows": [
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 0,
+            "Median of bytes": 0,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:klaus-dietrich-flade/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 1
+          },
+          {
+            "Unique": 10,
+            "95th percentile of bytes": 844.5999999999999,
+            "Median of bytes": 397,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 10,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/enterprise-search",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0.1
+          },
+          {
+            "Unique": 11,
+            "95th percentile of bytes": 899.55,
+            "Median of bytes": 678,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 11,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/products",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0.091
+          },
+          {
+            "Unique": 15,
+            "95th percentile of bytes": 867.1999999999998,
+            "Median of bytes": 621,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 15,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/business-analytics",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.067,
+            "count_5xx": 0.067
+          },
+          {
+            "Unique": 77,
+            "95th percentile of bytes": 15291.999999999995,
+            "Median of bytes": 5665,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 81,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.2-i686.rpm",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.037,
+            "count_5xx": 0.062
+          },
+          {
+            "Unique": 67,
+            "95th percentile of bytes": 10096.349999999999,
+            "Median of bytes": 6740.5,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 68,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/apm-server/apm-server-6.3.2-amd64.deb",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.088,
+            "count_5xx": 0.059
+          },
+          {
+            "Unique": 17,
+            "95th percentile of bytes": 837.25,
+            "Median of bytes": 523,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 17,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/metrics",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0.059
+          },
+          {
+            "Unique": 57,
+            "95th percentile of bytes": 9705.2,
+            "Median of bytes": 5628,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 57,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/kibana/kibana-6.3.2-linux-x86_64.tar.gz",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.088,
+            "count_5xx": 0.053
+          },
+          {
+            "Unique": 57,
+            "95th percentile of bytes": 9361.4,
+            "Median of bytes": 6814,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 59,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/beats/filebeat",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.051,
+            "count_5xx": 0.051
+          },
+          {
+            "Unique": 60,
+            "95th percentile of bytes": 10428.249999999993,
+            "Median of bytes": 6244.5,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 61,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.066,
+            "count_5xx": 0.049
+          },
+          {
+            "Unique": 62,
+            "95th percentile of bytes": 11902.299999999994,
+            "Median of bytes": 5438,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 63,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/enterprise",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.079,
+            "count_5xx": 0.048
+          },
+          {
+            "Unique": 61,
+            "95th percentile of bytes": 14133.5,
+            "Median of bytes": 8027,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 62,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/beats/metricbeat/metricbeat-6.3.2-amd64.deb",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.048,
+            "count_5xx": 0.048
+          },
+          {
+            "Unique": 73,
+            "95th percentile of bytes": 10067.25,
+            "Median of bytes": 7017,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 76,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/apm-server/apm-server-6.3.2-windows-x86.zip",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.066,
+            "count_5xx": 0.039
+          },
+          {
+            "Unique": 52,
+            "95th percentile of bytes": 13299.099999999999,
+            "Median of bytes": 6127,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 53,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/kibana/kibana-6.3.2-darwin-x86_64.tar.gz",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.057,
+            "count_5xx": 0.038
+          },
+          {
+            "Unique": 87,
+            "95th percentile of bytes": 9851.45,
+            "Median of bytes": 5913,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 90,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.zip",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.056,
+            "count_5xx": 0.033
+          },
+          {
+            "Unique": 60,
+            "95th percentile of bytes": 14912.35,
+            "Median of bytes": 10172.5,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 61,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.tar.gz",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.033,
+            "count_5xx": 0.033
+          },
+          {
+            "Unique": 74,
+            "95th percentile of bytes": 13972.799999999996,
+            "Median of bytes": 6761,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 78,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/elasticsearch",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.038,
+            "count_5xx": 0.026
+          },
+          {
+            "Unique": 80,
+            "95th percentile of bytes": 9864.5,
+            "Median of bytes": 5864.5,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 81,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/beats",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.037,
+            "count_5xx": 0.025
+          },
+          {
+            "Unique": 42,
+            "95th percentile of bytes": 9861.4,
+            "Median of bytes": 6554,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 42,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/main.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.048,
+            "count_5xx": 0.024
+          },
+          {
+            "Unique": 41,
+            "95th percentile of bytes": 9539.1,
+            "Median of bytes": 6492,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 43,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/ads.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.07,
+            "count_5xx": 0.023
+          },
+          {
+            "Unique": 43,
+            "95th percentile of bytes": 9584.3,
+            "Median of bytes": 6086,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 44,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/semantic-ui.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.091,
+            "count_5xx": 0.023
+          },
+          {
+            "Unique": 48,
+            "95th percentile of bytes": 9655.5,
+            "Median of bytes": 6898,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 49,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/ad-blocker.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.041,
+            "count_5xx": 0.02
+          },
+          {
+            "Unique": 53,
+            "95th percentile of bytes": 9258.799999999997,
+            "Median of bytes": 7841,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 54,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/pretty-layout.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.019,
+            "count_5xx": 0.019
+          },
+          {
+            "Unique": 63,
+            "95th percentile of bytes": 11917.599999999997,
+            "Median of bytes": 6053,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 66,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.2-linux-x86_64.tar.gz",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0.015
+          },
+          {
+            "Unique": 70,
+            "95th percentile of bytes": 13216.25,
+            "Median of bytes": 7048,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 71,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/elasticsearch/elasticsearch-6.3.2.deb",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.056,
+            "count_5xx": 0.014
+          },
+          {
+            "Unique": 77,
+            "95th percentile of bytes": 15035,
+            "Median of bytes": 7528,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 84,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/beats/metricbeat",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.024,
+            "count_5xx": 0.012
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5364,
+            "Median of bytes": 5364,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:mark-brown/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 16,
+            "95th percentile of bytes": 820.75,
+            "Median of bytes": 545,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 16,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/app-search",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 3100,
+            "Median of bytes": 3100,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:musa-manarov/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 8919,
+            "Median of bytes": 8919,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:vladimir-titov/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1455,
+            "Median of bytes": 1455,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:james-f-reilly/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 9717,
+            "Median of bytes": 9717,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:gennady-padalka/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 11,
+            "95th percentile of bytes": 871,
+            "Median of bytes": 492,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 11,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/logging",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 2823,
+            "Median of bytes": 2823,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:janice-voss/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 9855,
+            "Median of bytes": 9855,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:david-wolf/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 33,
+            "95th percentile of bytes": 8769.2,
+            "Median of bytes": 8735,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 33,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://cdn.elastic-elastic-elastic.org/styles/app.css",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.061,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 331,
+            "Median of bytes": 331,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:viktor-m-afanasyev/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 3833,
+            "Median of bytes": 3833,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:joseph-m-acaba/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 2502,
+            "Median of bytes": 2502,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:apollo-14/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 617,
+            "Median of bytes": 617,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:william-e-thornton/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 69,
+            "95th percentile of bytes": 11287.699999999992,
+            "Median of bytes": 5689,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 71,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/beats/filebeat/filebeat-6.3.2-linux-x86.tar.gz",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.056,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1691,
+            "Median of bytes": 1691,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:gregory-chamitoff/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 3700,
+            "Median of bytes": 3700,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:andriyan-nikolayev/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1404,
+            "Median of bytes": 1404,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:wendy-lawrence/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1599,
+            "Median of bytes": 1599,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:georgi-ivanov/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 4527,
+            "Median of bytes": 4527,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:randolph-bresnik/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 9547,
+            "Median of bytes": 9547,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:terrence-wilcutt/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 7066,
+            "Median of bytes": 7066,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:barry-wilmore/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 3671,
+            "Median of bytes": 3671,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:ronald-grabe/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 236,
+            "Median of bytes": 236,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:ronald-a-parise/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 11,
+            "95th percentile of bytes": 884,
+            "Median of bytes": 303,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 11,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/security-analytics",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 7607,
+            "Median of bytes": 7607,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:william-s-mcarthur/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 11,
+            "95th percentile of bytes": 794,
+            "Median of bytes": 372,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 11,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/site-search",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5189,
+            "Median of bytes": 5189,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:liu-boming/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1102,
+            "Median of bytes": 1102,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:aleksandr-lazutkin/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 8661,
+            "Median of bytes": 8661,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:eric-a-boe/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 358,
+            "Median of bytes": 358,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:richard-mullane/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 4118,
+            "Median of bytes": 4118,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:virgil-i-gus-grissom/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 2,
+            "95th percentile of bytes": 5939.15,
+            "Median of bytes": 5013.5,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 2,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:aleksei-yeliseyev/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1614,
+            "Median of bytes": 1614,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:ellen-s-baker/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 1251,
+            "Median of bytes": 1251,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:kent-rominger/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5985,
+            "Median of bytes": 5985,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:aleksandr-laveykin/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5819,
+            "Median of bytes": 5819,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:susan-still-kilrain/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 8704,
+            "Median of bytes": 8704,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:paul-lockhart/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 8614,
+            "Median of bytes": 8614,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:valery-bykovsky/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 3034,
+            "Median of bytes": 3034,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:david-griggs/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 2978,
+            "Median of bytes": 2978,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:k-megan-mcarthur/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 9818,
+            "Median of bytes": 9818,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:valentin-bondarenko/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 4029,
+            "Median of bytes": 4029,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:takuya-onishi/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5296,
+            "Median of bytes": 5296,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:andrei-borisenko/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 10,
+            "95th percentile of bytes": 897.1499999999999,
+            "Median of bytes": 370,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 10,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/solutions/apm",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 5615,
+            "Median of bytes": 5615,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:guy-gardner/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 61,
+            "95th percentile of bytes": 11145,
+            "Median of bytes": 5629,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 62,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://artifacts.elastic.co/downloads/kibana/kibana-6.3.2-windows-x86_64.zip",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.016,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 1,
+            "95th percentile of bytes": 9432,
+            "Median of bytes": 9432,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 1,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://elastic-elastic-elastic.org/people/type:astronauts/name:arnaldo-tamayo-m-ndez/profile",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0,
+            "count_5xx": 0
+          },
+          {
+            "Unique": 65,
+            "95th percentile of bytes": 12300.199999999999,
+            "Median of bytes": 6674,
+            "ae2c85ad-c1a3-4f4a-a1e2-761060ef1136": 65,
+            "fc9b8ff9-47dc-4a68-9028-583ecd4cb865": "https://www.elastic.co/downloads/apm",
+            "0089839c-ab91-420e-bdec-9583ce4d6015": 0.046,
+            "count_5xx": 0
+          }
+        ],
+        "warning": "299 Elasticsearch-9.7.0-d943898b0d2905988036390c43e7eb38129f5095 \"No limit defined, adding default limit of [1000]\""
+      }
+    }
+  }
+}

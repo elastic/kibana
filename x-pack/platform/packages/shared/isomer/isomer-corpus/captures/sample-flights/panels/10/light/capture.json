@@ -1,0 +1,461 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "panel_id": "10",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "xy",
+  "theme": "light",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "now-7d",
+        "to": "now"
+      },
+      "absolute": {
+        "from": "2025-01-08T12:00:00.000Z",
+        "to": "2025-01-15T12:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 8, 2025 @ 12:00:00.000",
+      "end": "Jan 15, 2025 @ 12:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealislight",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/7adfa750-4c81-11e8-b3d7-01146121b73d?_g=(time:(from:%272025-01-08T12:00:00.000Z%27,to:%272025-01-15T12:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 58,
+      "w": 24,
+      "h": 11
+    },
+    "size": {
+      "width": 782.3125,
+      "height": 300
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 1817,
+      "width": 782.3125,
+      "height": 300
+    },
+    "title": "[Flights] Delay Buckets",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 6,
+        "rect": {
+          "width": 766.3125,
+          "height": 260
+        },
+        "debugState": {
+          "legend": {
+            "items": [
+              {
+                "key": "groupId{axis-left}spec{247b176d-e81d-47dc-bbd1-4de85d098961:c7936be7-e59b-424e-a912-69ba820d8e24:c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da:-}yAccessor{c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da}splitAccessors{}",
+                "name": "Count",
+                "color": "#1F78C1"
+              }
+            ]
+          },
+          "axes": {
+            "x": [
+              {
+                "id": "x",
+                "title": "Flight Delay Minutes",
+                "position": "bottom",
+                "labels": [
+                  "0",
+                  "50",
+                  "100",
+                  "150",
+                  "200",
+                  "250",
+                  "300",
+                  "350",
+                  "400"
+                ],
+                "values": [
+                  0,
+                  50,
+                  100,
+                  150,
+                  200,
+                  250,
+                  300,
+                  350,
+                  400
+                ],
+                "gridlines": []
+              }
+            ],
+            "y": [
+              {
+                "id": "axis-left",
+                "title": "Count",
+                "position": "left",
+                "labels": [
+                  "0",
+                  "5",
+                  "10",
+                  "15",
+                  "20",
+                  "25",
+                  "30",
+                  "35"
+                ],
+                "values": [
+                  0,
+                  5,
+                  10,
+                  15,
+                  20,
+                  25,
+                  30,
+                  35
+                ],
+                "gridlines": []
+              }
+            ]
+          },
+          "areas": [],
+          "lines": [],
+          "bars": [
+            {
+              "key": "groupId{axis-left}spec{247b176d-e81d-47dc-bbd1-4de85d098961:c7936be7-e59b-424e-a912-69ba820d8e24:c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da:-}yAccessor{c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da}splitAccessors{}",
+              "name": "Count",
+              "color": "#1F78C1",
+              "bars": [
+                {
+                  "x": 15,
+                  "y": 21,
+                  "mark": null
+                },
+                {
+                  "x": 30,
+                  "y": 28,
+                  "mark": null
+                },
+                {
+                  "x": 45,
+                  "y": 28,
+                  "mark": null
+                },
+                {
+                  "x": 60,
+                  "y": 16,
+                  "mark": null
+                },
+                {
+                  "x": 75,
+                  "y": 34,
+                  "mark": null
+                },
+                {
+                  "x": 90,
+                  "y": 14,
+                  "mark": null
+                },
+                {
+                  "x": 105,
+                  "y": 17,
+                  "mark": null
+                },
+                {
+                  "x": 120,
+                  "y": 18,
+                  "mark": null
+                },
+                {
+                  "x": 135,
+                  "y": 25,
+                  "mark": null
+                },
+                {
+                  "x": 150,
+                  "y": 29,
+                  "mark": null
+                },
+                {
+                  "x": 165,
+                  "y": 18,
+                  "mark": null
+                },
+                {
+                  "x": 180,
+                  "y": 22,
+                  "mark": null
+                },
+                {
+                  "x": 195,
+                  "y": 21,
+                  "mark": null
+                },
+                {
+                  "x": 210,
+                  "y": 29,
+                  "mark": null
+                },
+                {
+                  "x": 225,
+                  "y": 27,
+                  "mark": null
+                },
+                {
+                  "x": 240,
+                  "y": 34,
+                  "mark": null
+                },
+                {
+                  "x": 255,
+                  "y": 27,
+                  "mark": null
+                },
+                {
+                  "x": 270,
+                  "y": 29,
+                  "mark": null
+                },
+                {
+                  "x": 285,
+                  "y": 19,
+                  "mark": null
+                },
+                {
+                  "x": 300,
+                  "y": 20,
+                  "mark": null
+                },
+                {
+                  "x": 315,
+                  "y": 19,
+                  "mark": null
+                },
+                {
+                  "x": 330,
+                  "y": 25,
+                  "mark": null
+                },
+                {
+                  "x": 345,
+                  "y": 16,
+                  "mark": null
+                },
+                {
+                  "x": 360,
+                  "y": 25,
+                  "mark": null
+                }
+              ],
+              "labels": [],
+              "visible": true
+            }
+          ],
+          "annotations": []
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "247b176d-e81d-47dc-bbd1-4de85d098961": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "c7936be7-e59b-424e-a912-69ba820d8e24",
+            "name": "Flight Delay Minutes",
+            "meta": {
+              "type": "number",
+              "field": "FlightDelayMin",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "0",
+                "enabled": true,
+                "type": "histogram",
+                "params": {
+                  "field": "FlightDelayMin",
+                  "autoExtendBounds": false,
+                  "interval": "auto",
+                  "used_interval": 1,
+                  "maxBars": 499.5,
+                  "min_doc_count": false,
+                  "has_extended_bounds": false,
+                  "extended_bounds": {}
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Horizontal axis",
+              "dimensionType": "x"
+            }
+          },
+          {
+            "id": "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da",
+            "name": "Count",
+            "meta": {
+              "type": "number",
+              "index": "kibana_sample_data_flights",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": true
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Vertical axis",
+              "dimensionType": "y"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 15,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 21
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 30,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 28
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 45,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 28
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 60,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 16
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 75,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 34
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 90,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 14
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 105,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 17
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 120,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 18
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 135,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 25
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 150,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 29
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 165,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 18
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 180,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 22
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 195,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 21
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 210,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 29
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 225,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 27
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 240,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 34
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 255,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 27
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 270,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 29
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 285,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 19
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 300,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 20
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 315,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 19
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 330,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 25
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 345,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 16
+          },
+          {
+            "c7936be7-e59b-424e-a912-69ba820d8e24": 360,
+            "c84f9fa9-e2a1-4845-8fcf-f5a34f5f92da": 25
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "d3d7af60-4c81-11e8-b3d7-01146121b73d",
+          "statistics": {
+            "totalCount": 561
+          }
+        }
+      }
+    }
+  }
+}

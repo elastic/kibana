@@ -1,0 +1,305 @@
+{
+  "dashboard_id": "isomer-corpus-long-titles",
+  "panel_id": "long-table",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "data_table",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-long-titles?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 0,
+      "y": 12,
+      "w": 48,
+      "h": 10
+    },
+    "size": {
+      "width": 1583.875,
+      "height": 272
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 8,
+      "y": 489,
+      "width": 1583.875,
+      "height": 272
+    },
+    "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [],
+    "metrics": [],
+    "dataGrids": [
+      {
+        "headers": [
+          {
+            "text": "Top 10 values of long_label↦",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--datatable_accessor_row_0 euiDataGridHeaderCell--hasColumnActions css-1imfnef-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-datatable_accessor_row_0",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          },
+          {
+            "text": "Count of records↵",
+            "tag": "div",
+            "className": "euiDataGridHeaderCell euiDataGridHeaderCell--datatable_accessor_metric_0 euiDataGridHeaderCell--hasColumnActions css-1imfnef-euiDataGridHeaderCell",
+            "testSubj": "dataGridHeaderCell-datatable_accessor_metric_0",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)"
+          }
+        ],
+        "cells": [
+          {
+            "text": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 0
+          },
+          {
+            "text": "42↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 euiDataGridRowCell--lastColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 0,
+            "column": 1
+          },
+          {
+            "text": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 0
+          },
+          {
+            "text": "42↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 euiDataGridRowCell--lastColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 1,
+            "column": 1
+          },
+          {
+            "text": "Short↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 0
+          },
+          {
+            "text": "42↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 euiDataGridRowCell--lastColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 2,
+            "column": 1
+          },
+          {
+            "text": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement↦",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_row_0 euiDataGridRowCell--firstColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 0
+          },
+          {
+            "text": "42↵",
+            "tag": "div",
+            "className": "euiDataGridRowCell euiDataGridRowCell--datatable_accessor_metric_0 euiDataGridRowCell--lastColumn css-bdkgbj-euiDataGridRowCell",
+            "testSubj": "dataGridRowCell",
+            "ariaLabel": null,
+            "inlineColor": "",
+            "inlineBackgroundColor": "",
+            "color": "rgb(180, 193, 213)",
+            "backgroundColor": "rgba(0, 0, 0, 0)",
+            "row": 3,
+            "column": 1
+          }
+        ],
+        "rowCount": 4,
+        "columnCount": null
+      }
+    ]
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "datatable_accessor_row_0",
+            "name": "Top 10 values of long_label",
+            "meta": {
+              "type": "string",
+              "field": "long_label",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "long_label",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": false,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Datatable column"
+            }
+          },
+          {
+            "id": "datatable_accessor_metric_0",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Datatable column"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "datatable_accessor_row_0": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+            "datatable_accessor_metric_0": 42
+          },
+          {
+            "datatable_accessor_row_0": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+            "datatable_accessor_metric_0": 42
+          },
+          {
+            "datatable_accessor_row_0": "Short",
+            "datatable_accessor_metric_0": 42
+          },
+          {
+            "datatable_accessor_row_0": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement",
+            "datatable_accessor_metric_0": 42
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+          "statistics": {
+            "totalCount": 168
+          }
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,228 @@
+{
+  "dashboard_id": "isomer-corpus-long-titles",
+  "panel_id": "long-pie-legend",
+  "in_as_code": true,
+  "panel_type": "vis",
+  "chart_type": "pie",
+  "theme": "dark",
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {
+      "relative": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      },
+      "absolute": {
+        "from": "2024-01-01T00:00:00.000Z",
+        "to": "2024-01-08T00:00:00.000Z"
+      }
+    },
+    "time_picker": {
+      "start": "Jan 1, 2024 @ 00:00:00.000",
+      "end": "Jan 8, 2024 @ 00:00:00.000"
+    },
+    "ui_settings": {
+      "dateFormat:tz": "UTC"
+    },
+    "page": {
+      "themeTag": "borealisdark",
+      "timeZone": "America/Toronto",
+      "locale": "en",
+      "navigatorLanguages": [
+        "en-US"
+      ],
+      "devicePixelRatio": 2,
+      "viewport": {
+        "width": 1600,
+        "height": 1057
+      },
+      "userAgent": "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/154.0.0.0 Safari/537.36",
+      "url": "http://localhost:5620/app/dashboards#/view/isomer-corpus-long-titles?_g=(time:(from:%272024-01-01T00:00:00.000Z%27,to:%272024-01-08T00:00:00.000Z%27))"
+    },
+    "grid": {
+      "x": 24,
+      "y": 0,
+      "w": 12,
+      "h": 12
+    },
+    "size": {
+      "width": 389.96875,
+      "height": 328
+    }
+  },
+  "debug_state_complete": true,
+  "panel": {
+    "found": true,
+    "rect": {
+      "x": 803.9375,
+      "y": 153,
+      "width": 389.96875,
+      "height": 328
+    },
+    "title": "A panel title long enough to overflow the panel header at every grid width, so truncation, wrapping and tooltips are exercised by each renderer",
+    "renderComplete": true,
+    "errorText": null,
+    "charts": [
+      {
+        "renderComplete": true,
+        "renderCount": 5,
+        "rect": {
+          "width": 373.96875,
+          "height": 288
+        },
+        "debugState": {
+          "partition": [
+            {
+              "panelTitle": "",
+              "partitions": [
+                {
+                  "name": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+                  "depth": 1,
+                  "color": "#a6edea",
+                  "value": 42,
+                  "coords": [
+                    265,
+                    66
+                  ]
+                },
+                {
+                  "name": "Short",
+                  "depth": 1,
+                  "color": "#61a2ff",
+                  "value": 42,
+                  "coords": [
+                    265,
+                    222
+                  ]
+                },
+                {
+                  "name": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement",
+                  "depth": 1,
+                  "color": "#bfdbff",
+                  "value": 42,
+                  "coords": [
+                    109,
+                    222
+                  ]
+                },
+                {
+                  "name": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+                  "depth": 1,
+                  "color": "#16c5c0",
+                  "value": 42,
+                  "coords": [
+                    109,
+                    66
+                  ]
+                }
+              ]
+            }
+          ]
+        }
+      }
+    ],
+    "metrics": [],
+    "dataGrids": []
+  },
+  "inspector": {
+    "status": "ok",
+    "adapters": [
+      "requests",
+      "tables",
+      "expression"
+    ],
+    "tables": {
+      "default": {
+        "type": "datatable",
+        "columns": [
+          {
+            "id": "partition_value_accessor_group_by_0",
+            "name": "Top 10 values of long_label",
+            "meta": {
+              "type": "string",
+              "field": "long_label",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "terms",
+                "params": {
+                  "id": "string",
+                  "otherBucketLabel": "Other"
+                }
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "0",
+                "enabled": true,
+                "type": "terms",
+                "params": {
+                  "field": "long_label",
+                  "orderBy": "1",
+                  "order": "desc",
+                  "size": 10,
+                  "otherBucket": false,
+                  "otherBucketLabel": "Other",
+                  "missingBucket": false,
+                  "includeIsRegex": false,
+                  "excludeIsRegex": false
+                },
+                "schema": "segment"
+              },
+              "dimensionName": "Slice"
+            }
+          },
+          {
+            "id": "partition_value_accessor_metric_0",
+            "name": "Count of records",
+            "meta": {
+              "type": "number",
+              "index": "isomer-corpus-edge-cases",
+              "params": {
+                "id": "number"
+              },
+              "source": "esaggs",
+              "sourceParams": {
+                "hasPrecisionError": false,
+                "indexPatternId": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+                "id": "1",
+                "enabled": true,
+                "type": "count",
+                "params": {
+                  "emptyAsNull": false
+                },
+                "schema": "metric"
+              },
+              "dimensionName": "Slice size"
+            }
+          }
+        ],
+        "rows": [
+          {
+            "partition_value_accessor_group_by_0": "A deliberately long category label that should be truncated or wrapped by every renderer that draws it",
+            "partition_value_accessor_metric_0": 42
+          },
+          {
+            "partition_value_accessor_group_by_0": "Another very long label, with punctuation: commas, colons; and \"quotes\" — plus an em dash",
+            "partition_value_accessor_metric_0": 42
+          },
+          {
+            "partition_value_accessor_group_by_0": "Short",
+            "partition_value_accessor_metric_0": 42
+          },
+          {
+            "partition_value_accessor_group_by_0": "Ünïcödé label with accents, CJK 漢字 and an emoji 🚀 to exercise text measurement",
+            "partition_value_accessor_metric_0": 42
+          }
+        ],
+        "meta": {
+          "type": "esaggs",
+          "source": "isomer-corpus-edge-cases-@timestamp-b6eac90083980d83be9026b0d32d464d37c39f9232217faacebecfff5e40e06a",
+          "statistics": {
+            "totalCount": 168
+          }
+        }
+      }
+    }
+  }
+}

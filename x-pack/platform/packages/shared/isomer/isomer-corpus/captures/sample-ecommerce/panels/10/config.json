@@ -1,0 +1,19 @@
+{
+  "dashboard_id": "722b74f0-b882-11e8-a6d9-e546fe2bba5f",
+  "in_as_code": true,
+  "panel": {
+    "id": "10",
+    "type": "discover_session",
+    "grid": {
+      "x": 0,
+      "y": 54,
+      "w": 48,
+      "h": 18
+    },
+    "config": {
+      "ref_id": "3ba638e0-b894-11e8-a6d9-e546fe2bba5f",
+      "overrides": {}
+    },
+    "inCollapsedSection": false
+  }
+}

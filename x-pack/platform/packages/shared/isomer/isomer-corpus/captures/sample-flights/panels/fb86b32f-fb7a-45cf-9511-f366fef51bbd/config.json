@@ -1,0 +1,102 @@
+{
+  "dashboard_id": "7adfa750-4c81-11e8-b3d7-01146121b73d",
+  "in_as_code": true,
+  "panel": {
+    "id": "fb86b32f-fb7a-45cf-9511-f366fef51bbd",
+    "type": "vis",
+    "grid": {
+      "x": 24,
+      "y": 8,
+      "w": 24,
+      "h": 28
+    },
+    "config": {
+      "type": "data_table",
+      "title": "[Flights] Most delayed cities",
+      "sampling": 1,
+      "ignore_global_filters": false,
+      "data_source": {
+        "type": "data_view_reference",
+        "ref_id": "d3d7af60-4c81-11e8-b3d7-01146121b73d"
+      },
+      "styling": {
+        "density": {
+          "mode": "default",
+          "height": {
+            "value": {
+              "type": "custom",
+              "lines": 1
+            }
+          }
+        },
+        "sort_by": {
+          "column_type": "metric",
+          "index": 0,
+          "direction": "desc"
+        }
+      },
+      "metrics": [
+        {
+          "format": {
+            "type": "percent",
+            "decimals": 0,
+            "compact": false
+          },
+          "label": "Delay %",
+          "operation": "formula",
+          "formula": "count(kql='FlightDelay : true ') / count()",
+          "apply_color_to": "background",
+          "visible": true,
+          "width": 302.5,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "negative"
+          },
+          "alignment": "center"
+        },
+        {
+          "format": {
+            "type": "percent",
+            "decimals": 0,
+            "compact": false
+          },
+          "label": "Cancel %",
+          "operation": "formula",
+          "formula": "count(kql='Cancelled: true') / count()",
+          "apply_color_to": "background",
+          "visible": true,
+          "color": {
+            "type": "distributed_palette",
+            "palette": "negative"
+          },
+          "alignment": "center"
+        }
+      ],
+      "rows": [
+        {
+          "operation": "terms",
+          "fields": [
+            "OriginCityName"
+          ],
+          "limit": 1000,
+          "other_bucket": {
+            "include_documents_without_field": false
+          },
+          "rank_by": {
+            "type": "alphabetical",
+            "direction": "asc"
+          },
+          "visible": true,
+          "width": 262.75,
+          "alignment": "left",
+          "color": {
+            "type": "auto"
+          },
+          "click_filter": false
+        }
+      ],
+      "hide_title": false
+    },
+    "inCollapsedSection": false
+  }
+}
