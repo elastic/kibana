@@ -63,7 +63,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           failure_store: { inherit: {} },
         },
       };
-      // Sources outlive the streams they are built on, so a failed test body must not own their cleanup.
+      // Deleting a source cascades to its queries and rules, so a failed body must not own that cleanup.
       const createdSourceIds: string[] = [];
 
       beforeEach(async () => {
@@ -74,10 +74,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       afterEach(async () => {
-        await deleteStream(apiClient, STREAM_NAME);
         for (const sourceId of createdSourceIds.splice(0)) {
           await deleteTestSource(roleScopedSupertest, sourceId);
         }
+        await deleteStream(apiClient, STREAM_NAME);
       });
 
       it('updates the queries', async () => {
