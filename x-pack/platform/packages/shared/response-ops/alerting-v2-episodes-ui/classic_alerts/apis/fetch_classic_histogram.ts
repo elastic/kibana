@@ -17,13 +17,14 @@ import {
 import {
   buildClassicAlertsHistogramAggs,
   buildClassicAlertsQuery,
-  classicHistogramBucketAggName,
   CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
   resolveClassicHistogramBreakdown,
 } from '../utils/query';
 import {
   type BaseRacOptions,
   type ClassicHistogramAggregations,
+  type ClassicHistogramOverlapAggregations,
+  type ClassicHistogramRangeAggregation,
   findClassicAlerts,
   toTimeRangeParam,
 } from './rac_find';
@@ -40,9 +41,35 @@ export interface FetchClassicAlertsHistogramOptions extends BaseRacOptions {
 
 const EMPTY_HISTOGRAM: EpisodeSourceHistogram = { counts: [], isCapHit: false };
 
+const toRunningTotals = (aggregation?: ClassicHistogramRangeAggregation): number[] => {
+  let total = 0;
+  return (aggregation?.buckets ?? []).map(({ doc_count: count }) => {
+    total += count;
+    return total;
+  });
+};
+
 /**
- * Returns per-bucket classic alert overlap counts computed by Elasticsearch
- * filter aggregations (RBAC enforced by the RAC alerts API).
+ * Overlap count per histogram bucket: alerts started before the bucket ends minus alerts
+ * ended at or before it starts (see `buildClassicAlertsHistogramAggs`).
+ */
+const toBucketCounts = (
+  { started, ended }: ClassicHistogramOverlapAggregations,
+  buckets: TimeBucket[],
+  breakdown?: string
+): HistogramBucketCount[] => {
+  const startedTotals = toRunningTotals(started);
+  const endedTotals = toRunningTotals(ended);
+  return buckets.map(({ start }, i) => ({
+    bucketStart: start,
+    count: (startedTotals[i] ?? 0) - (endedTotals[i] ?? 0),
+    ...(breakdown !== undefined ? { breakdown } : {}),
+  }));
+};
+
+/**
+ * Returns per-bucket classic alert overlap counts computed from Elasticsearch
+ * range aggregations (RBAC enforced by the RAC alerts API).
  */
 export const fetchClassicAlertsHistogram = async ({
   ruleTypeIds,
@@ -73,37 +100,31 @@ export const fetchClassicAlertsHistogram = async ({
     abortSignal
   );
 
-  let isCapHit = false;
-  const counts = buckets.flatMap(({ start }, i): HistogramBucketCount[] => {
-    const agg = response.aggregations?.[classicHistogramBucketAggName(i)];
-    if (!agg) {
-      return [];
-    }
-    if (!breakdownField) {
-      return [{ bucketStart: start, count: agg.doc_count }];
-    }
-    if (!breakdown) {
-      if (agg.doc_count === 0) {
-        return [];
-      }
-      return [
-        {
-          bucketStart: start,
-          count: agg.doc_count,
-          breakdown: CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN,
-        },
-      ];
-    }
-    if ((agg.breakdown?.sum_other_doc_count ?? 0) > 0) {
-      isCapHit = true;
-    }
-    return (agg.breakdown?.buckets ?? []).map(({ key, doc_count: count }) => ({
-      bucketStart: start,
-      count,
-      breakdown: breakdown.normalize(String(key)),
-    }));
-  });
+  const aggregations = response.aggregations ?? {};
+
+  if (!breakdownField) {
+    return { counts: toBucketCounts(aggregations, buckets), isCapHit: false };
+  }
+
+  if (!breakdown) {
+    return {
+      counts: toBucketCounts(aggregations, buckets, CLASSIC_HISTOGRAM_UNKNOWN_BREAKDOWN).filter(
+        ({ count }) => count > 0
+      ),
+      isCapHit: false,
+    };
+  }
+
+  const terms = aggregations.breakdown;
+  const counts = (terms?.buckets ?? []).flatMap(({ key, ...overlapAggregations }) =>
+    toBucketCounts(overlapAggregations, buckets, breakdown.normalize(String(key))).filter(
+      ({ count }) => count > 0
+    )
+  );
 
   // Normalised breakdown values can collapse several raw terms into one (e.g. recovered + untracked).
-  return { counts: mergeBucketCounts(counts), isCapHit };
+  return {
+    counts: mergeBucketCounts(counts),
+    isCapHit: (terms?.sum_other_doc_count ?? 0) > 0,
+  };
 };

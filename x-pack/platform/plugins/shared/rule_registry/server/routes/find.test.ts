@@ -54,19 +54,29 @@ describe('findAlertsByQueryRoute', () => {
     expect(response.status).toEqual(200);
   });
 
-  describe('aggregation filter validation', () => {
-    test('accepts query DSL clauses inside a filter aggregation', async () => {
+  describe('range aggregation validation', () => {
+    test('accepts range aggregations, including under a terms aggregation', async () => {
+      const started = {
+        range: {
+          field: 'kibana.alert.start',
+          ranges: [
+            { to: '2024-01-01T01:00:00.000Z' },
+            { from: '2024-01-01T01:00:00.000Z', to: '2024-01-01T02:00:00.000Z' },
+          ],
+        },
+      };
+      const ended = {
+        range: {
+          field: 'kibana.alert.end',
+          missing: 1704070800000,
+          ranges: [{ to: 1704067200001 }, { from: 1704067200001, to: 1704070800001 }],
+        },
+      };
       const aggs = {
-        bucket_0: {
-          filter: {
-            bool: {
-              filter: [
-                { range: { 'kibana.alert.start': { lt: '2024-01-01T01:00:00.000Z' } } },
-                { bool: { must_not: { exists: { field: 'kibana.alert.end' } } } },
-              ],
-            },
-          },
-          aggs: { breakdown: { terms: { field: 'kibana.alert.status', size: 50 } } },
+        started,
+        breakdown: {
+          terms: { field: 'kibana.alert.status', size: 50 },
+          aggs: { started, ended },
         },
       };
 
@@ -79,40 +89,26 @@ describe('findAlertsByQueryRoute', () => {
       expect(clients.rac.find).toHaveBeenCalledWith(
         expect.objectContaining({
           aggs: {
-            bucket_0: expect.objectContaining({
-              filter: expect.objectContaining({ bool: aggs.bucket_0.filter.bool }),
-              aggs: aggs.bucket_0.aggs,
+            started: expect.objectContaining({ range: started.range }),
+            breakdown: expect.objectContaining({
+              terms: expect.objectContaining(aggs.breakdown.terms),
+              aggs: {
+                started: expect.objectContaining({ range: started.range }),
+                ended: expect.objectContaining({ range: ended.range }),
+              },
             }),
           },
         })
       );
     });
 
-    test('still accepts a term filter aggregation', async () => {
-      const response = await server.inject(
-        {
-          ...getFindRequest(),
-          body: { aggs: { active: { filter: { term: { 'kibana.alert.status': 'active' } } } } },
-        },
-        context
-      );
-
-      expect(response.status).toEqual(200);
-    });
-
-    test('rejects unknown keys inside a filter aggregation', async () => {
+    test('rejects unknown keys inside a range aggregation', async () => {
       await expect(
         server.inject(
-          { ...getFindRequest(), body: { aggs: { bad: { filter: { not_a_query: {} } } } } },
-          context
-        )
-      ).rejects.toThrow(/not_a_query/);
-    });
-
-    test('rejects script queries inside a filter aggregation', async () => {
-      await expect(
-        server.inject(
-          { ...getFindRequest(), body: { aggs: { bad: { filter: { script: { source: '1' } } } } } },
+          {
+            ...getFindRequest(),
+            body: { aggs: { bad: { range: { field: 'kibana.alert.start', script: 'x' } } } },
+          },
           context
         )
       ).rejects.toThrow(/script/);

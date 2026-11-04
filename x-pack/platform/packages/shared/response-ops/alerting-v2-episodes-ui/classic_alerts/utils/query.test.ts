@@ -9,6 +9,7 @@ import {
   buildClassicAlertsQuery,
   buildClassicAlertsSort,
   buildClassicAlertsHistogramAggs,
+  getClassicHistogramBreakdownSize,
   resolveClassicHistogramBreakdown,
 } from './query';
 import { ALERT_EPISODE_STATUS } from '@kbn/alerting-v2-schemas';
@@ -206,49 +207,53 @@ describe('buildClassicAlertsHistogramAggs', () => {
     { start: T0 + HOUR, end: T0 + 2 * HOUR },
   ];
 
-  it('builds one strict overlap filter per bucket', () => {
-    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs: T0 + 2 * HOUR });
+  it('builds started/ended range aggregations with one contiguous slot per bucket', () => {
+    const nowMs = T0 + 2 * HOUR;
+    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs });
 
-    expect(Object.keys(aggs)).toEqual(['bucket_0', 'bucket_1']);
-    expect(aggs.bucket_0).toEqual({
-      filter: {
-        bool: {
-          filter: [
-            { range: { 'kibana.alert.start': { lt: '2024-01-01T01:00:00.000Z' } } },
-            {
-              bool: {
-                should: [
-                  { range: { 'kibana.alert.end': { gt: '2024-01-01T00:00:00.000Z' } } },
-                  { bool: { must_not: { exists: { field: 'kibana.alert.end' } } } },
-                ],
-                minimum_should_match: 1,
-              },
-            },
-          ],
+    expect(aggs).toEqual({
+      started: {
+        range: {
+          field: 'kibana.alert.start',
+          ranges: [{ to: T0 + HOUR }, { from: T0 + HOUR, to: T0 + 2 * HOUR }],
+        },
+      },
+      ended: {
+        range: {
+          field: 'kibana.alert.end',
+          missing: nowMs,
+          ranges: [{ to: T0 + 1 }, { from: T0 + 1, to: T0 + HOUR + 1 }],
         },
       },
     });
   });
 
-  it('excludes open alerts from buckets starting at or after now', () => {
-    const aggs = buildClassicAlertsHistogramAggs({ buckets, nowMs: T0 + HOUR });
-    const should = (
-      aggs.bucket_1.filter as { bool: { filter: Array<{ bool?: { should: unknown[] } }> } }
-    ).bool.filter[1].bool?.should;
-
-    expect(should).toEqual([{ range: { 'kibana.alert.end': { gt: '2024-01-01T01:00:00.000Z' } } }]);
-  });
-
-  it('adds a breakdown terms sub-aggregation when a breakdown is given', () => {
+  it('nests the range aggregations under a breakdown terms aggregation', () => {
     const aggs = buildClassicAlertsHistogramAggs({
       buckets,
       nowMs: T0,
       breakdown: resolveClassicHistogramBreakdown('rule.id'),
     });
 
-    expect(aggs.bucket_0.aggs).toEqual({
-      breakdown: { terms: { field: 'kibana.alert.rule.uuid', missing: 'unknown', size: 50 } },
+    expect(Object.keys(aggs)).toEqual(['breakdown']);
+    expect(aggs.breakdown.terms).toEqual({
+      field: 'kibana.alert.rule.uuid',
+      missing: 'unknown',
+      size: 50,
     });
+    expect(Object.keys(aggs.breakdown.aggs ?? {})).toEqual(['started', 'ended']);
+  });
+});
+
+describe('getClassicHistogramBreakdownSize', () => {
+  it('uses the full breakdown size for typical bucket counts', () => {
+    expect(getClassicHistogramBreakdownSize(60)).toBe(50);
+  });
+
+  it('shrinks the breakdown size so the response stays under search.max_buckets', () => {
+    const size = getClassicHistogramBreakdownSize(1000);
+    expect(size).toBe(32);
+    expect(size * (2 * 1000 + 1)).toBeLessThanOrEqual(65_536);
   });
 });
 

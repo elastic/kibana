@@ -250,7 +250,7 @@ describe('classic alerts query builders', () => {
     });
   });
 
-  describe('fetchClassicAlertsHistogram (filter aggregations)', () => {
+  describe('fetchClassicAlertsHistogram (range aggregations)', () => {
     const HOUR = 3_600_000;
     const T0 = Date.parse('2024-01-01T00:00:00.000Z');
     const NOW = T0 + 3.5 * HOUR;
@@ -403,7 +403,7 @@ describe('classic alerts query builders', () => {
       expect(counts.map(({ count }) => count)).toEqual([3, 3, 4, 2]);
     });
 
-    it.each(['episode.status', 'rule.id', 'last_ack_action'])(
+    it.each(['episode.status', 'rule.id', 'last_ack_action', 'last_assignee_uid'])(
       'matches client-side overlap counting with the %s breakdown',
       async (breakdownField) => {
         expect(await fetchCounts(breakdownField)).toEqual(expectedCounts(breakdownField));

@@ -236,41 +236,25 @@ export const resolveClassicHistogramBreakdown = (
   breakdownField: string
 ): ClassicHistogramBreakdown | undefined => CLASSIC_HISTOGRAM_BREAKDOWNS[breakdownField];
 
+/** Elasticsearch `search.max_buckets` default. */
+const ES_MAX_BUCKETS = 65_536;
+
 /**
- * Overlap filter for one histogram bucket: the alert started before the bucket ends and
- * either ended after the bucket starts or is still open. Open alerts only count in buckets
- * that start before `nowMs`, matching the client-side overlap counting for v2 episodes.
+ * Terms size for the breakdown: at most `CLASSIC_HISTOGRAM_BREAKDOWN_SIZE`, lowered so the
+ * response (two range buckets per histogram bucket for every term) stays under `search.max_buckets`.
  */
-const buildBucketOverlapFilter = (
-  { start, end }: TimeBucket,
-  nowMs: number
-): estypes.QueryDslQueryContainer => {
-  const stillOpen: estypes.QueryDslQueryContainer[] =
-    start < nowMs ? [{ bool: { must_not: { exists: { field: ALERT_END } } } }] : [];
+export const getClassicHistogramBreakdownSize = (bucketCount: number): number =>
+  Math.min(CLASSIC_HISTOGRAM_BREAKDOWN_SIZE, Math.floor(ES_MAX_BUCKETS / (2 * bucketCount + 1)));
 
-  return {
-    bool: {
-      filter: [
-        { range: { [ALERT_START]: { lt: new Date(end).toISOString() } } },
-        {
-          bool: {
-            should: [
-              { range: { [ALERT_END]: { gt: new Date(start).toISOString() } } },
-              ...stillOpen,
-            ],
-            minimum_should_match: 1,
-          },
-        },
-      ],
-    },
-  };
-};
-
-export const classicHistogramBucketAggName = (index: number): string => `bucket_${index}`;
+/** Contiguous epoch-millis ranges ending at each boundary: `(-inf, b0)`, `[b0, b1)`, ... */
+const toSlotRanges = (boundaries: number[]): estypes.AggregationsAggregationRange[] =>
+  boundaries.map((to, i) => (i > 0 ? { from: boundaries[i - 1], to } : { to }));
 
 /**
- * Builds one `filter` aggregation per histogram bucket so Elasticsearch returns
- * per-bucket overlap counts instead of documents.
+ * Builds range aggregations whose running totals give, for histogram bucket `i`, the number
+ * of alerts that started before the bucket ends (`started`) and the number that ended at or
+ * before it starts (`ended`). Their difference is the bucket's overlap count. Open alerts have
+ * no end and are treated as ending at `nowMs`, so they only count in buckets that start before now.
  */
 export const buildClassicAlertsHistogramAggs = ({
   buckets,
@@ -281,24 +265,32 @@ export const buildClassicAlertsHistogramAggs = ({
   nowMs: number;
   breakdown?: ClassicHistogramBreakdown;
 }): Record<string, estypes.AggregationsAggregationContainer> => {
-  const breakdownAggs = breakdown
-    ? {
-        aggs: {
-          breakdown: {
-            terms: {
-              field: breakdown.field,
-              missing: breakdown.missing,
-              size: CLASSIC_HISTOGRAM_BREAKDOWN_SIZE,
-            },
-          },
-        },
-      }
-    : {};
+  const overlapAggs: Record<string, estypes.AggregationsAggregationContainer> = {
+    started: {
+      range: { field: ALERT_START, ranges: toSlotRanges(buckets.map(({ end }) => end)) },
+    },
+    ended: {
+      range: {
+        field: ALERT_END,
+        missing: nowMs,
+        // +1ms turns the exclusive `to` into "ended at or before the bucket start"
+        ranges: toSlotRanges(buckets.map(({ start }) => start + 1)),
+      },
+    },
+  };
 
-  return Object.fromEntries(
-    buckets.map((bucket, i) => [
-      classicHistogramBucketAggName(i),
-      { filter: buildBucketOverlapFilter(bucket, nowMs), ...breakdownAggs },
-    ])
-  );
+  if (!breakdown) {
+    return overlapAggs;
+  }
+
+  return {
+    breakdown: {
+      terms: {
+        field: breakdown.field,
+        missing: breakdown.missing,
+        size: getClassicHistogramBreakdownSize(buckets.length),
+      },
+      aggs: overlapAggs,
+    },
+  };
 };
