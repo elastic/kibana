@@ -6,6 +6,7 @@
  */
 
 import { platformCoreTools } from '@kbn/agent-builder-common';
+import type { ScreenContextAttachmentData } from '@kbn/agent-builder-common/attachments';
 import type {
   ControlsGold,
   DashboardDatasetExample,
@@ -31,19 +32,40 @@ export interface ExampleMetadata {
   [key: string]: unknown;
 }
 
-/** A dashboard request; `structure` holds only what the prompt pins down. */
+/**
+ * The data-aware default for `kibana_sample_data_logs`. The sample data spans
+ * install time -10d to +50d, so it reads as live data and gets the 1-day window.
+ */
+export const SAMPLE_LOGS_DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' } as const;
+
+/** A home page screen context, whose time range a request that names no window must ignore. */
+export const HOME_SCREEN_CONTEXT: ScreenContextAttachmentData = {
+  app: 'home',
+  url: '/app/home#/',
+  // Deliberately improbable value: it never occurs as a default or a real picker choice.
+  time_range: { from: 'now-37m', to: 'now-3m' },
+};
+
+/**
+ * A dashboard request; `structure` holds only what the prompt pins down. No
+ * prompt names a time window, so every dashboard must get the data-aware
+ * default, with or without a `screenContext`.
+ */
 export const dashboardExample = ({
   question,
   structure,
+  screenContext,
 }: {
   question: string;
   structure: DashboardStructureGold;
+  screenContext?: ScreenContextAttachmentData;
 }): DashboardDatasetExample => ({
-  input: { question },
+  input: { question, ...(screenContext ? { screenContext } : {}) },
   metadata: { behaviour: 'creation', dataSource: 'logs' } satisfies ExampleMetadata,
   output: {
     route: 'dashboard',
     structure,
+    timeRange: SAMPLE_LOGS_DEFAULT_TIME_RANGE,
     goldenToolPath: ['load_skill', GENERATE_DASHBOARD_TOOL_ID],
   },
 });

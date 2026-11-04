@@ -6,17 +6,19 @@
  */
 
 import type { DashboardDatasetExample } from '../../../src/types';
-import { dashboardExample } from './factories';
+import { HOME_SCREEN_CONTEXT, dashboardExample } from './factories';
 
 /**
  * Dashboard creation over `kibana_sample_data_logs`. Layout rules and
  * composition order apply to every produced dashboard; `structure` adds only
- * what each prompt pins down.
+ * what each prompt pins down. The open-ended request is sent from the home
+ * page, so it also checks the screen context time range is not copied.
  */
 export const DASHBOARD_CREATION_EXAMPLES: DashboardDatasetExample[] = [
   dashboardExample({
     question: 'Create a dashboard showing my sample log data. Decide on visualizations and layout.',
     structure: { panelCount: { min: 10, max: 20 } },
+    screenContext: HOME_SCREEN_CONTEXT,
   }),
   dashboardExample({
     question:
