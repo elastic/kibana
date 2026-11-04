@@ -145,4 +145,17 @@ describe('lib/errors', () => {
       expect(errors.getDetailedErrorMessage(thrown)).toBe(message);
     });
   });
+
+  describe('#toErrorStatusCode', () => {
+    it.each([400, 404, 409, 500, 503, 599])('keeps the HTTP error status %p', (statusCode) => {
+      expect(errors.toErrorStatusCode(statusCode)).toBe(statusCode);
+    });
+
+    it.each([undefined, null, '404', 200, 399, 600, 404.5, NaN])(
+      'turns %p, which Boom would refuse, into 500',
+      (statusCode) => {
+        expect(errors.toErrorStatusCode(statusCode)).toBe(500);
+      }
+    );
+  });
 });

@@ -27,9 +27,13 @@ export type {
   ServiceAccountWorkloadBinder,
   ServiceAccountWorkloadBinding,
   BindServiceAccountWorkloadParams,
+  ServiceAccountWorkloadBindingChange,
+  ServiceAccountWorkloadBindingChangeError,
+  ServiceAccountWorkloadBindingChangeResult,
   ServiceAccountWorkloadRef,
   ServiceAccountWorkloadCoordinates,
   ServiceAccountWorkloadRequestParams,
   ServiceAccountBoundWorkload,
 } from './src/service_accounts';
+export { SERVICE_ACCOUNT_ID_MAX_LENGTH } from './src/service_accounts';
 export { UIAM_ERROR_CODES } from './src/uiam_error_codes';
