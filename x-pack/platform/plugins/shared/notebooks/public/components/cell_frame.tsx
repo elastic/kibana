@@ -19,6 +19,7 @@ import {
   EuiSpacer,
   EuiToolTip,
   euiCanAnimate,
+  transparentize,
   useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/react';
@@ -36,9 +37,11 @@ import { useNotebook } from './notebook_context';
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
 
-const focusPulse = (rest: string, highlight: string) => keyframes`
-  0%, 100% { box-shadow: ${rest}; }
-  50% { box-shadow: ${highlight}; }
+const FOCUS_FADE_DURATION = '1.5s';
+
+const focusFade = (border: string, glowColor: string) => keyframes`
+  from { box-shadow: ${border}, 0 0 16px 4px ${glowColor}; }
+  to { box-shadow: ${border}, 0 0 16px 4px transparent; }
 `;
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
@@ -148,11 +151,11 @@ export const CellFrame = ({
           ${isFocused &&
           css`
             ${euiCanAnimate} {
-              animation: ${focusPulse(
+              animation: ${focusFade(
                   `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`,
-                  `inset 0 0 0 ${euiTheme.border.width.thick} ${euiTheme.colors.primary}`
+                  transparentize(euiTheme.colors.primary, 0.6)
                 )}
-                ${euiTheme.animation.slow} ${euiTheme.animation.resistance} 3;
+                ${FOCUS_FADE_DURATION} ease-out;
             }
           `}
         `}
