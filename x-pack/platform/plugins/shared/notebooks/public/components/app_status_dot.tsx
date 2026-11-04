@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { combineLatest, map } from 'rxjs';
 import type { NotebookApp } from '../../common/types';
-import { getAppStatusGroups, type AppStatusGroup, type AttentionStatus } from '../model/app_layout';
+import { getAppStatusGroups, type AttentionStatus } from '../model/app_layout';
 import type { CellStatus } from '../model/types';
 import { useNotebook } from './notebook_context';
 
@@ -22,30 +22,11 @@ const DOT_COLORS: Record<AttentionStatus, string> = {
   idle: 'subdued',
 };
 
-const describeGroup = ({ status, names }: AppStatusGroup): string => {
-  const list = names.join(', ');
-  switch (status) {
-    case 'error':
-      return i18n.translate('xpack.notebook.app.status.error', {
-        defaultMessage: 'Failed to run: {names}',
-        values: { names: list },
-      });
-    case 'blocked':
-      return i18n.translate('xpack.notebook.app.status.blocked', {
-        defaultMessage: 'Blocked by an upstream error: {names}',
-        values: { names: list },
-      });
-    case 'stale':
-      return i18n.translate('xpack.notebook.app.status.stale', {
-        defaultMessage: 'Out of date, run to update: {names}',
-        values: { names: list },
-      });
-    case 'idle':
-      return i18n.translate('xpack.notebook.app.status.idle', {
-        defaultMessage: 'Not run yet: {names}',
-        values: { names: list },
-      });
-  }
+const STATUS_LABELS: Record<AttentionStatus, string> = {
+  error: i18n.translate('xpack.notebook.app.status.error', { defaultMessage: 'Errors' }),
+  blocked: i18n.translate('xpack.notebook.app.status.blocked', { defaultMessage: 'Blocked' }),
+  stale: i18n.translate('xpack.notebook.app.status.stale', { defaultMessage: 'Stale' }),
+  idle: i18n.translate('xpack.notebook.app.status.idle', { defaultMessage: 'Not run' }),
 };
 
 const useCellStatuses = (cellIds: readonly string[]): Readonly<Record<string, CellStatus>> => {
@@ -74,12 +55,12 @@ export const AppStatusDot = ({ app }: { app: NotebookApp }) => {
   const [worst] = groups;
   if (!worst) return null;
 
-  const description = groups.map(describeGroup).join('\n');
+  const description = groups.map(({ status }) => STATUS_LABELS[status]).join(', ');
   return (
     <EuiIconTip
       type="dot"
       color={DOT_COLORS[worst.status]}
-      content={<span css={{ whiteSpace: 'pre-line' }}>{description}</span>}
+      content={description}
       aria-label={description}
       iconProps={{ 'data-test-subj': `notebookAppStatus-${worst.status}` }}
     />
