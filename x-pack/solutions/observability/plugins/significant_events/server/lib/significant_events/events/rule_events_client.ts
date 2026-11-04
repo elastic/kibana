@@ -401,7 +401,7 @@ const isLaterAction = (candidate: ActionRow, current: ActionRow): boolean => {
 
 /**
  * `.rule-events` client used by agent-side call sites (`event_search`, `event_write`'s dedup scan,
- * `attach_investigation`, SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
+ * SML): reads, plus `createEvent` / `updateEvent` / `updateEventStatus` to
  * write versions. Query strategy (which ES|QL extraction form to use per field) is validated
  * per-shape on nightshift-program#1492 and #1517 before this client's output is trusted in
  * production.

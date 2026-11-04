@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { SignificantEventsMaintenanceState } from '../../../../common/maintenance/state_machine';
 import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_events_client.mock';
 import { RuleEventsClient } from '../../../lib/significant_events/events/rule_events_client';
 import { internalEventsRoutes } from './route';
@@ -20,8 +19,6 @@ jest.mock('../../utils/assert_significant_events_access', () => ({
   assertSignificantEventsAccess: jest.fn().mockResolvedValue(undefined),
 }));
 
-const investigateRoute =
-  internalEventsRoutes['POST /internal/significant_events/events/{id}/investigate'];
 const eventsSearchRoute = internalEventsRoutes['GET /internal/significant_events/events'];
 const eventsFacetsRoute = internalEventsRoutes['GET /internal/significant_events/events/_facets'];
 const lifecycleRoute =
@@ -29,12 +26,6 @@ const lifecycleRoute =
 const eventsUpdateRoute =
   internalEventsRoutes['POST /internal/significant_events/events/{id}/update'];
 const cleanupRoute = internalEventsRoutes['POST /internal/significant_events/events/_cleanup'];
-
-type HandlerParams = Parameters<typeof investigateRoute.handler>[0];
-
-const makeMaintenanceService = (state: SignificantEventsMaintenanceState = 'enabled') => ({
-  getState: jest.fn().mockResolvedValue(state),
-});
 
 describe('POST /internal/significant_events/events/_cleanup', () => {
   it('runs cleanup with manage-scoped event and rule clients', async () => {

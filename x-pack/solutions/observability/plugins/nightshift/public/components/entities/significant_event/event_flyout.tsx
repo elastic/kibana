@@ -35,11 +35,10 @@ import {
 import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
 import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
-import { useFetchInvestigationStatuses } from '../../../data/investigations/use_fetch_investigation_statuses';
+import { useFetchEventInvestigation } from '../../../data/significant_events/use_fetch_event_investigation';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
   getStatusColor,
-  isInvestigationRunning,
   isNeedsActionStatus,
   SIGNIFICANT_EVENT_STATUS_LABELS,
 } from './significant_event_status';
@@ -117,6 +116,13 @@ const FOLLOW_UP_INVESTIGATION_LABEL = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationButtonLabel',
   { defaultMessage: 'Run follow-up' }
 );
+const NO_EPISODE_INVESTIGATION_TOOLTIP = i18n.translate(
+  'xpack.nightshift.flyout.noEpisodeInvestigationTooltip',
+  {
+    defaultMessage: 'This event has no alert to investigate yet.',
+  }
+);
+
 const FOLLOW_UP_INVESTIGATION_TOOLTIP = i18n.translate(
   'xpack.nightshift.flyout.followUpInvestigationTooltip',
   {
@@ -156,33 +162,27 @@ export function EventFlyout({
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
   const stagedOverlayEventId = useRef<string>();
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
+  const [startedInvestigation, setStartedInvestigation] = useState<{
+    id: string;
+    startedAt: number;
+  }>();
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
-    onTriggered: () => {
+    onTriggered: (investigationId) => {
+      setStartedInvestigation({ id: investigationId, startedAt: Date.now() });
       void lifecycleQuery.refetch();
     },
   });
   const occurrencesQuery = useFetchDetectionOccurrences(lifecycleQuery.data?.detections ?? []);
-  const latestInvestigation = useMemo(() => event.investigations?.at(-1), [event.investigations]);
+  // The investigation is found through its subject (the event's alert, by episode id), as for any
+  // alert. The event's own `investigations[]` is not read here.
+  const { investigation: subjectInvestigation } = useFetchEventInvestigation(event.episode_id, {
+    awaiting: startedInvestigation,
+  });
+  const hasInvestigation = subjectInvestigation != null;
 
-  const investigationExecutionIds = useMemo(
-    () => (latestInvestigation ? [latestInvestigation.workflow_execution_id] : []),
-    [latestInvestigation]
-  );
-  const { data: investigationRunStatuses } =
-    useFetchInvestigationStatuses(investigationExecutionIds);
-  const latestRunStatus = latestInvestigation
-    ? investigationRunStatuses?.[latestInvestigation.workflow_execution_id]
-    : undefined;
-  const investigationNotFound =
-    latestInvestigation != null &&
-    investigationRunStatuses != null &&
-    latestRunStatus === undefined;
-  const availableInvestigation = investigationNotFound ? undefined : latestInvestigation;
-
-  // The recorded id is the investigation (Agent Builder conversation) id.
   const { investigation: investigationDetails, status: investigationStatus } = useInvestigation({
     http,
-    investigationId: availableInvestigation?.workflow_execution_id,
+    investigationId: subjectInvestigation?.id,
   });
   const conversationId = investigationDetails?.id;
 
@@ -272,20 +272,22 @@ export function EventFlyout({
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));
     }
   }, [agentBuilder, conversationId]);
-  const latestInvestigationInProgress =
-    availableInvestigation != null && availableInvestigation.completed_at == null;
-  const investigationRunning = isInvestigationRunning(event) || latestInvestigationInProgress;
+  const latestInvestigationInProgress = subjectInvestigation?.in_progress ?? false;
   const actionMenuPanels = useMemo<FlyoutFooterMenuPanel[]>(() => {
     const items: FlyoutFooterMenuItem[] = [];
     if (canManage) {
       items.push({
-        name: investigationRunning ? FOLLOW_UP_INVESTIGATION_LABEL : RUN_INVESTIGATION_LABEL,
+        name: latestInvestigationInProgress
+          ? FOLLOW_UP_INVESTIGATION_LABEL
+          : RUN_INVESTIGATION_LABEL,
         icon: 'inspect',
         toolTipContent:
           activityBlockTooltip ??
-          (investigationRunning ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
-        onClick: () => triggerInvestigation(event.event_id),
-        disabled: blocksActivity || triggeringEventId != null,
+          (event.episode_id ? undefined : NO_EPISODE_INVESTIGATION_TOOLTIP) ??
+          (latestInvestigationInProgress ? FOLLOW_UP_INVESTIGATION_TOOLTIP : undefined),
+        onClick: () =>
+          triggerInvestigation({ event_id: event.event_id, episode_id: event.episode_id }),
+        disabled: blocksActivity || triggeringEventId != null || !event.episode_id,
         hasAriaDisabled: true,
         'data-test-subj': 'nightshiftEventFlyoutRunInvestigationButton',
         ...getEbtProps({
@@ -297,7 +299,7 @@ export function EventFlyout({
         }),
       });
     }
-    if (agentBuilder && availableInvestigation) {
+    if (agentBuilder && hasInvestigation) {
       if (!latestInvestigationInProgress) {
         items.push({
           name: OPEN_INVESTIGATION_CHAT_LABEL,
@@ -346,13 +348,13 @@ export function EventFlyout({
   }, [
     activityBlockTooltip,
     agentBuilder,
-    availableInvestigation,
     blocksActivity,
     canManage,
     conversationId,
+    event.episode_id,
     event.event_id,
     event.status,
-    investigationRunning,
+    hasInvestigation,
     latestInvestigationInProgress,
     openInvestigationChat,
     openNewChat,
@@ -412,10 +414,10 @@ export function EventFlyout({
             <FlyoutTemplate.Body.Section title={SUMMARY_TITLE}>
               <TruncatableSummary summary={event.summary} />
             </FlyoutTemplate.Body.Section>
-            {availableInvestigation ? (
+            {hasInvestigation ? (
               <FlyoutTemplate.Body.Section title={INVESTIGATION_TITLE}>
                 <EventInvestigationCard
-                  event={event}
+                  inProgress={latestInvestigationInProgress}
                   investigation={investigationDetails}
                   status={investigationStatus}
                 />
