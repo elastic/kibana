@@ -27,6 +27,7 @@ import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
+import { registerFiltersForSelectionRoute } from './routes/filters_for_selection_route';
 import { registerMaterializeRoute } from './routes/materialize_route';
 
 export interface IsomerPluginSetup {
@@ -84,9 +85,12 @@ export class IsomerPlugin
   setup(core: CoreSetup): IsomerPluginSetup {
     core.analytics.registerEventType(MATERIALIZE_EVENT);
     core.analytics.registerEventType(RENDER_EVENT);
-    registerMaterializeRoute({
-      router: core.http.createRouter(),
+    const router = core.http.createRouter();
+    registerMaterializeRoute({ router, createClient: this.createClient });
+    registerFiltersForSelectionRoute({
+      router,
       createClient: this.createClient,
+      validateNode: this.validateNode,
     });
     return {
       registerMaterializer: (type, materializer) => this.registry.register(type, materializer),
