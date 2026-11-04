@@ -79,9 +79,9 @@ describe('applyDedicatedNamespaceTemplates', () => {
   it('adds the namespace to the installed version of the package, keeping the others', async () => {
     mockGetInfo.mockResolvedValue(info('2.1.0', ['staging']));
 
-    const failed = await applyDedicatedNamespaceTemplates(['aws'], 'prod');
+    const { failedPackages } = await applyDedicatedNamespaceTemplates(['aws'], 'prod');
 
-    expect(failed).toEqual([]);
+    expect(failedPackages).toEqual([]);
     expect(mockUpdate).toHaveBeenCalledWith('aws', '2.1.0', {
       namespace_customization_enabled_for: ['staging', 'prod'],
     });
@@ -100,7 +100,10 @@ describe('applyDedicatedNamespaceTemplates', () => {
   it('does nothing for a package that already has the namespace', async () => {
     mockGetInfo.mockResolvedValue(info('2.1.0', ['prod']));
 
-    expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual([]);
+    expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual({
+      failedPackages: [],
+      conflictingDataStreams: [],
+    });
     expect(mockUpdate).not.toHaveBeenCalled();
   });
 
@@ -110,7 +113,12 @@ describe('applyDedicatedNamespaceTemplates', () => {
       error: name === 'aws' ? new Error('prefix not allowed') : null,
     }));
 
-    expect(await applyDedicatedNamespaceTemplates(['aws', 'aws_bedrock'], 'prod')).toEqual(['aws']);
+    const { failedPackages } = await applyDedicatedNamespaceTemplates(
+      ['aws', 'aws_bedrock'],
+      'prod'
+    );
+
+    expect(failedPackages).toEqual(['aws']);
     expect(mockUpdate).toHaveBeenCalledTimes(2);
   });
 
@@ -119,10 +127,31 @@ describe('applyDedicatedNamespaceTemplates', () => {
       name === 'aws' ? { data: null, error: new Error('not found') } : info(undefined)
     );
 
-    expect(await applyDedicatedNamespaceTemplates(['aws', 'aws_bedrock'], 'prod')).toEqual([
-      'aws',
-      'aws_bedrock',
-    ]);
+    const { failedPackages } = await applyDedicatedNamespaceTemplates(
+      ['aws', 'aws_bedrock'],
+      'prod'
+    );
+
+    expect(failedPackages).toEqual(['aws', 'aws_bedrock']);
     expect(mockUpdate).not.toHaveBeenCalled();
+  });
+
+  it('reports the data streams whose dedicated template an existing one overrides, without failing', async () => {
+    mockGetInfo.mockResolvedValue(info('2.1.0'));
+    mockUpdate.mockResolvedValue({
+      data: {
+        warnings: [
+          { dataStreamName: 'logs-aws.cloudtrail-prod' },
+          { dataStreamName: 'logs-aws.cloudtrail-prod' },
+          { dataStreamName: 'metrics-aws.ec2_metrics-prod' },
+        ],
+      },
+      error: null,
+    });
+
+    expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual({
+      failedPackages: [],
+      conflictingDataStreams: ['logs-aws.cloudtrail-prod', 'metrics-aws.ec2_metrics-prod'],
+    });
   });
 });

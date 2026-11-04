@@ -93,15 +93,19 @@ export const toSOSettingsUpdate = (
 };
 
 /**
- * The update for settings that need no deploy: the name and description. The namespace, its
- * dedicated-templates switch and the instances are left out on purpose. They describe what was
- * last deployed: the namespace is the value drift detection compares the current one against, and a duplicate added in Step 2 but not
- * deployed yet must not come back on resume. Both are saved only together with a deploy.
+ * The update for settings that need no deploy: the name, description and the dedicated-templates
+ * switch, which is applied to the package when Next is clicked and has no drift baseline. The
+ * namespace and the instances are left out on purpose. They describe what was last deployed: the
+ * namespace is the value drift detection compares the current one against, and a duplicate added
+ * in Step 2 but not deployed yet must not come back on resume. Both are saved only with a deploy.
  */
 export const toSOMetadataUpdate = (
   serviceSettings: SOSettingsSource | null | undefined
-): { integrationName?: string; description: string | null } => {
-  const { namespace, dedicatedNamespaceTemplates, instances, ...metadata } =
-    toSOSettingsUpdate(serviceSettings);
+): {
+  integrationName?: string;
+  description: string | null;
+  dedicatedNamespaceTemplates: boolean;
+} => {
+  const { namespace, instances, ...metadata } = toSOSettingsUpdate(serviceSettings);
   return metadata;
 };

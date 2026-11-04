@@ -24,32 +24,55 @@ export const getGlobalNamespacePackages = (
   return [...new Set(packageNames)];
 };
 
+export interface ApplyDedicatedTemplatesResult {
+  /** The packages that could not be updated. */
+  failedPackages: string[];
+  /**
+   * The data streams whose dedicated template is overridden or blocked by an index template that
+   * already exists. Fleet still opts the namespace in and reports these as warnings.
+   */
+  conflictingDataStreams: string[];
+}
+
+interface PackageResult {
+  packageName: string;
+  failed: boolean;
+  conflicts?: string[];
+}
+
 /**
  * Opts the namespace in to dedicated index templates for each package, like Fleet's switch does
  * after a policy is saved. Only adds: a namespace that is already in the package's list is left
  * alone, and none is removed, since the list is shared with Fleet's own settings.
- *
- * @returns the packages that could not be updated.
  */
 export const applyDedicatedNamespaceTemplates = async (
   packageNames: string[],
   namespace: string
-): Promise<string[]> => {
+): Promise<ApplyDedicatedTemplatesResult> => {
   const results = await Promise.all(
-    packageNames.map(async (packageName) => {
+    packageNames.map(async (packageName): Promise<PackageResult> => {
       const { data, error: infoError } = await sendGetPackageInfoByKey(packageName);
       // The installed version, which can differ from the latest one the info call describes.
       const installationInfo = data?.item?.installationInfo;
-      if (infoError || !installationInfo?.version) return packageName;
+      if (infoError || !installationInfo?.version) return { packageName, failed: true };
 
       const enabledFor = installationInfo.namespace_customization_enabled_for ?? [];
-      if (enabledFor.includes(namespace)) return undefined;
+      if (enabledFor.includes(namespace)) return { packageName, failed: false };
 
-      const { error } = await sendUpdatePackage(packageName, installationInfo.version, {
-        namespace_customization_enabled_for: [...enabledFor, namespace],
-      });
-      return error ? packageName : undefined;
+      const { data: updated, error } = await sendUpdatePackage(
+        packageName,
+        installationInfo.version,
+        { namespace_customization_enabled_for: [...enabledFor, namespace] }
+      );
+      return {
+        packageName,
+        failed: !!error,
+        conflicts: (updated?.warnings ?? []).map(({ dataStreamName }) => dataStreamName),
+      };
     })
   );
-  return results.filter((packageName): packageName is string => !!packageName);
+  return {
+    failedPackages: results.filter(({ failed }) => failed).map(({ packageName }) => packageName),
+    conflictingDataStreams: [...new Set(results.flatMap(({ conflicts }) => conflicts ?? []))],
+  };
 };

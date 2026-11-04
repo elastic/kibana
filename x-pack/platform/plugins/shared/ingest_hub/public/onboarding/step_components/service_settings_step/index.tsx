@@ -109,6 +109,16 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
       (s) => s !== 'error' && s !== 'timeout'
     );
 
+  // ECF has no package policy to opt a namespace in for. Until the services are known the switch
+  // stays available rather than flickering off.
+  const isDedicatedTemplatesUnavailable =
+    awsServicesMap !== undefined &&
+    instances.length > 0 &&
+    !instances.some((inst) => {
+      const service = awsServicesMap.get(inst.serviceId);
+      return !!service && supportsNamespace(service);
+    });
+
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
 
@@ -453,6 +463,7 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         namespaceError={namespaceError}
         dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
         onDedicatedNamespaceTemplatesChange={setDedicatedNamespaceTemplates}
+        isDedicatedTemplatesUnavailable={isDedicatedTemplatesUnavailable}
         hasDeployedServices={isRegionDisabled}
       />
       <EuiSpacer size="m" />

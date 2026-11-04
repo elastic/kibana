@@ -50,7 +50,7 @@ const render = (props: Partial<Parameters<typeof useApplyDedicatedTemplates>[0]>
 describe('useApplyDedicatedTemplates', () => {
   beforeEach(() => {
     jest.resetAllMocks();
-    mockApply.mockResolvedValue([]);
+    mockApply.mockResolvedValue({ failedPackages: [], conflictingDataStreams: [] });
   });
 
   it('does nothing before the deploy is done', () => {
@@ -59,12 +59,18 @@ describe('useApplyDedicatedTemplates', () => {
     expect(mockApply).not.toHaveBeenCalled();
   });
 
-  it('applies once the deploy is done', () => {
+  it('applies when a deploy finishes while it is mounted', () => {
     const { rerender } = render();
 
     rerender({ enabled: true, isDeployDone: true, groups, globalNamespace: 'prod' });
 
     expect(mockApply).toHaveBeenCalledWith(['aws'], 'prod');
+  });
+
+  it('does not apply on its own when it is mounted already done, as on a resume', () => {
+    render({ isDeployDone: true });
+
+    expect(mockApply).not.toHaveBeenCalled();
   });
 
   it('applies when called by hand, for a step that leaves before the deploy state renders', async () => {
@@ -99,8 +105,23 @@ describe('useApplyDedicatedTemplates', () => {
     expect(mockApply).not.toHaveBeenCalled();
   });
 
+  it('warns about data streams whose dedicated template an existing one overrides', async () => {
+    mockApply.mockResolvedValueOnce({
+      failedPackages: [],
+      conflictingDataStreams: ['logs-aws.cloudtrail-prod'],
+    });
+    const { result } = render();
+
+    await act(async () => {
+      await result.current();
+    });
+
+    expect(mockAddWarning).toHaveBeenCalledTimes(1);
+    expect(mockAddWarning.mock.calls[0][0].text).toContain('logs-aws.cloudtrail-prod');
+  });
+
   it('warns about the packages that failed and allows a retry', async () => {
-    mockApply.mockResolvedValueOnce(['aws']);
+    mockApply.mockResolvedValueOnce({ failedPackages: ['aws'], conflictingDataStreams: [] });
     const { result } = render();
 
     await act(async () => {

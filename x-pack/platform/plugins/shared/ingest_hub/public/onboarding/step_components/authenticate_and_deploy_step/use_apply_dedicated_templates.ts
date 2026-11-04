@@ -26,12 +26,13 @@ interface UseApplyDedicatedTemplatesParams {
 }
 
 /**
- * Opts the global namespace in to dedicated index templates once the deploy is done, and returns
- * the same action to call by hand. The state-driven run covers a step that stays mounted, such as
- * managed integrations showing Done, or a resume. A step that deploys and navigates away in one go,
- * as agent-based does on Next, unmounts before the state changes, so it calls the action itself.
- * Either way a request that was already made, or a package that already has the namespace, is
- * left alone.
+ * Opts the global namespace in to dedicated index templates when a deploy finishes, and returns
+ * the same action to call by hand. The state-driven run covers a deploy that finishes while the
+ * step is shown, such as managed integrations reaching Done. It does not run for a step that is
+ * mounted already done, so reopening a deployment never writes the shared list on its own. A step
+ * that deploys and navigates away in one go, as agent-based does on Next, unmounts before the state
+ * changes, so Next calls the action itself. Either way a request that was already made, or a
+ * package that already has the namespace, is left alone.
  */
 export const useApplyDedicatedTemplates = ({
   enabled,
@@ -43,6 +44,7 @@ export const useApplyDedicatedTemplates = ({
     services: { notifications },
   } = useKibana<CoreStart>();
   const lastRequestRef = useRef<string>();
+  const wasDeployDoneRef = useRef(isDeployDone);
 
   const apply = useCallback(async () => {
     if (!enabled) return;
@@ -53,7 +55,25 @@ export const useApplyDedicatedTemplates = ({
     if (lastRequestRef.current === request) return;
     lastRequestRef.current = request;
 
-    const failedPackages = await applyDedicatedNamespaceTemplates(packageNames, globalNamespace);
+    const { failedPackages, conflictingDataStreams } = await applyDedicatedNamespaceTemplates(
+      packageNames,
+      globalNamespace
+    );
+    if (conflictingDataStreams.length > 0) {
+      notifications.toasts.addWarning({
+        title: i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.conflictTitle', {
+          defaultMessage: 'Dedicated index templates may not apply',
+        }),
+        text: i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.conflictText', {
+          defaultMessage:
+            'The "{namespace}" namespace was enabled, but existing index templates override or block the dedicated ones for: {dataStreams}. Review them in Fleet.',
+          values: {
+            namespace: globalNamespace,
+            dataStreams: conflictingDataStreams.join(', '),
+          },
+        }),
+      });
+    }
     if (failedPackages.length === 0) return;
     // Forget the request so a later change of the settings tries again.
     lastRequestRef.current = undefined;
@@ -70,7 +90,9 @@ export const useApplyDedicatedTemplates = ({
   }, [enabled, groups, globalNamespace, notifications]);
 
   useEffect(() => {
-    if (isDeployDone) apply();
+    // Only a deploy that finishes while this is mounted: a step that opens already done is a resume.
+    if (isDeployDone && !wasDeployDoneRef.current) apply();
+    wasDeployDoneRef.current = isDeployDone;
   }, [isDeployDone, apply]);
 
   return apply;

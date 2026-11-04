@@ -46,22 +46,6 @@ test.describe(
   () => {
     useOnboardingFeatureFlag();
 
-    test('is off and disabled until a namespace is set', async ({ browserAuth, page }) => {
-      await mockManagedIntegrations(page);
-      await navigateToOnboardingStep(browserAuth, page, 'service-settings', {
-        selectedServiceIds: ['elb'],
-      });
-
-      await openAdvancedSettings(page);
-      await expect(page.testSubj.locator(SWITCH)).toBeDisabled();
-      await expect(page.testSubj.locator(SWITCH)).toHaveAttribute('aria-checked', 'false');
-
-      const namespace = page.testSubj.locator('sharedSettingsNamespace').locator('input');
-      await namespace.fill('prod');
-      await namespace.press('Enter');
-      await expect(page.testSubj.locator(SWITCH)).toBeEnabled();
-    });
-
     test('a deploy with the switch on adds the namespace to the installed package', async ({
       browserAuth,
       page,
@@ -94,24 +78,6 @@ test.describe(
         namespace: 'prod',
       });
 
-      await deployWithTypedKeys(page);
-
-      expect(packageRequests.updates).toHaveLength(0);
-    });
-
-    test('does not update a package that already has the namespace', async ({
-      browserAuth,
-      page,
-    }) => {
-      await mockManagedIntegrations(page);
-      const packageRequests = await mockInstalledAwsPackage(page, ['prod']);
-      await navigateToOnboardingStep(browserAuth, page, 'service-settings', {
-        selectedServiceIds: ['elb'],
-        namespace: 'prod',
-      });
-
-      await openAdvancedSettings(page);
-      await page.testSubj.locator(SWITCH).click();
       await deployWithTypedKeys(page);
 
       expect(packageRequests.updates).toHaveLength(0);

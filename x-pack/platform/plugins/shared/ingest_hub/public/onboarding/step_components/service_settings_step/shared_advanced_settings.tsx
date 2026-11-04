@@ -19,6 +19,8 @@ interface SharedAdvancedSettingsProps {
   onNamespaceChange: (namespace: string) => void;
   dedicatedNamespaceTemplates: boolean;
   onDedicatedNamespaceTemplatesChange: (enabled: boolean) => void;
+  /** No selected service deploys as a policy, so the switch would have nothing to apply to. */
+  isDedicatedTemplatesUnavailable?: boolean;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices: boolean;
 }
@@ -32,11 +34,13 @@ export function SharedAdvancedSettings({
   onNamespaceChange,
   dedicatedNamespaceTemplates,
   onDedicatedNamespaceTemplatesChange,
+  isDedicatedTemplatesUnavailable = false,
   hasDeployedServices,
 }: SharedAdvancedSettingsProps) {
   const { services } = useKibana<CoreStart>();
   // Like Fleet's switch, it needs a valid namespace to act on.
-  const isDedicatedTemplatesDisabled = !namespace.trim() || !!getNamespaceError(namespace);
+  const isDedicatedTemplatesDisabled =
+    isDedicatedTemplatesUnavailable || !namespace.trim() || !!getNamespaceError(namespace);
 
   return (
     <EuiFlexGrid columns={2} gutterSize="l" data-test-subj="sharedAdvancedSettings">
@@ -66,13 +70,24 @@ export function SharedAdvancedSettings({
             'xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.label',
             { defaultMessage: 'Use dedicated index templates for this namespace' }
           )}
-          checked={dedicatedNamespaceTemplates}
+          checked={dedicatedNamespaceTemplates && !isDedicatedTemplatesUnavailable}
           disabled={isDedicatedTemplatesDisabled}
           onChange={(e) => onDedicatedNamespaceTemplatesChange(e.target.checked)}
           data-test-subj="sharedSettingsDedicatedNamespaceTemplates"
         />
         <EuiSpacer size="xs" />
         <EuiText size="xs" color="subdued">
+          {isDedicatedTemplatesUnavailable && (
+            <p data-test-subj="sharedSettingsDedicatedNamespaceTemplates-unavailable">
+              {i18n.translate(
+                'xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.unavailable',
+                {
+                  defaultMessage:
+                    'Not available while only services that deploy with ECF are selected.',
+                }
+              )}
+            </p>
+          )}
           <FormattedMessage
             id="xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.helpText"
             defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"

@@ -52,6 +52,7 @@ interface SharedSettingsSectionProps {
   namespaceError?: string;
   dedicatedNamespaceTemplates: boolean;
   onDedicatedNamespaceTemplatesChange: (enabled: boolean) => void;
+  isDedicatedTemplatesUnavailable?: boolean;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
 }
@@ -78,6 +79,7 @@ export function SharedSettingsSection({
   namespaceError,
   dedicatedNamespaceTemplates,
   onDedicatedNamespaceTemplatesChange,
+  isDedicatedTemplatesUnavailable = false,
   hasDeployedServices = false,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
@@ -259,6 +261,7 @@ export function SharedSettingsSection({
             onNamespaceChange={onNamespaceChange}
             dedicatedNamespaceTemplates={dedicatedNamespaceTemplates}
             onDedicatedNamespaceTemplatesChange={onDedicatedNamespaceTemplatesChange}
+            isDedicatedTemplatesUnavailable={isDedicatedTemplatesUnavailable}
             hasDeployedServices={hasDeployedServices}
           />
         </div>

@@ -451,12 +451,13 @@ describe('AuthenticateAndDeployStep', () => {
   });
 
   describe('Next calls onContinue', () => {
-    it('invokes onContinue when Next clicked after successful deploy', () => {
+    it('invokes onContinue when Next clicked after successful deploy', async () => {
       const onContinue = jest.fn();
       renderStep(onContinue);
       fireEvent.click(screen.getByTestId('mock-deploy-btn'));
       fireEvent.click(screen.getByTestId('authenticateAndDeployStep-nextButton'));
-      expect(onContinue).toHaveBeenCalledTimes(1);
+      // Next first applies the dedicated templates switch, which is asynchronous.
+      await waitFor(() => expect(onContinue).toHaveBeenCalledTimes(1));
     });
   });
 

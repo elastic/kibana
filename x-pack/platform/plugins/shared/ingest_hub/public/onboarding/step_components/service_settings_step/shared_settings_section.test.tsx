@@ -197,6 +197,19 @@ describe('SharedSettingsSection', () => {
         expect(onDedicatedNamespaceTemplatesChange).toHaveBeenCalledWith(true);
       });
 
+      it('is off and disabled, with a note, when only ECF services are selected', () => {
+        renderSection({
+          namespace: 'prod',
+          dedicatedNamespaceTemplates: true,
+          isDedicatedTemplatesUnavailable: true,
+        });
+
+        fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+        expect(screen.getByTestId(SWITCH)).toBeDisabled();
+        expect(screen.getByTestId(SWITCH)).not.toBeChecked();
+        expect(screen.getByTestId(`${SWITCH}-unavailable`)).toBeInTheDocument();
+      });
+
       it('shows as on when it is on', () => {
         renderSection({ namespace: 'prod', dedicatedNamespaceTemplates: true });
 

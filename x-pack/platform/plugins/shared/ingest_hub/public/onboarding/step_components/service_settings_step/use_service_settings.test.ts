@@ -1035,6 +1035,7 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'my-aws',
         description: 'Production',
+        dedicatedNamespaceTemplates: false,
       });
       expect(onContinue).toHaveBeenCalled();
     });
@@ -1052,6 +1053,21 @@ describe('useServiceSettings — integration name and description', () => {
       expect(mockUpdateDeployment).toHaveBeenCalledWith('dep-1', {
         integrationName: 'aws-1',
         description: null,
+        dedicatedNamespaceTemplates: false,
+      });
+    });
+
+    it('saves a switch that was changed on its own, so a reopened deployment keeps it', async () => {
+      withDeployment('dep-1');
+      const { result } = renderHook(() => useServiceSettings({ onContinue: jest.fn() }));
+      await waitFor(() => expect(result.current.integrationName).toBe('aws-1'));
+      act(() => result.current.setNamespace('prod'));
+      act(() => result.current.setDedicatedNamespaceTemplates(true));
+
+      act(() => result.current.handleNext());
+
+      expect(mockUpdateDeployment.mock.calls[0][1]).toMatchObject({
+        dedicatedNamespaceTemplates: true,
       });
     });
 

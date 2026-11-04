@@ -605,8 +605,11 @@ export function AuthenticateAndDeployStep({ onContinue, onBack }: AuthenticateAn
       // Called after the SO write is confirmed so a failed write leaves state intact for retry.
       removeDeployInstances(staleFailedIds);
     }
+    // The switch may have been turned on after the deploy, which the Deploy button does not redo.
+    await applyDedicatedTemplates();
     onContinue();
   }, [
+    applyDedicatedTemplates,
     deployGroups,
     failedInstances,
     removeDeployInstances,
