@@ -13,6 +13,8 @@ import (
 
 const (
 	StatusCacheTTL      = 2 * time.Second
+	AuthCacheTTL        = 1 * time.Second
+	authCacheMaxEntries = 1000
 	ipcRequestTimeout   = 5 * time.Second
 	sidecarSecretHeader = "x-kbn-sidecar-secret"
 )
@@ -56,6 +58,11 @@ type PrivilegeResult struct {
 	HasAllRequested bool `json:"has_all_requested"`
 }
 
+type authCacheEntry struct {
+	result *AuthResult
+	expiry time.Time
+}
+
 type NodeClient struct {
 	client *http.Client
 	secret string
@@ -63,6 +70,9 @@ type NodeClient struct {
 	cacheMu  sync.RWMutex
 	cached   *StatusBlob
 	cachedAt time.Time
+
+	authCacheMu sync.RWMutex
+	authCache   map[string]*authCacheEntry
 }
 
 func NewNodeClient(socketPath, secret string) *NodeClient {
@@ -78,7 +88,8 @@ func NewNodeClient(socketPath, secret string) *NodeClient {
 			Transport: transport,
 			Timeout:   ipcRequestTimeout,
 		},
-		secret: secret,
+		secret:    secret,
+		authCache: make(map[string]*authCacheEntry),
 	}
 }
 
@@ -120,7 +131,20 @@ func (c *NodeClient) GetStatus(ctx context.Context) (*StatusBlob, error) {
 	return &blob, nil
 }
 
+func (c *NodeClient) authCacheKey(originalReq *http.Request) string {
+	return originalReq.Header.Get("cookie") + "\x00" + originalReq.Header.Get("authorization")
+}
+
 func (c *NodeClient) Authenticate(ctx context.Context, originalReq *http.Request) (*AuthResult, error) {
+	cacheKey := c.authCacheKey(originalReq)
+
+	c.authCacheMu.RLock()
+	if entry, ok := c.authCache[cacheKey]; ok && time.Now().Before(entry.expiry) {
+		c.authCacheMu.RUnlock()
+		return entry.result, nil
+	}
+	c.authCacheMu.RUnlock()
+
 	req, err := http.NewRequestWithContext(ctx, http.MethodPost, "http://kibana-node/internal/sidecar/authenticate", nil)
 	if err != nil {
 		return nil, err
@@ -149,6 +173,25 @@ func (c *NodeClient) Authenticate(ctx context.Context, originalReq *http.Request
 	if err := json.NewDecoder(resp.Body).Decode(&result); err != nil {
 		return nil, fmt.Errorf("decoding auth response: %w", err)
 	}
+
+	c.authCacheMu.Lock()
+	if len(c.authCache) >= authCacheMaxEntries {
+		// Evict expired entries; if still full, clear all
+		now := time.Now()
+		for k, v := range c.authCache {
+			if now.After(v.expiry) {
+				delete(c.authCache, k)
+			}
+		}
+		if len(c.authCache) >= authCacheMaxEntries {
+			c.authCache = make(map[string]*authCacheEntry)
+		}
+	}
+	c.authCache[cacheKey] = &authCacheEntry{
+		result: &result,
+		expiry: time.Now().Add(AuthCacheTTL),
+	}
+	c.authCacheMu.Unlock()
 
 	return &result, nil
 }
