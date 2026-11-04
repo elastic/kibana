@@ -96,9 +96,8 @@ apiTest.describe(
     ): Promise<void> => {
       const response = await consume(apiClient, body);
       expect(response).toHaveStatusCode(200);
-      expect(response.body).toEqual(
-        expect.objectContaining({ allowed: true, limit: expect.any(Number) })
-      );
+      expect(response.body).toMatchObject({ allowed: true });
+      expect(typeof (response.body as { limit: unknown }).limit).toBe('number');
     };
 
     apiTest.beforeAll(async ({ samlAuth }) => {
