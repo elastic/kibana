@@ -25,9 +25,9 @@ export const useTabLabelWidth = ({
   const tabLabelRef = useRef<HTMLDivElement | null>(null);
   const [textUtils, setTextUtils] = useState<CanvasTextUtils>();
 
-  const { tabLabelWidth, tabLabelTextWidth } = useMemo(() => {
+  const { tabLabelWidth, tabLabelTextWidth, tabLabelFittedTextWidth } = useMemo(() => {
     if (!textUtils) {
-      return { tabLabelWidth: 0, tabLabelTextWidth: 0 };
+      return { tabLabelWidth: 0, tabLabelTextWidth: 0, tabLabelFittedTextWidth: 0 };
     }
 
     textUtils.setTextToCheck(item.label);
@@ -46,6 +46,8 @@ export const useTabLabelWidth = ({
     return {
       tabLabelWidth: resolvedLabelWidth,
       tabLabelTextWidth: resolvedLabelWidth - indicatorWidth,
+      // Hugs the text so an indicator can sit right after the label instead of at the tab's end
+      tabLabelFittedTextWidth: Math.min(textWidth, resolvedLabelWidth - indicatorWidth),
     };
   }, [
     euiTheme.base,
@@ -65,5 +67,5 @@ export const useTabLabelWidth = ({
     setTextUtils(new CanvasTextUtils({ container: tabLabelRef.current }));
   }, [fontWeight]);
 
-  return { tabLabelRef, tabLabelWidth, tabLabelTextWidth };
+  return { tabLabelRef, tabLabelWidth, tabLabelTextWidth, tabLabelFittedTextWidth };
 };

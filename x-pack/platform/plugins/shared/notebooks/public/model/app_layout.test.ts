@@ -11,9 +11,11 @@ import {
   appendPanel,
   createEmptyApp,
   generateDefaultApp,
+  getAppStatusGroups,
   getNewAppTitle,
   reconcileApps,
 } from './app_layout';
+import type { CellStatus } from './types';
 import { createPinnedTimeCell } from './cell_factory';
 import { NotebookStore } from './notebook_store';
 
@@ -158,6 +160,48 @@ describe('reconcileApps', () => {
       panels: [{ ...sales.panels[0], id: 'p2' }],
     });
     expect(next[2]).toEqual({ id: 'fresh', title: 'App 3', panels: [] });
+  });
+});
+
+describe('getAppStatusGroups', () => {
+  const cells = toRecord([esql('a'), esql('b'), esql('c'), esql('d'), notes('intro')]);
+  const statuses: Record<string, CellStatus> = {
+    a: 'stale',
+    b: 'error',
+    c: 'done',
+    d: 'stale',
+    intro: 'idle',
+  };
+  const appOf = (...cellIds: string[]): NotebookApp => ({
+    id: 'app',
+    title: 'App',
+    panels: cellIds.map((cellId, index) => ({
+      id: `p${index}`,
+      cellId,
+      x: 0,
+      y: index,
+      width: 1,
+      height: 1,
+    })),
+  });
+
+  it('groups cells needing attention, most severe first, without markdown', () => {
+    expect(
+      getAppStatusGroups(appOf('a', 'b', 'c', 'd', 'intro'), cells, (id) => statuses[id])
+    ).toEqual([
+      { status: 'error', names: ['b'] },
+      { status: 'stale', names: ['a', 'd'] },
+    ]);
+  });
+
+  it('is empty when every cell is done or running', () => {
+    expect(getAppStatusGroups(appOf('c'), cells, () => 'running')).toEqual([]);
+  });
+
+  it('counts a cell once even if it has several panels', () => {
+    expect(getAppStatusGroups(appOf('a', 'a'), cells, (id) => statuses[id])).toEqual([
+      { status: 'stale', names: ['a'] },
+    ]);
   });
 });
 

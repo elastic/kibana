@@ -186,11 +186,12 @@ export const Tab: React.FC<TabProps> = (props) => {
 
   const fontWeight = isSelected ? euiTheme.font.weight.semiBold : euiTheme.font.weight.regular;
 
-  const { tabLabelRef, tabLabelWidth, tabLabelTextWidth } = useTabLabelWidth({
-    item,
-    tabsSizeConfig,
-    fontWeight,
-  });
+  const { tabLabelRef, tabLabelWidth, tabLabelTextWidth, tabLabelFittedTextWidth } =
+    useTabLabelWidth({
+      item,
+      tabsSizeConfig,
+      fontWeight,
+    });
 
   useEffect(() => {
     if (isInlineEditActive && !isSelected) {
@@ -266,20 +267,29 @@ export const Tab: React.FC<TabProps> = (props) => {
                 responsive={false}
                 style={{ width: tabLabelWidth, fontWeight }}
               >
-                <EuiText
-                  id={tabLabelId}
-                  color="inherit"
-                  size="s"
+                <EuiFlexGroup
+                  gutterSize="xs"
+                  alignItems="center"
+                  wrap={false}
+                  responsive={false}
                   css={getTabLabelCss()}
-                  className="unifiedTabs__tabLabelText"
                 >
-                  <EuiTextTruncate
-                    text={item.label}
-                    width={tabLabelTextWidth}
-                    truncation="middle"
-                    title=""
-                  />
-                </EuiText>
+                  <EuiText
+                    id={tabLabelId}
+                    color="inherit"
+                    size="s"
+                    css={getTabLabelCss()}
+                    className="unifiedTabs__tabLabelText"
+                  >
+                    <EuiTextTruncate
+                      text={item.label}
+                      width={item.statusIndicator ? tabLabelFittedTextWidth : tabLabelTextWidth}
+                      truncation="middle"
+                      title=""
+                    />
+                  </EuiText>
+                  {item.statusIndicator ?? null}
+                </EuiFlexGroup>
                 {isUnsaved && (
                   <EuiIcon
                     data-test-subj={`unifiedTabs__tabChangesIndicator-${item.id}`}

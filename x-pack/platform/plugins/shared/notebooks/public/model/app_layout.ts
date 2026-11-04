@@ -9,6 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
+import type { CellStatus } from './types';
 import { buildGraph, getDescendants } from './graph';
 
 export const APP_GRID_COLUMNS = 12;
@@ -118,6 +119,36 @@ export const appDependsOn = (
 ): boolean => {
   const dependents = getDescendants(buildGraph(cells, cellOrder), [cellId]);
   return app.panels.some((panel) => dependents.has(panel.cellId));
+};
+
+export type AttentionStatus = Exclude<CellStatus, 'done' | 'running'>;
+
+/** Most severe first, so the first group decides the app's overall status. */
+const ATTENTION_ORDER: readonly AttentionStatus[] = ['error', 'blocked', 'stale', 'idle'];
+
+export interface AppStatusGroup {
+  status: AttentionStatus;
+  names: string[];
+}
+
+/**
+ * The app's cells that need attention, grouped by status with the most severe group first.
+ * Markdown cells never run, so they are left out.
+ */
+export const getAppStatusGroups = (
+  app: NotebookApp,
+  cells: Readonly<Record<string, CellDefinition>>,
+  getStatus: (cellId: string) => CellStatus
+): AppStatusGroup[] => {
+  const cellIds = [...new Set(app.panels.map(({ cellId }) => cellId))];
+  const shown = cellIds.flatMap((id) => {
+    const cell = cells[id];
+    return cell && cell.type !== 'markdown' ? [cell] : [];
+  });
+  return ATTENTION_ORDER.flatMap((status) => {
+    const names = shown.filter(({ id }) => getStatus(id) === status).map(({ name }) => name);
+    return names.length > 0 ? [{ status, names }] : [];
+  });
 };
 
 const SECTION_ORDER: ReadonlyArray<CellDefinition['type']> = ['markdown', 'input', 'chart', 'esql'];

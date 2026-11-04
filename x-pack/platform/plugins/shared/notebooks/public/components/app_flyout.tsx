@@ -41,6 +41,7 @@ import {
 } from '../model/app_layout';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
+import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
 import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
@@ -256,7 +257,12 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
       }
     );
   const tabs = useMemo<TabItem[]>(
-    () => apps.map(({ id, title }) => ({ id, label: title })),
+    () =>
+      apps.map((tabApp) => ({
+        id: tabApp.id,
+        label: tabApp.title,
+        statusIndicator: <AppStatusDot app={tabApp} />,
+      })),
     [apps]
   );
   const cells = useStateFromPublishingSubject(store.cells$);

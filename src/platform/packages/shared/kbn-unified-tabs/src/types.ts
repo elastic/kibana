@@ -18,6 +18,7 @@ export interface TabItem {
   duplicatedFromId?: string; // ID of the tab from which this tab was duplicated
   restoredFromId?: string; // ID of the closed tab from which this tab was restored
   customMenuButton?: React.JSX.Element;
+  statusIndicator?: React.JSX.Element; // shown after the label, e.g. a coloured dot with a tooltip
 }
 
 export type RecentlyClosedTabItem = TabItem & {
