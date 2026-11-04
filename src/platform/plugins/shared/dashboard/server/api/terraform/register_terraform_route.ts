@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import type { VersionedRouter } from '@kbn/core-http-server';
 import type { Logger, RequestHandlerContext, SavedObjectsClientContract } from '@kbn/core/server';
 import { isSavedObjectErrorResult, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -20,6 +19,18 @@ import type {
   Reference,
   ReferencedObject,
 } from '@kbn/as-code-dashboard-terraform';
+import {
+  createDashboardConverter,
+  DashboardConversionError,
+  DASHBOARD_RESOURCE_TYPE,
+  DATA_VIEW_RESOURCE_TYPE,
+  linkReferences,
+  loadDashboardOas,
+  TAG_RESOURCE,
+  TERRAFORM_PROVIDER,
+  toDataViewResource,
+  toResourceName,
+} from '@kbn/as-code-dashboard-terraform';
 import type { TagAttributes } from '@kbn/saved-objects-tagging-oss-plugin/common';
 import type {
   DataViewAttributes,
@@ -27,7 +38,6 @@ import type {
   DataViewsService,
 } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import { MAX_TITLE_LENGTH } from '@kbn/as-code-shared-schemas';
 import { logRequest } from '@kbn/as-code-utils';
 import {
   DASHBOARD_INTERNAL_API_PATH,
@@ -36,6 +46,7 @@ import {
 import { transformDashboardIn } from '../transforms';
 import { dataViewsService } from '../../kibana_services';
 import { getTypeDisplayName, toRelatedItems } from '../sanitize/related_items';
+import { terraformRequestBodySchema, terraformResponseBodySchema } from './schemas';
 import type {
   DashboardTerraformResponseBody,
   ExportedDataView,
@@ -43,13 +54,12 @@ import type {
   LiteralTag,
 } from './types';
 
-// Loaded on first use, not at startup; only a successful load is kept, so a failed one is retried.
+// The OpenAPI file is read and compiled on first use, not at startup; only a successful load is kept, so a failed one
+// is retried.
 let converter: Promise<DashboardConverter> | undefined;
 const getConverter = (): Promise<DashboardConverter> => {
-  converter ??= import('@kbn/as-code-dashboard-terraform')
-    .then(async ({ createDashboardConverter, loadDashboardOas }) =>
-      createDashboardConverter(await loadDashboardOas())
-    )
+  converter ??= loadDashboardOas()
+    .then(createDashboardConverter)
     .catch((error) => {
       converter = undefined;
       throw error;
@@ -216,34 +226,17 @@ export function registerTerraformRoute(
     .addVersion(
       {
         version: '1',
-        validate: {
-          request: {
-            body: schema.object({
-              dashboard: schema.object(
-                // The title names the Terraform resource.
-                { title: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })) },
-                { unknowns: 'allow' }
-              ),
-            }),
-          },
-        },
+        validate: () => ({
+          request: { body: terraformRequestBodySchema },
+          response: { 200: { body: () => terraformResponseBodySchema } },
+        }),
       },
       async (ctx, req, res) => {
         const { featureFlags, savedObjects, elasticsearch } = await ctx.core;
         if (!(await featureFlags.getBooleanValue(DASHBOARD_TERRAFORM_EXPORT_FLAG, false))) {
           return res.notFound();
         }
-        const {
-          DashboardConversionError,
-          DASHBOARD_RESOURCE_TYPE,
-          DATA_VIEW_RESOURCE_TYPE,
-          TAG_RESOURCE,
-          TERRAFORM_PROVIDER,
-          linkReferences,
-          toDataViewResource,
-          toResourceName,
-        } = await import('@kbn/as-code-dashboard-terraform');
-        const dashboard = req.body.dashboard as JsonObject;
+        const { dashboard } = req.body;
         try {
           const convert = await getConverter();
           const conversion = convert(dashboard);

@@ -8,26 +8,15 @@
  */
 
 import type { JsonObject, JsonValue } from '@kbn/utility-types';
+import type {
+  JsonStringPanel,
+  LinkedResource,
+  PanelSummary,
+  SkippedPanel,
+} from './conversion_schemas';
 import type { KeyedNode, OasDocument, RefFinder, TNode, Variant } from './oas_model';
 import { compileDashboardRoot } from './oas_model';
 import { toResourceName } from './resource_name';
-
-/** Identifies a panel a conversion reports on. */
-export interface PanelSummary {
-  /** API path of the panel, e.g. `panels[2]` or `panels[0].panels[1]` inside a section. */
-  path: string;
-  type?: string;
-  title?: string;
-}
-
-export interface SkippedPanel extends PanelSummary {
-  reason: string;
-}
-
-export interface JsonStringPanel extends PanelSummary {
-  /** Why the panel could not be converted to typed attributes. */
-  reason: string;
-}
 
 export interface PartialPanel extends PanelSummary {
   /** API paths of the panel's fields the resource has no attribute for. */
@@ -504,17 +493,6 @@ export interface ReferencedObject {
 }
 
 /** A resource written for a referenced object; it pins no ID, so applying it as written creates a new object. */
-export interface LinkedResource {
-  type: string;
-  /** Unique among the resources of its type in the module. */
-  name: string;
-  /** The ID of the object it was written from. */
-  id: string;
-  /** The object's display name as the user knows it (not escaped), its ID when it has none. */
-  label: string;
-  body: JsonObject;
-}
-
 export interface LinkedConversion {
   body: JsonObject;
   resources: LinkedResource[];

@@ -17,15 +17,24 @@ export {
 export type {
   DashboardConversion,
   DashboardConverter,
-  JsonStringPanel,
   LinkedConversion,
-  LinkedResource,
-  PanelSummary,
   PartialPanel,
   Reference,
   ReferencedObject,
-  SkippedPanel,
 } from './src/convert_dashboard';
+export {
+  jsonStringPanelSchema,
+  linkedResourceSchema,
+  panelSummarySchema,
+  skippedPanelSchema,
+  terraformBodySchema,
+} from './src/conversion_schemas';
+export type {
+  JsonStringPanel,
+  LinkedResource,
+  PanelSummary,
+  SkippedPanel,
+} from './src/conversion_schemas';
 export { loadDashboardOas } from './src/dashboard_oas';
 export { toDataViewResource } from './src/data_view_resource';
 export type { DataViewResource } from './src/data_view_resource';

@@ -578,7 +578,9 @@ describe('POST /internal/dashboards/_terraform', () => {
   it('rejects a title longer than the as-code title limit without converting it', async () => {
     const result = await post({ dashboard: { title: 'x'.repeat(1001), panels: [] } });
     expect(result.status).toBe(400);
-    expect(result.body.message).toContain('[request body.dashboard.title]');
+    expect(JSON.parse(result.body.message)).toEqual([
+      expect.objectContaining({ code: 'too_big', path: ['dashboard', 'title'] }),
+    ]);
     expect(mockConvert).not.toHaveBeenCalled();
   });
 
