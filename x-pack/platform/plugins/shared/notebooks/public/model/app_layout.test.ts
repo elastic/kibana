@@ -161,6 +161,18 @@ describe('reconcileApps', () => {
     });
     expect(next[2]).toEqual({ id: 'fresh', title: 'App 3', panels: [] });
   });
+
+  it('carries the hideTimePicker setting over to duplicates', () => {
+    const [, copy] = reconcileApps(
+      [{ ...sales, hideTimePicker: true }],
+      [
+        { id: 'sales', label: 'Sales' },
+        { id: 'copy', label: 'Sales (copy)', duplicatedFromId: 'sales' },
+      ],
+      () => 'p2'
+    );
+    expect(copy.hideTimePicker).toBe(true);
+  });
 });
 
 describe('getAppStatusGroups', () => {

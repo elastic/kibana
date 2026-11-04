@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -41,6 +41,7 @@ import {
 } from '../model/app_layout';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
+import { AppSettingsFlyout } from './app_settings_flyout';
 import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
 import { InputControl } from './input_cell';
@@ -267,7 +268,9 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
   );
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
+  const [settingsAppId, setSettingsAppId] = useState<string>();
   const pinnedTime = useMemo(() => {
+    if (app.hideTimePicker) return undefined;
     const cell = findPinnedTimeCell(cells);
     return cell && appDependsOn(app, cells, cellOrder, cell.id) ? cell : undefined;
   }, [app, cells, cellOrder]);
@@ -339,6 +342,15 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
           onChanged={({ items, selectedItem }) => applyTabs(items, selectedItem?.id)}
           getTopTabMenuItems={(item) => [
             {
+              'data-test-subj': 'notebookAppSettings',
+              name: 'appSettings',
+              label: i18n.translate('xpack.notebook.app.settings', {
+                defaultMessage: 'Settings',
+              }),
+              onClick: () => setSettingsAppId(item.id),
+              icon: 'gear',
+            },
+            {
               'data-test-subj': 'notebookAppDelete',
               name: 'deleteApp',
               label: i18n.translate('xpack.notebook.app.deleteApp', { defaultMessage: 'Delete' }),
@@ -359,6 +371,9 @@ const AppToolbar = ({ app, apps }: { app: NotebookApp; apps: NotebookApp[] }) =>
         <EuiFlexItem>
           <PinnedTimePicker cell={pinnedTime} />
         </EuiFlexItem>
+      )}
+      {settingsAppId && (
+        <AppSettingsFlyout appId={settingsAppId} onClose={() => setSettingsAppId(undefined)} />
       )}
     </EuiFlexGroup>
   );

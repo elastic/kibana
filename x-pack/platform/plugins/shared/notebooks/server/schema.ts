@@ -124,6 +124,7 @@ const appSchema = schema.object({
     }),
     { maxSize: MAX_CELLS }
   ),
+  hideTimePicker: schema.maybe(schema.boolean()),
 });
 
 const validateCellReferences = ({

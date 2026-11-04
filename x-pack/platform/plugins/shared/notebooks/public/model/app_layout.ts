@@ -103,6 +103,7 @@ export const reconcileApps = (
     if (existing) return existing.title === label ? existing : { ...existing, title: label };
     const source = duplicatedFromId ? byId.get(duplicatedFromId) : undefined;
     return {
+      ...(source?.hideTimePicker ? { hideTimePicker: true } : {}),
       id,
       title: label,
       panels: source?.panels.map((panel) => ({ ...panel, id: createId() })) ?? [],

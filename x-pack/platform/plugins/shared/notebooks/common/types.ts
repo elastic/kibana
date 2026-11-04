@@ -95,6 +95,8 @@ export interface NotebookApp {
   id: string;
   title: string;
   panels: AppPanel[];
+  /** Hides the global time picker on the app even when its cells use the time range. */
+  hideTimePicker?: boolean;
 }
 
 export interface NotebookAttributes {

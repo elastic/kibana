@@ -126,6 +126,15 @@ describe('notebookAttributesSchema', () => {
     expect(notebookAttributesSchema.validate(withApp('visits'))).toEqual(withApp('visits'));
   });
 
+  it('accepts the app hideTimePicker setting', () => {
+    const notebook = withApp('visits');
+    const withSetting = {
+      ...notebook,
+      panels: notebook.panels.map((app) => ({ ...app, hideTimePicker: true })),
+    };
+    expect(notebookAttributesSchema.validate(withSetting)).toEqual(withSetting);
+  });
+
   const manyCells = toNotebook(
     Array.from({ length: MAX_CELLS + 1 }, (_, index) => ({
       id: `md${index}`,
