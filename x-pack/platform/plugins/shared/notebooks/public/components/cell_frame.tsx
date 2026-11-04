@@ -18,11 +18,11 @@ import {
   EuiPopover,
   EuiSpacer,
   EuiToolTip,
-  euiCanAnimate,
   transparentize,
   useEuiTheme,
 } from '@elastic/eui';
-import { css, keyframes } from '@emotion/react';
+import { css } from '@emotion/react';
+import { filter, skip } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
@@ -37,12 +37,8 @@ import { useNotebook } from './notebook_context';
 
 const RUN_GUTTER_CLASS = 'notebookCellRunGutter';
 
-const FOCUS_FADE_DURATION = '1.5s';
-
-const focusFade = (border: string, glowColor: string) => keyframes`
-  from { box-shadow: ${border}, 0 0 16px 4px ${glowColor}; }
-  to { box-shadow: ${border}, 0 0 16px 4px transparent; }
-`;
+const FOCUS_FADE_DURATION_MS = 1500;
+const REDUCED_MOTION_QUERY = '(prefers-reduced-motion: reduce)';
 
 const ACTIONS_LABEL = i18n.translate('xpack.notebook.cell.actions', {
   defaultMessage: 'Cell actions',
@@ -67,14 +63,33 @@ export const CellFrame = ({
 }: PropsWithChildren<CellFrameProps>) => {
   const { store, openFlyouts$, focusedCell$ } = useNotebook();
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
-  const isFocused = useStateFromPublishingSubject(focusedCell$) === cell.id;
   const { euiTheme } = useEuiTheme();
   const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
   const frameRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
-    if (isFocused) frameRef.current?.focus({ preventScroll: true });
-  }, [isFocused]);
+    const border = `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`;
+    const glowColor = transparentize(euiTheme.colors.primary, 0.6);
+    // Skip the current value so a re-subscription doesn't replay an old focus.
+    const subscription = focusedCell$
+      .pipe(
+        skip(1),
+        filter((cellId) => cellId === cell.id)
+      )
+      .subscribe(() => {
+        frameRef.current?.focus({ preventScroll: true });
+        if (window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+        panelRef.current?.animate(
+          [
+            { boxShadow: `${border}, 0 0 16px 4px ${glowColor}` },
+            { boxShadow: `${border}, 0 0 16px 4px transparent` },
+          ],
+          { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
+        );
+      });
+    return () => subscription.unsubscribe();
+  }, [focusedCell$, cell.id, borderColor, euiTheme]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -146,18 +161,9 @@ export const CellFrame = ({
         hasBorder={false}
         hasShadow={false}
         paddingSize="s"
+        panelRef={panelRef}
         css={css`
           box-shadow: inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor};
-          ${isFocused &&
-          css`
-            ${euiCanAnimate} {
-              animation: ${focusFade(
-                  `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`,
-                  transparentize(euiTheme.colors.primary, 0.6)
-                )}
-                ${FOCUS_FADE_DURATION} ease-out;
-            }
-          `}
         `}
         data-test-subj={`notebookCell-${cell.name}`}
       >
