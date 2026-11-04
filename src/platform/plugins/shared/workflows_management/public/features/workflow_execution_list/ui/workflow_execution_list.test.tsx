@@ -9,7 +9,7 @@
 
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
-import { ExecutionStatus, type WorkflowExecutionListDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, type WorkflowExecutionListDto } from '@kbn/workflows';
 import { WorkflowExecutionList, type WorkflowExecutionListProps } from './workflow_execution_list';
 import { createStartServicesMock, type StartServicesMock } from '../../../mocks';
 import { getTestProvider } from '../../../shared/mocks/test_providers';
@@ -82,8 +82,6 @@ describe('WorkflowExecutionList', () => {
     overrides: Partial<WorkflowExecutionListProps> = {},
     services: StartServicesMock = createStartServicesMock()
   ) => {
-    services.userProfile.bulkGet.mockResolvedValue([]);
-
     return render(<WorkflowExecutionList {...defaultProps} {...overrides} />, {
       wrapper: getTestProvider({ services }),
     });
@@ -96,6 +94,21 @@ describe('WorkflowExecutionList', () => {
   it('renders the execution history title', () => {
     renderComponent();
     expect(screen.getByText('Execution history')).toBeInTheDocument();
+  });
+
+  it('shows the execution name column for named and unnamed runs', () => {
+    const { unmount } = renderComponent();
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+    unmount();
+
+    renderComponent({
+      executions: {
+        ...mockExecutions,
+        results: [{ ...mockExecutions.results[0], runName: 'Deploy staging' }],
+      },
+    });
+    expect(screen.getByRole('columnheader', { name: 'Execution name' })).toBeInTheDocument();
+    expect(screen.getByText('Deploy staging')).toBeInTheDocument();
   });
 
   it('renders the container with the data-test-subj attribute', () => {
@@ -135,6 +148,27 @@ describe('WorkflowExecutionList', () => {
         executions: { results: [], page: 1, size: 100, total: 0 },
       });
       expect(screen.getByText('No executions found')).toBeInTheDocument();
+    });
+
+    it.each([
+      { statuses: [ExecutionStatus.FAILED] },
+      { executionTypes: [ExecutionType.TEST] },
+      { runName: 'deploy' },
+    ])('says that no executions match the active filters: %j', (activeFilter) => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, ...activeFilter },
+      });
+      expect(screen.getByText('No executions match the filters.')).toBeInTheDocument();
+      expect(screen.queryByText('Workflow has not been executed yet.')).not.toBeInTheDocument();
+    });
+
+    it('ignores a blank execution name filter', () => {
+      renderComponent({
+        executions: { results: [], page: 1, size: 100, total: 0 },
+        filters: { ...defaultFilters, runName: '   ' },
+      });
+      expect(screen.getByText('Workflow has not been executed yet.')).toBeInTheDocument();
     });
   });
 
@@ -176,6 +210,38 @@ describe('WorkflowExecutionList', () => {
         'data-executed-by-label',
         'user1'
       );
+    });
+
+    it('shows the executor name resolved by the server without a client profile lookup', () => {
+      const services = createStartServicesMock();
+      const [first, second] = mockExecutions.results;
+
+      renderComponent(
+        {
+          showExecutor: true,
+          executions: {
+            ...mockExecutions,
+            results: [
+              {
+                ...first,
+                executedByProfile: {
+                  uid: 'user1',
+                  enabled: true,
+                  user: { username: 'jdoe', full_name: 'Jane Doe' },
+                  data: {},
+                },
+              },
+              second,
+            ],
+          },
+        },
+        services
+      );
+
+      expect(
+        within(screen.getAllByTestId('workflowExecutionListItem')[0]).getByText('Jane Doe')
+      ).toBeInTheDocument();
+      expect(services.userProfile.bulkGet).not.toHaveBeenCalled();
     });
 
     it('hides unresolved profile UIDs on Serverless', () => {

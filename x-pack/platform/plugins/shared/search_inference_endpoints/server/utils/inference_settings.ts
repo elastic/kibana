@@ -5,8 +5,14 @@
  * 2.0.
  */
 
-import type { SavedObject } from '@kbn/core/server';
+import type { Logger, SavedObject } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
+import {
+  type ChatCompletionReasoningEffort,
+  type InferenceConnector,
+  isInferenceRequestError,
+  validateReasoningEffort,
+} from '@kbn/inference-common';
 import type { InferenceSettingsAttributes, InferenceSettingsResponse } from '../../common/types';
 
 export const parseInferenceSettingsSO = (
@@ -57,4 +63,64 @@ export const validateInferenceSettings = (attrs: InferenceSettingsAttributes): s
   }
 
   return errors;
+};
+
+const getConnectorIfFound = async (
+  id: string,
+  getConnectorById: (id: string) => Promise<InferenceConnector>,
+  logger: Logger
+): Promise<InferenceConnector | undefined> => {
+  try {
+    return await getConnectorById(id);
+  } catch (e) {
+    if (isInferenceRequestError(e) && e.status === 404) {
+      logger.warn(`Skipped the reasoning effort check for inference endpoint "${id}": not found`);
+      return undefined;
+    }
+    throw e;
+  }
+};
+
+const getUnsupportedEffortErrors = (
+  connector: InferenceConnector,
+  efforts: Set<ChatCompletionReasoningEffort>
+): string[] =>
+  [...efforts].flatMap((effort) => {
+    try {
+      validateReasoningEffort(connector, effort);
+      return [];
+    } catch (e) {
+      if (isInferenceRequestError(e)) {
+        return [e.message];
+      }
+      throw e;
+    }
+  });
+
+/**
+ * Checks each stored reasoning effort against the levels its model supports, skipping endpoints that are not found.
+ */
+export const validateEndpointParameters = async (
+  attrs: InferenceSettingsAttributes,
+  getConnectorById: (id: string) => Promise<InferenceConnector>,
+  logger: Logger
+): Promise<string[]> => {
+  const effortsByEndpointId = new Map<string, Set<ChatCompletionReasoningEffort>>();
+  for (const { endpoints } of attrs.features) {
+    for (const { id, parameters } of endpoints) {
+      const effort = parameters?.reasoning?.effort;
+      if (effort) {
+        effortsByEndpointId.set(id, (effortsByEndpointId.get(id) ?? new Set()).add(effort));
+      }
+    }
+  }
+
+  const errors = await Promise.all(
+    [...effortsByEndpointId].map(async ([id, efforts]) => {
+      const connector = await getConnectorIfFound(id, getConnectorById, logger);
+      return connector ? getUnsupportedEffortErrors(connector, efforts) : [];
+    })
+  );
+
+  return errors.flat();
 };

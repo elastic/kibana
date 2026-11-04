@@ -20,7 +20,7 @@ import { run } from '@kbn/dev-cli-runner';
 import {
   ensureNightshiftServiceAccountRoles,
   NIGHTSHIFT_STATEFUL_SERVICE_ACCOUNT_ROLES,
-} from '../common/service_account_roles';
+} from '@kbn/nightshift-shared';
 
 const basicAuth = (credentials: string): string =>
   `Basic ${Buffer.from(credentials).toString('base64')}`;

@@ -19,7 +19,8 @@ set -euo pipefail
 # with the report's numbers is posted when it failed since the issue was filed or last commented
 # on, and that was FLAKY_TESTS_COMMENT_COOLDOWN_DAYS days ago at least, and it is reopened when
 # it failed after the close. The body's text stays as filed.
-# GITHUB_TOKEN (kibanamachine) comes from Vault via .buildkite/scripts/common/setup_job_env.sh.
+# GITHUB_TOKEN is the pipeline's short-lived Vault plugin token (elastic-vault-github-plugin-prod[bot]),
+# set by .buildkite/scripts/common/setup_job_env.sh.
 
 source .buildkite/scripts/common/util.sh
 
@@ -54,8 +55,6 @@ else
 fi
 
 echo "--- Bootstrap Kibana"
-# The step only runs Node scripts; skip building the dev-mode shared webpack bundles
-export KBN_BOOTSTRAP_NO_PREBUILT=true
 .buildkite/scripts/bootstrap.sh
 
 echo "--- Download flaky test report"

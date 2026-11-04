@@ -17,6 +17,7 @@ import { TaskManagerPlugin } from '../plugin';
 import { coreMock } from '@kbn/core/server/mocks';
 import { ApiKeyType, type TaskManagerConfig } from '../config';
 import { BulkUpdateError } from '../lib/errors';
+import { createEsResponseError } from '../test_utils';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
 // This suite exercises managed configuration, not startup task reconciliation.
@@ -234,6 +235,22 @@ describe('managed configuration', () => {
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
     });
 
+    test('should increase poll interval when an Elasticsearch request fails with a raw 429 error', async () => {
+      const rejectedExecutionError = createEsResponseError(429, 'es_rejected_execution_exception');
+      const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+      childEsClient.search.mockImplementationOnce(async () => {
+        throw rejectedExecutionError;
+      });
+
+      await expect(taskManagerStart.fetch({})).rejects.toBe(rejectedExecutionError);
+
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
+    });
+
     test('should increase poll interval TM utilization is low', async () => {
       savedObjectsClient.create.mockImplementationOnce(
         async (type: string, attributes: unknown) => ({
@@ -310,6 +327,24 @@ describe('managed configuration', () => {
       );
       expect(logger.debug).toHaveBeenCalledWith(
         'Task pool now using 20 as the max allowed cost which is based on a capacity of 10'
+      );
+    });
+
+    test('should lower capacity when an Elasticsearch request fails with a raw 429 error', async () => {
+      const rejectedExecutionError = createEsResponseError(429, 'es_rejected_execution_exception');
+      const childEsClient = esStart.client.asInternalUser.child({}) as jest.Mocked<Client>;
+      childEsClient.search.mockImplementationOnce(async () => {
+        throw rejectedExecutionError;
+      });
+
+      await expect(taskManagerStart.fetch({})).rejects.toBe(rejectedExecutionError);
+
+      clock.tick(ADJUST_THROUGHPUT_INTERVAL);
+      expect(logger.warn).toHaveBeenCalledWith(
+        'Capacity configuration is temporarily reduced after Elasticsearch returned 1 "too many request" and/or "execute [inline] script" error(s).'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(
+        'Capacity configuration changing from 10 to 8 after seeing 1 "too many request" and/or "execute [inline] script" error(s)'
       );
     });
   });

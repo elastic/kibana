@@ -568,18 +568,34 @@ describe('StepExecutionRuntime', () => {
         );
       });
 
-      it('should exit wait state and clear resumeAt when step already has resumeAt in state', () => {
+      it('exits the wait and clears resumeAt once the stored resumeAt has passed', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() - 1_000).toISOString();
         (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
           status: ExecutionStatus.WAITING,
-          state: { resumeAt: '2025-12-31T00:00:00.000Z' },
+          state: { resumeAt },
         } as Partial<EsWorkflowStepExecution>);
 
-        const entered = underTest.tryEnterWaitUntil(new Date('2025-12-31T00:00:00.000Z'));
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime()));
 
         expect(entered).toBe(false);
         expect(workflowExecutionState.upsertStep).toHaveBeenCalledWith(
           expect.objectContaining({ state: undefined })
         );
+      });
+
+      it('stays parked when re-entered before the stored resumeAt', () => {
+        const now = new Date();
+        const resumeAt = new Date(now.getTime() + 60_000).toISOString();
+        (workflowExecutionState.getStepExecution as jest.Mock).mockReturnValue({
+          status: ExecutionStatus.WAITING,
+          state: { resumeAt, resolvedDuration: '60s' },
+        } as Partial<EsWorkflowStepExecution>);
+
+        const entered = underTest.tryEnterWaitUntil(new Date(now.getTime() + 60_000));
+
+        expect(entered).toBe(true);
+        expect(workflowExecutionState.upsertStep).not.toHaveBeenCalled();
       });
 
       it('should enter wait state even when status is WAITING but resumeAt is absent', () => {

@@ -7,11 +7,7 @@
 
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SandboxSession } from '@kbn/sandbox-plugin/server';
-import {
-  findElasticSecretCredentials,
-  renderElasticManifest,
-  writeElasticManifest,
-} from './elastic_manifest';
+import { renderElasticManifest, writeElasticManifest } from './elastic_manifest';
 
 const connector = (connectorId: string) => ({ kind: 'connector' as const, connectorId });
 
@@ -23,6 +19,17 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('`CONNECTOR_CONFIG_URL`');
     expect(content).toContain('`CONNECTOR_HEADER_AUTHORIZATION`');
     expect(content).toContain('never hard-code their values');
+  });
+
+  it('without a telemetry connector, points to any Elasticsearch connector in connectors.md', () => {
+    const content = renderElasticManifest();
+
+    expect(content).toContain('/workspace/connectors.md');
+    expect(content).toContain('`.elasticsearch`');
+    expect(content).toContain('`.http`');
+    expect(content).not.toContain('connector_id: "');
+    expect(content).not.toContain('## Investigation telemetry');
+    expect(content).toContain('"$CONNECTOR_CONFIG_URL/_query?format=txt"');
   });
 
   it('documents the readable indices and a query example', () => {
@@ -57,42 +64,10 @@ describe('renderElasticManifest', () => {
     expect(content).toContain('FROM $1:logs-nginx.error-*');
     expect(content).not.toContain('FROM $1:logs-* ');
   });
-
-  it('tells the agent which secret keys unlock the credentials', () => {
-    const content = renderElasticManifest({
-      kind: 'secrets',
-      urlKey: 'ELASTICSEARCH_ENDPOINT',
-      apiKeyKey: 'ELASTICSEARCH_API_KEY',
-    });
-
-    expect(content).toContain('`secret_keys: ["ELASTICSEARCH_ENDPOINT", "ELASTICSEARCH_API_KEY"]`');
-    expect(content).toContain('"$ELASTICSEARCH_ENDPOINT/_query?format=txt"');
-    expect(content).toContain('Authorization: ApiKey $ELASTICSEARCH_API_KEY');
-    expect(content).toContain('# secret_keys must be set on every one of these commands');
-    expect(content).not.toContain('CONNECTOR_');
-  });
-});
-
-describe('findElasticSecretCredentials', () => {
-  it.each(['ELASTICSEARCH_URL', 'ELASTICSEARCH_ENDPOINT'])(
-    'pairs %s with the API key secret',
-    (urlKey) => {
-      expect(
-        findElasticSecretCredentials(['GITHUB_TOKEN', urlKey, 'ELASTICSEARCH_API_KEY'])
-      ).toEqual({ kind: 'secrets', urlKey, apiKeyKey: 'ELASTICSEARCH_API_KEY' });
-    }
-  );
-
-  it.each([[['ELASTICSEARCH_URL']], [['ELASTICSEARCH_API_KEY']], [[]]])(
-    'returns nothing for the incomplete pair %j',
-    (secretKeys) => {
-      expect(findElasticSecretCredentials(secretKeys)).toBeUndefined();
-    }
-  );
 });
 
 describe('writeElasticManifest', () => {
-  it('writes the manifest to /workspace/elastic.md', async () => {
+  it('writes the manifest to /workspace/.connector-docs/elastic.md', async () => {
     const writeFiles = jest.fn().mockResolvedValue([{ bytes_written: 100, success: true }]);
     const session = { writeFiles } as unknown as SandboxSession;
 
@@ -103,7 +78,7 @@ describe('writeElasticManifest', () => {
     });
 
     expect(writeFiles).toHaveBeenCalledWith([
-      { path: '/workspace/elastic.md', content: expect.any(Buffer) },
+      { path: '/workspace/.connector-docs/elastic.md', content: expect.any(Buffer) },
     ]);
     const [files] = writeFiles.mock.calls[0];
     expect(files[0].content.toString('utf8')).toContain('# Elasticsearch telemetry');

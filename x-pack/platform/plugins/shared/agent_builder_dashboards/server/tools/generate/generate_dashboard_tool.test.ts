@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { z } from '@kbn/zod/v4';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import {
   DASHBOARD_ATTACHMENT_TYPE,
@@ -83,7 +84,7 @@ const keepRequestedLayout = async ({
 const generatedDashboard: DashboardAttachmentData = { title: 'Agent dashboard', panels: [] };
 
 const callHandler = async (
-  dashboardAttachmentId?: string,
+  dashboardId?: string,
   layout?: string,
   upsert: Record<string, unknown> = {}
 ) => {
@@ -101,7 +102,7 @@ const callHandler = async (
     esClient: { asCurrentUser: {} },
   };
   const ret = await tool.handler(
-    { dashboardAttachmentId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
+    { dashboardId, layout, ...upsert } as unknown as Parameters<typeof tool.handler>[0],
     ctx as unknown as Parameters<typeof tool.handler>[1]
   );
   if (!('results' in ret)) throw new Error('Unexpected HITL return from tool handler');
@@ -143,6 +144,51 @@ describe('generateDashboardTool handler', () => {
         type: DASHBOARD_ATTACHMENT_TYPE,
         data: { ...generatedDashboard, time_range: { from: 'now-7d', to: 'now' } },
         origin,
+      },
+    });
+  });
+
+  it('returns each panel title in the summary', async () => {
+    mockRetrieveLatestVersion.mockReturnValue(undefined);
+    const grid = { x: 0, y: 0, w: 24, h: 10 };
+    mockExecuteDashboardUpsert.mockResolvedValue({
+      dashboardData: {
+        ...generatedDashboard,
+        panels: [
+          { id: 'errors', type: 'vis', config: { title: 'Errors over time' }, grid },
+          { id: 'note', type: 'markdown', config: { content: '# Note' }, grid },
+          {
+            id: 'breakdowns',
+            title: 'Breakdowns',
+            collapsed: false,
+            grid: { y: 10 },
+            panels: [{ id: 'hosts', type: 'vis', config: { title: 'Top hosts' }, grid }],
+          },
+        ],
+      },
+      created: [],
+      updated: [],
+      removed: [],
+      failures: [],
+      panelAuthoringNotes: [],
+    });
+
+    const { results } = await callHandler();
+
+    expect(results[0]).toMatchObject({
+      type: ToolResultType.dashboard,
+      data: {
+        dashboard: {
+          panels: [
+            { id: 'errors', type: 'vis', title: 'Errors over time' },
+            { id: 'note', type: 'markdown', title: undefined },
+            {
+              id: 'breakdowns',
+              title: 'Breakdowns',
+              panels: [{ id: 'hosts', type: 'vis', title: 'Top hosts' }],
+            },
+          ],
+        },
       },
     });
   });
@@ -389,5 +435,34 @@ describe('generateDashboardTool handler', () => {
         },
       });
     });
+  });
+});
+
+describe('generateDashboardTool descriptions', () => {
+  const tool = generateDashboardTool({ getDashboardValidator: jest.fn() });
+
+  interface DescribedNode {
+    description?: string;
+  }
+  const { properties } = z.toJSONSchema(tool.schema, { io: 'input' }) as unknown as {
+    properties: {
+      controls: DescribedNode;
+    };
+  };
+
+  it('keeps the tool description within the 1,024 characters function-calling APIs accept', () => {
+    expect(tool.description.length).toBeLessThanOrEqual(1024);
+    expect(tool.description).toContain('Pass that id as `dashboardId`');
+  });
+
+  it('says that changes apply one by one and failures are listed', () => {
+    expect(tool.description).toContain('Changes are applied one by one');
+    expect(tool.description).toContain('resend only the failed ones');
+  });
+
+  it('says which controls are left out without a failure', () => {
+    expect(properties.controls.description).toContain(
+      'silently, unless `user_requested` is true or it replaces an existing control'
+    );
   });
 });

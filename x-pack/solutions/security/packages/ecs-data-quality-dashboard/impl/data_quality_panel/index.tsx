@@ -47,6 +47,8 @@ interface Props {
   reportDataQualityCheckAllCompleted?: ReportDataQualityCheckAllCompleted;
   setLastChecked: (lastChecked: string) => void;
   startDate?: string | null;
+  /** Rendered in the summary panel, left of the ILM phase filter */
+  summaryFilters?: React.ReactNode;
   theme?: PartialTheme;
   defaultStartTime: string;
   defaultEndTime: string;
@@ -74,6 +76,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
   reportDataQualityCheckAllCompleted,
   setLastChecked,
   startDate,
+  summaryFilters,
   theme,
   defaultStartTime,
   defaultEndTime,
@@ -152,7 +155,7 @@ const DataQualityPanelComponent: React.FC<Props> = ({
         <IndicesCheckContext.Provider value={indicesCheckHookReturnValue}>
           <EuiFlexGroup data-test-subj="body" direction="column" gutterSize="none">
             <EuiFlexItem grow={false}>
-              <DataQualitySummary />
+              <DataQualitySummary summaryFilters={summaryFilters} />
               <EuiSpacer size="l" />
             </EuiFlexItem>
 

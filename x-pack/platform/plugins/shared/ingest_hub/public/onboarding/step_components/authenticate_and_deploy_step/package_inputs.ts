@@ -15,6 +15,7 @@ import {
   shouldDefaultCollectS3Logs,
   toTyped,
 } from '../service_settings_step/field_config';
+import { getBaseServiceId } from '../service_settings_step/instances';
 import type {
   ServiceVars,
   ServiceDataStreamVars,
@@ -335,10 +336,12 @@ export function toSOServiceVars(
   servicesMap: Map<string, AwsServiceMatrixEntry>
 ): Record<string, unknown> {
   const result: Record<string, unknown> = {};
-  for (const [serviceId, vars] of Object.entries(serviceVars)) {
-    const service = servicesMap.get(serviceId);
+  for (const [instanceId, vars] of Object.entries(serviceVars)) {
+    // Keyed by instance id, but the services map is keyed by service id: a duplicate
+    // (`elb__dup-1`) must be typed like its service.
+    const service = servicesMap.get(getBaseServiceId(instanceId));
     if (!service) {
-      result[serviceId] = vars;
+      result[instanceId] = vars;
       continue;
     }
     const typedVarsByDataStream: Record<string, unknown> = {};
@@ -355,7 +358,7 @@ export function toSOServiceVars(
       }
       typedVarsByDataStream[dsId] = { ...dsVars, varsByInput: typedVarsByInput };
     }
-    result[serviceId] = { ...vars, varsByDataStream: typedVarsByDataStream };
+    result[instanceId] = { ...vars, varsByDataStream: typedVarsByDataStream };
   }
   return result;
 }

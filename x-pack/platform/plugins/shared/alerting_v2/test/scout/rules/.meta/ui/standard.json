@@ -1,5 +1,5 @@
 {
-  "sha1": "6c1a11c87cdf8e035b3e5f0e15fdd92c04bec956",
+  "sha1": "006ea78a9a5f7d458d8f8decb1fe576ef35fd0b4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -176,7 +176,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout/rules/ui/tests/install_rule_template.spec.ts",
-        "line": 127,
+        "line": 120,
         "column": 19
       }
     },
