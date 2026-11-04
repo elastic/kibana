@@ -21,7 +21,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useStartServices } from '../../../../../hooks';
+import { useAutomaticImportAuthz, useStartServices } from '../../../../../hooks';
 
 import type {
   AutomaticImportTelemetry,
@@ -70,6 +70,7 @@ export const ManageIntegrationActions: React.FC<{
 }) => {
   const { euiTheme } = useEuiTheme();
   const { automaticImport } = useStartServices();
+  const { canEdit, canDelete, canApprove } = useAutomaticImportAuthz();
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showReviewModal, setShowReviewModal] = useState(false);
@@ -163,7 +164,7 @@ export const ManageIntegrationActions: React.FC<{
 
   return (
     <>
-      {inlineActionType === 'reviewApprove' && (
+      {inlineActionType === 'reviewApprove' && canApprove && (
         <EuiButtonEmpty
           size="xs"
           color="primary"
@@ -191,7 +192,7 @@ export const ManageIntegrationActions: React.FC<{
           />
         </EuiButtonEmpty>
       )}
-      {inlineActionType === 'editIntegration' && (
+      {inlineActionType === 'editIntegration' && canEdit && (
         <EuiButtonEmpty size="s" onClick={() => onEdit(integration.integrationId)}>
           <FormattedMessage
             id="xpack.fleet.epmList.manageIntegrations.actions.editInline"
@@ -233,19 +234,21 @@ export const ManageIntegrationActions: React.FC<{
         >
           <EuiContextMenuPanel
             items={[
-              <EuiContextMenuItem
-                key="review"
-                icon="grid"
-                disabled={reviewApproveDisabled}
-                toolTipContent={reviewApproveTooltip}
-                onClick={openReviewModal}
-                data-test-subj="manageIntegrationReviewApproveMenuItem"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
-                  defaultMessage="Review & Approve"
-                />
-              </EuiContextMenuItem>,
+              canApprove && (
+                <EuiContextMenuItem
+                  key="review"
+                  icon="grid"
+                  disabled={reviewApproveDisabled}
+                  toolTipContent={reviewApproveTooltip}
+                  onClick={openReviewModal}
+                  data-test-subj="manageIntegrationReviewApproveMenuItem"
+                >
+                  <FormattedMessage
+                    id="xpack.fleet.epmList.manageIntegrations.actions.reviewApprove"
+                    defaultMessage="Review & Approve"
+                  />
+                </EuiContextMenuItem>
+              ),
               <EuiContextMenuItem
                 key="installToCluster"
                 icon="upload"
@@ -282,34 +285,38 @@ export const ManageIntegrationActions: React.FC<{
                   defaultMessage="Download .zip package"
                 />
               </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="edit"
-                icon="pencil"
-                onClick={() => {
-                  closePopover();
-                  onEdit(integration.integrationId);
-                }}
-                data-test-subj="manageIntegrationEditMenuItem"
-              >
-                <FormattedMessage
-                  id="xpack.fleet.epmList.manageIntegrations.actions.edit"
-                  defaultMessage="Edit"
-                />
-              </EuiContextMenuItem>,
-              <EuiContextMenuItem
-                key="delete"
-                icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
-                onClick={openDeleteConfirm}
-                data-test-subj="manageIntegrationDeleteMenuItem"
-              >
-                <EuiTextColor color="danger">
+              canEdit && (
+                <EuiContextMenuItem
+                  key="edit"
+                  icon="pencil"
+                  onClick={() => {
+                    closePopover();
+                    onEdit(integration.integrationId);
+                  }}
+                  data-test-subj="manageIntegrationEditMenuItem"
+                >
                   <FormattedMessage
-                    id="xpack.fleet.epmList.manageIntegrations.actions.delete"
-                    defaultMessage="Delete"
+                    id="xpack.fleet.epmList.manageIntegrations.actions.edit"
+                    defaultMessage="Edit"
                   />
-                </EuiTextColor>
-              </EuiContextMenuItem>,
-            ]}
+                </EuiContextMenuItem>
+              ),
+              canDelete && (
+                <EuiContextMenuItem
+                  key="delete"
+                  icon={<EuiIcon type="trash" color="danger" aria-hidden={true} />}
+                  onClick={openDeleteConfirm}
+                  data-test-subj="manageIntegrationDeleteMenuItem"
+                >
+                  <EuiTextColor color="danger">
+                    <FormattedMessage
+                      id="xpack.fleet.epmList.manageIntegrations.actions.delete"
+                      defaultMessage="Delete"
+                    />
+                  </EuiTextColor>
+                </EuiContextMenuItem>
+              ),
+            ].filter((item): item is React.ReactElement => Boolean(item))}
           />
         </EuiPopover>
       )}

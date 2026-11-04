@@ -32,6 +32,7 @@ import {
   useKibana,
 } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
+import { useAuthorization } from '../../common/hooks/use_authorization';
 import {
   readReturnParams,
   getCreateBackLinkLabel,
@@ -230,6 +231,8 @@ export const IntegrationManagement = React.memo(() => {
     }
   }, [telemetry, sessionId, integrationId]);
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
+  const { canCreateIntegration, canEditIntegration } = useAuthorization();
+  const hasRequiredPrivilege = integrationId ? canEditIntegration : canCreateIntegration;
 
   const integrationsHomeHref = useMemo(
     () => application.getUrlForApp(INTEGRATIONS_APP_ID),
@@ -294,6 +297,22 @@ export const IntegrationManagement = React.memo(() => {
         </KibanaPageTemplate>
         <ButtonsFooter hideActionButton onCancel={handlePaywallCancel} />
       </>
+    );
+  }
+
+  if (!hasRequiredPrivilege) {
+    return (
+      <EuiEmptyPrompt
+        iconType="lock"
+        title={<h2>{i18n.INSUFFICIENT_PRIVILEGES_TITLE}</h2>}
+        body={<p>{i18n.INSUFFICIENT_PRIVILEGES_DESCRIPTION}</p>}
+        data-test-subj="automaticImportInsufficientPrivileges"
+        actions={
+          <EuiButton color="primary" fill onClick={navigateToManage}>
+            {i18n.GO_BACK_BUTTON}
+          </EuiButton>
+        }
+      />
     );
   }
 

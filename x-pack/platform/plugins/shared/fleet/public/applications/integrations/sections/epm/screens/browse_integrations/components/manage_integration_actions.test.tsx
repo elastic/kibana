@@ -1,0 +1,140 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import React from 'react';
+import { fireEvent, render, screen } from '@testing-library/react';
+import { I18nProvider } from '@kbn/i18n-react';
+
+const mockUseAutomaticImportAuthz = jest.fn();
+jest.mock('../../../../../hooks', () => ({
+  useStartServices: () => ({ automaticImport: undefined }),
+  useAutomaticImportAuthz: () => mockUseAutomaticImportAuthz(),
+}));
+
+jest.mock('./review_approve_modal', () => ({
+  ReviewApproveModal: () => null,
+}));
+
+import { ManageIntegrationActions } from './manage_integration_actions';
+import type { CreatedIntegrationRow } from './manage_integrations_table';
+
+const ALL_AUTHZ = {
+  canView: true,
+  canCreate: true,
+  canEdit: true,
+  canDelete: true,
+  canApprove: true,
+};
+const READ_AUTHZ = {
+  canView: true,
+  canCreate: false,
+  canEdit: false,
+  canDelete: false,
+  canApprove: false,
+};
+
+const integration: CreatedIntegrationRow = {
+  integrationId: 'my_integration',
+  title: 'My integration',
+  totalDataStreamCount: 1,
+  successfulDataStreamCount: 1,
+  version: '1.0.0',
+  createdBy: 'elastic',
+  status: 'completed',
+};
+
+const renderActions = (
+  props: Partial<React.ComponentProps<typeof ManageIntegrationActions>> = {}
+) =>
+  render(
+    <I18nProvider>
+      <ManageIntegrationActions
+        integration={integration}
+        isPackageReady={true}
+        onEdit={jest.fn()}
+        onDelete={jest.fn()}
+        onFetchReviewDetails={jest.fn()}
+        onApproveAndInstall={jest.fn()}
+        onDownloadZip={jest.fn()}
+        onInstallToCluster={jest.fn()}
+        {...props}
+      />
+    </I18nProvider>
+  );
+
+const openMenu = () => fireEvent.click(screen.getByTestId('manageIntegrationActionsBtn'));
+
+describe('ManageIntegrationActions privilege gating', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  describe('with the Automatic Import "all" privilege', () => {
+    beforeEach(() => {
+      mockUseAutomaticImportAuthz.mockReturnValue(ALL_AUTHZ);
+    });
+
+    it('shows the Review & Approve, Edit and Delete menu items', () => {
+      renderActions();
+      openMenu();
+
+      expect(screen.getByTestId('manageIntegrationReviewApproveMenuItem')).toBeInTheDocument();
+      expect(screen.getByTestId('manageIntegrationEditMenuItem')).toBeInTheDocument();
+      expect(screen.getByTestId('manageIntegrationDeleteMenuItem')).toBeInTheDocument();
+    });
+
+    it('shows the inline Review & approve button', () => {
+      renderActions({ inlineActionType: 'reviewApprove', showMenuButton: false });
+
+      expect(screen.getByTestId('manageIntegrationReviewApproveInlineBtn')).toBeInTheDocument();
+    });
+  });
+
+  describe('with the Automatic Import "read" privilege', () => {
+    beforeEach(() => {
+      mockUseAutomaticImportAuthz.mockReturnValue(READ_AUTHZ);
+    });
+
+    it('keeps the Download .zip package menu item', () => {
+      renderActions();
+      openMenu();
+
+      expect(screen.getByTestId('manageIntegrationDownloadZipMenuItem')).toBeInTheDocument();
+    });
+
+    it('hides the Edit and Delete menu items', () => {
+      renderActions();
+      openMenu();
+
+      expect(screen.queryByTestId('manageIntegrationEditMenuItem')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('manageIntegrationDeleteMenuItem')).not.toBeInTheDocument();
+    });
+
+    it('hides the Review & Approve menu item', () => {
+      renderActions();
+      openMenu();
+
+      expect(
+        screen.queryByTestId('manageIntegrationReviewApproveMenuItem')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the inline Review & approve button', () => {
+      renderActions({ inlineActionType: 'reviewApprove', showMenuButton: false });
+
+      expect(
+        screen.queryByTestId('manageIntegrationReviewApproveInlineBtn')
+      ).not.toBeInTheDocument();
+    });
+
+    it('hides the inline Edit Integration button', () => {
+      renderActions({ inlineActionType: 'editIntegration', showMenuButton: false });
+
+      expect(screen.queryByRole('button', { name: 'Edit Integration' })).not.toBeInTheDocument();
+    });
+  });
+});
