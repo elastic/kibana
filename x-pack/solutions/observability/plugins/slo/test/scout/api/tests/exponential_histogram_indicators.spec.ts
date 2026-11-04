@@ -153,6 +153,7 @@ apiTest.describe(
   'SLOs on exponential_histogram fields',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {
+    const createdSloIds: string[] = [];
     let histogramSloId: string;
     let customMetricSloId: string;
     let timesliceMetricSloId: string;
@@ -191,13 +192,15 @@ apiTest.describe(
             responseType: 'json',
           });
           expect(createResponse).toHaveStatusCode(200);
-          return createResponse.body.id as string;
+          const sloId = createResponse.body.id as string;
+          createdSloIds.push(sloId);
+          return sloId;
         })
       );
     });
 
     apiTest.afterAll(async ({ apiServices, esClient }) => {
-      await apiServices.slo.deleteAllSLOs();
+      await Promise.all(createdSloIds.map((sloId) => apiServices.slo.delete(sloId)));
       await esClient.indices.delete({ index: SOURCE_INDEX, ignore_unavailable: true });
     });
 
