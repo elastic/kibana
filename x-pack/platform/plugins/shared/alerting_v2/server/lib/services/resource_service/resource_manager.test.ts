@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 
-import type { IRetryService, RetryOptions } from '../retry_service/alerting_retry_service';
+import type { IRetryService, RetryOptions } from '../retry_service/types';
 import { LoggerService } from '../logger_service/logger_service';
 import { ResourceManager } from './resource_manager';
 import type { IResourceInitializer } from './resource_manager';

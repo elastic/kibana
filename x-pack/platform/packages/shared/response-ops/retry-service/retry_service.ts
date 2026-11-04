@@ -5,63 +5,66 @@
  * 2.0.
  */
 
-import type { BackoffFactory, BackoffStrategy, RetryReporter } from './types';
+import type { BackoffFactory, RetryReporter } from './types';
 
+const noopReporter: RetryReporter = {
+  onAttempt: () => {},
+  onRetry: () => {},
+  onSettled: () => {},
+};
+
+const delay = (ms: number): Promise<void> =>
+  new Promise((resolve) => {
+    setTimeout(resolve, ms);
+  });
+
+/**
+ * Retries a callback on retryable errors with a backoff delay between attempts.
+ * Instances hold only the policy, so one instance can run any number of
+ * operations, including concurrently.
+ */
 export abstract class RetryService {
-  private readonly reporter: RetryReporter;
+  private readonly backOffFactory: BackoffFactory;
   private readonly maxAttempts: number;
-  private readonly backOffStrategy: BackoffStrategy;
 
-  private timer: NodeJS.Timeout | null = null;
-  private attempt: number = 0;
-
-  constructor(reporter: RetryReporter, backOffFactory: BackoffFactory, maxAttempts: number = 10) {
-    this.reporter = reporter;
-    this.backOffStrategy = backOffFactory.create();
+  constructor(backOffFactory: BackoffFactory, maxAttempts: number = 10) {
+    this.backOffFactory = backOffFactory;
     this.maxAttempts = maxAttempts;
   }
 
-  public async retryWithBackoff<T>(cb: () => Promise<T>): Promise<T> {
+  /**
+   * Runs `cb` until it resolves, throws a non-retryable error, or `maxAttempts`
+   * retries are exhausted. The optional `reporter` observes this run only.
+   */
+  public async retryWithBackoff<T>(
+    cb: () => Promise<T>,
+    reporter: RetryReporter = noopReporter
+  ): Promise<T> {
+    const backOffStrategy = this.backOffFactory.create();
+    let attempt = 0;
+
     try {
-      this.reporter.onAttempt(this.attempt);
+      while (true) {
+        try {
+          reporter.onAttempt(attempt);
 
-      return await cb();
-    } catch (error) {
-      if (this.shouldRetry() && this.isRetryableError(error)) {
-        this.stop();
-        this.attempt++;
+          return await cb();
+        } catch (error) {
+          if (attempt >= this.maxAttempts || !this.isRetryableError(error)) {
+            throw error;
+          }
 
-        await this.delay();
+          attempt++;
 
-        this.reporter.onRetry(error, this.attempt);
+          await delay(backOffStrategy.nextBackOff());
 
-        return this.retryWithBackoff(cb);
+          reporter.onRetry(error, attempt);
+        }
       }
-
-      throw error;
     } finally {
-      this.reporter.onSettled(this.attempt);
+      reporter.onSettled(attempt);
     }
-  }
-
-  private shouldRetry() {
-    return this.attempt < this.maxAttempts;
   }
 
   protected abstract isRetryableError(error: Error): boolean;
-
-  private async delay() {
-    const ms = this.backOffStrategy.nextBackOff();
-
-    return new Promise((resolve) => {
-      this.timer = setTimeout(resolve, ms);
-    });
-  }
-
-  private stop(): void {
-    if (this.timer !== null) {
-      clearTimeout(this.timer);
-      this.timer = null;
-    }
-  }
 }

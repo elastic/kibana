@@ -9,15 +9,15 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { createLoggerService } from '../logger_service/logger_service.mock';
-import { AlertingRetryService } from './alerting_retry_service';
 import { EsConcurrentModificationError } from './es_concurrent_modification_error';
+import { EsTransientRetryService } from './es_transient_retry_service';
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
-describe('AlertingRetryService', () => {
-  const service = new AlertingRetryService();
+describe('EsTransientRetryService', () => {
+  const service = new EsTransientRetryService();
 
   async function flushTimers(ms: number = 2_000) {
-    // baseDelay is 250ms and maxBackoffTime is 1000ms in AlertingRetryService, so 2000ms
+    // baseDelay is 250ms and maxBackoffTime is 1000ms in EsTransientRetryService, so 2000ms
     // is enough to cover a retry delay even with jitter.
     await jest.advanceTimersByTimeAsync(ms);
   }
@@ -150,6 +150,29 @@ describe('AlertingRetryService', () => {
         error: expect.objectContaining({ message: 'Request timed out', type: 'TimeoutError' }),
       }
     );
+  });
+
+  it('runs concurrent operations independently on one instance', async () => {
+    const { logger } = createLogger();
+
+    const err = new errors.ResponseError({ statusCode: 503 } as DiagnosticResult);
+    const failing = jest.fn<Promise<never>, []>().mockRejectedValue(err);
+    const succeeding = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(err)
+      .mockResolvedValueOnce('ok');
+
+    const promise = Promise.allSettled([
+      service.retry(failing, { logger }),
+      service.retry(succeeding, { logger }),
+    ]);
+    await flushTimers(6_000);
+    const [failed, succeeded] = await promise;
+
+    expect(failed).toEqual({ status: 'rejected', reason: err });
+    expect(succeeded).toEqual({ status: 'fulfilled', value: 'ok' });
+    expect(failing).toHaveBeenCalledTimes(4);
+    expect(succeeding).toHaveBeenCalledTimes(2);
   });
 
   it('does not retry non-transient ES errors (e.g. 500)', async () => {

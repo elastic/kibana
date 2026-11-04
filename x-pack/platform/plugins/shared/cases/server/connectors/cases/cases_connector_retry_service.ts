@@ -5,10 +5,12 @@
  * 2.0.
  */
 import type { Logger } from '@kbn/core/server';
-import type { BackoffFactory } from '@kbn/response-ops-retry-service';
+import type { BackoffFactory, RetryReporter } from '@kbn/response-ops-retry-service';
 import { RetryService, createLoggerRetryReporter } from '@kbn/response-ops-retry-service';
 
 import { CasesConnectorError } from './cases_connector_error';
+
+const SERVICE_NAME = 'CasesConnector';
 
 export class CasesConnectorRetryService extends RetryService {
   /**
@@ -20,12 +22,19 @@ export class CasesConnectorRetryService extends RetryService {
    */
   private readonly RETRY_ERROR_STATUS_CODES: number[] = [409, 429, 503];
 
+  private readonly reporter: RetryReporter;
+
   constructor(
     private readonly logger: Logger,
     backOffFactory: BackoffFactory,
     maxAttempts: number = 10
   ) {
-    super(createLoggerRetryReporter(logger, 'CasesConnector'), backOffFactory, maxAttempts);
+    super(backOffFactory, maxAttempts);
+    this.reporter = createLoggerRetryReporter(logger, SERVICE_NAME);
+  }
+
+  public retryWithBackoff<T>(cb: () => Promise<T>): Promise<T> {
+    return super.retryWithBackoff(cb, this.reporter);
   }
 
   protected isRetryableError(error: Error) {
@@ -36,7 +45,7 @@ export class CasesConnectorRetryService extends RetryService {
       return true;
     }
 
-    this.logger.debug(`[CasesConnector][isRetryableError] Error is not retryable`, {
+    this.logger.debug(`[${SERVICE_NAME}][isRetryableError] Error is not retryable`, {
       tags: ['case-connector:retry-error'],
     });
 

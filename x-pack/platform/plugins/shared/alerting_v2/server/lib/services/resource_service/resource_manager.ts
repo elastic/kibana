@@ -7,7 +7,7 @@
 
 import { inject, injectable } from 'inversify';
 
-import type { IRetryService } from '../retry_service/alerting_retry_service';
+import type { IRetryService } from '../retry_service/types';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { LoggerServiceToken } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';

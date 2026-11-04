@@ -9,18 +9,25 @@ import type { Logger } from '@kbn/core/server';
 import type { errors as EsErrors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
 
-import type { BackoffFactory } from '@kbn/response-ops-retry-service';
+import type { BackoffFactory, RetryReporter } from '@kbn/response-ops-retry-service';
 import { RetryService, createLoggerRetryReporter } from '@kbn/response-ops-retry-service';
 
 const SERVICE_NAME = 'CasesAnalytics';
 
 export class CasesAnalyticsRetryService extends RetryService {
+  private readonly reporter: RetryReporter;
+
   constructor(
     private readonly logger: Logger,
     backOffFactory: BackoffFactory,
     maxAttempts: number = 10
   ) {
-    super(createLoggerRetryReporter(logger, SERVICE_NAME), backOffFactory, maxAttempts);
+    super(backOffFactory, maxAttempts);
+    this.reporter = createLoggerRetryReporter(logger, SERVICE_NAME);
+  }
+
+  public retryWithBackoff<T>(cb: () => Promise<T>): Promise<T> {
+    return super.retryWithBackoff(cb, this.reporter);
   }
 
   protected isRetryableError(error: EsErrors.ElasticsearchClientError) {

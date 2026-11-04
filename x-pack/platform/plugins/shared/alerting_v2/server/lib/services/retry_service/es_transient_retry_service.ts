@@ -5,21 +5,24 @@
  * 2.0.
  */
 
-import type { BackoffFactory, RetryReporter } from '@kbn/response-ops-retry-service';
-import { RetryService } from '@kbn/response-ops-retry-service';
+import type { RetryReporter } from '@kbn/response-ops-retry-service';
+import { RetryService, fullJitterBackoffFactory } from '@kbn/response-ops-retry-service';
 import { errors } from '@elastic/elasticsearch';
 import { isRetryableEsClientError } from '@kbn/core-elasticsearch-server-utils';
+import { injectable } from 'inversify';
 import type { LoggerServiceContract } from '../logger_service/logger_service';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import { EsConcurrentModificationError } from './es_concurrent_modification_error';
 import { EsUnacknowledgedError } from './es_unacknowledged_error';
+import type { IRetryService, RetryOptions } from './types';
 
 const MAX_ATTEMPTS = 3;
 
-/**
- * Reports retries through the caller's subsystem logger, so the warning carries the
- * caller's `log.logger`, its bound labels, a catalog code and the ECS error.
- */
+const backOffFactory = fullJitterBackoffFactory({
+  baseDelay: 250,
+  maxBackoffTime: 1000,
+});
+
 const createAlertingRetryReporter = (logger: LoggerServiceContract): RetryReporter => ({
   onAttempt: () => {},
   onRetry: (error, attempt) => {
@@ -32,20 +35,42 @@ const createAlertingRetryReporter = (logger: LoggerServiceContract): RetryReport
   onSettled: () => {},
 });
 
+const toError = (e: unknown): Error => {
+  // Preserve Elasticsearch client errors and Error instances as-is.
+  if (e instanceof errors.ResponseError || e instanceof Error) {
+    return e;
+  }
+
+  return new Error(`Elasticsearch error: ${String(e)}`);
+};
+
 /**
- * Retry service that retries transient Elasticsearch errors: connection/timeout
- * failures, retryable response status codes, unacknowledged cluster-state mutations,
- * and resources modified concurrently by another node.
+ * Retries transient Elasticsearch errors: connection/timeout failures, retryable
+ * response status codes, unacknowledged cluster-state mutations, and resources
+ * modified concurrently by another node. Each retry is logged through the caller's
+ * logger so it carries the caller's `log.logger` and bound labels.
  */
-export class EsTransientRetryService extends RetryService {
-  constructor(logger: LoggerServiceContract, backOffFactory: BackoffFactory) {
-    super(createAlertingRetryReporter(logger), backOffFactory, MAX_ATTEMPTS);
+@injectable()
+export class EsTransientRetryService extends RetryService implements IRetryService {
+  constructor() {
+    super(backOffFactory, MAX_ATTEMPTS);
+  }
+
+  public retry<T>(callback: () => Promise<T>, { logger }: RetryOptions): Promise<T> {
+    return this.retryWithBackoff(async () => {
+      try {
+        return await callback();
+      } catch (e) {
+        throw toError(e);
+      }
+    }, createAlertingRetryReporter(logger));
   }
 
   protected isRetryableError(error: Error): boolean {
     if (error instanceof EsUnacknowledgedError || error instanceof EsConcurrentModificationError) {
       return true;
     }
+
     return error instanceof errors.ElasticsearchClientError && isRetryableEsClientError(error);
   }
 }
