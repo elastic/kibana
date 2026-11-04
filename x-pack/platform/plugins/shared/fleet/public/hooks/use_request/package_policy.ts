@@ -250,15 +250,16 @@ export function useUpgradePackagePoliciesMutation() {
   return useMutation<
     UpgradePackagePolicyDryRunResponse,
     RequestError,
-    { packagePolicyIds: string[] }
+    { packagePolicyIds: string[]; acknowledgeBreakingChanges?: boolean }
   >(
-    ({ packagePolicyIds }) =>
+    ({ packagePolicyIds, acknowledgeBreakingChanges }) =>
       sendRequestForRq<UpgradePackagePolicyDryRunResponse>({
         path: packagePolicyRouteService.getUpgradePath(),
         method: 'post',
         version: API_VERSIONS.public.v1,
         body: JSON.stringify({
           packagePolicyIds,
+          ...(acknowledgeBreakingChanges ? { acknowledge_breaking_changes: true } : {}),
         }),
       }),
     {

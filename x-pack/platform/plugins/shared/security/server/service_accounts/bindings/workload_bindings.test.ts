@@ -89,6 +89,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       getSummary: jest.fn(),
       createFakeRequest: jest.fn().mockResolvedValue(mintedRequest),
       reauthenticateFakeRequest: jest.fn(),
+      refreshFakeRequestBeforeUse: jest.fn(),
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn(),
       delete: jest.fn(),

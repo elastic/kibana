@@ -17,6 +17,29 @@ export function scheduleToMinutes(schedule: SyntheticsMonitorSchedule): number {
   return Math.floor(scheduleToMilli(schedule) / (60 * 1000));
 }
 
+export function scheduleToSeconds(schedule: SyntheticsMonitorSchedule): number {
+  return scheduleToMilli(schedule) / 1000;
+}
+
+export const SCHEDULE_INTERVAL_FIELD = 'schedule_interval_seconds';
+
+export const withScheduleInterval = <T extends object>(
+  attributes: T
+): T & { schedule_interval_seconds?: number } => {
+  const schedule = (attributes as { schedule?: SyntheticsMonitorSchedule }).schedule;
+  if (!schedule?.number) {
+    return attributes;
+  }
+  return {
+    ...attributes,
+    // A missing unit is minutes, same as the model version backfill.
+    [SCHEDULE_INTERVAL_FIELD]: scheduleToSeconds({
+      number: schedule.number,
+      unit: schedule.unit ?? ScheduleUnit.MINUTES,
+    }),
+  };
+};
+
 function getMilliFactorForScheduleUnit(scheduleUnit: ScheduleUnit): number {
   switch (scheduleUnit) {
     case ScheduleUnit.SECONDS:

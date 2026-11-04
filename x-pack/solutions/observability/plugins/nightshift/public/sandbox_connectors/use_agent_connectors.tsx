@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { AgentWithPermissions } from '@kbn/agent-builder-browser';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '@kbn/nightshift-investigations-plugin/common';
 import { isHttpClientError } from '../common/http_error';
 import { useKibana } from '../hooks/use_kibana';
-import { ConnectorLibraryFlyout } from './connector_library_flyout';
-import { ConnectorTypePickerFlyout } from './connector_type_picker_flyout';
 
 export const INVESTIGATION_AGENT_QUERY_KEY = ['nightshift.investigationAgent'] as const;
 
@@ -22,7 +20,7 @@ export const noAgentPermissionReason = i18n.translate(
   { defaultMessage: 'You need permission to edit the investigation agent.' }
 );
 
-interface ConnectorRef {
+export interface ConnectorRef {
   id: string;
   name: string;
 }
@@ -37,18 +35,13 @@ export function useAgentConnectors(): {
   refetch: () => void;
   canEditAgent: boolean;
   hasConnectorsAllPrivileges: boolean;
-  isUpdating: boolean;
+  updatingId: string | undefined;
   assign: (connector: ConnectorRef) => void;
   unassign: (connector: ConnectorRef) => void;
-  openLibrary: () => void;
-  openCreate: () => void;
-  flyouts: React.ReactNode;
 } {
   const { agentBuilder, application, notifications } = useKibana().services;
   const agents = agentBuilder?.agents;
   const queryClient = useQueryClient();
-  const [isLibraryOpen, setIsLibraryOpen] = useState(false);
-  const [isCreating, setIsCreating] = useState(false);
 
   // The agent exists once Nightshift is enabled in the space, the first onboarding step.
   const agent = useQuery<AgentWithPermissions, Error>({
@@ -119,21 +112,8 @@ export function useAgentConnectors(): {
     refetch: () => void agent.refetch(),
     canEditAgent,
     hasConnectorsAllPrivileges,
-    isUpdating: update.isLoading,
+    updatingId: update.isLoading ? update.variables?.connector.id : undefined,
     assign,
     unassign,
-    openLibrary: () => setIsLibraryOpen(true),
-    openCreate: () => setIsCreating(true),
-    flyouts: (
-      <>
-        {isLibraryOpen && <ConnectorLibraryFlyout onClose={() => setIsLibraryOpen(false)} />}
-        {isCreating && (
-          <ConnectorTypePickerFlyout
-            onClose={() => setIsCreating(false)}
-            onConnectorCreated={assign}
-          />
-        )}
-      </>
-    ),
   };
 }
