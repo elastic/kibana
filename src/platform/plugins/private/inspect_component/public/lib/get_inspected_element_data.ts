@@ -67,8 +67,8 @@ export const getInspectedElementData = async ({
     return null;
   }
 
-  const { element, fiber } = target;
-  const { columnNumber, lineNumber, fileName } = fiber._debugSource;
+  const { element, fiber, source } = target;
+  const { columnNumber, lineNumber, fileName } = source;
   const response = await fetchComponentData({ httpService, fileName });
 
   if (!response) {

@@ -10,6 +10,12 @@
 /** Prefix of the property under which React stores a DOM node's fiber. */
 export const FIBER_KEY_PREFIX = '__reactFiber$';
 
+/** `tag` of the topmost fiber of a tree, whose `stateNode` is the root. */
+export const HOST_ROOT_TAG = 3;
+
+/** `tag` of a root created with `ReactDOM.render`, `createRoot` ones have `1`. */
+export const LEGACY_ROOT_TAG = 0;
+
 export const EUI_COMPONENT_PREFIX = 'Eui';
 
 /**
