@@ -19,8 +19,8 @@ describe('getWritableMemoryAiIndex', () => {
   const coreStart = coreMock.createStart();
   const aiIndex = {
     id: 'support',
-    memory_enabled: true,
     dest: { type: 'index', value: 'ai-index-idx-support' },
+    dreaming: { enabled: false, facts: [{ type: 'preference' }] },
   } as AiIndexHttpItem;
 
   const run = () =>
@@ -41,7 +41,7 @@ describe('getWritableMemoryAiIndex', () => {
     get.mockResolvedValue(aiIndex);
   });
 
-  it('returns an AI index when global and per-index memory are enabled', async () => {
+  it('returns an AI index when global memory is on and its dreaming is set up, even paused', async () => {
     await expect(run()).resolves.toBe(aiIndex);
 
     expect(globalSettingsGet).toHaveBeenCalledWith(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID);
@@ -54,10 +54,13 @@ describe('getWritableMemoryAiIndex', () => {
     await expect(run()).rejects.toThrow('Context Engine memory is not enabled.');
   });
 
-  it('rejects writes when memory is disabled for the AI index', async () => {
-    get.mockResolvedValue({ ...aiIndex, memory_enabled: false });
+  it('rejects writes when dreaming is not set up for the AI index', async () => {
+    const { dreaming, ...withoutDreaming } = aiIndex;
+    get.mockResolvedValue(withoutDreaming);
 
-    await expect(run()).rejects.toThrow("AI index 'support' does not have memory enabled.");
+    await expect(run()).rejects.toThrow(
+      "AI index 'support' does not take memories: dreaming is not set up."
+    );
   });
 
   it('rejects index-pattern destinations', async () => {

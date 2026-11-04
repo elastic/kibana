@@ -22,4 +22,3 @@ export { KiValidationError } from './ki_validation_error';
 export { AiIndexQueryResponseTooLargeError } from './ai_index_query_response_too_large_error';
 export { AiIndexDescribeResponseTooLargeError } from './ai_index_describe_response_too_large_error';
 export { InvalidAiIndexQueryError } from './invalid_ai_index_query_error';
-export { InvalidDreamingConfigError } from './invalid_dreaming_config_error';

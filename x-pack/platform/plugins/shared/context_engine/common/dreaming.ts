@@ -110,6 +110,13 @@ export const dreamingTypesOf = ({
   };
 };
 
+/**
+ * Whether an AI index takes memories: its dreaming config is set up, on or off. `enabled` only
+ * decides whether dreaming runs on its schedule.
+ */
+export const isDreamingConfigured = (dreaming: AiIndexDreamingConfig | undefined): boolean =>
+  dreaming !== undefined && (dreaming.enabled || dreamingBuildsAnything(dreaming));
+
 /** Whether a config builds anything at all: at least one fact or entity type. */
 export const dreamingBuildsAnything = (
   config: Pick<AiIndexDreamingConfig, 'facts' | 'entities'>

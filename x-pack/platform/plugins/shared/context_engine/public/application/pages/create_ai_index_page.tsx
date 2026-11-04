@@ -23,7 +23,6 @@ import React, { useState } from 'react';
 import { DEFAULT_AI_INDEX_TYPE, MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_UI_EBT } from '../../../common/telemetry';
 import { AiIndexDescriptionField } from '../components/ai_index_description_field';
-import { MemorySettingsPanel } from '../components/memory_settings_panel';
 import { useContextEngineBreadcrumbs } from '../hooks/use_context_engine_breadcrumbs';
 import { useCreateAiIndex } from '../hooks/use_create_ai_index';
 import { useMemoryEnabled } from '../hooks/use_memory_enabled';
@@ -59,7 +58,6 @@ export const CreateAiIndexPage = () => {
   const isMemoryFeatureEnabled = useMemoryEnabled();
   const [id, setId] = useState('');
   const [description, setDescription] = useState('');
-  const [memoryEnabled, setMemoryEnabled] = useState(true);
   const backHref = createContextEngineUrl(CONTEXT_ENGINE_PATHS.landing);
 
   useContextEngineBreadcrumbs([{ text: createPageTitle }]);
@@ -72,15 +70,13 @@ export const CreateAiIndexPage = () => {
   });
 
   const createAndContinue = async () => {
-    const withMemory = isMemoryFeatureEnabled && memoryEnabled;
     const created = await createAiIndex({
       id,
       description,
-      memoryEnabled: isMemoryFeatureEnabled ? memoryEnabled : undefined,
       sources: [],
     });
-    // Dreaming needs memory, so only an AI index with memory gets to pick what it learns.
-    if (created && withMemory) {
+    // An AI index takes memories once dreaming is set up, which the global memory setting allows.
+    if (created && isMemoryFeatureEnabled) {
       navigateToContextEngine(getAiIndexDreamingTemplatePath(created.id));
     } else if (created) {
       navigateToContextEngine(
@@ -147,18 +143,6 @@ export const CreateAiIndexPage = () => {
             />
           </EuiFormRow>
         </EuiPanel>
-
-        {isMemoryFeatureEnabled && (
-          <>
-            <EuiSpacer size="l" />
-
-            <MemorySettingsPanel
-              checked={memoryEnabled}
-              onChange={({ target: { checked } }) => setMemoryEnabled(checked)}
-              toggleTestSubject="contextCreateAiIndexMemoryToggle"
-            />
-          </>
-        )}
 
         <EuiSpacer size="l" />
 
