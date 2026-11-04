@@ -1,0 +1,96 @@
+{
+  "summary": "Technical support. Content includes API docs, error guides, and integration help. The agent uses it to resolve errors, check compatibility and walk developers through migrations.",
+  "rationale": "Technical support turns on errors and the software around them. Tracking which SDK versions need which runtimes, which integrations raise which errors and which plan limits apply lets the agent diagnose a problem from the versions a developer is on.",
+  "dreaming": {
+    "instructions": "Record what users need to make an integration work: how each error is resolved, required configuration, which versions work together, how to migrate between versions, and the limits that apply. Keep exact error codes, header names, version numbers and limits.\n\nSkip:\n- Marketing language about product features.\n- Roadmap items or unreleased feature descriptions.\n- Internal implementation details not relevant to users.",
+    "facts": [
+      {
+        "type": "error_resolution",
+        "description": "How an error is fixed, such as \"error 429 fixed by adding exponential backoff\"."
+      },
+      {
+        "type": "configuration",
+        "description": "A setting or request detail something needs to work, such as \"webhook requires Content-Type: application/json header\"."
+      },
+      {
+        "type": "compatibility",
+        "description": "Which versions work together, such as \"SDK v3 requires Node 18+, breaks on Node 16\"."
+      },
+      {
+        "type": "migration_step",
+        "description": "A change needed to move between versions, such as \"v2 to v3 requires updating auth header from X-Token to Bearer\"."
+      },
+      {
+        "type": "rate_limit",
+        "description": "A limit on usage, such as \"free tier allows 100 requests per minute per API key\"."
+      }
+    ],
+    "entities": {
+      "nodes": [
+        {
+          "type": "error",
+          "description": "An error code or message users see.",
+          "attributes": [
+            "code",
+            "message"
+          ]
+        },
+        {
+          "type": "sdk",
+          "description": "A client library, by language and major version.",
+          "attributes": [
+            "language",
+            "version"
+          ]
+        },
+        {
+          "type": "runtime",
+          "description": "A runtime, language version or platform an SDK runs on, such as Node 18.",
+          "attributes": [
+            "version"
+          ]
+        },
+        {
+          "type": "integration",
+          "description": "A way of connecting to the product, such as webhooks, the REST API or an SDK."
+        },
+        {
+          "type": "plan",
+          "description": "A pricing tier with its own limits."
+        }
+      ],
+      "edges": [
+        {
+          "type": "raised_by",
+          "source": "error",
+          "target": "integration",
+          "description": "The integration returns this error."
+        },
+        {
+          "type": "requires",
+          "source": "sdk",
+          "target": "runtime",
+          "description": "The SDK needs this runtime or a later one."
+        },
+        {
+          "type": "incompatible_with",
+          "source": "sdk",
+          "target": "runtime",
+          "description": "The SDK breaks on this runtime."
+        },
+        {
+          "type": "supersedes",
+          "source": "sdk",
+          "target": "sdk",
+          "description": "The SDK version replaces an older one."
+        },
+        {
+          "type": "limited_by",
+          "source": "integration",
+          "target": "plan",
+          "description": "The plan sets the integration's limits."
+        }
+      ]
+    }
+  }
+}

@@ -19,6 +19,7 @@ import { CONTEXT_ENGINE_PATHS } from '../paths';
 import { MAX_AI_INDEX_DESCRIPTION_LENGTH } from '../../../common/constants';
 import { CONTEXT_ENGINE_BACK_BUTTON_TEST_SUBJ } from '../layout/context_engine_page_header';
 import { AI_INDEX_CREATED_LOCATION_STATE } from '../ai_index_created_location_state';
+import { useMemoryEnabled } from '../hooks/use_memory_enabled';
 import { CreateAiIndexPage } from './create_ai_index_page';
 
 jest.mock('../hooks/use_data_connectors', () => ({
@@ -29,6 +30,12 @@ jest.mock('../hooks/use_data_connectors', () => ({
     isLoading: false,
   }),
 }));
+
+jest.mock('../hooks/use_memory_enabled', () => ({
+  useMemoryEnabled: jest.fn(),
+}));
+
+const mockUseMemoryEnabled = jest.mocked(useMemoryEnabled);
 
 const renderWithProviders = (services: ReturnType<typeof coreMock.createStart>) => {
   const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
@@ -66,7 +73,9 @@ const typeDescription = (description: string) => {
 const VALID_ID = 'support-ticket-triage';
 
 describe('CreateAiIndexPage', () => {
-  beforeEach(() => {});
+  beforeEach(() => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+  });
 
   afterEach(() => {
     jest.clearAllMocks();
@@ -114,6 +123,22 @@ describe('CreateAiIndexPage', () => {
 
     typeId(VALID_ID);
     expect(screen.getByTestId('contextCreateAiIndexButton')).toBeEnabled();
+  });
+
+  it('continues to the dreaming setup after creating an AI index while memory is on', async () => {
+    mockUseMemoryEnabled.mockReturnValue(true);
+    const services = coreMock.createStart();
+    services.http.post.mockResolvedValue({});
+
+    renderWithProviders(services);
+    typeId(VALID_ID);
+    fireEvent.click(screen.getByTestId('contextCreateAiIndexButton'));
+
+    await waitFor(() => {
+      expect(services.application.navigateToApp).toHaveBeenCalledWith(CONTEXT_ENGINE_APP_ID, {
+        path: '/ai_index/support-ticket-triage/dreaming_template',
+      });
+    });
   });
 
   it('does not ask about memory: an AI index takes memories once dreaming is set up', () => {

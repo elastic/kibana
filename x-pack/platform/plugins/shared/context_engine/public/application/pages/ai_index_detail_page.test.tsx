@@ -40,6 +40,7 @@ const AI_INDEX_DETAIL_ROUTE_PATHS = [
   CONTEXT_ENGINE_PATHS.detail,
   CONTEXT_ENGINE_PATHS.detailSources,
   CONTEXT_ENGINE_PATHS.detailKnowledgeIndicators,
+  CONTEXT_ENGINE_PATHS.detailSettings,
 ] as const;
 
 jest.mock('@kbn/esql/public', () => ({
@@ -424,6 +425,37 @@ describe('AiIndexDetailPage', () => {
     expect(screen.getByTestId('contextSelectedSource-esql-0')).toHaveTextContent('FROM My view');
     expect(screen.getByTestId('contextSourceTypeBadge')).toHaveTextContent('ES|QL');
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.tabs)).toBeInTheDocument();
+  });
+
+  it('opens the dreaming settings from the Settings tab when memory is globally enabled', async () => {
+    const services = createServices();
+    services.http.get.mockResolvedValue({
+      ...aiIndex,
+      dreaming: { enabled: true, facts: [{ type: 'preference' }] },
+    });
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+    fireEvent.click(await screen.findByTestId('contextAiIndexDetailTab-settings'));
+
+    expect(await screen.findByTestId('contextAiIndexDreamingPanel')).toBeInTheDocument();
+    expect(screen.getByTestId('contextDreamingConfigFact-preference')).toBeInTheDocument();
+    expect(screen.getByTestId('contextAiIndexDetailTab-settings')).toHaveAttribute(
+      'aria-selected',
+      'true'
+    );
+  });
+
+  it('hides the Settings tab when memory is globally disabled', async () => {
+    mockUseMemoryEnabled.mockReturnValue(false);
+    const services = createServices();
+    services.http.get.mockResolvedValue(aiIndex);
+
+    renderWithProviders(services);
+    await waitForAiIndexDetailLoaded();
+
+    expect(screen.getByTestId('contextAiIndexDetailTab-overview')).toBeInTheDocument();
+    expect(screen.queryByTestId('contextAiIndexDetailTab-settings')).not.toBeInTheDocument();
   });
 
   it('renders a back button linking to the AI indexes landing page', async () => {
