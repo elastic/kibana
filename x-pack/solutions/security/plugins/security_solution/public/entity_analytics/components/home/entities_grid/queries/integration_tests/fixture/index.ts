@@ -25,14 +25,14 @@ import type { FixtureIndex } from './fixture_index';
  *
  * Resolved rows (main entities):
  *
- * | entity.id        | name     | risk         | criticality | records | alerts (open, 30d)    | anomalies | risk change |
- * |------------------|----------|--------------|-------------|---------|-----------------------|-----------|-------------|
- * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 3 (1 C, 2 H), last 3h | –         | +30         |
- * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h        | 1         | 0           |
- * | host:h3          | web-3    | –            | –           | 1       | 0                     | –         | –           |
- * | service:payments | payments | 20, Low      | –           | 1       | 0                     | –         | –           |
- * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h      | 2         | -10         |
- * | user:bob@okta    | bob      | –            | –           | 2       | 0                     | –         | –           |
+ * | entity.id        | name     | risk         | criticality | records | alerts (open, 30d)         | anomalies | risk change |
+ * |------------------|----------|--------------|-------------|---------|----------------------------|-----------|-------------|
+ * | host:h1          | web-1    | 90, Critical | high_impact | 3       | 4 (1 C, 2 H, 1 M), last 3h | –         | +30         |
+ * | host:h2          | web-2    | 50, Moderate | –           | 1       | 1 (L), last 1h             | 1         | 0           |
+ * | host:h3          | web-3    | –            | –           | 1       | 0                          | –         | –           |
+ * | service:payments | payments | 20, Low      | –           | 1       | 0                          | –         | –           |
+ * | user:alice@okta  | alice    | 70, High     | –           | 1       | 2 (2 M), last 2h           | 2         | -10         |
+ * | user:bob@okta    | bob      | –            | –           | 2       | 0                          | –         | –           |
  *
  * Aliases: host:h4 and host:h5 resolve to host:h1, user:carol@okta resolves to user:bob@okta.
  * Alerts are stamped with the entity id, except the one of host:h2, whose id comes from
