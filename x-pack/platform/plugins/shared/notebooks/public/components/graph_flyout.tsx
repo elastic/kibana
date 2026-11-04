@@ -6,7 +6,7 @@
  */
 
 import React, { Suspense } from 'react';
-import { EuiFlyoutHeader, EuiLoadingSpinner, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiLoadingSpinner } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { NotebookFlyout } from './notebook_flyout';
 
@@ -22,29 +22,21 @@ export const GraphFlyout = ({
 }: {
   onClose: () => void;
   onSelectCell: (cellId: string | undefined) => void;
-}) => {
-  const titleId = useGeneratedHtmlId({ prefix: 'notebookGraph' });
-  return (
-    <NotebookFlyout
-      type="push"
-      ownFocus={false}
-      paddingSize="none"
-      onClose={onClose}
-      aria-labelledby={titleId}
-      data-test-subj="notebookGraphFlyout"
-    >
-      <EuiFlyoutHeader hasBorder>
-        <EuiTitle size="s">
-          <h2 id={titleId}>
-            {i18n.translate('xpack.notebook.graph.title', { defaultMessage: 'Dependency graph' })}
-          </h2>
-        </EuiTitle>
-      </EuiFlyoutHeader>
-      <div css={{ flex: 1, minHeight: 0 }}>
-        <Suspense fallback={<EuiLoadingSpinner />}>
-          <LazyDependencyGraph onSelectCell={onSelectCell} />
-        </Suspense>
-      </div>
-    </NotebookFlyout>
-  );
-};
+}) => (
+  <NotebookFlyout
+    type="push"
+    ownFocus={false}
+    paddingSize="none"
+    onClose={onClose}
+    aria-label={i18n.translate('xpack.notebook.graph.ariaLabel', {
+      defaultMessage: 'Dependency graph',
+    })}
+    data-test-subj="notebookGraphFlyout"
+  >
+    <div css={{ flex: 1, minHeight: 0 }}>
+      <Suspense fallback={<EuiLoadingSpinner />}>
+        <LazyDependencyGraph onSelectCell={onSelectCell} />
+      </Suspense>
+    </div>
+  </NotebookFlyout>
+);
