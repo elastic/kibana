@@ -56,6 +56,20 @@ tags: "${{ inputs.tags }}"  # ✅ Works
 items: "${{ inputs.items | slice: 0, 2 }}"  # ✅ Works with filters
 ```
 
+#### Expressions in provided input values
+
+A caller can pass a `${{ }}` string as an input value when it starts a run. The engine evaluates that value only when a person or API caller started the run directly (`triggeredBy: manual`). Every other source keeps the value as a literal string. This includes child runs (`workflow-step`), scheduled runs, alerts, event triggers, HITL, workflow pages (`page`), and plugin callers. A `page` visitor is anonymous, and an expression can read `consts` and the rest of the render context.
+
+The rule applies only to values the caller provides. Expressions that the workflow author writes still render:
+
+- Input `default` values render for every run.
+- A parent renders the `with.inputs` of a `workflow.execute` or `workflow.executeAsync` step before the child run starts. The child gets the rendered values.
+
+| `triggeredBy` | Provided `"${{ consts.token }}"` becomes |
+|---------------|-----------------------------------------|
+| `manual` | The value of `consts.token` |
+| Any other value | The literal string `"${{ consts.token }}"` |
+
 ### Liquid Tags (`{% %}`)
 
 Control flow and logic. Common tags: `{% if %}`, `{% for %}`, `{% assign %}`, `{% case %}`.

@@ -41,6 +41,13 @@ const WELL_KNOWN_SET: ReadonlySet<string> = new Set<WellKnownWorkflowTriggerSour
 ]);
 
 /**
+ * True when the engine evaluates a provided `${{ }}` input value as an expression: only for a run
+ * a person or API caller started directly. Any other source may pass data it does not control.
+ */
+export const evaluatesProvidedInputExpressions = (triggeredBy: string | undefined): boolean =>
+  triggeredBy === 'manual';
+
+/**
  * Execution fields used to classify event-driven runs. Callers may pass a full
  * execution document or a subset (`triggeredBy` + `context`).
  */
