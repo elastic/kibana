@@ -12,9 +12,16 @@ import type { Serializable, SyntheticsMonitorDocument } from '@kbn/synthtrace-cl
 import { timerange } from '@kbn/synthtrace-client';
 import type { ScenarioInitOptions } from '../../cli/scenario';
 import type { SynthtraceClients } from '../../cli/utils/clients_manager';
+import { getServiceUrls } from '../../cli/utils/get_service_urls';
 import { KibanaClient } from '../../lib/shared/base_kibana_client';
+import { discoverPrivateLocation } from '../../lib/synthetics/synthetics_private_locations_api';
 import scenario from '../synthetics_overview';
 import { SYNTHETICS_OVERVIEW_TAG, getOverviewMonitors } from './synthetics_overview';
+
+jest.mock('../../cli/utils/get_service_urls', () => ({ getServiceUrls: jest.fn() }));
+jest.mock('../../lib/synthetics/synthetics_private_locations_api', () => ({
+  discoverPrivateLocation: jest.fn(),
+}));
 
 const LOCATION = { id: 'location-id', label: 'Location label' };
 const FROM = new Date('2026-01-01T00:00:00.000Z').getTime();
@@ -26,8 +33,10 @@ const scenarioOpts = {
   monitors: 4,
 };
 
+const logger = { info: jest.fn() };
+
 const init = (opts: Record<string, unknown> = scenarioOpts) =>
-  scenario({ scenarioOpts: opts, from: FROM, to: TO } as ScenarioInitOptions);
+  scenario({ scenarioOpts: opts, from: FROM, to: TO, logger } as unknown as ScenarioInitOptions);
 
 const clients = { syntheticsEsClient: {} } as SynthtraceClients;
 
@@ -54,8 +63,61 @@ const createKibanaClient = () => {
 };
 
 describe('synthetics_overview scenario', () => {
-  it('requires a private location', async () => {
-    await expect(init({})).rejects.toThrow('privateLocationId');
+  describe('private location', () => {
+    beforeEach(() => {
+      jest.mocked(getServiceUrls).mockReset();
+      jest.mocked(discoverPrivateLocation).mockReset();
+      jest.mocked(getServiceUrls).mockResolvedValue({
+        kibanaUrl: 'http://localhost:5601',
+        username: 'elastic',
+        password: 'changeme',
+      } as never);
+      jest.mocked(discoverPrivateLocation).mockResolvedValue(LOCATION);
+    });
+
+    const locationOfFirstCheck = async (opts: Record<string, unknown>) => {
+      const { generate } = await init(opts);
+      const output = generate({ range: timerange(FROM, FROM + 60 * 1000), clients });
+      const { generator } = Array.isArray(output) ? output[0] : output;
+      const [first] = Array.isArray(generator) ? generator : [generator];
+      const [event] = Array.from(first as Iterable<Serializable<SyntheticsMonitorDocument>>);
+
+      return event.serialize()[0]['observer.name'];
+    };
+
+    it('does not look for it when the options name one', async () => {
+      await init();
+
+      expect(discoverPrivateLocation).not.toHaveBeenCalled();
+    });
+
+    it('uses the only private location of the space when the options do not name one', async () => {
+      await expect(locationOfFirstCheck({ monitors: 4 })).resolves.toBe(LOCATION.id);
+
+      expect(discoverPrivateLocation).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'default' })
+      );
+    });
+
+    it('looks in the space of the scenario', async () => {
+      await init({ monitors: 4, spaceId: 'team-a' });
+
+      expect(discoverPrivateLocation).toHaveBeenCalledWith(
+        expect.objectContaining({ spaceId: 'team-a' })
+      );
+    });
+
+    it('fails with the reason when it cannot find one', async () => {
+      jest
+        .mocked(discoverPrivateLocation)
+        .mockRejectedValue(new Error('No private location found'));
+
+      await expect(init({ monitors: 4 })).rejects.toThrow('No private location found');
+    });
+
+    it('rejects a location id without a label', async () => {
+      await expect(init({ privateLocationId: 'id' })).rejects.toThrow('privateLocationLabel');
+    });
   });
 
   describe('generate', () => {
@@ -137,19 +199,33 @@ describe('synthetics_overview scenario', () => {
         expect(body.tags).toContain(SYNTHETICS_OVERVIEW_TAG);
       }
     });
+
+    it('logs how many monitors it created', async () => {
+      logger.info.mockClear();
+      const { bootstrap } = await init();
+
+      await bootstrap?.(clients, createKibanaClient().kibanaClient, {} as Client);
+
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Created 4 monitors'));
+    });
   });
 
   describe('teardown', () => {
-    it('keeps the monitors by default', async () => {
+    beforeEach(() => {
+      logger.info.mockClear();
+    });
+
+    it('keeps the monitors by default, and says so', async () => {
       const { teardown } = await init();
       const { kibanaClient, fetch } = createKibanaClient();
 
       await teardown?.(clients, kibanaClient, {} as Client);
 
       expect(fetch).not.toHaveBeenCalled();
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Leaving the monitors'));
     });
 
-    it('deletes the monitors when deleteMonitorsOnExit is set', async () => {
+    it('deletes the monitors when deleteMonitorsOnExit is set, and logs how many', async () => {
       const { teardown } = await init({ ...scenarioOpts, deleteMonitorsOnExit: true });
       const { kibanaClient, fetch } = createKibanaClient();
 
@@ -157,6 +233,7 @@ describe('synthetics_overview scenario', () => {
 
       expect(fetch).toHaveBeenCalledTimes(1);
       expect(String(fetch.mock.calls[0][0])).toContain(`tags=${SYNTHETICS_OVERVIEW_TAG}`);
+      expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('Deleted 0 monitors'));
     });
   });
 });

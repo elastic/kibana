@@ -62,7 +62,8 @@ export interface PrivateLocation {
 }
 
 export interface SyntheticsOverviewOpts {
-  privateLocation: PrivateLocation;
+  /** Undefined when the options do not name one: the scenario then looks for it in Kibana. */
+  privateLocation?: PrivateLocation;
   monitors: number;
   seed: string;
   spaceId: string;
@@ -74,11 +75,11 @@ export const parseSyntheticsOverviewOpts = (
 ): SyntheticsOverviewOpts => {
   const id = getStringOpt(scenarioOpts, 'privateLocationId');
   const label = getStringOpt(scenarioOpts, 'privateLocationLabel');
-  if (!id || !label) {
+  if (Boolean(id) !== Boolean(label)) {
     throw new Error(
-      'synthetics_overview needs --scenarioOpts.privateLocationId and --scenarioOpts.privateLocationLabel. ' +
-        'List your private locations with GET <kibana>/api/synthetics/private_locations, ' +
-        'or create one first (for example with `run-data synthetics`).'
+      'synthetics_overview needs both --scenarioOpts.privateLocationId and ' +
+        '--scenarioOpts.privateLocationLabel, or neither: without them, it uses the only private ' +
+        'location of the Kibana space.'
     );
   }
 
@@ -88,7 +89,7 @@ export const parseSyntheticsOverviewOpts = (
   }
 
   return {
-    privateLocation: { id, label },
+    privateLocation: id && label ? { id, label } : undefined,
     monitors,
     seed: getStringOpt(scenarioOpts, 'seed') ?? DEFAULT_SEED,
     spaceId: getStringOpt(scenarioOpts, 'spaceId') ?? DEFAULT_SPACE_ID,
@@ -118,7 +119,10 @@ const getTarget = (type: SyntheticsMonitorConfigType, number: number): string | 
 export const getOverviewMonitors = ({
   monitors,
   privateLocation,
-}: Pick<SyntheticsOverviewOpts, 'monitors' | 'privateLocation'>): OverviewMonitor[] =>
+}: {
+  monitors: number;
+  privateLocation: PrivateLocation;
+}): OverviewMonitor[] =>
   Array.from({ length: monitors }, (_, index) => {
     const type = MONITOR_TYPES[index % MONITOR_TYPES.length];
     const number = index + 1;

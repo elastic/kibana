@@ -195,31 +195,66 @@ describe('createCheckTimeline', () => {
 
 describe('getCheckTimestamp', () => {
   const SCHEDULE = 3;
-  const check = (rangeFrom: number, rangeTo: number, timestamp = rangeFrom) =>
-    getCheckTimestamp({ timestamp, rangeFrom, rangeTo, from: FROM, scheduleMinutes: SCHEDULE });
+  const INTERVAL = SCHEDULE * MINUTE;
 
-  it('keeps every timestamp of a range as long as the schedule or longer', () => {
-    expect(check(FROM, FROM + 60 * MINUTE, FROM + 9 * MINUTE)).toBe(FROM + 9 * MINUTE);
-    expect(check(FROM, FROM + 3 * MINUTE, FROM)).toBe(FROM);
+  /**
+   * The checks that a range generates: a range gets one timestamp per schedule interval, from
+   * its start, as `range.interval()` does, and each gets the schedule point of its position.
+   */
+  const checksOfRange = (rangeFrom: number, rangeTo: number): number[] => {
+    const timestamps = Math.ceil((rangeTo - rangeFrom) / INTERVAL);
+
+    return Array.from({ length: timestamps }, (_, index) =>
+      getCheckTimestamp({
+        index,
+        rangeFrom,
+        rangeTo,
+        from: FROM,
+        scheduleMinutes: SCHEDULE,
+      })
+    ).filter((timestamp): timestamp is number => timestamp !== undefined);
+  };
+
+  const schedulePoints = (count: number) =>
+    Array.from({ length: count }, (_, index) => FROM + index * INTERVAL);
+
+  it('generates the schedule points of a range that starts on the schedule', () => {
+    expect(checksOfRange(FROM, FROM + 12 * MINUTE)).toEqual(schedulePoints(4));
+  });
+
+  it('generates the schedule points of a range that does not start on the schedule', () => {
+    // The range starts 1 minute after a schedule point: its first check is the next one.
+    expect(checksOfRange(FROM + 4 * MINUTE, FROM + 13 * MINUTE)).toEqual([6, 9, 12].map(toMs));
+  });
+
+  it('puts no check off the schedule or twice, however the run is split between workers', () => {
+    const to = FROM + 24 * 60 * MINUTE;
+
+    for (const workers of [1, 2, 3, 7, 9, 10, 11]) {
+      const span = (to - FROM) / workers;
+      const checks = Array.from({ length: workers }, (_, worker) =>
+        checksOfRange(Math.round(FROM + worker * span), Math.round(FROM + (worker + 1) * span))
+      ).flat();
+
+      expect(checks).toEqual(schedulePoints(480));
+    }
   });
 
   it('generates one check per schedule interval from 1 s live buckets', () => {
-    const second = 1000;
-    const timestamps: number[] = [];
+    const checks: number[] = [];
 
-    for (let start = FROM; start < FROM + 10 * MINUTE; start += second) {
-      const timestamp = check(start, start + second);
-      if (timestamp !== undefined) {
-        timestamps.push(timestamp);
-      }
+    for (let start = FROM; start < FROM + 10 * MINUTE; start += 1000) {
+      checks.push(...checksOfRange(start, start + 1000));
     }
 
-    expect(timestamps).toEqual([0, 3, 6, 9].map((minutes) => FROM + minutes * MINUTE));
+    expect(checks).toEqual(schedulePoints(4));
   });
 
   it('finds the schedule point inside a longer live bucket, after a delay', () => {
-    expect(check(FROM + 2 * MINUTE + 50_000, FROM + 3 * MINUTE + 10_000)).toBe(FROM + 3 * MINUTE);
-    expect(check(FROM + 3 * MINUTE + 1000, FROM + 3 * MINUTE + 6000)).toBeUndefined();
+    expect(checksOfRange(FROM + 2 * MINUTE + 50_000, FROM + 3 * MINUTE + 10_000)).toEqual([
+      FROM + 3 * MINUTE,
+    ]);
+    expect(checksOfRange(FROM + 3 * MINUTE + 1000, FROM + 3 * MINUTE + 6000)).toEqual([]);
   });
 });
 
