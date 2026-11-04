@@ -82,6 +82,8 @@ export interface DroppedPanel {
   sectionId?: string;
   title?: string;
   hideTitle?: boolean;
+  /** The content of a legacy Markdown visualization stored inside the dashboard. */
+  markdown?: string;
   /** The saved object a by-reference panel shows. */
   savedObject?: { type: string; id: string };
 }
