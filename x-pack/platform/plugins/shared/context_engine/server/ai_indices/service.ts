@@ -74,6 +74,12 @@ const mergeManagedAiIndex = (
   dest: registration.dest,
 });
 
+/** Properties without the ones the service accepts and ignores. */
+const withoutIgnoredProperties = ({
+  memory_enabled: _memoryEnabled,
+  ...properties
+}: AiIndexProperties): AiIndexProperties => properties;
+
 const ADD_AUTOMATION_CONFLICT_RETRIES = 2;
 
 export interface AiIndexManagedBootstrap {
@@ -151,7 +157,7 @@ export class AiIndexService {
     await this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
       undefined
     );
   }
@@ -177,7 +183,7 @@ export class AiIndexService {
     return this.writeDocument(
       aiIndexId,
       spaceId,
-      { ...properties, id: aiIndexId, space: spaceId, managed: false },
+      { ...withoutIgnoredProperties(properties), id: aiIndexId, space: spaceId, managed: false },
       existing
     );
   }
@@ -205,7 +211,7 @@ export class AiIndexService {
       aiIndexId,
       spaceId,
       {
-        ...properties,
+        ...withoutIgnoredProperties(properties),
         id: aiIndexId,
         space: spaceId,
         managed: true,

@@ -18,12 +18,14 @@ describe('registerInvestigationsAiIndex', () => {
       'security-investigations',
       expect.objectContaining({
         dest: { type: 'index', value: 'ai-index-idx-security-investigations' },
+        memory_enabled: false,
       })
     );
     expect(registerAiIndex).toHaveBeenCalledWith(
       'security-attack-fingerprints',
       expect.objectContaining({
         dest: { type: 'index', value: 'ai-index-idx-security-attack-fingerprints' },
+        memory_enabled: false,
       })
     );
   });
