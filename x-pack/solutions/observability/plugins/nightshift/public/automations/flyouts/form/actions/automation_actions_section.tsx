@@ -28,7 +28,7 @@ import { i18n } from '@kbn/i18n';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
-} from '../../../../settings/components/apps_section/use_relay_app_bindings';
+} from '../../../../data/relay_apps/use_relay_app_bindings';
 import type { SlackActionFormValues, SlackTarget } from '../automation_form_values';
 import { SectionHeader } from '../section_header';
 import { SlackChannelComboBox } from '../slack_channel_combo_box';

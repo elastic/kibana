@@ -20,7 +20,7 @@ jest.mock('../data/investigations/use_start_investigation', () => ({
 jest.mock('./use_onboarding', () => ({
   useStartOnboardingSuggestions: () => ({ mutate: mockRetry, isLoading: false }),
 }));
-jest.mock('../sandbox_connectors/connect_sources_grid', () => ({
+jest.mock('../components/entities/sandbox_connector/connect_sources_grid', () => ({
   ConnectSourcesGrid: ({ group }: { group: string }) => <div data-test-subj={`grid-${group}`} />,
 }));
 

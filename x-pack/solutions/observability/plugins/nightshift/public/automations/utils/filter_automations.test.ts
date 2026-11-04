@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 import {
   countFilterValues,
   EMPTY_FILTERS,

@@ -9,12 +9,12 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { CreateAutomationFlyout } from './create_automation_flyout';
-import { useCreateAutomation } from '../../hooks/use_automations';
+import { useCreateAutomation } from '../../../data/automations/use_automations';
 
-jest.mock('../../hooks/use_automations', () => ({ useCreateAutomation: jest.fn() }));
+jest.mock('../../../data/automations/use_automations', () => ({ useCreateAutomation: jest.fn() }));
 jest.mock('../../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
-jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [{ channel: 'C2', displayName: 'oncall', status: 'bound_to_self' }],
     isLoading: false,

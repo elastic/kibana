@@ -15,19 +15,19 @@ import {
   useAutomationRunsInRange,
   useToggleAutomation,
   useUpdateAutomation,
-} from '../hooks/use_automations';
+} from '../../data/automations/use_automations';
 import { useKibana } from '../../hooks/use_kibana';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 
-jest.mock('../hooks/use_automations', () => ({
+jest.mock('../../data/automations/use_automations', () => ({
   useAutomationRunsInRange: jest.fn(),
   useToggleAutomation: jest.fn(),
   useUpdateAutomation: jest.fn(),
 }));
 jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 jest.mock('../../data/rules/use_rule_catalog', () => ({ useRuleCatalog: () => ({ data: [] }) }));
-jest.mock('../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [],
     isLoading: false,

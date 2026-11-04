@@ -17,7 +17,7 @@ import { RunLimitsSection } from './components/run_limits_section';
 import { SettingsSaveBar } from './components/settings_save_bar';
 import { SettingsSection, SettingsSectionRow } from './components/settings_section';
 import { useRunLimitsForm } from './components/use_run_limits_form';
-import { SandboxAllowlistSection } from '../sandbox_allowlist/sandbox_allowlist_section';
+import { SandboxAllowlistSection } from './components/sandbox_allowlist/sandbox_allowlist_section';
 
 const INVESTIGATION_RUN_LIMIT_GROUPS = ['investigation'] as const;
 

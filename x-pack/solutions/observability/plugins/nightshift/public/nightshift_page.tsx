@@ -40,7 +40,7 @@ import { SettingsPage } from './settings/page';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from './service_account/use_investigator_service_account';
+} from './data/service_accounts/use_investigator_service_account';
 import { DETECTION_TAB_IDS, isDetectionTabId } from './pages/detection/detection_tabs';
 import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
 

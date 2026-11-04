@@ -7,7 +7,7 @@
 
 import { useMemo } from 'react';
 import datemath from '@elastic/datemath';
-import { useAutomationsRunsInRange, type Automation } from './use_automations';
+import { useAutomationsRunsInRange, type Automation } from '../../data/automations/use_automations';
 
 export interface TimeRange {
   start: string;

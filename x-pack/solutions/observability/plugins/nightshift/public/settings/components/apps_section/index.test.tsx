@@ -10,12 +10,16 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
+import {
+  useRelayAppBindings,
+  useBindChannel,
+  useUnbindChannel,
+} from '../../../data/relay_apps/use_relay_app_bindings';
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('./use_relay_app_bindings', () => ({
-  ...jest.requireActual('./use_relay_app_bindings'),
+jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
   useRelayAppBindings: jest.fn(),
   useBindChannel: jest.fn(),
   useUnbindChannel: jest.fn(),

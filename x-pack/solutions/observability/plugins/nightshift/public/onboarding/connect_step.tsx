@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import { ConnectSourcesGrid } from '../sandbox_connectors/connect_sources_grid';
-import { AddDataCard } from '../sandbox_connectors/add_data_card';
+import { ConnectSourcesGrid } from '../components/entities/sandbox_connector/connect_sources_grid';
+import { AddDataCard } from '../components/entities/sandbox_connector/add_data_card';
 
 export type ConnectSubStep = 'telemetry' | 'additional';
 

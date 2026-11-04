@@ -14,8 +14,8 @@ jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: { getUrlForApp: () => '' } } }),
 }));
 
-jest.mock('../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [
       { channel: 'C1', displayName: 'alerts', visibility: 'public', status: 'bound_to_self' },

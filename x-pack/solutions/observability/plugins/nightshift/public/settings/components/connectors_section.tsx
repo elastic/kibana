@@ -11,9 +11,9 @@ import { i18n } from '@kbn/i18n';
 import {
   ManageConnectorsLink,
   SandboxConnectorsTable,
-} from '../../sandbox_connectors/sandbox_connectors';
-import { useAgentConnectors } from '../../sandbox_connectors/use_agent_connectors';
-import { AddConnectorFlyout } from '../../sandbox_connectors/add_connector_flyout';
+} from '../../components/entities/sandbox_connector/sandbox_connectors';
+import { useAgentConnectors } from '../../data/sandbox_connectors/use_agent_connectors';
+import { AddConnectorFlyout } from '../../components/entities/sandbox_connector/add_connector_flyout';
 import { SettingsSection } from './settings_section';
 
 export function ConnectorsSection(): React.ReactElement {

@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { isRunQuotaReached, type RunQuotasResponse } from '@kbn/significant-events-plugin/common';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 import { getTriggerDisplay } from './trigger_display';
 
 export const statusLabels = {

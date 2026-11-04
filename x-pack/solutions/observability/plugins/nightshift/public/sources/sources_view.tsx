@@ -30,7 +30,10 @@ import { useKiGeneration } from './onboarding/ki_generation_context';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { GenerateSplitButton } from './onboarding/generate_split_button';
 import { getGenerateDisabledTooltip } from './onboarding/translations';
-import { ConfirmSourceActionModal, type SourceAction } from './confirm_source_action_modal';
+import {
+  ConfirmSourceActionModal,
+  type SourceAction,
+} from '../components/entities/source/confirm_source_action_modal';
 import { SourcesTable } from './sources_table';
 import { isOnboardingInProgress } from './utils';
 import {
@@ -49,11 +52,13 @@ import {
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
   RecommendedSourcesTable,
   type RecommendedSourcesCreationState,
-} from './recommended_sources/recommended_sources_table';
-import { ADD_RECOMMENDED_SOURCES_TITLE } from './recommended_sources/translations';
+} from '../components/entities/source/recommended_sources/recommended_sources_table';
+import { ADD_RECOMMENDED_SOURCES_TITLE } from '../components/entities/source/recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
-  import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
+  import('../components/entities/source/source_flyout/source_flyout').then(
+    ({ SourceFlyout: Flyout }) => ({ default: Flyout })
+  )
 );
 
 /** Source catalog with bulk onboarding controls and a routed create/edit flyout. */

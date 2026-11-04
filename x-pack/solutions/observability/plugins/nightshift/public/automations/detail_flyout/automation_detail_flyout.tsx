@@ -58,7 +58,7 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
   type Automation,
-} from '../hooks/use_automations';
+} from '../../data/automations/use_automations';
 import { getDailyUsageTone } from '../utils/daily_usage';
 import { statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';

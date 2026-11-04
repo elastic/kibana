@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RecommendedSourcesCreationState } from './recommended_sources/recommended_sources_table';
+import type { RecommendedSourcesCreationState } from '../components/entities/source/recommended_sources/recommended_sources_table';
 import { SourcesView } from './sources_view';
 
 const createSource = (id: string): NightshiftSource => ({
@@ -93,7 +93,7 @@ jest.mock('./find_significant_events_button', () => ({
   ),
 }));
 let mockRecommendedSourcesTableMountCount = 0;
-jest.mock('./recommended_sources/recommended_sources_table', () => ({
+jest.mock('../components/entities/source/recommended_sources/recommended_sources_table', () => ({
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
     isCreating: false,
     hasCreatedSources: false,
@@ -168,7 +168,7 @@ jest.mock('./sources_table', () => ({
     </>
   ),
 }));
-jest.mock('./source_flyout/source_flyout', () => ({
+jest.mock('../components/entities/source/source_flyout/source_flyout', () => ({
   SourceFlyout: ({
     source,
     readOnly,
