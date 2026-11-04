@@ -68,7 +68,7 @@ const getTopologyRoute = createServerRoute({
   },
 });
 
-const featureUuidSchema = z.string().min(1).max(MAX_ID_LENGTH);
+const featureUuidSchema = lazySchema(() => z.string().min(1).max(MAX_ID_LENGTH));
 
 const getTopologyFeaturesRoute = createServerRoute({
   endpoint: 'GET /internal/nightshift/topology/features',
