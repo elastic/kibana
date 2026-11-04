@@ -148,7 +148,7 @@ describe('ensureLocalElasticsearchConnector', () => {
       action: {
         actionTypeId: '.elasticsearch',
         name: 'Local Elasticsearch',
-        config: { url: URL },
+        config: { url: URL, selectedActions: ['_test'] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5jb2RlZA==' },
       },
     });

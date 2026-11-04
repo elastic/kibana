@@ -135,7 +135,7 @@ describe('createOnboardingClient', () => {
     expect(actionsClient.create).toHaveBeenCalledWith({
       action: expect.objectContaining({
         actionTypeId: '.elasticsearch',
-        config: { url: ES_URL },
+        config: { url: ES_URL, selectedActions: ['_test'] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5j' },
       }),
     });

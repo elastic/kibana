@@ -125,7 +125,7 @@ export const ensureLocalElasticsearchConnector = async ({
       action: {
         actionTypeId: LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID,
         name: LOCAL_ELASTICSEARCH_CONNECTOR_NAME,
-        config: { url },
+        config: { url, selectedActions: ['_test'] },
         secrets: { authType: 'api_key_header', Authorization: `ApiKey ${apiKey.encoded}` },
       },
     });
