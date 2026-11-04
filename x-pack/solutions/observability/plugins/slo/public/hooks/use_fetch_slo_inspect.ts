@@ -9,12 +9,13 @@ import type { CreateSLOInput } from '@kbn/slo-schema';
 import { useQuery } from '@kbn/react-query';
 import { usePluginContext } from './use_plugin_context';
 
-export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) {
+export function useFetchSloInspect(slo: CreateSLOInput | undefined, shouldInspect: boolean) {
   const { sloClient } = usePluginContext();
 
   const { isLoading, isError, isSuccess, data } = useQuery({
-    queryKey: ['slo', 'inspect'],
+    queryKey: ['slo', 'inspect', slo],
     queryFn: async ({ signal }) => {
+      if (!slo) return;
       try {
         return await sloClient.fetch('POST /internal/observability/slos/_inspect', {
           params: { body: slo },
@@ -24,9 +25,8 @@ export function useFetchSloInspect(slo: CreateSLOInput, shouldInspect: boolean) 
         // ignore error
       }
     },
-    enabled: shouldInspect,
+    enabled: shouldInspect && slo !== undefined,
     refetchOnWindowFocus: false,
-    keepPreviousData: true,
   });
 
   return {
