@@ -76,12 +76,18 @@ export const writeConnectorManifest = async ({
 
   logger.debug(`Writing connector manifest (${connectors.length} connector(s))`);
 
-  await session.mkdirs([CONNECTOR_DOCS_ROOT]);
-  await session.writeFiles([
+  const files = [
     { path: CONNECTOR_MANIFEST_PATH, content: Buffer.from(content, 'utf8') },
     ...CONNECTOR_DOCS.map(({ path, content: doc }) => ({
       path,
       content: Buffer.from(doc, 'utf8'),
     })),
-  ]);
+  ];
+  await session.mkdirs([CONNECTOR_DOCS_ROOT]);
+  const results = await session.writeFiles(files);
+  // A failed overwrite can leave a stale file that the workspace cache would take as ready.
+  const failedPaths = files.filter((_, index) => !results[index]?.success).map(({ path }) => path);
+  if (failedPaths.length > 0) {
+    throw new Error(`Failed to write sandbox connector guidance: ${failedPaths.join(', ')}`);
+  }
 };
