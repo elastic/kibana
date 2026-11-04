@@ -6,6 +6,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
+import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { applyLimit } from './apply_limit';
 
 export interface EsqlPreview {
@@ -21,15 +22,17 @@ const zipRows = (
     Object.fromEntries(columns.map((column, index) => [column.name, row[index]]))
   );
 
-/** Row count and a capped sample of a query's results, for grounding a model without running it itself. */
+/** Row count and a capped sample of a query's results, restricted to what `spaceId` can see. */
 export const previewEsqlQuery = async (
   esClient: ElasticsearchClient,
   query: string,
-  sampleSize: number
+  sampleSize: number,
+  spaceId: string
 ): Promise<EsqlPreview> => {
+  const filter = buildAiIndexSpaceFilter(spaceId);
   const [countResponse, sampleResponse] = await Promise.all([
-    esClient.esql.query({ query: `${query.trimEnd()}\n| STATS row_count = COUNT(*)` }),
-    esClient.esql.query({ query: applyLimit(query, sampleSize) }),
+    esClient.esql.query({ query: `${query.trimEnd()}\n| STATS row_count = COUNT(*)`, filter }),
+    esClient.esql.query({ query: applyLimit(query, sampleSize), filter }),
   ]);
 
   const rowCount = countResponse.values[0]?.[0];

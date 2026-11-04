@@ -42,6 +42,7 @@ describe('buildAutomationSuggestionContext', () => {
     jest.clearAllMocks();
     selectSignalsMock.mockResolvedValue({
       patterns: [],
+      tagCounts: [],
       spaces: [],
       signalCount: 0,
       window: { from: 'now-30d', to: 'now' },
@@ -64,6 +65,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
 
     expect(result.sources).toEqual([
@@ -76,13 +78,39 @@ describe('buildAutomationSuggestionContext', () => {
       },
     ]);
     expect(describeAiIndexFieldsMock).toHaveBeenCalledWith({ esClient, target: 'tickets' });
-    expect(previewEsqlQueryMock).toHaveBeenCalledWith(esClient, 'FROM tickets', 5);
+    expect(previewEsqlQueryMock).toHaveBeenCalledWith(esClient, 'FROM tickets', 5, 'default');
+  });
+
+  it('cuts long sampled values with a marker instead of sending them whole', async () => {
+    describeAiIndexFieldsMock.mockResolvedValue({
+      fields: [],
+      allFields: [],
+      semanticFields: [],
+      omittedFieldCount: 0,
+    });
+    previewEsqlQueryMock.mockResolvedValue({
+      row_count: 1,
+      sample_rows: [{ body: 'x'.repeat(1000), priority: 'high' }],
+    });
+
+    const result = await buildAutomationSuggestionContext(buildAiIndex(), {
+      esClient,
+      spaceId: 'default',
+      request,
+      canReadWorkflows: true,
+    });
+
+    expect(result.sources[0]).toMatchObject({
+      sample_documents: [
+        { body: `${'x'.repeat(500)}… [truncated from 1000 characters]`, priority: 'high' },
+      ],
+    });
   });
 
   it('does not inspect a connector source', async () => {
     const result = await buildAutomationSuggestionContext(
       buildAiIndex({ sources: [{ type: 'connector', value: 'my-connector' }] }),
-      { esClient, spaceId: 'default', request }
+      { esClient, spaceId: 'default', request, canReadWorkflows: true }
     );
 
     expect(result.sources).toEqual([{ type: 'connector', value: 'my-connector' }]);
@@ -103,6 +131,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
 
     expect(result.sources).toEqual([
@@ -121,11 +150,58 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
       workflows,
     });
 
     expect(result.automations).toEqual([{ type: 'workflow', value: 'wf-1', yaml: 'name: wf-1' }]);
     expect(getWorkflow).toHaveBeenCalledWith('wf-1', 'default', request);
+  });
+
+  it('leaves out a definition longer than the limit rather than cutting it', async () => {
+    const workflows: WorkflowEnablementApi = {
+      updateWorkflow: jest.fn(),
+      getWorkflow: jest.fn().mockResolvedValue({ yaml: 'y'.repeat(32_001) }),
+    };
+
+    const result = await buildAutomationSuggestionContext(buildAiIndex(), {
+      esClient,
+      spaceId: 'default',
+      request,
+      canReadWorkflows: true,
+      workflows,
+    });
+
+    expect(result.automations).toEqual([
+      {
+        type: 'workflow',
+        value: 'wf-1',
+        fetch_error:
+          'Workflow definition exceeds 32000 characters and was not included; use get_workflow.',
+      },
+    ]);
+  });
+
+  it('does not read a workflow the caller has no Workflows read privilege for', async () => {
+    const getWorkflow = jest.fn().mockResolvedValue({ yaml: 'name: wf-1' });
+    const workflows: WorkflowEnablementApi = { updateWorkflow: jest.fn(), getWorkflow };
+
+    const result = await buildAutomationSuggestionContext(buildAiIndex(), {
+      esClient,
+      spaceId: 'default',
+      request,
+      canReadWorkflows: false,
+      workflows,
+    });
+
+    expect(getWorkflow).not.toHaveBeenCalled();
+    expect(result.automations).toEqual([
+      {
+        type: 'workflow',
+        value: 'wf-1',
+        fetch_error: 'The Workflows read privilege is required.',
+      },
+    ]);
   });
 
   it('records a fetch_error when an automation cannot be read, and when workflows is unavailable', async () => {
@@ -138,6 +214,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
       workflows,
     });
     expect(withWorkflows.automations).toEqual([
@@ -148,6 +225,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
     expect(withoutWorkflows.automations).toEqual([
       {
@@ -165,6 +243,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
 
     expect(result.traces).toEqual([
@@ -179,6 +258,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
 
     expect(result.traces).toEqual([
@@ -186,7 +266,7 @@ describe('buildAutomationSuggestionContext', () => {
     ]);
   });
 
-  it('summarizes signals by tag', async () => {
+  it('summarizes signals by tag from the exact tag counts, not from the capped patterns', async () => {
     selectSignalsMock.mockResolvedValue({
       patterns: [
         {
@@ -196,20 +276,10 @@ describe('buildAutomationSuggestionContext', () => {
           count: 2,
           signal_ids: ['a'],
         },
-        {
-          tag: 'coverage_gap',
-          target_index: 'tickets',
-          tool: 'execute_esql',
-          count: 1,
-          signal_ids: ['b'],
-        },
-        {
-          tag: 'empty_retrieval',
-          target_index: 'tickets',
-          tool: 'execute_esql',
-          count: 3,
-          signal_ids: ['c'],
-        },
+      ],
+      tagCounts: [
+        { tag: 'coverage_gap', count: 3 },
+        { tag: 'empty_retrieval', count: 3 },
       ],
       spaces: ['default'],
       signalCount: 6,
@@ -220,6 +290,7 @@ describe('buildAutomationSuggestionContext', () => {
       esClient,
       spaceId: 'default',
       request,
+      canReadWorkflows: true,
     });
 
     expect(result.signals_summary).toEqual({

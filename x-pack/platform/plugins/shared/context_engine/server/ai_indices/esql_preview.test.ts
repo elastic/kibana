@@ -6,6 +6,7 @@
  */
 
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { buildAiIndexSpaceFilter } from '../../common/space_filter';
 import { countEsqlRows, previewEsqlQuery } from './esql_preview';
 
 describe('previewEsqlQuery', () => {
@@ -32,7 +33,7 @@ describe('previewEsqlQuery', () => {
       } as any;
     });
 
-    const result = await previewEsqlQuery(esClient, 'FROM tickets', 2);
+    const result = await previewEsqlQuery(esClient, 'FROM tickets', 2, 'default');
 
     expect(result).toEqual({
       row_count: 42,
@@ -46,7 +47,7 @@ describe('previewEsqlQuery', () => {
   it('runs the count and the sample as two independent queries, capping only the sample', async () => {
     esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as any);
 
-    await previewEsqlQuery(esClient, 'FROM tickets | WHERE status == "open"', 5);
+    await previewEsqlQuery(esClient, 'FROM tickets | WHERE status == "open"', 5, 'default');
 
     const queries = esClient.esql.query.mock.calls.map(([params]) => params.query);
     expect(queries).toEqual([
@@ -57,10 +58,22 @@ describe('previewEsqlQuery', () => {
     expect(queries[1]).not.toContain('STATS row_count');
   });
 
+  it('limits both queries to the AI-index documents visible in the space', async () => {
+    esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as any);
+
+    await previewEsqlQuery(esClient, 'FROM tickets', 5, 'marketing');
+
+    const filters = esClient.esql.query.mock.calls.map(([params]) => params.filter);
+    expect(filters).toEqual([
+      buildAiIndexSpaceFilter('marketing'),
+      buildAiIndexSpaceFilter('marketing'),
+    ]);
+  });
+
   it('defaults the row count to 0 when the count query returns nothing usable', async () => {
     esClient.esql.query.mockResolvedValue({ columns: [], values: [] } as any);
 
-    const result = await previewEsqlQuery(esClient, 'FROM tickets', 5);
+    const result = await previewEsqlQuery(esClient, 'FROM tickets', 5, 'default');
 
     expect(result.row_count).toBe(0);
   });

@@ -7,6 +7,7 @@
 
 import type { IRouter, RequestHandler } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH } from '../../common/constants';
 import { apiPrivileges } from '../../common/features';
 import { AiIndexNotFoundError, AiIndexNotReadableError } from '../ai_indices/errors';
@@ -36,6 +37,7 @@ describe('automation suggestion routes', () => {
   let aiIndexService: { get: jest.Mock };
   let workflows: WorkflowEnablementApi;
   let getWorkflows: jest.Mock;
+  let security: SecurityPluginStart | undefined;
 
   const aiIndexItem = {
     id: 'support',
@@ -74,6 +76,7 @@ describe('automation suggestion routes', () => {
     aiIndexService = { get: jest.fn().mockResolvedValue(aiIndexItem) };
     workflows = { updateWorkflow: jest.fn(), getWorkflow: jest.fn() };
     getWorkflows = jest.fn().mockResolvedValue(workflows);
+    security = undefined;
     buildAutomationSuggestionContextMock.mockResolvedValue({
       sources: [],
       automations: [],
@@ -95,6 +98,7 @@ describe('automation suggestion routes', () => {
       router,
       getAiIndexService: () => aiIndexService as unknown as AiIndexService,
       getSpaces: async () => undefined,
+      getSecurity: async () => security,
       getWorkflows,
     });
   });
@@ -104,6 +108,24 @@ describe('automation suggestion routes', () => {
       access: 'internal',
       security: { authz: { requiredPrivileges: [apiPrivileges.readContextEngine] } },
     });
+  });
+
+  it('tells the context whether the caller may read workflows in the space', async () => {
+    security = {
+      authz: {
+        actions: { api: { get: (action: string) => action } },
+        checkPrivilegesWithRequest: () => ({
+          atSpace: async () => ({ hasAllRequested: false }),
+        }),
+      },
+    } as unknown as SecurityPluginStart;
+
+    await callRoute();
+
+    expect(buildAutomationSuggestionContextMock).toHaveBeenCalledWith(
+      aiIndexItem,
+      expect.objectContaining({ canReadWorkflows: false })
+    );
   });
 
   it('returns 404 when the context engine is disabled', async () => {

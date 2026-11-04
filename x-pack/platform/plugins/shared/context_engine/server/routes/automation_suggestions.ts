@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { RouteSecurity } from '@kbn/core-http-server';
+import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import {
   AI_INDEX_SUGGEST_AUTOMATION_CONTEXT_PATH,
@@ -21,6 +22,7 @@ import { AiIndexNotFoundError, AiIndexNotReadableError } from '../ai_indices/err
 import type { AiIndexService } from '../ai_indices/service';
 import { buildAutomationSuggestionContext } from '../automation_suggestions/build_context';
 import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
+import { hasWorkflowReadPrivilege } from '../utils/has_workflow_read_privilege';
 import { resolveSpaceId } from '../utils/resolve_space_id';
 import { withContextEngineFeatureFlag } from './with_feature_flag';
 
@@ -45,11 +47,13 @@ export const registerAutomationSuggestionRoutes = ({
   router,
   getAiIndexService,
   getSpaces,
+  getSecurity,
   getWorkflows,
 }: {
   router: IRouter;
   getAiIndexService: () => AiIndexService;
   getSpaces: () => Promise<SpacesPluginStart | undefined>;
+  getSecurity: () => Promise<SecurityPluginStart | undefined>;
   getWorkflows: () => Promise<WorkflowEnablementApi | undefined>;
 }) => {
   router.versioned
@@ -86,9 +90,14 @@ export const registerAutomationSuggestionRoutes = ({
           throw error;
         }
 
+        const canReadWorkflows = await hasWorkflowReadPrivilege({
+          security: await getSecurity(),
+          request,
+          spaceId,
+        });
         const body: SuggestAutomationContextResponse = await buildAutomationSuggestionContext(
           aiIndex,
-          { esClient, spaceId, request, workflows: await getWorkflows() }
+          { esClient, spaceId, request, workflows: await getWorkflows(), canReadWorkflows }
         );
 
         return response.ok({ body });

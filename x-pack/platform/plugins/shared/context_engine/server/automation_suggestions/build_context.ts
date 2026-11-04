@@ -22,16 +22,30 @@ import { parseFromClause } from '../tasks/transform';
 
 /** Documents sampled per source, enough to judge whether a field is populated without flooding the prompt. */
 const SOURCE_SAMPLE_SIZE = 5;
+/** Keeps a few large sampled fields from pushing the attachment past the request size limit. */
+const MAX_SAMPLE_VALUE_LENGTH = 500;
+/** Left out rather than cut: a truncated workflow looks complete and could be saved back damaged. */
+const MAX_WORKFLOW_YAML_LENGTH = 32_000;
 
 export interface BuildAutomationSuggestionContextDeps {
   esClient: ElasticsearchClient;
   spaceId: string;
   request: KibanaRequest;
+  canReadWorkflows: boolean;
   workflows?: WorkflowEnablementApi;
 }
 
+const truncateSampleValue = (value: unknown): unknown =>
+  typeof value === 'string' && value.length > MAX_SAMPLE_VALUE_LENGTH
+    ? `${value.slice(0, MAX_SAMPLE_VALUE_LENGTH)}… [truncated from ${value.length} characters]`
+    : value;
+
+const truncateSampleRow = (row: Record<string, unknown>): Record<string, unknown> =>
+  Object.fromEntries(Object.entries(row).map(([key, value]) => [key, truncateSampleValue(value)]));
+
 const inspectSource = async (
   esClient: ElasticsearchClient,
+  spaceId: string,
   source: AiIndexHttpItem['sources'][number]
 ): Promise<AiIndexSourceContext> => {
   if (source.type === 'connector') {
@@ -46,13 +60,13 @@ const inspectSource = async (
       target
         ? describeAiIndexFields({ esClient, target }).catch(() => undefined)
         : Promise.resolve(undefined),
-      previewEsqlQuery(esClient, source.value, SOURCE_SAMPLE_SIZE),
+      previewEsqlQuery(esClient, source.value, SOURCE_SAMPLE_SIZE, spaceId),
     ]);
 
     return {
       ...source,
       row_count: preview.row_count,
-      sample_documents: preview.sample_rows,
+      sample_documents: preview.sample_rows.map(truncateSampleRow),
       ...(fieldsDescription ? { fields: fieldsDescription.allFields } : {}),
     };
   } catch (error) {
@@ -62,10 +76,16 @@ const inspectSource = async (
 
 const readAutomation = async (
   automation: AiIndexHttpItem['automations'][number],
-  spaceId: string,
-  request: KibanaRequest,
-  workflows: WorkflowEnablementApi | undefined
+  {
+    spaceId,
+    request,
+    canReadWorkflows,
+    workflows,
+  }: Omit<BuildAutomationSuggestionContextDeps, 'esClient'>
 ): Promise<AiIndexAutomationContext> => {
+  if (!canReadWorkflows) {
+    return { ...automation, fetch_error: 'The Workflows read privilege is required.' };
+  }
   if (!workflows) {
     return { ...automation, fetch_error: 'Workflows management is not available.' };
   }
@@ -74,6 +94,12 @@ const readAutomation = async (
     const workflow = await workflows.getWorkflow(automation.value, spaceId, request);
     if (!workflow) {
       return { ...automation, fetch_error: 'Workflow was not found.' };
+    }
+    if (workflow.yaml.length > MAX_WORKFLOW_YAML_LENGTH) {
+      return {
+        ...automation,
+        fetch_error: `Workflow definition exceeds ${MAX_WORKFLOW_YAML_LENGTH} characters and was not included; use get_workflow.`,
+      };
     }
     return { ...automation, yaml: workflow.yaml };
   } catch (error) {
@@ -99,21 +125,13 @@ const buildSignalsSummary = async (
   aiIndex: AiIndexHttpItem,
   spaceId: string
 ): Promise<AiIndexSignalsSummary> => {
-  const { patterns, signalCount } = await selectSignals(esClient, {
+  const { tagCounts, signalCount } = await selectSignals(esClient, {
     destValue: aiIndex.dest.value,
     sources: aiIndex.sources,
     spaceId,
   });
 
-  const countByTag = new Map<string, number>();
-  for (const pattern of patterns) {
-    countByTag.set(pattern.tag, (countByTag.get(pattern.tag) ?? 0) + pattern.count);
-  }
-
-  return {
-    total: signalCount,
-    by_tag: [...countByTag.entries()].map(([tag, count]) => ({ tag, count })),
-  };
+  return { total: signalCount, by_tag: tagCounts };
 };
 
 /**
@@ -123,19 +141,18 @@ const buildSignalsSummary = async (
  */
 export const buildAutomationSuggestionContext = async (
   aiIndex: AiIndexHttpItem,
-  { esClient, spaceId, request, workflows }: BuildAutomationSuggestionContextDeps
+  { esClient, spaceId, request, workflows, canReadWorkflows }: BuildAutomationSuggestionContextDeps
 ): Promise<{
   sources: AiIndexSourceContext[];
   automations: AiIndexAutomationContext[];
   traces: AiIndexTraceContext[];
   signals_summary: AiIndexSignalsSummary;
 }> => {
+  const automationDeps = { spaceId, request, workflows, canReadWorkflows };
   const [sources, automations, traces, signalsSummary] = await Promise.all([
-    Promise.all(aiIndex.sources.map((source) => inspectSource(esClient, source))),
+    Promise.all(aiIndex.sources.map((source) => inspectSource(esClient, spaceId, source))),
     Promise.all(
-      aiIndex.automations.map((automation) =>
-        readAutomation(automation, spaceId, request, workflows)
-      )
+      aiIndex.automations.map((automation) => readAutomation(automation, automationDeps))
     ),
     Promise.all(aiIndex.traces.map((trace) => countTrace(esClient, trace, spaceId))),
     buildSignalsSummary(esClient, aiIndex, spaceId),
