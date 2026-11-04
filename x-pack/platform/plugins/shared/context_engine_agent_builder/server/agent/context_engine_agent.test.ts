@@ -27,6 +27,14 @@ const registeredInstructions = (): string => {
   return register.mock.calls[0][0].configuration.instructions;
 };
 
+describe('Context Engine agent registration', () => {
+  it('registers the agent as hidden so it does not surface in agent pickers or listings', () => {
+    const register = jest.fn();
+    registerContextEngineAgent({ agents: { register } } as unknown as AgentBuilderPluginSetup);
+    expect(register.mock.calls[0][0].hidden).toBe(true);
+  });
+});
+
 describe('Context Engine agent instructions', () => {
   const instructions = registeredInstructions();
 

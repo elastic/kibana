@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { isValidNamespace } from '../../services';
+import { isValidNamespace, validateNoPathTraversalIdSchema } from '../../services';
 import { MAX_REUSABLE_AGENT_POLICIES_PER_PACKAGE_POLICY } from '../../constants/package_policy';
 
 const PACKAGE_POLICY_ID_MAX_LENGTH = 255;
@@ -371,14 +371,24 @@ export const NewPackagePolicySchema = schema.object(
 
 // REST-only input and stream IDs with reporting bounds. PackagePolicyInputsSchema and
 // PackagePolicyStreamsSchema stay unchanged because they feed the frozen SO model-version schemas.
+// `validate` rejects path-traversal ids early; the service layer enforces the same check for
+// non-REST callers.
 const RestPackagePolicyInputIdSchema = schema.maybe(
-  schema.savedObjectId.warn({ minLength: 0, label: 'fleet.package_policies.inputs.id' })
+  schema.savedObjectId.warn({
+    minLength: 0,
+    label: 'fleet.package_policies.inputs.id',
+    validate: validateNoPathTraversalIdSchema,
+  })
 );
 
 const RestPackagePolicyStreamSchema = schema.object({
   ...PackagePolicyStreamsSchema,
   id: schema.maybe(
-    schema.savedObjectId.warn({ minLength: 0, label: 'fleet.package_policies.inputs.streams.id' })
+    schema.savedObjectId.warn({
+      minLength: 0,
+      label: 'fleet.package_policies.inputs.streams.id',
+      validate: validateNoPathTraversalIdSchema,
+    })
   ), // BWC < 7.11
 });
 
