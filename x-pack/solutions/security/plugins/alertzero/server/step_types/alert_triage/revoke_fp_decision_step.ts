@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { KibanaRequest } from '@kbn/core/server';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { HUNT_COVERAGE_AI_INDEX_DEST } from '../../../common/step_types/package_report';
 import { triageRevokeFpDecisionStepCommonDefinition } from '../../../common/step_types/alert_triage';
@@ -19,10 +18,6 @@ import { FP_DECISION_ID_PREFIX } from '../../alert_triage/fp_decisions';
 import { tagInChunks } from '../../alert_triage/plan_sweep';
 import { findAlertIdsByTag, openAlerts, statusCodeOf, tagAlerts } from './ports';
 
-export interface RevokeFpDecisionStepDependencies {
-  isContextEngineEnabled: (request: KibanaRequest) => Promise<boolean>;
-}
-
 /**
  * Takes a decision back. The decision is soft-deleted first, as the Context Engine does, so no
  * later sweep matches it, and then its alerts are put back:
@@ -31,43 +26,51 @@ export interface RevokeFpDecisionStepDependencies {
  *   picks them up again.
  *
  * Only alerts carrying the decision's tag are touched. It is safe to run again: a step that fails
- * is counted in `failures`, and the tag still marks what is left. It does not stop when the
- * Context Engine is off, because the alerts must be put back whatever the state of the setting.
+ * is counted in `failures`, and the tag still marks what is left.
+ *
+ * The decision must belong to the space of the run: a decision of another space reads as
+ * `not_found`, and the step touches neither it nor any alert. The decision is deleted whatever the
+ * state of the Context Engine setting, because a decision left active would close the alerts again
+ * once the setting is back on.
  */
-export const getTriageRevokeFpDecisionStepDefinition = ({
-  isContextEngineEnabled,
-}: RevokeFpDecisionStepDependencies) =>
+export const getTriageRevokeFpDecisionStepDefinition = () =>
   createServerStepDefinition({
     ...triageRevokeFpDecisionStepCommonDefinition,
     handler: async ({ input, contextManager, logger }) => {
       const id = input.decision_id;
       const isApproval = id.startsWith(FP_DECISION_ID_PREFIX);
       let failures = 0;
-      let status: 'ok' | 'disabled' | 'not_found' = 'ok';
+      let status: 'ok' | 'not_found' = 'ok';
 
-      if (await isContextEngineEnabled(contextManager.getFakeRequest())) {
-        try {
-          await contextManager.getScopedEsClient().update({
-            index: HUNT_COVERAGE_AI_INDEX_DEST.value,
-            id,
-            doc: {
-              updated_at: new Date().toISOString(),
-              governance: { lifecycle: { status: 'deleted' } },
-            },
-            refresh: true,
-          });
-        } catch (error) {
-          if (statusCodeOf(error) === 404) {
-            status = 'not_found';
-          } else {
-            failures++;
-            logger.warn(
-              `Could not delete decision ${id}: ${error instanceof Error ? error.message : error}`
-            );
-          }
+      const es = contextManager.getScopedEsClient();
+      try {
+        const existing = await es.get<{ attributes?: { space_id?: string } }>({
+          index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+          id,
+          _source: ['attributes.space_id'],
+        });
+        if (existing._source?.attributes?.space_id !== input.space_id) {
+          status = 'not_found';
+          return { output: { status, alerts_reopened: 0, alerts_released: 0, failures } };
         }
-      } else {
-        status = 'disabled';
+        await es.update({
+          index: HUNT_COVERAGE_AI_INDEX_DEST.value,
+          id,
+          doc: {
+            updated_at: new Date().toISOString(),
+            governance: { lifecycle: { status: 'deleted' } },
+          },
+          refresh: true,
+        });
+      } catch (error) {
+        if (statusCodeOf(error) === 404) {
+          status = 'not_found';
+        } else {
+          failures++;
+          logger.warn(
+            `Could not delete decision ${id}: ${error instanceof Error ? error.message : error}`
+          );
+        }
       }
 
       // A decision that could not be deleted would close its alerts again on the next sweep.

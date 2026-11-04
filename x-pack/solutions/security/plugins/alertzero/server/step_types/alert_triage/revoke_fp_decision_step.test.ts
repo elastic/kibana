@@ -15,13 +15,15 @@ const DISMISSAL = 'fp-dismissal-0123456789abcdef';
 const setup = ({
   decisionId = APPROVAL,
   tagged = ['a', 'b'],
-  enabled = true,
+  storedSpace = 'default',
+  getError,
   updateError,
   statusError,
 }: {
   decisionId?: string;
   tagged?: string[];
-  enabled?: boolean;
+  storedSpace?: string;
+  getError?: Error & { statusCode?: number };
   updateError?: Error & { statusCode?: number };
   statusError?: Error;
 }) => {
@@ -37,19 +39,21 @@ const setup = ({
     left = left.filter((id) => !body.ids.includes(id));
     return { body: { updated: body.ids.length, timed_out: false, failures: [] } };
   });
+  const get = jest.fn(async () => {
+    if (getError) throw getError;
+    return { _source: { attributes: { space_id: storedSpace } } };
+  });
   const update = jest.fn(async () => {
     if (updateError) throw updateError;
     return {};
   });
   const run = () =>
-    getTriageRevokeFpDecisionStepDefinition({
-      isContextEngineEnabled: async () => enabled,
-    }).handler({
-      input: { decision_id: decisionId },
+    getTriageRevokeFpDecisionStepDefinition().handler({
+      input: { decision_id: decisionId, space_id: 'default' },
       contextManager: {
         callKibanaApi,
         getFakeRequest: () => ({}),
-        getScopedEsClient: () => ({ update }),
+        getScopedEsClient: () => ({ get, update }),
       },
       logger: { warn: jest.fn() },
     } as unknown as StepHandlerContext<unknown, unknown>);
@@ -57,7 +61,7 @@ const setup = ({
     callKibanaApi.mock.calls
       .filter(([{ path }]) => path.endsWith(suffix))
       .map(([{ body }]) => body);
-  return { run, update, calls };
+  return { run, get, update, calls };
 };
 
 describe('triage revoke decision step', () => {
@@ -98,7 +102,7 @@ describe('triage revoke decision step', () => {
 
   it('still puts the alerts back when the decision is already gone', async () => {
     const { run } = setup({
-      updateError: Object.assign(new Error('not found'), { statusCode: 404 }),
+      getError: Object.assign(new Error('not found'), { statusCode: 404 }),
     });
 
     const { output } = await run();
@@ -106,17 +110,23 @@ describe('triage revoke decision step', () => {
     expect(output).toEqual(expect.objectContaining({ status: 'not_found', alerts_reopened: 2 }));
   });
 
-  it('still puts the alerts back when the Context Engine is off', async () => {
-    const { run, update } = setup({ enabled: false });
+  it('does not touch a decision of another space, nor any alert', async () => {
+    const { run, update, calls } = setup({ storedSpace: 'other' });
 
     const { output } = await run();
 
     expect(update).not.toHaveBeenCalled();
-    expect(output).toEqual(expect.objectContaining({ status: 'disabled', alerts_reopened: 2 }));
+    expect(calls('/signals/search')).toEqual([]);
+    expect(output).toEqual({
+      status: 'not_found',
+      alerts_reopened: 0,
+      alerts_released: 0,
+      failures: 0,
+    });
   });
 
   it('puts nothing back when the decision could not be deleted, so a rerun is safe', async () => {
-    const { run, calls } = setup({ updateError: new Error('es down') });
+    const { run, calls } = setup({ getError: new Error('es down') });
 
     const { output } = await run();
 

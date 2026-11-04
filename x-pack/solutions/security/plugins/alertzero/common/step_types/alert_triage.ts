@@ -564,7 +564,7 @@ export const triageMatchFpDecisionsStepCommonDefinition: CommonStepDefinition<
   outputSchema: matchFpDecisionsOutputSchema,
 };
 
-export const REVOKE_FP_DECISION_STATUSES = ['ok', 'disabled', 'not_found'] as const;
+export const REVOKE_FP_DECISION_STATUSES = ['ok', 'not_found'] as const;
 
 const revokeFpDecisionInputSchema = lazySchema(() =>
   z.object({
@@ -572,6 +572,7 @@ const revokeFpDecisionInputSchema = lazySchema(() =>
       .string()
       .regex(/^fp-(decision|dismissal)-[0-9a-f]{16}$/)
       .describe('Id of the decision: `fp-decision-<hash>` or `fp-dismissal-<hash>`.'),
+    space_id: idSchema.describe('Space of the run. A decision of another space is not found.'),
   })
 );
 
@@ -580,7 +581,7 @@ const revokeFpDecisionOutputSchema = lazySchema(() =>
     status: z
       .enum(REVOKE_FP_DECISION_STATUSES)
       .describe(
-        '`disabled` when the Context Engine is off in the space, `not_found` when no such decision exists. Its alerts are still put back.'
+        '`not_found` when no such decision exists in this space. Alerts that carry its tag are still put back.'
       ),
     alerts_reopened: z.number().describe('Alerts the decision closed that were reopened.'),
     alerts_released: z
