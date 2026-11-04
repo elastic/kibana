@@ -177,6 +177,7 @@ export const DetectionPage = ({
     >
       <NightshiftAppHeader
         {...headerProps}
+        hideMenu={view.type !== 'workspace'}
         page="detection"
         back={{
           href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
