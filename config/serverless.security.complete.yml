@@ -12,11 +12,6 @@ xpack.proposals.enabled: true
 xpack.features.overrides:
   ### Workflows Management should be moved from Analytics category to the Security one.
   workflowsManagement.category: "security"
-  ### Alerting V2 is Observability-only, so its features are hidden in Role management.
-  alerting_v2_rules.hidden: true
-  alerting_v2_alerts.hidden: true
-  alerting_v2_action_policies.hidden: true
-  alerting_v2_execution_history.hidden: true
   ### AlertZero and the features it relies on come right after Security (1100). Agentic
   ### investigations and Proposals are moved from Analytics category to the Security one.
   alertzero.order: 1101
