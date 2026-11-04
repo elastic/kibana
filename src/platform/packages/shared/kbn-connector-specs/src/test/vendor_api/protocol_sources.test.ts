@@ -902,6 +902,19 @@ describe('protocol sources', () => {
       expect(snapshot).not.toContain('Unused');
     });
 
+    it('keeps only the root fields used when a fragment names the root type', async () => {
+      const { recorded, offline } = await recordQuery(
+        'type Query { used: String, unused: Unused } type Unused { id: ID }',
+        'query { ...Roots } fragment Roots on Query { used }'
+      );
+
+      expect(recorded.problems).toEqual([]);
+      expect(offline).toEqual({ changed: [], problems: [] });
+      const snapshot = await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8');
+      expect(snapshot).toContain('used: String');
+      expect(snapshot).not.toContain('nused');
+    });
+
     it('reports a source that serves something else as unreachable', async () => {
       await recordGraphQL();
       documents[GRAPHQL_SPEC_URL] = '{ "error": "unauthorized" }';

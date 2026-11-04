@@ -218,10 +218,11 @@ const projectSdl = (
     }
   }
   // A fragment can name a type the root fields don't reach, such as `... on Card` inside a fragment
-  // on `Node`. Naming an interface doesn't call for its implementers.
+  // on `Node`. Naming an interface doesn't call for its implementers, and naming a root type doesn't
+  // call for its other fields.
   for (const name of namedTypes) {
     const type = schema.getType(name);
-    if (type) {
+    if (type && !rootNames.has(name)) {
       visitType(type, false);
     }
   }
