@@ -79,11 +79,15 @@ poll_memory() {
     local ts
     ts=$(date +%s)
 
-    # Find Kibana node process (the main server, not workers)
+    # Find the Kibana node process with the highest RSS (the server, not the launcher)
     local kbn_pid
-    kbn_pid=$(pgrep -f 'node.*scripts/kibana' 2>/dev/null | head -1 || true)
+    kbn_pid=$(pgrep -f 'node.*scripts/kibana' 2>/dev/null \
+      | xargs -I{} ps -o pid=,rss= -p {} 2>/dev/null \
+      | sort -k2 -rn | head -1 | awk '{print $1}' || true)
     if [ -z "$kbn_pid" ]; then
-      kbn_pid=$(pgrep -f 'node.*kbn.*serve' 2>/dev/null | head -1 || true)
+      kbn_pid=$(pgrep -f 'node.*kbn.*serve' 2>/dev/null \
+        | xargs -I{} ps -o pid=,rss= -p {} 2>/dev/null \
+        | sort -k2 -rn | head -1 | awk '{print $1}' || true)
     fi
     if [ -n "$kbn_pid" ]; then
       local rss
