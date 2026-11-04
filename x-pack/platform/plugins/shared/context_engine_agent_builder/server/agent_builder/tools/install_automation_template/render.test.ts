@@ -38,7 +38,9 @@ interface TemplateStep {
   concurrency?: number;
   mode?: string;
   'on-failure'?: object;
-  with?: { query?: string; verifiers?: string[]; unit_escaped?: string };
+  'connector-id'?: string;
+  'connector-id-by-feature'?: string;
+  with?: { query?: string; verifiers?: string[]; unit_escaped?: string; prompt?: string };
   steps?: TemplateStep[];
   else?: TemplateStep[];
 }
@@ -471,6 +473,156 @@ describe('automation template rendering', () => {
 
       expect(query.indexOf('| SORT _id')).toBeGreaterThan(-1);
       expect(query.indexOf('| SORT _id')).toBeLessThan(query.indexOf('| LIMIT'));
+    });
+  });
+
+  describe('editable prompt and model', () => {
+    const promptTemplates = [
+      {
+        name: 'document',
+        yaml: () => renderDocumentOrchestrationTemplate(documentValues),
+        instructionsStart: 'Produce a structured summary of this document',
+      },
+      {
+        name: 'unit profile',
+        yaml: () => renderUnitProfileTemplate(unitValues),
+        instructionsStart: 'Write a structured profile grounded strictly in the data above.',
+      },
+      {
+        name: 'index metadata',
+        yaml: () =>
+          renderIndexMetadataTemplate({
+            aiIndexId: 'airline-loyalty',
+            automationName: 'loyalty-index-metadata',
+            sources: [{ index: 'loyalty-docs', categoryField: 'tier' }],
+          }),
+        instructionsStart: 'Using ONLY the information above, produce a structured index profile',
+      },
+    ];
+
+    const promptSteps = (yaml: string): TemplateStep[] =>
+      allSteps(parse(yaml).steps).filter((step) => step.type === 'ai.prompt');
+
+    /** Renders each model step's connector fields the way the engine does, for a given const. */
+    const renderConnectorFields = (yaml: string, connectorId: string): string[][] => {
+      const definition = parse(yaml);
+      const consts = { ...definition.consts, connector_id: connectorId };
+      return promptSteps(yaml).map((step) =>
+        [step['connector-id'] ?? '', step['connector-id-by-feature'] ?? ''].map((field) =>
+          createWorkflowLiquidEngine().parseAndRenderSync(field, { consts })
+        )
+      );
+    };
+
+    it.each(promptTemplates)(
+      'ships the $name template with the default model and its instructions as plain text',
+      ({ yaml, instructionsStart }) => {
+        const { consts } = parse(yaml());
+
+        expect(consts.connector_id).toBe('');
+        expect(consts.instructions.startsWith(instructionsStart)).toBe(true);
+        expect(consts.instructions).not.toMatch(/\{\{|\{%/);
+      }
+    );
+
+    it.each(promptTemplates)(
+      'inserts the instructions const into every prompt of the $name template',
+      ({ yaml, instructionsStart }) => {
+        const definition = parse(yaml());
+        const steps = promptSteps(yaml());
+
+        expect(steps).not.toHaveLength(0);
+        for (const step of steps) {
+          expect(step.with?.prompt).toContain('{{ consts.instructions }}');
+          expect(
+            createWorkflowLiquidEngine().parseAndRenderSync(step.with?.prompt ?? '', {
+              consts: definition.consts,
+            })
+          ).toContain(instructionsStart);
+        }
+      }
+    );
+
+    it.each(promptTemplates)(
+      "falls back to Context Engine's model in the $name template when no connector is set",
+      ({ yaml }) => {
+        for (const fields of renderConnectorFields(yaml(), '')) {
+          expect(fields).toEqual(['', 'context_engine_prompt']);
+        }
+      }
+    );
+
+    it.each(promptTemplates)(
+      'uses the chosen connector alone in the $name template',
+      ({ yaml }) => {
+        for (const fields of renderConnectorFields(yaml(), 'my-connector')) {
+          expect(fields).toEqual(['my-connector', '']);
+        }
+      }
+    );
+
+    it('has no model step, and so no prompt or model consts, in the targeted KI writer', () => {
+      const yaml = renderTargetedKiWriterTemplate({ aiIndexId: 'a', kis: '- ki_id: a\n  ki: {}' });
+
+      expect(promptSteps(yaml)).toEqual([]);
+      expect(parse(yaml).consts).not.toHaveProperty('instructions');
+    });
+  });
+
+  describe('field checks', () => {
+    it('fails a document run up front when the title or body field is gone', () => {
+      const yaml = renderDocumentOrchestrationTemplate(documentValues);
+      const names = parse(yaml).steps.map((step: TemplateStep) => step.name);
+
+      expect(renderUnitQuery(yaml, 'check_fields').trim()).toBe(
+        'FROM loyalty-docs\n| KEEP `title`, `body`\n| LIMIT 0'
+      );
+      expect(names.indexOf('check_fields')).toBeLessThan(names.indexOf('discover_documents'));
+    });
+
+    it('fails a unit profile run up front when any configured field is gone', () => {
+      const yaml = renderUnitProfileTemplate({
+        ...unitValues,
+        metricFields: ['Points Accumulated'],
+      });
+      const names = parse(yaml).steps.map((step: TemplateStep) => step.name);
+
+      expect(renderUnitQuery(yaml, 'check_fields').trim()).toBe(
+        'FROM airline_loyalty_customer_loyalty_history\n' +
+          '| KEEP `Province`, `Enrollment Date`, `Loyalty Card`, `Points Accumulated`\n' +
+          '| LIMIT 0'
+      );
+      expect(names.indexOf('check_fields')).toBeLessThan(names.indexOf('discover_units'));
+    });
+  });
+
+  describe('unit profile over multi-valued keys', () => {
+    it('drops the empty key after counting, so it is never profiled as a unit', () => {
+      const query = renderUnitQuery(renderUnitProfileTemplate(unitValues), 'discover_units');
+
+      expect(query).toMatch(
+        /\| STATS docs = COUNT\(\*\) BY `Province`\s*\| WHERE `Province` != ""\s*\| SORT/
+      );
+    });
+
+    it('matches a unit inside a multi-valued key in every per-unit query', () => {
+      const yaml = renderUnitProfileTemplate(unitValues);
+
+      for (const step of ['unit_totals', 'unit_breakdown']) {
+        const query = renderUnitQuery(yaml, step);
+        expect(query).toContain('| WHERE MV_CONTAINS(`Province`, "ON")');
+        expect(query).not.toContain('`Province` ==');
+      }
+    });
+
+    it('asks the model for MV_CONTAINS in the queries it writes', () => {
+      const [profile] = allSteps(parse(renderUnitProfileTemplate(unitValues)).steps).filter(
+        (step) => step.name === 'profile_unit'
+      );
+
+      expect(profile.with?.prompt).toContain('`MV_CONTAINS({{ consts.unit_key }}, ?unit)`');
+      expect(profile.with?.prompt).toContain('`WHERE MV_CONTAINS({{ consts.unit_key }}, "...")`');
+      expect(profile.with?.prompt).not.toContain('{{ consts.unit_key }} ==');
     });
   });
 

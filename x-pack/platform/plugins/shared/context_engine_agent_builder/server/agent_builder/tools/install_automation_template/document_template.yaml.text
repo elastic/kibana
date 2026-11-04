@@ -10,8 +10,14 @@ version: "1"
 #      string takes the whole index.
 #   2. Add any further fields the summary should draw on to the `KEEP` in `fetch_documents`,
 #      remembering that `KEEP` fixes the column order the `foreach` reads by position.
-#   3. Tell the prompt what these documents are. "Product manual" and "incident record" produce
-#      different summaries from the same text, and the model cannot tell which it is holding.
+#   3. Say what these documents are in `instructions`. "Product manual" and "incident record"
+#      produce different summaries from the same text, and the model cannot tell which it is
+#      holding.
+#
+# `instructions` and `connector_id` can be edited after install, like the other consts.
+# `instructions` is the guidance on what to write. The prompt around it carries the document, the
+# mapping, the output fields and the ES|QL rules the verifiers enforce, and stays as it is.
+# `instructions` is plain text, not Liquid: refer to the document and the index as given above it.
 #
 # One KI per document is the right granularity only for a bounded corpus of documents that each
 # answer something on their own. When a pass produces many near-identically-titled KIs, the corpus
@@ -43,6 +49,23 @@ consts:
   # Bodies are truncated before they reach the prompt so one long document cannot exhaust the
   # context window and silently drop the rest of the batch.
   body_max_chars: __BODY_MAX_CHARS__
+  # The AI connector the summaries are written with. "" uses Context Engine's default model.
+  connector_id: ""
+  # What each summary should say. Plain text, inserted into the prompt as written.
+  instructions: |
+    Produce a structured summary of this document, using only its text above.
+
+    This KI sits alongside one per other document in the corpus, so `summary` has to say
+    what *this* document settles that its neighbours do not. A summary that would fit any
+    document in the corpus is worse than useless: it makes the whole set unrankable.
+
+    For `access_patterns` give up to 2 ways to reach this material as live data. Return
+    an empty array rather than an invented query when the document is reached only by its
+    id or no ES|QL against it is meaningful; a KI that only orients is allowed, a query
+    that answers nothing is not.
+
+    When you return patterns, at least one retrieves this exact document; the others reach
+    the documents around it — same topic, same period, whatever the corpus makes sensible.
 
 tags:
   - document-ki
@@ -68,6 +91,16 @@ steps:
     with:
       method: GET
       path: /{{ consts.source_index }}/_mapping
+
+  # The configured fields must still exist. A renamed or removed field fails the run here, with
+  # Elasticsearch naming it, instead of failing every batch inside the loop, which continues.
+  - name: check_fields
+    type: elasticsearch.esql.query
+    with:
+      query: |
+        FROM {{ consts.source_index }}
+        | KEEP `{{ consts.title_field }}`, `{{ consts.body_field }}`
+        | LIMIT 0
 
   # Sorted by _id so a pilot's documents are the first of the full run's, and the full run
   # replaces the pilot's KIs.
@@ -120,9 +153,11 @@ steps:
               title: "{{ foreach.item[1] }}"
               body: "{{ foreach.item[2] }}"
 
+          # `== blank` covers an empty or missing `connector_id`; an empty `connector-id` is unset.
           - name: summarize_document
             type: ai.prompt
-            connector-id-by-feature: context_engine_prompt
+            connector-id: "{{ consts.connector_id }}"
+            connector-id-by-feature: "{% if consts.connector_id == blank %}context_engine_prompt{% endif %}"
             with:
               systemPrompt: |
                 You summarise source documents for a retrieval index. Ground every statement in the
@@ -144,23 +179,13 @@ steps:
                 your ES|QL may name:
                 {{ steps.fetch_mapping.output | json }}
 
-                Produce a structured summary of this document, using only its text above.
+                {{ consts.instructions }}
 
-                This KI sits alongside one per other document in the corpus, so `summary` has to say
-                what *this* document settles that its neighbours do not. A summary that would fit any
-                document in the corpus is worse than useless: it makes the whole set unrankable.
-
-                For `access_patterns` give up to 2 ways to reach this material as live data. Return
-                an empty array rather than an invented query when the document is reached only by its
-                id or no ES|QL against it is meaningful; a KI that only orients is allowed, a query
-                that answers nothing is not. Each entry has:
+                Each `access_patterns` entry has:
                 - question_type: a short label for the kind of question.
                 - esql_template: a parameterized ES|QL query using named `?param` placeholders.
                 - esql_example: the same query with real values substituted and a small LIMIT.
                 - returns: a short description of what the query returns.
-
-                When you return patterns, at least one retrieves this exact document; the others reach
-                the documents around it — same topic, same period, whatever the corpus makes sensible.
 
                 ES|QL correctness rules — esql_template and esql_example are both executed by the
                 verifier, so both must be valid and runnable:
