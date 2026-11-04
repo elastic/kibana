@@ -1,21 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useId,
-  useMemo,
-  useRef,
-  useState,
-  type ReactNode,
-} from 'react';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -33,12 +24,25 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
+import React, {
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { Capabilities } from '@kbn/core/public';
+import {
+  type Action,
+  type ActionUiApi,
+  ActionUiBridge,
+  type ActionUiHost,
+} from '@kbn/custom-app-registry';
+import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { WorkflowRunRequest } from '../runtime/app_runtime';
-import { DataLayerContext } from '../data/data_layer_context';
-import { getServices } from '../services';
+import { getServices } from './services';
 import { createWorkflowClient, type WorkflowClient, type WorkflowSummary } from './workflow_client';
 
 /** The id of the Workflows application, which an execution is looked at in. */
@@ -59,6 +63,12 @@ const hasNestedSteps = (steps: Steps): boolean =>
     )
   );
 
+/** A workflow that an action asks to be run, with every input already resolved. */
+export interface WorkflowRunRequest {
+  workflow: string;
+  inputs: Readonly<Record<string, unknown>>;
+}
+
 export type WorkflowAvailability = { canRun: true } | { canRun: false; reason: string };
 
 /**
@@ -70,7 +80,7 @@ export const getWorkflowAvailability = (capabilities: Capabilities): WorkflowAva
   if (!workflows) {
     return {
       canRun: false,
-      reason: i18n.translate('xpack.customApp.workflows.unavailable', {
+      reason: i18n.translate('workflows.customApp.runWorkflow.unavailable', {
         defaultMessage: 'Workflows are not available in this space or with this license.',
       }),
     };
@@ -78,7 +88,7 @@ export const getWorkflowAvailability = (capabilities: Capabilities): WorkflowAva
   if (workflows.executeWorkflow !== true) {
     return {
       canRun: false,
-      reason: i18n.translate('xpack.customApp.workflows.noPrivilege', {
+      reason: i18n.translate('workflows.customApp.runWorkflow.noPrivilege', {
         defaultMessage: 'You need the Execute privilege of Workflows to run a workflow.',
       }),
     };
@@ -94,32 +104,12 @@ export const getWorkflowAvailability = (capabilities: Capabilities): WorkflowAva
  */
 export type WorkflowStatus = 'found' | 'missing' | 'unknown';
 
-export interface WorkflowRunner {
-  availability: WorkflowAvailability;
-  /** What is known of the workflows that were asked about with `track`, by id. */
-  statuses: Readonly<Record<string, WorkflowStatus>>;
-  /** Finds out, once for each, whether these workflows exist, so that `statuses` can say. */
-  track: (ids: readonly string[]) => void;
-  /** Asks the user to confirm, then runs, the workflows an action asked for. */
-  request: (requests: WorkflowRunRequest[], nodeId: string) => void;
-}
-
-/** Without a runner, nothing runs, as in anything rendered outside of the app. */
-const NO_RUNNER: WorkflowRunner = {
-  availability: {
-    canRun: false,
-    reason: i18n.translate('xpack.customApp.workflows.notHere', {
-      defaultMessage: 'Workflows cannot be run from here.',
-    }),
-  },
-  statuses: {},
-  track: () => {},
-  request: () => {},
-};
-
-const WorkflowRunnerContext = createContext<WorkflowRunner>(NO_RUNNER);
-
-export const useWorkflowRunner = (): WorkflowRunner => useContext(WorkflowRunnerContext);
+/** The ids of the workflows that these actions run. */
+const getWorkflowIds = (actions: readonly Action[]): string[] =>
+  actions.flatMap((action) => {
+    const { type, workflow } = action as { type: string; workflow?: string };
+    return type === 'runWorkflow' && typeof workflow === 'string' ? [workflow] : [];
+  });
 
 type Details =
   | { status: 'loading' }
@@ -149,7 +139,9 @@ const WorkflowSteps = ({ steps }: { steps: Steps | undefined }) => {
       <EuiSpacer size="s" />
       <EuiText size="xs">
         <strong>
-          {i18n.translate('xpack.customApp.workflows.steps', { defaultMessage: 'What it does' })}
+          {i18n.translate('workflows.customApp.runWorkflow.steps', {
+            defaultMessage: 'What it does',
+          })}
         </strong>
       </EuiText>
       <EuiDescriptionList
@@ -165,11 +157,11 @@ const WorkflowSteps = ({ steps }: { steps: Steps | undefined }) => {
         <EuiText size="xs" color="subdued">
           <p>
             {steps.length > shown.length
-              ? i18n.translate('xpack.customApp.workflows.moreSteps', {
+              ? i18n.translate('workflows.customApp.runWorkflow.moreSteps', {
                   defaultMessage: 'And {count, plural, one {# more step} other {# more steps}}.',
                   values: { count: steps.length - shown.length },
                 })
-              : i18n.translate('xpack.customApp.workflows.nestedSteps', {
+              : i18n.translate('workflows.customApp.runWorkflow.nestedSteps', {
                   defaultMessage: 'Some of these have steps of their own, which are not listed.',
                 })}
           </p>
@@ -213,10 +205,10 @@ const ConfirmRunModal = ({
               : {
                   status: 'error',
                   message: workflow.enabled
-                    ? i18n.translate('xpack.customApp.workflows.invalid', {
+                    ? i18n.translate('workflows.customApp.runWorkflow.invalid', {
                         defaultMessage: 'This workflow is not valid, so it cannot be run.',
                       })
-                    : i18n.translate('xpack.customApp.workflows.disabled', {
+                    : i18n.translate('workflows.customApp.runWorkflow.disabled', {
                         defaultMessage: 'This workflow is disabled. Enable it to run it.',
                       }),
                 }
@@ -226,7 +218,7 @@ const ConfirmRunModal = ({
             status: 'error',
             message:
               (error as { body?: { statusCode?: number } })?.body?.statusCode === 404
-                ? i18n.translate('xpack.customApp.workflows.notFound', {
+                ? i18n.translate('workflows.customApp.runWorkflow.notFound', {
                     defaultMessage: 'This workflow does not exist, or you cannot see it.',
                   })
                 : toMessage(error),
@@ -254,7 +246,7 @@ const ConfirmRunModal = ({
     >
       <EuiModalHeader>
         <EuiModalHeaderTitle id={titleId}>
-          {i18n.translate('xpack.customApp.workflows.confirmTitle', {
+          {i18n.translate('workflows.customApp.runWorkflow.confirmTitle', {
             defaultMessage: 'Run {count, plural, one {this workflow} other {these # workflows}}?',
             values: { count: requests.length },
           })}
@@ -263,7 +255,7 @@ const ConfirmRunModal = ({
       <EuiModalBody>
         <EuiText size="s">
           <p>
-            {i18n.translate('xpack.customApp.workflows.confirmBody', {
+            {i18n.translate('workflows.customApp.runWorkflow.confirmBody', {
               defaultMessage:
                 'It runs with your own privileges, as if you had started it from Workflows.',
             })}
@@ -298,7 +290,7 @@ const ConfirmRunModal = ({
               {Object.keys(inputs).length === 0 ? (
                 <EuiText size="xs" color="subdued">
                   <p>
-                    {i18n.translate('xpack.customApp.workflows.noInputs', {
+                    {i18n.translate('workflows.customApp.runWorkflow.noInputs', {
                       defaultMessage: 'It is given no inputs.',
                     })}
                   </p>
@@ -319,7 +311,7 @@ const ConfirmRunModal = ({
       </EuiModalBody>
       <EuiModalFooter>
         <EuiButtonEmpty onClick={onCancel} isDisabled={isRunning}>
-          {i18n.translate('xpack.customApp.workflows.cancel', { defaultMessage: 'Cancel' })}
+          {i18n.translate('workflows.customApp.runWorkflow.cancel', { defaultMessage: 'Cancel' })}
         </EuiButtonEmpty>
         <EuiButton
           fill
@@ -328,7 +320,7 @@ const ConfirmRunModal = ({
           isDisabled={!canRun}
           data-test-subj="customAppRunWorkflowConfirm"
         >
-          {i18n.translate('xpack.customApp.workflows.run', { defaultMessage: 'Run' })}
+          {i18n.translate('workflows.customApp.runWorkflow.run', { defaultMessage: 'Run' })}
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
@@ -349,11 +341,11 @@ const FINISHED = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
  * Lets what is inside run workflows, after the user has agreed. `appId` is the saved app they come
  * from, when there is one, and is sent with each run so it can be traced to the app.
  */
-export const WorkflowRunnerProvider = ({
-  appId,
+export const RunWorkflowUi = ({
+  host: { appId, refreshData },
   children,
 }: {
-  appId?: string;
+  host: ActionUiHost;
   children: ReactNode;
 }) => {
   const { core } = getServices();
@@ -367,8 +359,7 @@ export const WorkflowRunnerProvider = ({
   const [statuses, setStatuses] = useState<Readonly<Record<string, WorkflowStatus>>>({});
   const asked = useRef(new Set<string>());
   // A run can change what the app shows, such as the severity of a case, so when it is over the
-  // app asks for its data again. Without a data layer around it, there is nothing to ask.
-  const layer = useContext(DataLayerContext);
+  // app asks for its data again.
   const isMounted = useRef(true);
   useEffect(() => {
     isMounted.current = true;
@@ -391,9 +382,9 @@ export const WorkflowRunnerProvider = ({
         }
       }
       // Whether it ended or is still going, what is shown is asked for again once.
-      if (isMounted.current) layer?.retry();
+      if (isMounted.current) refreshData();
     },
-    [client, layer]
+    [client, refreshData]
   );
 
   const look = useCallback(
@@ -438,7 +429,7 @@ export const WorkflowRunnerProvider = ({
     (requests: WorkflowRunRequest[], nodeId: string) => {
       if (!availability.canRun) {
         core.notifications.toasts.addWarning({
-          title: i18n.translate('xpack.customApp.workflows.cannotRunTitle', {
+          title: i18n.translate('workflows.customApp.runWorkflow.cannotRunTitle', {
             defaultMessage: 'The workflow was not run',
           }),
           text: availability.reason,
@@ -465,7 +456,7 @@ export const WorkflowRunnerProvider = ({
         });
         void refreshWhenDone(workflowExecutionId);
         core.notifications.toasts.addSuccess({
-          title: i18n.translate('xpack.customApp.workflows.started', {
+          title: i18n.translate('workflows.customApp.runWorkflow.started', {
             defaultMessage: 'Workflow run started',
           }),
           text: toMountPoint(
@@ -478,7 +469,7 @@ export const WorkflowRunnerProvider = ({
                 })
               }
             >
-              {i18n.translate('xpack.customApp.workflows.viewExecution', {
+              {i18n.translate('workflows.customApp.runWorkflow.viewExecution', {
                 defaultMessage: 'View the execution',
               })}
             </EuiLink>,
@@ -487,7 +478,7 @@ export const WorkflowRunnerProvider = ({
         });
       } catch (error) {
         core.notifications.toasts.addDanger({
-          title: i18n.translate('xpack.customApp.workflows.runError', {
+          title: i18n.translate('workflows.customApp.runWorkflow.runError', {
             defaultMessage: 'The workflow could not be run',
           }),
           text: toMessage(error),
@@ -498,13 +489,32 @@ export const WorkflowRunnerProvider = ({
     setPending(undefined);
   }, [appId, client, core, pending, refreshWhenDone]);
 
-  const value = useMemo<WorkflowRunner>(
-    () => ({ availability, statuses, track, request }),
-    [availability, statuses, track, request]
+  const api = useMemo<ActionUiApi>(
+    () => ({
+      request: (payloads, nodeId) => request(payloads as WorkflowRunRequest[], nodeId),
+      // Finding out whether a workflow is there is only worth the request for someone who may run it.
+      watch: (actions) => {
+        if (availability.canRun) track(getWorkflowIds(actions));
+      },
+      gate: (actions) => {
+        if (!availability.canRun) return availability.reason;
+        const missing = getWorkflowIds(actions).find(
+          (id) => id !== '' && statuses[id] === 'missing'
+        );
+        return missing === undefined
+          ? undefined
+          : i18n.translate('workflows.customApp.runWorkflow.notSaved', {
+              defaultMessage:
+                'The workflow "{workflow}" has not been saved yet. Save it in the Workflows application and this will work.',
+              values: { workflow: missing },
+            });
+      },
+    }),
+    [availability, request, statuses, track]
   );
 
   return (
-    <WorkflowRunnerContext.Provider value={value}>
+    <ActionUiBridge actionId="runWorkflow" api={api}>
       {children}
       {pending && (
         <ConfirmRunModal
@@ -515,6 +525,6 @@ export const WorkflowRunnerProvider = ({
           onCancel={() => setPending(undefined)}
         />
       )}
-    </WorkflowRunnerContext.Provider>
+    </ActionUiBridge>
   );
 };

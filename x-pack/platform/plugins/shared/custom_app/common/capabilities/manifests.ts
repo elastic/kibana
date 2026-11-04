@@ -6,6 +6,7 @@
  */
 
 import { registerCapability, type AnyCapability } from '@kbn/custom-app-registry';
+import { registerBuiltinActions } from '../actions/manifests';
 import { badgeCapability } from './badge/manifest';
 import { stackCapability } from './stack/manifest';
 import { flyoutCapability } from './flyout/manifest';
@@ -70,6 +71,7 @@ export const BUILTIN_CONTAINERS = [
 
 /** Registers the capabilities that ship with custom apps. It can be called more than once. */
 export const registerBuiltinCapabilities = (): void => {
+  registerBuiltinActions();
   [...BUILTIN_CAPABILITIES, ...BUILTIN_CONTAINERS].forEach((capability) =>
     registerCapability(capability as unknown as AnyCapability)
   );

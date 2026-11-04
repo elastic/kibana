@@ -9,6 +9,7 @@ import React, { type ReactElement } from 'react';
 import { act, render, type RenderResult } from '@testing-library/react';
 import type { FetchContext } from '@kbn/presentation-publishing';
 import { appDocumentSchema, collectSources, type AppDocument } from '@kbn/custom-app-common';
+import { ActionUiProviders } from '../actions/action_ui_providers';
 import { createDataLayer, type DataLayer, type RunCases, type RunQuery } from '../data/data_layer';
 import { DataLayerContext } from '../data/data_layer_context';
 import { createAppRuntime, type AppRuntime } from '../runtime/app_runtime';
@@ -27,7 +28,11 @@ export const renderWithRuntime = (
   const runtime = createAppRuntime(document);
   return {
     runtime,
-    ...render(<AppRuntimeContext.Provider value={runtime}>{ui}</AppRuntimeContext.Provider>),
+    ...render(
+      <AppRuntimeContext.Provider value={runtime}>
+        <ActionUiProviders>{ui}</ActionUiProviders>
+      </AppRuntimeContext.Provider>
+    ),
   };
 };
 
@@ -61,13 +66,15 @@ export const renderApp = async (
   const view = render(
     <AppRuntimeContext.Provider value={runtime}>
       <DataLayerContext.Provider value={layer}>
-        {framed ? (
-          <AppFrame theme={document.theme}>
+        <ActionUiProviders>
+          {framed ? (
+            <AppFrame theme={document.theme}>
+              <NodeRenderer node={document.root} />
+            </AppFrame>
+          ) : (
             <NodeRenderer node={document.root} />
-          </AppFrame>
-        ) : (
-          <NodeRenderer node={document.root} />
-        )}
+          )}
+        </ActionUiProviders>
       </DataLayerContext.Provider>
     </AppRuntimeContext.Provider>
   );

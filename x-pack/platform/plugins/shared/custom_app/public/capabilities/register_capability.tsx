@@ -20,7 +20,7 @@ import { useDataLayer } from '../data/data_layer_context';
 import { toEsqlVariables } from '../data/esql_variables';
 import { useSource } from '../data/use_source';
 import { useAppRuntime, useStateValues } from '../runtime/app_runtime_context';
-import { useActionRunner } from '../workflows/use_action_runner';
+import { useActionRunner } from '../actions/use_action_runner';
 import { DroppedActions } from '../components/dropped_actions';
 import { ACCENT_COLORS } from '../theme/page_theme';
 import { usePageAccent } from '../components/app_frame';

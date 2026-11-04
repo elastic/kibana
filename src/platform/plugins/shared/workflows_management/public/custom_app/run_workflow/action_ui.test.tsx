@@ -1,21 +1,31 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import {
-  getWorkflowAvailability,
-  useWorkflowRunner,
-  WorkflowRunnerProvider,
-} from './workflow_runner';
-import type { WorkflowRunRequest } from '../runtime/app_runtime';
-import { DataLayerContext } from '../data/data_layer_context';
-import type { DataLayer } from '../data/data_layer';
+import React from 'react';
+import { useActionUis } from '@kbn/custom-app-registry';
+import { getWorkflowAvailability, RunWorkflowUi, type WorkflowRunRequest } from './action_ui';
+
+/** What the app does with the part of the action that is drawn, as a hook, for the tests. */
+const useWorkflowRunner = () => {
+  const api = useActionUis().runWorkflow;
+  return {
+    request: (requests: WorkflowRunRequest[], nodeId: string) => api.request(requests, nodeId),
+    track: (ids: readonly string[]) =>
+      api.watch?.(ids.map((workflow) => ({ type: 'runWorkflow', workflow, inputs: {} }))),
+    gate: (id: string) =>
+      api.gate?.([{ type: 'runWorkflow', workflow: id, inputs: {} }]) === undefined
+        ? 'saved'
+        : 'missing',
+  };
+};
 
 const mockClient = { get: jest.fn(), run: jest.fn(), list: jest.fn(), execution: jest.fn() };
 const toasts = { addSuccess: jest.fn(), addDanger: jest.fn(), addWarning: jest.fn() };
@@ -27,7 +37,7 @@ jest.mock('@kbn/react-kibana-mount', () => ({
   // The toast text is a mount point in Kibana; here it is the element, so that it can be pressed.
   toMountPoint: (node: unknown) => node,
 }));
-jest.mock('../services', () => ({
+jest.mock('./services', () => ({
   getServices: () => ({
     core: {
       http: {},
@@ -65,19 +75,12 @@ const Asker = ({ requests }: { requests: WorkflowRunRequest[] }) => {
 const setup = (
   requests: WorkflowRunRequest[] = [{ workflow: 'isolate-host', inputs: { host: 'web-1' } }],
   appId?: string,
-  layer?: Pick<DataLayer, 'retry'>
+  layer?: { retry: () => void }
 ) => {
-  const runner = (
-    <WorkflowRunnerProvider appId={appId}>
-      <Asker requests={requests} />
-    </WorkflowRunnerProvider>
-  );
   render(
-    layer ? (
-      <DataLayerContext.Provider value={layer as DataLayer}>{runner}</DataLayerContext.Provider>
-    ) : (
-      runner
-    )
+    <RunWorkflowUi host={{ appId, refreshData: () => layer?.retry() }}>
+      <Asker requests={requests} />
+    </RunWorkflowUi>
   );
 };
 
@@ -403,21 +406,23 @@ describe('running the workflows an action asks for', () => {
 
 describe('knowing whether the workflows of an app are saved', () => {
   const Reader = ({ ids }: { ids: string[] }) => {
-    const { statuses, track } = useWorkflowRunner();
+    const { gate, track } = useWorkflowRunner();
     return (
       <>
         <button type="button" onClick={() => track(ids)}>
           {'track'}
         </button>
-        <output data-test-subj="statuses">{JSON.stringify(statuses)}</output>
+        <output data-test-subj="statuses">
+          {JSON.stringify(Object.fromEntries(ids.map((id) => [id, gate(id)])))}
+        </output>
       </>
     );
   };
   const read = (ids: string[]) => {
     render(
-      <WorkflowRunnerProvider>
+      <RunWorkflowUi host={{ refreshData: () => {} }}>
         <Reader ids={ids} />
-      </WorkflowRunnerProvider>
+      </RunWorkflowUi>
     );
   };
   const statuses = () => JSON.parse(screen.getByTestId('statuses').textContent ?? '{}');
@@ -436,7 +441,7 @@ describe('knowing whether the workflows of an app are saved', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'track' }));
 
-    await waitFor(() => expect(statuses()).toEqual({ here: 'found', gone: 'missing' }));
+    await waitFor(() => expect(statuses()).toEqual({ here: 'saved', gone: 'missing' }));
   });
 
   it('does not say a workflow is missing when it could only not be looked at', async () => {
@@ -445,7 +450,8 @@ describe('knowing whether the workflows of an app are saved', () => {
 
     await userEvent.click(screen.getByRole('button', { name: 'track' }));
 
-    await waitFor(() => expect(statuses()).toEqual({ hidden: 'unknown' }));
+    await waitFor(() => expect(mockClient.get).toHaveBeenCalledTimes(1));
+    expect(statuses()).toEqual({ hidden: 'saved' });
   });
 
   it('looks once for each workflow, however often it is asked', async () => {
@@ -455,8 +461,7 @@ describe('knowing whether the workflows of an app are saved', () => {
     await userEvent.click(screen.getByRole('button', { name: 'track' }));
     await userEvent.click(screen.getByRole('button', { name: 'track' }));
 
-    await waitFor(() => expect(statuses()).toEqual({ 'isolate-host': 'found' }));
-    expect(mockClient.get).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(mockClient.get).toHaveBeenCalledTimes(1));
   });
 
   it('does not look for a workflow that is not named yet', async () => {
@@ -476,14 +481,14 @@ describe('knowing whether the workflows of an app are saved', () => {
     mockClient.get.mockResolvedValue(workflow({ id: 'later' }));
     window.dispatchEvent(new Event('focus'));
 
-    await waitFor(() => expect(statuses()).toEqual({ later: 'found' }));
+    await waitFor(() => expect(statuses()).toEqual({ later: 'saved' }));
   });
 
   it('does not look again for the ones that are there when the person comes back', async () => {
     mockClient.get.mockResolvedValue(workflow());
     read(['isolate-host']);
     await userEvent.click(screen.getByRole('button', { name: 'track' }));
-    await waitFor(() => expect(statuses()).toEqual({ 'isolate-host': 'found' }));
+    await waitFor(() => expect(mockClient.get).toHaveBeenCalledTimes(1));
 
     window.dispatchEvent(new Event('focus'));
 

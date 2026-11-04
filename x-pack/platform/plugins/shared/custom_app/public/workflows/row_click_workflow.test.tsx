@@ -9,12 +9,10 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appDocumentSchema } from '@kbn/custom-app-common';
 import type { RunQuery } from '../data/data_layer';
+import { mockWorkflowRunner } from '../../common/actions/run_workflow_stand_in';
 import { renderApp } from '../components/test_utils';
 
-const mockRequest = jest.fn();
-jest.mock('./workflow_runner', () => ({
-  useWorkflowRunner: () => ({ availability: { canRun: true }, request: mockRequest }),
-}));
+const mockRequest = mockWorkflowRunner.request;
 
 const runQuery = jest.fn<ReturnType<RunQuery>, Parameters<RunQuery>>(async () => ({
   columns: [

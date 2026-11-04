@@ -65,7 +65,7 @@ import type { HasCustomAppLibraryId } from './has_library_id';
 import { createAppRuntime } from './runtime/app_runtime';
 import { AppRuntimeContext } from './runtime/app_runtime_context';
 import { TimeRangeControlContext } from './runtime/time_range_context';
-import { WorkflowRunnerProvider } from './workflows/workflow_runner';
+import { ActionUiProviders } from './actions/action_ui_providers';
 import { createRunCases } from './data/run_cases';
 import { createRunEsqlQuery } from './data/run_esql_query';
 import { createDefaultDocument } from './default_document';
@@ -339,7 +339,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
           <AppRuntimeContext.Provider value={runtime}>
             <TimeRangeControlContext.Provider value={timeRangeControl}>
               <DataLayerContext.Provider value={dataLayer}>
-                <WorkflowRunnerProvider appId={libraryId}>
+                <ActionUiProviders appId={libraryId}>
                   {isEmptyDocument(document) ? (
                     <EmptyApp
                       canEdit={viewMode === 'edit'}
@@ -351,7 +351,7 @@ export const customAppEmbeddableFactory: EmbeddablePublicDefinition<
                       <NodeRenderer node={document.root} />
                     </AppFrame>
                   )}
-                </WorkflowRunnerProvider>
+                </ActionUiProviders>
               </DataLayerContext.Provider>
             </TimeRangeControlContext.Provider>
           </AppRuntimeContext.Provider>

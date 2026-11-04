@@ -8,14 +8,24 @@
 import type { z } from '@kbn/zod/v4';
 import type { CapabilityManifest } from './define_capability';
 import type { DocumentResolver } from './document_resolver';
+import type { ActionManifest } from './define_action';
+import type { ActionHandler } from './action_handler';
+import type { ActionUiProvider } from './action_ui';
 
 export type AnyCapability = CapabilityManifest<string, z.ZodRawShape>;
 
 /** Loads the code that draws a capability. Only the browser has any. */
 export type CapabilityViewLoader = () => Promise<{ default: unknown }>;
 
+export type AnyAction = ActionManifest<string, z.ZodRawShape>;
+
 interface Store {
   capabilities: Map<string, AnyCapability>;
+  actions: Map<string, AnyAction>;
+  actionHandlers: Map<string, ActionHandler>;
+  actionUiProviders: Map<string, ActionUiProvider>;
+  /** A React context, made by the first that needs it. */
+  actionUiContext?: unknown;
   views: Map<string, CapabilityViewLoader>;
   documentResolvers: DocumentResolver[];
 }
@@ -32,7 +42,14 @@ export const getStore = (): Store => {
   const holder = globalThis as unknown as Record<symbol, Store | undefined>;
   const existing = holder[STORE_KEY];
   if (existing) return existing;
-  const created: Store = { capabilities: new Map(), views: new Map(), documentResolvers: [] };
+  const created: Store = {
+    capabilities: new Map(),
+    actions: new Map(),
+    actionHandlers: new Map(),
+    actionUiProviders: new Map(),
+    views: new Map(),
+    documentResolvers: [],
+  };
   holder[STORE_KEY] = created;
   return created;
 };

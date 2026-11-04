@@ -5,7 +5,9 @@
  * 2.0.
  */
 
+import { registerRunWorkflowStandIn } from '../actions/run_workflow_stand_in';
 import { registerBuiltinCapabilities } from './manifests';
 
 // Documents are checked against what is registered, so the tests start with what ships registered.
 registerBuiltinCapabilities();
+registerRunWorkflowStandIn();

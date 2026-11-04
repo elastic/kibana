@@ -22,7 +22,7 @@ import { AppRuntimeContext } from '../runtime/app_runtime_context';
 import { createView, getViewKeys, isSameView, type ViewState } from '../runtime/view_state';
 import { TimeRangeControlContext } from '../runtime/time_range_context';
 import { getServices } from '../services';
-import { WorkflowRunnerProvider } from '../workflows/workflow_runner';
+import { ActionUiProviders } from '../actions/action_ui_providers';
 
 const DEFAULT_TIME_RANGE = { from: 'now-24h', to: 'now' };
 
@@ -122,11 +122,11 @@ export const LiveApp = ({ document, appId, view, onViewChange }: LiveAppProps) =
         <AppRuntimeContext.Provider value={runtime}>
           <TimeRangeControlContext.Provider value={timeRangeControl}>
             <DataLayerContext.Provider value={dataLayer}>
-              <WorkflowRunnerProvider appId={appId}>
+              <ActionUiProviders appId={appId}>
                 <AppFrame theme={document.theme}>
                   <NodeRenderer node={document.root} />
                 </AppFrame>
-              </WorkflowRunnerProvider>
+              </ActionUiProviders>
             </DataLayerContext.Provider>
           </TimeRangeControlContext.Provider>
         </AppRuntimeContext.Provider>

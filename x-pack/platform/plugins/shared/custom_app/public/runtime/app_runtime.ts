@@ -17,7 +17,7 @@ import {
   type StateDeclaration,
   type StateValue,
 } from '@kbn/custom-app-common';
-import { getCapability } from '@kbn/custom-app-registry';
+import { getActionHandler, getCapability } from '@kbn/custom-app-registry';
 
 export type StateValues = Readonly<Record<string, StateValue>>;
 
@@ -41,9 +41,18 @@ export interface WorkflowRunRequest {
   inputs: Readonly<Record<string, WorkflowInputValue>>;
 }
 
+/** Something an action handed to the app to be done, once the person has had their say. */
+export interface ActionRequest {
+  /** The id of the action that asked. */
+  action: string;
+  payload: unknown;
+}
+
 export interface RunActionsResult {
   /** The actions, or parts of them, that were not applied, each with the reason. */
   dropped: string[];
+  /** What actions of other plugins asked for, which the runtime does not do itself. */
+  requests: ActionRequest[];
   /**
    * The workflows to run. The runtime does not run them: that takes the user's say, and the network.
    * What is handed over is as the app was when the action reached it, so a value set before it counts.
@@ -102,19 +111,6 @@ const rejectValue = (
   if (typeof value === 'string' && value.length > MAX_STATE_STRING_LENGTH) {
     return `"${key}" expects at most ${MAX_STATE_STRING_LENGTH} characters`;
   }
-};
-
-const isPlainValue = (value: unknown): value is string | number | boolean | null =>
-  value === null ||
-  typeof value === 'string' ||
-  typeof value === 'boolean' ||
-  (typeof value === 'number' && Number.isFinite(value));
-
-/** A column holds a value, or several, as ES|QL does; anything else is not something to hand over. */
-const toWorkflowInput = (value: unknown): WorkflowInputValue | undefined => {
-  if (isPlainValue(value)) return value;
-  if (Array.isArray(value) && value.every(isPlainValue)) return value;
-  return undefined;
 };
 
 const collectFlyoutIds = (root: AppDocument['root']): Set<string> => {
@@ -193,7 +189,7 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
     openFlyoutId$,
     run: (actions, input = {}) => {
       const dropped: string[] = [];
-      const workflows: WorkflowRunRequest[] = [];
+      const requests: ActionRequest[] = [];
 
       actions.forEach((action) => {
         switch (action.type) {
@@ -210,39 +206,29 @@ export const createAppRuntime = (document: Pick<AppDocument, 'state' | 'root'>):
           case 'closeFlyout':
             openFlyoutId$.next(undefined);
             break;
-          case 'runWorkflow': {
-            const inputs: Record<string, WorkflowInputValue> = {};
-            // One input that cannot be had is reason enough not to run the workflow at all: it would
-            // be handed less than it was written to be given.
-            const missing = Object.entries(action.inputs).find(([name, source]) => {
-              let resolved: unknown;
-              if (typeof source !== 'object') {
-                resolved = source;
-              } else if ('fromColumn' in source) {
-                if (!input.row || !(source.fromColumn in input.row)) {
-                  dropped.push(`Column "${source.fromColumn}" is not in the row`);
-                  return true;
-                }
-                resolved = input.row[source.fromColumn];
-              } else {
-                resolved = state$.getValue()[source.fromState];
-              }
-
-              const value = toWorkflowInput(resolved);
-              if (value === undefined) {
-                dropped.push(`The input "${name}" of "${action.workflow}" is not a plain value`);
-                return true;
-              }
-              inputs[name] = value;
-              return false;
+          default: {
+            // An action of another plugin, which carries itself out with what it is handed.
+            const { type } = action as { type: string };
+            const handler = getActionHandler(type);
+            if (!handler) {
+              dropped.push(`The action "${type}" is not available`);
+              break;
+            }
+            handler(action as never, {
+              input,
+              state: state$.getValue(),
+              drop: (reason) => dropped.push(reason),
+              request: (payload) => requests.push({ action: type, payload }),
             });
-            if (!missing) workflows.push({ workflow: action.workflow, inputs });
-            break;
           }
         }
       });
 
-      return { dropped, workflows };
+      const workflows = requests
+        .filter(({ action }) => action === 'runWorkflow')
+        .map(({ payload }) => payload as WorkflowRunRequest);
+
+      return { dropped, requests, workflows };
     },
     restoreView: ({ values, flyout }, keys) => {
       const current = state$.getValue();

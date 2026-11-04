@@ -6,7 +6,12 @@
  */
 
 import type { z } from '@kbn/zod/v4';
-import { getCapability, type CapabilityValidationContext } from '@kbn/custom-app-registry';
+import {
+  getAction,
+  getCapability,
+  type ActionValidationContext,
+  type CapabilityValidationContext,
+} from '@kbn/custom-app-registry';
 import {
   CASES_FILTERS,
   CASES_SEVERITIES,
@@ -42,12 +47,6 @@ const ACTION_VALUE_SOURCES: Record<string, { fromColumn: boolean; fromInput: boo
   onClick: { fromColumn: false, fromInput: false },
   onSubmit: { fromColumn: false, fromInput: false },
 };
-
-/**
- * Where an action may run a workflow: when something is pressed or a row is clicked, never when an
- * input changes, which is every key that is typed and would start a workflow for each.
- */
-const WORKFLOW_EVENTS: readonly string[] = ['onClick', 'onRowClick', 'onChartClick', 'onSubmit'];
 
 const collectNodes = (
   root: AppNode,
@@ -269,63 +268,18 @@ export const validateDocument = (document: DocumentToValidate, ctx: z.Refinement
       const allowed = ACTION_VALUE_SOURCES[event] ?? { fromColumn: false, fromInput: false };
 
       actions.forEach((action) => {
-        if (action.type === 'runWorkflow') {
-          if (!WORKFLOW_EVENTS.includes(event)) {
-            issue(
-              `Node "${node.id}" runs a workflow on ${event}; a workflow can only be run by a button, a row click, a click on a chart or a form that is submitted`,
-              node.id
-            );
-          }
-          Object.entries(action.inputs).forEach(([name, value]) => {
-            if (typeof value !== 'object') return;
-            if ('fromColumn' in value && !allowed.fromColumn) {
-              issue(
-                `Node "${node.id}": the input "${name}" of the workflow takes a column, which only a row click has`,
-                node.id
-              );
-            }
-            if ('fromState' in value && !(value.fromState in state)) {
-              issue(
-                `Node "${node.id}": the input "${name}" of the workflow takes the unknown state key "${value.fromState}"`,
-                node.id
-              );
-            }
-          });
-          return;
-        }
-        if (action.type === 'openFlyout' && !flyoutIds.has(action.flyout)) {
-          issue(`Node "${node.id}" opens "${action.flyout}", which is not a flyout`, node.id);
-        }
-        if (action.type !== 'setState') return;
-
-        const declaration = state[action.key];
-        if (!declaration) {
-          issue(`Node "${node.id}" sets unknown state key "${action.key}"`, node.id);
-          return;
-        }
-
-        const { value } = action;
-        if (Array.isArray(value)) {
-          if (declaration.type !== 'list') {
-            issue(
-              `Node "${node.id}" sets state key "${action.key}" (${declaration.type}) to a list`,
-              node.id
-            );
-          }
-        } else if (typeof value === 'object') {
-          if ('fromColumn' in value && !allowed.fromColumn) {
-            issue(`Node "${node.id}": fromColumn is not valid in ${event}`, node.id);
-          }
-          if ('fromInput' in value && !allowed.fromInput) {
-            issue(`Node "${node.id}": fromInput is only valid on input nodes`, node.id);
-          }
-        } else if (typeof value !== declaration.type) {
-          issue(
-            `Node "${node.id}" sets state key "${action.key}" (${
-              declaration.type
-            }) to a ${typeof value}`
-          );
-        }
+        (
+          getAction(action.type)?.validate as
+            | ((action: unknown, context: ActionValidationContext) => void)
+            | undefined
+        )?.(action, {
+          nodeId: node.id,
+          event,
+          allowed,
+          state,
+          overlayIds: flyoutIds,
+          issue: (message) => issue(message, node.id),
+        });
       });
     });
   });

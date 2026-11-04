@@ -7,10 +7,18 @@
 
 import type { z } from '@kbn/zod/v4';
 import type { CapabilityManifest } from './define_capability';
-import { getStore, type AnyCapability, type CapabilityViewLoader } from './shared_store';
+import {
+  getStore,
+  type AnyAction,
+  type AnyCapability,
+  type CapabilityViewLoader,
+} from './shared_store';
+import type { ActionManifest } from './define_action';
+import type { ActionHandler } from './action_handler';
+import type { ActionUiProvider } from './action_ui';
 import type { DocumentResolver } from './document_resolver';
 
-export type { AnyCapability, CapabilityViewLoader };
+export type { AnyAction, AnyCapability, CapabilityViewLoader };
 
 /**
  * Adds a capability. An id can be registered once. The browser also says how to draw it; the
@@ -49,3 +57,35 @@ export const registerDocumentResolver = <Context>(resolver: DocumentResolver<Con
 
 export const listDocumentResolvers = (): readonly DocumentResolver<never>[] =>
   getStore().documentResolvers;
+
+/**
+ * Adds an action. An id can be registered once. The browser also says how to carry it out, and
+ * what it needs drawn, such as a dialog to confirm it; the server only needs the manifest, to
+ * check the documents that use it.
+ */
+export const registerAction = <Id extends string, Shape extends z.ZodRawShape>(
+  manifest: ActionManifest<Id, Shape>,
+  handler?: ActionHandler<never>,
+  ui?: ActionUiProvider
+): void => {
+  const { actions, actionHandlers, actionUiProviders } = getStore();
+  const known = actions.get(manifest.id);
+  if (known && known !== (manifest as unknown as AnyAction)) {
+    throw new Error(`The action "${manifest.id}" is registered already`);
+  }
+  actions.set(manifest.id, manifest as unknown as AnyAction);
+  if (handler) actionHandlers.set(manifest.id, handler as ActionHandler);
+  if (ui) actionUiProviders.set(manifest.id, ui);
+};
+
+export const getAction = (id: string): AnyAction | undefined => getStore().actions.get(id);
+
+export const listActions = (): readonly AnyAction[] => Array.from(getStore().actions.values());
+
+/** How to carry out an action that was registered with a handler. */
+export const getActionHandler = (id: string): ActionHandler | undefined =>
+  getStore().actionHandlers.get(id);
+
+/** The parts of actions that are drawn, for the app to put around what it shows. */
+export const listActionUiProviders = (): ReadonlyArray<readonly [string, ActionUiProvider]> =>
+  Array.from(getStore().actionUiProviders.entries());

@@ -9,19 +9,9 @@ import React from 'react';
 import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
-import type { WorkflowRunner } from '../../workflows/workflow_runner';
+import { mockWorkflowRunner as mockRunner } from '../../../common/actions/run_workflow_stand_in';
 import { NodeRenderer } from '../../components/node_renderer';
 import { renderWithRuntime } from '../../components/test_utils';
-
-const mockRunner: WorkflowRunner = {
-  availability: { canRun: true },
-  statuses: {},
-  track: jest.fn(),
-  request: jest.fn(),
-};
-jest.mock('../../workflows/workflow_runner', () => ({
-  useWorkflowRunner: () => mockRunner,
-}));
 
 const documentWith = (onClick: unknown[], extra: unknown[] = []): AppDocument =>
   appDocumentSchema.parse({
@@ -50,10 +40,10 @@ const show = (document: AppDocument) => {
 
 describe('the button', () => {
   beforeEach(() => {
-    (mockRunner.request as jest.Mock).mockReset();
+    mockRunner.request.mockReset();
     mockRunner.availability = { canRun: true };
     mockRunner.statuses = {};
-    (mockRunner.track as jest.Mock).mockReset();
+    mockRunner.track.mockReset();
   });
 
   it('is shown with what is written on it', async () => {
@@ -147,7 +137,7 @@ describe('a button whose workflow is not saved yet', () => {
   beforeEach(() => {
     mockRunner.availability = { canRun: true };
     mockRunner.statuses = {};
-    (mockRunner.track as jest.Mock).mockReset();
+    mockRunner.track.mockReset();
   });
 
   const hover = async () =>
@@ -188,6 +178,6 @@ describe('a button whose workflow is not saved yet', () => {
     show(documentWith([{ type: 'openFlyout', flyout: 'detail' }]));
 
     expect(screen.getByRole('button', { name: 'Isolate host' })).toBeEnabled();
-    expect(mockRunner.track).toHaveBeenCalledWith([]);
+    expect(mockRunner.track).not.toHaveBeenCalled();
   });
 });

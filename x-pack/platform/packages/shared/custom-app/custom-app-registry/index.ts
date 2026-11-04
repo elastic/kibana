@@ -14,14 +14,30 @@ export type {
   CapabilityValidationContext,
 } from './define_capability';
 export {
+  getAction,
+  getActionHandler,
   getCapability,
   getCapabilityViewLoader,
+  listActions,
+  listActionUiProviders,
   listCapabilities,
   listDocumentResolvers,
+  registerAction,
   registerCapability,
   registerDocumentResolver,
 } from './capability_registry';
-export type { AnyCapability, CapabilityViewLoader } from './capability_registry';
+export type { AnyAction, AnyCapability, CapabilityViewLoader } from './capability_registry';
+export { defineAction } from './define_action';
+export type {
+  ActionManifest,
+  ActionOf,
+  ActionOfShape,
+  ActionValidationContext,
+} from './define_action';
+export type { ActionHandler, ActionHandlerContext } from './action_handler';
+export { ActionUiBridge, useActionUis } from './action_ui';
+export type { ActionUiApi, ActionUiHost, ActionUiProvider } from './action_ui';
+export { actionSchema, getActionSchemas } from './action_schema';
 export type {
   CapabilityQueryResult,
   CapabilitySourceState,
@@ -76,3 +92,27 @@ export type AppNodeOfType<T extends AppNodeType> = NodeTypeMap[T];
 export type ContainerNode = [RegisteredType] extends [never]
   ? GenericNode & { children: GenericNode[] }
   : Extract<AppNode, { children: unknown }>;
+
+/**
+ * The actions that can be defined. Like the nodes, it is declared here, and not re-exported,
+ * because that is the module an augmentation names: an action adds itself with
+ * `declare module '@kbn/custom-app-registry' { interface ActionTypeMap { … } }`.
+ */
+export interface ActionTypeMap {
+  /** Never a type of action: an interface cannot be empty. */
+  readonly __none?: never;
+}
+
+type RegisteredActionType = Exclude<keyof ActionTypeMap, '__none'>;
+
+/** What any action is, whatever its type, for code that registers none and so knows none. */
+export interface GenericAction {
+  type: string;
+  [prop: string]: unknown;
+}
+
+/** An action of any type that has been defined, or a generic one when none are known here. */
+export type Action = [RegisteredActionType] extends [never]
+  ? GenericAction
+  : ActionTypeMap[RegisteredActionType];
+export type ActionType = RegisteredActionType;

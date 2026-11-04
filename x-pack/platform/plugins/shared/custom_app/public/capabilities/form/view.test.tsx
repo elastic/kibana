@@ -9,19 +9,9 @@ import React from 'react';
 import { act, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { appDocumentSchema, type AppDocument } from '@kbn/custom-app-common';
-import type { WorkflowRunner } from '../../workflows/workflow_runner';
+import { mockWorkflowRunner as mockRunner } from '../../../common/actions/run_workflow_stand_in';
 import { NodeRenderer } from '../../components/node_renderer';
 import { renderWithRuntime } from '../../components/test_utils';
-
-const mockRunner: WorkflowRunner = {
-  availability: { canRun: true },
-  statuses: {},
-  track: jest.fn(),
-  request: jest.fn(),
-};
-jest.mock('../../workflows/workflow_runner', () => ({
-  useWorkflowRunner: () => mockRunner,
-}));
 
 const text = (value = '') => ({ type: 'string', default: value });
 
@@ -72,10 +62,10 @@ const submit = () => userEvent.click(screen.getByRole('button', { name: 'Escalat
 
 describe('the form', () => {
   beforeEach(() => {
-    (mockRunner.request as jest.Mock).mockReset();
+    mockRunner.request.mockReset();
     mockRunner.availability = { canRun: true };
     mockRunner.statuses = {};
-    (mockRunner.track as jest.Mock).mockReset();
+    mockRunner.track.mockReset();
   });
 
   it('shows each field with its label, and what is written on the button', async () => {

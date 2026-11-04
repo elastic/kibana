@@ -6,24 +6,16 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { nodeIdSchema } from '@kbn/custom-app-registry';
-import { stateKeySchema } from './bindings';
-import {
-  MAX_ACTIONS_PER_EVENT,
-  MAX_HEADING_LENGTH,
-  MAX_LIST_ITEMS,
-  MAX_STATE_STRING_LENGTH,
-  MAX_WORKFLOW_ID_LENGTH,
-  MAX_WORKFLOW_INPUT_NAME_LENGTH,
-  MAX_WORKFLOW_INPUTS,
-} from './constants';
+import { actionSchema, type Action } from '@kbn/custom-app-registry';
+import { MAX_ACTIONS_PER_EVENT, MAX_LIST_ITEMS, MAX_STATE_STRING_LENGTH } from './constants';
 
-const stateValueSchema = lazySchema(() =>
+/** A text, a number or a boolean, as a value of the app. */
+export const stateValueSchema = lazySchema(() =>
   z.union([z.string().max(MAX_STATE_STRING_LENGTH), z.number().finite(), z.boolean()])
 );
 
 /** A list of texts, such as the usernames to look for. */
-const listValueSchema = lazySchema(() =>
+export const listValueSchema = lazySchema(() =>
   z.array(z.string().max(MAX_STATE_STRING_LENGTH)).max(MAX_LIST_ITEMS)
 );
 
@@ -37,58 +29,9 @@ export const stateDeclarationSchema = lazySchema(() =>
   ])
 );
 
-/** The closed set of things a user interaction can do. */
-const setStateActionSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('setState'),
-    key: stateKeySchema,
-    value: z.union([
-      stateValueSchema,
-      listValueSchema,
-      z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
-      z.object({ fromInput: z.literal(true) }),
-    ]),
-  })
-);
+export { actionSchema };
 
-/**
- * Runs a Workflow, as the person who triggered it, so it needs no more privilege than they have.
- * What it hands over is a closed set: a fixed value, a column of the row that was clicked, or a
- * value of the app. They travel as typed values and are never put together into text.
- */
-const runWorkflowActionSchema = lazySchema(() =>
-  z.object({
-    type: z.literal('runWorkflow'),
-    /** The id of the workflow, as the Workflows application knows it. */
-    workflow: z.string().min(1).max(MAX_WORKFLOW_ID_LENGTH),
-    inputs: z
-      .record(
-        z.string().min(1).max(MAX_WORKFLOW_INPUT_NAME_LENGTH),
-        z.union([
-          stateValueSchema,
-          z.object({ fromColumn: z.string().min(1).max(MAX_HEADING_LENGTH) }),
-          z.object({ fromState: stateKeySchema }),
-        ])
-      )
-      .refine((inputs) => Object.keys(inputs).length <= MAX_WORKFLOW_INPUTS, {
-        message: `An action may hand at most ${MAX_WORKFLOW_INPUTS} inputs to a workflow`,
-      })
-      .default({}),
-  })
+/** What an event can do: the actions that are registered, a few at most. */
+export const actionsSchema: z.ZodArray<z.ZodType<Action>> = lazySchema(() =>
+  z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT)
 );
-
-const openFlyoutActionSchema = lazySchema(() =>
-  z.object({ type: z.literal('openFlyout'), flyout: nodeIdSchema })
-);
-const closeFlyoutActionSchema = lazySchema(() => z.object({ type: z.literal('closeFlyout') }));
-
-export const actionSchema = lazySchema(() =>
-  z.discriminatedUnion('type', [
-    setStateActionSchema,
-    openFlyoutActionSchema,
-    closeFlyoutActionSchema,
-    runWorkflowActionSchema,
-  ])
-);
-
-export const actionsSchema = lazySchema(() => z.array(actionSchema).max(MAX_ACTIONS_PER_EVENT));

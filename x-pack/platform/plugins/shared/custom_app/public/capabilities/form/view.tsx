@@ -24,8 +24,8 @@ import {
 } from '@kbn/custom-app-common';
 import { useAppId } from '../../runtime/app_id_context';
 import { useStateValues } from '../../runtime/app_runtime_context';
-import { useActionRunner } from '../../workflows/use_action_runner';
-import { useWorkflowsGate } from '../../workflows/use_workflows_gate';
+import { useActionRunner } from '../../actions/use_action_runner';
+import { useActionGate } from '../../actions/use_action_gate';
 import { DroppedActions } from '../../components/dropped_actions';
 import {
   getFormAnswersKey,
@@ -127,7 +127,7 @@ export const FormNode = ({ node }: { node: AppNodeOfType<'form'> }) => {
 
   const answerTo = ({ bind }: FormField): string => typed[bind] ?? String(state[bind] ?? '');
 
-  const unavailableReason = useWorkflowsGate(node.onSubmit);
+  const unavailableReason = useActionGate(node.onSubmit);
 
   const submit = (event: FormEvent) => {
     event.preventDefault();

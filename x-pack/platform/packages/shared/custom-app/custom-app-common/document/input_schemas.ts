@@ -7,6 +7,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import { nodeIdSchema } from '@kbn/custom-app-registry';
+import type { Action } from '@kbn/custom-app-registry';
 import { stateKeySchema } from './bindings';
 import {
   MAX_HEADING_LENGTH,
@@ -92,7 +93,11 @@ export const formFieldSchema = lazySchema(() =>
 );
 
 /** The settings every input has, with a description of each. */
-export const describedInputProps = () => ({
+export const describedInputProps = (): {
+  label: z.ZodString;
+  bind: typeof stateKeySchema;
+  onChange: z.ZodDefault<z.ZodArray<z.ZodType<Action>>>;
+} => ({
   label: z.string().max(MAX_HEADING_LENGTH).describe('What the input is for, shown beside it.'),
   bind: stateKeySchema.describe(
     'The text value of the app that the input sets. It must be declared as a string.'

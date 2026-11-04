@@ -15,6 +15,9 @@
     "server/**/*.json"
   ],
   "kbn_references": [
+    "@kbn/custom-app-registry",
+    "@kbn/react-kibana-mount",
+    "@kbn/custom-app-common",
     "@kbn/security-plugin",
     "@kbn/ui-callout",
     "@kbn/entity-access-control-ui",

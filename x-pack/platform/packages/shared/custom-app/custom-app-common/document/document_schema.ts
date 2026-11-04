@@ -24,7 +24,7 @@ import { validateDocument } from './validate_document';
 
 export { stateKeySchema, actionSchema, stateDeclarationSchema, nodeSchema, getNodeSchemas };
 export type { AppNode, AppNodeOfType, AppNodeType, ContainerNode };
-export type Action = z.output<typeof actionSchema>;
+export type { Action } from '@kbn/custom-app-registry';
 export type FormField = z.output<typeof formFieldSchema>;
 export type CasesSource = z.output<typeof casesSourceSchema>;
 /** Where a component gets what it shows. */

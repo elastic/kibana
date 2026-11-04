@@ -39,7 +39,7 @@ describe('running a workflow', () => {
       type: 'runWorkflow',
       workflow: 'isolate-host',
       inputs,
-    } as Action);
+    } as unknown as Action);
 
   it('asks for a workflow to be run, and runs nothing itself', () => {
     const runtime = createAppRuntime(document);
@@ -131,8 +131,8 @@ describe('running a workflow', () => {
 
     const { workflows } = runtime.run([
       { type: 'openFlyout', flyout: 'detail' },
-      { type: 'runWorkflow', workflow: 'first', inputs: {} } as Action,
-      { type: 'runWorkflow', workflow: 'second', inputs: {} } as Action,
+      { type: 'runWorkflow', workflow: 'first', inputs: {} } as unknown as Action,
+      { type: 'runWorkflow', workflow: 'second', inputs: {} } as unknown as Action,
     ]);
 
     expect(workflows.map(({ workflow }) => workflow)).toEqual(['first', 'second']);
@@ -435,7 +435,11 @@ describe('createAppRuntime', () => {
       runtime.run([setState('users', ['alice', 'bob'])]);
 
       const { workflows } = runtime.run([
-        { type: 'runWorkflow', workflow: 'w', inputs: { users: { fromState: 'users' } } },
+        {
+          type: 'runWorkflow',
+          workflow: 'w',
+          inputs: { users: { fromState: 'users' } },
+        } as unknown as Action,
       ]);
 
       expect(workflows).toEqual([{ workflow: 'w', inputs: { users: ['alice', 'bob'] } }]);

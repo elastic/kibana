@@ -13,7 +13,7 @@ import type { AppNodeOfType } from '@kbn/custom-app-common';
 import type { SourceData } from '../../data/data_layer';
 import { useDataLayer } from '../../data/data_layer_context';
 import { useSource } from '../../data/use_source';
-import { useActionRunner } from '../../workflows/use_action_runner';
+import { useActionRunner } from '../../actions/use_action_runner';
 import { DataState } from '../../components/data_state';
 import { formatValue, toSortValue, type CellFormat } from '../../components/format_value';
 import { MissingColumn } from '../../components/missing_column';

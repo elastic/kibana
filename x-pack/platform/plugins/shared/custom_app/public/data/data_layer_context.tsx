@@ -15,3 +15,6 @@ export const useDataLayer = (): DataLayer => {
   if (!layer) throw new Error('useDataLayer must be used inside a DataLayerContext provider');
   return layer;
 };
+
+/** The data layer of the app, when there is one around. */
+export const useOptionalDataLayer = (): DataLayer | undefined => useContext(DataLayerContext);
