@@ -143,6 +143,9 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
               onPanelWidthChange={({ [GRAPH_PANEL_ID]: size }) => {
                 if (size !== undefined) setGraphPanelSize(size);
               }}
+              css={css`
+                height: calc(100vh - var(--euiFixedHeadersOffset, 0px) - ${euiTheme.size.xl});
+              `}
             >
               {(EuiResizablePanel, EuiResizableButton) => (
                 <>
@@ -150,7 +153,6 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
                     id={NOTEBOOK_PANEL_ID}
                     size={100 - graphPanelSize}
                     minSize="360px"
-                    scrollable={false}
                     paddingSize="none"
                     css={css`
                       padding-right: ${RUN_GUTTER_WIDTH};
@@ -158,7 +160,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
                   >
                     <CellList />
                   </EuiResizablePanel>
-                  <EuiResizableButton indicator="border" />
+                  <EuiResizableButton />
                   <EuiResizablePanel
                     id={GRAPH_PANEL_ID}
                     size={graphPanelSize}
@@ -166,20 +168,9 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
                     scrollable={false}
                     paddingSize="none"
                   >
-                    <div
-                      css={css`
-                        position: sticky;
-                        top: calc(var(--euiFixedHeadersOffset, 0px) + ${euiTheme.size.m});
-                        height: calc(
-                          100vh - var(--euiFixedHeadersOffset, 0px) - ${euiTheme.size.xxl}
-                        );
-                        padding-left: ${euiTheme.size.s};
-                      `}
-                    >
-                      <Suspense fallback={<EuiLoadingSpinner />}>
-                        <LazyDependencyGraph onSelectCell={scrollToCell} />
-                      </Suspense>
-                    </div>
+                    <Suspense fallback={<EuiLoadingSpinner />}>
+                      <LazyDependencyGraph onSelectCell={scrollToCell} />
+                    </Suspense>
                   </EuiResizablePanel>
                 </>
               )}
