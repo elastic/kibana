@@ -32,6 +32,7 @@ describe('render', () => {
       '3 of 3 successful'
     );
     expect(screen.getByText(/3 total shards/i)).toBeInTheDocument();
+    expect(screen.queryByText(/Request stopped before completion/)).not.toBeInTheDocument();
   });
 
   describe('partial', () => {
@@ -73,25 +74,29 @@ describe('render', () => {
       expect(screen.getByText(/failed/i)).toBeInTheDocument();
     });
 
-    test('should display callout when request timed out', () => {
-      const clusterDetails = {
-        status: 'partial',
-        indices: 'kibana_sample_data*',
-        took: 10005,
-        timed_out: true,
-        _shards: {
-          total: 3,
-          successful: 3,
-          skipped: 0,
-          failed: 0,
-        },
-      } as estypes.ClusterDetails;
+    test.each(['partial', 'failed'])(
+      'should warn about incomplete results without assuming why a %s request stopped',
+      (status) => {
+        const clusterDetails = {
+          status,
+          indices: 'kibana_sample_data*',
+          took: 10005,
+          timed_out: true,
+          _shards: {
+            total: 3,
+            successful: 3,
+            skipped: 0,
+            failed: 0,
+          },
+        } as estypes.ClusterDetails;
 
-      render(<ClusterView clusterDetails={clusterDetails} />);
-      expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
-        'Request timed out before completion'
-      );
-    });
+        render(<ClusterView clusterDetails={clusterDetails} />);
+        expect(screen.getByTestId('inspectorRequestClustersDetails')).toHaveTextContent(
+          'Request stopped before completion. Results may be incomplete or empty.'
+        );
+        expect(screen.queryByText(/Request timed out/)).not.toBeInTheDocument();
+      }
+    );
   });
 
   describe('skipped or failed', () => {
