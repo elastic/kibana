@@ -37,6 +37,7 @@ import type {
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
@@ -88,6 +89,13 @@ const inputSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Caller-supplied prompt for the investigation agent'),
+    instructions: z
+      .string()
+      .max(MAX_AUTOMATION_INSTRUCTIONS_LENGTH)
+      .optional()
+      .describe(
+        'Additional operator guidance for this investigation round; empty means no additional guidance'
+      ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
@@ -263,6 +271,9 @@ export const triggerInvestigationStepDefinition = (
             ...(input.telemetry_target ? { telemetry_target: input.telemetry_target } : {}),
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
+            instructions:
+              input.instructions ??
+              (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
             source_ids: input.source_ids,
             context: alerts
               ? { alerts }
