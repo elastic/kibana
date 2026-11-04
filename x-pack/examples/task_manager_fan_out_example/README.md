@@ -23,7 +23,8 @@ yarn start --run-examples
 Schedule a parent:
 
 ```sh
-curl -u elastic:changeme -X POST -H 'kbn-xsrf: true' -H 'Content-Type: application/json' \
+curl -u elastic:changeme -X POST -H 'kbn-xsrf: true' -H 'x-elastic-internal-origin: Kibana' \
+  -H 'Content-Type: application/json' \
   http://localhost:5601/internal/task_manager_fan_out_example/run -d '{"id":"fan-out-demo"}'
 ```
 

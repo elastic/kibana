@@ -1,0 +1,16 @@
+{
+  "type": "plugin",
+  "id": "@kbn/task-manager-fan-out-example-plugin",
+  "owner": "@elastic/response-ops",
+  "group": "platform",
+  "visibility": "private",
+  "description": "Example of a Task Manager parent task that fans out into sub-tasks, yields, and joins their results.",
+  "plugin": {
+    "id": "taskManagerFanOutExample",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "taskManager"
+    ]
+  }
+}
