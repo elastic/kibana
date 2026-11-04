@@ -8,9 +8,9 @@
  */
 
 import { parse } from 'yaml';
-import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/continuous_onboarding.yaml';
-import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
-import SCHEDULED_REVIEW_YAML from './scheduled_review.yaml';
+import SCHEDULED_REVIEW_YAML from './bound_scheduled_review.yaml';
+import CONTINUOUS_ONBOARDING_YAML from './knowledge_indicators/bound_continuous_onboarding.yaml';
+import ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import DISCOVERY_YAML from './significant_events/discovery.yaml';
 import { createWorkflowLiquidEngine } from '../../../common/utils';
 
@@ -146,11 +146,12 @@ describe('Significant Events run quota workflow contracts', () => {
 
   it('places discovery and KI gates before their expensive work', () => {
     expect(definitions.discovery.steps.slice(0, 3).map(({ name }) => name)).toEqual([
-      'bootstrap_cleanup_workflow',
       'check_budget',
       'exit_if_budget_denied',
+      'set_initial_vars',
     ]);
-    expect(definitions.onboarding.steps.slice(0, 2).map(({ name }) => name)).toEqual([
+    expect(definitions.onboarding.steps.slice(0, 3).map(({ name }) => name)).toEqual([
+      'refuse_direct_runs',
       'check_budget',
       'exit_if_budget_denied',
     ]);
