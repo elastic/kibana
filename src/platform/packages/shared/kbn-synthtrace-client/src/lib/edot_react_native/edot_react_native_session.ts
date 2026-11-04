@@ -307,8 +307,8 @@ const sendRequest = (
   requestedTime: number,
   latestEnd: number
 ): EdotReactNativeEvent[] => {
-  // The request, and with it its 1ms minimum duration, must end by latestEnd: the end of the screen
-  // view, or never on a view that crashes, whose requests may even start after the crash
+  // The request, and with it its 1ms minimum duration, must end by latestEnd: the end of the visit,
+  // or never on a visit that crashes, whose requests may even start after the crash
   const time = Math.min(requestedTime, latestEnd - 1);
   const {
     method,
@@ -453,18 +453,18 @@ const exportedBeforeCrash = (
 };
 
 /**
- * Everything that happens on one screen view. When the app crashes on it, requests run on past the
- * crash, so that `exportedBeforeCrash` drops them instead of cutting them short.
+ * Everything that happens on one screen view. Requests keep running when the user moves on to
+ * another screen, until `latestRequestEnd`.
  */
 const viewScreen = (
   ctx: SessionContext,
   view: ScreenViewPlan,
+  latestRequestEnd: number,
   crashedAt?: number
 ): EdotReactNativeEvent[] => {
   const { client, app, health, manualSpans, random } = ctx;
   const { screen, start, appeared, end } = view;
   const events: EdotReactNativeEvent[] = [];
-  const latestRequestEnd = crashedAt === undefined ? end : Number.POSITIVE_INFINITY;
 
   // Drawn on both platforms, so that the platform doesn't change the rest of the draws
   const viewContext = newTraceContext(random);
@@ -560,10 +560,13 @@ const simulateVisit = (
     );
   }
 
+  // Requests end by the time the user leaves the app. When it crashes, they run on past the crash,
+  // so that `exportedBeforeCrash` drops them instead of cutting them short.
+  const latestRequestEnd = crashedAt === undefined ? end : Number.POSITIVE_INFINITY;
   const lastView = screenViews.length - 1;
   events.push(
     ...screenViews.flatMap((view, i) =>
-      viewScreen(ctx, view, i === lastView ? crashedAt : undefined)
+      viewScreen(ctx, view, latestRequestEnd, i === lastView ? crashedAt : undefined)
     )
   );
 

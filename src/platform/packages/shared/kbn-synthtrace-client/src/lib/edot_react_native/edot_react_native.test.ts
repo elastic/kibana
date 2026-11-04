@@ -719,6 +719,42 @@ describe('edotReactNative', () => {
       expect(Math.max(...times) - Math.min(...times)).toBeLessThanOrEqual(ANDROID_MAX_SESSION_MS);
     });
 
+    it('lets requests run on after their screen, until the user leaves the app', () => {
+      const latencyMs = 3_000;
+      const docs = serialize(
+        edotReactNative.session({
+          client: ios(),
+          app: APP_MODEL,
+          health: withHealth({ httpLatency: { median: latencyMs, sigma: 0 } }),
+          screenViews: 6,
+          dwell: { median: 1_000, sigma: 0 },
+          start: TIMESTAMP,
+          random: seededRandom('requests-outlive-screens'),
+        })
+      );
+      // The user leaves the app at the end of the visit, which sends it to the background
+      const sessionEnd = Math.max(...docs.map(timeOf));
+      expect(
+        logs(docs).find((doc) => doc.attributes?.['ios.app.state'] === 'background')?.['@timestamp']
+      ).toBe(sessionEnd);
+      // iOS view spans are CLIENT spans too
+      const requestSpans = docs
+        .filter(isSpan)
+        .filter(({ attributes }) => attributes['url.full'] !== undefined);
+      const endOf = (span: EdotReactNativeSpanDocument) =>
+        timeOf(span) + (span.duration ?? 0) / 1_000_000;
+      requestSpans.forEach((span) => {
+        expect(endOf(span)).toBeLessThanOrEqual(sessionEnd);
+        // Only the end of the visit cuts a request short
+        if (timeOf(span) + latencyMs <= sessionEnd) {
+          expect(span.duration).toBe(latencyMs * 1_000_000);
+        }
+      });
+      expect(requestSpans.filter(({ duration }) => duration === latencyMs * 1_000_000).length).toBe(
+        requestSpans.length - requestSpans.filter((span) => endOf(span) === sessionEnd).length
+      );
+    });
+
     it('logs an error when a request with an error log fails', () => {
       const docs = simulate({
         platform: 'android',
