@@ -46,7 +46,7 @@ it('resolves credentials from the environment and preserves other preconfigured 
       'orcabench-es': {
         name: 'orcabench_es',
         actionTypeId: '.elasticsearch',
-        config: { url: 'https://orca.example.com' },
+        config: { url: 'https://orca.example.com', selectedActions: ['_test'] },
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey remote-key' },
       },
     });

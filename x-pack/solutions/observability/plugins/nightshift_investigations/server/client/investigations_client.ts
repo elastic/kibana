@@ -6,11 +6,13 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { badRequest } from '@hapi/boom';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
 import {
   NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
   NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
@@ -33,6 +35,7 @@ import {
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
   INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
   MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
   investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
@@ -74,14 +77,17 @@ import {
 import {
   buildAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
+  buildInvestigationRoundMessage,
   type AlertRecoveredMessageInput,
 } from './build_investigation_message';
 import {
   InvestigationNotFoundError,
+  InvestigationFailureContextError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
@@ -366,6 +372,7 @@ export interface NightshiftInvestigationsClientDeps {
   uiSettings?: CoreStart['uiSettings'];
   isAvailable: (connectorId?: string) => Promise<boolean>;
   isInfrastructureAvailable: () => Promise<boolean>;
+  ensureFailureSweep?: () => Promise<void>;
   /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
   isServiceAccountExecutionEnabled?: () => boolean;
 }
@@ -384,12 +391,14 @@ export class NightshiftInvestigationsClient {
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
+  private readonly ensureFailureSweep?: () => Promise<void>;
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
   private readonly isServiceAccountExecutionEnabled: () => boolean;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
+    this.ensureFailureSweep = deps.ensureFailureSweep;
     this.workflowsManagement = deps.workflowsManagement;
     this.spaces = deps.spaces;
     this.logger = deps.logger;
@@ -478,6 +487,7 @@ export class NightshiftInvestigationsClient {
       title,
       trigger_type,
       message,
+      instructions,
       timeout_seconds,
       source_ids,
       connector_id,
@@ -490,10 +500,16 @@ export class NightshiftInvestigationsClient {
       entryPoint,
     }: { automationBudget?: AutomationBudget; entryPoint: InvestigationEntryPoint }
   ): Promise<StartInvestigationResponse> {
+    if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+      throw badRequest(
+        `Instructions must be at most ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
+      );
+    }
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    await this.ensureFailureSweep?.();
     if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -560,15 +576,20 @@ export class NightshiftInvestigationsClient {
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
+    const roundMessage = isFollowUp
+      ? buildFollowUpMessage({
+          subject: resolvedSubject,
+          message: prepared.message,
+          alerts,
+          newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
+        })
+      : prepared.message;
     const inputs = {
-      message: isFollowUp
-        ? buildFollowUpMessage({
-            subject: resolvedSubject,
-            message: prepared.message,
-            alerts,
-            newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
-          })
-        : prepared.message,
+      message: buildInvestigationRoundMessage({
+        message: roundMessage,
+        instructions,
+        isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
+      }),
       // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
       // investigation from the first round instead.
       ...(title ? { title } : {}),
@@ -581,6 +602,7 @@ export class NightshiftInvestigationsClient {
         : {}),
       context: {
         ...prepared.context,
+        is_follow_up: isFollowUp,
         source: resolvedSubject.type,
         [`${resolvedSubject.type}_id`]: resolvedSubject.id,
         trigger_type,
@@ -888,7 +910,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || execution.status !== ExecutionStatus.FAILED)
+      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -898,11 +920,17 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    // A recovery follow-up waits in the investigation's queue after its lookup found it open, so
-    // it only continues an investigation that is still open when it gets its turn.
-    if (isAlertRecoveredFollowUp(inputs)) {
+    // API-started and ensured runs already have conversations; recovery must not recreate them
+    // after deletion. Alert recovery follow-ups also require the conversation to remain open.
+    const hadConversation =
+      (isPlainObject(inputs?.context) && typeof inputs.context.is_follow_up === 'boolean') ||
+      execution.stepExecutions?.some(
+        ({ stepId, status }) =>
+          stepId === 'persist_investigation_started' && status === ExecutionStatus.COMPLETED
+      );
+    if (isAlertRecoveredFollowUp(inputs) || (!reopen && hadConversation)) {
       const found = await findInvestigationConversation(conversations, investigationId);
-      if (found?.status !== 'open') {
+      if (!found || (isAlertRecoveredFollowUp(inputs) && found.status !== 'open')) {
         throw new InvestigationNotFoundError(investigationId);
       }
     }
@@ -918,13 +946,18 @@ export class NightshiftInvestigationsClient {
         : {}),
     });
 
+    let failureEventError: Error | undefined;
     if (failureReason !== undefined) {
-      await this.recordInvestigationRunFailure({
+      failureEventError = await this.recordInvestigationRunFailure({
         conversations,
         conversationId: conversation.id,
         executionId,
         message: asString(inputs?.message),
         reason: failureReason,
+        eventType:
+          execution.status === ExecutionStatus.TIMED_OUT
+            ? INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE
+            : INVESTIGATION_RUN_FAILED_EVENT_TYPE,
       });
     }
 
@@ -962,6 +995,8 @@ export class NightshiftInvestigationsClient {
       });
     }
 
+    // Preserve subject recovery while allowing the sweep to retry a missing timeline entry.
+    if (failureEventError) throw new InvestigationFailureContextError(failureEventError);
     return conversation.id;
   }
 
@@ -971,19 +1006,33 @@ export class NightshiftInvestigationsClient {
     executionId,
     message,
     reason,
+    eventType,
   }: {
     conversations: ConversationPublicClient;
     conversationId: string;
     executionId: string;
     message?: string;
     reason: string;
-  }): Promise<void> {
+    eventType:
+      | typeof INVESTIGATION_RUN_FAILED_EVENT_TYPE
+      | typeof INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE;
+  }): Promise<Error | undefined> {
     try {
+      const existing = await conversations.get(conversationId);
+      if (
+        existing.events?.some(
+          (event) =>
+            event.type === eventType &&
+            investigationRunFailedEventSchema.safeParse(event.data).data?.execution_id ===
+              executionId
+        )
+      )
+        return undefined;
       await conversations.addEvents({
         conversationId,
         events: [
           {
-            type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+            type: eventType,
             data: investigationRunFailedEventSchema.parse({
               execution_id: executionId,
               request: message?.trim()
@@ -999,21 +1048,57 @@ export class NightshiftInvestigationsClient {
           },
         ],
       });
+      return undefined;
     } catch (error) {
       this.logger.warn(
         `Could not record failure context for investigation "${conversationId}", execution "${executionId}": ${
           error instanceof Error ? error.message : String(error)
         }`
       );
+      return error instanceof Error ? error : new Error(String(error));
     }
   }
 
-  /**
-   * Reads a run of the investigation workflow that works on this investigation: its
-   * `investigation_id` input, or the run itself without one. Throws not found for a missing run,
-   * another workflow's run, or a run of another investigation.
-   */
-  private async readInvestigationExecution(investigationId: string, executionId: string) {
+  /** Reads a persisted unsuccessful investigation run under this request's space and permissions. */
+  async getUnsuccessfulRun(
+    executionId: string
+  ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
+    if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
+    const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
+    if (
+      execution.isTestRun ||
+      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
+    ) {
+      throw new InvestigationNotFoundError(executionId);
+    }
+    const investigationId = asString(inputs?.investigation_id) ?? executionId;
+    if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
+    return { execution, investigationId };
+  }
+
+  /** Prevents a delayed outcome from replacing the aggregate state of a newer investigation run. */
+  async isLatestInvestigationRun(execution: WorkflowExecutionDto): Promise<boolean> {
+    if (!execution.concurrencyGroupKey) return false;
+    const { workflowsManagement } = this.requireWriteDeps();
+    const { results } = await workflowsManagement.management.getWorkflowExecutions(
+      {
+        request: this.request,
+        concurrencyGroupKey: execution.concurrencyGroupKey,
+        executionTypes: [ExecutionType.PRODUCTION],
+        omitStepRuns: true,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        size: 1,
+      },
+      this.getSpaceId()
+    );
+    return results[0]?.id === execution.id;
+  }
+
+  private async readInvestigationExecution(
+    investigationId: string | undefined,
+    executionId: string
+  ) {
     const { workflowsManagement } = this.requireWriteDeps();
     const execution = await workflowsManagement.management.getWorkflowExecution(
       executionId,
@@ -1027,10 +1112,12 @@ export class NightshiftInvestigationsClient {
 
     if (
       !execution ||
+      execution.spaceId !== this.getSpaceId() ||
       !isInvestigationWorkflowExecution(execution) ||
-      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
+      (investigationId !== undefined &&
+        (asString(inputs?.investigation_id) ?? executionId) !== investigationId)
     ) {
-      throw new InvestigationNotFoundError(investigationId);
+      throw new InvestigationNotFoundError(investigationId ?? executionId);
     }
     const entryPoint = await workflowsManagement.management
       .getWorkflow(
