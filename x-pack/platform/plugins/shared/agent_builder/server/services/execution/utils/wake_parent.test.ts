@@ -83,6 +83,7 @@ const chosenForParent = {
 const parentRun = {
   executionId: 'parent-1',
   agentId: 'parent-agent',
+  executionMode: AgentExecutionMode.conversation,
   agentParams: {
     conversationId: 'conversation-1',
     nextInput: { message: 'start' },
@@ -193,6 +194,13 @@ describe('wakeParent', () => {
     await expect(wake()).resolves.toBe('skipped');
 
     get = executionById(null);
+    await expect(wake()).resolves.toBe('skipped');
+
+    get = executionById({
+      ...parentRun,
+      executionMode: AgentExecutionMode.standalone,
+      agentParams: { nextInput: { message: 'start' } },
+    } as AgentExecution);
     await expect(wake()).resolves.toBe('skipped');
     get = executionById();
 

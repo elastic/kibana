@@ -254,6 +254,7 @@ describe('AgentExecutionService', () => {
           ? ({
               executionId: 'parent-1',
               agentId: 'parent-agent',
+              executionMode: AgentExecutionMode.conversation,
               agentParams: { conversationId: 'parent-conv', nextInput: { message: 'start' } },
             } as never)
           : (childRecord as never)

@@ -100,7 +100,11 @@ export const wakeParent = async ({
   // The run that spawned the child names the conversation and carries the settings the user
   // chose for it; the service would otherwise fall back to the agent's defaults.
   const parent = await executionClient.get(child.parentExecutionId);
-  const conversationId = parent?.agentParams.conversationId;
+  // A standalone parent has no conversation to report to.
+  if (parent?.executionMode !== AgentExecutionMode.conversation) {
+    return 'skipped';
+  }
+  const { conversationId } = parent.agentParams;
   if (!conversationId) {
     return 'skipped';
   }
