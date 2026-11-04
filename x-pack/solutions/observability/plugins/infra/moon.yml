@@ -166,6 +166,8 @@ tags:
   - group-observability
   - private
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*

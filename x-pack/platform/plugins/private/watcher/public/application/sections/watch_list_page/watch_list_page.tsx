@@ -348,7 +348,7 @@ export const WatchListPage = () => {
       <>
         {header}
         <EuiPageTemplate.EmptyPrompt
-          iconType="managementApp"
+          iconType="gear"
           title={
             <h2>
               <FormattedMessage

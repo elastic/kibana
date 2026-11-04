@@ -16,7 +16,13 @@ export { UserAvatar } from './src/user_avatar';
 export { UserToolTip } from './src/user_tooltip';
 export { UserProfilesSelectable } from './src/user_profiles_selectable';
 export { UserProfilesPopover } from './src/user_profiles_popover';
-export { getUserDisplayName, isValidUserProfileAvatarColor } from './src/user_profile';
+export { getUserAvatarColor } from './src/user_avatar_color';
+export {
+  getUserAvatarInitials,
+  getUserDisplayName,
+  isValidUserProfileAvatarColor,
+  USER_AVATAR_MAX_INITIALS,
+} from './src/user_profile';
 export type { GetUserDisplayNameParams } from './src/user_profile';
 export type {
   UserSettingsData,

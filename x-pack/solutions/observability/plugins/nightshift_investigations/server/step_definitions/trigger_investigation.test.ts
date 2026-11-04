@@ -75,14 +75,20 @@ describe('triggerInvestigationStepDefinition', () => {
       const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
       const { definition, getEpisodeLookup } = createDefinition(start);
 
-      await definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }));
+      await definition.handler(
+        createContext({
+          subject_type: 'alert',
+          subject_id: 'episode-1',
+          telemetry_target: 'orca',
+        })
+      );
 
       expect(getEpisodeLookup).toHaveBeenCalledWith(request, 'test-space');
       expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledWith(
         expect.objectContaining({ alertIds: ['episode-1'] })
       );
       expect(start).toHaveBeenCalledWith(
-        expect.objectContaining({ context: { alerts: snapshots } }),
+        expect.objectContaining({ context: { alerts: snapshots }, telemetry_target: 'orca' }),
         expect.anything()
       );
     });
@@ -120,6 +126,26 @@ describe('triggerInvestigationStepDefinition', () => {
       }),
       expect.anything()
     );
+  });
+
+  it.each([
+    [
+      'slack',
+      {
+        subject_type: 'slack_thread',
+        message: 'Review',
+        slack_thread: { workspace: 'T1', channel: 'C1', thread_ts: '1.1' },
+      },
+    ],
+    ['automation', { subject_type: 'significant_event', subject_id: 'event-1' }],
+    ['automation', { subject_type: 'manual', message: 'Review errors.' }],
+  ])('starts with entry point %s for %j', async (entryPoint, input) => {
+    const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+    const { definition } = createDefinition(start);
+
+    await definition.handler(createContext(input));
+
+    expect(start).toHaveBeenCalledWith(expect.anything(), expect.objectContaining({ entryPoint }));
   });
 
   it('starts without a title, which Agent Builder generates', async () => {
