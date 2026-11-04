@@ -249,8 +249,15 @@ describe('AgentExecutionService', () => {
       mockHandleAgentExecution.mockResolvedValue(of());
       mockCollectAndWriteEvents.mockReturnValue(new Promise<void>((resolve) => (finish = resolve)));
       mockExecutionClient.create.mockResolvedValueOnce(childRecord as never);
-      mockExecutionClient.get.mockResolvedValue(childRecord as never);
-      mockExecutionClient.peek.mockResolvedValue({ conversationId: 'parent-conv' } as never);
+      mockExecutionClient.get.mockImplementation(async (id: string) =>
+        id === 'parent-1'
+          ? ({
+              executionId: 'parent-1',
+              agentId: 'parent-agent',
+              agentParams: { conversationId: 'parent-conv', nextInput: { message: 'start' } },
+            } as never)
+          : (childRecord as never)
+      );
       conversationClient.get.mockResolvedValue({
         id: 'parent-conv',
         rounds: [],
@@ -293,7 +300,7 @@ describe('AgentExecutionService', () => {
         expect.objectContaining({
           id: 'agent-wake-child-1',
           taskType: 'agent-builder:wake-parent',
-          params: { conversationId: 'parent-conv', childExecutionId: 'child-1' },
+          params: { childExecutionId: 'child-1' },
         }),
         { request, cloneApiKey: true }
       );

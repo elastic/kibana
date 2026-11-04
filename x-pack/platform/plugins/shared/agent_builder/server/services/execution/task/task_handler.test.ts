@@ -571,11 +571,7 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
       elasticsearch: { client: { asInternalUser: {} } },
       conversationService,
       getExecutionService: () => ({ executeAgent }),
-    } as never).wakeParent({
-      conversationId: 'conversation-1',
-      childExecutionId: 'child-1',
-      fakeRequest,
-    });
+    } as never).wakeParent({ childExecutionId: 'child-1', fakeRequest });
 
   beforeEach(() => {
     wakeParentMock.mockReset();
@@ -587,7 +583,6 @@ describe('TaskHandler retrying a wake of a busy parent', () => {
     await expect(wake()).resolves.toEqual({ done: true });
     expect(wakeParentMock).toHaveBeenCalledWith({
       request: fakeRequest,
-      conversationId: 'conversation-1',
       childExecutionId: 'child-1',
       executionClient: expect.anything(),
       conversationService,

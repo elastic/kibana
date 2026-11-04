@@ -73,8 +73,20 @@ describe('describeFinishedChild', () => {
 const parentRun = {
   executionId: 'parent-1',
   agentId: 'parent-agent',
-  agentParams: { nextInput: { message: 'start' }, connectorId: 'connector-9' },
+  agentParams: {
+    conversationId: 'conversation-1',
+    nextInput: { message: 'start' },
+    connectorId: 'connector-9',
+  },
 } as unknown as AgentExecution;
+
+// `null` stands for a missing parent record; `undefined` would select the default.
+const executionById = (parent: AgentExecution | null = parentRun) =>
+  jest
+    .fn()
+    .mockImplementation(async (id: string) =>
+      id === 'parent-1' ? parent ?? undefined : finishedChild
+    );
 
 describe('wakeParent', () => {
   let maybeExecuteAgent: jest.Mock;
@@ -85,7 +97,6 @@ describe('wakeParent', () => {
   const wake = () =>
     wakeParent({
       request,
-      conversationId: 'conversation-1',
       childExecutionId: 'child-1',
       executionClient: { get } as unknown as AgentExecutionClient,
       conversationService: {
@@ -98,9 +109,7 @@ describe('wakeParent', () => {
     jest.clearAllMocks();
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
-    get = jest
-      .fn()
-      .mockImplementation(async (id: string) => (id === 'parent-1' ? parentRun : finishedChild));
+    get = executionById();
     getScopedClientAsUser = jest.fn().mockImplementation(async () => conversationClient);
     conversationClient = createConversationClientMock();
     conversationClient.get.mockResolvedValue({
@@ -134,20 +143,14 @@ describe('wakeParent', () => {
     });
   });
 
-  it('leaves the model to the agent when the run that spawned the child is gone or chose none', async () => {
-    get.mockImplementation(async (id: string) => (id === 'parent-1' ? undefined : finishedChild));
-    await expect(wake()).resolves.toBe('woken');
+  it('leaves the model to the agent when the run that spawned the child chose none', async () => {
+    get = executionById({
+      ...parentRun,
+      agentParams: { conversationId: 'conversation-1', nextInput: { message: 'start' } },
+    } as AgentExecution);
 
-    get.mockImplementation(async (id: string) =>
-      id === 'parent-1'
-        ? { ...parentRun, agentParams: { nextInput: { message: 'start' } } }
-        : finishedChild
-    );
     await expect(wake()).resolves.toBe('woken');
-
-    for (const [{ params }] of maybeExecuteAgent.mock.calls) {
-      expect(params).not.toHaveProperty('connectorId');
-    }
+    expect(maybeExecuteAgent.mock.calls[0][0].params).not.toHaveProperty('connectorId');
   });
 
   it('leaves the message for the next run when the sub-agent asked for never', async () => {
@@ -164,12 +167,19 @@ describe('wakeParent', () => {
     );
   });
 
-  it('skips a child without a record or owner, and an idle parent that already reported or waits on a prompt', async () => {
+  it('skips a child without a record, owner or parent run, and an idle parent that already reported or waits on a prompt', async () => {
     get.mockResolvedValueOnce({ ...finishedChild, owner: undefined });
     await expect(wake()).resolves.toBe('skipped');
 
     get.mockResolvedValueOnce(undefined);
     await expect(wake()).resolves.toBe('skipped');
+
+    get.mockResolvedValueOnce({ ...finishedChild, parentExecutionId: undefined });
+    await expect(wake()).resolves.toBe('skipped');
+
+    get = executionById(null);
+    await expect(wake()).resolves.toBe('skipped');
+    get = executionById();
 
     conversationClient.get.mockResolvedValueOnce({ id: 'conversation-1', state: {} } as never);
     await expect(wake()).resolves.toBe('skipped');
@@ -218,7 +228,7 @@ describe('wakeParent', () => {
 
 describe('reportToParent', () => {
   let maybeExecuteAgent: jest.Mock;
-  let peek: jest.Mock;
+  let get: jest.Mock;
   let ensureScheduled: jest.Mock;
   let removeIfExists: jest.Mock;
   let conversationClient: ReturnType<typeof createConversationClientMock>;
@@ -227,7 +237,7 @@ describe('reportToParent', () => {
     {
       id: 'agent-wake-child-1',
       taskType: 'agent-builder:wake-parent',
-      params: { conversationId: 'conversation-1', childExecutionId: 'child-1' },
+      params: { childExecutionId: 'child-1' },
       state: {},
       scope: ['agent-builder'],
       enabled: true,
@@ -240,10 +250,7 @@ describe('reportToParent', () => {
     reportToParent({
       execution,
       request,
-      executionClient: {
-        peek,
-        get: jest.fn().mockResolvedValue(finishedChild),
-      } as unknown as AgentExecutionClient,
+      executionClient: { get } as unknown as AgentExecutionClient,
       conversationService: {
         getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
       } as unknown as ConversationService,
@@ -257,7 +264,7 @@ describe('reportToParent', () => {
     jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
     isPendingResumeConversationMock.mockReturnValue(false);
     maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
-    peek = jest.fn().mockResolvedValue({ conversationId: 'conversation-1' });
+    get = executionById();
     ensureScheduled = jest.fn().mockResolvedValue({});
     removeIfExists = jest.fn().mockResolvedValue(undefined);
     conversationClient = createConversationClientMock();
@@ -271,18 +278,19 @@ describe('reportToParent', () => {
     jest.useRealTimers();
   });
 
-  it('does nothing for a child that is not reporting or whose parent is gone', async () => {
+  it('does nothing for a child that is not reporting, and settles without a run when its parent is gone', async () => {
     await report({
       ...finishedChild,
       agentParams: { nextInput: { message: 'go' } },
     } as AgentExecution);
-    expect(peek).not.toHaveBeenCalled();
-
-    peek.mockResolvedValueOnce({});
-    await report();
-
-    expect(maybeExecuteAgent).not.toHaveBeenCalled();
     expect(ensureScheduled).not.toHaveBeenCalled();
+    expect(get).not.toHaveBeenCalled();
+
+    get = executionById(null);
+    await report();
+    expect(ensureScheduled).toHaveBeenCalledTimes(1);
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
+    expect(removeIfExists).toHaveBeenCalledWith('agent-wake-child-1');
   });
 
   it('holds a retry task on its own credential across the wake and removes it once the report settled', async () => {

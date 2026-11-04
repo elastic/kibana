@@ -20,7 +20,6 @@ export interface RunAgentTaskParams {
 }
 
 export interface WakeParentTaskParams {
-  conversationId: string;
   childExecutionId: string;
 }
 

@@ -28,7 +28,7 @@ describe('wake-parent task definition', () => {
     definitions[taskTypes.wakeParent].createTaskRunner({
       taskInstance: {
         id: wakeParentTaskId('child-1'),
-        params: { conversationId: 'conversation-1', childExecutionId: 'child-1' },
+        params: { childExecutionId: 'child-1' },
       },
       fakeRequest,
     } as never);
@@ -44,7 +44,6 @@ describe('wake-parent task definition', () => {
     wakeParent.mockResolvedValueOnce({ done: true });
     await expect(runner.run()).resolves.toEqual({ state: {} });
     expect(wakeParent).toHaveBeenCalledWith({
-      conversationId: 'conversation-1',
       childExecutionId: 'child-1',
       fakeRequest: expect.anything(),
     });

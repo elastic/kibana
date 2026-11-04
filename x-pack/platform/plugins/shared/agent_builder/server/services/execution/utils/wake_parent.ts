@@ -32,7 +32,6 @@ export type WakeParentResult = 'woken' | 'queued' | 'busy' | 'skipped';
 
 export interface WakeParentParams {
   request: KibanaRequest;
-  conversationId: string;
   childExecutionId: string;
   executionClient: AgentExecutionClient;
   conversationService: ConversationService;
@@ -54,18 +53,25 @@ export const describeFinishedChild = (child: AgentExecution): string => {
 
 /**
  * Reports a finished background sub-agent to its parent conversation: a run for `always`, the
- * message alone for `never`.
+ * message alone for `never`. Everything is resolved from the child's record, so a caller needs
+ * nothing but its id.
  */
 export const wakeParent = async ({
   request,
-  conversationId,
   childExecutionId,
   executionClient,
   conversationService,
   executionService,
 }: WakeParentParams): Promise<WakeParentResult> => {
   const child = await executionClient.get(childExecutionId);
-  if (!child?.owner) {
+  if (!child?.owner || !child.parentExecutionId) {
+    return 'skipped';
+  }
+  // The run that spawned the child names the conversation and carries the model the user chose;
+  // the service would otherwise fall back to the agent's default.
+  const parent = await executionClient.get(child.parentExecutionId);
+  const conversationId = parent?.agentParams.conversationId;
+  if (!conversationId) {
     return 'skipped';
   }
 
@@ -96,12 +102,7 @@ export const wakeParent = async ({
   }
 
   const triggerMode = child.agentParams.parentTriggerMode ?? ChatTriggerMode.Always;
-  // The run that spawned the child carries the model the user chose; the service would otherwise
-  // fall back to the agent's default.
-  const parent = child.parentExecutionId
-    ? await executionClient.get(child.parentExecutionId)
-    : undefined;
-  const connectorId = parent?.agentParams.connectorId;
+  const connectorId = parent.agentParams.connectorId;
   try {
     await executionService.maybeExecuteAgent({
       mode: AgentExecutionMode.conversation,
@@ -132,17 +133,17 @@ export const wakeParent = async ({
   return triggerMode === ChatTriggerMode.Never ? 'queued' : 'woken';
 };
 
-export interface ReportToParentParams
-  extends Omit<WakeParentParams, 'conversationId' | 'childExecutionId'> {
+export interface ReportToParentParams extends Omit<WakeParentParams, 'childExecutionId'> {
   execution: AgentExecution;
   taskManager: TaskManagerStartContract;
   logger: Logger;
 }
 
 /**
- * Wakes the parent of a finished background sub-agent. The retry task is scheduled first, so a
- * failed attempt or a busy parent is retried from a task with its own credential; an attempt that
- * settles the report removes it, and a task that outlives one finds nothing left to do. Never throws.
+ * Wakes the parent of a finished background sub-agent. The retry task is scheduled before anything
+ * is read, so a failed attempt or a busy parent is retried from a task with its own credential; an
+ * attempt that settles the report removes it, and a task that outlives one finds nothing left to
+ * do. Never throws.
  */
 export const reportToParent = async ({
   execution,
@@ -155,11 +156,6 @@ export const reportToParent = async ({
     return;
   }
 
-  const conversationId = (await wake.executionClient.peek(parentExecutionId))?.conversationId;
-  if (!conversationId) {
-    return;
-  }
-
   const taskId = wakeParentTaskId(childExecutionId);
   const scheduleRetry = async (): Promise<boolean> => {
     try {
@@ -167,7 +163,7 @@ export const reportToParent = async ({
         {
           id: taskId,
           taskType: taskTypes.wakeParent,
-          params: { conversationId, childExecutionId },
+          params: { childExecutionId },
           state: {},
           scope: ['agent-builder'],
           enabled: true,
@@ -188,14 +184,12 @@ export const reportToParent = async ({
 
   let settled = false;
   try {
-    const result = await wakeParent({ ...wake, conversationId, childExecutionId });
-    logger.debug(
-      `Wake of conversation ${conversationId} for background execution ${childExecutionId}: ${result}`
-    );
+    const result = await wakeParent({ ...wake, childExecutionId });
+    logger.debug(`Wake of the parent of background execution ${childExecutionId}: ${result}`);
     settled = result !== 'busy';
   } catch (error) {
     logger.warn(
-      `Wake of conversation ${conversationId} for background execution ${childExecutionId} failed${
+      `Wake of the parent of background execution ${childExecutionId} failed${
         scheduled ? ', retrying from a task' : ''
       }: ${error.message}`
     );

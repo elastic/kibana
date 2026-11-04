@@ -41,7 +41,6 @@ export interface TaskHandlerDeps extends AgentExecutionDeps {
 }
 
 export interface WakeParentParams {
-  conversationId: string;
   childExecutionId: string;
   fakeRequest: KibanaRequest;
 }
@@ -319,21 +318,17 @@ class TaskHandlerImpl implements TaskHandler {
   }
 
   async wakeParent({
-    conversationId,
     childExecutionId,
     fakeRequest,
   }: WakeParentParams): Promise<{ done: boolean }> {
     const result = await wakeParent({
       request: fakeRequest,
-      conversationId,
       childExecutionId,
       executionClient: this.createExecutionClient(),
       conversationService: this.deps.conversationService,
       executionService: this.deps.getExecutionService(),
     });
-    this.logger.debug(
-      `Wake of conversation ${conversationId} for background execution ${childExecutionId}: ${result}`
-    );
+    this.logger.debug(`Wake of the parent of background execution ${childExecutionId}: ${result}`);
     return { done: result !== 'busy' };
   }
 
