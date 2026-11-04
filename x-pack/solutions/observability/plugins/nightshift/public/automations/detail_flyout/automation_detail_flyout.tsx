@@ -52,10 +52,7 @@ import {
   useUpdateAutomation,
   type Automation,
 } from '../hooks/use_automations';
-import {
-  isAutomationRateLimited,
-  statusLabels,
-} from '../utils/filter_automations';
+import { isAutomationRateLimited, statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';
 import { AutomationUsageCell } from '../list/cells/usage_cell';
 import { RunsSparkline } from '../list/cells/runs_sparkline';

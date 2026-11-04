@@ -41,16 +41,8 @@ export const AutomationUsageCell = ({
   const warningText = euiTheme.colors.textWarning;
   const disabledText = euiTheme.colors.textDisabled;
   const limitColor = euiTheme.colors.vis.euiColorVisWarning0;
-  const emphasisColor = isGlobalLimitReached
-    ? disabledText
-    : isLimitHigh
-    ? warningText
-    : undefined;
-  const progressColor = isGlobalLimitReached
-    ? disabledText
-    : isLimitHigh
-    ? limitColor
-    : 'success';
+  const emphasisColor = isGlobalLimitReached ? disabledText : isLimitHigh ? warningText : undefined;
+  const progressColor = isGlobalLimitReached ? disabledText : isLimitHigh ? limitColor : 'success';
   const tooltip = getAutomationUsageTooltip({ used, limit, isGlobalLimitReached });
 
   return (
@@ -89,12 +81,7 @@ export const AutomationUsageCell = ({
             </EuiFlexItem>
           </EuiFlexGroup>
           {limit !== undefined && (
-            <EuiProgress
-              value={Math.min(used, limit)}
-              max={limit}
-              size="s"
-              color={progressColor}
-            />
+            <EuiProgress value={Math.min(used, limit)} max={limit} size="s" color={progressColor} />
           )}
         </div>
       </EuiToolTip>
