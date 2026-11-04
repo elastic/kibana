@@ -261,6 +261,7 @@ export class NightshiftInvestigationsPlugin
         spaces: this.spaces,
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
+        assistantEnabled: this.assistantEnabled,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
