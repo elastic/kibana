@@ -102,6 +102,7 @@ const applyEbtProps = (
 
 export interface NightshiftAppHeaderProps {
   page?: 'landing' | 'automations' | 'detection' | 'knowledge' | 'settings' | 'sources';
+  hideMenu?: boolean;
   onSourcesClick?: () => void | Promise<void>;
   sourcesHref?: string;
   onKnowledgeClick?: () => void | Promise<void>;
@@ -120,6 +121,7 @@ export interface NightshiftAppHeaderProps {
 
 export function NightshiftAppHeader({
   page = 'landing',
+  hideMenu = false,
   onSourcesClick,
   sourcesHref,
   onKnowledgeClick,
@@ -285,7 +287,8 @@ export function NightshiftAppHeader({
       }
       back={back}
       tabs={tabs}
-      menu={menu}
+      menu={hideMenu ? undefined : menu}
+      docLink={hideMenu ? '' : undefined}
       spacing="compact"
     />
   );

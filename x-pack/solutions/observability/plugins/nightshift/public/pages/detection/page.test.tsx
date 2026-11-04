@@ -21,7 +21,43 @@ import type { DetectionTabId } from './detection_tabs';
 import { DetectionPage } from './page';
 
 jest.mock('../../components/app_header', () => ({
-  NightshiftAppHeader: () => <div data-test-subj="nightshiftAppHeaderStub" />,
+  NightshiftAppHeader: ({
+    hideMenu,
+    onKnowledgeClick,
+    knowledgeHref,
+    onSourcesClick,
+    sourcesHref,
+    onSettingsClick,
+    settingsHref,
+  }: {
+    hideMenu?: boolean;
+    onKnowledgeClick?: () => void;
+    knowledgeHref?: string;
+    onSourcesClick?: () => void;
+    sourcesHref?: string;
+    onSettingsClick?: () => void;
+    settingsHref?: string;
+  }) => (
+    <div data-test-subj="nightshiftAppHeaderStub">
+      {!hideMenu && (
+        <>
+          {onSourcesClick && sourcesHref && (
+            <a data-test-subj="nightshiftSourcesLinkStub" href={sourcesHref}>
+              Sources
+            </a>
+          )}
+          {onSettingsClick && settingsHref && (
+            <a data-test-subj="nightshiftSettingsLinkStub" href={settingsHref}>
+              Settings
+            </a>
+          )}
+          {onKnowledgeClick && knowledgeHref && (
+            <button data-test-subj="nightshiftOverflowMenuStub">More</button>
+          )}
+        </>
+      )}
+    </div>
+  ),
 }));
 jest.mock('../../data/detection_overview/use_detection_overview');
 jest.mock('../../data/detection_entities/use_detection_entities');
@@ -106,6 +142,9 @@ const mockUseMaintenanceStatus = useMaintenanceStatus as jest.Mock;
 const mockUseFetchSources = useFetchSources as jest.Mock;
 const mockUseDeveloperMode = useDeveloperMode as jest.Mock;
 const refetch = jest.fn();
+const onKnowledgeClick = jest.fn();
+const onSourcesClick = jest.fn();
+const onSettingsClick = jest.fn();
 let mockSourcesCount = 1;
 let mockSourcesError = false;
 let mockSourcesIsFetching = false;
@@ -121,7 +160,17 @@ const renderPage = (initialPath = '/detections/events', tab: DetectionTabId = 'e
     <I18nProvider>
       <EuiProvider>
         <Router history={history}>
-          <DetectionPage headerProps={{}} tab={tab} />
+          <DetectionPage
+            headerProps={{
+              onKnowledgeClick,
+              knowledgeHref: '/app/nightshift/knowledge',
+              onSourcesClick,
+              sourcesHref: '/app/nightshift/sources',
+              onSettingsClick,
+              settingsHref: '/app/nightshift/settings/detections',
+            }}
+            tab={tab}
+          />
         </Router>
       </EuiProvider>
     </I18nProvider>
@@ -200,6 +249,9 @@ describe('DetectionPage', () => {
     expect(screen.getByTestId('nightshiftDetectionOnboarding')).toBeInTheDocument();
     expect(screen.getByTestId('recommendedSourcesTableStub')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftDetectionTab-events')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSourcesLinkStub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSettingsLinkStub')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftOverflowMenuStub')).not.toBeInTheDocument();
   });
 
   it('shows earlier results and a warning when the space has no sources', async () => {
@@ -347,6 +399,15 @@ describe('DetectionPage', () => {
 
     expect(await screen.findByTestId('eventsTabStub')).toBeInTheDocument();
     expect(screen.queryByTestId('nightshiftDetectionOnboarding')).not.toBeInTheDocument();
+    expect(screen.getByTestId('nightshiftSourcesLinkStub')).toHaveAttribute(
+      'href',
+      '/app/nightshift/sources'
+    );
+    expect(screen.getByTestId('nightshiftSettingsLinkStub')).toHaveAttribute(
+      'href',
+      '/app/nightshift/settings/detections'
+    );
+    expect(screen.getByTestId('nightshiftOverflowMenuStub')).toBeInTheDocument();
   });
 
   it('shows the locked onboarding to a viewer with no sources or history', () => {
