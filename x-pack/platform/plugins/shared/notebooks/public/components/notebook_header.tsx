@@ -8,7 +8,6 @@
 import React, { useMemo, useRef, useState } from 'react';
 import {
   EuiBadge,
-  EuiButtonGroup,
   EuiFlexGroup,
   EuiFlexItem,
   EuiInlineEditTitle,
@@ -113,36 +112,16 @@ const NotebookDescription = () => {
   );
 };
 
-export type NotebookView = 'notebook' | 'graph';
-
-const VIEW_LEGEND = i18n.translate('xpack.notebook.header.view', { defaultMessage: 'View' });
-
-const VIEW_OPTIONS: Array<{ id: NotebookView; label: string; iconType: string }> = [
-  {
-    id: 'notebook',
-    label: i18n.translate('xpack.notebook.header.viewNotebook', { defaultMessage: 'Notebook' }),
-    iconType: 'document',
-  },
-  {
-    id: 'graph',
-    label: i18n.translate('xpack.notebook.header.viewGraph', { defaultMessage: 'Graph' }),
-    iconType: 'graphApp',
-  },
-];
-
-const isNotebookView = (id: string): id is NotebookView =>
-  VIEW_OPTIONS.some((option) => option.id === id);
-
 export const NotebookHeader = ({
   onSave,
   isSaving,
-  view,
-  onViewChange,
+  isGraphOpen,
+  onToggleGraph,
 }: {
   onSave?: () => void;
   isSaving?: boolean;
-  view: NotebookView;
-  onViewChange: (view: NotebookView) => void;
+  isGraphOpen: boolean;
+  onToggleGraph: () => void;
 }) => {
   const { store, scheduler } = useNotebook();
   const { core } = useNotebookServices();
@@ -164,8 +143,17 @@ export const NotebookHeader = ({
           run: () => scheduler.runAll(),
         },
         {
-          id: 'settings',
+          id: 'graph',
           order: 2,
+          label: i18n.translate('xpack.notebook.header.graph', { defaultMessage: 'Graph' }),
+          iconType: 'graphApp',
+          testId: 'notebookGraphToggle',
+          isSelected: isGraphOpen,
+          run: onToggleGraph,
+        },
+        {
+          id: 'settings',
+          order: 3,
           label: i18n.translate('xpack.notebook.header.settings', { defaultMessage: 'Settings' }),
           iconType: 'gear',
           testId: 'notebookSettings',
@@ -186,7 +174,7 @@ export const NotebookHeader = ({
           }
         : {}),
     }),
-    [scheduler, onSave, isSaving, isDirty]
+    [scheduler, onSave, isSaving, isDirty, isGraphOpen, onToggleGraph]
   );
 
   return (
@@ -220,20 +208,6 @@ export const NotebookHeader = ({
             <PinnedTimePicker cell={pinnedTime} />
           </EuiFlexItem>
         )}
-        <EuiFlexItem grow={false}>
-          <EuiButtonGroup
-            legend={VIEW_LEGEND}
-            buttonSize="compressed"
-            options={VIEW_OPTIONS.map(({ id, label, iconType }) => ({
-              id,
-              label,
-              iconType,
-              'data-test-subj': `notebookView-${id}`,
-            }))}
-            idSelected={view}
-            onChange={(id) => isNotebookView(id) && onViewChange(id)}
-          />
-        </EuiFlexItem>
       </EuiFlexGroup>
       <EuiSpacer size="s" />
       <NotebookDescription />

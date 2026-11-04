@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo, useRef, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import {
   Background,
   Controls,
@@ -17,7 +17,6 @@ import {
   type Node,
   type NodeProps,
   type NodeTypes,
-  type ReactFlowInstance,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import {
@@ -190,13 +189,12 @@ const SourceNode = ({ data: { label, highlight } }: NodeProps<SourceFlowNode>) =
 const NODE_TYPES: NodeTypes = { cell: CellNode, source: SourceNode };
 
 /** The notebook's cells and data sources as a top-to-bottom dependency graph. */
-export const DependencyGraph = ({ onOpenCell }: { onOpenCell: (cellId: string) => void }) => {
+export const DependencyGraph = ({ onSelectCell }: { onSelectCell: (cellId: string) => void }) => {
   const { store } = useNotebook();
   const { euiTheme, colorMode } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const cellOrder = useStateFromPublishingSubject(store.cellOrder$);
   const [selectedId, setSelectedId] = useState<string>();
-  const flow = useRef<ReactFlowInstance<FlowNode, Edge>>();
 
   const view = useMemo(() => buildGraphView(cells, cellOrder), [cells, cellOrder]);
 
@@ -247,19 +245,10 @@ export const DependencyGraph = ({ onOpenCell }: { onOpenCell: (cellId: string) =
     };
   }, [view, selectedId, euiTheme]);
 
-  const focusNode = (node: FlowNode) => {
-    setSelectedId(node.id);
-    const { width, height } = node.type === 'cell' ? CELL_NODE_SIZE : SOURCE_NODE_SIZE;
-    flow.current?.setCenter(node.position.x + width / 2, node.position.y + height / 2, {
-      zoom: flow.current.getZoom(),
-      duration: 300,
-    });
-  };
-
   return (
     <div
       css={css`
-        height: max(480px, calc(100vh - 280px));
+        height: 100%;
         border: ${euiTheme.border.thin};
         border-radius: ${euiTheme.border.radius.medium};
         overflow: hidden;
@@ -283,15 +272,11 @@ export const DependencyGraph = ({ onOpenCell }: { onOpenCell: (cellId: string) =
           nodesDraggable={false}
           nodesConnectable={false}
           elementsSelectable={false}
-          onInit={(instance) => {
-            flow.current = instance;
-          }}
-          onNodeClick={(_event, node) => focusNode(node)}
-          onNodeDoubleClick={(_event, node) => {
-            if (node.type === 'cell') onOpenCell(node.id);
+          onNodeClick={(_event, node) => {
+            setSelectedId(node.id);
+            if (node.type === 'cell') onSelectCell(node.id);
           }}
           onPaneClick={() => setSelectedId(undefined)}
-          zoomOnDoubleClick={false}
           fitView
           minZoom={0.2}
           proOptions={{ hideAttribution: true }}
