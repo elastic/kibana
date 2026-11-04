@@ -31,6 +31,16 @@ Every `materialize` call runs one pipeline, as the requesting user:
 - **`toChartData(table, options)`** turns a `Datatable` into a chart's `data`, unreordered with raw values, so selections refer to the source rows. Each column's `source` is its `Datatable` column (`{ kind: 'kibana-datatable-column', column }`) and `data.source` is the table's meta, so a host can rebuild the table a selection refers to. Pre-rendered formats and bucket labels arrive as `display` strings, and anything that didn't carry over is a `losses` entry.
 - **`paletteColors(count, paletteId)`** returns a `@kbn/palettes` palette's colors for light and dark, falling back to Kibana's default palette.
 
+### Selections
+
+`filtersForSelection(event, node)` turns a `ChartEvent` on a node into the Kibana filters Kibana's value click and range select actions build, as the requesting user. It rebuilds the `Datatable` from the node's column sources and resolves each selected column:
+
+- **Data view tables** (`esaggs` columns): the column's agg config, created through the server aggs service from its data view, builds the filter with the agg type's own `createFilter`: terms, the Other bucket (excluding the other terms beside it), the missing bucket, histograms, ranges, date histograms and the rest.
+- **ES|QL tables**: date histogram and histogram columns filter to their bucket, other aggregated columns to field existence, and raw columns to their value when the index pattern's field can be filtered.
+- **Brushes** filter the brushed column's field to the brushed range.
+
+A `negate` selection negates every filter, and duplicates are dropped. Filters carry no display mapping (`meta.key`, `meta.value`), which Kibana's filter manager adds when a Kibana host adds them; ES|QL filters name the query's index pattern as their `meta.index`.
+
 ### Instrumentation
 
 Sizes are measured as Isomer's input budget counts them (`measureInput` matches the SDK's `checkInputBudget`), and reported as event-based telemetry and debug logs (`plugins.isomer.instrumentation`):
