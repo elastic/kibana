@@ -32,11 +32,15 @@ export interface ExampleMetadata {
   [key: string]: unknown;
 }
 
-/** The screen context the app sends from the home page, with the global time picker default. */
+/**
+ * A home page screen context. Its time range is one no data-aware default or
+ * plausible guess produces, so a dashboard with it can only have copied it.
+ */
 export const HOME_SCREEN_CONTEXT: ScreenContextAttachmentData = {
   app: 'home',
   url: '/app/home#/',
-  time_range: { from: 'now-15m', to: 'now' },
+  // Deliberately improbable value: it never occurs as a default or a real picker choice.
+  time_range: { from: 'now-37m', to: 'now-3m' },
 };
 
 /**
