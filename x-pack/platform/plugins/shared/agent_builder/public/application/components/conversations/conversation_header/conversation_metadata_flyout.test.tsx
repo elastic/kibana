@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+import moment from 'moment-timezone';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { EuiThemeProvider } from '@elastic/eui';
@@ -123,6 +124,19 @@ describe('ConversationMetadataFlyout', () => {
     expect(screen.getByText('Members')).toBeInTheDocument();
     expect(screen.getByText('1')).toBeInTheDocument();
     expect(screen.getByText('Default')).toBeInTheDocument();
+  });
+
+  it('shows dates in the timezone from the dateFormat:tz setting', () => {
+    // Core applies `dateFormat:tz` as moment's default timezone; Jest's setup defaults it to New York.
+    moment.tz.setDefault('Asia/Tokyo');
+    try {
+      renderFlyout();
+
+      expect(screen.getByText('Jul 12, 2026 9:00 PM')).toBeInTheDocument();
+      expect(screen.getByText('Jul 15, 2026 9:00 PM')).toBeInTheDocument();
+    } finally {
+      moment.tz.setDefault('America/New_York');
+    }
   });
 
   it('shows the template name and the member count for a restricted chat', () => {

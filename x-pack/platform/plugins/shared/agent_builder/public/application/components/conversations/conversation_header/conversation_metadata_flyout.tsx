@@ -18,7 +18,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedDate } from '@kbn/i18n-react';
+import moment from 'moment';
+import { i18n } from '@kbn/i18n';
 import {
   isPrivatelySharedConversation,
   isPublicConversation,
@@ -63,17 +64,9 @@ const MetadataRow: React.FC<MetadataRowProps> = ({ label, children }) => (
   </EuiFlexGroup>
 );
 
+// Formatted with moment, like the timeline, so it follows the `dateFormat:tz` advanced setting.
 const MetadataDate: React.FC<{ value: string }> = ({ value }) => (
-  <EuiText size="s">
-    <FormattedDate
-      value={value}
-      year="numeric"
-      month="short"
-      day="numeric"
-      hour="numeric"
-      minute="2-digit"
-    />
-  </EuiText>
+  <EuiText size="s">{moment(value).locale(i18n.getLocale()).format('lll')}</EuiText>
 );
 
 interface ConversationMetadataFlyoutProps {
