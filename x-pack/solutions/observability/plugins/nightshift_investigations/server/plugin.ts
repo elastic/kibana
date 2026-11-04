@@ -25,6 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { getTelemetryTargets } from './telemetry_targets';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
@@ -35,6 +36,8 @@ import { NightshiftInvestigationsClient } from './client/investigations_client';
 import { createIsNightshiftEnabledSync } from './is_nightshift_enabled';
 import { createGatedSandboxStart } from './sandbox_gate';
 import { NIGHTSHIFT_INVESTIGATIONS_MANAGED_WORKFLOW_OWNER } from './lib/managed_workflows/constants';
+import { createEnsureFailureSweep } from './lib/managed_workflows/ensure_failure_sweep';
+import { sweepInvestigationFailuresStepDefinition } from './step_definitions/sweep_investigation_failures';
 import { installInvestigationWorkflow } from './lib/managed_workflows/install_investigation_workflow';
 import { installOnlineEvalsWorkflow } from './lib/managed_workflows/install_online_evals_workflow';
 import { installDecisionTreeWorkflows } from './lib/managed_workflows/install_decision_tree_workflows';
@@ -260,6 +263,7 @@ export class NightshiftInvestigationsPlugin
         agentAvailability: this.getInvestigationAvailability(),
       }),
       logger: this.logger.get('onboarding'),
+      ensureFailureSweep: this.ensureFailureSweep,
     });
 
     const listSandboxConnectors = createListSandboxConnectors({
@@ -502,6 +506,18 @@ export class NightshiftInvestigationsPlugin
           scoreOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getEvaluate: () => this.evals?.evaluate,
+            resolveJudgeConnectorId: (request) => {
+              if (!this.inference || !this.savedObjects || !this.uiSettings) {
+                throw new Error('Nightshift model resolution is unavailable');
+              }
+              return resolveNightshiftModelForRequest({
+                request,
+                inference: this.inference,
+                savedObjects: this.savedObjects,
+                uiSettings: this.uiSettings,
+                step: 'onlineEvalsJudge',
+              });
+            },
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
             telemetry,
@@ -528,6 +544,16 @@ export class NightshiftInvestigationsPlugin
             getInvestigationsClient: this.getInvestigationsClient,
             getActions: () => this.actionsStart,
             getRoutingClient: this.getNotificationRoutingClient,
+          })
+        );
+        plugins.workflowsExtensions.registerStepDefinition(
+          sweepInvestigationFailuresStepDefinition({
+            investigationLocator,
+            getInvestigationsClient: this.getInvestigationsClient,
+            getActions: () => this.actionsStart,
+            getRoutingClient: this.getNotificationRoutingClient,
+            getTriggerEmitter,
+            getWorkflowsManagement: () => this.workflowsManagement,
           })
         );
         plugins.workflowsExtensions.registerStepDefinition(
@@ -834,6 +860,16 @@ export class NightshiftInvestigationsPlugin
     return this.investigationAvailability;
   };
 
+  private ensureFailureSweep = async (request: KibanaRequest, spaceId: string): Promise<void> =>
+    createEnsureFailureSweep({
+      getWorkflowsManagement: () => this.workflowsManagement,
+      getManagedWorkflowsClient: async () => {
+        if (!this.managedWorkflowsClient) throw new Error('Managed workflows are unavailable');
+        return this.managedWorkflowsClient;
+      },
+      logger: this.logger,
+    })(request, spaceId);
+
   private getInvestigationsClient = (request: KibanaRequest, spaceId?: string) => {
     if (!this.featureFlags) {
       throw new Error('featureFlags is not available — plugin start() has not been called');
@@ -848,6 +884,7 @@ export class NightshiftInvestigationsPlugin
       spaces: this.spaces,
       logger: this.logger,
       spaceIdOverride: spaceId,
+      ensureFailureSweep: () => this.ensureFailureSweep(request, resolvedSpaceId),
       agentBuilder: this.agentBuilder,
       agenticInvestigations: this.agenticInvestigations,
       agentAvailability: this.getInvestigationAvailability(),
