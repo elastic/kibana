@@ -310,6 +310,7 @@ describe('createEvaluateDataset', () => {
       goldIdBySeededId: new Map(),
       alertCount: 3,
       openAlertIds: SEEDED_IDS,
+      worldDocs: [],
     });
   });
 
@@ -461,6 +462,7 @@ describe('createEvaluateDataset', () => {
           goldIdBySeededId: new Map(),
           alertCount: 3,
           openAlertIds: SEEDED_IDS,
+          worldDocs: [],
         })
         .mockRejectedValueOnce(new Error('seed bulk socket hang up'));
       assertClean.mockImplementation(async ({ when }) => {

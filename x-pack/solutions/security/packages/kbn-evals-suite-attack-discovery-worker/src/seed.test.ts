@@ -183,7 +183,7 @@ describe('seedScenario world documents', () => {
       expect(events.length).toBeGreaterThan(0);
       expect(seededScenario.worldDocs).toHaveLength(entities.length + events.length);
       const alertHostIds = new Set(alerts.flatMap((a) => (a['host.id'] ? [a['host.id']] : [])));
-      const eventHostIds = new Set(events.map((e) => e['host.id']));
+      const eventHostIds = new Set(events.map((e) => String(e['host.id'])));
       expect(alertHostIds.size).toBeGreaterThan(0);
       for (const hostId of eventHostIds) expect(alertHostIds.has(hostId)).toBe(true);
     }
