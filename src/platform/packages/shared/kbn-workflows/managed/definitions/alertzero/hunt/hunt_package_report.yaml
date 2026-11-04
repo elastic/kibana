@@ -109,7 +109,7 @@ triggers:
           description: The hunt child's `coverage_gaps` output, named in the coverage knowledge item and the Investigation summary for a `retired_incomplete` run.
         tier2_invoked:
           type: boolean
-          description: Whether the hunt ran Tier 2, including a Tier 2 that failed. Read only for product telemetry. The Worker sends false when unknown, such as a hunt that never reached the coordinator.
+          description: Whether the hunt ran Behavior Hunt, including a Behavior Hunt that failed. Read only for product telemetry. The Worker sends false when unknown, such as a hunt that never reached the coordinator.
       required:
         - reportId
         - investigationConversationId

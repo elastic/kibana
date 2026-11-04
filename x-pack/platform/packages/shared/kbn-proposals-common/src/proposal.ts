@@ -438,11 +438,9 @@ export const isAwaitingDecision = (proposal: Pick<Proposal, 'status'>): boolean 
   proposal.status === 'pending';
 
 /**
- * A to-do for a human: something the analyst carries out themselves, so approving it records that
- * they did. Decision surfaces present it as "I've applied" rather than Approve/Decline, and as
- * "Applied" once marked. Keyed on the category rather than on the absence of an action, so a
- * producer states it explicitly, and a proposal without an action that still asks for permission
- * (to run an analysis, say) keeps Approve/Decline.
+ * Manual work for the analyst (`category: todo`): approving records that they did it.
+ * UI offers "Mark as applied" (with Decline). Keyed on category, not missing action —
+ * a proposal without an action can still ask for permission and keep Approve/Decline.
  */
 export const isTodoProposal = (proposal: Pick<Proposal, 'category'>): boolean =>
   proposal.category === PROPOSAL_CATEGORY_TODO;

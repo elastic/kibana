@@ -618,11 +618,11 @@ describe('deployNewAgentPolicy', () => {
 
     const body = mockSendCreateAgentPolicy.mock.calls[0][0];
     expect(body.package_policies).toHaveLength(2);
-    // bucket_arn is a multi var (an ECF trigger var), so toTyped yields string[].
+    // Agent-based keeps the manifest's single-value bucket_arn (only the ECF view forces multi).
     const arns = body.package_policies.map(
       (pp: any) => pp.inputs['vpcflow-aws-s3'].streams['aws.vpcflow'].vars.bucket_arn
     );
-    expect(arns).toEqual([['arn:aws:s3:::bucket-one'], ['arn:aws:s3:::bucket-two']]);
+    expect(arns).toEqual(['arn:aws:s3:::bucket-one', 'arn:aws:s3:::bucket-two']);
     // The point of the test: the two documents carry different ARNs.
     expect(arns[0]).not.toEqual(arns[1]);
   });

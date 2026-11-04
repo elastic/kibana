@@ -22,11 +22,13 @@ import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
 } from '../../service_account/use_investigator_service_account';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 import { SettingsSectionRow } from './settings_section';
 
 /** Shows whether this space is set up with the Nightshift service account, read-only. */
 export const InvestigationIdentitySection = () => {
   const status = useInvestigatorServiceAccount();
+  const { isDeveloperMode } = useDeveloperMode();
   const isSetUp = isNightshiftSetUp(status.data);
 
   const renderStatus = () => {
@@ -82,19 +84,21 @@ export const InvestigationIdentitySection = () => {
             </EuiBadge>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiText size="xs" color="subdued">
-            <FormattedMessage
-              id="xpack.nightshift.settings.serviceAccount.account"
-              defaultMessage="Account: {account} · Role: {role}"
-              values={{
-                account: renderAccount(agent),
-                role: <EuiCode>{agent.role}</EuiCode>,
-              }}
-            />
-          </EuiText>
-        </EuiFlexItem>
-        {isSetUp && (
+        {isDeveloperMode && (
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs" color="subdued">
+              <FormattedMessage
+                id="xpack.nightshift.settings.serviceAccount.account"
+                defaultMessage="Account: {account} · Role: {role}"
+                values={{
+                  account: renderAccount(agent),
+                  role: <EuiCode>{agent.role}</EuiCode>,
+                }}
+              />
+            </EuiText>
+          </EuiFlexItem>
+        )}
+        {isDeveloperMode && isSetUp && (
           <EuiFlexItem grow={false}>
             <EuiText size="xs" color="subdued" data-test-subj="nightshiftServiceAccountOthers">
               <FormattedMessage

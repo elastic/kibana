@@ -45,10 +45,7 @@ groups:
           ece: ga
           eck: ga
           self: ga
-          serverless:
-            elasticsearch: ga
-            observability: ga
-            vectordb: ga
+          serverless: ga
 
   - group: Universal Alerting
     id: kibana-alerting-v2-global-settings

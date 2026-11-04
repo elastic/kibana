@@ -313,6 +313,7 @@ export const WorkflowExecutionFlyout = React.memo<WorkflowExecutionFlyoutProps>(
               >
                 <ExecutionFlyoutTitle
                   workflowName={workflowName}
+                  runName={workflowExecution?.runName}
                   startedAtIso={workflowExecution?.startedAt}
                 />
 

@@ -30,6 +30,9 @@ export const YARA_VALIDATE_RESULT_CACHE_MAX = 10_000;
 /** Byte cap so worst-case compiled results cannot pin unbounded JS heap. */
 const YARA_VALIDATE_RESULT_CACHE_MAX_SIZE_BYTES = 32 * 1024 * 1024;
 
+/** The compile is synchronous: a validate slower than this blocks the event loop noticeably, so it is logged as a warning. */
+const YARA_SLOW_VALIDATE_WARN_THRESHOLD_MS = 1_000;
+
 const createYaraValidateResultCache = (max: number): LRUCache<string, YaraValidateResult> =>
   new LRUCache<string, YaraValidateResult>({
     max,
@@ -73,7 +76,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
   const cacheKey = hashYaraSource(source);
   const cached = validateResultCache.get(cacheKey);
   if (cached !== undefined) {
-    logger?.debug(
+    logger?.trace(
       () =>
         `YARA validate cache hit: sourceSha256=${cacheKey}, sourceByteLength=${Buffer.byteLength(
           source,
@@ -86,7 +89,7 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
   }
 
   try {
-    const result = await compileYaraRule(source);
+    const result = await compileYaraRule(source, cacheKey);
     validateResultCache.set(cacheKey, result);
     return cloneYaraValidateResult(result);
   } catch (error) {
@@ -103,9 +106,9 @@ export const validateYaraRule = async (source: string): Promise<YaraValidateResu
 const cloneYaraValidateResult = (result: YaraValidateResult): YaraValidateResult =>
   structuredClone(result);
 
-async function compileYaraRule(source: string): Promise<YaraValidateResult> {
-  const started = performance.now();
+async function compileYaraRule(source: string, sourceSha256: string): Promise<YaraValidateResult> {
   const mod = await loadYaraValidateModule();
+  const started = performance.now();
 
   /**
    * WASM heap address of the C string returned by `validate_yara`.
@@ -137,6 +140,14 @@ async function compileYaraRule(source: string): Promise<YaraValidateResult> {
           result.rules.length
         }, durationMs=${durationMs}, sourceByteLength=${Buffer.byteLength(source, 'utf8')}`
     );
+
+    if (durationMs > YARA_SLOW_VALIDATE_WARN_THRESHOLD_MS) {
+      logger?.warn(
+        `Slow YARA validate blocked the event loop for ${durationMs}ms (threshold: ${YARA_SLOW_VALIDATE_WARN_THRESHOLD_MS}ms): outcome=${outcome}, ruleCount=${
+          result.rules.length
+        }, sourceByteLength=${Buffer.byteLength(source, 'utf8')}, sourceSha256=${sourceSha256}`
+      );
+    }
 
     return result;
   } catch (error) {

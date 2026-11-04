@@ -50,6 +50,7 @@ describe('SettingsTab', () => {
           basePath: { prepend: prependMock },
         },
         productDocBase: undefined,
+        settings: coreStartMock.settings,
         notifications: {
           toasts: {
             add: jest.fn(),

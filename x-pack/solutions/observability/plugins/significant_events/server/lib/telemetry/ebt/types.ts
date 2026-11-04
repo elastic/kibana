@@ -88,20 +88,6 @@ interface AgentToolEventInvestigationAttachProps {
   error_message?: string;
 }
 
-interface CodeAnalysisGroundingProps {
-  source_id: string;
-  /**
-   * Outcome of the code_analysis computed feature: `feature` (a repository was
-   * selected and a feature emitted), `no_match` (candidates existed but none
-   * verified enough strings), `no_candidates`, `no_strings`, or `unavailable`
-   * (SCS / Agent Builder not installed).
-   */
-  status: string;
-  repository?: string;
-  candidate_count: number;
-  verified_count: number;
-}
-
 interface DiscoveryTriggeredProps {
   execution_id: string;
   space_id: string;
@@ -176,7 +162,6 @@ export {
   type AgentToolEventSearchProps,
   type AgentToolEventStatusUpdateProps,
   type AgentToolEventWriteProps,
-  type CodeAnalysisGroundingProps,
   type DetectionScanProps,
   type DiscoveryTriggeredProps,
   type KnowledgeIndicatorQueriesGeneratedProps,

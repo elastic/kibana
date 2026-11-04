@@ -13,12 +13,12 @@ import {
   aiAssistantSearchConnectorIndexPattern,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { FieldRow, FieldRowProvider } from '@kbn/management-settings-components-field-row';
+import { useEditableSettings } from '@kbn/management-settings-hooks';
 import { isEmpty } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { LogSourcesSettingSynchronisationInfo } from '@kbn/logs-data-access-plugin/public';
 import type { UseKnowledgeBaseResult } from '@kbn/ai-assistant';
-import { useEditableSettings } from '../../../hooks/use_editable_settings';
 import { useAppContext } from '../../../hooks/use_app_context';
 import { useKibana } from '../../../hooks/use_kibana';
 import { BottomBarActions } from '../bottom_bar_actions/bottom_bar_actions';
@@ -46,7 +46,12 @@ export function UISettings({ knowledgeBase }: { knowledgeBase: UseKnowledgeBaseR
     saveAll,
     isSaving,
     cleanUnsavedChanges,
-  } = useEditableSettings(settingsKeys);
+  } = useEditableSettings({
+    settingsKeys,
+    settingsClient: settings.client,
+    metadataClient: settings.metadata,
+    scope: 'namespace',
+  });
 
   const canEditAdvancedSettings = capabilities.advancedSettings?.save;
 
