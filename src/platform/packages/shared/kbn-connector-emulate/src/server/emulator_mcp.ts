@@ -99,7 +99,7 @@ const fixtureSchema = {
       type: 'object',
       required: ['status'],
       properties: {
-        status: { type: 'integer', minimum: 100, maximum: 599 },
+        status: { type: 'integer', minimum: 200, maximum: 599 },
         headers: { type: 'object', additionalProperties: { type: 'string', ...LIMIT } },
         body: { description: 'The response body, as JSON' },
       },
@@ -272,6 +272,12 @@ export const createEmulatorMcpHandler = (
         }
       : tool;
   const tools = (exportFixtures ? [...TOOLS, EXPORT_TOOL] : TOOLS).map(withConnector);
+  // The SDK checks the request's shape, not a tool's own arguments. The SDK's default Ajv validator
+  // compiles schemas to code, which Jest disallows.
+  const validator = new CfWorkerJsonSchemaValidator();
+  const argumentChecks = new Map(
+    tools.map((tool) => [tool.name, validator.getValidator<unknown>(tool.inputSchema)])
+  );
   const byConnector = <T extends { readonly connector?: string }>(
     items: readonly T[],
     connector: string | undefined
@@ -280,12 +286,16 @@ export const createEmulatorMcpHandler = (
 
   const call = async (name: string, args: Record<string, unknown>): Promise<CallToolResult> => {
     const connector = text(args.connector);
-    if (connector !== undefined && !connectors?.includes(connector)) {
-      return failed(
-        connectors
-          ? `No connector ${connector}; there are ${connectors.join(', ')}`
-          : 'The emulator serves one connector; leave out connector'
-      );
+    if (connector !== undefined && connectors && !connectors.includes(connector)) {
+      return failed(`No connector ${connector}; there are ${connectors.join(', ')}`);
+    }
+    // A selector of the wrong type must not read as no selector, which would act on everything.
+    const validation = argumentChecks.get(name)?.(args);
+    if (validation && !validation.valid) {
+      return failed(`Invalid arguments for ${name}: ${validation.errorMessage}`);
+    }
+    if (args.connector !== undefined && !connectors) {
+      return failed('The emulator serves one connector; leave out connector');
     }
     switch (name) {
       case 'list_operations': {
@@ -347,8 +357,7 @@ export const createEmulatorMcpHandler = (
       {
         capabilities: { tools: {} },
         instructions: connectors ? `${INSTRUCTIONS}${COMBINED_INSTRUCTIONS}` : INSTRUCTIONS,
-        // The SDK's default Ajv validator compiles schemas to code, which Jest disallows.
-        jsonSchemaValidator: new CfWorkerJsonSchemaValidator(),
+        jsonSchemaValidator: validator,
       }
     );
     server.setRequestHandler(ListToolsRequestSchema, () => ({ tools }));

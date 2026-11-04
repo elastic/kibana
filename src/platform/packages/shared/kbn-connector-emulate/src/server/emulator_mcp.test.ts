@@ -8,6 +8,7 @@
  */
 
 import type { OpenApiDocument } from '../openapi';
+import { combineEmulators } from '../fetch/combine_emulators';
 import { createEmulatorFetch } from '../fetch/create_emulator_fetch';
 import { createEmulatorMcpHandler } from './emulator_mcp';
 
@@ -149,6 +150,38 @@ describe('createEmulatorMcpHandler', () => {
     const malformed = await callTool('set_fixtures', { fixtures: [{ response: { status: 200 } }] });
     expect(malformed).toEqual({ isError: true, value: expect.stringContaining('operation') });
     expect(emulator.runtimeFixtures.list()).toEqual([]);
+  });
+
+  it('rejects arguments of the wrong type instead of acting on everything', async () => {
+    emulator.runtimeFixtures.set([{ operation: listItems, response: { status: 429 } }]);
+    await emulator.fetch(ITEMS);
+
+    const results = [
+      await callTool('clear_fixtures', { id: 123 }),
+      await callTool('reset', { connector: 123 }),
+      await callTool('list_calls', { since: 'all' }),
+    ];
+
+    results.forEach((result) => expect(result.isError).toBe(true));
+    expect(results[0].value).toContain('Invalid arguments for clear_fixtures');
+    expect(emulator.runtimeFixtures.list()).toHaveLength(1);
+    expect(emulator.calls).toHaveLength(1);
+  });
+
+  it('keeps other connectors state when a connector argument has the wrong type', async () => {
+    const combined = combineEmulators({
+      one: createEmulatorFetch({ specs: [spec] }),
+      two: createEmulatorFetch({ specs: [spec] }),
+    });
+    handle = createEmulatorMcpHandler(combined);
+    await combined.fetch(ITEMS);
+
+    const invalid = await callTool('reset', { connector: 123 });
+    const unknown = await callTool('reset', { connector: 'three' });
+
+    expect([invalid.isError, unknown.isError]).toEqual([true, true]);
+    expect(unknown.value).toBe('No connector three; there are one, two');
+    expect(combined.calls).toHaveLength(1);
   });
 
   it('clears fixtures and resets the emulator', async () => {
