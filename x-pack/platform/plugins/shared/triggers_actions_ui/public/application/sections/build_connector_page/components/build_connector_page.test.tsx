@@ -1052,30 +1052,26 @@ describe('BuildConnectorPage', () => {
       fetchConnectorTypeLogo.mockResolvedValue({ icon: logoDataUri });
     });
 
-    it('enables Load only for an http(s) URL', async () => {
+    it('loads nothing while typing, and flags a URL that is not http(s)', async () => {
       renderPage();
 
-      const load = await screen.findByTestId('buildConnectorLogoLoadButton');
-      expect(load).toBeDisabled();
-
-      await typeLogoUrl('not a url');
-      expect(load).toBeDisabled();
-
-      await userEvent.clear(screen.getByTestId('buildConnectorLogoUrlInput'));
       await typeLogoUrl('ftp://example.com/logo.png');
-      expect(load).toBeDisabled();
+      expect(fetchConnectorTypeLogo).not.toHaveBeenCalled();
 
-      await userEvent.clear(screen.getByTestId('buildConnectorLogoUrlInput'));
-      await typeLogoUrl('https://cdn.example.com/logo.png');
-      expect(load).toBeEnabled();
+      await userEvent.tab();
+      expect(
+        await screen.findByText('Enter an HTTP or HTTPS URL, or clear the field.')
+      ).toBeInTheDocument();
+      expect(fetchConnectorTypeLogo).not.toHaveBeenCalled();
     });
 
-    it('loads the logo, previews it and sends it with the connector type', async () => {
+    it('loads the logo when the field loses focus, previews it and sends it', async () => {
       renderPage();
 
       await applyYaml(yamlDefinition);
       await typeLogoUrl('  https://cdn.example.com/logo.png ');
-      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+      expect(fetchConnectorTypeLogo).not.toHaveBeenCalled();
+      await userEvent.tab();
 
       await waitFor(() =>
         expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
@@ -1094,7 +1090,20 @@ describe('BuildConnectorPage', () => {
           })
         )
       );
+      expect(fetchConnectorTypeLogo).toHaveBeenCalledTimes(1);
       expect(createConnectorType.mock.calls[0][0].connectorType).not.toHaveProperty('logoUrl');
+    });
+
+    it('loads the logo when a URL is pasted', async () => {
+      renderPage();
+
+      await userEvent.click(await screen.findByTestId('buildConnectorLogoUrlInput'));
+      await userEvent.paste('https://cdn.example.com/logo.png');
+
+      await screen.findByTestId('buildConnectorLogoPreview');
+      expect(fetchConnectorTypeLogo).toHaveBeenCalledWith(
+        expect.objectContaining({ url: 'https://cdn.example.com/logo.png' })
+      );
     });
 
     it('shows the server message when the logo cannot be loaded', async () => {
@@ -1104,7 +1113,7 @@ describe('BuildConnectorPage', () => {
       renderPage();
 
       await typeLogoUrl('https://cdn.example.com/huge.png');
-      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+      await userEvent.tab();
 
       expect(await screen.findByText('The logo exceeds the 64 KB limit.')).toBeInTheDocument();
       expect(screen.queryByTestId('buildConnectorLogoPreview')).not.toBeInTheDocument();
@@ -1114,7 +1123,7 @@ describe('BuildConnectorPage', () => {
       renderPage();
 
       await typeLogoUrl('https://cdn.example.com/logo.png');
-      await userEvent.click(screen.getByTestId('buildConnectorLogoLoadButton'));
+      await userEvent.tab();
       await screen.findByTestId('buildConnectorLogoPreview');
 
       await userEvent.click(screen.getByTestId('buildConnectorLogoRemoveButton'));
@@ -1125,16 +1134,31 @@ describe('BuildConnectorPage', () => {
       expect(screen.getByTestId('buildConnectorLogoUrlInput')).toHaveValue('');
     });
 
-    it('does not save while a typed URL has not been loaded', async () => {
+    it('loads a URL that was not loaded yet when saving', async () => {
       renderPage();
 
       await applyYaml(yamlDefinition);
       await typeLogoUrl('https://cdn.example.com/logo.png');
       await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
 
-      expect(
-        await screen.findByText('Load the logo before saving, or clear the URL.')
-      ).toBeInTheDocument();
+      await waitFor(() =>
+        expect(createConnectorType).toHaveBeenCalledWith(
+          expect.objectContaining({
+            connectorType: expect.objectContaining({ icon: logoDataUri }),
+          })
+        )
+      );
+    });
+
+    it('does not save when the logo cannot be loaded on save', async () => {
+      fetchConnectorTypeLogo.mockRejectedValue({ body: { message: 'Not an image.' } });
+      renderPage();
+
+      await applyYaml(yamlDefinition);
+      await typeLogoUrl('https://cdn.example.com/logo.png');
+      await userEvent.click(screen.getByTestId('build-connector-page-save-btn'));
+
+      expect(await screen.findByText('Not an image.')).toBeInTheDocument();
       expect(createConnectorType).not.toHaveBeenCalled();
     });
 

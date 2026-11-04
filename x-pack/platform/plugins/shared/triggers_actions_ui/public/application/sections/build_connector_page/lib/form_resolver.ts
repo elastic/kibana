@@ -18,6 +18,7 @@ import {
 import type { BuildConnectorFormData } from '../types';
 import { formDataToRequest } from './form_serializers';
 import { parseJsonObject } from './json_body';
+import { isHttpUrl } from './connector_logo';
 
 type AddError = (formPath: string, message: string, type?: string) => void;
 
@@ -101,9 +102,9 @@ const FORMAT_MESSAGES: Record<string, string> = {
   'test.request.headers.*.key': HEADER_NAME_FORMAT,
 };
 
-const LOGO_NOT_LOADED = i18n.translate(
-  'xpack.triggersActionsUI.sections.buildConnectorPage.error.logoNotLoaded',
-  { defaultMessage: 'Load the logo before saving, or clear the URL.' }
+const LOGO_URL_INVALID = i18n.translate(
+  'xpack.triggersActionsUI.sections.buildConnectorPage.error.logoUrlInvalid',
+  { defaultMessage: 'Enter an HTTP or HTTPS URL, or clear the field.' }
 );
 
 const AUTH_TYPES_REQUIRED = i18n.translate(
@@ -345,9 +346,10 @@ const validateFormOnly = (
 
   const test = { ...values.test, request: validateRequest(values.test.request, 'test.request') };
 
-  // A URL that was typed but never loaded would be saved without its logo.
-  if (values.logoUrl.trim() && !values.icon) {
-    addError('logoUrl', LOGO_NOT_LOADED);
+  // The logo itself is loaded from the URL by the field, or on save; only the URL is checked here.
+  const logoUrl = values.logoUrl.trim();
+  if (logoUrl && !isHttpUrl(logoUrl)) {
+    addError('logoUrl', LOGO_URL_INVALID);
   }
 
   return { ...values, actions, test, auth: validateAuth(values.auth, addError) };

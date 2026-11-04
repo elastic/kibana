@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import React, { memo, useCallback, useState } from 'react';
+import React, { memo, useCallback, useRef, useState } from 'react';
 import {
-  EuiButton,
   EuiButtonEmpty,
   EuiFieldText,
   EuiFlexGroup,
@@ -23,48 +22,58 @@ import { Controller, useFormContext, useWatch } from 'react-hook-form';
 import { useKibana } from '../../../../common/lib/kibana';
 import { fetchConnectorTypeLogo } from '../../../lib/action_connector_api';
 import type { BuildConnectorFormData } from '../types';
+import { getLogoErrorMessage, isHttpUrl } from '../lib/connector_logo';
 
 const MAX_LOGO_KB = CONNECTOR_TYPE_ICON_MAX_BYTES / 1024;
 
-const isHttpUrl = (value: string): boolean => {
-  try {
-    const { protocol } = new URL(value);
-    return protocol === 'https:' || protocol === 'http:';
-  } catch {
-    return false;
-  }
-};
-
-const getErrorMessage = (error: { body?: { message?: string } }): string =>
-  error.body?.message ??
-  i18n.translate('xpack.triggersActionsUI.sections.buildConnectorPage.logo.loadErrorFallback', {
-    defaultMessage: 'The logo could not be loaded.',
-  });
-
-/** The connector type's logo: loaded once from an image URL, then kept with the type. */
+/**
+ * The connector type's logo, read from an image URL and kept with the type. It loads when the URL
+ * is pasted or the field loses focus, so the preview shows without an extra step; saving loads it
+ * too if that has not happened yet.
+ */
 const ConnectorLogoFieldComponent: React.FC = () => {
   const { http } = useKibana().services;
   const { control, setValue, trigger } = useFormContext<BuildConnectorFormData>();
   const icon = useWatch({ control, name: 'icon' });
-  const logoUrl = useWatch({ control, name: 'logoUrl' });
   const [isLoading, setIsLoading] = useState(false);
   const [loadError, setLoadError] = useState<string | undefined>();
+  // Only the latest load may update the form, so a slow response cannot replace a newer logo.
+  const latestRequest = useRef(0);
+  const isPasting = useRef(false);
 
-  const loadLogo = useCallback(async () => {
-    setIsLoading(true);
-    setLoadError(undefined);
-    try {
-      const { icon: loadedIcon } = await fetchConnectorTypeLogo({ http, url: logoUrl.trim() });
-      setValue('icon', loadedIcon, { shouldDirty: true });
-      void trigger('logoUrl');
-    } catch (error) {
-      setLoadError(getErrorMessage(error));
-    } finally {
-      setIsLoading(false);
-    }
-  }, [http, logoUrl, setValue, trigger]);
+  const loadLogo = useCallback(
+    async (url: string) => {
+      const requestId = ++latestRequest.current;
+      setIsLoading(true);
+      setLoadError(undefined);
+      try {
+        const { icon: loadedIcon } = await fetchConnectorTypeLogo({ http, url });
+        if (requestId !== latestRequest.current) return;
+        setValue('icon', loadedIcon, { shouldDirty: true });
+        void trigger('logoUrl');
+      } catch (error) {
+        if (requestId !== latestRequest.current) return;
+        setLoadError(getLogoErrorMessage(error));
+      } finally {
+        if (requestId === latestRequest.current) setIsLoading(false);
+      }
+    },
+    [http, setValue, trigger]
+  );
+
+  const loadIfNeeded = useCallback(
+    (value: string) => {
+      const url = value.trim();
+      if (isHttpUrl(url)) {
+        void loadLogo(url);
+      }
+    },
+    [loadLogo]
+  );
 
   const removeLogo = useCallback(() => {
+    latestRequest.current++;
+    setIsLoading(false);
     setLoadError(undefined);
     setValue('icon', '', { shouldDirty: true });
     setValue('logoUrl', '', { shouldDirty: true });
@@ -104,27 +113,29 @@ const ConnectorLogoFieldComponent: React.FC = () => {
                     placeholder="https://example.com/logo.png"
                     data-test-subj="buildConnectorLogoUrlInput"
                     value={field.value ?? ''}
+                    isLoading={isLoading}
                     onChange={(event) => {
+                      const { value } = event.target;
+                      // A new URL makes the current logo stale; it is replaced once the URL loads.
+                      latestRequest.current++;
+                      setIsLoading(false);
                       setLoadError(undefined);
-                      field.onChange(event.target.value);
+                      setValue('icon', '', { shouldDirty: true });
+                      field.onChange(value);
+                      if (isPasting.current) {
+                        isPasting.current = false;
+                        loadIfNeeded(value);
+                      }
                     }}
-                    onBlur={field.onBlur}
+                    onPaste={() => {
+                      isPasting.current = true;
+                    }}
+                    onBlur={() => {
+                      field.onBlur();
+                      if (!icon && !isLoading) loadIfNeeded(field.value ?? '');
+                    }}
                     inputRef={field.ref}
                   />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    size="s"
-                    isLoading={isLoading}
-                    isDisabled={!isHttpUrl((logoUrl ?? '').trim())}
-                    onClick={loadLogo}
-                    data-test-subj="buildConnectorLogoLoadButton"
-                  >
-                    {i18n.translate(
-                      'xpack.triggersActionsUI.sections.buildConnectorPage.logo.loadButton',
-                      { defaultMessage: 'Load logo' }
-                    )}
-                  </EuiButton>
                 </EuiFlexItem>
               </EuiFlexGroup>
               {icon && (

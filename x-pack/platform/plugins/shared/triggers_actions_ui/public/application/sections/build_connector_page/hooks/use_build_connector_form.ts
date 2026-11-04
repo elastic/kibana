@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { useCallback, useMemo } from 'react';
+import { useCallback, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import type { UseFormReturn } from 'react-hook-form';
 import type { CreateConnectorTypeRequest } from '@kbn/actions-plugin/common';
 import type { CreateConnectorTypeError } from '../../../hooks/use_create_connector_type';
 import { useCreateConnectorType } from '../../../hooks/use_create_connector_type';
+import { useKibana } from '../../../../common/lib/kibana';
+import { fetchConnectorTypeLogo } from '../../../lib/action_connector_api';
+import { getLogoErrorMessage, isHttpUrl } from '../lib/connector_logo';
 import { buildConnectorFormResolver } from '../lib/form_resolver';
 import { formDataToRequest, getEmptyFormData, requestToFormData } from '../lib/form_serializers';
 import type { BuildConnectorFormData } from '../types';
@@ -43,12 +46,17 @@ export const useBuildConnectorForm = ({
     defaultValues: initialDefinition ? requestToFormData(initialDefinition) : getEmptyFormData(),
     resolver: buildConnectorFormResolver,
   });
+  const { http } = useKibana().services;
   const {
+    getValues,
     handleSubmit,
     reset,
+    setError,
+    setValue,
     trigger,
-    formState: { isSubmitting },
+    formState: { isSubmitting: isSubmittingForm },
   } = methods;
+  const [isLoadingLogo, setIsLoadingLogo] = useState(false);
   const {
     isLoading: isSaving,
     createConnectorType,
@@ -74,7 +82,32 @@ export const useBuildConnectorForm = ({
     [createConnectorType, onCreated]
   );
 
-  const submit = useMemo(() => handleSubmit(onValid), [handleSubmit, onValid]);
+  // A logo URL that the field has not loaded yet is read here, so saving never needs a separate step.
+  const loadPendingLogo = useCallback(async (): Promise<boolean> => {
+    const [logoUrl, icon] = getValues(['logoUrl', 'icon']);
+    const url = logoUrl.trim();
+    if (icon || !isHttpUrl(url)) return true;
+    setIsLoadingLogo(true);
+    try {
+      const { icon: loadedIcon } = await fetchConnectorTypeLogo({ http, url });
+      setValue('icon', loadedIcon, { shouldDirty: true });
+      return true;
+    } catch (error) {
+      await trigger();
+      setError('logoUrl', { type: 'manual', message: getLogoErrorMessage(error) });
+      return false;
+    } finally {
+      setIsLoadingLogo(false);
+    }
+  }, [getValues, http, setError, setValue, trigger]);
+
+  const submit = useCallback(async () => {
+    if (await loadPendingLogo()) {
+      await handleSubmit(onValid)();
+    }
+  }, [handleSubmit, loadPendingLogo, onValid]);
+
+  const isSubmitting = isSubmittingForm || isLoadingLogo;
 
   return {
     methods,
