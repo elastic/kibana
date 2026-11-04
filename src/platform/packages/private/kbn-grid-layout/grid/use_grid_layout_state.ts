@@ -89,7 +89,12 @@ export const useGridLayoutState = ({
   );
   useEffect(() => {
     const runtimeSettings = runtimeSettings$.getValue();
-    if (!deepEqual(gridSettings, pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount'])))
+    if (
+      !deepEqual(
+        gridSettings,
+        pick(runtimeSettings, ['gutterSize', 'rowHeight', 'columnCount', 'allowGaps'])
+      )
+    )
       runtimeSettings$.next({
         ...gridSettings,
         columnPixelWidth: runtimeSettings.columnPixelWidth,
@@ -97,7 +102,7 @@ export const useGridLayoutState = ({
   }, [gridSettings, runtimeSettings$]);
 
   const gridLayoutStateManager = useMemo(() => {
-    const orderedLayout = getOrderedLayout(layout);
+    const orderedLayout = getOrderedLayout(layout, gridSettings);
     const gridLayout$ = new BehaviorSubject<OrderedLayout>(orderedLayout);
     const gridDimensions$ = new BehaviorSubject<ObservedSize>({ width: 0, height: 0 });
     const scrollContainer$ = new BehaviorSubject(getScrollContainer());
@@ -111,7 +116,7 @@ export const useGridLayoutState = ({
       // if an interaction event is happening, then ignore any "draft" layout changes
       filter(([_, event]) => !Boolean(event)),
       // once no interaction event, convert to the grid data format
-      map(([newLayout]) => getGridLayout(newLayout)),
+      map(([newLayout]) => getGridLayout(newLayout, runtimeSettings$.getValue())),
       // only emit if the layout has changed
       distinctUntilChanged(isLayoutEqual)
     );

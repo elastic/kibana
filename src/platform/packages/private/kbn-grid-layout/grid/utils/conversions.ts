@@ -11,15 +11,18 @@ import { cloneDeep } from 'lodash';
 
 import type { GridPanelData } from '../grid_panel';
 import type { GridSectionData } from '../grid_section';
-import type { GridLayoutData, OrderedLayout } from '../types';
+import type { GridLayoutData, OrderedLayout, ResolveLayoutOptions } from '../types';
 import { getLayoutInOrder, getSectionsInOrder, resolveGridSection } from './resolve_grid_section';
 
-export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
+export const getGridLayout = (
+  layout: OrderedLayout,
+  options: ResolveLayoutOptions = {}
+): GridLayoutData => {
   let gridLayout: GridLayoutData = {};
   let mainRow = 0;
   getSectionsInOrder(layout).forEach((section) => {
     const panels: { [key: string]: GridPanelData & { type?: 'panel' } } = cloneDeep(
-      resolveGridSection(section.panels)
+      resolveGridSection(section.panels, undefined, options)
     );
     if (section.isMainSection) {
       const panelValues = Object.values(panels);
@@ -46,7 +49,10 @@ export const getGridLayout = (layout: OrderedLayout): GridLayoutData => {
   return gridLayout;
 };
 
-export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
+export const getOrderedLayout = (
+  layout: GridLayoutData,
+  options: ResolveLayoutOptions = {}
+): OrderedLayout => {
   const widgets = cloneDeep(getLayoutInOrder(layout));
   const orderedLayout: OrderedLayout = {};
   let order = 0;
@@ -60,7 +66,9 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         order,
         isMainSection: true,
       };
-      const startingRow = (layout[widgets[i].id] as GridPanelData).row;
+      // keep empty rows above the first panels when gaps are allowed
+      const startingRow =
+        options.allowGaps && order === 0 ? 0 : (layout[widgets[i].id] as GridPanelData).row;
       let maxRow = -Infinity;
       while (i < widgets.length && widgets[i].type === 'panel') {
         const { type: drop, ...panel } = cloneDeep(layout[widgets[i].id]) as GridPanelData & {
@@ -72,7 +80,9 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         i++;
       }
       orderedLayout[`main-${order}`].panels = resolveGridSection(
-        orderedLayout[`main-${order}`].panels
+        orderedLayout[`main-${order}`].panels,
+        undefined,
+        options
       );
       i--;
       mainRow += maxRow;
@@ -87,7 +97,7 @@ export const getOrderedLayout = (layout: GridLayoutData): OrderedLayout => {
         ...section,
         order,
         isMainSection: false,
-        panels: resolveGridSection(section.panels),
+        panels: resolveGridSection(section.panels, undefined, options),
       };
       mainRow++;
     }

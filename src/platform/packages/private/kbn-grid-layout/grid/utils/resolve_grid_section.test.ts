@@ -36,6 +36,30 @@ describe('resolve grid  section', () => {
     });
   });
 
+  test('keeps empty space above panels when gaps are allowed', () => {
+    const panels = {
+      panel1: { id: 'panel1', row: 2, column: 0, height: 2, width: 4 },
+      panel2: { id: 'panel2', row: 6, column: 4, height: 2, width: 4 },
+    };
+    expect(resolveGridSection(panels, undefined, { allowGaps: true })).toEqual(panels);
+    expect(resolveGridSection(panels)).toEqual({
+      panel1: { ...panels.panel1, row: 0 },
+      panel2: { ...panels.panel2, row: 0 },
+    });
+  });
+
+  test('still pushes colliding panels down when gaps are allowed', () => {
+    const result = resolveGridSection(
+      { panel1: { id: 'panel1', row: 5, column: 0, height: 2, width: 4 } },
+      { id: 'panel2', row: 4, column: 0, height: 2, width: 4 },
+      { allowGaps: true }
+    );
+    expect(result).toEqual({
+      panel1: { id: 'panel1', row: 6, column: 0, height: 2, width: 4 },
+      panel2: { id: 'panel2', row: 4, column: 0, height: 2, width: 4 },
+    });
+  });
+
   test('drag causes no collision', () => {
     const result = resolveGridSection(
       {

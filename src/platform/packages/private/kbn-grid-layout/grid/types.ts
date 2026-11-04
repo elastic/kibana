@@ -26,7 +26,15 @@ export interface GridSettings {
   rowHeight: number;
   columnCount: number;
   keyboardDragTopLimit: number;
+  /**
+   * When true, panels stay where they are dropped instead of floating up to close empty space
+   * above them. Collisions are still resolved. Defaults to false.
+   */
+  allowGaps?: boolean;
 }
+
+/** The grid settings that change how a layout is resolved. */
+export type ResolveLayoutOptions = Pick<GridSettings, 'allowGaps'>;
 
 /**
  * The runtime settings for the grid, including the pixel width of each column

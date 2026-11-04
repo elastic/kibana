@@ -211,13 +211,17 @@ export const moveAction = (
 
     // resolve destination grid
     const destinationGrid = nextLayout[targetSectionId];
-    const resolvedDestinationGrid = resolveGridSection(destinationGrid.panels, requestedPanelData);
+    const resolvedDestinationGrid = resolveGridSection(
+      destinationGrid.panels,
+      requestedPanelData,
+      runtimeSettings
+    );
     nextLayout[targetSectionId].panels = resolvedDestinationGrid;
 
     // resolve origin grid
     if (hasChangedGridSection) {
       const originGrid = nextLayout[lastSectionId];
-      const resolvedOriginGrid = resolveGridSection(originGrid.panels);
+      const resolvedOriginGrid = resolveGridSection(originGrid.panels, undefined, runtimeSettings);
       nextLayout[lastSectionId].panels = resolvedOriginGrid;
     }
 

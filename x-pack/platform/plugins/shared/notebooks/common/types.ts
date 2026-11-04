@@ -105,6 +105,8 @@ export interface NotebookApp {
   panels: AppPanel[];
   /** Hides the global time picker on the app even when its cells use the time range. */
   hideTimePicker?: boolean;
+  /** Panels keep the gaps left between them instead of moving up to close them. */
+  freePlacement?: boolean;
   /** Shown at the top of the app; the tab title is separate and only labels the tab. */
   heading?: string;
   description?: string;

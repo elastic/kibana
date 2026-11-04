@@ -72,7 +72,7 @@ export const GridLayout = ({
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    const orderedLayout = getOrderedLayout(layout);
+    const orderedLayout = getOrderedLayout(layout, gridSettings);
     if (!isOrderedLayoutEqual(orderedLayout, gridLayoutStateManager.gridLayout$.getValue())) {
       const newLayout = cloneDeep(orderedLayout);
       /**
@@ -80,7 +80,7 @@ export const GridLayout = ({
        * so, we need to loop through each row and ensure it is compacted
        */
       Object.entries(newLayout).forEach(([sectionId, row]) => {
-        newLayout[sectionId].panels = resolveGridSection(row.panels);
+        newLayout[sectionId].panels = resolveGridSection(row.panels, undefined, gridSettings);
       });
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }

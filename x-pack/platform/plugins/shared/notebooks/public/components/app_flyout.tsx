@@ -391,8 +391,9 @@ const AppGrid = ({
       rowHeight: APP_ROW_HEIGHT,
       columnCount: APP_GRID_COLUMNS,
       keyboardDragTopLimit: 0,
+      allowGaps: app.freePlacement ?? false,
     }),
-    [euiTheme.base]
+    [euiTheme.base, app.freePlacement]
   );
   const gridStyles = useMemo(() => getGridStyles(euiTheme), [euiTheme]);
 
@@ -434,6 +435,7 @@ const AppGrid = ({
   return (
     <div data-test-subj="notebookAppGrid">
       <GridLayout
+        key={app.freePlacement ? 'free' : 'compact'}
         layout={layout}
         gridSettings={gridSettings}
         renderPanelContents={renderPanelContents}

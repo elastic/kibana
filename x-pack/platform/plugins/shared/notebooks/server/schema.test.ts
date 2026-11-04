@@ -129,6 +129,7 @@ describe('notebookAttributesSchema', () => {
       panels: notebook.panels.map((app) => ({
         ...app,
         hideTimePicker: true,
+        freePlacement: true,
         heading: 'Traffic overview',
         description: 'Daily visits by host',
       })),

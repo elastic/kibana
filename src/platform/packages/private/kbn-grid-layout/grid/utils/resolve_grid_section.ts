@@ -9,7 +9,12 @@
 
 import type { GridPanelData } from '../grid_panel';
 import type { GridSectionData } from '../grid_section';
-import type { GridLayoutData, GridLayoutWidget, OrderedLayout } from '../types';
+import type {
+  GridLayoutData,
+  GridLayoutWidget,
+  OrderedLayout,
+  ResolveLayoutOptions,
+} from '../types';
 
 const collides = (panelA: GridPanelData, panelB: GridPanelData) => {
   if (panelA.id === panelB.id) return false; // same panel
@@ -142,7 +147,8 @@ const compactGridSection = (originalLayout: GridSectionData['panels']) => {
 
 export const resolveGridSection = (
   originalSectionData: GridSectionData['panels'],
-  dragRequest?: GridPanelData
+  dragRequest?: GridPanelData,
+  { allowGaps = false }: ResolveLayoutOptions = {}
 ): GridSectionData['panels'] => {
   let nextSectionData = { ...originalSectionData };
   // apply drag request
@@ -162,6 +168,7 @@ export const resolveGridSection = (
     );
     collision = getFirstCollision(nextSectionData, sortedKeys);
   }
+  if (allowGaps) return nextSectionData;
   return compactGridSection(nextSectionData); // compact the grid to close any gaps
 };
 

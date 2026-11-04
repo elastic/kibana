@@ -135,6 +135,7 @@ const appSchema = schema.object({
     { maxSize: MAX_CELLS }
   ),
   hideTimePicker: schema.maybe(schema.boolean()),
+  freePlacement: schema.maybe(schema.boolean()),
   heading: schema.maybe(schema.string({ maxLength: MAX_TITLE_LENGTH })),
   description: schema.maybe(schema.string({ maxLength: MAX_DESCRIPTION_LENGTH })),
 });

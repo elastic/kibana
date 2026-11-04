@@ -103,6 +103,25 @@ export const AppSettingsFlyout = ({ appId, onClose }: { appId: string; onClose: 
             data-test-subj="notebookAppSettingsHideTimePicker"
           />
         </EuiFormRow>
+        <EuiFormRow
+          helpText={i18n.translate('xpack.notebook.appSettings.freePlacementHelp', {
+            defaultMessage:
+              'Panels stay where you drop them, leaving space between them, instead of moving up to fill it.',
+          })}
+        >
+          <EuiSwitch
+            label={i18n.translate('xpack.notebook.appSettings.freePlacement', {
+              defaultMessage: 'Free panel placement',
+            })}
+            checked={app.freePlacement ?? false}
+            onChange={({ target: { checked } }) =>
+              store.updateApp(appId, ({ freePlacement, ...rest }) =>
+                checked ? { ...rest, freePlacement: true } : rest
+              )
+            }
+            data-test-subj="notebookAppSettingsFreePlacement"
+          />
+        </EuiFormRow>
       </EuiFlyoutBody>
     </NotebookFlyout>
   );
