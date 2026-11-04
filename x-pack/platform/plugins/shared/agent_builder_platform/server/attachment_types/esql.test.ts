@@ -76,16 +76,18 @@ describe('esql attachment type', () => {
       expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
     });
 
-    it('leaves out the link when its path is too long for one', async () => {
+    it('leaves the link out of Slack when its URL is too long for one', async () => {
       const composition = await toComposition(
-        { query: `FROM logs | WHERE message == "${'x'.repeat(2500)}"` },
+        { query: `FROM logs | WHERE message == "${'x'.repeat(3500)}"` },
         discoverLocator
       );
+      const { valid, slack } = await renderSurface(composition);
 
-      expect(composition?.body.map(({ type }) => type)).toEqual(['code']);
+      expect(valid).toBe(true);
+      expect(slack).not.toContain('/app/discover');
     });
 
-    it('cuts a query too long to show, and still renders', async () => {
+    it('renders a query too long to show whole, which Slack cuts', async () => {
       const composition = await toComposition({ query: `FROM logs ${'| LIMIT 1 '.repeat(2000)}` });
       const { valid, errors } = await renderSurface(composition);
 

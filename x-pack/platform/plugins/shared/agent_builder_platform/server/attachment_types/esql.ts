@@ -15,7 +15,7 @@ import type {
   SurfaceComposition,
   SurfaceNode,
 } from '@kbn/agent-builder-server/attachments';
-import { SURFACE_LIMITS, clampText, hasText } from '@kbn/agent-builder-server/attachments';
+import { hasText } from '@kbn/agent-builder-server/attachments';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 import type { SerializableRecord } from '@kbn/utility-types';
@@ -56,21 +56,19 @@ export const createEsqlAttachmentType = ({
     try {
       const { app, path } = await locator.getLocation({ query: { esql: query } });
 
-      return path.length <= SURFACE_LIMITS.linkPath
-        ? [
+      return [
+        {
+          type: 'link',
+          label: i18n.translate(
+            'xpack.agentBuilderPlatform.attachments.esql.surface.openInDiscover',
             {
-              type: 'link',
-              label: i18n.translate(
-                'xpack.agentBuilderPlatform.attachments.esql.surface.openInDiscover',
-                {
-                  defaultMessage: 'Open in Discover',
-                }
-              ),
-              app,
-              path,
-            },
-          ]
-        : [];
+              defaultMessage: 'Open in Discover',
+            }
+          ),
+          app,
+          path,
+        },
+      ];
     } catch (error) {
       logger?.debug(`Leaving out the Discover link of an ES|QL attachment: ${error.message}`);
       return [];
@@ -120,7 +118,7 @@ export const createEsqlAttachmentType = ({
               {
                 type: 'code' as const,
                 language: 'esql',
-                text: clampText(query, SURFACE_LIMITS.codeText),
+                text: query,
               },
               ...(await toDiscoverLink(query)),
             ]

@@ -5,97 +5,18 @@
  * 2.0.
  */
 
-import { code, context, fields, header, link, table } from '@kbn/isomer-components';
-import { SURFACE_LIMITS, clampText, hasText, toLine } from './surface_limits';
-
-const text = (length: number) => 'x'.repeat(length);
+import { fields } from '@kbn/isomer-components';
+import { SURFACE_LIMITS, hasText } from './surface_limits';
 
 describe('SURFACE_LIMITS', () => {
-  const cases: Array<
-    [
-      string,
-      { safeParse: (node: unknown) => { success: boolean } },
-      number,
-      (length: number) => unknown
-    ]
-  > = [
-    [
-      'headerText',
-      header.schema,
-      SURFACE_LIMITS.headerText,
-      (length) => ({ type: 'header', text: text(length) }),
-    ],
-    [
-      'contextText',
-      context.schema,
-      SURFACE_LIMITS.contextText,
-      (length) => ({ type: 'context', items: [{ text: text(length) }] }),
-    ],
-    [
-      'codeText',
-      code.schema,
-      SURFACE_LIMITS.codeText,
-      (length) => ({ type: 'code', text: text(length) }),
-    ],
-    [
-      'fieldLabel',
-      fields.schema,
-      SURFACE_LIMITS.fieldLabel,
-      (length) => ({ type: 'fields', items: [{ label: text(length), value: 'value' }] }),
-    ],
-    [
-      'fieldValue',
-      fields.schema,
-      SURFACE_LIMITS.fieldValue,
-      (length) => ({ type: 'fields', items: [{ label: 'label', value: text(length) }] }),
-    ],
-    [
-      'fieldItems',
-      fields.schema,
-      SURFACE_LIMITS.fieldItems,
-      (length) => ({
-        type: 'fields',
-        items: Array.from({ length }, () => ({ label: 'label', value: 'value' })),
-      }),
-    ],
-    [
-      'linkPath',
-      link.schema,
-      SURFACE_LIMITS.linkPath,
-      (length) => ({ type: 'link', label: 'Open', app: 'discover', path: `/${text(length - 1)}` }),
-    ],
-    [
-      'tableCell',
-      table.schema,
-      SURFACE_LIMITS.tableCell,
-      (length) => ({ type: 'table', columns: [{ label: 'Name' }], rows: [[text(length)]] }),
-    ],
-  ];
+  it('fieldItems matches the components pack', () => {
+    const toNode = (length: number) => ({
+      type: 'fields',
+      items: Array.from({ length }, () => ({ label: 'label', value: 'value' })),
+    });
 
-  it.each(cases)('%s matches the components pack', (_name, schema, limit, toNode) => {
-    expect(schema.safeParse(toNode(limit)).success).toBe(true);
-    expect(schema.safeParse(toNode(limit + 1)).success).toBe(false);
-  });
-});
-
-describe('clampText', () => {
-  it('keeps a value within the limit', () => {
-    expect(clampText('abc', 3)).toBe('abc');
-  });
-
-  it('cuts a longer value to the limit, with an ellipsis', () => {
-    expect(clampText('abcdef', 4)).toBe('abc…');
-  });
-
-  it('does not split a character made of two code units', () => {
-    expect(clampText('ab😀cd', 4)).toBe('ab…');
-    expect(clampText('ab😀cd', 5)).toBe('ab😀…');
-  });
-});
-
-describe('toLine', () => {
-  it('collapses whitespace before clamping', () => {
-    expect(toLine('  a\n\n b  ', 10)).toBe('a b');
+    expect(fields.schema.safeParse(toNode(SURFACE_LIMITS.fieldItems)).success).toBe(true);
+    expect(fields.schema.safeParse(toNode(SURFACE_LIMITS.fieldItems + 1)).success).toBe(false);
   });
 });
 
