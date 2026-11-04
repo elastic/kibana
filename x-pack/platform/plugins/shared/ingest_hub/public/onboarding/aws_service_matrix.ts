@@ -1116,6 +1116,19 @@ export function makeDsView(service: AwsServiceMatrixEntry, dsId: string): AwsSer
   };
 }
 
+/**
+ * Data streams a never-configured instance collects from: every stream of a single-stream service,
+ * else only those the manifest enables by default (the flyout shows the rest switched off). Falls
+ * back to all streams when the manifest enables none, so such a service still gets one input.
+ */
+export function getDefaultEnabledDataStreams(service: AwsServiceMatrixEntry): string[] {
+  if (service.dataStreams.length <= 1) return service.dataStreams;
+  const enabled = service.dataStreams.filter(
+    (dsId) => (service.varDefsByDataStream?.[dsId]?.defaultEnabledInputs ?? []).length > 0
+  );
+  return enabled.length > 0 ? enabled : service.dataStreams;
+}
+
 /** Internal static entries — exported for use by buildAwsServiceMatrix in the hook. */
 export const AWS_SERVICES_STATIC: AwsServiceStaticEntry[] = AWS_SERVICES_MATRIX_RAW;
 

@@ -6,6 +6,7 @@
  */
 
 import type { AwsServiceMatrixEntry } from '../../../aws_service_matrix';
+import { getDefaultEnabledDataStreams } from '../../../aws_service_matrix';
 import type { AuthenticateAndDeployStepState } from '../../../onboarding_flow_context';
 import type { ServiceVars } from '../../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from '../package_inputs';
@@ -249,7 +250,7 @@ export async function buildGroupPackagePolicy(
     const rawVars = storedServiceVars[instance.instanceId] ?? storedServiceVars[instance.serviceId];
     if (!rawVars) {
       serviceVarsMap[service.id] = {
-        enabledDataStreams: service.dataStreams,
+        enabledDataStreams: getDefaultEnabledDataStreams(service),
         varsByDataStream: {},
       };
     } else {
