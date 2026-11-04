@@ -74,6 +74,104 @@ describe('syntheticsMonitor', () => {
     });
   });
 
+  describe('check results', () => {
+    it('up() sets the summary, state and monitor status consistently', () => {
+      const [doc] = syntheticsMonitor.create().up().serialize();
+
+      expect(doc).toMatchObject({
+        'monitor.status': 'up',
+        'summary.up': 1,
+        'summary.down': 0,
+        'summary.final_attempt': true,
+        'state.status': 'up',
+        'state.up': 1,
+        'state.down': 0,
+        'state.checks': 1,
+        'state.duration_ms': 0,
+      });
+    });
+
+    it('down() sets the summary, state and monitor status consistently', () => {
+      const [doc] = syntheticsMonitor.create().down().serialize();
+
+      expect(doc).toMatchObject({
+        'monitor.status': 'down',
+        'summary.up': 0,
+        'summary.down': 1,
+        'summary.final_attempt': true,
+        'state.status': 'down',
+        'state.up': 0,
+        'state.down': 1,
+      });
+    });
+
+    it('sets monitor.duration.us', () => {
+      const [doc] = syntheticsMonitor.create().duration(150000).serialize();
+
+      expect(doc['monitor.duration.us']).toBe(150000);
+    });
+
+    it('keeps status() as a plain monitor.status setter without summary fields', () => {
+      const [doc] = syntheticsMonitor.create().status('disabled').serialize();
+
+      expect(doc['monitor.status']).toBe('disabled');
+      // Array paths check the literal flat key; a dotted string would be read as a nested path.
+      expect(doc).not.toHaveProperty(['summary.up']);
+      expect(doc).not.toHaveProperty(['state.status']);
+    });
+
+    describe('state.id', () => {
+      const stateId = (build: (monitor: ReturnType<typeof syntheticsMonitor.create>) => void) => {
+        const monitor = syntheticsMonitor.create().configId('config-1');
+        build(monitor);
+        return monitor.serialize()[0]['state.id'];
+      };
+
+      it('is deterministic for the same monitor, location and status', () => {
+        const a = stateId((m) => m.location({ id: 'loc-1', label: 'L1' }).up());
+        const b = stateId((m) => m.location({ id: 'loc-1', label: 'L1' }).up());
+
+        expect(a).toBeDefined();
+        expect(a).toBe(b);
+      });
+
+      it('differs between up and down, and between locations', () => {
+        const up = stateId((m) => m.location({ id: 'loc-1', label: 'L1' }).up());
+        const down = stateId((m) => m.location({ id: 'loc-1', label: 'L1' }).down());
+        const otherLocation = stateId((m) => m.location({ id: 'loc-2', label: 'L2' }).up());
+
+        expect(new Set([up, down, otherLocation]).size).toBe(3);
+      });
+
+      it('keeps an explicit state.id', () => {
+        const id = stateId((m) => m.up().overrides({ 'state.id': 'explicit' }));
+
+        expect(id).toBe('explicit');
+      });
+
+      it('is not set when no check result was set', () => {
+        const [doc] = syntheticsMonitor.create().configId('config-1').serialize();
+
+        expect(doc).not.toHaveProperty(['state.id']);
+      });
+    });
+
+    describe('state.started_at', () => {
+      it('defaults to the check timestamp', () => {
+        const timestamp = new Date('2026-01-01T10:00:00.000Z').getTime();
+        const [doc] = syntheticsMonitor.create().timestamp(timestamp).up().serialize();
+
+        expect(doc['state.started_at']).toBe('2026-01-01T10:00:00.000Z');
+      });
+
+      it('is not set without a timestamp', () => {
+        const [doc] = syntheticsMonitor.create().up().serialize();
+
+        expect(doc).not.toHaveProperty(['state.started_at']);
+      });
+    });
+  });
+
   it('accepts the summary, state, observer and config fields used by the Synthetics UI', () => {
     const fields: SyntheticsMonitorDocument = {
       config_id: 'config-1',

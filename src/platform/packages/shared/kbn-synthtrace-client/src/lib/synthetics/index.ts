@@ -9,6 +9,7 @@
 
 import type { Fields } from '../entity';
 import { Serializable } from '../serializable';
+import { hashKeysOf } from '../utils/hash';
 
 export type SyntheticsMonitorDocument = Fields &
   Partial<{
@@ -114,6 +115,33 @@ class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
     return this;
   }
 
+  duration(us: number) {
+    this.fields['monitor.duration.us'] = us;
+    return this;
+  }
+
+  up() {
+    return this.setCheckResult('up');
+  }
+
+  down() {
+    return this.setCheckResult('down');
+  }
+
+  private setCheckResult(result: 'up' | 'down') {
+    const isUp = result === 'up';
+    this.fields['monitor.status'] = result;
+    this.fields['summary.up'] = isUp ? 1 : 0;
+    this.fields['summary.down'] = isUp ? 0 : 1;
+    this.fields['summary.final_attempt'] = true;
+    this.fields['state.status'] = result;
+    this.fields['state.up'] = isUp ? 1 : 0;
+    this.fields['state.down'] = isUp ? 0 : 1;
+    this.fields['state.checks'] = 1;
+    this.fields['state.duration_ms'] = 0;
+    return this;
+  }
+
   configId(value: string) {
     this.fields.config_id = value;
     return this;
@@ -181,6 +209,27 @@ class SyntheticsMonitor extends Serializable<SyntheticsMonitorDocument> {
   timestamp(time: number) {
     super.timestamp(time);
     return this;
+  }
+
+  // Fills the state fields that depend on other fields; explicit values are kept.
+  serialize() {
+    if (this.fields['state.status'] === undefined) {
+      return super.serialize();
+    }
+
+    // The monitor details "Error states" tile counts distinct state.id values.
+    this.fields['state.id'] ??= hashKeysOf(this.fields, [
+      'config_id',
+      'observer.name',
+      'state.status',
+    ]);
+
+    const timestamp = this.fields['@timestamp'];
+    if (timestamp !== undefined) {
+      this.fields['state.started_at'] ??= new Date(timestamp).toISOString();
+    }
+
+    return super.serialize();
   }
 }
 
