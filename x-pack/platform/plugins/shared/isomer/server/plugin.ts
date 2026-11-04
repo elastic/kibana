@@ -5,14 +5,40 @@
  * 2.0.
  */
 
-import type { Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  KibanaRequest,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
+import type { Subscription } from 'rxjs';
+import { MATERIALIZE_FEATURE_FLAG } from '../common';
+import { createScopedMaterializeClient } from './materialize/materialize_client';
+import { MaterializerRegistry } from './materialize/registry';
+import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
+import { abortSignalFor } from './materialize/abort_signal';
+import { registerMaterializeRoute } from './routes/materialize_route';
 
-export type IsomerPluginSetup = Record<string, never>;
+export interface IsomerPluginSetup {
+  /** Registers the materializer for one saved object type. Each type has at most one. */
+  registerMaterializer: <TConfig>(type: string, materializer: Materializer<TConfig>) => void;
+}
+
+export interface AsScopedOptions {
+  /** Cancels the user's queries. Defaults to the request's own abort. */
+  abortSignal?: AbortSignal;
+}
 
 export interface IsomerPluginStart {
   /** Loads the shared runtime and primitive packs on first use. */
   getRuntime: () => Promise<KibanaIsomerRuntime>;
+  /** Whether materialization is turned on. */
+  isMaterializeEnabled: () => Promise<boolean>;
+  /** Materialization as the user who made `request`. */
+  asScoped: (request: KibanaRequest, options?: AsScopedOptions) => ScopedMaterializeClient;
 }
 
 const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
@@ -25,21 +51,56 @@ const createRuntime = async (): Promise<KibanaIsomerRuntime> => {
 
 export class IsomerPlugin implements Plugin<IsomerPluginSetup, IsomerPluginStart> {
   private readonly logger: Logger;
+  private readonly registry = new MaterializerRegistry();
   private runtime?: Promise<KibanaIsomerRuntime>;
+  private materializeEnabled = false;
+  private materializeEnabledSubscription?: Subscription;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
   }
 
-  setup(): IsomerPluginSetup {
-    return {};
+  setup(core: CoreSetup): IsomerPluginSetup {
+    registerMaterializeRoute({
+      router: core.http.createRouter(),
+      createClient: this.createClient,
+    });
+    return {
+      registerMaterializer: (type, materializer) => this.registry.register(type, materializer),
+    };
   }
 
-  start(): IsomerPluginStart {
-    return { getRuntime: this.getRuntime };
+  start(core: CoreStart): IsomerPluginStart {
+    this.materializeEnabledSubscription = core.featureFlags
+      .getBooleanValue$(MATERIALIZE_FEATURE_FLAG, false)
+      .subscribe((enabled) => {
+        this.materializeEnabled = enabled;
+      });
+    return {
+      getRuntime: this.getRuntime,
+      isMaterializeEnabled: this.isMaterializeEnabled,
+      asScoped: (request, { abortSignal } = {}) =>
+        this.createClient({
+          request,
+          savedObjectsClient: core.savedObjects.getScopedClient(request),
+          abortSignal: abortSignal ?? abortSignalFor(request),
+        }),
+    };
   }
 
-  stop() {}
+  stop() {
+    this.materializeEnabledSubscription?.unsubscribe();
+  }
+
+  private readonly isMaterializeEnabled = async (): Promise<boolean> => this.materializeEnabled;
+
+  private readonly createClient = (scope: MaterializeScope): ScopedMaterializeClient =>
+    createScopedMaterializeClient({
+      registry: this.registry,
+      scope,
+      isEnabled: this.isMaterializeEnabled,
+      logger: this.logger.get('materialize'),
+    });
 
   private readonly getRuntime = (): Promise<KibanaIsomerRuntime> => {
     this.runtime ??= createRuntime().then(

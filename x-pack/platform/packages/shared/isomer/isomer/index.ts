@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-export type { Composition, PrimitivePack, ValidationError } from '@elastic/isomer-sdk';
+export type {
+  Composition,
+  PrimitiveNode,
+  PrimitivePack,
+  ValidationError,
+} from '@elastic/isomer-sdk';
 export { CompositionValidationError } from '@elastic/isomer-sdk';
 export { createKibanaIsomerRuntime } from './src/create_kibana_isomer_runtime';
 export type {

@@ -3,11 +3,18 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["server/**/*"],
+  "include": ["common/**/*", "server/**/*"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
     "@kbn/isomer",
-    "@kbn/isomer-components"
+    "@kbn/isomer-components",
+    "@kbn/i18n",
+    "@kbn/es-query",
+    "@kbn/es-query-server",
+    "@kbn/esql-types",
+    "@kbn/zod",
+    "@kbn/data-plugin",
+    "@kbn/expressions-plugin"
   ]
 }

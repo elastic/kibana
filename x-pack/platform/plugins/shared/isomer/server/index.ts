@@ -12,5 +12,36 @@ export const plugin = async (initializerContext: PluginInitializerContext) => {
   return new IsomerPlugin(initializerContext);
 };
 
-export type { IsomerPluginSetup, IsomerPluginStart } from './plugin';
+export type { AsScopedOptions, IsomerPluginSetup, IsomerPluginStart } from './plugin';
 export type { KibanaIsomerRuntime } from '@kbn/isomer';
+export type {
+  MaterializeByReference,
+  MaterializeByValue,
+  MaterializeContext,
+  MaterializeInput,
+} from '../common';
+export type {
+  ChartCell,
+  ChartEvent,
+  MaterializedChartNode,
+  MaterializedComponentNode,
+  MaterializedNode,
+  MaterializedNodeSource,
+  MaterializeLoss,
+  UnsupportedNode,
+} from './materialize/nodes';
+export type {
+  AggsDataRequest,
+  DataRequest,
+  EsqlDataRequest,
+  EsqlParamValue,
+  MaterializeContextOverride,
+  MaterializeDataRequest,
+  MaterializeDescription,
+  MaterializeKit,
+  MaterializeResults,
+  MaterializeScope,
+  Materializer,
+  ScopedMaterializeClient,
+  SearchDataRequest,
+} from './materialize/types';
