@@ -9,17 +9,19 @@ import { z } from '@kbn/zod/v4';
 import { i18n } from '@kbn/i18n';
 import type { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
 import { streamsUnitIdentifierSchema } from '@kbn/streams-schema';
-import { STREAMS_API_PRIVILEGES, STREAMS_DEFAULT_UNIT_ID } from '../../../../../common/constants';
+import {
+  STREAMS_DEFAULT_UNIT_ID,
+  STREAMS_V2_API_PRIVILEGES,
+} from '../../../../../common/constants';
 import {
   MAX_RESOLVE_INDEX_PATTERN_LENGTH,
   MAX_RESOLVE_INDEX_PATTERNS,
 } from '../../../../../common';
 import { StatusError } from '../../../../lib/streams/errors/status_error';
+import type { UnitApiKey } from '../../../../lib/unit_config/unit_api_keys';
 import { createServerRoute } from '../../../create_server_route';
-import {
-  findDestinationApiKeyIds,
-  invalidateApiKeyIds,
-} from '../../../../lib/unit_config/managed_api_keys';
+import { assertStreamsCanvasEnabled } from '../../../streams/unit/assert_streams_canvas_enabled';
+import { createUnitApiKeyService, recordComponentApiKey } from '../create_unit_api_key_service';
 import {
   createDestinationApiKeyPrivilegeCheck,
   createDestinationApiKeyRoleDescriptors,
@@ -50,7 +52,7 @@ const getDestinationApiKeyPrivilegesRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -79,7 +81,7 @@ const createDestinationApiKeyRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -89,11 +91,15 @@ const createDestinationApiKeyRoute = createServerRoute({
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
-  handler: async ({ getScopedClients, request, params }) => {
-    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+  handler: async ({ getScopedClients, request, params, logger }) => {
+    const clients = await getScopedClients({ request });
+    const { scopedClusterClient, isSecurityEnabled } = clients;
     const {
       body: { destinationId, patterns, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
+
+    await assertStreamsCanvasEnabled(clients.uiSettingsClient);
+
     const privileges = await getDestinationApiKeyPrivileges({
       scopedClusterClient,
       isSecurityEnabled,
@@ -116,6 +122,19 @@ const createDestinationApiKeyRoute = createServerRoute({
       },
     });
 
+    await recordComponentApiKey({
+      unitApiKeyService: createUnitApiKeyService({ clients, logger }),
+      unitId,
+      apiKey: {
+        key_id: id,
+        component_type: 'destination',
+        component_id: destinationId,
+        created_at: createdAt,
+      },
+      invalidate: clients.invalidateApiKeysAsInternalUser,
+      logger,
+    });
+
     return {
       id,
       name,
@@ -126,7 +145,7 @@ const createDestinationApiKeyRoute = createServerRoute({
 });
 
 /**
- * Invalidates the current user's API keys minted for a destination.
+ * Invalidates every recorded API key minted for a destination, whichever user created it.
  */
 const deleteDestinationApiKeysRoute = createServerRoute({
   endpoint: 'DELETE /internal/streams/destinations/api_key',
@@ -135,7 +154,7 @@ const deleteDestinationApiKeysRoute = createServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: [STREAMS_API_PRIVILEGES.manage],
+      requiredPrivileges: [STREAMS_V2_API_PRIVILEGES.manage],
     },
   },
   params: z.object({
@@ -144,21 +163,25 @@ const deleteDestinationApiKeysRoute = createServerRoute({
       unitId: streamsUnitIdentifierSchema.optional(),
     }),
   }),
-  handler: async ({ getScopedClients, request, params }) => {
-    const { scopedClusterClient, isSecurityEnabled } = await getScopedClients({ request });
+  handler: async ({ getScopedClients, request, params, logger }) => {
+    const clients = await getScopedClients({ request });
     const {
       body: { destinationId, unitId = STREAMS_DEFAULT_UNIT_ID },
     } = params;
-    if (!isSecurityEnabled) {
-      return { invalidatedApiKeys: [] };
-    }
-    const client = scopedClusterClient.asCurrentUser;
-    const ids = await findDestinationApiKeyIds({
-      client,
-      destinationIds: [destinationId],
-      unitId,
-    });
-    const { invalidatedApiKeys, errorCount } = await invalidateApiKeyIds({ client, ids });
+
+    await assertStreamsCanvasEnabled(clients.uiSettingsClient);
+
+    const isDestinationApiKey = ({
+      component_type: componentType,
+      component_id: componentId,
+    }: UnitApiKey) => componentType === 'destination' && componentId === destinationId;
+
+    const unitApiKeyService = createUnitApiKeyService({ clients, logger });
+    const selectedCount = (await unitApiKeyService.listApiKeys(unitId)).filter(
+      isDestinationApiKey
+    ).length;
+    const { revoked } = await unitApiKeyService.revokeApiKeys(unitId, isDestinationApiKey);
+    const errorCount = selectedCount - revoked.length;
     if (errorCount > 0) {
       throw new StatusError(
         i18n.translate('xpack.streams.destinations.invalidateApiKeysErrorMessage', {
@@ -170,7 +193,7 @@ const deleteDestinationApiKeysRoute = createServerRoute({
       );
     }
 
-    return { invalidatedApiKeys };
+    return { invalidatedApiKeys: revoked.map(({ key_id: keyId }) => keyId) };
   },
 });
 

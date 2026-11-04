@@ -8,6 +8,7 @@
 import { getPlaceholderFor } from '@kbn/xstate-utils';
 import type { CoreStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+import { isHttpFetchError } from '@kbn/server-route-repository-client';
 import {
   and,
   assign,
@@ -105,6 +106,12 @@ export interface DestinationCreationContext {
 
 export type ResolvedIndicesStatus = 'loading' | 'ready' | 'unavailable';
 
+export interface ResolvedIndicesError {
+  message: string;
+  /** Elasticsearch refused the lookup because the user lacks index privileges on the targets. */
+  forbidden: boolean;
+}
+
 export interface DestinationsStateContext {
   unitDefinition: Unit;
   creationContext?: DestinationCreationContext;
@@ -114,7 +121,7 @@ export interface DestinationsStateContext {
   hasReceivedUnit: boolean;
   parentRef: AnyActorRef;
   resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>;
-  resolvedIndicesError?: string;
+  resolvedIndicesError?: ResolvedIndicesError;
   /** Spawned when a destination's details are first shown, stopped once nothing shows them. */
   destinationDetailRefs: ReadonlyMap<string, DestinationDetailActorRef>;
   /** Components showing each destination's details. */
@@ -354,7 +361,12 @@ export const destinationsStateMachine = setup({
     }),
     storeResolvedIndicesError: assign(({ event }) =>
       event.type === 'xstate.error.actor.loadResolvedIndices'
-        ? { resolvedIndicesError: getFormattedError(event.error).message }
+        ? {
+            resolvedIndicesError: {
+              message: getFormattedError(event.error).message,
+              forbidden: isHttpFetchError(event.error) && event.error.body?.statusCode === 403,
+            },
+          }
         : {}
     ),
     syncLoadedUnit: assign(({ context, event }) => {
