@@ -7,9 +7,15 @@
 
 import { executeUntilValid } from '@kbn/inference-prompt-utils';
 import type { Evaluator } from '@kbn/evals';
+import type { ToolingLog } from '@kbn/tooling-log';
+import type { BoundInferenceClient } from '@kbn/inference-common';
 import { createAttackDiscoveryBasicEvaluator } from './attack_discovery_basic_evaluator';
 import { createAttackDiscoveryRubricEvaluator } from './attack_discovery_rubric_evaluator';
-import type { AttackDiscoveryDatasetExample, AttackDiscoveryTaskOutput } from '../types';
+import type {
+  AttackDiscoveryDatasetExample,
+  AttackDiscoveryFindDoc,
+  AttackDiscoveryTaskOutput,
+} from '../types';
 
 jest.mock('@kbn/inference-prompt-utils', () => ({
   executeUntilValid: jest.fn(),
@@ -43,8 +49,7 @@ const findApiDoc = {
 };
 
 const generateApiOutput: AttackDiscoveryTaskOutput = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  insights: [findApiDoc] as any,
+  insights: [findApiDoc],
   raw: {
     execution_uuid: 'fec2a61d8ebb62f2',
     status: 'succeeded',
@@ -90,10 +95,8 @@ const run = async (
 const rubricEvaluator = () =>
   createAttackDiscoveryRubricEvaluator({
     // The judge must not be invoked on the empty-reference path.
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    inferenceClient: undefined as any,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    log: undefined as any,
+    inferenceClient: undefined as unknown as BoundInferenceClient,
+    log: undefined as unknown as ToolingLog,
   });
 
 describe('AttackDiscoveryBasic', () => {
@@ -128,9 +131,7 @@ describe('AttackDiscoveryBasic', () => {
     const snake = await run(
       evaluator,
       {
-        insights: [
-          { alert_ids: ['a'], title: 't' },
-        ] as unknown as AttackDiscoveryTaskOutput['insights'],
+        insights: [{ alert_ids: ['a'], title: 't' }],
       },
       {
         attackDiscoveries: [],
@@ -141,9 +142,7 @@ describe('AttackDiscoveryBasic', () => {
     const camel = await run(
       evaluator,
       {
-        insights: [
-          { alertIds: ['a'], title: 't' },
-        ] as unknown as AttackDiscoveryTaskOutput['insights'],
+        insights: [{ alertIds: ['a'], title: 't' }],
       },
       {
         attackDiscoveries: [],
@@ -157,8 +156,7 @@ describe('AttackDiscoveryBasic', () => {
     async (falsyInsight) => {
       const result = await run(
         evaluator,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        { insights: [findApiDoc, falsyInsight] as any },
+        { insights: [findApiDoc, falsyInsight as unknown as AttackDiscoveryFindDoc] },
         { attackDiscoveries: [] }
       );
       expect(result.score).toBe(0);
@@ -196,7 +194,7 @@ describe('AttackDiscoveryRubric (empty reference)', () => {
 
     const result = await run(
       rubricEvaluator(),
-      { insights: [emptyInsightShell] } as unknown as AttackDiscoveryTaskOutput,
+      { insights: [emptyInsightShell] },
       { attackDiscoveries: [] }
     );
 
@@ -212,7 +210,7 @@ describe('AttackDiscoveryRubric (empty reference)', () => {
 
     const result = await run(
       rubricEvaluator(),
-      { insights: [emptyInsightShell] } as unknown as AttackDiscoveryTaskOutput,
+      { insights: [emptyInsightShell] },
       undefined as unknown as AttackDiscoveryDatasetExample['output']
     );
 
@@ -228,13 +226,9 @@ describe('AttackDiscoveryRubric (empty reference)', () => {
       gradeResponse('N', 'the submission reports no discoveries')
     );
 
-    const result = await run(
-      rubricEvaluator(),
-      { insights: [emptyInsightShell] } as unknown as AttackDiscoveryTaskOutput,
-      {
-        attackDiscoveries: [referencedDiscovery],
-      } as unknown as AttackDiscoveryDatasetExample['output']
-    );
+    const result = await run(rubricEvaluator(), { insights: [emptyInsightShell] }, {
+      attackDiscoveries: [referencedDiscovery],
+    } as unknown as AttackDiscoveryDatasetExample['output']);
 
     expect(executeUntilValidMock).toHaveBeenCalledTimes(1);
     expect(result.score).toBe(0);
