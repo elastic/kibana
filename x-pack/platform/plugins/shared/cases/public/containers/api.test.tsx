@@ -12,6 +12,7 @@ import {
   CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_BULK_DELETE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
@@ -20,6 +21,7 @@ import {
 import { SortFieldCase } from '../../common/ui/types';
 
 import {
+  bulkDeleteAttachments,
   deleteCases,
   deleteComment,
   getActionLicense,
@@ -1170,6 +1172,43 @@ describe('Cases API', () => {
         }
       );
       expect(resp).toBe(undefined);
+    });
+  });
+
+  describe('bulkDeleteAttachments', () => {
+    const url = INTERNAL_BULK_DELETE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId);
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+
+    it('leaves include_related to the server by default', async () => {
+      await bulkDeleteAttachments({ caseId: basicCaseId, request: { ids: ['attachment-1'] } });
+
+      expect(fetchMock).toHaveBeenCalledWith(url, {
+        method: 'POST',
+        body: JSON.stringify({ ids: ['attachment-1'] }),
+        signal: undefined,
+      });
+    });
+
+    it('sends include_related when given', async () => {
+      await bulkDeleteAttachments({
+        caseId: basicCaseId,
+        request: { type: 'security.attack', attachmentIds: ['attack-1'] },
+        includeRelated: false,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'security.attack',
+          attachmentIds: ['attack-1'],
+          include_related: false,
+        }),
+        signal: undefined,
+      });
     });
   });
 

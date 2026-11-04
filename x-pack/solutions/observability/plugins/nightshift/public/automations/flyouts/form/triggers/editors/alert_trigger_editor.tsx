@@ -11,7 +11,7 @@ import type { TriggerFormValues } from '../../automation_form_values';
 import { PillPopover } from '../pills/pill_popover';
 import { Sentence, SentenceIcon } from '../pills/sentence';
 import { triggerLabels } from '../translations';
-import { useRuleCatalog } from '../../../../../hooks/use_rule_catalog';
+import { useRuleCatalog } from '../../../../../data/rules/use_rule_catalog';
 import { RulePicker } from './rule_picker';
 import { rulePillLabel } from './rule_selection';
 

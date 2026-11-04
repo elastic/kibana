@@ -24,6 +24,8 @@ import {
   runAfterExecutionWorkflows,
 } from './run_after_execution_workflows';
 import { executeWorkflow } from '@kbn/agent-builder-tools-base/workflows';
+import { context as otelContext, createContextKey, ROOT_CONTEXT } from '@opentelemetry/api';
+import { AsyncLocalStorageContextManager } from '@opentelemetry/context-async-hooks';
 import { getCurrentSpaceId } from '../../utils/spaces';
 
 jest.mock('@kbn/agent-builder-tools-base/workflows', () => ({
@@ -844,6 +846,40 @@ describe('runAfterExecutionWorkflows', () => {
       expect(executeWorkflowMock).toHaveBeenCalledWith(
         expect.objectContaining({ waitForCompletion: true })
       );
+    });
+
+    it('detaches executeWorkflow from the active OpenTelemetry context using ROOT_CONTEXT', async () => {
+      const contextManager = new AsyncLocalStorageContextManager();
+      otelContext.setGlobalContextManager(contextManager);
+      contextManager.enable();
+
+      try {
+        const { workflowApi, getInternalServices } = createDeps();
+        const testKey = createContextKey('test.foreground_span_key');
+        let observedContextBeforeHook: unknown;
+        let observedContextDuringExecute: unknown = 'unset';
+
+        executeWorkflowMock.mockImplementation(async () => {
+          observedContextDuringExecute = otelContext.active().getValue(testKey);
+          return { success: true, execution: completedExecution };
+        });
+
+        const parentCtx = ROOT_CONTEXT.setValue(testKey, 'foreground-span');
+        await otelContext.with(parentCtx, () => {
+          observedContextBeforeHook = otelContext.active().getValue(testKey);
+          return runAfterExecutionWorkflows({
+            context: createContext(),
+            workflowApi,
+            getInternalServices,
+            logger,
+          });
+        });
+
+        expect(observedContextBeforeHook).toBe('foreground-span');
+        expect(observedContextDuringExecute).toBeUndefined();
+      } finally {
+        contextManager.disable();
+      }
     });
   });
 });

@@ -125,6 +125,7 @@ describe('createFailureIssue()', () => {
       <!-- kibanaCiData = {\\"failed-test\\":{\\"test.class\\":\\"Chrome X-Pack UI Functional Tests.x-pack/platform/test/functional/apps/maps/sample_data·js\\",\\"test.name\\":\\"maps app maps loaded from sample data\\",\\"test.failCount\\":1,\\"test.type\\":\\"ftr\\"}} -->",
             Array [
               "failed-test",
+              "ftr",
             ],
           ],
         ],
@@ -162,6 +163,32 @@ describe('createFailureIssue()', () => {
     expect(title).toContain(classname);
     expect(body).toContain('| Location | x-pack/platform/example/tests/example.test.ts |');
     expect(body).toContain(`"test.class":"${classname}"`);
+  });
+
+  it.each([
+    ['ftr', ['failed-test', 'ftr']],
+    ['jest', ['failed-test', 'jest']],
+    ['cypress', ['failed-test', 'cypress']],
+    [undefined, ['failed-test']],
+  ] as const)('labels a %s failure with %j', async (testType, expectedLabels) => {
+    const api = new GithubApi();
+
+    await createFailureIssue(
+      'https://build-url',
+      {
+        classname: 'Jest Tests.x-pack/platform/example',
+        failure: 'this is the failure text',
+        name: 'test name',
+        time: '1.000',
+        likelyIrrelevant: false,
+        testType,
+      },
+      api,
+      'main',
+      'kibana-on-merge'
+    );
+
+    expect(api.createIssue.mock.calls[0][2]).toEqual(expectedLabels);
   });
 
   it('normalizes multiple code owners in the details table', async () => {

@@ -12,8 +12,9 @@ export type EncodedPowershellVariant = 'tp' | 'fp';
 
 /**
  * Base time handed to the scenario registry, which starts the chain two hours
- * before it. One hour after the attack's `@timestamp` puts every alert and raw
- * event inside the analysis's ±2h raw-event window around that timestamp.
+ * before it. One hour after the attack's `@timestamp` keeps every alert and raw
+ * event inside the analysis window, ±2h around the cited alerts'
+ * `kibana.alert.original_time`.
  */
 export const ENCODED_POWERSHELL_CHAIN_BASE_TIME = new Date(
   FP_TP_BASE_TIME.getTime() + 60 * 60 * 1000

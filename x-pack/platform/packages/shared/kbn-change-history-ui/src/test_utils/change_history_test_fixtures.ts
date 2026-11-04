@@ -14,6 +14,11 @@ export const TEST_CHANGE_HISTORY_SCOPE = {
   dataset: 'documents',
   objectType: 'document',
 } as const;
+export const TEST_CHANGE_HISTORY_SUPPORTS = {
+  compare: true,
+  restore: false,
+  unsavedChanges: false,
+};
 export const TEST_SNAPSHOT = { content: 'name: test\n' };
 export const TEST_SNAPSHOT_OLD = { content: 'name: old\n' };
 export const TEST_SNAPSHOT_OLDER = { content: 'name: older\n' };

@@ -85,55 +85,6 @@ export const renderRuleTuningWorkerYaml = (
     JSON.stringify(values.extras)
   );
 
-export type HuntWorkerTemplateValues = ScheduledWorkerTemplateValues;
-
-/**
- * Hunt Watch Continuous Threat Hunt has no configurable dials: enabled/disabled
- * (autonomy) and the schedule interval are its only settings. tier2When, candidateLimit,
- * and fanOutMax are fixed implementation constants.
- */
-const HUNT_WORKER_DEFAULTS = {
-  tier2When: 'always' as const,
-  candidateLimit: 10,
-  fanOutMax: 10,
-};
-
-/**
- * The manual trigger's optional `reportIds` input: a manual-bypass
- * fan-out over named reports, capped at 10 to match `create_proposal.yaml`'s
- * trigger-input shape and the candidates route's own `report_ids` bound. Present on
- * every autonomy level's manual trigger, scheduled or not.
- */
-const MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT = [
-  '  - type: manual',
-  '    inputs:',
-  '      properties:',
-  '        reportIds:',
-  '          type: array',
-  '          items:',
-  '            type: string',
-  '          maxItems: 10',
-].join('\n');
-
-/**
- * Hunt always emits scheduled (locked 4h default) plus manual with optional reportIds.
- * Autonomy is fixed Manual; the schedule still runs on its own.
- */
-export const renderHuntWorkerYaml = (yaml: string, values: HuntWorkerTemplateValues): string => {
-  const triggers = [
-    '  - type: scheduled',
-    '    with:',
-    `      every: ${JSON.stringify(values.scheduleInterval)}`,
-    MANUAL_TRIGGER_WITH_REPORT_IDS_INPUT,
-  ].join('\n');
-
-  return renderScheduledWorkerYaml(yaml, values)
-    .replaceAll('__WORKER_TRIGGERS__', triggers)
-    .replaceAll('__WORKER_TIER2_WHEN__', JSON.stringify(HUNT_WORKER_DEFAULTS.tier2When))
-    .replaceAll('__WORKER_CANDIDATE_LIMIT__', String(HUNT_WORKER_DEFAULTS.candidateLimit))
-    .replaceAll('__WORKER_FAN_OUT_MAX__', String(HUNT_WORKER_DEFAULTS.fanOutMax));
-};
-
 export interface AlertTriageWorkerTemplateValues extends ScheduledWorkerTemplateValues {
   extras: {
     autoCloseConfidenceScoreMinThreshold: number;
@@ -156,6 +107,32 @@ export const scheduleIntervalToMinutes = (interval: string): number => {
   }
   return Number(match[1]) * MINUTES_PER_UNIT[match[2] as keyof typeof MINUTES_PER_UNIT];
 };
+
+/** One day's retrieval. Also the hard ceiling: a longer interval does not raise it. */
+const ATTACK_DISCOVERY_ALERTS_PER_DAY = 10_000;
+/** One batch. Shorter intervals stay at a single batch rather than a partial one. */
+const ATTACK_DISCOVERY_MIN_ALERTS = 100;
+const MINUTES_PER_DAY = 24 * 60;
+
+/**
+ * Alerts one Attack Discovery run may retrieve, prorated to its schedule interval.
+ * 10,000 per 24h, at least 100, and never more than 10,000.
+ */
+export const attackDiscoveryMaxAlerts = (interval: string): number => {
+  const prorated = Math.floor(
+    (ATTACK_DISCOVERY_ALERTS_PER_DAY * scheduleIntervalToMinutes(interval)) / MINUTES_PER_DAY
+  );
+  return Math.min(ATTACK_DISCOVERY_ALERTS_PER_DAY, Math.max(ATTACK_DISCOVERY_MIN_ALERTS, prorated));
+};
+
+export const renderAttackDiscoveryWorkerYaml = (
+  yaml: string,
+  values: ScheduledWorkerTemplateValues
+): string =>
+  renderScheduledWorkerYaml(yaml, values).replaceAll(
+    '__WORKER_MAX_ALERTS__',
+    String(attackDiscoveryMaxAlerts(values.scheduleInterval))
+  );
 
 export const renderAlertTriageWorkerYaml = (
   yaml: string,

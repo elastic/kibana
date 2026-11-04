@@ -13,6 +13,8 @@ import type { Agent, AgentPolicy } from '../../../types';
  * bulk actions. Used by the table's `selection.selectable` and by the parent
  * page's `selectableAgents` count / "select all" filter.
  *
+ * Agents on agentless policies are never selectable.
+ *
  * OpAMP collectors live on an auto-created managed policy by design; bulk
  * actions applicable to them (export, remove collector) should still be allowed.
  */
@@ -26,6 +28,9 @@ export function isAgentSelectable(
   const basePolicyId = removeVersionSuffixFromPolicyId(agent.policy_id);
   const agentPolicy = agentPoliciesIndexedById[basePolicyId];
   const isHosted = agentPolicy?.is_managed === true;
+
+  // agentless agents are managed by Elastic, no action is available for them
+  if (agentPolicy?.supports_agentless === true) return false;
 
   if (isHosted && agent.type === 'OPAMP') return true;
   return !isHosted;

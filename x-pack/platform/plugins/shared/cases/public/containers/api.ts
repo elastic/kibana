@@ -583,15 +583,20 @@ export const deleteFileAttachments = async ({
 export const bulkDeleteAttachments = async ({
   caseId,
   request,
+  includeRelated,
   signal,
 }: {
   caseId: string;
   request: BulkDeleteAttachmentsRequest;
+  /** Whether the related attachments go too; the server defaults to `true`. */
+  includeRelated?: boolean;
   signal?: AbortSignal;
 }): Promise<void> => {
   await KibanaServices.get().http.fetch(getCaseBulkDeleteAttachmentsUrl(caseId), {
     method: 'POST',
-    body: JSON.stringify(request),
+    body: JSON.stringify(
+      includeRelated == null ? request : { ...request, include_related: includeRelated }
+    ),
     signal,
   });
 };

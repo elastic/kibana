@@ -9,11 +9,16 @@
 
 import { NEVER } from 'rxjs';
 import type {
+  AuthHeaders,
+  HttpSelfCredentialRefresher,
   HttpSelfUnauthorizedErrorHandler,
   IAuthHeadersStorage,
   KibanaRequest,
 } from '@kbn/core-http-server';
-import { UIAM_INTERNAL_CALLER_ATTESTATION_HEADER } from '@kbn/core-security-server';
+import {
+  ES_CLIENT_AUTHENTICATION_HEADER,
+  UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
+} from '@kbn/core-security-server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
@@ -23,6 +28,7 @@ import {
   createInternalHttpSelfClient,
   SELF_CALL_MTLS_ERROR,
   SELF_CALL_RECURSION_ERROR,
+  type SelfClientOwnClientAuthenticationCheck,
   type SelfClientUiamAttestationGetter,
 } from './self_client';
 import { SelfHttpDispatcherProvider } from './self_client_dispatcher';
@@ -62,17 +68,21 @@ const createClient = ({
   } as HttpConfig),
   serverProtocol = 'http',
   getUiamAttestationGetter,
+  getOwnClientAuthenticationCheck,
   unauthorizedErrorHandler,
+  credentialRefresher,
 }: {
   publicBaseUrl?: string | null;
-  authHeaders?: Record<string, string>;
+  authHeaders?: AuthHeaders;
   authRequestHeaders?: IAuthHeadersStorage;
   target?: 'auto' | 'local';
   getHttpConfig?: jest.MockedFunction<() => HttpConfig>;
   serverProtocol?: 'http' | 'https';
   hostname?: string;
   getUiamAttestationGetter?: () => SelfClientUiamAttestationGetter | undefined;
+  getOwnClientAuthenticationCheck?: () => SelfClientOwnClientAuthenticationCheck | undefined;
   unauthorizedErrorHandler?: HttpSelfUnauthorizedErrorHandler;
+  credentialRefresher?: HttpSelfCredentialRefresher;
 } = {}) => {
   const authRequestHeaders =
     suppliedAuthRequestHeaders ??
@@ -102,7 +112,9 @@ const createClient = ({
     log,
     target,
     getUiamAttestationGetter,
+    getOwnClientAuthenticationCheck,
     getUnauthorizedErrorHandler: () => unauthorizedErrorHandler,
+    getCredentialRefresher: () => credentialRefresher,
   });
 
   return { authRequestHeaders, getHttpConfig, log, self };
@@ -947,6 +959,205 @@ describe('InternalHttpSelfScopedClient', () => {
     });
   });
 
+  describe('UIAM client authentication', () => {
+    const isOwnClientAuthentication = (value: string) => value === 'kibana-own-secret';
+
+    it("strips Kibana's own client authentication from the stored auth headers", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest().headers.get('authorization')).toBe('Bearer essu_token');
+    });
+
+    it('relays client authentication supplied by an upstream caller', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips every entry of Kibana's own client authentication from an array value", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'kibana-own-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+    });
+
+    it('relays only the upstream entry of a mixed array value', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: ['kibana-own-secret', 'upstream-secret'],
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+    });
+
+    it("strips Kibana's own client authentication regardless of header name case", async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          'X-Client-Authentication': 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+    });
+
+    it('leaves client authentication unchanged when no check is registered', async () => {
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_token',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => undefined,
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('kibana-own-secret');
+    });
+
+    it("strips Kibana's own client authentication from the retry as well", async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        authHeaders: {
+          authorization: 'Bearer essu_expired',
+          [ES_CLIENT_AUTHENTICATION_HEADER]: 'kibana-own-secret',
+        },
+        getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+        getUiamAttestationGetter: () => () => 'attestation',
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
+        ),
+      });
+
+      await self.asScoped(createRequest()).fetch('/api/status');
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(sentRequest(0).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest(1).headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBeNull();
+      expect(sentRequest(1).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+      expect(sentRequest(1).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation'
+      );
+    });
+
+    describe('together with the attestation getter', () => {
+      const createWiredClient = (
+        clientAuthentication: string | string[],
+        getAttestation: SelfClientUiamAttestationGetter = jest.fn().mockReturnValue('attestation')
+      ) => {
+        const { self } = createClient({
+          authHeaders: {
+            authorization: 'Bearer essu_token',
+            [ES_CLIENT_AUTHENTICATION_HEADER]: clientAuthentication,
+          },
+          getOwnClientAuthenticationCheck: () => isOwnClientAuthentication,
+          getUiamAttestationGetter: () => getAttestation,
+        });
+        return { self, getAttestation };
+      };
+
+      it("attests when it strips Kibana's own client authentication", async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('attests regardless of client authentication on request.headers', async () => {
+        const { self } = createWiredClient('kibana-own-secret');
+        const request = createRequest({
+          headers: { [ES_CLIENT_AUTHENTICATION_HEADER]: 'upstream-secret' },
+        });
+
+        await self.asScoped(request).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+          'attestation'
+        );
+      });
+
+      it('does not attest relayed client authentication', async () => {
+        const { self, getAttestation } = createWiredClient('upstream-secret');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+        expect(getAttestation).not.toHaveBeenCalled();
+      });
+
+      it('does not attest the relayed entry of a mixed array value', async () => {
+        const { self } = createWiredClient(['kibana-own-secret', 'upstream-secret']);
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('upstream-secret');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest an empty relayed client authentication', async () => {
+        const { self } = createWiredClient('');
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.get(ES_CLIENT_AUTHENTICATION_HEADER)).toBe('');
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+
+      it('does not attest when the getter declines the credential', async () => {
+        const { self } = createWiredClient(
+          'kibana-own-secret',
+          jest.fn().mockReturnValue(undefined)
+        );
+
+        await self.asScoped(createRequest()).fetch('/api/status');
+
+        expect(sentRequest().headers.has(ES_CLIENT_AUTHENTICATION_HEADER)).toBe(false);
+        expect(sentRequest().headers.has(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(false);
+      });
+    });
+  });
+
   describe('401 retry', () => {
     const retryHandler = (authHeaders: Record<string, string>): HttpSelfUnauthorizedErrorHandler =>
       jest.fn(async (options, toolkit) => toolkit.retry({ authHeaders }));
@@ -1365,6 +1576,254 @@ describe('InternalHttpSelfScopedClient', () => {
         expect(global.fetch).toHaveBeenCalledTimes(1);
         expect(log.warn).not.toHaveBeenCalledWith(expect.stringContaining('mint exploded'));
       });
+    });
+  });
+
+  describe('credential refresher', () => {
+    const replacing = (authHeaders: Record<string, string>) =>
+      jest.fn<ReturnType<HttpSelfCredentialRefresher>, Parameters<HttpSelfCredentialRefresher>>(
+        (options, toolkit) => toolkit.replace({ authHeaders })
+      );
+    const notHandling = () =>
+      jest.fn<ReturnType<HttpSelfCredentialRefresher>, Parameters<HttpSelfCredentialRefresher>>(
+        (options, toolkit) => toolkit.notHandled()
+      );
+
+    const attestationGetter = (_request: KibanaRequest, outboundAuthorization: string | null) =>
+      outboundAuthorization
+        ? `attestation-for-${outboundAuthorization.replace('Bearer ', '')}`
+        : undefined;
+
+    it('sends the refreshed credential on the first attempt', async () => {
+      mockFetchResponses(okResponse());
+      const credentialRefresher = replacing({ authorization: 'Bearer essu_refreshed' });
+      const { self } = createClient({ credentialRefresher });
+      const request = createFakeRequest({ authorization: 'Bearer essu_expiring' });
+
+      await expect(self.asScoped(request).fetch('/api/status')).resolves.toEqual({ ok: true });
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(credentialRefresher).toHaveBeenCalledWith(
+        { request, path: '/api/status', timeoutMs: 60_000 },
+        expect.anything()
+      );
+    });
+
+    it("passes the call's own timeout", async () => {
+      mockFetchResponses(okResponse());
+      const credentialRefresher = notHandling();
+      const { self } = createClient({ credentialRefresher });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+        .fetch('/api/status', { timeout: 300_000 });
+
+      expect(credentialRefresher).toHaveBeenCalledWith(
+        expect.objectContaining({ timeoutMs: 300_000 }),
+        expect.anything()
+      );
+    });
+
+    it('sends the derived credential when the refresher does not handle the call', async () => {
+      mockFetchResponses(okResponse());
+      const { self } = createClient({ credentialRefresher: notHandling() });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+        .fetch('/api/status');
+
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_token');
+    });
+
+    it('sends the credential the request holds once the refresher is done', async () => {
+      mockFetchResponses(okResponse());
+      const request = createFakeRequest({ authorization: 'Bearer essu_before' });
+      const { self } = createClient({
+        credentialRefresher: jest.fn((options, toolkit) => {
+          // Stands in for a registry that replaces the shared header while the refresher waits.
+          (options.request.headers as Record<string, string>).authorization = 'Bearer essu_after';
+          return toolkit.notHandled();
+        }),
+      });
+
+      await self.asScoped(request).fetch('/api/status');
+
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_after');
+    });
+
+    it('sends no credential when the refresher leaves the request without one', async () => {
+      mockFetchResponses(okResponse());
+      const request = createFakeRequest({ authorization: 'Bearer essu_released' });
+      const { self } = createClient({
+        credentialRefresher: jest.fn((options, toolkit) => {
+          delete (options.request.headers as Record<string, string>).authorization;
+          return toolkit.notHandled();
+        }),
+      });
+
+      await self.asScoped(request).fetch('/api/status');
+
+      expect(sentRequest(0).headers.has('authorization')).toBe(false);
+    });
+
+    it('derives the attestation from the refreshed credential', async () => {
+      mockFetchResponses(okResponse());
+      const { self } = createClient({
+        credentialRefresher: replacing({ authorization: 'Bearer essu_refreshed' }),
+        getUiamAttestationGetter: () => attestationGetter,
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expiring' }))
+        .fetch('/api/status');
+
+      expect(sentRequest(0).headers.get(UIAM_INTERNAL_CALLER_ATTESTATION_HEADER)).toBe(
+        'attestation-for-essu_refreshed'
+      );
+    });
+
+    it('builds the outbound request once, after the refresher', async () => {
+      mockFetchResponses(okResponse());
+      const getAttestation = jest.fn(attestationGetter);
+      const { self } = createClient({
+        credentialRefresher: notHandling(),
+        getUiamAttestationGetter: () => getAttestation,
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+        .fetch('/api/status', { method: 'POST', body: { name: 'value' } });
+
+      expect(getAttestation).toHaveBeenCalledTimes(1);
+      expect(sentRequest(0).headers.get('content-type')).toBe('application/json');
+      await expect(sentRequest(0).text()).resolves.toBe('{"name":"value"}');
+    });
+
+    it('rejects invalid options before consulting the refresher', async () => {
+      const credentialRefresher = notHandling();
+      const { self } = createClient({ credentialRefresher });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+          .fetch('/api/status', { method: 'POST', body: {}, rawBody: Buffer.from('raw') })
+      ).rejects.toThrow('Invalid self HTTP options, body and rawBody are mutually exclusive.');
+      expect(credentialRefresher).not.toHaveBeenCalled();
+    });
+
+    it('ignores headers the refresher may not set', async () => {
+      mockFetchResponses(okResponse());
+      const { log, self } = createClient({
+        credentialRefresher: replacing({
+          authorization: 'Bearer essu_refreshed',
+          'kbn-version': '0.0.0',
+        }),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expiring' }))
+        .fetch('/api/status');
+
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(sentRequest(0).headers.get('kbn-version')).toBe('9.9.9');
+      expect(log.warn).toHaveBeenCalledWith(
+        'Ignoring header [kbn-version] returned by the Kibana self HTTP credential refresher.'
+      );
+    });
+
+    it('fails the call without sending it when the refresher rejects it', async () => {
+      mockFetchResponses(okResponse());
+      const refusal = Object.assign(new Error('The credential was refused.'), {
+        code: 'CREDENTIAL_REFUSED',
+      });
+      const { self } = createClient({
+        credentialRefresher: jest.fn((options, toolkit) => toolkit.reject({ error: refusal })),
+      });
+
+      const error = await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expiring' }))
+        .fetch('/api/status')
+        .catch((e: Error) => e);
+
+      expect(global.fetch).not.toHaveBeenCalled();
+      expect((error as Error).message).toMatch(
+        /^Kibana self HTTP call failed: .*: CREDENTIAL_REFUSED: The credential was refused\.$/
+      );
+      expect((error as Error).cause).toBe(refusal);
+    });
+
+    it('treats a refresher that throws as broken and sends the call unchanged', async () => {
+      mockFetchResponses(okResponse());
+      const { log, self } = createClient({
+        credentialRefresher: jest.fn(async () => {
+          throw new Error('mint exploded');
+        }),
+      });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+          .fetch('/api/status')
+      ).resolves.toEqual({ ok: true });
+
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_token');
+      expect(log.warn).toHaveBeenCalledWith(
+        'Kibana self HTTP call could not refresh its credential before sending: mint exploded'
+      );
+    });
+
+    it('still replays an authentication-stage 401 with the handler credential', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        credentialRefresher: replacing({ authorization: 'Bearer essu_refreshed' }),
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          toolkit.retry({ authHeaders: { authorization: 'Bearer essu_reminted' } })
+        ),
+      });
+
+      await self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_expiring' }))
+        .fetch('/api/status');
+
+      expect(global.fetch).toHaveBeenCalledTimes(2);
+      expect(sentRequest(0).headers.get('authorization')).toBe('Bearer essu_refreshed');
+      expect(sentRequest(1).headers.get('authorization')).toBe('Bearer essu_reminted');
+    });
+
+    it('does not replay with the credential the refresher already sent', async () => {
+      mockFetchResponses(unauthorizedResponse(), okResponse());
+      const { self } = createClient({
+        credentialRefresher: replacing({ authorization: 'Bearer essu_refreshed' }),
+        unauthorizedErrorHandler: jest.fn(async (options, toolkit) =>
+          toolkit.retry({ authHeaders: { authorization: 'Bearer essu_refreshed' } })
+        ),
+      });
+
+      await expect(
+        self
+          .asScoped(createFakeRequest({ authorization: 'Bearer essu_expiring' }))
+          .fetch('/api/status')
+      ).rejects.toThrow();
+
+      expect(global.fetch).toHaveBeenCalledTimes(1);
+    });
+
+    it('stops waiting on the refresher when the caller aborts', async () => {
+      mockFetchResponses(okResponse());
+      const { self } = createClient({
+        credentialRefresher: jest.fn(() => new Promise<never>(() => {})),
+      });
+      const controller = new AbortController();
+
+      const pending = self
+        .asScoped(createFakeRequest({ authorization: 'Bearer essu_token' }))
+        .fetch('/api/status', { signal: controller.signal });
+      await flushPromises();
+      controller.abort();
+
+      await expect(pending).rejects.toThrow();
+      expect(global.fetch).not.toHaveBeenCalled();
     });
   });
 });

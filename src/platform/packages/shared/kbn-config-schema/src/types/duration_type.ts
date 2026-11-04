@@ -27,6 +27,7 @@ export interface DurationOptions {
 
 export class DurationType extends Type<Duration> {
   constructor(options: DurationOptions = {}) {
+    options = { ...options };
     let defaultValue;
     if (typeof options.defaultValue === 'function') {
       const originalDefaultValue = options.defaultValue;
@@ -40,15 +41,26 @@ export class DurationType extends Type<Duration> {
       defaultValue = options.defaultValue;
     }
 
-    let schema = internals.duration();
     if (options.min) {
-      schema = schema.min(options.min);
+      ensureDuration(options.min);
     }
     if (options.max) {
-      schema = schema.max(options.max);
+      ensureDuration(options.max);
     }
 
-    super(schema, { validate: options.validate, defaultValue });
+    super(
+      () => {
+        let schema = internals.duration();
+        if (options.min) {
+          schema = schema.min(options.min);
+        }
+        if (options.max) {
+          schema = schema.max(options.max);
+        }
+        return schema;
+      },
+      { validate: options.validate, defaultValue }
+    );
   }
 
   protected handleError(

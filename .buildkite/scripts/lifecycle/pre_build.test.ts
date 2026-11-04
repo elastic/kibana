@@ -80,12 +80,27 @@ exit 0
     Path.join(binDir, 'node'),
     `#!/usr/bin/env bash
 set -euo pipefail
-echo "node $*" >> "$CALLS_FILE"
+echo "node $* ES_SNAPSHOT_MANIFEST_DEFAULT=\${ES_SNAPSHOT_MANIFEST_DEFAULT:-}" >> "$CALLS_FILE"
 if [[ "\${MOCK_FAIL_CMD:-}" == "node" ]]; then
   echo "forced node failure" >&2
   exit 1
 fi
+if [[ -n "\${MOCK_FAIL_NODE_SCRIPT:-}" && "$*" == *"\${MOCK_FAIL_NODE_SCRIPT}"* ]]; then
+  echo "forced node script failure" >&2
+  exit 1
+fi
 exit 0
+`
+  );
+
+  // GNU `timeout` is missing on macOS; run the command directly and record the limit.
+  writeExecutable(
+    Path.join(binDir, 'timeout'),
+    `#!/usr/bin/env bash
+set -euo pipefail
+echo "timeout $1" >> "$CALLS_FILE"
+shift
+exec "$@"
 `
   );
 
@@ -123,6 +138,8 @@ const runPreBuildScript = (overrides: Record<string, string> = {}) => {
     GITHUB_PR_LABELS: '',
     KIBANA_BUILD_ID: '',
     KIBANA_REUSABLE_BUILD_JOB_URL: '',
+    BUILDKITE_PIPELINE_SLUG: '',
+    ON_MERGE_SELECTIVE_MODE: '',
     ...overrides,
   };
 
@@ -245,6 +262,52 @@ describe('lifecycle pre_build.sh', () => {
 
     expect(result.status).not.toBe(0);
     expect(hasCall(result.calls, 'meta-data set ES_SNAPSHOT_MANIFEST_DEFAULT')).toBe(false);
+  });
+
+  it('resolves the on-merge selection with the ES snapshot manifest when enabled', () => {
+    const result = runPreBuildScript({
+      BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge',
+      ON_MERGE_SELECTIVE_MODE: 'shadow',
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.calls).toEqual(
+      expect.arrayContaining([
+        'timeout 3m',
+        expect.stringMatching(
+          /node .*resolve_on_merge_selection\.ts ES_SNAPSHOT_MANIFEST_DEFAULT=https:\/\/storage\.googleapis\.com\/kibana-ci-es-snapshots-daily\/9\.9\.9\/archives\/20260930-000000_abcdef12\/manifest\.json/
+        ),
+      ])
+    );
+  });
+
+  it.each([
+    [
+      'other pipelines',
+      { BUILDKITE_PIPELINE_SLUG: 'kibana-pull-request', ON_MERGE_SELECTIVE_MODE: 'shadow' },
+    ],
+    ['mode off', { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge', ON_MERGE_SELECTIVE_MODE: 'off' }],
+    ['mode unset', { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge' }],
+    [
+      'invalid mode',
+      { BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge', ON_MERGE_SELECTIVE_MODE: 'Shadow' },
+    ],
+  ])('does not resolve the on-merge selection for %s', (_, overrides) => {
+    const result = runPreBuildScript(overrides);
+
+    expect(result.status).toBe(0);
+    expect(hasCall(result.calls, 'resolve_on_merge_selection.ts')).toBe(false);
+  });
+
+  it('does not fail when on-merge selection resolution fails', () => {
+    const result = runPreBuildScript({
+      BUILDKITE_PIPELINE_SLUG: 'kibana-on-merge',
+      ON_MERGE_SELECTIVE_MODE: 'shadow',
+      MOCK_FAIL_NODE_SCRIPT: 'resolve_on_merge_selection.ts',
+    });
+
+    expect(result.status).toBe(0);
+    expect(result.stderr).toContain('Failed to resolve on-merge selection');
   });
 
   it('fails when manifest resolution command fails', () => {

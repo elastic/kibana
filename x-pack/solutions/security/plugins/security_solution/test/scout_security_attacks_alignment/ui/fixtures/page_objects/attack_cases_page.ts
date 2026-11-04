@@ -201,9 +201,10 @@ export class AttackCasesPage {
   public readonly attackGridBulkTakeActionButton: Locator;
   public readonly attackGridBulkActionsPopover: Locator;
 
-  // Case view – the Cases removal confirmation
+  // Case view – the Cases removal confirmation, which asks whether the attack's alerts go too
   public readonly removeConfirmModal: Locator;
-  public readonly removeConfirmButton: Locator;
+  public readonly removeOnlyButton: Locator;
+  public readonly removeWithRelatedButton: Locator;
 
   // Attack details flyout (legacy expandable flyout, i.e. `enableNewFlyout: false`)
   public readonly attackDetailsFlyoutBody: Locator;
@@ -314,8 +315,13 @@ export class AttackCasesPage {
       ATTACK_TAB_BULK_ACTIONS_POPOVER_TEST_ID
     );
 
-    this.removeConfirmModal = page.testSubj.locator('property-actions-confirm-modal');
-    this.removeConfirmButton = this.removeConfirmModal.getByTestId('confirmModalConfirmButton');
+    this.removeConfirmModal = page.testSubj.locator('remove-with-related-modal');
+    this.removeOnlyButton = this.removeConfirmModal.getByTestId(
+      'remove-with-related-modal-remove-only'
+    );
+    this.removeWithRelatedButton = this.removeConfirmModal.getByTestId(
+      'remove-with-related-modal-remove-with-related'
+    );
 
     this.attackDetailsFlyoutBody = page.testSubj.locator('attack-details-flyout-body');
   }
@@ -595,9 +601,9 @@ export class AttackCasesPage {
   /**
    * Removes one attack through its grid row's "Remove from case" item, then confirms. The row
    * menu is suffixed with the attachment saved object id, so the row is named rather than picked
-   * by position.
+   * by position. `includeRelated` picks whether the alerts the attack brought in go too.
    */
-  async removeAttackFromGrid(savedObjectId: string) {
+  async removeAttackFromGrid(savedObjectId: string, { includeRelated = true } = {}) {
     const moreActionsButton = this.attackGrid.getByTestId(
       `${ATTACK_TAB_ROW_MORE_ACTIONS_TEST_ID}-${savedObjectId}`
     );
@@ -606,13 +612,13 @@ export class AttackCasesPage {
     await moreActionsButton.click();
     await this.attackGridMoreActionsPopover.waitFor({ state: 'visible', timeout: 30_000 });
     await this.rowMoreActionsMenuItem(ATTACK_TAKE_ACTION_ITEM_TEST_ID.removeFromCase).click();
-    await this.confirmRemove();
+    await this.confirmRemove({ includeRelated });
   }
 
-  /** Confirms the Cases removal prompt and waits for it to close. */
-  async confirmRemove() {
+  /** Answers the Cases removal prompt and waits for it to close. */
+  async confirmRemove({ includeRelated = true } = {}) {
     await this.removeConfirmModal.waitFor({ state: 'visible', timeout: 30_000 });
-    await this.removeConfirmButton.click();
+    await (includeRelated ? this.removeWithRelatedButton : this.removeOnlyButton).click();
     await this.removeConfirmModal.waitFor({ state: 'hidden', timeout: 30_000 });
   }
 }

@@ -89,7 +89,7 @@ export default ({ getService }: FtrProviderContext): void => {
     return id;
   };
 
-  describe('Attack attachments — attackAttachmentsEnabled OFF', () => {
+  describe('Attack attachments — attackAttachments OFF', () => {
     afterEach(async () => {
       await deleteAllCaseItems(es);
       await deleteAttackDocuments(es);
@@ -110,7 +110,7 @@ export default ({ getService }: FtrProviderContext): void => {
       expect(response.message).to.contain(
         `Invalid attachment payload for type '${SECURITY_ATTACK_ATTACHMENT_TYPE}'`
       );
-      expect(response.message).to.contain('attackAttachmentsEnabled');
+      expect(response.message).to.contain('attackAttachments');
 
       const comments = await getAllComments({ supertest, caseId: postedCase.id });
       expect(comments.length).to.be(0);

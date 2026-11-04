@@ -157,6 +157,7 @@ describe('get_trigger_type_suggestions', () => {
         expect(casesSuggestion).toMatchObject({
           label: 'cases.caseCreated',
           detail: 'Cases - Case created',
+          filterText: 'cases.caseCreated',
         });
       });
 
@@ -164,12 +165,14 @@ describe('get_trigger_type_suggestions', () => {
         const result = getTriggerTypeSuggestions('alerting.', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['alerting.actions.alertAcked']);
+        expect(result.map((s) => s.detail)).toEqual(['Alerting - Alert acknowledged']);
       });
 
       it('should filter registered triggers by title prefix', () => {
         const result = getTriggerTypeSuggestions('Cases - Case', mockRange);
 
         expect(result.map((s) => s.label)).toEqual(['cases.caseCreated']);
+        expect(result.map((s) => s.detail)).toEqual(['Cases - Case created']);
       });
     });
 

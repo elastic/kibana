@@ -9,6 +9,7 @@ RESOLVE = SCRIPT_DIR / "resolve_verbosity.sh"
 PUBLISH = SCRIPT_DIR / "publish_test_plan.sh"
 MARKER = "<!-- test-plan-generated -->"
 TOKENS = "<!-- tokens: input=1 output=2 cache_create=3 cache_read=4 total=10 -->"
+COST = "<!-- cost: usd=0.9773 pricing=2026-10-21 -->"
 
 
 class ScriptTestCase(unittest.TestCase):
@@ -105,6 +106,14 @@ class PublishNormalizationTests(ScriptTestCase):
             f"{MARKER}\n<!-- generated-by: gpt-5 -->\n<!-- verbosity: detailed -->\n{TOKENS}\n# Plan\n",
         )
 
+    def test_cost_marker_goes_after_tokens(self) -> None:
+        result = self.dry_run(f"{COST}\n<!-- verbosity: lean -->\n{TOKENS}\n# Plan\n", "--model", "m")
+        self.assertEqual(result.returncode, 0, result.stderr)
+        self.assertEqual(
+            result.stdout,
+            f"{MARKER}\n<!-- generated-by: m -->\n<!-- verbosity: lean -->\n{TOKENS}\n{COST}\n# Plan\n",
+        )
+
     def test_blank_line_after_markers_is_kept(self) -> None:
         result = self.dry_run("<!-- verbosity: lean -->\n\n# Plan\n", "--model", "gpt-5")
         self.assertEqual(result.returncode, 0, result.stderr)
@@ -132,6 +141,7 @@ class PublishNormalizationTests(ScriptTestCase):
         self.assertEqual(result.returncode, 0, result.stderr)
         self.assertIn("<!-- verbosity: standard -->", result.stdout)
         self.assertNotIn("tokens", result.stdout)
+        self.assertNotIn("cost", result.stdout)
 
     def test_markers_inside_the_body_are_left_alone(self) -> None:
         result = self.dry_run("<!-- verbosity: lean -->\n# Plan\n<!-- verbosity: detailed -->\n", "--model", "gpt-5")
@@ -148,6 +158,14 @@ class PublishNormalizationTests(ScriptTestCase):
         self.assertEqual(self.dry_run("<!-- verbosity: lean -->\n<!-- verbosity: lean -->\n", "--model", "m").returncode, 65)
         self.assertEqual(self.dry_run("<!-- verbosity: verbose -->\n", "--model", "m").returncode, 65)
         self.assertEqual(self.dry_run("<!-- tokens: total=0 -->\n", "--model", "m").returncode, 65)
+        self.assertEqual(self.dry_run(f"{COST}\n{COST}\n", "--model", "m").returncode, 65)
+        self.assertEqual(self.dry_run("<!-- cost: usd=0.98 pricing=2026-10-21 -->\n", "--model", "m").returncode, 65)
+        self.assertEqual(self.dry_run("<!-- cost: usd=0.9773 -->\n", "--model", "m").returncode, 65)
+
+    def test_cost_marker_without_tokens_marker_fails(self) -> None:
+        result = self.dry_run(f"<!-- verbosity: lean -->\n{COST}\n# Plan\n", "--model", "m")
+        self.assertEqual(result.returncode, 65)
+        self.assertIn("cost marker without a tokens marker", result.stderr)
 
     def test_dry_run_keeps_the_draft(self) -> None:
         draft = self.write("# Plan\n")

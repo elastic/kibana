@@ -6,11 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render as rtlRender, screen, within } from '@testing-library/react';
+import { EuiProvider } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import type { ExecutionTerminatedEvent, RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { createExecutionTerminatedEvent } from '../items/execution_terminated_event.factory';
 import { ExecutionMetadataPopover } from './execution_metadata_popover';
+
+const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: EuiProvider });
 
 jest.mock('../../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: {}, settings: {} } }),
@@ -108,6 +111,23 @@ describe('ExecutionMetadataPopover', () => {
       expect(screen.getByText('111')).toBeInTheDocument();
       expect(screen.getByText('Tokens received')).toBeInTheDocument();
       expect(screen.getByText('22')).toBeInTheDocument();
+    });
+
+    it('shows the tokens in a compact format', async () => {
+      render(
+        <ExecutionMetadataPopover
+          executionTerminatedEvent={eventWithUsage({
+            connector_id: 'c1',
+            llm_calls: 1,
+            input_tokens: 1234567,
+            output_tokens: 12345,
+          })}
+        />
+      );
+      await openPopover();
+
+      expect(screen.getByText('1.2m')).toBeInTheDocument();
+      expect(screen.getByText('12.3k')).toBeInTheDocument();
     });
 
     it('shows the cache hit tokens under the tokens sent when they are reported', async () => {
@@ -319,7 +339,8 @@ describe('ExecutionMetadataPopover', () => {
       const user = await openPopover();
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
-      expect(screen.getByText('Tokens received (reasoning)')).toBeInTheDocument();
+      expect(screen.getByText('Tokens received')).toBeInTheDocument();
+      expect(screen.getByText('(reasoning)')).toBeInTheDocument();
       expect(
         within(screen.getByTestId('executionMetadataModelRow-all')).getByText(/120/)
       ).toBeInTheDocument();
@@ -331,6 +352,24 @@ describe('ExecutionMetadataPopover', () => {
           'Not reported by this model'
         )
       ).toHaveLength(2);
+    });
+
+    it('reserves the second header line for every column when a header has a suffix', async () => {
+      render(
+        <ExecutionMetadataPopover executionTerminatedEvent={eventWithUsage(usageWithBreakdown)} />
+      );
+      const user = await openPopover();
+      await user.click(screen.getByTestId('executionMetadataByModelTab'));
+
+      const [model, llmCalls, tokensSent, tokensReceived] = within(
+        screen.getByTestId('executionMetadataByModelTable')
+      ).getAllByRole('columnheader');
+
+      expect(tokensSent).toHaveTextContent('(cached)');
+      expect(tokensSent.querySelector('[aria-hidden="true"]')).toBeNull();
+      [model, llmCalls, tokensReceived].forEach((header) => {
+        expect(header.querySelectorAll('[aria-hidden="true"]')).toHaveLength(1);
+      });
     });
 
     it('does not mention the cached tokens when no model reported them', async () => {
@@ -349,7 +388,7 @@ describe('ExecutionMetadataPopover', () => {
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
       expect(screen.getByText('Tokens sent')).toBeInTheDocument();
-      expect(screen.queryByText('Tokens sent (cached)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(cached)')).not.toBeInTheDocument();
       expect(screen.queryByLabelText('Not reported by this model')).not.toBeInTheDocument();
     });
 
@@ -361,7 +400,7 @@ describe('ExecutionMetadataPopover', () => {
       await user.click(screen.getByTestId('executionMetadataByModelTab'));
 
       expect(screen.getByText('Tokens received')).toBeInTheDocument();
-      expect(screen.queryByText('Tokens received (reasoning)')).not.toBeInTheDocument();
+      expect(screen.queryByText('(reasoning)')).not.toBeInTheDocument();
     });
 
     it('falls back to the model, then to the connector id, when the connector name is unknown', async () => {

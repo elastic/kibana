@@ -54,9 +54,9 @@ describe('AlertEpisodesSeverityFilter', () => {
     renderFilter({}, true);
     fireEvent.click(screen.getByTestId('test-severity-filter-button'));
 
-    expect(screen.getByText('Warning')).toBeInTheDocument();
-    expect(screen.getByText('Minor')).toBeInTheDocument();
-    expect(screen.getByText('Major')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-warning')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-minor')).toBeInTheDocument();
+    expect(screen.getByTestId('test-severity-filter-popover-option-major')).toBeInTheDocument();
   });
 
   it('emits extension severity values when selected', () => {

@@ -8,6 +8,7 @@
 import React, { Suspense, type ComponentType } from 'react';
 import type {
   CommonAttachmentListViewProps,
+  RelatedRemovalChoice,
   UnifiedReferenceAttachmentViewProps,
 } from '@kbn/cases-plugin/public';
 import { defineAttachment } from '@kbn/cases-plugin/public';
@@ -97,12 +98,38 @@ const getAttackCountLabel = (count: number): string =>
     values: { count },
   });
 
+const getAttackRelatedRemoval = (count: number): RelatedRemovalChoice => ({
+  description: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.description',
+    {
+      defaultMessage:
+        'Also remove the alerts {count, plural, one {this attack} other {these attacks}} added to the case? Alerts that also belong to another attack in this case stay.',
+      values: { count },
+    }
+  ),
+  removeOnlyLabel: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.removeOnlyButtonLabel',
+    {
+      defaultMessage: 'Remove {count, plural, one {attack} other {attacks}} only',
+      values: { count },
+    }
+  ),
+  removeWithRelatedLabel: i18n.translate(
+    'xpack.securitySolution.attackDiscovery.cases.relatedRemoval.removeWithAlertsButtonLabel',
+    {
+      defaultMessage: 'Remove {count, plural, one {attack} other {attacks}} and alerts',
+      values: { count },
+    }
+  ),
+});
+
 export const getAttackAttachment = () =>
   defineAttachment({
     id: SECURITY_ATTACK_ATTACHMENT_TYPE,
     getIcon: () => 'securitySignalDetected',
     getLabel: () => DISPLAY_NAME,
     getCountLabel: ({ count }) => getAttackCountLabel(count),
+    getRelatedRemoval: ({ count }) => getAttackRelatedRemoval(count),
     schema: AttackAttachmentPayloadSchema,
     getCreationActivity: () => ({
       eventColor: 'subdued' as const,

@@ -1,5 +1,5 @@
 {
-  "sha1": "bcc0924237ab30465cd2e6caa3953f34750e4e53",
+  "sha1": "8065d9e1b4f8c9d580c9553383e5d9c61a3c56a0",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -782,6 +782,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -789,7 +790,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 30,
+        "line": 28,
         "column": 7
       }
     },
@@ -799,6 +800,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -806,7 +808,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 52,
+        "line": 50,
         "column": 9
       }
     },
@@ -816,6 +818,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -823,7 +826,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 69,
+        "line": 67,
         "column": 11
       }
     },
@@ -833,6 +836,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -840,7 +844,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 88,
+        "line": 86,
         "column": 64
       }
     },
@@ -850,6 +854,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -857,7 +862,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/create_filters.spec.ts",
-        "line": 110,
+        "line": 108,
         "column": 20
       }
     },
@@ -867,6 +872,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -874,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 57,
+        "line": 55,
         "column": 26
       }
     },
@@ -884,6 +890,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -891,7 +898,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 72,
+        "line": 70,
         "column": 9
       }
     },
@@ -901,6 +908,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -908,7 +916,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 91,
+        "line": 89,
         "column": 15
       }
     },
@@ -918,6 +926,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -925,7 +934,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/delete_filters.spec.ts",
-        "line": 106,
+        "line": 104,
         "column": 18
       }
     },
@@ -935,6 +944,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -942,8 +952,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 81,
-        "column": 18
+        "line": 79,
+        "column": 23
       }
     },
     {
@@ -952,6 +962,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -959,8 +970,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 127,
-        "column": 21
+        "line": 126,
+        "column": 20
       }
     },
     {
@@ -969,6 +980,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -976,8 +988,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters_stats.spec.ts",
-        "line": 138,
-        "column": 25
+        "line": 136,
+        "column": 50
       }
     },
     {
@@ -986,6 +998,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -993,7 +1006,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 43,
+        "line": 41,
         "column": 61
       }
     },
@@ -1003,6 +1016,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1010,7 +1024,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 53,
+        "line": 51,
         "column": 20
       }
     },
@@ -1020,6 +1034,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1027,7 +1042,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 63,
+        "line": 61,
         "column": 27
       }
     },
@@ -1037,6 +1052,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1044,7 +1060,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 75,
+        "line": 73,
         "column": 27
       }
     },
@@ -1054,6 +1070,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1061,7 +1078,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/get_filters.spec.ts",
-        "line": 88,
+        "line": 86,
         "column": 13
       }
     },
@@ -1071,6 +1088,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1078,7 +1096,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 66,
+        "line": 64,
         "column": 25
       }
     },
@@ -1088,6 +1106,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1095,7 +1114,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 80,
+        "line": 78,
         "column": 42
       }
     },
@@ -1105,6 +1124,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1112,7 +1132,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 96,
+        "line": 94,
         "column": 50
       }
     },
@@ -1122,6 +1142,7 @@
       "expectedStatus": "passed",
       "tags": [
         "@local-stateful-classic",
+        "@cloud-stateful-classic",
         "@local-serverless-observability_complete",
         "@cloud-serverless-observability_complete",
         "@local-serverless-security_complete",
@@ -1129,7 +1150,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/filters/update_filters.spec.ts",
-        "line": 115,
+        "line": 113,
         "column": 25
       }
     },
@@ -1723,12 +1744,13 @@
       "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_weblogs module with datafeed and verifies states",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
-        "line": 78,
-        "column": 24
+        "line": 79,
+        "column": 7
       }
     },
     {
@@ -1736,12 +1758,13 @@
       "title": "setup_module: sample data modules with startDatafeed true sets up sample_data_ecommerce module with datafeed and verifies states",
       "expectedStatus": "passed",
       "tags": [
-        "@local-stateful-classic"
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/ml/test/scout/api/tests/modules/setup_module_samples_datafeed.spec.ts",
-        "line": 78,
-        "column": 24
+        "line": 79,
+        "column": 7
       }
     },
     {

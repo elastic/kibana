@@ -92,6 +92,7 @@ tags:
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - common/**/*
@@ -102,6 +103,4 @@ fileGroups:
     - server/**/*.json
     - public/**/*.json
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

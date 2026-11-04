@@ -1,0 +1,7 @@
+## Question (context only)
+{{{question}}}
+
+## Tool-call trajectory (everything the agent called, in order)
+{{{trajectory}}}
+
+List the failed and the no-data calls, then call the `score` tool.

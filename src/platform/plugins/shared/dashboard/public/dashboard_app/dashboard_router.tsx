@@ -86,6 +86,7 @@ export async function mountApp({
     routeParams: ParsedQuery<string>
   ): DashboardEmbedSettings | undefined => {
     return {
+      isEmbeddedViaUrl: true,
       forceShowTopNavMenu: routeParams[dashboardUrlParams.showTopMenu] === 'true',
       forceShowQueryInput: routeParams[dashboardUrlParams.showQueryInput] === 'true',
       forceShowDatePicker: routeParams[dashboardUrlParams.showTimeFilter] === 'true',

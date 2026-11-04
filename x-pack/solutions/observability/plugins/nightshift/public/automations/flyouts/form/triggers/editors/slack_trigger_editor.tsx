@@ -10,7 +10,7 @@ import { EuiBadge, EuiPanel, EuiText, EuiTextArea } from '@elastic/eui';
 import {
   formatChannelValue,
   useAllRelayAppBindings,
-} from '../../../../../settings/components/apps_section/use_relay_app_bindings';
+} from '../../../../../data/relay_apps/use_relay_app_bindings';
 import { actionLabels } from '../../actions/automation_actions_section';
 import type { SlackTriggerFormValues, TriggerFormValues } from '../../automation_form_values';
 import { findUnconnectedChannels, SlackChannelComboBox } from '../../slack_channel_combo_box';
@@ -119,6 +119,16 @@ export const SlackTriggerEditor = ({
       values={trigger.users}
       onChange={(users) => onChange({ ...trigger, users })}
       testSubject="automationSlackTriggerUsers"
+      readOnly={readOnly}
+    />
+    <EuiText size="s">{triggerLabels.via}</EuiText>
+    <ListPill
+      ariaLabel={triggerLabels.anyApp}
+      emptyLabel={triggerLabels.anyApp}
+      placeholder={triggerLabels.searchApps}
+      values={trigger.bots}
+      onChange={(bots) => onChange({ ...trigger, bots })}
+      testSubject="automationSlackTriggerBots"
       readOnly={readOnly}
     />
   </Sentence>

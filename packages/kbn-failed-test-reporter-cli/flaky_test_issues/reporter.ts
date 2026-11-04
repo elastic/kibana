@@ -347,7 +347,7 @@ const fetchFailedTestIssues = async (
 };
 
 /** `failed-test` plus the label of each owning team, the latter only in the Kibana repository. */
-export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => {
+export const issueLabels = (suite: Pick<FlakySuite, 'owners'>, githubRepo: string): string[] => {
   if (githubRepo !== DEFAULT_GITHUB_REPO) {
     return [FAILED_TEST_LABEL];
   }
@@ -476,8 +476,7 @@ export const reportFlakySuiteIssues = async (
   };
 
   /**
-   * Metadata first: the failed-test alert a `kibanamachine` comment runs in elastic/kibana reads
-   * the report count from it. The body's text stays as filed, this report's numbers go in the
+   * Metadata first. The body's text stays as filed, this report's numbers go in the
    * comment. A comment that then fails is not retried: the metadata already records it, so the
    * next qualifying report comments instead. Recording it after the comment would take another
    * edit, and a failure there would mean a duplicate comment rather than a missed one.

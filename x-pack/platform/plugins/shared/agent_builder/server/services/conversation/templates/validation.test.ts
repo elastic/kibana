@@ -8,6 +8,8 @@
 import type {
   ConversationTemplate,
   ConversationTemplateFieldDefinition,
+  MetadataFieldValue,
+  SerializedMetadataValue,
 } from '@kbn/agent-builder-common';
 import {
   collectFieldViolations,
@@ -253,6 +255,90 @@ describe('validateMetadataUpdate', () => {
 
   it('reports required violation when setting an empty string', () => {
     expect(() => validateMetadataUpdate(TEMPLATE_ID, fields, { severity: '' })).toThrow('required');
+  });
+
+  describe('immutable fields', () => {
+    const immutableFields: Record<string, ConversationTemplateFieldDefinition> = {
+      target: { input_type: 'TEXT', immutable: true },
+      count: { input_type: 'NUMBER', immutable: true },
+      enabled: { input_type: 'TOGGLE', immutable: true },
+      tags: { input_type: 'TEXT_ARRAY', immutable: true },
+      summary: { input_type: 'TEXT', max_length: 20 },
+    };
+
+    it('allows initial values during conversation creation', () => {
+      expect(() =>
+        validateMetadataUpdate(TEMPLATE_ID, immutableFields, { target: 'orca' })
+      ).not.toThrow();
+    });
+
+    it.each<Record<string, SerializedMetadataValue>>([{}, { target: 'orca' }])(
+      'rejects assigning a different value: %p',
+      (stored) => {
+        expect(() =>
+          validateMetadataUpdate(TEMPLATE_ID, immutableFields, { target: 'c0' }, stored)
+        ).toThrow('field "target" is immutable');
+      }
+    );
+
+    it.each<{
+      updates: Record<string, MetadataFieldValue>;
+      stored: Record<string, SerializedMetadataValue>;
+    }>([
+      { updates: { target: 'orca' }, stored: { target: 'orca' } },
+      { updates: { count: 42 }, stored: { count: '42' } },
+      { updates: { enabled: true }, stored: { enabled: 'true' } },
+      { updates: { tags: ['a', 'b'] }, stored: { tags: ['a', 'b'] } },
+      { updates: { tags: 'a' }, stored: { tags: ['a'] } },
+    ])('allows values with identical storage representations: %p', ({ updates, stored }) => {
+      expect(() =>
+        validateMetadataUpdate(TEMPLATE_ID, immutableFields, updates, stored)
+      ).not.toThrow();
+    });
+
+    it('allows updating unrelated fields without supplying immutable fields', () => {
+      expect(() =>
+        validateMetadataUpdate(
+          TEMPLATE_ID,
+          immutableFields,
+          { summary: 'Updated' },
+          { target: 'orca' }
+        )
+      ).not.toThrow();
+    });
+
+    it('rejects changes to array values', () => {
+      expect(() =>
+        validateMetadataUpdate(
+          TEMPLATE_ID,
+          immutableFields,
+          { tags: ['b', 'a'] },
+          { tags: ['a', 'b'] }
+        )
+      ).toThrow('field "tags" is immutable');
+    });
+
+    it('accumulates immutable field violations alongside other validation errors', () => {
+      expect(() =>
+        validateMetadataUpdate(
+          TEMPLATE_ID,
+          immutableFields,
+          { target: 'c0', summary: 'x'.repeat(30) },
+          { target: 'orca' }
+        )
+      ).toThrow(/target.*immutable.*summary.*max_length/);
+    });
+
+    it('reports invalid types without trying to serialize them', () => {
+      expect(() =>
+        validateMetadataUpdate(
+          TEMPLATE_ID,
+          immutableFields,
+          { target: undefined },
+          { target: 'orca' }
+        )
+      ).toThrow('expected a string');
+    });
   });
 });
 

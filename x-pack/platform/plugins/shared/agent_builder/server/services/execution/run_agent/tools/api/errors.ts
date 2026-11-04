@@ -62,10 +62,11 @@ export const apiFailureToErrorResult = (
         message: discoveryEnabled
           ? `Unknown API identifier: "${api}". Use the ${internalTools.discoverApis} tool to ` +
             `find valid identifiers.`
-          : `The ${target} target exposes no API named "${api}". Identifiers are spelled ` +
-            `"namespace.name" (e.g. "indices.create", "cluster.health") or just "name" for root ` +
-            `operations (e.g. "bulk"). Retry with the identifier of an operation you know ` +
-            `${target} ships, or tell the user the operation is not available.`,
+          : `The ${target} target exposes no API named "${api}". Do not retry with another ` +
+            `identifier unless a skill or the user gave it to you. ` +
+            `Otherwise, stop using ${internalTools.describeApi} and ${internalTools.executeApi} ` +
+            `for this operation. Do the task with your other tools instead, or tell the user ` +
+            `the operation is not available.`,
       });
 
     case 'load_failed':

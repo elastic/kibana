@@ -24,7 +24,7 @@ const cssHistogram = ({ euiTheme }: UseEuiTheme) => ({
 
 const cssHistogramLegend = ({ euiTheme }: UseEuiTheme) =>
   ({
-    color: euiTheme.colors.mediumShade,
+    color: euiTheme.colors.textSubdued,
     marginTop: euiTheme.size.xs,
     fontStyle: 'italic',
     fontWeight: 'normal',

@@ -13,6 +13,7 @@ import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
+import type { IsomerPluginStart } from '@kbn/isomer-plugin/server';
 import type { SearchInferenceEndpointsPluginStart } from '@kbn/search-inference-endpoints/server';
 import type { DataStreamsStart } from '@kbn/core-data-streams-server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
@@ -129,6 +130,7 @@ export interface ServicesStartDeps {
   searchInferenceEndpoints: SearchInferenceEndpointsPluginStart;
   licensing: LicensingPluginStart;
   deploymentInfo: DeploymentInfo;
+  isomer: IsomerPluginStart;
   /** `xpack.agentBuilder.deductive.register` for this deployment. */
   deductiveRegister: boolean;
 }

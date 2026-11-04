@@ -16,3 +16,4 @@ export * from './has_alerts_fields';
 export * from './get_selected_action_group';
 export * from './get_initial_consumer';
 export * from './get_default_params';
+export * from './get_edit_rule_permissions';
