@@ -1530,6 +1530,12 @@ describe('<IndexDetailsPage />', () => {
           );
         });
 
+        // Saving leaves add-fields mode, so saved fields are no longer listed as pending.
+        await waitFor(() =>
+          expect(screen.queryByTestId('indexDetailsMappingsPendingBlock')).not.toBeInTheDocument()
+        );
+        expect(screen.getByTestId('indexDetailsMappingsAddField')).toBeInTheDocument();
+
         // Verify the post-save refetch is consumed: JSON view reads the loaded mapping payload
         // (not local pending-field state). Checking for the field name avoids a full JSON equality
         // assert that was expensive/flaky on CI.
