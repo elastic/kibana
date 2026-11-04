@@ -203,7 +203,7 @@ apiTest.describe(
         });
         expect(res).toHaveStatusCode(200);
         const body = res.body as { schedules: LabelCount[] };
-        expect(body.schedules).toEqual(
+        expect(body.schedules).toStrictEqual(
           expect.arrayContaining([
             { label: '10m', count: 1 },
             { label: '10s', count: 1 },
