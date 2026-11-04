@@ -18,7 +18,7 @@ const discoverAdManagementTrigger: typeof DISCOVER_AD_MANAGEMENT_TRIGGER =
 
 /**
  * Returns a callback which opens the anomaly detection job suggestions for the data view,
- * or undefined when the data source can't be analyzed or nothing handles the trigger.
+ * or undefined when the data source (a data view or an ES|QL query) has no time field to analyze or nothing handles the trigger.
  */
 export const useDiscoverAdManagement = ({
   services,
@@ -31,6 +31,10 @@ export const useDiscoverAdManagement = ({
 
   // Primitives, so a new data source object for the same data view doesn't restart the check
   const { indexPattern, dataViewId } = useMemo(() => {
+    if (dataSource?.kind === 'esql') {
+      // The index pattern is the one the query reads from
+      return dataSource.timeFieldName ? { indexPattern: dataSource.title } : {};
+    }
     if (dataSource?.kind !== 'index-pattern') {
       return {};
     }

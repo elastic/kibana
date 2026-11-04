@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { FC, ReactNode } from 'react';
+import type { IconType } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 import moment from 'moment';
 import useObservable from 'react-use/lib/useObservable';
@@ -267,7 +268,8 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
   const renderSectionCard = (
     target: 'suggest' | 'current',
     title: string,
-    description: ReactNode
+    description: ReactNode,
+    titleIcon?: IconType
   ) => (
     <EuiPanel
       hasShadow={false}
@@ -280,9 +282,18 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
     >
       <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
         <EuiFlexItem>
-          <EuiText size="s">
-            <strong>{title}</strong>
-          </EuiText>
+          <EuiFlexGroup alignItems="center" gutterSize="xs" responsive={false}>
+            {titleIcon && (
+              <EuiFlexItem grow={false}>
+                <EuiIcon type={titleIcon} color="primary" aria-hidden={true} />
+              </EuiFlexItem>
+            )}
+            <EuiFlexItem grow={false}>
+              <EuiText size="s">
+                <strong>{title}</strong>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
           <EuiText size="s" color="subdued">
             {description}
           </EuiText>
@@ -313,7 +324,8 @@ export const DiscoverADManagementFlyout: FC<Props> = ({ onClose, indexPattern })
           id="xpack.ml.discoverADManagementFlyout.suggestSectionDescription"
           defaultMessage="Find jobs which suit the data in {indexPattern}, and create and start them."
           values={{ indexPattern: <strong>{indexPattern}</strong> }}
-        />
+        />,
+        'sparkles'
       )}
     </>
   );

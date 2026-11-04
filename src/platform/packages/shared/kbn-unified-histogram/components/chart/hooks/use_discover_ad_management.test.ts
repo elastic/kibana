@@ -22,7 +22,8 @@ const executeTriggerActions = unifiedHistogramServicesMock.uiActions
 
 const timeBasedSource = new DataViewSource(dataViewWithTimefieldMock);
 const noTimeFieldSource = new DataViewSource(dataViewMock);
-const esqlSource = createMockEsqlSource();
+const esqlSource = createMockEsqlSource([], [], '@timestamp', 'FROM logs-* | LIMIT 10');
+const esqlSourceWithoutTimeField = createMockEsqlSource();
 
 describe('useDiscoverAdManagement', () => {
   beforeEach(() => {
@@ -74,12 +75,27 @@ describe('useDiscoverAdManagement', () => {
     expect(getTriggerCompatibleActions).not.toHaveBeenCalled();
   });
 
-  it('returns undefined for an ES|QL data source', async () => {
+  it('returns a callback which runs the trigger for the index of an ES|QL query', async () => {
+    getTriggerCompatibleActions.mockResolvedValue([{ id: 'test' }]);
+    const { result } = renderHook(() =>
+      useDiscoverAdManagement({ services: unifiedHistogramServicesMock, dataSource: esqlSource })
+    );
+
+    await waitFor(() => expect(result.current).toBeDefined());
+    result.current!();
+
+    expect(executeTriggerActions).toHaveBeenCalledWith('DISCOVER_AD_MANAGEMENT_TRIGGER', {
+      indexPattern: esqlSource.title,
+      dataViewId: undefined,
+    });
+  });
+
+  it('returns undefined for an ES|QL query without a time field', async () => {
     getTriggerCompatibleActions.mockResolvedValue([{ id: 'test' }]);
     const { result } = renderHook(() =>
       useDiscoverAdManagement({
         services: unifiedHistogramServicesMock,
-        dataSource: esqlSource,
+        dataSource: esqlSourceWithoutTimeField,
       })
     );
 

@@ -84,7 +84,7 @@ export interface UnifiedHistogramChartProps {
 }
 
 const suggestAdJobsLabel = i18n.translate('unifiedHistogram.suggestAdJobsButtonLabel', {
-  defaultMessage: 'Suggest anomaly jobs',
+  defaultMessage: 'Anomaly detection',
 });
 
 const RequestStatusError: typeof RequestStatus.ERROR = 2;
