@@ -11,8 +11,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 import { AutomationActionsSection } from './automation_actions_section';
 import type { SlackActionFormValues } from '../automation_form_values';
 
-jest.mock('../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [
       { channel: 'C1', displayName: 'alerts', status: 'bound_to_self' },
