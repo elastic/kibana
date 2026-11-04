@@ -96,6 +96,9 @@ const RequestServiceVarsSchema = schema.recordOf(
   { meta: { description: 'Per-service config keyed by instance ID.' } }
 );
 
+const PolicySettingsSchema = (description: string) =>
+  schema.recordOf(schema.string({ maxLength: 256 }), schema.any(), { meta: { description } });
+
 const InstanceSchema = schema.object({
   instanceId: schema.string({
     minLength: 1,
@@ -203,6 +206,11 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
   instances: schema.maybe(
     InstancesSchema(
       'Service instances, including duplicates, from the last deployment. Used to restore the service list when an onboarding is resumed.'
+    )
+  ),
+  policySettings: schema.maybe(
+    PolicySettingsSchema(
+      'Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`).'
     )
   ),
   namespace: schema.maybe(
@@ -352,6 +360,11 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
     instances: schema.maybe(
       InstancesSchema(
         'Service instances, including duplicates, being deployed. Used to restore the service list when the onboarding is resumed.'
+      )
+    ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Package policy settings from the Service settings step that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`).'
       )
     ),
     namespace: schema.maybe(
@@ -590,6 +603,11 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
     instances: schema.maybe(
       InstancesSchema(
         'Service instances, including duplicates, from the last deployment. Replaces the stored list, so instances removed since the last deployment are dropped.'
+      )
+    ),
+    policySettings: schema.maybe(
+      PolicySettingsSchema(
+        'Package policy settings that apply to every package policy of the deployment, keyed by package policy field (for example `output_id`). Replaces the stored settings; omit it to keep them.'
       )
     ),
     services: schema.maybe(

@@ -277,7 +277,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         const baseOpts = {
           namespace: DEFAULT_NAMESPACE,
           globalNamespace: serviceSettings?.namespace,
-          outputId: serviceSettings?.outputId,
+          policySettings: serviceSettings?.policySettings,
           globalRegion,
           storedServiceVars,
           authenticateAndDeployStep: {
@@ -306,7 +306,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
             globalNamespace: serviceSettings?.namespace,
-            outputId: serviceSettings?.outputId,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep,
             servicesMap: servicesMap ?? new Map(),
             // Keep the policy's current policy_ids, unless this run also applies a changed agent
@@ -351,7 +351,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
             globalRegion,
             namespace: DEFAULT_NAMESPACE,
             globalNamespace: serviceSettings?.namespace,
-            outputId: serviceSettings?.outputId,
+            policySettings: serviceSettings?.policySettings,
             authenticateAndDeployStep: shared
               ? { ...authenticateAndDeployStep, existingSecretRefs: shared }
               : authenticateAndDeployStep,

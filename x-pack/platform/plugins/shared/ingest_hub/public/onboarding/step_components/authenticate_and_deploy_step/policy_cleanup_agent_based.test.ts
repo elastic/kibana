@@ -207,7 +207,7 @@ describe('updateAgentBasedPolicy — payload shape', () => {
       });
       await cleanupAgentBasedPolicies({
         ...BASE_OPTS,
-        outputId,
+        policySettings: outputId === undefined ? {} : { output_id: outputId },
         instances: [instance],
         servicesMap: new Map([['vpcflow', vpcflow]]),
         pendingCleanupPolicyIds: { 'inst-a': 'policy-1' },

@@ -25,6 +25,7 @@ import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
 import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
+import { getPolicySettingsUpdate } from '../../common/policy_settings';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
   selectedAgentPolicyIds: string[];
@@ -131,7 +132,7 @@ export async function updateAgentBasedPolicy(
     servicesMap,
     selectedAgentPolicyIds,
     agentCredentials,
-    outputId,
+    policySettings,
   } = opts;
 
   const members = resolveSurvivingMembers(survivingInstanceIds, instances, servicesMap);
@@ -254,8 +255,8 @@ export async function updateAgentBasedPolicy(
   const updateResult = await sendUpdatePackagePolicy(policyId, {
     name: policyName,
     namespace: policyNamespace,
-    // An empty choice is the inherited output, which clears an override the policy had.
-    ...(outputId !== undefined ? { output_id: outputId || null } : {}),
+    // A setting set back to empty is sent as null, which clears what the policy had.
+    ...getPolicySettingsUpdate(policySettings, 'agent_based'),
     package: { name: packageName, version: pkgVersion },
     ...(vars ? { vars } : {}),
     inputs,

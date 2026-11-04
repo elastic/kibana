@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { CloudOnboardingDeploymentSchemaV4, CloudOnboardingDeploymentSchemaV5 } from '../models';
+import {
+  CloudOnboardingDeploymentSchemaV4,
+  CloudOnboardingDeploymentSchemaV5,
+  CloudOnboardingDeploymentSchemaV6,
+  CloudOnboardingDeploymentSchemaV7,
+} from '../models';
 
 import {
   CreateCloudOnboardingDeploymentRequestSchema,
@@ -145,6 +150,36 @@ describe('saved object model versions', () => {
 
     expect(forwardCompatible.validate({ ...record, somethingNewer: true })).not.toHaveProperty(
       'somethingNewer'
+    );
+  });
+
+  it('V7 stores the package policy settings', () => {
+    expect(
+      CloudOnboardingDeploymentSchemaV7.validate({
+        ...record,
+        policySettings: { output_id: 'logstash-1' },
+      })
+    ).toEqual(expect.objectContaining({ policySettings: { output_id: 'logstash-1' } }));
+  });
+
+  it('V6 does not know the package policy settings, which is why they need their own model version', () => {
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV6.validate({
+        ...record,
+        policySettings: { output_id: 'logstash-1' },
+      })
+    ).toThrow();
+  });
+});
+
+describe('policySettings in requests', () => {
+  it('accepts package policy settings on create and update', () => {
+    const policySettings = { output_id: 'logstash-1' };
+    expect(
+      CreateCloudOnboardingDeploymentRequestSchema.body.validate(createBody({ policySettings }))
+    ).toEqual(expect.objectContaining({ policySettings }));
+    expect(UpdateCloudOnboardingDeploymentRequestSchema.body.validate({ policySettings })).toEqual(
+      expect.objectContaining({ policySettings })
     );
   });
 });

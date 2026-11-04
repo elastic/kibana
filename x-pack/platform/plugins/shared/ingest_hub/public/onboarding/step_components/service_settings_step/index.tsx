@@ -41,6 +41,7 @@ import { SignalTypeBadge } from '../services_step/signal_type_badge';
 import { ServiceSearchFilter } from '../service_search_filter';
 import type { SignalFilter } from '../services_step/use_services_step';
 import { StepFooter } from '../step_footer';
+import { supportsPolicySetting } from '../../common/policy_settings';
 
 interface ServiceSettingsStepProps {
   onContinue: () => void;
@@ -60,8 +61,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     namespace,
     setNamespace,
     namespaceError,
-    outputId,
-    setOutputId,
+    policySettings,
+    setPolicySetting,
     bareNamePackage,
     instances,
     filteredInstances,
@@ -462,10 +463,10 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
         output={
-          deploymentMethod === 'agent_based'
+          supportsPolicySetting('output_id', deploymentMethod)
             ? {
-                value: outputId,
-                onChange: setOutputId,
+                value: policySettings.output_id ?? '',
+                onChange: (outputId) => setPolicySetting('output_id', outputId),
                 packageName: bareNamePackage,
                 inputTypes: outputInputTypes,
                 isInheritedOutputDefault: agentBasedDeployment.agentHostsMode === 'new',

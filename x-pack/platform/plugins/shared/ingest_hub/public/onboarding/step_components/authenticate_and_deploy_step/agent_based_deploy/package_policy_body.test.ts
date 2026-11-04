@@ -155,7 +155,7 @@ describe('buildGroupPackagePolicy — output', () => {
       storedServiceVars: withInputs(['aws-s3']),
       authenticateAndDeployStep: {},
       pkgVersion: '1.0.0',
-      outputId,
+      policySettings: { output_id: outputId },
     } as BuildPackagePolicyOpts);
 
   it('sends the chosen output', async () => {

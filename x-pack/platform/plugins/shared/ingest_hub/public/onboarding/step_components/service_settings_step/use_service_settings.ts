@@ -37,6 +37,7 @@ import {
   isMainPackageName,
 } from '../authenticate_and_deploy_step/deploy_group_helpers';
 import { getNamespaceError } from './instance_namespace_field';
+import type { PolicySettings } from '../../common/policy_settings';
 import {
   getDescriptionError,
   getIntegrationNameError,
@@ -99,10 +100,11 @@ export interface ServiceSettingsPersistedState {
    */
   namespace?: string;
   /**
-   * Output every package policy of an agent-based deploy sends its data to. Empty inherits the
-   * agent policy's; absent means never chosen. Managed and ECF deploys have no output to pick.
+   * Package policy fields every policy of the onboarding gets (e.g. the output), keyed by Fleet
+   * field name. Each deployment method applies only the ones it supports. An empty value is the
+   * Fleet default; an absent one was never chosen.
    */
-  outputId?: string;
+  policySettings?: PolicySettings;
   /** Keyed by instanceId. */
   serviceVars: Record<string, ServiceVars>;
   /** Absent in old sessions — reconciled on read from selectedServiceIds. */
@@ -241,13 +243,16 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     [persisted, setPersisted]
   );
 
-  const outputId = persisted?.outputId ?? '';
+  const policySettings = useMemo(
+    () => persisted?.policySettings ?? {},
+    [persisted?.policySettings]
+  );
 
-  const setOutputId = useCallback(
-    (value: string) => {
+  const setPolicySetting = useCallback(
+    <K extends keyof PolicySettings>(key: K, value: PolicySettings[K]) => {
       setPersisted({
         ...(persisted ?? { globalRegion: '', serviceVars: {} }),
-        outputId: value,
+        policySettings: { ...(persisted?.policySettings ?? {}), [key]: value },
       });
     },
     [persisted, setPersisted]
@@ -593,8 +598,8 @@ export function useServiceSettings({ onContinue }: { onContinue: () => void }) {
     namespace,
     setNamespace,
     namespaceError,
-    outputId,
-    setOutputId,
+    policySettings,
+    setPolicySetting,
     bareNamePackage,
     instances,
     filteredInstances,
