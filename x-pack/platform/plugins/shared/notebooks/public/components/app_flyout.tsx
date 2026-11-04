@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
+import { isEqual } from 'lodash';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -20,9 +21,12 @@ import {
   EuiText,
   EuiTitle,
   EuiToolTip,
+  transparentize,
   useEuiTheme,
+  type UseEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { GridLayout, type GridLayoutData, type GridSettings } from '@kbn/grid-layout';
 import { i18n } from '@kbn/i18n';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { UnifiedTabs, type TabItem } from '@kbn/unified-tabs';
@@ -35,11 +39,13 @@ import type {
 } from '../../common/types';
 import {
   appDependsOn,
+  applyGridLayout,
   APP_GRID_COLUMNS,
   createEmptyApp,
   generateDefaultApp,
   getNewAppTitle,
   reconcileApps,
+  toGridLayout,
 } from '../model/app_layout';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
@@ -110,10 +116,8 @@ const AppGridPanel = ({ app, panel }: { app: NotebookApp; panel: AppPanel }) => 
     <div
       css={css`
         position: relative;
-        grid-column: ${panel.x + 1} / span ${panel.width};
-        grid-row: ${panel.y + 1} / span ${panel.height};
+        height: 100%;
         min-width: 0;
-        min-height: 0;
         overflow: auto;
         &:hover > .${REMOVE_BUTTON_CLASS}, &:focus-within > .${REMOVE_BUTTON_CLASS} {
           opacity: 1;
@@ -202,8 +206,77 @@ const AppHeader = ({ app }: { app: NotebookApp }) => {
   );
 };
 
+/** Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard. */
+const getGridStyles = (euiTheme: UseEuiTheme['euiTheme']) => {
+  const dot = (position: string) =>
+    `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
+  return css`
+    padding-top: ${euiTheme.size.l};
+
+    .kbnGridSection--targeted {
+      background-position: top calc((var(--kbnGridGutterSize) / 2) * -1px) left
+        calc((var(--kbnGridGutterSize) / 2) * -1px);
+      background-size: calc((var(--kbnGridColumnWidth) + var(--kbnGridGutterSize)) * 1px)
+        calc((var(--kbnGridRowHeight) + var(--kbnGridGutterSize)) * 1px);
+      background-image: ${dot('top left')}, ${dot('top right')}, ${dot('bottom left')},
+        ${dot('bottom right')};
+      background-origin: content-box;
+    }
+
+    .kbnGridPanel--dragPreview {
+      background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+    }
+
+    .kbnGridPanel--resizeHandle:after {
+      display: block;
+      width: 100%;
+      height: 100%;
+      content: '';
+      mask-repeat: no-repeat;
+      mask-position: bottom ${euiTheme.size.xs} right ${euiTheme.size.xs};
+      mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='7' cy='1' r='1'/%3E%3Ccircle cx='4' cy='4' r='1'/%3E%3Ccircle cx='7' cy='4' r='1'/%3E%3Ccircle cx='1' cy='7' r='1'/%3E%3Ccircle cx='4' cy='7' r='1'/%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/svg%3E");
+      background-color: ${euiTheme.colors.borderBaseProminent};
+    }
+
+    .kbnGridPanel--resizeHandle:hover:after,
+    .kbnGridPanel--resizeHandle:focus-visible:after {
+      background-color: ${euiTheme.colors.vis.euiColorVis0};
+    }
+  `;
+};
+
 const AppGrid = ({ app }: { app: NotebookApp }) => {
+  const { store } = useNotebook();
   const { euiTheme } = useEuiTheme();
+  const layout = useMemo(() => toGridLayout(app.panels), [app.panels]);
+  const gridSettings = useMemo<GridSettings>(
+    () => ({
+      gutterSize: euiTheme.base / 2,
+      rowHeight: APP_ROW_HEIGHT,
+      columnCount: APP_GRID_COLUMNS,
+      keyboardDragTopLimit: 0,
+    }),
+    [euiTheme.base]
+  );
+  const gridStyles = useMemo(() => getGridStyles(euiTheme), [euiTheme]);
+
+  const onLayoutChange = useCallback(
+    (next: GridLayoutData) =>
+      store.updateApp(app.id, (current) => {
+        const panels = applyGridLayout(current.panels, next);
+        return isEqual(panels, current.panels) ? current : { ...current, panels };
+      }),
+    [store, app.id]
+  );
+
+  const renderPanelContents = useCallback(
+    (panelId: string) => {
+      const panel = app.panels.find(({ id }) => id === panelId);
+      return panel ? <AppGridPanel app={app} panel={panel} /> : null;
+    },
+    [app]
+  );
+
   if (app.panels.length === 0) {
     return (
       <EuiEmptyPrompt
@@ -216,18 +289,14 @@ const AppGrid = ({ app }: { app: NotebookApp }) => {
     );
   }
   return (
-    <div
-      css={css`
-        display: grid;
-        grid-template-columns: repeat(${APP_GRID_COLUMNS}, minmax(0, 1fr));
-        grid-auto-rows: ${APP_ROW_HEIGHT}px;
-        gap: ${euiTheme.size.s};
-      `}
-      data-test-subj="notebookAppGrid"
-    >
-      {app.panels.map((panel) => (
-        <AppGridPanel key={panel.id} app={app} panel={panel} />
-      ))}
+    <div data-test-subj="notebookAppGrid">
+      <GridLayout
+        layout={layout}
+        gridSettings={gridSettings}
+        renderPanelContents={renderPanelContents}
+        onLayoutChange={onLayoutChange}
+        css={gridStyles}
+      />
     </div>
   );
 };

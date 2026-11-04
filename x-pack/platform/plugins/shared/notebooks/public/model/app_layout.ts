@@ -7,6 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
+import type { GridLayoutData } from '@kbn/grid-layout';
 import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
 import type { CellStatus } from './types';
@@ -87,6 +88,24 @@ export const appendPanel = (
   ...app,
   panels: [...app.panels, ...packPanels([cell], getBottom(app.panels), createId)],
 });
+
+/** The app's panels in the shape the grid layout engine edits, keyed by panel id. */
+export const toGridLayout = (panels: readonly AppPanel[]): GridLayoutData =>
+  Object.fromEntries(
+    panels.map(({ id, x, y, width, height }) => [
+      id,
+      { type: 'panel' as const, id, column: x, row: y, width, height },
+    ])
+  );
+
+/** The panels moved and resized to match the grid layout; panels it doesn't mention keep their place. */
+export const applyGridLayout = (panels: readonly AppPanel[], layout: GridLayoutData): AppPanel[] =>
+  panels.map((panel) => {
+    const widget = layout[panel.id];
+    if (widget?.type !== 'panel') return panel;
+    const { column, row, width, height } = widget;
+    return { ...panel, x: column, y: row, width, height };
+  });
 
 /**
  * The apps after the tabs bar changed them: tabs are reordered, renamed or closed in place, new

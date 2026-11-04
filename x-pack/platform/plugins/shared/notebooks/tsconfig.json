@@ -21,6 +21,7 @@
     "@kbn/esql-utils",
     "@kbn/expressions-plugin",
     "@kbn/features-plugin",
+    "@kbn/grid-layout",
     "@kbn/i18n",
     "@kbn/i18n-react",
     "@kbn/lens-common",

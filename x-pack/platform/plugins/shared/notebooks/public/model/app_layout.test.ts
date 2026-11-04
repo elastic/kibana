@@ -9,6 +9,8 @@ import type { CellDefinition, NotebookApp } from '../../common/types';
 import {
   appDependsOn,
   appendPanel,
+  applyGridLayout,
+  toGridLayout,
   createEmptyApp,
   generateDefaultApp,
   getAppStatusGroups,
@@ -220,6 +222,38 @@ describe('getAppStatusGroups', () => {
     expect(getAppStatusGroups(appOf('a', 'a'), cells, (id) => statuses[id])).toEqual([
       { status: 'stale', names: ['a'] },
     ]);
+  });
+});
+
+describe('grid layout conversion', () => {
+  const panels = [
+    { id: 'p1', cellId: 'a', x: 0, y: 0, width: 6, height: 4 },
+    { id: 'p2', cellId: 'b', x: 6, y: 0, width: 6, height: 4 },
+  ];
+
+  it('round-trips panels through the grid layout', () => {
+    expect(applyGridLayout(panels, toGridLayout(panels))).toEqual(panels);
+  });
+
+  it('moves and resizes panels from the layout and keeps the cell they show', () => {
+    const layout = toGridLayout(panels);
+    const moved = {
+      ...layout,
+      p2: { type: 'panel' as const, id: 'p2', column: 0, row: 4, width: 12, height: 2 },
+    };
+    expect(applyGridLayout(panels, moved)[1]).toEqual({
+      id: 'p2',
+      cellId: 'b',
+      x: 0,
+      y: 4,
+      width: 12,
+      height: 2,
+    });
+  });
+
+  it('keeps a panel the layout does not mention where it was', () => {
+    const { p1 } = toGridLayout(panels);
+    expect(applyGridLayout(panels, { p1 })).toEqual(panels);
   });
 });
 
