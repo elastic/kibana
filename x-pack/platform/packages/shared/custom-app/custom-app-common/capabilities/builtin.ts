@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerCapability, type AnyCapability } from '@kbn/custom-app-registry';
 import { badgeCapability } from './badge';
 import { stackCapability } from './stack';
 import { flyoutCapability } from './flyout';
@@ -18,7 +19,6 @@ import { tableCapability } from './table';
 import { customContentCapability } from './custom_content';
 import { chartCapability } from './chart';
 import { buttonCapability } from './button';
-import { esqlEditorCapability } from './esql_editor';
 import { linkCapability } from './link';
 import { formCapability } from './form';
 import { selectCapability } from './select';
@@ -32,9 +32,6 @@ import { headingCapability } from './heading';
 import { metricCapability } from './metric';
 import { progressCapability } from './progress';
 import { textCapability } from './text';
-import { registerCapability, type AnyCapability } from './capability_registry';
-import type { CapabilityNode } from './capability_node_schema';
-import type { CapabilityManifest } from './define_capability';
 import { statCapability } from './stat';
 
 /**
@@ -54,7 +51,6 @@ export const BUILTIN_CAPABILITIES = [
   customContentCapability,
   chartCapability,
   buttonCapability,
-  esqlEditorCapability,
   linkCapability,
   formCapability,
   selectCapability,
@@ -75,15 +71,6 @@ export const BUILTIN_CONTAINERS = [
   tabsCapability,
   accordionCapability,
 ] as const;
-
-type NodeOf<Manifest> = Manifest extends CapabilityManifest<infer Id, infer Shape>
-  ? CapabilityNode<Id, Shape>
-  : never;
-
-/** A node of any capability in the lists, which can hold nodes of any of them. */
-export type BuiltinNode =
-  | NodeOf<(typeof BUILTIN_CAPABILITIES)[number]>
-  | (NodeOf<(typeof BUILTIN_CONTAINERS)[number]> & { children: BuiltinNode[] });
 
 /** Registers the capabilities that ship with the package. It can be called more than once. */
 export const registerBuiltinCapabilities = (): void => {

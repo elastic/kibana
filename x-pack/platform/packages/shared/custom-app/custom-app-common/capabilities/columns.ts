@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, columnsCountSchema } from '../bindings';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, columnsCountSchema } from '../document/bindings';
 
 export const columnsCapability = defineCapability({
   kind: 'component',
@@ -29,3 +29,9 @@ export const columnsCapability = defineCapability({
   bound: { columns: { schema: columnsCountSchema, kind: 'number' } },
   container: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    columns: CapabilityNodeOf<typeof columnsCapability> & { children: AppNode[] };
+  }
+}

@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_TEXT_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_TEXT_LENGTH } from '../document/constants';
 
 export const textCapability = defineCapability({
   kind: 'component',
@@ -29,3 +29,9 @@ export const textCapability = defineCapability({
   },
   interpolated: ['text'],
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    text: CapabilityNodeOf<typeof textCapability>;
+  }
+}

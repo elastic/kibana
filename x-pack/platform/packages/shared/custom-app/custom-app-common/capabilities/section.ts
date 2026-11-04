@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, sectionOpenSchema } from '../bindings';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, sectionOpenSchema } from '../document/bindings';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const sectionCapability = defineCapability({
   kind: 'component',
@@ -40,3 +40,9 @@ export const sectionCapability = defineCapability({
     }
   },
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    section: CapabilityNodeOf<typeof sectionCapability> & { children: AppNode[] };
+  }
+}

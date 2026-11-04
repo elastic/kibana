@@ -24,6 +24,7 @@ dependsOn:
   - '@kbn/i18n'
   - '@kbn/zod'
   - '@kbn/custom-app-common'
+  - '@kbn/custom-app-registry'
   - '@kbn/ui-actions-plugin'
   - '@kbn/ui-callout'
   - '@kbn/data-plugin'
@@ -32,11 +33,9 @@ dependsOn:
   - '@kbn/custom-content-renderer'
   - '@kbn/esql-types'
   - '@kbn/esql-utils'
-  - '@kbn/esql'
   - '@kbn/agent-builder-server'
   - '@kbn/agent-builder-common'
   - '@kbn/agent-builder-browser'
-  - '@kbn/shared-ux-ai-components'
   - '@kbn/rison'
   - '@kbn/share-plugin'
   - '@kbn/datemath'
@@ -47,7 +46,6 @@ dependsOn:
   - '@kbn/shared-ux-router'
   - '@kbn/custom-content-server'
   - '@kbn/es-types'
-  - '@kbn/code-editor'
   - '@kbn/custom-content-common'
   - '@kbn/lens-plugin'
   - '@kbn/data-views-plugin'
@@ -67,6 +65,4 @@ fileGroups:
     - public/**/*
     - server/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

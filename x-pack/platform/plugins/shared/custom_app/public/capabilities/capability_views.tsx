@@ -14,14 +14,14 @@ export interface CapabilityViewProps<Node extends AppNode> {
   text: (value: string) => string;
 }
 
-type View = ComponentType<CapabilityViewProps<AppNode>>;
+export type View = ComponentType<CapabilityViewProps<AppNode>>;
+export type Loader = () => Promise<{ default: View }>;
 
 /** The code that draws each capability, loaded when an app first has one. */
 const component = (load: () => Promise<Record<string, unknown>>, name: string) => () =>
   load().then((module) => ({ default: module[name] as unknown as View }));
 
-const LOADERS: Readonly<Record<string, () => Promise<{ default: View }>>> = {
-  esql_editor: component(() => import('./esql_editor_view'), 'EsqlEditorView'),
+const CORE_LOADERS: Readonly<Record<string, Loader>> = {
   stack: component(() => import('./stack_view'), 'StackView'),
   flyout: component(() => import('./flyout_view'), 'FlyoutView'),
   card: component(() => import('./card_view'), 'CardView'),
@@ -68,10 +68,17 @@ const LOADERS: Readonly<Record<string, () => Promise<{ default: View }>>> = {
     import('./badge_view').then(({ BadgeView }) => ({ default: BadgeView as unknown as View })),
 };
 
+const loaders = new Map<string, Loader>(Object.entries(CORE_LOADERS));
 const loaded = new Map<string, LazyExoticComponent<View>>();
 
+/** Says how to draw a capability that another plugin registered. */
+export const registerCapabilityView = (type: string, load: Loader): void => {
+  loaders.set(type, load);
+  loaded.delete(type);
+};
+
 export const getCapabilityView = (type: string): LazyExoticComponent<View> | undefined => {
-  const load = LOADERS[type];
+  const load = loaders.get(type);
   if (!load) return undefined;
   if (!loaded.has(type)) loaded.set(type, lazy(load));
   return loaded.get(type);

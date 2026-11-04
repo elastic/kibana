@@ -15,7 +15,7 @@ import {
   CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   type CustomAppContextAttachmentData,
 } from '../../common/app_context_attachment';
-import { CUSTOM_APP_AUTHORING_GUIDE } from '../../common/authoring_guide';
+import { getAuthoringGuide } from '../../common/authoring_guide';
 import {
   CUSTOM_APP_CREATED_UI_EVENT,
   type CustomAppCreatedUiEventData,
@@ -48,7 +48,9 @@ export const createCreateCustomAppTool = (): BuiltinToolDefinition<
   },
   tags: ['custom_app'],
   excludeFromMcp: true,
-  description: `Create a new custom app: an interactive panel built from components, each driven by its own ES|QL query. Use it when the user asks for an app (filters, tables, details) and none is attached yet.
+  // Made when it is read, so that it says what the registry has by then.
+  get description() {
+    return `Create a new custom app: an interactive panel built from components, each driven by its own ES|QL query. Use it when the user asks for an app (filters, tables, details) and none is attached yet.
 
 Pass the COMPLETE \`document\`. Check every ES|QL query and its fields with the tools you have before using it.
 
@@ -56,7 +58,8 @@ If the document has problems, this returns them one by one, each naming the comp
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the app inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\`. To change the app later, call ${UPDATE_CUSTOM_APP_TOOL_ID} with that \`attachment_id\`. To put it on a dashboard that is attached to this conversation, use the dashboard generation tool with \`source: "config"\`, \`type: "custom_app"\` and \`config: { title, document }\`, passing this document unchanged; if no dashboard is attached, tell the user to choose "Save to dashboard" on the app's card.
 
-${CUSTOM_APP_AUTHORING_GUIDE}`,
+${getAuthoringGuide()}`;
+  },
   schema: customAppCreateSchema,
   handler: async (
     { title, document: requested },

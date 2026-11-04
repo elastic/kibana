@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HEADING_LENGTH, MAX_KEY_VALUE_FIELDS } from '../constants';
-import { describedDataFields } from '../data_fields';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH, MAX_KEY_VALUE_FIELDS } from '../document/constants';
+import { describedDataFields } from '../document/data_fields';
 
 export const keyValueCapability = defineCapability({
   kind: 'component',
@@ -31,3 +31,9 @@ export const keyValueCapability = defineCapability({
   },
   data: 'query_or_source',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    key_value: CapabilityNodeOf<typeof keyValueCapability>;
+  }
+}

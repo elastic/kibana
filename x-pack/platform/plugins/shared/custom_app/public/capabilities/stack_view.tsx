@@ -8,7 +8,8 @@
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiPanel } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { getCapability, type AppNode, type AppNodeOfType } from '@kbn/custom-app-common';
+import { type AppNode, type AppNodeOfType } from '@kbn/custom-app-common';
+import { getCapability } from '@kbn/custom-app-registry';
 import { NodeRenderer } from '../components/node_renderer';
 import type { CapabilityViewProps } from './capability_views';
 

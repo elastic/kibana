@@ -6,7 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
 
 export const accordionCapability = defineCapability({
   kind: 'component',
@@ -30,3 +30,9 @@ export const accordionCapability = defineCapability({
       );
   },
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    accordion: CapabilityNodeOf<typeof accordionCapability> & { children: AppNode[] };
+  }
+}

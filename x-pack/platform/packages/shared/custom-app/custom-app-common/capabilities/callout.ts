@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, calloutColorSchema } from '../bindings';
-import { MAX_HEADING_LENGTH, MAX_TEXT_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, calloutColorSchema } from '../document/bindings';
+import { MAX_HEADING_LENGTH, MAX_TEXT_LENGTH } from '../document/constants';
 
 export const calloutCapability = defineCapability({
   kind: 'component',
@@ -36,3 +36,9 @@ export const calloutCapability = defineCapability({
   interpolated: ['title', 'text'],
   bound: { color: { schema: calloutColorSchema, kind: 'string' } },
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    callout: CapabilityNodeOf<typeof calloutCapability>;
+  }
+}

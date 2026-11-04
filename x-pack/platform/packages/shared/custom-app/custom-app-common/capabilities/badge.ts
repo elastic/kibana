@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { badgeColorSchema, bindable } from '../bindings';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { badgeColorSchema, bindable } from '../document/bindings';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const badgeCapability = defineCapability({
   kind: 'component',
@@ -33,3 +33,9 @@ export const badgeCapability = defineCapability({
   bound: { color: { schema: badgeColorSchema, kind: 'string' } },
   compact: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    badge: CapabilityNodeOf<typeof badgeCapability>;
+  }
+}

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { registerCapability } from '@kbn/custom-app-registry';
 import type { CoreSetup, Plugin } from '@kbn/core/server';
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
@@ -26,7 +27,13 @@ interface SetupDeps {
   agentBuilder?: AgentBuilderPluginSetup;
 }
 
-export class CustomAppPlugin implements Plugin<void, void, SetupDeps> {
+/** What other plugins can use to add capabilities to custom apps. */
+export interface CustomAppServerSetup {
+  /** Adds a capability, so that the apps that use it can be checked and saved. */
+  registerCapability: typeof registerCapability;
+}
+
+export class CustomAppPlugin implements Plugin<CustomAppServerSetup, void, SetupDeps> {
   setup(core: CoreSetup, { embeddable, features, agentBuilder }: SetupDeps) {
     // Registered unconditionally: the saved objects check can only vouch for what it can see.
     core.savedObjects.registerType(customAppSavedObjectType);
@@ -55,6 +62,8 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps> {
       );
       agentBuilder.skills.register(customAppCreationSkill);
     }
+
+    return { registerCapability };
   }
 
   start() {}

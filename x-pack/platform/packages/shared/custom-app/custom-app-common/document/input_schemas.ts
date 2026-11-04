@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { nodeIdSchema } from '@kbn/custom-app-registry';
 import { stateKeySchema } from './bindings';
 import {
   MAX_HEADING_LENGTH,
@@ -16,7 +17,6 @@ import {
   MAX_STATE_STRING_LENGTH,
 } from './constants';
 import { actionsSchema } from './action_schemas';
-import { nodeIdSchema } from './node_id_schema';
 
 /**
  * Where a link goes, always inside Kibana: the query of a component opened in Discover, a page of

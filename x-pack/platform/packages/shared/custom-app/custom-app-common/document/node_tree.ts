@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getCapability } from './capabilities/capability_registry';
+import { getCapability } from '@kbn/custom-app-registry';
 import { ANNOTATIONS_SOURCE_SUFFIX, OPTIONS_SOURCE_SUFFIX } from './constants';
 import { isContainerNode, type Action, type AppNode, type DataSource } from './document_schema';
 

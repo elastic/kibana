@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { actionsSchema } from '../action_schemas';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { actionsSchema } from '../document/action_schemas';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const buttonCapability = defineCapability({
   kind: 'component',
@@ -28,3 +28,9 @@ export const buttonCapability = defineCapability({
   events: { onClick: 'onClick' },
   compact: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    button: CapabilityNodeOf<typeof buttonCapability>;
+  }
+}

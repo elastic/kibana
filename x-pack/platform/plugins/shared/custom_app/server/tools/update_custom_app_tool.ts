@@ -16,7 +16,7 @@ import {
   CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE,
   type CustomAppContextAttachmentData,
 } from '../../common/app_context_attachment';
-import { CUSTOM_APP_AUTHORING_GUIDE } from '../../common/authoring_guide';
+import { getAuthoringGuide } from '../../common/authoring_guide';
 import { readAppContextData } from '../../common/read_app_context_data';
 import { customAppUpdateSchema } from '../../common/update_app_schema';
 import {
@@ -52,7 +52,9 @@ export const createUpdateCustomAppTool = (): BuiltinToolDefinition<
   },
   tags: ['custom_app'],
   excludeFromMcp: true,
-  description: `Change a custom app: an interactive panel built from components, each driven by its own ES|QL query.
+  // Made when it is read, so that it says what the registry has by then.
+  get description() {
+    return `Change a custom app: an interactive panel built from components, each driven by its own ES|QL query.
 
 Pass the \`embeddable_id\` of the app (or, for an app created in this conversation, its \`attachment_id\`) and the COMPLETE \`document\` as it should be after the change. Start from the current document in the app's context and change only what was asked; do not drop components or values the user did not mention. Check ES|QL queries with the tools you have before using them.
 
@@ -62,7 +64,8 @@ This tool only reaches apps attached to the conversation: apps the user sent fro
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated app inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\`.
 
-${CUSTOM_APP_AUTHORING_GUIDE}`,
+${getAuthoringGuide()}`;
+  },
   schema: customAppUpdateSchema,
   handler: async (
     { embeddable_id: embeddableId, attachment_id: attachmentId, document: requested },

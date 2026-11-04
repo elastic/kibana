@@ -33,7 +33,7 @@ export {
   MAX_TEXT_LENGTH,
   MAX_WORKFLOW_ID_LENGTH,
   MAX_WORKFLOW_INPUTS,
-} from './constants';
+} from './document/constants';
 export {
   bindable,
   getBoundSignature,
@@ -46,7 +46,7 @@ export {
   THEME_BOUND_PROPS,
   type StateRef,
   type VisibleWhen,
-} from './bindings';
+} from './document/bindings';
 export {
   actionSchema,
   appDocumentSchema,
@@ -68,13 +68,13 @@ export {
   type FormField,
   type StateDeclaration,
   type CustomAppState,
-} from './document_schema';
+} from './document/document_schema';
 export {
   findStateReferences,
   hasMalformedReference,
   interpolate,
   type StateValue,
-} from './interpolation';
+} from './document/interpolation';
 export {
   collectQueries,
   collectSources,
@@ -89,16 +89,8 @@ export {
   getAnnotationsSourceId,
   getNodeQuery,
   isEmptyDocument,
-} from './node_tree';
-export { getStateDefaults } from './state_defaults';
-export { getDocumentIssues, type DocumentIssue } from './document_issues';
+} from './document/node_tree';
+export { getStateDefaults } from './document/state_defaults';
+export { getDocumentIssues, type DocumentIssue } from './document/document_issues';
 
-export {
-  checkCapability,
-  defineCapability,
-  describeCapability,
-  getCapability,
-  listCapabilities,
-  registerCapability,
-  type CapabilityManifest,
-} from './capabilities';
+export * from './capabilities';

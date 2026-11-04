@@ -11,9 +11,9 @@ import {
   CUSTOM_CONTENT_MIN_HEIGHT,
   CUSTOM_CONTENT_SCRIPT_PATTERN,
 } from '@kbn/custom-content-common';
-import { MAX_PROMPT_LENGTH, MAX_TEMPLATE_LENGTH } from '../constants';
-import { querySchema } from '../data_fields';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_PROMPT_LENGTH, MAX_TEMPLATE_LENGTH } from '../document/constants';
+import { querySchema } from '../document/data_fields';
 
 export const customContentCapability = defineCapability({
   kind: 'component',
@@ -73,3 +73,9 @@ export const customContentCapability = defineCapability({
     }
   },
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    custom_content: CapabilityNodeOf<typeof customContentCapability>;
+  }
+}

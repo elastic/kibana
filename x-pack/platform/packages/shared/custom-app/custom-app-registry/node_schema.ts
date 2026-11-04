@@ -6,8 +6,9 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { capabilityNodeSchema } from './capabilities/capability_node_schema';
-import { listCapabilities } from './capabilities/capability_registry';
+import { capabilityNodeSchema } from './capability_node_schema';
+import { listCapabilities } from './capability_registry';
+import type { AppNode } from '.';
 
 /** The schema of each type of node: those of the capabilities registered. */
 export const getNodeSchemas = (): readonly z.ZodObject<z.ZodRawShape>[] =>
@@ -16,6 +17,6 @@ export const getNodeSchemas = (): readonly z.ZodObject<z.ZodRawShape>[] =>
   ) as unknown as readonly z.ZodObject<z.ZodRawShape>[];
 
 /** A node of any type. It is made when it is first used, so that the capabilities are there. */
-export const nodeSchema: z.ZodType = z.lazy(
-  () => z.discriminatedUnion('type', getNodeSchemas() as never) as unknown as z.ZodType
+export const nodeSchema: z.ZodType<AppNode> = z.lazy(
+  () => z.discriminatedUnion('type', getNodeSchemas() as never) as unknown as z.ZodType<AppNode>
 );

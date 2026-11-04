@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const headingCapability = defineCapability({
   kind: 'component',
@@ -28,3 +28,9 @@ export const headingCapability = defineCapability({
   },
   interpolated: ['text'],
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    heading: CapabilityNodeOf<typeof headingCapability>;
+  }
+}

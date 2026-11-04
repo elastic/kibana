@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { describeCapability, listCapabilities } from '@kbn/custom-app-common';
+import { describeCapability, listCapabilities } from '@kbn/custom-app-registry';
 
 /**
  * A small app that uses every idea an agent needs: a filter that sets a value, a time range, a table whose
@@ -66,8 +66,12 @@ export const AUTHORING_GUIDE_EXAMPLE = {
   },
 } as const;
 
-/** What an agent needs to know to build or change a custom app. */
-export const CUSTOM_APP_AUTHORING_GUIDE = `A custom app is one JSON document, { "state", "root", "theme"? }. "root" is a tree of components; every component has a unique "id" (letters, digits, - and _) and a "type".
+/**
+ * What an agent needs to know to build or change a custom app. It is made when it is asked for, so
+ * that it says what the registry has by then, including what other plugins registered.
+ */
+export const getAuthoringGuide =
+  (): string => `A custom app is one JSON document, { "state", "root", "theme"? }. "root" is a tree of components; every component has a unique "id" (letters, digits, - and _) and a "type".
 
 Look: "theme" is optional and changes every component of the app at once: { "accent"?: "blue" | "teal" | "purple" | "pink" | "orange" | "green" | "red", "shape"?: "soft" | "sharp" }. The accent is the colour of what can be pressed or followed, and the shape is how round the corners are ("soft" is very round, "sharp" is nearly square). Leave it out for the look of Kibana. Set it when the person asks for a look ("make it purple", "rounder"), or when the app is for people outside the team (a presentation or a story), where a clear accent helps; do not set it for a plain tool. To let the person pick the accent, declare a string value whose default is an accent, set "accent" to { "$state": "<that value>" } and bind a button_group or select to the value with the accent names as option values (see Connecting components below). There are no other colours, fonts or sizes to choose. To change the look later, change "theme" and keep the rest of the document as it is.
 

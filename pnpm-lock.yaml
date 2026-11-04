@@ -1771,9 +1771,15 @@ importers:
       '@kbn/custom-app-common':
         specifier: workspace:*
         version: link:x-pack/platform/packages/shared/custom-app/custom-app-common
+      '@kbn/custom-app-esql-plugin':
+        specifier: workspace:*
+        version: link:x-pack/platform/plugins/shared/custom_app_esql
       '@kbn/custom-app-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/shared/custom_app
+      '@kbn/custom-app-registry':
+        specifier: workspace:*
+        version: link:x-pack/platform/packages/shared/custom-app/custom-app-registry
       '@kbn/custom-branding-plugin':
         specifier: workspace:*
         version: link:x-pack/platform/plugins/private/custom_branding
@@ -9066,6 +9072,8 @@ importers:
 
   x-pack/platform/packages/shared/custom-app/custom-app-common: {}
 
+  x-pack/platform/packages/shared/custom-app/custom-app-registry: {}
+
   x-pack/platform/packages/shared/custom-content/custom-content-common: {}
 
   x-pack/platform/packages/shared/custom-content/custom-content-renderer: {}
@@ -9451,6 +9459,8 @@ importers:
   x-pack/platform/plugins/shared/context_engine_agent_builder: {}
 
   x-pack/platform/plugins/shared/custom_app: {}
+
+  x-pack/platform/plugins/shared/custom_app_esql: {}
 
   x-pack/platform/plugins/shared/custom_content: {}
 
@@ -14283,6 +14293,7 @@ packages:
   '@smithy/core@3.36.2':
     resolution: {integrity: sha512-oRw0rB9QSUiCZfEs23G5F4Af+b2rQt1lItIICWu5IejFNd+uPM8SWqiKLMpQ6bX1Q7slsLbjuoE2niErFtkVPQ==}
     engines: {node: '>=18.0.0'}
+    deprecated: Deprecated due to a bug in custom logger data redaction. See https://github.com/aws/aws-sdk-js-v3/issues/8393.
 
   '@smithy/credential-provider-imds@4.5.2':
     resolution: {integrity: sha512-A9uSdn72ozbRUSit0eib0TW7nXuNPlaeM0zcGkJ+nE6tFcSDbnmtwoxbTCFBukVQcszDAyvsd7+rTduPTXpygg==}

@@ -15,3 +15,5 @@ export const plugin = async () => {
   const { CustomAppPlugin } = await import('./plugin');
   return new CustomAppPlugin();
 };
+
+export type { CustomAppServerSetup } from './plugin';

@@ -6,6 +6,7 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import { nodeIdSchema } from '@kbn/custom-app-registry';
 import { stateKeySchema } from './bindings';
 import {
   MAX_ACTIONS_PER_EVENT,
@@ -16,7 +17,6 @@ import {
   MAX_WORKFLOW_INPUT_NAME_LENGTH,
   MAX_WORKFLOW_INPUTS,
 } from './constants';
-import { nodeIdSchema } from './node_id_schema';
 
 const stateValueSchema = lazySchema(() =>
   z.union([z.string().max(MAX_STATE_STRING_LENGTH), z.number().finite(), z.boolean()])

@@ -6,10 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_INPUT_OPTIONS, OPTIONS_SOURCE_SUFFIX } from '../constants';
-import { querySchema } from '../data_fields';
-import { describedInputProps, inputOptionSchema } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_INPUT_OPTIONS, OPTIONS_SOURCE_SUFFIX } from '../document/constants';
+import { querySchema } from '../document/data_fields';
+import { describedInputProps, inputOptionSchema } from '../document/input_schemas';
 
 export const selectCapability = defineCapability({
   kind: 'component',
@@ -68,3 +68,9 @@ export const selectCapability = defineCapability({
   },
   filter: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    select: CapabilityNodeOf<typeof selectCapability>;
+  }
+}

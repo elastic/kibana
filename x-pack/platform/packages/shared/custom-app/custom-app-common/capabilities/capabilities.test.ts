@@ -6,18 +6,19 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { appDocumentSchema } from '../document_schema';
-import { getInterpolatedText } from '../node_tree';
+import { appDocumentSchema } from '../document/document_schema';
+import { getInterpolatedText } from '../document/node_tree';
 import { badgeCapability } from './badge';
 import { statCapability } from './stat';
-import { esqlEditorCapability } from './esql_editor';
-import { getDocumentIssues } from '../document_issues';
-import { collectSources } from '../node_tree';
+import { collectSources } from '../document/node_tree';
 import { registerBuiltinCapabilities } from './builtin';
-import { getCapability, registerCapability } from './capability_registry';
-import { describeCapability } from './capability_guide';
-import { checkCapability } from './check_capability';
-import { defineCapability } from './define_capability';
+import {
+  checkCapability,
+  defineCapability,
+  describeCapability,
+  getCapability,
+  registerCapability,
+} from '@kbn/custom-app-registry';
 
 const documentWith = (node: Record<string, unknown>) => ({
   state: {},
@@ -137,10 +138,9 @@ describe('capabilities', () => {
   it('takes a capability that another plugin registers, with no edit in the package', async () => {
     await jest.isolateModulesAsync(async () => {
       const { z: zod } = await import('@kbn/zod/v4');
-      const registry = await import('./capability_registry');
-      const { defineCapability: define } = await import('./define_capability');
+      const registry = await import('@kbn/custom-app-registry');
       registry.registerCapability(
-        define({
+        registry.defineCapability({
           kind: 'component',
           id: 'gauge',
           version: 1,
@@ -152,49 +152,11 @@ describe('capabilities', () => {
           },
         })
       );
-      const { appDocumentSchema: schema } = await import('../document_schema');
+      const { appDocumentSchema: schema } = await import('../document/document_schema');
       expect(
         schema.safeParse(documentWith({ type: 'gauge', id: 'load', title: 'Load' })).success
       ).toBe(true);
       expect(schema.safeParse(documentWith({ type: 'gauge', id: 'load' })).success).toBe(false);
-    });
-  });
-
-  describe('esql_editor', () => {
-    it('has nothing wrong with it', () => {
-      expect(checkCapability(esqlEditorCapability)).toEqual([]);
-    });
-
-    it('fetches by itself, so the runtime runs no query for it', () => {
-      const parsed = appDocumentSchema.parse(
-        documentWith({ type: 'esql_editor', id: 'explore', query: 'FROM logs-* | LIMIT 10' })
-      );
-      expect(collectSources(parsed.root)).toEqual({});
-    });
-
-    it('keeps the text in a declared text value of the app, when it is bound', () => {
-      const withState = (state: Record<string, unknown>) =>
-        getDocumentIssues({
-          state,
-          root: {
-            type: 'stack',
-            id: 'root',
-            direction: 'vertical',
-            children: [{ type: 'esql_editor', id: 'explore', bind: 'text' }],
-          },
-        });
-
-      expect(withState({ text: { type: 'string', default: '' } })).toEqual([]);
-      expect(withState({}).map(({ message }) => message)).toEqual([
-        expect.stringContaining('unknown state key "text"'),
-      ]);
-      expect(withState({ text: { type: 'number', default: 1 } })).not.toEqual([]);
-    });
-
-    it('describes itself for an LLM from its manifest', () => {
-      expect(describeCapability(esqlEditorCapability)).toContain(
-        '- esql_editor { title?, query?, bind? }'
-      );
     });
   });
 });

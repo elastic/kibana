@@ -6,9 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { stateKeySchema } from '../bindings';
-import { MAX_HEADING_LENGTH, MAX_QUERY_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, stateKeySchema, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH, MAX_QUERY_LENGTH } from '@kbn/custom-app-common';
 
 export const esqlEditorCapability = defineCapability({
   kind: 'component',
@@ -50,3 +49,9 @@ export const esqlEditorCapability = defineCapability({
   private: true,
   data: 'own',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    esql_editor: CapabilityNodeOf<typeof esqlEditorCapability>;
+  }
+}

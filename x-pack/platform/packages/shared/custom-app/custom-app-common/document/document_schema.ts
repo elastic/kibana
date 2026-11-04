@@ -6,11 +6,18 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
+import {
+  getCapability,
+  getNodeSchemas,
+  nodeSchema,
+  type AppNode,
+  type AppNodeOfType,
+  type AppNodeType,
+  type ContainerNode,
+} from '@kbn/custom-app-registry';
 import { CUSTOM_APP_STATE_VERSION } from './constants';
 import { bindable, stateKeySchema, themeAccentSchema, themeShapeSchema } from './bindings';
-import { registerBuiltinCapabilities, type BuiltinNode } from './capabilities/builtin';
-import { getCapability } from './capabilities/capability_registry';
-import { nodeSchema as anyNodeSchema } from './node_schema';
+import { registerBuiltinCapabilities } from '../capabilities/builtin';
 import { actionSchema, stateDeclarationSchema } from './action_schemas';
 import type { casesSourceSchema } from './data_fields';
 import type { formFieldSchema } from './input_schemas';
@@ -18,18 +25,8 @@ import { validateDocument } from './validate_document';
 
 registerBuiltinCapabilities();
 
-export { stateKeySchema, actionSchema, stateDeclarationSchema };
-export { getNodeSchemas } from './node_schema';
-
-/** The schema of a node of any type. */
-export const nodeSchema = anyNodeSchema as z.ZodType<AppNode>;
-
-/** A node of any type: it is the union of what the capabilities define. */
-export type AppNode = BuiltinNode;
-/** The nodes that hold other nodes. */
-export type ContainerNode = Extract<AppNode, { children: unknown }>;
-export type AppNodeType = AppNode['type'];
-export type AppNodeOfType<T extends AppNodeType> = Extract<AppNode, { type: T }>;
+export { stateKeySchema, actionSchema, stateDeclarationSchema, nodeSchema, getNodeSchemas };
+export type { AppNode, AppNodeOfType, AppNodeType, ContainerNode };
 export type Action = z.output<typeof actionSchema>;
 export type FormField = z.output<typeof formFieldSchema>;
 export type CasesSource = z.output<typeof casesSourceSchema>;

@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { describedInputProps } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH } from '../document/constants';
+import { describedInputProps } from '../document/input_schemas';
 
 export const searchCapability = defineCapability({
   kind: 'component',
@@ -34,3 +34,9 @@ export const searchCapability = defineCapability({
   bindings: (node) => [node.bind],
   filter: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    search: CapabilityNodeOf<typeof searchCapability>;
+  }
+}

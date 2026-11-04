@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, stackDirectionSchema } from '../bindings';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, stackDirectionSchema } from '../document/bindings';
 
 export const stackCapability = defineCapability({
   kind: 'component',
@@ -28,3 +28,9 @@ export const stackCapability = defineCapability({
   bound: { direction: { schema: stackDirectionSchema, kind: 'string' } },
   container: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    stack: CapabilityNodeOf<typeof stackCapability> & { children: AppNode[] };
+  }
+}

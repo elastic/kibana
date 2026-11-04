@@ -6,10 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { actionsSchema } from '../action_schemas';
-import { MAX_FORM_FIELDS, MAX_HEADING_LENGTH } from '../constants';
-import { formFieldSchema } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { actionsSchema } from '../document/action_schemas';
+import { MAX_FORM_FIELDS, MAX_HEADING_LENGTH } from '../document/constants';
+import { formFieldSchema } from '../document/input_schemas';
 
 export const formCapability = defineCapability({
   kind: 'component',
@@ -68,3 +68,9 @@ export const formCapability = defineCapability({
     });
   },
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    form: CapabilityNodeOf<typeof formCapability>;
+  }
+}

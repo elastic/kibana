@@ -20,29 +20,32 @@ import { i18n } from '@kbn/i18n';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-types';
 import { KbnDangerCallout } from '@kbn/ui-callout';
-import {
-  MAX_STATE_STRING_LENGTH,
-  type AppNodeOfType,
-  type StateValue,
-} from '@kbn/custom-app-common';
-import { createRunEsqlQuery } from '../data/run_esql_query';
-import type { SourceData } from '../data/data_layer';
-import { useDataLayer } from '../data/data_layer_context';
-import { useAppRuntime, useStateValues } from '../runtime/app_runtime_context';
-import { getServices } from '../services';
-import { useSubjectValue } from '../utils/use_subject_value';
-import { formatOf } from '../components/table_node';
-import { formatValue } from '../components/format_value';
-import type { CapabilityViewProps } from './capability_views';
+import { MAX_STATE_STRING_LENGTH, type StateValue } from '@kbn/custom-app-common';
+import type { CapabilityNodeOf } from '@kbn/custom-app-registry';
+import type {
+  CustomAppCapabilityViewProps,
+  CustomAppQueryResult,
+} from '@kbn/custom-app-plugin/public';
+import type { esqlEditorCapability } from '../common/esql_editor';
 
 type Result =
   | { status: 'idle' }
   | { status: 'loading' }
-  | { status: 'success'; data: SourceData }
+  | { status: 'success'; data: CustomAppQueryResult }
   | { status: 'error'; message: string };
 
 /** How long typing pauses before the text is kept in the value of the app it is bound to. */
 const BIND_DEBOUNCE_MS = 300;
+
+const NUMBER_TYPES = new Set([
+  'long',
+  'integer',
+  'short',
+  'byte',
+  'double',
+  'float',
+  'unsigned_long',
+]);
 
 /** What the editor needs to suggest the values of the app while a query is typed. */
 const toVariables = (values: Readonly<Record<string, StateValue>>): ESQLControlVariable[] =>
@@ -55,42 +58,47 @@ const toVariables = (values: Readonly<Record<string, StateValue>>): ESQLControlV
 const toMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
 
+const formatCell = (value: unknown, type: string): string => {
+  if (value === null || value === undefined) return '—';
+  if (typeof value === 'number' && NUMBER_TYPES.has(type)) {
+    return new Intl.NumberFormat(i18n.getLocale()).format(value);
+  }
+  return typeof value === 'object' ? JSON.stringify(value) : String(value);
+};
+
 /**
  * An ES|QL editor for the people using the app, with the table of what their query returns. The
- * query is theirs, so it is not one the runtime knows about: it runs here, as the person who is
+ * query is theirs, so it is not one that the app knows about: it runs here, as the person who is
  * looking, with the period, the filters and the values of the app.
  */
 export const EsqlEditorView = ({
   node,
   text: interpolateText,
-}: CapabilityViewProps<AppNodeOfType<'esql_editor'>>) => {
-  const { core, search } = getServices();
-  const layer = useDataLayer();
-  const runtime = useAppRuntime();
-  const values = useStateValues();
-  const context = useSubjectValue(layer.context$);
-  const runQuery = useMemo(() => createRunEsqlQuery({ search, http: core.http }), [search, core]);
-
+  context,
+  state,
+  runQuery,
+  setValue,
+}: CustomAppCapabilityViewProps<CapabilityNodeOf<typeof esqlEditorCapability>>) => {
   const [text, setText] = useState(node.query);
   const [result, setResult] = useState<Result>({ status: 'idle' });
   const controller = useRef<AbortController>();
-  const latest = useRef({ text, context, values });
-  latest.current = { text, context, values };
+  const latest = useRef({ text, runQuery, state });
+  latest.current = { text, runQuery, state };
 
   const run = useCallback(async () => {
-    const { text: query, context: fetchContext, values: state } = latest.current;
-    if (!fetchContext || query.trim() === '') return;
+    const { text: query, runQuery: execute } = latest.current;
+    if (query.trim() === '') return;
     controller.current?.abort();
     const next = new AbortController();
     controller.current = next;
     setResult({ status: 'loading' });
     try {
-      const data = await runQuery(query, { context: fetchContext, state }, next.signal);
+      const data = await execute(query, next.signal);
       if (!next.signal.aborted) setResult({ status: 'success', data });
     } catch (error) {
       if (!next.signal.aborted) setResult({ status: 'error', message: toMessage(error) });
     }
-  }, [runQuery]);
+  }, []);
 
   useEffect(() => () => controller.current?.abort(), []);
 
@@ -98,11 +106,10 @@ export const EsqlEditorView = ({
   useEffect(() => {
     if (bind === undefined || text.length > MAX_STATE_STRING_LENGTH) return undefined;
     const timer = setTimeout(() => {
-      if (String(latest.current.values[bind] ?? '') === text) return;
-      runtime.run([{ type: 'setState', key: bind, value: { fromInput: true } }], { input: text });
+      if (String(latest.current.state[bind] ?? '') !== text) setValue(bind, text);
     }, BIND_DEBOUNCE_MS);
     return () => clearTimeout(timer);
-  }, [bind, text, runtime]);
+  }, [bind, text, setValue]);
 
   const columns = useMemo<Array<EuiBasicTableColumn<Record<string, unknown>>>>(
     () =>
@@ -111,7 +118,7 @@ export const EsqlEditorView = ({
             field: `c${index}`,
             name,
             sortable: true,
-            render: (value: unknown) => formatValue(value, formatOf(type)),
+            render: (value: unknown) => formatCell(value, type),
           }))
         : [],
     [result]
@@ -147,7 +154,7 @@ export const EsqlEditorView = ({
         disableAutoFocus
         initialState={{ editorHeight: 160 }}
         errors={[]}
-        esqlVariables={toVariables(values)}
+        esqlVariables={toVariables(state)}
       />
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s" responsive={false}>
@@ -161,7 +168,7 @@ export const EsqlEditorView = ({
             isDisabled={!context || text.trim() === ''}
             data-test-subj="customAppEsqlEditorRun"
           >
-            {i18n.translate('xpack.customApp.esqlEditor.run', { defaultMessage: 'Run' })}
+            {i18n.translate('xpack.customAppEsql.run', { defaultMessage: 'Run' })}
           </EuiButton>
         </EuiFlexItem>
       </EuiFlexGroup>
@@ -171,7 +178,7 @@ export const EsqlEditorView = ({
         <KbnDangerCallout
           announceOnMount={false}
           size="s"
-          title={i18n.translate('xpack.customApp.esqlEditor.errorTitle', {
+          title={i18n.translate('xpack.customAppEsql.errorTitle', {
             defaultMessage: 'The query could not run',
           })}
         >
@@ -184,10 +191,10 @@ export const EsqlEditorView = ({
           columns={columns}
           pagination={{ pageSizeOptions: [10, 25, 50] }}
           sorting
-          tableCaption={i18n.translate('xpack.customApp.esqlEditor.caption', {
+          tableCaption={i18n.translate('xpack.customAppEsql.caption', {
             defaultMessage: 'The result of the query',
           })}
-          noItemsMessage={i18n.translate('xpack.customApp.esqlEditor.noRows', {
+          noItemsMessage={i18n.translate('xpack.customAppEsql.noRows', {
             defaultMessage: 'The query returned no rows.',
           })}
           data-test-subj="customAppEsqlEditorResult"

@@ -6,7 +6,9 @@
  */
 
 import { appDocumentSchema, getDocumentIssues } from '@kbn/custom-app-common';
-import { AUTHORING_GUIDE_EXAMPLE, CUSTOM_APP_AUTHORING_GUIDE } from './authoring_guide';
+import { AUTHORING_GUIDE_EXAMPLE, getAuthoringGuide } from './authoring_guide';
+
+const CUSTOM_APP_AUTHORING_GUIDE = getAuthoringGuide();
 
 describe('the authoring guide', () => {
   it('has an example that is a valid app, so the guide cannot drift from the schema', () => {

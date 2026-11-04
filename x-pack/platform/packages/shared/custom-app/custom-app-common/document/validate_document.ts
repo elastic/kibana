@@ -6,6 +6,7 @@
  */
 
 import type { z } from '@kbn/zod/v4';
+import { getCapability, type CapabilityValidationContext } from '@kbn/custom-app-registry';
 import {
   CASES_FILTERS,
   CASES_SEVERITIES,
@@ -15,8 +16,6 @@ import {
   MAX_STATE_KEYS,
 } from './constants';
 import type { AppNode, AppTheme, StateDeclaration } from './document_schema';
-import { getCapability } from './capabilities/capability_registry';
-import type { CapabilityValidationContext } from './capabilities/define_capability';
 import { THEME_BOUND_PROPS, getBoundProps, getPath, isStateRef, type StateRef } from './bindings';
 import { findStateReferences, hasMalformedReference } from './interpolation';
 import {

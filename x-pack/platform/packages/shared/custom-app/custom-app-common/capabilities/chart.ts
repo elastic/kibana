@@ -6,11 +6,11 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { actionsSchema } from '../action_schemas';
-import { annotationsVisibleSchema, bindable, chartTypeSchema } from '../bindings';
-import { ANNOTATIONS_SOURCE_SUFFIX, MAX_HEADING_LENGTH } from '../constants';
-import { querySchema } from '../data_fields';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { actionsSchema } from '../document/action_schemas';
+import { annotationsVisibleSchema, bindable, chartTypeSchema } from '../document/bindings';
+import { ANNOTATIONS_SOURCE_SUFFIX, MAX_HEADING_LENGTH } from '../document/constants';
+import { querySchema } from '../document/data_fields';
 
 export const chartCapability = defineCapability({
   kind: 'component',
@@ -79,3 +79,9 @@ export const chartCapability = defineCapability({
       : [{ suffix: ANNOTATIONS_SOURCE_SUFFIX, query: node.annotations.query }],
   data: 'query',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    chart: CapabilityNodeOf<typeof chartCapability>;
+  }
+}

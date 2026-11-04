@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { casesSourceSchema, querySchema } from '../data_fields';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { casesSourceSchema, querySchema } from '../document/data_fields';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const statCapability = defineCapability({
   kind: 'component',
@@ -42,3 +42,9 @@ export const statCapability = defineCapability({
   interpolated: ['title'],
   data: 'query_or_source',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    stat: CapabilityNodeOf<typeof statCapability>;
+  }
+}

@@ -7,29 +7,20 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 import {
+  getCapability,
+  stateKeySchema,
+  visibleWhenSchema,
+  type VisibleWhen,
+} from '@kbn/custom-app-registry';
+import {
   BADGE_COLORS,
   CARD_ICONS,
   MAX_COLUMNS,
-  MAX_STATE_KEY_LENGTH,
-  MAX_STATE_STRING_LENGTH,
   PROGRESS_COLORS,
-  RESERVED_STATE_KEYS,
   THEME_ACCENTS,
   THEME_SHAPES,
 } from './constants';
-import { getCapability } from './capabilities/capability_registry';
 import type { AppNode } from './document_schema';
-
-/** A valid ES|QL parameter name, so a state key can be used as `?key` in a query. */
-export const stateKeySchema = lazySchema(() =>
-  z
-    .string()
-    .max(MAX_STATE_KEY_LENGTH)
-    .regex(/^[A-Za-z_][A-Za-z0-9_]*$/)
-    .refine((key) => !RESERVED_STATE_KEYS.includes(key.toLowerCase()), {
-      message: `Reserved by ES|QL for the time range: ${RESERVED_STATE_KEYS.join(', ')}`,
-    })
-);
 
 /** The value of a state key, in place of a value that is written down. */
 export const stateRefSchema = lazySchema(() => z.object({ $state: stateKeySchema }));
@@ -55,23 +46,6 @@ export const bindable = <T extends z.ZodType>(schema: T): T =>
  * draws the component.
  */
 export const stateRef = <T>(key: string): T => ({ $state: key } as unknown as T);
-
-/**
- * Whether a component is shown: when the key is true, or, with `equals`, when it is that value, such
- * as the option of a select. Left out, it is always shown.
- */
-export const visibleWhenSchema = lazySchema(() =>
-  z
-    .object({
-      $state: stateKeySchema,
-      equals: z
-        .union([z.string().max(MAX_STATE_STRING_LENGTH), z.number().finite(), z.boolean()])
-        .optional(),
-    })
-    .optional()
-);
-
-export type VisibleWhen = NonNullable<z.output<typeof visibleWhenSchema>>;
 
 /** What a bindable property is when it is written down, and the kind of value that can set it. */
 export const calloutColorSchema = lazySchema(() =>
@@ -202,3 +176,5 @@ export const isNodeVisible = (
   const value = values[visibleWhen.$state];
   return visibleWhen.equals === undefined ? value === true : value === visibleWhen.equals;
 };
+
+export { stateKeySchema, visibleWhenSchema, type VisibleWhen };

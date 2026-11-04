@@ -16,8 +16,8 @@ import {
   type AppDocument,
   type StateDeclaration,
   type StateValue,
-  getCapability,
 } from '@kbn/custom-app-common';
+import { getCapability } from '@kbn/custom-app-registry';
 
 export type StateValues = Readonly<Record<string, StateValue>>;
 

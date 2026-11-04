@@ -9,5 +9,5 @@
   "exclude": [
     "target/**/*"
   ],
-  "kbn_references": ["@kbn/zod", "@kbn/custom-content-common"]
+  "kbn_references": ["@kbn/zod", "@kbn/custom-content-common", "@kbn/custom-app-registry"]
 }

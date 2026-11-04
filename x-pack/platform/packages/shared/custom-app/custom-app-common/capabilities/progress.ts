@@ -6,10 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, progressColorSchema, progressMaxSchema } from '../bindings';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { describedDataFields } from '../data_fields';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, progressColorSchema, progressMaxSchema } from '../document/bindings';
+import { MAX_HEADING_LENGTH } from '../document/constants';
+import { describedDataFields } from '../document/data_fields';
 
 export const progressCapability = defineCapability({
   kind: 'component',
@@ -51,3 +51,9 @@ export const progressCapability = defineCapability({
   },
   data: 'query_or_source',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    progress: CapabilityNodeOf<typeof progressCapability>;
+  }
+}

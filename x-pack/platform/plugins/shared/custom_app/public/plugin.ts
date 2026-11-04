@@ -18,6 +18,7 @@ import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER, ON_OPEN_PANEL_MENU } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { CUSTOM_APP_EMBEDDABLE_TYPE } from '@kbn/custom-app-common';
+import { registerCustomAppCapability } from './capabilities/register_capability';
 import { CUSTOM_APP_CONTEXT_ATTACHMENT_TYPE } from '../common/app_context_attachment';
 import type { CustomAppByReferenceState } from '../server';
 import {
@@ -45,7 +46,13 @@ interface StartDeps {
   share?: SharePluginStart;
 }
 
-export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps> {
+/** What other plugins can use to add capabilities to custom apps. */
+export interface CustomAppPublicSetup {
+  /** Adds a capability: its manifest, and the code that draws it. */
+  registerCapability: typeof registerCustomAppCapability;
+}
+
+export class CustomAppPlugin implements Plugin<CustomAppPublicSetup, void, SetupDeps, StartDeps> {
   setup(core: CoreSetup<StartDeps>, { embeddable }: SetupDeps) {
     core.application.register({
       id: CUSTOM_APP_APPLICATION_ID,
@@ -84,6 +91,8 @@ export class CustomAppPlugin implements Plugin<void, void, SetupDeps, StartDeps>
       }),
       getIconForSavedObject: () => 'apps',
     });
+
+    return { registerCapability: registerCustomAppCapability };
   }
 
   start(

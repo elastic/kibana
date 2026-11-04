@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { bindable, cardIconSchema } from '../bindings';
-import { MAX_HEADING_LENGTH, MAX_TEXT_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { bindable, cardIconSchema } from '../document/bindings';
+import { MAX_HEADING_LENGTH, MAX_TEXT_LENGTH } from '../document/constants';
 
 export const cardCapability = defineCapability({
   kind: 'component',
@@ -39,3 +39,9 @@ export const cardCapability = defineCapability({
   bound: { icon: { schema: cardIconSchema, kind: 'string' } },
   container: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    card: CapabilityNodeOf<typeof cardCapability> & { children: AppNode[] };
+  }
+}

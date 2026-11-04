@@ -15,8 +15,8 @@ import {
   type AppDocument,
   type AppNode,
   type StateValue,
-  getCapability,
 } from '@kbn/custom-app-common';
+import { getCapability } from '@kbn/custom-app-registry';
 
 /** What a link has to carry for another person, or a refresh, to see the app as it was left. */
 export interface ViewState {

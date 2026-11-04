@@ -6,12 +6,11 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { visibleWhenSchema } from '../bindings';
-import { MAX_CHILDREN_PER_NODE } from '../constants';
-import { nodeIdSchema } from '../node_id_schema';
+import { MAX_CHILDREN_PER_NODE } from './constants';
+import { nodeIdSchema, visibleWhenSchema } from './node_envelope';
 import type { CapabilityManifest } from './define_capability';
 
-/** A node of a capability: what every node has, and the settings of the capability. */
+/** The node of a capability: what every node has, and the settings of the capability. */
 export type CapabilityNode<Id extends string, Shape extends z.ZodRawShape> = z.output<
   z.ZodObject<
     {
@@ -21,6 +20,11 @@ export type CapabilityNode<Id extends string, Shape extends z.ZodRawShape> = z.o
     } & Shape
   >
 >;
+
+/** The node of a capability, from its manifest. */
+export type CapabilityNodeOf<Manifest> = Manifest extends CapabilityManifest<infer Id, infer Shape>
+  ? CapabilityNode<Id, Shape>
+  : never;
 
 const schemas = new WeakMap<object, z.ZodType>();
 

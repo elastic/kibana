@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { linkTargetSchema } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH } from '../document/constants';
+import { linkTargetSchema } from '../document/input_schemas';
 
 export const linkCapability = defineCapability({
   kind: 'component',
@@ -53,3 +53,9 @@ export const linkCapability = defineCapability({
   },
   compact: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    link: CapabilityNodeOf<typeof linkCapability>;
+  }
+}

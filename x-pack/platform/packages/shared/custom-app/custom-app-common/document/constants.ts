@@ -10,10 +10,8 @@ export const CUSTOM_APP_EMBEDDABLE_TYPE = 'custom_app';
 /** Version of the stored panel state. Bump it, with an upgrade step, on any breaking change. */
 export const CUSTOM_APP_STATE_VERSION = 1;
 
-export const MAX_NODE_ID_LENGTH = 64;
 export const MAX_NODE_COUNT = 200;
 export const MAX_NODE_DEPTH = 8;
-export const MAX_CHILDREN_PER_NODE = 50;
 export const MAX_HEADING_LENGTH = 200;
 export const MAX_TEXT_LENGTH = 5_000;
 export const MAX_QUERY_LENGTH = 10_000;
@@ -22,8 +20,6 @@ export const MAX_TEMPLATE_LENGTH = 40_000;
 /** What a template is generated from: an instruction, not a description of the result. */
 export const MAX_PROMPT_LENGTH = 10_000;
 export const MAX_STATE_KEYS = 20;
-export const MAX_STATE_KEY_LENGTH = 64;
-export const MAX_STATE_STRING_LENGTH = 1_000;
 /** A list holds a few values to look for, as many as a person can paste into a box. */
 export const MAX_LIST_ITEMS = 1_000;
 export const MAX_ACTIONS_PER_EVENT = 5;
@@ -36,7 +32,6 @@ export const MAX_TABLE_COLUMNS = 50;
 export const MAX_KEY_VALUE_FIELDS = 50;
 
 /** ES|QL reserves these parameter names for the query's time range. */
-export const RESERVED_STATE_KEYS: readonly string[] = ['_tstart', '_tend'];
 export const MAX_INPUT_OPTIONS = 50;
 /** The most options a query can give a select, as many as a person can look through in one. */
 export const MAX_QUERY_OPTIONS = 500;
@@ -105,3 +100,11 @@ export const MAX_LINK_PATH_LENGTH = 500;
 export const MAX_LINK_APP_ID_LENGTH = 100;
 /** A form asks a few things; more than this is a page, not a form. */
 export const MAX_FORM_FIELDS = 10;
+
+export {
+  MAX_CHILDREN_PER_NODE,
+  MAX_NODE_ID_LENGTH,
+  MAX_STATE_KEY_LENGTH,
+  MAX_STATE_STRING_LENGTH,
+  RESERVED_STATE_KEYS,
+} from '@kbn/custom-app-registry';

@@ -6,9 +6,9 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_BUTTON_GROUP_OPTIONS } from '../constants';
-import { describedInputProps, inputOptionSchema } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_BUTTON_GROUP_OPTIONS } from '../document/constants';
+import { describedInputProps, inputOptionSchema } from '../document/input_schemas';
 
 export const buttonGroupCapability = defineCapability({
   kind: 'component',
@@ -47,3 +47,9 @@ export const buttonGroupCapability = defineCapability({
   },
   filter: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    button_group: CapabilityNodeOf<typeof buttonGroupCapability>;
+  }
+}

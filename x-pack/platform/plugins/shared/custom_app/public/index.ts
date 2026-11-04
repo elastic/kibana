@@ -8,3 +8,10 @@
 import { CustomAppPlugin } from './plugin';
 
 export const plugin = () => new CustomAppPlugin();
+
+export type { CustomAppPublicSetup } from './plugin';
+export type {
+  CustomAppCapability,
+  CustomAppCapabilityViewProps,
+  CustomAppQueryResult,
+} from './capabilities/register_capability';

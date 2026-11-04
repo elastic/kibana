@@ -6,10 +6,10 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { actionsSchema } from '../action_schemas';
-import { MAX_HEADING_LENGTH, MAX_TABLE_COLUMNS } from '../constants';
-import { describedDataFields } from '../data_fields';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { actionsSchema } from '../document/action_schemas';
+import { MAX_HEADING_LENGTH, MAX_TABLE_COLUMNS } from '../document/constants';
+import { describedDataFields } from '../document/data_fields';
 
 export const tableCapability = defineCapability({
   kind: 'component',
@@ -56,3 +56,9 @@ export const tableCapability = defineCapability({
   events: { onRowClick: 'onRowClick' },
   data: 'query_or_source',
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    table: CapabilityNodeOf<typeof tableCapability>;
+  }
+}

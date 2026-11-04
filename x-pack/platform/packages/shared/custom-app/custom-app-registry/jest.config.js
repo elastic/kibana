@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_NODE_ID_LENGTH } from './constants';
-
-export const nodeIdSchema = lazySchema(() =>
-  z
-    .string()
-    .min(1)
-    .max(MAX_NODE_ID_LENGTH)
-    .regex(/^[A-Za-z0-9_-]+$/)
-);
+module.exports = {
+  preset: '@kbn/jest/jest_node',
+  rootDir: '../../../../../..',
+  roots: ['<rootDir>/x-pack/platform/packages/shared/custom-app/custom-app-registry'],
+};

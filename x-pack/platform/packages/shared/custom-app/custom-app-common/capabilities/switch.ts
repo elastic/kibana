@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { describedInputProps } from '../input_schemas';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { describedInputProps } from '../document/input_schemas';
 
 export const switchCapability = defineCapability({
   kind: 'component',
@@ -32,3 +32,9 @@ export const switchCapability = defineCapability({
   bindingType: 'boolean',
   filter: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    switch: CapabilityNodeOf<typeof switchCapability>;
+  }
+}

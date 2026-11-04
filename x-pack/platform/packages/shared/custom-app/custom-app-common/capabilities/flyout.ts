@@ -6,8 +6,8 @@
  */
 
 import { z, lazySchema } from '@kbn/zod/v4';
-import { MAX_HEADING_LENGTH } from '../constants';
-import { defineCapability } from './define_capability';
+import { defineCapability, type CapabilityNodeOf } from '@kbn/custom-app-registry';
+import { MAX_HEADING_LENGTH } from '../document/constants';
 
 export const flyoutCapability = defineCapability({
   kind: 'component',
@@ -30,3 +30,9 @@ export const flyoutCapability = defineCapability({
   container: true,
   overlay: true,
 });
+
+declare module '@kbn/custom-app-registry' {
+  interface NodeTypeMap {
+    flyout: CapabilityNodeOf<typeof flyoutCapability> & { children: AppNode[] };
+  }
+}
