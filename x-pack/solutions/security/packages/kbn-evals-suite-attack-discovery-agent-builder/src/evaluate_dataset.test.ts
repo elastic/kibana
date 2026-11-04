@@ -16,6 +16,7 @@ import {
   extractRetrievalEvidence,
   extractUnscopedAlertRetrievalRowCounts,
   findAdToolResult,
+  hasScopedAgentAlertRetrievalWithoutIdentity,
   insightsForResponse,
   insightsFromValidatedDiscoveries,
   trackedStageKeys,
@@ -42,12 +43,17 @@ const recordedEsqlStep = ({
   ids,
   includeResultQuery = true,
   includeIdColumn = true,
+  identityColumn = '_id',
 }: {
   query: string;
   rows?: number;
   ids?: string[];
   includeResultQuery?: boolean;
   includeIdColumn?: boolean;
+  /** The column the rows carry their alert identity in. `kibana.alert.uuid`
+   *  models a retrieval that kept no `_id` metadata but still returned the
+   *  alert's own identity. */
+  identityColumn?: '_id' | 'kibana.alert.uuid';
 }): AttackDiscoveryAgentBuilderTaskOutput['steps'][number] => {
   const alertIds =
     ids ?? Array.from({ length: rows ?? 0 }, (_, index) => `ad-scenario-alert-${index}`);
@@ -61,7 +67,7 @@ const recordedEsqlStep = ({
         type: 'esql_results',
         data: {
           columns: includeIdColumn
-            ? [{ name: '_id', type: 'keyword' }]
+            ? [{ name: identityColumn, type: 'keyword' }]
             : [{ name: 'message', type: 'text' }],
           ...(includeResultQuery ? { query } : {}),
           source: 'esql',
@@ -897,9 +903,10 @@ describe("the AD tool call's own ES|QL query", () => {
 describe('supplied alerts can never be read as retrieved', () => {
   // `get_pipeline_data` Step 2.5 writes the SUPPLIED alert set into the
   // retrieval block (`extraction_strategy: 'provided'`,
-  // `alerts_context_count: providedAlerts.length`). That branch is unreachable
-  // at this revision; making it reachable without this exclusion would score the
-  // 7 provided-mode dense reps 16-vs-95 — a 0 that says nothing about retrieval.
+  // `alerts_context_count: providedAlerts.length`). That branch is the reading
+  // for a supplied-alerts run — no alert-retrieval workflow executes, so
+  // `alertRetrievalData` stays null, and counting it would score the supplied
+  // set as a retrieval.
   it('reads a provided-mode reconstruction as supplied, and scores the agent retrieval', () => {
     const result = computeWorkflowAlertCounts({
       pipeline: {
@@ -1125,6 +1132,104 @@ describe('an unscoped retrieval scores 0 rather than going unscored', () => {
 
     expect(result.retrievedAlertCount).toBeNull();
     expect(result.retrievedAlertCountSource).toBe('none');
+  });
+});
+
+describe('an alert identity carried without the _id metadata', () => {
+  it('counts the alert population from kibana.alert.uuid', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: denseRetrievalQuery,
+        ids: denseAlertIds(95),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+
+  it('unions the _id and kibana.alert.uuid results of a split retrieval', () => {
+    const steps = [
+      recordedEsqlStep({ query: denseRetrievalQuery, ids: denseAlertIds(50) }),
+      recordedEsqlStep({
+        query: `${denseRetrievalQuery}\n  | WHERE host.name == "wks-karen-06"`,
+        ids: denseAlertIds(45, 50),
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+
+    expect(extractAgentAlertRetrievalPopulation(steps)).toBe(95);
+  });
+});
+
+describe('a scoped retrieval whose rows carry no identity is attributed', () => {
+  const scopedQuery = `FROM .alerts-security.alerts-default | WHERE tags == "${AD2_SCENARIO_SEED_LABEL}"`;
+
+  const workflowFor = (steps: AttackDiscoveryAgentBuilderTaskOutput['steps']) =>
+    buildWorkflow({
+      pipeline: null,
+      agentEsqlRowCounts: extractAgentEsqlRowCounts(steps),
+      agentAlertRetrievalPopulation: extractAgentAlertRetrievalPopulation(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      scopedAgentRetrievalWithoutIdentity: hasScopedAgentAlertRetrievalWithoutIdentity(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+      retrievalScope: AD2_SCENARIO_SEED_LABEL,
+      unscopedAgentAlertRetrievalRowCounts: extractUnscopedAlertRetrievalRowCounts(
+        steps,
+        AD2_SCENARIO_SEED_LABEL
+      ),
+    });
+
+  it('reports the retrieval as unidentified rather than as no retrieval', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 2, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval_unidentified');
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([2]);
+  });
+
+  it('does not call an empty scoped retrieval unidentified, whatever its projection', () => {
+    const steps = [recordedEsqlStep({ query: scopedQuery, rows: 0, includeIdColumn: false })];
+    const workflow = workflowFor(steps);
+
+    expect(hasScopedAgentAlertRetrievalWithoutIdentity(steps, AD2_SCENARIO_SEED_LABEL)).toBe(false);
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
+    expect(workflow.retrievalEvidence.agentEsqlRowCounts).toEqual([0]);
+  });
+
+  it('attributes a scoped retrieval that returned the expected population', () => {
+    const steps = [
+      recordedEsqlStep({
+        query: scopedQuery,
+        ids: ['fixture-alert-1', 'fixture-alert-2'],
+        identityColumn: 'kibana.alert.uuid',
+      }),
+    ];
+    const workflow = workflowFor(steps);
+
+    expect(workflow.retrievedAlertCount).toBe(2);
+    expect(workflow.retrievedAlertCountSource).toBe('agent_esql_retrieval');
+  });
+
+  it('leaves an unscoped-only retrieval reporting unscoped_retrieval', () => {
+    const workflow = workflowFor([
+      recordedEsqlStep({ query: denseRetrievalQuery, rows: 97, includeIdColumn: false }),
+    ]);
+
+    expect(workflow.retrievedAlertCountSource).toBe('unscoped_retrieval');
+  });
+
+  it('leaves a run with no alerts retrieval reporting none', () => {
+    const workflow = workflowFor([]);
+
+    expect(workflow.retrievedAlertCount).toBe(0);
+    expect(workflow.retrievedAlertCountSource).toBe('none');
   });
 });
 
