@@ -202,6 +202,8 @@ export {
   type RuntimeAgentConfigurationOverrides,
   agentIdRegexp,
   agentIdMaxLength,
+  AGENT_NAME_MAX_LENGTH,
+  AGENT_DESCRIPTION_MAX_LENGTH,
   SELF_AGENT_ID,
   AgentExecutionMode,
   SubagentExecutionMode,
