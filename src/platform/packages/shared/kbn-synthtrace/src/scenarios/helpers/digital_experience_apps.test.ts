@@ -41,7 +41,7 @@ const collect = (
     withSessionId,
     includeRawAttribution,
     scale,
-    // Unseeded runs are random, which could make the minimums the tests rely on flaky
+    // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
   }).flatMap((generator) =>
     Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())

@@ -417,11 +417,7 @@ export const parseSeed = (value: unknown, defaultValue?: string): string | undef
   throw new Error('seed must be a non-empty string or a finite number');
 };
 
-/**
- * The seed of a run without the `seed` option: the run's `from` in milliseconds. Synthtrace evaluates
- * the scenario again in every worker and for every live batch, so a random default would differ
- * between them, while `from` is the same for the whole run.
- */
+/** The default seed: the run's `from` in milliseconds, which every worker and live batch share. */
 export const getDefaultSeed = (from: number): string => String(from);
 
 /** Appended to the logged options: the default seed repeats the data of runs with the same `from`. */

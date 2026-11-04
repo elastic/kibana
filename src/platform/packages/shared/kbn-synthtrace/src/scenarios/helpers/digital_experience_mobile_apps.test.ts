@@ -38,7 +38,7 @@ const collect = (
     scale: 1,
     platform: 'both',
     withManualSpans: true,
-    // Unseeded runs are random, which could make the minimums the tests rely on flaky
+    // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-mobile-test',
     ...opts,
   }).flatMap((generator) =>
