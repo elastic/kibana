@@ -35,7 +35,12 @@ import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
-import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
+import {
+  findAuthorizationEndpoints,
+  findTokenEndpoints,
+  respondToAuthorizationRequest,
+  respondToTokenRequest,
+} from '../openapi/token_endpoints';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
 import type { SmithyModel } from '../smithy';
 import { convertSmithy, isSmithyModel } from '../smithy';
@@ -61,7 +66,10 @@ export interface ContractCall {
    * `operation` names the message.
    */
   readonly protocolMessage?: true;
-  /** Set for requests to the token URL of an OAuth 2 flow, which the mock answers itself. */
+  /**
+   * Set for requests to the token or authorization URL of an OAuth 2 flow, which the mock answers
+   * itself.
+   */
   readonly token?: true;
   readonly status: number;
   readonly requestViolations: readonly Violation[];
@@ -269,6 +277,7 @@ export const createEmulatorFetch = ({
   const loadedProtocols = loadProtocols(specs, namedResponses);
   const protocols = toProtocolEndpoints(loadedProtocols);
   const tokenEndpoints = findTokenEndpoints(operations);
+  const isAuthorizationUrl = findAuthorizationEndpoints(operations);
   const engine = createResponseEngine(operations, { fixtures, recordings, fallback: respond });
   const contract = createOpenApiAdapter(
     operations,
@@ -427,6 +436,18 @@ export const createEmulatorFetch = ({
     }
     const routed = contract.route(request);
     const grants = 'operation' in routed ? undefined : tokenEndpoints(request.url);
+    if (!('operation' in routed) && request.method === 'get' && isAuthorizationUrl(request.url)) {
+      const { response, violations } = respondToAuthorizationRequest(request);
+      calls.push({
+        request: description,
+        operation: 'OAuth authorization',
+        token: true,
+        status: response.statusCode,
+        requestViolations: violations,
+        responseViolations: [],
+      });
+      return response;
+    }
     if (grants) {
       const { response, violations } = respondToTokenRequest(grants, request);
       calls.push({
