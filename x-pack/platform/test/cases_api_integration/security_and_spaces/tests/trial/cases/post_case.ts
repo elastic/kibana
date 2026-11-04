@@ -6,11 +6,15 @@
  */
 
 import expect from '@kbn/expect';
+import { CASE_CONFIGURE_SAVED_OBJECT } from '@kbn/cases-plugin/common/constants';
+import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server/src/saved_objects_index_pattern';
 
 import { getPostCaseRequest } from '../../../../common/lib/mock';
 import {
   deleteAllCaseItems,
   createCase,
+  createConfiguration,
+  getConfigurationRequest,
   findCases,
   removeServerGeneratedPropertiesFromCase,
 } from '../../../../common/lib/api';
@@ -77,6 +81,28 @@ export default ({ getService }: FtrProviderContext): void => {
           });
 
           it('stores false when extractObservables is omitted', async () => {
+            const createdCase = await createCase(
+              supertest,
+              getPostCaseRequest({ owner, settings: { syncAlerts: true } })
+            );
+
+            expect(createdCase.settings.extractObservables).to.be(false);
+          });
+
+          it('stores false when the space configuration holds a stored true and the value is omitted', async () => {
+            const configuration = await createConfiguration(
+              supertest,
+              getConfigurationRequest({ overrides: { owner } })
+            );
+            // The configuration API refuses true for these owners, so the old data is written
+            // directly. The document id has no space prefix: this works only in the default space.
+            await es.update({
+              index: ALERTING_CASES_SAVED_OBJECT_INDEX,
+              id: `${CASE_CONFIGURE_SAVED_OBJECT}:${configuration.id}`,
+              doc: { [CASE_CONFIGURE_SAVED_OBJECT]: { extractObservables: true } },
+              refresh: true,
+            });
+
             const createdCase = await createCase(
               supertest,
               getPostCaseRequest({ owner, settings: { syncAlerts: true } })

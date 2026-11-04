@@ -68,7 +68,7 @@ export const canStoreExtractObservablesTrue = (owner: string): boolean =>
 /**
  * Resolves the effective `extractObservables` value for a new case, applying the full precedence
  * chain when the caller omitted the field:
- *   blocked by owner → false
+ *   owner cannot store true (Stack, Observability) → false
  *   space config present → space config value
  *   no space config → owner autoExtractDefault
  *   owner unknown → false
@@ -79,7 +79,7 @@ export const resolveExtractObservables = (
   owner: string,
   spaceExtractObservables: boolean | undefined
 ): boolean => {
-  if (isObservablesExtractionBlocked(owner)) {
+  if (!canStoreExtractObservablesTrue(owner)) {
     return false;
   }
   return (

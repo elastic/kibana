@@ -98,6 +98,12 @@ describe('resolveExtractObservables', () => {
     expect(resolveExtractObservables('observability', undefined)).toBe(false);
   });
 
+  it('returns false for Stack regardless of space config', () => {
+    expect(resolveExtractObservables('cases', true)).toBe(false);
+    expect(resolveExtractObservables('cases', false)).toBe(false);
+    expect(resolveExtractObservables('cases', undefined)).toBe(false);
+  });
+
   it('returns the space config value when present for Security', () => {
     expect(resolveExtractObservables('securitySolution', true)).toBe(true);
     expect(resolveExtractObservables('securitySolution', false)).toBe(false);

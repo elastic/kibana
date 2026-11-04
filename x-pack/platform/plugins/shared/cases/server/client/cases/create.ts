@@ -113,6 +113,14 @@ export const create = async (
       });
     }
 
+    // Only a value the caller sent is rejected. Values from a template, the space configuration
+    // or the owner default are coerced to false below, so stored data never causes a 400.
+    // Runs after authorization and before any template read or write.
+    assertCanStoreExtractObservables({
+      owner: query.owner,
+      extractObservables: query.settings.extractObservables,
+    });
+
     // Expand the template's case defaults and extended_fields defaults into the request
     // (caller-wins), and pin the resolved template version. Runs AFTER the createCase
     // authorization so the unsecured template read never becomes an existence oracle for
@@ -185,24 +193,20 @@ export const create = async (
       defaultValue: defaultExtractObservables,
     });
 
-    // Default extractObservables when the caller omitted it and template expansion did not fill it.
+    // Resolve the final extractObservables value.
     // Precedence: caller-explicit > template definition > space config > owner default > false.
-    if (query.settings.extractObservables === undefined) {
-      query = {
-        ...query,
-        settings: {
-          ...query.settings,
-          extractObservables: defaultExtractObservables,
-        },
-      };
-    }
-
-    // Checked on the final value (caller, template, space configuration or owner default), after
-    // authorization and before any write.
-    assertCanStoreExtractObservables({
-      owner: query.owner,
-      extractObservables: query.settings.extractObservables,
-    });
+    // An owner that cannot store true always gets false, so an inherited true never reaches the
+    // write (a caller-sent true was already rejected above).
+    query = {
+      ...query,
+      settings: {
+        ...query.settings,
+        extractObservables: resolveExtractObservables(
+          query.owner,
+          query.settings.extractObservables ?? configurations[0]?.extractObservables
+        ),
+      },
+    };
 
     // Global (isGlobal) field-definition defaults are applied client-side by the create-case UI
     // before submission, so UI-created cases persist them — but API and workflow-step callers

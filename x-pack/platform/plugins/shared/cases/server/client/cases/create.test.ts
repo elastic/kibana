@@ -2646,15 +2646,52 @@ describe('create', () => {
       }
     );
 
-    it('rejects a true that comes from the space configuration for a blocked owner', async () => {
-      const clientArgs = createClientArgs(true);
-      const request = { ...theCase, owner: GENERAL_CASES_OWNER };
+    it.each(blockedOwners)(
+      'coerces a true from the space configuration to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs(true);
 
-      const error = await getRejection(create(request, clientArgs, ownerRuleCasesClient));
+        await create({ ...theCase, owner }, clientArgs, ownerRuleCasesClient);
 
-      expect(error.boomify().output.statusCode).toBe(400);
-      expect(clientArgs.services.caseService.createCase).not.toHaveBeenCalled();
-    });
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(false);
+      }
+    );
+
+    it.each(blockedOwners)(
+      'coerces a true from a template to false for the %s owner',
+      async (owner) => {
+        const clientArgs = createClientArgs();
+        clientArgs.config = { ...clientArgs.config, templates: { enabled: true } };
+        clientArgs.services.templatesService.getTemplate.mockResolvedValue({
+          id: 'so-tpl',
+          type: 'cases-templates',
+          references: [],
+          attributes: {
+            templateId: 'tmpl-owner-rule',
+            name: 'Owner rule template',
+            owner,
+            definition: yamlStringify({
+              name: 'Owner rule template',
+              fields: [],
+              settings: { extractObservables: true },
+            }),
+            templateVersion: 1,
+            deletedAt: null,
+            isLatest: true,
+          },
+        } as never);
+
+        await create(
+          { ...theCase, owner, template: { id: 'tmpl-owner-rule', version: 1 } },
+          clientArgs,
+          ownerRuleCasesClient
+        );
+
+        const { attributes } = clientArgs.services.caseService.createCase.mock.calls[0][0];
+        expect(attributes.settings.extractObservables).toBe(false);
+      }
+    );
 
     it.each(blockedOwners)('accepts an explicit false for the %s owner', async (owner) => {
       const clientArgs = createClientArgs();
