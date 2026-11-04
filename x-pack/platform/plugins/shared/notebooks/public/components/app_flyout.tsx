@@ -11,16 +11,21 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiContextMenuItem,
+  EuiContextMenuPanel,
   EuiEmptyPrompt,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
   EuiFlyoutHeader,
+  EuiIcon,
   EuiMarkdownFormat,
+  EuiPopover,
   EuiSpacer,
   EuiText,
   EuiTitle,
   EuiToolTip,
+  euiShadow,
   transparentize,
   useEuiTheme,
   type UseEuiTheme,
@@ -103,54 +108,163 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition
   }
 };
 
-const REMOVE_BUTTON_CLASS = 'notebookAppPanelRemove';
+const HOVER_ACTIONS_CLASS = 'notebookAppPanelHoverActions';
 
-const AppGridPanel = ({ app, panel }: { app: NotebookApp; panel: AppPanel }) => {
+const PANEL_MENU_LABEL = i18n.translate('xpack.notebook.app.panelMenu', {
+  defaultMessage: 'Panel menu',
+});
+
+const MOVE_PANEL_LABEL = i18n.translate('xpack.notebook.app.movePanel', {
+  defaultMessage: 'Move panel',
+});
+
+/** Dashboard-style panel chrome: a dashed outline and floating move and menu actions on hover. */
+const getPanelStyles = (euiThemeContext: UseEuiTheme, isMenuOpen: boolean) => {
+  const { euiTheme } = euiThemeContext;
+  const visible = css`
+    z-index: ${euiTheme.levels.menu};
+    opacity: 1;
+    visibility: visible;
+    transition: none;
+  `;
+  return {
+    container: css`
+      position: relative;
+      height: 100%;
+      &:hover .${HOVER_ACTIONS_CLASS}, &:has(:focus-visible) .${HOVER_ACTIONS_CLASS} {
+        ${visible}
+      }
+    `,
+    hoverActions: css`
+      position: absolute;
+      top: -${euiTheme.size.l};
+      left: 0;
+      right: 0;
+      height: ${euiTheme.size.xl};
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 ${euiTheme.size.m};
+      pointer-events: none;
+      opacity: 0;
+      visibility: hidden;
+      transition: opacity ${euiTheme.animation.extraFast} ease-in,
+        visibility ${euiTheme.animation.extraFast} linear;
+      transition-delay: ${euiTheme.animation.fast};
+      ${isMenuOpen ? visible : ''}
+
+      & > * {
+        display: flex;
+        align-items: center;
+        height: ${euiTheme.size.xl};
+        pointer-events: all;
+        padding: calc(${euiTheme.size.xs} - 1px);
+        border-radius: ${euiTheme.border.radius.small};
+        background-color: ${euiTheme.colors.backgroundBasePlain};
+        ${euiShadow(euiThemeContext, 'xs')}
+      }
+    `,
+    dragHandle: css`
+      display: flex;
+      padding: ${euiTheme.size.xs};
+      border: none;
+      background: none;
+      cursor: move;
+    `,
+    content: css`
+      height: 100%;
+      min-width: 0;
+      overflow: auto;
+      padding: ${euiTheme.size.s};
+      border-radius: ${euiTheme.border.radius.small};
+      outline: ${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseProminent};
+      background-color: ${euiTheme.colors.backgroundBasePlain};
+    `,
+  };
+};
+
+const AppGridPanel = ({
+  app,
+  panel,
+  setDragHandles,
+}: {
+  app: NotebookApp;
+  panel: AppPanel;
+  setDragHandles: (refs: Array<HTMLElement | null>) => void;
+}) => {
   const { store } = useNotebook();
-  const { euiTheme } = useEuiTheme();
+  const euiThemeContext = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const styles = useMemo(
+    () => getPanelStyles(euiThemeContext, isMenuOpen),
+    [euiThemeContext, isMenuOpen]
+  );
+  const dragHandleRef = useCallback(
+    (element: HTMLButtonElement | null) => setDragHandles([element]),
+    [setDragHandles]
+  );
   const cell = cells[panel.cellId];
   if (!cell) return null;
 
-  return (
-    <div
-      css={css`
-        position: relative;
-        height: 100%;
-        min-width: 0;
-        overflow: auto;
-        &:hover > .${REMOVE_BUTTON_CLASS}, &:focus-within > .${REMOVE_BUTTON_CLASS} {
-          opacity: 1;
-        }
-      `}
-      data-test-subj={`notebookAppPanel-${cell.name}`}
+  const closeMenu = () => setIsMenuOpen(false);
+  const menuItems = [
+    <EuiContextMenuItem
+      key="remove"
+      icon="trash"
+      onClick={() => {
+        closeMenu();
+        store.updateApp(app.id, (current) => ({
+          ...current,
+          panels: current.panels.filter(({ id }) => id !== panel.id),
+        }));
+      }}
+      data-test-subj="notebookAppPanelRemove"
     >
-      <PanelContent panelId={panel.id} cell={cell} />
-      <div
-        className={REMOVE_BUTTON_CLASS}
-        css={css`
-          position: absolute;
-          top: 0;
-          right: 0;
-          opacity: 0;
-          transition: opacity ${euiTheme.animation.fast};
-        `}
-      >
-        <EuiToolTip content={REMOVE_PANEL_LABEL} disableScreenReaderOutput>
-          <EuiButtonIcon
-            iconType="cross"
-            size="xs"
-            color="text"
-            display="base"
-            aria-label={REMOVE_PANEL_LABEL}
-            onClick={() =>
-              store.updateApp(app.id, (current) => ({
-                ...current,
-                panels: current.panels.filter(({ id }) => id !== panel.id),
-              }))
+      {REMOVE_PANEL_LABEL}
+    </EuiContextMenuItem>,
+  ];
+
+  return (
+    <div css={styles.container} data-test-subj={`notebookAppPanel-${cell.name}`}>
+      <div className={HOVER_ACTIONS_CLASS} css={styles.hoverActions}>
+        <span>
+          <button
+            type="button"
+            ref={dragHandleRef}
+            aria-label={MOVE_PANEL_LABEL}
+            css={styles.dragHandle}
+            data-test-subj="notebookAppPanelDragHandle"
+          >
+            <EuiIcon type="move" color="text" aria-hidden={true} />
+          </button>
+        </span>
+        <span>
+          <EuiPopover
+            isOpen={isMenuOpen}
+            closePopover={closeMenu}
+            panelPaddingSize="none"
+            anchorPosition="downRight"
+            repositionOnScroll
+            aria-label={PANEL_MENU_LABEL}
+            button={
+              <EuiToolTip content={PANEL_MENU_LABEL} disableScreenReaderOutput>
+                <EuiButtonIcon
+                  iconType="ellipsis"
+                  color="text"
+                  aria-label={PANEL_MENU_LABEL}
+                  onClick={() => setIsMenuOpen((open) => !open)}
+                  data-test-subj="notebookAppPanelMenu"
+                />
+              </EuiToolTip>
             }
-          />
-        </EuiToolTip>
+          >
+            <EuiContextMenuPanel items={menuItems} />
+          </EuiPopover>
+        </span>
+      </div>
+      <div css={styles.content}>
+        <PanelContent panelId={panel.id} cell={cell} />
       </div>
     </div>
   );
@@ -270,9 +384,11 @@ const AppGrid = ({ app }: { app: NotebookApp }) => {
   );
 
   const renderPanelContents = useCallback(
-    (panelId: string) => {
+    (panelId: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
       const panel = app.panels.find(({ id }) => id === panelId);
-      return panel ? <AppGridPanel app={app} panel={panel} /> : null;
+      return panel ? (
+        <AppGridPanel app={app} panel={panel} setDragHandles={setDragHandles} />
+      ) : null;
     },
     [app]
   );
@@ -294,6 +410,7 @@ const AppGrid = ({ app }: { app: NotebookApp }) => {
         layout={layout}
         gridSettings={gridSettings}
         renderPanelContents={renderPanelContents}
+        useCustomDragHandle
         onLayoutChange={onLayoutChange}
         css={gridStyles}
       />
