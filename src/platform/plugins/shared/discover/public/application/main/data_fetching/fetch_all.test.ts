@@ -383,5 +383,30 @@ describe('test fetchAll', () => {
 
       expect((await collect()).find(({ error }) => error)).toBeUndefined();
     });
+
+    test('should fail documents$ and totalHits$ for an ES|QL error and resolve', async () => {
+      const collectDocuments = subjectCollector(subjects.documents$);
+      const collectTotalHits = subjectCollector(subjects.totalHits$);
+      const error = new Error('This query failed');
+      mockfetchEsql.mockRejectedValue(error);
+      const query = { esql: 'from foo' };
+      deps.internalState.dispatch(
+        internalStateActions.updateAppState({
+          tabId: deps.getCurrentTab().id,
+          appState: { query },
+        })
+      );
+
+      await fetchAll(deps);
+
+      expect((await collectDocuments()).at(-1)).toEqual({
+        fetchStatus: FetchStatus.ERROR,
+        error,
+        query,
+        errorAfterMs: expect.any(Number),
+      });
+      expect((await collectTotalHits()).at(-1)).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+      expect(subjects.main$.getValue()).toEqual({ fetchStatus: FetchStatus.ERROR, error });
+    });
   });
 });

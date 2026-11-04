@@ -51,7 +51,6 @@ import {
   useCurrentTabDataStateContainer,
   useInternalStateDispatch,
 } from '../../state_management/redux';
-import { useDataState } from '../../hooks/use_data_state';
 import { getDefinedControlGroupState } from '../../state_management/utils/get_defined_control_group_state';
 
 const LENS_ACTIONS_OPTIONS: UseUnifiedHistogramProps['lensActionsOptions'] = {
@@ -102,10 +101,6 @@ export const useDiscoverHistogram = (
   const isEsqlMode = useIsEsqlMode();
   const dispatch = useInternalStateDispatch();
   const updateAppState = useCurrentTabAction(internalStateActions.updateAppState);
-  const documentsState = useDataState(documents$);
-  const isChartLoading = useMemo(() => {
-    return isEsqlMode && documentsState?.fetchStatus === FetchStatus.LOADING;
-  }, [isEsqlMode, documentsState?.fetchStatus]);
 
   /**
    * API initialization
@@ -436,7 +431,6 @@ export const useDiscoverHistogram = (
       onBrushEnd: histogramCustomization?.onBrushEnd,
       withDefaultActions: histogramCustomization?.withDefaultActions,
       disabledActions: histogramCustomization?.disabledActions,
-      isChartLoading,
       onVisContextChanged: isEsqlMode ? onVisContextChanged : undefined,
       onBreakdownFieldChange,
       onTimeIntervalChange,
@@ -448,7 +442,6 @@ export const useDiscoverHistogram = (
       histogramCustomization?.onFilter,
       histogramCustomization?.withDefaultActions,
       isEsqlMode,
-      isChartLoading,
       onBreakdownFieldChange,
       onTimeIntervalChange,
       onVisContextChanged,
