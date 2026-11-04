@@ -20,7 +20,6 @@ import {
   getCreateRuleFromTemplateRoute,
   getTriggersActionsManagementPath,
 } from '@kbn/rule-data-utils';
-import { RulesSettingsLink } from './components/rules_setting/rules_settings_link';
 import { RulesListDocLink } from './sections/rules_list/components/rules_list_doc_link';
 import { CreateRuleButton } from './sections/rules_list/components/create_rule_button';
 import type { Section } from './constants';
@@ -97,9 +96,6 @@ export const TriggersActionsUIHome: React.FunctionComponent<RouteComponentProps<
 
   const headerActions = [
     ...(authorizedToCreateAnyRules ? [<CreateRuleButton openFlyout={openRuleTypeModal} />] : []),
-    <RulesSettingsLink
-      alertDeleteCategoryIds={['management', 'observability', 'securitySolution']}
-    />,
     <RulesListDocLink />,
   ];
 

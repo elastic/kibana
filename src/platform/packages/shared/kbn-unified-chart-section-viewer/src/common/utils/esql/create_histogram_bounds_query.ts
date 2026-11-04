@@ -21,10 +21,12 @@ export const HISTOGRAM_BOUNDS_MAX_COLUMN = 'max_value';
 export const createHistogramBoundsQuery = ({
   metricItem,
   whereStatements = [],
+  metadataFields = [],
   originalSource,
 }: {
   metricItem: ParsedMetricItem;
   whereStatements?: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
 }): HistogramBoundsQuery | undefined => {
   const expression = getHistogramFieldExpression(metricItem);
@@ -33,7 +35,7 @@ export const createHistogramBoundsQuery = ({
   }
 
   const source = resolveSource(originalSource, metricItem.indexName);
-  const query = esql.ts(source);
+  const query = esql.ts([source], [...metadataFields]);
   const trimmedWhere = whereStatements
     .map((statement) => statement.trim())
     .filter((statement) => statement.length > 0);

@@ -66,85 +66,88 @@ beforeEach(() => {
   mockSearchStepExecutions.mockResolvedValue({ results: [] });
 });
 
-it('returns mapped runs when the automation has a workflowId', async () => {
-  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
-  mockGetWorkflowExecutions.mockResolvedValue({
-    results: [
-      {
-        id: 'exec-1',
-        status: 'completed',
-        startedAt: '2026-09-01T00:00:00.000Z',
-        finishedAt: '2026-09-01T00:01:00.000Z',
-        duration: 60000,
-        triggeredBy: 'schedule',
-      },
-    ],
-    total: 1,
-    page: 1,
-    size: 20,
-  });
-  mockSearchStepExecutions.mockResolvedValue({
-    results: [
-      {
-        workflowRunId: 'exec-1',
-        input: { title: 'Alert triage', message: 'Investigate the alert' },
-        output: { investigation_id: 'investigation-1' },
-      },
-    ],
-  });
-
-  const result = await call('auto-1');
-
-  expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
-    {
-      workflowId: 'wf-1',
-      omitStepRuns: true,
+it.each([{ message: 'Investigate the alert' }, { instructions: 'Investigate the alert' }])(
+  'returns mapped runs with the recorded prompt: %j',
+  async (prompt) => {
+    mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+    mockGetWorkflowExecutions.mockResolvedValue({
+      results: [
+        {
+          id: 'exec-1',
+          status: 'completed',
+          startedAt: '2026-09-01T00:00:00.000Z',
+          finishedAt: '2026-09-01T00:01:00.000Z',
+          duration: 60000,
+          triggeredBy: 'schedule',
+        },
+      ],
+      total: 1,
       page: 1,
       size: 20,
-      startedAfter: undefined,
-      startedBefore: undefined,
-      request: mockRequest,
-    },
-    'default'
-  );
-  expect(mockSearchStepExecutions).toHaveBeenCalledWith(
-    {
-      workflowId: 'wf-1',
-      stepId: 'trigger_investigation',
-      workflowExecutionIds: ['exec-1'],
-      includeInput: true,
-      includeOutput: true,
-      startedAfter: undefined,
-      startedBefore: undefined,
-      page: 1,
-      size: 1,
-      sourceIncludes: ['workflowRunId', 'input', 'output'],
-      request: mockRequest,
-    },
-    'default'
-  );
-  expect(result).toEqual({
-    runs: [
+    });
+    mockSearchStepExecutions.mockResolvedValue({
+      results: [
+        {
+          workflowRunId: 'exec-1',
+          input: { title: 'Alert triage', ...prompt },
+          output: { investigation_id: 'investigation-1' },
+        },
+      ],
+    });
+
+    const result = await call('auto-1');
+
+    expect(mockGetWorkflowExecutions).toHaveBeenCalledWith(
       {
-        id: 'exec-1',
-        status: 'succeeded',
-        startedAt: '2026-09-01T00:00:00.000Z',
-        finishedAt: '2026-09-01T00:01:00.000Z',
-        duration: 60000,
-        triggeredBy: 'schedule',
-        title: 'Alert triage',
-        message: 'Investigate the alert',
-        investigationId: 'investigation-1',
-        skipReason: null,
-        dailyLimit: undefined,
+        workflowId: 'wf-1',
+        omitStepRuns: true,
+        page: 1,
+        size: 20,
+        startedAfter: undefined,
+        startedBefore: undefined,
+        request: mockRequest,
       },
-    ],
-    total: 1,
-    usedToday: 0,
-    page: 1,
-    size: 20,
-  });
-});
+      'default'
+    );
+    expect(mockSearchStepExecutions).toHaveBeenCalledWith(
+      {
+        workflowId: 'wf-1',
+        stepId: 'trigger_investigation',
+        workflowExecutionIds: ['exec-1'],
+        includeInput: true,
+        includeOutput: true,
+        startedAfter: undefined,
+        startedBefore: undefined,
+        page: 1,
+        size: 1,
+        sourceIncludes: ['workflowRunId', 'input', 'output'],
+        request: mockRequest,
+      },
+      'default'
+    );
+    expect(result).toEqual({
+      runs: [
+        {
+          id: 'exec-1',
+          status: 'succeeded',
+          startedAt: '2026-09-01T00:00:00.000Z',
+          finishedAt: '2026-09-01T00:01:00.000Z',
+          duration: 60000,
+          triggeredBy: 'schedule',
+          title: 'Alert triage',
+          message: 'Investigate the alert',
+          investigationId: 'investigation-1',
+          skipReason: null,
+          dailyLimit: undefined,
+        },
+      ],
+      total: 1,
+      usedToday: 0,
+      page: 1,
+      size: 20,
+    });
+  }
+);
 
 it.each([
   ['completed', 'succeeded'],
@@ -384,4 +387,23 @@ it('reports budget denials as skipped, preserving the limit at dispatch and excl
     runs: [{ status: 'skipped', skipReason: 'daily_limit', dailyLimit: 2 }],
   });
   expect(result.runs[0].investigationId).toBeUndefined();
+});
+
+it('reports global investigation-limit denials as skipped with their own reason', async () => {
+  mockGet.mockResolvedValueOnce({
+    attributes: { workflowId: 'wf-1', runtime: { dailyDispatchLimit: 10 } },
+  });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [{ id: 'exec-1', status: 'completed', triggeredBy: 'scheduled' }],
+    total: 1,
+    page: 1,
+    size: 20,
+  });
+  mockSearchStepExecutions.mockResolvedValue({
+    results: [{ workflowRunId: 'exec-1', output: { skip_reason: 'investigation_limit' } }],
+  });
+
+  const result = await call('auto-1');
+  expect(result.runs[0]).toMatchObject({ status: 'skipped', skipReason: 'investigation_limit' });
+  expect(result.runs[0].dailyLimit).toBeUndefined();
 });

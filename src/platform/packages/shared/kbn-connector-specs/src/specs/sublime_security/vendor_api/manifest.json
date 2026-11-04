@@ -1,0 +1,104 @@
+{
+  "operations": {
+    "getAsaVerdict": [
+      {
+        "method": "get",
+        "path": "/v0/messages/{id}/asa_verdict",
+        "source": "v0"
+      }
+    ],
+    "getAttackScore": [
+      {
+        "method": "get",
+        "path": "/v0/messages/{id}/attack_score",
+        "source": "v0"
+      }
+    ],
+    "getMessage": [
+      {
+        "method": "get",
+        "path": "/v0/messages/{id}",
+        "source": "v0"
+      }
+    ],
+    "getMessageGroup": [
+      {
+        "method": "get",
+        "path": "/v0/message-groups/{id}",
+        "source": "v0"
+      }
+    ],
+    "getTask": [
+      {
+        "method": "get",
+        "path": "/v0/tasks/{id}",
+        "source": "v0"
+      }
+    ],
+    "listMailboxes": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "mailboxes",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/v0/mailboxes",
+        "source": "v0"
+      }
+    ],
+    "quarantineMessageGroups": [
+      {
+        "method": "post",
+        "path": "/v0/message-groups/quarantine",
+        "source": "v0"
+      }
+    ],
+    "restoreMessageGroups": [
+      {
+        "method": "post",
+        "path": "/v0/message-groups/restore",
+        "source": "v0"
+      }
+    ],
+    "searchMessageGroups": [
+      {
+        "method": "get",
+        "pagination": {
+          "request": {
+            "offsetParam": "offset",
+            "sizeParam": "limit"
+          },
+          "response": {
+            "itemsPath": "message_groups",
+            "totalPath": "total"
+          },
+          "style": "offset"
+        },
+        "path": "/v0/message-groups",
+        "source": "v0"
+      }
+    ],
+    "trashMessageGroups": [
+      {
+        "method": "post",
+        "path": "/v0/message-groups/trash",
+        "source": "v0"
+      }
+    ]
+  },
+  "sources": {
+    "v0": {
+      "apiVersion": "generated",
+      "fetchedAt": "2026-10-07T20:20:25.121Z",
+      "format": "openapi",
+      "url": "https://docs.sublime.security/openapi/sublime-platform-api.json"
+    }
+  }
+}

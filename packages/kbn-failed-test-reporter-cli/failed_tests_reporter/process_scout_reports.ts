@@ -103,6 +103,7 @@ export async function processScoutReports(
     pipeline,
     prependTitle,
     updateGithub,
+    perTestIssues,
     indexInEs,
     reportUpdate,
   } = params;
@@ -194,6 +195,15 @@ export async function processScoutReports(
         }
         updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         recordGithubIssue(failure);
+        continue;
+      }
+
+      if (!perTestIssues) {
+        log.info(
+          `No failed-test issue tracks this test yet: ${failure.classname} - ${failure.name}`
+        );
+        failure.failureCount = 0;
+        updateScoutHtmlReport({ log, reportDir, failure, reportUpdate });
         continue;
       }
 

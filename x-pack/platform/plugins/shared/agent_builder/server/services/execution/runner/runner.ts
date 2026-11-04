@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { UserIdAndName } from '@kbn/agent-builder-common';
 import type { Logger } from '@kbn/logging';
 import type { ElasticsearchServiceStart } from '@kbn/core-elasticsearch-server';
 import type { HttpServiceStart, KibanaRequest } from '@kbn/core-http-server';
@@ -64,7 +65,7 @@ import type { AttachmentStateManager } from '@kbn/agent-builder-server/attachmen
 import { createAttachmentStateManager } from '@kbn/agent-builder-server/attachments';
 import type { TodoStateManager } from '@kbn/agent-builder-server/runner';
 import { createTodoStateManager } from '@kbn/agent-builder-server/runner';
-import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
+import type { AgentExecutionService, ExecutionRunAs } from '@kbn/agent-builder-server/execution';
 import { AGENT_BUILDER_DYNAMIC_TOOLS_SETTING_ID } from '../../../../common/constants';
 import { DEDUCTIVE_AGENT_ID, getDeductiveConfig } from '../run_agent/deductive/config';
 import type { ToolsServiceStart } from '../../tools';
@@ -119,6 +120,13 @@ export interface CreateScopedRunnerDeps {
   // other deps
   logger: Logger;
   request: KibanaRequest;
+  /**
+   * The identity conversation writes are attributed to when it differs from the request's
+   * principal, as when the request carries a bound service account's credential.
+   */
+  owner?: UserIdAndName;
+  /** Service account the execution runs as; see {@link RunAgentParams.runAs}. */
+  runAs?: ExecutionRunAs;
   defaultConnectorId?: string;
   /**
    * Optional CPS project routing expression scoping this run's search tools to a set of projects
@@ -283,6 +291,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
 
   const createScopedRunnerWithDeps = async ({
     request,
+    owner,
+    runAs,
     agentId,
     defaultConnectorId,
     projectRouting,
@@ -300,6 +310,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     workflowExecutionId,
   }: {
     request: KibanaRequest;
+    owner?: UserIdAndName;
+    runAs?: ExecutionRunAs;
     /** Agent id for this run; used to lazily resolve Deductive-only config. */
     agentId?: string;
     defaultConnectorId?: string;
@@ -398,6 +410,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       ...runnerDeps,
       modelProvider,
       request,
+      owner,
+      runAs,
       defaultConnectorId,
       projectRouting,
       abortSignal,
@@ -452,6 +466,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
     runAgent: async (params) => {
       const {
         request,
+        owner,
+        runAs,
         defaultConnectorId,
         projectRouting,
         telemetryMetadata,
@@ -470,6 +486,8 @@ export const createRunner = (deps: CreateRunnerDeps): Runner => {
       const interactivity = normalizeInteractive(interactive, executionMode);
       const runner = await createScopedRunnerWithDeps({
         request,
+        owner,
+        runAs,
         agentId,
         defaultConnectorId,
         projectRouting,

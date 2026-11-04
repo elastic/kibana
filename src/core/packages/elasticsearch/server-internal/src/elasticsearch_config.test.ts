@@ -474,6 +474,63 @@ describe('deprecations', () => {
     const { messages } = applyElasticsearchDeprecations({ ssl: { key: '', certificate: '' } });
     expect(messages).toEqual([]);
   });
+
+  it('logs a warning for a health check delay below 100ms', () => {
+    const { messages } = applyElasticsearchDeprecations({ healthCheck: { delay: 0 } });
+    expect(messages).toMatchInlineSnapshot(`
+      Array [
+        "\\"elasticsearch.healthCheck.delay\\" is set to 0ms, so Kibana checks the Elasticsearch connection more often than needed, adding load to Elasticsearch. Values below 100ms will be rejected in a future major version.",
+      ]
+    `);
+  });
+
+  it.each([
+    ['delay', '50ms'],
+    ['startupDelay', 1],
+    ['onFailureDelay', '99ms'],
+  ])('logs a warning for healthCheck.%s set to %s', (key, value) => {
+    const { messages, levels } = applyElasticsearchDeprecations({ healthCheck: { [key]: value } });
+    expect(messages).toEqual([
+      expect.stringContaining(`"elasticsearch.healthCheck.${key}" is set to`),
+    ]);
+    expect(levels).toEqual(['warning']);
+  });
+
+  it.each([
+    ['delay', 100],
+    ['delay', '1s'],
+    ['startupDelay', 0],
+    ['onFailureDelay', '0s'],
+    ['delay', 'not a duration'],
+  ])('does not log a warning for healthCheck.%s set to %s', (key, value) => {
+    const { messages } = applyElasticsearchDeprecations({ healthCheck: { [key]: value } });
+    expect(messages).toEqual([]);
+  });
+});
+
+describe('healthCheck delays', () => {
+  const maxDelay = 2 ** 31 - 1;
+
+  it.each(['delay', 'startupDelay', 'onFailureDelay'])(
+    'accepts %s up to the longest delay a timer supports',
+    (key) => {
+      expect(() => config.schema.validate({ healthCheck: { [key]: maxDelay } })).not.toThrow();
+    }
+  );
+
+  it.each(['delay', 'startupDelay', 'onFailureDelay'])('rejects a longer %s', (key) => {
+    expect(() => config.schema.validate({ healthCheck: { [key]: maxDelay + 1 } })).toThrow(
+      `[healthCheck.${key}]`
+    );
+  });
+
+  it('explains the rejection', () => {
+    expect(() =>
+      config.schema.validate({ healthCheck: { delay: '30d' } })
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"[healthCheck.delay]: must be 2147483647ms (about 24.8 days) or less"`
+    );
+  });
 });
 
 test('#username throws if equal to "elastic"', () => {

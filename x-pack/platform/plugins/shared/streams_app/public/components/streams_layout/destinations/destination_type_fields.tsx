@@ -6,51 +6,30 @@
  */
 
 import React from 'react';
-import { EuiText } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { LocalElasticsearchFields } from './local_elasticsearch_fields';
-import type {
-  DestinationCreationFormErrors,
-  DestinationStorageKind,
-  ElasticsearchDestinationFormData,
-} from './types';
+import { S3Fields } from './s3_fields';
+import type { DestinationCreationFormErrors, DestinationStorageKind } from './types';
 
 interface DestinationTypeFieldsProps {
   storageKind: DestinationStorageKind;
-  auto: boolean;
-  logsIndex: string;
-  metricsIndex: string;
-  tracesIndex: string;
-  staticIndexesError?: DestinationCreationFormErrors['staticIndexes'];
-  logsIndexError?: DestinationCreationFormErrors['logsIndex'];
-  metricsIndexError?: DestinationCreationFormErrors['metricsIndex'];
-  tracesIndexError?: DestinationCreationFormErrors['tracesIndex'];
+  errors: DestinationCreationFormErrors;
   disabled: boolean;
-  onAutoChange: (auto: boolean) => void;
-  onIndexesChange: (
-    indexes: Partial<
-      Pick<ElasticsearchDestinationFormData, 'logsIndex' | 'metricsIndex' | 'tracesIndex'>
-    >
-  ) => void;
-  onBlur: () => void;
 }
 
 /**
  * Renders the form section for the selected destination type.
  * Add a case and a fields component when a new type becomes available.
+ * Fields read and write their values through the surrounding `FormProvider`.
  */
-export const DestinationTypeFields = ({ storageKind, ...fields }: DestinationTypeFieldsProps) => {
+export const DestinationTypeFields = ({
+  storageKind,
+  errors,
+  disabled,
+}: DestinationTypeFieldsProps) => {
   switch (storageKind) {
     case 'local_elasticsearch':
-      return <LocalElasticsearchFields {...fields} />;
+      return <LocalElasticsearchFields errors={errors} disabled={disabled} />;
     case 'external_storage':
-      return (
-        <EuiText size="s" color="subdued">
-          <FormattedMessage
-            id="xpack.streams.destinations.externalStorageUnavailableDescription"
-            defaultMessage="External storage isn't available yet."
-          />
-        </EuiText>
-      );
+      return <S3Fields errors={errors} disabled={disabled} />;
   }
 };

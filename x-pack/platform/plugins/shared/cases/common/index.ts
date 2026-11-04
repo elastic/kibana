@@ -112,5 +112,5 @@ export {
 
 export { AttachmentActionType } from './utils/attachment_actions';
 
-export { buildAlertAttachmentPayloadSchema } from './types/domain_zod/attachment/alert/v2';
-export type { AlertAttachmentMetadata } from './types/domain_zod/attachment/alert/v2';
+export { buildAlertAttachmentPayloadSchema } from './types/domain/attachment/alert/v2';
+export type { AlertAttachmentMetadata } from './types/domain/attachment/alert/v2';

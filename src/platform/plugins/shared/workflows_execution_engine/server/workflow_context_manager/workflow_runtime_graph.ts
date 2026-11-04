@@ -51,6 +51,8 @@ function getPairByNodeId(nodeId: string): { enterNodeId: string; exitNodeId: str
 export class WorkflowRuntimeGraph {
   private readonly originalNodesTopologicalOrder!: GraphNodeUnion[];
   private nodesInTopologicalOrder!: GraphNodeUnion[];
+  private nodesById = new Map<string, GraphNodeUnion>();
+  private compiledPredecessorsById: Map<string, GraphNodeUnion[]> | undefined;
   private readonly syntheticNodesById = new Map<
     string,
     {
@@ -100,13 +102,13 @@ export class WorkflowRuntimeGraph {
       stepType
     );
     this.recordSyntheticScope(ownerNodeId, enterSynthetic, exitSynthetic);
-    this.nodesInTopologicalOrder = this.upsertSyntheticNodes(this.originalNodesTopologicalOrder);
+    this.setNodesInTopologicalOrder(this.upsertSyntheticNodes(this.originalNodesTopologicalOrder));
     return enterSynthetic.id;
   }
 
   /** Node the cursor or a step should run, by id. Missing id is `undefined`. */
   public getNode(nodeId: string): GraphNodeUnion | undefined {
-    return this.nodesInTopologicalOrder.find((candidate) => candidate.id === nodeId);
+    return this.nodesById.get(nodeId);
   }
 
   /**
@@ -241,7 +243,12 @@ export class WorkflowRuntimeGraph {
       }
     }
 
-    this.nodesInTopologicalOrder = this.upsertSyntheticNodes(this.originalNodesTopologicalOrder);
+    this.setNodesInTopologicalOrder(this.upsertSyntheticNodes(this.originalNodesTopologicalOrder));
+  }
+
+  private setNodesInTopologicalOrder(nodes: GraphNodeUnion[]): void {
+    this.nodesInTopologicalOrder = nodes;
+    this.nodesById = new Map(nodes.map((node) => [node.id, node]));
   }
 
   private isEnterNode(node: GraphNodeUnion): boolean {
@@ -301,9 +308,17 @@ export class WorkflowRuntimeGraph {
   }
 
   private directCompiledPredecessors(nodeId: string): GraphNodeUnion[] {
-    return this.originalNodesTopologicalOrder.filter((node) =>
-      this.compiledGraph.getDirectSuccessors(node.id).some((successor) => successor.id === nodeId)
-    );
+    if (!this.compiledPredecessorsById) {
+      this.compiledPredecessorsById = new Map();
+      for (const node of this.originalNodesTopologicalOrder) {
+        for (const successor of this.compiledGraph.getDirectSuccessors(node.id)) {
+          const predecessors = this.compiledPredecessorsById.get(successor.id) ?? [];
+          predecessors.push(node);
+          this.compiledPredecessorsById.set(successor.id, predecessors);
+        }
+      }
+    }
+    return this.compiledPredecessorsById.get(nodeId) ?? [];
   }
 
   /** Splices the current pair after the owner enter and before the owner exit. */

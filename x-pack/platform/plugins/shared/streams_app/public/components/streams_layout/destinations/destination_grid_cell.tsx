@@ -9,7 +9,7 @@ import React from 'react';
 import { EuiBadge, EuiFlexGroup, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ResolvedDestinationIndex } from '@kbn/streams-plugin/common';
-import { DESTINATION_SIGNAL_LABELS, LOCAL_ELASTICSEARCH_LABEL } from './destination_type_config';
+import { DESTINATION_SIGNAL_LABELS, getDestinationTypeLabel } from './destination_type_config';
 import type { ResolvedIndicesStatus } from './state_machines/destinations_state_machine';
 import type { DestinationViewModel } from './types';
 
@@ -42,47 +42,30 @@ export const DestinationGridCell = ({
       );
     case 'type':
       return (
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiBadge color="hollow">{LOCAL_ELASTICSEARCH_LABEL}</EuiBadge>
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
+          <EuiBadge color="hollow">{getDestinationTypeLabel(destination.type)}</EuiBadge>
         </EuiFlexGroup>
       );
     case 'indices':
+      if (destination.type !== 'elasticsearch') {
+        return '-';
+      }
       if (resolvedIndicesStatus === 'loading' && targetedIndexCount === 0) {
         return (
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <EuiLoadingSpinner size="s" />
           </EuiFlexGroup>
         );
       }
       if (resolvedIndicesStatus === 'unavailable') {
         return (
-          <EuiFlexGroup
-            justifyContent="flexEnd"
-            alignItems="center"
-            gutterSize="none"
-            responsive={false}
-          >
+          <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
             <span>-</span>
           </EuiFlexGroup>
         );
       }
       return (
-        <EuiFlexGroup
-          justifyContent="flexEnd"
-          alignItems="center"
-          gutterSize="none"
-          responsive={false}
-        >
+        <EuiFlexGroup alignItems="center" gutterSize="none" responsive={false}>
           <EuiBadge
             color="hollow"
             data-test-subj="streamsDestinationIndexCountBadge"
@@ -110,7 +93,7 @@ export const getDestinationSortableValue = (
 ): string | number => {
   switch (columnId) {
     case 'type':
-      return LOCAL_ELASTICSEARCH_LABEL;
+      return getDestinationTypeLabel(destination.type);
     case 'indices':
       return indexCount;
     case 'name':
@@ -120,6 +103,6 @@ export const getDestinationSortableValue = (
 };
 
 export const getTargetedIndexCount = (
-  resolvedIndicesByDestination: Record<string, ResolvedDestinationIndex[]>,
+  resolvedIndicesByDestination: ReadonlyMap<string, ResolvedDestinationIndex[]>,
   destinationId: string
-): number => resolvedIndicesByDestination[destinationId]?.length ?? 0;
+): number => resolvedIndicesByDestination.get(destinationId)?.length ?? 0;

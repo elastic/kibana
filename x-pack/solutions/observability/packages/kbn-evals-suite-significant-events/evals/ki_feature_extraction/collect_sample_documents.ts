@@ -10,11 +10,13 @@ import type { Client } from '@elastic/elasticsearch';
 import type { QueryDslQueryContainer, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { getSampleDocumentsEsql, DEFAULT_ESQL_QUERY_TIMEOUT_MS } from '@kbn/ai-tools';
-import { DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/significant-events-schema';
 import {
   MANAGED_STREAM_SEARCH_PATTERN,
   type KIFeatureExtractionScenario,
 } from '../../src/datasets';
+
+// Mirrors the sampleSize default of the features identification managed workflow.
+const DEFAULT_SAMPLE_SIZE = 20;
 
 const addUniqueHitsToSample = ({
   hits,
@@ -49,7 +51,7 @@ export const collectSampleDocuments = async ({
   esClient,
   scenario,
   log,
-  size = DEFAULT_SIGNIFICANT_EVENTS_TUNING_CONFIG.sample_size,
+  size = DEFAULT_SAMPLE_SIZE,
 }: {
   esClient: Client;
   scenario: KIFeatureExtractionScenario;

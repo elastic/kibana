@@ -60,7 +60,8 @@ test.describe(
       await test.step('should request clusters when zoomed to larger regions showing lots of data', async () => {
         await pageObjects.maps.setView(20, -90, 2);
         const { rawResponse: response } = await pageObjects.maps.getResponse(
-          LOAD_CLUSTERS_REQUEST_NAME
+          LOAD_CLUSTERS_REQUEST_NAME,
+          true // the next step types a query
         );
         expect(response.aggregations.gridSplit.buckets).toHaveLength(15);
       });

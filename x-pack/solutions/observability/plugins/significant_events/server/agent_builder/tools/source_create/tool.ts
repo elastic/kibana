@@ -32,6 +32,9 @@ const sourceCreateSchema = lazySchema(() => {
     description: shape.description.describe('Optional. What the source contains.'),
     tags: shape.tags.describe('Optional. Free-form labels. Defaults to none.'),
     esql: shape.esql.describe(`ES|QL query that defines the source. ${SOURCE_ESQL_RULES}`),
+    enabled: shape.enabled.describe(
+      'Optional. `false` creates the source switched off: it is not onboarded and nothing runs on it until it is enabled. Defaults to `true`.'
+    ),
   });
 });
 
@@ -50,7 +53,9 @@ export const createSourceCreateTool = ({
     user, so the user needs read access to the indices it targets. An invalid query returns an
     error that says why.
 
-    The source is created enabled, and its onboarding starts on its own.
+    The source is created enabled by default, and its onboarding starts on its own. With
+    \`enabled: false\` it is created switched off instead, and onboarding starts when it is enabled
+    later, with source_update or from the Nightshift Sources page.
     ${ONBOARDING_PROGRESS_DESCRIPTION} Returns the created source, including its \`slug\`.
     ${ONBOARDING_PAUSED_DESCRIPTION}
   `,
