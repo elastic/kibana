@@ -213,8 +213,9 @@ export interface SearchStepExecutionsParams {
   includeOutput?: boolean;
   /**
    * When set, only these `_source` paths are returned, and `includeInput`/`includeOutput` are
-   * ignored. `input`, `output`, and paths under them are not read from the step document; the
-   * whole payload is loaded through the executions IO client.
+   * ignored. `input`, `output`, and paths under them are not read from the step document.
+   * `output.structured_output` is read as `value.structured_output`. A bare `input` or `output`
+   * loads the whole IO document.
    */
   sourceIncludes?: string[];
   page?: number;

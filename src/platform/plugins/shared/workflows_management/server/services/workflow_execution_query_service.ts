@@ -403,6 +403,7 @@ export class WorkflowExecutionQueryService {
     await this.attachStepPayloads(result.results, {
       input: payloads.includeInput,
       output: payloads.includeOutput,
+      sourceIncludes: payloads.ioSourceIncludes,
     });
     return result;
   }
@@ -1060,7 +1061,11 @@ export class WorkflowExecutionQueryService {
   /** Drops any payload copied from the step document, then fills the requested sides from IO. */
   private async attachStepPayloads(
     steps: EsWorkflowStepExecution[],
-    { input, output }: { input: boolean; output: boolean }
+    {
+      input,
+      output,
+      sourceIncludes,
+    }: { input: boolean; output: boolean; sourceIncludes?: string[] }
   ): Promise<void> {
     omitEmbeddedStepPayloads(steps);
     if (!input && !output) {
@@ -1071,6 +1076,7 @@ export class WorkflowExecutionQueryService {
       stepExecutions: steps,
       includeInput: input,
       includeOutput: output,
+      sourceIncludes,
     });
   }
 }
@@ -1121,13 +1127,19 @@ function isStepPayloadSourcePath(path: string): boolean {
 
 /**
  * `sourceIncludes` wins over the include flags. Payload paths in that list are not sent to the
- * step index; the matching side is loaded as a whole document through the IO client.
+ * step index. A field path is read as `value.<field>`; a bare `input` or `output` loads the
+ * whole IO document, because one field list applies to every id in the batch.
  */
 function payloadSourceRequest(params: {
   sourceIncludes?: string[];
   includeInput?: boolean;
   includeOutput?: boolean;
-}): { sourceIncludes?: string[]; includeInput: boolean; includeOutput: boolean } {
+}): {
+  sourceIncludes?: string[];
+  includeInput: boolean;
+  includeOutput: boolean;
+  ioSourceIncludes?: string[];
+} {
   if (!params.sourceIncludes?.length) {
     return {
       includeInput: Boolean(params.includeInput),
@@ -1148,7 +1160,23 @@ function payloadSourceRequest(params: {
   if (includeOutput && !sourceIncludes.includes('outputId')) {
     sourceIncludes.push('outputId');
   }
-  return { sourceIncludes, includeInput, includeOutput };
+  return {
+    sourceIncludes,
+    includeInput,
+    includeOutput,
+    ioSourceIncludes: ioSourceIncludes(params.sourceIncludes),
+  };
+}
+
+/** `output.structured_output` becomes `value.structured_output`. A bare side loads everything. */
+function ioSourceIncludes(paths: string[]): string[] | undefined {
+  const payloadPaths = paths.filter(isStepPayloadSourcePath);
+  if (payloadPaths.length === 0 || payloadPaths.some((path) => !path.includes('.'))) {
+    return undefined;
+  }
+  const fields = payloadPaths.map((path) => `value.${path.slice(path.indexOf('.') + 1)}`);
+  const projected = fields.filter((field) => field.length > 'value.'.length);
+  return projected.length > 0 ? [...new Set(projected)] : undefined;
 }
 
 function omitEmbeddedStepPayloads(steps: EsWorkflowStepExecution[]): void {

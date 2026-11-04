@@ -15,6 +15,8 @@ export interface HydrateExecutionIoParams {
   stepExecutions?: EsWorkflowStepExecution[];
   includeInput?: boolean;
   includeOutput?: boolean;
+  /** `value.<field>` paths. Absent means the whole input or output document. */
+  sourceIncludes?: string[];
 }
 
 /**
@@ -26,6 +28,7 @@ export async function hydrateExecutionIo({
   stepExecutions = [],
   includeInput = false,
   includeOutput = false,
+  sourceIncludes,
 }: HydrateExecutionIoParams): Promise<void> {
   const ids: string[] = [];
   for (const step of stepExecutions) {
@@ -40,7 +43,9 @@ export async function hydrateExecutionIo({
     return;
   }
 
-  const { items } = await executionsIoDataClient.getByIds(ids);
+  const { items } = sourceIncludes?.length
+    ? await executionsIoDataClient.getByIds(ids, { sourceIncludes })
+    : await executionsIoDataClient.getByIds(ids);
   const values = new Map(items.map((item) => [item.document.id, item.document.value]));
 
   for (const step of stepExecutions) {
