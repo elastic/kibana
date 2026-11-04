@@ -13,10 +13,22 @@ export type {
 } from './custom_content';
 export {
   buildConfigPanelContent,
+  createPanelContentResolver,
+  findPanelKind,
+  getConfigPanelReferences,
+  getInlinePanelKindGuidance,
+  getPanelTypeSelection,
+  requiresRegisteredSchema,
   getEditableEmbeddableTypes,
   getRendererEmbeddableType,
   upsertPanelContentSchema,
 } from './registry';
-export type { PanelResolutionRequest, ResolvePanelContent, UpsertPanelContent } from './registry';
+export type {
+  ConfigPanelReference,
+  PanelKindExecutors,
+  PanelResolutionRequest,
+  ResolvePanelContent,
+  UpsertPanelContent,
+} from './registry';
 export { planPanelContent } from './resolution_requests';
 export type { PanelContentSource } from './resolution_requests';
