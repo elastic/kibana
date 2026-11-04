@@ -13,6 +13,7 @@ import type {
   Plugin,
   PluginInitializerContext,
 } from '@kbn/core/server';
+import type { DashboardPluginStart } from '@kbn/dashboard-plugin/server';
 import type { PluginStart as DataPluginStart } from '@kbn/data-plugin/server';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { KibanaIsomerRuntime } from '@kbn/isomer';
@@ -27,6 +28,10 @@ import { MaterializerRegistry } from './materialize/registry';
 import { createNodeValidator } from './materialize/validate_node';
 import type { MaterializeScope, Materializer, ScopedMaterializeClient } from './materialize/types';
 import { abortSignalFor } from './materialize/abort_signal';
+import {
+  DASHBOARD_SAVED_OBJECT_TYPE,
+  createDashboardMaterializer,
+} from './materializers/dashboard';
 import { registerFiltersForSelectionRoute } from './routes/filters_for_selection_route';
 import { registerMaterializeRoute } from './routes/materialize_route';
 
@@ -92,6 +97,34 @@ export class IsomerPlugin
       createClient: this.createClient,
       validateNode: this.validateNode,
     });
+    this.registry.register(
+      DASHBOARD_SAVED_OBJECT_TYPE,
+      createDashboardMaterializer({
+        // Resolved at runtime: a plugin dependency on dashboard would be a cycle through
+        // observabilityAIAssistant and agentBuilder, which depend on isomer.
+        getDashboard: async () => {
+          const { dashboard } = await core.plugins.onStart<{ dashboard: DashboardPluginStart }>(
+            'dashboard'
+          );
+          return dashboard.found ? dashboard.contract : undefined;
+        },
+        getDataViews: async ({ request, savedObjectsClient }) => {
+          const { data, elasticsearch } = this.startServices();
+          return data.indexPatterns.dataViewsServiceFactory(
+            savedObjectsClient,
+            elasticsearch.client.asScoped(request).asCurrentUser,
+            request
+          );
+        },
+        getUiSettings: ({ savedObjectsClient }) =>
+          this.startServices().uiSettings.asScopedToClient(savedObjectsClient),
+        getKibanaUrl: (request) => {
+          const { basePath } = core.http;
+          const origin = basePath.publicBaseUrl ? new URL(basePath.publicBaseUrl).origin : '';
+          return `${origin}${basePath.get(request)}`;
+        },
+      })
+    );
     return {
       registerMaterializer: (type, materializer) => this.registry.register(type, materializer),
     };
@@ -123,6 +156,14 @@ export class IsomerPlugin
   stop() {
     this.materializeEnabledSubscription?.unsubscribe();
   }
+
+  private readonly startServices = () => {
+    const { data, uiSettings, elasticsearch } = this;
+    if (!data || !uiSettings || !elasticsearch) {
+      throw new Error('The isomer plugin materializes only after it starts.');
+    }
+    return { data, uiSettings, elasticsearch };
+  };
 
   private readonly isMaterializeEnabled = async (): Promise<boolean> => this.materializeEnabled;
 

@@ -104,6 +104,34 @@ describe('createScopedMaterializeClient', () => {
       expect(load).toHaveBeenCalledWith('note-1', scope);
     });
 
+    it('resolves a parsed config as the scoped user before planning', async () => {
+      const resolve = jest.fn(async (config: NoteConfig) => ({ ...config, text: 'Resolved.' }));
+      const materializer = createNoteMaterializer({ resolve });
+      const { client, scope } = setup({ materializer });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'markdown',
+        text: 'Resolved.',
+      });
+      expect(resolve).toHaveBeenCalledWith(note, scope);
+      expect(materializer.plan).toHaveBeenCalledWith({ ...note, text: 'Resolved.' }, {});
+    });
+
+    it('returns unsupported when resolving a config fails', async () => {
+      const resolve = jest.fn(async (): Promise<NoteConfig> => {
+        throw new Error('Data view [logs] not found');
+      });
+      const materializer = createNoteMaterializer({ resolve });
+      const { client } = setup({ materializer });
+
+      await expect(client.materialize({ type: 'note', config: note })).resolves.toEqual({
+        type: 'unsupported',
+        title: 'Content not available',
+        reason: 'The note config could not be read: Data view [logs] not found',
+      });
+      expect(materializer.plan).not.toHaveBeenCalled();
+    });
+
     it('returns unsupported when materialization is off', async () => {
       const materializer = createNoteMaterializer();
       const { client } = setup({ materializer, enabled: false });

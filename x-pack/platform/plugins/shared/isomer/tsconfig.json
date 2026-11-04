@@ -3,7 +3,7 @@
   "compilerOptions": {
     "outDir": "target/types"
   },
-  "include": ["common/**/*", "server/**/*"],
+  "include": ["common/**/*", "server/**/*", "server/**/*.json"],
   "exclude": ["target/**/*"],
   "kbn_references": [
     "@kbn/core",
@@ -21,6 +21,13 @@
     "@kbn/palettes",
     "@kbn/core-ui-settings-server-internal",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-common"
+    "@kbn/field-formats-common",
+    "@kbn/dashboard-plugin",
+    "@kbn/as-code-filters-schema",
+    "@kbn/as-code-filters-transforms",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/as-code-shared-transforms",
+    "@kbn/controls-constants",
+    "@kbn/controls-schemas"
   ]
 }
