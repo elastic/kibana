@@ -115,10 +115,20 @@ describe('enableFloorWorker', () => {
     expect(patches(fetch)[1]).toEqual({ enabled: false });
   });
 
-  it('leaves a worker that was already enabled alone on restore', async () => {
-    const { fetch, promise } = run({ enabled: true }, { enabled: true, workflowId: 'wf-1' });
+  it('puts back the settings of a worker that was already enabled, without disabling it', async () => {
+    const previous = {
+      serviceAccountId: 'sa-old',
+      autonomy: 'supervised',
+      scheduleInterval: '30m',
+    };
+    const { fetch, promise } = run(
+      { enabled: true, settings: previous },
+      { enabled: true, workflowId: 'wf-1' }
+    );
     await (await promise).restore();
-    expect(patches(fetch)).toHaveLength(1);
+    const [, restored] = patches(fetch);
+    expect(restored).toEqual({ settingsRevision: 3, settings: previous });
+    expect(restored.enabled).toBeUndefined();
   });
 
   it('fails when the worker is blocked', async () => {

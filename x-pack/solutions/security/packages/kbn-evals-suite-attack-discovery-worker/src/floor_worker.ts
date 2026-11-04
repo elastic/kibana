@@ -194,8 +194,16 @@ export const enableFloorWorker = async ({
   return {
     workflowId: after.workflowId,
     restore: async () => {
-      if (before.enabled) return;
       const current = await readFloorWorker(fetch, spaceId);
+      if (before.enabled) {
+        // Put back the settings the setup replaced, using the current revision.
+        await patchFloorWorker(fetch, spaceId, {
+          settingsRevision: current.settingsRevision ?? null,
+          settings: before.settings,
+        });
+        log.info('[ad-worker] floor worker settings restored');
+        return;
+      }
       await patchFloorWorker(fetch, spaceId, { enabled: false });
       log.info(
         `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
