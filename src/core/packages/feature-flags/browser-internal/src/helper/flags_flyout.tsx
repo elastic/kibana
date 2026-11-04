@@ -8,6 +8,7 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiButton,
@@ -51,9 +52,15 @@ interface OfrepBulkResponse {
   flags: Array<{ key: string; value: unknown }>;
 }
 
+interface TrackedFlagEvaluation {
+  key: string;
+  value: unknown;
+}
+
 interface OverridesResponse {
   runtimeOverrides: Record<string, unknown>;
   configOverrides: Record<string, unknown>;
+  evaluatedFlags?: TrackedFlagEvaluation[];
 }
 
 export type FeatureFlagsHelperHttp = Pick<InternalHttpSetup, 'get' | 'post' | 'put' | 'delete'>;
@@ -61,13 +68,21 @@ export type FeatureFlagsHelperHttp = Pick<InternalHttpSetup, 'get' | 'post' | 'p
 export interface FlagsFlyoutProps {
   http: FeatureFlagsHelperHttp;
   refreshFlags: () => Promise<void>;
+  /** Flags evaluated in this browser tab. Server evaluations arrive on the overrides response. */
+  getBrowserEvaluations: () => TrackedFlagEvaluation[];
   onClose: () => void;
 }
 
-const sourceColor: Record<FeatureFlagSource, 'accent' | 'primary' | 'success'> = {
+/** Keep the identifier on one line so a narrow flyout scrolls instead of covering it. */
+const flagNameStyle = css`
+  white-space: nowrap;
+`;
+
+const sourceColor: Record<FeatureFlagSource, 'accent' | 'primary' | 'success' | 'default'> = {
   runtime: 'accent',
   config: 'primary',
   provider: 'success',
+  fallback: 'default',
 };
 
 function isForbidden(error: unknown): boolean {
@@ -80,14 +95,23 @@ function isForbidden(error: unknown): boolean {
 }
 
 function snapshotValues(body: OfrepBulkResponse | undefined): Record<string, unknown> {
+  return evaluationValues(body?.flags);
+}
+
+function evaluationValues(flags: TrackedFlagEvaluation[] | undefined): Record<string, unknown> {
   const values: Record<string, unknown> = {};
-  for (const flag of body?.flags ?? []) {
+  for (const flag of flags ?? []) {
     values[flag.key] = flag.value;
   }
   return values;
 }
 
-export function FlagsFlyout({ http, refreshFlags, onClose }: FlagsFlyoutProps) {
+export function FlagsFlyout({
+  http,
+  refreshFlags,
+  getBrowserEvaluations,
+  onClose,
+}: FlagsFlyoutProps) {
   const [rows, setRows] = useState<FlagRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [forbidden, setForbidden] = useState(false);
@@ -125,10 +149,15 @@ export function FlagsFlyout({ http, refreshFlags, onClose }: FlagsFlyoutProps) {
         snapshot,
         runtimeOverrides: overrides.runtimeOverrides ?? {},
         configOverrides: overrides.configOverrides ?? {},
+        // This tab's evaluation wins over another node's when the snapshot has no value.
+        evaluated: {
+          ...evaluationValues(overrides.evaluatedFlags),
+          ...evaluationValues(getBrowserEvaluations()),
+        },
       })
     );
     setLoading(false);
-  }, [http]);
+  }, [getBrowserEvaluations, http]);
 
   useEffect(() => {
     void load();
@@ -202,7 +231,12 @@ export function FlagsFlyout({ http, refreshFlags, onClose }: FlagsFlyoutProps) {
       field: 'key',
       name: i18n.translate('core.featureFlags.helper.flagColumnLabel', { defaultMessage: 'Flag' }),
       sortable: true,
-      truncateText: true,
+      minWidth: '12rem',
+      render: (key: string) => (
+        <EuiText size="s" css={flagNameStyle}>
+          {key}
+        </EuiText>
+      ),
     },
     {
       field: 'type',
@@ -303,6 +337,9 @@ export function FlagsFlyout({ http, refreshFlags, onClose }: FlagsFlyoutProps) {
             items={rows}
             columns={columns}
             itemId="key"
+            tableLayout="auto"
+            scrollableInline
+            stickyScrollbar
             sorting={{ sort: { field: 'key', direction: 'asc' } }}
             pagination={{ pageSizeOptions: [25, 50, 100], initialPageSize: 50 }}
             search={{
@@ -386,6 +423,10 @@ function sourceLabel(source: FeatureFlagSource): string {
     case 'provider':
       return i18n.translate('core.featureFlags.helper.providerBadgeLabel', {
         defaultMessage: 'Provider',
+      });
+    case 'fallback':
+      return i18n.translate('core.featureFlags.helper.fallbackBadgeLabel', {
+        defaultMessage: 'Fallback',
       });
   }
 }

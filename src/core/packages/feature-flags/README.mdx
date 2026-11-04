@@ -204,7 +204,7 @@ In the browser console, run:
 toggleFeatureFlagsHelper()
 ```
 
-This adds a `tableGear` button to the bottom-left of the screen. The choice is stored in `localStorage`, so the button stays until you run the command again. The button opens a flyout listing the flags returned by the server snapshot, including config and runtime overrides. A superuser can type a new value and save it as a runtime override, or clear one. Anyone else sees the values and a notice that a superuser is required to change them.
+This adds a `tableGear` button to the bottom-left of the screen. The choice is stored in `localStorage`, so the button stays until you run the command again. The button opens a flyout listing the server snapshot, flags this Kibana node and this browser tab have evaluated, and config and runtime overrides. Without provider credentials the snapshot is empty, and the flyout still lists the flags Kibana has evaluated, using the value that evaluation returned. A superuser can type a new value and save it as a runtime override, or clear one. Anyone else sees the values and a notice that a superuser is required to change them.
 
 ## Usage in Cloud
 

@@ -706,6 +706,22 @@ describe('FeatureFlagsService Server', () => {
       expect(options.options.access).toBe('internal');
     });
 
+    test('records evaluated flags for the helper', async () => {
+      jest.useFakeTimers();
+      const { router, start } = startWithRepository();
+      await start.getBooleanValue('my-flag', false);
+
+      const { handler } = findRoute(router, 'get', FEATURE_FLAGS_OVERRIDES_API_PATH);
+      const response = mockRouter.createResponseFactory();
+      await handler({}, mockRouter.createKibanaRequest({ method: 'get' }), response);
+
+      expect(response.ok).toHaveBeenCalledWith({
+        body: expect.objectContaining({
+          evaluatedFlags: expect.arrayContaining([{ key: 'my-flag', value: false }]),
+        }),
+      });
+    });
+
     test('lets a runtime override win over config and notifies subscribers', async () => {
       jest.useFakeTimers();
       const { repository, setup, start } = startWithRepository();

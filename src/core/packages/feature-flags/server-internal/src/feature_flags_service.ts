@@ -92,6 +92,8 @@ export interface FeatureFlagsStartDeps {
 }
 
 /** Enough for every flag Kibana evaluates, with room for experiments. */
+const MAX_TRACKED_EVALUATIONS = 1000;
+
 /**
  * Start contract used inside core. One-shot evaluation stays available for the HTTP
  * request-handler context. Plugin start contracts only receive {@link FeatureFlagsStart}.
@@ -168,6 +170,8 @@ export class FeatureFlagsService {
   private context: MultiContextEvaluationContext = { kind: 'multi' };
   private initialFeatureFlagsGetter: InitialFeatureFlagsGetter = async () => ({});
   private waitForContextReadyPromise: Promise<void> | undefined;
+  /** Last value returned for each flag this node has evaluated. */
+  private readonly evaluatedFlags = new Map<string, FeatureFlagOverrideValue>();
 
   /**
    * The core service's constructor
@@ -348,8 +352,17 @@ export class FeatureFlagsService {
 
     // Report the counter for the flag evaluation.
     incrementCounter(flagName, value);
+    this.rememberEvaluation(flagName, value);
 
     return value;
+  }
+
+  /** Keeps the helper's flag list populated when the provider has no snapshot. */
+  private rememberEvaluation(flagName: string, value: FeatureFlagOverrideValue): void {
+    if (!this.evaluatedFlags.has(flagName) && this.evaluatedFlags.size >= MAX_TRACKED_EVALUATIONS) {
+      return;
+    }
+    this.evaluatedFlags.set(flagName, value);
   }
 
   /**
@@ -390,6 +403,10 @@ export class FeatureFlagsService {
       getOverridesResponse: () => ({
         runtimeOverrides: this.runtimeOverrides$.value,
         configOverrides: this.configOverrides$.value,
+        evaluatedFlags: [...this.evaluatedFlags.entries()].map(([key, flagValue]) => ({
+          key,
+          value: flagValue,
+        })),
       }),
       commitRuntimeOverrides: (overrides) => this.commitRuntimeOverrides(overrides),
       logger: this.logger,

@@ -9,7 +9,7 @@
 
 export type FeatureFlagValue = boolean | number | string;
 export type FeatureFlagValueType = 'boolean' | 'number' | 'string';
-export type FeatureFlagSource = 'runtime' | 'config' | 'provider';
+export type FeatureFlagSource = 'runtime' | 'config' | 'provider' | 'fallback';
 
 export interface FlagRow {
   key: string;
@@ -25,6 +25,8 @@ export interface BuildFlagRowsInput {
   snapshot: Record<string, unknown>;
   runtimeOverrides: Record<string, unknown>;
   configOverrides: Record<string, unknown>;
+  /** Last values from flags Kibana has evaluated. Used when the snapshot has no entry. */
+  evaluated: Record<string, unknown>;
 }
 
 export function isFeatureFlagValue(value: unknown): value is FeatureFlagValue {
@@ -42,18 +44,21 @@ function valueType(value: FeatureFlagValue): FeatureFlagValueType {
 }
 
 /**
- * One row per flag in the server snapshot or either override map.
- * Runtime overrides win, then config overrides, then the provider value.
+ * One row per flag in the server snapshot, either override map, or an evaluation.
+ * Runtime overrides win, then config overrides, then the provider value, then the
+ * last evaluated value.
  */
 export function buildFlagRows({
   snapshot,
   runtimeOverrides,
   configOverrides,
+  evaluated,
 }: BuildFlagRowsInput): FlagRow[] {
   const keys = new Set<string>([
     ...Object.keys(snapshot),
     ...Object.keys(configOverrides),
     ...Object.keys(runtimeOverrides),
+    ...Object.keys(evaluated),
   ]);
 
   const rows: FlagRow[] = [];
@@ -61,6 +66,7 @@ export function buildFlagRows({
     const runtime = runtimeOverrides[key];
     const config = configOverrides[key];
     const provider = snapshot[key];
+    const evaluatedValue = evaluated[key];
     const hasRuntimeOverride = isFeatureFlagValue(runtime);
     let source: FeatureFlagSource | undefined;
     let value: FeatureFlagValue | undefined;
@@ -73,6 +79,9 @@ export function buildFlagRows({
     } else if (isFeatureFlagValue(provider)) {
       source = 'provider';
       value = provider;
+    } else if (isFeatureFlagValue(evaluatedValue)) {
+      source = 'fallback';
+      value = evaluatedValue;
     }
     if (value === undefined || source === undefined) {
       continue;

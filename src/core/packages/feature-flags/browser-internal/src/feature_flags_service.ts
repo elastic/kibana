@@ -53,6 +53,8 @@ type FeatureFlagValue = boolean | string | number;
 type FeatureFlagValueType = 'boolean' | 'string' | 'number';
 
 const HELPER_STORAGE_KEY = 'core.featureFlags.helper.enabled';
+/** Enough for every flag Kibana evaluates, with room for experiments. */
+const MAX_TRACKED_EVALUATIONS = 1000;
 
 export interface FeatureFlagsHelperDeps {
   http: InternalHttpSetup;
@@ -125,6 +127,8 @@ export class FeatureFlagsService {
   private readonly logger: Logger;
   private readonly contextChanged$ = new Subject<void>();
   private readonly lastReportedValues = new Map<string, ReportedFlagValue>();
+  /** Last value returned for each flag this page has evaluated. */
+  private readonly evaluatedFlags = new Map<string, FeatureFlagValue>();
   private helperDeps?: FeatureFlagsHelperDeps;
   private unmountHelper?: () => void;
   private isProviderReadyPromise?: Promise<void>;
@@ -272,6 +276,7 @@ export class FeatureFlagsService {
       overlays: deps.overlays,
       rendering: deps.rendering,
       refreshFlags: () => this.refresh(),
+      getBrowserEvaluations: () => this.getEvaluatedFlags(),
     }).unmount;
     this.logger.info('Feature flags helper enabled.');
   }
@@ -353,9 +358,23 @@ export class FeatureFlagsService {
     const value = evaluationFn.bind(this.featureFlagsClient)(flagName, fallbackValue);
     apm.addLabels({ [`flag_${flagName.replaceAll('.', '_')}`]: value });
 
+    this.rememberEvaluation(flagName, value);
     this.reportValueIfChanged(flagName, value);
 
     return value;
+  }
+
+  /** Flags this page has evaluated. The helper uses these when the provider snapshot is empty. */
+  public getEvaluatedFlags(): Array<{ key: string; value: FeatureFlagValue }> {
+    return [...this.evaluatedFlags.entries()].map(([key, value]) => ({ key, value }));
+  }
+
+  /** Keeps the helper's flag list populated when the provider has no snapshot. */
+  private rememberEvaluation(flagName: string, value: FeatureFlagValue): void {
+    if (!this.evaluatedFlags.has(flagName) && this.evaluatedFlags.size >= MAX_TRACKED_EVALUATIONS) {
+      return;
+    }
+    this.evaluatedFlags.set(flagName, value);
   }
 
   private reportValueIfChanged(flagName: string, value: FeatureFlagValue): void {
