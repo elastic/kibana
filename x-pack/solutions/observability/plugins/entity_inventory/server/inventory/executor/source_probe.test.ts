@@ -98,6 +98,18 @@ describe('probeSources', () => {
     });
   });
 
+  it('reports an error without an Elasticsearch response as a failure with no status', async () => {
+    const client = setup(async () => {
+      throw new Error('connection reset');
+    });
+
+    expect((await probeSources(client, ['metrics-*'])).get('metrics-*')).toEqual({
+      failed: true,
+      status: null,
+      reason: 'connection reset',
+    });
+  });
+
   it('does not read a 400 that is not a verification error as no time-series index', async () => {
     const client = setup(async () => {
       throw responseError(400, 'parsing_exception', 'verification_exception');

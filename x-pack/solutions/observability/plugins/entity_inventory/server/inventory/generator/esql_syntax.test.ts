@@ -8,11 +8,7 @@
 import { Parser } from '@elastic/esql';
 import { INVENTORY_DEFINITION_FIXTURES } from '../__fixtures__/definitions';
 import { InventoryDefinitionError } from './errors';
-import {
-  assertSafeIndexPattern,
-  isSafeIndexPattern,
-  quoteIdentifier,
-} from './esql_syntax';
+import { assertSafeIndexPattern, isSafeIndexPattern, quoteIdentifier } from './esql_syntax';
 
 describe('quoteIdentifier', () => {
   it('quotes a plain path', () => {

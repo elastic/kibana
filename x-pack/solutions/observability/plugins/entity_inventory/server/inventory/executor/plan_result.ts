@@ -25,8 +25,9 @@ import type { PlanResult } from './types';
 //   literal).
 // - An attribute typed `null` stays in the query and is reported as unavailable.
 //
-// ES|QL groups by keyword fields with `index: false` or `doc_values: false` and by `text` fields,
-// so "mapped" is the only question; whether a field is indexed does not matter.
+// ES|QL groups by keyword fields with `index: false` or `doc_values: false` and by `text` fields
+// (observed on 9.6, not documented), so "mapped" is the only question; whether a field is indexed
+// does not matter.
 
 /** Whether a plan's result can be used, and which of its attribute fields no index maps. */
 export interface PlanAvailability {
@@ -51,8 +52,7 @@ const unavailableAttributeFields = (
     if (kind !== 'attribute' || field === undefined) {
       return [];
     }
-    const column = resultColumns.find((candidate) => candidate.name === name);
-    return column?.type === 'null' ? [field] : [];
+    return isMapped(resultColumns, name) ? [] : [field];
   });
   return [...new Set(fields)];
 };

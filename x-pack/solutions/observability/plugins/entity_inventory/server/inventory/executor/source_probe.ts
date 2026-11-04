@@ -19,8 +19,9 @@ import type { EsqlQueryResult } from './esql_client';
 //   `@timestamp` typed `date`/`date_nanos`  a readable time-series index exists   TS and FROM plans
 //   `@timestamp` typed `null`               none readable, or none at all         FROM plan only
 //   `verification_exception`                a concrete index that is not time     FROM plan only
-//                                           series, or a name that does not exist
-//                                           (the FROM plan then fails visibly)
+//                                           series (the FROM plan reads it), or a
+//                                           name that does not exist (the FROM
+//                                           plan then fails visibly)
 //   any other failure                       unknown; reported as a source error   no plan runs
 //
 // The last row matters: the FROM plan excludes time-series indices, so reading a timeout or a

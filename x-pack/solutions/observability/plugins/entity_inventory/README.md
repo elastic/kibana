@@ -36,8 +36,8 @@ Attributes only for now; metrics, detail and the document filter are later phase
 SET unmapped_fields="nullify";
 TS <index pattern>                            -- TS plan
 FROM <index pattern> METADATA _index_mode     -- FROM plan
-| WHERE [`_index_mode` != "time_series" AND]   -- FROM plan only
-    `@timestamp` >= ?from AND `@timestamp` < ?to
+| WHERE [`_index_mode` != "time_series"        -- FROM plan only
+    AND] `@timestamp` >= ?from AND `@timestamp` < ?to
     [AND (<plan filter>)]
     AND <identity present>
 | STATS `<attr>` = LAST(`<field>`, `@timestamp`) WHERE `<field>` IS NOT NULL, ...,
@@ -73,6 +73,7 @@ The executor reads the type of the `@timestamp` column to decide whether the sou
 | module | does |
 | --- | --- |
 | `source_probe.ts` | Runs the probe once per distinct pattern and reads whether a time-series index exists behind it. |
+| `esql_results_to_rows.ts` | Turns the ES\|QL `columns` and `values` arrays into rows keyed by column name. |
 | `esql_client.ts` | Runs one generated query with its named parameters and `include_execution_metadata`, returning rows as objects keyed by column name (multi-values stay arrays) with `took`, documents found, values loaded and the row count. `drop_null_columns` stays off so every plan returns the same columns. |
 | `errors/source_error.ts` | Flattens a failed query to `{ indexPattern, status, reason }`; never a stack or the raw body. |
 | `value_labels.ts` | Maps an attribute's raw values to its `valueLabels` per plan, before the merge; an unmapped value passes through stringified. |

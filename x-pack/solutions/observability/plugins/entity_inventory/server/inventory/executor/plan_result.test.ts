@@ -58,7 +58,7 @@ describe('interpretPlanResult', () => {
   it('is unusable when last_seen is null', () => {
     expect(
       interpretPlanResult(
-        result({ 'host.id': 'keyword', last_seen: 'null' }),
+        result({ 'host.id': 'keyword', os: 'keyword', ip: 'ip', last_seen: 'null' }),
         compositions,
         outputColumns
       )
@@ -67,6 +67,16 @@ describe('interpretPlanResult', () => {
       reason: 'no readable index behind "p" maps @timestamp',
       unavailableFields: [],
     });
+  });
+
+  it('treats an attribute column the result lacks as unavailable', () => {
+    expect(
+      interpretPlanResult(
+        result({ 'host.id': 'keyword', os: 'keyword', last_seen: 'date' }),
+        compositions,
+        outputColumns
+      ).unavailableFields
+    ).toEqual(['host.ip']);
   });
 
   it('is unusable when last_seen is absent', () => {
@@ -88,7 +98,13 @@ describe('interpretPlanResult', () => {
   it('is unusable when no composition is fully mapped', () => {
     expect(
       interpretPlanResult(
-        result({ 'host.id': 'keyword', 'host.name': 'null', last_seen: 'date' }),
+        result({
+          'host.id': 'keyword',
+          'host.name': 'null',
+          os: 'keyword',
+          ip: 'ip',
+          last_seen: 'date',
+        }),
         [['host.id', 'host.name'], ['host.hostname']],
         outputColumns
       )
