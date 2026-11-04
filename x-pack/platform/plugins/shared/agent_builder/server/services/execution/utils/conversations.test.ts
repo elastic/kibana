@@ -345,7 +345,7 @@ describe('conversations utils', () => {
       expect(appendArgs.activeExecution).toBe(activeExecution);
     });
 
-    it('records the given actor on the message instead of the poster', async () => {
+    it('stores an agent actor as an agent message, not a user message', async () => {
       const conversationClient = createConversationClientMock();
       const conversation = withOperation(createEmptyConversation({ id: 'conv-1' }), 'UPDATE');
       const actor = { type: EventActorType.agent, id: 'child-agent' };
@@ -361,7 +361,7 @@ describe('conversations utils', () => {
       });
 
       const [appendArgs] = conversationClient.appendEvents.mock.calls[0];
-      expect(appendArgs.events[0]).toMatchObject({ type: TimelineEventType.userMessage, actor });
+      expect(appendArgs.events[0]).toMatchObject({ type: TimelineEventType.agentMessage, actor });
     });
 
     it('persistUserMessage passes the active execution to the append fallback when create finds an existing conversation', async () => {

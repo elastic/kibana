@@ -418,7 +418,11 @@ class AgentExecutionServiceImpl implements AgentExecutionService {
       throw createBadRequestError('User message requests require input or attachments');
     }
 
-    const conversationClient = await this.deps.conversationService.getScopedClient({ request });
+    const { conversationClient } = await this.resolveConversationClient({
+      request,
+      executionClient: this.createExecutionClient(),
+      parentExecutionId: params.reportsBackgroundExecution,
+    });
     const { validatedParams, conversation, receivedAt } = await this.resolveConversationRequest({
       params,
       request,

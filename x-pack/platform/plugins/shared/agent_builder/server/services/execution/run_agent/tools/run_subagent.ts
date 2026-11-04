@@ -19,6 +19,7 @@ import {
   isRoundCompleteEvent,
   internalTools,
   SELF_AGENT_ID,
+  ChatTriggerMode,
   SubagentExecutionMode,
   SubagentMode,
   toAutoApprovedApis,
@@ -377,6 +378,12 @@ export const createSubagentTool = ({
       .describe(
         'Set to true to run this agent in the background. You will be notified when it completes.'
       ),
+    trigger_mode: z
+      .enum([ChatTriggerMode.Always, ChatTriggerMode.Never])
+      .optional()
+      .describe(
+        'Only with run_in_background. Leave unset: the sub-agent wakes you with its result as soon as it finishes, so you can report it. Set "never" only when the user said not to interrupt them; the result then waits in the conversation until the next turn.'
+      ),
     effort: z
       .enum([EffortLevels.low, EffortLevels.medium, EffortLevels.high])
       .optional()
@@ -413,6 +420,7 @@ export const createSubagentTool = ({
         description,
         prompt,
         run_in_background = false,
+        trigger_mode,
         effort = 'medium',
         mode,
         name,
@@ -542,7 +550,12 @@ export const createSubagentTool = ({
             prompt: fullPrompt,
             connectorId: selectedConnectorId,
             ...(autoApprovedApis ? { autoApprovedApis } : {}),
-            ...(run_in_background ? { runInBackground: true } : { abortSignal }),
+            ...(run_in_background
+              ? {
+                  runInBackground: true,
+                  ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}),
+                }
+              : { abortSignal }),
           });
 
           // Store the entry with the sentinel-shaped agent_id (not the
@@ -567,6 +580,7 @@ export const createSubagentTool = ({
                   agent_execution_id: executionId,
                   mode: SubagentExecutionMode.background,
                   status: 'queued',
+                  trigger_mode: trigger_mode ?? ChatTriggerMode.Always,
                   ...grantReport,
                 }),
               ],
@@ -601,7 +615,12 @@ export const createSubagentTool = ({
           prompt: fullPrompt,
           ...(autoApprovedApis ? { autoApprovedApis } : {}),
           // background agents should continue running even if main execution completes
-          ...(run_in_background ? { runInBackground: true } : { abortSignal }),
+          ...(run_in_background
+            ? {
+                runInBackground: true,
+                ...(trigger_mode ? { parentTriggerMode: trigger_mode } : {}),
+              }
+            : { abortSignal }),
         });
 
         events.reportProgress(`Sub-agent execution ${executionId} started`, {
@@ -620,6 +639,7 @@ export const createSubagentTool = ({
                 agent_execution_id: executionId,
                 mode: SubagentExecutionMode.background,
                 status: 'queued',
+                trigger_mode: trigger_mode ?? ChatTriggerMode.Always,
                 ...grantReport,
               }),
             ],

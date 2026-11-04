@@ -47,6 +47,7 @@ import {
   executionTerminatedEventId,
   resumeExecutionId,
   roundUserMessageEventId,
+  EventActorType,
 } from '@kbn/agent-builder-common';
 import type { ActivityContext, ConversationClient } from '../../conversation';
 import type { AcquireActiveExecution } from '../../conversation/client/types';
@@ -58,6 +59,7 @@ import {
   interruptedExecutionToEvents,
   lastTerminatedExecutionIndex,
   nextResumeIndex,
+  agentMessageEvent,
 } from '../../conversation/client/rounds_to_events';
 import { createConversationUpdatedEvent, createConversationCreatedEvent } from './events';
 import { getPendingResumeRound } from './pending_round';
@@ -152,6 +154,7 @@ export const persistUserMessage = async ({
   input: ConverseInput;
   author?: ConversationRoundAuthor;
   origin?: ConversationRoundOrigin;
+  /** An agent actor posts an `agent_message`; anything else a `user_message` from the poster. */
   actor?: EventActor;
   /** Actor fallback when the poster has no author, for a conversation they do not own. */
   user?: UserIdAndName;
@@ -169,17 +172,21 @@ export const persistUserMessage = async ({
   activeExecution?: AcquireActiveExecution;
   consumeBackgroundExecution?: string;
 }): Promise<string> => {
-  const event = userMessageEvent(
-    {
-      id: eventId,
-      createdAt: receivedAt.toISOString(),
-      input: { message: input.message?.trim() ?? '' },
-      ...(author ? { author } : {}),
-      ...(origin ? { origin } : {}),
-      ...(actor ? { actor } : {}),
-    },
-    { ...conversation, ...(user ? { user } : {}) }
-  );
+  const createdAt = receivedAt.toISOString();
+  const message = { message: input.message?.trim() ?? '' };
+  const event =
+    actor?.type === EventActorType.agent
+      ? agentMessageEvent({ id: eventId, createdAt, input: message, actor })
+      : userMessageEvent(
+          {
+            id: eventId,
+            createdAt,
+            input: message,
+            ...(author ? { author } : {}),
+            ...(origin ? { origin } : {}),
+          },
+          { ...conversation, ...(user ? { user } : {}) }
+        );
 
   const events = [event, ...additionalEvents];
 

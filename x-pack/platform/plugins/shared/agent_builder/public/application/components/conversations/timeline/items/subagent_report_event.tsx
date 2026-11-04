@@ -5,39 +5,62 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { i18n } from '@kbn/i18n';
-import type { UserMessageEvent } from '@kbn/agent-builder-common';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { AgentMessageEvent } from '@kbn/agent-builder-common';
 import { useAgentBuilderAgentById } from '../../../../hooks/agents/use_agent_by_id';
 import { AgentAvatar } from '../../../common/agent_avatar';
-import { AuthorHeader } from '../author_header';
+import { StepLayout } from '../event_steps/step_layout';
 import { UserMessageText } from '../user_message/user_message_text';
 
-const labels = {
-  report: i18n.translate('xpack.agentBuilder.timeline.subagentReport.label', {
-    defaultMessage: 'Sub-agent report',
-  }),
-  icon: i18n.translate('xpack.agentBuilder.timeline.subagentReport.iconTitle', {
-    defaultMessage: 'Sub-agent',
-  }),
-};
-
 interface SubagentReportEventProps {
-  event: UserMessageEvent;
+  event: AgentMessageEvent;
+  isUnread?: boolean;
 }
 
-export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({ event }) => {
+/**
+ * A background sub-agent's report, drawn like a step: one line, the text behind a click. It is
+ * faded until a run has read it.
+ */
+export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({
+  event,
+  isUnread = false,
+}) => {
   const { euiTheme } = useEuiTheme();
   const { agent } = useAgentBuilderAgentById(event.actor.id);
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  const label = (
+    <EuiText size="s">
+      <p role="status">
+        {agent ? (
+          <FormattedMessage
+            id="xpack.agentBuilder.timeline.subagentReport.finishedNamed"
+            defaultMessage="Background agent finished · {name}"
+            values={{ name: agent.name }}
+          />
+        ) : (
+          <FormattedMessage
+            id="xpack.agentBuilder.timeline.subagentReport.finished"
+            defaultMessage="Background agent finished"
+          />
+        )}
+      </p>
+    </EuiText>
+  );
 
   return (
     <EuiFlexGroup
       gutterSize="s"
       alignItems="flexStart"
       responsive={false}
+      css={css`
+        opacity: ${isUnread ? 0.6 : 1};
+      `}
       data-test-subj="agentBuilderTimelineSubagentReport"
+      data-unread={isUnread}
     >
       <EuiFlexItem
         grow={false}
@@ -45,11 +68,7 @@ export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({ event 
           min-inline-size: ${euiTheme.size.l};
         `}
       >
-        {agent ? (
-          <AgentAvatar agent={agent} size="s" iconSize="l" />
-        ) : (
-          <EuiIcon type="processor" size="l" aria-label={labels.icon} />
-        )}
+        {agent && <AgentAvatar agent={agent} size="s" iconSize="l" />}
       </EuiFlexItem>
       <EuiFlexItem
         grow={true}
@@ -57,23 +76,18 @@ export const SubagentReportEvent: React.FC<SubagentReportEventProps> = ({ event 
           min-inline-size: 0;
         `}
       >
-        <EuiFlexGroup direction="column" gutterSize="xs">
-          <EuiFlexItem grow={false}>
-            <AuthorHeader
-              name={agent?.name ?? event.actor.id}
-              showAgentBadge={true}
-              label={labels.report}
-              startedAt={event.created_at}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
+        <StepLayout
+          label={label}
+          onClick={() => setIsExpanded((value) => !value)}
+          isExpanded={isExpanded}
+          expansion={
             <EuiPanel hasShadow={false} hasBorder={true} color="subdued" paddingSize="m">
               <EuiText size="s">
                 <UserMessageText text={event.data.message} />
               </EuiText>
             </EuiPanel>
-          </EuiFlexItem>
-        </EuiFlexGroup>
+          }
+        />
       </EuiFlexItem>
     </EuiFlexGroup>
   );

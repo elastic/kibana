@@ -16,6 +16,7 @@ import {
 import type { ToolResult } from '@kbn/agent-builder-common';
 import { groupTimelineEvents, buildItems } from './to_timeline_items';
 import { createUserMessageEvent } from './items/user_message_event.factory';
+import { createAgentMessageEvent } from './items/agent_message_event.factory';
 import { createExecutionStartedEvent } from './items/execution_started.factory';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createExecutionFailedEvent } from './items/execution_failed_event.factory';
@@ -37,6 +38,14 @@ const makeEventsById = (events: TimelineDisplayEvent[]) => new Map(events.map((e
 describe('groupTimelineEvents', () => {
   it('returns empty array for empty input', () => {
     expect(groupTimelineEvents([], new Map())).toEqual([]);
+  });
+
+  it('keeps an agent message as its own item', () => {
+    const report = createAgentMessageEvent({ id: 'report-1' });
+
+    expect(groupTimelineEvents([report], makeEventsById([report]))).toEqual([
+      { kind: 'agentMessage', key: 'report-1', event: report },
+    ]);
   });
 
   it('groups a full round into 2 items — one agentTurn with status completed', () => {

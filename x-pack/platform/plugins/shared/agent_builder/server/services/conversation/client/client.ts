@@ -92,7 +92,9 @@ import { createSpaceDslFilter, isDefaultSpace } from '../../../utils/spaces';
 import {
   ConversationBusySignal,
   applyActiveExecutionUpdate,
+  isAcquireActiveExecution,
   isActiveExecutionUpdateNoop,
+  isExecutionStale,
   readHeldExecution,
   toActiveExecution,
 } from './active_execution';
@@ -122,7 +124,7 @@ export type { ActivityContext } from './activity_events';
 import { getTemplate } from '../templates/registry';
 import { validateTemplateDefaults, validateMetadataUpdate } from '../templates/validation';
 import { serializeMetadataValue, buildMetadataFromTemplate } from '../templates/serialize';
-import { keepStoredUserMessages, reconcileAttachments } from './round_writes';
+import { keepStoredAgentMessages, reconcileAttachments } from './round_writes';
 import { updateReadBy } from './read_by';
 import { updatePinnedBy } from './pinned_by';
 import { buildSearchSort, compileConversationFilter } from '../search';
@@ -386,12 +388,18 @@ const isBackgroundExecutionNotPending = (value: unknown): value is BackgroundExe
 
 const consumeBackgroundExecution = (
   current: NormalizedConversation,
-  executionId: string
+  executionId: string,
+  acquiring: boolean
 ): ConversationInternalState | undefined => {
   const stored = current.state;
   if (!stored?.background_executions?.[executionId]) {
-    // A held conversation has not stored its state yet: the acquire decides, answering busy.
-    if (current.active_execution) {
+    // A held conversation has not stored its state yet: a live holder answers busy, through the
+    // acquire when there is one; a dead holder's state is never coming.
+    const { active_execution: held, execution } = current;
+    if (held) {
+      if (!acquiring && !isExecutionStale(execution)) {
+        throw new ConversationBusySignal(held.execution_id);
+      }
       return undefined;
     }
     throw backgroundExecutionNotPending(executionId);
@@ -1142,6 +1150,7 @@ class ConversationClientImpl implements ConversationClient {
       source,
       refresh,
       activeExecution,
+      peekHeld: Boolean(backgroundExecutionToConsume),
       fields: (current) => {
         if (skipIfTerminalExistsFor && hasTerminalEventFor(current, skipIfTerminalExistsFor)) {
           throw skipWrite(current);
@@ -1149,7 +1158,11 @@ class ConversationClientImpl implements ConversationClient {
         const nextState =
           state ??
           (backgroundExecutionToConsume
-            ? consumeBackgroundExecution(current, backgroundExecutionToConsume)
+            ? consumeBackgroundExecution(
+                current,
+                backgroundExecutionToConsume,
+                isAcquireActiveExecution(activeExecution)
+              )
             : undefined);
         const currentEvents = current.events ?? [];
         const existingIds = new Set(currentEvents.map((event) => event.id));
@@ -1229,7 +1242,7 @@ class ConversationClientImpl implements ConversationClient {
         const existingIds = new Set(nonRoundEvents.map((event) => event.id));
         // Round-derived events for this round were just wiped, so they always pass; additive ids
         // collide only when a caller re-inserts an existing uuid, which we drop.
-        const eventsToWrite = keepStoredUserMessages(
+        const eventsToWrite = keepStoredAgentMessages(
           currentEvents.filter((event) => event.id.startsWith(roundPrefix)),
           events.filter((event) => !existingIds.has(event.id))
         );
@@ -1835,6 +1848,7 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries = 5,
     refresh,
     activeExecution,
+    peekHeld,
     ...emission
   }: {
     conversationId: string;
@@ -1843,8 +1857,9 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries?: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   } & ConversationWriteEmission): Promise<Conversation> {
-    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution });
+    const writer = this.createWriter({ access, maxRetries, refresh, activeExecution, peekHeld });
     // `mutate` may run more than once on OCC retry; the last run is the one that was written.
     // Typed through `as` so the assignment inside the closure does not narrow it to `undefined`.
     let before = undefined as NormalizedConversation | undefined;
@@ -1919,11 +1934,13 @@ class ConversationClientImpl implements ConversationClient {
     maxRetries,
     refresh,
     activeExecution,
+    peekHeld,
   }: {
     access: ConversationAccess;
     maxRetries: number;
     refresh?: Refresh;
     activeExecution?: ActiveExecutionUpdate;
+    peekHeld?: boolean;
   }): OccWriter<NormalizedConversation> {
     return new OccWriter<NormalizedConversation>({
       get: async (id) => {
@@ -1932,6 +1949,7 @@ class ConversationClientImpl implements ConversationClient {
           document,
           update: activeExecution,
           executionClient: this.executionClient,
+          peekHeld,
         });
 
         return {

@@ -8,6 +8,7 @@
 import { EMPTY } from 'rxjs';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
+import { ChatTriggerMode } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { createSubAgentExecutor } from './sub_agent_executor';
 
@@ -229,10 +230,19 @@ describe('createSubAgentExecutor and background sub-agents', () => {
     });
 
     for (const [params] of executeAgentMock.mock.calls) {
-      expect(params.params.wakeParentOnCompletion).toBe(true);
+      expect(params.params.parentTriggerMode).toBe(ChatTriggerMode.Always);
       expect(params.useTaskManager).toBe(true);
       expect(params.requestImmediateClaim).toBe(true);
     }
+
+    await executor.executeSubAgent({
+      agentId: 'child',
+      prompt: 'go',
+      parentExecutionId: 'parent-execution-id',
+      runInBackground: true,
+      parentTriggerMode: ChatTriggerMode.Never,
+    });
+    expect(executeAgentMock.mock.calls[2][0].params.parentTriggerMode).toBe(ChatTriggerMode.Never);
   });
 
   it('leaves a foreground sub-agent alone', async () => {
@@ -244,7 +254,7 @@ describe('createSubAgentExecutor and background sub-agents', () => {
       parentExecutionId: 'parent-execution-id',
     });
 
-    expect(executeAgentMock.mock.calls[0][0].params.wakeParentOnCompletion).toBeUndefined();
+    expect(executeAgentMock.mock.calls[0][0].params.parentTriggerMode).toBeUndefined();
     expect(executeAgentMock.mock.calls[0][0].useTaskManager).toBeUndefined();
   });
 

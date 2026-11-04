@@ -7,7 +7,11 @@
 
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { SubAgentExecutor } from '@kbn/agent-builder-server';
-import { AgentExecutionMode, createNonInteractiveConfig } from '@kbn/agent-builder-common';
+import {
+  AgentExecutionMode,
+  ChatTriggerMode,
+  createNonInteractiveConfig,
+} from '@kbn/agent-builder-common';
 import type { AutoApprovedApi, InteractivityConfig } from '@kbn/agent-builder-common';
 import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import { unionBy } from 'lodash';
@@ -56,7 +60,9 @@ export const createSubAgentExecutor = ({
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.runInBackground ? { wakeParentOnCompletion: true } : {}),
+          ...(params.runInBackground
+            ? { parentTriggerMode: params.parentTriggerMode ?? ChatTriggerMode.Always }
+            : {}),
           nextInput: { message: params.prompt },
           projectRouting,
           // Standalone runs report no round events; it's passed on to the sub-agents they spawn.
@@ -77,7 +83,9 @@ export const createSubAgentExecutor = ({
           agentId: params.agentId,
           connectorId: params.connectorId,
           parentExecutionId: params.parentExecutionId,
-          ...(params.runInBackground ? { wakeParentOnCompletion: true } : {}),
+          ...(params.runInBackground
+            ? { parentTriggerMode: params.parentTriggerMode ?? ChatTriggerMode.Always }
+            : {}),
           conversationId: params.conversationId,
           autoCreateConversationWithId: true,
           nextInput: { message: params.prompt },

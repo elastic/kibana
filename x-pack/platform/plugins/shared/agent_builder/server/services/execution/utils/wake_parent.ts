@@ -10,6 +10,7 @@ import type { Logger } from '@kbn/logging';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import {
   AgentExecutionMode,
+  ChatTriggerMode,
   EventActorType,
   ExecutionStatus,
   isBackgroundExecutionAlreadyReportedError,
@@ -26,7 +27,7 @@ import {
 } from '../task/task_definitions';
 import { isPendingResumeConversation } from './conversations';
 
-export type WakeParentResult = 'woken' | 'busy' | 'skipped';
+export type WakeParentResult = 'woken' | 'queued' | 'busy' | 'skipped';
 
 export interface WakeParentParams {
   request: KibanaRequest;
@@ -50,7 +51,10 @@ export const describeFinishedChild = (child: AgentExecution): string => {
   return header;
 };
 
-/** Starts a run on the parent conversation that reports a finished background sub-agent. */
+/**
+ * Reports a finished background sub-agent to its parent conversation: a run for `always`, the
+ * message alone for `never`.
+ */
 export const wakeParent = async ({
   request,
   conversationId,
@@ -81,8 +85,9 @@ export const wakeParent = async ({
     return 'skipped';
   }
 
+  const triggerMode = child.agentParams.parentTriggerMode ?? ChatTriggerMode.Always;
   try {
-    await executionService.executeAgent({
+    await executionService.maybeExecuteAgent({
       mode: AgentExecutionMode.conversation,
       request,
       useTaskManager: true,
@@ -92,6 +97,7 @@ export const wakeParent = async ({
         nextInput: { message: describeFinishedChild(child) },
         actor: { type: EventActorType.agent, id: child.agentId, username: child.agentId },
         reportsBackgroundExecution: childExecutionId,
+        triggerMode,
       },
     });
   } catch (error) {
@@ -104,7 +110,7 @@ export const wakeParent = async ({
     throw error;
   }
 
-  return 'woken';
+  return triggerMode === ChatTriggerMode.Never ? 'queued' : 'woken';
 };
 
 export interface ReportToParentParams
@@ -125,7 +131,7 @@ export const reportToParent = async ({
   ...wake
 }: ReportToParentParams): Promise<void> => {
   const { executionId: childExecutionId, parentExecutionId } = execution;
-  if (!parentExecutionId || !execution.agentParams.wakeParentOnCompletion) {
+  if (!parentExecutionId || !execution.agentParams.parentTriggerMode) {
     return;
   }
 

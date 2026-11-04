@@ -27,7 +27,7 @@ import {
   isEventsNativeVersion,
   isExecutionTerminalEvent,
   isTimelineEvent,
-  isUserMessageEvent,
+  isMessageEvent,
   lastExecutionTerminal,
   parseExecutionId,
   pendingPromptRequest,
@@ -59,7 +59,7 @@ export type AnyTimelineEvent = TimelineEvent | ProcessedTimelineEvent | Conversa
  */
 type UserMessageOf<E extends AnyTimelineEvent> = Extract<
   E,
-  { type: TimelineEventType.userMessage }
+  { type: TimelineEventType.userMessage } | { type: TimelineEventType.agentMessage }
 >;
 /**
  * The standalone events of a timeline element type: `ProcessedStandaloneEvent` for the processed
@@ -230,7 +230,7 @@ export const groupTimelineRounds = <E extends AnyTimelineEvent>(
 ): Array<TimelineRound<E>> => {
   const rounds: Array<TimelineRound<E>> = [];
   for (const execution of groupTimelineExecutions(timeline)) {
-    const userMessage = execution.triggers.find(isUserMessageEvent);
+    const userMessage = execution.triggers.find(isMessageEvent);
     const terminal = execution.events.find((event): event is E & ExecutionTerminalEvent =>
       isExecutionTerminalEvent(event)
     );
@@ -301,7 +301,7 @@ export const standaloneUserMessages = <E extends AnyTimelineEvent>(
   );
   return timeline.filter(
     (event): event is E & UserMessageOf<E> =>
-      isUserMessageEvent(event) &&
+      isMessageEvent(event) &&
       !event.execution_id &&
       !triggerIds.has(event.id) &&
       !isRoundDerivedEventId(event.id)
@@ -309,11 +309,7 @@ export const standaloneUserMessages = <E extends AnyTimelineEvent>(
 };
 
 const userMessageIds = (timeline: ReadonlyArray<AnyTimelineEvent>): Set<string> =>
-  new Set(
-    timeline
-      .filter((event) => event.type === TimelineEventType.userMessage)
-      .map((event) => event.id)
-  );
+  new Set(timeline.filter((event) => isMessageEvent(event)).map((event) => event.id));
 
 /** True when `event` is a `chat_input` attachment event linked to a message present in `messageIds`. */
 const isLinkedInput = (event: AttachmentTimelineEvent, messageIds: ReadonlySet<string>): boolean =>

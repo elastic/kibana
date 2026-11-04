@@ -9,11 +9,11 @@ import { isEqual } from 'lodash';
 import type { Conversation, ConversationEvent, ConversationRound } from '@kbn/agent-builder-common';
 import {
   CONVERSATION_EVENT_ID_DELIMITER,
-  EventActorType,
   TimelineEventType,
   createAttachmentPermanentDeleteBlockedError,
   lastExecutionTerminal,
   parseExecutionId,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { isAttachmentReferencedInRounds } from '../../attachments/attachment_guards';
@@ -58,24 +58,35 @@ const eventsForKnownRound = (
 ): ConversationEvent[] =>
   hasResumeExecution(round.id, storedForRound)
     ? storedForRound
-    : keepStoredUserMessages(storedForRound, roundToEvents(round, conversation));
+    : keepStoredAgentMessages(storedForRound, roundToEvents(round, conversation));
 
 /** A round carries no agent author, so a rewritten `user_message` keeps its stored agent actor. */
-export const keepStoredUserMessages = (
+/** A round records no agent author, so its regenerated events take the stored agent message as is. */
+export const keepStoredAgentMessages = (
   stored: ConversationEvent[],
   events: ConversationEvent[]
 ): ConversationEvent[] => {
-  const agentActorsById = new Map(
+  const agentMessages = new Map(
     stored
-      .filter(
-        (event) =>
-          event.type === TimelineEventType.userMessage && event.actor.type === EventActorType.agent
-      )
-      .map((event) => [event.id, event.actor])
+      .filter((event) => event.type === TimelineEventType.agentMessage)
+      .map((event) => [event.id, event])
   );
+  if (agentMessages.size === 0) {
+    return events;
+  }
   return events.map((event) => {
-    const actor = agentActorsById.get(event.id);
-    return actor ? { ...event, actor } : event;
+    const storedMessage = agentMessages.get(event.id);
+    if (storedMessage) {
+      return storedMessage;
+    }
+    if (
+      event.type === TimelineEventType.executionStarted &&
+      event.trigger_event_id &&
+      agentMessages.has(event.trigger_event_id)
+    ) {
+      return { ...event, data: { ...event.data, trigger_type: TimelineTriggerType.agentMessage } };
+    }
+    return event;
   });
 };
 

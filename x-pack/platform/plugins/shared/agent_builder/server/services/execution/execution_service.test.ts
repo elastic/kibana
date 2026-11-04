@@ -229,7 +229,7 @@ describe('AgentExecutionService', () => {
       spaceId: 'default',
       parentExecutionId: 'parent-1',
       owner: { id: 'profile-1', username: 'alice' },
-      agentParams: { nextInput: { message: 'go' }, wakeParentOnCompletion: true },
+      agentParams: { nextInput: { message: 'go' }, parentTriggerMode: ChatTriggerMode.Always },
       eventCount: 0,
       events: [],
     };
@@ -261,13 +261,13 @@ describe('AgentExecutionService', () => {
           agentId: 'child-agent',
           nextInput: { message: 'go' },
           parentExecutionId: 'parent-1',
-          wakeParentOnCompletion: true,
+          parentTriggerMode: ChatTriggerMode.Always,
         },
         useTaskManager: false,
       });
 
       wakeRun = jest
-        .spyOn(service, 'executeAgent')
+        .spyOn(service, 'maybeExecuteAgent')
         .mockRejectedValue(
           createConversationBusyError({ conversationId: 'parent-conv', activeExecutionId: 'other' })
         );
@@ -1638,6 +1638,27 @@ describe('AgentExecutionService', () => {
       expect(conversationService.getScopedClientAsUser).toHaveBeenCalledWith(
         expect.objectContaining({ user: expect.objectContaining({ id: 'profile-1' }) })
       );
+
+      mockExecutionClient.peek.mockResolvedValueOnce({
+        status: ExecutionStatus.completed,
+        eventCount: 0,
+        owner: { id: 'profile-1', username: 'alice' },
+      });
+      await service
+        .maybeExecuteAgent({
+          mode: AgentExecutionMode.conversation,
+          request: httpServerMock.createKibanaRequest(),
+          params: {
+            conversationId: 'conv-1',
+            nextInput: { message: 'finished' },
+            reportsBackgroundExecution: 'child-1',
+            triggerMode: ChatTriggerMode.Never,
+          },
+          useTaskManager: true,
+        })
+        .catch(() => undefined);
+
+      expect(conversationService.getScopedClientAsUser).toHaveBeenCalledTimes(2);
     });
   });
 

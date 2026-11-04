@@ -4421,12 +4421,18 @@ describe('ConversationClient', () => {
       });
     });
 
-    it('replaceRoundEvents keeps the actor the stored user message was received with', async () => {
+    it('replaceRoundEvents keeps a stored agent message as it was received', async () => {
       const agentActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
       mockGetDocumentResponse(
         createConversationDocument({
           schemaVersion: 1,
-          events: [{ ...userMessage('r1::user_message'), actor: agentActor }],
+          events: [
+            {
+              ...userMessage('r1::user_message'),
+              type: TimelineEventType.agentMessage,
+              actor: agentActor,
+            },
+          ],
         })
       );
 
@@ -4444,7 +4450,10 @@ describe('ConversationClient', () => {
 
       const written = (mockEsClient.index.mock.calls[0][0] as { document: Document['_source'] })
         .document.events;
-      expect(written?.find((event) => event.id === 'r1::user_message')?.actor).toEqual(agentActor);
+      expect(written?.find((event) => event.id === 'r1::user_message')).toMatchObject({
+        type: TimelineEventType.agentMessage,
+        actor: agentActor,
+      });
     });
 
     it('a write skipped by the terminal guard emits nothing', async () => {
@@ -6308,12 +6317,12 @@ describe('ConversationClient', () => {
       };
     };
 
-    const appendConsuming = (childId: string) =>
+    const appendConsuming = (childId: string, acquire = true) =>
       client.appendEvents(
         {
           id: 'conversation-1',
           events: [],
-          activeExecution: setActiveExecution('e2'),
+          ...(acquire ? { activeExecution: setActiveExecution('e2') } : {}),
           consumeBackgroundExecution: childId,
         },
         { source: 'execution' }
@@ -6343,6 +6352,16 @@ describe('ConversationClient', () => {
       expect(isConversationBusyError(busy)).toBe(true);
       expect(isBackgroundExecutionAlreadyReportedError(busy)).toBe(false);
       expect(mockEsClient.index).toHaveBeenCalledTimes(1);
+
+      // A write without an acquire asks the live holder the same way, and goes through once it is gone.
+      const busyWithoutRun = await appendConsuming('child-1', false).catch(
+        (caught: unknown) => caught
+      );
+      expect(isConversationBusyError(busyWithoutRun)).toBe(true);
+      staleHolder();
+      await appendConsuming('child-1', false);
+      expect(indexedSource(1).active_execution).toEqual({ execution_id: 'e1' });
+      expect(mockEsClient.index).toHaveBeenCalledTimes(2);
     });
 
     it('appendEvents setting the active execution refuses when a concurrent one wins the version conflict', async () => {

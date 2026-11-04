@@ -53,8 +53,11 @@ export interface BaseExecutionParams {
    * execution's owner, so it must name the running parent, never a value from user or model input.
    */
   parentExecutionId?: string;
-  /** Set on a background sub-agent: its parent's conversation is woken when it finishes. */
-  wakeParentOnCompletion?: boolean;
+  /**
+   * Set on a background sub-agent: how its parent gets the result when it finishes. `always`
+   * starts the parent conversation, `never` leaves the message for the parent's next run.
+   */
+  parentTriggerMode?: ChatTriggerMode;
   /**
    * Connector telemetry to attribute this execution's LLM calls to a specific feature
    * (sets `metadata.connectorTelemetry` on inference calls). When omitted, the default

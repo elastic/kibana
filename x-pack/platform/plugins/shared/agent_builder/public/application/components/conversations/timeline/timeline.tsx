@@ -10,11 +10,13 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import moment from 'moment';
 import type { AgentDefinition, VersionedAttachment } from '@kbn/agent-builder-common';
 import { UserMessageEvent } from './items/user_message_event';
+import { SubagentReportEvent } from './items/subagent_report_event';
 import { AttachmentEvent } from './items/attachment_event';
 import { CustomEvent } from './items/custom_event';
 import { AgentTurn } from './agent_turn';
 import { ConversationDateDivider } from './conversation_date_divider';
 import type { TimelineItem } from './types';
+import { unreadMessageKeys } from './unread_messages';
 
 interface TimelineProps {
   items: TimelineItem[];
@@ -48,6 +50,8 @@ export const Timeline: React.FC<TimelineProps> = ({
     [items]
   );
 
+  const unread = useMemo(() => unreadMessageKeys(items), [items]);
+
   return (
     <>
       <EuiFlexGroup direction="column" gutterSize="l">
@@ -64,6 +68,9 @@ export const Timeline: React.FC<TimelineProps> = ({
                   conversationAttachments={conversationAttachments}
                 />
               );
+              break;
+            case 'agentMessage':
+              content = <SubagentReportEvent event={item.event} isUnread={unread.has(item.key)} />;
               break;
             case 'agentTurn':
               content = (

@@ -19,6 +19,7 @@ import {
   EventActorType,
   TimelineEventType,
   attachmentTools,
+  TimelineTriggerType,
 } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { createEmptyConversation, createRound } from '../../../test_utils';
@@ -87,16 +88,24 @@ describe('reconcileEvents', () => {
     expect(reconcile({ ...conversation, rounds: [], events: stored })).toEqual([]);
   });
 
-  it('keeps the stored user_message of a regenerated round, with the actor it was received with', () => {
+  it('keeps the stored agent_message of a regenerated round, and its run keeps that trigger type', () => {
     const r1 = completedRound({ id: 'r1', started_at: T0 });
     const reportActor = { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' };
     const stored = roundToEvents(r1, conversation).map((event) =>
-      event.id === 'r1::user_message' ? { ...event, actor: reportActor } : event
+      event.id === 'r1::user_message'
+        ? { ...event, type: TimelineEventType.agentMessage, actor: reportActor }
+        : event
     );
 
     const result = reconcile({ ...conversation, rounds: [r1], events: stored });
 
-    expect(result.find((event) => event.id === 'r1::user_message')?.actor).toEqual(reportActor);
+    expect(result.find((event) => event.id === 'r1::user_message')).toMatchObject({
+      type: TimelineEventType.agentMessage,
+      actor: reportActor,
+    });
+    expect(result.find((event) => event.id === 'r1::execution_started')).toMatchObject({
+      data: { trigger_type: TimelineTriggerType.agentMessage },
+    });
     expect(ids(result)).toEqual([
       'r1::user_message',
       'r1::execution_started',

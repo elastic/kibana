@@ -7,6 +7,7 @@
 
 import { Subject, ReplaySubject } from 'rxjs';
 import {
+  ChatTriggerMode,
   ChatEventType,
   SELF_AGENT_ID,
   SubagentMode,
@@ -71,6 +72,7 @@ const callHandler = async (
     description: string;
     prompt: string;
     run_in_background?: boolean;
+    trigger_mode?: ChatTriggerMode;
     effort?: EffortLevels;
     mode?: SubagentMode;
     name?: string;
@@ -404,12 +406,28 @@ describe('createSubagentTool', () => {
       agent_execution_id: 'bg-exec-id',
       mode: 'background',
       status: 'queued',
+      trigger_mode: 'always',
     });
     expect(registerExecution).toHaveBeenCalledWith('bg-exec-id');
     expect(executeSubAgent).toHaveBeenCalledWith(
       expect.objectContaining({ runInBackground: true })
     );
     expect(executeSubAgent.mock.calls[0][0]).not.toHaveProperty('abortSignal');
+
+    const queued = await callHandler(
+      tool,
+      {
+        description: 'later',
+        prompt: 'Leave it for later',
+        run_in_background: true,
+        trigger_mode: ChatTriggerMode.Never,
+      },
+      context
+    );
+    expect(queued.results[0].data).toEqual(expect.objectContaining({ trigger_mode: 'never' }));
+    expect(executeSubAgent).toHaveBeenLastCalledWith(
+      expect.objectContaining({ parentTriggerMode: 'never' })
+    );
 
     // Clean up — complete the observable (it's still running in the background)
     events$.complete();
@@ -648,6 +666,7 @@ describe('createSubagentTool', () => {
         agent_execution_id: 'bg-child',
         mode: 'background',
         status: 'queued',
+        trigger_mode: 'always',
       });
       expect(registerExecution).toHaveBeenCalledWith('bg-child');
       expect(createSubAgent).toHaveBeenCalledWith(

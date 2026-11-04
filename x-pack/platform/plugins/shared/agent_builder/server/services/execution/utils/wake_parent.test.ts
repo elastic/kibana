@@ -10,6 +10,7 @@ import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import {
   AgentExecutionMode,
   ChatEventType,
+  ChatTriggerMode,
   EventActorType,
   ExecutionStatus,
   createBackgroundExecutionAlreadyReportedError,
@@ -41,7 +42,7 @@ const finishedChild = {
   status: ExecutionStatus.completed,
   parentExecutionId: 'parent-1',
   owner: { id: 'profile-1', username: 'alice' },
-  agentParams: { nextInput: { message: 'go' }, wakeParentOnCompletion: true },
+  agentParams: { nextInput: { message: 'go' }, parentTriggerMode: ChatTriggerMode.Always },
   events: [
     {
       type: ChatEventType.roundComplete,
@@ -69,7 +70,7 @@ describe('describeFinishedChild', () => {
 });
 
 describe('wakeParent', () => {
-  let executeAgent: jest.Mock;
+  let maybeExecuteAgent: jest.Mock;
   let get: jest.Mock;
   let getScopedClientAsUser: jest.Mock;
   let conversationClient: ReturnType<typeof createConversationClientMock>;
@@ -83,13 +84,13 @@ describe('wakeParent', () => {
       conversationService: {
         getScopedClientAsUser,
       } as unknown as ConversationService,
-      executionService: { executeAgent } as unknown as AgentExecutionService,
+      executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
     });
 
   beforeEach(() => {
     jest.clearAllMocks();
     isPendingResumeConversationMock.mockReturnValue(false);
-    executeAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
+    maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
     get = jest.fn().mockResolvedValue(finishedChild);
     getScopedClientAsUser = jest.fn().mockImplementation(async () => conversationClient);
     conversationClient = createConversationClientMock();
@@ -106,7 +107,7 @@ describe('wakeParent', () => {
       request,
       user: { id: 'profile-1', username: 'alice', isAdmin: false },
     });
-    expect(executeAgent).toHaveBeenCalledWith({
+    expect(maybeExecuteAgent).toHaveBeenCalledWith({
       mode: AgentExecutionMode.conversation,
       request,
       useTaskManager: true,
@@ -116,8 +117,23 @@ describe('wakeParent', () => {
         nextInput: { message: describeFinishedChild(finishedChild) },
         actor: { type: EventActorType.agent, id: 'child-agent', username: 'child-agent' },
         reportsBackgroundExecution: 'child-1',
+        triggerMode: ChatTriggerMode.Always,
       },
     });
+  });
+
+  it('leaves the message for the next run when the sub-agent asked for never', async () => {
+    get.mockResolvedValueOnce({
+      ...finishedChild,
+      agentParams: { ...finishedChild.agentParams, parentTriggerMode: ChatTriggerMode.Never },
+    });
+
+    await expect(wake()).resolves.toBe('queued');
+    expect(maybeExecuteAgent).toHaveBeenCalledWith(
+      expect.objectContaining({
+        params: expect.objectContaining({ triggerMode: ChatTriggerMode.Never }),
+      })
+    );
   });
 
   it('skips a child without a record or owner, and an idle parent that already reported or waits on a prompt', async () => {
@@ -133,7 +149,7 @@ describe('wakeParent', () => {
     isPendingResumeConversationMock.mockReturnValueOnce(true);
     await expect(wake()).resolves.toBe('skipped');
 
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
   });
 
   it('tries a held parent even when its stored state does not list the child yet', async () => {
@@ -142,7 +158,7 @@ describe('wakeParent', () => {
       active_execution: { execution_id: 'parent-run' },
       state: {},
     } as never);
-    executeAgent.mockRejectedValue(
+    maybeExecuteAgent.mockRejectedValue(
       createConversationBusyError({
         conversationId: 'conversation-1',
         activeExecutionId: 'parent-run',
@@ -150,11 +166,11 @@ describe('wakeParent', () => {
     );
 
     await expect(wake()).resolves.toBe('busy');
-    expect(executeAgent).toHaveBeenCalledTimes(1);
+    expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
   });
 
   it('skips when the write finds the result already reported and propagates any other error', async () => {
-    executeAgent.mockRejectedValueOnce(
+    maybeExecuteAgent.mockRejectedValueOnce(
       createBackgroundExecutionAlreadyReportedError({
         conversationId: 'conversation-1',
         executionId: 'child-1',
@@ -162,13 +178,13 @@ describe('wakeParent', () => {
     );
     await expect(wake()).resolves.toBe('skipped');
 
-    executeAgent.mockRejectedValueOnce(new Error('boom'));
+    maybeExecuteAgent.mockRejectedValueOnce(new Error('boom'));
     await expect(wake()).rejects.toThrow('boom');
   });
 });
 
 describe('reportToParent', () => {
-  let executeAgent: jest.Mock;
+  let maybeExecuteAgent: jest.Mock;
   let peek: jest.Mock;
   let schedule: jest.Mock;
   let conversationClient: ReturnType<typeof createConversationClientMock>;
@@ -184,7 +200,7 @@ describe('reportToParent', () => {
       conversationService: {
         getScopedClientAsUser: jest.fn().mockResolvedValue(conversationClient),
       } as unknown as ConversationService,
-      executionService: { executeAgent } as unknown as AgentExecutionService,
+      executionService: { maybeExecuteAgent } as unknown as AgentExecutionService,
       taskManager: { schedule } as unknown as TaskManagerStartContract,
       logger: loggingSystemMock.createLogger(),
     });
@@ -193,7 +209,7 @@ describe('reportToParent', () => {
     jest.clearAllMocks();
     jest.useFakeTimers().setSystemTime(new Date('2026-01-01T00:00:00.000Z'));
     isPendingResumeConversationMock.mockReturnValue(false);
-    executeAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
+    maybeExecuteAgent = jest.fn().mockResolvedValue({ executionId: 'wake-1', events$: of() });
     peek = jest.fn().mockResolvedValue({ conversationId: 'conversation-1' });
     schedule = jest.fn().mockResolvedValue({});
     conversationClient = createConversationClientMock();
@@ -216,15 +232,15 @@ describe('reportToParent', () => {
 
     peek.mockResolvedValueOnce({});
     await report();
-    expect(executeAgent).not.toHaveBeenCalled();
+    expect(maybeExecuteAgent).not.toHaveBeenCalled();
 
     await report();
-    expect(executeAgent).toHaveBeenCalledTimes(1);
+    expect(maybeExecuteAgent).toHaveBeenCalledTimes(1);
     expect(schedule).not.toHaveBeenCalled();
   });
 
   it('leaves a retry task on its own credential when the parent is busy or the attempt fails', async () => {
-    executeAgent.mockRejectedValueOnce(
+    maybeExecuteAgent.mockRejectedValueOnce(
       createConversationBusyError({ conversationId: 'conversation-1', activeExecutionId: 'x' })
     );
     await report();
