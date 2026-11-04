@@ -133,6 +133,7 @@ import {
 import { createCustomContextClient } from './custom_context';
 import { createSandboxAllowlistClient } from './sandbox_allowlist';
 import { createSlackTurnAdmissionCheck } from './lib/slack_turn_admission';
+import { getNightshiftSettingsUrl } from './lib/notifications/notify_investigation_quota_reached';
 import type {
   InvestigationQuotaCallback,
   NightshiftInvestigationsServerSetup,
@@ -301,6 +302,12 @@ export class NightshiftInvestigationsPlugin
       plugins.agentBuilder.callbacks.registerAdmissionCheck(
         createSlackTurnAdmissionCheck({
           getQuotaCallback: () => this.investigationQuotaCallback,
+          getSettingsUrl: (spaceId) =>
+            getNightshiftSettingsUrl({
+              locator: settingsLocator,
+              spaceId,
+              kibanaUrl: core.http.basePath.publicBaseUrl,
+            }),
           logger: this.logger,
         })
       );

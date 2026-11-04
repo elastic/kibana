@@ -12,12 +12,29 @@ import type { CallbackAdmissionCheck } from '@kbn/agent-builder-server';
 import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { evaluateInvestigationQuota } from '../client/evaluate_investigation_quota';
 import { InvestigationQuotaDeniedError, InvestigationUnavailableError } from '../client/errors';
-import type { InvestigationQuotaCallback } from '../types';
+import type { InvestigationQuotaCallback, InvestigationQuotaLimit } from '../types';
 
 const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
   NIGHTSHIFT_ASSISTANT_AGENT_ID,
   NIGHTSHIFT_INVESTIGATION_AGENT_ID,
 ]);
+
+/**
+ * Marks a refusal whose message is meant for the person in the external conversation. Relay posts
+ * that message in the Slack thread instead of retrying the turn.
+ */
+export const USER_FACING_ERROR_HEADER = 'x-elastic-user-facing-error';
+
+/** Readers may lack the privilege to change settings, so the text addresses an admin. */
+export const getLimitReachedMessage = (
+  deniedBy: InvestigationQuotaLimit,
+  settingsUrl?: string
+): string => {
+  const reached = new InvestigationQuotaDeniedError(deniedBy).message;
+  return settingsUrl
+    ? `${reached}. An admin can raise it in Nightshift settings: ${settingsUrl}`
+    : `${reached}. An admin can raise it in the Nightshift settings.`;
+};
 
 /**
  * Charges the daily manual investigation quota for a Slack mention of a Nightshift agent that
@@ -27,12 +44,15 @@ const SLACK_AGENT_IDS: ReadonlySet<string> = new Set([
 export const createSlackTurnAdmissionCheck =
   ({
     getQuotaCallback,
+    getSettingsUrl,
     logger,
   }: {
     getQuotaCallback: () => InvestigationQuotaCallback | undefined;
+    /** The absolute Nightshift settings URL in a space, when it can be built. */
+    getSettingsUrl: (spaceId: string) => string | undefined;
     logger: Logger;
   }): CallbackAdmissionCheck =>
-  async ({ origin, agentId }) => {
+  async ({ origin, agentId, spaceId }) => {
     if (origin.type !== ConversationOriginType.Slack || !SLACK_AGENT_IDS.has(agentId)) {
       return;
     }
@@ -48,7 +68,11 @@ export const createSlackTurnAdmissionCheck =
         : error;
     });
     if (!allowed) {
-      throw tooManyRequests(new InvestigationQuotaDeniedError(deniedBy ?? 'manual').message);
+      const refusal = tooManyRequests(
+        getLimitReachedMessage(deniedBy ?? 'manual', getSettingsUrl(spaceId))
+      );
+      refusal.output.headers[USER_FACING_ERROR_HEADER] = 'true';
+      throw refusal;
     }
     return release;
   };
