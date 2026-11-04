@@ -9,6 +9,7 @@
 import type { EsWorkflowStepExecution } from '@kbn/workflows';
 import type { EnterRetryNode } from '@kbn/workflows/graph';
 import { ExecutionError } from '@kbn/workflows/server';
+import { WorkflowTemplatingEngine } from '../../../../templating_engine';
 import type { StepExecutionRuntime } from '../../../../workflow_context_manager/step_execution_runtime';
 import type { WorkflowExecutionRuntimeManager } from '../../../../workflow_context_manager/workflow_execution_runtime_manager';
 import type { IWorkflowEventLogger } from '../../../../workflow_event_logger';
@@ -409,6 +410,38 @@ describe('EnterRetryNodeImpl', () => {
 
         expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.id);
         expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+      });
+
+      describe('with a condition rendered by the templating engine', () => {
+        beforeEach(() => {
+          const templatingEngine = new WorkflowTemplatingEngine();
+          fakeFailedContextManager.evaluateBooleanExpressionInContext.mockImplementation(
+            (condition, additionalContext) =>
+              templatingEngine.renderCondition(condition, { ...additionalContext }) === true
+          );
+        });
+
+        it('retries when the condition matches on error.retryable', async () => {
+          node.configuration.condition = '${{ error.retryable == false }}';
+
+          await underTest.catchError(fakeFailedContext);
+
+          expect(workflowRuntime.navigateToNode).toHaveBeenCalledWith(node.id);
+          expect(workflowRuntime.setWorkflowError).toHaveBeenCalledWith(undefined);
+        });
+
+        it('propagates the error when the condition evaluates to false', async () => {
+          node.configuration.condition = '${{ error.retryable != false }}';
+
+          await underTest.catchError(fakeFailedContext);
+
+          expect(workflowRuntime.navigateToNode).not.toHaveBeenCalled();
+          expect(workflowRuntime.setWorkflowError).not.toHaveBeenCalled();
+          expect(stepExecutionRuntime.failStep).not.toHaveBeenCalled();
+          expect(workflowLogger.logDebug).toHaveBeenCalledWith(
+            'Condition for retry step not met, propagating error.'
+          );
+        });
       });
     });
 
