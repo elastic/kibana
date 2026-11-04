@@ -9,6 +9,7 @@
 
 import { isRecord } from '../openapi/schema_walk';
 import type { JsonSchema, OpenApiDocument } from '../openapi/types';
+import { isAwsJsonModel, toAwsJsonDocument } from './aws_json';
 import type { Location } from './shape_schema';
 import { createShapeConverter, isRequired } from './shape_schema';
 import type { MemberShape, Shape, SmithyModel } from './smithy_model';
@@ -65,7 +66,8 @@ const bindingOf = (member: MemberShape): string | undefined =>
  * header parameters by their binding traits, the `@httpPayload`, or the JSON body; and modeled
  * errors become responses at their `@httpError` status. Requests are served from the regional
  * endpoint, `https://{endpointPrefix}.{region}.amazonaws.com`, and must carry an
- * `Authorization` header when the service uses SigV4.
+ * `Authorization` header when the service uses SigV4. AWS JSON RPC services (`awsJson1_0`,
+ * `awsJson1_1`) have no paths, so they are described by `toAwsJsonDocument` instead.
  */
 export const convertSmithy = (
   model: SmithyModel,
@@ -73,11 +75,15 @@ export const convertSmithy = (
 ): OpenApiDocument => {
   const [serviceId, service] = pickService(model, options.service);
   const protocols = protocolsOf(service);
+  // RPC services have no paths to convert; they are described by operation instead.
   if (!protocols.includes(REST_JSON) && !protocols.includes(REST_XML)) {
+    if (isAwsJsonModel(model, options.service)) {
+      return toAwsJsonDocument(model, options);
+    }
     throw new Error(
       `${serviceId} uses ${
         protocols.join(', ') || 'no AWS protocol'
-      }; convertSmithy supports ${REST_JSON} and ${REST_XML}`
+      }; convertSmithy supports ${REST_JSON}, ${REST_XML}, aws.protocols#awsJson1_0 and aws.protocols#awsJson1_1`
     );
   }
   const xml = !protocols.includes(REST_JSON);

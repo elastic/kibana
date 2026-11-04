@@ -107,18 +107,28 @@ const fitToSizeLimit = (event: OnlineEvalScoreEvent): OnlineEvalScoreEvent => {
 
 /**
  * Builds the score event for one scored run. Explanations are included only when
- * `includeExplanations` is true, because they may quote customer data.
+ * `includeExplanations` is true, because they may quote customer data. `failedEvaluators` are
+ * the evaluators of an evaluation that failed as a whole, so none of them ran.
  */
 export const buildOnlineEvalScoreEvent = ({
   metadata,
   results,
+  failedEvaluators = [],
   includeExplanations,
 }: {
   metadata: OnlineEvalScoreMetadata;
   results: EvaluateResult[];
+  failedEvaluators?: ReadonlyArray<{ name: string; version?: string }>;
   includeExplanations: boolean;
 }): OnlineEvalScoreEvent => {
-  const errors = toErrors(results);
+  const errors: OnlineEvalError[] = [
+    ...toErrors(results),
+    ...failedEvaluators.map(({ name, version }) => ({
+      evaluator_name: name,
+      ...(version ? { evaluator_version: version } : {}),
+      code: 'evaluation_failed' as const,
+    })),
+  ];
   const skippedCount = errors.filter(({ code }) => code === 'evidence_unmet').length;
   // Online evals run every judge on one fixed model, so one value covers the event.
   const judgeModel = results.find(({ evaluator }) => evaluator.model)?.evaluator.model?.id;
@@ -127,7 +137,7 @@ export const buildOnlineEvalScoreEvent = ({
     ...metadata,
     ...(judgeModel ? { judge_model: judgeModel } : {}),
     scores: toScores(results, includeExplanations),
-    evaluator_count: results.length,
+    evaluator_count: results.length + failedEvaluators.length,
     failed_count: errors.length - skippedCount,
     skipped_count: skippedCount,
     errors,

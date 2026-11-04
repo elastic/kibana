@@ -400,6 +400,32 @@ steps:
         with:
           failed_retag_count: "${{ steps.retag_approved_leftovers.output.failed | default: 0 }}"
 
+      # The proposal API does not expose the close action's output, so the comment cannot read how
+      # many alerts were already closed. The close sets `false_positive`, so a live alert that is
+      # closed with another reason was closed by an analyst first. The sentence about them is
+      # posted only when there are some. If this search fails the sentence is left out.
+      - name: count_analyst_closed
+        type: elasticsearch.search
+        on-failure:
+          retry:
+            max-attempts: 3
+            delay: 5s
+          continue: true
+        with:
+          index: ".alerts-security.alerts-{{ workflow.spaceId }}"
+          size: 0
+          track_total_hits: true
+          query:
+            bool:
+              filter:
+                - terms:
+                    _id: "${{ variables.live_alert_ids }}"
+                - term:
+                    kibana.alert.workflow_status: closed
+              must_not:
+                - term:
+                    kibana.alert.workflow_reason: false_positive
+
       # Everything the analyst approved has already happened by this point: the alerts are
       # closed and the proposal is `succeeded`. Failing the run on the bookkeeping patch
       # would report a successful triage as a failure, so the patch is allowed to fail.
@@ -443,7 +469,7 @@ steps:
           author_name: "{{ consts.author_name }}"
           conversation_id: "{{ inputs.conversation_id }}"
           message: >-
-            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %}. {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} closed as false positive.{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
+            Proposal {{ steps.get_proposal.output.decision | default: 'approved' }}{% if steps.get_proposal.output.decidedBy %} by @{{ steps.get_proposal.output.decidedBy.username }}{% endif %} and {{ variables.fp_candidate_count }} alert{% if variables.fp_candidate_count != 1 %}s{% endif %} {% if variables.fp_candidate_count != 1 %}are{% else %}is{% endif %} now closed.{% if steps.count_analyst_closed.output.hits.total.value > 0 %} Alerts an analyst had already closed kept their original reason.{% endif %}{% if steps.retag_approved_leftovers.output.matched > 0 %} {{ steps.retag_approved_leftovers.output.matched }} open alert{% if steps.retag_approved_leftovers.output.matched != 1 %}s{% endif %} that {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} not part of the approved closure {% if steps.retag_approved_leftovers.output.matched != 1 %}were{% else %}was{% endif %} re-tagged az:inconclusive.{% endif %}{% if steps.retag_approved_leftovers.error != blank or variables.failed_retag_count > 0 %} ⚠️ Re-tagging the alerts that were not part of the approved closure did not fully succeed, so some may still be tagged az:false_positive.{% endif %}
 
   - name: handle_dismissed
     type: if

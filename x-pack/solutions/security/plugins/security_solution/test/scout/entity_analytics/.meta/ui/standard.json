@@ -1,5 +1,5 @@
 {
-  "sha1": "26d935069783262b3831c65879d8bc996d1f4add",
+  "sha1": "b448f57de6dc55a58ff12da4d6414b96988a714f",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -30,6 +30,34 @@
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page_privileges.spec.ts",
         "line": 80,
         "column": 9
+      }
+    },
+    {
+      "id": "d6a418d97af1165-dc79c66192b7a9b",
+      "title": "Entity analytics new home page loads with the six tiles and the entities grid",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts",
+        "line": 66,
+        "column": 25
+      }
+    },
+    {
+      "id": "d6a418d97af1165-3853a30d8d6fef8",
+      "title": "Entity analytics new home page a tile filters the grid to its entities, and a second click clears it",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/security_solution/test/scout/entity_analytics/ui/tests/new_home_page.spec.ts",
+        "line": 76,
+        "column": 8
       }
     }
   ]
