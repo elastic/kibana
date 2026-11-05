@@ -9,27 +9,29 @@ import { asRuleEventsClient } from '../../../lib/significant_events/events/rule_
 import { updateEventStatusToolHandler } from './handler';
 
 describe('updateEventStatusToolHandler', () => {
-  it('creates a new event version when status changes', async () => {
+  it('creates an alert action for the stored episode when the status changes', async () => {
     const eventClient = {
       findLatestByEventId: jest.fn().mockResolvedValue({
         event_id: 'event-id-1',
         status: 'active',
+        episode_id: 'episode-1',
       }),
     };
-    const alertEventsClient = { createAlertEvent: jest.fn().mockResolvedValue(undefined) };
+    const alertActionsClient = { createEpisodeAction: jest.fn().mockResolvedValue(undefined) };
 
     const result = await updateEventStatusToolHandler({
       eventSearchClient: asRuleEventsClient(eventClient, {
-        getAlertEventsClient: async () => alertEventsClient as never,
+        getAlertActionsClient: async () => alertActionsClient as never,
       }),
       eventId: 'event-id-1',
       status: 'inactive',
     });
 
-    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledTimes(1);
-    expect(alertEventsClient.createAlertEvent).toHaveBeenCalledWith(
-      expect.objectContaining({ alert_status: 'inactive' })
-    );
+    expect(alertActionsClient.createEpisodeAction).toHaveBeenCalledTimes(1);
+    expect(alertActionsClient.createEpisodeAction).toHaveBeenCalledWith({
+      episodeId: 'episode-1',
+      action: expect.objectContaining({ action_type: 'deactivate' }),
+    });
     expect(result).toEqual({
       event_id: 'event-id-1',
       updated: 1,

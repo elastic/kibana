@@ -6,8 +6,8 @@
  */
 
 /**
- * The two codes an alert action is rejected with when the write it was asked
- * for would not change the alert. They live beside the response schemas,
+ * The codes an alert action is rejected with when the write it was asked
+ * for would not change the alert, or acts on a superseded alert. They live beside the response schemas,
  * rather than only in the server's error catalog, because clients have to
  * recognize them: in bulk they arrive as per-item entries in `errors[]`,
  * where they mean "left untouched", not "failed".
@@ -18,6 +18,12 @@
  * or `unsnooze` of a series with no snooze in effect.
  */
 export const INVALID_ALERT_STATE_TRANSITION_CODE = 'INVALID_ALERT_STATE_TRANSITION';
+
+/**
+ * A lifecycle action (`activate` / `deactivate`) on an alert that is not the latest of its
+ * series: a newer episode exists, so the caller acted on stale state.
+ */
+export const ALERT_NOT_LATEST_CODE = 'ALERT_NOT_LATEST';
 
 /**
  * `assign` to the current assignee, `tag` with the current set, or `snooze`

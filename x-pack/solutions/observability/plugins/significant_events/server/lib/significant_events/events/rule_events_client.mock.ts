@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
+import type { AlertActionsClientApi, AlertEventsClientApi } from '@kbn/alerting-v2-plugin/server';
 import type { TriggerEmitter } from '../../../workflows/triggers/emit';
 import { RuleEventsClient } from './rule_events_client';
 
@@ -18,6 +18,7 @@ export const asRuleEventsClient = (
   reads: object,
   writer: {
     getAlertEventsClient?: () => Promise<AlertEventsClientApi>;
+    getAlertActionsClient?: () => Promise<AlertActionsClientApi>;
     emitTrigger?: TriggerEmitter;
   } = {}
 ): RuleEventsClient =>

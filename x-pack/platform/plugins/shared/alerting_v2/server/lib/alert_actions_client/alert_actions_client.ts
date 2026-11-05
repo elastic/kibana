@@ -26,7 +26,9 @@ import { ALERTING_ERROR_CODES } from '../errors/error_codes';
 import {
   getAlertEpisodeNotFoundMessage,
   getAlertSeriesNotFoundMessage,
+  getAlertActionsNotPersistedMessage,
   getEpisodeNotLatestMessage,
+  getUserProfileRequiredMessage,
 } from '../errors/alert_error_messages';
 import {
   ALERT_ACTIONS_RESOURCE_KEY,
@@ -41,8 +43,10 @@ import {
 import { AlertActionEventPublisher } from '../events/alert_action_event_publisher/alert_action_event_publisher';
 import { type QueryServiceContract } from '../services/query_service/query_service';
 import { QueryServiceInternalToken } from '../services/query_service/tokens';
-import type { StorageServiceContract } from '../services/storage_service/storage_service';
-import { StorageServiceScopedToken } from '../services/storage_service/tokens';
+import type {
+  BulkIndexResult,
+  StorageServiceContract,
+} from '../services/storage_service/storage_service';
 import type { UserServiceContract } from '../services/user_service/user_service';
 import { UserService } from '../services/user_service/user_service';
 import { RequestSpaceIdToken } from '../services/spaces_service/tokens';
@@ -62,6 +66,7 @@ import {
   loadSeriesActionStatesBySeries,
   type SeriesActionState,
 } from './context_loaders/load_series_action_states';
+import { AlertActionsRequireUserProfileToken, AlertActionsStorageToken } from './tokens';
 import type { AlertEventRecord } from './types';
 import type { PreparedAction } from './handler';
 import {
@@ -158,13 +163,14 @@ const isLifecycleActionType = (actionType: EpisodeAlertActionType): boolean =>
 export class AlertActionsClient {
   constructor(
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
-    @inject(StorageServiceScopedToken) private readonly storageService: StorageServiceContract,
+    @inject(AlertActionsStorageToken) private readonly storageService: StorageServiceContract,
     @inject(UserService) private readonly userService: UserServiceContract,
     @inject(Request) private readonly request: KibanaRequest,
     @inject(RequestSpaceIdToken) private readonly spaceId: string,
     @inject(AlertActionEventPublisher)
     private readonly eventPublisher: AlertActionEventPublisher,
-    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract
+    @inject(ResourceManager) private readonly resourceManager: ResourceManagerContract,
+    @inject(AlertActionsRequireUserProfileToken) private readonly requireUserProfile: boolean
   ) {}
 
   /**
@@ -187,7 +193,7 @@ export class AlertActionsClient {
     }
 
     const [userProfileUid, alertEvent, seriesActionStates] = await Promise.all([
-      this.userService.getCurrentUserProfileUid(),
+      this.getActorProfileUid(),
       loadLastSeriesAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
@@ -206,7 +212,7 @@ export class AlertActionsClient {
         seriesActionStates.get(encodeSeriesId(series) ?? seriesId) ?? EMPTY_SERIES_ACTION_STATE,
     });
 
-    await this.persistPreparedActions([prepared]);
+    await this.persistPreparedActionsOrThrow([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
@@ -227,7 +233,7 @@ export class AlertActionsClient {
     const { episodeId, action } = params;
 
     const [userProfileUid, alertEvent, actionStates] = await Promise.all([
-      this.userService.getCurrentUserProfileUid(),
+      this.getActorProfileUid(),
       loadLastEpisodeAlertEventOrThrow({
         queryService: this.queryService,
         spaceId: this.spaceId,
@@ -255,7 +261,7 @@ export class AlertActionsClient {
       alertActionState: actionStates.get(episodeId) ?? EMPTY_ALERT_ACTION_STATE,
     });
 
-    await this.persistPreparedActions([prepared]);
+    await this.persistPreparedActionsOrThrow([prepared]);
     this.eventPublisher.emitEpisodeActions(this.request, [prepared.alertActionDoc]);
   }
 
@@ -389,14 +395,28 @@ export class AlertActionsClient {
   }
 
   /**
+   * The acting user's profile uid. When the client was resolved to write as the internal user
+   * (`requireUserProfile`), a missing uid is a 403: the action would otherwise carry no actor.
+   */
+  private async getActorProfileUid(): Promise<string | null> {
+    const userProfileUid = await this.userService.getCurrentUserProfileUid();
+    if (this.requireUserProfile && userProfileUid == null) {
+      throw Boom.forbidden(getUserProfileRequiredMessage());
+    }
+    return userProfileUid;
+  }
+
+  /**
    * Persists a batch of prepared actions in a single ES `_bulk` round-trip.
    * `bulkIndexDocsAcrossIndices` is used uniformly so audit-only batches and
    * mixed audit + synthetic `.rule-events` batches share one code path. The
    * `wait_for` refresh ensures the next API/UI read sees the new state.
    */
-  private async persistPreparedActions(prepared: readonly PreparedAction[]): Promise<void> {
+  private async persistPreparedActions(
+    prepared: readonly PreparedAction[]
+  ): Promise<BulkIndexResult<Record<string, unknown>> | undefined> {
     if (prepared.length === 0) {
-      return;
+      return undefined;
     }
 
     const docs = prepared.flatMap(({ alertActionDoc, ruleEvent }) =>
@@ -414,10 +434,26 @@ export class AlertActionsClient {
       this.resourceManager.ensureResourceReady(ALERT_EVENTS_RESOURCE_KEY),
     ]);
 
-    await this.storageService.bulkIndexDocsAcrossIndices({
+    return this.storageService.bulkIndexDocsAcrossIndices({
       docs,
       refresh: 'wait_for',
     });
+  }
+
+  /**
+   * Persists the one action of a single-action call and throws when the bulk reports a
+   * per-document failure. Per-document failures resolve the promise, so without this a half-written
+   * action (the audit row without its synthetic rule event, or the reverse) reads as a success.
+   * The bulk methods keep their behavior and are not changed here.
+   */
+  private async persistPreparedActionsOrThrow(prepared: readonly PreparedAction[]): Promise<void> {
+    const result = await this.persistPreparedActions(prepared);
+    if (result && result.errors.length > 0) {
+      throw Boom.internal(
+        getAlertActionsNotPersistedMessage(result.errors.length, result.attempted),
+        { code: ALERTING_ERROR_CODES.INTERNAL_SERVER_ERROR }
+      );
+    }
   }
 
   /**
@@ -439,7 +475,7 @@ export class AlertActionsClient {
     const requestSpaceItems = decodedItems.filter(({ inRequestSpace }) => inRequestSpace);
 
     const [userProfileUid, latestEvents, seriesActionStates] = await Promise.all([
-      this.userService.getCurrentUserProfileUid(),
+      this.getActorProfileUid(),
       loadLatestAlertEventsBySeries({
         queryService: this.queryService,
         spaceId: this.spaceId,
@@ -513,7 +549,7 @@ export class AlertActionsClient {
     items: BulkCreateEpisodeAlertActionItemBody[]
   ): Promise<BulkResponse> {
     const [userProfileUid, episodeEvents, actionStates] = await Promise.all([
-      this.userService.getCurrentUserProfileUid(),
+      this.getActorProfileUid(),
       loadLatestAlertEventsByEpisodeId({
         queryService: this.queryService,
         spaceId: this.spaceId,
