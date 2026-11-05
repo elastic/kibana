@@ -18,12 +18,18 @@ export type OnlineEvalGradedReport = 'first_round' | 'pre_recovery' | 'current';
 export type OnlineEvalEntryPoint = InvestigationEntryPoint;
 
 /**
- * Why an evaluator produced no score. `evidence_unmet` counts as skipped: the round didn't have
- * what the evaluator grades. `evaluation_failed` means no evaluator ran, because the evidence
+ * Why an evaluator produced no score. `evidence_unmet` and `not_applicable` count as skipped:
+ * `evidence_unmet` means the round didn't have what the evaluator grades, and `not_applicable`
+ * means the evaluator read the round and found nothing to grade, such as a recovery with no
+ * verified cause. `evaluation_failed` means no evaluator ran, because the evidence
  * couldn't be read or `evaluate()` threw. Error messages are never sent, because they can quote
  * evidence.
  */
-export type OnlineEvalErrorCode = 'evidence_unmet' | 'evaluator_error' | 'evaluation_failed';
+export type OnlineEvalErrorCode =
+  | 'evidence_unmet'
+  | 'not_applicable'
+  | 'evaluator_error'
+  | 'evaluation_failed';
 
 export interface OnlineEvalScore {
   evaluator_name: string;
@@ -192,7 +198,10 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
   },
   skipped_count: {
     type: 'long',
-    _meta: { description: "Evaluators skipped because the round didn't have what they grade." },
+    _meta: {
+      description:
+        "Evaluators skipped because the round didn't have what they grade, or they didn't apply to it.",
+    },
   },
   errors: {
     type: 'array',
@@ -207,7 +216,7 @@ const onlineEvalScoreSchema: RootSchema<OnlineEvalScoreEvent> = {
           type: 'keyword',
           _meta: {
             description:
-              'Error code: evidence_unmet (skipped), evaluator_error, or evaluation_failed when no evaluator ran.',
+              'Error code: evidence_unmet or not_applicable (skipped), evaluator_error, or evaluation_failed when no evaluator ran.',
           },
         },
       },
