@@ -81,7 +81,7 @@ describe('IntroBannerVideo', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftOnboardingIntroVideoClose'));
     expect(screen.queryByTestId('nightshiftOnboardingIntroVideoExpanded')).toBeNull();
-    // Without the pre-open blur, EuiModal restores focus to the preview instead of <body>.
+    // Without the pre-open blur, EuiFocusTrap restores focus to the preview instead of <body>.
     expect(preview).toHaveFocus();
   });
 

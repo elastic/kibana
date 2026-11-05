@@ -9,12 +9,14 @@ import { css } from '@emotion/react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButtonIcon,
+  EuiFocusTrap,
   EuiIcon,
-  EuiModal,
-  EuiModalBody,
+  EuiOverlayMask,
+  EuiScreenReaderOnly,
   EuiToolTip,
   keys,
   transparentize,
+  useEuiShadow,
   useEuiTheme,
   useGeneratedHtmlId,
 } from '@elastic/eui';
@@ -65,7 +67,9 @@ const iframeTitle = i18n.translate('xpack.nightshift.onboarding.introVideoIframe
  */
 export function IntroBannerVideo(): React.ReactElement {
   const { euiTheme } = useEuiTheme();
+  const expandedShadow = useEuiShadow('xl');
   const mediaRootRef = useRef<HTMLDivElement>(null);
+  const maskRef = useRef<HTMLDivElement>(null);
   const modalTitleId = useGeneratedHtmlId({ prefix: 'nightshiftIntroVideoTitle' });
   const [isExpanded, setIsExpanded] = useState(false);
   const [isPreviewHighlighted, setIsPreviewHighlighted] = useState(false);
@@ -99,6 +103,23 @@ export function IntroBannerVideo(): React.ReactElement {
     clearPreviewHighlight();
     setIsExpanded(false);
   }, [clearPreviewHighlight]);
+
+  const handleMaskClick = useCallback(
+    (event: MouseEvent | TouchEvent) => {
+      if (event.target === maskRef.current) {
+        closeExpanded();
+      }
+    },
+    [closeExpanded]
+  );
+
+  const handleExpandedKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === keys.ESCAPE) {
+      event.preventDefault();
+      event.stopPropagation();
+      closeExpanded();
+    }
+  };
 
   const handleMediaClick = (event: React.MouseEvent<HTMLDivElement>) => {
     event.preventDefault();
@@ -171,12 +192,6 @@ export function IntroBannerVideo(): React.ReactElement {
       background: ${transparentize(euiTheme.colors.plainDark, 0.6)};
       color: ${euiTheme.colors.textGhost};
     }
-
-    .euiButtonIcon__icon {
-      fill: ${euiTheme.colors.textGhost};
-      inline-size: ${euiTheme.size.base};
-      block-size: ${euiTheme.size.base};
-    }
   `;
 
   const playBadgeStyles = css`
@@ -204,33 +219,13 @@ export function IntroBannerVideo(): React.ReactElement {
     }
   `;
 
-  const modalStyles = css`
-    max-block-size: ${EXPANDED_MAX_VIEWPORT_PERCENT}vh;
-
-    .euiModalHeader {
-      display: none;
-    }
-
-    /* Prefer the glass close control that matches the prototype chrome. */
-    .euiModal__closeIcon {
-      display: none !important;
-    }
-
-    .euiModalBody {
-      padding: 0;
-    }
-
-    .euiModalBody__overflow {
-      mask-image: none;
-      padding: 0;
-    }
-  `;
-
   const expandedPanelStyles = css`
+    ${expandedShadow};
     position: relative;
     width: min(${EXPANDED_MAX_VIEWPORT_PERCENT}vw, ${(EXPANDED_MAX_VIEWPORT_PERCENT * 16) / 9}vh);
     aspect-ratio: 16 / 9;
     background: ${euiTheme.colors.plainDark};
+    border-radius: ${euiTheme.border.radius.medium};
     overflow: hidden;
   `;
 
@@ -298,19 +293,22 @@ export function IntroBannerVideo(): React.ReactElement {
       </div>
 
       {isExpanded ? (
-        <EuiModal
-          aria-labelledby={modalTitleId}
-          css={modalStyles}
-          maxWidth={false}
-          onClose={closeExpanded}
-          outsideClickCloses
-          data-test-subj="nightshiftOnboardingIntroVideoExpanded"
-        >
-          <h2 id={modalTitleId} className="euiScreenReaderOnly">
-            {iframeTitle}
-          </h2>
-          <EuiModalBody>
-            <div css={expandedPanelStyles}>
+        <EuiOverlayMask maskRef={maskRef} data-test-subj="nightshiftOnboardingIntroVideoMask">
+          <EuiFocusTrap scrollLock preventScrollOnFocus onClickOutside={handleMaskClick}>
+            {/* Escape is handled on the dialog itself, as EuiModal does. */}
+            {/* eslint-disable-next-line jsx-a11y/no-noninteractive-element-interactions */}
+            <div
+              css={expandedPanelStyles}
+              role="dialog"
+              aria-modal={true}
+              aria-labelledby={modalTitleId}
+              tabIndex={0}
+              onKeyDown={handleExpandedKeyDown}
+              data-test-subj="nightshiftOnboardingIntroVideoExpanded"
+            >
+              <EuiScreenReaderOnly>
+                <h2 id={modalTitleId}>{iframeTitle}</h2>
+              </EuiScreenReaderOnly>
               <EuiToolTip content={closeButtonAriaLabel} disableScreenReaderOutput>
                 <EuiButtonIcon
                   css={closeButtonStyles}
@@ -334,8 +332,8 @@ export function IntroBannerVideo(): React.ReactElement {
                 sandbox="allow-scripts allow-same-origin"
               />
             </div>
-          </EuiModalBody>
-        </EuiModal>
+          </EuiFocusTrap>
+        </EuiOverlayMask>
       ) : null}
     </>
   );
