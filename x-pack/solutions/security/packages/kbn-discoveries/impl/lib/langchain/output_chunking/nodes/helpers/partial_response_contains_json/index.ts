@@ -5,12 +5,6 @@
  * 2.0.
  */
 
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under the
- * Elastic License 2.0. Use of this file except in compliance with the Elastic
- * License 2.0.
- */
-
 /**
  * Whether a partial generation looks like part of the JSON document, rather
  * than the reasoning prose the prompts ask the model to show before it.
