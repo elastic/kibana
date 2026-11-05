@@ -14,6 +14,7 @@ import {
   DEFAULT_CONVERSATION_TITLE,
   type ConversationWithoutRoundsWithPermissions,
 } from '@kbn/agent-builder-common';
+import { setNightshiftInvestigatingShimmer } from '@kbn/custom-content-renderer';
 import { conversationToInvestigationSummary, InvestigationBriefCard } from './brief_card';
 
 const conversation = {
@@ -29,6 +30,10 @@ const conversation = {
 } as ConversationWithoutRoundsWithPermissions;
 
 describe('InvestigationBriefCard', () => {
+  beforeEach(() => {
+    setNightshiftInvestigatingShimmer(true);
+  });
+
   it('derives a summary from the conversation alone', () => {
     expect(conversationToInvestigationSummary(conversation)).toEqual({
       id: 'conv-1',
@@ -74,6 +79,8 @@ describe('InvestigationBriefCard', () => {
     await waitFor(() => expect(loader.load).toHaveBeenCalledWith('conv-1'));
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
     expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
-    expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toHaveAttribute('data-text', 'In progress');
+    expect(screen.getByTestId('pulseDotsLoader')).toHaveAttribute('width', '12');
+    expect(screen.queryByTestId('investigationCardRunningDots')).not.toBeInTheDocument();
   });
 });

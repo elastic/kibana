@@ -6,6 +6,10 @@
  */
 
 import { useQuery } from '@kbn/react-query';
+import {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  getNightshiftInvestigationDetailsPreview,
+} from '@kbn/custom-content-renderer';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { CoreStart, HttpStart } from '@kbn/core/public';
 import { AGENTIC_INVESTIGATIONS_API_VERSION, INVESTIGATION_BY_ID_URL } from '../../../common';
@@ -35,15 +39,27 @@ export const fetchInvestigation = (
  * can start running again without any action in the flyout (a proposal decided elsewhere or past
  * its deadline, a new worker taking over), so polling does not depend on `in_progress`.
  */
+const readPreviewInvestigation = (id: string): Investigation | undefined => {
+  if (id !== NIGHTSHIFT_PREVIEW_INVESTIGATION_ID) {
+    return undefined;
+  }
+  const preview = getNightshiftInvestigationDetailsPreview()?.investigation;
+  return preview === undefined ? undefined : (preview as Investigation);
+};
+
 export const useInvestigation = (id: string) => {
   const {
     services: { http },
   } = useKibana<CoreStart>();
+  const previewInvestigation = readPreviewInvestigation(id);
 
   return useQuery({
     queryKey: investigationQueryKeys.detail(id),
-    queryFn: ({ signal }) => fetchInvestigation(http, id, signal),
-    refetchInterval: IN_PROGRESS_REFETCH_INTERVAL_MS,
-    retry: retryOnTransientError,
+    queryFn: ({ signal }) => {
+      const preview = readPreviewInvestigation(id);
+      return preview ?? fetchInvestigation(http, id, signal);
+    },
+    refetchInterval: previewInvestigation ? false : IN_PROGRESS_REFETCH_INTERVAL_MS,
+    retry: previewInvestigation ? false : retryOnTransientError,
   });
 };

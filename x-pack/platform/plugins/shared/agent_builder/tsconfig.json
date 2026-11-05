@@ -152,6 +152,7 @@
     "@kbn/context-engine-plugin",
     "@kbn/files-plugin",
     "@kbn/ui-callout",
+    "@kbn/custom-content-renderer",
     "@kbn/core-http-browser-mocks",
     "@kbn/projects-solutions-groups",
   ]

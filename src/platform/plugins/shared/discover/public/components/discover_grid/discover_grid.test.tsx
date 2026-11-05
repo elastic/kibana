@@ -45,6 +45,7 @@ jest.mock('../../application/main/components/layout/cascaded_documents', () => {
 });
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { dataViewMock } from '@kbn/discover-utils/src/__mocks__';
 import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
@@ -110,6 +111,50 @@ describe('DiscoverGrid renderMode', () => {
     render(<DiscoverGrid {...(baseProps as unknown as DiscoverGridProps)} />);
     const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
     expect(lastProps?.renderMode).toBeUndefined();
+  });
+});
+
+describe('DiscoverGrid keyboard shortcuts', () => {
+  beforeEach(() => {
+    mockUnifiedDataTable.mockClear();
+  });
+
+  const renderToolbar = (keyboardShortcutsControl: React.ReactNode) => {
+    const renderCustomToolbar = jest.fn(() => <></>);
+    render(
+      <DiscoverGrid
+        {...(baseProps as unknown as DiscoverGridProps)}
+        renderCustomToolbar={renderCustomToolbar}
+      />
+    );
+    const lastProps = mockUnifiedDataTable.mock.calls.at(-1)?.[0];
+    const renderDiscoverToolbar = lastProps?.renderCustomToolbar as (props: {
+      toolbarProps: { keyboardShortcutsControl: React.ReactNode };
+      gridProps: Record<string, never>;
+    }) => void;
+
+    renderDiscoverToolbar({
+      toolbarProps: { keyboardShortcutsControl },
+      gridProps: {},
+    });
+
+    return renderCustomToolbar.mock.calls[0][0].toolbarProps
+      .keyboardShortcutsControl as React.ReactElement;
+  };
+
+  it('replaces the visible data grid shortcut control with Discover keycaps', () => {
+    const control = renderToolbar(<span data-test-subj="euiKeyboardShortcuts" />);
+    render(<EuiProvider>{control}</EuiProvider>);
+
+    expect(screen.getByTestId('discoverKeyboardShortcutsButton')).toBeInTheDocument();
+    expect(screen.queryByTestId('euiKeyboardShortcuts')).not.toBeInTheDocument();
+  });
+
+  it('keeps the screen-reader-only shortcut control', () => {
+    const hidden = <span data-test-subj="hiddenShortcuts" {...{ showOnFocus: true }} />;
+    const control = renderToolbar(hidden);
+
+    expect(control).toBe(hidden);
   });
 });
 

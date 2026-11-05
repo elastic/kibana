@@ -9,10 +9,33 @@ import {
   ConversationAccessControlMode,
   ConversationAccessControlRole,
 } from '@kbn/agent-builder-common';
+import {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  setNightshiftInvestigationDetailsPreview,
+} from '@kbn/custom-content-renderer';
 import { publicApiPath, internalApiPath } from '../../../common/constants';
 import { ConversationsService } from './conversations_service';
 
 describe('ConversationsService', () => {
+  afterEach(() => {
+    setNightshiftInvestigationDetailsPreview(undefined);
+  });
+
+  it('returns the Nightshift preview conversation without requesting it', async () => {
+    const conversation = { id: NIGHTSHIFT_PREVIEW_INVESTIGATION_ID, title: 'Checkout errors' };
+    setNightshiftInvestigationDetailsPreview({
+      conversation,
+      investigation: { in_progress: true },
+    });
+    const get = jest.fn();
+    const service = new ConversationsService({ http: { get } as never });
+
+    await expect(
+      service.get({ conversationId: NIGHTSHIFT_PREVIEW_INVESTIGATION_ID })
+    ).resolves.toBe(conversation);
+    expect(get).not.toHaveBeenCalled();
+  });
+
   it('creates an empty conversation for an agent', async () => {
     const post = jest.fn().mockResolvedValue({ id: 'conv-1' });
     const service = new ConversationsService({ http: { post } as never });

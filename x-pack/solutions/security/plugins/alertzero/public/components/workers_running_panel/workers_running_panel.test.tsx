@@ -21,6 +21,15 @@ describe('WorkersRunningPanel', () => {
     expect(
       screen.getByRole('heading', { name: 'Workers are running in the background' })
     ).toBeVisible();
+    expect(screen.getByText('Workers are running in the background')).toHaveAttribute(
+      'data-text',
+      'Workers are running in the background'
+    );
+    expect(screen.getByTestId('motionLoader')).toHaveAttribute('data-loader-scenario', 'workersRunning');
+    expect(screen.getByTestId('pulseDotsLoader')).toHaveAttribute('width', '24');
+    expect(
+      screen.queryByText('Proposals land here as each Worker finishes. Nothing needs you right now.')
+    ).not.toBeInTheDocument();
   });
 
   it('should not use first-run wording', () => {

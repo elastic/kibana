@@ -13,6 +13,7 @@ import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
+import { useNightshiftInvestigatingPreview } from '@kbn/custom-content-renderer';
 import { NIGHTSHIFT_APP_ID, OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import {
   getNightshiftCapabilities,
@@ -178,6 +179,7 @@ export function NightshiftPage(): React.ReactElement | null {
   const closeCustomContextFlyout = useCallback(() => setIsCustomContextFlyoutOpen(false), []);
 
   const { isAvailable, isLoading: isAvailabilityLoading } = useSignificantEventsAvailability();
+  const previewInvestigating = useNightshiftInvestigatingPreview();
 
   const onboarding = useOnboardingVisibility({
     isEnabled: canManage && nightshiftInvestigations?.investigationsClient != null,
@@ -206,8 +208,17 @@ export function NightshiftPage(): React.ReactElement | null {
   const onboardingFinishedThisLoad =
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
+  // The loaders control can hold the real home in its investigating state, including before setup.
+  const showInvestigatingHome =
+    previewInvestigating &&
+    !canUseAutomationsPage &&
+    !isSettingsPage &&
+    !isKnowledgePage &&
+    !isSourcesPage &&
+    !isDetectionPage;
   // Before the first investigation the page is only about onboarding, as in the design.
-  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
+  const hidesHeaderActions =
+    isOnboarding && !onboarding.latestInvestigation && !showInvestigatingHome;
 
   // The landing page owns the start investigation modal so the header's primary action can toggle it.
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
@@ -219,7 +230,8 @@ export function NightshiftPage(): React.ReactElement | null {
   useEffect(() => {
     setIsStartInvestigationOpen(false);
   }, [pathname]);
-  const isLandingContent = !canUseAutomationsPage && !isOnboarding && !onboarding.isLoading;
+  const isLandingContent =
+    !canUseAutomationsPage && (showInvestigatingHome || (!isOnboarding && !onboarding.isLoading));
   // Starting an investigation only needs the investigations client, so the action and its modal
   // don't depend on what the landing list renders.
   const canStartInvestigation =
@@ -296,7 +308,7 @@ export function NightshiftPage(): React.ReactElement | null {
 
   // Until the space is set up, every page shows the regular onboarding, which starts at its
   // "Enable Elastic Nightshift" step, for everyone: only admins can complete it.
-  if (isSetupPending || needsSetup) {
+  if ((isSetupPending || needsSetup) && !showInvestigatingHome) {
     return (
       <ObservabilityPageTemplate
         data-test-subj="nightshiftPage"
@@ -319,13 +331,14 @@ export function NightshiftPage(): React.ReactElement | null {
   }
 
   const isHomePage =
-    !isSettingsPage &&
-    !isKnowledgePage &&
-    !isSourcesPage &&
-    !isDetectionPage &&
-    !canUseAutomationsPage &&
-    !isOnboarding &&
-    !onboarding.isLoading;
+    showInvestigatingHome ||
+    (!isSettingsPage &&
+      !isKnowledgePage &&
+      !isSourcesPage &&
+      !isDetectionPage &&
+      !canUseAutomationsPage &&
+      !isOnboarding &&
+      !onboarding.isLoading);
 
   return (
     <ObservabilityPageTemplate
@@ -463,7 +476,7 @@ export function NightshiftPage(): React.ReactElement | null {
             restrictWidth={
               canUseAutomationsPage
                 ? false
-                : isOnboarding || onboarding.isLoading
+                : (isOnboarding || onboarding.isLoading) && !showInvestigatingHome
                 ? ONBOARDING_MAX_WIDTH
                 : '1000px'
             }
@@ -474,13 +487,13 @@ export function NightshiftPage(): React.ReactElement | null {
                 <Route path="/automations/:id" component={AutomationsPage} />
                 <Route path="/automations" component={AutomationsPage} />
               </Routes>
-            ) : isOnboarding ? (
+            ) : isOnboarding && !showInvestigatingHome ? (
               <NightshiftOnboarding
                 latestInvestigation={onboarding.latestInvestigation}
                 automationsHref={canUseAutomations ? automationsHref : undefined}
                 onFinish={finishOnboarding}
               />
-            ) : onboarding.isLoading ? (
+            ) : onboarding.isLoading && !showInvestigatingHome ? (
               <EuiFlexGroup justifyContent="center" data-test-subj="nightshiftOnboardingLoading">
                 <EuiLoadingSpinner size="xl" />
               </EuiFlexGroup>

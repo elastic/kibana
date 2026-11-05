@@ -18,6 +18,11 @@ import {
   useResizeObserver,
 } from '@elastic/eui';
 import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
+import {
+  MotionLoader,
+  ShimmeringText,
+  useNightshiftInvestigatingShimmer,
+} from '@kbn/custom-content-renderer';
 import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigatingTypingDots } from './investigating_typing_dots';
@@ -81,6 +86,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   actions,
 }) => {
   const { euiTheme } = useEuiTheme();
+  const shimmerStatus = useNightshiftInvestigatingShimmer();
   const { labelCss: aiLabelCss } = useAiButtonGradientStyles({ variant: 'outlined' });
   // Same primary→assistance stop colors the AI label gradient uses (dots can't use background-clip).
   const aiDotsFill = `linear-gradient(135deg, ${euiTheme.colors.textPrimary} 2.98%, ${euiTheme.colors.textAssistance} 66.24%)`;
@@ -111,20 +117,38 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       <EuiText size="xs" color="subdued" component="span" aria-hidden>
         •
       </EuiText>
-      <EuiText
-        size="xs"
-        component="span"
-        css={[
-          aiLabelCss,
-          css`
-            padding: 0;
-            line-height: 1;
-          `,
-        ]}
-      >
-        {IN_PROGRESS_LABEL}
-      </EuiText>
-      <InvestigatingTypingDots color={aiDotsFill} />
+      {shimmerStatus ? (
+        <>
+          <EuiText
+            size="xs"
+            component="span"
+            css={css`
+              padding: 0;
+              line-height: 1;
+            `}
+          >
+            <ShimmeringText text={IN_PROGRESS_LABEL} enabled />
+          </EuiText>
+          <MotionLoader scenario="nightshift" loaderId="pulseDots" size={12} decorative />
+        </>
+      ) : (
+        <>
+          <EuiText
+            size="xs"
+            component="span"
+            css={[
+              aiLabelCss,
+              css`
+                padding: 0;
+                line-height: 1;
+              `,
+            ]}
+          >
+            {IN_PROGRESS_LABEL}
+          </EuiText>
+          <InvestigatingTypingDots color={aiDotsFill} />
+        </>
+      )}
     </span>
   ) : undefined;
 

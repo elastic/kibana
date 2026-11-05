@@ -9,6 +9,46 @@ export type { CustomContentRendererServices } from './src/types';
 export type { CustomContentComponentProps } from './src/custom_content_component';
 export { CustomContentComponent } from './src/custom_content_component';
 export { CustomContentEmptyPrompt } from './src/custom_content_empty_prompt';
+export { MotionLoader } from './src/loaders/motion_loader';
+export {
+  getLoader,
+  setLoader,
+  subscribeLoaders,
+  LOADER_IDS,
+  LOADER_IDS_BY_SCENARIO,
+  LOADER_SCENARIOS,
+} from './src/loaders/loader_preference';
+export type { LoaderId, LoaderScenario } from './src/loaders/loader_preference';
+export { useLoader } from './src/loaders/use_loader';
+export { getCustomPanelShimmer, setCustomPanelShimmer } from './src/loaders/custom_panel_shimmer';
+export { useCustomPanelShimmer } from './src/loaders/use_custom_panel_shimmer';
+export {
+  getWorkersRunningShimmer,
+  setWorkersRunningShimmer,
+} from './src/loaders/workers_running_shimmer';
+export { useWorkersRunningShimmer } from './src/loaders/use_workers_running_shimmer';
+export {
+  getWorkersRunningPreview,
+  setWorkersRunningPreview,
+} from './src/loaders/workers_running_preview';
+export { useWorkersRunningPreview } from './src/loaders/use_workers_running_preview';
+export {
+  getNightshiftInvestigatingPreview,
+  setNightshiftInvestigatingPreview,
+} from './src/loaders/nightshift_investigating_preview';
+export { useNightshiftInvestigatingPreview } from './src/loaders/use_nightshift_investigating_preview';
+export {
+  getNightshiftInvestigatingShimmer,
+  setNightshiftInvestigatingShimmer,
+} from './src/loaders/nightshift_investigating_shimmer';
+export { useNightshiftInvestigatingShimmer } from './src/loaders/use_nightshift_investigating_shimmer';
+export {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  getNightshiftInvestigationDetailsPreview,
+  setNightshiftInvestigationDetailsPreview,
+} from './src/loaders/nightshift_investigation_details_preview';
+export type { NightshiftInvestigationDetailsPreview } from './src/loaders/nightshift_investigation_details_preview';
+export { ShimmeringText } from './src/shimmering_text';
 export { useCustomContentHtml } from './src/use_custom_content_html';
 export type {
   UseCustomContentHtmlParams,

@@ -6,12 +6,13 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiLoadingElastic, useEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { AgentDefinition } from '@kbn/agent-builder-common';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import { AgentAvatar } from '../../common/agent_avatar';
+import { AgentAvatarLoader } from '../../../../components/agent_avatar_loader/agent_avatar_loader';
 import { AuthorHeader } from './author_header';
 import { useConversationId } from '../../../context/conversation/use_conversation_id';
 import { EventSteps } from './event_steps/event_steps';
@@ -130,6 +131,16 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
     min-inline-size: ${euiTheme.size.l};
   `;
 
+  // The finished avatar for size "s" is a size.l box. A smaller loader stays centered in it.
+  const loaderFrameStyles = css`
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    inline-size: ${euiTheme.size.l};
+    block-size: ${euiTheme.size.l};
+  `;
+
   const contentColumnStyles = css`
     min-inline-size: 0;
   `;
@@ -145,7 +156,9 @@ const AgentTurnComponent: React.FC<AgentTurnProps> = ({
         data-test-subj="agentBuilderTimelineAvatar"
       >
         {isLoading ? (
-          <EuiLoadingElastic size="l" aria-label={loadingLabel} />
+          <div css={loaderFrameStyles} data-test-subj="agentBuilderAvatarLoaderFrame">
+            <AgentAvatarLoader label={loadingLabel} size={16} />
+          </div>
         ) : (
           agent && <AgentAvatar agent={agent} size="s" iconSize="l" />
         )}
