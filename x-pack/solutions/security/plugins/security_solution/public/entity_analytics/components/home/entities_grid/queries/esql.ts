@@ -203,12 +203,6 @@ export const buildEntityAggregations = (
 export const buildStatsByEntityClause = (aggregations: readonly string[]): string =>
   `| STATS ${aggregations.length ? `${aggregations.join(', ')} ` : ''}BY \`entity.id\``;
 
-export const indentForkBranch = (esql: string): string =>
-  esql
-    .split('\n')
-    .map((line) => `    ${line}`)
-    .join('\n');
-
 const toRows = ({ columns, values }: Pick<ESQLSearchResponse, 'columns' | 'values'>): Row[] =>
   values.map((row) => Object.fromEntries(columns.map((col, i) => [col.name, row[i]])));
 
