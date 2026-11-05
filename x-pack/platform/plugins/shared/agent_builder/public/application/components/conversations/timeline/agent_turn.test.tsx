@@ -9,6 +9,7 @@ import React from 'react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { render, screen, fireEvent } from '@testing-library/react';
+import { setLoader } from '@kbn/custom-content-renderer';
 import { createToolCallStep } from '@kbn/agent-builder-common/chat/conversation';
 import { createExecutionTerminatedEvent } from './items/execution_terminated_event.factory';
 import { createExecutionPausedEvent } from './items/execution_paused_event.factory';
@@ -113,6 +114,21 @@ const renderTimeline = (item: TimelineItem, conversationAttachments?: VersionedA
 describe('AgentTurn', () => {
   beforeEach(() => {
     mockOnResponseRender.mockClear();
+  });
+
+  it('shows pulse dots at 16px in place of the avatar while the turn is running', () => {
+    setLoader('agentAvatar', 'pulseDots');
+    renderTimeline(running);
+
+    const loader = screen.getByTestId('motionLoader');
+    expect(loader).toHaveAttribute('data-loader-scenario', 'agentAvatar');
+    expect(loader).toHaveAttribute('data-loader-id', 'pulseDots');
+    const frame = screen.getByTestId('agentBuilderAvatarLoaderFrame');
+    const dots = screen.getByTestId('pulseDotsLoader');
+    expect(frame).toContainElement(dots);
+    expect(dots).toHaveAttribute('data-variant', 'pulse-dots');
+    expect(dots).toHaveAttribute('width', '16');
+    expect(dots).toHaveAttribute('height', '16');
   });
 
   it('gives the response what it needs to render attachments', () => {

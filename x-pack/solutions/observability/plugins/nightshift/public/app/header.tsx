@@ -15,6 +15,7 @@ import {
   EuiTitle,
   useEuiTheme,
 } from '@elastic/eui';
+import { MotionLoader } from '@kbn/custom-content-renderer';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
@@ -143,7 +144,11 @@ export function NightshiftHeader({
                   width: calc(${euiTheme.size.xxl} + ${euiTheme.size.m});
                 `}
               >
-                <NightshiftMarkIcon />
+                {hasActiveInvestigations ? (
+                  <MotionLoader scenario="nightshift" size={20} decorative />
+                ) : (
+                  <NightshiftMarkIcon />
+                )}
               </div>
             </EuiFlexItem>
             <EuiFlexItem>

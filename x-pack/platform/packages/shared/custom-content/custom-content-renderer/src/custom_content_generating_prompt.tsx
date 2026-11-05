@@ -6,12 +6,22 @@
  */
 
 import React from 'react';
-import { EuiLoadingElastic, EuiSpacer, EuiText, EuiTitle, useEuiTheme } from '@elastic/eui';
+import { EuiSpacer, useEuiFontSize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
+import { useCustomPanelShimmer } from './loaders/use_custom_panel_shimmer';
+import { MotionLoader } from './loaders/motion_loader';
+import { ShimmeringText } from './shimmering_text';
+
+const GENERATING_LOADER_SIZE = 16;
 
 export const CustomContentGeneratingPrompt = () => {
   const { euiTheme } = useEuiTheme();
+  const statusFontSize = useEuiFontSize('s');
+  const shimmer = useCustomPanelShimmer();
+  const title = i18n.translate('xpack.customContent.generating.title', {
+    defaultMessage: 'Generating your panel...',
+  });
 
   return (
     <div
@@ -31,23 +41,16 @@ export const CustomContentGeneratingPrompt = () => {
       role="status"
       aria-live="polite"
     >
-      <EuiLoadingElastic size="xxl" />
-      <EuiSpacer size="m" />
-      <EuiTitle size="xs">
-        <h3>
-          {i18n.translate('xpack.customContent.generating.title', {
-            defaultMessage: 'Generating your panel...',
-          })}
-        </h3>
-      </EuiTitle>
-      <EuiSpacer size="xs" />
-      <EuiText size="s" color="subdued">
-        <p>
-          {i18n.translate('xpack.customContent.generating.body', {
-            defaultMessage: 'This may take a few moments while the agent builds your panel.',
-          })}
-        </p>
-      </EuiText>
+      <MotionLoader scenario="customPanel" size={GENERATING_LOADER_SIZE} decorative />
+      <EuiSpacer size="s" />
+      <span
+        css={css`
+          ${statusFontSize}
+          color: ${euiTheme.colors.textDisabled};
+        `}
+      >
+        <ShimmeringText text={title} enabled={shimmer} />
+      </span>
     </div>
   );
 };

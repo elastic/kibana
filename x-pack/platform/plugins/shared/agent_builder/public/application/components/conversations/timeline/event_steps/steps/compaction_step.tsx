@@ -7,15 +7,26 @@
 
 import React from 'react';
 import { EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { ShimmeringText } from '@kbn/custom-content-renderer';
 import type { CompactionStep as CompactionStepData } from '@kbn/agent-builder-common';
 import { StepLayout } from '../step_layout';
+import { useChatStatusShimmer } from '../../use_chat_status_shimmer';
+
+const compactingLabel = i18n.translate(
+  'xpack.agentBuilder.eventSteps.steps.compaction.inProgress',
+  {
+    defaultMessage: 'Compacting context',
+  }
+);
 
 interface CompactionStepProps {
   step: CompactionStepData;
 }
 
 export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
+  const chatShimmer = useChatStatusShimmer();
   const isInProgress = step.token_count_after === 0;
 
   return (
@@ -24,10 +35,7 @@ export const CompactionStep: React.FC<CompactionStepProps> = ({ step }) => {
         <EuiText color="inherit">
           <p role="status" aria-live="polite">
             {isInProgress ? (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.compaction.inProgress"
-                defaultMessage="Compacting context"
-              />
+              <ShimmeringText text={compactingLabel} enabled={chatShimmer} />
             ) : (
               <FormattedMessage
                 id="xpack.agentBuilder.eventSteps.steps.compaction.completeTokens"

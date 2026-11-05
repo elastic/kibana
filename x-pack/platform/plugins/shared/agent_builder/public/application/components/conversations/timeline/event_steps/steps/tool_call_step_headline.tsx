@@ -10,8 +10,10 @@ import { EuiBadge, EuiFlexGroup, EuiFlexItem, useEuiFontSize, useEuiTheme } from
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
+import { ShimmeringText } from '@kbn/custom-content-renderer';
 import { isErrorResult } from '@kbn/agent-builder-common/tools/tool_result';
 import type { ToolCallStep as ToolCallStepData } from '@kbn/agent-builder-common/chat/conversation';
+import { useChatStatusShimmer } from '../../use_chat_status_shimmer';
 
 const toolCallAriaLabel = i18n.translate('xpack.agentBuilder.eventSteps.steps.toolCall.ariaLabel', {
   defaultMessage: 'Tool call',
@@ -22,17 +24,25 @@ const toolBadgeToolLabel = i18n.translate(
   { defaultMessage: 'tool' }
 );
 
+const runningLabel = i18n.translate('xpack.agentBuilder.eventSteps.steps.toolCall.running', {
+  defaultMessage: 'running…',
+});
+
 interface ToolCallStepHeadlineProps {
   step: ToolCallStepData;
   hasResults: boolean;
   isAborted?: boolean;
+  /** A group summary already carries the sweep, so its rows stay still. */
+  shimmerStatus?: boolean;
 }
 
 export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
   step,
   hasResults,
   isAborted = false,
+  shimmerStatus = true,
 }) => {
+  const chatShimmer = useChatStatusShimmer();
   const { euiTheme } = useEuiTheme();
   const suffixFontSize = useEuiFontSize('s');
   const hasErrorResult = step.results.some(isErrorResult);
@@ -78,10 +88,7 @@ export const ToolCallStepHeadline: React.FC<ToolCallStepHeadlineProps> = ({
                 defaultMessage="stopped"
               />
             ) : (
-              <FormattedMessage
-                id="xpack.agentBuilder.eventSteps.steps.toolCall.running"
-                defaultMessage="running…"
-              />
+              <ShimmeringText text={runningLabel} enabled={shimmerStatus && chatShimmer} />
             )}
           </span>
         </EuiFlexItem>

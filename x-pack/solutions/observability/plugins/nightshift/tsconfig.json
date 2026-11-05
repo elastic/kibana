@@ -23,6 +23,7 @@
     "@kbn/core-http-browser",
     "@kbn/cps",
     "@kbn/cps-utils",
+    "@kbn/custom-content-renderer",
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/date-range-picker",

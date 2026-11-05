@@ -55,7 +55,7 @@ describe('ToolCallGroup', () => {
         steps={[toolStep('c1', 'search', [otherResult('r1')]), toolStep('c2', 'read')]}
       />
     );
-    expect(screen.getByText('2 tools running…')).toBeInTheDocument();
+    expect(screen.getByText('2 tools running…')).toHaveAttribute('data-text', '2 tools running…');
   });
 
   it('shows "N tools stopped" instead of "running…" when the turn was stopped', () => {

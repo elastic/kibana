@@ -27,6 +27,7 @@ import { ProjectRoutingAccess } from '@kbn/cps-utils';
 import { registerLocators } from './locator/register_locators';
 import { buildAgentBuilderDeepLinks, registerAnalytics, registerApp } from './register';
 import { AgentBuilderNavControlInitiator } from './components/nav_control/lazy_agent_builder_nav_control';
+import { AgentAvatarLoaderControl } from './components/agent_avatar_loader/agent_avatar_loader_control';
 import {
   AgentBuilderAccessChecker,
   AgentService,
@@ -468,6 +469,10 @@ export class AgentBuilderPlugin
             agentBuilderService={agentBuilderService}
           />
         ),
+      });
+      // Registered after the Agent button so it sits immediately left of the user avatar.
+      core.chrome.controls.aiButton.register({
+        content: <AgentAvatarLoaderControl />,
       });
     }
 

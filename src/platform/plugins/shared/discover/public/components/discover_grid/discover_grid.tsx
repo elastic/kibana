@@ -11,9 +11,10 @@ import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import {
   DEFAULT_PAGINATION_MODE,
-  renderCustomToolbar,
+  renderCustomToolbar as defaultRenderCustomToolbar,
   UnifiedDataTable,
   type UnifiedDataTableProps,
+  type UnifiedDataTableRenderCustomToolbar,
 } from '@kbn/unified-data-table';
 import { useProfileAccessor } from '../../context_awareness';
 import type { DiscoverAppState } from '../../application/main/state_management/redux';
@@ -23,6 +24,7 @@ import {
   LazyCascadedDocumentsLayout,
   CascadedDocumentsProvider,
 } from '../../application/main/components/layout/cascaded_documents';
+import { withDiscoverKeyboardShortcuts } from './keyboard_shortcuts';
 
 export interface DiscoverGridProps extends UnifiedDataTableProps {
   query?: DiscoverAppState['query'];
@@ -44,6 +46,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     externalAdditionalControls: customExternalAdditionalControls,
     rowAdditionalLeadingControls: customRowAdditionalLeadingControls,
     onFullScreenChange,
+    renderCustomToolbar: renderCustomToolbarFromProps = defaultRenderCustomToolbar,
     ...props
   }) => {
     const { dataView } = props;
@@ -98,6 +101,20 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     const isCascadedDocumentsAvailable =
       dataSource?.kind === 'esql' && !!cascadedDocumentsContext?.availableCascadeGroups.length;
 
+    const renderDiscoverToolbar = useCallback<UnifiedDataTableRenderCustomToolbar>(
+      (toolbarArgs) =>
+        renderCustomToolbarFromProps({
+          ...toolbarArgs,
+          toolbarProps: {
+            ...toolbarArgs.toolbarProps,
+            keyboardShortcutsControl: withDiscoverKeyboardShortcuts(
+              toolbarArgs.toolbarProps.keyboardShortcutsControl
+            ),
+          },
+        }),
+      [renderCustomToolbarFromProps]
+    );
+
     const externalAdditionalControls = useMemo(() => {
       if (!customExternalAdditionalControls && !isCascadedDocumentsAvailable) {
         return undefined;
@@ -141,7 +158,6 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
     ) : (
       <UnifiedDataTable
         showColumnTokens
-        renderCustomToolbar={renderCustomToolbar}
         rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         paginationMode={paginationModeConfig.paginationMode}
         customGridColumnsConfiguration={customGridColumnsConfiguration}
@@ -149,6 +165,7 @@ export const DiscoverGrid: React.FC<DiscoverGridProps> = React.memo(
         externalAdditionalControls={externalAdditionalControls}
         onFullScreenChange={onFullScreenChange}
         {...props}
+        renderCustomToolbar={renderDiscoverToolbar}
         canDragAndDropColumns
         enableComparisonMode
         enableInTableSearch

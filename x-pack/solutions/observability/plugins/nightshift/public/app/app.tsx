@@ -16,6 +16,11 @@ import {
   EuiSpacer,
   useEuiTheme,
 } from '@elastic/eui';
+import {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  setNightshiftInvestigationDetailsPreview,
+  useNightshiftInvestigatingPreview,
+} from '@kbn/custom-content-renderer';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { usePageReady } from '@kbn/ebt-tools';
 import { i18n } from '@kbn/i18n';
@@ -33,7 +38,10 @@ import {
   type InvestigationViewSource,
 } from '../common/ebt_events';
 import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
+import {
+  useInvestigationSections,
+  type InvestigationSectionState,
+} from '../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
   type InvestigationListHandle,
@@ -53,11 +61,38 @@ import {
 } from '../common/url_params';
 import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
+import { previewConversation, previewInvestigation } from './investigating_preview_details';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
 function isSeverity(value: string | undefined): value is Severity {
   return SEVERITY_OPTIONS.some((severity) => severity === value);
 }
+
+/** Keeps the home's real in-progress section, or one sample investigation when nothing is running. */
+const sectionsWithInvestigatingPreview = (
+  sections: InvestigationSectionState[]
+): InvestigationSectionState[] =>
+  sections.map((section) => {
+    const settled =
+      section.isInitialLoading && section.investigations.length === 0
+        ? { ...section, isInitialLoading: false, isFetching: false, error: null }
+        : section;
+    if (settled.id !== 'in-progress') {
+      return settled;
+    }
+    if (settled.investigations.some((item) => item.in_progress)) {
+      return { ...settled, isInitialLoading: false, error: null };
+    }
+    const investigations = [previewInvestigation, ...settled.investigations];
+    return {
+      ...settled,
+      investigations,
+      total: Math.max(settled.total, investigations.length),
+      isInitialLoading: false,
+      isFetching: false,
+      error: null,
+    };
+  });
 
 const INVESTIGATIONS_SEARCH_DEBOUNCE_MS = 300;
 
@@ -100,18 +135,48 @@ export function NightshiftApp({
     loadedCount,
     refetchAll,
   } = useInvestigationSections({ query: debouncedSearchQuery });
+  const previewInvestigating = useNightshiftInvestigatingPreview();
+  const visibleSections = useMemo(
+    () => (previewInvestigating ? sectionsWithInvestigatingPreview(sections) : sections),
+    [previewInvestigating, sections]
+  );
+  const visibleHasActiveInvestigations = hasActiveInvestigations || previewInvestigating;
+  const visibleInitialLoading = isInitialLoading && !previewInvestigating;
+
+  // The details flyout loads by conversation id. While this preview is on, that id resolves to
+  // the sample investigation instead of a missing conversation.
+  useEffect(() => {
+    if (!previewInvestigating) {
+      setNightshiftInvestigationDetailsPreview(undefined);
+      if (
+        getNightshiftInvestigationIdFromSearch(history.location.search) ===
+        NIGHTSHIFT_PREVIEW_INVESTIGATION_ID
+      ) {
+        const params = new URLSearchParams(history.location.search);
+        clearNightshiftInvestigationIdParam(params);
+        history.replace({ search: params.toString() });
+      }
+      return;
+    }
+
+    setNightshiftInvestigationDetailsPreview({
+      conversation: previewConversation,
+      investigation: previewInvestigation,
+    });
+    return () => setNightshiftInvestigationDetailsPreview(undefined);
+  }, [history, previewInvestigating]);
 
   // A tile scrolls to its section, so it is only actionable while the list is rendering that
   // section — which the list, not the count, decides.
   const scrollableSeverities = useMemo(
     () =>
       new Set(
-        sections
+        visibleSections
           .filter(isInvestigationSectionVisible)
           .map(({ id }) => id)
           .filter(isSeverity)
       ),
-    [sections]
+    [visibleSections]
   );
 
   // Investigations are Agent Builder conversations listed by the agentic investigations API.
@@ -317,7 +382,7 @@ export function NightshiftApp({
     },
   });
 
-  if (!isInvestigationsAvailable || allFailed) {
+  if ((!isInvestigationsAvailable || allFailed) && !previewInvestigating) {
     const fatalError = sections.find((section) => section.error)?.error ?? null;
     if (!isInvestigationsAvailable || isHttpNotFoundError(fatalError)) {
       return (
@@ -349,8 +414,8 @@ export function NightshiftApp({
       `}
     >
       <NightshiftHeader
-        isLoading={isInitialLoading}
-        hasActiveInvestigations={hasActiveInvestigations}
+        isLoading={visibleInitialLoading}
+        hasActiveInvestigations={visibleHasActiveInvestigations}
         showAllEventsHref={showAllEventsHref}
       />
 
@@ -383,7 +448,7 @@ export function NightshiftApp({
       <InvestigationSeverityTiles
         severityCounts={severityCounts}
         scrollableSeverities={scrollableSeverities}
-        isLoading={isInitialLoading}
+        isLoading={visibleInitialLoading}
         onSeverityClick={handleSeverityClick}
       />
 
@@ -391,7 +456,7 @@ export function NightshiftApp({
 
       <InvestigationList
         ref={sectionsRef}
-        sections={sections}
+        sections={visibleSections}
         selectedInvestigationId={selectedInvestigationId}
         onInvestigationClick={handleInvestigationClick}
       />

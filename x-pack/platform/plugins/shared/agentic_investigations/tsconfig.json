@@ -51,6 +51,7 @@
     "@kbn/proposals-ui",
     "@kbn/charts-theme",
     "@kbn/core-ui-settings-browser",
+    "@kbn/custom-content-renderer",
     "@kbn/visualization-utils",
     "@kbn/shared-ux-ai-components",
     "@kbn/deeplinks-observability",

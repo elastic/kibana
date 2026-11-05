@@ -6,6 +6,10 @@
  */
 
 import { type HttpSetup, buildPath } from '@kbn/core-http-browser';
+import {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  getNightshiftInvestigationDetailsPreview,
+} from '@kbn/custom-content-renderer';
 import type { FeedbackChipId } from '@kbn/agent-builder-common';
 import type {
   CreateConversationResponse,
@@ -85,6 +89,13 @@ export class ConversationsService {
   }
 
   async get({ conversationId }: ConversationGetOptions) {
+    const preview = getNightshiftInvestigationDetailsPreview();
+    if (
+      conversationId === NIGHTSHIFT_PREVIEW_INVESTIGATION_ID &&
+      preview?.conversation !== undefined
+    ) {
+      return preview.conversation as GetConversationResponse;
+    }
     return await this.http.get<GetConversationResponse>(
       buildPath(`${publicApiPath}/conversations/{conversationId}`, { conversationId })
     );

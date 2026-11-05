@@ -14,6 +14,7 @@ import { createMemoryHistory, type MemoryHistory } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { coreMock } from '@kbn/core/public/mocks';
+import { setWorkersRunningPreview } from '@kbn/custom-content-renderer';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/public/mocks';
 import {
   useAssignInvestigation,
@@ -787,6 +788,10 @@ describe('ConversationsPage decisions', () => {
 });
 
 describe('ConversationsPage idle state', () => {
+  afterEach(() => {
+    setWorkersRunningPreview(false);
+  });
+
   it('shows the workers-running panel and idle header when nothing is open or closed', () => {
     mockProposals({});
     mockOpenCount(0);
@@ -822,6 +827,33 @@ describe('ConversationsPage idle state', () => {
 
     expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
     expect(screen.getByRole('button', { name: /^Closed Actions/ })).toBeInTheDocument();
+  });
+
+  it('shows the workers-running panel again when preview is turned on', () => {
+    mockProposals({ respond: [{ ...proposal, category: 'respond' }] });
+    mockOpenCount(1);
+
+    renderPage('/');
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: 'Show workers running' })).not.toBeInTheDocument();
+
+    act(() => {
+      setWorkersRunningPreview(true);
+    });
+
+    expect(screen.getByTestId('alertZeroWorkersRunningPanel')).toBeInTheDocument();
+    expect(screen.queryByRole('button', { name: /^Respond/ })).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Proposals land here as each Worker finishes. Nothing needs you right now.'
+      )
+    ).not.toBeInTheDocument();
+
+    setWorkersRunningPreview(false);
+
+    expect(screen.queryByTestId('alertZeroWorkersRunningPanel')).not.toBeInTheDocument();
+    expect(screen.getByRole('button', { name: /^Respond/ })).toBeInTheDocument();
   });
 
   it('does not claim Workers are running when none is enabled', () => {

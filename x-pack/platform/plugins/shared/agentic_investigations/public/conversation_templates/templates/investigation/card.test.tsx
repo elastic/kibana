@@ -9,6 +9,7 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
+import { setNightshiftInvestigatingShimmer } from '@kbn/custom-content-renderer';
 import type { InvestigationSummary } from '../../../../common';
 import { InvestigationCard } from './card';
 
@@ -53,6 +54,10 @@ const renderCard = (props: React.ComponentProps<typeof InvestigationCard>) =>
   );
 
 describe('InvestigationCard', () => {
+  beforeEach(() => {
+    setNightshiftInvestigatingShimmer(true);
+  });
+
   it('shows the title, summary, and impacted entities, but not subjects or proposals', () => {
     renderCard({ investigation: investigation() });
 
@@ -85,10 +90,29 @@ describe('InvestigationCard', () => {
 
     expect(screen.getByText('•')).toBeInTheDocument();
     expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
-    expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
+    expect(screen.getByText('In progress')).toHaveAttribute('data-text', 'In progress');
+    expect(screen.getByTestId('pulseDotsLoader')).toHaveAttribute('width', '12');
+    expect(screen.queryByTestId('investigationCardRunningDots')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSeverity')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardSummary')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationCardPendingProposals')).not.toBeInTheDocument();
+  });
+
+  it('restores the gradient label and typing dots when shimmer is off', () => {
+    setNightshiftInvestigatingShimmer(false);
+    renderCard({
+      investigation: investigation({
+        in_progress: true,
+        metadata: { status: 'open' },
+        subjects: [],
+        impact: undefined,
+      }),
+    });
+
+    expect(screen.getByTestId('investigationCardRunning')).toHaveTextContent('In progress');
+    expect(screen.getByText('In progress')).not.toHaveAttribute('data-text');
+    expect(screen.getByTestId('investigationCardRunningDots')).toBeInTheDocument();
+    expect(screen.queryByTestId('pulseDotsLoader')).not.toBeInTheDocument();
   });
 
   it.each([

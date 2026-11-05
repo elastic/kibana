@@ -14,6 +14,7 @@ import { openAppMenuOverflow } from '@kbn/app-header/test_helpers';
 import { I18nProvider } from '@kbn/i18n-react';
 import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
+import { setNightshiftInvestigatingPreview } from '@kbn/custom-content-renderer';
 import { NightshiftPage } from './nightshift_page';
 import { Router } from '@kbn/shared-ux-router';
 import { useKibana } from './hooks/use_kibana';
@@ -215,6 +216,24 @@ describe('NightshiftPage', () => {
 
       expect(screen.getByTestId('nightshiftOnboardingStub')).toBeInTheDocument();
       expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
+    });
+
+    it('shows the home instead of setup while investigating is previewed', () => {
+      withInvestigations();
+      mockServiceAccount = {
+        isLoading: false,
+        isSuccess: true,
+        data: { installed: false, enabled: null, serviceAccountsEnabled: true },
+      };
+      setNightshiftInvestigatingPreview(true);
+
+      renderPage();
+
+      expect(screen.getByTestId('nightshiftAppStub')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftOnboardingStub')).not.toBeInTheDocument();
+      act(() => {
+        setNightshiftInvestigatingPreview(false);
+      });
     });
 
     it('shows the app once the space is set up', () => {

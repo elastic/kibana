@@ -12,6 +12,7 @@
     "@kbn/security-plugin",
     "@kbn/agentic-investigations-common",
     "@kbn/core",
+    "@kbn/custom-content-renderer",
     "@kbn/config-schema",
     "@kbn/safer-lodash-set",
     "@kbn/datemath",

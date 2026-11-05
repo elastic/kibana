@@ -55,6 +55,7 @@ describe('ToolCallStep', () => {
     const status = screen.getByRole('status');
     expect(status.querySelector('.euiBadge')).toHaveTextContent('tool: search');
     expect(status).toHaveTextContent('running…');
+    expect(screen.getByText('running…')).toHaveAttribute('data-text', 'running…');
     await user.click(screen.getByRole('button'));
     expect(screen.getByText('tool: search')).toBeInTheDocument();
   });

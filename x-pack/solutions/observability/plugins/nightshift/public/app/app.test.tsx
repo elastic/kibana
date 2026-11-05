@@ -12,6 +12,12 @@ import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/co
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
+import {
+  NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+  getNightshiftInvestigationDetailsPreview,
+  setNightshiftInvestigatingPreview,
+  setNightshiftInvestigationDetailsPreview,
+} from '@kbn/custom-content-renderer';
 import { NightshiftApp } from './app';
 import type { InvestigationSectionState } from '../data/investigations/use_investigation_sections';
 import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
@@ -175,6 +181,8 @@ function renderApp({ initialEntries = ['/'] }: { initialEntries?: string[] } = {
 
 describe('NightshiftApp', () => {
   beforeEach(() => {
+    setNightshiftInvestigatingPreview(false);
+    setNightshiftInvestigationDetailsPreview(undefined);
     refetchAll.mockClear();
     reportEvent.mockClear();
     scrollTo.mockClear();
@@ -209,6 +217,60 @@ describe('NightshiftApp', () => {
     });
   });
 
+  it('shows an investigating investigation on the home when that preview is on', () => {
+    setSections({
+      sections: defaultSections(),
+      hasActiveInvestigations: false,
+      isInitialLoading: true,
+    });
+    setNightshiftInvestigatingPreview(true);
+
+    renderApp();
+
+    expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
+    expect(screen.queryByText('Looking into your data...')).not.toBeInTheDocument();
+    expect(
+      screen.getByText(
+        'Checkout is failing for a slice of payment attempts. The investigation is still running.'
+      )
+    ).toBeInTheDocument();
+    expect(getNightshiftInvestigationDetailsPreview()).toEqual(
+      expect.objectContaining({
+        investigation: expect.objectContaining({
+          id: NIGHTSHIFT_PREVIEW_INVESTIGATION_ID,
+          in_progress: true,
+          metadata: expect.objectContaining({ severity: 'high' }),
+        }),
+      })
+    );
+  });
+
+  it("opens the preview investigation's details flyout from its card", async () => {
+    setSections({
+      sections: defaultSections(),
+      hasActiveInvestigations: false,
+      isInitialLoading: true,
+    });
+    setNightshiftInvestigatingPreview(true);
+
+    renderApp();
+
+    fireEvent.click(
+      screen.getByText(
+        'Checkout is failing for a slice of payment attempts. The investigation is still running.'
+      )
+    );
+
+    await waitFor(() =>
+      expect(openConversationDetails).toHaveBeenCalledWith(
+        expect.objectContaining({ conversationId: NIGHTSHIFT_PREVIEW_INVESTIGATION_ID })
+      )
+    );
+    expect(screen.getByTestId('locationProbe')).toHaveTextContent(
+      `investigationId=${NIGHTSHIFT_PREVIEW_INVESTIGATION_ID}`
+    );
+  });
+
   it('renders investigations and reports the page ready metrics', () => {
     renderApp();
 
@@ -218,6 +280,7 @@ describe('NightshiftApp', () => {
     );
     expect(screen.getByText('Checkout errors are elevated')).toBeInTheDocument();
     expect(screen.getByText('Investigations are underway')).toBeInTheDocument();
+    expect(screen.getByTestId('scanDotsLoader')).toBeInTheDocument();
     expect(mockUsePageReady).toHaveBeenCalledWith(
       expect.objectContaining({
         isReady: true,

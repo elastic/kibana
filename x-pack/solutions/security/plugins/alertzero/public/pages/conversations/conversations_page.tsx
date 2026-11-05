@@ -9,6 +9,7 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useQueryClient } from '@kbn/react-query';
 import { css } from '@emotion/react';
 import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { useWorkersRunningPreview } from '@kbn/custom-content-renderer';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { PROPOSALS_UI_CAPABILITY_SHOW } from '@kbn/proposals-common';
@@ -216,6 +217,8 @@ const ConversationsPageContent: React.FC = () => {
     openCount === 0 &&
     closedTotal === 0 &&
     proposalsById.size === 0;
+  const previewWorkersRunning = useWorkersRunningPreview();
+  const showWorkersRunning = isIdle || previewWorkersRunning;
   const hasSummaryError = Boolean(error) && chartsSummary === undefined;
   useReportHomeOpened({
     isSettled: chartsSummary !== undefined || hasSummaryError,
@@ -424,7 +427,7 @@ const ConversationsPageContent: React.FC = () => {
             // beside a populated header.
             isQueueEmpty={openCount === 0}
             eventCount={openCount}
-            {...(isIdle && {
+            {...(showWorkersRunning && {
               greeting: IDLE_HEADER.greeting,
               title: IDLE_HEADER.title,
               subtitle: IDLE_HEADER.subtitle(runningSummary),
@@ -440,7 +443,7 @@ const ConversationsPageContent: React.FC = () => {
         <EuiFlexItem grow={false}>
           <ProposalsTrendChartRow />
         </EuiFlexItem>
-        {isIdle && (
+        {showWorkersRunning && (
           <EuiFlexItem grow={false}>
             <WorkersRunningPanel />
           </EuiFlexItem>
@@ -477,7 +480,7 @@ const ConversationsPageContent: React.FC = () => {
 
         {/* Every bucket is rendered, empty or not: the accordions are the page's structure,
             so one disappearing would move the others as the queue drains. */}
-        {!isIdle &&
+        {!showWorkersRunning &&
           sections.map((section) => (
             <EuiFlexItem key={section.id} grow={false}>
               <QueueSection

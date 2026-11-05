@@ -17,9 +17,15 @@ import { ToolCallStepHeadline } from './tool_call_step_headline';
 interface ToolCallStepProps {
   step: ToolCallStepData;
   isAborted?: boolean;
+  /** A group summary already carries the sweep, so its rows stay still. */
+  shimmerStatus?: boolean;
 }
 
-export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isAborted = false }) => {
+export const ToolCallStep: React.FC<ToolCallStepProps> = ({
+  step,
+  isAborted = false,
+  shimmerStatus = true,
+}) => {
   const flyoutStack = useFlyoutStack();
   const [isFlyoutOpen, { on: openFlyout, off: closeFlyout }] = useBoolean();
 
@@ -29,7 +35,14 @@ export const ToolCallStep: React.FC<ToolCallStepProps> = ({ step, isAborted = fa
   return (
     <div data-test-subj="agentBuilderToolCallStep">
       <StepLayout
-        label={<ToolCallStepHeadline step={step} hasResults={hasResults} isAborted={isAborted} />}
+        label={
+          <ToolCallStepHeadline
+            step={step}
+            hasResults={hasResults}
+            isAborted={isAborted}
+            shimmerStatus={shimmerStatus}
+          />
+        }
         isExpandable={false}
         onClick={handleClick}
         ebtAction={AGENT_BUILDER_UI_EBT.action.conversation.VIEW_TOOL_RESPONSE}

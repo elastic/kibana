@@ -10,6 +10,7 @@ import { render, screen } from '@testing-library/react';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { CustomContentComponent } from './custom_content_component';
+import { setCustomPanelShimmer } from './loaders/custom_panel_shimmer';
 import type { CustomContentRendererServices } from './types';
 
 jest.mock('./use_custom_content_html', () => ({ useCustomContentHtml: jest.fn() }));
@@ -129,9 +130,27 @@ describe('CustomContentComponent', () => {
   });
 
   it('shows the generating prompt while the agent is working', () => {
+    setCustomPanelShimmer(true);
     render(<CustomContentComponent {...defaultProps} isGenerating />);
 
     expect(screen.getByTestId('customContentGeneratingPrompt')).toBeInTheDocument();
-    expect(screen.getByText('Generating your panel...')).toBeInTheDocument();
+    expect(screen.getByText('Generating your panel...')).toHaveAttribute(
+      'data-text',
+      'Generating your panel...'
+    );
+    expect(
+      screen.queryByText('This may take a few moments while the agent builds your panel.')
+    ).not.toBeInTheDocument();
+    const dots = screen.getByTestId('scanDotsLoader');
+    expect(dots).toHaveAttribute('data-variant', 'scan-dots');
+    expect(dots).toHaveAttribute('width', '16');
+    expect(dots).toHaveAttribute('height', '16');
+  });
+
+  it('keeps the generating title still when shimmer is off', () => {
+    setCustomPanelShimmer(false);
+    render(<CustomContentComponent {...defaultProps} isGenerating />);
+
+    expect(screen.getByText('Generating your panel...')).not.toHaveAttribute('data-text');
   });
 });
