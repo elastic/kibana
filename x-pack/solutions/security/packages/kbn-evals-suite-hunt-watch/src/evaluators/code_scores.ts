@@ -94,7 +94,7 @@ export const resolveTier1Status = (actual: HuntReportArtifacts): HuntTier1Status
 
   const headline = actual.hunt?.headline ?? '';
   if (/(?:IOC Hunt|Tier 1) found no matches/i.test(headline)) return 'no_environment_hits';
-  if (/no searchable/i.test(headline)) return 'no_searchable_terms';
+  if (/no searchable|had nothing to search/i.test(headline)) return 'no_searchable_terms';
   if (/(?:IOC Hunt|Tier 1) found (?!no matches)/i.test(headline)) return 'environment_hits_found';
   return undefined;
 };
