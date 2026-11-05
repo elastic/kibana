@@ -87,8 +87,8 @@ export enum TaskCost {
 }
 
 /**
- * String values for task cost as stored in the task schema (e.g. in saved objects).
- * Use these when reading cost from task params or instance attributes.
+ * String values for task cost as stored on the task saved object. Internal to Task Manager:
+ * consumers only see TaskCost, and the task store converts at the saved object boundary.
  */
 export enum InstanceTaskCost {
   Tiny = 'tiny',
@@ -97,23 +97,33 @@ export enum InstanceTaskCost {
   ExtraLarge = 'extralarge',
 }
 
-/** Maps schema cost strings to their integer values for capacity calculations. */
-const INSTANCE_TASK_COST_TO_INT: Record<InstanceTaskCost, TaskCost> = {
-  [InstanceTaskCost.Tiny]: TaskCost.Tiny,
-  [InstanceTaskCost.Normal]: TaskCost.Normal,
-  [InstanceTaskCost.Large]: TaskCost.Large,
-  [InstanceTaskCost.ExtraLarge]: TaskCost.ExtraLarge,
+const INSTANCE_TASK_COST_TO_TASK_COST: ReadonlyMap<string, TaskCost> = new Map([
+  [InstanceTaskCost.Tiny, TaskCost.Tiny],
+  [InstanceTaskCost.Normal, TaskCost.Normal],
+  [InstanceTaskCost.Large, TaskCost.Large],
+  [InstanceTaskCost.ExtraLarge, TaskCost.ExtraLarge],
+]);
+
+const TASK_COST_TO_INSTANCE_TASK_COST: Record<TaskCost, InstanceTaskCost> = {
+  [TaskCost.Tiny]: InstanceTaskCost.Tiny,
+  [TaskCost.Normal]: InstanceTaskCost.Normal,
+  [TaskCost.Large]: InstanceTaskCost.Large,
+  [TaskCost.ExtraLarge]: InstanceTaskCost.ExtraLarge,
 };
 
 /**
- * Translates cost string from task params/instance (e.g. 'extralarge') to the
- * corresponding TaskCost integer. Returns undefined if the string is invalid or null.
+ * Translates a stored cost string (e.g. 'extralarge') to its TaskCost. Returns undefined when
+ * the string is missing or unknown, e.g. a cost tier added by a newer version of Kibana.
  */
-export const getTaskCostFromInstance = (cost?: InstanceTaskCost): number | undefined => {
-  if (cost) {
-    return INSTANCE_TASK_COST_TO_INT[cost];
-  }
-};
+export const getTaskCostFromInstance = (cost?: string): TaskCost | undefined =>
+  cost ? INSTANCE_TASK_COST_TO_TASK_COST.get(cost) : undefined;
+
+/**
+ * Translates a TaskCost to the string stored on the task saved object. Returns undefined when
+ * the cost is missing or not a TaskCost value.
+ */
+export const getInstanceCostFromTaskCost = (cost?: TaskCost): InstanceTaskCost | undefined =>
+  cost === undefined ? undefined : TASK_COST_TO_INSTANCE_TASK_COST[cost];
 
 /*
  * Type definitions and validations for tasks.
@@ -637,11 +647,9 @@ export interface TaskInstance {
 
   /**
    * Optional cost for this task instance, overriding the task type's default cost.
-   * When set, must be one of the InstanceTaskCost enum values ('tiny', 'normal', 'extralarge').
    * Used by the task selector and capacity logic to limit concurrent work.
-   * Use getTaskCostFromInstance() to translate to the integer TaskCost.
    */
-  cost?: InstanceTaskCost;
+  cost?: TaskCost;
 
   /**
    * Runs the task as the service account bound to this workload, instead of with an API key. The
@@ -792,7 +800,7 @@ export interface ConcreteTaskInstanceVersion {
 
 export type SerializedConcreteTaskInstance = Omit<
   ConcreteTaskInstance,
-  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt'
+  'state' | 'params' | 'scheduledAt' | 'startedAt' | 'retryAt' | 'runAt' | 'cost'
 > & {
   state: string;
   params: string;
@@ -805,6 +813,8 @@ export type SerializedConcreteTaskInstance = Omit<
   apiKey?: string;
   uiamApiKey?: string;
   userScope?: TaskUserScope;
+  /** Not limited to InstanceTaskCost: a newer version of Kibana may store a tier this one doesn't know. */
+  cost?: string;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {

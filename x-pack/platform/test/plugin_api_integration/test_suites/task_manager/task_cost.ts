@@ -7,7 +7,8 @@
 import expect from '@kbn/expect';
 import type { estypes } from '@elastic/elasticsearch';
 import { taskMappings as TaskManagerMapping } from '@kbn/task-manager-plugin/server/saved_objects/mappings';
-import { InstanceTaskCost } from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { TaskCost } from '@kbn/task-manager-plugin/server';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { RawDoc } from './test_utils';
 import { scheduleTask, historyDocs } from './test_utils';
@@ -19,6 +20,19 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const supertest = getService('supertest');
   const testHistoryIndex = '.kibana_task_manager_test_result';
+
+  async function getStoredCost(taskId: string): Promise<string | undefined> {
+    const response = await es.get<{ task: { cost?: string } }>({
+      index: '.kibana_task_manager',
+      id: `task:${taskId}`,
+    });
+    return response._source?.task.cost;
+  }
+
+  async function getTask(taskId: string): Promise<ConcreteTaskInstance> {
+    const response = await supertest.get(`/api/sample_tasks/task/${taskId}`).expect(200);
+    return response.body;
+  }
 
   describe('task cost', () => {
     beforeEach(async () => {
@@ -61,10 +75,11 @@ export default function ({ getService }: FtrProviderContext) {
         taskType: 'extraLargeCostTask',
         schedule: { interval: '1d' },
         params: {},
-        cost: InstanceTaskCost.Tiny,
+        cost: TaskCost.Tiny,
       });
 
-      expect(task.cost).to.eql(InstanceTaskCost.Tiny);
+      expect(task.cost).to.eql(TaskCost.Tiny);
+      expect(await getStoredCost(task.id)).to.eql('tiny');
 
       // check that the task ran
       await retry.try(async () => {
@@ -110,10 +125,11 @@ export default function ({ getService }: FtrProviderContext) {
         taskType: 'sampleTask',
         schedule: { interval: '1d' },
         params: {},
-        cost: InstanceTaskCost.ExtraLarge,
+        cost: TaskCost.ExtraLarge,
       });
 
-      expect(task.cost).to.eql(InstanceTaskCost.ExtraLarge);
+      expect(task.cost).to.eql(TaskCost.ExtraLarge);
+      expect(await getStoredCost(task.id)).to.eql('extralarge');
 
       // check that the task ran
       await retry.try(async () => {
@@ -122,21 +138,31 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('ensure task with unknown TaskCost is run', async () => {
+    it('ensure task with a stored cost it does not recognize is run', async () => {
       const task = await scheduleTask(supertest, {
         taskType: 'sampleTask',
         schedule: { interval: '1d' },
         params: {},
-        cost: 'HUGE' as InstanceTaskCost,
+        enabled: false,
       });
 
-      expect(task.cost).to.eql('HUGE');
+      // simulate a cost tier written by a newer version of Kibana, then let the task be claimed
+      await es.update({
+        index: '.kibana_task_manager',
+        id: `task:${task.id}`,
+        refresh: true,
+        doc: { task: { cost: 'huge', enabled: true } },
+      });
 
       // check that the task ran
       await retry.try(async () => {
         const docs: RawDoc[] = await historyDocs({ es, index: testHistoryIndex, taskId: task.id });
         expect(docs.length).to.be.greaterThan(0);
       });
+
+      expect(await getTask(task.id)).not.to.have.property('cost');
+      // updates after the run merge into the stored task, so the unknown cost is kept for newer versions
+      expect(await getStoredCost(task.id)).to.eql('huge');
     });
   });
 }
