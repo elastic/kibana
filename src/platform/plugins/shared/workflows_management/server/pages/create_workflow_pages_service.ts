@@ -7,14 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreStart, Logger } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import type {
   EncryptedSavedObjectsPluginSetup,
   EncryptedSavedObjectsPluginStart,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { SecurityPluginStart } from '@kbn/security-plugin-types-server';
 import { WORKFLOWS_PAGES_ENABLED_FLAG } from '@kbn/workflows';
+import type { WorkflowsManagementApiActions } from '@kbn/workflows';
 import { WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
-import type { WorkflowPageAuditLog } from './workflow_pages_service';
+import type { WorkflowPageAuditLog, WorkflowPagesServiceDeps } from './workflow_pages_service';
 import { WorkflowPagesService } from './workflow_pages_service';
 
 const includedHiddenTypes = [WORKFLOW_PAGE_SAVED_OBJECT_TYPE];
@@ -26,8 +28,13 @@ export const createWorkflowPagesService = ({
   encryptedSavedObjectsStart,
   logger,
   audit,
+  authz,
+  assertWorkflowAccess,
 }: {
   coreStart: CoreStart;
+  /** Undefined when security is off. Every privilege check then passes, like in routes. */
+  authz: SecurityPluginStart['authz'] | undefined;
+  assertWorkflowAccess: WorkflowPagesServiceDeps['assertWorkflowAccess'];
   encryptedSavedObjectsSetup: EncryptedSavedObjectsPluginSetup;
   encryptedSavedObjectsStart: EncryptedSavedObjectsPluginStart;
   logger: Logger;
@@ -51,5 +58,19 @@ export const createWorkflowPagesService = ({
     getEncryptedClient: async () => encryptedSavedObjectsStart.getClient({ includedHiddenTypes }),
     isEnabled: async () => enabled,
     audit,
+    hasPrivileges: async (
+      request: KibanaRequest,
+      spaceId: string,
+      apiActions: readonly WorkflowsManagementApiActions[]
+    ) => {
+      if (!authz) {
+        return true;
+      }
+      const { hasAllRequested } = await authz.checkPrivilegesWithRequest(request).atSpace(spaceId, {
+        kibana: apiActions.map((action) => authz.actions.api.get(action)),
+      });
+      return hasAllRequested;
+    },
+    assertWorkflowAccess,
   });
 };

@@ -53,19 +53,10 @@ describe('WorkflowsManagementFeatureConfig', () => {
       expect(subPrivilege.includeIn).toBe('all');
     });
 
-    it('lets workflow runners read pages, to copy the link', () => {
-      const subPrivilege = getSubFeaturePrivilege('workflow_execute')!;
-
-      expect(subPrivilege.savedObject).toEqual({
-        all: [],
-        read: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE],
-      });
-    });
-
     it('gives no other privilege access to pages', () => {
       const others = WorkflowsManagementFeatureConfig.subFeatures!.flatMap((subFeature) =>
         subFeature.privilegeGroups.flatMap((group) => group.privileges)
-      ).filter(({ id }) => id !== 'workflow_page_manage' && id !== 'workflow_execute');
+      ).filter(({ id }) => id !== 'workflow_page_manage');
 
       others.forEach(({ savedObject }) => {
         expect([...savedObject.all, ...savedObject.read]).not.toContain(
