@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { BehaviorSubject, Subscription, type Observable } from 'rxjs';
+import { BehaviorSubject, Subscription, distinctUntilChanged, skip, type Observable } from 'rxjs';
 import type { AggregateQuery } from '@kbn/es-query';
 import { getGeoPrecisionParamValues } from '@kbn/esql-utils';
 import type { VegaMapPosition, VegaRenderDescriptor } from '../data_model/types';
@@ -26,9 +26,15 @@ const usesGeoPrecisionParam = (precisions: GeoPrecisionValues[]) =>
  * last fetch.
  */
 export function initializeGeoPrecisionManager({
+  spec$,
   esql$,
   visData$,
 }: {
+  /**
+   * A new spec starts from its own map position and zoom. Create the manager before any
+   * subscription that fetches on `spec$`, so the reset runs before the fetch reads the map view.
+   */
+  spec$: Observable<unknown>;
   esql$: Observable<AggregateQuery[]>;
   visData$: Observable<VegaRenderDescriptor | undefined>;
 }) {
@@ -40,6 +46,11 @@ export function initializeGeoPrecisionManager({
   let queries: AggregateQuery[] = [];
   let visData: VegaRenderDescriptor | undefined;
   const subscription = new Subscription();
+  subscription.add(
+    spec$.pipe(distinctUntilChanged(), skip(1)).subscribe(() => {
+      mapView = undefined;
+    })
+  );
   subscription.add(
     esql$.subscribe((nextQueries) => {
       queries = nextQueries;
@@ -55,10 +66,6 @@ export function initializeGeoPrecisionManager({
     mapViewChange$,
     /** Latest position reported by the map view. */
     getMapView: () => mapView,
-    /** A new spec starts from its own map position and zoom. */
-    resetMapView: () => {
-      mapView = undefined;
-    },
     /** Call when a fetch starts so later reports are compared to the precisions the fetch used. */
     onFetch: () => {
       fetchedPrecisions = mapView ? getPrecisions(queries, mapView.zoom) : undefined;

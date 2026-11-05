@@ -209,6 +209,7 @@ export const vegaEmbeddableFactory = (
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
     const geoPrecisionManager = initializeGeoPrecisionManager({
+      spec$,
       esql$,
       visData$: renderInput$.pipe(map((renderInput) => renderInput?.visData)),
     });
@@ -366,8 +367,6 @@ export const vegaEmbeddableFactory = (
       rendered$.next(true);
     };
 
-    let lastSpec = spec$.getValue();
-
     const fetchSubscription = combineLatest([
       spec$,
       geoPrecisionManager.mapViewChange$,
@@ -377,12 +376,6 @@ export const vegaEmbeddableFactory = (
     ])
       .pipe(
         switchMap(async ([spec, , data, panelQuery, panelFilters]) => {
-          // A new spec starts from its own map position and zoom.
-          if (spec !== lastSpec) {
-            lastSpec = spec;
-            geoPrecisionManager.resetMapView();
-          }
-
           geoPrecisionManager.onFetch();
           abortController.abort();
           abortController = new AbortController();
