@@ -12,10 +12,14 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 
 /**
  * Custom Scout stateful server configuration for SIEM Readiness evals.
- * Enables the Agent Builder experimental features UI setting and the
- * siemReadinessAgentBuilder experimental flag in Security Solution, which is
- * what registers the `siem-readiness` skill, its four `security.siem_readiness.*`
- * tools and its attachment.
+ * Enables the `siemReadinessAgentBuilder` experimental flag in Security
+ * Solution, which is what registers the `siem-readiness` skill, its four
+ * `security.siem_readiness.*` tools and its attachment.
+ *
+ * The `agentBuilder:experimentalFeatures` UI setting is deliberately NOT set
+ * here: the suite enables it in beforeAll via the uiSettings API and unsets it
+ * in afterAll, and a value covered by `--uiSettings.overrides.*` is read-only,
+ * which makes that setup call fail with HTTP 400.
  *
  * Without this set the suite runs against a tree where the capability is dark
  * (the flag defaults to off and is not exposed as an Advanced Setting), so every
@@ -30,7 +34,6 @@ export const servers: ScoutServerConfig = {
     ...evalsTracingConfig.kbnTestServer,
     serverArgs: [
       ...evalsTracingConfig.kbnTestServer.serverArgs,
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
       `--xpack.securitySolution.enableExperimental=${JSON.stringify([
         'siemReadinessAgentBuilder',
       ])}`,
