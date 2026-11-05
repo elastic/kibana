@@ -5,25 +5,17 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
 import type { ApplicationUsageResponse } from '../../../../common/types/usage';
-import type { SearchContext } from '../../../lib/helpers/search';
-import { searchAggregations } from '../../../lib/helpers/search';
-import type { ApplicationSearchParams } from '../../application_tab_route';
+import type { ApplicationSearch } from '../../application_tab_route';
 import { USAGE_SEARCH_SPAN_NAME } from '../constants';
 import { usageSearch } from './search_request';
-import type { UsageAggregations } from './search_response';
 import { toUsage } from './to_usage';
 
 /** What users load and do in one EDOT Browser application, for the Overview's panels. */
-export const getOtelUsage = ({
+export const getOtelUsage = async ({
   esClient,
-  signal,
   ...searchParams
-}: ApplicationSearchParams & SearchContext): Promise<ApplicationUsageResponse> => {
-  return withSpan(USAGE_SEARCH_SPAN_NAME, async () => {
-    return toUsage(
-      await searchAggregations<UsageAggregations>({ esClient, signal }, usageSearch(searchParams))
-    );
-  });
+}: ApplicationSearch): Promise<ApplicationUsageResponse> => {
+  const { aggregations } = await esClient.search(USAGE_SEARCH_SPAN_NAME, usageSearch(searchParams));
+  return toUsage(aggregations);
 };

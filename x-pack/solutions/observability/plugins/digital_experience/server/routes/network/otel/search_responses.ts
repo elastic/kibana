@@ -5,36 +5,11 @@
  * 2.0.
  */
 
-import type { PercentilesAggregation } from '../../../lib/helpers/aggregations';
-import type { ByEnvironmentAggregations } from '../../../lib/otel/environments';
-
-// The aggregations `search_requests.ts` asks for, by the same names.
-
-export interface ResourceBucket {
-  key: string;
-  doc_count: number;
-  duration: PercentilesAggregation;
-  transferSize: PercentilesAggregation;
-  initiatorType: { buckets: Array<{ key: string }> };
-  renderBlocking: { doc_count: number };
-}
+import type { AggregationsOf } from '../../../lib/create_digital_experience_traced_es_client';
+import type { httpRequestsSearch, resourcesSearch } from './search_requests';
 
 /** `resourcesSearch`: the resources and top page in one environment, and every environment. */
-export type ResourcesAggregations = ByEnvironmentAggregations<{
-  resources: { urls: { buckets: ResourceBucket[] } };
-  pageLoads: { topPage: { buckets: Array<{ key: string }> } };
-}>;
-
-/** The requests of one URL and method; the key is `[url, method]`. */
-export interface RequestBucket {
-  key: [string, string];
-  doc_count: number;
-  withOutcome: { doc_count: number };
-  failed: { doc_count: number };
-  duration: PercentilesAggregation;
-}
+export type ResourcesAggregations = AggregationsOf<ReturnType<typeof resourcesSearch>>;
 
 /** `httpRequestsSearch`: the HTTP requests in the selected environment, and every environment. */
-export type HttpRequestsAggregations = ByEnvironmentAggregations<{
-  requests: { buckets: RequestBucket[] };
-}>;
+export type HttpRequestsAggregations = AggregationsOf<ReturnType<typeof httpRequestsSearch>>;

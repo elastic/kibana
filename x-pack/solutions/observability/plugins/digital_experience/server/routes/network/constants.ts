@@ -5,5 +5,9 @@
  * 2.0.
  */
 
-/** Name of the APM span that traces the Network tab's searches. */
-export const NETWORK_SEARCH_SPAN_NAME = 'get_digital_experience_otel_network';
+/** Name of the APM span that traces the Network tab's resources search. */
+export const NETWORK_RESOURCES_SEARCH_SPAN_NAME = 'get_digital_experience_otel_network_resources';
+
+/** Name of the APM span that traces the Network tab's HTTP requests search. */
+export const NETWORK_HTTP_REQUESTS_SEARCH_SPAN_NAME =
+  'get_digital_experience_otel_network_http_requests';

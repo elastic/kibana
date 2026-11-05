@@ -30,9 +30,9 @@ export const toHttpRequests = (aggregations?: HttpRequestsAggregations): HttpReq
 /** The slowest resources, in the order of the search (p75 duration, descending). */
 export const toSlowestResources = (aggregations?: ResourcesAggregations): SlowResource[] => {
   return (aggregations?.inEnvironment.resources.urls.buckets ?? []).map(
-    ({ key: url, doc_count: count, initiatorType, renderBlocking, duration, transferSize }) => {
+    ({ key, doc_count: count, initiatorType, renderBlocking, duration, transferSize }) => {
       return {
-        url,
+        url: String(key),
         initiatorType: firstBucketKey(initiatorType),
         renderBlocking: renderBlocking.doc_count > 0,
         count,

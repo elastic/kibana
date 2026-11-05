@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import type {
-  HttpRequestsAggregations,
-  RequestBucket,
-  ResourcesAggregations,
-} from './search_responses';
+import {
+  NO_ENVIRONMENTS,
+  keyBuckets,
+  termsAggregate,
+} from '../../../lib/helpers/aggregate_fixtures.test_helpers';
+import type { HttpRequestsAggregations, ResourcesAggregations } from './search_responses';
 import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
+
+type RequestBucket = HttpRequestsAggregations['inEnvironment']['requests']['buckets'][number];
+type ResourceBucket =
+  ResourcesAggregations['inEnvironment']['resources']['urls']['buckets'][number];
 
 const percentile = (value: number | null) => {
   return {
@@ -27,10 +32,22 @@ const request = (
 ): RequestBucket => {
   return {
     key: [url, method],
+    key_as_string: `${url}|${method}`,
     doc_count: count,
     withOutcome: { doc_count: count },
     failed: { doc_count: failed },
     duration: { values: p95Ns === null ? [] : [{ key: 95, value: p95Ns }] },
+  };
+};
+
+const resources = (buckets: ResourceBucket[], topPages: string[] = []): ResourcesAggregations => {
+  return {
+    ...NO_ENVIRONMENTS,
+    inEnvironment: {
+      doc_count: 0,
+      resources: { doc_count: 0, urls: termsAggregate(buckets) },
+      pageLoads: { doc_count: 0, topPage: termsAggregate(keyBuckets(topPages)) },
+    },
   };
 };
 
@@ -41,17 +58,14 @@ describe('toHttpRequests', () => {
 
   it('maps each URL and method in the order of the search, durations from nanoseconds to milliseconds', () => {
     const aggregations: HttpRequestsAggregations = {
-      environments: { buckets: [] },
-      environmentNames: { buckets: [] },
-      environmentNotDefined: { doc_count: 0 },
+      ...NO_ENVIRONMENTS,
       inEnvironment: {
-        requests: {
-          buckets: [
-            request('https://api/cart', 'GET', 6, 0, 1_500_000),
-            request('https://api/products', 'GET', 4, 1, 250_000_000),
-            request('https://api/products', 'POST', 1, 0, null),
-          ],
-        },
+        doc_count: 0,
+        requests: termsAggregate([
+          request('https://api/cart', 'GET', 6, 0, 1_500_000),
+          request('https://api/products', 'GET', 4, 1, 250_000_000),
+          request('https://api/products', 'POST', 1, 0, null),
+        ]),
       },
     };
 
@@ -90,36 +104,24 @@ describe('toSlowestResources', () => {
   });
 
   it('flags the render-blocking resources and maps null percentiles', () => {
-    const aggregations: ResourcesAggregations = {
-      environments: { buckets: [] },
-      environmentNames: { buckets: [] },
-      environmentNotDefined: { doc_count: 0 },
-      inEnvironment: {
-        pageLoads: { topPage: { buckets: [] } },
-        resources: {
-          urls: {
-            buckets: [
-              {
-                key: 'https://cdn/app.js',
-                doc_count: 2,
-                duration: percentile(850.5),
-                transferSize: percentile(4096),
-                initiatorType: { buckets: [{ key: 'script' }] },
-                renderBlocking: { doc_count: 1 },
-              },
-              {
-                key: 'https://cdn/logo.svg',
-                doc_count: 1,
-                duration: percentile(null),
-                transferSize: percentile(null),
-                initiatorType: { buckets: [] },
-                renderBlocking: { doc_count: 0 },
-              },
-            ],
-          },
-        },
+    const aggregations = resources([
+      {
+        key: 'https://cdn/app.js',
+        doc_count: 2,
+        duration: percentile(850.5),
+        transferSize: percentile(4096),
+        initiatorType: termsAggregate(keyBuckets(['script'])),
+        renderBlocking: { doc_count: 1 },
       },
-    };
+      {
+        key: 'https://cdn/logo.svg',
+        doc_count: 1,
+        duration: percentile(null),
+        transferSize: percentile(null),
+        initiatorType: termsAggregate([]),
+        renderBlocking: { doc_count: 0 },
+      },
+    ]);
 
     expect(toSlowestResources(aggregations)).toEqual([
       {
@@ -143,22 +145,8 @@ describe('toSlowestResources', () => {
 });
 
 describe('toPageOrigin', () => {
-  const withTopPage = (keys: string[]): ResourcesAggregations => {
-    return {
-      environments: { buckets: [] },
-      environmentNames: { buckets: [] },
-      environmentNotDefined: { doc_count: 0 },
-      inEnvironment: {
-        resources: { urls: { buckets: [] } },
-        pageLoads: {
-          topPage: {
-            buckets: keys.map((key) => {
-              return { key };
-            }),
-          },
-        },
-      },
-    };
+  const withTopPage = (keys: string[]) => {
+    return resources([], keys);
   };
 
   it('returns the origin of the most loaded page', () => {

@@ -5,41 +5,36 @@
  * 2.0.
  */
 
-import { withSpan } from '@kbn/apm-utils';
 import type { ApplicationNetworkResponse } from '../../../../common/types/network';
 import { sortEnvironments } from '../../../lib/helpers/environment';
-import type { SearchContext } from '../../../lib/helpers/search';
-import { searchAggregations } from '../../../lib/helpers/search';
 import { pickerEnvironments } from '../../../lib/otel/environments';
-import type { ApplicationSearchParams } from '../../application_tab_route';
-import { NETWORK_SEARCH_SPAN_NAME } from '../constants';
+import type { ApplicationSearch } from '../../application_tab_route';
+import {
+  NETWORK_HTTP_REQUESTS_SEARCH_SPAN_NAME,
+  NETWORK_RESOURCES_SEARCH_SPAN_NAME,
+} from '../constants';
 import { httpRequestsSearch, resourcesSearch } from './search_requests';
-import type { HttpRequestsAggregations, ResourcesAggregations } from './search_responses';
 import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
 
 /** The HTTP requests and slowest resources of one EDOT Browser application, for its Network tab. */
-export const getOtelNetwork = ({
+export const getOtelNetwork = async ({
   esClient,
-  signal,
   ...searchParams
-}: ApplicationSearchParams & SearchContext): Promise<ApplicationNetworkResponse> => {
-  return withSpan(NETWORK_SEARCH_SPAN_NAME, async () => {
-    const context = { esClient, signal };
-    const [resources, requests] = await Promise.all([
-      searchAggregations<ResourcesAggregations>(context, resourcesSearch(searchParams)),
-      searchAggregations<HttpRequestsAggregations>(context, httpRequestsSearch(searchParams)),
-    ]);
+}: ApplicationSearch): Promise<ApplicationNetworkResponse> => {
+  const [{ aggregations: resources }, { aggregations: requests }] = await Promise.all([
+    esClient.search(NETWORK_RESOURCES_SEARCH_SPAN_NAME, resourcesSearch(searchParams)),
+    esClient.search(NETWORK_HTTP_REQUESTS_SEARCH_SPAN_NAME, httpRequestsSearch(searchParams)),
+  ]);
 
-    return {
-      serviceName: searchParams.serviceName,
-      httpRequests: toHttpRequests(requests),
-      slowestResources: toSlowestResources(resources),
-      pageOrigin: toPageOrigin(resources),
-      // Browser logs and client spans can each hold an environment the other lacks.
-      environments: sortEnvironments([
-        ...pickerEnvironments(resources),
-        ...pickerEnvironments(requests),
-      ]),
-    };
-  });
+  return {
+    serviceName: searchParams.serviceName,
+    httpRequests: toHttpRequests(requests),
+    slowestResources: toSlowestResources(resources),
+    pageOrigin: toPageOrigin(resources),
+    // Browser logs and client spans can each hold an environment the other lacks.
+    environments: sortEnvironments([
+      ...pickerEnvironments(resources),
+      ...pickerEnvironments(requests),
+    ]),
+  };
 };

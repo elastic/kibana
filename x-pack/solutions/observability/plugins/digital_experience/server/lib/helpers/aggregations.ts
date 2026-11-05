@@ -5,6 +5,9 @@
  * 2.0.
  */
 
+const P75 = 75;
+const P95 = 95;
+
 export interface TermsAggregation {
   buckets: Array<{ key: string | number }>;
 }
@@ -30,18 +33,16 @@ export const getP75 = getPercentile;
 
 const percentileOf = (field: string, percent: number) => {
   return {
-    percentiles: { field, percents: [percent], keyed: false },
+    percentiles: { field, percents: [percent], keyed: false as const },
   };
 };
-
-const P75 = 75;
 
 export const p75Of = (field: string) => {
   return percentileOf(field, P75);
 };
 
 export const p95Of = (field: string) => {
-  return percentileOf(field, 95);
+  return percentileOf(field, P95);
 };
 
 /** Orders terms buckets by their `p75Of` sub-aggregation named `aggregationName`, highest first. */

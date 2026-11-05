@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { termsQuery } from '@kbn/es-query';
 import { OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
@@ -37,10 +36,7 @@ const DEVICE_TYPES = 2;
  * What users load and do in one application: top pages and breakdowns (navigation timings) and top
  * clicks, over the selected environment only.
  */
-export const usageSearch = ({
-  environment,
-  ...application
-}: ApplicationSearchParams): estypes.SearchRequest => {
+export const usageSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
     query: {

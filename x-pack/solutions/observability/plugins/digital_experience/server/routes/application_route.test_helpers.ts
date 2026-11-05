@@ -64,19 +64,25 @@ export const applicationRouteTestCases = ({
     await expect(runHandler({ start: START, end: END })).resolves.toBe(RESPONSE);
 
     expect(getData).toHaveBeenCalledWith(
-      expect.objectContaining({ serviceName: 'shop', esClient })
+      expect.objectContaining({
+        serviceName: 'shop',
+        esClient: expect.objectContaining({ client: esClient }),
+      })
     );
   });
 
-  it('converts the ISO range to epoch milliseconds and passes an abort signal', async () => {
+  it('converts the ISO range to epoch milliseconds and searches with an abort signal', async () => {
     await runHandler({ start: START, end: END });
 
     expect(getData).toHaveBeenCalledWith(
-      expect.objectContaining({
-        start: Date.parse(START),
-        end: Date.parse(END),
-        signal: expect.any(AbortSignal),
-      })
+      expect.objectContaining({ start: Date.parse(START), end: Date.parse(END) })
+    );
+    esClient.search.mockResolvedValue({ body: {} });
+    const [[{ esClient: tracedClient }]] = getData.mock.calls;
+    await tracedClient.search('search', { index: 'logs-*', size: 0, track_total_hits: false });
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.anything(),
+      expect.objectContaining({ signal: expect.any(AbortSignal) })
     );
   });
 

@@ -8,9 +8,10 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import { lazySchema, z } from '@kbn/zod/v4';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
+import type { TracedElasticsearchClient } from '@kbn/traced-es-client';
 import { APM_API_PRIVILEGE, DIGITAL_EXPERIENCE_API_PRIVILEGES } from '../../common/feature';
 import { MAX_SERVICE_NAME_LENGTH } from '../lib/constants';
-import type { SearchContext } from '../lib/helpers/search';
+import { createDigitalExperienceTracedEsClient } from '../lib/create_digital_experience_traced_es_client';
 import type { DigitalExperienceRouteHandlerResources } from './create_digital_experience_server_route';
 import { timeRangeQuery } from './params';
 
@@ -25,6 +26,9 @@ export interface ApplicationSearchParams {
   /** Only this environment's data when set. */
   environment?: string;
 }
+
+/** A tab's search params and the client that runs its searches. */
+export type ApplicationSearch = ApplicationSearchParams & { esClient: TracedElasticsearchClient };
 
 export const APPLICATION_TAB_ROUTE_OPTIONS = { access: 'internal' } as const;
 
@@ -43,8 +47,8 @@ export const applicationTabRouteParams = lazySchema(() => {
 });
 
 /**
- * The search params of a tab's route: the ISO range as epoch milliseconds, the current user's
- * client, and a signal that stops the searches when the request is aborted.
+ * The search params of a tab's route, the ISO range as epoch milliseconds, and the current user's
+ * client, whose searches stop when the request is aborted.
  */
 export const toApplicationSearch = async ({
   params: {
@@ -52,18 +56,22 @@ export const toApplicationSearch = async ({
     query: { start, end, environment },
   },
   context,
+  logger,
   request,
-}: Pick<DigitalExperienceRouteHandlerResources, 'context'> & {
+}: Pick<DigitalExperienceRouteHandlerResources, 'context' | 'logger'> & {
   params: z.infer<typeof applicationTabRouteParams>;
   request: Pick<KibanaRequest, 'events'>;
-}): Promise<ApplicationSearchParams & SearchContext> => {
+}): Promise<ApplicationSearch> => {
   const { elasticsearch } = await context.core;
   return {
     serviceName,
     start: Date.parse(start),
     end: Date.parse(end),
     environment,
-    esClient: elasticsearch.client.asCurrentUser,
-    signal: getRequestAbortedSignal(request.events.aborted$),
+    esClient: createDigitalExperienceTracedEsClient({
+      client: elasticsearch.client.asCurrentUser,
+      logger,
+      abortSignal: getRequestAbortedSignal(request.events.aborted$),
+    }),
   };
 };

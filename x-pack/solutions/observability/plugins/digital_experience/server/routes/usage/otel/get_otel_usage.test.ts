@@ -5,29 +5,27 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { createTracedEsClientMock } from '../../../lib/create_digital_experience_traced_es_client.test_helpers';
 import { getOtelUsage } from './get_otel_usage';
 
 const PARAMS = { serviceName: 'shop', start: 10, end: 20 };
 
 describe('getOtelUsage', () => {
-  it('searches the OTel logs of the application, passing the signal', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({} as never);
-    const signal = new AbortController().signal;
+  it('searches the OTel logs of the application', async () => {
+    const { client, esClient } = createTracedEsClientMock();
+    client.search.mockResolvedValue({} as never);
 
-    await getOtelUsage({ esClient, ...PARAMS, signal });
+    await getOtelUsage({ esClient, ...PARAMS });
 
-    expect(esClient.search).toHaveBeenCalledTimes(1);
-    const [[request, options]] = esClient.search.mock.calls;
+    expect(client.search).toHaveBeenCalledTimes(1);
+    const [[request]] = client.search.mock.calls;
     expect(request?.index).toBe('logs-*.otel-*');
     expect(request?.query?.bool?.filter).toContainEqual({ term: { 'service.name': 'shop' } });
-    expect(options).toEqual({ signal });
   });
 
   it('returns empty lists when the indices hold nothing', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({} as never);
+    const { client, esClient } = createTracedEsClientMock();
+    client.search.mockResolvedValue({} as never);
 
     await expect(getOtelUsage({ esClient, ...PARAMS })).resolves.toEqual({
       topPages: [],
@@ -38,8 +36,8 @@ describe('getOtelUsage', () => {
   });
 
   it('fails when the search fails, instead of reporting empty panels', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockRejectedValue(new Error('search_phase_execution_exception'));
+    const { client, esClient } = createTracedEsClientMock();
+    client.search.mockRejectedValue(new Error('search_phase_execution_exception'));
 
     await expect(getOtelUsage({ esClient, ...PARAMS })).rejects.toThrow(
       'search_phase_execution_exception'

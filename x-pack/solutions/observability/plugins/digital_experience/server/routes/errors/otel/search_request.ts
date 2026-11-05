@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { EXCEPTION_MESSAGE, EXCEPTION_TYPE } from '@kbn/apm-types';
 import { ERROR_GROUPS_ROWS } from '../../../../common/top_rows';
 import {
@@ -43,10 +42,7 @@ const ERROR_GROUP_AGGS = {
  * The message is never a group: it often holds ids or values that would split one error into many.
  * A stack trace over the field's `ignore_above` is not indexed and falls in no group.
  */
-export const errorsSearch = ({
-  environment,
-  ...application
-}: ApplicationSearchParams): estypes.SearchRequest => {
+export const errorsSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
     query: {

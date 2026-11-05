@@ -9,16 +9,11 @@ import { httpRequestsSearch, resourcesSearch } from './search_requests';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
-/** A request body navigated by property, without describing every aggregation. */
-interface Aggs {
-  [key: string]: Aggs;
-}
-
 describe('resourcesSearch', () => {
   it('searches every browser log, for the picker to list every environment', () => {
     const request = resourcesSearch(PARAMS);
-    const { filter } = (request.query as Aggs).bool;
-    const aggs = request.aggs as Aggs;
+    const { filter } = request.query.bool;
+    const aggs = request.aggs;
 
     expect(request).toMatchObject({ index: 'logs-*.otel-*', size: 0 });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
@@ -28,7 +23,7 @@ describe('resourcesSearch', () => {
   });
 
   it('lists the resource timings without the API calls', () => {
-    const { resources } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+    const { resources } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs;
 
     expect(resources.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.resource_timing' } },
@@ -39,7 +34,7 @@ describe('resourcesSearch', () => {
   });
 
   it('finds the most loaded page, for the page origin', () => {
-    const { pageLoads } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+    const { pageLoads } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs;
 
     expect(pageLoads.filter.bool.filter).toEqual([
       { term: { event_name: 'browser.navigation_timing' } },
@@ -48,7 +43,7 @@ describe('resourcesSearch', () => {
   });
 
   it('orders the resources by the p75 duration and flags the render-blocking ones', () => {
-    const { urls } = (resourcesSearch(PARAMS).aggs as Aggs).inEnvironment.aggs.resources.aggs;
+    const { urls } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs.resources.aggs;
 
     // 50, for the table to page through and filter on the render-blocking ones.
     expect(urls.terms).toEqual({ field: 'url.full', size: 50, order: { 'duration.75': 'desc' } });
@@ -63,7 +58,7 @@ describe('resourcesSearch', () => {
 describe('httpRequestsSearch', () => {
   it('searches the client HTTP spans of the application in the local OTel traces', () => {
     const request = httpRequestsSearch(PARAMS);
-    const { filter } = (request.query as Aggs).bool;
+    const { filter } = request.query.bool;
 
     expect(request).toMatchObject({ index: 'traces-*.otel-*', size: 0 });
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
@@ -72,7 +67,7 @@ describe('httpRequestsSearch', () => {
   });
 
   it('groups by URL and method, with the outcomes and the p95 duration', () => {
-    const { requests } = (httpRequestsSearch(PARAMS).aggs as Aggs).inEnvironment.aggs;
+    const { requests } = httpRequestsSearch(PARAMS).aggs.inEnvironment.aggs;
 
     expect(requests.multi_terms).toEqual({
       terms: [{ field: 'url.full' }, { field: 'http.request.method' }],
@@ -83,7 +78,7 @@ describe('httpRequestsSearch', () => {
   });
 
   it('lists every environment for the picker and filters the requests to the selected one', () => {
-    const aggs = httpRequestsSearch({ ...PARAMS, environment: 'staging' } as never).aggs as Aggs;
+    const aggs = httpRequestsSearch({ ...PARAMS, environment: 'staging' }).aggs;
 
     expect(aggs.environments).toBeDefined();
     expect(aggs.environmentNotDefined).toBeDefined();

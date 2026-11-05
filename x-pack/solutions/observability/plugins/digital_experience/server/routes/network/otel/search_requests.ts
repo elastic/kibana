@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { estypes } from '@elastic/elasticsearch';
 import { termQuery, termsQuery } from '@kbn/es-query';
 import { DURATION, HTTP_REQUEST_METHOD, OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
@@ -47,10 +46,7 @@ const listedResources = {
 };
 
 /** One application's slowest resources, most loaded page and environments with browser data. */
-export const resourcesSearch = ({
-  environment,
-  ...application
-}: ApplicationSearchParams): estypes.SearchRequest => {
+export const resourcesSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
     query: {
@@ -96,10 +92,7 @@ export const resourcesSearch = ({
 };
 
 /** One application's HTTP requests by URL and method, and its environments with client spans. */
-export const httpRequestsSearch = ({
-  environment,
-  ...application
-}: ApplicationSearchParams): estypes.SearchRequest => {
+export const httpRequestsSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_TRACES_INDEX),
     query: {

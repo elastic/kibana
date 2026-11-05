@@ -9,19 +9,10 @@ import { NO_STACKTRACE, errorsSearch } from './search_request';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
-/** A request body navigated by property, without describing every aggregation. */
-interface Aggs {
-  [key: string]: Aggs;
-}
-
-const aggsOf = (params = PARAMS) => {
-  return errorsSearch(params).aggs as Aggs;
-};
-
 describe('errorsSearch', () => {
   it('searches the exceptions of the application in the local OTel logs', () => {
     const request = errorsSearch(PARAMS);
-    const { filter } = (request.query as Aggs).bool;
+    const { filter } = request.query.bool;
 
     expect(request).toMatchObject({ index: 'logs-*.otel-*', size: 0, ignore_unavailable: true });
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
@@ -30,7 +21,7 @@ describe('errorsSearch', () => {
   });
 
   it('lists every environment for the picker and filters the groups to the selected one', () => {
-    const aggs = aggsOf({ ...PARAMS, environment: 'production' } as typeof PARAMS);
+    const { aggs } = errorsSearch({ ...PARAMS, environment: 'production' });
 
     expect(aggs.environments).toBeDefined();
     expect(aggs.environmentNotDefined).toBeDefined();
@@ -41,7 +32,7 @@ describe('errorsSearch', () => {
   });
 
   it('groups the errors by type and stack trace, never by message', () => {
-    const { groups } = aggsOf().inEnvironment.aggs.exceptions.aggs;
+    const { groups } = errorsSearch(PARAMS).aggs.inEnvironment.aggs.exceptions.aggs;
 
     expect(groups.multi_terms).toEqual({
       terms: [
@@ -54,7 +45,7 @@ describe('errorsSearch', () => {
   });
 
   it('gives each group its latest message and last occurrence', () => {
-    const groupAggs = aggsOf().inEnvironment.aggs.exceptions.aggs.groups.aggs;
+    const groupAggs = errorsSearch(PARAMS).aggs.inEnvironment.aggs.exceptions.aggs.groups.aggs;
 
     expect(groupAggs.message.top_hits).toMatchObject({ size: 1, fields: ['exception.message'] });
     expect(groupAggs.lastSeen).toEqual({ max: { field: '@timestamp' } });

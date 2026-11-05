@@ -5,49 +5,47 @@
  * 2.0.
  */
 
-import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { createTracedEsClientMock } from '../../../lib/create_digital_experience_traced_es_client.test_helpers';
 import { getOtelNetwork } from './get_otel_network';
 
 const PARAMS = { serviceName: 'shop', start: 10, end: 20 };
 
 describe('getOtelNetwork', () => {
-  it('searches the OTel logs and traces of the application in parallel, passing the signal', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+  it('searches the OTel logs and traces of the application in parallel', async () => {
+    const { client, esClient } = createTracedEsClientMock();
     const resolvers: Array<() => void> = [];
-    esClient.search.mockImplementation(() => {
+    client.search.mockImplementation(() => {
       return new Promise((resolve) => {
         return resolvers.push(() => {
           return resolve({});
         });
       }) as never;
     });
-    const signal = new AbortController().signal;
 
-    const result = getOtelNetwork({ esClient, ...PARAMS, signal });
+    const result = getOtelNetwork({ esClient, ...PARAMS });
     await Promise.resolve();
     await Promise.resolve();
 
     // Both searches are in flight before either answers.
-    expect(esClient.search).toHaveBeenCalledTimes(2);
+    expect(client.search).toHaveBeenCalledTimes(2);
     resolvers.forEach((resolve) => {
       return resolve();
     });
     await result;
 
     expect(
-      esClient.search.mock.calls.map(([request]) => {
+      client.search.mock.calls.map(([request]) => {
         return request?.index;
       })
     ).toEqual(['logs-*.otel-*', 'traces-*.otel-*']);
-    esClient.search.mock.calls.forEach(([request, options]) => {
+    client.search.mock.calls.forEach(([request]) => {
       expect(request?.query?.bool?.filter).toContainEqual({ term: { 'service.name': 'shop' } });
-      expect(options).toEqual({ signal });
     });
   });
 
   it('returns empty lists when the indices hold nothing', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockResolvedValue({} as never);
+    const { client, esClient } = createTracedEsClientMock();
+    client.search.mockResolvedValue({} as never);
 
     await expect(getOtelNetwork({ esClient, ...PARAMS })).resolves.toEqual({
       serviceName: 'shop',
@@ -59,7 +57,7 @@ describe('getOtelNetwork', () => {
   });
 
   it('lists the environments of both the browser logs and the client spans', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
+    const { client, esClient } = createTracedEsClientMock();
     const withEnvironment = (environment: string, inEnvironment: object) => {
       return {
         aggregations: {
@@ -70,7 +68,7 @@ describe('getOtelNetwork', () => {
         },
       } as never;
     };
-    esClient.search
+    client.search
       .mockResolvedValueOnce(
         withEnvironment('production', {
           resources: { urls: { buckets: [] } },
@@ -85,8 +83,8 @@ describe('getOtelNetwork', () => {
   });
 
   it('fails when a search fails, instead of reporting empty lists', async () => {
-    const esClient = elasticsearchServiceMock.createElasticsearchClient();
-    esClient.search.mockRejectedValue(new Error('search_phase_execution_exception'));
+    const { client, esClient } = createTracedEsClientMock();
+    client.search.mockRejectedValue(new Error('search_phase_execution_exception'));
 
     await expect(getOtelNetwork({ esClient, ...PARAMS })).rejects.toThrow(
       'search_phase_execution_exception'

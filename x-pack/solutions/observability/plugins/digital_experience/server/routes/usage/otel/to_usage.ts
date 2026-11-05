@@ -5,19 +5,23 @@
  * 2.0.
  */
 
-import type { ApplicationUsageResponse, Breakdowns } from '../../../../common/types/usage';
+import type {
+  ApplicationUsageResponse,
+  Breakdowns,
+  DeviceName,
+} from '../../../../common/types/usage';
 import { firstBucketKey, getP75 } from '../../../lib/helpers/aggregations';
 import type { UsageAggregations, DeviceBucket } from './search_response';
 
-const isMobile = ({ key, key_as_string: keyAsString }: DeviceBucket): boolean => {
-  return key === 1 || key === 'true' || keyAsString === 'true';
+const toDeviceName = ({ key, key_as_string: keyAsString }: DeviceBucket): DeviceName => {
+  return key === 1 || key === 'true' || keyAsString === 'true' ? 'mobile' : 'desktop';
 };
 
 const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
   const pageLoads = logs?.inEnvironment.pageLoads;
-  const toItems = (buckets: Array<{ key: string; doc_count: number }> = []) => {
+  const toItems = (buckets: Array<{ key: string | number; doc_count: number }> = []) => {
     return buckets.map(({ key, doc_count: count }) => {
-      return { name: key, pageLoads: count };
+      return { name: String(key), pageLoads: count };
     });
   };
 
@@ -27,7 +31,7 @@ const toBreakdowns = (logs?: UsageAggregations): Breakdowns => {
     operatingSystems: toItems(pageLoads?.operatingSystems.buckets),
     devices: (pageLoads?.devices.buckets ?? []).map((bucket) => {
       return {
-        name: isMobile(bucket) ? ('mobile' as const) : ('desktop' as const),
+        name: toDeviceName(bucket),
         pageLoads: bucket.doc_count,
       };
     }),
@@ -44,7 +48,7 @@ export const toUsage = (logs?: UsageAggregations): ApplicationUsageResponse => {
     topPages: (metrics?.pageLoads.topPages.buckets ?? []).map(
       ({ key, doc_count: pageLoads, loadTime }) => {
         return {
-          url: key,
+          url: String(key),
           pageLoads,
           loadTimeP75Ms: getP75(loadTime),
         };
@@ -52,9 +56,9 @@ export const toUsage = (logs?: UsageAggregations): ApplicationUsageResponse => {
     ),
     breakdowns: toBreakdowns(logs),
     topClicks: (metrics?.clicks.selectors.buckets ?? []).map(
-      ({ key: cssSelector, doc_count: count, tagName }) => {
+      ({ key, doc_count: count, tagName }) => {
         return {
-          cssSelector,
+          cssSelector: String(key),
           tagName: firstBucketKey(tagName),
           count,
         };

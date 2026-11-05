@@ -9,13 +9,8 @@ import { usageSearch } from './search_request';
 
 const PARAMS = { serviceName: 'shop', start: 1000, end: 2000 };
 
-/** A request body navigated by property, without describing every aggregation. */
-interface Aggs {
-  [key: string]: Aggs;
-}
-
 const inEnvironment = (request: ReturnType<typeof usageSearch>) => {
-  return (request.aggs as Aggs).inEnvironment;
+  return request.aggs.inEnvironment;
 };
 
 describe('usageSearch', () => {
@@ -29,7 +24,7 @@ describe('usageSearch', () => {
   });
 
   it('filters the browser documents of the application, page loads and clicks only', () => {
-    const { filter } = (usageSearch(PARAMS).query as Aggs).bool;
+    const { filter } = usageSearch(PARAMS).query.bool;
 
     expect(filter).toContainEqual({ term: { 'telemetry.sdk.language': 'webjs' } });
     expect(filter).toContainEqual({ term: { 'service.name': 'shop' } });
@@ -39,7 +34,7 @@ describe('usageSearch', () => {
   });
 
   it('filters the environment in one aggregation, without picker terms', () => {
-    const all = usageSearch(PARAMS).aggs as Aggs;
+    const all = usageSearch(PARAMS).aggs;
     const production = inEnvironment(usageSearch({ ...PARAMS, environment: 'production' }));
 
     expect(Object.keys(all)).toEqual(['inEnvironment']);

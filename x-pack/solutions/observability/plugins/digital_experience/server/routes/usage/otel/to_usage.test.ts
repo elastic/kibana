@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { keyBuckets, termsAggregate } from '../../../lib/helpers/aggregate_fixtures.test_helpers';
 import type { UsageAggregations } from './search_response';
 import { toUsage } from './to_usage';
 
@@ -18,17 +19,18 @@ const logs = (
   pageLoads: Partial<UsageAggregations['inEnvironment']['pageLoads']> = {},
   clicks: UsageAggregations['inEnvironment']['clicks'] = {
     doc_count: 0,
-    selectors: { buckets: [] },
+    selectors: termsAggregate([]),
   }
 ): UsageAggregations => {
   return {
     inEnvironment: {
+      doc_count: 0,
       pageLoads: {
         doc_count: 0,
-        topPages: { buckets: [] },
-        browsers: { buckets: [] },
-        operatingSystems: { buckets: [] },
-        devices: { buckets: [] },
+        topPages: termsAggregate([]),
+        browsers: termsAggregate([]),
+        operatingSystems: termsAggregate([]),
+        devices: termsAggregate([]),
         ...pageLoads,
       },
       clicks,
@@ -52,20 +54,18 @@ describe('toUsage', () => {
   it('maps the top pages with their p75 load time, null without a timed load', () => {
     const usage = toUsage(
       logs({
-        topPages: {
-          buckets: [
-            {
-              key: 'https://shop/',
-              doc_count: 4,
-              loadTime: percentile(1200.5),
-            },
-            {
-              key: 'https://shop/cart',
-              doc_count: 1,
-              loadTime: percentile(null),
-            },
-          ],
-        },
+        topPages: termsAggregate([
+          {
+            key: 'https://shop/',
+            doc_count: 4,
+            loadTime: percentile(1200.5),
+          },
+          {
+            key: 'https://shop/cart',
+            doc_count: 1,
+            loadTime: percentile(null),
+          },
+        ]),
       })
     );
 
@@ -83,19 +83,15 @@ describe('toUsage', () => {
     const usage = toUsage(
       logs({
         doc_count: 8,
-        browsers: {
-          buckets: [
-            { key: 'Chrome', doc_count: 3 },
-            { key: 'Safari', doc_count: 2 },
-          ],
-        },
-        operatingSystems: { buckets: [{ key: 'macOS', doc_count: 5 }] },
-        devices: {
-          buckets: [
-            { key: 0, key_as_string: 'false', doc_count: 3 },
-            { key: 1, key_as_string: 'true', doc_count: 2 },
-          ],
-        },
+        browsers: termsAggregate([
+          { key: 'Chrome', doc_count: 3 },
+          { key: 'Safari', doc_count: 2 },
+        ]),
+        operatingSystems: termsAggregate([{ key: 'macOS', doc_count: 5 }]),
+        devices: termsAggregate([
+          { key: 0, key_as_string: 'false', doc_count: 3 },
+          { key: 1, key_as_string: 'true', doc_count: 2 },
+        ]),
       })
     );
 
@@ -119,12 +115,10 @@ describe('toUsage', () => {
         {},
         {
           doc_count: 7,
-          selectors: {
-            buckets: [
-              { key: '#add-to-cart', doc_count: 2, tagName: { buckets: [{ key: 'BUTTON' }] } },
-              { key: '.card', doc_count: 1, tagName: { buckets: [] } },
-            ],
-          },
+          selectors: termsAggregate([
+            { key: '#add-to-cart', doc_count: 2, tagName: termsAggregate(keyBuckets(['BUTTON'])) },
+            { key: '.card', doc_count: 1, tagName: termsAggregate([]) },
+          ]),
         }
       )
     );

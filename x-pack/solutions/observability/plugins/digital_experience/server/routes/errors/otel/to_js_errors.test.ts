@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  NO_ENVIRONMENTS,
+  termsAggregate,
+  topHitsAggregate,
+} from '../../../lib/helpers/aggregate_fixtures.test_helpers';
 import { NO_STACKTRACE } from './search_request';
 import type { ErrorGroupBucket, ErrorsAggregations } from './search_response';
 import { toHasMoreErrors, toJsErrors } from './to_js_errors';
@@ -18,21 +23,19 @@ const group = (
 ): ErrorGroupBucket => {
   return {
     key: [type, stacktrace],
+    key_as_string: `${type}|${stacktrace}`,
     doc_count: count,
-    message: {
-      hits: { hits: message === null ? [] : [{ fields: { 'exception.message': [message] } }] },
-    },
+    message: topHitsAggregate(message === null ? [] : [{ 'exception.message': [message] }]),
     lastSeen: { value: lastSeen },
   };
 };
 
 const aggregations = (groups: ErrorGroupBucket[], otherCount = 0): ErrorsAggregations => {
   return {
-    environments: { buckets: [] },
-    environmentNames: { buckets: [] },
-    environmentNotDefined: { doc_count: 0 },
+    ...NO_ENVIRONMENTS,
     inEnvironment: {
-      exceptions: { groups: { buckets: groups, sum_other_doc_count: otherCount } },
+      doc_count: 0,
+      exceptions: { doc_count: 0, groups: termsAggregate(groups, otherCount) },
     },
   };
 };
