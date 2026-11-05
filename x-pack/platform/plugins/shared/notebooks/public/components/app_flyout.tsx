@@ -104,7 +104,7 @@ const CodePanelContent = ({ cell }: { cell: CellDefinition }) => {
     return (
       <EuiText size="s" color="subdued">
         {i18n.translate('xpack.notebook.app.noCodeOutput', {
-          defaultMessage: 'Run the code to see its exports and logs.',
+          defaultMessage: 'Run the code to see its exports.',
         })}
       </EuiText>
     );

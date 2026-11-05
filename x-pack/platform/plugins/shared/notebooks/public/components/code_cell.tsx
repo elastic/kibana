@@ -7,6 +7,7 @@
 
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  EuiAccordion,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -36,32 +37,77 @@ const EXPORTS_TITLE = i18n.translate('xpack.notebook.codeCell.exports', {
 const CONSOLE_TITLE = i18n.translate('xpack.notebook.codeCell.console', {
   defaultMessage: 'Console',
 });
+const getLevelCountLabel = (level: 'error' | 'warn', count: number) =>
+  level === 'error'
+    ? i18n.translate('xpack.notebook.codeCell.errorCount', {
+        defaultMessage: '{count, plural, one {# error} other {# errors}}',
+        values: { count },
+      })
+    : i18n.translate('xpack.notebook.codeCell.warningCount', {
+        defaultMessage: '{count, plural, one {# warning} other {# warnings}}',
+        values: { count },
+      });
 
-const LOG_ICONS: Record<CodeLogLevel, string> = {
-  log: 'chevronSingleRight',
+const LOG_ICONS: Partial<Record<CodeLogLevel, string>> = {
   info: 'info',
   debug: 'bug',
   warn: 'warning',
   error: 'error',
 };
 
-const LogLine = ({ entry }: { entry: CodeLogEntry }) => {
+const useLevelColors = (level: CodeLogLevel) => {
   const { euiTheme } = useEuiTheme();
-  const { level, message } = entry;
-  const color =
-    level === 'error'
-      ? euiTheme.colors.textDanger
-      : level === 'warn'
-      ? euiTheme.colors.textWarning
-      : euiTheme.colors.textParagraph;
+  const { colors } = euiTheme;
+  if (level === 'error') {
+    return {
+      text: colors.textDanger,
+      background: colors.backgroundBaseDanger,
+      border: colors.borderBaseDanger,
+    };
+  }
+  if (level === 'warn') {
+    return {
+      text: colors.textWarning,
+      background: colors.backgroundBaseWarning,
+      border: colors.borderBaseWarning,
+    };
+  }
+  return {
+    text: level === 'debug' ? colors.textSubdued : colors.textParagraph,
+    background: 'transparent',
+    border: colors.borderBaseSubdued,
+  };
+};
+
+const ConsoleLine = ({ entry: { level, message } }: { entry: CodeLogEntry }) => {
+  const { euiTheme } = useEuiTheme();
+  const { text, background, border } = useLevelColors(level);
+  const icon = LOG_ICONS[level];
   return (
-    <EuiFlexGroup gutterSize="s" alignItems="flexStart" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiIcon type={LOG_ICONS[level]} size="s" color={color} aria-label={level} />
+    <EuiFlexGroup
+      gutterSize="s"
+      alignItems="flexStart"
+      responsive={false}
+      data-test-subj={`notebookCodeLog-${level}`}
+      css={css`
+        color: ${text};
+        background: ${background};
+        border-block: ${euiTheme.border.width.thin} solid ${border};
+        margin-block-start: -${euiTheme.border.width.thin};
+        padding: ${euiTheme.size.xxs} ${euiTheme.size.s};
+      `}
+    >
+      <EuiFlexItem
+        grow={false}
+        css={css`
+          inline-size: ${euiTheme.size.base};
+          padding-block-start: ${euiTheme.size.xxs};
+        `}
+      >
+        {icon && <EuiIcon type={icon} size="s" color={text} aria-label={level} />}
       </EuiFlexItem>
       <EuiFlexItem
         css={css`
-          color: ${color};
           white-space: pre-wrap;
           word-break: break-word;
         `}
@@ -72,17 +118,68 @@ const LogLine = ({ entry }: { entry: CodeLogEntry }) => {
   );
 };
 
-/** A code cell's exported values and console output. */
+const LevelCount = ({ level, count }: { level: 'error' | 'warn'; count: number }) => {
+  const { text } = useLevelColors(level);
+  if (count === 0) return null;
+  return (
+    <EuiFlexItem grow={false}>
+      <EuiText size="xs" color={text}>
+        <EuiIcon type={LOG_ICONS[level] ?? level} size="s" color={text} aria-hidden={true} />{' '}
+        {getLevelCountLabel(level, count)}
+      </EuiText>
+    </EuiFlexItem>
+  );
+};
+
+/** DevTools-style console listing a code cell's `console.*` calls; collapsible. */
+const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogEntry[] }) => {
+  const { euiTheme } = useEuiTheme();
+  if (logs.length === 0) return null;
+  const countOf = (level: CodeLogLevel) => logs.filter((entry) => entry.level === level).length;
+  return (
+    <EuiAccordion
+      id={`notebookCodeConsole-${cellId}`}
+      initialIsOpen
+      paddingSize="none"
+      buttonContent={
+        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
+          <EuiFlexItem grow={false}>
+            <EuiText size="xs">
+              <strong>{CONSOLE_TITLE}</strong> ({logs.length})
+            </EuiText>
+          </EuiFlexItem>
+          <LevelCount level="error" count={countOf('error')} />
+          <LevelCount level="warn" count={countOf('warn')} />
+        </EuiFlexGroup>
+      }
+      data-test-subj="notebookCodeLogs"
+    >
+      <div
+        css={css`
+          margin-block-start: ${euiTheme.size.xs};
+          max-block-size: calc(${euiTheme.size.l} * 12);
+          overflow-y: auto;
+          font-family: ${euiTheme.font.familyCode};
+          font-size: ${euiTheme.size.m};
+          line-height: ${euiTheme.size.l};
+          border: ${euiTheme.border.thin};
+          border-radius: ${euiTheme.border.radius.small};
+          padding-block-start: ${euiTheme.border.width.thin};
+        `}
+      >
+        {logs.map((entry, index) => (
+          <ConsoleLine key={index} entry={entry} />
+        ))}
+      </div>
+    </EuiAccordion>
+  );
+};
+
+/** A code cell's exported values. */
 export const CodePreview = ({ output }: { output: Extract<CellOutput, { kind: 'code' }> }) => {
   const { euiTheme } = useEuiTheme();
   const exports = Object.entries(output.values);
-  const { logs } = output;
-  if (exports.length === 0 && logs.length === 0) return null;
-
-  const monospace = css`
-    font-family: ${euiTheme.font.familyCode};
-    font-size: ${euiTheme.size.m};
-  `;
+  if (exports.length === 0) return null;
   return (
     <EuiPanel
       color="subdued"
@@ -90,33 +187,23 @@ export const CodePreview = ({ output }: { output: Extract<CellOutput, { kind: 'c
       hasBorder={false}
       data-test-subj="notebookCodePreview"
     >
-      {exports.length > 0 && (
-        <>
-          <EuiTitle size="xxxs">
-            <h4>{EXPORTS_TITLE}</h4>
-          </EuiTitle>
-          <EuiText size="xs" css={monospace} data-test-subj="notebookCodeExports">
-            {exports.map(([name, value]) => (
-              <div key={name}>
-                <strong>{name}</strong> = {formatCodeValue(value)}
-              </div>
-            ))}
-          </EuiText>
-        </>
-      )}
-      {exports.length > 0 && logs.length > 0 && <EuiSpacer size="s" />}
-      {logs.length > 0 && (
-        <>
-          <EuiTitle size="xxxs">
-            <h4>{CONSOLE_TITLE}</h4>
-          </EuiTitle>
-          <EuiText size="xs" css={monospace} data-test-subj="notebookCodeLogs">
-            {logs.map((entry, index) => (
-              <LogLine key={index} entry={entry} />
-            ))}
-          </EuiText>
-        </>
-      )}
+      <EuiTitle size="xxxs">
+        <h4>{EXPORTS_TITLE}</h4>
+      </EuiTitle>
+      <EuiText
+        size="xs"
+        css={css`
+          font-family: ${euiTheme.font.familyCode};
+          font-size: ${euiTheme.size.m};
+        `}
+        data-test-subj="notebookCodeExports"
+      >
+        {exports.map(([name, value]) => (
+          <div key={name}>
+            <strong>{name}</strong> = {formatCodeValue(value)}
+          </div>
+        ))}
+      </EuiText>
     </EuiPanel>
   );
 };
@@ -169,7 +256,13 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
         }}
         dataTestSubj={`notebookCodeEditor-${cell.name}`}
       />
-      {output?.kind === 'code' && (
+      {output?.kind === 'code' && output.logs.length > 0 && (
+        <>
+          <EuiSpacer size="s" />
+          <CodeConsole cellId={cell.id} logs={output.logs} />
+        </>
+      )}
+      {output?.kind === 'code' && Object.keys(output.values).length > 0 && (
         <>
           <EuiSpacer size="s" />
           <CodePreview output={output} />
