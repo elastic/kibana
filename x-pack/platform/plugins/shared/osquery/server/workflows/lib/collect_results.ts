@@ -63,6 +63,16 @@ const FALLBACK_PAGE_SIZES = [25, 5, 1];
 const nextSmallerPageSize = (pageSize: number): number | undefined =>
   FALLBACK_PAGE_SIZES.find((size) => size < pageSize);
 
+const PAGE_SIZES = [RESULTS_PAGE_SIZE, ...FALLBACK_PAGE_SIZES];
+
+/**
+ * Size of the page that starts at `offset`: the largest standard size that fits the rows still
+ * wanted and divides `offset`, so the route's page index (`offset / size`) stays whole and the
+ * last page does not read rows that are then discarded.
+ */
+const pageSizeAt = (offset: number, limit: number): number =>
+  PAGE_SIZES.find((size) => size <= limit && offset % size === 0) ?? 1;
+
 export interface CollectedResults {
   rows: ResultRow[];
   /** A read failed (not a 401/403): `rows` holds what was read before it. */
@@ -100,17 +110,18 @@ export const collectResults = async ({
   if (budget.exhausted) return { rows, readFailed: false };
 
   const path = resultsPath(actionId, queryActionId);
-  // The first page is no wider than what is asked for, so `max_rows: 1` does not read 200 rows.
-  let pageSize = Math.min(RESULTS_PAGE_SIZE, maxRows);
-  // Always a multiple of `pageSize`: it only grows by whole pages, and the size only steps down
-  // to a divisor of itself (the capped first page is the only page when it is not 200).
+  // The widest page to read. The first page is no wider than what is asked for, so
+  // `max_rows: 1` does not read 200 rows; a failed read lowers it.
+  let ceiling = Math.min(RESULTS_PAGE_SIZE, maxRows);
   let offset = 0;
 
-  while (
-    rows.length < maxRows &&
-    rows.length < rowCount &&
-    offset + pageSize <= RESULTS_MAX_WINDOW
-  ) {
+  while (rows.length < maxRows && rows.length < rowCount) {
+    // The first page can be any size up to `maxRows`. Later pages shrink to what is still wanted,
+    // so `max_rows: 201` reads 200 rows and then 1, not 200 rows twice.
+    const wanted = Math.min(maxRows, rowCount) - rows.length;
+    const pageSize = offset === 0 ? ceiling : pageSizeAt(offset, Math.min(ceiling, wanted));
+    if (offset + pageSize > RESULTS_MAX_WINDOW) break;
+
     let edges: NonNullable<ResultsResponse['data']>['edges'];
     try {
       const { body } = await contextManager.callKibanaApi<ResultsResponse>({
@@ -134,7 +145,7 @@ export const collectResults = async ({
 
       const smaller = nextSmallerPageSize(pageSize);
       if (smaller !== undefined) {
-        pageSize = smaller;
+        ceiling = smaller;
         continue;
       }
 

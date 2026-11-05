@@ -65,6 +65,48 @@ describe('collectResults', () => {
     });
   });
 
+  describe('page sizes after the first page', () => {
+    const pageRequests = async (maxRows: number) => {
+      const pages: Array<{ page: unknown; pageSize: unknown }> = [];
+      const { result } = collect(
+        {
+          [RESULTS]: ({ query }) => {
+            pages.push({ page: query?.page, pageSize: query?.pageSize });
+
+            return { data: { edges: resultEdges(Number(query?.pageSize)) } };
+          },
+        },
+        { rowCount: 1000, maxRows }
+      );
+      const { rows } = await result;
+
+      return { pages, rows };
+    };
+
+    it('does not read a whole second page to keep one row', async () => {
+      const { pages, rows } = await pageRequests(201);
+
+      expect(pages).toEqual([
+        { page: 0, pageSize: 200 },
+        { page: 200, pageSize: 1 },
+      ]);
+      expect(rows).toHaveLength(201);
+    });
+
+    it('steps down 200, 25, 5, 1 so the page index stays whole', async () => {
+      const { pages, rows } = await pageRequests(431);
+
+      expect(pages).toEqual([
+        { page: 0, pageSize: 200 },
+        { page: 1, pageSize: 200 },
+        { page: 16, pageSize: 25 },
+        { page: 85, pageSize: 5 },
+        { page: 430, pageSize: 1 },
+      ]);
+      expect(rows).toHaveLength(431);
+    });
+  });
+
   describe('failed reads', () => {
     it('keeps the rows read before a failed page instead of dropping them', async () => {
       let call = 0;
