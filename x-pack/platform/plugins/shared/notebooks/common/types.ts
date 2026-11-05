@@ -74,8 +74,11 @@ export interface ChartCellDefinition extends CellBase {
 export interface CustomCellDefinition extends CellBase {
   type: 'custom';
   runMode: RunMode;
+  /** Where the rows come from: `sourceCell`'s results (the default) or the cell's own `query`. */
+  dataSource?: 'cell' | 'query';
   /** Id of the ES|QL cell whose rows fill the template; null until the user picks a source. */
   sourceCell: string | null;
+  query?: string;
   template: string;
 }
 

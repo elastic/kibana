@@ -125,6 +125,28 @@ describe('buildGraph', () => {
     expect(graph.errors.size).toBe(0);
   });
 
+  it('links a custom cell with its own query to the inputs it uses, not its old source', () => {
+    const graph = graphOf([
+      time('time'),
+      dropdown('os'),
+      esql('q', 'FROM logs'),
+      {
+        id: 'p',
+        name: 'p',
+        type: 'custom',
+        runMode: 'auto',
+        dataSource: 'query',
+        sourceCell: 'q',
+        query: 'FROM logs | WHERE os == ?os AND @timestamp >= ?_tstart',
+        template: '',
+      },
+    ]);
+
+    expect([...(graph.parents.get('p') ?? [])].sort()).toEqual(['os', 'time']);
+    expect(graph.children.get('q')).toEqual([]);
+    expect(graph.errors.size).toBe(0);
+  });
+
   it('gives a chart without a source no parent and no error', () => {
     const graph = graphOf([chart('c', null)]);
     expect(graph.parents.get('c')).toEqual([]);

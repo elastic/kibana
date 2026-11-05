@@ -204,6 +204,31 @@ describe('NotebookScheduler', () => {
       expect(env.output('p')).toBe(env.output('q'));
     });
 
+    it('runs a custom cell with its own query, and switches back to its source', async () => {
+      const own: CellDefinition = {
+        id: 'p',
+        name: 'p',
+        type: 'custom',
+        runMode: 'auto',
+        dataSource: 'query',
+        sourceCell: 'q',
+        query: 'FROM hosts',
+        template: '',
+      };
+      const env = track(setup([esql('q', 'FROM logs'), own]));
+      await env.open();
+
+      expect(env.fake.calls.map(({ query }) => query).sort()).toEqual(['FROM hosts', 'FROM logs']);
+      expect(env.runtime('p').status).toBe('done');
+      expect(env.output('p')).not.toBe(env.output('q'));
+
+      env.store.updateCell('p', (cell) =>
+        cell.type === 'custom' ? { ...cell, dataSource: 'cell' } : cell
+      );
+      await env.scheduler.whenIdle();
+      expect(env.output('p')).toBe(env.output('q'));
+    });
+
     it('runs independent branches concurrently', async () => {
       const env = track(setup([esql('a', 'FROM a'), esql('b', 'FROM b')]));
       env.fake.setDeferred(true);

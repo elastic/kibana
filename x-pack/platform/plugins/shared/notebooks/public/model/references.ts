@@ -7,7 +7,12 @@
 
 import { Parser, Walker } from '@elastic/esql';
 import { getESQLQueryVariables } from '@kbn/esql-utils';
-import type { CellDefinition, CellOutputKey, InputCellDefinition } from '../../common/types';
+import type {
+  CellDefinition,
+  CellOutputKey,
+  CustomCellDefinition,
+  InputCellDefinition,
+} from '../../common/types';
 
 /** Cell names must match this; a leading `_` is reserved for built-in params such as `_tstart`. */
 export const CELL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
@@ -112,10 +117,15 @@ export const renameQueryParam = (query: string, from: string, to: string): strin
     }, query);
 };
 
+/** A custom cell's own query, or undefined when its rows come from a source cell. */
+export const getOwnQuery = ({ dataSource, query = '' }: CustomCellDefinition): string | undefined =>
+  dataSource === 'query' ? query : undefined;
+
 const renameCellParam = (cell: CellDefinition, from: string, to: string): CellDefinition => {
-  if (cell.type === 'esql') {
-    const query = renameQueryParam(cell.query, from, to);
-    return query === cell.query ? cell : { ...cell, query };
+  if (cell.type === 'esql' || (cell.type === 'custom' && cell.query !== undefined)) {
+    const current = cell.query ?? '';
+    const query = renameQueryParam(current, from, to);
+    return query === current ? cell : { ...cell, query };
   }
   if (cell.type === 'input' && cell.input.kind === 'dropdown') {
     const optionsQuery = renameQueryParam(cell.input.optionsQuery, from, to);
@@ -172,6 +182,10 @@ export const getCellDisplayName = ({ label, name }: CellDefinition): string => l
 /** Param names a cell consumes. */
 export const getCellParamNames = (cell: CellDefinition): string[] => {
   if (cell.type === 'esql') return getQueryParamNames(cell.query);
+  if (cell.type === 'custom') {
+    const query = getOwnQuery(cell);
+    return query === undefined ? [] : getQueryParamNames(query);
+  }
   if (cell.type === 'input' && cell.input.kind === 'dropdown') {
     const { optionsSource = 'query', optionsQuery } = cell.input;
     return optionsSource === 'query' ? getQueryParamNames(optionsQuery) : [];

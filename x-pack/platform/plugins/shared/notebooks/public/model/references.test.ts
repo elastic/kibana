@@ -155,6 +155,23 @@ describe('renameOutput', () => {
     expect(renamedCell(result, os.id)).toBe(os);
   });
 
+  it("updates a custom cell's own query", () => {
+    const custom: CellDefinition = {
+      id: 'p',
+      name: 'p',
+      type: 'custom',
+      runMode: 'auto',
+      dataSource: 'query',
+      sourceCell: null,
+      query: 'FROM logs | WHERE @timestamp <= ?window_end',
+      template: '',
+    };
+    const result = renameOutput({ ...cells, [custom.id]: custom }, window, 'end', 'until');
+    expect(renamedCell(result, custom.id)).toMatchObject({
+      query: 'FROM logs | WHERE @timestamp <= ?until',
+    });
+  });
+
   it.each([
     ['an invalid name', 'Until'],
     ['a reserved name', '_until'],

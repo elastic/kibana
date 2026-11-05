@@ -13,6 +13,7 @@ import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
 import type { CellStatus } from './types';
 import { buildGraph, getDescendants } from './graph';
+import { getOwnQuery } from './references';
 
 export const getGridColumns = ({ gridColumns }: NotebookApp): number =>
   gridColumns ?? DEFAULT_GRID_COLUMNS;
@@ -249,9 +250,11 @@ export const generateDefaultApp = (
     return cell && !isPinnedTimeCell(cell) ? [cell] : [];
   });
   const charted = new Set(
-    ordered.flatMap((cell) =>
-      (cell.type === 'chart' || cell.type === 'custom') && cell.sourceCell ? [cell.sourceCell] : []
-    )
+    ordered.flatMap((cell) => {
+      const isSourced =
+        cell.type === 'chart' || (cell.type === 'custom' && getOwnQuery(cell) === undefined);
+      return isSourced && cell.sourceCell ? [cell.sourceCell] : [];
+    })
   );
   const included = ordered.filter((cell) => cell.type !== 'esql' || !charted.has(cell.id));
 

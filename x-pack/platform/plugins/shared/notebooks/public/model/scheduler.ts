@@ -20,7 +20,7 @@ import type {
 import { buildGraph, getDescendants, type NotebookGraph } from './graph';
 import { getDefaultInputValue, type NotebookStore } from './notebook_store';
 import { buildQueryParams, resolveInputParams } from './params';
-import { getCellDisplayName } from './references';
+import { getCellDisplayName, getOwnQuery } from './references';
 import type {
   CellOutput,
   CellRuntime,
@@ -44,7 +44,7 @@ const EXECUTION_FIELDS: {
 } = {
   esql: ['runMode'],
   chart: ['sourceCell', 'runMode'],
-  custom: ['sourceCell', 'runMode'],
+  custom: ['dataSource', 'sourceCell', 'runMode'],
   input: ['input', 'name'],
   markdown: [],
 };
@@ -284,8 +284,13 @@ export class NotebookScheduler {
     switch (cell.type) {
       case 'esql':
         return this.evaluateEsql(cell, forced, signal);
+      case 'custom': {
+        const query = getOwnQuery(cell);
+        return query === undefined
+          ? this.evaluateSourced(cell, forced)
+          : this.evaluateEsql({ ...cell, query }, forced, signal);
+      }
       case 'chart':
-      case 'custom':
         return this.evaluateSourced(cell, forced);
       case 'input':
         return this.evaluateInput(cell, forced, signal);
@@ -293,7 +298,7 @@ export class NotebookScheduler {
   }
 
   private async evaluateEsql(
-    { id, query, runMode }: EsqlCellDefinition,
+    { id, query, runMode }: Pick<EsqlCellDefinition, 'id' | 'query' | 'runMode'>,
     forced: boolean,
     signal: AbortSignal
   ): Promise<void> {

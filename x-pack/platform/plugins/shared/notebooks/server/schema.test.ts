@@ -83,6 +83,16 @@ const everyVariant = toNotebook([
     sourceCell: 'visits',
     template: '{% for row in rows %}<p>{{ row["c"].value }}</p>{% endfor %}',
   },
+  {
+    id: 'custom_query',
+    name: 'custom_query',
+    type: 'custom',
+    runMode: 'manual',
+    dataSource: 'query',
+    sourceCell: null,
+    query: 'FROM logs | STATS c = COUNT()',
+    template: '<p>{{ rows[0]["c"].value }}</p>',
+  },
   { id: 'notes', name: 'notes', type: 'markdown', content: '# Instructions' },
 ]);
 

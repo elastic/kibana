@@ -109,7 +109,9 @@ const cellSchema = schema.discriminatedUnion('type', [
     ...cellBaseProps,
     type: schema.literal('custom'),
     runMode: runModeSchema,
+    dataSource: schema.maybe(schema.oneOf([schema.literal('cell'), schema.literal('query')])),
     sourceCell: schema.nullable(idSchema),
+    query: schema.maybe(querySchema),
     template: schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH }),
   }),
   schema.object({
