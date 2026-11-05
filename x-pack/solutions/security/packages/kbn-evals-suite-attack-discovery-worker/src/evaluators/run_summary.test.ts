@@ -5,14 +5,23 @@
  * 2.0.
  */
 
+import type { ToolingLog } from '@kbn/tooling-log';
 import { POSITIVE_CONTROL_RECALL_THRESHOLD } from './audit_positive_control_recall_evaluator';
 import { computeScoreStats } from '../score_stats';
-import type { WorkerEvaluator } from './dataset_evaluator';
+import type { CohortRouting } from '../cohort_routing';
+import {
+  createAuditEvaluators,
+  createCodeEvaluators,
+  type WorkerEvaluator,
+} from './dataset_evaluator';
 import {
   assertCodeScoresPass,
   createRunCollector,
   describeRow,
   isCodeMiss,
+  logQualityMisses,
+  PIPELINE_CODE_EVALUATORS,
+  QUALITY_CODE_EVALUATORS,
   withScoreCollection,
 } from './run_summary';
 
@@ -47,10 +56,84 @@ const gate = async (evaluator: WorkerEvaluator) => {
   return collector.codeFailures;
 };
 
+const ROUTING = {
+  cohort: 'whole',
+  generationModel: 'm',
+  reviewModel: 'm',
+} as unknown as CohortRouting;
+
 describe('CODE gate', () => {
-  it('reports a 0 BlindReviewAbstained without failing the run, but still fails a 0 elsewhere', async () => {
-    expect(await gate(evaluatorScoring({ name: 'BlindReviewAbstained', score: 0 }))).toEqual([]);
-    expect(await gate(evaluatorScoring({ name: 'VerdictMatchesGold', score: 0 }))).toHaveLength(1);
+  describe('pipeline vs quality evaluators', () => {
+    const registeredCodeNames = [
+      ...createCodeEvaluators(ROUTING),
+      ...createAuditEvaluators(ROUTING),
+    ]
+      .filter(({ kind }) => kind === 'CODE')
+      .map(({ name }) => name);
+
+    it('classifies every registered CODE evaluator as exactly one of pipeline or quality', () => {
+      expect(registeredCodeNames.length).toBeGreaterThan(0);
+      const misclassified = registeredCodeNames.filter(
+        (name) => PIPELINE_CODE_EVALUATORS.has(name) === QUALITY_CODE_EVALUATORS.has(name)
+      );
+      expect(misclassified).toEqual([]);
+    });
+
+    it('names no evaluator that is not registered', () => {
+      const unknown = [...PIPELINE_CODE_EVALUATORS, ...QUALITY_CODE_EVALUATORS].filter(
+        (name) => !registeredCodeNames.includes(name)
+      );
+      expect(unknown).toEqual([]);
+    });
+
+    it.each([...QUALITY_CODE_EVALUATORS])(
+      '%s: a miss is recorded but does not fail the dataset',
+      async (name) => {
+        const failures = await gate(evaluatorScoring({ name, score: 0 }));
+        expect(failures).toHaveLength(1);
+        expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
+      }
+    );
+
+    it.each([...PIPELINE_CODE_EVALUATORS])('%s: a miss fails the dataset', async (name) => {
+      const failures = await gate(evaluatorScoring({ name, score: 0 }));
+      expect(() => assertCodeScoresPass('dataset', failures)).toThrow(new RegExp(name));
+    });
+
+    it('fails an evaluator nobody classified', async () => {
+      const failures = await gate(evaluatorScoring({ name: 'BrandNewCheck', score: 0 }));
+      expect(() => assertCodeScoresPass('dataset', failures)).toThrow(/BrandNewCheck/);
+    });
+
+    it('still fails a failed row reported by a quality evaluator', () => {
+      const failures = [
+        { evaluator: 'ForbiddenJoin', row: 'space: row-a', score: null, label: 'ROW_FAILED' },
+      ];
+      expect(() => assertCodeScoresPass('dataset', failures)).toThrow(/ROW_FAILED/);
+    });
+
+    it('lists only quality misses with the reported-not-gating heading', async () => {
+      const warning = jest.fn();
+      const log = { warning } as unknown as ToolingLog;
+      const quality = await gate(evaluatorScoring({ name: 'VerdictMatchesGold', score: 0 }));
+      const pipeline = await gate(evaluatorScoring({ name: 'RunnerCompleted', score: 0 }));
+      logQualityMisses({ failures: [...quality, ...pipeline], datasetName: 'dataset', log });
+      expect(warning).toHaveBeenCalledTimes(1);
+      const message = warning.mock.calls[0][0] as string;
+      expect(message).toContain('1 quality miss(es) (reported, not gating)');
+      expect(message).toContain('VerdictMatchesGold');
+      expect(message).not.toContain('RunnerCompleted');
+    });
+
+    it('logs nothing when there are no quality misses', () => {
+      const warning = jest.fn();
+      logQualityMisses({
+        failures: [],
+        datasetName: 'dataset',
+        log: { warning } as unknown as ToolingLog,
+      });
+      expect(warning).not.toHaveBeenCalled();
+    });
   });
 
   it('passes a fractional PositiveControlRecall that meets its threshold', async () => {
@@ -65,12 +148,12 @@ describe('CODE gate', () => {
     expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
   });
 
-  it('fails a PositiveControlRecall below its threshold', async () => {
+  it('records a PositiveControlRecall below its threshold as a quality miss', async () => {
     const failures = await gate(
       evaluatorScoring({ name: 'PositiveControlRecall', score: 0.5, label: 'missed' })
     );
     expect(failures).toHaveLength(1);
-    expect(() => assertCodeScoresPass('dataset', failures)).toThrow(/PositiveControlRecall/);
+    expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
   });
 
   it('summarises ROW_FAILED misses once per row instead of once per evaluator', () => {
@@ -86,7 +169,7 @@ describe('CODE gate', () => {
         failure('RunnerCompleted', 'space: row-a'),
         failure('NegativeControl', 'space: row-a'),
         failure('RunnerCompleted', 'space: row-b'),
-        { evaluator: 'VerdictMatchesGold', row: 'space: row-b', score: 0, label: 'wrong' },
+        { evaluator: 'OutcomeReported', row: 'space: row-b', score: 0, label: 'wrong' },
       ]);
     } catch (error) {
       message = (error as Error).message;
@@ -94,13 +177,14 @@ describe('CODE gate', () => {
     expect(message).toContain('4 CODE evaluator miss(es)');
     expect(message).toContain('space: row-a: 2 code evaluator(s) ROW_FAILED');
     expect(message).toContain('space: row-b: 1 code evaluator(s) ROW_FAILED');
-    expect(message).toContain('VerdictMatchesGold [space: row-b]: 0');
+    expect(message).toContain('OutcomeReported [space: row-b]: 0');
     expect(message).not.toContain('RunnerCompleted [');
   });
 
   it('still requires exactly 1 from evaluators without a threshold', async () => {
-    const failures = await gate(evaluatorScoring({ name: 'NegativeControl', score: 0.9 }));
+    const failures = await gate(evaluatorScoring({ name: 'OutcomeReported', score: 0.9 }));
     expect(failures).toHaveLength(1);
+    expect(() => assertCodeScoresPass('dataset', failures)).toThrow(/OutcomeReported/);
   });
 
   it('keeps null as N/A when labelled N/A and as a miss otherwise', () => {

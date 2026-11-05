@@ -41,6 +41,7 @@ import {
   assertCodeScoresPass,
   createRunCollector,
   describeRow,
+  logQualityMisses,
   logRunSummary,
   ROW_FAILED_LABEL,
   withScoreCollection,
@@ -511,6 +512,7 @@ export const createEvaluateDataset =
     }
 
     logRunSummary({ sink: collector.scores, datasetName: dataset.name, log });
+    logQualityMisses({ failures: collector.codeFailures, datasetName: dataset.name, log });
     // Every row has settled, so each space is checked once more: nothing follows the last row to
     // report a late write the way the next row's `seedScenario` does. Row failures, a dirty
     // space, an executor failure and failed code scores are all reported together.

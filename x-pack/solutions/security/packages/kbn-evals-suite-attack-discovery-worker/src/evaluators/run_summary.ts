@@ -7,6 +7,10 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import { computeScoreStats, type ScoreStats } from '../score_stats';
+import { AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME } from './audit_conditional_remediation_evaluator';
+import { AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME } from './audit_forbidden_join_evaluator';
+import { AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME } from './audit_meta_alert_as_evidence_evaluator';
+import { AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME } from './audit_negative_control_evaluator';
 import {
   AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
   POSITIVE_CONTROL_RECALL_THRESHOLD,
@@ -31,9 +35,48 @@ export interface CodeFailure {
  */
 export const CODE_PASS_THRESHOLDS: Readonly<Record<string, number>> = {
   [AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME]: POSITIVE_CONTROL_RECALL_THRESHOLD,
-  // Reported only: a definite verdict on a row the workflow cannot see is the workflow's gap.
-  BlindReviewAbstained: 0,
 };
+
+/**
+ * CODE evaluators that check the worker pipeline itself: the run completed, every stage left its
+ * artifacts, the review parked where it should. A miss here is a broken suite or a broken
+ * workflow, not a weak model, so it fails the dataset.
+ */
+export const PIPELINE_CODE_EVALUATORS: ReadonlySet<string> = new Set([
+  'RunnerCompleted',
+  'AlertsRetrieved',
+  'DiscoveriesPersisted',
+  'FingerprintsDispatched',
+  'ReviewsSettled',
+  'OneReviewPerAttack',
+  'InvestigationOpened',
+  'ParkedAtGate',
+  'OutcomeReported',
+  'StageModelResolved',
+]);
+
+/**
+ * CODE evaluators that measure the model's judgement. They are scored, logged as warnings and
+ * listed in the run summary, but never fail the dataset: a gate on them fails every weak model
+ * alike, and the run could no longer tell models apart.
+ */
+export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
+  'VerdictMatchesGold',
+  'BlindReviewAbstained',
+  AUDIT_FORBIDDEN_JOIN_EVALUATOR_NAME,
+  AUDIT_META_ALERT_AS_EVIDENCE_EVALUATOR_NAME,
+  AUDIT_NEGATIVE_CONTROL_EVALUATOR_NAME,
+  AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
+  AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
+]);
+
+/**
+ * A miss gates unless its evaluator is explicitly a quality check, so an evaluator nobody
+ * classified fails closed. A failed row gates whichever evaluator reports it: the row has no
+ * output to judge, which is a pipeline failure.
+ */
+export const isGatingCodeFailure = ({ evaluator, label }: CodeFailure): boolean =>
+  label === ROW_FAILED_LABEL || !QUALITY_CODE_EVALUATORS.has(evaluator);
 
 /** N/A is never a miss; a `null` score otherwise is, and so is a score below the pass threshold. */
 export const isCodeMiss = ({
@@ -145,13 +188,19 @@ export const withScoreCollection = (
     };
   });
 
+const describeFailure = ({ evaluator, row, score, label, explanation }: CodeFailure): string =>
+  `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${explanation ? ` (${explanation})` : ''}`;
+
 /**
- * The pass criterion for CODE evaluators: every applicable check scores 1 on every row, except
- * the graded ones in `CODE_PASS_THRESHOLDS`, which pass at their threshold. A 0 is a pinned
- * behavior that changed; MISSING is an artifact that should exist and does not. Both fail the
- * dataset after the summary is logged. LLM judges are reported, never gated here.
+ * The pass criterion for CODE evaluators: every applicable pipeline check
+ * (`PIPELINE_CODE_EVALUATORS`) scores 1 on every row, except the graded ones in
+ * `CODE_PASS_THRESHOLDS`, which pass at their threshold. A 0 is a pinned behavior that changed;
+ * MISSING is an artifact that should exist and does not. Both fail the dataset after the summary
+ * is logged, as does a failed row. Quality misses (`QUALITY_CODE_EVALUATORS`) and LLM judges are
+ * reported, never gated here.
  */
-export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[]): void => {
+export const assertCodeScoresPass = (datasetName: string, allFailures: CodeFailure[]): void => {
+  const failures = allFailures.filter(isGatingCodeFailure);
   if (failures.length === 0) return;
   // A failed row scores every CODE evaluator `ROW_FAILED`; one line per row says so once, since
   // the row error already carries the cause.
@@ -163,19 +212,12 @@ export const assertCodeScoresPass = (datasetName: string, failures: CodeFailure[
     ...[...failedRows].map(
       ([row, count]) => `  - ${row}: ${count} code evaluator(s) ${ROW_FAILED_LABEL}`
     ),
-    ...failures
-      .filter(({ label }) => label !== ROW_FAILED_LABEL)
-      .map(
-        ({ evaluator, row, score, label, explanation }) =>
-          `  - ${evaluator} [${row}]: ${score ?? label ?? 'null'}${
-            explanation ? ` (${explanation})` : ''
-          }`
-      ),
+    ...failures.filter(({ label }) => label !== ROW_FAILED_LABEL).map(describeFailure),
   ];
   throw new Error(
     `${datasetName}: ${
       failures.length
-    } CODE evaluator miss(es); every applicable CODE check must score 1 (or reach its threshold)\n${lines.join(
+    } CODE evaluator miss(es); every applicable pipeline CODE check must score 1 (or reach its threshold)\n${lines.join(
       '\n'
     )}`
   );
@@ -221,4 +263,26 @@ export const logRunSummary = ({
     );
   }
   return rows;
+};
+
+/**
+ * Lists the quality misses the gate did not count, after the per-evaluator summary, so a run that
+ * passes still states what the model got wrong.
+ */
+export const logQualityMisses = ({
+  failures,
+  datasetName,
+  log,
+}: {
+  failures: CodeFailure[];
+  datasetName: string;
+  log: ToolingLog;
+}): void => {
+  const reported = failures.filter((failure) => !isGatingCodeFailure(failure));
+  if (reported.length === 0) return;
+  log.warning(
+    `${datasetName}: ${reported.length} quality miss(es) (reported, not gating)\n${reported
+      .map(describeFailure)
+      .join('\n')}`
+  );
 };

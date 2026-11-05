@@ -330,7 +330,12 @@ describe('createEvaluateDataset', () => {
     await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
   });
 
-  it('turns the dataset red when the Worker persisted an attack on a benign row', async () => {
+  const qualityMissWarning = () =>
+    (log.warning as jest.Mock).mock.calls
+      .map(([message]) => String(message))
+      .find((message) => message.includes('quality miss(es) (reported, not gating)'));
+
+  it('reports, but does not fail on, an attack the Worker persisted on a benign row', async () => {
     collect.mockResolvedValue(
       quietArtifacts({
         insights: [
@@ -344,15 +349,17 @@ describe('createEvaluateDataset', () => {
         ],
       })
     );
-    await expect(evaluateRow('benign-batch')).rejects.toThrow(/NegativeControl/);
+    await expect(evaluateRow('benign-batch')).resolves.toBeUndefined();
+    expect(qualityMissWarning()).toContain('NegativeControl');
   });
 
-  it('turns the dataset red when the verdict disagrees with gold', async () => {
+  it('reports, but does not fail on, a verdict that disagrees with gold', async () => {
     const artifacts = attackArtifacts();
     collect.mockResolvedValue(
       attackArtifacts({ reviews: [{ ...artifacts.reviews[0], verdict: 'false_positive' }] })
     );
-    await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/VerdictMatchesGold/);
+    await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+    expect(qualityMissWarning()).toContain('VerdictMatchesGold');
   });
 
   it('turns the dataset red when a true positive was actioned without an analyst', async () => {
@@ -396,12 +403,13 @@ describe('createEvaluateDataset', () => {
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/StageModelResolved/);
   });
 
-  it('turns the dataset red when the verdict is missing rather than counting it as a pass', async () => {
+  it('records a missing verdict as a quality miss, never as a pass', async () => {
     const artifacts = attackArtifacts();
     collect.mockResolvedValue(
       attackArtifacts({ reviews: [{ ...artifacts.reviews[0], verdict: undefined }] })
     );
-    await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(/VerdictMatchesGold/);
+    await expect(evaluateRow('positive-chain-with-noise')).resolves.toBeUndefined();
+    expect(qualityMissWarning()).toContain('VerdictMatchesGold');
   });
 
   it('checks the space once more after the last row and fails when a late write is there', async () => {
@@ -420,7 +428,7 @@ describe('createEvaluateDataset', () => {
     collect.mockResolvedValue(quietArtifacts());
     assertClean.mockRejectedValueOnce(new Error('Space is not clean after the last row'));
     await expect(evaluateRow('positive-chain-with-noise')).rejects.toThrow(
-      /not clean after the last row.*VerdictMatchesGold|VerdictMatchesGold.*not clean after the last row/s
+      /not clean after the last row.*DiscoveriesPersisted|DiscoveriesPersisted.*not clean after the last row/s
     );
   });
 

@@ -61,10 +61,22 @@ to the same new Investigation, listed in the review's `sibling_attack_discovery_
 count as covered; any other attachment went to an existing fingerprint and fails. Review ids plus
 sibling ids must equal the persisted attack ids, compared at the matcher's 512-character id length.
 
-Code scores gate through `assertCodeScoresPass`: a `null` score is never a pass, and `N/A` and
-`MISSING` are distinct outcomes. A code check passes at a score of 1, except the graded ones listed
-in `CODE_PASS_THRESHOLDS` (`run_summary.ts`): `PositiveControlRecall` passes at a recall of 0.6 or
-more, the same threshold behind its `recalled`/`missed` label.
+Only pipeline checks gate the run. `assertCodeScoresPass` fails the dataset when a CODE evaluator in
+`PIPELINE_CODE_EVALUATORS` (`run_summary.ts`: `RunnerCompleted`, `AlertsRetrieved`,
+`DiscoveriesPersisted`, `FingerprintsDispatched`, `ReviewsSettled`, `OneReviewPerAttack`,
+`InvestigationOpened`, `ParkedAtGate`, `OutcomeReported`, `StageModelResolved`) misses, or when a row
+failed (`ROW_FAILED`, whichever evaluator reports it). A `null` score is never a pass, and `N/A` and
+`MISSING` are distinct outcomes. A check passes at a score of 1, except the graded ones listed in
+`CODE_PASS_THRESHOLDS`: `PositiveControlRecall` reaches 0.6 or more, the same threshold behind its
+`recalled`/`missed` label.
+
+The quality evaluators in `QUALITY_CODE_EVALUATORS` measure the model's judgement
+(`VerdictMatchesGold`, `BlindReviewAbstained`, `ForbiddenJoin`, `MetaAlertAsEvidence`,
+`NegativeControl`, `PositiveControlRecall`, `ConditionalRemediation`). They are scored, logged as
+warnings per miss, and listed at the end of the run under "quality miss(es) (reported, not gating)",
+but never fail the dataset: a gate on them fails every weak model alike and the run cannot tell
+models apart. A test requires every registered CODE evaluator to be in exactly one of the two sets,
+and an evaluator in neither fails closed (it gates).
 
 Seeding cleans up after itself: if the bulk write or the read-back fails midway, `seedScenario`
 deletes the alerts it meant to write by exact document id before it throws, so the next row starts
