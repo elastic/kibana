@@ -22,6 +22,8 @@ interface PhaseStats {
 
 /** The parts of a worker log line these tests read. */
 interface WorkerLogLine {
+  /** When the worker's logger wrote the line, by the wall clock. */
+  '@timestamp': string;
   message: string;
   log: { level: string; logger: string };
   kibana?: {
@@ -37,6 +39,8 @@ interface WorkerLogLine {
 interface MainLogLine {
   level: string;
   message: string;
+  /** When the main thread wrote the line, by the wall clock; only on some lines. */
+  at?: number;
 }
 
 interface HarnessResult {
@@ -48,8 +52,6 @@ interface HarnessResult {
   unparsedLogLines: string[];
   /** Main-thread log lines, from the child's fd 3. */
   mainLogLines: MainLogLine[];
-  /** When the test read each log line, by its own monotonic clock (ms). */
-  receivedAt: Map<WorkerLogLine | MainLogLine, number>;
   stderr: string;
 }
 
@@ -58,17 +60,6 @@ interface RunHarnessOptions {
   /** Checked after each stdout log line; the child is killed with SIGKILL once it returns true. */
   killWhen?: (workerLogLines: WorkerLogLine[]) => boolean;
 }
-
-/** Calls `onLine` for each line as it comes in: a chunk can end in the middle of a line. */
-const lineReader = (onLine: (line: string) => void) => {
-  let pending = '';
-  return (chunk: string, flush = false) => {
-    pending += chunk;
-    const lines = pending.split('\n');
-    pending = flush ? '' : lines.pop() ?? '';
-    lines.filter(Boolean).forEach(onLine);
-  };
-};
 
 /**
  * Runs a harness scenario in a child `node` with a piped stdout and without NODE_OPTIONS.
@@ -88,35 +79,30 @@ const runHarness = (
     );
     const workerLogLines: WorkerLogLine[] = [];
     const unparsedLogLines: string[] = [];
-    const mainLogLines: MainLogLine[] = [];
-    const receivedAt = new Map<WorkerLogLine | MainLogLine, number>();
+    let pendingStdout = '';
     let stderr = '';
     let mainLog = '';
     let killed = false;
-    const readStdout = lineReader((line) => {
-      try {
-        const workerLogLine: WorkerLogLine = JSON.parse(line);
-        workerLogLines.push(workerLogLine);
-        receivedAt.set(workerLogLine, performance.now());
-      } catch {
-        unparsedLogLines.push(line);
+    // Line-buffered: a chunk can end in the middle of a log line.
+    const readStdout = (chunk: string, flush = false) => {
+      pendingStdout += chunk;
+      const lines = pendingStdout.split('\n');
+      pendingStdout = flush ? '' : lines.pop() ?? '';
+      for (const line of lines.filter(Boolean)) {
+        try {
+          workerLogLines.push(JSON.parse(line));
+        } catch {
+          unparsedLogLines.push(line);
+        }
       }
       if (killWhen && !killed && killWhen(workerLogLines)) {
         killed = true;
         child.kill('SIGKILL');
       }
-    });
-    const readMainLog = lineReader((line) => {
-      const mainLogLine: MainLogLine = JSON.parse(line);
-      mainLogLines.push(mainLogLine);
-      receivedAt.set(mainLogLine, performance.now());
-    });
+    };
     child.stdout?.on('data', (chunk) => readStdout(String(chunk)));
     child.stderr?.on('data', (chunk) => (stderr += chunk));
-    child.stdio[3]?.on('data', (chunk) => {
-      mainLog += chunk;
-      readMainLog(String(chunk));
-    });
+    child.stdio[3]?.on('data', (chunk) => (mainLog += chunk));
     const timer = setTimeout(() => {
       child.kill('SIGKILL');
       reject(
@@ -132,14 +118,16 @@ const runHarness = (
     child.on('close', (exitCode, signal) => {
       clearTimeout(timer);
       readStdout('', true);
-      readMainLog('', true);
+      const mainLogLines: MainLogLine[] = mainLog
+        .split('\n')
+        .filter(Boolean)
+        .map((line) => JSON.parse(line));
       resolve({
         exitCode,
         signal,
         workerLogLines,
         unparsedLogLines,
         mainLogLines,
-        receivedAt,
         stderr,
       });
     });
@@ -156,9 +144,6 @@ const statsOf = ({ workerLogLines }: HarnessResult) =>
 const statsLogLines = ({ workerLogLines }: HarnessResult) =>
   workerLogLines.filter(({ kibana }) => kibana?.event_loop_watchdog?.stats);
 const blockOf = ({ kibana }: WorkerLogLine) => kibana?.event_loop_watchdog;
-/** When the test read a log line, by its own clock; NaN for a missing line, which fails any bound. */
-const readAt = ({ receivedAt }: HarnessResult, line?: WorkerLogLine | MainLogLine) =>
-  (line && receivedAt.get(line)) ?? NaN;
 
 describe('event loop watchdog in a child process', () => {
   let blocks: HarnessResult;
@@ -275,10 +260,11 @@ describe('event loop watchdog in a child process', () => {
       kibana: { event_loop_watchdog: { phase: 'running', ongoing: true } },
     });
     const blocking = result.mainLogLines.find(({ message }) => message === 'blocking');
-    expect(blocking).toBeDefined();
-    // By the test's own clock: after the main thread blocked, and inside the ~10 s it takes a
-    // blocked event loop to fail a liveness probe.
-    const sinceBlockingMs = readAt(result, warning) - readAt(result, blocking);
+    expect(blocking).toMatchObject({ at: expect.any(Number) });
+    // Both times are taken where the log lines are written, so they don't depend on when the test
+    // reads them: after the main thread blocked, and inside the ~10 s it takes a blocked event loop
+    // to fail a liveness probe.
+    const sinceBlockingMs = Date.parse(warning['@timestamp']) - (blocking?.at ?? NaN);
     expect(sinceBlockingMs).toBeGreaterThan(0);
     expect(sinceBlockingMs).toBeLessThan(10_000);
   }, 90_000);

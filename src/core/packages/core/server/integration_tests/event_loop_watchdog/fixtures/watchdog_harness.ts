@@ -25,8 +25,8 @@ const STATS_INTERVAL_MS = 1_000;
 
 const MAIN_LOG_FD = 3;
 const mainLogLines: string[] = [];
-const writeMainLogLine = (level: string, message: string) =>
-  writeSync(MAIN_LOG_FD, `${JSON.stringify({ level, message })}\n`);
+const writeMainLogLine = (level: string, message: string, at?: number) =>
+  writeSync(MAIN_LOG_FD, `${JSON.stringify({ level, message, at })}\n`);
 const log =
   (level: string) =>
   (message: string | (() => string)): void => {
@@ -130,8 +130,9 @@ const scenarios: Record<string, () => Promise<void>> = {
       blockFor(500);
       await sleep(BLOCK_GAP_MS);
     }
-    // Written synchronously, so the line is out before the main thread blocks.
-    writeMainLogLine('info', 'blocking');
+    // Written synchronously, with the time it was written, so the line is out before the main
+    // thread blocks.
+    writeMainLogLine('info', 'blocking', Date.now());
     for (;;) {
       // blocks the main thread until the process is killed
     }
