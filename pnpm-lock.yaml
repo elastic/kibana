@@ -2552,7 +2552,7 @@ importers:
         version: link:src/platform/test/plugin_functional/plugins/kbn_top_nav
       '@kbn/kbn-tp-custom-visualizations-plugin':
         specifier: workspace:*
-        version: link:src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations
+        version: link:src/platform/test_plugins/kbn_tp_custom_visualizations
       '@kbn/kbn-tp-run-pipeline-plugin':
         specifier: workspace:*
         version: link:src/platform/test/interpreter_functional/plugins/kbn_tp_run_pipeline
@@ -8863,7 +8863,7 @@ importers:
 
   src/platform/test/plugin_functional/plugins/kbn_top_nav: {}
 
-  src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations: {}
+  src/platform/test_plugins/kbn_tp_custom_visualizations: {}
 
   src/platform/test/plugin_functional/plugins/rendering_plugin: {}
 
