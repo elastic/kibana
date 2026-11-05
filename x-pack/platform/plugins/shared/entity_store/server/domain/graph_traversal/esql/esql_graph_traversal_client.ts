@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import {
   listEntityGraphTraversalScenarioIds,
@@ -15,6 +16,7 @@ import type {
   GraphTraversalExclusion,
   GraphTraversalNode,
   GraphTraversalStopCondition,
+  GraphTraversalTimings,
   RunGraphTraversalResponse,
 } from '../../../../common/graph_traversal';
 import { GraphTraversalError } from '../graph_traversal_error';
@@ -23,6 +25,10 @@ import { buildEntityLookupQuery, buildGraphExpandStatement } from './build_graph
 import { mapGraphExpandResult, readEntity, type EsqlResult } from './map_graph_expand_result';
 
 export const ESQL_GRAPH_TRAVERSAL_EXECUTION_ID = 'esql';
+
+/** Milliseconds since `startedAt`, to a tenth. */
+const elapsedMs = (startedAt: number): number =>
+  Math.round((performance.now() - startedAt) * 10) / 10;
 
 export interface EsqlGraphTraversalClientDeps {
   logger: Logger;
@@ -79,7 +85,9 @@ export class EsqlGraphTraversalClient {
       );
     }
     const indexPattern = getLatestEntityIndexPattern(this.namespace);
+    const resolveStartedAt = performance.now();
     const lookupIndex = await this.resolveLookupIndex();
+    const resolveIndexMs = elapsedMs(resolveStartedAt);
     const statement = buildGraphExpandStatement({
       plan,
       indexPattern,
@@ -89,16 +97,39 @@ export class EsqlGraphTraversalClient {
       exclusions,
       until,
     });
-    this.logger.debug(
-      `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}, issuing:\n${
-        statement.query
-      }\nparams: ${JSON.stringify(statement.params)}`
+    // The translated statement, like the workflow hop step logs its queries: the text and the
+    // number of bound parameters, never the parameter values.
+    this.logger.info(
+      `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}: ${statement.params.length} parameters, statement:\n${statement.query}`
     );
-    const [result, seed] = await Promise.all([
-      this.execute(statement.query, statement.params),
-      this.lookupSeed(indexPattern, seedId, plan.seed.type),
+    const statementStartedAt = performance.now();
+    const seedStartedAt = statementStartedAt;
+    const [{ result, statementMs }, { seed, seedLookupMs }] = await Promise.all([
+      this.execute(statement.query, statement.params).then((executed) => ({
+        result: executed,
+        statementMs: elapsedMs(statementStartedAt),
+      })),
+      this.lookupSeed(indexPattern, seedId, plan.seed.type).then((node) => ({
+        seed: node,
+        seedLookupMs: elapsedMs(seedStartedAt),
+      })),
     ]);
+    const mapStartedAt = performance.now();
     const mapped = mapGraphExpandResult(result, statement, plan, seed);
+    const timings: GraphTraversalTimings = {
+      resolve_index_ms: resolveIndexMs,
+      statement_ms: statementMs,
+      ...(typeof result.took === 'number' && { statement_took_ms: result.took }),
+      seed_lookup_ms: seedLookupMs,
+      map_ms: elapsedMs(mapStartedAt),
+    };
+    const inElasticsearch =
+      timings.statement_took_ms !== undefined
+        ? ` (${timings.statement_took_ms} ms in Elasticsearch)`
+        : '';
+    this.logger.info(
+      `entity graph traversal (ES|QL) scenario "${plan.id}" from ${seedId}: statement ${timings.statement_ms} ms round trip${inElasticsearch}, index resolution ${timings.resolve_index_ms} ms, seed lookup ${timings.seed_lookup_ms} ms, mapping ${timings.map_ms} ms`
+    );
     if (mapped.hubs.length > 0) {
       this.logger.debug(
         `entity graph traversal (ES|QL) skipped hubs: ${mapped.hubs
@@ -120,6 +151,7 @@ export class EsqlGraphTraversalClient {
         until: [...plan.until, ...(until ?? [])],
       },
       duration_ms: Date.now() - startedAt,
+      timings,
     };
   }
 
@@ -180,7 +212,11 @@ export class EsqlGraphTraversalClient {
       if (!Array.isArray(typed.columns) || !Array.isArray(typed.values)) {
         throw new Error('ES|QL response did not contain columns and values arrays');
       }
-      return { columns: typed.columns, values: typed.values };
+      return {
+        columns: typed.columns,
+        values: typed.values,
+        ...(typeof typed.took === 'number' && { took: typed.took }),
+      };
     } catch (error) {
       const status = (error as { statusCode?: number; meta?: { statusCode?: number } }).meta
         ?.statusCode;

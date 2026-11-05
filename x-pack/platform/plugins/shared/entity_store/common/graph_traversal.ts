@@ -172,6 +172,24 @@ export const traceGraphTraversalRoutes = (
   return routes;
 };
 
+/** Where an ES|QL engine run spent its time, in milliseconds. */
+export interface GraphTraversalTimings {
+  /** Resolving the concrete lookup-join index before the statement is built. */
+  resolve_index_ms: number;
+  /** The GRAPH EXPAND statement, from request to parsed response. */
+  statement_ms: number;
+  /**
+   * Time Elasticsearch reports it spent on the statement (`took`), when the response carries
+   * it; `statement_ms` minus this is transport and client cost. Per-hop subplan timings are
+   * logged by Elasticsearch, not returned.
+   */
+  statement_took_ms?: number;
+  /** The seed entity lookup, which runs alongside the statement. */
+  seed_lookup_ms: number;
+  /** Mapping the result rows into nodes, edges and routes. */
+  map_ms: number;
+}
+
 export interface RunGraphTraversalResponse {
   /** `esql` when the run was one GRAPH EXPAND statement; otherwise the workflow execution id. */
   execution_id: string;
@@ -184,4 +202,6 @@ export interface RunGraphTraversalResponse {
   /** Present when the execution did not complete. */
   error?: string;
   duration_ms: number;
+  /** ES|QL engine only. */
+  timings?: GraphTraversalTimings;
 }

@@ -48,7 +48,12 @@ export interface GraphTraversalWorkflowRunner {
 export const GRAPH_TRAVERSAL_TRIGGERED_BY = 'entity_store_graph_traversal';
 
 export const DEFAULT_GRAPH_TRAVERSAL_TIMEOUT_MS = 5 * 60 * 1000;
-export const DEFAULT_GRAPH_TRAVERSAL_POLL_INTERVAL_MS = 1_000;
+/**
+ * How often the execution is polled for completion. A run finishes in a few hundred
+ * milliseconds, so a long interval would dominate what the caller waits; each poll is one
+ * document read.
+ */
+export const DEFAULT_GRAPH_TRAVERSAL_POLL_INTERVAL_MS = 100;
 
 export interface GraphTraversalClientDeps {
   logger: Logger;

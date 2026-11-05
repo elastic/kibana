@@ -24,6 +24,8 @@ import {
 export interface EsqlResult {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
+  /** Milliseconds Elasticsearch reports it spent on the query, when the response carries it. */
+  took?: number;
 }
 
 const NODE_FROM = 'node_from';

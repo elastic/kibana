@@ -47,14 +47,16 @@ describe('buildGraphExpandStatement', () => {
           'ROW node_id = ?',
           `| GRAPH EXPAND ${INDEX} ON node_id == \`entity.id\``,
           '    TO (`entity.relationships.member_of.ids`, `entity.relationships.sso_to_role.ids`, `entity.relationships.can_assume.ids`, `entity.relationships.can_connect.ids`, `entity.relationships.runs_as.ids`, `entity.relationships.grants_access_to.ids`)',
-          '    STATS __count = COUNT(*), __payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`entity.sub_type`)',
-          '    WITH {"max_hops":7,"max_nodes":1000,"max_frontier":250,"hub_degree":200,"direction":"out"}',
+          '    STATS __count = COUNT(*)',
+          '    WITH {"max_hops":7,"max_nodes":1000,"max_frontier":250,"hub_degree":200,"max_edges_per_hop":2000,"direction":"out","hop_fields":["entity.relationships.member_of.ids","entity.relationships.sso_to_role.ids","entity.relationships.can_assume.ids,entity.relationships.can_connect.ids,entity.relationships.runs_as.ids,entity.relationships.grants_access_to.ids","entity.relationships.can_assume.ids,entity.relationships.can_connect.ids,entity.relationships.runs_as.ids,entity.relationships.grants_access_to.ids","entity.relationships.can_assume.ids,entity.relationships.can_connect.ids,entity.relationships.runs_as.ids,entity.relationships.grants_access_to.ids","entity.relationships.can_assume.ids,entity.relationships.can_connect.ids,entity.relationships.runs_as.ids,entity.relationships.grants_access_to.ids","entity.relationships.can_assume.ids,entity.relationships.can_connect.ids,entity.relationships.runs_as.ids,entity.relationships.grants_access_to.ids"]}',
           '| RENAME node_reached AS `entity.id`',
           `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
+          '| KEEP node_from, node_to, hop, relation, dropped, __count, `entity.id`, `entity.name`, `entity.type`, `entity.sub_type`, `entity.EngineMetadata.Type`, `entity.source`, `asset.criticality`, `entity.risk.calculated_level`, `entity.risk.calculated_score_norm`, `entity.relationships.resolution.resolved_to`',
         ].join('\n')
       );
       expect(statement.params).toEqual(['user:john.doe@acmecrm.com@okta']);
-      expect(statement.payloadFields).toEqual(['entity.name', 'entity.sub_type']);
+      // No payload is aggregated: the reached node's document comes from the join.
+      expect(statement.payloadFields).toEqual([]);
       expect(statement.maxHops).toBe(7);
     });
 
@@ -85,8 +87,13 @@ describe('buildGraphExpandStatement', () => {
       );
       expect(statement.query).toContain('    UNTIL node_reached IN (?)');
       expect(statement.query).toContain(
-        '"hub_degree":200,"direction":"both","exclude":["185.220.101.42"]}'
+        '"hub_degree":200,"max_edges_per_hop":2000,"direction":"both"'
       );
+      // One entry per expanded hop, each naming that hop's fields.
+      expect(statement.query).toContain(
+        '"hop_fields":["entity.relationships.executed.ids,entity.relationships.dropped.ids,entity.relationships.connected_to.ids","entity.relationships.executed.ids,entity.relationships.dropped.ids,entity.relationships.connected_to.ids"'
+      );
+      expect(statement.query).toContain('"exclude":["185.220.101.42"]}');
       expect(statement.query).not.toContain('LOOKUP JOIN');
       expect(statement.params).toEqual(['host:WKSTN-RECV01', 'IP address', 'host:WIN-FIN-03']);
       expect(statement.excludedIds).toEqual(['185.220.101.42']);

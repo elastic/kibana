@@ -159,13 +159,12 @@ export const buildGraphExpandStatement = ({
     predicates.push(`(${quoted} IS NULL OR NOT (${contains}))`);
   }
 
-  const payloadFields = Array.from(new Set(plan.hops.flatMap((hop) => hop.payload_fields)));
-  const stats = [
-    `${GRAPH_EXPAND_COUNT_COLUMN} = COUNT(*)`,
-    ...payloadFields.map(
-      (field, index) => `${graphExpandPayloadColumn(index)} = VALUES(${quoteField(field)})`
-    ),
-  ];
+  // Only the edge count is aggregated. The scenario's payload fields would describe the
+  // scanned document, which on an outbound leg is the frontier node rather than the node
+  // reached; the reached node's document comes from the LOOKUP JOIN after the walk, and stop
+  // conditions on payload fields are refused below, so aggregating them is wasted work.
+  const payloadFields: string[] = [];
+  const stats = [`${GRAPH_EXPAND_COUNT_COLUMN} = COUNT(*)`];
 
   // Stop conditions become UNTIL on the reached node. Only node ids translate: a condition on
   // a payload field would have to test a multi-valued STATS column, which IN cannot.
@@ -182,12 +181,17 @@ export const buildGraphExpandStatement = ({
   const { limits } = plan;
   // Excluded node ids are handed to the walk itself: an edge touching one is dropped before
   // it is admitted, so nothing beyond it is visited and no budget is spent on it.
+  // hop_fields gives the walk the scenario's fields per hop, so a hop only issues subplans
+  // for its own fields rather than for the whole TO union; max_edges_per_hop caps each
+  // subplan's rows at the index.
   const options = {
     max_hops: limits.max_hops,
     max_nodes: limits.max_nodes,
     max_frontier: limits.max_frontier,
     hub_degree: limits.hub_degree,
+    max_edges_per_hop: limits.max_edges_per_hop,
     direction: plan.direction,
+    hop_fields: plan.hops.map((hop) => hop.target_fields.map((t) => t.field).join(',')),
     ...(excludedIds.length > 0 && { exclude: excludedIds }),
   };
 
@@ -206,9 +210,23 @@ export const buildGraphExpandStatement = ({
   }
   lines.push(`    WITH ${JSON.stringify(options)}`);
   if (lookupIndex !== undefined) {
+    // The join brings every column of the reached entity's document; only the walk columns
+    // and the columns the mapper reads travel back. `relation` exists only for a multi-field
+    // TO and `dropped` only with hub_degree, which is always set.
+    const kept = [
+      'node_from',
+      'node_to',
+      'hop',
+      ...(targets.length > 1 ? ['relation'] : []),
+      'dropped',
+      GRAPH_EXPAND_COUNT_COLUMN,
+      quoteField(NODE_ID_EXCLUSION_FIELD),
+      ...Object.values(ENTITY_COLUMNS).map(quoteField),
+    ];
     lines.push(
       `| RENAME ${NODE_REACHED_COLUMN} AS ${quoteField(NODE_ID_EXCLUSION_FIELD)}`,
-      `| LOOKUP JOIN ${lookupIndex} ON ${quoteField(NODE_ID_EXCLUSION_FIELD)}`
+      `| LOOKUP JOIN ${lookupIndex} ON ${quoteField(NODE_ID_EXCLUSION_FIELD)}`,
+      `| KEEP ${kept.join(', ')}`
     );
   }
 

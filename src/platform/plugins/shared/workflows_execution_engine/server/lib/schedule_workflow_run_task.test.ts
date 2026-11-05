@@ -81,6 +81,34 @@ describe('schedule_workflow_run_task', () => {
       expect(bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
     });
 
+    it('requests an immediate claim once the task is scheduled', async () => {
+      taskManager.schedule.mockImplementation(async (task) => task as never);
+
+      await scheduleRunTaskOrMarkFailed(deps, tasks[0], request);
+
+      expect(taskManager.runSoon).toHaveBeenCalledWith('workflow:exec-a:alert', {
+        requestImmediateClaim: true,
+      });
+    });
+
+    it('does not request a claim when scheduling failed', async () => {
+      await expect(scheduleRunTaskOrMarkFailed(deps, tasks[0], request)).rejects.toBe(
+        scheduleError
+      );
+
+      expect(taskManager.runSoon).not.toHaveBeenCalled();
+    });
+
+    it('treats a failed immediate claim as best effort', async () => {
+      taskManager.schedule.mockImplementation(async (task) => task as never);
+      taskManager.runSoon.mockRejectedValue(new Error('already claimed'));
+
+      await expect(scheduleRunTaskOrMarkFailed(deps, tasks[0], request)).resolves.toBeUndefined();
+
+      expect(bulkUpdateWorkflowExecutions).not.toHaveBeenCalled();
+      expect(logger.debug).toHaveBeenCalledWith(expect.stringContaining('already claimed'));
+    });
+
     it('logs and still rethrows the schedule error when marking the execution FAILED also fails', async () => {
       bulkUpdateWorkflowExecutions.mockRejectedValue(new Error('es unavailable'));
 
