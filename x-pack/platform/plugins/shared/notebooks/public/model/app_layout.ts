@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
 import type { GridLayoutData } from '@kbn/grid-layout';
 import { DEFAULT_GRID_COLUMNS } from '../../common/constants';
-import type { AppPanel, CellDefinition, NotebookApp } from '../../common/types';
+import type { AppPanel, CellDefinition, CodeCellDefinition, NotebookApp } from '../../common/types';
 import { isPinnedTimeCell } from './cell_factory';
 import type { CellStatus } from './types';
 import { buildGraph, getDescendants } from './graph';
@@ -37,20 +37,24 @@ export const createEmptyApp = (
   createId: () => string = uuidv4
 ): NotebookApp => ({ id: createId(), title: getNewAppTitle(apps), panels: [] });
 
+/** Cells that can be placed on an app; code cells are notebook-only. */
+export type AppCellDefinition = Exclude<CellDefinition, CodeCellDefinition>;
+
+export const canShowInApp = (cell: CellDefinition): cell is AppCellDefinition =>
+  cell.type !== 'code';
+
 interface PanelSize {
   width: number;
   height: number;
 }
 
 /** The size a cell takes on the default 12-column grid when it is first placed on an app. */
-const getBasePanelSize = (cell: CellDefinition): PanelSize => {
+const getBasePanelSize = (cell: AppCellDefinition): PanelSize => {
   switch (cell.type) {
     case 'input':
       return { width: 4, height: 2 };
     case 'markdown':
       return { width: DEFAULT_GRID_COLUMNS, height: 3 };
-    case 'code':
-      return { width: 6, height: 4 };
     case 'chart':
     case 'custom':
       return { width: 6, height: 7 };
@@ -61,7 +65,7 @@ const getBasePanelSize = (cell: CellDefinition): PanelSize => {
 
 /** How much of a grid with the given number of columns a cell takes when it is first placed. */
 export const getDefaultPanelSize = (
-  cell: CellDefinition,
+  cell: AppCellDefinition,
   columns: number = DEFAULT_GRID_COLUMNS
 ): PanelSize => {
   const { width, height } = getBasePanelSize(cell);
@@ -73,7 +77,7 @@ const getBottom = (panels: readonly AppPanel[]): number =>
 
 /** Places sized cells left to right, wrapping to a new row when one doesn't fit. */
 const packPanels = (
-  cells: readonly CellDefinition[],
+  cells: readonly AppCellDefinition[],
   top: number,
   createId: () => string,
   columns: number = DEFAULT_GRID_COLUMNS
@@ -98,7 +102,7 @@ const packPanels = (
 /** The app with the cell appended in a new row below its existing panels. */
 export const appendPanel = (
   app: NotebookApp,
-  cell: CellDefinition,
+  cell: AppCellDefinition,
   createId: () => string = uuidv4
 ): NotebookApp => ({
   ...app,
@@ -229,7 +233,7 @@ export const getAppStatusGroups = (
   });
 };
 
-const SECTION_ORDER: ReadonlyArray<CellDefinition['type']> = [
+const SECTION_ORDER: ReadonlyArray<AppCellDefinition['type']> = [
   'markdown',
   'input',
   'chart',
@@ -249,7 +253,7 @@ export const generateDefaultApp = (
 ): NotebookApp => {
   const ordered = cellOrder.flatMap((id) => {
     const cell = cells[id];
-    return cell && !isPinnedTimeCell(cell) ? [cell] : [];
+    return cell && canShowInApp(cell) && !isPinnedTimeCell(cell) ? [cell] : [];
   });
   const charted = new Set(
     ordered.flatMap((cell) => {

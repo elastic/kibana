@@ -157,6 +157,7 @@ Observable-style cells that run plain JavaScript in the page (POC: no sandbox, n
 - **Inputs** are injected as top-level `const`s, only for the names the code references: input params by value, ES|QL cells as arrays of row objects keyed by column name, and other code cells' exports by value. Reassigning one throws; declaring the same name in the cell shadows it.
 - **Exports** (`export const|let|var|function|class`, `export { a, b as c }`) become the cell's outputs under exactly those names. `export default` is an error. String, number and `null` exports also bind as ES|QL `?params`, and every export is available to markdown interpolation.
 - The body runs as an async function, so top-level `await` works. `console.log|info|warn|error|debug` calls are captured (and still forwarded to the browser console) and shown in a collapsible DevTools-style console under the editor; an error keeps the logs written before it. Export values are not displayed; the footer lists their names.
+- Code cells are notebook-only: they have no "Add to app" action, the default app skips them, and an app panel pointing at one renders nothing.
 - Edits run on Run/Cmd+Enter, like ES|QL. `memoKey = objectHash({ code, parents })`, where an input parent contributes its value and other parents their own `memoKey`.
 
 ## Running ES|QL

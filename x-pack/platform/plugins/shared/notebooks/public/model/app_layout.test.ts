@@ -7,6 +7,7 @@
 
 import type { CellDefinition, NotebookApp } from '../../common/types';
 import {
+  type AppCellDefinition,
   appDependsOn,
   appendPanel,
   applyGridLayout,
@@ -38,11 +39,19 @@ const chart = (id: string, sourceCell: string): CellDefinition => ({
   lensAttributes: null,
 });
 const notes = (id: string): CellDefinition => ({ id, name: id, type: 'markdown', content: '# Hi' });
-const dropdown = (id: string): CellDefinition => ({
+const dropdown = (id: string): AppCellDefinition => ({
   id,
   name: id,
   type: 'input',
   input: { kind: 'dropdown', optionsQuery: '', defaultValue: null },
+});
+
+const code = (id: string): CellDefinition => ({
+  id,
+  name: id,
+  type: 'code',
+  runMode: 'auto',
+  code: 'export const total = 1;',
 });
 
 const sequentialIds = () => {
@@ -307,6 +316,18 @@ describe('grid layout conversion', () => {
   });
 });
 
+describe('code cells', () => {
+  it('are left out of the default app', () => {
+    const app = generateDefaultApp(
+      toRecord([dropdown('host'), code('calc')]),
+      ['host', 'calc'],
+      'App',
+      sequentialIds()
+    );
+    expect(app.panels.map(({ cellId }) => cellId)).toEqual(['host']);
+  });
+});
+
 describe('getNewAppTitle', () => {
   it('numbers past titles already in use', () => {
     expect(getNewAppTitle([])).toBe('App 1');
@@ -315,9 +336,9 @@ describe('getNewAppTitle', () => {
 });
 
 describe('NotebookStore apps', () => {
-  const cells = [esql('raw'), dropdown('host')];
+  const cells = [esql('raw'), dropdown('host'), code('calc')];
   const createStore = () =>
-    new NotebookStore({ title: 'T', cellOrder: ['raw', 'host'], cells: toRecord(cells) });
+    new NotebookStore({ title: 'T', cellOrder: ['raw', 'host', 'calc'], cells: toRecord(cells) });
 
   it('has no apps and saves no panels until one is created', () => {
     const store = createStore();
@@ -332,6 +353,7 @@ describe('NotebookStore apps', () => {
     store.addCellToApp('app', 'raw');
     store.addCellToApp('app', 'raw');
     store.addCellToApp('app', 'host');
+    store.addCellToApp('app', 'calc');
     expect(store.apps$.getValue()[0].panels.map(({ cellId }) => cellId)).toEqual(['raw', 'host']);
 
     store.removeCell('raw');

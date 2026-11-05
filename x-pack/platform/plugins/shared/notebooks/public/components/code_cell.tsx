@@ -126,13 +126,7 @@ const LevelCount = ({ level, count }: { level: 'error' | 'warn'; count: number }
 };
 
 /** DevTools-style console listing a code cell's `console.*` calls; collapsible. */
-export const CodeConsole = ({
-  cellId,
-  logs,
-}: {
-  cellId: string;
-  logs: readonly CodeLogEntry[];
-}) => {
+const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogEntry[] }) => {
   const { euiTheme } = useEuiTheme();
   if (logs.length === 0) return null;
   const countOf = (level: CodeLogLevel) => logs.filter((entry) => entry.level === level).length;

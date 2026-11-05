@@ -13,7 +13,7 @@ import type {
   NotebookApp,
   NotebookAttributes,
 } from '../../common/types';
-import { appendPanel } from './app_layout';
+import { appendPanel, canShowInApp } from './app_layout';
 import { createPinnedTimeCell, findPinnedTimeCell } from './cell_factory';
 import type { CellRuntime, InputValue } from './types';
 
@@ -160,10 +160,10 @@ export class NotebookStore {
     this.apps$.next(this.apps$.getValue().filter((app) => app.id !== id));
   }
 
-  /** Appends the cell to the app in a new row; does nothing if the app already shows it. */
+  /** Appends the cell to the app in a new row; does nothing if the app already shows it or can't show it. */
   addCellToApp(appId: string, cellId: string): void {
     const cell = this.getCell(cellId);
-    if (!cell) return;
+    if (!cell || !canShowInApp(cell)) return;
     this.updateApp(appId, (app) =>
       app.panels.some((panel) => panel.cellId === cellId) ? app : appendPanel(app, cell)
     );

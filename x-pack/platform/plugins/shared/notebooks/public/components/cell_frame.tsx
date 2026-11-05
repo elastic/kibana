@@ -27,6 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CellDefinition } from '../../common/types';
+import { canShowInApp } from '../model/app_layout';
 import { duplicateCell } from '../model/cell_factory';
 import type { CellRuntime } from '../model/types';
 import { TYPE_ICONS, getCellElementId, getStatusBorderColor, getTypeLabel } from './cell_display';
@@ -233,9 +234,11 @@ export const CellFrame = ({
           </EuiFlexItem>
           <EuiFlexItem />
           {headerActions}
-          <EuiFlexItem grow={false}>
-            <AddToAppButton cellId={cell.id} />
-          </EuiFlexItem>
+          {canShowInApp(cell) && (
+            <EuiFlexItem grow={false}>
+              <AddToAppButton cellId={cell.id} />
+            </EuiFlexItem>
+          )}
           <EuiFlexItem grow={false}>
             <EuiPopover
               isOpen={isMenuOpen}

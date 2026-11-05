@@ -44,6 +44,7 @@ import type {
 import {
   appDependsOn,
   applyGridLayout,
+  canShowInApp,
   createEmptyApp,
   generateDefaultApp,
   getGridColumns,
@@ -51,13 +52,13 @@ import {
   reconcileApps,
   toGridLayout,
 } from '../model/app_layout';
+import type { AppCellDefinition } from '../model/app_layout';
 import { GRID_SUBDIVISIONS } from '../../common/constants';
 import { useNotebookServices } from '../services';
 import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
 import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
-import { CodeConsole } from './code_cell';
 import { CustomCanvas } from './custom_cell';
 import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
@@ -97,29 +98,12 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
   return <ResultGrid table={output.table} height="100%" />;
 };
 
-const CodePanelContent = ({ cell }: { cell: CellDefinition }) => {
-  const { store } = useNotebook();
-  const { output } = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  if (output?.kind !== 'code' || output.logs.length === 0) {
-    return (
-      <EuiText size="s" color="subdued">
-        {i18n.translate('xpack.notebook.app.noCodeOutput', {
-          defaultMessage: 'Run the code to see its console output.',
-        })}
-      </EuiText>
-    );
-  }
-  return <CodeConsole cellId={cell.id} logs={output.logs} />;
-};
-
-const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition }) => {
+const PanelContent = ({ panelId, cell }: { panelId: string; cell: AppCellDefinition }) => {
   switch (cell.type) {
     case 'chart':
       return <ChartPanelContent panelId={panelId} cell={cell} />;
     case 'custom':
       return <CustomCanvas cell={cell} />;
-    case 'code':
-      return <CodePanelContent cell={cell} />;
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':
@@ -232,7 +216,7 @@ const AppGridPanel = ({
     [setDragHandles]
   );
   const cell = cells[panel.cellId];
-  if (!cell) return null;
+  if (!cell || !canShowInApp(cell)) return null;
 
   const closeMenu = () => setIsMenuOpen(false);
   const menuItems = [
