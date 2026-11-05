@@ -29,6 +29,7 @@ const CoverageOverviewDashboardComponent = () => {
 
   return (
     <>
+      <EuiSpacer size="m" />
       <EuiText color="subdued" size="s">
         <span>{i18n.CoverageOverviewDashboardInformation(frameworkLabel)}</span>{' '}
         <CoverageOverviewLink />
