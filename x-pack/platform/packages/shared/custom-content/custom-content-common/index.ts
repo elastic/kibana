@@ -23,14 +23,16 @@ export {
 
 export {
   customContentStateSchema,
-  fitsEsqlQueriesTotalLength,
-  ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
   customContentPanelUpdateSchema,
   readEsqlQuery,
   readAdditionalEsqlQueries,
   toEsqlQueryState,
 } from './schema';
 export type { CustomContentState } from './schema';
+export {
+  fitsEsqlQueriesTotalLength,
+  ESQL_QUERIES_TOTAL_LENGTH_MESSAGE,
+} from './esql_queries_total_length';
 
 export { resolveCustomContentQuery } from './resolve_custom_content_query';
 export type {

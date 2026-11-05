@@ -14,8 +14,9 @@ import {
   CUSTOM_CONTENT_MAX_ESQL_QUERY_LENGTH,
   CUSTOM_CONTENT_MAX_ESQL_QUERIES,
 } from '@kbn/custom-content-common';
+import { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE } from './constants';
 
-export const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_context';
+export { CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE };
 
 /**
  * Ceiling for the captured panel height.
