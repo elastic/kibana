@@ -9,6 +9,7 @@
 
 import type { DataReferenceCatalog, DataReferenceItem } from './build_data_reference_catalog';
 import {
+  isContainerReference,
   lookupReferenceTypeLabel,
   normalizeReferenceForm,
   parseWholeReference,
@@ -78,9 +79,42 @@ describe('lookupReferenceTypeLabel', () => {
     expect(lookupReferenceTypeLabel(catalog, 'steps.a.output')).toBe('unknown');
   });
 
-  it('ignores filters and returns undefined for unknown paths', () => {
-    expect(lookupReferenceTypeLabel(catalog, 'steps.b.output.hits | json')).toBe('array');
+  it('returns undefined for paths the catalog does not know', () => {
     expect(lookupReferenceTypeLabel(catalog, 'inputs.nope')).toBeUndefined();
+  });
+
+  it('says unknown once a filter reshapes the value, instead of the type before the filter', () => {
+    // `hits` is a list, but `| json` makes it a string and `| size` a number.
+    expect(lookupReferenceTypeLabel(catalog, 'steps.b.output.hits')).toBe('array');
+    expect(lookupReferenceTypeLabel(catalog, 'steps.b.output.hits | json')).toBeUndefined();
+    expect(lookupReferenceTypeLabel(catalog, 'steps.b.output.hits | size')).toBeUndefined();
+  });
+
+  it('types a comparison or a logical combination as boolean, whatever its operands are', () => {
+    [
+      'inputs.nope != blank',
+      'inputs.nope == 5',
+      'steps.b.output.hits >= 3',
+      'steps.b.output.hits < 3',
+      'steps.b.output.hits contains 2',
+      'inputs.a != blank and inputs.b != blank',
+      'inputs.a == blank or inputs.b == blank',
+    ].forEach((expression) => {
+      expect(lookupReferenceTypeLabel(catalog, expression)).toBe('boolean');
+    });
+  });
+
+  it('ignores operators and pipes inside quoted text', () => {
+    // A plain path whose quoted key happens to contain an operator is still just a path.
+    expect(lookupReferenceTypeLabel(catalog, "inputs['a == b']")).toBeUndefined();
+    expect(lookupReferenceTypeLabel(catalog, "steps.b.output.hits['x | y']")).toBeUndefined();
+    // A comparison against a quoted string is still a comparison.
+    expect(lookupReferenceTypeLabel(catalog, "inputs.nope == 'a | b'")).toBe('boolean');
+  });
+
+  it('does not mistake a name that contains and/or for an operator', () => {
+    expect(lookupReferenceTypeLabel(catalog, 'inputs.order')).toBeUndefined();
+    expect(lookupReferenceTypeLabel(catalog, 'inputs.android')).toBeUndefined();
   });
 });
 
@@ -100,5 +134,19 @@ describe('normalizeReferenceForm', () => {
   it('leaves plain text alone', () => {
     expect(normalizeReferenceForm('escalated')).toBe('escalated');
     expect(normalizeReferenceForm('')).toBe('');
+  });
+});
+
+describe('isContainerReference', () => {
+  it('is true for a known list or record, unless a filter already reshapes it', () => {
+    expect(isContainerReference('consts.tags', 'array')).toBe(true);
+    expect(isContainerReference('consts.doc', 'object')).toBe(true);
+    expect(isContainerReference('consts.tags | json', 'array')).toBe(false);
+  });
+
+  it('is false for text, numbers and anything the catalog does not know', () => {
+    expect(isContainerReference('consts.name', 'string')).toBe(false);
+    expect(isContainerReference('consts.count', 'number')).toBe(false);
+    expect(isContainerReference('inputs.x')).toBe(false);
   });
 });

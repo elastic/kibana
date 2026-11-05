@@ -31,6 +31,7 @@ export type StepFieldKind =
   | 'select'
   | 'code'
   | 'key-value'
+  | 'list'
   | 'switch-cases'
   | 'parallel-branches';
 export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
@@ -55,6 +56,10 @@ export interface StepFormField {
   readonly options?: readonly string[];
   /** Schema default (from `.default()`), used to pre-fill new steps. */
   readonly defaultValue?: unknown;
+  /** `list` fields: true when one value alone is valid too (`string | string[]`). */
+  readonly acceptsSingle?: boolean;
+  /** `list` fields whose items aren't typed text: they usually come from earlier data. */
+  readonly preferData?: boolean;
   /**
    * `false` when the engine reads the value exactly as typed (e.g. a loop cap), so the form
    * must not offer references for it. Declared with `.meta({ templatable: false })`.
@@ -249,11 +254,55 @@ const isScalarValueSchema = (schema: z.ZodType): boolean => {
   );
 };
 
+const isTextItemSchema = (schema: z.ZodType): boolean => {
+  const inner = unwrapSchema(schema);
+  return (
+    inner instanceof z.ZodString || inner instanceof z.ZodEnum || inner instanceof z.ZodLiteral
+  );
+};
+
+const textItemOptions = (schema: z.ZodType): readonly string[] | undefined => {
+  const inner = unwrapSchema(schema);
+  if (inner instanceof z.ZodEnum) return inner.options.map(String);
+  if (inner instanceof z.ZodLiteral) return [String(inner.value)];
+  return undefined;
+};
+
+/**
+ * A list of text values, edited as tags: `string[]`, or `string | string[]` where one value
+ * alone is valid too. `string | unknown[]` (`foreach`) also counts, but its items aren't typed
+ * text, so the list usually comes from earlier data.
+ */
+const resolveListShape = (
+  inner: z.ZodType
+): Pick<StepFormField, 'options' | 'acceptsSingle' | 'preferData'> | undefined => {
+  if (inner instanceof z.ZodArray) {
+    const element = inner.element as z.ZodType;
+    if (!isTextItemSchema(element)) return undefined;
+    return { acceptsSingle: false, options: textItemOptions(element) };
+  }
+  if (inner instanceof z.ZodUnion) {
+    const members = (inner.options as z.ZodType[]).map(unwrapSchema);
+    if (members.length !== 2) return undefined;
+    const [array] = members.filter((member) => member instanceof z.ZodArray) as z.ZodArray[];
+    const hasString = members.some((member) => member instanceof z.ZodString);
+    if (!array || !hasString) return undefined;
+    const element = unwrapSchema(array.element as z.ZodType);
+    if (isTextItemSchema(element)) {
+      return { acceptsSingle: true, options: textItemOptions(element) };
+    }
+    if (element instanceof z.ZodUnknown || element instanceof z.ZodAny) {
+      return { acceptsSingle: true, preferData: true };
+    }
+  }
+  return undefined;
+};
+
 const resolveKind = (
   stepType: string,
   key: string,
   schema: z.ZodType
-): Pick<StepFormField, 'kind' | 'language' | 'options'> => {
+): Pick<StepFormField, 'kind' | 'language' | 'options' | 'acceptsSingle' | 'preferData'> => {
   if (stepType === 'switch' && key === 'cases') {
     return { kind: 'switch-cases' };
   }
@@ -288,6 +337,9 @@ const resolveKind = (
     }
     return { kind: 'code', language: namedLanguage };
   }
+
+  const listShape = resolveListShape(inner);
+  if (listShape) return { kind: 'list', ...listShape };
 
   if (inner instanceof z.ZodEnum) {
     return { kind: 'select', options: inner.options.map(String) };
@@ -354,7 +406,11 @@ const fieldsFromObject = (
         !isNeverSchema(fieldSchema)
     )
     .map(([key, fieldSchema]): StepFormField => {
-      const { kind, language, options } = resolveKind(stepType, key, fieldSchema);
+      const { kind, language, options, acceptsSingle, preferData } = resolveKind(
+        stepType,
+        key,
+        fieldSchema
+      );
       const advanced = resolveAdvancedHint(stepType, key, fieldSchema);
       return {
         key,
@@ -366,6 +422,8 @@ const fieldsFromObject = (
         kind,
         language,
         options,
+        ...(acceptsSingle !== undefined ? { acceptsSingle } : {}),
+        ...(preferData ? { preferData } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(readFieldMeta(fieldSchema)?.templatable === false
           ? { templatable: false as const }
@@ -602,6 +660,8 @@ export const isFieldValueRepresentable = (field: StepFormField, value: unknown):
       return true;
     case 'key-value':
       return typeof value === 'object' && !Array.isArray(value);
+    case 'list':
+      return typeof value === 'string' || Array.isArray(value);
     case 'boolean':
       return typeof value === 'boolean' || typeof value === 'string';
     case 'number':
@@ -636,6 +696,9 @@ const placeholderFor = (field: StepFormField): unknown => {
       return [];
     case 'key-value':
       return {};
+    case 'list':
+      // A single value alone is valid for `string | string[]`; keep the old empty-string start.
+      return field.acceptsSingle ? '' : [];
     case 'text':
     default:
       return '';

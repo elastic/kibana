@@ -30,7 +30,11 @@ import {
   formatValueReferenceToken,
 } from '../lib/build_data_reference_catalog';
 import type { ReferenceForm } from '../lib/reference_value';
-import { lookupReferenceTypeLabel, parseWholeReference } from '../lib/reference_value';
+import {
+  isContainerReference,
+  lookupReferenceTypeLabel,
+  parseWholeReference,
+} from '../lib/reference_value';
 
 /**
  * The "Data" side of a Fixed | Data switch: one box holding a single reference chip that
@@ -45,6 +49,7 @@ export function ReferenceValueBox({
   isInvalid = false,
   onBlur,
   ariaLabel,
+  keepTypeFor = 'any',
   'data-test-subj': dataTestSubj,
 }: {
   readonly catalog: DataReferenceCatalog;
@@ -54,6 +59,12 @@ export function ReferenceValueBox({
   readonly isInvalid?: boolean;
   readonly onBlur?: () => void;
   readonly ariaLabel: string;
+  /**
+   * Which stored text-form references get the "Keep the type" nudge. `any` for numbers and
+   * yes/no; `containers` for fields where one string is a valid value too (`index`), so only a
+   * reference known to be a list or record is flagged.
+   */
+  readonly keepTypeFor?: 'any' | 'containers';
   readonly 'data-test-subj': string;
 }) {
   const { euiTheme } = useEuiTheme();
@@ -64,7 +75,11 @@ export function ReferenceValueBox({
   const whole = parseWholeReference(value);
   // A typed value kept while the switch sits on Data is not a reference, so it isn't shown here.
   const hasValue = isReferenceValue(value);
-  const needsKeepType = whole?.form === 'text' && form === 'value';
+  const typeLabel = whole ? lookupReferenceTypeLabel(catalog, whole.expression) : undefined;
+  const needsKeepType =
+    whole?.form === 'text' &&
+    form === 'value' &&
+    (keepTypeFor === 'any' || isContainerReference(whole.expression, typeLabel));
 
   const closePicker = useCallback(() => {
     setIsOpen(false);
@@ -116,7 +131,7 @@ export function ReferenceValueBox({
   const content = whole ? (
     <ReferenceChip
       expression={whole.expression}
-      typeLabel={lookupReferenceTypeLabel(catalog, whole.expression)}
+      typeLabel={typeLabel}
       tone={needsKeepType ? 'warning' : 'neutral'}
       hint={chipHint}
       onClick={() => setIsOpen(true)}

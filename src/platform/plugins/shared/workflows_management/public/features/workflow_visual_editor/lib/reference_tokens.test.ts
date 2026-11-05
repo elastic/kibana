@@ -51,6 +51,13 @@ describe('findReferenceTokens', () => {
     expect(unknown).toMatchObject({ typeLabel: undefined, iconType: 'unknown', tone: 'neutral' });
   });
 
+  it('types a comparison as boolean and a filtered value as unknown', () => {
+    const [comparison] = findReferenceTokens('${{ inputs.nope != blank }}', { catalog });
+    expect(comparison).toMatchObject({ typeLabel: 'boolean', iconType: 'boolean' });
+    const [filtered] = findReferenceTokens('{{ consts.tags | json }}', { catalog });
+    expect(filtered).toMatchObject({ typeLabel: undefined, iconType: 'unknown' });
+  });
+
   it('ignores Liquid tags, empty spans and unclosed braces', () => {
     expect(findReferenceTokens('{% if a %}x{% endif %} {{ }} {{ open', { catalog })).toEqual([]);
   });

@@ -53,6 +53,7 @@ import type { DataReferenceRunControls } from './data_reference_catalog_tree';
 import { FieldEditorSubFlyout } from './field_editor_sub_flyout';
 import { FlyoutMonacoFrame, getFlyoutMonacoEditorOptions } from './flyout_monaco_frame';
 import { KeyValueField } from './key_value_field';
+import { ListField } from './list_field';
 import { ReferenceCapableField } from './reference_capable_field';
 import { ReferenceTextInput } from './reference_text_input';
 import { ReferenceValueBox } from './reference_value_box';
@@ -68,6 +69,7 @@ import { ValueSourceToggle } from './value_source_toggle';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { isTagValue } from '../lib/list_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
 import type { ReferenceForm } from '../lib/reference_value';
 import {
@@ -1366,7 +1368,10 @@ function StepFieldRow({
   const testSubj = `workflowStepConfigField-${field.path.join('.')}`;
   // Fixed | Data: any whole reference is "Data". Switching to Data before anything is picked
   // keeps the typed value until a pick replaces it.
-  const [forcedData, setForcedData] = useState(false);
+  // Lists whose items aren't typed text (`foreach`) usually come from earlier data: start there.
+  const [forcedData, setForcedData] = useState(
+    field.preferData === true && isEmptyFieldValue(value)
+  );
   const valueIsReference = isReferenceValue(value);
   const source: ValueSource = !fixedOnly && (valueIsReference || forcedData) ? 'data' : 'fixed';
 
@@ -1451,14 +1456,21 @@ function StepFieldRow({
     }
     setForcedData(false);
     // Only a reference needs clearing; a typed value that was kept stays as it is.
-    if (valueIsReference) onChange(field.required && field.kind === 'boolean' ? false : undefined);
+    if (valueIsReference) {
+      onChange(
+        field.kind === 'list' ? [] : field.required && field.kind === 'boolean' ? false : undefined
+      );
+    }
   };
   const handleDataChange = (next: string | undefined) => {
     setForcedData(true);
     onChange(next);
   };
+  // A list whose items aren't text (objects, numbers) stays in the JSON editor, as before.
+  const listIsTags = field.kind === 'list' && isTagValue(value);
   const hasSourceToggle =
-    !fixedOnly && (field.kind === 'boolean' || field.kind === 'number' || field.kind === 'select');
+    !fixedOnly &&
+    (field.kind === 'boolean' || field.kind === 'number' || field.kind === 'select' || listIsTags);
   const sourceToggle = hasSourceToggle ? (
     <ValueSourceToggle
       source={source}
@@ -1634,7 +1646,40 @@ function StepFieldRow({
     <div className="workflowStepConfigFieldRow">{child}</div>
   );
 
-  switch (field.kind) {
+  const codeField: StepFormField =
+    field.kind === 'list' ? { ...field, kind: 'code', language: 'json' } : field;
+
+  switch (field.kind === 'list' && !listIsTags ? 'code' : field.kind) {
+    case 'list':
+      return wrapRow(
+        <StepValidatedFormRow {...rowProps}>
+          {source === 'data' ? (
+            <ReferenceValueBox
+              catalog={referenceCatalog}
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              // One string is a valid value too, so only a known list or record is flagged.
+              keepTypeFor="containers"
+              data-test-subj={testSubj}
+            />
+          ) : (
+            <ListField
+              value={value}
+              onChange={onChange}
+              options={field.options}
+              acceptsSingle={field.acceptsSingle === true}
+              ariaLabel={field.label}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              data-test-subj={testSubj}
+            />
+          )}
+        </StepValidatedFormRow>
+      );
     case 'number':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
@@ -1736,7 +1781,7 @@ function StepFieldRow({
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
           <CodeField
-            field={field}
+            field={codeField}
             value={value}
             catalog={referenceCatalog}
             onChange={onChange}

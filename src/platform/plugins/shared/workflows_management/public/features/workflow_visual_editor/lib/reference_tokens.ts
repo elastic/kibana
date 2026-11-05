@@ -12,7 +12,7 @@ import type { DataReferenceCatalog } from './build_data_reference_catalog';
 import { toReferenceIconType } from './build_data_reference_catalog';
 import type { ReferenceChipTone } from './reference_chip_styles';
 import type { ReferenceForm } from './reference_value';
-import { lookupReferenceTypeLabel } from './reference_value';
+import { isContainerReference, lookupReferenceTypeLabel } from './reference_value';
 
 /** One `{{ … }}` or `${{ … }}` span found inside a text value. */
 export interface ReferenceToken {
@@ -114,11 +114,11 @@ export const findReferenceTokens = (
       const iconType = toReferenceIconType(typeLabel ?? 'unknown');
       const isWhole = start <= trimmedStart && end >= trimmedEnd;
       const form: ReferenceForm = isValueForm ? 'value' : 'text';
-      // A filter (`| json`, `| join`) already shapes the data into something printable.
-      const isContainer =
-        (iconType === 'array' || iconType === 'object') && !expression.includes('|');
       const isContainerInSentence =
-        warnContainersInSentence && form === 'text' && !isWhole && isContainer;
+        warnContainersInSentence &&
+        form === 'text' &&
+        !isWhole &&
+        isContainerReference(expression, typeLabel);
       const isValueFormInSentence = form === 'value' && !isWhole;
       tokens.push({
         start,

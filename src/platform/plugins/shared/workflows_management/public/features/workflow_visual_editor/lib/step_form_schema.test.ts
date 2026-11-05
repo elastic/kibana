@@ -107,6 +107,44 @@ describe('step_form_schema', () => {
       expect(kindOf('nested')).toBe('code');
     });
 
+    it('edits lists of text as tags, and says whether one value alone is valid', () => {
+      const listConnectors = [
+        {
+          type: 'lister',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            tags: z.array(z.string()).optional(),
+            index: z.union([z.string(), z.array(z.string())]).optional(),
+            status: z.array(z.enum(['open', 'closed'])).optional(),
+            ids: z.array(z.number()).optional(),
+            rules: z.array(z.object({ id: z.string() })).optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const field = (key: string) =>
+        getStepFormSchema('lister', listConnectors)?.fields.find((f) => f.key === key);
+      expect(field('tags')).toMatchObject({ kind: 'list', acceptsSingle: false });
+      expect(field('index')).toMatchObject({ kind: 'list', acceptsSingle: true });
+      expect(field('status')).toMatchObject({
+        kind: 'list',
+        acceptsSingle: false,
+        options: ['open', 'closed'],
+      });
+      expect(field('tags')?.preferData).toBeUndefined();
+      // Lists of anything but text keep the JSON editor.
+      expect(field('ids')?.kind).toBe('code');
+      expect(field('rules')?.kind).toBe('code');
+    });
+
+    it('treats foreach as a list that usually comes from earlier data', () => {
+      expect(
+        getStepFormSchema('foreach', [])?.fields.find((f) => f.key === 'foreach')
+      ).toMatchObject({ kind: 'list', acceptsSingle: true, preferData: true });
+    });
+
     it('adds a non-templatable max-iterations field to loop steps', () => {
       const maxIterations = getStepFormSchema('while', [])?.fields.find(
         (f) => f.key === 'max-iterations'
@@ -557,6 +595,15 @@ describe('step_form_schema', () => {
       expect(isFieldValueRepresentable(text, 'x')).toBe(true);
       expect(isFieldValueRepresentable(text, { a: 1 })).toBe(false);
       expect(isFieldValueRepresentable({ ...text, kind: 'code' }, { a: 1 })).toBe(true);
+    });
+
+    it('takes a string or a list in a list control, but not a map or a number', () => {
+      const list = { ...text, kind: 'list' as const };
+      expect(isFieldValueRepresentable(list, 'a')).toBe(true);
+      expect(isFieldValueRepresentable(list, ['a', 'b'])).toBe(true);
+      expect(isFieldValueRepresentable(list, undefined)).toBe(true);
+      expect(isFieldValueRepresentable(list, { a: 1 })).toBe(false);
+      expect(isFieldValueRepresentable(list, 5)).toBe(false);
     });
 
     it('takes a plain map in a key-value control, but not a string or a list', () => {

@@ -1201,6 +1201,18 @@ with:
       expect(getComputedStyle(trailing).textOverflow).toBe('ellipsis');
     });
 
+    it('draws a comparison in an if condition as a boolean pill, not unknown', () => {
+      renderPanel({
+        stepType: 'if',
+        initialFragment:
+          'name: gate\ntype: if\ncondition: "${{ event.alerts[0] != blank }}"\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+      });
+      const chip = within(screen.getByTestId('workflowStepConfigField-condition')).getByTestId(
+        'workflowReferenceChip'
+      );
+      expect(chip).toHaveAttribute('aria-label', 'Reference event.alerts[0] != blank, boolean');
+    });
+
     it('opens the picker on the chip to swap it when a chip is clicked', () => {
       renderPanel();
       const chip = within(screen.getByTestId('workflowStepConfigField-with.message')).getByTestId(
@@ -1414,6 +1426,135 @@ with:
       expect(screen.getByTestId('workflowStepConfigField-with.headers-add')).toHaveTextContent(
         'Add field'
       );
+    });
+  });
+
+  describe('one value or a few', () => {
+    const listConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'lister',
+        hasConnectorId: false,
+        paramsSchema: z.object({
+          index: z.union([z.string(), z.array(z.string())]).optional(),
+          tags: z.array(z.string()).optional(),
+          status: z.array(z.enum(['open', 'closed'])).optional(),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Lister',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const renderLister = (withBlock: string) =>
+      renderPanel({
+        stepType: 'lister',
+        connectors: listConnectors,
+        initialFragment: `name: l\ntype: lister\nwith:${withBlock}\n`,
+      });
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+    const searchInput = (testId: string) =>
+      within(screen.getByTestId(testId)).getByTestId('comboBoxSearchInput');
+    const addTag = (testId: string, text: string) => {
+      fireEvent.change(searchInput(testId), { target: { value: text } });
+      fireEvent.keyDown(searchInput(testId), { key: 'Enter' });
+    };
+
+    it('keeps one value a plain string, makes two a list, and collapses back to one', () => {
+      const { onFragmentChange } = renderLister('\n  index: logs-*');
+      const field = 'workflowStepConfigField-with.index';
+      expect(screen.getByTestId(field)).toHaveTextContent('logs-*');
+
+      addTag(field, 'metrics-*');
+      expect(lastFragment(onFragmentChange)).toMatch(/index:\s*\n\s+- logs-\*\n\s+- metrics-\*/);
+
+      // Backspace in the empty input removes the last tag.
+      fireEvent.keyDown(searchInput(field), { key: 'Backspace' });
+      expect(lastFragment(onFragmentChange)).toMatch(/index: logs-\*/);
+    });
+
+    it('keeps a list even down to one value when the schema does not accept a single value', () => {
+      const { onFragmentChange } = renderLister('\n  tags: [a, b]');
+      const field = 'workflowStepConfigField-with.tags';
+      fireEvent.keyDown(searchInput(field), { key: 'Backspace' });
+      expect(lastFragment(onFragmentChange)).toMatch(/tags:\s*\n\s+- a/);
+      expect(lastFragment(onFragmentChange)).not.toMatch(/tags: a/);
+    });
+
+    it('offers only the fixed choices for an enum list', () => {
+      const { onFragmentChange } = renderLister('\n  status: [open]');
+      addTag('workflowStepConfigField-with.status', 'bogus');
+      expect(lastFragment(onFragmentChange)).not.toMatch(/bogus/);
+    });
+
+    it('takes the whole list from earlier data and writes the value form', () => {
+      const { onFragmentChange } = renderLister('\n  tags: [a]');
+      const field = 'workflowStepConfigField-with.tags';
+      fireEvent.click(screen.getByTestId(`${field}-source-data`));
+      fireEvent.focusIn(screen.getByTestId(`${field}-pick`));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ steps.find.output.indices }}');
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /tags: \$\{\{ steps\.find\.output\.indices \}\}/
+      );
+    });
+
+    describe('a stored text-form reference', () => {
+      const constsDefinition = {
+        version: '1',
+        name: 'demo',
+        enabled: true,
+        triggers: [{ type: 'manual' }],
+        consts: { name: 'logs-*', tags: ['a', 'b'] },
+        steps: [{ name: 'l', type: 'lister', with: {} }],
+      } as unknown as WorkflowYaml;
+      const chipTone = (ref: string) => {
+        renderPanel({
+          stepType: 'lister',
+          connectors: listConnectors,
+          workflowDefinition: constsDefinition,
+          initialFragment: `name: l\ntype: lister\nwith:\n  index: "${ref}"\n`,
+        });
+        return screen
+          .getByTestId('workflowStepConfigField-with.index-chip')
+          .getAttribute('data-tone');
+      };
+
+      it('is fine as one string for a field that accepts a single value', () => {
+        expect(chipTone('{{ consts.name }}')).toBe('neutral');
+        expect(screen.queryByTestId('workflowStepConfigField-with.index-keepType')).toBeNull();
+      });
+
+      it('is flagged when the reference is known to be a list', () => {
+        expect(chipTone('{{ consts.tags }}')).toBe('warning');
+        expect(screen.getByTestId('workflowStepConfigField-with.index-keepType')).toBeVisible();
+      });
+    });
+
+    it('opens foreach on earlier data when it is empty, and offers Fixed too', () => {
+      renderPanel({
+        initialFragment:
+          'name: loop\ntype: foreach\nforeach: ""\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+        stepType: 'foreach',
+      });
+      expect(screen.getByTestId('workflowStepConfigField-foreach-pick')).toBeInTheDocument();
+      expect(
+        screen.getByTestId('workflowStepConfigField-foreach-source-fixed')
+      ).toBeInTheDocument();
+    });
+
+    it('keeps a list of objects in the JSON editor instead of tags', () => {
+      renderPanel({
+        initialFragment:
+          'name: loop\ntype: foreach\nforeach:\n  - id: 1\nsteps:\n  - name: a\n    type: console\n    with:\n      message: hi\n',
+        stepType: 'foreach',
+      });
+      expect(screen.getByTestId('workflowStepConfigField-foreach')).toHaveAttribute(
+        'data-language',
+        'json'
+      );
+      expect(
+        screen.queryByTestId('workflowStepConfigField-foreach-source-data')
+      ).not.toBeInTheDocument();
     });
   });
 });
