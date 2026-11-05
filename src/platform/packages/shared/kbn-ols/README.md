@@ -8,8 +8,6 @@ For now, it holds the vocabulary and the rules every later piece relies on: acce
 access policies, and the shapes an ACL takes when it is written and when it is read back. Its tests also get a
 hand-written table of stored ACL shapes with the access each one must grant.
 
-⚠️ NOTE: Nothing in Kibana uses this package yet. Adding it changes no behavior.
-
 ## Access levels
 
 Access is cumulative. Each level includes every level below it:
@@ -90,32 +88,42 @@ way.
 An ACL is in one of three states (`AclState`):
 
 - `absent`: there is no ACL, or it holds only empty values. The type's default general access applies.
-- `valid`: the version is `1`, and the ACL is enforced.
-- `invalid`: the ACL is damaged, for example has an unsupported version, and grants no ordinary access at all.
+- `valid`: the ACL has a supported version, an owner, and general access, as every ACL Kibana writes does, and it
+  is enforced.
+- `invalid`: the ACL is damaged, for example it has an unsupported version or no owner, and grants no ordinary
+  access at all.
 
 ## Reading a stored ACL
 
 These are the rules for reading a stored ACL, and the fixture table follows them. Each rule has to hold both when
 Kibana reads a single object and when it filters a search, so a list never disagrees with opening the object.
 
-- **State.** An ACL where no field holds a value is `absent`. Otherwise it is `valid` when it holds at least one
-  version value and every one is `1`, and `invalid` when it doesn't. An invalid ACL grants nothing at all, not even
-  ownership.
+The version, the owner, and general access decide who controls the object, and Kibana always writes all three. A
+stored ACL with anything else in them didn't come from Kibana, so it counts as damaged. Entries only ever add access,
+so an unreadable entry just grants nothing.
+
+- **State.** An ACL where no field holds a value is `absent`. Otherwise, it is `valid` when all of these hold, and
+  `invalid` when any doesn't:
+  - It has at least one version value, and every one is `1`.
+  - The owner has exactly one known kind, once unknown kinds are ignored, and at least one ID.
+  - General access has at least one value the type allows.
+
+  An invalid ACL grants nothing at all, not even ownership. A recovery administrator repairs it by transferring
+  ownership, which writes a complete ACL.
 - **Values are text.** Numbers and booleans are read as text, the way Elasticsearch indexes them into `keyword`
   fields: an owner ID stored as `1` matches a principal whose ID is `"1"`, and a general access of `true` is an
   unknown value.
-- **General access.** The lowest value the type allows applies. Unknown values, `manage`, and values the type
-  doesn't allow are ignored. When nothing is left, general access is `none`, including in a `valid` ACL that
-  doesn't set it.
-- **Kinds.** Unknown kinds are ignored. An owner or an entry needs exactly one known kind, and with two it grants
-  nothing. A principal only matches its own kind, so a service account never matches a user whose ID has the same
-  text.
-- **IDs.** Every stored ID counts. An entry grants its level to each ID, and an owner with several IDs makes each of
-  them an owner. This is the one place where several values don't fall back to the most restrictive reading: a
-  search matches a document when any stored ID matches, and a search filter can't cheaply tell one stored ID from
-  several, so reading a single object has to agree with it. Kibana never writes more than one owner ID, so only a
-  direct write to the index can produce such an ACL.
-- **Entry levels.** The lowest level the type allows for entries applies, and an entry without one grants nothing.
+- **General access.** Values the type doesn't allow are ignored, and the lowest allowed one applies.
+- **Owner IDs.** Every stored owner ID counts, so an owner with several IDs makes each of them an owner. This is the
+  one place where several values don't fall back to the most restrictive reading: a search matches a document when
+  any stored ID matches, and a search filter can't cheaply tell one stored ID from several, so reading a single
+  object has to agree with it. Kibana never writes more than one owner ID, so only a direct write to the index can
+  produce such an ACL.
+- **Entries.** Unknown kinds and levels the type doesn't allow for entries are ignored. An entry with exactly one
+  known kind and at least one allowed level grants the lowest of those levels to each of its IDs. Any other entry
+  grants nothing, and the rest of the ACL still applies.
+- **Kinds match exactly.** A principal only matches its own kind, so a service account never matches a user whose
+  ID has the same text.
 - **Entries stay separate.** A kind, an ID, and a level from different entries never combine into a grant.
 - **One ACL, however it is spelled.** Dotted keys, such as `"acl.owner.id"` at the document root or `"owner.id"`
   inside `acl`, and an array of `acl` objects all add their values to the same ACL, the way Elasticsearch indexes

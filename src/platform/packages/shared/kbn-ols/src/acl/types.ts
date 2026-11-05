@@ -17,8 +17,8 @@ export interface Acl {
   /** Version of the ACL format. Only `1` exists. */
   version: 1;
   /**
-   * The object's owner. Every ACL Kibana writes has one. A stored ACL without an owner can still
-   * exist, for example after a direct write to the index, and then nobody owns the object.
+   * The object's owner. Every ACL Kibana writes has one, so a stored ACL without an owner is
+   * damaged and grants nothing.
    */
   owner: Principal;
   /** What everyone who can reach the object can do. */
@@ -49,17 +49,20 @@ export interface AclEntry extends Principal {
  */
 export interface StoredAcl {
   /**
-   * Every stored version value. The ACL is `valid` only when it holds at least one value and every
+   * Every stored version value. The ACL is damaged unless it holds at least one value and every
    * value is `1`.
    */
   version: unknown[];
   /**
-   * Every stored owner kind and ID. Unknown kinds are ignored. When exactly one known kind remains,
-   * each ID owns the object, otherwise nobody does. The package README explains why several IDs all
-   * count.
+   * Every stored owner kind and ID. Unknown kinds are ignored, and the ACL is damaged unless
+   * exactly one known kind and at least one ID remain. Each ID then owns the object: the package
+   * README explains why several IDs all count.
    */
   owner: { type: string[]; id: string[] };
-  /** Every stored general access value. The lowest one the type allows applies, else `none`. */
+  /**
+   * Every stored general access value. The lowest one the type allows applies, and the ACL is
+   * damaged when there is none.
+   */
   general_access: string[];
   /** Every stored entry. */
   entries: StoredAclEntry[];
@@ -71,7 +74,7 @@ export interface StoredAcl {
 export interface StoredAclEntry {
   /**
    * Every stored principal kind. Unknown kinds are ignored, and the entry grants nothing unless
-   * exactly one known kind remains.
+   * exactly one known kind remains. The rest of the ACL still applies.
    */
   type: string[];
   /** Every stored principal ID. The entry grants its level to each of them. */
@@ -83,7 +86,7 @@ export interface StoredAclEntry {
 }
 
 /**
- * State of a stored ACL: missing or holding only empty values (`absent`), enforced (`valid`), or
- * damaged (`invalid`). A damaged ACL grants no ordinary access.
+ * State of a stored ACL: missing or holding only empty values (`absent`), complete and enforced
+ * (`valid`), or damaged (`invalid`). A damaged ACL grants no ordinary access.
  */
 export type AclState = 'absent' | 'valid' | 'invalid';
