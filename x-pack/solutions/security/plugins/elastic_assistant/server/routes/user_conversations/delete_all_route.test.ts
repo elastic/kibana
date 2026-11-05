@@ -37,6 +37,12 @@ describe('Delete all conversations route', () => {
       );
 
       expect(response.status).toEqual(200);
+      expect(
+        clients.elasticAssistant.getAIAssistantConversationsDataClient.deleteAllConversations
+      ).toHaveBeenCalledWith({
+        authenticatedUser: mockUser1,
+        excludedIds: ['conversation-1'],
+      });
     });
 
     test('returns failure if exists', async () => {

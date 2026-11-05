@@ -7,6 +7,7 @@
 
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { authenticatedUser } from '../../__mocks__/user';
 import type { DeleteAllConversationsParams } from './delete_all_conversations';
 import { deleteAllConversations } from './delete_all_conversations';
 
@@ -14,6 +15,7 @@ export const getDeleteAllConversationsOptionsMock = (): DeleteAllConversationsPa
   esClient: elasticsearchClientMock.createScopedClusterClient().asCurrentUser,
   conversationIndex: '.kibana-elastic-ai-assistant-conversations',
   logger: loggingSystemMock.createLogger(),
+  authenticatedUser,
   excludedIds: ['test'],
 });
 
@@ -33,6 +35,60 @@ describe('deleteAllConversations', () => {
 
     const deletedConversations = await deleteAllConversations(options);
     expect(deletedConversations).toEqual(mockResponse);
+    expect(options.esClient.deleteByQuery).toHaveBeenCalledWith(
+      expect.objectContaining({
+        query: {
+          bool: {
+            must: { match_all: {} },
+            filter: {
+              bool: {
+                should: [
+                  {
+                    bool: {
+                      must: [
+                        { exists: { field: 'created_by' } },
+                        {
+                          bool: {
+                            should: [
+                              { term: { 'created_by.id': authenticatedUser.profile_uid } },
+                              { term: { 'created_by.name': authenticatedUser.username } },
+                            ],
+                            minimum_should_match: 1,
+                          },
+                        },
+                      ],
+                    },
+                  },
+                  {
+                    bool: {
+                      must: [
+                        { bool: { must_not: [{ exists: { field: 'created_by' } }] } },
+                        {
+                          nested: {
+                            path: 'users',
+                            query: {
+                              bool: {
+                                should: [
+                                  { term: { 'users.id': authenticatedUser.profile_uid } },
+                                  { term: { 'users.name': authenticatedUser.username } },
+                                ],
+                                minimum_should_match: 1,
+                              },
+                            },
+                          },
+                        },
+                      ],
+                    },
+                  },
+                ],
+                minimum_should_match: 1,
+              },
+            },
+            must_not: { ids: { values: ['test'] } },
+          },
+        },
+      })
+    );
   });
 
   test('throw error if no conversation was deleted', async () => {
