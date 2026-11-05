@@ -7,6 +7,8 @@
 
 import type { MemoryStoreConfig } from '../../../config';
 import { createElasticsearchMemoryStore } from './elasticsearch_memory_store';
+import { createAgentCoreMemoryStore } from './agentcore_memory_store';
+import { createMem0MemoryStore } from './mem0_memory_store';
 import { createSupermemoryMemoryStore } from './supermemory_memory_store';
 import type { CreateMemorySearch, CreateMemoryStore } from './types';
 
@@ -29,9 +31,20 @@ export interface MemoryBackend {
 
 /** Returns the memory backend selected by `xpack.contextEngineAgentBuilder.memory.store`. */
 export const getMemoryBackend = (config: MemoryStoreConfig): MemoryBackend => {
-  if (config.type === 'supermemory') {
-    const createStore = createSupermemoryMemoryStore(config);
-    return { createStore, createSearch: createStore };
+  switch (config.type) {
+    case 'supermemory': {
+      const createStore = createSupermemoryMemoryStore(config);
+      return { createStore, createSearch: createStore };
+    }
+    case 'mem0': {
+      const createStore = createMem0MemoryStore(config);
+      return { createStore, createSearch: createStore };
+    }
+    case 'agentcore': {
+      const createStore = createAgentCoreMemoryStore(config);
+      return { createStore, createSearch: createStore };
+    }
+    case 'elasticsearch':
+      return { createStore: createElasticsearchMemoryStore };
   }
-  return { createStore: createElasticsearchMemoryStore };
 };

@@ -34,6 +34,36 @@ describe('getMemoryBackend', () => {
     expect(createSearch).toBe(createStore);
   });
 
+  it.each([
+    ['mem0', { apiKey: 'm0_test' }],
+    [
+      'agentcore',
+      {
+        region: 'us-east-1',
+        memoryId: 'kibana_memory-abcdefghij',
+        accessKeyId: 'AKIDEXAMPLE',
+        secretAccessKey: 'secret',
+      },
+    ],
+  ])('returns a %s store with search when configured', (type, settings) => {
+    const { memory } = configSchema.validate({ memory: { store: { type, ...settings } } });
+
+    const { createStore, createSearch } = getMemoryBackend(memory.store);
+    expect(memory.store.type).toBe(type);
+    expect(createStore).not.toBe(createElasticsearchMemoryStore);
+    expect(createSearch).toBe(createStore);
+  });
+
+  it('requires AWS credentials for the AgentCore store', () => {
+    expect(() =>
+      configSchema.validate({
+        memory: {
+          store: { type: 'agentcore', region: 'us-east-1', memoryId: 'kibana_memory-abcdefghij' },
+        },
+      })
+    ).toThrow();
+  });
+
   it('requires an API key for the Supermemory store', () => {
     expect(() => configSchema.validate({ memory: { store: { type: 'supermemory' } } })).toThrow();
   });

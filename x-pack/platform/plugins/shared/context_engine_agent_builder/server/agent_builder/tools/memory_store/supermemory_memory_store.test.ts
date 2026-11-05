@@ -8,7 +8,7 @@
 import { KiNotFoundError } from '@kbn/context-engine-plugin/server/ai_indices/errors';
 import type { StoredKi } from '@kbn/context-engine-plugin/server/ai_indices/ki_revision';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import { createSupermemoryMemoryStore, toSupermemoryNamespace } from './supermemory_memory_store';
+import { createSupermemoryMemoryStore } from './supermemory_memory_store';
 
 const memory: StoredKi = {
   '@timestamp': '2026-09-24T12:00:00.000Z',
@@ -54,13 +54,6 @@ describe('createSupermemoryMemoryStore', () => {
   beforeEach(() => {
     fetchMock.mockReset();
     global.fetch = fetchMock;
-  });
-
-  it('builds a valid namespace per space and AI index', () => {
-    expect(toSupermemoryNamespace('kibana', 'my space', 'support.logs')).toBe(
-      'kibana:my_space:support_logs'
-    );
-    expect(toSupermemoryNamespace('k', 's', 'x'.repeat(200))).toHaveLength(100);
   });
 
   it('creates a new memory as a document keyed by the KI id', async () => {
@@ -137,7 +130,7 @@ describe('createSupermemoryMemoryStore', () => {
           memories: [{ id: 'mem_1' }, { id: 'mem_2' }],
         })
       )
-      .mockResolvedValue(jsonResponse({ count: 2, matches: [], errors: [] }));
+      .mockImplementation(async () => jsonResponse({ count: 2, matches: [], errors: [] }));
     const writer = { uri: 'tool://forget', metadata: { run_id: 'run-1' } };
 
     const existing = await store.get('memory-1');

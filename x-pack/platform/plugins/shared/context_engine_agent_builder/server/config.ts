@@ -22,6 +22,20 @@ export const configSchema = schema.object({
           apiKey: schema.string({ minLength: 1 }),
           namespacePrefix: schema.string({ defaultValue: 'kibana' }),
         }),
+        schema.object({
+          type: schema.literal('mem0'),
+          url: schema.uri({ scheme: ['http', 'https'], defaultValue: 'https://api.mem0.ai' }),
+          apiKey: schema.string({ minLength: 1 }),
+          namespacePrefix: schema.string({ defaultValue: 'kibana' }),
+        }),
+        schema.object({
+          type: schema.literal('agentcore'),
+          region: schema.string({ minLength: 1 }),
+          memoryId: schema.string({ minLength: 1 }),
+          accessKeyId: schema.string({ minLength: 1 }),
+          secretAccessKey: schema.string({ minLength: 1 }),
+          namespacePrefix: schema.string({ defaultValue: 'kibana' }),
+        }),
       ],
       { defaultValue: { type: 'elasticsearch' as const } }
     ),
