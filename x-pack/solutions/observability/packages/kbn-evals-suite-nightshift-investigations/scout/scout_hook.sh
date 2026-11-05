@@ -106,7 +106,18 @@ if [[ "${EVAL_SHARD_ID:-}" == orcabench || "${NIGHTSHIFT_DATASETS:-}" == orcaben
   fi
   connector_set=orcabench
   es_url="$(config_value '.nightshiftOrcaEs.url')"
-  es_key="$(config_value '.nightshiftOrcaEs.apiKey')"
+  # The flag ablation reads through its own restricted key, kept next to the full one, so selecting
+  # the variant never means swapping the key every other ORCA run uses.
+  if [[ "${NIGHTSHIFT_ORCA_TELEMETRY_VARIANT:-full}" == no-flags ]]; then
+    es_key="$(config_value '.nightshiftOrcaEs.noFlagsApiKey')"
+    if [[ -z "$es_key" ]]; then
+      echo "nightshift-investigations scout hook: NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags requires" \
+        "nightshiftOrcaEs.noFlagsApiKey in the Nightshift evals config" >&2
+      exit 1
+    fi
+  else
+    es_key="$(config_value '.nightshiftOrcaEs.apiKey')"
+  fi
 else
   # The Elasticsearch URL and key come from one source, so a partial profile block is never
   # completed from the shell. The Vault field keeps its original name, `nightshift.telemetry`.
