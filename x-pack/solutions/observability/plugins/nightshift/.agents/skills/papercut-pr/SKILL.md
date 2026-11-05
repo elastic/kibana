@@ -33,7 +33,7 @@ If the fix visibly changes the design (a divider disappears, spacing changes, a 
    Add a test only if it passes the rule in the plugin's `AGENTS.md` ("Tests earn their place"). Layout fixes usually need none, because Jest cannot measure layout in jsdom. Say so in one line in the PR.
 7. **Open the draft PR** with `gh pr create --draft` and `--attach` (below). Use [references/pr_template.md](references/pr_template.md) for the body. Start the title with `[Nightshift]`.
 8. **Read back** the PR with `gh pr view <n> --json body` and confirm the images were rewritten to `github.com/user-attachments/...` URLs. Report the PR URL.
-9. **Clean up.** Stop the stack you started, and remove the scratch spec and `.scout` directory if you did not already.
+9. **Clean up.** Delete the scratch spec and `test/scout/ui/.scout`, and stop the stack you started (the `scout start-server` process, its Elasticsearch and Kibana). Leave other Kibana dev servers on the machine alone.
 
 ## Embedding screenshots in the PR description
 

@@ -80,8 +80,7 @@ Nightshift specifics:
 
 - **Feature flag.** The app is gated behind `nightshift.enabled`. The `beforeAll` above sets it through `/internal/core/_settings`, which only exists on local stacks. That is fine for this skill, because it only runs locally.
 - **Developer mode.** The Signals tab is hidden unless the `OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE` setting (`@kbn/management-settings-ids`) is on. To capture it, add `await kbnClient.uiSettings.update({ [OBSERVABILITY_NIGHTSHIFT_DEVELOPER_MODE]: true })` before navigating, and unset it in an `afterAll` as `nightshift.spec.ts` does.
-- **Routes** (`page.gotoApp('nightshift/...')`): `nightshift`, `nightshift/detections` (redirects to `.../events`), `nightshift/settings/general|detections|investigations`.
-- **Test subjects** seen in the existing spec: `nightshiftPage`, `nightshiftDetectionPage`, `nightshiftDetectionOverview`, `nightshiftDetectionTab-events|rules|signals`, `nightshiftSettingsTab-investigations`, `nightshiftRunLimitEnabledSwitch-investigation`. For anything else, search `public/` for `data-test-subj`.
+- **Routes and test subjects.** Navigate with `page.gotoApp('nightshift/<path>')`. The routes are defined in `public/nightshift_page.tsx`; find test subjects by searching `public/` for `data-test-subj`, and see `nightshift.spec.ts` for working examples.
 - **Mocks.** Mock every request the screenshot depends on with `page.route`, and use made-up numbers and names. Never point the capture at real data.
 
 ## Running it
@@ -101,8 +100,7 @@ PAPERCUT_OUT_DIR="$TMP" PAPERCUT_LABEL=after \
 ```
 
 - Write `--project=local` with an equals sign. `--project local <file>` makes Playwright read the file as a second project name.
-- Do **not** call `node scripts/scout run-tests` while the server is running. It starts its own Elasticsearch and Kibana, and a second Elasticsearch on the same data directory damages the running one (shard path errors, Kibana "degraded"). If that happens, stop both and restart `start-server`. Use `run-tests` only when no server is running; it then starts and stops the stack by itself, which is also fine for a single capture.
-- `node scripts/scout start-server --help` can keep running after it prints. If it does, kill it, and check `pgrep -fl "scout start-server"` before starting a real one.
+- Do **not** call `node scripts/scout run-tests` while the server is running. It starts its own Elasticsearch and Kibana on the same data directory and damages the running stack (shard path errors, Kibana "degraded"). If that happens, stop both and restart `start-server`.
 - The `PAPERCUT_MEASURE` line is in the Playwright output. Grep for it.
 
 ## Guidance
@@ -111,5 +109,3 @@ PAPERCUT_OUT_DIR="$TMP" PAPERCUT_LABEL=after \
 - Capture only what a reviewer needs: the broken area, not a full page, unless context matters. A second full-page shot is fine when the fix could affect the surrounding layout.
 - If the problem cannot be reproduced on current `main`, stop. Tell the user, because it may already be fixed.
 - To show a layout change in numbers, log `boundingBox()` of the first and last item and also compare their `y` values. A fix that aligns the columns can change the row spacing too, and that belongs in the PR's design-change line.
-- Delete the scratch spec and `x-pack/solutions/observability/plugins/nightshift/test/scout/ui/.scout`, then run `git status` before committing.
-- When you are done, stop the stack you started (the `scout start-server` process, its Elasticsearch and its Kibana). Other Kibana dev servers on the machine are not yours; leave them alone.
