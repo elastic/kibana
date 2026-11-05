@@ -144,6 +144,11 @@ components:
           type: string
           enum:
             - evidence_unmet
+            - not_applicable
+          description: >-
+            `evidence_unmet`: the round lacks the evidence the evaluator requires.
+            `not_applicable`: the evaluator read the round and reported that it
+            does not apply.
         message:
           type: string
           maxLength: 8192

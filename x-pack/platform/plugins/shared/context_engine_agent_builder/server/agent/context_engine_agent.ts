@@ -7,7 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { AgentAvailabilityConfig } from '@kbn/agent-builder-server/agents';
-import { SELF_AGENT_ID, chatAgentTypeId } from '@kbn/agent-builder-common';
+import { chatAgentTypeId } from '@kbn/agent-builder-common';
 import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import { internalNamespaces } from '@kbn/agent-builder-common/base/namespaces';
 import { CONTEXT_ENGINE_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
@@ -46,6 +46,7 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
       'populate indices with useful, relevant data.',
     avatar_icon: 'logoElastic',
     availability: contextEngineAgentAvailability,
+    hidden: true,
     configuration: {
       instructions,
       skill_ids: [
@@ -66,15 +67,12 @@ export const registerContextEngineAgent = (agentBuilder: AgentBuilderPluginSetup
             platformCoreTools.getWorkflowExecutionStatus,
             `${internalNamespaces.workflows}.get_connectors`,
             `${internalNamespaces.workflows}.get_step_definitions`,
-            `${internalNamespaces.workflows}.get_examples`,
             `${internalNamespaces.workflows}.get_workflow`,
-            `${internalNamespaces.workflows}.validate_workflow`,
           ],
         },
       ],
       ai_indices: [],
       enable_elastic_capabilities: false,
-      subagent_ids: [SELF_AGENT_ID],
       connector_ids: [],
     },
   });

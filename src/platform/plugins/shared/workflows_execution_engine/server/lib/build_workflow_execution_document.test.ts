@@ -41,7 +41,10 @@ const baseParams = {
   spaceId: 'default',
   context: { spaceId: 'default' },
   defaultTriggeredBy: 'manual',
-  authenticatedUser: 'user-1',
+  authenticatedUser: {
+    executedBy: 'user-1',
+    user: { name: 'User One', username: 'user-1-name', profileUid: 'user-1' },
+  },
   now: new Date('2024-06-01T12:00:00.000Z'),
   maxEventChainDepth: 10,
   getConcurrencyGroupKey: () => null,
@@ -260,6 +263,7 @@ describe('buildWorkflowExecutionDocument', () => {
       workflowId: 'workflow-1',
       status: ExecutionStatus.PENDING,
       executedBy: 'user-1',
+      executedByUser: { name: 'User One', username: 'user-1-name', profileUid: 'user-1' },
       triggeredBy: 'manual',
       createdAt: '2024-06-01T12:00:00.000Z',
     });
@@ -281,12 +285,13 @@ describe('buildWorkflowExecutionDocument', () => {
         message: MISSING_EXECUTION_IDENTITY_MESSAGE,
       },
     });
+    expect(workflowExecution.executedByUser).toBeUndefined();
   });
 
   it('does not treat a real principal named unknown as a missing identity', () => {
     const workflowExecution = buildWorkflowExecutionDocument({
       ...baseParams,
-      authenticatedUser: 'unknown',
+      authenticatedUser: { executedBy: 'unknown', user: { name: 'unknown', username: 'unknown' } },
     });
 
     expect(workflowExecution).toMatchObject({

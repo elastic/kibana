@@ -9,32 +9,6 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 
-const sandboxConfigSchema = schema.object({
-  telemetry_targets: schema.recordOf(
-    schema.string({
-      maxLength: 64,
-      validate: (name) =>
-        name !== 'none' && /^[a-z][a-z0-9_-]*$/.test(name)
-          ? undefined
-          : 'Invalid telemetry target name',
-    }),
-    schema.object({
-      connector_id: schema.string({ minLength: 1, maxLength: 500 }),
-      readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
-    }),
-    { defaultValue: {} }
-  ),
-  default_telemetry_target: schema.maybe(schema.string({ minLength: 1, maxLength: 64 })),
-  /**
-   * Id of the preconfigured connector holding the Elasticsearch URL and API key the sandbox
-   * queries telemetry with. It is added to the investigator's connector allow-list; credentials
-   * are injected per command, only when the agent asks for it.
-   */
-  telemetry_connector_id: schema.maybe(schema.string()),
-  // Operator-supplied readable index patterns and remote names for the telemetry manifest.
-  telemetry_readable_indices: schema.maybe(schema.string({ maxLength: 10_000 })),
-});
-
 const cortexConfigSchema = schema.object({
   /**
    * Governs Cortex end to end: the hydrate/optimize hooks on the investigator agent, the Cortex
@@ -69,7 +43,6 @@ const findingsRecorderConfigSchema = schema.object({
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
-  sandbox: schema.maybe(sandboxConfigSchema),
   cortex: cortexConfigSchema,
   decision_trees: decisionTreesConfigSchema,
   memory: memoryConfigSchema,
@@ -80,4 +53,13 @@ export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<NightshiftInvestigationsConfig> = {
   schema: configSchema,
+  // The former `sandbox.telemetry_*` settings: Elasticsearch is now a connector saved on the
+  // investigator. Dropped with a warning so a stale kibana.yml does not stop Kibana from starting.
+  deprecations: ({ unused }) => [
+    unused('sandbox', {
+      level: 'warning',
+      message:
+        '"xpack.nightshift_investigations.sandbox" is no longer used. Save the Elasticsearch connector on the Nightshift investigator agent instead.',
+    }),
+  ],
 };
