@@ -406,6 +406,13 @@ export const ALERTING_LOG_CODES = {
   /** Scheduling a workflow execution for a dispatch group failed. */
   DISPATCH_WORKFLOW_SCHEDULE_FAILED: 'DISPATCH_WORKFLOW_SCHEDULE_FAILED',
   /**
+   * Looking up or scheduling the workflows of dispatch groups failed with a
+   * transient error that outlasted the retry budget. The groups are left
+   * unrecorded, the tick halts `dispatch_deferred` with the watermark held, and
+   * the next tick dispatches them again.
+   */
+  DISPATCH_TRANSIENT_FAILURE_DEFERRED: 'DISPATCH_TRANSIENT_FAILURE_DEFERRED',
+  /**
    * Writing the `.alert-actions` records of a dispatch commit failed (the
    * request threw, or Elasticsearch rejected every record), so scheduling
    * stopped and the tick halts `commit_failed` with the watermark held. The

@@ -6,6 +6,7 @@
  */
 
 import { createActionGroup, createDispatchFailure } from '../fixtures/test_utils';
+import type { DispatchDeferral } from '../types';
 import { DispatchOutcome } from './dispatch_outcome';
 
 describe('DispatchOutcome', () => {
@@ -18,6 +19,25 @@ describe('DispatchOutcome', () => {
     expect(outcome.executionIdsFor('g1')).toEqual(['exec-1', 'exec-2']);
     expect(outcome.executionIdsFor('missing')).toEqual([]);
     expect(outcome.scheduledGroupCount).toBe(1);
+  });
+
+  it('carries the deferred attempts', () => {
+    const deferral: DispatchDeferral = {
+      policyId: 'p1',
+      spaceId: 'default',
+      actionGroupId: 'g1',
+      workflowId: 'wf-1',
+      alerts: [],
+      message: 'es down',
+    };
+    const outcome = DispatchOutcome.of({
+      executionsByGroup: new Map(),
+      failures: [],
+      deferrals: [deferral],
+    });
+
+    expect(outcome.deferrals).toEqual([deferral]);
+    expect(DispatchOutcome.empty().deferrals).toEqual([]);
   });
 
   describe('deliveredDestinationsFor', () => {

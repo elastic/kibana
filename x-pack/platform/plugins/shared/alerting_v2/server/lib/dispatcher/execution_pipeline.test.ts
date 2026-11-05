@@ -74,6 +74,24 @@ describe('DispatcherPipeline', () => {
       expect(step3.execute).not.toHaveBeenCalled();
     });
 
+    it('merges the data of a halting step into the final state', async () => {
+      const triage = AlertTriage.empty();
+      const step1 = createMockDispatcherStep('step1', async () => ({
+        type: 'halt',
+        reason: 'dispatch_deferred',
+        data: { triage },
+      }));
+
+      const pipeline = new DispatcherPipeline([step1]);
+      const input = createDispatcherPipelineInput();
+
+      const result = await pipeline.execute(input, createLoggerService().loggerService);
+
+      expect(result.haltReason).toBe('dispatch_deferred');
+      expect(result.finalState.triage).toBe(triage);
+      expect(result.finalState.input).toBe(input);
+    });
+
     it('accumulates state across steps correctly', async () => {
       const statesReceived: DispatcherPipelineState[] = [];
 

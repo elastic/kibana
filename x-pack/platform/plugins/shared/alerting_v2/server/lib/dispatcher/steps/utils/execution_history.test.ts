@@ -26,7 +26,7 @@ import type {
   RuleId,
 } from '../../types';
 import { DispatchOutcome, DispatchPlan, RuleCatalog } from '../../state';
-import { emitExecutionHistory } from './execution_history';
+import { emitDispatchFailures, emitExecutionHistory } from './execution_history';
 import { DISPATCH_FAILURE_REASONS } from '../constants';
 
 describe('emitExecutionHistory', () => {
@@ -873,5 +873,32 @@ describe('emitExecutionHistory', () => {
       execution: { uuid: 'execution-1' },
     });
     expect(dispatchedEvent?.['@timestamp']).toBe('2026-01-22T08:00:00.000Z');
+  });
+});
+
+describe('emitDispatchFailures', () => {
+  it('emits one dispatch_failed event per failure', () => {
+    const { eventLogService, mockEventLogger } = createEventLogService();
+
+    emitDispatchFailures({
+      eventLogService,
+      failures: [
+        createDispatchFailure({ actionGroupId: 'g1', workflowId: 'wf-1' }),
+        createDispatchFailure({ actionGroupId: 'g2', workflowId: 'wf-2' }),
+      ],
+      rules: RuleCatalog.empty(),
+      timestamp: '2026-01-22T08:00:00.000Z',
+      executionUuid: 'execution-1',
+    });
+
+    const events = mockEventLogger.logEvent.mock.calls.map(([event]) => event);
+    expect(events.map((event) => event?.event?.action)).toEqual([
+      'dispatch_failed',
+      'dispatch_failed',
+    ]);
+    expect(events.map((event) => event?.kibana?.alerting_v2?.dispatcher)).toEqual([
+      expect.objectContaining({ action_group_ids: ['g1'], workflow_ids: ['wf-1'] }),
+      expect.objectContaining({ action_group_ids: ['g2'], workflow_ids: ['wf-2'] }),
+    ]);
   });
 });
