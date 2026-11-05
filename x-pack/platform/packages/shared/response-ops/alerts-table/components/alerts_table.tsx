@@ -304,8 +304,16 @@ const AlertsTableContent = typedForwardRef(
     const [pageSize, setPageSize] = useControllableState({
       value: pageSizeProp,
       onChange: onPageSizeChange,
-      defaultValue: pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
+      defaultValue: configuration?.pageSize ?? pageSizeProp ?? DEFAULT_ALERTS_PAGE_SIZE,
     });
+    const updatePageSize = useCallback<typeof setPageSize>(
+      (setStateAction) => {
+        const newPageSize = applySetStateAction(setStateAction, pageSize);
+        setPageSize(newPageSize);
+        setConfiguration({ pageSize: newPageSize });
+      },
+      [pageSize, setPageSize, setConfiguration]
+    );
     const defaultPageIndex = pageIndexProp ?? 0;
     const [pageIndex, setPageIndex] = useControllableState({
       value: pageIndexProp,
@@ -542,7 +550,7 @@ const AlertsTableContent = typedForwardRef(
           pageIndex,
           onPageIndexChange: setPageIndex,
           pageSize,
-          onPageSizeChange: setPageSize,
+          onPageSizeChange: updatePageSize,
           showAlertStatusWithFlapping,
           bulkActionsStore,
           renderCellValue,
@@ -581,7 +589,7 @@ const AlertsTableContent = typedForwardRef(
         pageIndex,
         setPageIndex,
         pageSize,
-        setPageSize,
+        updatePageSize,
         showAlertStatusWithFlapping,
         bulkActionsStore,
         renderCellValue,
