@@ -51,8 +51,12 @@ export interface RelatedAlertFixture {
   technique: { id: string; name: string };
   /** Flat ECS keys; `buildRelatedAlertDoc` nests the `host`, `user` and `process` ones. */
   observable: Record<string, unknown>;
-  /** Aggregating-rule alert: drops the endpoint host/process/agent noise, keeping only `host.id`. */
-  identityOnly?: boolean;
+  /**
+   * Makes the fixture an alert of an aggregating ES|QL rule running this query: drops the endpoint
+   * host/process/agent noise (keeping `host.id`) and writes the ES|QL rule's identity and
+   * provenance fields instead of a custom-query Endpoint alert's.
+   */
+  esqlQuery?: string;
 }
 
 export interface RelatedAlertCase {
@@ -62,6 +66,11 @@ export interface RelatedAlertCase {
   expected: Classification;
   target: RelatedAlertFixture;
   related: RelatedAlertFixture[];
+  /**
+   * 'id' when the target carries host.id / user.id but no names, so tools that correlate by
+   * host.name, user.name or IP cannot find its related alerts; only the entity graph can.
+   */
+  correlatedBy?: 'id';
 }
 
 const MAC_HOST = {
@@ -415,8 +424,15 @@ const INJECTION_RELATED = windowsAlert(
 
 // ── ID-only malicious control: the target carries host.id and user.id but no names ─────────
 
-// An ES|QL rule `STATS ... BY host.id, user.id` writes only the grouped identity columns plus its
+// An aggregating ES|QL rule (`STATS ... BY host.id, user.id`) alerts on its grouped columns plus its
 // own `Esql.*` outputs, so the alert has no host.name/user.name; related Defend alerts keep theirs.
+const ID_ONLY_ESQL_QUERY = [
+  'FROM logs-endpoint.events.process-*',
+  '| WHERE host.os.type == "macos" AND event.action == "exec" AND process.name == "curl"',
+  '| STATS Esql.event_count = COUNT(*), Esql.process_name_values = VALUES(process.name),',
+  '    Esql.process_command_line_values = VALUES(process.command_line) BY host.id, user.id',
+  '| WHERE Esql.event_count >= 5',
+].join('\n');
 const ID_ONLY_TARGET: RelatedAlertFixture = {
   key: 'target-esql-id-only',
   ruleName: 'Repeated File Downloads via Curl by Host and User',
@@ -426,7 +442,7 @@ const ID_ONLY_TARGET: RelatedAlertFixture = {
   riskScore: 47,
   tactic: { id: 'TA0011', name: 'Command and Control' },
   technique: { id: 'T1105', name: 'Ingress Tool Transfer' },
-  identityOnly: true,
+  esqlQuery: ID_ONLY_ESQL_QUERY,
   observable: {
     'event.kind': 'signal',
     'host.id': MAC_HOST['host.id'],
@@ -479,12 +495,18 @@ export const RELATED_ALERT_CASES: RelatedAlertCase[] = [
     expected: 'true_positive',
     target: ID_ONLY_TARGET,
     related: [REVERSE_SHELL_RULE, CURL_PIPE_SH_RULE, LAUNCH_AGENT_RULE],
+    correlatedBy: 'id',
   },
 ];
 
 const ENDPOINT_NOISE_PREFIXES = ['process.', 'elastic.agent.', 'data_stream.', 'ecs.'];
 const ENDPOINT_NOISE_KEYS = ['agent', 'Endpoint', 'Events', 'Responses'];
 const KEPT_ID_ONLY_KEYS = ['host.id', 'event.kind'];
+const ESQL_DROPPED_PREFIXES = [
+  'kibana.alert.original_event.',
+  'kibana.alert.original_data_stream.',
+  'kibana.alert.original_time',
+];
 
 /** Moves flat `host.*`, `user.*` and `process.*` keys into nested objects; other keys stay flat. */
 export const nestEntityFields = (doc: Record<string, unknown>): Record<string, unknown> => {
@@ -544,18 +566,35 @@ export const buildRelatedAlertDoc = (
     'host.id': hostId,
   };
 
-  if (fixture.identityOnly) {
+  if (fixture.esqlQuery) {
     for (const key of Object.keys(doc)) {
       const isHostOrEventNoise =
         (key.startsWith('host.') || key.startsWith('event.')) && !KEPT_ID_ONLY_KEYS.includes(key);
       if (
         isHostOrEventNoise ||
         ENDPOINT_NOISE_KEYS.includes(key) ||
-        ENDPOINT_NOISE_PREFIXES.some((prefix) => key.startsWith(prefix))
+        [...ENDPOINT_NOISE_PREFIXES, ...ESQL_DROPPED_PREFIXES].some((prefix) =>
+          key.startsWith(prefix)
+        )
       ) {
         delete doc[key];
       }
     }
+    // An aggregating rule has no source document: the executor wraps an empty `_id` / `_index`
+    // parent, so there is no original_event or data stream and the ancestor carries no ids.
+    doc['kibana.alert.rule.category'] = 'ES|QL Rule';
+    doc['kibana.alert.rule.type'] = 'esql';
+    doc['kibana.alert.rule.rule_type_id'] = 'siem.esqlRule';
+    doc['kibana.alert.rule.indices'] = ['logs-endpoint.events.process-*'];
+    doc['kibana.alert.ancestors'] = [{ depth: 0, index: '', id: '', type: 'event' }];
+    doc['kibana.alert.rule.parameters'] = {
+      description: fixture.ruleDescription,
+      risk_score: fixture.riskScore,
+      severity: fixture.severity,
+      type: 'esql',
+      language: 'esql',
+      query: fixture.esqlQuery,
+    };
   }
 
   if (isMac) {
@@ -567,7 +606,7 @@ export const buildRelatedAlertDoc = (
     }
     doc['kibana.alert.entity.id'] = [
       `host:${hostId}`,
-      `user:${observable['user.name'] ?? observable['user.id']}@${hostId}@local`,
+      `user:${observable['user.name']}@${hostId}@local`,
     ];
   }
 
