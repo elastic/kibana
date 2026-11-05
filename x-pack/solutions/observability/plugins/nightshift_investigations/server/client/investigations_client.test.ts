@@ -70,6 +70,7 @@ const startFromApi = (client: NightshiftInvestigationsClient, request: StartInve
 
 const mockManagement = {
   getWorkflowExecution: jest.fn(),
+  getWorkflowExecutions: jest.fn(),
   getWorkflow: jest.fn(),
   runWorkflow: jest.fn(),
 };
@@ -79,6 +80,7 @@ const mockWorkflowsManagement = {
 } as unknown as WorkflowsServerPluginSetup;
 
 const conversations = {
+  get: jest.fn().mockResolvedValue({ events: [] }),
   bulkGet: jest.fn(),
   create: jest.fn(),
   patchMetadata: jest.fn(),
@@ -109,7 +111,6 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
-  telemetryTarget,
   workflowExecutionIds,
 }: {
   id: string;
@@ -117,15 +118,12 @@ const makeConversation = ({
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
-  telemetryTarget?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
-  agent_id: 'nightshift.investigation',
   metadata: {
-    ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
   },
@@ -233,16 +231,16 @@ beforeEach(() => {
     }: {
       id: string;
       title?: string;
-      metadata?: { workflow_execution_ids?: string[]; telemetry_target?: string };
+      metadata?: { workflow_execution_ids?: string[] };
     }) =>
       makeConversation({
         id,
         title: title ?? DEFAULT_CONVERSATION_TITLE,
         workflowExecutionIds: metadata?.workflow_execution_ids,
-        telemetryTarget: metadata?.telemetry_target,
       })
   );
   conversations.patchMetadata.mockResolvedValue({ conversation: {}, changedFields: ['status'] });
+  conversations.get.mockResolvedValue({ events: [] });
   conversations.addEvents.mockResolvedValue([]);
   subjectsClient.upsertSubjects.mockResolvedValue([]);
   subjectsClient.findConversationIdsBySubjects.mockResolvedValue([]);
@@ -396,52 +394,6 @@ describe('NightshiftInvestigationsClient.start()', () => {
       expect.anything(),
       'nightshift-investigations'
     );
-  });
-
-  it('passes the telemetry default separately from the LLM and stores it alongside the creating run', async () => {
-    mockManagement.getWorkflow.mockResolvedValue(mockWorkflow);
-    mockManagement.runWorkflow.mockResolvedValue('exec-123');
-    await startFromApi(
-      makeClient({
-        telemetryConfig: {
-          default_telemetry_target: 'c0',
-          telemetry_targets: { c0: { connector_id: 'telemetry-c0' } },
-        },
-      }),
-      { subject: { type: 'manual', id: 'question' }, trigger_type: 'manual' }
-    );
-    expect(mockManagement.runWorkflow.mock.calls[0][2]).toMatchObject({ telemetry_target: 'c0' });
-    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
-    );
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        agentId: 'nightshift.investigation',
-        templateId: 'investigation',
-        metadata: {
-          severity: 'medium',
-          telemetry_target: 'c0',
-          workflow_execution_ids: ['exec-123'],
-        },
-      })
-    );
-    expect(getConnectorById).toHaveBeenCalledWith(
-      NIGHTSHIFT_DEFAULT_MODELS.investigation,
-      mockRequest
-    );
-  });
-
-  it('rejects an unknown telemetry target before launching or claiming', async () => {
-    await expect(
-      startFromApi(makeClient(), {
-        subject: { type: 'manual', id: 'question' },
-        trigger_type: 'manual',
-        telemetry_target: 'unknown',
-      })
-    ).rejects.toThrow('Unknown telemetry target');
-    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(subjectsClient.claimSubjects).not.toHaveBeenCalled();
-    expect(conversations.create).not.toHaveBeenCalled();
   });
 
   it('rejects an unknown custom connector before launching or claiming', async () => {
@@ -1325,85 +1277,6 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  const telemetryConfig = {
-    default_telemetry_target: 'orca',
-    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-  };
-
-  it('keeps a matched investigation target when the follow-up omits it', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    await startFromApi(makeClient({ telemetryConfig }), {
-      subject: { type: 'manual', id: 'question' },
-      trigger_type: 'manual',
-    });
-    expect(runInputs()).toMatchObject({ investigation_id: 'inv-1', telemetry_target: 'c0' });
-    expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it.each(['c0', 'none', undefined])(
-    'defers an omitted target to the pending investigation binding %p',
-    async (target) => {
-      subjectsClient.claimSubjects.mockResolvedValue({ claimed: false, heldBy: 'inv-pending' });
-      const client = makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      });
-
-      await expect(
-        startFromApi(client, {
-          subject: { type: 'alert', id: 'alert-1' },
-          trigger_type: 'automatic',
-          context: { alerts: [makeAlert('alert-1')] },
-        })
-      ).resolves.toEqual({ investigation_id: 'inv-pending' });
-
-      const inputs = runInputs();
-      expect(inputs.telemetry_target).toBeUndefined();
-      expect(conversations.create).not.toHaveBeenCalled();
-
-      // The first run creates the conversation before this queued follow-up is ensured.
-      withConversations(
-        makeConversation({
-          id: 'inv-pending',
-          telemetryTarget: target,
-          workflowExecutionIds: ['exec-original'],
-        })
-      );
-      mockManagement.getWorkflowExecution.mockResolvedValue({
-        effectiveIdentity: INVESTIGATOR_IDENTITY,
-        id: 'exec-1',
-        workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
-        status: ExecutionStatus.RUNNING,
-        context: { inputs },
-      });
-
-      await expect(client.ensureOrCreate('inv-pending', 'exec-1')).resolves.toBe('inv-pending');
-      expect(conversations.create).not.toHaveBeenCalled();
-      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-pending', {
-        workflow_execution_ids: ['exec-original', 'exec-1'],
-      });
-      const expectedConnectorId = target === 'none' ? undefined : target ?? 'legacy';
-      expect((await client.getTelemetryTarget('inv-pending')).connectorId).toBe(
-        expectedConnectorId
-      );
-    }
-  );
-
-  it('rejects changing a matched investigation target before launching its follow-up', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    await expect(
-      startFromApi(makeClient({ telemetryConfig }), {
-        subject: { type: 'manual', id: 'question' },
-        trigger_type: 'manual',
-        telemetry_target: 'orca',
-      })
-    ).rejects.toThrow('cannot change its telemetry target');
-    expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-  });
-
   it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
     await expect(startAlerts('alert-1', 'alert-2')).resolves.toEqual({
       investigation_id: 'inv-new',
@@ -1891,6 +1764,7 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     workflowId?: string;
   } = {}) =>
     mockManagement.getWorkflowExecution.mockResolvedValue({
+      spaceId: SPACE_ID,
       effectiveIdentity: INVESTIGATOR_IDENTITY,
       id: 'exec-1',
       workflowId,
@@ -1903,8 +1777,10 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     ['as another service account', { type: 'service_account', id: 'kibana/other' }],
     ['without an identity', undefined],
   ])('rejects a run that executes %s before touching the investigation', async (_, identity) => {
+    mockManagement.getWorkflow.mockResolvedValue({ definition: BOUND_DEFINITION });
     mockManagement.getWorkflowExecution.mockResolvedValue({
       id: 'exec-1',
+      spaceId: SPACE_ID,
       workflowId: NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
       effectiveIdentity: identity,
       status: ExecutionStatus.RUNNING,
@@ -1919,122 +1795,93 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
-  const telemetryConfig = {
-    default_telemetry_target: 'orca',
-    telemetry_targets: { c0: { connector_id: 'c0' }, orca: { connector_id: 'orca' } },
-  };
-
-  it.each(['c0', 'orca', 'none'])(
-    'binds the %s target to a new shared investigation conversation',
-    async (target) => {
-      withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: target } });
-      await makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1');
-      expect(conversations.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'nightshift.investigation',
-          metadata: {
-            severity: 'medium',
-            telemetry_target: target,
-            workflow_execution_ids: ['exec-1'],
-          },
-          templateId: 'investigation',
-        })
-      );
-      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    }
-  );
-
-  it('keeps the conversation target when a later run omits it', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1', telemetryTarget: 'c0' }));
-    const client = makeClient({ telemetryConfig });
-    await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
-      connectorId: 'c0',
-      allowSecretFallback: false,
+  it('records a timeout once and preserves closed conversation state on replay', async () => {
+    withExecution({ status: ExecutionStatus.TIMED_OUT });
+    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded');
+    const event = conversations.addEvents.mock.calls[0][0].events[0];
+    expect(event).toMatchObject({
+      type: 'investigation_run_timed_out',
+      data: { execution_id: 'exec-1', reason: 'Deadline exceeded' },
     });
+    conversations.get.mockResolvedValue({ events: [event] });
+    await makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded');
+    expect(conversations.addEvents).toHaveBeenCalledTimes(1);
+    expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
+      'inv-1',
+      expect.objectContaining({ status: 'open' })
+    );
+  });
+
+  it('does not recreate a deleted accepted investigation during reconciliation', async () => {
+    withExecution({
+      status: ExecutionStatus.TIMED_OUT,
+      inputs: { investigation_id: 'inv-1', context: { is_follow_up: false } },
+    });
+    await expect(
+      makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded')
+    ).rejects.toThrow(InvestigationNotFoundError);
     expect(conversations.create).not.toHaveBeenCalled();
   });
 
   it.each([
-    [
-      'a single configured target',
-      {
-        telemetry_connector_id: 'legacy',
-        telemetry_readable_indices: 'logs-*',
-        telemetry_targets: {},
-      },
-    ],
-    [
-      'a single named target and no default',
-      { telemetry_targets: { prod: { connector_id: 'prod-es', readable_indices: 'logs-*' } } },
-    ],
-    ['several targets', undefined],
-  ])(
-    'gives a conversation the caller cannot read no telemetry target, with %s',
-    async (_, config) => {
-      // A service-account-bound run cannot see a conversation its owner keeps private.
-      withConversations();
-      await expect(
-        makeClient({ telemetryConfig: config ?? telemetryConfig }).getTelemetryTarget('private-1')
-      ).resolves.toEqual({});
+    ExecutionStatus.RUNNING,
+    ExecutionStatus.QUEUED,
+    ExecutionStatus.WAITING,
+    ExecutionStatus.COMPLETED,
+    ExecutionStatus.CANCELLED,
+  ])('rejects %s as an unsuccessful terminal run', async (status) => {
+    withExecution({ status });
+    await expect(makeClient().getUnsuccessfulRun('exec-1')).rejects.toThrow(
+      InvestigationNotFoundError
+    );
+  });
+
+  it.each([ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT])(
+    'validates the original execution and binding for %s',
+    async (status) => {
+      withExecution({ status });
+      await expect(makeClient().getUnsuccessfulRun('exec-1')).resolves.toMatchObject({
+        investigationId: 'inv-1',
+        execution: { id: 'exec-1', status },
+      });
     }
   );
 
-  it('keeps direct chats on the investigator working without an investigation template', async () => {
-    withConversations(makeConversation({ id: 'chat-1', templateId: 'default' }));
-    await expect(
-      makeClient({
-        telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
-      }).getTelemetryTarget('chat-1')
-    ).resolves.toMatchObject({ connectorId: 'legacy' });
-  });
-
-  it('keeps legacy telemetry when a named default is added', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1' }));
-    const client = makeClient({
-      telemetryConfig: { ...telemetryConfig, telemetry_connector_id: 'legacy' },
+  it('rejects a terminal run from another space', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    const execution = await mockManagement.getWorkflowExecution();
+    mockManagement.getWorkflowExecution.mockResolvedValue({
+      ...execution,
+      spaceId: 'another-space',
     });
-    await client.ensureOrCreate('inv-1', 'exec-1');
-    await expect(client.getTelemetryTarget('inv-1')).resolves.toMatchObject({
-      connectorId: 'legacy',
-    });
+    await expect(makeClient().getUnsuccessfulRun('exec-1')).rejects.toThrow(
+      InvestigationNotFoundError
+    );
     expect(conversations.create).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalledWith(
-      'inv-1',
-      expect.objectContaining({ telemetry_target: expect.anything() })
-    );
   });
 
-  it.each(['a'.repeat(64), 'orca-', 'orca_'])(
-    'accepts target %s without turning its name into an agent id',
-    async (target) => {
-      withExecution({ inputs: { investigation_id: 'inv-1', telemetry_target: target } });
-      await makeClient({
-        telemetryConfig: { telemetry_targets: { [target]: { connector_id: 'telemetry' } } },
-      }).ensureOrCreate('inv-1', 'exec-1');
-      expect(conversations.create).toHaveBeenCalledWith(
-        expect.objectContaining({
-          agentId: 'nightshift.investigation',
-          metadata: {
-            severity: 'medium',
-            telemetry_target: target,
-            workflow_execution_ids: ['exec-1'],
-          },
-        })
-      );
-    }
-  );
-
-  it('rejects another target before reopening or recording subjects and execution metadata', async () => {
-    withExecution({ inputs: { investigation_id: 'inv-1', subjects, telemetry_target: 'orca' } });
-    withConversations(makeConversation({ id: 'inv-1', status: 'closed', telemetryTarget: 'c0' }));
-    await expect(makeClient({ telemetryConfig }).ensureOrCreate('inv-1', 'exec-1')).rejects.toThrow(
-      'cannot change its telemetry target'
+  it('defers an older lifecycle outcome to a newer queued follow-up', async () => {
+    withExecution({ status: ExecutionStatus.FAILED });
+    const execution = await mockManagement.getWorkflowExecution();
+    mockManagement.getWorkflowExecutions.mockResolvedValue({
+      results: [{ id: 'newer-queued-run' }],
+    });
+    await expect(
+      makeClient().isLatestInvestigationRun({
+        ...execution,
+        concurrencyGroupKey: 'investigation:inv-1',
+      })
+    ).resolves.toBe(false);
+    expect(mockManagement.getWorkflowExecutions).toHaveBeenCalledWith(
+      expect.objectContaining({
+        concurrencyGroupKey: 'investigation:inv-1',
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        size: 1,
+      }),
+      SPACE_ID
     );
-    expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 
   it('rejects a run as the agent account when the space is no longer set up', async () => {
@@ -2045,40 +1892,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
       /only run as the Nightshift service account/
     );
     expect(conversations.create).not.toHaveBeenCalled();
-  });
-
-  it('stores the target while using the single investigator for an early failure', async () => {
-    withExecution({
-      inputs: { investigation_id: 'inv-1', telemetry_target: 'c0' },
-      status: ExecutionStatus.FAILED,
-    });
-    await makeClient({ telemetryConfig }).ensureForFailure(
-      'inv-1',
-      'exec-1',
-      'Sandbox startup failed'
-    );
-    expect(installInvestigationAgentMock).toHaveBeenCalledWith(
-      expect.objectContaining({ spaceId: SPACE_ID, availability: mockAgentAvailability })
-    );
-    expect(conversations.addEvents).toHaveBeenCalledWith({
-      conversationId: 'inv-1',
-      events: [
-        {
-          type: INVESTIGATION_RUN_FAILED_EVENT_TYPE,
-          data: { execution_id: 'exec-1', reason: 'Sandbox startup failed' },
-        },
-      ],
-    });
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        agentId: 'nightshift.investigation',
-        metadata: {
-          severity: 'medium',
-          telemetry_target: 'c0',
-          workflow_execution_ids: ['exec-1'],
-        },
-      })
-    );
   });
 
   it('creates the investigation conversation and records the run subjects', async () => {
@@ -2233,20 +2046,25 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     expect(conversations.addEvents).toHaveBeenCalledTimes(1);
   });
 
-  it('logs a rejected timeline write and still records subjects and execution association', async () => {
-    withExecution();
-    withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
-    conversations.addEvents.mockRejectedValueOnce(new Error('Timeline access denied'));
+  it.each(['get', 'addEvents'] as const)(
+    'surfaces a rejected timeline %s after recording subjects and execution association',
+    async (operation) => {
+      withExecution();
+      withConversations(makeConversation({ id: 'inv-1', status: 'closed' }));
+      conversations[operation].mockRejectedValueOnce(new Error('Timeline access denied'));
 
-    await expect(
-      makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
-    ).resolves.toBe('inv-1');
-    expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
-      workflow_execution_ids: ['exec-1'],
-    });
-    expect(mockLogger.warn).toHaveBeenCalledWith(expect.stringContaining('Timeline access denied'));
-  });
+      await expect(
+        makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
+      ).rejects.toThrow('Timeline access denied');
+      expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
+      expect(conversations.patchMetadata).toHaveBeenCalledWith('inv-1', {
+        workflow_execution_ids: ['exec-1'],
+      });
+      expect(mockLogger.warn).toHaveBeenCalledWith(
+        expect.stringContaining('Timeline access denied')
+      );
+    }
+  );
 
   it.each([undefined, '', ' \n '])(
     'omits an unavailable request (%p) and defaults an empty reason',
@@ -2336,9 +2154,20 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
   });
 
   it.each([ExecutionStatus.COMPLETED, ExecutionStatus.CANCELLED, ExecutionStatus.TIMED_OUT])(
-    'does not materialize failure for an execution already %s',
+    'recovers timed-out runs while rejecting other terminal outcomes (%s)',
     async (status) => {
       withExecution({ status });
+      if (status === ExecutionStatus.TIMED_OUT) {
+        await expect(
+          makeClient().ensureForFailure('inv-1', 'exec-1', 'Deadline exceeded')
+        ).resolves.toBe('inv-1');
+        expect(conversations.addEvents).toHaveBeenCalledWith(
+          expect.objectContaining({
+            events: [expect.objectContaining({ type: 'investigation_run_timed_out' })],
+          })
+        );
+        return;
+      }
       await expect(
         makeClient().ensureForFailure('inv-1', 'exec-1', 'Permission denied')
       ).rejects.toThrow(InvestigationNotFoundError);
@@ -2933,6 +2762,7 @@ describe('NightshiftInvestigationsClient notification destinations', () => {
       workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID
     ) =>
       mockManagement.getWorkflowExecution.mockResolvedValue({
+        spaceId: SPACE_ID,
         effectiveIdentity: INVESTIGATOR_IDENTITY,
         id: 'exec-1',
         workflowId,

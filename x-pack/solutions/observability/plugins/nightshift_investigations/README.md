@@ -266,7 +266,11 @@ Destinations and delivery history live in a hidden, readonly `nightshift.notific
 
 The investigation workflow sends a started message, stores its confirmed Slack thread reference, and replies with completion or failure. Later executions reuse that thread. An explicitly supplied parent timestamp is also supported. Failure delivery initializes routing even before the started step runs. A failure without an existing or explicit thread posts directly to the configured channel and stores its confirmed thread reference. Terminal delivery selects one persisted outcome, preventing contradictory completion and failure messages.
 
+The managed failure sweep runs every five minutes and stores its checkpoint in ordinary workflow output. It pages through a fixed time window, then retains a completed time watermark so subsequent sweeps query new failures with a ten-minute overlap rather than all retained history. The overlap tolerates delayed search visibility; terminal recovery writes with a new finish timestamp enter a later window. Writes backdated beyond the overlap are not guaranteed to be discovered. Reporting failures keep the page cursor before the first failed candidate for up to three sweeps, tracked in the checkpoint, while an additional recent-failure query prioritizes fresh outcomes during a backlog. After that candidate blocks three sweeps, the sweep logs the unresolved execution and advances; its reporting may remain incomplete. The overlap can revisit it while it is still recent. Explicit investigation-not-found results are skipped without holding the cursor; failed creation is retained as a recovery error. Timeline read/write failures remain retryable after subject recovery and execution association. Slack delivery still proceeds if conversation recovery fails, and confirmed delivery claims prevent duplicate messages during retries.
+
 Each execution, destination, and phase is claimed as `unconfirmed` before connector execution. The shared attachment factory handles versioned writes, and the connector executes once using workflow authentication, the investigation's space, and the abort signal. A confirmed message timestamp produces `sent`; connector error responses produce `failed`; exceptions, cancellation after claiming, and missing timestamps remain `unconfirmed`. Replay skips all existing attempts. An uncertain root blocks automatic root recreation across later executions; a definitely failed root may be attempted again by a later execution.
+
+Routing readers preserve additional fields, including nested fields, when updating documents written by newer versions. Stored phases and attempt statuses accept bounded unfamiliar values; operation inputs still validate supported phases. An unfamiliar terminal phase stops delivery for that execution. An unfamiliar attempt status retains its claim and counts as `unconfirmed` for the requested phase. An unfamiliar root-delivery status also blocks automatic root recreation unless a thread is already confirmed. Invalid required fields still fail validation instead of resetting the routing record and losing delivery history. This supports additive format changes; changes to required field types still need a coordinated rollout.
 
 The `nightshift.sendNotifications` step validates the persisted workflow execution and its investigation binding, and reads the investigation (title, severity, summary, impact, first pending proposed action) through the shared query API. Until Agent Builder titles the investigation, messages use the run's `title` input. Investigation and execution IDs may differ for explicit continuation. It returns persisted `sent`, `failed`, and `unconfirmed` counts for the requested execution and phase; full diagnostics are available through authorized attachment reads. Notification-step failures continue the investigation workflow, while persistence failures stop further posts within that step. There is no automatic claim expiry, resend, or routing-document cleanup on investigation or space deletion. A confirmed root post from the Elastic Slack app claims its thread as a `slack_thread` subject using the thread key the Relay returns, so a mention or reply in it continues the investigation. Posts through a custom Slack connector and replies under a caller-named message register nothing here; a thread another investigation holds stays with it.
 
@@ -305,3 +309,44 @@ these fallbacks. Reporting those outcomes needs a durable Workflows terminal-out
 coordinated with recovery (#1677), before #1820 can be closed. Future intentional-cancellation messages
 should say "Investigation stopped". The separate Slack follow-up workflow's status-message editor is
 unchanged; consolidating it with investigation-owned notifications remains follow-up work.
+
+## Unexpected termination reconciliation
+
+Nightshift installs `system-nightshift-investigation-failure-sweep-<spaceId>` when the space is
+onboarded or an investigation is created. The managed copy is enabled using the caller's normal
+Workflows scheduling authorization and retains that scheduler identity. Installation failure is
+logged without failing investigation creation; a subsequent enable/start attempts setup again.
+Existing spaces acquire the sweep on their next onboarding enable or investigation creation.
+
+The sweep runs every five minutes with a four-minute workflow timeout and drops overlapping runs.
+This budget covers execution reads, context persistence, and notifications; the sweep never invokes
+an agent or waits for an investigation to finish. It reads
+permission-filtered, non-test `failed` and `timed_out` executions of the investigation workflow and
+its managed copies, then revalidates each source execution and investigation binding. It never
+classifies running, waiting, or queued work as terminal. Recovery still owns that decision.
+
+A history pass starts at the sweep copy's creation time and has a fixed upper completion-time
+bound. Each run scans at most 100 records by ID and saves its cursor in normal workflow output;
+the next completed sweep resumes that pass. Finishing a pass advances a completed-time watermark;
+subsequent windows retain a ten-minute overlap for late-visible writes and recent retries. During a
+large history pass, an additional page of at most 100 failures from the last ten minutes gets priority, overlapping
+consecutive runs to tolerate scheduling and persistence delays. Reporting latency is normally the
+schedule interval, but depends on scheduling and backlog volume. Workflows history retention bounds
+catch-up. Failures completed before installation are not backfilled.
+
+The reporter uses the source execution ID and its validated inputs for request context, subjects,
+and notification destinations. It preserves conversation rounds and open/closed state and does not
+recreate a deleted investigation known to have been accepted or ensured. A timeout has a distinct
+conversation entry and Slack message; existing failure-trigger subscribers receive an unsuccessful
+outcome with the original execution ID. A delayed sweep suppresses that aggregate lifecycle update
+when a newer run is found in the same concurrency group, including queued follow-ups. If the group
+or its lookup is unavailable, the sweep also skips aggregate lifecycle emission; per-run context and
+Slack reporting still proceed. Started notifications, normal completion, and the ordinary
+failure fallback remain in the investigation workflow.
+
+Slack claims and receipts suppress repeated or uncertain external delivery. Conversation entries
+are reused by execution ID, and a persisted claim limits terminal lifecycle emission to one attempt.
+This is best effort: a process exit after a claim can leave delivery unconfirmed or lifecycle
+emission missing. Denied writes remain denied, cancellation is outside this sweep's scope, and a
+per-space schedule that cannot run requires its normal Workflows identity/scheduling issue to be
+repaired. There is no new watcher service, storage index, or engine hook.

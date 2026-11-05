@@ -30,7 +30,10 @@ import { useKiGeneration } from './onboarding/ki_generation_context';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { GenerateSplitButton } from './onboarding/generate_split_button';
 import { getGenerateDisabledTooltip } from './onboarding/translations';
-import { ConfirmSourceActionModal, type SourceAction } from './confirm_source_action_modal';
+import {
+  ConfirmSourceActionModal,
+  type SourceAction,
+} from '../components/entities/source/confirm_source_action_modal';
 import { SourcesTable } from './sources_table';
 import { isOnboardingInProgress } from './utils';
 import {
@@ -49,11 +52,13 @@ import {
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
   RecommendedSourcesTable,
   type RecommendedSourcesCreationState,
-} from './recommended_sources/recommended_sources_table';
-import { ADD_RECOMMENDED_SOURCES_TITLE } from './recommended_sources/translations';
+} from '../components/entities/source/recommended_sources/recommended_sources_table';
+import { ADD_RECOMMENDED_SOURCES_TITLE } from '../components/entities/source/recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
-  import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
+  import('../components/entities/source/source_flyout/source_flyout').then(
+    ({ SourceFlyout: Flyout }) => ({ default: Flyout })
+  )
 );
 
 /** Source catalog with bulk onboarding controls and a routed create/edit flyout. */
@@ -64,7 +69,8 @@ export function SourcesView() {
     },
     notifications: { toasts },
   } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(nightshift);
+  const { canManage, canManageAndConfigure: canChangeSources } =
+    getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
   const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
@@ -115,10 +121,10 @@ export function SourcesView() {
   const closeFlyout = () => history.push({ pathname: '/sources', search });
 
   useEffect(() => {
-    if (isCreating && !canManage) {
+    if (isCreating && !canChangeSources) {
       history.replace({ pathname: '/sources', search });
     }
-  }, [canManage, history, isCreating, search]);
+  }, [canChangeSources, history, isCreating, search]);
 
   useEffect(() => {
     // A cached list can predate the linked source, so wait for any refetch to finish too.
@@ -244,7 +250,7 @@ export function SourcesView() {
                 isClearable
               />
             </EuiFlexItem>
-            {canManage && !showInitialSourceSetup && (
+            {canChangeSources && !showInitialSourceSetup && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="significantEventsAppCreateSourceButton"
@@ -309,7 +315,7 @@ export function SourcesView() {
           <>
             {showSourceCreation && (
               <EuiFlexItem key="sourceCreation">
-                {canManage ? (
+                {canChangeSources ? (
                   <EuiFlexGroup direction="column" gutterSize="xl">
                     {showInitialSourceSetup && (
                       <EuiFlexItem grow={false}>
@@ -388,6 +394,7 @@ export function SourcesView() {
                     awaitingRunSourceIds={awaitingRunSourceIds}
                     activityBlockTooltip={activityBlockTooltip}
                     canManage={canManage}
+                    canChangeSources={canChangeSources}
                     selection={
                       canManage
                         ? {
@@ -418,12 +425,12 @@ export function SourcesView() {
         )}
       </EuiFlexGroup>
 
-      {((isCreating && canManage) || routedSource) && (
+      {((isCreating && canChangeSources) || routedSource) && (
         <React.Suspense fallback={null}>
           <SourceFlyout
             key={routedSource?.id ?? 'new'}
             source={routedSource}
-            readOnly={!canManage}
+            readOnly={!canChangeSources}
             onClose={closeFlyout}
           />
         </React.Suspense>
