@@ -38,6 +38,7 @@ import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import type { CustomCellDefinition } from '../../common/types';
+import { createCell } from '../model/cell_factory';
 import { getCellDisplayName } from '../model/references';
 import type { CellRuntime } from '../model/types';
 import { useNotebookServices } from '../services';
@@ -192,7 +193,7 @@ export const CustomCellFlyout = ({
   onGenerateWithChat,
 }: CustomCellFlyoutProps) => {
   const { core } = useNotebookServices();
-  const { store, scheduler, revealCell } = useNotebook();
+  const { store, scheduler, revealCell, addedCellIds } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const cells = useStateFromPublishingSubject(store.cells$);
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
@@ -259,6 +260,17 @@ export const CustomCellFlyout = ({
       return draft.sourceCell ? getTable(store.getRuntime(draft.sourceCell)) : undefined;
     if (!draft.query.trim()) return undefined;
     return knownQueryRun ? knownQueryRun.table : runDraftQuery();
+  };
+
+  // Placed above the panel, so the notebook reads source first.
+  const addQueryToNotebook = () => {
+    const created = createCell('esql', store.cells$.getValue());
+    if (created.type !== 'esql') return;
+    const esqlCell = { ...created, query: draft.query };
+    const index = store.cellOrder$.getValue().indexOf(cell.id);
+    addedCellIds.add(esqlCell.id);
+    store.addCell(esqlCell, index >= 0 ? index : undefined);
+    update({ dataSource: 'cell', sourceCell: esqlCell.id });
   };
 
   const preview = async () => onPreview({ template: draft.template, table: await getDraftTable() });
@@ -488,18 +500,35 @@ export const CustomCellFlyout = ({
                 defaultMessage: 'Query',
               })}
               labelAppend={
-                <EuiButtonEmpty
-                  size="xs"
-                  iconType="play"
-                  isLoading={isRunning}
-                  isDisabled={!draft.query.trim()}
-                  onClick={runDraftQuery}
-                  data-test-subj="notebookCustomRunQuery"
-                >
-                  {i18n.translate('xpack.notebook.customCell.flyout.runQuery', {
-                    defaultMessage: 'Run',
-                  })}
-                </EuiButtonEmpty>
+                <EuiFlexGroup gutterSize="xs" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="plusInCircle"
+                      isDisabled={!draft.query.trim()}
+                      onClick={addQueryToNotebook}
+                      data-test-subj="notebookCustomAddQueryToNotebook"
+                    >
+                      {i18n.translate('xpack.notebook.customCell.flyout.addToNotebook', {
+                        defaultMessage: 'Add to notebook',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                  <EuiFlexItem grow={false}>
+                    <EuiButtonEmpty
+                      size="xs"
+                      iconType="play"
+                      isLoading={isRunning}
+                      isDisabled={!draft.query.trim()}
+                      onClick={runDraftQuery}
+                      data-test-subj="notebookCustomRunQuery"
+                    >
+                      {i18n.translate('xpack.notebook.customCell.flyout.runQuery', {
+                        defaultMessage: 'Run',
+                      })}
+                    </EuiButtonEmpty>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
               }
             >
               <Suspense fallback={<EuiLoadingSpinner />}>
