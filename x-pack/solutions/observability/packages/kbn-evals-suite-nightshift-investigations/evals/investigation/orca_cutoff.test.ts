@@ -1,0 +1,226 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import {
+  ORCA_FLAG_DOCUMENTS_QUERY,
+  ORCA_REFERENCE_CUTOFF,
+  getOrcaCutoff,
+  groupOrcaCasesByCutoff,
+  mintOrcaCutoffKeys,
+  orcaCutoffQuery,
+  resolveOrcaEsCredentials,
+} from './orca_cutoff';
+import type { OrcaTelemetryVariant } from './orca_dataset';
+
+const task = (caseId: string, metadata: Record<string, string> = {}) => ({
+  metadata: { case_id: caseId, current_time: '2026-04-19T16:22:00Z', ...metadata },
+});
+
+describe('getOrcaCutoff', () => {
+  it('bounds a task at its recorded snapshot, to the millisecond', () => {
+    expect(getOrcaCutoff(task('a', { telemetry_snapshot_time: '2026-04-24T19:25:42Z' }))).toBe(
+      '2026-04-24T19:25:42.000Z'
+    );
+  });
+  it('bounds a task without a recorded snapshot five minutes after its current time', () => {
+    expect(getOrcaCutoff(task('a'))).toBe('2026-04-19T16:27:00.000Z');
+  });
+  it('rejects a task whose times cannot bound it', () => {
+    expect(() => getOrcaCutoff(task('a', { telemetry_snapshot_time: 'soon' }))).toThrow(
+      'ORCA case a has an unparseable telemetry_snapshot_time'
+    );
+    expect(() => getOrcaCutoff({ metadata: { case_id: 'b' } })).toThrow(
+      'ORCA case b has no parseable current_time'
+    );
+  });
+});
+
+describe('groupOrcaCasesByCutoff', () => {
+  const tasks = [
+    task('late', { telemetry_snapshot_time: '2026-04-24T19:25:42Z' }),
+    task('early-1'),
+    task('early-2', { current_time: '2026-04-19T16:22:00.000Z' }),
+  ];
+  it('puts tasks sharing a cutoff in one space with one connector, in cutoff order', () => {
+    const groups = groupOrcaCasesByCutoff(tasks);
+    expect(groups.map(({ cutoff, caseIds }) => [cutoff, caseIds])).toEqual([
+      ['2026-04-19T16:27:00.000Z', ['early-1', 'early-2']],
+      ['2026-04-24T19:25:42.000Z', ['late']],
+    ]);
+    expect(new Set(groups.map(({ spaceId }) => spaceId)).size).toBe(2);
+    for (const { spaceId, connectorId } of groups) {
+      expect(spaceId).toMatch(/^orca-[0-9a-f]{12}$/);
+      expect(connectorId).toBe(`orcabench-es-${spaceId.slice('orca-'.length)}`);
+    }
+  });
+  it('keeps ids stable across runs without showing the investigator its snapshot time', () => {
+    const ids = (examples: typeof tasks) =>
+      groupOrcaCasesByCutoff(examples).map(({ cutoff, spaceId, connectorId }) => ({
+        cutoff,
+        spaceId,
+        connectorId,
+      }));
+    expect(ids([...tasks].reverse())).toEqual(ids(tasks));
+    for (const { connectorId } of ids(tasks)) {
+      expect(connectorId).not.toMatch(/2026|1627|1925/);
+    }
+  });
+});
+
+describe('orcaCutoffQuery', () => {
+  it('filters on @timestamp up to the cutoff, and also hides flag documents for no-flags', () => {
+    const range = { range: { '@timestamp': { lte: '2026-04-19T16:27:00.000Z' } } };
+    expect(orcaCutoffQuery('2026-04-19T16:27:00.000Z', 'full')).toEqual(range);
+    expect(orcaCutoffQuery('2026-04-19T16:27:00.000Z', 'no-flags')).toEqual({
+      bool: { filter: [range], must_not: [ORCA_FLAG_DOCUMENTS_QUERY] },
+    });
+  });
+});
+
+describe('resolveOrcaEsCredentials', () => {
+  const env = {
+    NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
+    NIGHTSHIFT_ORCA_ES_URL: 'https://orca.example/',
+    NIGHTSHIFT_ORCA_ES_USERNAME: 'nightshift-orcabench-eval',
+    NIGHTSHIFT_ORCA_ES_PASSWORD: 'password',
+  };
+  it('reads the eval user the Scout hook exported', () => {
+    expect(resolveOrcaEsCredentials(env)).toEqual({
+      url: 'https://orca.example',
+      username: 'nightshift-orcabench-eval',
+      password: 'password',
+    });
+  });
+  it.each(['NIGHTSHIFT_ORCA_ES_PASSWORD', 'NIGHTSHIFT_ORCA_ES_URL', 'NIGHTSHIFT_CONNECTOR_SET'])(
+    'requires the orcabench Scout server, not just %s',
+    (name) => {
+      expect(() => resolveOrcaEsCredentials({ ...env, [name]: '' })).toThrow(
+        'ORCA requires a Scout server started with the orcabench connector set'
+      );
+    }
+  );
+});
+
+/**
+ * An ORCA cluster that mints keys for the eval user and answers each key's reads. `seenAfter` and
+ * `flagDocuments` are what a key's counts return for reads past its cutoff and for flag documents.
+ */
+const fakeOrca = ({
+  seenAfter = 0,
+  flagDocuments = 0,
+  variant = 'full',
+}: { seenAfter?: number; flagDocuments?: number; variant?: OrcaTelemetryVariant } = {}) => {
+  const minted: Array<{ id: string; body: { name: string; role_descriptors: unknown } }> = [];
+  const invalidated: unknown[] = [];
+  const pinned =
+    variant === 'full'
+      ? { logs: 14268, traces: 11864, metrics: 117594 }
+      : { logs: 13182, traces: 11136, metrics: 115056 };
+  const request = jest.fn(async (input: string | URL | Request, init?: RequestInit) => {
+    const { pathname } = new URL(String(input));
+    const body = init?.body ? JSON.parse(String(init.body)) : undefined;
+    const authorization = (init?.headers as Record<string, string>).Authorization;
+    if (pathname === '/_security/api_key' && init?.method === 'POST') {
+      expect(authorization).toBe(`Basic ${Buffer.from('eval:password').toString('base64')}`);
+      const id = `key-${minted.length + 1}`;
+      minted.push({ id, body });
+      return new Response(JSON.stringify({ id, encoded: `encoded-${id}` }));
+    }
+    if (pathname === '/_security/api_key' && init?.method === 'DELETE') {
+      invalidated.push(body);
+      return new Response(JSON.stringify({ invalidated_api_keys: body.ids }));
+    }
+    expect(authorization).toMatch(/^ApiKey encoded-key-\d+$/);
+    if (pathname === '/_query') {
+      const signal = body.query.split(/[ -]/)[1] as keyof typeof pinned;
+      return new Response(JSON.stringify({ values: [[pinned[signal]]] }));
+    }
+    const count = !body ? 10 : body.query.range ? seenAfter : flagDocuments;
+    return new Response(JSON.stringify({ count }));
+  });
+  return { request, minted, invalidated };
+};
+
+describe('mintOrcaCutoffKeys', () => {
+  const credentials = { url: 'https://orca.example', username: 'eval', password: 'password' };
+  const cutoffs = ['2026-04-19T16:27:00.000Z', '2026-04-24T19:25:42.000Z'];
+
+  it('mints a checked DLS key per cutoff as the eval user, after a reference key proves the variant', async () => {
+    const orca = fakeOrca({ variant: 'no-flags' });
+
+    const { apiKeys, invalidate } = await mintOrcaCutoffKeys({
+      credentials,
+      cutoffs,
+      variant: 'no-flags',
+      request: orca.request,
+      concurrency: 1,
+    });
+
+    expect([...apiKeys.entries()]).toEqual([
+      [cutoffs[0], 'encoded-key-2'],
+      [cutoffs[1], 'encoded-key-3'],
+    ]);
+    expect(orca.minted[0].body.name).toBe(
+      `nightshift-orcabench-eval-no-flags-${ORCA_REFERENCE_CUTOFF}`
+    );
+    expect(orca.minted[1].body.role_descriptors).toEqual({
+      orca_cutoff: {
+        indices: [
+          {
+            names: ['logs-orcabench.otel-*', 'traces-orcabench.otel-*', 'metrics-orcabench.otel-*'],
+            privileges: ['read', 'view_index_metadata'],
+            query: orcaCutoffQuery(cutoffs[0], 'no-flags'),
+          },
+        ],
+      },
+    });
+    expect(orca.minted.map(({ body }) => body)).toEqual(
+      orca.minted.map(() => expect.objectContaining({ expiration: '1d' }))
+    );
+    // Each cutoff key is checked on every signal: after the cutoff, up to it, and flag documents.
+    const counts = orca.request.mock.calls.filter(([url]) => String(url).endsWith('/_count'));
+    expect(counts).toHaveLength(cutoffs.length * 3 * 3);
+
+    await invalidate();
+    expect(orca.invalidated).toEqual([{ ids: ['key-1', 'key-2', 'key-3'], owner: true }]);
+  });
+
+  it('refuses a key that reads past its cutoff and revokes every key minted so far', async () => {
+    const orca = fakeOrca({ seenAfter: 3 });
+
+    const minting = mintOrcaCutoffKeys({
+      credentials,
+      cutoffs,
+      variant: 'full',
+      request: orca.request,
+    });
+
+    await expect(minting).rejects.toThrow(/ORCA key for 2026-04-.* reads 3 .* documents after it/);
+    await expect(minting).rejects.not.toThrow(/encoded-key/);
+    expect(orca.invalidated).toEqual([
+      { ids: expect.arrayContaining(['key-1', 'key-2']), owner: true },
+    ]);
+  });
+
+  it('refuses a no-flags key that still reads flag documents', async () => {
+    const orca = fakeOrca({ variant: 'no-flags', flagDocuments: 2 });
+
+    await expect(
+      mintOrcaCutoffKeys({ credentials, cutoffs, variant: 'no-flags', request: orca.request })
+    ).rejects.toThrow(/no-flags key for .* reads 2 .* flag documents/);
+  });
+
+  it('refuses keys whose variant the pinned counts do not prove', async () => {
+    const orca = fakeOrca({ variant: 'full' });
+
+    await expect(
+      mintOrcaCutoffKeys({ credentials, cutoffs, variant: 'no-flags', request: orca.request })
+    ).rejects.toThrow('pinned no-flags snapshot');
+    expect(orca.minted).toHaveLength(1);
+    expect(orca.invalidated).toEqual([{ ids: ['key-1'], owner: true }]);
+  });
+});

@@ -38,6 +38,24 @@ const investigation = (overrides: Partial<Investigation> = {}): Investigation =>
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
 
+it('starts and reads the investigation in the space the base path names', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValueOnce({ investigation_id: 'investigation' })
+    .mockResolvedValueOnce(investigation())
+    .mockResolvedValueOnce({ rounds: [{ steps: [] }] })
+    .mockResolvedValueOnce(investigation());
+
+  await runInvestigation(fetch, example, connector, { basePath: '/s/orca-abc' });
+
+  expect(fetch.mock.calls.map(([path]) => path)).toEqual([
+    '/s/orca-abc/internal/nightshift/investigations',
+    '/s/orca-abc/internal/investigations/investigations/investigation',
+    '/s/orca-abc/api/agent_builder/conversations/investigation',
+    '/s/orca-abc/internal/investigations/investigations/investigation',
+  ]);
+});
+
 it('executes the manual investigation and reads what it recorded from the shared API', async () => {
   const conversation = {
     rounds: [

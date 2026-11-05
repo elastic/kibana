@@ -1,0 +1,262 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import assert from 'assert';
+import { createHash, randomBytes } from 'crypto';
+import pMap from 'p-map';
+import { z, lazySchema } from '@kbn/zod/v4';
+import { ORCABENCH_ES_CONNECTOR_PREFIX, getConnectorSet } from './connector_sets';
+import { assertOrcaSource, orcaCurrentTimeMs } from './orca_dataset';
+import type { OrcaTelemetryVariant } from './orca_dataset';
+import type { InvestigationExample } from './types';
+
+/** The three ORCA signals, each a set of hourly data streams. */
+export const ORCA_SIGNALS = ['logs', 'traces', 'metrics'] as const;
+const ORCA_INDEX_PATTERNS = ORCA_SIGNALS.map((signal) => `${signal}-orcabench.otel-*`);
+
+/** ORCA serves each task the first telemetry snapshot taken at least this long after `current_time`. */
+export const ORCA_SNAPSHOT_LEAD_MS = 5 * 60_000;
+
+/**
+ * ORCA's last telemetry snapshot. A key bounded here sees the whole window the pinned preflight
+ * counts cover (16:22 to 16:50 UTC on 2026-04-19), so it proves which variant the keys serve.
+ */
+export const ORCA_REFERENCE_CUTOFF = '2026-04-24T19:25:42.000Z';
+
+/**
+ * Flag documents, which the `no-flags` variant hides: flagd itself, every `feature_flag` field,
+ * flag-evaluation spans and log lines naming a flag or one of the demo's flag keys.
+ */
+export const ORCA_FLAG_DOCUMENTS_QUERY = {
+  bool: {
+    should: [
+      { term: { 'service.name': 'flagd' } },
+      { term: { 'resource.attributes.service.name': 'flagd' } },
+      { exists: { field: '*feature_flag*' } },
+      { wildcard: { name: { value: '*flag*', case_insensitive: true } } },
+      {
+        query_string: {
+          fields: ['body.text', 'message'],
+          query:
+            'paymentFailure OR paymentUnreachable OR productCatalogFailure OR cartFailure OR adFailure OR adManualGc OR adHighCpu OR imageSlowLoad OR recommendationCacheFailure OR loadGeneratorFloodHomepage OR kafkaQueueProblems OR emailMemoryLeak OR llmRateLimitError OR llmInaccurateResponse OR flagd OR "feature flag" OR openfeature',
+        },
+      },
+    ],
+    minimum_should_match: 1,
+  },
+} as const;
+
+/**
+ * The last moment of telemetry an ORCA task may read: its recorded snapshot time, or else the first
+ * snapshot ORCA would serve it. Always written with milliseconds, because Elasticsearch rounds a
+ * `lte` date without them up to the end of that second.
+ */
+export const getOrcaCutoff = ({ metadata }: Pick<InvestigationExample, 'metadata'>): string => {
+  const { case_id: caseId, telemetry_snapshot_time: snapshotTime } = metadata;
+  if (snapshotTime !== undefined && snapshotTime !== null) {
+    const snapshotMs = typeof snapshotTime === 'string' ? Date.parse(snapshotTime) : Number.NaN;
+    assert(
+      !Number.isNaN(snapshotMs),
+      `ORCA case ${caseId} has an unparseable telemetry_snapshot_time`
+    );
+    return new Date(snapshotMs).toISOString();
+  }
+  const currentMs = orcaCurrentTimeMs(metadata.current_time);
+  assert(currentMs !== undefined, `ORCA case ${caseId} has no parseable current_time`);
+  return new Date(currentMs + ORCA_SNAPSHOT_LEAD_MS).toISOString();
+};
+
+/** The tasks sharing one cutoff, and the Kibana space and connector that read up to it. */
+export interface OrcaCutoffGroup {
+  cutoff: string;
+  spaceId: string;
+  connectorId: string;
+  caseIds: readonly string[];
+}
+
+/**
+ * Groups tasks by cutoff, in cutoff order. Space and connector ids derive from a hash of the
+ * cutoff, so they are stable across runs and do not show the investigator its snapshot time.
+ */
+export const groupOrcaCasesByCutoff = (
+  examples: ReadonlyArray<Pick<InvestigationExample, 'metadata'>>
+): OrcaCutoffGroup[] => {
+  const caseIdsByCutoff = new Map<string, string[]>();
+  for (const example of examples) {
+    const cutoff = getOrcaCutoff(example);
+    caseIdsByCutoff.set(cutoff, [...(caseIdsByCutoff.get(cutoff) ?? []), example.metadata.case_id]);
+  }
+  return [...caseIdsByCutoff.entries()]
+    .sort(([left], [right]) => (left < right ? -1 : left > right ? 1 : 0))
+    .map(([cutoff, caseIds]) => {
+      const suffix = createHash('sha256').update(cutoff).digest('hex').slice(0, 12);
+      return {
+        cutoff,
+        spaceId: `orca-${suffix}`,
+        connectorId: `${ORCABENCH_ES_CONNECTOR_PREFIX}${suffix}`,
+        caseIds,
+      };
+    });
+};
+
+/** The document-level security query of a key that reads ORCA up to `cutoff`, inclusive. */
+export const orcaCutoffQuery = (cutoff: string, variant: OrcaTelemetryVariant) => {
+  const range = { range: { '@timestamp': { lte: cutoff } } };
+  return variant === 'no-flags'
+    ? { bool: { filter: [range], must_not: [ORCA_FLAG_DOCUMENTS_QUERY] } }
+    : range;
+};
+
+/** The ORCA cluster and the eval user that mints its read keys. */
+export interface OrcaEsCredentials {
+  url: string;
+  username: string;
+  password: string;
+}
+
+/** The eval user's credentials, which the Scout hook exports for the orcabench connector set. */
+export const resolveOrcaEsCredentials = (
+  env: NodeJS.ProcessEnv = process.env
+): OrcaEsCredentials => {
+  const {
+    NIGHTSHIFT_ORCA_ES_URL: url,
+    NIGHTSHIFT_ORCA_ES_USERNAME: username,
+    NIGHTSHIFT_ORCA_ES_PASSWORD: password,
+  } = env;
+  assert(
+    url && username && password && getConnectorSet(env) === 'orcabench',
+    'ORCA requires a Scout server started with the orcabench connector set'
+  );
+  return { url: url.replace(/\/$/, ''), username, password };
+};
+
+type OrcaEsRequest = (method: string, path: string, body?: object) => Promise<unknown>;
+
+/** Requests to the ORCA cluster. Errors name the request, never the credential or a response. */
+const createOrcaEsRequest =
+  (url: string, authorization: string, request: typeof globalThis.fetch): OrcaEsRequest =>
+  async (method, path, body) => {
+    const response = await request(`${url}${path}`, {
+      method,
+      headers: { Authorization: authorization, 'Content-Type': 'application/json' },
+      ...(body ? { body: JSON.stringify(body) } : {}),
+      signal: AbortSignal.timeout(30_000),
+    });
+    assert(response.ok, `ORCA ${method} ${path} returned HTTP ${response.status}`);
+    return response.json();
+  };
+
+const countSchema = lazySchema(() => z.object({ count: z.number() }));
+const apiKeySchema = lazySchema(() =>
+  z.object({ id: z.string().min(1), encoded: z.string().min(1) })
+);
+
+/**
+ * Checks a cutoff key on every signal: nothing after the cutoff, something up to it, and for
+ * `no-flags` no flag document.
+ */
+export const assertOrcaCutoffKey = async (
+  request: OrcaEsRequest,
+  cutoff: string,
+  variant: OrcaTelemetryVariant
+): Promise<void> => {
+  await Promise.all(
+    ORCA_INDEX_PATTERNS.map(async (index) => {
+      const count = async (query?: object) =>
+        countSchema.parse(await request('POST', `/${index}/_count`, query ? { query } : undefined))
+          .count;
+      const [after, visible, flags] = await Promise.all([
+        count({ range: { '@timestamp': { gt: cutoff } } }),
+        count(),
+        variant === 'no-flags' ? count(ORCA_FLAG_DOCUMENTS_QUERY) : 0,
+      ]);
+      assert(after === 0, `ORCA key for ${cutoff} reads ${after} ${index} documents after it`);
+      assert(visible > 0, `ORCA key for ${cutoff} reads no ${index} documents`);
+      assert(flags === 0, `ORCA no-flags key for ${cutoff} reads ${flags} ${index} flag documents`);
+    })
+  );
+};
+
+/** One read key per cutoff, and how to revoke them all. */
+export interface OrcaCutoffKeys {
+  apiKeys: ReadonlyMap<string, string>;
+  invalidate: () => Promise<void>;
+}
+
+/**
+ * Mints a short-lived document-level security key per cutoff as the eval user, and checks each
+ * before any investigation starts. A reference key first proves the variant with the pinned counts.
+ * Keys can only carry privileges when a user creates them, so the eval holds a user credential
+ * rather than an API key. Each key expires after a day; `invalidate` revokes them all sooner.
+ */
+export const mintOrcaCutoffKeys = async ({
+  credentials: { url, username, password },
+  cutoffs,
+  variant,
+  request = globalThis.fetch,
+  concurrency = 8,
+}: {
+  credentials: OrcaEsCredentials;
+  cutoffs: readonly string[];
+  variant: OrcaTelemetryVariant;
+  request?: typeof globalThis.fetch;
+  concurrency?: number;
+}): Promise<OrcaCutoffKeys> => {
+  const asEvalUser = createOrcaEsRequest(
+    url,
+    `Basic ${Buffer.from(`${username}:${password}`).toString('base64')}`,
+    request
+  );
+  const run = randomBytes(4).toString('hex');
+  const minted: string[] = [];
+  const invalidate = async () => {
+    if (minted.length === 0) return;
+    await asEvalUser('DELETE', '/_security/api_key', { ids: minted.splice(0), owner: true });
+  };
+  const mint = async (cutoff: string) => {
+    const { id, encoded } = apiKeySchema.parse(
+      await asEvalUser('POST', '/_security/api_key', {
+        name: `nightshift-orcabench-eval-${variant}-${cutoff}`,
+        expiration: '1d',
+        role_descriptors: {
+          orca_cutoff: {
+            indices: [
+              {
+                names: ORCA_INDEX_PATTERNS,
+                privileges: ['read', 'view_index_metadata'],
+                query: orcaCutoffQuery(cutoff, variant),
+              },
+            ],
+          },
+        },
+        metadata: { purpose: 'nightshift-orcabench-eval', run, cutoff, variant },
+      })
+    );
+    minted.push(id);
+    return encoded;
+  };
+  try {
+    await assertOrcaSource({ url, apiKey: await mint(ORCA_REFERENCE_CUTOFF), variant }, request);
+    const apiKeys = await pMap(
+      cutoffs,
+      async (cutoff) => {
+        const apiKey = await mint(cutoff);
+        await assertOrcaCutoffKey(
+          createOrcaEsRequest(url, `ApiKey ${apiKey}`, request),
+          cutoff,
+          variant
+        );
+        return [cutoff, apiKey] as const;
+      },
+      { concurrency }
+    );
+    return { apiKeys: new Map(apiKeys), invalidate };
+  } catch (error) {
+    await invalidate();
+    throw error;
+  }
+};

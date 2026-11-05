@@ -43,16 +43,18 @@ export const getDatasetCustomContext = ({
     ? [...CUSTOMER0_CUSTOM_CONTEXT, RETROSPECTIVE_GUARDRAIL_CONTEXT]
     : [];
 
-/** Replaces the space's custom context with exactly these snippets. */
+/** Replaces the space's custom context with exactly these snippets; `basePath` selects the space. */
 export const replaceCustomContext = async (
   fetch: HttpHandler,
-  snippets: readonly string[]
+  snippets: readonly string[],
+  basePath = ''
 ): Promise<void> => {
-  const current = await fetch<GetCustomContextResponse>(CUSTOM_CONTEXT_API_PATH);
+  const path = `${basePath}${CUSTOM_CONTEXT_API_PATH}`;
+  const current = await fetch<GetCustomContextResponse>(path);
   if (snippets.length === 0 && current.snippets.length === 0) return;
   const body: PutCustomContextRequest = {
     snippets: snippets.map((text) => ({ text })),
     version: current.version,
   };
-  await fetch(CUSTOM_CONTEXT_API_PATH, { method: 'PUT', body: JSON.stringify(body) });
+  await fetch(path, { method: 'PUT', body: JSON.stringify(body) });
 };

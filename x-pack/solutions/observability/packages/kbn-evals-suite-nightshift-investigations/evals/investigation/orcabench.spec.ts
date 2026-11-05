@@ -23,6 +23,9 @@ registerInvestigationEvaluation({
     dataset_sha256: release.sha256,
     source_release: 'data-0418/2026-10-01',
     telemetry_variant: telemetryVariant,
+    // Each task reads through a key whose document-level security ends at its snapshot, so these
+    // runs never mix with the proxy-bounded baseline or unbounded runs.
+    telemetry_cutoff: 'dls',
     ...(slice ? { dataset_slice: `${slice.index}/${slice.count}` } : {}),
   },
 });

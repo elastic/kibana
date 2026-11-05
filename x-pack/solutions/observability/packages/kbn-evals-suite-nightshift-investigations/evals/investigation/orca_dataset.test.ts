@@ -198,7 +198,7 @@ const call = {
   type: ConversationRoundStepType.toolCall,
   tool_call_id: 'call',
   tool_id: 'nightshift_sandbox_bash',
-  params: { connector_id: 'orcabench-es', command: 'curl ...' },
+  params: { connector_id: 'orcabench-es-0123456789ab', command: 'curl ...' },
   results: [
     {
       tool_result_id: 'result',
@@ -228,6 +228,7 @@ describe('ORCA telemetry evidence', () => {
   it.each([
     { ...call, tool_id: 'execute_api' },
     { ...call, params: { ...call.params, connector_id: 'another-cluster' } },
+    { ...call, params: { ...call.params, connector_id: 'orcabench-es' } },
     {
       ...call,
       results: [{ ...call.results[0], data: { stdout: '{"values":[[0]]}', exit_code: 0 } }],
@@ -262,19 +263,16 @@ describe('ORCA telemetry evidence', () => {
 });
 
 describe('ORCA source preflight', () => {
-  const env = {
-    NIGHTSHIFT_ES_URL: 'https://orca.example',
-    NIGHTSHIFT_ES_API_KEY: 'private-key',
-    NIGHTSHIFT_CONNECTOR_SET: 'orcabench',
-  };
+  const source = { url: 'https://orca.example/', apiKey: 'private-key', variant: 'full' } as const;
   it('checks all three historical signals with the read key', async () => {
     const request = jest.fn<ReturnType<typeof fetch>, Parameters<typeof fetch>>();
     request
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[14268]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[11864]] })))
       .mockResolvedValueOnce(new Response(JSON.stringify({ values: [[117594]] })));
-    await expect(assertOrcaSource(request, env)).resolves.toBeUndefined();
+    await expect(assertOrcaSource(source, request)).resolves.toBeUndefined();
     expect(request).toHaveBeenCalledTimes(3);
+    expect(request.mock.calls[0][0]).toBe('https://orca.example/_query');
     expect(request.mock.calls[0][1]?.headers).toEqual({
       Authorization: 'ApiKey private-key',
       'Content-Type': 'application/json',
@@ -288,7 +286,7 @@ describe('ORCA source preflight', () => {
     'rejects unusable credentials, missing data or partial responses before investigations',
     async (response) => {
       const request = jest.fn().mockImplementation(async () => response.clone());
-      await expect(assertOrcaSource(request, env)).rejects.toThrow('ORCA');
+      await expect(assertOrcaSource(source, request)).rejects.toThrow('ORCA');
     }
   );
 
@@ -300,14 +298,14 @@ describe('ORCA source preflight', () => {
     return request;
   };
   it('accepts a flag-ablation key only when the run asks for that variant', async () => {
-    const noFlags = { ...env, NIGHTSHIFT_ORCA_TELEMETRY_VARIANT: 'no-flags' };
+    const noFlags = { ...source, variant: 'no-flags' } as const;
     await expect(
-      assertOrcaSource(answering(13182, 11136, 115056), noFlags)
+      assertOrcaSource(noFlags, answering(13182, 11136, 115056))
     ).resolves.toBeUndefined();
-    await expect(assertOrcaSource(answering(13182, 11136, 115056), env)).rejects.toThrow(
+    await expect(assertOrcaSource(source, answering(13182, 11136, 115056))).rejects.toThrow(
       'pinned full snapshot'
     );
-    await expect(assertOrcaSource(answering(14268, 11864, 117594), noFlags)).rejects.toThrow(
+    await expect(assertOrcaSource(noFlags, answering(14268, 11864, 117594))).rejects.toThrow(
       'pinned no-flags snapshot'
     );
   });

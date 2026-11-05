@@ -12,7 +12,7 @@ import { z, lazySchema } from '@kbn/zod/v4';
 import { isToolCallStep, ToolResultType } from '@kbn/agent-builder-common';
 import type { ConversationRound } from '@kbn/agent-builder-common';
 import type { EvalsClient, EvaluationDataset } from '@kbn/evals';
-import { ORCABENCH_ES_CONNECTOR_ID, getConnectorSet } from './connector_sets';
+import { isOrcaConnectorId } from './connector_sets';
 import { investigationExampleSchema } from './types';
 import type { InvestigationExample } from './types';
 
@@ -266,7 +266,7 @@ export const hasOrcaTelemetryQuery = (rounds: Array<Pick<ConversationRound, 'ste
     .some(
       ({ tool_id: toolId, params, results }) =>
         toolId === 'nightshift_sandbox_bash' &&
-        params.connector_id === ORCABENCH_ES_CONNECTOR_ID &&
+        isOrcaConnectorId(params.connector_id) &&
         results.some(
           ({ type, data }) =>
             type === ToolResultType.other &&
@@ -306,20 +306,13 @@ export const resolveOrcaTelemetryVariant = (
 };
 
 /**
- * Checks the immutable historical data with the configured read key before starting paid tasks. The
- * counts also prove which variant the key sees, so an ablation cannot run on full telemetry.
+ * Checks the immutable historical data with a read key before starting paid tasks. The counts also
+ * prove which variant the key sees, so an ablation cannot run on full telemetry.
  */
 export const assertOrcaSource = async (
-  request: typeof globalThis.fetch = globalThis.fetch,
-  env: NodeJS.ProcessEnv = process.env
+  { url, apiKey, variant }: { url: string; apiKey: string; variant: OrcaTelemetryVariant },
+  request: typeof globalThis.fetch = globalThis.fetch
 ): Promise<void> => {
-  const url = env.NIGHTSHIFT_ES_URL;
-  const apiKey = env.NIGHTSHIFT_ES_API_KEY;
-  assert(
-    url && apiKey && getConnectorSet(env) === 'orcabench',
-    'ORCA requires a Scout server started with the orcabench connector set'
-  );
-  const variant = resolveOrcaTelemetryVariant(env);
   await Promise.all(
     Object.entries(ORCA_PREFLIGHT_COUNTS[variant]).map(async ([signal, expected]) => {
       const response = await request(`${url.replace(/\/$/, '')}/_query`, {

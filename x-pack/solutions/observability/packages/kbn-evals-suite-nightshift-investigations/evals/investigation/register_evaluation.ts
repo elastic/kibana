@@ -19,7 +19,7 @@ import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { evaluate } from '../../src/evaluate';
 import { loadInvestigationDataset } from './datasets';
 import { getDatasetCustomContext, replaceCustomContext } from './custom_context';
-import { saveConnectorSetOnInvestigator } from './connector_sets';
+import { saveConnectorSetOnInvestigator, saveConnectorsOnInvestigator } from './connector_sets';
 import { createInvestigationJudges, createOrcaEvaluators } from './judges';
 import { orcaJudgeConnector } from './orca_judge';
 import { efficiencyEvaluators } from './efficiency_evaluators';
@@ -29,7 +29,13 @@ import { assertSuccessfulSandboxCommand } from './trace_evidence';
 import { createAdminSessionRequest } from './admin_session_request';
 import type { AdminSessionRequestOptions } from './admin_session_request';
 import type { InvestigationExample, InvestigationTaskOutput } from './types';
-import { assertOrcaSource, hasOrcaTelemetryQuery } from './orca_dataset';
+import { hasOrcaTelemetryQuery, resolveOrcaTelemetryVariant } from './orca_dataset';
+import {
+  groupOrcaCasesByCutoff,
+  mintOrcaCutoffKeys,
+  resolveOrcaEsCredentials,
+} from './orca_cutoff';
+import { ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
 import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
@@ -38,6 +44,8 @@ import {
 
 // CI runs the suite on a serverless observability Scout cluster.
 const suiteTags = [...tags.serverless.observability.complete];
+// `xpack.spaces.maxSpaces` on Serverless, the default space included.
+const SERVERLESS_MAX_SPACES = 100;
 
 /** Registers a dataset with the native investigation task, RCA judges and execution checks. */
 export const registerInvestigationEvaluation = ({
@@ -78,9 +86,23 @@ export const registerInvestigationEvaluation = ({
       }) => {
         if (orca) {
           expect(repetitions, 'ORCA runs each incident once').toBe(1);
-          await assertOrcaSource();
         }
+        const orcaCredentials = orca ? resolveOrcaEsCredentials() : undefined;
         const dataset = await loadDataset(evalsClient);
+        // An ORCA task reads telemetry only up to its snapshot. Each cutoff gets a space whose
+        // investigator holds one connector, whose key's document-level security stops there.
+        const cutoffGroups = orca ? groupOrcaCasesByCutoff(dataset.examples) : [];
+        if (orca && config.serverless) {
+          expect(
+            cutoffGroups.length,
+            'Every ORCA cutoff needs a space; run fewer cutoffs per Serverless stack with NIGHTSHIFT_ORCA_SLICE'
+          ).toBeLessThan(SERVERLESS_MAX_SPACES);
+        }
+        const basePathByCase = new Map(
+          cutoffGroups.flatMap(({ spaceId, caseIds }) =>
+            caseIds.map((caseId) => [caseId, spaceBasePath(spaceId)] as const)
+          )
+        );
         // The bundled synthetic examples supply their own evidence and must not query a cluster.
         const bundledSynthetic =
           !orca && !process.env.NIGHTSHIFT_EXAMPLES_FILE && !process.env.NIGHTSHIFT_DATASET_NAME;
@@ -110,9 +132,11 @@ export const registerInvestigationEvaluation = ({
         evaluate.setTimeout(
           Math.ceil((dataset.examples.length * repetitions) / concurrency) *
             (INVESTIGATION_TIMEOUT_MS + 2 * 60_000) +
-            5 * 60_000
+            5 * 60_000 +
+            // Minting, checking and setting up each ORCA cutoff's key and space.
+            cutoffGroups.length * 60_000
         );
-        // Investigations only run as the Nightshift agent service account, so the space has to be
+        // Investigations only run as the Nightshift agent service account, so each space has to be
         // set up first. The eval user holds manage_security; setup is idempotent. On stateful,
         // Elasticsearch has no predefined roles for the account, so the eval creates them first.
         await ensureNightshiftServiceAccountRoles(esClient, { isServerless: config.serverless });
@@ -139,65 +163,115 @@ export const registerInvestigationEvaluation = ({
           }),
           { isServerless: config.serverless }
         );
-        await expect
-          .poll(
-            async () =>
-              setupRequest<{ installed: boolean; bound: boolean }>(
-                '/internal/nightshift/investigations/service_account/_enable',
-                { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
-              ).then(
-                ({ installed, bound }) => installed && bound,
-                (error: unknown) => {
-                  log.warning(`Nightshift setup failed, retrying: ${String(error)}`);
-                  return false;
-                }
-              ),
-            // Setup needs the managed workflows plugin to be ready after a cold start.
-            { timeout: 120_000, intervals: [5_000] }
-          )
-          .toBe(true);
-        await expect
-          .poll(
-            async () =>
-              (
-                await fetch<{ available: boolean }>(
-                  `/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
-                    connector.id
-                  )}`
-                )
-              ).available,
-            { timeout: 60_000 }
-          )
-          .toBe(true);
-        // Availability can turn true while Kibana is still installing the managed workflow after a
-        // cold start.
-        await expect
-          .poll(
-            async () =>
-              fetch(`/api/workflows/workflow/${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}`, {
-                headers: { 'elastic-api-version': '2023-10-31' },
-              }).then(
-                () => true,
-                () => false
-              ),
-            { timeout: 60_000 }
-          )
-          .toBe(true);
-        await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
-        await replaceCustomContext(fetch, getDatasetCustomContext(dataset));
-        const [experiment] = await executorClient.runExperiment(
-          {
-            name: orca
-              ? 'Nightshift ORCA investigation traces'
-              : 'Nightshift graded investigation traces',
-            datasets: [dataset],
-            trustUpstreamDataset,
-            concurrency,
-            metadata: { ...experimentMetadata, concurrency },
-            task: (example) => runInvestigation(fetch, example, connector),
-          },
-          evaluators
-        );
+        // Sets Nightshift up in one space: `basePath` is its `/s/<id>`, or empty for the default.
+        const setUpNightshiftSpace = async (basePath: string) => {
+          await expect
+            .poll(
+              async () =>
+                setupRequest<{ installed: boolean; bound: boolean }>(
+                  `${basePath}/internal/nightshift/investigations/service_account/_enable`,
+                  { method: 'POST', body: JSON.stringify({ serviceAccountIds }) }
+                ).then(
+                  ({ installed, bound }) => installed && bound,
+                  (error: unknown) => {
+                    log.warning(`Nightshift setup failed, retrying: ${String(error)}`);
+                    return false;
+                  }
+                ),
+              // Setup needs the managed workflows plugin to be ready after a cold start.
+              { timeout: 120_000, intervals: [5_000] }
+            )
+            .toBe(true);
+          await expect
+            .poll(
+              async () =>
+                (
+                  await fetch<{ available: boolean }>(
+                    `${basePath}/internal/nightshift/investigations/availability?connector_id=${encodeURIComponent(
+                      connector.id
+                    )}`
+                  )
+                ).available,
+              { timeout: 60_000 }
+            )
+            .toBe(true);
+          // Availability can turn true while Kibana is still installing the managed workflow after a
+          // cold start.
+          await expect
+            .poll(
+              async () =>
+                fetch(
+                  `${basePath}/api/workflows/workflow/${NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID}`,
+                  {
+                    headers: { 'elastic-api-version': '2023-10-31' },
+                  }
+                ).then(
+                  () => true,
+                  () => false
+                ),
+              { timeout: 60_000 }
+            )
+            .toBe(true);
+          await replaceCustomContext(fetch, getDatasetCustomContext(dataset), basePath);
+        };
+        const runExperiment = () =>
+          executorClient.runExperiment(
+            {
+              name: orca
+                ? 'Nightshift ORCA investigation traces'
+                : 'Nightshift graded investigation traces',
+              datasets: [dataset],
+              trustUpstreamDataset,
+              concurrency,
+              metadata: {
+                ...experimentMetadata,
+                concurrency,
+                ...(orca ? { telemetry_cutoffs: cutoffGroups.length } : {}),
+              },
+              task: (example) =>
+                runInvestigation(fetch, example, connector, {
+                  basePath: basePathByCase.get(example.metadata.case_id),
+                }),
+            },
+            evaluators
+          );
+
+        let experimentResults: Awaited<ReturnType<typeof runExperiment>>;
+        if (orcaCredentials) {
+          const { url } = orcaCredentials;
+          const { apiKeys, invalidate } = await mintOrcaCutoffKeys({
+            credentials: orcaCredentials,
+            cutoffs: cutoffGroups.map(({ cutoff }) => cutoff),
+            variant: resolveOrcaTelemetryVariant(),
+          });
+          log.info(
+            `ORCA: ${dataset.examples.length} tasks read through ${cutoffGroups.length} cutoff keys`
+          );
+          // The keys only serve the investigations, so they are revoked as soon as those finish.
+          try {
+            await pMap(
+              cutoffGroups,
+              async ({ cutoff, spaceId, connectorId }) => {
+                const apiKey = apiKeys.get(cutoff);
+                if (!apiKey) throw new Error(`No ORCA key was minted for cutoff ${cutoff}`);
+                const basePath = spaceBasePath(spaceId);
+                await ensureOrcaSpace(fetch, spaceId);
+                await setUpNightshiftSpace(basePath);
+                await saveOrcaConnector(fetch, { basePath, connectorId, url, apiKey });
+                await saveConnectorsOnInvestigator(fetch, [connectorId], basePath);
+              },
+              { concurrency: 4 }
+            );
+            experimentResults = await runExperiment();
+          } finally {
+            await invalidate();
+          }
+        } else {
+          await setUpNightshiftSpace('');
+          await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
+          experimentResults = await runExperiment();
+        }
+        const [experiment] = experimentResults;
 
         const runs = Object.values(experiment.runs);
         expect(runs).toHaveLength(dataset.examples.length * repetitions);
@@ -236,7 +310,9 @@ export const registerInvestigationEvaluation = ({
             // Completed runs must have persisted their conversation and agent trace.
             if (!getExecutionFailure(output)) {
               const conversation = await fetch<{ rounds: ConversationRound[] }>(
-                `/api/agent_builder/conversations/${encodeURIComponent(
+                `${
+                  basePathByCase.get(output.case_id) ?? ''
+                }/api/agent_builder/conversations/${encodeURIComponent(
                   output.conversation_id ?? ''
                 )}`,
                 { headers: { 'elastic-api-version': '2023-10-31' } }
