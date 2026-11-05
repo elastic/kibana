@@ -22,6 +22,7 @@ import {
   getDefaultSeed,
   parseDigitalExperienceScenarioOpts,
 } from './digital_experience_apps';
+import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
 const range = timerange(
   new Date('2026-10-16T12:00:00.000Z'),
@@ -44,6 +45,7 @@ const collect = (
     withSessionId,
     includeRawAttribution,
     environments: false,
+    edgeCases: false,
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -53,11 +55,12 @@ const collect = (
 
 describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
-    it('defaults to session.id, no raw attribution, one environment and scale 1', () => {
+    it('defaults to session.id, no raw attribution, one environment, no edge cases and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
         withSessionId: true,
         includeRawAttribution: false,
         environments: false,
+        edgeCases: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -70,6 +73,7 @@ describe('digital experience apps', () => {
             withSessionId: false,
             includeRawAttribution: true,
             environments: true,
+            edgeCases: true,
             scale: 3,
           },
           FROM
@@ -78,6 +82,7 @@ describe('digital experience apps', () => {
         withSessionId: false,
         includeRawAttribution: true,
         environments: true,
+        edgeCases: true,
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -90,6 +95,7 @@ describe('digital experience apps', () => {
             withSessionId: 'true',
             includeRawAttribution: 'true',
             environments: 'true',
+            edgeCases: 'true',
             scale: '2.5',
           },
           FROM
@@ -98,6 +104,7 @@ describe('digital experience apps', () => {
         withSessionId: true,
         includeRawAttribution: true,
         environments: true,
+        edgeCases: true,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -136,6 +143,9 @@ describe('digital experience apps', () => {
       ).toThrow('includeRawAttribution must be true or false');
       expect(() => parseDigitalExperienceScenarioOpts({ environments: 'all' }, FROM)).toThrow(
         'environments must be true or false'
+      );
+      expect(() => parseDigitalExperienceScenarioOpts({ edgeCases: 'many' }, FROM)).toThrow(
+        'edgeCases must be true or false'
       );
     });
   });
@@ -207,6 +217,7 @@ describe('digital experience apps', () => {
           withSessionId,
           includeRawAttribution: false,
           environments: false,
+          edgeCases: false,
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -502,13 +513,14 @@ describe('digital experience apps', () => {
   describe('catalogue', () => {
     // Half an hour of every app, with the traffic of two, to see rare cases too
     const halfHour = timerange(at(0), at(1800), {} as ToolingLog);
-    const generate = (environments: boolean) =>
+    const generate = (environments: boolean, edgeCases: boolean = false) =>
       generateEdotBrowserSessions(halfHour, {
         environment: 'test',
         from: halfHour.from.getTime(),
         withSessionId: true,
         includeRawAttribution: false,
         environments,
+        edgeCases,
         scale: 2,
         seed: 'digital-experience-test',
       }).flatMap((generator) =>
@@ -516,6 +528,7 @@ describe('digital experience apps', () => {
       );
     const docs = generate(false);
     const withEnvironments = generate(true);
+    const withEdgeCases = generate(false, true);
 
     const attribute = (doc: EdotBrowserDocument, key: string) => doc.attributes?.[key];
     const appDocs = (all: EdotBrowserDocument[], serviceName: string) =>
@@ -559,8 +572,9 @@ describe('digital experience apps', () => {
           // Random stack traces make every occurrence a group of its own
           expect(groups.length).toBeLessThan(occurrences / 3);
           expect(Math.max(...groups)).toBeGreaterThan(5);
-          // Most groups differ in size, so that sorting them by occurrences means something
-          expect(new Set(groups).size).toBeGreaterThan(groups.length / 3);
+          // Groups differ in size, so that sorting them by occurrences means something. There are
+          // more of them than stacks, as Firefox and Safari write stack traces in their own way.
+          expect(new Set(groups).size).toBeGreaterThan(5);
         });
       });
 
@@ -663,6 +677,121 @@ describe('digital experience apps', () => {
         expect(new Set(sessionIds(withEnvironments)).size).toBe(
           sessionIds(withEnvironments).length
         );
+      });
+    });
+
+    describe('edge cases', () => {
+      const lengths = (all: EdotBrowserDocument[]) =>
+        all.map((doc) => String(attribute(doc, 'url.full')).length);
+      const tracesOf = (all: EdotBrowserDocument[]) =>
+        eventsOf(all, 'exception')
+          .map((doc) => attribute(doc, 'exception.stacktrace'))
+          .filter((trace): trace is string => typeof trace === 'string');
+
+      it('adds nothing out of the ordinary without the option', () => {
+        const exceptions = eventsOf(docs, 'exception');
+
+        expect(
+          Math.max(...lengths([...eventsOf(docs, 'browser.resource_timing'), ...requests(docs)]))
+        ).toBeLessThan(1_024);
+        expect(Math.max(...tracesOf(docs).map((trace) => trace.length))).toBeLessThan(8_191);
+        expect(
+          exceptions.every(
+            (doc) =>
+              attribute(doc, 'exception.type') !== undefined &&
+              attribute(doc, 'exception.stacktrace') !== undefined
+          )
+        ).toBe(true);
+        expect(docs.every((doc) => doc.resource?.attributes?.['browser.name'])).toBe(true);
+      });
+
+      it('has URLs of thousands of characters, in resources and in requests', () => {
+        expect(
+          Math.max(...lengths(eventsOf(withEdgeCases, 'browser.resource_timing')))
+        ).toBeGreaterThan(2_083);
+        expect(Math.max(...lengths(requests(withEdgeCases)))).toBeGreaterThan(4_000);
+      });
+
+      it('has stack traces of dozens of frames, one of them over 8,191 characters', () => {
+        const traces = tracesOf(withEdgeCases);
+
+        expect(Math.max(...traces.map((trace) => trace.length))).toBeGreaterThan(8_191);
+        expect(Math.max(...traces.map((trace) => trace.split('\n').length))).toBeGreaterThan(50);
+      });
+
+      it('has a stack trace just under 8,191 characters, and one over', () => {
+        const lengthsOf = (message: string) =>
+          eventsOf(withEdgeCases, 'exception')
+            .filter((doc) => attribute(doc, 'exception.message') === message)
+            .map((doc) => String(attribute(doc, 'exception.stacktrace')).length);
+
+        // The longest ones are the ones of Chromium, which also writes the error and indents
+        expect(
+          Math.max(
+            ...lengthsOf(
+              'Too many re-renders. React limits the number of renders to prevent an infinite loop.'
+            )
+          )
+        ).toBeLessThan(8_191);
+        expect(
+          Math.max(
+            ...lengthsOf(
+              'Too many re-renders. React limits the number of renders to prevent an infinite loop.'
+            )
+          )
+        ).toBeGreaterThan(7_000);
+        expect(Math.min(...lengthsOf('Maximum update depth exceeded'))).toBeGreaterThan(8_191);
+      });
+
+      it('has errors with no type, with no stack trace and with an empty one', () => {
+        const exceptions = eventsOf(withEdgeCases, 'exception');
+
+        expect(exceptions.some((doc) => attribute(doc, 'exception.type') === undefined)).toBe(true);
+        expect(exceptions.some((doc) => attribute(doc, 'exception.stacktrace') === undefined)).toBe(
+          true
+        );
+        expect(exceptions.some((doc) => attribute(doc, 'exception.stacktrace') === '')).toBe(true);
+      });
+
+      it('has more than 100 distinct stack traces for one app', () => {
+        const stacks = (
+          DIGITAL_EXPERIENCE_EDGE_CASES['support-center-web'].exceptions ?? []
+        ).flatMap(({ stacks: exceptionStacks = [] }) => exceptionStacks);
+
+        expect(new Set(stacks.map((stack) => JSON.stringify(stack))).size).toBeGreaterThan(100);
+      });
+
+      it('has browsers that are not identified, and clicks without a selector', () => {
+        expect(
+          withEdgeCases.some((doc) => doc.resource?.attributes?.['browser.name'] === undefined)
+        ).toBe(true);
+        expect(
+          eventsOf(withEdgeCases, 'browser.user_action.click').some(
+            (doc) => attribute(doc, 'browser.css_selector') === undefined
+          )
+        ).toBe(true);
+      });
+
+      it('has the pages of a list as pages of their own', () => {
+        const pages = new Set(
+          withEdgeCases
+            .map((doc) => String(attribute(doc, 'url.full')))
+            .filter((url) => url.includes('example-store.com/products?page='))
+        );
+
+        expect(pages.size).toBeGreaterThan(2);
+      });
+
+      it('draws the same sessions with edge cases as without', () => {
+        const sessionsOf = (all: EdotBrowserDocument[]) =>
+          new Set(
+            appDocs(all, 'docs-web')
+              .map((doc) => attribute(doc, 'session.id'))
+              .filter(Boolean)
+          );
+
+        // docs-web only brings a search index and browsers that aren't identified
+        expect(sessionsOf(withEdgeCases)).toEqual(sessionsOf(docs));
       });
     });
 

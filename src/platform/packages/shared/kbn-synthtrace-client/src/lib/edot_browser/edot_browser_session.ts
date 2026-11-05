@@ -63,16 +63,26 @@ export interface EdotBrowserRequest {
 
 export interface EdotBrowserClickTarget {
   tagName: string;
-  /** In the format of the user-action instrumentation: ids and `:nth-child`, no `:nth-of-type`. */
-  cssSelector: string;
+  /**
+   * In the format of the user-action instrumentation: ids and `:nth-child`, no `:nth-of-type`.
+   * Unset for an element the instrumentation can't build a selector for.
+   */
+  cssSelector?: string;
   /** The element's `data-otel-*` attributes, without the prefix. */
   otelAttributes?: Record<string, string>;
   /** Request fired by clicking the element. */
   request?: EdotBrowserRequest;
 }
 
-/** A frame of a JavaScript stack trace, in the format of Chromium: `at function (url:line:column)`. */
+/**
+ * A frame of a JavaScript stack trace. Every browser writes it its own way: `at function
+ * (url:line:column)` in Chromium, `function@url:line:column` in Firefox and Safari.
+ */
 export interface EdotBrowserStackFrame {
+  /**
+   * An `async ` prefix marks the frames that continue after an await. Empty for an anonymous
+   * function, which has no name to show.
+   */
   functionName: string;
   /** Path on the site origin, or an absolute URL. The site's main script when unset. */
   file?: string;
@@ -83,7 +93,8 @@ export interface EdotBrowserStackFrame {
 }
 
 export interface EdotBrowserExceptionTemplate {
-  type: string;
+  /** Unset for what isn't an error, like a promise rejected with a string. */
+  type?: string;
   message: string;
   /** How often the exception happens compared to the other ones of the site, 1 when unset. */
   weight?: number;
@@ -93,6 +104,11 @@ export interface EdotBrowserExceptionTemplate {
    * of occurrences. One generic stack in the main script when unset.
    */
   stacks?: ReadonlyArray<readonly EdotBrowserStackFrame[]>;
+  /**
+   * The stack trace exactly as it is written, for what doesn't follow the usual format. `null`
+   * leaves it out, as for a cross-origin "Script error." that has no stack. Overrides `stacks`.
+   */
+  rawStacktrace?: string | null;
 }
 
 export interface EdotBrowserPage {
@@ -146,7 +162,7 @@ const MIN_RESOURCES = 3;
 // Pages with fewer resources of their own are padded with common ones up to 3-8 entries
 const MAX_RESOURCES = 8;
 // Real pages load many more resources than that, so a page can bring up to this many of its own
-const MAX_OWN_RESOURCES = 24;
+const MAX_OWN_RESOURCES = 40;
 const MOBILE_SLOWDOWN = 1.4;
 const DEFAULT_FAILURE_STATUS_CODES = [500, 502, 503, 504] as const;
 const RELOAD_RATE = 0.1;
@@ -163,13 +179,21 @@ const FILLER_RESOURCES: readonly EdotBrowserResource[] = [
   { path: 'https://www.googletagmanager.com/gtag/js', initiatorType: 'script', sizeBytes: 140_000 },
 ];
 
-// UI framework internals, which live in a shared chunk of the page
+// UI framework internals, which live in a shared chunk of the page: what a render error passes
+// through before it reaches the component that threw it
 const FRAMEWORK_SCRIPT = '/static/js/vendor.4f1c2a.js';
 const FRAMEWORK_FRAMES: readonly EdotBrowserStackFrame[] = [
-  { functionName: 'renderWithHooks', file: FRAMEWORK_SCRIPT },
-  { functionName: 'beginWork', file: FRAMEWORK_SCRIPT },
-  { functionName: 'performUnitOfWork', file: FRAMEWORK_SCRIPT },
-];
+  'renderWithHooks',
+  'updateFunctionComponent',
+  'beginWork',
+  'performUnitOfWork',
+  'workLoopSync',
+  'renderRootSync',
+  'performConcurrentWorkOnRoot',
+  'workLoop',
+  'flushWork',
+  'MessagePort.performWorkUntilDeadline',
+].map((functionName) => ({ functionName, file: FRAMEWORK_SCRIPT }));
 
 const DEFAULT_STACK: readonly EdotBrowserStackFrame[] = [
   { functionName: 'render' },
@@ -348,26 +372,58 @@ const mainScript = ({ resources = [] }: EdotBrowserSite): string =>
 const stableColumn = (url: string, functionName: string): number =>
   1000 + Math.floor(createSeededRandom(`${url}:${functionName}`)() * 89_000);
 
+type BrowserEngine = EdotBrowserClient['browserEngine'];
+
 const formatFrame = (
   site: EdotBrowserSite,
+  engine: BrowserEngine,
   { functionName, file = mainScript(site), line = 1, column }: EdotBrowserStackFrame
 ): string => {
   const url = toUrl(site, file);
-  return `    at ${functionName} (${url}:${line}:${column ?? stableColumn(url, functionName)})`;
+  const position = `${url}:${line}:${column ?? stableColumn(url, functionName)}`;
+  if (engine === 'chromium') {
+    return functionName ? `    at ${functionName} (${position})` : `    at ${position}`;
+  }
+  // Firefox marks the frames after an await with `async*`, Safari doesn't know async frames
+  const name = functionName.replace(/^async /, '');
+  const asyncMark = engine === 'firefox' && name !== functionName ? 'async*' : '';
+  return `${asyncMark}${name}@${position}`;
 };
 
 /**
- * The stack trace of an occurrence of an exception. It only depends on the stack the occurrence
- * is thrown from, never on chance, so that occurrences of one stack are one group of errors.
+ * The stack trace of an occurrence of an exception, written the way the browser's engine does. It
+ * only depends on the stack the occurrence is thrown from, never on chance, so that occurrences of
+ * one stack in one engine are one group of errors.
  */
 const stacktrace = (
-  { site, random }: SessionContext,
-  { type, message, stacks = [DEFAULT_STACK] }: EdotBrowserExceptionTemplate
-): string => {
+  { site, random, client }: SessionContext,
+  { type, message, stacks = [DEFAULT_STACK], rawStacktrace }: EdotBrowserExceptionTemplate
+): string | undefined => {
+  if (rawStacktrace !== undefined) {
+    return rawStacktrace ?? undefined;
+  }
   const [first = DEFAULT_STACK] = stacks;
   const frames = stacks.length > 1 ? pick(random, stacks) : first;
-  return [`${type}: ${message}`, ...frames.map((frame) => formatFrame(site, frame))].join('\n');
+  const engine = client.browserEngine;
+  const lines = frames.map((frame) => formatFrame(site, engine, frame));
+
+  switch (engine) {
+    case 'chromium':
+      // V8 starts the stack with the error as `toString()` writes it, which Firefox and Safari don't
+      return [[type, message].filter(Boolean).join(': '), ...lines].join('\n');
+    case 'firefox':
+      return lines.map((line) => `${line}\n`).join('');
+    default:
+      return lines.join('\n');
+  }
 };
+
+const exceptionEvent = (ctx: SessionContext, template: EdotBrowserExceptionTemplate) =>
+  ctx.client.exception({
+    type: template.type,
+    message: template.message,
+    stacktrace: stacktrace(ctx, template),
+  });
 
 /**
  * CLS, and INP if the user interacted, which web-vitals reports when the document is hidden. Like
@@ -509,15 +565,7 @@ const sendRequest = (
           message: `Request failed with status code ${statusCode}`,
           stacks: [REQUEST_FAILURE_STACK],
         };
-    events.push(
-      client
-        .exception({
-          type: exception.type,
-          message: exception.message,
-          stacktrace: stacktrace(ctx, exception),
-        })
-        .timestamp(endTime)
-    );
+    events.push(exceptionEvent(ctx, exception).timestamp(endTime));
   }
   return events;
 };
@@ -760,9 +808,7 @@ const interactWithPage = (
       ({ weight = 1 }) => weight
     );
     events.push(
-      client
-        .exception({ ...exception, stacktrace: stacktrace(ctx, exception) })
-        .timestamp(Math.floor(between(random, from, slotEnd)))
+      exceptionEvent(ctx, exception).timestamp(Math.floor(between(random, from, slotEnd)))
     );
   }
 

@@ -23,6 +23,7 @@ import {
   type SynthtraceGenerator,
   type Timerange,
 } from '@kbn/synthtrace-client';
+import { DIGITAL_EXPERIENCE_EDGE_CASES } from './digital_experience_edge_cases';
 
 export interface DigitalExperienceEnvironment {
   /** Unset for traffic that reports no environment, like apps that don't set one. */
@@ -68,6 +69,14 @@ export interface DigitalExperienceScenarioOpts {
    */
   environments: boolean;
   /**
+   * Add what is far from the usual to the apps: URLs of thousands of characters, stack traces of
+   * dozens of frames and one that is over 8,191 characters, errors with no type or no stack, more
+   * than 100 distinct stack traces in one app, browsers that EDOT Browser can't identify, and
+   * clicks on elements with no selector. To see all the stack traces of the app that has them, use a
+   * `scale` of 3 for an hour, or run for several hours.
+   */
+  edgeCases: boolean;
+  /**
    * Multiplies the number of sessions per minute of every app. Fractions of a session add up over
    * time, so a scale below 1 thins out every app in proportion.
    */
@@ -84,6 +93,7 @@ const DEFAULT_SCENARIO_OPTS: Omit<DigitalExperienceScenarioOpts, 'seed'> = {
   withSessionId: true,
   includeRawAttribution: false,
   environments: false,
+  edgeCases: false,
   scale: 1,
 };
 
@@ -887,7 +897,7 @@ export const DIGITAL_EXPERIENCE_APPS: readonly DigitalExperienceApp[] = [
   },
 ];
 
-type BooleanOptKey = 'withSessionId' | 'includeRawAttribution' | 'environments';
+type BooleanOptKey = 'withSessionId' | 'includeRawAttribution' | 'environments' | 'edgeCases';
 
 /** Parses a boolean scenario option given as a boolean or a `true`/`false` string. */
 export const parseBooleanOption = (key: string, value: unknown, defaultValue: boolean): boolean => {
@@ -956,6 +966,7 @@ export const parseDigitalExperienceScenarioOpts = (
     withSessionId: parseBooleanOpt(opts, 'withSessionId'),
     includeRawAttribution: parseBooleanOpt(opts, 'includeRawAttribution'),
     environments: parseBooleanOpt(opts, 'environments'),
+    edgeCases: parseBooleanOpt(opts, 'edgeCases'),
     scale: parseScale(opts?.scale, DEFAULT_SCENARIO_OPTS.scale),
     seed: parseSeed(opts?.seed, getDefaultSeed(from)),
   };
@@ -1048,6 +1059,7 @@ export const generateEdotBrowserSessions = (
     withSessionId,
     includeRawAttribution,
     environments: withEnvironments,
+    edgeCases: withEdgeCases,
     scale,
     seed,
   }: DigitalExperienceScenarioOpts & { environment: string; from: number }
@@ -1080,9 +1092,18 @@ export const generateEdotBrowserSessions = (
             ? DISTRO_VERSION_WITH_SESSIONS
             : DISTRO_VERSION_WITHOUT_SESSIONS,
         });
-        const site: EdotBrowserSite = exceptions
-          ? { ...appSite, exceptions: [...(appSite.exceptions ?? []), ...exceptions] }
-          : appSite;
+        const edgeCases = withEdgeCases ? DIGITAL_EXPERIENCE_EDGE_CASES[serviceName] : undefined;
+        const site: EdotBrowserSite = {
+          ...appSite,
+          // Extra resources go last, so the app's own script stays its main one
+          resources: [...(appSite.resources ?? []), ...(edgeCases?.resources ?? [])],
+          pages: [...appSite.pages, ...(edgeCases?.pages ?? [])],
+          exceptions: [
+            ...(appSite.exceptions ?? []),
+            ...(edgeCases?.exceptions ?? []),
+            ...(exceptions ?? []),
+          ],
+        };
         // The sessions of an app are the same whether or not it is spread over environments
         const sessionKey =
           deployments.length > 1 ? `${serviceName}:${name ?? 'no-environment'}` : serviceName;
@@ -1098,7 +1119,14 @@ export const generateEdotBrowserSessions = (
             const random = createSeededRandom(`${seed}:${sessionKey}:${index}`);
             const pageViews =
               MIN_PAGE_VIEWS + Math.floor(random() * (MAX_PAGE_VIEWS - MIN_PAGE_VIEWS + 1));
-            const profile = edotBrowser.pickBrowserProfile(random, browserWeights);
+            const pickedProfile = edotBrowser.pickBrowserProfile(random, browserWeights);
+            // Drawn apart from the session, so that the option doesn't change the rest of its draws
+            const profile =
+              edgeCases?.unidentifiedBrowserRate !== undefined &&
+              createSeededRandom(`${seed}:${sessionKey}:${index}:browser`)() <
+                edgeCases.unidentifiedBrowserRate
+                ? edotBrowser.withoutBrowserDetails(pickedProfile)
+                : pickedProfile;
             // Everything below is drawn even when it isn't used, so that options and the kind of
             // session don't change the rest of the draws of the session
             const [sessionId, previousSessionId, tabId, otherTabId] = Array.from(

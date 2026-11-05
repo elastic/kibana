@@ -17,7 +17,12 @@ import {
 } from './health_profiles';
 import type { EdotBrowserSpanDocument } from './edot_browser_span';
 import { createSeededRandom } from '../utils/seeded_random';
-import { edotBrowser, type EdotBrowserDocument, type EdotBrowserSite } from '.';
+import {
+  edotBrowser,
+  type EdotBrowserDocument,
+  type EdotBrowserExceptionTemplate,
+  type EdotBrowserSite,
+} from '.';
 
 const LOGS_INDEX = 'logs-generic.otel-default';
 const TRACES_INDEX = 'traces-generic.otel-default';
@@ -39,10 +44,10 @@ const resourceTimings = {
   decodedBodySize: 16000,
 };
 
-const createClient = (sessionId?: string) =>
+const createClient = (sessionId?: string, profile: BrowserProfile = BROWSER_PROFILES.chromeMacos) =>
   edotBrowser
     .app({ serviceName: 'storefront-web', serviceVersion: '1.2.3', environment: 'production' })
-    .client(BROWSER_PROFILES.chromeMacos, { sessionId });
+    .client(profile, { sessionId });
 
 const SITE: EdotBrowserSite = {
   origin: 'https://shop.example.com',
@@ -104,7 +109,9 @@ describe('edotBrowser', () => {
       Object.values(BROWSER_PROFILES).forEach(({ resourceAttributes }) => {
         const userAgent = resourceAttributes['user_agent.original'];
         expect(userAgent).toContain(
-          `${uaTokens[resourceAttributes['browser.name']]}${resourceAttributes['browser.version']}`
+          `${uaTokens[String(resourceAttributes['browser.name'])]}${
+            resourceAttributes['browser.version']
+          }`
         );
         expect(typeof resourceAttributes['browser.mobile']).toBe('boolean');
         expect(resourceAttributes['browser.language']).toBeTruthy();
@@ -117,6 +124,28 @@ describe('edotBrowser', () => {
         'browser.brands',
       ]);
       expect(BROWSER_PROFILES.safariIos.resourceAttributes).not.toHaveProperty(['browser.brands']);
+    });
+
+    it('tells the engine of a browser, which decides how it writes stack traces', () => {
+      const engineOf = (profile: BrowserProfile) => createClient('s', profile).browserEngine;
+
+      expect(engineOf(BROWSER_PROFILES.chromeMacos)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.edgeWindows)).toBe('chromium');
+      expect(engineOf(BROWSER_PROFILES.firefoxLinux)).toBe('firefox');
+      expect(engineOf(BROWSER_PROFILES.safariIos)).toBe('webkit');
+    });
+
+    it('keeps only the language, version and user agent of a browser that is not identified', () => {
+      const { resourceAttributes } = edotBrowser.withoutBrowserDetails(BROWSER_PROFILES.safariIos);
+
+      expect(Object.keys(resourceAttributes).sort()).toEqual([
+        'browser.language',
+        'browser.version',
+        'user_agent.original',
+      ]);
+      expect(resourceAttributes['user_agent.original']).toBe(
+        BROWSER_PROFILES.safariIos.resourceAttributes['user_agent.original']
+      );
     });
 
     it('picks a profile from the weighted set', () => {
@@ -630,6 +659,7 @@ describe('edotBrowser', () => {
       pageViews = 4,
       health = HEALTH_PROFILES.healthy,
       sessionId,
+      profile,
       site = SITE,
       dwell,
       end,
@@ -640,6 +670,7 @@ describe('edotBrowser', () => {
       pageViews?: number;
       health?: HealthProfile;
       sessionId?: string;
+      profile?: BrowserProfile;
       site?: EdotBrowserSite;
       dwell?: Distribution;
       /** Anchors the session to end here instead of starting at `TIMESTAMP`. */
@@ -650,7 +681,7 @@ describe('edotBrowser', () => {
       edotBrowser
         .session({
           ...(end !== undefined ? { end } : { start: TIMESTAMP }),
-          client: createClient(sessionId),
+          client: createClient(sessionId, profile),
           site,
           health,
           pageViews,
@@ -1155,9 +1186,13 @@ describe('edotBrowser', () => {
         origin: string = SITE.origin
       ): EdotBrowserSite => ({ ...SITE, origin, exceptions });
       // Unhealthy sessions, to have many exceptions
-      const exceptionsOf = (site: EdotBrowserSite, sessions: number = 150) =>
+      const exceptionsOf = (
+        site: EdotBrowserSite,
+        sessions: number = 150,
+        profile?: BrowserProfile
+      ) =>
         Array.from({ length: sessions }, (_, seed) =>
-          createSession({ seed, site, health: HEALTH_PROFILES.critical })
+          createSession({ seed, site, health: HEALTH_PROFILES.critical, profile })
         )
           .flat()
           .filter((doc) => 'event_name' in doc && doc.event_name === 'exception');
@@ -1268,6 +1303,99 @@ describe('edotBrowser', () => {
         expect(new Set(frames).size).toBe(1);
       });
 
+      it('writes stack traces the way the engine of the browser does', () => {
+        const site = exceptionSite([
+          {
+            type: 'Error',
+            message: 'boom',
+            weight: 1000,
+            stacks: [
+              [
+                { functionName: 'inner', file: '/a.js', line: 2, column: 3 },
+                { functionName: 'async outer', file: '/b.js', line: 4, column: 5 },
+                { functionName: '', file: '/c.js', line: 6, column: 7 },
+              ],
+            ],
+          },
+        ]);
+        const traceOn = (profile: BrowserProfile) =>
+          exceptionsOf(site, 150, profile).find(
+            ({ attributes }) => attributes?.['exception.message'] === 'boom'
+          )?.attributes?.['exception.stacktrace'];
+        const shop = 'https://shop.example.com';
+
+        // V8 starts with the error and indents the frames, anonymous ones have no parentheses
+        expect(traceOn(BROWSER_PROFILES.chromeMacos)).toBe(
+          [
+            'Error: boom',
+            `    at inner (${shop}/a.js:2:3)`,
+            `    at async outer (${shop}/b.js:4:5)`,
+            `    at ${shop}/c.js:6:7`,
+          ].join('\n')
+        );
+        // Firefox has no header, marks async frames and ends with a line break
+        expect(traceOn(BROWSER_PROFILES.firefoxLinux)).toBe(
+          [`inner@${shop}/a.js:2:3`, `async*outer@${shop}/b.js:4:5`, `@${shop}/c.js:6:7`, ''].join(
+            '\n'
+          )
+        );
+        // Safari doesn't know async frames, and doesn't end with a line break
+        expect(traceOn(BROWSER_PROFILES.safariIos)).toBe(
+          [`inner@${shop}/a.js:2:3`, `outer@${shop}/b.js:4:5`, `@${shop}/c.js:6:7`].join('\n')
+        );
+      });
+
+      it('leaves out the type and the stack trace of what is not an error', () => {
+        const attributesOf = (template: EdotBrowserExceptionTemplate) =>
+          exceptionsOf(exceptionSite([{ ...template, weight: 1000 }])).find(
+            ({ attributes }) => attributes?.['exception.message'] === template.message
+          )?.attributes;
+
+        // A promise rejected with a string
+        const plain = attributesOf({ message: 'Timeout', rawStacktrace: null });
+        expect(plain).toMatchObject({ 'exception.message': 'Timeout' });
+        expect(plain).not.toHaveProperty(['exception.type']);
+        expect(plain).not.toHaveProperty(['exception.stacktrace']);
+
+        // The browser had a stack and left it empty
+        expect(attributesOf({ type: 'Error', message: 'empty', rawStacktrace: '' })).toMatchObject({
+          'exception.type': 'Error',
+          'exception.stacktrace': '',
+        });
+
+        // Written as it is, however long
+        const raw = 'x'.repeat(10_000);
+        expect(attributesOf({ type: 'Error', message: 'raw', rawStacktrace: raw })).toMatchObject({
+          'exception.stacktrace': raw,
+        });
+      });
+
+      it('writes a header without a colon for an error with no message or no type', () => {
+        const traceOf = (template: EdotBrowserExceptionTemplate) =>
+          String(
+            exceptionsOf(exceptionSite([{ ...template, weight: 1000 }])).find(
+              ({ attributes }) => attributes?.['exception.message'] === template.message
+            )?.attributes?.['exception.stacktrace']
+          ).split('\n')[0];
+
+        expect(traceOf({ type: 'Error', message: '' })).toBe('Error');
+        expect(traceOf({ message: 'only a message' })).toBe('only a message');
+      });
+
+      it('writes stack traces of any depth, and long enough to pass 8,191 characters', () => {
+        const frames = Array.from({ length: 80 }, (_, i) => ({
+          functionName: `fn${i}`,
+          file: `https://cdn.example.com/${'chunk-'.repeat(20)}.js`,
+        }));
+        const [first] = exceptionsOf(
+          exceptionSite([{ type: 'Error', message: 'deep', weight: 1000, stacks: [frames] }])
+        ).filter(({ attributes }) => attributes?.['exception.message'] === 'deep');
+        const trace = String(first.attributes?.['exception.stacktrace']);
+
+        expect(trace.split('\n')).toHaveLength(81);
+        expect(trace.length).toBeGreaterThan(8191);
+      });
+
       it('picks exceptions by weight', () => {
         const docs = exceptionsOf(
           exceptionSite([
@@ -1304,6 +1432,22 @@ describe('edotBrowser', () => {
 
         expect(count(true)).toBeGreaterThan(0);
         expect(count(false)).toBe(0);
+      });
+    });
+
+    it('writes clicks without a selector for an element that has none', () => {
+      const site: EdotBrowserSite = {
+        ...SITE,
+        pages: [{ path: '/', clickTargets: [{ tagName: 'DIV' }] }],
+      };
+      const clicks = Array.from({ length: 30 }, (_, seed) => createSession({ seed, site }))
+        .flat()
+        .filter((doc) => 'event_name' in doc && doc.event_name === 'browser.user_action.click');
+
+      expect(clicks.length).toBeGreaterThan(0);
+      clicks.forEach(({ attributes }) => {
+        expect(attributes).toMatchObject({ 'browser.tag_name': 'DIV' });
+        expect(attributes).not.toHaveProperty(['browser.css_selector']);
       });
     });
 
