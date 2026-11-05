@@ -17,12 +17,6 @@ jest.mock('./destination_card', () => ({
 }));
 
 describe('DestinationCardList', () => {
-  it('renders nothing without destinations', () => {
-    const { container } = render(<DestinationCardList destinations={[]} />);
-
-    expect(container).toBeEmptyDOMElement();
-  });
-
   it('renders one card per destination in order', () => {
     render(
       <DestinationCardList

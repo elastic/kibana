@@ -50,24 +50,28 @@ const WORKFLOW_LOAD_ERROR_MESSAGE = i18n.translate(
   { defaultMessage: 'Unable to load workflow details' }
 );
 
-const TRUNCATE_CSS = {
-  overflow: 'hidden',
-  textOverflow: 'ellipsis',
-  whiteSpace: 'nowrap',
-} as const;
-
 const WorkflowDestinationCard = ({ id }: { id: string }) => {
-  const {
-    data: workflow,
-    isLoading,
-    isError,
-    error,
-  } = useFetchWorkflow(id, true, { notifyOnError: false });
+  const { data: workflow, isLoading, error } = useFetchWorkflow(id, true, { notifyOnError: false });
   const application = useService(CoreStart('application'));
   const href = application.getUrlForApp(WORKFLOWS_APP_ID, { path: `/${id}` });
   const isNotFound = isNotFoundError(error);
-  // A failed background refetch keeps the cached workflow visible unless it was deleted.
-  const showError = isError && (isNotFound || !workflow);
+
+  const renderBody = () => {
+    if (isLoading) {
+      return <LoadingBody />;
+    }
+    // Cached data stays visible when a background refetch fails, unless the workflow was deleted.
+    if (workflow && !isNotFound) {
+      return (
+        <WorkflowBody
+          name={workflow.name}
+          description={workflow.description}
+          connectorTypes={getWorkflowConnectorTypes(workflow.definition)}
+        />
+      );
+    }
+    return <ErrorBody id={id} isNotFound={isNotFound} />;
+  };
 
   return (
     <EuiPanel
@@ -78,15 +82,7 @@ const WorkflowDestinationCard = ({ id }: { id: string }) => {
     >
       <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
         <EuiFlexItem grow css={{ minWidth: 0 }}>
-          {isLoading && <LoadingBody />}
-          {!isLoading && showError && <ErrorBody id={id} isNotFound={isNotFound} />}
-          {!isLoading && !showError && (
-            <WorkflowBody
-              name={workflow?.name ?? id}
-              description={workflow?.description}
-              connectorTypes={getWorkflowConnectorTypes(workflow?.definition)}
-            />
-          )}
+          {renderBody()}
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
           <EuiToolTip content={OPEN_WORKFLOW_LABEL} disableScreenReaderOutput>
@@ -149,7 +145,7 @@ const WorkflowBody = ({ name, description, connectorTypes }: WorkflowBodyProps) 
       <EuiText
         size="xs"
         color="subdued"
-        css={TRUNCATE_CSS}
+        className="eui-textTruncate"
         data-test-subj="actionPolicyDestinationCardDescription"
       >
         {description}
@@ -167,7 +163,7 @@ const CardTitle = ({ name }: { name: string }) => (
     <EuiText
       size="s"
       tabIndex={0}
-      css={TRUNCATE_CSS}
+      className="eui-textTruncate"
       data-test-subj="actionPolicyDestinationCardTitle"
     >
       <strong>{name}</strong>

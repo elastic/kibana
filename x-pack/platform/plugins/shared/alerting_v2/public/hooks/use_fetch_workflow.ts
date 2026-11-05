@@ -10,10 +10,8 @@ import { useService, CoreStart } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
 import type { WorkflowDetailDto } from '@kbn/workflows';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { isNotFoundError } from '../utils/is_not_found_error';
+import { retryUnlessNotFound } from '../utils/is_not_found_error';
 import { workflowKeys } from './query_key_factory';
-
-const DEFAULT_MAX_RETRIES = 3;
 
 export const useFetchWorkflow = (
   id: string | undefined,
@@ -28,9 +26,7 @@ export const useFetchWorkflow = (
     queryFn: () => workflowsApi.getWorkflow(id!),
     enabled: !!id && isEnabled,
     refetchOnWindowFocus: false,
-    // Don't retry 404s — the workflow is gone, retrying just delays the not-found
-    // UI. Other errors (network, 5xx) keep the default retry behaviour.
-    retry: (failureCount, error) => !isNotFoundError(error) && failureCount < DEFAULT_MAX_RETRIES,
+    retry: retryUnlessNotFound,
     onError: (error: Error) => {
       if (!notifyOnError) {
         return;
