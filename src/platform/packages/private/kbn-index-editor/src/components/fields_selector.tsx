@@ -62,13 +62,28 @@ export const FieldsSelector: React.FC<FieldsSelectorProps> = ({
     }
 
     const checkedColumnNames = new Set(checkedNames);
+    const originalIndexByName = new Map(columns.map((column, index) => [column.name, index]));
+    const originalIndexOf = (name: string) =>
+      originalIndexByName.get(name) ?? Number.MAX_SAFE_INTEGER;
 
-    // Keep the current order of columns that stay visible, then append newly revealed ones in
-    // data view order.
-    const nextVisibleColumns = [
-      ...visibleColumns.filter((name) => checkedColumnNames.has(name)),
-      ...checkedNames.filter((name) => !visibleColumnNames.has(name)),
-    ];
+    // Columns that stay visible keep their current relative order.
+    const nextVisibleColumns = visibleColumns.filter((name) => checkedColumnNames.has(name));
+
+    // Insert each newly revealed column back at its original position relative to the columns
+    // already shown, instead of appending it at the end.
+    const revealedNames = checkedNames.filter((name) => !visibleColumnNames.has(name));
+    for (const name of revealedNames) {
+      const originalIndex = originalIndexOf(name);
+      const insertAt = nextVisibleColumns.findIndex(
+        (visibleName) => originalIndexOf(visibleName) > originalIndex
+      );
+
+      if (insertAt === -1) {
+        nextVisibleColumns.push(name);
+      } else {
+        nextVisibleColumns.splice(insertAt, 0, name);
+      }
+    }
 
     onChange(nextVisibleColumns);
   };

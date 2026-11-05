@@ -35,7 +35,24 @@ describe('FieldsSelector', () => {
     expect(screen.getByRole('button', { name: /Fields \(2\/5\)/ })).toBeVisible();
   });
 
-  it('reveals a hidden field, appending it after the already visible ones', async () => {
+  it('reveals a hidden field at its original position relative to the visible ones', async () => {
+    const user = setupUser();
+    const onChange = jest.fn();
+    renderWithI18n(
+      <FieldsSelector
+        columns={columns}
+        visibleColumns={['alpha', 'gamma', 'epsilon']}
+        onChange={onChange}
+      />
+    );
+
+    await user.click(screen.getByRole('button', { name: /Fields/ }));
+    await user.click(screen.getByRole('option', { name: /delta/ }));
+
+    expect(onChange).toHaveBeenCalledWith(['alpha', 'gamma', 'delta', 'epsilon']);
+  });
+
+  it('appends a revealed field that sits after every visible one', async () => {
     const user = setupUser();
     const onChange = jest.fn();
     renderWithI18n(
