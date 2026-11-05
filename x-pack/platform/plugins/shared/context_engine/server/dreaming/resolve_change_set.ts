@@ -16,7 +16,7 @@ import {
 import type { AccessPattern, DreamChangeSet } from '../../common/step_types/apply_dream_changes';
 import { baseContent } from './access_patterns';
 import { citedMemoryIds, kindOf, type DreamedKi } from './dreamed_ki';
-import { entityId, factId } from './ids';
+import { batchKeyOf, entityId, factId } from './ids';
 
 const NEW_REF_PREFIX = 'new:';
 
@@ -131,6 +131,7 @@ export const resolveChangeSet = (
 ): ResolvedChangeSet => {
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
+  const batchKey = batchKeyOf(memories.keys());
   /** New entity keys, and existing entity ids, to their final id. */
   const entityRefs = new Map<string, string>();
   for (const [id, ki] of existing) {
@@ -271,7 +272,7 @@ export const resolveChangeSet = (
       const sourceMemoryIds = resolveSources(fact.source_memory_ids, current);
       operations.push({
         op: 'upsert_fact',
-        id: current?.id ?? factId(executionId, fact.ref),
+        id: current?.id ?? factId(executionId, batchKey, fact.ref),
         type,
         title,
         content,

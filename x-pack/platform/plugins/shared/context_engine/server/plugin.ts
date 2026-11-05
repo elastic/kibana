@@ -86,6 +86,7 @@ export class ContextEnginePlugin
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
+  private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
   private analyticsService?: ContextEngineAnalyticsService;
@@ -325,6 +326,11 @@ export class ContextEnginePlugin
         checkWritePrivilege,
         logger: this.logger.get('feedback_analysis'),
       },
+      dreaming: {
+        getAiIndexService,
+        isContextEngineEnabled,
+        isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
+      },
     });
 
     // Read-only Signals routes (reads run as the current user, scoped to the active space).
@@ -465,6 +471,8 @@ export class ContextEnginePlugin
     this.isFeedbackLoopEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
       false;
+    this.isGlobalMemoryEnabled = async () =>
+      (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
 
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(

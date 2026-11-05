@@ -68,8 +68,10 @@ const referenceKey = ({ uri, relation, description }: DreamedKiReference): strin
   `${relation ?? ''}\u0000${relation === 'relates_to' ? description ?? '' : ''}\u0000${uri}`;
 
 /**
- * Adds references without duplicates. Over the cap, the oldest relationships go first and the
- * `derived_from` references last, because they are what counts the memories a KI was seen in.
+ * Adds references without duplicates. Over the cap, the oldest `derived_from` citations go first:
+ * relationships and the entities a fact is about are the graph, while a sighting is already
+ * counted in `memory.number_of_occurrences`. A memory whose citation was dropped counts again if
+ * it is seen again.
  */
 export const addReferences = (
   current: readonly DreamedKiReference[] | undefined,
@@ -80,7 +82,7 @@ export const addReferences = (
     byKey.set(referenceKey(reference), byKey.get(referenceKey(reference)) ?? reference);
   }
   const references = [...byKey.values()];
-  for (const relation of ['relates_to', 'derived_from'] as const) {
+  for (const relation of ['derived_from', 'relates_to'] as const) {
     while (references.length > MAX_KI_REFERENCES) {
       const index = references.findIndex((reference) => reference.relation === relation);
       if (index === -1) {

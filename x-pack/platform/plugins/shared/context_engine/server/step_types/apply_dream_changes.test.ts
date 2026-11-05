@@ -153,6 +153,36 @@ describe('getApplyDreamChangesStepDefinition', () => {
     );
   });
 
+  it('writes nothing from a memory whose latest revision is a tombstone', async () => {
+    const stored: Record<string, Record<string, unknown>> = {};
+    const context = createMockStepContext({
+      input: {
+        ai_index_id: 'support',
+        memories: [
+          {
+            id: 'mem-9',
+            updated_at: '2026-11-02T18:40:12.000Z',
+            governance: { lifecycle: { status: 'deleted' } },
+          },
+        ],
+        changes: {
+          entities: [{ ref: 'new:1', type: 'city', name: 'Lyon', source_memory_ids: ['mem-9'] }],
+        },
+      },
+      esClient: createEsClient(stored),
+    });
+
+    const { output } = await definition(aiIndexService()).handler(context);
+
+    expect(output).toEqual(
+      expect.objectContaining({
+        created: 0,
+        rejected: [{ item: 'entity new:1', reason: 'cites memories it was not shown: mem-9' }],
+      })
+    );
+    expect(stored).toEqual({});
+  });
+
   it('fails on a change set that does not match the schema', async () => {
     const context = createMockStepContext({
       input: { ai_index_id: 'support', memories: [], changes: { entities: 'nope' } },

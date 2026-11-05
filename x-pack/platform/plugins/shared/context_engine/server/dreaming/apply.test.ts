@@ -302,24 +302,44 @@ describe('applyOperations', () => {
 });
 
 describe('addReferences', () => {
-  it('drops relationships before the memories an item cites when over the cap', () => {
-    const memories = Array.from({ length: 99 }, (_, index) => ({
-      uri: `ki://m-${index}`,
+  const citations = (count: number, from = 0) =>
+    Array.from({ length: count }, (_, index) => ({
+      uri: `ki://m-${from + index}`,
       relation: 'derived_from' as const,
     }));
-    const relationships = [
-      { uri: 'ki://entity-a', relation: 'relates_to' as const, description: 'knows' },
-      { uri: 'ki://entity-b', relation: 'relates_to' as const, description: 'knows' },
-    ];
+  const relationships = [
+    { uri: 'ki://entity-a', relation: 'relates_to' as const, description: 'knows' },
+    { uri: 'ki://entity-b', relation: 'relates_to' as const, description: 'knows' },
+  ];
+
+  it('drops the oldest memory citations before any relationship when over the cap', () => {
+    const newRelationship = {
+      uri: 'ki://entity-c',
+      relation: 'relates_to' as const,
+      description: 'knows',
+    };
 
     const references = addReferences(
-      [...relationships, ...memories],
-      [{ uri: 'ki://m-new', relation: 'derived_from' }]
+      [...relationships, ...citations(100)],
+      [newRelationship, ...citations(1, 100)]
     );
 
     expect(references).toHaveLength(100);
-    expect(references).not.toContainEqual(relationships[0]);
-    expect(references).not.toContainEqual(relationships[1]);
-    expect(references).toContainEqual({ uri: 'ki://m-new', relation: 'derived_from' });
+    expect(references).toEqual(expect.arrayContaining([...relationships, newRelationship]));
+    expect(references).not.toContainEqual({ uri: 'ki://m-0', relation: 'derived_from' });
+    expect(references).toContainEqual({ uri: 'ki://m-100', relation: 'derived_from' });
+  });
+
+  it('drops the oldest relationships only once no citation is left', () => {
+    const many = Array.from({ length: 101 }, (_, index) => ({
+      uri: `ki://entity-${index}`,
+      relation: 'relates_to' as const,
+      description: 'knows',
+    }));
+
+    const references = addReferences(many, []);
+
+    expect(references).toHaveLength(100);
+    expect(references).not.toContainEqual(many[0]);
   });
 });

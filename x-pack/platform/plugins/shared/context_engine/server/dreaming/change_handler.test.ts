@@ -60,14 +60,22 @@ describe('createDreamingChangeHandler', () => {
     expect(scheduleService.reconcile).toHaveBeenCalledTimes(1);
   });
 
-  it('leaves the workflow alone when the dreaming config is saved unchanged', async () => {
+  it('reconciles when the dreaming config is saved unchanged, which retries and re-mints the key', async () => {
     const current = { ...aiIndex, dreaming };
 
     await notifier.notify({ ...change, previous: current, current, saved: ['dreaming'] });
+
+    expect(scheduleService.reconcile).toHaveBeenCalledTimes(1);
+  });
+
+  it('leaves the workflow alone when a save writes only other fields', async () => {
+    const current = { ...aiIndex, dreaming };
+
     await notifier.notify({
       ...change,
       previous: current,
-      current: { ...current, description: 'Support cases' },
+      current: { ...current, feedback_analysis: { enabled: true } },
+      saved: ['feedback_analysis'],
     });
 
     expect(scheduleService.reconcile).not.toHaveBeenCalled();

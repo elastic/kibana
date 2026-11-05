@@ -124,12 +124,17 @@ export const applyDreamChangesInputSchema = lazySchema(() =>
           .object({
             id: refSchema,
             updated_at: z.string().max(MAX_TIMESTAMP_LENGTH).optional(),
+            governance: z
+              .object({
+                lifecycle: z.object({ status: z.string().max(64).optional() }).optional(),
+              })
+              .optional(),
           })
           .passthrough()
       )
       .max(MAX_DREAMING_STEP_MEMORIES)
       .describe(
-        'The memories the model was shown, as read from the AI index. Every item it writes must cite some of them, or memories the item already cites.'
+        'The memories the model was shown, as read from the AI index: the latest revision of each. Every item it writes must cite some of them, or memories the item already cites. Deleted ones are ignored.'
       ),
     changes: dreamChangeSetSchema.describe('The change set the dreaming model returned'),
   })

@@ -68,4 +68,31 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
       expect.objectContaining({ entity_types: [], relationship_types: [] })
     );
   });
+
+  it('checks whether to dream before reading memories or calling a model', () => {
+    const [status, run] = render().steps;
+
+    expect(status).toEqual(
+      expect.objectContaining({ name: 'status', type: 'context-engine.getDreamingStatus' })
+    );
+    expect(run).toEqual(
+      expect.objectContaining({
+        type: 'if',
+        condition: '${{ steps.status.output.dream == true }}',
+      })
+    );
+    expect(run.steps.map(({ name }: { name: string }) => name)).toEqual([
+      'last_run',
+      'read_memories',
+      'dream',
+    ]);
+  });
+
+  it('keeps tombstones in the memory query, so collapse returns each memory latest revision', () => {
+    const readMemories = render().steps[1].steps[1];
+
+    expect(readMemories.with.collapse).toEqual({ field: 'id' });
+    expect(readMemories.with.query.bool).not.toHaveProperty('must_not');
+    expect(readMemories.with._source).toContain('governance.lifecycle.status');
+  });
 });

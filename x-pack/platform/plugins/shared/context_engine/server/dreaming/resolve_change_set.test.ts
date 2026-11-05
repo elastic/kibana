@@ -10,7 +10,7 @@ import {
   type DreamChangeSet,
 } from '../../common/step_types/apply_dream_changes';
 import type { DreamedKi } from './dreamed_ki';
-import { factId } from './ids';
+import { batchKeyOf, factId } from './ids';
 import {
   referencedIds,
   resolveChangeSet,
@@ -122,7 +122,7 @@ describe('resolveChangeSet', () => {
     const fact = operations[1] as UpsertFactOperation;
     expect(fact).toMatchObject({
       op: 'upsert_fact',
-      id: factId('exec-1', 'new:2'),
+      id: factId('exec-1', batchKeyOf(['m-1', 'm-2']), 'new:2'),
       about: [existingEntity.id],
       lastSeenAt: '2026-10-02T10:00:00.000Z',
     });
@@ -133,6 +133,29 @@ describe('resolveChangeSet', () => {
       type: 'member_of',
       remove: false,
     });
+  });
+
+  it('gives the same new key in two batches of one run two different facts', () => {
+    const newFact = changeSet({
+      facts: [
+        { ref: 'new:1', type: 'preference', title: 'T', content: 'C', source_memory_ids: ['m-1'] },
+      ],
+    });
+    const secondBatch = changeSet({
+      facts: [
+        { ref: 'new:1', type: 'preference', title: 'T', content: 'C', source_memory_ids: ['m-3'] },
+      ],
+    });
+
+    const first = resolveChangeSet(newFact, context()).operations[0] as UpsertFactOperation;
+    const second = resolveChangeSet(
+      secondBatch,
+      context({ memories: new Map([['m-3', '2026-10-03T10:00:00.000Z']]) })
+    ).operations[0] as UpsertFactOperation;
+    const retried = resolveChangeSet(newFact, context()).operations[0] as UpsertFactOperation;
+
+    expect(second.id).not.toBe(first.id);
+    expect(retried.id).toBe(first.id);
   });
 
   it('updates an existing item under its own id, keeping what the change leaves out', () => {

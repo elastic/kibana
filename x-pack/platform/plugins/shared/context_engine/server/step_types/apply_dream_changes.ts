@@ -27,6 +27,11 @@ import {
   kiWriterFromContext,
 } from './helpers';
 
+const INACTIVE_STATUSES: ReadonlySet<string> = new Set(['deleted', 'verification_failed']);
+
+const isInactiveStatus = (status: string | undefined): boolean =>
+  status !== undefined && INACTIVE_STATUSES.has(status);
+
 export const getApplyDreamChangesStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
@@ -93,7 +98,12 @@ export const getApplyDreamChangesStepDefinition = ({
       const resolved = resolveChangeSet(changeSet, {
         executionId: stepContext.execution.id,
         vocabulary: vocabularyOf(aiIndex.dreaming),
-        memories: new Map(memories.map(({ id, updated_at: updatedAt }) => [id, updatedAt])),
+        // A deleted memory's latest revision is its tombstone: nothing may be written from it.
+        memories: new Map(
+          memories
+            .filter(({ governance }) => !isInactiveStatus(governance?.lifecycle?.status))
+            .map(({ id, updated_at: updatedAt }) => [id, updatedAt])
+        ),
         existing,
       });
       const { operations, dropped } = await keepVerifiedPatterns(
