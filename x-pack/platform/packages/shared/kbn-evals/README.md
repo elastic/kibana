@@ -351,10 +351,10 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 Exit codes (with `--fail-on-regression`):
 
 - **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked. Any `insufficient pairs` or `no usable p-value` warning means those evaluators were not checked, not that they passed.
-- **1, regression**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs.
-- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs or no usable p-value, or only neutral evaluators are in scope). Missing scores or overlapping datasets are errors, as before.
+- **1, significant regression or an unexpected error**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs. Unexpected errors (bad flags, Kibana unreachable) also exit 1, so read the log line to tell the two apart.
+- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when there are no scores, no overlapping datasets or no paired scores to compare, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs or no usable p-value, or only neutral evaluators are in scope).
 
-Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0.
+Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0, and missing scores, datasets or pairs remain plain errors (exit 1).
 
 The gate decision is a pure function (`evaluateRegressionGate` in `src/utils/reporting/regression_gate.ts`); the Holm adjustment is in `holm_correction.ts`.
 

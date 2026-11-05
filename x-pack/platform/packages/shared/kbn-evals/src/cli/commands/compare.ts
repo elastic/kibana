@@ -55,8 +55,9 @@ export const compareCmd: Command<void> = {
     --fail-on-regression            Exit non-zero if any evaluator got significantly worse
                                     (direction-aware; higher-is-better and lower-is-better
                                     evaluators are both handled, neutral ones never trip).
-                                    Exit codes: 0 passed, 1 regression, 2 inconclusive or not
-                                    evaluated (no baseline, no results, or nothing checkable)
+                                    Exit codes: 0 passed, 1 regression or unexpected error, 2
+                                    inconclusive or not evaluated (no baseline, no scores or
+                                    pairs, nothing checkable, no evaluator matched)
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
@@ -119,6 +120,15 @@ export const compareCmd: Command<void> = {
     // Scores are only readable from the spaces they were ingested into, so a
     // comparison has to be made from where the runs put them.
     const spaceIds = readSpaceIdsFlag(flagsReader) ?? getSpaceIdsFromEnv();
+
+    // "Nothing to compare" means the gate was not evaluated. Under --fail-on-regression that gets
+    // its own exit code; otherwise it stays the plain error it always was.
+    const nothingToCompare = (message: string): Error =>
+      failOnRegression
+        ? createFailError(`${message} --fail-on-regression: regression gate was NOT evaluated.`, {
+            exitCode: GATE_INCONCLUSIVE_EXIT_CODE,
+          })
+        : new Error(message);
 
     if (format !== 'terminal' && format !== 'markdown') {
       throw createFlagError('--format must be "terminal" or "markdown".');
@@ -285,11 +295,11 @@ export const compareCmd: Command<void> = {
     ]);
 
     if (targetExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${targetExperimentId}`);
+      throw nothingToCompare(`No scores found for experiment ID: ${targetExperimentId}`);
     }
 
     if (baselineExperimentScores.length === 0) {
-      throw new Error(`No scores found for experiment ID: ${baselineExperimentId}`);
+      throw nothingToCompare(`No scores found for experiment ID: ${baselineExperimentId}`);
     }
 
     const targetExperimentDatasets = new Map(
@@ -306,7 +316,7 @@ export const compareCmd: Command<void> = {
     );
 
     if (overlappingDatasetIds.length === 0) {
-      throw new Error('No overlapping datasets found between the two experiments.');
+      throw nothingToCompare('No overlapping datasets found between the two experiments.');
     }
 
     log.info(`Found ${overlappingDatasetIds.length} overlapping dataset(s).`);
@@ -325,7 +335,7 @@ export const compareCmd: Command<void> = {
     );
 
     if (pairs.length === 0) {
-      throw new Error('No paired scores found between the two experiments.');
+      throw nothingToCompare('No paired scores found between the two experiments.');
     }
 
     log.info(
