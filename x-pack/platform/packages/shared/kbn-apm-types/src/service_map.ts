@@ -64,7 +64,8 @@ export type ServiceMapResponse = Pick<ServiceMapTelemetry, 'tracesCount'> & Serv
 export interface ServiceMapServiceStats {
   transactionType: string;
   throughput: number;
-  failedTransactionRate: number;
+  /** `null` when none of the main type's transactions has a known outcome */
+  failedTransactionRate: number | null;
   /** In microseconds */
   latency: number | null;
   requestCount: number;

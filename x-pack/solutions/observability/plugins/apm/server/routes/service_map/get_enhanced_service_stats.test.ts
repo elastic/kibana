@@ -271,6 +271,17 @@ describe('getEnhancedServiceStats', () => {
       });
     });
 
+    it('sets no failed transaction rate when no transaction has a known outcome', async () => {
+      const [service] = await getServices([
+        {
+          name: 'unknown-outcome',
+          defaultType: { ...REQUEST, successful: 0, successfulOrFailed: 0 },
+        },
+      ]);
+
+      expect(service.stats?.failedTransactionRate).toBeNull();
+    });
+
     it('leaves the stats out when the service has no transaction types', async () => {
       const [service] = await getServices([{ name: 'no-types' }]);
 

@@ -26,6 +26,7 @@ import {
 } from '../../../common/es_fields/apm';
 import { defaultTransactionTypes } from '../../../common/transaction_types';
 import { environmentQuery } from '../../../common/utils/environment_query';
+import { isFiniteNumber } from '../../../common/utils/is_finite_number';
 import { ENVIRONMENT_ALL } from '../../../common/environment_filter_values';
 import type { IEnvOptions } from './get_service_map';
 import { extractEsQueryFilters } from './extract_es_query_filters';
@@ -146,6 +147,10 @@ export async function getEnhancedServiceStats({
   return buckets.map((bucket) => {
     const agentMetrics = bucket.agent.top[0]?.metrics;
     const mainTypeBucket = bucket.default_type.buckets[0] ?? bucket.top_type.buckets[0];
+    // NaN when none of the main type's transactions has a known outcome
+    const failedTransactionRate = mainTypeBucket
+      ? calculateFailedTransactionRate(mainTypeBucket)
+      : undefined;
 
     return {
       [SERVICE_NAME]: bucket.key as string,
@@ -165,7 +170,9 @@ export async function getEnhancedServiceStats({
                 end,
                 value: mainTypeBucket.doc_count,
               }),
-              failedTransactionRate: calculateFailedTransactionRate(mainTypeBucket),
+              failedTransactionRate: isFiniteNumber(failedTransactionRate)
+                ? failedTransactionRate
+                : null,
               latency: mainTypeBucket.latency.value,
               requestCount: mainTypeBucket.doc_count,
             },
