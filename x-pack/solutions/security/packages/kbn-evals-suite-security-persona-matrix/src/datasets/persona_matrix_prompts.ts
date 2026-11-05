@@ -524,9 +524,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'Shows the complete workflow YAML to the user: version "1", a manual trigger, a \'message\' input, ' +
         'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
         "/chat.postMessage to channel '#general' with the message text taken from the 'message' input. " +
-        'The workflow passes validation (validate_workflow reports it valid). The response may also note ' +
-        'that the Slack connector id could not be confirmed or is unknown, and may suggest connector steps ' +
-        'instead of a raw http step; that does not contradict the reference.',
+        'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
       expectedSkill: 'workflow-authoring',
@@ -556,9 +554,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 ' +
         "that sends POST /chat.postMessage to channel '#general' with the fixed text " +
         "'Chrysalis hunt complete - see case for details'. The workflow passes validation " +
-        '(validate_workflow reports it valid). The response may also note that the Slack connector id could ' +
-        'not be confirmed or is unknown, and may suggest connector steps instead of a raw http step; that ' +
-        'does not contradict the reference.',
+        '(validate_workflow reports it valid).',
     },
     metadata: {
       // No expectedSkill: the prompt does not ask for the skill, and
@@ -588,9 +584,7 @@ export const PERSONA_MATRIX_EXAMPLES: PersonaMatrixExample[] = [
         'Shows the final workflow YAML to the user: version "1", a manual trigger, a \'summary\' string input, ' +
         'and a single http step on connector d7306385-cbe6-4541-9726-49afdff59ba5 that sends POST ' +
         "/chat.postMessage to channel '#general' with the message text taken from the 'summary' input. " +
-        'The workflow passes validation (validate_workflow reports it valid). The response may also note ' +
-        'that the Slack connector id could not be confirmed or is unknown, and may suggest connector steps ' +
-        'instead of a raw http step; that does not contradict the reference.',
+        'The workflow passes validation (validate_workflow reports it valid).',
     },
     metadata: {
       // No expectedSkill: see `workflow-authoring-b` — the prompt does not ask

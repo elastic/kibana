@@ -28,6 +28,11 @@ export interface RejudgedCell {
   /** Dataset/column key within that execution. */
   datasetId: string;
   evaluatorName: string;
+  /**
+   * Which repetition of the example was re-graded; absent on single-rep runs
+   * and treated as repetition 0 (the same default `planReplay` and fetch use).
+   */
+  repetition?: number;
   /** The re-computed score. */
   score: number;
   /** The judge that produced `score`. */
@@ -39,6 +44,8 @@ export interface GoldenCell {
   experimentId: string;
   datasetId: string;
   evaluatorName: string;
+  /** Repetition of the example this score belongs to; absent on single-rep runs (0). */
+  repetition?: number;
   score: number;
   judgeModelId?: string;
 }
@@ -57,8 +64,16 @@ export interface MergeOutcome {
   unmatched: RejudgedCell[];
 }
 
-const keyOf = (c: { experimentId: string; datasetId: string; evaluatorName: string }): string =>
-  `${c.experimentId}\u0000${c.datasetId}\u0000${c.evaluatorName}`;
+// A multi-repetition execution stores one score per repetition under the same
+// experiment/dataset/evaluator, so the repetition is part of the cell identity;
+// without it the last repetition would overwrite the others.
+const keyOf = (c: {
+  experimentId: string;
+  datasetId: string;
+  evaluatorName: string;
+  repetition?: number;
+}): string =>
+  `${c.experimentId}\u0000${c.datasetId}\u0000${c.evaluatorName}\u0000${c.repetition ?? 0}`;
 
 /**
  * Apply a rejudge artifact to a golden board.

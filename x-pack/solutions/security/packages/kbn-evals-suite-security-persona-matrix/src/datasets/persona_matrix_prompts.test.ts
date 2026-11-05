@@ -185,4 +185,18 @@ describe('PERSONA_MATRIX_EXAMPLES expectation contracts', () => {
     });
     expect(mismatches).toEqual([]);
   });
+
+  // The correctness judge reads the reference. A clause excusing an unconfirmed
+  // connector or a non-http step would let Factuality pass what the
+  // deterministic ConnectorInvoked check (connector id + step type) fails.
+  it('references never excuse a missing connector or a different step type', () => {
+    const excusing = PERSONA_MATRIX_EXAMPLES.filter(
+      ({ metadata, output }) =>
+        (metadata.expectedConnectorId || metadata.expectedStepType) &&
+        /could not be confirmed|is unknown|instead of a raw|does not contradict|not contradict/i.test(
+          output.reference ?? ''
+        )
+    ).map(({ id }) => id);
+    expect(excusing).toEqual([]);
+  });
 });

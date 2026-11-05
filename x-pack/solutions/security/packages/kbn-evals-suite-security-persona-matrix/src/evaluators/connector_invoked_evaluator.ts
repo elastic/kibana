@@ -32,20 +32,25 @@ const VALIDATE_WORKFLOW_TOOL_ID = 'platform.workflows.validate_workflow';
 const isRecord = (value: unknown): value is Record<string, unknown> =>
   typeof value === 'object' && value !== null;
 
+const RENDER_ATTACHMENT_ID_PATTERN = /<render_attachment\s+id="([^"]+)"/g;
+
 /**
  * Pull the text that can contain the delivered workflow. In Agent Builder runs
  * the YAML is NOT in the `generate_workflow` result (it returns only
  * attachment/proposal ids plus a prose comment) and `validate_workflow`
  * returns only `{ result }`, so the artifact is read from, in order:
  *  - the conversation's current `workflow.yaml` attachments
- *    (`workflowAttachments`, read back by the chat client);
+ *    (`workflowAttachments`, read back by the chat client). When several exist,
+ *    only the one the final message rendered (`<render_attachment id=…>`) is
+ *    scored, falling back to the last one — a leftover draft must not rescue
+ *    the run;
  *  - `data.yaml` of `generate_workflow` results (the shape the tool returns to
  *    non-agent callers);
- *  - the final answer messages, when the model pastes the YAML inline.
- * Only when none of the first two yields YAML does the LAST `validate_workflow`
- * `params.yaml` stand in: it is the candidate the agent finished on. Earlier
- * validation inputs are superseded drafts, so an early candidate carrying the
- * connector cannot rescue a final workflow that dropped it.
+ *  - the LAST `validate_workflow` `params.yaml`: the candidate the agent
+ *    finished on. Earlier validation inputs are superseded drafts.
+ * The final answer messages are scored only when none of these yields YAML
+ * (the model pasted the workflow inline). When an artifact exists, a message
+ * restating the prompt (`type: http` plus the connector id) cannot vouch for it.
  *
  * Deliberately NOT scanned: `generate_workflow` params (`query`/`context` are
  * the model restating the prompt, connector id included), params of every
@@ -55,7 +60,7 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
  * authored workflow targeting the connector.
  */
 export const collectProducedText = (output: unknown): string => {
-  const parts: string[] = [];
+  const messageParts: string[] = [];
   const { messages, steps, workflowAttachments } = (output ?? {}) as {
     messages?: unknown;
     steps?: unknown;
@@ -65,19 +70,29 @@ export const collectProducedText = (output: unknown): string => {
     messages.forEach((entry) => {
       const message = isRecord(entry) ? entry.message : undefined;
       if (typeof message === 'string') {
-        parts.push(message);
+        messageParts.push(message);
       }
     });
   }
-  const delivered: string[] = [];
+
+  const attachments: Array<{ id?: string; yaml: string }> = [];
   if (Array.isArray(workflowAttachments)) {
     workflowAttachments.forEach((attachment) => {
-      const yaml = isRecord(attachment) ? attachment.yaml : undefined;
-      if (typeof yaml === 'string') {
-        delivered.push(yaml);
+      if (isRecord(attachment) && typeof attachment.yaml === 'string') {
+        attachments.push({
+          id: typeof attachment.id === 'string' ? attachment.id : undefined,
+          yaml: attachment.yaml,
+        });
       }
     });
   }
+  const renderedIds = new Set(
+    Array.from(messageParts.join('\n').matchAll(RENDER_ATTACHMENT_ID_PATTERN), ([, id]) => id)
+  );
+  const rendered = attachments.filter(({ id }) => id !== undefined && renderedIds.has(id));
+  const deliveredAttachment = (rendered.length ? rendered : attachments).slice(-1);
+
+  const generated: string[] = [];
   let lastValidatedYaml: string | undefined;
   if (Array.isArray(steps)) {
     steps.forEach((step) => {
@@ -92,16 +107,18 @@ export const collectProducedText = (output: unknown): string => {
         results.forEach((result) => {
           const data = isRecord(result) ? result.data : undefined;
           if (isRecord(data) && typeof data.yaml === 'string') {
-            delivered.push(data.yaml);
+            generated.push(data.yaml);
           }
         });
       }
     });
   }
+
+  const delivered = [...deliveredAttachment.map(({ yaml }) => yaml), ...generated];
   if (delivered.length === 0 && lastValidatedYaml !== undefined) {
     delivered.push(lastValidatedYaml);
   }
-  return [...parts, ...delivered].join('\n');
+  return (delivered.length > 0 ? delivered : messageParts).join('\n');
 };
 
 export const createConnectorInvokedEvaluator = (): Evaluator => ({

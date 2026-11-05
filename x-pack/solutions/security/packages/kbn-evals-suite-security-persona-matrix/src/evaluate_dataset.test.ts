@@ -421,6 +421,52 @@ describe('createPersonaMatrixFinalAnswerPresentEvaluator', () => {
     expect(result.score).toBe(0);
   });
 
+  // `generate_workflow` returns only ids plus prose; the user sees the workflow
+  // solely through the render tag, exactly like a created rule.
+  const generateWorkflowStep = (data: unknown) =>
+    ruleToolStep(data, 'platform.core.generate_workflow');
+  const WORKFLOW_ATTACHMENT_ID = 'wf_attachment_1';
+  const generatedWorkflow = (extra: Record<string, unknown> = {}) => ({
+    success: true,
+    attachment_id: WORKFLOW_ATTACHMENT_ID,
+    attachment_version: 1,
+    ...extra,
+  });
+
+  it('scores 1 when the run rendered the generated workflow via a matching render tag', async () => {
+    const result = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow())],
+    });
+    expect(result.score).toBe(1);
+    expect(result.explanation).toContain('artifact');
+  });
+
+  it('scores 0 when a workflow was generated but never rendered', async () => {
+    const result = await evaluate({
+      messages: [{ message: 'Let me draft that workflow.' }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow())],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when generate_workflow failed or returned no attachment id', async () => {
+    const failed = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep(generatedWorkflow({ success: false }))],
+    });
+    const noId = await evaluate({
+      messages: [{ message: renderTag(WORKFLOW_ATTACHMENT_ID) }],
+      messageSource: 'last_assistant_step',
+      steps: [generateWorkflowStep({ success: true })],
+    });
+    expect(failed.score).toBe(0);
+    expect(noId.score).toBe(0);
+  });
+
   it('returns N/A when there is no task output at all', async () => {
     const result = await evaluate(undefined);
     expect(result.score).toBeNull();
@@ -654,6 +700,73 @@ describe('task output shape', () => {
     const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
 
     expect(output.messageSource).toBe('last_assistant_step');
+  });
+});
+
+describe('task judges and the last-assistant-step fallback', () => {
+  const runTask = async (response: Record<string, unknown>) => {
+    const correctnessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
+    const groundednessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
+    let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    const evaluateDataset = createEvaluatePersonaMatrixDataset({
+      chatClient: {
+        query: jest
+          .fn()
+          .mockResolvedValue({ steps: [], errors: [], traceId: 'trace-1', ...response }),
+      } as unknown as PersonaMatrixChatClient,
+      evaluators: {
+        traceBasedEvaluators: {
+          inputTokens: { name: 'inputTokens' },
+          outputTokens: { name: 'outputTokens' },
+          toolCalls: { name: 'toolCalls' },
+          latency: { name: 'latency' },
+        },
+        criteria: jest.fn(),
+        correctnessAnalysis: () => ({ evaluate: correctnessEvaluate }),
+        groundednessAnalysis: () => ({ evaluate: groundednessEvaluate }),
+      } as unknown as DefaultEvaluators,
+      executorClient: {
+        runExperiment: jest.fn(async (params: { task: unknown }) => {
+          capturedTask = params.task as (example: unknown) => Promise<unknown>;
+        }),
+      } as unknown as EvalsExecutorClient,
+      traceEsClient: {} as EsClient,
+      log: buildLog(),
+    });
+    await evaluateDataset({
+      dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
+    });
+    const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
+    return { output, correctnessEvaluate, groundednessEvaluate };
+  };
+
+  const judgedAnswer = (evaluate: jest.Mock) => {
+    const { output } = evaluate.mock.calls[0][0] as {
+      output: { messages: Array<{ message: string }> };
+    };
+    return output.messages[output.messages.length - 1]?.message;
+  };
+
+  it('does not let the judges grade fallback narration as the final answer', async () => {
+    const { output, correctnessEvaluate, groundednessEvaluate } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(judgedAnswer(correctnessEvaluate)).toBe('');
+    expect(judgedAnswer(groundednessEvaluate)).toBe('');
+    // The narration stays on the stored output for the trace card.
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe(
+      'I will now preview the detection rule.'
+    );
+  });
+
+  it('still judges a real closing answer', async () => {
+    const { correctnessEvaluate, groundednessEvaluate } = await runTask({
+      messages: [{ message: 'the real answer' }],
+      messageSource: 'response',
+    });
+    expect(judgedAnswer(correctnessEvaluate)).toBe('the real answer');
+    expect(judgedAnswer(groundednessEvaluate)).toBe('the real answer');
   });
 });
 

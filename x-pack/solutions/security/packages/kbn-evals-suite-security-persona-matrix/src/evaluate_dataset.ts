@@ -27,6 +27,12 @@ import type {
 import { selectShard } from './datasets/select_shard';
 import { createConnectorInvokedEvaluator } from './evaluators/connector_invoked_evaluator';
 import { TRACE_INDEX_PATTERN } from './evaluators/trace_index_pattern';
+import {
+  createPersonaMatrixInputTokensEvaluator,
+  createPersonaMatrixLatencyEvaluator,
+  createPersonaMatrixOutputTokensEvaluator,
+  createPersonaMatrixToolCallsEvaluator,
+} from './evaluators/trace_evaluators';
 import type { PersonaMatrixChatClient } from './chat_client';
 
 /**
@@ -121,12 +127,17 @@ export const createPersonaMatrixExpectedToolCalledEvaluator = (): Evaluator => (
 
 /**
  * Tools whose successful result is itself the user-facing deliverable: they
- * render an artifact (a rule) inline in the conversation. A run that ends on
- * one of these has answered the user even with no closing prose.
+ * render an artifact (a rule, an authored workflow) inline in the
+ * conversation. A run that ends on one of these has answered the user even
+ * with no closing prose. The value names the result field that proves the
+ * artifact was produced, besides `success: true` and an `attachment_id`;
+ * `null` when the id alone suffices (`generate_workflow` returns only ids plus
+ * a prose comment, the YAML stays in the attachment).
  */
-const ARTIFACT_PRODUCING_TOOL_IDS = new Set([
-  'security.create_detection_rule',
-  'security.update_detection_rule',
+const ARTIFACT_PRODUCING_TOOLS: ReadonlyMap<string, string | null> = new Map([
+  ['security.create_detection_rule', 'rule'],
+  ['security.update_detection_rule', 'rule'],
+  ['platform.core.generate_workflow', null],
 ]);
 
 const messageTexts = (output: TaskOutput): string[] =>
@@ -148,7 +159,8 @@ const isRenderTagFor = (text: string, attachmentId: string): boolean =>
 
 /**
  * True when the run rendered an artifact: an artifact-producing tool returned
- * `success: true` with a `rule` payload AND an `attachment_id`, and a message
+ * `success: true` with its payload (see `ARTIFACT_PRODUCING_TOOLS`) AND an
+ * `attachment_id`, and a message
  * emitted a `<render_attachment id="<that id>">` tag. The tool only stores the
  * attachment; the user sees it solely when the agent emits the tag, so a
  * successful tool result alone is not a rendered artifact.
@@ -159,19 +171,16 @@ const hasRenderedArtifact = (output: TaskOutput): boolean => {
     return false;
   }
   return getToolCallSteps(output).some((step) => {
-    if (!step.tool_id || !ARTIFACT_PRODUCING_TOOL_IDS.has(step.tool_id)) {
+    if (!step.tool_id || !ARTIFACT_PRODUCING_TOOLS.has(step.tool_id)) {
       return false;
     }
+    const payloadKey = ARTIFACT_PRODUCING_TOOLS.get(step.tool_id);
     return (step.results ?? []).some((result) => {
-      const data = (
-        result as
-          | { data?: { success?: unknown; rule?: unknown; attachment_id?: unknown } }
-          | undefined
-      )?.data;
+      const data = (result as { data?: Record<string, unknown> } | undefined)?.data;
       const attachmentId = data?.attachment_id;
       return Boolean(
         data?.success === true &&
-          data?.rule &&
+          (payloadKey === null || payloadKey === undefined || data?.[payloadKey]) &&
           typeof attachmentId === 'string' &&
           attachmentId.length > 0 &&
           texts.some((text) => isRenderTagFor(text, attachmentId))
@@ -225,7 +234,7 @@ export const createPersonaMatrixFinalAnswerPresentEvaluator = (): Evaluator => (
     if (hasRenderedArtifact(output as TaskOutput)) {
       return {
         score: 1,
-        explanation: 'No closing prose, but the run rendered a rule artifact inline.',
+        explanation: 'No closing prose, but the run rendered an artifact inline.',
       };
     }
     return {
@@ -499,7 +508,13 @@ export function createEvaluatePersonaMatrixDataset({
     // called, never what it produced -- see connector_invoked_evaluator.ts.
     const connectorInvokedEvaluator = createConnectorInvokedEvaluator();
 
-    const { inputTokens, outputTokens, toolCalls, latency } = evaluators.traceBasedEvaluators;
+    // Suite-local trace evaluators: the shared ones query `FROM traces-*`, which
+    // a remote tracing cluster's eval key cannot read (see trace_evaluators.ts).
+    const traceDeps = { traceEsClient, log };
+    const inputTokens = createPersonaMatrixInputTokensEvaluator(traceDeps);
+    const outputTokens = createPersonaMatrixOutputTokensEvaluator(traceDeps);
+    const toolCalls = createPersonaMatrixToolCallsEvaluator(traceDeps);
+    const latency = createPersonaMatrixLatencyEvaluator(traceDeps);
 
     // Quantitative correctness/groundedness evaluators are pure functions of
     // the precomputed analyses attached to task output below — no LLM calls
@@ -547,7 +562,7 @@ export function createEvaluatePersonaMatrixDataset({
           if (!question) throw new Error('Missing question in example input');
           const response = await chatClient.query(question, input?.attachment);
 
-          const taskOutput: TaskOutput = {
+          const taskOutput = {
             messages: response.messages,
             // Which turn the answer came from: 'response' is the model's real
             // closing message, 'last_assistant_step' is chat_client's fallback
@@ -569,6 +584,16 @@ export function createEvaluatePersonaMatrixDataset({
           // example (was: once here + once again as a registered evaluator).
           const expected = example.output as PersonaMatrixDatasetExpected;
 
+          // The judges read the last message as the agent's answer. A
+          // 'last_assistant_step' message is interior narration, not a closing
+          // answer (FinalAnswerPresent scores it 0), so grading it would let
+          // Factuality/Relevance credit a run that never answered. Judge an
+          // empty answer instead; the narration stays on the stored output.
+          const judgedOutput: TaskOutput =
+            taskOutput.messageSource === 'last_assistant_step'
+              ? { ...taskOutput, messages: [{ message: '' }] }
+              : taskOutput;
+
           // The judges already retry internally; if they still fail, degrade this
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
@@ -578,7 +603,7 @@ export function createEvaluatePersonaMatrixDataset({
               evaluators.correctnessAnalysis().evaluate({
                 input,
                 expected,
-                output: taskOutput,
+                output: judgedOutput,
                 metadata: example.metadata,
               })
             ),
@@ -586,7 +611,7 @@ export function createEvaluatePersonaMatrixDataset({
               evaluators.groundednessAnalysis().evaluate({
                 input,
                 expected,
-                output: taskOutput,
+                output: judgedOutput,
                 metadata: example.metadata,
               })
             ),

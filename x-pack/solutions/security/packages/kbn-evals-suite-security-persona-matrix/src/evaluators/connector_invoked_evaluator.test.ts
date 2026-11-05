@@ -167,6 +167,67 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.score).toBe(0);
   });
 
+  // A final message restating the prompt carries `type: http` + the connector
+  // id verbatim; it must not vouch for an artifact that lacks them.
+  const promptRestatingMessage = {
+    message: `Created it. <render_attachment id="att-1" version="1"/>\nstep type: http on ${SLACK_CONNECTOR_ID}`,
+  };
+
+  it('scores 0 when a prompt-restating message accompanies an attachment on the wrong connector', async () => {
+    const wrong = WORKFLOW_WITH_SLACK.replace(
+      SLACK_CONNECTOR_ID,
+      '00000000-dead-beef-0000-000000000000'
+    );
+    const result = await run({
+      messages: [promptRestatingMessage],
+      steps: [agentGenerateStep()],
+      workflowAttachments: [{ id: 'att-1', version: 1, yaml: wrong }],
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ connectorPresent: false });
+  });
+
+  it('scores 0 when a prompt-restating message accompanies an attachment with no http step', async () => {
+    const result = await run({
+      messages: [promptRestatingMessage],
+      steps: [agentGenerateStep()],
+      workflowAttachments: [{ id: 'att-1', version: 1, yaml: WORKFLOW_WITHOUT_SLACK }],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores 0 when a prompt-restating message accompanies a validated candidate without the step', async () => {
+    const result = await run({
+      messages: [promptRestatingMessage],
+      steps: [agentGenerateStep(), agentValidateStep(WORKFLOW_WITHOUT_SLACK)],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('scores only the rendered attachment, not a leftover draft', async () => {
+    const result = await run({
+      messages: [{ message: 'Done. <render_attachment id="att-2" version="1"/>' }],
+      steps: [agentGenerateStep()],
+      workflowAttachments: [
+        { id: 'att-1', version: 1, yaml: WORKFLOW_WITH_SLACK },
+        { id: 'att-2', version: 1, yaml: WORKFLOW_WITHOUT_SLACK },
+      ],
+    });
+    expect(result.score).toBe(0);
+  });
+
+  it('passes when the rendered attachment is correct even if an earlier draft was not', async () => {
+    const result = await run({
+      messages: [{ message: 'Done. <render_attachment id="att-2" version="1"/>' }],
+      steps: [agentGenerateStep()],
+      workflowAttachments: [
+        { id: 'att-1', version: 1, yaml: WORKFLOW_WITHOUT_SLACK },
+        { id: 'att-2', version: 1, yaml: WORKFLOW_WITH_SLACK },
+      ],
+    });
+    expect(result.score).toBe(1);
+  });
+
   it('passes when generate_workflow returns the YAML itself (non-agent callers)', async () => {
     const result = await run({
       messages: [{ message: 'Here is your workflow.' }],
@@ -273,7 +334,11 @@ describe('ConnectorInvoked evaluator', () => {
   });
 
   describe('collectProducedText', () => {
-    it('gathers messages, attachments and generate data.yaml; validate params.yaml only as a last-candidate fallback', () => {
+    it('falls back to the final messages when no artifact YAML was recovered', () => {
+      expect(collectProducedText({ messages: [{ message: 'inline-yaml' }] })).toBe('inline-yaml');
+    });
+
+    it('gathers attachments and generate data.yaml; messages and validate params.yaml only as fallbacks', () => {
       const text = collectProducedText({
         messages: [{ message: 'one' }],
         workflowAttachments: [{ id: 'a', version: 1, yaml: 'attachment-yaml' }],
@@ -291,7 +356,7 @@ describe('ConnectorInvoked evaluator', () => {
         ],
         correctnessAnalysis: 'analysis-only',
       });
-      expect(text).toContain('one');
+      expect(text).not.toContain('one');
       expect(text).toContain('attachment-yaml');
       expect(text).not.toContain('validated-yaml');
       expect(text).toContain('generated-yaml');

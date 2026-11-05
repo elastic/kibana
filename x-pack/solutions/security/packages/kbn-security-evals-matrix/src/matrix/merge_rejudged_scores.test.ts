@@ -109,4 +109,40 @@ describe('mergeRejudgedScores', () => {
     expect(result.cells).toEqual(board);
     expect(result.unmatched).toEqual([]);
   });
+
+  it('keeps each repetition of a multi-rep execution as its own cell', () => {
+    const rep = (repetition: number, score: number, judgeModelId?: string) => ({
+      experimentId: 'exp-1',
+      datasetId: 'linux-curl',
+      evaluatorName: 'Criteria',
+      repetition,
+      score,
+      judgeModelId,
+    });
+    const result = mergeRejudgedScores(
+      [rep(0, 0.1, 'old'), rep(1, 0.2, 'old'), rep(2, 0.3, 'old')],
+      [rep(0, 0.5, 'new'), rep(1, 0.6, 'new'), rep(2, 0.7, 'new')] as RejudgedCell[]
+    );
+
+    expect(result.replaced).toBe(3);
+    expect(result.cells.map((c) => c.score)).toEqual([0.5, 0.6, 0.7]);
+    expect(result.unmatched).toEqual([]);
+  });
+
+  it('leaves the other repetitions untouched when only one was re-judged', () => {
+    const rep = (repetition: number, score: number) => ({
+      experimentId: 'exp-1',
+      datasetId: 'linux-curl',
+      evaluatorName: 'Criteria',
+      repetition,
+      score,
+    });
+    const result = mergeRejudgedScores(
+      [rep(0, 0.1), rep(1, 0.2)],
+      [{ ...rep(1, 0.9), judgeModelId: 'new' }]
+    );
+
+    expect(result.cells.map((c) => c.score)).toEqual([0.1, 0.9]);
+    expect(result.replaced).toBe(1);
+  });
 });
