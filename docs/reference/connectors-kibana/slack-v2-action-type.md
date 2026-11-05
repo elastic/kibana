@@ -78,25 +78,28 @@ Example `app_mention` body:
 
 That payload emits `slack2.app_mention` with `workspace`, `channel`, `messageId`, `sender`, and `text`.
 
-### Workflow human-in-the-loop (HITL) interactive responses [slack-v2-hitl-interactive]
+### Receive responses to workflow requests [slack-v2-receive-responses-to-workflow-requests]
 ```{applies_to}
 serverless: preview
 stack: preview 9.7+
 ```
 
-Human-in-the-loop (HITL) (`waitForApproval` / `waitForInput`) steps can collect the response in Slack when the workflow channel uses Slack (v2) with `interactive: true`:
+The connector can receive responses from interactive Slack messages posted by `waitForApproval` and `waitForInput` workflow steps. To have a step post buttons and fields in Slack instead of links to {{kib}}, set `interactive: true` on the step's `with.channels.slack2` channel. For step configuration, refer to [`waitForApproval`](docs-content://explore-analyze/workflows/steps/wait-for-approval.md#external-channels) and [`waitForInput`](docs-content://explore-analyze/workflows/steps/wait-for-input.md#external-channels).
 
-```yaml
-channels:
-  slack2:
-    connector-id: my-slack2-connector
-    channels: ['C0123456789']
-    interactive: true
+A response resumes the paused step. It doesn't start a workflow.
+
+To receive responses:
+
+- The connector must use your own Slack app, with OAuth Authorization Code or Bot Token authentication. Quick Connect OAuth 2.0 doesn't support interactive responses.
+- **Receive events** must be turned on for the connector.
+- Your Slack app's interactivity request URL must be the connector's webhook URL, with the ingest token added as a `token` query parameter. For details, refer to [Handling user interaction](https://docs.slack.dev/interactivity/handling-user-interaction/) in the Slack documentation.
+
+```text
+https://<kibana-host>/api/actions/events/.slack2/<connector-id>?token=<ingest-token>
+https://<kibana-host>/s/<space-id>/api/actions/events/.slack2/<connector-id>?token=<ingest-token>
 ```
 
-That posts Block Kit controls (Approve/Decline, or fields from the `waitForInput` schema) instead of {{kib}} resume links. The click resumes the paused step. It does not start a workflow.
-
-Turn **Receive events** on for the connector. Point the Slack app Interactivity Request URL at that connector ingest URL, including the ingest token, and post to conversation IDs the bot can post to. Point the Slack Event Subscriptions Request URL at the same ingest URL only when workflows should also start from Slack events.
+You need an Event Subscriptions request URL only if you also want Slack events to start workflows.
 
 ## Test connectors [slack-v2-action-configuration]
 
