@@ -123,11 +123,7 @@ export const AddCellBar = ({
 
   const getLineCss = (direction: 'left' | 'right') => css`
     height: ${euiTheme.border.width.thin};
-    background: linear-gradient(
-      to ${direction},
-      transparent,
-      ${euiTheme.colors.borderBaseProminent}
-    );
+    background: linear-gradient(to ${direction}, transparent, ${euiTheme.colors.primary});
   `;
 
   return (
@@ -137,6 +133,9 @@ export const AddCellBar = ({
       responsive={false}
       css={css`
         flex-grow: 0;
+        width: 70%;
+        align-self: center;
+        margin-inline: auto;
         opacity: ${alwaysVisible || isOpen ? 1 : 0};
         transition: opacity ${euiTheme.animation.fast};
         &:hover,
@@ -156,6 +155,7 @@ export const AddCellBar = ({
             <EuiToolTip content={ADD_CELL_LABEL} disableScreenReaderOutput>
               <EuiButtonIcon
                 size="xs"
+                color="primary"
                 iconType="plus"
                 aria-label={ADD_CELL_LABEL}
                 onClick={() => setIsOpen((open) => !open)}
