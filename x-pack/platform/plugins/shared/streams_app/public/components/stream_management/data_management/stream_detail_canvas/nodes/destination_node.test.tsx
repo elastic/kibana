@@ -59,7 +59,7 @@ describe('DestinationNode', () => {
 
     expect(mockUseDestinationStats).toHaveBeenCalledWith('es-prod');
     expect(isShown('streamsCanvasDestinationStats')).toBe(true);
-    expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k eps');
+    expect(screen.getByTestId('streamsCanvasDestinationRate').textContent).toBe('3.7k/s');
     expect(screen.getByTestId('streamsCanvasDestinationIndexCount').textContent).toBe('3 indices');
   });
 
