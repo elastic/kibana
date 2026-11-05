@@ -71,4 +71,3 @@ These rules apply to every new file and to any file you move.
 - A new page or tab is a module-scope `React.lazy` import. A heavy flyout or editor loads on open, like `SourceFlyout` in `sources/sources_view.tsx`.
 - Import individual files. Don't add barrel files that re-export a folder.
 - The plugin entry (`index.ts`) exports the initializer and types only. Never export page UI from it.
-- `public/.eslintrc.json` enforces the import rules above. When you add a folder under `pages/`, add a zone for it there.
