@@ -41,6 +41,7 @@ export {
   ConversationDetailsFlyoutFooter,
   type ConversationDetailsFlyoutFooterProps,
   type CloseInvestigationModalRenderProps,
+  type DeleteInvestigationModalRenderProps,
 } from './src/components/details/flyout_footer';
 export {
   ConversationHeaderBlocks,
