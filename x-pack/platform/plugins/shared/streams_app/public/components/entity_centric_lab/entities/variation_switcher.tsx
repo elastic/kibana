@@ -36,7 +36,7 @@ import type { VariationDimension } from './variation_registry';
  * Lab prototype build number shown in the variation selector.
  * Bump by 0.01 on each prototype push (e.g. 1.00 → 1.01 → 1.02).
  */
-export const PROTOTYPE_VERSION = '1.20';
+export const PROTOTYPE_VERSION = '1.21';
 
 /**
  * Newest-first change log for the About tab. Update on each prototype push
@@ -49,6 +49,12 @@ const PROTOTYPE_CHANGELOG: readonly {
   readonly details?: string;
 }[] = [
   {
+    date: '2026-11-05',
+    summary: 'Infrastructure notices use the current Kibana banner and callout layout.',
+    details:
+      'The old-to-new experience notice is an announcement banner (illustration, Take a tour, Revert in Advanced Settings, corner dismiss). The 10k entity limit is a compact warning callout with the icon beside the copy. Bump to v1.21.',
+  },
+  {
     date: '2026-11-04',
     summary:
       'K8s related resources, hex flyout actions, child dashboard preview stack, and push width fallback.',
@@ -57,7 +63,8 @@ const PROTOTYPE_CHANGELOG: readonly {
   },
   {
     date: '2026-11-03',
-    summary: 'Pod Kubernetes Events table: newest-first order, column layout, and wrapped messages.',
+    summary:
+      'Pod Kubernetes Events table: newest-first order, column layout, and wrapped messages.',
     details:
       'Events stay sorted most recent at top. Table uses auto layout with room for Type badges and the event count badge without clipping; Message column wraps long text. Bump to v1.19.',
   },
@@ -103,43 +110,37 @@ const PROTOTYPE_CHANGELOG: readonly {
   },
   {
     date: '2026-10-22',
-    summary:
-      'Left-nav inventory counts, alert dots, list defaults, and group-by label polish.',
+    summary: 'Left-nav inventory counts, alert dots, list defaults, and group-by label polish.',
     details:
       'Infrastructure nav shows inventoried totals in category titles and a clickable red dot when a category has active alerts (deep-links to ?alertsFilter=active on Inventory). Default list table page size is 25 for new views. Demo data keeps Databases and Storage free of firing alerts. Group resources by link lists locked levels (e.g. Category, Type on scoped pages). Bump to v1.11.',
   },
   {
     date: '2026-10-22',
-    summary:
-      'Discover-style filter for / filter out on Kubernetes inventory list grids.',
+    summary: 'Discover-style filter for / filter out on Kubernetes inventory list grids.',
     details:
       'ElasticOn data grids on cluster, namespace, node, and deployment columns (plus name on those resource tables): plus/minus cell actions update page K8s dropdowns or search-bar phrase chips. Wired through Security grouping (default table style) and Default list layout. Bump to v1.10.',
   },
   {
     date: '2026-10-21',
-    summary:
-      'Cloud account KQL/column, K8s node host runtime tabs, and APM services labeling.',
+    summary: 'Cloud account KQL/column, K8s node host runtime tabs, and APM services labeling.',
     details:
       'Filter and column for ECS cloud.account.id / cloud.account.name on cloud resources; fix Cloud inventory scoping to provider-backed entities. Kubernetes nodes get APM services and Processes tabs (kubelet/CRI demo processes) while keeping the K8s-first Overview; rename the host runtime tab to “APM services” to avoid clashing with Kubernetes Services. Bump to v1.09.',
   },
   {
     date: '2026-10-21',
-    summary:
-      'New/ classic UX toggle, shareable inventory URLs, and dashboard linking polish.',
+    summary: 'New/ classic UX toggle, shareable inventory URLs, and dashboard linking polish.',
     details:
       'Kebab “New experience” syncs with Advanced Settings (New infrastructure experience); classic screenshot overlay with transition modal; hi-res old Hosts asset; inventory state in ?inventory= URLs and nav saved-view links; saved-view viewMode restore; custom dashboards “Port resource name to dashboard” option and updated Create dashboard agent prompt. Bump to v1.08.',
   },
   {
     date: '2026-10-20',
-    summary:
-      'Lazy sparklines, VM default metrics, and flyout icon fixes.',
+    summary: 'Lazy sparklines, VM default metrics, and flyout icon fixes.',
     details:
       'Table sparklines load asynchronously (viewport-gated with staggered fade-in). Add default CPU/Memory/Disk columns for VM hosts table. Bump to v1.07.',
   },
   {
     date: '2026-10-16',
-    summary:
-      'Flyout title icons match category icons for all entity types.',
+    summary: 'Flyout title icons match category icons for all entity types.',
     details:
       'Flyout header icon now resolves cloud sub-categories (Lambda → function, S3 → folderOpen, VPC/CDN → globe), networking types (Nginx, HAProxy, Envoy → globe), and Other (→ package). Icon always renders even when no EntityKind is resolved. Bump to v1.06.',
   },
@@ -152,15 +153,13 @@ const PROTOTYPE_CHANGELOG: readonly {
   },
   {
     date: '2026-10-15',
-    summary:
-      'Add alert filter, nav badge counts, and page-level display density setting.',
+    summary: 'Add alert filter, nav badge counts, and page-level display density setting.',
     details:
       'Filter entities by alert status (with active alerts / no active alerts / no alert set up). Show alert counts as badges in the left nav per category. New Display options popover (Compact / Normal / Expanded) persisted in localStorage, controlling table density, data-grid cell padding/font size, and hex-map card panel padding. Reduce margins between hex blocks and chase vertical space across list view. Bump to v1.04.',
   },
   {
     date: '2026-10-15',
-    summary:
-      'Add prototype About tab with change log, hex-map legend help, and inventory polish.',
+    summary: 'Add prototype About tab with change log, hex-map legend help, and inventory polish.',
     details:
       'Variation selector tabs (settings / about) with design disclaimer and scrollable change log; hex Color-by legends get info tips and metric (stat) labels; P95/P99 stats; Availability Zone group-by; column/flyout metric explanations; utilization wording; Create dashboard primary button. Group by control gets an info tip (nesting, examples, order matters). Bump to v1.03.',
   },
@@ -200,7 +199,8 @@ const PROTOTYPE_CHANGELOG: readonly {
   },
   {
     date: '2026-10-02',
-    summary: 'Add Other nav category, dashboard thumbnail variation, and saved-views collapse/reorder.',
+    summary:
+      'Add Other nav category, dashboard thumbnail variation, and saved-views collapse/reorder.',
   },
   {
     date: '2026-10-02',
@@ -215,7 +215,8 @@ const PROTOTYPE_CHANGELOG: readonly {
   },
   {
     date: '2026-10-01',
-    summary: 'ElasticOn Phase 1: dashboard preview defaults, Messaging empty state, and flyout polish.',
+    summary:
+      'ElasticOn Phase 1: dashboard preview defaults, Messaging empty state, and flyout polish.',
     details:
       'Default Phase 1 to list + flyout preview, seed Messaging as the demo empty category with a deploy-safe Add data link, and align log document and dashboard preview flyouts with the parent.',
   },
@@ -280,9 +281,7 @@ const DimensionRow = ({
     [dimension.id, onChange]
   );
 
-  const activeDescription = dimension.options.find(
-    (opt) => opt.id === activeOptionId
-  )?.description;
+  const activeDescription = dimension.options.find((opt) => opt.id === activeOptionId)?.description;
 
   return (
     <EuiFormRow label={dimension.label} fullWidth>
@@ -296,7 +295,13 @@ const DimensionRow = ({
           isFullWidth
         />
         {activeDescription ? (
-          <EuiText size="xs" color="subdued" css={css`margin-top: 4px;`}>
+          <EuiText
+            size="xs"
+            color="subdued"
+            css={css`
+              margin-top: 4px;
+            `}
+          >
             <p>{activeDescription}</p>
           </EuiText>
         ) : null}
@@ -377,11 +382,7 @@ const SeedDemoDataButton = () => {
           color={status === 'success' ? 'success' : 'primary'}
           onClick={handleSeed}
         >
-          {status === 'loading'
-            ? 'Seeding…'
-            : status === 'success'
-            ? 'Seeded ✓'
-            : 'Seed demo data'}
+          {status === 'loading' ? 'Seeding…' : status === 'success' ? 'Seeded ✓' : 'Seed demo data'}
         </EuiButton>
       </EuiFormRow>
     </>
@@ -460,9 +461,9 @@ const AboutPrototypePanel = () => (
           <strong>This is a DESIGN prototype.</strong>
         </p>
         <p>
-          Disclaimer: it uses an outdated version of Kibana so may not come with the latest
-          and greatest components (flyout, banners). Use the latest version in the
-          production code. If any ambiguity, please ask me (Nico).
+          Disclaimer: it uses an outdated version of Kibana so may not come with the latest and
+          greatest components (flyout, banners). Use the latest version in the production code. If
+          any ambiguity, please ask me (Nico).
         </p>
       </EuiText>
     </EuiFlexItem>
@@ -478,7 +479,11 @@ const AboutPrototypePanel = () => (
         {PROTOTYPE_CHANGELOG.map((entry) => (
           <EuiFlexItem key={`${entry.date}-${entry.summary}`} grow={false}>
             <EuiText size="xs">
-              <p css={css`margin-bottom: 0;`}>
+              <p
+                css={css`
+                  margin-bottom: 0;
+                `}
+              >
                 <strong>{formatChangelogDate(entry.date)}</strong>
                 {' — '}
                 {entry.summary}
@@ -486,7 +491,14 @@ const AboutPrototypePanel = () => (
             </EuiText>
             {entry.details ? (
               <EuiText size="xs" color="subdued">
-                <p css={css`margin-bottom: 0; margin-top: 2px;`}>{entry.details}</p>
+                <p
+                  css={css`
+                    margin-bottom: 0;
+                    margin-top: 2px;
+                  `}
+                >
+                  {entry.details}
+                </p>
               </EuiText>
             ) : null}
           </EuiFlexItem>
@@ -587,13 +599,16 @@ export const VariationSwitcher = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <span data-test-subj="entityCentricLabPrototypeVersion">
-                  v{PROTOTYPE_VERSION}
-                </span>
+                <span data-test-subj="entityCentricLabPrototypeVersion">v{PROTOTYPE_VERSION}</span>
               </EuiText>
             </EuiFlexItem>
           </EuiFlexGroup>
-          <EuiHorizontalRule margin="s" css={css`flex-shrink: 0;`} />
+          <EuiHorizontalRule
+            margin="s"
+            css={css`
+              flex-shrink: 0;
+            `}
+          />
           <div
             css={css`
               flex: 1 1 auto;
@@ -608,11 +623,7 @@ export const VariationSwitcher = () => {
               <EuiFlexGroup direction="column" gutterSize="m">
                 {dimensions.map((dim) => (
                   <EuiFlexItem key={dim.id} grow={false}>
-                    <DimensionRow
-                      dimension={dim}
-                      activeOptionId={get(dim.id)}
-                      onChange={set}
-                    />
+                    <DimensionRow dimension={dim} activeOptionId={get(dim.id)} onChange={set} />
                   </EuiFlexItem>
                 ))}
                 <EuiFlexItem grow={false}>

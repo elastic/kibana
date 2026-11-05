@@ -15,7 +15,6 @@ import {
   EuiButtonEmpty,
   EuiButtonGroup,
   EuiButtonIcon,
-  EuiCallOut,
   EuiComboBox,
   EuiContextMenuItem,
   EuiContextMenuPanel,
@@ -32,7 +31,6 @@ import {
   EuiTitle,
   EuiTourStep,
   EuiEmptyPrompt,
-  EuiLink,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -63,7 +61,6 @@ const k8sFilterGroupCss = css`
 /** Sentinel for the top-level category filter ("All categories"). */
 const CATEGORY_FILTER_ALL = '__all_categories__';
 
-
 import {
   EntityFlyout,
   EntityFlyoutServicesProvider,
@@ -78,6 +75,7 @@ import {
   type DashboardPreviewRequest,
 } from '@kbn/entity-centric-lab-flyout';
 import { InventoryDashboardPreviewFlyout } from './inventory_dashboard_preview_flyout';
+import { InfrastructureExperienceBanner, LabTruncationCallout } from './inventory_notices';
 import { FAKE_ENTITY_TYPES } from '../fake_entity_types';
 import { K8sDetailDashboard } from './k8s_detail_dashboard';
 
@@ -256,11 +254,7 @@ import {
   readPageSizes,
   writePageSizes,
 } from './storage_keys';
-import {
-  DEFAULT_LIST_DENSITY,
-  isListDensity,
-  type ListDensity,
-} from './list_density';
+import { DEFAULT_LIST_DENSITY, isListDensity, type ListDensity } from './list_density';
 import { ListDisplayOptionsPopover } from './list_display_options_popover';
 import {
   encodeInventorySharePayload,
@@ -414,7 +408,6 @@ const usePageSizes = (): [Record<string, number>, (next: Record<string, number>)
 // "Overview" and clear the filters every time. Same pattern as
 // `useEntitiesViewMode`: hydrate lazily from `localStorage` on first
 // render, write on every change, no cross-tab sync.
-
 
 const isCategoryTab = (value: unknown): value is CategoryTab =>
   value === 'inventory' || value === 'monitoring';
@@ -630,9 +623,7 @@ const persistScenarioBannerDismissed = (scenario: string): void => {
 };
 
 /** Inventory-backed alerts override for flyout tab data (`null` = no rules configured). */
-const inventoryAlertsActiveOverride = (
-  entity: Entity | undefined
-): number | null | undefined => {
+const inventoryAlertsActiveOverride = (entity: Entity | undefined): number | null | undefined => {
   if (!entity) {
     return undefined;
   }
@@ -672,7 +663,7 @@ const AddObservabilityDataEmptyPrompt = ({
 
   const addDataHref = useMemo(() => {
     const onboardingCategory = categoryScope
-      ? (ONBOARDING_CATEGORY_MAP[categoryScope] ?? categoryScope)
+      ? ONBOARDING_CATEGORY_MAP[categoryScope] ?? categoryScope
       : undefined;
     const appPath = `/app/observabilityOnboarding${
       onboardingCategory ? `?category=${encodeURIComponent(onboardingCategory)}` : ''
@@ -753,8 +744,7 @@ const TRANSITION_COMPLETED_SESSION_KEY = 'elasticOn_transitionCompleted';
 const HAS_REVERTED_TO_CLASSIC_SESSION_KEY = 'elasticOn_hasRevertedToClassic';
 const PENDING_TRANSITION_MODAL_SESSION_KEY = 'elasticOn_pendingTransitionModal';
 
-const ADVANCED_SETTINGS_NEW_INFRA_PATH =
-  '/app/management/kibana/settings?query=newInfraExperience';
+const ADVANCED_SETTINGS_NEW_INFRA_PATH = '/app/management/kibana/settings?query=newInfraExperience';
 
 const MoreActionsMenu = ({
   onPlayTour,
@@ -771,10 +761,9 @@ const MoreActionsMenu = ({
   const button = (
     <EuiButtonIcon
       iconType="boxesVertical"
-      aria-label={i18n.translate(
-        'xpack.streams.entityCentricLab.entities.moreActions',
-        { defaultMessage: 'More actions' }
-      )}
+      aria-label={i18n.translate('xpack.streams.entityCentricLab.entities.moreActions', {
+        defaultMessage: 'More actions',
+      })}
       color="text"
       display="base"
       size="s"
@@ -802,10 +791,9 @@ const MoreActionsMenu = ({
             }}
             data-test-subj="entityCentricLabMoreActionsPlayTour"
           >
-            {i18n.translate(
-              'xpack.streams.entityCentricLab.entities.moreActions.playTour',
-              { defaultMessage: 'Play feature tour' }
-            )}
+            {i18n.translate('xpack.streams.entityCentricLab.entities.moreActions.playTour', {
+              defaultMessage: 'Play feature tour',
+            })}
           </EuiContextMenuItem>,
           ...(newExperienceEnabled !== undefined && onToggleNewExperience
             ? [
@@ -859,10 +847,9 @@ const MoreActionsMenu = ({
               window.open('https://ela.st/entity-centric-docs', '_blank');
             }}
           >
-            {i18n.translate(
-              'xpack.streams.entityCentricLab.entities.moreActions.documentation',
-              { defaultMessage: 'View documentation' }
-            )}
+            {i18n.translate('xpack.streams.entityCentricLab.entities.moreActions.documentation', {
+              defaultMessage: 'View documentation',
+            })}
           </EuiContextMenuItem>,
           <EuiContextMenuItem
             key="feedback"
@@ -872,10 +859,9 @@ const MoreActionsMenu = ({
               window.open('https://ela.st/entity-centric-feedback', '_blank');
             }}
           >
-            {i18n.translate(
-              'xpack.streams.entityCentricLab.entities.moreActions.feedback',
-              { defaultMessage: 'Feedback' }
-            )}
+            {i18n.translate('xpack.streams.entityCentricLab.entities.moreActions.feedback', {
+              defaultMessage: 'Feedback',
+            })}
           </EuiContextMenuItem>,
         ]}
       />
@@ -1043,21 +1029,14 @@ const AllEntitiesViewInner = ({
         const diffDays = parsedEnd.diff(parsedStart, 'days', true);
         if (diffDays > MAX_RANGE_DAYS) {
           notifications.toasts.addWarning({
-            title: i18n.translate(
-              'xpack.streams.entityCentricLab.entities.dateRange.tooWide',
-              {
-                defaultMessage: 'Date range limited to {days} days',
-                values: { days: MAX_RANGE_DAYS },
-              }
-            ),
-            text: i18n.translate(
-              'xpack.streams.entityCentricLab.entities.dateRange.tooWideText',
-              {
-                defaultMessage:
-                  'Please select a date range of {days} days or less.',
-                values: { days: MAX_RANGE_DAYS },
-              }
-            ),
+            title: i18n.translate('xpack.streams.entityCentricLab.entities.dateRange.tooWide', {
+              defaultMessage: 'Date range limited to {days} days',
+              values: { days: MAX_RANGE_DAYS },
+            }),
+            text: i18n.translate('xpack.streams.entityCentricLab.entities.dateRange.tooWideText', {
+              defaultMessage: 'Please select a date range of {days} days or less.',
+              values: { days: MAX_RANGE_DAYS },
+            }),
           });
           return;
         }
@@ -1122,9 +1101,7 @@ const AllEntitiesViewInner = ({
   const detailVariation = useVariation('detail') as DetailVariation;
   const flyoutPresentation = useVariation('flyoutPresentation') as FlyoutPresentationVariation;
   const isDemoEmptyCategoryPage =
-    isElasticOn &&
-    dataVariation === 'default' &&
-    isElasticOnDefaultEmptyCategory(categoryScope);
+    isElasticOn && dataVariation === 'default' && isElasticOnDefaultEmptyCategory(categoryScope);
   const showAddDataEmptyPrompt =
     isElasticOn && (dataVariation === 'empty' || isDemoEmptyCategoryPage);
   const tableStyleVariation = useVariation('tableStyle') as TableStyleVariation;
@@ -1235,11 +1212,7 @@ const AllEntitiesViewInner = ({
     if (!pendingTransitionModal) {
       applyNewInfraEnabledFromAdvancedSettings();
     }
-  }, [
-    newInfraEnabled,
-    applyNewInfraEnabledFromAdvancedSettings,
-    handleRevertToClassic,
-  ]);
+  }, [newInfraEnabled, applyNewInfraEnabledFromAdvancedSettings, handleRevertToClassic]);
 
   const isBannerScenario =
     (scenarioVariation === 'transition' && transitionCompleted) ||
@@ -1270,8 +1243,7 @@ const AllEntitiesViewInner = ({
   const showOldForTransitionModal =
     newInfraEnabled &&
     !transitionCompleted &&
-    (pendingTransitionModal ||
-      (scenarioVariation === 'transition' && !hasRevertedToClassic));
+    (pendingTransitionModal || (scenarioVariation === 'transition' && !hasRevertedToClassic));
 
   const showOldExperiencePage =
     canRevertToClassicUx && (!newInfraEnabled || showOldForTransitionModal);
@@ -1447,10 +1419,7 @@ const AllEntitiesViewInner = ({
   //
   // Map: step number → required view mode. Steps not listed here are
   // assumed to render in all modes.
-  const tourStepViewModeRequirements: Record<number, ViewMode> = useMemo(
-    () => ({ 3: 'grid' }),
-    []
-  );
+  const tourStepViewModeRequirements: Record<number, ViewMode> = useMemo(() => ({ 3: 'grid' }), []);
   useEffect(() => {
     if (!isTourActive || tourStep === 0) return;
     const requiredMode = tourStepViewModeRequirements[tourStep];
@@ -1526,10 +1495,7 @@ const AllEntitiesViewInner = ({
   // ---------------------------------------------------------------------------
   // Top-level Category filter — derived values (state lives above for search).
   // ---------------------------------------------------------------------------
-  const visibleCategories = useMemo(
-    () => getVisibleEntityCategories(isElasticOn),
-    [isElasticOn]
-  );
+  const visibleCategories = useMemo(() => getVisibleEntityCategories(isElasticOn), [isElasticOn]);
   const categoriesWithEntities = useMemo(() => {
     const present = new Set(scopedEntities.map((e) => e.category));
     return visibleCategories.filter((c) => present.has(c.id));
@@ -1539,10 +1505,13 @@ const AllEntitiesViewInner = ({
   // category page OR when "Kubernetes" is selected in the top-level
   // category filter on the cross-category page.
   const showK8sFilters =
-    (!!categoryScope ? categoryScope === 'kubernetes' : categoryFilter === 'kubernetes') && isElasticOn;
+    (!!categoryScope ? categoryScope === 'kubernetes' : categoryFilter === 'kubernetes') &&
+    isElasticOn;
   /** Cell "Filter for" and flyout "Add to filter" — same scope as K8s facet filters. */
   const enableK8sAddToFilterActions = showK8sFilters;
-  const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(KUBERNETES_RESOURCE_TYPE_ALL);
+  const [k8sResourceType, setK8sResourceType] = useState<KubernetesResourceType>(
+    KUBERNETES_RESOURCE_TYPE_ALL
+  );
   const [k8sClusterFilter, setK8sClusterFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sNamespaceFilter, setK8sNamespaceFilter] = useState<string>(KUBERNETES_FILTER_ALL);
   const [k8sDeploymentFilter, setK8sDeploymentFilter] = useState<string>(KUBERNETES_FILTER_ALL);
@@ -1561,7 +1530,10 @@ const AllEntitiesViewInner = ({
     [k8sBaseEntities]
   );
   const k8sEntitiesForFilters = useMemo(
-    () => (showK8sFilters ? filterEntitiesByResourceType(k8sBaseEntities, k8sResourceType) : k8sBaseEntities),
+    () =>
+      showK8sFilters
+        ? filterEntitiesByResourceType(k8sBaseEntities, k8sResourceType)
+        : k8sBaseEntities,
     [showK8sFilters, k8sBaseEntities, k8sResourceType]
   );
 
@@ -1570,24 +1542,32 @@ const AllEntitiesViewInner = ({
     [showK8sFilters, k8sBaseEntities]
   );
   const k8sNamespaceNames = useMemo(
-    () => (showK8sFilters && k8sFilterVisibility.showNamespace
-      ? getKubernetesNamespaceNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
-      : []),
-    [showK8sFilters, k8sBaseEntities, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNamespace]
+    () =>
+      showK8sFilters && k8sFilterVisibility.showNamespace
+        ? getKubernetesNamespaceNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
+        : [],
+    [
+      showK8sFilters,
+      k8sBaseEntities,
+      k8sClusterFilter,
+      k8sClusterNames,
+      k8sFilterVisibility.showNamespace,
+    ]
   );
   const effectiveK8sNamespaceFilter =
     k8sNamespaceFilter !== KUBERNETES_FILTER_ALL && !k8sNamespaceNames.includes(k8sNamespaceFilter)
       ? KUBERNETES_FILTER_ALL
       : k8sNamespaceFilter;
   const k8sDeploymentNames = useMemo(
-    () => (showK8sFilters && k8sFilterVisibility.showDeployment
-      ? getKubernetesDeploymentNames(
-          k8sBaseEntities,
-          k8sClusterFilter,
-          effectiveK8sNamespaceFilter,
-          k8sClusterNames
-        )
-      : []),
+    () =>
+      showK8sFilters && k8sFilterVisibility.showDeployment
+        ? getKubernetesDeploymentNames(
+            k8sBaseEntities,
+            k8sClusterFilter,
+            effectiveK8sNamespaceFilter,
+            k8sClusterNames
+          )
+        : [],
     [
       showK8sFilters,
       k8sBaseEntities,
@@ -1598,14 +1578,22 @@ const AllEntitiesViewInner = ({
     ]
   );
   const effectiveK8sDeploymentFilter =
-    k8sDeploymentFilter !== KUBERNETES_FILTER_ALL && !k8sDeploymentNames.includes(k8sDeploymentFilter)
+    k8sDeploymentFilter !== KUBERNETES_FILTER_ALL &&
+    !k8sDeploymentNames.includes(k8sDeploymentFilter)
       ? KUBERNETES_FILTER_ALL
       : k8sDeploymentFilter;
   const k8sNodeNames = useMemo(
-    () => (showK8sFilters && k8sFilterVisibility.showNode
-      ? getKubernetesNodeNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
-      : []),
-    [showK8sFilters, k8sBaseEntities, k8sClusterFilter, k8sClusterNames, k8sFilterVisibility.showNode]
+    () =>
+      showK8sFilters && k8sFilterVisibility.showNode
+        ? getKubernetesNodeNames(k8sBaseEntities, k8sClusterFilter, k8sClusterNames)
+        : [],
+    [
+      showK8sFilters,
+      k8sBaseEntities,
+      k8sClusterFilter,
+      k8sClusterNames,
+      k8sFilterVisibility.showNode,
+    ]
   );
   const effectiveK8sNodeFilter = useMemo(() => {
     if (k8sNodeFilter === KUBERNETES_FILTER_ALL) {
@@ -1627,79 +1615,62 @@ const AllEntitiesViewInner = ({
       ? k8sNodeFilter
       : KUBERNETES_FILTER_ALL;
   }, [k8sNodeFilter, k8sNodeNames, k8sBaseEntities, k8sClusterFilter, k8sClusterNames]);
-  const handleK8sResourceTypeChange = useCallback(
-    (next: KubernetesResourceType) => {
-      setK8sResourceType(next);
-      setK8sClusterFilter(KUBERNETES_FILTER_ALL);
-      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
-      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
-      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
-    },
-    []
-  );
-  const handleK8sClusterChange = useCallback(
-    (next: string) => {
-      setK8sClusterFilter(next);
-      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
-      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
-      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
-    },
-    []
-  );
-  const handleK8sNamespaceChange = useCallback(
-    (next: string) => {
-      setK8sNamespaceFilter(next);
-      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
-    },
-    []
-  );
+  const handleK8sResourceTypeChange = useCallback((next: KubernetesResourceType) => {
+    setK8sResourceType(next);
+    setK8sClusterFilter(KUBERNETES_FILTER_ALL);
+    setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+    setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
+    setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+  }, []);
+  const handleK8sClusterChange = useCallback((next: string) => {
+    setK8sClusterFilter(next);
+    setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+    setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
+    setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+  }, []);
+  const handleK8sNamespaceChange = useCallback((next: string) => {
+    setK8sNamespaceFilter(next);
+    setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
+  }, []);
 
   // Cloud provider filter — shown on the Cloud inventory in ElasticOn,
   // mirrors the K8s cluster filter (category route or All resources + Cloud).
   const isCloudCategoryPage =
     effectiveCategoryScope === 'cloud' && isElasticOn && !cloudProviderScope;
-  const [cloudProviderFilter, setCloudProviderFilter] = useState<string>(
-    CLOUD_PROVIDER_FILTER_ALL
-  );
+  const [cloudProviderFilter, setCloudProviderFilter] = useState<string>(CLOUD_PROVIDER_FILTER_ALL);
 
-  const handleCategoryFilterChange = useCallback(
-    (next: string) => {
-      setCategoryFilter(next);
-      // Reset sub-filters when category changes.
-      setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
-      setK8sClusterFilter(KUBERNETES_FILTER_ALL);
-      setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
-      setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
-      setK8sNodeFilter(KUBERNETES_FILTER_ALL);
-      setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
-      setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
-    },
-    []
-  );
+  const handleCategoryFilterChange = useCallback((next: string) => {
+    setCategoryFilter(next);
+    // Reset sub-filters when category changes.
+    setK8sResourceType(KUBERNETES_RESOURCE_TYPE_ALL);
+    setK8sClusterFilter(KUBERNETES_FILTER_ALL);
+    setK8sNamespaceFilter(KUBERNETES_FILTER_ALL);
+    setK8sDeploymentFilter(KUBERNETES_FILTER_ALL);
+    setK8sNodeFilter(KUBERNETES_FILTER_ALL);
+    setCloudProviderFilter(CLOUD_PROVIDER_FILTER_ALL);
+    setCategoryTypeFilter(CATEGORY_RESOURCE_TYPE_ALL);
+  }, []);
 
   // Generic category resource-type filter — shown on non-K8s category
   // pages that have 2+ distinct entity types (Hosts, Cloud, Networking, etc.).
   const [categoryTypeFilter, setCategoryTypeFilter] = useState<string>(CATEGORY_RESOURCE_TYPE_ALL);
-  const categoryTypeLabels = useMemo(
-    () => {
-      const scope = effectiveCategoryScope;
-      if (!scope || scope === 'kubernetes' || !isElasticOn) return [];
-      return getEntityTypeLabels(
-        categoryScope || (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL)
-          ? effectiveInventoryEntities
-          : scopedEntities
-      );
-    },
-    [
-      effectiveCategoryScope,
-      isElasticOn,
-      categoryScope,
-      isCrossCategoryPage,
-      categoryFilter,
-      effectiveInventoryEntities,
-      scopedEntities,
-    ]
-  );
+  const categoryTypeLabels = useMemo(() => {
+    const scope = effectiveCategoryScope;
+    if (!scope || scope === 'kubernetes' || !isElasticOn) return [];
+    return getEntityTypeLabels(
+      categoryScope || (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL)
+        ? effectiveInventoryEntities
+        : scopedEntities
+    );
+  }, [
+    effectiveCategoryScope,
+    isElasticOn,
+    categoryScope,
+    isCrossCategoryPage,
+    categoryFilter,
+    effectiveInventoryEntities,
+    scopedEntities,
+  ]);
   const showCategoryTypeFilter = categoryTypeLabels.length >= 2;
 
   // Reset category sub-filters when the effective inventory category changes.
@@ -1916,14 +1887,7 @@ const AllEntitiesViewInner = ({
         updateTimeRange({ from: state.timeRange.from, to: state.timeRange.to });
       }
     },
-    [
-      setActiveTagFilters,
-      setCategoryTab,
-      setViewMode,
-      setGroupBy,
-      setPageSizes,
-      updateTimeRange,
-    ]
+    [setActiveTagFilters, setCategoryTab, setViewMode, setGroupBy, setPageSizes, updateTimeRange]
   );
 
   // Shareable URL: `?inventory=<base64>` carries the full on-page snapshot so
@@ -1959,13 +1923,7 @@ const AllEntitiesViewInner = ({
     if (!view) return;
     appliedLoadViewIdRef.current = loadViewId;
     applyViewStateSnapshot(view.state);
-  }, [
-    isLatest,
-    loadViewId,
-    location.search,
-    savedViewsList,
-    applyViewStateSnapshot,
-  ]);
+  }, [isLatest, loadViewId, location.search, savedViewsList, applyViewStateSnapshot]);
 
   // Latest: if the loaded view is deleted (e.g. from the nav's "Manage saved
   // views" modal), its id no longer resolves but `?loadView` lingers in the URL.
@@ -2095,15 +2053,21 @@ const AllEntitiesViewInner = ({
             k8sClusterNames
           )
         : filteredEntitiesAfterResourceType,
-    [filteredEntitiesAfterResourceType, showK8sFilters, k8sClusterFilter, effectiveK8sNamespaceFilter, effectiveK8sDeploymentFilter, effectiveK8sNodeFilter, k8sClusterNames]
+    [
+      filteredEntitiesAfterResourceType,
+      showK8sFilters,
+      k8sClusterFilter,
+      effectiveK8sNamespaceFilter,
+      effectiveK8sDeploymentFilter,
+      effectiveK8sNodeFilter,
+      k8sClusterNames,
+    ]
   );
   // Cloud provider filter — page-level on the Cloud category page.
   const filteredEntitiesAfterProvider = useMemo(
     () =>
       isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL
-        ? filteredEntitiesAfterCluster.filter(
-            (entity) => entity.provider === cloudProviderFilter
-          )
+        ? filteredEntitiesAfterCluster.filter((entity) => entity.provider === cloudProviderFilter)
         : filteredEntitiesAfterCluster,
     [filteredEntitiesAfterCluster, isCloudCategoryPage, cloudProviderFilter]
   );
@@ -2140,9 +2104,7 @@ const AllEntitiesViewInner = ({
     // distinct sub-types (the visible panels) rather than distinct categories
     // (which would always be 1).
     if (categoryScope && isDefaultGroupBy(groupBy)) {
-      return new Set(
-        filteredEntities.map((entity) => entity.subType ?? entity.type)
-      ).size;
+      return new Set(filteredEntities.map((entity) => entity.subType ?? entity.type)).size;
     }
 
     // Use the effective first grouping field — `customGroupBy` strips
@@ -2153,7 +2115,15 @@ const AllEntitiesViewInner = ({
     const field = effectiveFields[0] ?? groupByFields[0];
     if (!field) return 0;
     return new Set(filteredEntities.map((entity) => field.valueOf(entity))).size;
-  }, [isElasticOn, groupBy, customGroupBy, activeGroupByFields, groupByFields, filteredEntities, categoryScope]);
+  }, [
+    isElasticOn,
+    groupBy,
+    customGroupBy,
+    activeGroupByFields,
+    groupByFields,
+    filteredEntities,
+    categoryScope,
+  ]);
 
   const entityCountLabel = useMemo(() => {
     const count = filteredEntities.length.toLocaleString();
@@ -2178,13 +2148,12 @@ const AllEntitiesViewInner = ({
     labFilters.length > 0 ||
     search.trim() !== '' ||
     (isCrossCategoryPage && categoryFilter !== CATEGORY_FILTER_ALL) ||
-    (showK8sFilters && (
-      k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL ||
-      k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
-      effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
-      effectiveK8sDeploymentFilter !== KUBERNETES_FILTER_ALL ||
-      effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL
-    )) ||
+    (showK8sFilters &&
+      (k8sResourceType !== KUBERNETES_RESOURCE_TYPE_ALL ||
+        k8sClusterFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sNamespaceFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sDeploymentFilter !== KUBERNETES_FILTER_ALL ||
+        effectiveK8sNodeFilter !== KUBERNETES_FILTER_ALL)) ||
     (isCloudCategoryPage && cloudProviderFilter !== CLOUD_PROVIDER_FILTER_ALL) ||
     (showCategoryTypeFilter && categoryTypeFilter !== CATEGORY_RESOURCE_TYPE_ALL) ||
     (isElasticOn && alertsFilter !== ALERTS_FILTER_ALL);
@@ -2281,15 +2250,11 @@ const AllEntitiesViewInner = ({
   }, [childEntity, childEntityType, childEntityName]);
 
   const inventoryPushRequested =
-    flyoutPresentation === 'push' &&
-    Boolean(selectedEntityName || inventoryDashboardPreview);
+    flyoutPresentation === 'push' && Boolean(selectedEntityName || inventoryDashboardPreview);
   const inventoryPushInsetPx = useInventoryPushInsetPx(inventoryPushRequested);
   // Wide flyouts (e.g. size `l` dashboard preview) fall back to overlay — no page inset.
   const inventoryPushActive = inventoryPushRequested && inventoryPushInsetPx > 0;
-  const inventoryPushShellCss = getInventoryPushShellCss(
-    inventoryPushActive,
-    inventoryPushInsetPx
-  );
+  const inventoryPushShellCss = getInventoryPushShellCss(inventoryPushActive, inventoryPushInsetPx);
 
   // Honours the per-entity-type enablement switch in "Manage entity types":
   // when the resolved type is disabled, opening is silently declined. Read
@@ -2399,8 +2364,7 @@ const AllEntitiesViewInner = ({
     (entityName: string, options?: { tab?: string }) => {
       if (!isEntityOpenable(entityName)) return;
       const params = new URLSearchParams(location.search);
-      const tab =
-        options?.tab ?? params.get('tab') ?? readPreferredFlyoutTab() ?? undefined;
+      const tab = options?.tab ?? params.get('tab') ?? readPreferredFlyoutTab() ?? undefined;
       if (tab) {
         writePreferredFlyoutTab(tab);
         if (options?.tab) {
@@ -2654,12 +2618,7 @@ const AllEntitiesViewInner = ({
       flyoutFrom: flyoutTimeRange.from,
       flyoutTo: flyoutTimeRange.to,
     });
-  }, [
-    syncFlyoutShareParams,
-    flyoutTimeRange.from,
-    flyoutTimeRange.to,
-    writePreferredFlyoutTab,
-  ]);
+  }, [syncFlyoutShareParams, flyoutTimeRange.from, flyoutTimeRange.to, writePreferredFlyoutTab]);
 
   // "Add to filter" from the K8s flyout: keep "All resource types" but fill
   // in the contextual cascade filters (cluster, namespace, node) based on
@@ -2686,9 +2645,7 @@ const AllEntitiesViewInner = ({
           : entity.attributes?.deployment ?? KUBERNETES_FILTER_ALL
       );
       setK8sNodeFilter(
-        entity.subType === 'Nodes'
-          ? entity.name
-          : entity.attributes?.node ?? KUBERNETES_FILTER_ALL
+        entity.subType === 'Nodes' ? entity.name : entity.attributes?.node ?? KUBERNETES_FILTER_ALL
       );
       setSelectedEntityName(null);
       setChildEntityName(null);
@@ -2749,9 +2706,7 @@ const AllEntitiesViewInner = ({
 
       // Always use the hovered Node row’s canonical `name` (e.g. `node-012`).
       const nodeFromApply =
-        entity.subType === 'Nodes' && apply.resourceType === 'Pods'
-          ? entity.name
-          : apply.node;
+        entity.subType === 'Nodes' && apply.resourceType === 'Pods' ? entity.name : apply.node;
 
       const namespaceFromApply =
         entity.subType === 'Namespaces' && apply.resourceType === 'Pods'
@@ -2878,7 +2833,10 @@ const AllEntitiesViewInner = ({
       resourceCopy: isElasticOn,
       density: listDensity,
       enrichK8sFlyoutOverviewDetails: isElasticOn
-        ? (entityName: string, rows: import('@kbn/entity-centric-lab-flyout').EntityDetailRow[]) => {
+        ? (
+            entityName: string,
+            rows: import('@kbn/entity-centric-lab-flyout').EntityDetailRow[]
+          ) => {
             const matched = entityByName.get(entityName);
             return enrichK8sFlyoutOverviewDetails(matched, rows);
           }
@@ -2920,9 +2878,7 @@ const AllEntitiesViewInner = ({
             }
           }
         : undefined,
-      onK8sFlyoutSelectRelatedEntity: isElasticOn
-        ? handleK8sFlyoutSelectRelatedEntity
-        : undefined,
+      onK8sFlyoutSelectRelatedEntity: isElasticOn ? handleK8sFlyoutSelectRelatedEntity : undefined,
       onOpenInventoryDashboardPreview: isElasticOn ? openInventoryDashboardPreview : undefined,
       renderAlertDetailFlyout,
       onOpenAlertDetail,
@@ -3078,13 +3034,7 @@ const AllEntitiesViewInner = ({
       });
     }, 300);
     return () => window.clearTimeout(timer);
-  }, [
-    isLatest,
-    inventorySharePayload,
-    history,
-    location.pathname,
-    location.search,
-  ]);
+  }, [isLatest, inventorySharePayload, history, location.pathname, location.search]);
 
   // Fold the "Store time with view" choice into the state written on Save /
   // Update: capture the live time range when on, strip it when off.
@@ -3244,230 +3194,222 @@ const AllEntitiesViewInner = ({
   return (
     <>
       <div css={inventoryPushShellCss} data-test-subj="entityCentricLabInventoryPushShell">
-      <StreamsAppPageTemplate.Header
-        pageTitle={
-          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
-            {headerIcon ? (
+        <StreamsAppPageTemplate.Header
+          pageTitle={
+            <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+              {headerIcon ? (
+                <EuiFlexItem grow={false}>
+                  <EuiIcon type={headerIcon} size="l" aria-hidden />
+                </EuiFlexItem>
+              ) : null}
               <EuiFlexItem grow={false}>
-                <EuiIcon type={headerIcon} size="l" aria-hidden />
-              </EuiFlexItem>
-            ) : null}
-            <EuiFlexItem grow={false}>
-              {/*
+                {/*
                 Titles intentionally omit an entity count — the Inventory
                 tab label already renders "Inventory ({count})" for both
                 the per-category and cross-category pages, so duplicating
                 it in the page title just noise.
               */}
-              {headerLabel
-                ? headerLabel
-                : isElasticOn
-                ? i18n.translate('xpack.streams.entityCentricLab.entities.titleResources', {
-                    defaultMessage: 'All entities',
-                  })
-                : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
-                    defaultMessage: 'All entities',
-                  })}
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        }
-        tabs={
-          // Latest drops the Inventory/Monitoring tab strip entirely — the
-          // Monitoring assets surface is gone, so there's only the Inventory
-          // surface below and nothing to switch between. Every other mode keeps
-          // the two tabs unchanged.
-          isLatest
-            ? undefined
-            : [
-                {
-                  label: i18n.translate('xpack.streams.entityCentricLab.entities.tabs.inventory', {
-                    defaultMessage: 'Inventory ({count})',
-                    // Cross-category inventory covers the full dataset; per-
-                    // category inventory is scoped to the current category.
-                    // The button count reflects the same set the tab body
-                    // renders, so `scopedEntities` is the right source either
-                    // way.
-                    values: { count: scopedEntities.length.toLocaleString() },
-                  }),
-                  isSelected: categoryTab === 'inventory',
-                  onClick: () => setCategoryTab('inventory'),
-                  'data-test-subj': 'entityCentricLabInventoryTab',
-                },
-                {
-                  label: i18n.translate(
-                    'xpack.streams.entityCentricLab.entities.tabs.monitoringAssets',
-                    {
-                      defaultMessage: 'Monitoring',
-                    }
-                  ),
-                  isSelected: categoryTab === 'monitoring',
-                  onClick: () => setCategoryTab('monitoring'),
-                  'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
-                },
-              ]
-        }
-        rightSideItems={
-          isInfraShortTerm
-            ? []
-            : [
-                ...(isPhase1
-                  ? []
-                  : [
-                      <EuiButton
-                        key="manage"
-                        iconType="gear"
-                        size={isElasticOn ? 's' : 'm'}
-                        color={isElasticOn ? 'text' : 'primary'}
-                        onClick={() => {
-                          router.push('/manage-entity-types', { path: {}, query: {} });
-                        }}
-                        data-test-subj="entityCentricLabManageEntityTypesButton"
-                      >
-                        {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
-                          defaultMessage: 'Manage {thing} types',
-                          values: { thing: labThing(isElasticOn) },
-                        })}
-                      </EuiButton>,
-                    ]),
-                ...(isElasticOn
-                  ? [
-                      <EuiTourStep
-                        key="save-view-tour"
-                        step={4}
-                        stepsTotal={tourStepCount}
-                        isStepOpen={isTourActive && tourStep === 4}
-                        subtitle="New infrastructure inventory"
-                        title="Save and share views"
-                        content={
-                          <p>
-                            Capture your current filters, grouping, and layout as a saved view.
-                            Access it from the left nav or share the link with your team.
-                          </p>
-                        }
-                        onFinish={closeTour}
-                        footerAction={
-                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonEmpty size="s" onClick={closeTour}>
-                                Close tour
-                              </EuiButtonEmpty>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButton size="s" onClick={advanceTour}>
-                                Next
-                              </EuiButton>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        }
-                        anchorPosition="downRight"
-                      >
-                        <SaveViewButton
-                          currentState={currentViewState}
-                          loadedView={loadedView}
-                          isModified={isLoadedViewModified}
-                          onUpdate={handleUpdateLoadedView}
-                          onSaveAsNew={handleSaveAsNewView}
-                          showMakeDefault
-                          isLoadedViewDefault={
-                            Boolean(loadedView) &&
-                            savedViewsApi.defaultViewId === loadedView?.id
+                {headerLabel
+                  ? headerLabel
+                  : isElasticOn
+                  ? i18n.translate('xpack.streams.entityCentricLab.entities.titleResources', {
+                      defaultMessage: 'All entities',
+                    })
+                  : i18n.translate('xpack.streams.entityCentricLab.entities.title', {
+                      defaultMessage: 'All entities',
+                    })}
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          }
+          tabs={
+            // Latest drops the Inventory/Monitoring tab strip entirely — the
+            // Monitoring assets surface is gone, so there's only the Inventory
+            // surface below and nothing to switch between. Every other mode keeps
+            // the two tabs unchanged.
+            isLatest
+              ? undefined
+              : [
+                  {
+                    label: i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.tabs.inventory',
+                      {
+                        defaultMessage: 'Inventory ({count})',
+                        // Cross-category inventory covers the full dataset; per-
+                        // category inventory is scoped to the current category.
+                        // The button count reflects the same set the tab body
+                        // renders, so `scopedEntities` is the right source either
+                        // way.
+                        values: { count: scopedEntities.length.toLocaleString() },
+                      }
+                    ),
+                    isSelected: categoryTab === 'inventory',
+                    onClick: () => setCategoryTab('inventory'),
+                    'data-test-subj': 'entityCentricLabInventoryTab',
+                  },
+                  {
+                    label: i18n.translate(
+                      'xpack.streams.entityCentricLab.entities.tabs.monitoringAssets',
+                      {
+                        defaultMessage: 'Monitoring',
+                      }
+                    ),
+                    isSelected: categoryTab === 'monitoring',
+                    onClick: () => setCategoryTab('monitoring'),
+                    'data-test-subj': 'entityCentricLabMonitoringAssetsTab',
+                  },
+                ]
+          }
+          rightSideItems={
+            isInfraShortTerm
+              ? []
+              : [
+                  ...(isPhase1
+                    ? []
+                    : [
+                        <EuiButton
+                          key="manage"
+                          iconType="gear"
+                          size={isElasticOn ? 's' : 'm'}
+                          color={isElasticOn ? 'text' : 'primary'}
+                          onClick={() => {
+                            router.push('/manage-entity-types', { path: {}, query: {} });
+                          }}
+                          data-test-subj="entityCentricLabManageEntityTypesButton"
+                        >
+                          {i18n.translate('xpack.streams.entityCentricLab.entities.manageButton', {
+                            defaultMessage: 'Manage {thing} types',
+                            values: { thing: labThing(isElasticOn) },
+                          })}
+                        </EuiButton>,
+                      ]),
+                  ...(isElasticOn
+                    ? [
+                        <EuiTourStep
+                          key="save-view-tour"
+                          step={4}
+                          stepsTotal={tourStepCount}
+                          isStepOpen={isTourActive && tourStep === 4}
+                          subtitle="New infrastructure inventory"
+                          title="Save and share views"
+                          content={
+                            <p>
+                              Capture your current filters, grouping, and layout as a saved view.
+                              Access it from the left nav or share the link with your team.
+                            </p>
                           }
-                          compact
-                          neutral
-                          disabled={isCategoryEmptyState}
-                        />
-                      </EuiTourStep>,
-                      <EuiTourStep
-                        key="more-actions-tour"
-                        step={5}
-                        stepsTotal={tourStepCount}
-                        isStepOpen={isTourActive && tourStep === 5}
-                        subtitle="New infrastructure inventory"
-                        title="Help us improve"
-                        content={
-                          <p>
-                            Have feedback? Found something that could work better? Let us know —
-                            your input shapes what comes next.
-                            {scenarioVariation !== 'banner-user' ? (
-                              <> You can switch back to the classic
-                              view anytime from <strong>Advanced Settings &gt; Observability</strong>.</>
-                            ) : null}
-                          </p>
-                        }
-                        onFinish={closeTour}
-                        footerAction={
-                          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                            <EuiFlexItem grow={false}>
-                              <EuiButtonEmpty size="s" onClick={closeTour}>
-                                Close tour
-                              </EuiButtonEmpty>
-                            </EuiFlexItem>
-                            <EuiFlexItem grow={false}>
-                              <EuiButton size="s" onClick={closeTour}>
-                                Done
-                              </EuiButton>
-                            </EuiFlexItem>
-                          </EuiFlexGroup>
-                        }
-                        anchorPosition="downRight"
-                      >
-                        <MoreActionsMenu
-                          onPlayTour={startScenarioTour}
-                          newExperienceEnabled={
-                            canRevertToClassicUx ? newInfraEnabled : undefined
+                          onFinish={closeTour}
+                          footerAction={
+                            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty size="s" onClick={closeTour}>
+                                  Close tour
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButton size="s" onClick={advanceTour}>
+                                  Next
+                                </EuiButton>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
                           }
-                          onToggleNewExperience={
-                            canRevertToClassicUx
-                              ? handleToggleNewExperience
-                              : undefined
+                          anchorPosition="downRight"
+                        >
+                          <SaveViewButton
+                            currentState={currentViewState}
+                            loadedView={loadedView}
+                            isModified={isLoadedViewModified}
+                            onUpdate={handleUpdateLoadedView}
+                            onSaveAsNew={handleSaveAsNewView}
+                            showMakeDefault
+                            isLoadedViewDefault={
+                              Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
+                            }
+                            compact
+                            neutral
+                            disabled={isCategoryEmptyState}
+                          />
+                        </EuiTourStep>,
+                        <EuiTourStep
+                          key="more-actions-tour"
+                          step={5}
+                          stepsTotal={tourStepCount}
+                          isStepOpen={isTourActive && tourStep === 5}
+                          subtitle="New infrastructure inventory"
+                          title="Help us improve"
+                          content={
+                            <p>
+                              Have feedback? Found something that could work better? Let us know —
+                              your input shapes what comes next.
+                              {scenarioVariation !== 'banner-user' ? (
+                                <>
+                                  {' '}
+                                  You can switch back to the classic view anytime from{' '}
+                                  <strong>Advanced Settings &gt; Observability</strong>.
+                                </>
+                              ) : null}
+                            </p>
                           }
-                        />
-                      </EuiTourStep>,
-                    ]
-                  : []),
-              ]
-        }
-      />
-      <StreamsAppPageTemplate.Body css={inventoryPushActive ? inventoryPushBodyCss : undefined}>
-        {dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities ? (
-          <>
-            <EuiCallOut
-              title={i18n.translate(
-                'xpack.streams.entityCentricLab.allEntities.truncationBanner',
-                {
-                  defaultMessage:
-                    'We can only show 10,000 entities at a time. Use filters to slice and dice further your data.',
-                }
-              )}
-              color="warning"
-              iconType="warning"
-              size="s"
-            />
-            <EuiSpacer size="s" />
-          </>
-        ) : null}
-        <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-          <EuiFlexItem css={inventoryPushActive ? inventoryPushFlexItemCss : undefined}>
-            {showOverviewTab ? (
-              categoryScope ? (
-                isDemoEmptyCategoryPage ? (
-                  <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
+                          onFinish={closeTour}
+                          footerAction={
+                            <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty size="s" onClick={closeTour}>
+                                  Close tour
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                              <EuiFlexItem grow={false}>
+                                <EuiButton size="s" onClick={closeTour}>
+                                  Done
+                                </EuiButton>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                          }
+                          anchorPosition="downRight"
+                        >
+                          <MoreActionsMenu
+                            onPlayTour={startScenarioTour}
+                            newExperienceEnabled={
+                              canRevertToClassicUx ? newInfraEnabled : undefined
+                            }
+                            onToggleNewExperience={
+                              canRevertToClassicUx ? handleToggleNewExperience : undefined
+                            }
+                          />
+                        </EuiTourStep>,
+                      ]
+                    : []),
+                ]
+          }
+        />
+        <StreamsAppPageTemplate.Body css={inventoryPushActive ? inventoryPushBodyCss : undefined}>
+          {dataset.totalBeforeTruncation && filteredEntities.length >= dataset.totalEntities ? (
+            <>
+              <LabTruncationCallout />
+              <EuiSpacer size="s" />
+            </>
+          ) : null}
+          <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
+            <EuiFlexItem css={inventoryPushActive ? inventoryPushFlexItemCss : undefined}>
+              {showOverviewTab ? (
+                categoryScope ? (
+                  isDemoEmptyCategoryPage ? (
+                    <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
+                  ) : (
+                    <MonitoringAssetsView
+                      category={categoryScope}
+                      onSelectEntity={openEntity}
+                      scopeLabel={cloudProviderScope ? headerLabel : undefined}
+                      dataStreamNameIncludes={cloudStreamMatch}
+                    />
+                  )
                 ) : (
-                  <MonitoringAssetsView
-                    category={categoryScope}
-                    onSelectEntity={openEntity}
-                    scopeLabel={cloudProviderScope ? headerLabel : undefined}
-                    dataStreamNameIncludes={cloudStreamMatch}
-                  />
+                  <AllEntitiesOverviewView onSelectEntity={openEntity} />
                 )
-              ) : (
-                <AllEntitiesOverviewView onSelectEntity={openEntity} />
-              )
-            ) : showAddDataEmptyPrompt ? (
-              <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
-            ) : isElasticOn ? (
-              <>
-                {/*
+              ) : showAddDataEmptyPrompt ? (
+                <AddObservabilityDataEmptyPrompt categoryScope={categoryScope} />
+              ) : isElasticOn ? (
+                <>
+                  {/*
                   ElasticOn Inventory toolbar (3 rows):
                     1. Unified KQL search bar — the same "multidimensional
                        filter" used on Hosts / Infrastructure inventory (query
@@ -3479,488 +3421,493 @@ const AllEntitiesViewInner = ({
                     2. Independent facet filters (region, environment, …).
                     3. Summary + Group-by-provider + view-mode toggle + Save view.
                 */}
-                <EuiTourStep
-                  step={1}
-                  stepsTotal={tourStepCount}
-                  isStepOpen={isTourActive && tourStep === 1}
-                  subtitle="New infrastructure inventory"
-                  title="Search and filter"
-                  content={
-                    <p>
-                      {isPhase1
-                        ? 'Filter entities by name, team, or category-specific attributes using KQL. Add structured filters with the + button.'
-                        : 'Filter entities by name, health, team, or category-specific attributes using KQL. Add structured filters with the + button.'}
-                    </p>
-                  }
-                  onFinish={closeTour}
-                  footerAction={
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                      <EuiFlexItem grow={false}>
-                        <EuiButtonEmpty size="s" onClick={closeTour}>
-                          Close tour
-                        </EuiButtonEmpty>
-                      </EuiFlexItem>
-                      <EuiFlexItem grow={false}>
-                        <EuiButton size="s" onClick={advanceTour}>
-                          Next
-                        </EuiButton>
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  }
-                  anchorPosition="downCenter"
-                >
-                  <div css={[NO_GROW, inventorySearchBarShellCss]}>
-                    <EuiFlexGroup
-                      gutterSize="xs"
-                      alignItems="center"
-                      responsive={false}
-                      wrap
-                      css={INVENTORY_TOOLBAR_WRAP}
-                    >
-                      <EuiFlexItem css={inventorySearchBarRowCss}>
-                        <unifiedSearch.ui.SearchBar
-                          appName="streamsApp"
-                          indexPatterns={labDataView ? [labDataView] : []}
-                          showQueryInput
-                          showQueryMenu
-                          showFilterBar
-                          showDatePicker
-                          isAutoRefreshDisabled={false}
-                          displayStyle="inPage"
-                          query={{ query: search, language: 'kuery' } as Query}
-                          filters={labFilters}
-                          dateRangeFrom={rangeFrom}
-                          dateRangeTo={rangeTo}
-                          onQuerySubmit={(payload, isUpdate) => {
-                            const nextQuery = payload.query?.query;
-                            setSearch(typeof nextQuery === 'string' ? nextQuery : '');
-                            if (payload.dateRange) {
-                              handleTimeChange({
-                                start: payload.dateRange.from,
-                                end: payload.dateRange.to,
-                              });
-                            }
-                            if (!isUpdate) handleLiveRefresh();
-                          }}
-                          onFiltersUpdated={setLabFilters}
-                          onRefresh={handleLiveRefresh}
-                          commonlyUsedRanges={inventoryCommonlyUsedRanges}
-                          placeholder={i18n.translate(
-                            'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
-                            {
-                              defaultMessage: 'Search {things} — e.g. {example}',
-                              values: {
-                                things: labThings(isElasticOn),
-                                example:
-                                  effectiveCategoryScope === 'kubernetes'
-                                    ? 'cluster:prod* AND namespace:payments'
-                                    : effectiveCategoryScope === 'hosts'
-                                    ? isPhase1
-                                      ? 'os:linux AND type:host'
-                                      : 'os:linux AND health:unhealthy'
-                                    : effectiveCategoryScope === 'cloud'
-                                    ? isPhase1
-                                      ? 'cloud.provider:aws'
-                                      : 'cloud.provider:aws AND health:unhealthy'
-                                    : isPhase1
-                                    ? 'environment:production'
-                                    : 'health:unhealthy AND environment:production',
-                              },
-                            }
-                          )}
+                  <EuiTourStep
+                    step={1}
+                    stepsTotal={tourStepCount}
+                    isStepOpen={isTourActive && tourStep === 1}
+                    subtitle="New infrastructure inventory"
+                    title="Search and filter"
+                    content={
+                      <p>
+                        {isPhase1
+                          ? 'Filter entities by name, team, or category-specific attributes using KQL. Add structured filters with the + button.'
+                          : 'Filter entities by name, health, team, or category-specific attributes using KQL. Add structured filters with the + button.'}
+                      </p>
+                    }
+                    onFinish={closeTour}
+                    footerAction={
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                        <EuiFlexItem grow={false}>
+                          <EuiButtonEmpty size="s" onClick={closeTour}>
+                            Close tour
+                          </EuiButtonEmpty>
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false}>
+                          <EuiButton size="s" onClick={advanceTour}>
+                            Next
+                          </EuiButton>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    }
+                    anchorPosition="downCenter"
+                  >
+                    <div css={[NO_GROW, inventorySearchBarShellCss]}>
+                      <EuiFlexGroup
+                        gutterSize="xs"
+                        alignItems="center"
+                        responsive={false}
+                        wrap
+                        css={INVENTORY_TOOLBAR_WRAP}
+                      >
+                        <EuiFlexItem css={inventorySearchBarRowCss}>
+                          <unifiedSearch.ui.SearchBar
+                            appName="streamsApp"
+                            indexPatterns={labDataView ? [labDataView] : []}
+                            showQueryInput
+                            showQueryMenu
+                            showFilterBar
+                            showDatePicker
+                            isAutoRefreshDisabled={false}
+                            displayStyle="inPage"
+                            query={{ query: search, language: 'kuery' } as Query}
+                            filters={labFilters}
+                            dateRangeFrom={rangeFrom}
+                            dateRangeTo={rangeTo}
+                            onQuerySubmit={(payload, isUpdate) => {
+                              const nextQuery = payload.query?.query;
+                              setSearch(typeof nextQuery === 'string' ? nextQuery : '');
+                              if (payload.dateRange) {
+                                handleTimeChange({
+                                  start: payload.dateRange.from,
+                                  end: payload.dateRange.to,
+                                });
+                              }
+                              if (!isUpdate) handleLiveRefresh();
+                            }}
+                            onFiltersUpdated={setLabFilters}
+                            onRefresh={handleLiveRefresh}
+                            commonlyUsedRanges={inventoryCommonlyUsedRanges}
+                            placeholder={i18n.translate(
+                              'xpack.streams.entityCentricLab.entities.searchBarPlaceholder',
+                              {
+                                defaultMessage: 'Search {things} — e.g. {example}',
+                                values: {
+                                  things: labThings(isElasticOn),
+                                  example:
+                                    effectiveCategoryScope === 'kubernetes'
+                                      ? 'cluster:prod* AND namespace:payments'
+                                      : effectiveCategoryScope === 'hosts'
+                                      ? isPhase1
+                                        ? 'os:linux AND type:host'
+                                        : 'os:linux AND health:unhealthy'
+                                      : effectiveCategoryScope === 'cloud'
+                                      ? isPhase1
+                                        ? 'cloud.provider:aws'
+                                        : 'cloud.provider:aws AND health:unhealthy'
+                                      : isPhase1
+                                      ? 'environment:production'
+                                      : 'health:unhealthy AND environment:production',
+                                },
+                              }
+                            )}
+                          />
+                        </EuiFlexItem>
+                        <EuiFlexItem grow={false} css={inventoryMaxRangeHintWideCss}>
+                          <EuiText size="xs" color="subdued">
+                            {inventoryMaxRangeHint}
+                          </EuiText>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                    </div>
+                  </EuiTourStep>
+                  <EuiSpacer size="xs" />
+                  <EuiFlexGroup
+                    gutterSize="s"
+                    alignItems="center"
+                    responsive={false}
+                    wrap
+                    css={INVENTORY_TOOLBAR_WRAP}
+                  >
+                    {getVisibleTagKeys(isElasticOn, isPhase1).length > 0 ? (
+                      <EuiFlexItem
+                        grow={false}
+                        css={css`
+                          flex: 0 1 auto;
+                          max-width: 100%;
+                        `}
+                      >
+                        <EntitiesTagFilters
+                          facets={tagFacets}
+                          activeFilters={activeTagFilters}
+                          onChange={setActiveTagFilters}
+                          compressed
+                          hideClear
+                          isElasticOn
+                          isPhase1={isPhase1}
                         />
                       </EuiFlexItem>
-                      <EuiFlexItem grow={false} css={inventoryMaxRangeHintWideCss}>
-                        <EuiText size="xs" color="subdued">
-                          {inventoryMaxRangeHint}
-                        </EuiText>
+                    ) : null}
+                    {isCrossCategoryPage && categoriesWithEntities.length >= 2 ? (
+                      <EuiFlexItem
+                        grow={false}
+                        css={css`
+                          flex: 0 1 auto;
+                          max-width: 100%;
+                          min-width: min(100%, 180px);
+                        `}
+                      >
+                        <EuiComboBox
+                          compressed
+                          singleSelection={{ asPlainText: true }}
+                          options={categoriesWithEntities.map((c) => ({
+                            label: c.label,
+                            value: c.id,
+                          }))}
+                          selectedOptions={
+                            categoryFilter === CATEGORY_FILTER_ALL
+                              ? []
+                              : categoriesWithEntities
+                                  .filter((c) => c.id === categoryFilter)
+                                  .map((c) => ({
+                                    label: `Entity category: ${c.label}`,
+                                    value: c.id,
+                                  }))
+                          }
+                          onChange={(selected) => {
+                            handleCategoryFilterChange(
+                              selected.length > 0
+                                ? (selected[0].value as string)
+                                : CATEGORY_FILTER_ALL
+                            );
+                          }}
+                          placeholder={i18n.translate(
+                            'xpack.streams.entityCentricLab.entities.categoryFilter.placeholder',
+                            { defaultMessage: 'All entity categories' }
+                          )}
+                          isClearable
+                          aria-label={i18n.translate(
+                            'xpack.streams.entityCentricLab.entities.categoryFilter.ariaLabel',
+                            { defaultMessage: 'Filter by entity category' }
+                          )}
+                          data-test-subj="entityCentricLabCategoryFilter"
+                          fullWidth
+                        />
                       </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </div>
-                </EuiTourStep>
-                <EuiSpacer size="xs" />
-                <EuiFlexGroup
-                  gutterSize="s"
-                  alignItems="center"
-                  responsive={false}
-                  wrap
-                  css={INVENTORY_TOOLBAR_WRAP}
-                >
-                  {getVisibleTagKeys(isElasticOn, isPhase1).length > 0 ? (
-                    <EuiFlexItem grow={false} css={css`flex: 0 1 auto; max-width: 100%;`}>
-                      <EntitiesTagFilters
-                        facets={tagFacets}
-                        activeFilters={activeTagFilters}
-                        onChange={setActiveTagFilters}
-                        compressed
-                        hideClear
-                        isElasticOn
-                        isPhase1={isPhase1}
+                    ) : null}
+                    {extraFilterDefs.length > 0 ? (
+                      <EuiFlexItem grow={false}>
+                        <EntityExtraFilters
+                          defs={extraFilterDefs}
+                          facets={extraFacets}
+                          activeFilters={activeExtraFilters}
+                          onChange={setActiveExtraFilters}
+                          compressed
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    {isCloudCategoryPage ? (
+                      <EuiFlexItem grow={false}>
+                        <CloudProviderFilter
+                          value={cloudProviderFilter}
+                          onChange={setCloudProviderFilter}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    {showK8sFilters ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiFlexGroup
+                          gutterSize="none"
+                          alignItems="center"
+                          responsive={false}
+                          css={k8sFilterGroupCss}
+                        >
+                          <EuiFlexItem grow={false}>
+                            <KubernetesResourceTypeFilter
+                              value={k8sResourceType}
+                              onChange={handleK8sResourceTypeChange}
+                            />
+                          </EuiFlexItem>
+                          {k8sFilterVisibility.showCluster && k8sClusterNames.length > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <KubernetesClusterFilter
+                                clusterNames={k8sClusterNames}
+                                value={k8sClusterFilter}
+                                onChange={handleK8sClusterChange}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                          {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <KubernetesNodeFilter
+                                nodeNames={k8sNodeNames}
+                                value={effectiveK8sNodeFilter}
+                                onChange={setK8sNodeFilter}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                          {k8sFilterVisibility.showNamespace && k8sNamespaceNames.length > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <KubernetesNamespaceFilter
+                                namespaceNames={k8sNamespaceNames}
+                                value={effectiveK8sNamespaceFilter}
+                                onChange={handleK8sNamespaceChange}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                          {k8sFilterVisibility.showDeployment && k8sDeploymentNames.length > 0 ? (
+                            <EuiFlexItem grow={false}>
+                              <KubernetesDeploymentFilter
+                                deploymentNames={k8sDeploymentNames}
+                                value={effectiveK8sDeploymentFilter}
+                                onChange={setK8sDeploymentFilter}
+                              />
+                            </EuiFlexItem>
+                          ) : null}
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                    ) : null}
+                    {showCategoryTypeFilter ? (
+                      <EuiFlexItem grow={false}>
+                        <CategoryResourceTypeFilter
+                          typeLabels={categoryTypeLabels}
+                          value={categoryTypeFilter}
+                          onChange={setCategoryTypeFilter}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    {isElasticOn ? (
+                      <EuiFlexItem grow={false}>
+                        <EntityAlertsFilter
+                          value={alertsFilter}
+                          onChange={handleAlertsFilterChange}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                    {hasActiveFilters ? (
+                      <EuiFlexItem grow={false}>
+                        <EuiButtonEmpty
+                          size="xs"
+                          flush="left"
+                          iconType="cross"
+                          onClick={handleClearFilters}
+                          data-test-subj="entityCentricLabClearFilters"
+                        >
+                          {i18n.translate('xpack.streams.entityCentricLab.entities.clearFilters', {
+                            defaultMessage: 'Clear filters',
+                          })}
+                        </EuiButtonEmpty>
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  {!showOverviewTab && !showAddDataEmptyPrompt ? (
+                    <>
+                      <InventorySummaryCards
+                        entities={filteredEntitiesAfterCategoryType}
+                        thingsLabel={labThingsLabel(isElasticOn)}
+                        scopeKey={inventorySummaryScopeKey}
+                        alertsFilter={alertsFilter}
+                        onAlertsFilterChange={handleAlertsFilterChange}
+                        charts={charts}
+                        density={listDensity}
                       />
-                    </EuiFlexItem>
+                      <EuiSpacer size="s" />
+                    </>
                   ) : null}
-                  {isCrossCategoryPage && categoriesWithEntities.length >= 2 ? (
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    wrap
+                    css={INVENTORY_TOOLBAR_WRAP}
+                  >
+                    <EuiFlexItem
+                      grow={false}
+                      css={css`
+                        flex: 1 1 200px;
+                        min-width: 0;
+                      `}
+                    >
+                      <EuiTitle size="xxs">
+                        <h3>
+                          {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
+                            defaultMessage: '{count} {things} · {groups} Groups',
+                            values: {
+                              count: entityCountLabel,
+                              things: labThingsLabel(isElasticOn),
+                              groups: isElasticOn
+                                ? elasticOnGroupCount
+                                : categoryScope
+                                ? filteredEntities.length > 0
+                                  ? 1
+                                  : 0
+                                : dataset.totalGroups,
+                            },
+                          })}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
                     <EuiFlexItem
                       grow={false}
                       css={css`
                         flex: 0 1 auto;
                         max-width: 100%;
-                        min-width: min(100%, 180px);
                       `}
                     >
-                      <EuiComboBox
-                        compressed
-                        singleSelection={{ asPlainText: true }}
-                        options={categoriesWithEntities.map((c) => ({
-                          label: c.label,
-                          value: c.id,
-                        }))}
-                        selectedOptions={
-                          categoryFilter === CATEGORY_FILTER_ALL
-                            ? []
-                            : categoriesWithEntities
-                                .filter((c) => c.id === categoryFilter)
-                                .map((c) => ({ label: `Entity category: ${c.label}`, value: c.id }))
-                        }
-                        onChange={(selected) => {
-                          handleCategoryFilterChange(
-                            selected.length > 0 ? (selected[0].value as string) : CATEGORY_FILTER_ALL
-                          );
-                        }}
-                        placeholder={i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.categoryFilter.placeholder',
-                          { defaultMessage: 'All entity categories' }
-                        )}
-                        isClearable
-                        aria-label={i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.categoryFilter.ariaLabel',
-                          { defaultMessage: 'Filter by entity category' }
-                        )}
-                        data-test-subj="entityCentricLabCategoryFilter"
-                        fullWidth
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  {extraFilterDefs.length > 0 ? (
-                    <EuiFlexItem grow={false}>
-                      <EntityExtraFilters
-                        defs={extraFilterDefs}
-                        facets={extraFacets}
-                        activeFilters={activeExtraFilters}
-                        onChange={setActiveExtraFilters}
-                        compressed
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  {isCloudCategoryPage ? (
-                    <EuiFlexItem grow={false}>
-                      <CloudProviderFilter
-                        value={cloudProviderFilter}
-                        onChange={setCloudProviderFilter}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  {showK8sFilters ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="none" alignItems="center" responsive={false} css={k8sFilterGroupCss}>
+                      <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
                         <EuiFlexItem grow={false}>
-                          <KubernetesResourceTypeFilter
-                            value={k8sResourceType}
-                            onChange={handleK8sResourceTypeChange}
-                          />
-                        </EuiFlexItem>
-                        {k8sFilterVisibility.showCluster && k8sClusterNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesClusterFilter
-                              clusterNames={k8sClusterNames}
-                              value={k8sClusterFilter}
-                              onChange={handleK8sClusterChange}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                        {k8sFilterVisibility.showNode && k8sNodeNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesNodeFilter
-                              nodeNames={k8sNodeNames}
-                              value={effectiveK8sNodeFilter}
-                              onChange={setK8sNodeFilter}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                        {k8sFilterVisibility.showNamespace && k8sNamespaceNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesNamespaceFilter
-                              namespaceNames={k8sNamespaceNames}
-                              value={effectiveK8sNamespaceFilter}
-                              onChange={handleK8sNamespaceChange}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                        {k8sFilterVisibility.showDeployment && k8sDeploymentNames.length > 0 ? (
-                          <EuiFlexItem grow={false}>
-                            <KubernetesDeploymentFilter
-                              deploymentNames={k8sDeploymentNames}
-                              value={effectiveK8sDeploymentFilter}
-                              onChange={setK8sDeploymentFilter}
-                            />
-                          </EuiFlexItem>
-                        ) : null}
-                      </EuiFlexGroup>
-                    </EuiFlexItem>
-                  ) : null}
-                  {showCategoryTypeFilter ? (
-                    <EuiFlexItem grow={false}>
-                      <CategoryResourceTypeFilter
-                        typeLabels={categoryTypeLabels}
-                        value={categoryTypeFilter}
-                        onChange={setCategoryTypeFilter}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                  {isElasticOn ? (
-                    <EuiFlexItem grow={false}>
-                      <EntityAlertsFilter value={alertsFilter} onChange={handleAlertsFilterChange} />
-                    </EuiFlexItem>
-                  ) : null}
-                  {hasActiveFilters ? (
-                    <EuiFlexItem grow={false}>
-                      <EuiButtonEmpty
-                        size="xs"
-                        flush="left"
-                        iconType="cross"
-                        onClick={handleClearFilters}
-                        data-test-subj="entityCentricLabClearFilters"
-                      >
-                        {i18n.translate('xpack.streams.entityCentricLab.entities.clearFilters', {
-                          defaultMessage: 'Clear filters',
-                        })}
-                      </EuiButtonEmpty>
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                {!showOverviewTab && !showAddDataEmptyPrompt ? (
-                  <>
-                    <InventorySummaryCards
-                      entities={filteredEntitiesAfterCategoryType}
-                      thingsLabel={labThingsLabel(isElasticOn)}
-                      scopeKey={inventorySummaryScopeKey}
-                      alertsFilter={alertsFilter}
-                      onAlertsFilterChange={handleAlertsFilterChange}
-                      charts={charts}
-                      density={listDensity}
-                    />
-                    <EuiSpacer size="s" />
-                  </>
-                ) : null}
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  wrap
-                  css={INVENTORY_TOOLBAR_WRAP}
-                >
-                  <EuiFlexItem
-                    grow={false}
-                    css={css`
-                      flex: 1 1 200px;
-                      min-width: 0;
-                    `}
-                  >
-                    <EuiTitle size="xxs">
-                      <h3>
-                        {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                          defaultMessage: '{count} {things} · {groups} Groups',
-                          values: {
-                            count: entityCountLabel,
-                            things: labThingsLabel(isElasticOn),
-                            groups: isElasticOn
-                              ? elasticOnGroupCount
-                              : categoryScope
-                              ? filteredEntities.length > 0
-                                ? 1
-                                : 0
-                              : dataset.totalGroups,
-                          },
-                        })}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false} css={css`flex: 0 1 auto; max-width: 100%;`}>
-                    <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} wrap>
-                      <EuiFlexItem grow={false}>
-                        <EuiTourStep
-                      step={2}
-                      stepsTotal={tourStepCount}
-                      isStepOpen={isTourActive && tourStep === 2}
-                      subtitle="New infrastructure inventory"
-                      title="Toggle between views"
-                      content={
-                        <p>
-                          Switch between the list view when you need to find something
-                          specific and the hexagon map for an at-a-glance overview.
-                        </p>
-                      }
-                      onFinish={closeTour}
-                      footerAction={
-                        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-                          <EuiFlexItem grow={false}>
-                            <EuiButtonEmpty size="s" onClick={closeTour}>
-                              Close tour
-                            </EuiButtonEmpty>
-                          </EuiFlexItem>
-                          <EuiFlexItem grow={false}>
-                            <EuiButton size="s" onClick={advanceTour}>
-                              Next
-                            </EuiButton>
-                          </EuiFlexItem>
-                        </EuiFlexGroup>
-                      }
-                      anchorPosition="downCenter"
-                    >
-                      <EuiButtonGroup
-                        legend={i18n.translate(
-                          'xpack.streams.entityCentricLab.entities.viewMode.legend',
-                          { defaultMessage: 'View mode' }
-                        )}
-                        options={viewModeOptions}
-                        idSelected={effectiveViewMode}
-                        onChange={(id) => setViewMode(id as ViewMode)}
-                        isIconOnly
-                        buttonSize="compressed"
-                        color="text"
-                        data-test-subj="entityCentricLabEntitiesViewModeToggle"
-                      />
-                        </EuiTourStep>
-                      </EuiFlexItem>
-                      {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
-                        <EuiFlexItem grow={false}>
-                          <ListDisplayOptionsPopover
-                            density={listDensity}
-                            onChange={setListDensity}
-                          />
-                        </EuiFlexItem>
-                      ) : null}
-                      <EuiFlexItem grow={false}>
-                        <EntityGroupByControls
-                          fields={groupByFields}
-                          groupBy={groupBy}
-                          onChange={setGroupBy}
-                          lockedFieldIds={categoryScope ? ['category'] : []}
-                          variant="link"
-                          linkPrefix={i18n.translate(
-                            'xpack.streams.entityCentricLab.entities.groupBy.linkLabel',
-                            {
-                              defaultMessage: 'Group {things} by',
-                              values: { things: labThingsLabel(isElasticOn) },
+                          <EuiTourStep
+                            step={2}
+                            stepsTotal={tourStepCount}
+                            isStepOpen={isTourActive && tourStep === 2}
+                            subtitle="New infrastructure inventory"
+                            title="Toggle between views"
+                            content={
+                              <p>
+                                Switch between the list view when you need to find something
+                                specific and the hexagon map for an at-a-glance overview.
+                              </p>
                             }
-                          )}
-                        />
-                      </EuiFlexItem>
-                    </EuiFlexGroup>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-                <EuiHorizontalRule margin="s" />
-                {isBannerScenario && !bannerDismissed ? (
-                  <>
-                    <EuiCallOut
-                      title={'\uD83C\uDF89 Your infrastructure view has been updated'}
-                      color="primary"
-                    >
-                      <p>
-                        {scenarioVariation === 'transition'
-                          ? 'You\u2019ve successfully enabled the new infrastructure experience for all users on this deployment. It brings faster load times, hex map visualizations, and richer flyout context.'
-                          : scenarioVariation === 'banner-admin'
-                          ? 'An admin on your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'
-                          : 'Your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'}
-                      </p>
-                      <EuiFlexGroup gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
+                            onFinish={closeTour}
+                            footerAction={
+                              <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+                                <EuiFlexItem grow={false}>
+                                  <EuiButtonEmpty size="s" onClick={closeTour}>
+                                    Close tour
+                                  </EuiButtonEmpty>
+                                </EuiFlexItem>
+                                <EuiFlexItem grow={false}>
+                                  <EuiButton size="s" onClick={advanceTour}>
+                                    Next
+                                  </EuiButton>
+                                </EuiFlexItem>
+                              </EuiFlexGroup>
+                            }
+                            anchorPosition="downCenter"
+                          >
+                            <EuiButtonGroup
+                              legend={i18n.translate(
+                                'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                                { defaultMessage: 'View mode' }
+                              )}
+                              options={viewModeOptions}
+                              idSelected={effectiveViewMode}
+                              onChange={(id) => setViewMode(id as ViewMode)}
+                              isIconOnly
+                              buttonSize="compressed"
+                              color="text"
+                              data-test-subj="entityCentricLabEntitiesViewModeToggle"
+                            />
+                          </EuiTourStep>
                         </EuiFlexItem>
-                        {canRevertToClassicUx ? (
+                        {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
                           <EuiFlexItem grow={false}>
-                            <EuiLink onClick={openRevertSettings}>
-                              Revert in Advanced Settings
-                            </EuiLink>
+                            <ListDisplayOptionsPopover
+                              density={listDensity}
+                              onChange={setListDensity}
+                            />
                           </EuiFlexItem>
                         ) : null}
                         <EuiFlexItem grow={false}>
-                          <EuiLink onClick={dismissScenarioBanner}>Dismiss</EuiLink>
+                          <EntityGroupByControls
+                            fields={groupByFields}
+                            groupBy={groupBy}
+                            onChange={setGroupBy}
+                            lockedFieldIds={categoryScope ? ['category'] : []}
+                            variant="link"
+                            linkPrefix={i18n.translate(
+                              'xpack.streams.entityCentricLab.entities.groupBy.linkLabel',
+                              {
+                                defaultMessage: 'Group {things} by',
+                                values: { things: labThingsLabel(isElasticOn) },
+                              }
+                            )}
+                          />
                         </EuiFlexItem>
                       </EuiFlexGroup>
-                    </EuiCallOut>
-                    <EuiSpacer size="s" />
-                  </>
-                ) : null}
-                <EntityErrorBoundary section="Entity view">
-                {effectiveViewMode === 'grid' ? (
-                  <GroupedGridView
-                    key={`grid-${phaseVariation}`}
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={false}
-                    enablePaletteColoring={isElasticOn}
-                    refreshTick={refreshTick}
-                    customGroupBy={customGroupBy}
-                    hideCategoryHeader={!!categoryScope}
-                    density={listDensity}
-                    onHexTileFilterFor={handleHexTileFilterFor}
-                    onHexTileRelatedFilter={
-                      enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
-                    }
-                    k8sRelatedInventory={
-                      enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
-                    }
-                    colorByTourStep={
-                      isTourActive && tourStep === 3
-                        ? {
-                            isOpen: true,
-                            step: 3,
-                            stepsTotal: tourStepCount,
-                            onNext: advanceTour,
-                            onClose: closeTour,
-                          }
-                        : undefined
-                    }
-                  />
-                ) : tableStyleVariation === 'security' ? (
-                  <SecurityGroupingView
-                    key={`${groupBy.join(',')}-${phaseVariation}`}
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    onSelectEntityAlerts={openEntityOnAlertsTab}
-                    groupByFields={groupByFields}
-                    activeGroupBy={groupBy}
-                    refreshTick={refreshTick}
-                    categoryScope={categoryScope}
-                    density={listDensity}
-                    onK8sCellFilter={
-                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
-                    }
-                  />
-                ) : (
-                  <EntitiesListView
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    onSelectEntityAlerts={openEntityOnAlertsTab}
-                    groupCloudByProvider={false}
-                    enableColumnSettings={isElasticOn}
-                    refreshTick={refreshTick}
-                    customGroupBy={customGroupBy}
-                    hideCategoryHeader={!!categoryScope}
-                    density={listDensity}
-                    onK8sCellFilter={
-                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
-                    }
-                  />
-                )}
-                </EntityErrorBoundary>
-              </>
-            ) : (
-              <>
-                {/*
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <EuiHorizontalRule margin="s" />
+                  {isBannerScenario && !bannerDismissed ? (
+                    <>
+                      <InfrastructureExperienceBanner
+                        scenarioVariation={scenarioVariation}
+                        canRevert={canRevertToClassicUx}
+                        onTakeTour={startScenarioTour}
+                        onRevert={openRevertSettings}
+                        onDismiss={dismissScenarioBanner}
+                      />
+                      <EuiSpacer size="s" />
+                    </>
+                  ) : null}
+                  <EntityErrorBoundary section="Entity view">
+                    {effectiveViewMode === 'grid' ? (
+                      <GroupedGridView
+                        key={`grid-${phaseVariation}`}
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        selectedEntityName={selectedEntityName}
+                        groupCloudByProvider={false}
+                        enablePaletteColoring={isElasticOn}
+                        refreshTick={refreshTick}
+                        customGroupBy={customGroupBy}
+                        hideCategoryHeader={!!categoryScope}
+                        density={listDensity}
+                        onHexTileFilterFor={handleHexTileFilterFor}
+                        onHexTileRelatedFilter={
+                          enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
+                        }
+                        k8sRelatedInventory={
+                          enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
+                        }
+                        colorByTourStep={
+                          isTourActive && tourStep === 3
+                            ? {
+                                isOpen: true,
+                                step: 3,
+                                stepsTotal: tourStepCount,
+                                onNext: advanceTour,
+                                onClose: closeTour,
+                              }
+                            : undefined
+                        }
+                      />
+                    ) : tableStyleVariation === 'security' ? (
+                      <SecurityGroupingView
+                        key={`${groupBy.join(',')}-${phaseVariation}`}
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        onSelectEntityAlerts={openEntityOnAlertsTab}
+                        groupByFields={groupByFields}
+                        activeGroupBy={groupBy}
+                        refreshTick={refreshTick}
+                        categoryScope={categoryScope}
+                        density={listDensity}
+                        onK8sCellFilter={
+                          enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
+                        }
+                      />
+                    ) : (
+                      <EntitiesListView
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        onSelectEntityAlerts={openEntityOnAlertsTab}
+                        groupCloudByProvider={false}
+                        enableColumnSettings={isElasticOn}
+                        refreshTick={refreshTick}
+                        customGroupBy={customGroupBy}
+                        hideCategoryHeader={!!categoryScope}
+                        density={listDensity}
+                        onK8sCellFilter={
+                          enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
+                        }
+                      />
+                    )}
+                  </EntityErrorBoundary>
+                </>
+              ) : (
+                <>
+                  {/*
               Saved views: a compact toolbar row above the search/filters
               row. Lets the user snapshot the current category + tab +
               view mode + tag filters + search under a name, and re-load
@@ -3971,332 +3918,312 @@ const AllEntitiesViewInner = ({
               section), so it renders only the compact "Save view" button in
               the filters row below instead of this full bar.
             */}
-                {isLatest ? null : (
-                  <>
-                    <SavedViewsBar
-                      currentState={currentViewState}
-                      onApplyView={handleApplyView}
-                      savedViews={savedViewsApi}
-                    />
-                    <EuiSpacer size="s" />
-                  </>
-                )}
-                {/*
+                  {isLatest ? null : (
+                    <>
+                      <SavedViewsBar
+                        currentState={currentViewState}
+                        onApplyView={handleApplyView}
+                        savedViews={savedViewsApi}
+                      />
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
+                  {/*
           Search, tag filters and time picker share one row to keep the
           page top compact. `NO_GROW` is applied to the wrapper so the row
           stays at content height when the body shrinks (same trick as the
           toolbar below — see the `NO_GROW` definition for the rationale).
         */}
-                <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
-                  <EuiFlexItem>
-                    <EuiFieldSearch
-                      fullWidth
-                      incremental
-                      placeholder={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.searchPlaceholder',
-                        { defaultMessage: 'Filter entities by name' }
-                      )}
-                      value={search}
-                      onChange={(event) => setSearch(event.target.value)}
-                      data-test-subj="entityCentricLabEntitiesSearch"
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EntitiesTagFilters
-                      facets={tagFacets}
-                      activeFilters={activeTagFilters}
-                      onChange={setActiveTagFilters}
-                      isPhase1={isPhase1}
-                    />
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiSuperDatePicker
-                      start={rangeFrom}
-                      end={rangeTo}
-                      onTimeChange={handleTimeChange}
-                      onRefresh={handleTimeRefresh}
-                      showUpdateButton="iconOnly"
-                      width="auto"
-                      commonlyUsedRanges={inventoryCommonlyUsedRanges}
-                      data-test-subj="entityCentricLabEntitiesTimePicker"
-                    />
-                  </EuiFlexItem>
-                  {isLatest ? (
+                  <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false} css={NO_GROW}>
+                    <EuiFlexItem>
+                      <EuiFieldSearch
+                        fullWidth
+                        incremental
+                        placeholder={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.searchPlaceholder',
+                          { defaultMessage: 'Filter entities by name' }
+                        )}
+                        value={search}
+                        onChange={(event) => setSearch(event.target.value)}
+                        data-test-subj="entityCentricLabEntitiesSearch"
+                      />
+                    </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      {/*
+                      <EntitiesTagFilters
+                        facets={tagFacets}
+                        activeFilters={activeTagFilters}
+                        onChange={setActiveTagFilters}
+                        isPhase1={isPhase1}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem grow={false}>
+                      <EuiSuperDatePicker
+                        start={rangeFrom}
+                        end={rangeTo}
+                        onTimeChange={handleTimeChange}
+                        onRefresh={handleTimeRefresh}
+                        showUpdateButton="iconOnly"
+                        width="auto"
+                        commonlyUsedRanges={inventoryCommonlyUsedRanges}
+                        data-test-subj="entityCentricLabEntitiesTimePicker"
+                      />
+                    </EuiFlexItem>
+                    {isLatest ? (
+                      <EuiFlexItem grow={false}>
+                        {/*
                         Latest: the saved-views list lives in the left nav, so
                         the toolbar only carries the save action. When a view is
                         loaded, Save offers to update it or fork a new one; the
                         new/updated view shows up under "Saved views" in the nav
                         (same localStorage store).
                       */}
-                      <SaveViewButton
-                        currentState={currentViewState}
-                        loadedView={loadedView}
-                        isModified={isLoadedViewModified}
-                        onUpdate={handleUpdateLoadedView}
-                        onSaveAsNew={handleSaveAsNewView}
-                        showMakeDefault={isElasticOn}
-                        isLoadedViewDefault={
-                          Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
-                        }
-                        disabled={isCategoryEmptyState}
-                      />
-                    </EuiFlexItem>
-                  ) : null}
-                </EuiFlexGroup>
-                <EuiSpacer size="s" />
-                <EuiFlexGroup
-                  alignItems="center"
-                  gutterSize="s"
-                  responsive={false}
-                  wrap
-                  css={NO_GROW}
-                >
-                  <EuiFlexItem grow={false}>
-                    <EuiTitle size="xxs">
-                      <h3>
-                        {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
-                          defaultMessage: '{count} {things} · {groups} Groups',
-                          values: {
-                            count: entityCountLabel,
-                            things: labThingsLabel(isElasticOn),
-                            // On the cross-category page the dataset-wide group
-                            // total is the right summary. When scoped to one
-                            // category the grid only ever renders that single
-                            // section, so collapse the count to 1 (or 0 if the
-                            // category is empty).
-                            groups: categoryScope
-                              ? filteredEntities.length > 0
-                                ? 1
-                                : 0
-                              : dataset.totalGroups,
-                          },
-                        })}
-                      </h3>
-                    </EuiTitle>
-                  </EuiFlexItem>
-                  <EuiFlexItem />
-                  <EuiFlexItem grow={false}>
-                    <EuiButtonGroup
-                      legend={i18n.translate(
-                        'xpack.streams.entityCentricLab.entities.viewMode.legend',
-                        {
-                          defaultMessage: 'View mode',
-                        }
-                      )}
-                      options={viewModeOptions}
-                      idSelected={effectiveViewMode}
-                      onChange={(id) => setViewMode(id as ViewMode)}
-                      isIconOnly
-                      data-test-subj="entityCentricLabEntitiesViewModeToggle"
-                    />
-                  </EuiFlexItem>
-                  {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                        <SaveViewButton
+                          currentState={currentViewState}
+                          loadedView={loadedView}
+                          isModified={isLoadedViewModified}
+                          onUpdate={handleUpdateLoadedView}
+                          onSaveAsNew={handleSaveAsNewView}
+                          showMakeDefault={isElasticOn}
+                          isLoadedViewDefault={
+                            Boolean(loadedView) && savedViewsApi.defaultViewId === loadedView?.id
+                          }
+                          disabled={isCategoryEmptyState}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                  <EuiSpacer size="s" />
+                  <EuiFlexGroup
+                    alignItems="center"
+                    gutterSize="s"
+                    responsive={false}
+                    wrap
+                    css={NO_GROW}
+                  >
                     <EuiFlexItem grow={false}>
-                      <ListDisplayOptionsPopover
-                        density={listDensity}
-                        onChange={setListDensity}
+                      <EuiTitle size="xxs">
+                        <h3>
+                          {i18n.translate('xpack.streams.entityCentricLab.entities.summary', {
+                            defaultMessage: '{count} {things} · {groups} Groups',
+                            values: {
+                              count: entityCountLabel,
+                              things: labThingsLabel(isElasticOn),
+                              // On the cross-category page the dataset-wide group
+                              // total is the right summary. When scoped to one
+                              // category the grid only ever renders that single
+                              // section, so collapse the count to 1 (or 0 if the
+                              // category is empty).
+                              groups: categoryScope
+                                ? filteredEntities.length > 0
+                                  ? 1
+                                  : 0
+                                : dataset.totalGroups,
+                            },
+                          })}
+                        </h3>
+                      </EuiTitle>
+                    </EuiFlexItem>
+                    <EuiFlexItem />
+                    <EuiFlexItem grow={false}>
+                      <EuiButtonGroup
+                        legend={i18n.translate(
+                          'xpack.streams.entityCentricLab.entities.viewMode.legend',
+                          {
+                            defaultMessage: 'View mode',
+                          }
+                        )}
+                        options={viewModeOptions}
+                        idSelected={effectiveViewMode}
+                        onChange={(id) => setViewMode(id as ViewMode)}
+                        isIconOnly
+                        data-test-subj="entityCentricLabEntitiesViewModeToggle"
                       />
                     </EuiFlexItem>
+                    {effectiveViewMode === 'list' || effectiveViewMode === 'grid' ? (
+                      <EuiFlexItem grow={false}>
+                        <ListDisplayOptionsPopover
+                          density={listDensity}
+                          onChange={setListDensity}
+                        />
+                      </EuiFlexItem>
+                    ) : null}
+                  </EuiFlexGroup>
+                  <EuiHorizontalRule margin="s" />
+                  {isBannerScenario && !bannerDismissed ? (
+                    <>
+                      <InfrastructureExperienceBanner
+                        scenarioVariation={scenarioVariation}
+                        canRevert={canRevertToClassicUx}
+                        onTakeTour={startScenarioTour}
+                        onRevert={openRevertSettings}
+                        onDismiss={dismissScenarioBanner}
+                      />
+                      <EuiSpacer size="s" />
+                    </>
                   ) : null}
-                </EuiFlexGroup>
-                <EuiHorizontalRule margin="s" />
-                {isBannerScenario && !bannerDismissed ? (
-                  <>
-                    <EuiCallOut
-                      title={'\uD83C\uDF89 Your infrastructure view has been updated'}
-                      color="primary"
-                    >
-                      <p>
-                        {scenarioVariation === 'transition'
-                          ? 'You\u2019ve successfully enabled the new infrastructure experience for all users on this deployment. It brings faster load times, hex map visualizations, and richer flyout context.'
-                          : scenarioVariation === 'banner-admin'
-                          ? 'An admin on your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'
-                          : 'Your team has enabled the new infrastructure experience. It brings faster load times, hex map visualizations, and richer flyout context.'}
-                      </p>
-                      <EuiFlexGroup gutterSize="s" responsive={false}>
-                        <EuiFlexItem grow={false}>
-                          <EuiLink onClick={startScenarioTour}>Take a tour</EuiLink>
-                        </EuiFlexItem>
-                        {canRevertToClassicUx ? (
-                          <EuiFlexItem grow={false}>
-                            <EuiLink onClick={openRevertSettings}>
-                              Revert in Advanced Settings
-                            </EuiLink>
-                          </EuiFlexItem>
-                        ) : null}
-                        <EuiFlexItem grow={false}>
-                          <EuiLink onClick={dismissScenarioBanner}>Dismiss</EuiLink>
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                    </EuiCallOut>
-                    <EuiSpacer size="s" />
-                  </>
-                ) : null}
-                <EntityErrorBoundary section="Entity view">
-                {effectiveViewMode === 'grid' ? (
-                  <GroupedGridView
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    selectedEntityName={selectedEntityName}
-                    groupCloudByProvider={false}
-                    enablePaletteColoring={isElasticOn}
-                    refreshTick={refreshTick}
-                    density={listDensity}
-                    onHexTileFilterFor={handleHexTileFilterFor}
-                    onHexTileRelatedFilter={
-                      enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
-                    }
-                    k8sRelatedInventory={
-                      enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
-                    }
-                  />
-                ) : effectiveViewMode === 'geomap' ? (
-                  <GeomapView
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    onSelectRegion={handleSelectRegion}
-                  />
-                ) : (
-                  <EntitiesListView
-                    entities={filteredEntities}
-                    onSelectEntity={openEntity}
-                    onSelectEntityAlerts={openEntityOnAlertsTab}
-                    groupCloudByProvider={false}
-                    density={listDensity}
-                    onK8sCellFilter={
-                      enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
-                    }
-                  />
-                )}
-                </EntityErrorBoundary>
-              </>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </StreamsAppPageTemplate.Body>
+                  <EntityErrorBoundary section="Entity view">
+                    {effectiveViewMode === 'grid' ? (
+                      <GroupedGridView
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        selectedEntityName={selectedEntityName}
+                        groupCloudByProvider={false}
+                        enablePaletteColoring={isElasticOn}
+                        refreshTick={refreshTick}
+                        density={listDensity}
+                        onHexTileFilterFor={handleHexTileFilterFor}
+                        onHexTileRelatedFilter={
+                          enableK8sAddToFilterActions ? handleHexTileRelatedFilter : undefined
+                        }
+                        k8sRelatedInventory={
+                          enableK8sAddToFilterActions ? k8sRelatedInventory : undefined
+                        }
+                      />
+                    ) : effectiveViewMode === 'geomap' ? (
+                      <GeomapView
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        onSelectRegion={handleSelectRegion}
+                      />
+                    ) : (
+                      <EntitiesListView
+                        entities={filteredEntities}
+                        onSelectEntity={openEntity}
+                        onSelectEntityAlerts={openEntityOnAlertsTab}
+                        groupCloudByProvider={false}
+                        density={listDensity}
+                        onK8sCellFilter={
+                          enableK8sAddToFilterActions ? handleK8sInventoryCellFilter : undefined
+                        }
+                      />
+                    )}
+                  </EntityErrorBoundary>
+                </>
+              )}
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </StreamsAppPageTemplate.Body>
       </div>
       {selectedEntityName || inventoryDashboardPreview ? (
         <EntityErrorBoundary section="Entity detail">
-        <EntityFlyoutServicesProvider services={flyoutServices}>
-          {selectedEntityName ? (
-          <>
-          <EntityFlyout
-            key={flyoutPresentation}
-            session="start"
-            size={flyoutSize}
-            flyoutType={flyoutPresentation}
-            entityName={selectedEntityName}
-            entityType={selectedEntityType}
-            entityHealth={selectedEntityHealth}
-            region={selectedEntityRegion}
-            onClose={closeEntity}
-            onSelectEntity={openChildEntity}
-            onNavigateEntity={openEntity}
-            onManageEntityType={
-              isInfraShortTerm || isPhase1 ? undefined : () => manageEntityType(selectedEntity)
-            }
-            minimalTabs={isInfraShortTerm}
-            onExpand={
-              detailVariation === 'flyoutExpandable' ? handleExpandToFullPage : undefined
-            }
-            hideHealthBadge={isPhase1}
-            alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
-            alertsActiveCount={
-              isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
-            }
-            podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
-            timeRange={flyoutTimeRange}
-            hideAiSummary={isPhase1}
-            hideOwnership={isPhase1}
-            hideEvents={isPhase1}
-            hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
-            dashboardStyle={dashboardStyleVariation}
-            showDashboardThumbnails={showDashboardThumbnails}
-            tabIntent={flyoutTabIntent}
-            onTabChange={handleParentFlyoutTabChange}
-            onTimeRangeChange={handleFlyoutTimeRangeChange}
-            onAddToFilter={
-              enableK8sAddToFilterActions && selectedEntity?.category === 'kubernetes'
-                ? () => handleAddToK8sFilter(selectedEntity)
-                : undefined
-            }
-            hostedApmServiceNames={selectedHostedApmServiceNames}
-          />
-          {childEntityName ? (
-            <EntityFlyout
-              session="inherit"
-              size="fill"
-              flyoutType={flyoutPresentation}
-              entityName={childEntityName}
-              entityType={childEntityType}
-              entityHealth={childEntityHealth}
-              region={childEntityRegion}
-              hostedApmServiceNames={childHostedApmServiceNames}
-              onClose={closeChildEntity}
-              onSelectEntity={openChildEntity}
-              onNavigateEntity={openChildEntity}
-              onManageEntityType={
-                isInfraShortTerm || isPhase1 ? undefined : () => manageEntityType(childEntity)
-              }
-              minimalTabs={isInfraShortTerm}
-              hideHealthBadge={isPhase1}
-              alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
-              alertsActiveCount={
-                isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
-              }
-              podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
-              timeRange={flyoutTimeRange}
-              onTimeRangeChange={handleFlyoutTimeRangeChange}
-              hideAiSummary={isPhase1}
-              hideOwnership={isPhase1}
-              hideEvents={isPhase1}
-              hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
-              dashboardStyle={dashboardStyleVariation}
-              showDashboardThumbnails={showDashboardThumbnails}
-              tabIntent={childFlyoutTabIntent}
-              onTabChange={handleChildFlyoutTabChange}
-            />
-          ) : null}
-          </>
-          ) : null}
-          {inventoryDashboardPreview ? (
-            <InventoryDashboardPreviewFlyout
-              preview={inventoryDashboardPreview.preview}
-              entityName={inventoryDashboardPreview.entityName}
-              entityType={inventoryDashboardPreview.entityType}
-              onBack={restoreInventoryFlyoutsFromDashboardPreview}
-              onClose={dismissInventoryDashboardPreview}
-            />
-          ) : null}
-          {selectedEntityName && alertDetailRequest && renderAlertDetailFlyout ? (
-            <EntityLabAlertDetailFlyoutHost
-              request={alertDetailRequest}
-              onClose={closeAlertDetail}
-              renderAlertDetailFlyout={renderAlertDetailFlyout}
-            />
-          ) : null}
-          {selectedEntityName && alertDetailRequest && !renderAlertDetailFlyout ? (
-            <EntityLabAlertDetailMockFlyout
-              alertRow={alertDetailRequest.alertRow}
-              entityName={alertDetailRequest.entityName}
-              onClose={closeAlertDetail}
-            />
-          ) : null}
-          {selectedEntityName && ruleDetailRequest ? (
-            <EntityLabRuleSummaryFlyout
-              key={ruleDetailRequest.ruleId}
-              request={ruleDetailRequest}
-              onClose={closeRuleDetail}
-            />
-          ) : null}
-        </EntityFlyoutServicesProvider>
+          <EntityFlyoutServicesProvider services={flyoutServices}>
+            {selectedEntityName ? (
+              <>
+                <EntityFlyout
+                  key={flyoutPresentation}
+                  session="start"
+                  size={flyoutSize}
+                  flyoutType={flyoutPresentation}
+                  entityName={selectedEntityName}
+                  entityType={selectedEntityType}
+                  entityHealth={selectedEntityHealth}
+                  region={selectedEntityRegion}
+                  onClose={closeEntity}
+                  onSelectEntity={openChildEntity}
+                  onNavigateEntity={openEntity}
+                  onManageEntityType={
+                    isInfraShortTerm || isPhase1
+                      ? undefined
+                      : () => manageEntityType(selectedEntity)
+                  }
+                  minimalTabs={isInfraShortTerm}
+                  onExpand={
+                    detailVariation === 'flyoutExpandable' ? handleExpandToFullPage : undefined
+                  }
+                  hideHealthBadge={isPhase1}
+                  alertsBadge={isPhase1 ? computeAlertsBadge(selectedEntity) : undefined}
+                  alertsActiveCount={
+                    isPhase1 ? inventoryAlertsActiveOverride(selectedEntity) : undefined
+                  }
+                  podPhaseBadge={podPhaseBadgeForEntity(selectedEntity)}
+                  timeRange={flyoutTimeRange}
+                  hideAiSummary={isPhase1}
+                  hideOwnership={isPhase1}
+                  hideEvents={isPhase1}
+                  hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
+                  dashboardStyle={dashboardStyleVariation}
+                  showDashboardThumbnails={showDashboardThumbnails}
+                  tabIntent={flyoutTabIntent}
+                  onTabChange={handleParentFlyoutTabChange}
+                  onTimeRangeChange={handleFlyoutTimeRangeChange}
+                  onAddToFilter={
+                    enableK8sAddToFilterActions && selectedEntity?.category === 'kubernetes'
+                      ? () => handleAddToK8sFilter(selectedEntity)
+                      : undefined
+                  }
+                  hostedApmServiceNames={selectedHostedApmServiceNames}
+                />
+                {childEntityName ? (
+                  <EntityFlyout
+                    session="inherit"
+                    size="fill"
+                    flyoutType={flyoutPresentation}
+                    entityName={childEntityName}
+                    entityType={childEntityType}
+                    entityHealth={childEntityHealth}
+                    region={childEntityRegion}
+                    hostedApmServiceNames={childHostedApmServiceNames}
+                    onClose={closeChildEntity}
+                    onSelectEntity={openChildEntity}
+                    onNavigateEntity={openChildEntity}
+                    onManageEntityType={
+                      isInfraShortTerm || isPhase1 ? undefined : () => manageEntityType(childEntity)
+                    }
+                    minimalTabs={isInfraShortTerm}
+                    hideHealthBadge={isPhase1}
+                    alertsBadge={isPhase1 ? computeAlertsBadge(childEntity) : undefined}
+                    alertsActiveCount={
+                      isPhase1 ? inventoryAlertsActiveOverride(childEntity) : undefined
+                    }
+                    podPhaseBadge={podPhaseBadgeForEntity(childEntity)}
+                    timeRange={flyoutTimeRange}
+                    onTimeRangeChange={handleFlyoutTimeRangeChange}
+                    hideAiSummary={isPhase1}
+                    hideOwnership={isPhase1}
+                    hideEvents={isPhase1}
+                    hiddenTabIds={isPhase1 ? ['custom', 'relationships', 'profiling'] : undefined}
+                    dashboardStyle={dashboardStyleVariation}
+                    showDashboardThumbnails={showDashboardThumbnails}
+                    tabIntent={childFlyoutTabIntent}
+                    onTabChange={handleChildFlyoutTabChange}
+                  />
+                ) : null}
+              </>
+            ) : null}
+            {inventoryDashboardPreview ? (
+              <InventoryDashboardPreviewFlyout
+                preview={inventoryDashboardPreview.preview}
+                entityName={inventoryDashboardPreview.entityName}
+                entityType={inventoryDashboardPreview.entityType}
+                onBack={restoreInventoryFlyoutsFromDashboardPreview}
+                onClose={dismissInventoryDashboardPreview}
+              />
+            ) : null}
+            {selectedEntityName && alertDetailRequest && renderAlertDetailFlyout ? (
+              <EntityLabAlertDetailFlyoutHost
+                request={alertDetailRequest}
+                onClose={closeAlertDetail}
+                renderAlertDetailFlyout={renderAlertDetailFlyout}
+              />
+            ) : null}
+            {selectedEntityName && alertDetailRequest && !renderAlertDetailFlyout ? (
+              <EntityLabAlertDetailMockFlyout
+                alertRow={alertDetailRequest.alertRow}
+                entityName={alertDetailRequest.entityName}
+                onClose={closeAlertDetail}
+              />
+            ) : null}
+            {selectedEntityName && ruleDetailRequest ? (
+              <EntityLabRuleSummaryFlyout
+                key={ruleDetailRequest.ruleId}
+                request={ruleDetailRequest}
+                onClose={closeRuleDetail}
+              />
+            ) : null}
+          </EntityFlyoutServicesProvider>
         </EntityErrorBoundary>
       ) : null}
-      {showAddDataOverlay ? (
-        <AddDataOverlay onClose={() => setShowAddDataOverlay(false)} />
-      ) : null}
+      {showAddDataOverlay ? <AddDataOverlay onClose={() => setShowAddDataOverlay(false)} /> : null}
       {isElasticOn ? <VariationSwitcher /> : null}
     </>
   );
