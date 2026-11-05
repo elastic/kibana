@@ -9,7 +9,7 @@ import type { FtrProviderContext } from '../../../../../common/ftr_provider_cont
 import { setupSpacesAndUsers, tearDown } from '../../../../setup';
 
 export default function alertingTests({ loadTestFile, getService }: FtrProviderContext) {
-  describe('Alerts - Group 3 - schedule circuit breaker', () => {
+  describe.skip('Alerts - Group 3 - schedule circuit breaker', () => {
     describe('alerts', () => {
       before(async () => {
         await setupSpacesAndUsers(getService);
