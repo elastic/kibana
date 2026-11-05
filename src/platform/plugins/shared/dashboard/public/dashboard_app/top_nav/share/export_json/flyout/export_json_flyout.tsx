@@ -9,7 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 
-import { EuiSwitch } from '@elastic/eui';
+import { EuiSpacer, EuiSwitch, EuiText } from '@elastic/eui';
 import { ExportJsonFlyoutContent } from '@kbn/as-code-export-flyout-component';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -80,23 +80,52 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
         ) : undefined
       }
       headerNotice={
-        isByReference && !forceExportByValue ? (
-          <KbnInfoCallout
-            announceOnMount
-            title={i18n.translate('dashboard.exportJson.linkedToLibraryCalloutTitle', {
-              defaultMessage: 'Linked to library',
-            })}
-            text={
+        <>
+          <EuiText size="s" color="subdued" data-test-subj="dashboardPanelExportJsonImportHint">
+            <p>
               <FormattedMessage
-                id="dashboard.exportJson.showFullConfigCallout"
-                defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
+                id="dashboard.exportJson.importHint"
+                defaultMessage="To add this panel to another dashboard, copy this JSON and paste it in {addLabel} > {fromJsonLabel}."
                 values={{
-                  buttonLabel: <i>{showFullConfigurationLabel}</i>,
+                  addLabel: (
+                    <strong>
+                      {i18n.translate('dashboard.exportJson.importHint.addLabel', {
+                        defaultMessage: 'Add',
+                      })}
+                    </strong>
+                  ),
+                  fromJsonLabel: (
+                    <strong>
+                      {i18n.translate('dashboard.exportJson.importHint.fromJsonLabel', {
+                        defaultMessage: 'From JSON',
+                      })}
+                    </strong>
+                  ),
                 }}
               />
-            }
-          />
-        ) : undefined
+            </p>
+          </EuiText>
+          {isByReference && !forceExportByValue && (
+            <>
+              <EuiSpacer size="s" />
+              <KbnInfoCallout
+                announceOnMount
+                title={i18n.translate('dashboard.exportJson.linkedToLibraryCalloutTitle', {
+                  defaultMessage: 'Linked to library',
+                })}
+                text={
+                  <FormattedMessage
+                    id="dashboard.exportJson.showFullConfigCallout"
+                    defaultMessage="This panel is linked to the library, so this dashboard stores only a reference to it. Select {buttonLabel} to see its complete definition."
+                    values={{
+                      buttonLabel: <i>{showFullConfigurationLabel}</i>,
+                    }}
+                  />
+                }
+              />
+            </>
+          )}
+        </>
       }
       prepareExportJson={prepareExportJson}
       titleId={titleId}

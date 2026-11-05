@@ -44,12 +44,14 @@ const renderFlyout = ({
   onImportSuccess = jest.fn(),
   closeFlyout = jest.fn(),
   services = createServices(),
+  getMissingRelatedItemsSummary,
 }: {
   sanitizeImportJson?: jest.Mock;
   createFromJson?: jest.Mock;
   onImportSuccess?: jest.Mock;
   closeFlyout?: jest.Mock;
   services?: ImportJsonFlyoutServices;
+  getMissingRelatedItemsSummary?: (count: number) => string;
 } = {}) => {
   render(
     <I18nProvider>
@@ -64,6 +66,7 @@ const renderFlyout = ({
         sanitizeImportJson={sanitizeImportJson}
         createFromJson={createFromJson}
         onImportSuccess={onImportSuccess}
+        getMissingRelatedItemsSummary={getMissingRelatedItemsSummary}
       />
     </I18nProvider>
   );
@@ -261,6 +264,31 @@ describe('ImportJsonFlyoutContent', () => {
     expect(screen.getAllByText('data-view-1')[0]).toBeInTheDocument();
     expect(screen.getAllByText('lens')[0]).toBeInTheDocument();
     expect(screen.getAllByText('library-item-1')[0]).toBeInTheDocument();
+    expect(screen.getByTestId('testImportButton')).toBeEnabled();
+  });
+
+  it('uses the custom summary for related items that do not exist', async () => {
+    const sanitizeImportJson = jest.fn().mockResolvedValue({
+      data: VALID_STATE,
+      warnings: [],
+      relatedItems: [
+        { type: 'index-pattern', type_label: 'data view', id: 'data-view-1', isMissing: true },
+        { type: 'index-pattern', type_label: 'data view', id: 'data-view-2', isMissing: false },
+      ],
+      relatedItemsCount: 2,
+    });
+    renderFlyout({
+      sanitizeImportJson,
+      getMissingRelatedItemsSummary: (count) => `${count} data view is missing`,
+    });
+    await pickFile(VALID_FILE);
+
+    await waitFor(() =>
+      expect(screen.getByTestId('testMissingRelatedItemsSummary')).toHaveTextContent(
+        '1 data view is missing'
+      )
+    );
+    expect(screen.queryByTestId('testRelatedItemsSummary')).not.toBeInTheDocument();
     expect(screen.getByTestId('testImportButton')).toBeEnabled();
   });
 

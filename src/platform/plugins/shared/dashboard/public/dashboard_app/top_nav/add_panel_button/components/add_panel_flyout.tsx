@@ -38,12 +38,14 @@ import { useFeaturedItems } from '../use_featured_items';
 import type { MenuItem, MenuItemGroup } from '../types';
 import { Groups } from './groups';
 import { FeaturedItemCard } from './featured_item_card';
+import { FromJsonTab } from './from_json_tab';
 import { OPEN_DASHBOARD_CHAT_ACTION_ID } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat_action';
 import { openDashboardChat } from '../../../../dashboard_renderer/viewport/empty_screen/dashboard_empty_screen_chat';
 
 const TAB_NEW_ID = 'new' as const;
 const TAB_LIBRARY_ID = 'library' as const;
-type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID;
+const TAB_JSON_ID = 'json' as const;
+type FlyoutTab = typeof TAB_NEW_ID | typeof TAB_LIBRARY_ID | typeof TAB_JSON_ID;
 
 function NewPanelContent({
   dashboardApi,
@@ -256,15 +258,30 @@ export function AddPanelFlyout({
               defaultMessage="From library"
             />
           </EuiTab>
+          <EuiTab
+            isSelected={selectedTab === TAB_JSON_ID}
+            onClick={() => onTabClick(TAB_JSON_ID)}
+            data-test-subj="addToDashboardTab-json"
+          >
+            <FormattedMessage
+              id="dashboard.addToDashboardFlyout.tabs.fromJson"
+              defaultMessage="From JSON"
+            />
+          </EuiTab>
         </EuiTabs>
       </EuiFlyoutHeader>
-      <EuiFlyoutBody>
-        {selectedTab === TAB_NEW_ID ? (
-          <NewPanelContent dashboardApi={dashboardApi} returnFocus={returnFocus} />
-        ) : (
-          <LibraryContent dashboardApi={dashboardApi} />
-        )}
-      </EuiFlyoutBody>
+      {selectedTab === TAB_JSON_ID ? (
+        // Renders its own body and footer, since adding a panel from JSON needs a confirm button
+        <FromJsonTab dashboardApi={dashboardApi} />
+      ) : (
+        <EuiFlyoutBody>
+          {selectedTab === TAB_NEW_ID ? (
+            <NewPanelContent dashboardApi={dashboardApi} returnFocus={returnFocus} />
+          ) : (
+            <LibraryContent dashboardApi={dashboardApi} />
+          )}
+        </EuiFlyoutBody>
+      )}
     </>
   );
 }

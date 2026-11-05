@@ -9,7 +9,6 @@
 
 import React from 'react';
 
-import { buildPath } from '@kbn/core-http-browser';
 import { EXPORT_ACTION_GROUP } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type {
@@ -35,9 +34,9 @@ import { openLazyFlyout } from '@kbn/presentation-util';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
-import { isDashboardPanel } from '../../common';
-import { DASHBOARD_INTERNAL_API_PATH } from '../../common/constants';
-import type { DashboardSanitizeResponseBody } from '../../server';
+import type { DashboardApi } from '../dashboard_api/types';
+import { buildPanelJsonEntries } from '../panel_json/build_panel_json_entries';
+import { sanitizePanels } from '../panel_json/sanitize_panels';
 import { coreServices } from '../services/kibana_services';
 import { ACTION_EXPORT_JSON } from './constants';
 
@@ -58,6 +57,22 @@ const isApiCompatible = (api: unknown | null): api is ExportJSONActionApi =>
       apiPublishesTitle(api) &&
       apiHasSerializableState(api)
   );
+
+const apiCanGetDashboardPanel = (
+  api: unknown
+): api is Pick<DashboardApi, 'getDashboardPanelFromId'> =>
+  typeof (api as Partial<Pick<DashboardApi, 'getDashboardPanelFromId'>>)
+    ?.getDashboardPanelFromId === 'function';
+
+const getPanelGrid = ({ parentApi, uuid }: ExportJSONActionApi) => {
+  if (!apiCanGetDashboardPanel(parentApi)) return undefined;
+  try {
+    return parentApi.getDashboardPanelFromId(uuid).grid;
+  } catch {
+    // The panel isn't in the dashboard layout, so it's exported with the default size
+    return undefined;
+  }
+};
 
 export class ExportJSONAction implements Action<EmbeddableApiContext> {
   public readonly id = ACTION_EXPORT_JSON;
@@ -98,37 +113,21 @@ export class ExportJSONAction implements Action<EmbeddableApiContext> {
             closeFlyout={closeFlyout}
             isByReference={isByReference}
             getExportJson={(forceExportByValue = false) => {
-              if (supportsByReference && forceExportByValue) {
-                return embeddable.getSerializedStateByValue();
-              } else {
-                return embeddable.serializeState();
-              }
+              const config =
+                supportsByReference && forceExportByValue
+                  ? embeddable.getSerializedStateByValue()
+                  : embeddable.serializeState();
+              const [panel] = buildPanelJsonEntries([
+                { type: embeddable.type, grid: getPanelGrid(embeddable), config },
+              ]);
+              return panel;
             }}
-            sanitizeState={async (state) => {
-              const result = await coreServices.http.post<DashboardSanitizeResponseBody>(
-                buildPath(`${DASHBOARD_INTERNAL_API_PATH}/_sanitize`),
-                {
-                  version: '1',
-                  // create a mock dashboard with a single panel to use sanitize route
-                  body: JSON.stringify({
-                    title: 'Mock Dashboard for Panel Sanitization', // title must have a length of at least 1
-                    panels: [
-                      {
-                        grid: { x: 0, y: 0, w: 1, h: 1 },
-                        type: embeddable.type,
-                        config: state,
-                      },
-                    ],
-                  }),
-                }
-              );
-              return {
-                data:
-                  result.data.panels?.length !== 1 || !isDashboardPanel(result.data.panels[0])
-                    ? undefined
-                    : result.data.panels[0].config,
-                warnings: result.warnings ?? [],
-              };
+            sanitizeState={async (panel) => {
+              const {
+                panels: [sanitizedPanel],
+                warnings,
+              } = await sanitizePanels([panel]);
+              return { data: sanitizedPanel, warnings };
             }}
             titleId={ariaLabelledBy}
           />

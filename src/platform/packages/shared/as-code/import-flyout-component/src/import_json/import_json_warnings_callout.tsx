@@ -7,15 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import { EuiAccordion, EuiBasicTable, EuiSpacer, EuiText, useGeneratedHtmlId } from '@elastic/eui';
 import type { EuiBasicTableColumn } from '@elastic/eui';
-import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { importJsonFlyoutStrings } from './import_json_strings';
+import type { ImportJsonRelatedItem } from './types';
 import { useScrollableListStyles } from './use_scrollable_list_styles';
 
-const RELATED_ITEMS_COLUMNS: Array<EuiBasicTableColumn<AsCodeRelatedItem>> = [
+const RELATED_ITEMS_COLUMNS: Array<EuiBasicTableColumn<ImportJsonRelatedItem>> = [
   {
     field: 'type_label',
     name: importJsonFlyoutStrings.getRelatedItemsTypeColumn(),
@@ -26,20 +26,77 @@ const RELATED_ITEMS_COLUMNS: Array<EuiBasicTableColumn<AsCodeRelatedItem>> = [
   },
 ];
 
+interface RelatedItemsSectionProps {
+  accordionId: string;
+  dataTestSubj: string;
+  summary: ReactNode;
+  items: ImportJsonRelatedItem[];
+  tableCaption: string;
+}
+
+const RelatedItemsSection = ({
+  accordionId,
+  dataTestSubj,
+  summary,
+  items,
+  tableCaption,
+}: RelatedItemsSectionProps) => {
+  const listStyles = useScrollableListStyles();
+  const [isExpanded, setIsExpanded] = useState(false);
+
+  return (
+    <>
+      <EuiText size="s" data-test-subj={`${dataTestSubj}Summary`}>
+        {summary}
+      </EuiText>
+      {items.length > 0 && (
+        <EuiAccordion
+          id={accordionId}
+          initialIsOpen={false}
+          onToggle={setIsExpanded}
+          paddingSize="s"
+          buttonContent={
+            isExpanded
+              ? importJsonFlyoutStrings.getWarningsAccordionHide()
+              : importJsonFlyoutStrings.getWarningsAccordionShow()
+          }
+          data-test-subj={`${dataTestSubj}Accordion`}
+        >
+          {isExpanded ? (
+            <div data-test-subj={`${dataTestSubj}List`} css={listStyles}>
+              <EuiBasicTable
+                compressed
+                items={items}
+                columns={RELATED_ITEMS_COLUMNS}
+                tableCaption={tableCaption}
+                responsiveBreakpoint={false}
+              />
+            </div>
+          ) : null}
+        </EuiAccordion>
+      )}
+    </>
+  );
+};
+
 interface ImportJsonWarningsCalloutProps {
   dataTestSubjPrefix: string;
   warnings: string[];
-  relatedItems: AsCodeRelatedItem[];
+  relatedItems: ImportJsonRelatedItem[];
   relatedItemsCount: number;
   getWarningsSummary?: (count: number) => string;
+  /** Override the default summary of related items that don't exist in this cluster or space. */
+  getMissingRelatedItemsSummary?: (count: number) => string;
 }
 
+/** Shows the warnings returned by sanitization and the related items the imported state depends on. */
 export const ImportJsonWarningsCallout = ({
   dataTestSubjPrefix,
   warnings,
   relatedItems,
   relatedItemsCount,
   getWarningsSummary,
+  getMissingRelatedItemsSummary,
 }: ImportJsonWarningsCalloutProps) => {
   const listStyles = useScrollableListStyles();
   const warningsAccordionId = useGeneratedHtmlId({
@@ -48,14 +105,26 @@ export const ImportJsonWarningsCallout = ({
   const relatedItemsAccordionId = useGeneratedHtmlId({
     prefix: `${dataTestSubjPrefix}RelatedItems`,
   });
+  const missingRelatedItemsAccordionId = useGeneratedHtmlId({
+    prefix: `${dataTestSubjPrefix}MissingRelatedItems`,
+  });
   const [isWarningsExpanded, setIsWarningsExpanded] = useState(false);
-  const [isRelatedItemsExpanded, setIsRelatedItemsExpanded] = useState(false);
   const [isVisible, setIsVisible] = useState(true);
   const warningsSummary =
     getWarningsSummary?.(warnings.length) ??
     importJsonFlyoutStrings.getWarningsSummary(warnings.length);
 
-  if (!isVisible || (warnings.length === 0 && relatedItems.length === 0)) {
+  const missingItems = relatedItems.filter(({ isMissing }) => isMissing === true);
+  const uncheckedItems = relatedItems.filter(({ isMissing }) => isMissing === undefined);
+  const foundItemsCount = relatedItems.length - missingItems.length - uncheckedItems.length;
+  // Items left out of a truncated `relatedItems` list were never checked
+  const uncheckedItemsCount = Math.max(
+    relatedItemsCount - foundItemsCount - missingItems.length,
+    uncheckedItems.length
+  );
+  const hasRelatedItems = missingItems.length > 0 || uncheckedItemsCount > 0;
+
+  if (!isVisible || (warnings.length === 0 && !hasRelatedItems)) {
     return null;
   }
 
@@ -65,21 +134,20 @@ export const ImportJsonWarningsCallout = ({
         announceOnMount
         size="s"
         title={
-          relatedItems.length > 0
+          hasRelatedItems
             ? importJsonFlyoutStrings.getReviewWarningsTitle()
             : importJsonFlyoutStrings.getWarningsTitle()
         }
-        text={relatedItems.length > 0 ? undefined : warningsSummary}
+        text={hasRelatedItems ? undefined : warningsSummary}
         data-test-subj={`${dataTestSubjPrefix}Warnings`}
         onDismiss={() => {
           setIsVisible(false);
           setIsWarningsExpanded(false);
-          setIsRelatedItemsExpanded(false);
         }}
       >
         {warnings.length > 0 && (
           <>
-            {relatedItems.length > 0 && (
+            {hasRelatedItems && (
               <EuiText size="s">
                 <p>{warningsSummary}</p>
               </EuiText>
@@ -112,41 +180,44 @@ export const ImportJsonWarningsCallout = ({
             </EuiAccordion>
           </>
         )}
-        {relatedItems.length > 0 && (
+        {missingItems.length > 0 && (
           <>
             {warnings.length > 0 && <EuiSpacer size="s" />}
-            <EuiText size="s">
-              <p>{importJsonFlyoutStrings.getRelatedItemsSummary(relatedItemsCount)}</p>
-              {relatedItemsCount > relatedItems.length && (
+            <RelatedItemsSection
+              accordionId={missingRelatedItemsAccordionId}
+              dataTestSubj={`${dataTestSubjPrefix}MissingRelatedItems`}
+              summary={
                 <p>
-                  {importJsonFlyoutStrings.getRelatedItemsTruncatedSummary(relatedItems.length)}
+                  {getMissingRelatedItemsSummary?.(missingItems.length) ??
+                    importJsonFlyoutStrings.getMissingRelatedItemsSummary(missingItems.length)}
                 </p>
-              )}
-            </EuiText>
-            <EuiAccordion
-              id={relatedItemsAccordionId}
-              initialIsOpen={false}
-              onToggle={setIsRelatedItemsExpanded}
-              paddingSize="s"
-              buttonContent={
-                isRelatedItemsExpanded
-                  ? importJsonFlyoutStrings.getWarningsAccordionHide()
-                  : importJsonFlyoutStrings.getWarningsAccordionShow()
               }
-              data-test-subj={`${dataTestSubjPrefix}RelatedItemsAccordion`}
-            >
-              {isRelatedItemsExpanded ? (
-                <div data-test-subj={`${dataTestSubjPrefix}RelatedItemsList`} css={listStyles}>
-                  <EuiBasicTable
-                    compressed
-                    items={relatedItems}
-                    columns={RELATED_ITEMS_COLUMNS}
-                    tableCaption={importJsonFlyoutStrings.getRelatedItemsTableCaption()}
-                    responsiveBreakpoint={false}
-                  />
-                </div>
-              ) : null}
-            </EuiAccordion>
+              items={missingItems}
+              tableCaption={importJsonFlyoutStrings.getMissingRelatedItemsTableCaption()}
+            />
+          </>
+        )}
+        {uncheckedItemsCount > 0 && (
+          <>
+            {(warnings.length > 0 || missingItems.length > 0) && <EuiSpacer size="s" />}
+            <RelatedItemsSection
+              accordionId={relatedItemsAccordionId}
+              dataTestSubj={`${dataTestSubjPrefix}RelatedItems`}
+              summary={
+                <>
+                  <p>{importJsonFlyoutStrings.getRelatedItemsSummary(uncheckedItemsCount)}</p>
+                  {uncheckedItems.length > 0 && uncheckedItemsCount > uncheckedItems.length && (
+                    <p>
+                      {importJsonFlyoutStrings.getRelatedItemsTruncatedSummary(
+                        uncheckedItems.length
+                      )}
+                    </p>
+                  )}
+                </>
+              }
+              items={uncheckedItems}
+              tableCaption={importJsonFlyoutStrings.getRelatedItemsTableCaption()}
+            />
           </>
         )}
       </KbnWarningCallout>

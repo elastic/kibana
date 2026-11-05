@@ -9,13 +9,20 @@
 
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { apm } from '@elastic/apm-rum';
-import type { AsCodeRelatedItem } from '@kbn/as-code-shared-schemas';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { importJsonFlyoutStrings } from './import_json_strings';
-import type { CreateFromJson, ImportJsonFlyoutServices, SanitizeImportJson } from './types';
+import { isImportJsonValidationError } from './import_json_validation_error';
+import type {
+  CreateFromJson,
+  ImportJsonFlyoutServices,
+  ImportJsonRelatedItem,
+  SanitizeImportJson,
+} from './types';
 
 /** Client-side import limit; deployments may configure `server.maxPayload` differently. */
 const MAX_IMPORT_JSON_FILE_BYTES = 1_048_576;
+/** Pasted or typed JSON is validated once the user pauses, not on every keystroke. */
+const TEXT_VALIDATION_DELAY_MS = 300;
 
 // Only 4xx messages describe user-fixable input; 5xx details stay in server logs.
 const getClientErrorMessage = (error: unknown): string | undefined => {
@@ -37,6 +44,7 @@ interface UseImportJsonFlyoutStateParams<SanitizedState> {
   onImportSuccess: (id: string, title: string) => void;
 }
 
+/** Holds the validation and import state of JSON coming from a file or from pasted text. */
 export const useImportJsonFlyoutState = <SanitizedState>({
   title,
   closeFlyout,
@@ -45,63 +53,59 @@ export const useImportJsonFlyoutState = <SanitizedState>({
   createFromJson,
   onImportSuccess,
 }: UseImportJsonFlyoutStateParams<SanitizedState>) => {
-  const [filePickerError, setFilePickerError] = useState<string | null>(null);
+  const [jsonText, setJsonText] = useState('');
+  const [inputError, setInputError] = useState<string | null>(null);
   const [serverError, setServerError] = useState<{ details?: string } | null>(null);
   const [warnings, setWarnings] = useState<string[]>([]);
-  const [relatedItems, setRelatedItems] = useState<AsCodeRelatedItem[]>([]);
+  const [relatedItems, setRelatedItems] = useState<ImportJsonRelatedItem[]>([]);
   const [relatedItemsCount, setRelatedItemsCount] = useState(0);
   const [sanitizedState, setSanitizedState] = useState<SanitizedState | null>(null);
   const [isValidating, setIsValidating] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
-  const [fileSelectionId, setFileSelectionId] = useState(0);
+  const [inputVersion, setInputVersion] = useState(0);
+  const jsonTextRef = useRef('');
   const sanitizeAbortRef = useRef<AbortController | null>(null);
+  const textValidationTimerRef = useRef<ReturnType<typeof setTimeout> | undefined>();
 
-  const abortSanitize = useCallback(() => {
+  const cancelValidation = useCallback(() => {
+    clearTimeout(textValidationTimerRef.current);
+    textValidationTimerRef.current = undefined;
     sanitizeAbortRef.current?.abort();
     sanitizeAbortRef.current = null;
   }, []);
 
   useEffect(() => {
     return () => {
-      abortSanitize();
+      cancelValidation();
     };
-  }, [abortSanitize]);
+  }, [cancelValidation]);
 
-  const onFileChange = useCallback(
-    async (files: FileList | null) => {
-      abortSanitize();
-      setFilePickerError(null);
-      setServerError(null);
-      setWarnings([]);
-      setRelatedItems([]);
-      setRelatedItemsCount(0);
-      setSanitizedState(null);
-      setFileSelectionId((currentId) => currentId + 1);
-      const selected = files?.[0] ?? null;
+  const resetValidation = useCallback(() => {
+    cancelValidation();
+    setInputError(null);
+    setServerError(null);
+    setWarnings([]);
+    setRelatedItems([]);
+    setRelatedItemsCount(0);
+    setSanitizedState(null);
+    setIsValidating(false);
+    setInputVersion((currentVersion) => currentVersion + 1);
+  }, [cancelValidation]);
 
-      if (!selected) {
-        setIsValidating(false);
-        return;
-      }
-
-      if (selected.size > MAX_IMPORT_JSON_FILE_BYTES) {
-        setFilePickerError(importJsonFlyoutStrings.getFileTooLargeError());
-        setIsValidating(false);
-        return;
-      }
-
+  const validateJson = useCallback(
+    async (readText: (signal: AbortSignal) => Promise<string>, invalidJsonError: string) => {
       const abortController = new AbortController();
       sanitizeAbortRef.current = abortController;
       setIsValidating(true);
       try {
-        const text = await selected.text();
+        const text = await readText(abortController.signal);
         if (abortController.signal.aborted) return;
 
         let raw: unknown;
         try {
           raw = JSON.parse(text);
         } catch {
-          setFilePickerError(importJsonFlyoutStrings.getInvalidJsonError());
+          setInputError(invalidJsonError);
           return;
         }
 
@@ -124,6 +128,10 @@ export const useImportJsonFlyoutState = <SanitizedState>({
           if (wasAborted) {
             return;
           }
+          if (isImportJsonValidationError(error)) {
+            setInputError(error.message);
+            return;
+          }
           const capturedError = error instanceof Error ? error : new Error(String(error));
           apm.captureError(capturedError, {
             labels: {
@@ -139,7 +147,57 @@ export const useImportJsonFlyoutState = <SanitizedState>({
         }
       }
     },
-    [abortSanitize, sanitizeImportJson]
+    [sanitizeImportJson]
+  );
+
+  const onFileChange = useCallback(
+    async (files: FileList | null) => {
+      resetValidation();
+      const selected = files?.[0] ?? null;
+
+      if (!selected) {
+        return;
+      }
+
+      if (selected.size > MAX_IMPORT_JSON_FILE_BYTES) {
+        setInputError(importJsonFlyoutStrings.getFileTooLargeError());
+        return;
+      }
+
+      await validateJson(async (signal) => {
+        const text = await selected.text();
+        if (!signal.aborted) {
+          jsonTextRef.current = text;
+          setJsonText(text);
+        }
+        return text;
+      }, importJsonFlyoutStrings.getInvalidJsonError());
+    },
+    [resetValidation, validateJson]
+  );
+
+  const onTextChange = useCallback(
+    (text: string) => {
+      if (text === jsonTextRef.current) return;
+      jsonTextRef.current = text;
+      setJsonText(text);
+      resetValidation();
+
+      if (!text.trim()) {
+        return;
+      }
+
+      if (new Blob([text]).size > MAX_IMPORT_JSON_FILE_BYTES) {
+        setInputError(importJsonFlyoutStrings.getTextTooLargeError());
+        return;
+      }
+
+      textValidationTimerRef.current = setTimeout(() => {
+        textValidationTimerRef.current = undefined;
+        void validateJson(async () => text, importJsonFlyoutStrings.getInvalidTextError());
+      }, TEXT_VALIDATION_DELAY_MS);
+    },
+    [resetValidation, validateJson]
   );
 
   const onImport = useCallback(async () => {
@@ -161,17 +219,20 @@ export const useImportJsonFlyoutState = <SanitizedState>({
   }, [sanitizedState, createFromJson, closeFlyout, onImportSuccess, services, title]);
 
   return {
-    filePickerError,
+    jsonText,
+    inputError,
     serverError,
     warnings,
     relatedItems,
     relatedItemsCount,
+    sanitizedState,
     isValidating,
     isImporting,
-    fileSelectionId,
+    inputVersion,
     canImport:
-      Boolean(sanitizedState) && !isValidating && !isImporting && !filePickerError && !serverError,
+      Boolean(sanitizedState) && !isValidating && !isImporting && !inputError && !serverError,
     onFileChange,
+    onTextChange,
     onImport,
   };
 };

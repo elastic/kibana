@@ -9,14 +9,23 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import { ImportJsonFlyoutContent } from '@kbn/as-code-import-flyout-component';
+import {
+  ImportJsonFlyoutContent,
+  type SanitizeImportJson,
+} from '@kbn/as-code-import-flyout-component';
 import type { DashboardState } from '@kbn/as-code-dashboard-schema';
 
 import { DASHBOARD_API_PATH, DASHBOARD_API_VERSION } from '../../../common/constants';
 import type { DashboardCreateResponseBody } from '../../../server';
 import { coreServices } from '../../services/kibana_services';
 import { sanitizeDashboard } from '../../dashboard_app/top_nav/share/export_json/sanitize_dashboard';
+import { markMissingDataViews } from '../../utils/mark_missing_data_views';
 import { importDashboardJsonStrings } from './_import_dashboard_json_strings';
+
+const sanitizeDashboardForImport: SanitizeImportJson<DashboardState> = async (raw, signal) => {
+  const result = await sanitizeDashboard(raw, signal);
+  return { ...result, relatedItems: await markMissingDataViews(result.relatedItems) };
+};
 
 interface ImportDashboardJsonFlyoutProps {
   closeFlyout: () => void;
@@ -52,7 +61,8 @@ export const ImportDashboardJsonFlyout = ({
       serverValidationErrorTitle={importDashboardJsonStrings.getServerValidationErrorTitle()}
       serverValidationErrorText={importDashboardJsonStrings.getServerValidationErrorText()}
       getWarningsSummary={importDashboardJsonStrings.getWarningsBody}
-      sanitizeImportJson={sanitizeDashboard}
+      getMissingRelatedItemsSummary={importDashboardJsonStrings.getMissingDataViewsSummary}
+      sanitizeImportJson={sanitizeDashboardForImport}
       createFromJson={async (data) => {
         const result = await coreServices.http.post<DashboardCreateResponseBody>(
           DASHBOARD_API_PATH,

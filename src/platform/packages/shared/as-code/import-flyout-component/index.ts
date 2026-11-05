@@ -9,7 +9,18 @@
 
 export type {
   CreateFromJson,
+  CreateFromJsonResult,
   ImportJsonFlyoutServices,
+  ImportJsonRelatedItem,
   SanitizeImportJson,
+  SanitizeImportJsonResult,
 } from './src/import_json/types';
 export { ImportJsonFlyoutContent } from './src/import_json/import_json_flyout_content';
+export { ImportJsonEditor } from './src/import_json/import_json_editor';
+export { ImportJsonServerErrorCallout } from './src/import_json/import_json_server_error_callout';
+export { ImportJsonWarningsCallout } from './src/import_json/import_json_warnings_callout';
+export {
+  ImportJsonValidationError,
+  isImportJsonValidationError,
+} from './src/import_json/import_json_validation_error';
+export { useImportJsonFlyoutState } from './src/import_json/use_import_json_flyout_state';

@@ -38,6 +38,12 @@ export const importDashboardJsonStrings = {
         '{count} item{count, plural, one {} other {s}} removed from the imported dashboard.',
       values: { count },
     }),
+  getMissingDataViewsSummary: (count: number) =>
+    i18n.translate('dashboard.importJson.flyout.missingDataViewsSummary', {
+      defaultMessage:
+        'This dashboard uses {count, plural, one {a data view that doesn’t} other {# data views that don’t}} exist in this space. Panels that use {count, plural, one {it} other {them}} show an error until you create {count, plural, one {it} other {them}} or edit those panels.',
+      values: { count },
+    }),
   getSuccessToast: (title: string) =>
     i18n.translate('dashboard.importJson.successToast', {
       defaultMessage: 'Dashboard "{title}" imported successfully.',

@@ -42,6 +42,10 @@ jest.mock('../../../../services/kibana_services', () => {
   };
 });
 
+jest.mock('./from_json_tab', () => ({
+  FromJsonTab: () => <div data-test-subj="mockFromJsonTab">From JSON content</div>,
+}));
+
 const mockUseFeaturedItems = jest.fn((): { featuredItems: MenuItem[]; loading: boolean } => ({
   featuredItems: [],
   loading: false,
@@ -77,7 +81,7 @@ describe('AddPanelFlyout', () => {
       require('../use_menu_item_groups').useMenuItemGroups = () => ({});
     });
 
-    test('renders "New" and "From library" tabs', async () => {
+    test('renders "New", "From library" and "From JSON" tabs', async () => {
       render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
         wrapper: ContextWrapper,
       });
@@ -86,6 +90,19 @@ describe('AddPanelFlyout', () => {
       });
       expect(screen.getByTestId('addToDashboardTab-new')).toBeInTheDocument();
       expect(screen.getByTestId('addToDashboardTab-library')).toBeInTheDocument();
+      expect(screen.getByTestId('addToDashboardTab-json')).toBeInTheDocument();
+    });
+
+    test('switches to "From JSON" tab on click', async () => {
+      render(<AddPanelFlyout dashboardApi={mockDashboardApi} ariaLabelledBy="addPanelFlyout" />, {
+        wrapper: ContextWrapper,
+      });
+      await waitFor(async () => {
+        expect(screen.getByTestId('addToDashboardTab-json')).toBeInTheDocument();
+      });
+      await userEvent.click(screen.getByTestId('addToDashboardTab-json'));
+      expect(screen.getByTestId('mockFromJsonTab')).toBeInTheDocument();
+      expect(screen.getByTestId('addToDashboardTab-json')).toHaveAttribute('aria-selected', 'true');
     });
 
     test('defaults to "New" tab', async () => {

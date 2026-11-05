@@ -22,9 +22,10 @@ const exportJsonFlyoutSpy = jest
   .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
+const mockPost = jest.fn();
 jest.mock('../services/kibana_services', () => ({
   coreServices: {
-    http: { post: jest.fn() },
+    http: { post: (...args: unknown[]) => mockPost(...args) },
   },
 }));
 
@@ -136,6 +137,62 @@ describe('Export JSON action', () => {
       getExportJson();
       expect(getSerializedStateByValueMock).not.toHaveBeenCalled();
       expect(embeddableWithLibrary.serializeState).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe('exported JSON', () => {
+    const renderFlyoutContent = async () => {
+      const { loadContent } = mockOpenLazyFlyout.mock.calls[0][0];
+      render(
+        await loadContent({
+          closeFlyout: jest.fn(),
+          ariaLabelledBy: 'dashboardExportJsonFlyoutTitle',
+        })
+      );
+      return exportJsonFlyoutSpy.mock.calls[0][0];
+    };
+
+    it('is a Dashboards API panel entry with the position of the panel on the dashboard', async () => {
+      const getDashboardPanelFromId = jest.fn().mockReturnValue({
+        type: 'testEmbeddable',
+        grid: { x: 12, y: 30, w: 24, h: 10 },
+        serializedState: {},
+      });
+      await action.execute({
+        embeddable: { ...context.embeddable, parentApi: { getDashboardPanelFromId } },
+      });
+      const { getExportJson } = await renderFlyoutContent();
+
+      expect(getExportJson()).toEqual({
+        type: 'testEmbeddable',
+        grid: { x: 12, y: 30, w: 24, h: 10 },
+        config: { rawState: { key: 'value' } },
+      });
+      expect(getDashboardPanelFromId).toHaveBeenCalledWith('panel-1');
+    });
+
+    it('uses the default size for panels outside of a dashboard', async () => {
+      await action.execute(context);
+      const { getExportJson } = await renderFlyoutContent();
+
+      expect(getExportJson()).toEqual({
+        type: 'testEmbeddable',
+        grid: { x: 0, y: 0, w: 24, h: 15 },
+        config: { rawState: { key: 'value' } },
+      });
+    });
+
+    it('is sanitized with the dashboard sanitize route', async () => {
+      const panel = { type: 'testEmbeddable', grid: { x: 0, y: 0, w: 24, h: 15 }, config: {} };
+      const warnings = [{ type: 'dropped_property', message: 'Removed "legacy"', key: 'legacy' }];
+      mockPost.mockResolvedValue({
+        data: { title: 'Panels to sanitize', panels: [{ ...panel, id: '0' }] },
+        warnings,
+      });
+      await action.execute(context);
+      const { sanitizeState } = await renderFlyoutContent();
+
+      await expect(sanitizeState(panel)).resolves.toEqual({ data: panel, warnings });
     });
   });
 });

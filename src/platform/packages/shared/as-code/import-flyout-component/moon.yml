@@ -18,6 +18,8 @@ project:
   sourceRoot: src/platform/packages/shared/as-code/import-flyout-component
 dependsOn:
   - '@kbn/as-code-shared-schemas'
+  - '@kbn/code-editor'
+  - '@kbn/code-editor-mock'
   - '@kbn/core-application-browser'
   - '@kbn/core-application-browser-mocks'
   - '@kbn/core-http-browser'
