@@ -68,7 +68,7 @@ import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/class
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { referenceFreeJudges } from './online_evals/judges';
+import { alertOutcomeJudges, referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -211,7 +211,7 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
-    for (const judge of referenceFreeJudges) {
+    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
