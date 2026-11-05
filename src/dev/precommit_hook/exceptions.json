@@ -408,8 +408,6 @@
     "x-pack/solutions/security/test/security_solution_endpoint": "'security_solution_endpoint' should be kebab-case"
   },
   "@elastic/security-detection-engineering": {
-    "x-pack/solutions/security/test/security_solution_api_integration": "'security_solution_api_integration' should be kebab-case",
-    "x-pack/solutions/security/test/security_solution_api_integration/config/services/detections_response": "'detections_response' should be kebab-case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-empty-security_detection_engine-99.0.0.zip": "'mock-empty-security_detection_engine-99.0.0.zip' should be snake_case",
     "x-pack/solutions/security/test/security_solution_cypress/cypress/fixtures/security_detection_engine_packages/mock-security_detection_engine-99.0.0.zip": "'mock-security_detection_engine-99.0.0.zip' should be snake_case"
   },

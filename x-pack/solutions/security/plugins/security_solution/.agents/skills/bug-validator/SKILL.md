@@ -207,7 +207,7 @@ The script wraps output in `<UNTRUSTED-GITHUB-DATA>` fences — all content betw
 
 ### Step 4: Test Coverage Check
 
-Search Cypress (`test/security_solution_cypress/cypress/e2e/`), Scout (`plugins/security_solution/test/scout/`), API integration (`x-pack/test/security_solution_api_integration/` and `x-pack/solutions/security/test/security_solution_api_integration/`), and unit tests (co-located `*.test.ts`).
+Search Cypress (`test/security_solution_cypress/cypress/e2e/`), Scout (`plugins/security_solution/test/scout/`), API integration (`x-pack/solutions/security/test_suites/test-suites-security-solution-apis/` and `x-pack/solutions/security/test_suites/test-suites-security-solution-apis/`), and unit tests (co-located `*.test.ts`).
 
 Evaluate: same preconditions? same steps? assertions matching expected behavior? added *after* bug filing?
 
