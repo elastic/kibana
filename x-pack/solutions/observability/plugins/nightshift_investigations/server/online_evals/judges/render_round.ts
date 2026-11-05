@@ -6,6 +6,7 @@
  */
 
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { MessageRole, type Message, type ToolCallArguments } from '@kbn/inference-common';
 import { z, lazySchema } from '@kbn/zod/v4';
 
@@ -102,7 +103,8 @@ export const renderTraceMessages = (
     }
     // Ids only pair a call with its result. Providers restrict their characters, so don't reuse the agent's.
     const toolCallId = `call_${index + 1}`;
-    const name = step.tool_id ?? 'unknown_tool';
+    // The same normalization Agent Builder applies to tool names it sends to a provider.
+    const name = sanitizeToolId(step.tool_id ?? 'unknown_tool');
     const args = toToolCallArguments(step.arguments);
     const response = truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS) || '(empty)';
     const note = step.reasoning ? truncate(step.reasoning, MAX_TOOL_FIELD_CHARS) : null;

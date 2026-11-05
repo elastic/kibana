@@ -92,7 +92,7 @@ describe('renderTraceMessages', () => {
       steps: [
         {
           tool_call_id: 'toolu_01/with:odd chars',
-          tool_id: 'search',
+          tool_id: 'platform.core.search',
           reasoning: 'Searching the checkout logs.',
           arguments: { q: 'x' },
           result: { hits: 2 },
@@ -108,9 +108,19 @@ describe('renderTraceMessages', () => {
       {
         role: 'assistant',
         content: 'Searching the checkout logs.',
-        toolCalls: [{ toolCallId: 'call_1', function: { name: 'search', arguments: { q: 'x' } } }],
+        toolCalls: [
+          {
+            toolCallId: 'call_1',
+            function: { name: 'platform_core_search', arguments: { q: 'x' } },
+          },
+        ],
       },
-      { role: 'tool', name: 'search', toolCallId: 'call_1', response: { result: '{"hits":2}' } },
+      {
+        role: 'tool',
+        name: 'platform_core_search',
+        toolCallId: 'call_1',
+        response: { result: '{"hits":2}' },
+      },
       {
         role: 'assistant',
         content: null,
