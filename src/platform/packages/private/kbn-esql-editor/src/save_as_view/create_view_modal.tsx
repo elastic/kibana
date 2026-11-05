@@ -28,6 +28,7 @@ import {
   EuiTextArea,
   useGeneratedHtmlId,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { validateQuery } from '@kbn/esql-language';
@@ -43,6 +44,14 @@ import {
 } from '@kbn/esql-utils';
 import type { ESQLEditorDeps } from '../types';
 import { ESQLEditorTelemetryService, type ViewCreatedSource } from '../telemetry/telemetry_service';
+
+// A long warning must not set the modal's shrink-to-fit width. Zero intrinsic size
+// plus min-inline-size 100% makes it wrap to the width the form already establishes.
+const validationWarningStyles = css({
+  inlineSize: 0,
+  minInlineSize: '100%',
+  overflowWrap: 'anywhere',
+});
 
 export const createViewLabel = i18n.translate('esqlEditor.createView.openModalTooltip', {
   defaultMessage: 'Create view',
@@ -329,15 +338,17 @@ export const CreateViewModal: FunctionComponent<CreateViewModalProps> = ({
       <EuiModalBody>
         {validationWarnings.length > 0 && (
           <>
-            <KbnWarningCallout
-              announceOnMount
-              data-test-subj="saveAsViewValidationWarning"
-              size="s"
-              text={validationWarnings.map((warning) => (
-                <p key={warning}>{warning}</p>
-              ))}
-              title={createWarningTitle(name)}
-            />
+            <div css={validationWarningStyles}>
+              <KbnWarningCallout
+                announceOnMount
+                data-test-subj="saveAsViewValidationWarning"
+                size="s"
+                text={validationWarnings.map((warning) => (
+                  <p key={warning}>{warning}</p>
+                ))}
+                title={createWarningTitle(name)}
+              />
+            </div>
             <EuiSpacer size="l" />
           </>
         )}
