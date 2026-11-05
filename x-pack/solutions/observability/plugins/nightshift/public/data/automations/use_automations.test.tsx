@@ -20,18 +20,11 @@ import {
 } from './use_automations';
 
 jest.mock('../../hooks/use_kibana');
-jest.mock('@kbn/react-kibana-mount', () => ({
-  toMountPoint: (node: React.ReactNode) => node,
-}));
 
 const mockUseKibana = useKibana as jest.Mock;
 const investigationsFetch = jest.fn();
 const addSuccess = jest.fn();
 const addError = jest.fn();
-const getUrlForApp = jest.fn(
-  (_app: string, { path }: { path: string }) => `/app/nightshift${path}`
-);
-const navigateToUrl = jest.fn();
 
 const renderWithClient = <T,>(hook: () => T) => {
   const queryClient = new QueryClient({
@@ -49,10 +42,8 @@ describe('use_automations', () => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
       services: {
-        application: { getUrlForApp, navigateToUrl },
         notifications: { toasts: { addError, addSuccess } },
         nightshiftInvestigations: { investigationsClient: { fetch: investigationsFetch } },
-        rendering: {},
       },
     });
   });
@@ -116,14 +107,9 @@ describe('use_automations', () => {
 
     act(() => result.current.mutate(body));
 
-    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
-    expect(addSuccess).toHaveBeenCalledWith(
-      expect.objectContaining({ title: 'Automation created' })
+    await waitFor(() =>
+      expect(addSuccess).toHaveBeenCalledWith({ title: 'Automation created', text: 'Triage' })
     );
-    expect(getUrlForApp).toHaveBeenCalledWith('nightshift', {
-      path: '/automations?search=Triage',
-    });
-
     expect(investigationsFetch).toHaveBeenCalledWith('POST /internal/nightshift/automations', {
       params: { body },
       signal: null,

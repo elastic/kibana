@@ -36,6 +36,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
+import { cloneActionIcon, deleteActionIcon } from '../action_menu_icons';
 import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 import { NIGHTSHIFT_APP_ROUTE } from '../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
@@ -692,7 +693,7 @@ export const AutomationDetailFlyout = ({
                               items: [
                                 {
                                   name: labels.clone,
-                                  icon: 'copy',
+                                  icon: cloneActionIcon,
                                   'data-test-subj': 'automationCloneButton',
                                   ...getEbtProps({
                                     action: NIGHTSHIFT_EBT_ACTIONS.CLONE_AUTOMATION,
@@ -706,7 +707,7 @@ export const AutomationDetailFlyout = ({
                                 { isSeparator: true, key: 'divider' },
                                 {
                                   name: labels.delete,
-                                  icon: 'trash',
+                                  icon: deleteActionIcon,
                                   color: 'danger',
                                   'data-test-subj': 'automationDeleteButton',
                                   ...getEbtProps({

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useHistory, useLocation } from 'react-router-dom';
+import { useState } from 'react';
 import type { Automation } from '../../data/automations/use_automations';
 import { TRIGGER_LABEL_ORDER } from '../utils/trigger_display';
 import {
@@ -20,46 +19,11 @@ import {
   type AutomationFilters,
 } from '../utils/filter_automations';
 
-const SEARCH_QUERY_PARAM = 'search';
-
-const readSearchParam = (locationSearch: string) =>
-  new URLSearchParams(locationSearch).get(SEARCH_QUERY_PARAM) ?? '';
-
 export const useAutomationFilters = (
   automations: Automation[],
   getFacets: (automation: Automation) => AutomationFacets
 ) => {
-  const history = useHistory();
-  const { pathname, search: locationSearch } = useLocation();
-  const searchFromUrl = useMemo(() => readSearchParam(locationSearch), [locationSearch]);
-  const [filters, setFilters] = useState<AutomationFilters>(() => ({
-    ...EMPTY_FILTERS,
-    search: searchFromUrl,
-  }));
-
-  useEffect(() => {
-    setFilters((current) =>
-      current.search === searchFromUrl ? current : { ...current, search: searchFromUrl }
-    );
-  }, [searchFromUrl]);
-
-  const writeSearchParam = useCallback(
-    (search: string) => {
-      const nextParams = new URLSearchParams(locationSearch);
-      if (search.trim()) {
-        nextParams.set(SEARCH_QUERY_PARAM, search);
-      } else {
-        nextParams.delete(SEARCH_QUERY_PARAM);
-      }
-      const nextSearch = nextParams.toString();
-      if (nextSearch === new URLSearchParams(locationSearch).toString()) {
-        return;
-      }
-      history.replace({ pathname, search: nextSearch });
-    },
-    [history, locationSearch, pathname]
-  );
-
+  const [filters, setFilters] = useState<AutomationFilters>(EMPTY_FILTERS);
   const facets = automations.map(getFacets);
   const options = {
     statuses: countFilterValues(
@@ -85,22 +49,12 @@ export const useAutomationFilters = (
 
   return {
     filters: activeFilters,
-    setFilter: <K extends keyof AutomationFilters>(key: K, value: AutomationFilters[K]) => {
-      setFilters((current) => ({ ...current, [key]: value }));
-      if (key === 'search') {
-        writeSearchParam(value as string);
-      }
-    },
-    showOnlyStatus: (status: string) => {
-      setFilters({ ...EMPTY_FILTERS, statuses: [status] });
-      writeSearchParam('');
-    },
+    setFilter: <K extends keyof AutomationFilters>(key: K, value: AutomationFilters[K]) =>
+      setFilters((current) => ({ ...current, [key]: value })),
+    showOnlyStatus: (status: string) => setFilters({ ...EMPTY_FILTERS, statuses: [status] }),
     clearFilterSelections: () =>
       setFilters((current) => ({ ...EMPTY_FILTERS, search: current.search })),
-    clearSearchAndFilters: () => {
-      setFilters(EMPTY_FILTERS);
-      writeSearchParam('');
-    },
+    clearSearchAndFilters: () => setFilters(EMPTY_FILTERS),
     hasFilterSelections: hasFilterSelections(activeFilters),
     hasActiveFilters: hasActiveFilters(activeFilters),
     visibleAutomations: automations.filter((automation, index) =>
