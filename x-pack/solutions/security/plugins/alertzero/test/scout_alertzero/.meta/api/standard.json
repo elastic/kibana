@@ -1,5 +1,5 @@
 {
-  "sha1": "15b3624722668c96bc026fad760bddc70e84e803",
+  "sha1": "ff66dcfdee833a1b9dc7b17ce07ab756fb09bad8",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -25,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 384,
-        "column": 9
+        "line": 362,
+        "column": 5
       }
     },
     {
@@ -39,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 384,
-        "column": 9
+        "line": 362,
+        "column": 5
       }
     },
     {
@@ -53,8 +53,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 384,
-        "column": 9
+        "line": 362,
+        "column": 5
       }
     },
     {
