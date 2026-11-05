@@ -360,6 +360,26 @@ describe('getActionStatuses version specific policy actions', () => {
     expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-id' });
   });
 
+  it('uses the latest PIT id returned by a search for the next page and for cleanup', async () => {
+    const esClient = makeEsClient([
+      Array.from({ length: 20 }, (_, i) => actionDoc(`sentinel-${i}`, 1, 'p1#sentinel')),
+      [actionDoc('A', 1, 'p1')],
+    ]);
+    const search = esClient.search as jest.Mock;
+    const impl = search.getMockImplementation()!;
+    let pitCalls = 0;
+    search.mockImplementation(async (request: any) => {
+      const res = await impl(request);
+      return request.pit ? { ...res, pit_id: `pit-id-${++pitCalls}` } : res;
+    });
+
+    await getActionStatuses(esClient, { errorSize: 0 });
+
+    const searches = getActionsSearches(esClient);
+    expect(searches.map((request) => request.pit.id)).toEqual(['pit-id', 'pit-id-1']);
+    expect(esClient.closePointInTime).toHaveBeenCalledWith({ id: 'pit-id-2' });
+  });
+
   it('does a single search when the first page has enough docs', async () => {
     const esClient = makeEsClient([
       Array.from({ length: 20 }, (_, i) => actionDoc(`action-${i}`, 2, 'p1')),

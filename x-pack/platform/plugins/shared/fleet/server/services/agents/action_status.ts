@@ -247,11 +247,13 @@ async function getActions(
   const hits: Array<{ _source?: FleetServerAgentAction }> = [];
   // Page through a point in time, so that documents indexed between searches cannot shift the
   // offsets and return the same document on two pages.
-  const { id: pitId } = await esClient.openPointInTime({
-    index: AGENT_ACTIONS_INDEX,
-    keep_alive: '1m',
-    ignore_unavailable: true,
-  });
+  let pitId = (
+    await esClient.openPointInTime({
+      index: AGENT_ACTIONS_INDEX,
+      keep_alive: '1m',
+      ignore_unavailable: true,
+    })
+  ).id;
   try {
     for (let from = 0; hits.length < limit && from + limit <= MAX_RESULT_WINDOW; ) {
       const res = await esClient.search<FleetServerAgentAction>({
@@ -262,6 +264,8 @@ async function getActions(
         // The action id keeps the order stable between pages when documents share a timestamp.
         sort: [{ '@timestamp': 'desc' }, { action_id: 'asc' }],
       });
+      // Elasticsearch can return a new PIT id, which must be used from then on
+      pitId = res.pit_id ?? pitId;
       const pageHits = res.hits.hits;
       hits.push(
         ...pageHits.filter((hit) => !hasVersionSuffix(hit._source?.data?.policy_id as string))
