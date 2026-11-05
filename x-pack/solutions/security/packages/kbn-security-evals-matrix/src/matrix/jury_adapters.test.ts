@@ -66,7 +66,7 @@ describe('personaMatrixJury.toArgs', () => {
   // The live run does not grade `last_assistant_step` narration as the final
   // answer (evaluate_dataset.ts); the replay must grade the same submission
   // rather than restore credit for the narration.
-  it('blanks a last_assistant_step cell instead of grading its narration', () => {
+  it('blanks a last_assistant_step cell with no artifact instead of grading its narration', () => {
     const args = personaMatrixJury.toArgs(
       cell({
         agentResponse: 'I will now preview the detection rule.',
@@ -75,6 +75,60 @@ describe('personaMatrixJury.toArgs', () => {
     );
     expect(args).not.toBeNull();
     expect(args!.output.messages).toEqual([{ message: '' }]);
+  });
+
+  it('judges a last_assistant_step cell on its rendered rule artifact', () => {
+    const args = personaMatrixJury.toArgs(
+      cell({
+        agentResponse: 'I will now preview the detection rule.',
+        taskOutput: {
+          messageSource: 'last_assistant_step',
+          messages: [{ message: 'Done. <render_attachment id="att-1" version="1"/>' }],
+          steps: [
+            {
+              type: 'tool_call',
+              tool_id: 'security.create_detection_rule',
+              results: [
+                {
+                  data: {
+                    success: true,
+                    attachment_id: 'att-1',
+                    rule: { name: 'beacon-rule', query: 'process.name: curl' },
+                  },
+                },
+              ],
+            },
+          ],
+        },
+      })
+    );
+    const answer = (args!.output.messages as Array<{ message: string }>)[0].message;
+    expect(answer).toContain('beacon-rule');
+    expect(answer).not.toContain('preview');
+  });
+
+  it('judges a last_assistant_step cell on its delivered workflow YAML', () => {
+    const args = personaMatrixJury.toArgs(
+      cell({
+        agentResponse: 'Generating the workflow now.',
+        taskOutput: {
+          messageSource: 'last_assistant_step',
+          messages: [{ message: '<render_attachment id="att-2" version="1"/>' }],
+          steps: [
+            {
+              type: 'tool_call',
+              tool_id: 'platform.core.generate_workflow',
+              results: [
+                { data: { success: true, attachment_id: 'att-2', yaml: 'workflow: steps: []' } },
+              ],
+            },
+          ],
+        },
+      })
+    );
+    expect((args!.output.messages as Array<{ message: string }>)[0].message).toBe(
+      'workflow: steps: []'
+    );
   });
 
   it('still grades a normal closing answer in full', () => {

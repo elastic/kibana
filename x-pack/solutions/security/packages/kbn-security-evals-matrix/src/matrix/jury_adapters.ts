@@ -68,8 +68,93 @@ export interface JuryAdapter {
   }>;
 }
 
+/**
+ * Artifact-producing tools and the key under which each result carries the
+ * artifact payload. Mirrors `ARTIFACT_PRODUCING_TOOLS` in the persona-matrix
+ * suite; `null` means the payload is the delivered workflow YAML (recovered
+ * from workflow attachments / generate results), not a result field.
+ */
+const ARTIFACT_PRODUCING_TOOLS: ReadonlyMap<string, string | null> = new Map([
+  ['security.create_detection_rule', 'rule'],
+  ['security.update_detection_rule', 'rule'],
+  ['platform.core.generate_workflow', null],
+]);
+
+/** The workflow YAML the run actually delivered, for generate_workflow runs. */
+const deliveredWorkflowYaml = (output: Record<string, unknown>): unknown => {
+  const attachments = Array.isArray(output.workflowAttachments)
+    ? (output.workflowAttachments as unknown[])
+    : [];
+  const fromAttachment = attachments
+    .map((a) => (isRecord(a) && typeof a.yaml === 'string' ? a.yaml : undefined))
+    .filter((yaml): yaml is string => yaml !== undefined);
+  if (fromAttachment.length > 0) {
+    return fromAttachment[fromAttachment.length - 1];
+  }
+  const steps = Array.isArray(output.steps) ? (output.steps as Array<Record<string, unknown>>) : [];
+  for (const step of steps) {
+    if (step.tool_id === 'platform.core.generate_workflow' && Array.isArray(step.results)) {
+      for (const result of step.results) {
+        const data = isRecord(result) ? (result.data as Record<string, unknown>) : undefined;
+        if (isRecord(data) && typeof data.yaml === 'string') {
+          return data.yaml;
+        }
+      }
+    }
+  }
+  return undefined;
+};
+
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
+
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const isRenderTagFor = (text: string, attachmentId: string): boolean =>
+  text.includes('<render_attachment') &&
+  new RegExp(`<render_attachment[^>]*\\bid\\s*=\\s*["']?${escapeRegExp(attachmentId)}\\b`).test(
+    text
+  );
+
+/**
+ * Mirrors `renderedArtifactPayload` from the persona-matrix suite
+ * (evaluate_dataset.ts), which cannot be imported from this platform package.
+ *
+ * A fallback run the live suite judges on its rendered artifact -- an
+ * artifact-producing tool result with `success: true`, an `attachment_id`, and
+ * a matching `<render_attachment>` tag in a message -- must be replayed with
+ * that same payload (the rule object, or the workflow YAML) instead of an
+ * empty answer, or the rejudge grades a different submission than the live
+ * run did.
+ */
+const renderedArtifactPayload = (output: Record<string, unknown>): unknown => {
+  const texts = ((output.messages as Array<{ message?: unknown }> | undefined) ?? [])
+    .map((entry) => entry?.message)
+    .filter((message): message is string => typeof message === 'string');
+  const steps = Array.isArray(output.steps) ? (output.steps as Array<Record<string, unknown>>) : [];
+  for (const step of steps) {
+    const payloadKey =
+      typeof step.tool_id === 'string' ? ARTIFACT_PRODUCING_TOOLS.get(step.tool_id) : undefined;
+    if (payloadKey !== undefined) {
+      const results = Array.isArray(step.results) ? step.results : [];
+      const rendered = results.find((result) => {
+        const data = isRecord(result) ? (result.data as Record<string, unknown>) : undefined;
+        const attachmentId = data?.attachment_id;
+        return (
+          data?.success === true &&
+          typeof attachmentId === 'string' &&
+          texts.some((text) => isRenderTagFor(text, attachmentId))
+        );
+      });
+      if (rendered !== undefined) {
+        return payloadKey === null
+          ? deliveredWorkflowYaml(output)
+          : (rendered as { data: Record<string, unknown> }).data[payloadKey];
+      }
+    }
+  }
+  return undefined;
+};
 
 /**
  * persona-matrix: prose answers graded by the correctness/groundedness pair.
@@ -89,12 +174,22 @@ export const personaMatrixJury: JuryAdapter = {
     // from a weak answer.
     //
     // A `last_assistant_step` cell is interior narration, not a closing
-    // answer; the live run blanks/blanks-to-artifact such answers before
-    // judging (evaluate_dataset.ts), so the replay must grade the same
-    // submission rather than restore credit for the narration.
-    const isFallback =
-      isRecord(cell.taskOutput) && cell.taskOutput.messageSource === 'last_assistant_step';
-    const agentResponse = isFallback ? '' : cell.agentResponse;
+    // answer; the live run judges the rendered artifact's payload when the
+    // run ends on one and an empty answer otherwise (evaluate_dataset.ts), so
+    // the replay must grade the same submission rather than restore credit
+    // for the narration.
+    const taskOutput = isRecord(cell.taskOutput) ? cell.taskOutput : undefined;
+    const isFallback = taskOutput?.messageSource === 'last_assistant_step';
+    let agentResponse = cell.agentResponse;
+    if (isFallback) {
+      const payload = taskOutput ? renderedArtifactPayload(taskOutput) : undefined;
+      agentResponse =
+        payload === undefined
+          ? ''
+          : typeof payload === 'string'
+          ? payload
+          : JSON.stringify(payload);
+    }
     if (!cell.expected || (!agentResponse && !isFallback)) {
       return null;
     }
