@@ -311,6 +311,39 @@ describe('createEvaluationService', () => {
       expect(conclusionQualityContext.referenceData).toEqual(referenceData);
     });
 
+    it('skips an evaluator that reports it does not apply, without failing the others', async () => {
+      const alertOutcome = buildEvaluator({
+        name: 'alert_outcome',
+        evaluate: jest.fn().mockResolvedValue({
+          scores: [{ name: 'alert_outcome', score: 0 }],
+          notApplicable: { reason: 'no confirmed cause' },
+        }),
+      });
+      const groundedness = buildEvaluator({ name: 'groundedness' });
+      const { evaluateEvidence } = setup([alertOutcome, groundedness]);
+
+      const results = await evaluateEvidence({
+        evaluators: [{ name: 'alert_outcome' }, { name: 'groundedness' }],
+        evidence: { round: EVIDENCE_ROUND },
+      });
+
+      expect(results).toEqual([
+        {
+          status: 'error',
+          evaluator: expect.objectContaining({ name: 'alert_outcome' }),
+          error: {
+            code: 'not_applicable',
+            message: 'Evaluator not applicable: no confirmed cause',
+          },
+        },
+        {
+          status: 'ok',
+          evaluator: expect.objectContaining({ name: 'groundedness' }),
+          scores: [{ name: 'groundedness', score: 1 }],
+        },
+      ]);
+    });
+
     it('validates reference data against the evaluator schema', async () => {
       const correctness: EvaluatorDefinition = {
         ...buildEvaluator({ name: 'correctness' }),

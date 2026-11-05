@@ -44,10 +44,11 @@ const createInvestigationConfig = (
     throw new Error(`SANDBOX_KIBANA_CONFIG references a missing file: ${sandboxKibanaConfig}`);
   }
 
-  const telemetryConfig = process.env.NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG;
-  if (telemetryConfig && !existsSync(telemetryConfig)) {
+  // The suite's connector set: preconfigured connectors the eval saves on the investigator.
+  const connectorsConfig = process.env.NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG;
+  if (connectorsConfig && !existsSync(connectorsConfig)) {
     throw new Error(
-      `NIGHTSHIFT_TELEMETRY_KIBANA_CONFIG references a missing file: ${telemetryConfig}`
+      `NIGHTSHIFT_CONNECTORS_KIBANA_CONFIG references a missing file: ${connectorsConfig}`
     );
   }
 
@@ -71,7 +72,7 @@ const createInvestigationConfig = (
         '--xpack.nightshift_investigations.memory.enabled=false',
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
         `--config=${sandboxKibanaConfig}`,
-        ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
+        ...(connectorsConfig ? [`--config=${connectorsConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
         '--uiSettings.overrides.workflows:aiAgent:enabled=true',
         // The tracing config set already lifts the content redaction settings.
