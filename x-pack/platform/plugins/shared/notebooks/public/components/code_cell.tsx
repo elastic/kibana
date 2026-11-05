@@ -193,6 +193,7 @@ const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogE
 };
 
 export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
+  const { euiTheme } = useEuiTheme();
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const [draft, setDraft] = useState(cell.code);
@@ -229,7 +230,12 @@ export const CodeCell = ({ cell }: { cell: CodeCellDefinition }) => {
 
   return (
     <CellFrame cell={cell} runtime={runtime} onRun={() => run(draft)}>
-      <div ref={editorRef}>
+      <div
+        ref={editorRef}
+        css={css`
+          margin-block-end: ${euiTheme.size.s};
+        `}
+      >
         <CodeEditor
           languageId="javascript"
           value={draft}
