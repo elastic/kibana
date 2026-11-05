@@ -21,7 +21,6 @@ import {
 } from 'rxjs';
 import useResizeObserver, { type ObservedSize } from 'use-resize-observer/polyfilled';
 
-import { useEuiTheme } from '@elastic/eui';
 import { getScrollContainer } from '@kbn/core-chrome-layout-utils';
 
 import type { ActivePanelEvent } from './grid_panel';
@@ -48,7 +47,6 @@ export const useGridLayoutState = ({
   setDimensionsRef: (instance: HTMLDivElement | null) => void;
 } => {
   const panelRefs = useRef<{ [panelId: string]: HTMLDivElement | null }>({});
-  const { euiTheme } = useEuiTheme();
 
   const accessMode$ = useMemo(
     () => new BehaviorSubject<GridAccessMode>(accessMode),
@@ -89,7 +87,7 @@ export const useGridLayoutState = ({
     ]).pipe(
       // if an interaction event is happening, then ignore any "draft" layout changes
       filter(([_, event]) => !Boolean(event)),
-      map(([layout]) => layout),
+      map(([currentLayout]) => currentLayout),
       // only emit if the layout has changed
       distinctUntilChanged(isEqual)
     );

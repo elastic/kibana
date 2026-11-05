@@ -13,7 +13,7 @@ import { BehaviorSubject, distinctUntilChanged, filter, map } from 'rxjs';
 
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import type { FlexPanelData } from './types';
-import { FlexLayoutData } from '../types';
+import type { FlexLayoutData } from '../types';
 
 export const useGridPanelState = ({
   panelId,

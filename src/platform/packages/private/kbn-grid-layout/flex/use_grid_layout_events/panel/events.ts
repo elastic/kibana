@@ -35,11 +35,9 @@ import { getNextKeyboardPositionForPanel } from './utils';
  */
 export const useGridLayoutPanelEvents = ({
   interactionType,
-  sectionId,
   panelId,
 }: {
   interactionType: ActivePanelEvent['type'];
-  sectionId?: string;
   panelId: string;
 }) => {
   const { gridLayoutStateManager } = useGridLayoutContext();
@@ -48,9 +46,9 @@ export const useGridLayoutPanelEvents = ({
 
   const onStart = useCallback(
     (ev: UserInteractionEvent) => {
-      startAction(ev, interactionType, gridLayoutStateManager, sectionId, panelId);
+      startAction(ev, interactionType, gridLayoutStateManager, panelId);
     },
-    [gridLayoutStateManager, interactionType, sectionId, panelId]
+    [gridLayoutStateManager, interactionType, panelId]
   );
 
   const onEnd = useCallback(() => {
@@ -58,14 +56,11 @@ export const useGridLayoutPanelEvents = ({
   }, [gridLayoutStateManager]);
 
   const onBlur = useCallback(() => {
-    const {
-      activePanelEvent$: { value: { id, targetSection } = {} },
-    } = gridLayoutStateManager;
     // make sure the user hasn't started another interaction in the meantime
-    if (id === panelId && sectionId === targetSection) {
+    if (gridLayoutStateManager.activePanelEvent$.value?.id === panelId) {
       commitAction(gridLayoutStateManager);
     }
-  }, [gridLayoutStateManager, panelId, sectionId]);
+  }, [gridLayoutStateManager, panelId]);
 
   const onCancel = useCallback(() => {
     cancelAction(gridLayoutStateManager);

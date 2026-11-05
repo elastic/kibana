@@ -7,8 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip, startWith } from 'rxjs';
+import React, { useEffect, useMemo } from 'react';
+import { combineLatest, filter, map, pairwise, skip, startWith } from 'rxjs';
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -83,7 +83,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
           ref.style.zIndex = `${euiTheme.levels.modal}`;
           if (activePanel.type === 'resize') {
-            // // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+            // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
             ref.style.flexGrow = '0';
             ref.style.width = `${Math.max(
               draggingPosition.right - draggingPosition.left,

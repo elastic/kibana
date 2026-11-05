@@ -10,7 +10,7 @@
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getScrollDimensions, isAtBottomOfPage } from '@kbn/core-chrome-layout-utils';
 
-import type { ActivePanelEvent, GridPanelData } from '../../grid_panel';
+import type { ActivePanelEvent, FlexPanelData } from '../../grid_panel';
 import type { FlexLayoutStateManager, RuntimeGridSettings } from '../../types';
 import { updateClientY } from '../keyboard_utils';
 import { getSensorPosition, isKeyboardEvent, isMouseEvent, isTouchEvent } from '../sensors';
@@ -55,7 +55,7 @@ export const getResizePreviewRect = ({
   pointerPixel: PointerPosition;
   activePanel: ActivePanelEvent;
   runtimeSettings: RuntimeGridSettings;
-  resizeOptions: GridPanelData['resizeOptions'];
+  resizeOptions: FlexPanelData['resizeOptions'];
   maxRight: number;
 }) => {
   const panelRect = activePanel.panelDiv.getBoundingClientRect();

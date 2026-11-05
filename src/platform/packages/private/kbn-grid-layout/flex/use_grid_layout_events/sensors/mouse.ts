@@ -8,7 +8,7 @@
  */
 
 import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
-import type { UserInteractionEvent } from '../../types';
+import type { UserInteractionEvent } from '../types';
 import { handleAutoscroll, startAutoScroll, stopAutoScroll } from './autoscroll';
 
 export type UserMouseEvent = MouseEvent | React.MouseEvent<HTMLButtonElement, MouseEvent>;

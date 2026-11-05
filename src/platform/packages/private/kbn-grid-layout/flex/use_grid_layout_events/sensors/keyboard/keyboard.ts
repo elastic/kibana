@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UserInteractionEvent } from '../../../types';
+import type { UserInteractionEvent } from '../../types';
 import type { KeyboardCodes, UserKeyboardEvent } from './types';
 import { KeyboardCode } from './types';
 

@@ -16,7 +16,6 @@ import type { GridLayoutContextType } from '../../use_grid_layout_context';
 import { getSensorType } from '../sensors';
 import type { PointerPosition, UserInteractionEvent } from '../types';
 import { getDragPreviewRect, getResizePreviewRect, getSensorOffsets } from './utils';
-import { CONFIRM_BUTTON } from '@elastic/eui/src/components/modal/confirm_modal';
 
 let startingLayout: FlexLayoutData | undefined;
 
@@ -24,7 +23,6 @@ export const startAction = (
   e: UserInteractionEvent,
   type: ActivePanelEvent['type'],
   gridLayoutStateManager: FlexLayoutStateManager,
-  sectionId: string | undefined,
   panelId: string
 ) => {
   const panelRef = gridLayoutStateManager.panelRefs.current[panelId];
@@ -36,7 +34,6 @@ export const startAction = (
     type,
     id: panelId,
     panelDiv: panelRef,
-    targetSection: sectionId,
     sensorType: getSensorType(e),
     position: panelRect,
     sensorOffsets: getSensorOffsets(e, panelRect),
@@ -67,7 +64,7 @@ export const moveAction = (
     return;
   }
 
-  const { columnCount, gutterSize, rowHeight, columnPixelWidth } = runtimeSettings;
+  const { gutterSize, rowHeight } = runtimeSettings;
   const isResize = activePanel.type === 'resize';
   const gridLayoutRect = gridLayoutElement?.getBoundingClientRect();
 
@@ -95,9 +92,8 @@ export const moveAction = (
   );
 
   const getRow = (rect: { top: number; bottom: number }) => {
-    // this section already exists, so use the wrapper element to figure out target row
     const gridTop = gridLayoutRect?.top ?? 0;
-    const localYCoordinate = (rect.top ?? 0) - gridTop;
+    const localYCoordinate = rect.top - gridTop;
     return Math.min(
       Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
       numberOfRows
@@ -110,7 +106,7 @@ export const moveAction = (
     if (!isEqual(requestedPanelData, lastRequestedPanelPosition.current)) {
       lastRequestedPanelPosition.current = { ...requestedPanelData };
 
-      let nextLayout = cloneDeep(currentLayout) ?? {};
+      const nextLayout = cloneDeep(currentLayout) ?? {};
       delete nextLayout[activePanel.id];
       nextLayout[requestedPanelData.id] = requestedPanelData;
 
@@ -119,20 +115,11 @@ export const moveAction = (
   } else {
     const sorted = Object.entries(panelElements)
       .map(([id, panel]) => {
-        const comparison = panel?.getBoundingClientRect();
-        const row = getRow(comparison);
-        return {
-          id,
-          ...(comparison ?? { left: 0 }),
-          row,
-          test: (comparison?.left ?? 0) + row * (gridLayoutRect?.width ?? 1),
-        };
+        const rect = panel?.getBoundingClientRect() ?? { top: 0, bottom: 0, left: 0 };
+        const row = getRow(rect);
+        return { id, sortKey: rect.left + row * (gridLayoutRect?.width ?? 1) };
       })
-      .sort((a, b) => {
-        return a.test - b.test;
-        // if (a.row === b.row) return a.left - b.left;
-        // return a.row - b.row;
-      });
+      .sort((a, b) => a.sortKey - b.sortKey);
 
     const nextLayout: FlexLayoutData = {};
     sorted.forEach(({ id }, index) => {

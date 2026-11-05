@@ -16,54 +16,51 @@ import { i18n } from '@kbn/i18n';
 import { useGridLayoutContext } from '../use_grid_layout_context';
 import { useGridLayoutPanelEvents, getDefaultResizeOptions } from '../use_grid_layout_events';
 
-export const ResizeHandle = React.memo(
-  ({ sectionId, panelId }: { sectionId?: string; panelId: string }) => {
-    const buttonRef = useRef<HTMLButtonElement | null>(null);
-    const startDrag = useGridLayoutPanelEvents({
-      interactionType: 'resize',
-      panelId,
-      sectionId,
-    });
-    const { gridLayoutStateManager } = useGridLayoutContext();
+export const ResizeHandle = React.memo(({ panelId }: { panelId: string }) => {
+  const buttonRef = useRef<HTMLButtonElement | null>(null);
+  const startDrag = useGridLayoutPanelEvents({
+    interactionType: 'resize',
+    panelId,
+  });
+  const { gridLayoutStateManager } = useGridLayoutContext();
 
-    useEffect(() => {
-      /** Change the cursor depending on if the panel can be resized in a specific direction */
-      const resizeCursorSubscription = gridLayoutStateManager.layoutUpdated$.subscribe((layout) => {
-        const panel = layout[panelId];
-        if (!panel || panel.type !== 'panel' || !buttonRef.current) return;
+  useEffect(() => {
+    /** Change the cursor depending on if the panel can be resized in a specific direction */
+    const resizeCursorSubscription = gridLayoutStateManager.layoutUpdated$.subscribe((layout) => {
+      const panel = layout[panelId];
+      if (!panel || panel.type !== 'panel' || !buttonRef.current) return;
 
-        const { minWidth, maxWidth, minHeight, maxHeight } = {
-          ...getDefaultResizeOptions(gridLayoutStateManager.runtimeSettings$.getValue()),
-          ...panel.resizeOptions,
-        };
-        let direction = 'nwse';
-        if (panel.width === maxWidth && panel.height === maxHeight) {
-          direction = 'nw';
-        } else if (panel.width === minWidth && panel.height === minHeight) {
-          direction = 'se';
-        }
-        buttonRef.current.style.setProperty('--kbnDragHandleCursor', `${direction}-resize`);
-      });
-      return () => {
-        resizeCursorSubscription.unsubscribe();
+      const { minWidth, maxWidth } = {
+        ...getDefaultResizeOptions(gridLayoutStateManager.runtimeSettings$.getValue()),
+        ...panel.resizeOptions,
       };
-    }, [gridLayoutStateManager, panelId]);
+      let direction = 'ew';
+      if (panel.width === maxWidth) {
+        direction = 'w';
+      } else if (panel.width === minWidth) {
+        direction = 'e';
+      }
+      buttonRef.current.style.setProperty('--kbnDragHandleCursor', `${direction}-resize`);
+    });
+    return () => {
+      resizeCursorSubscription.unsubscribe();
+    };
+  }, [gridLayoutStateManager, panelId]);
 
-    return (
-      <button
-        ref={buttonRef}
-        css={styles}
-        onMouseDown={startDrag}
-        onTouchStart={startDrag}
-        onKeyDown={startDrag}
-        className="kbnFlexPanel--resizeHandle"
-        aria-label={i18n.translate('kbnFlexLayout.resizeHandle.ariaLabel', {
-          defaultMessage: 'Resize panel',
-        })}
-      />
-    );
-  }
-);
+  return (
+    <button
+      ref={buttonRef}
+      css={styles}
+      onMouseDown={startDrag}
+      onTouchStart={startDrag}
+      onKeyDown={startDrag}
+      className="kbnFlexPanel--resizeHandle"
+      aria-label={i18n.translate('kbnFlexLayout.resizeHandle.ariaLabel', {
+        defaultMessage: 'Resize panel',
+      })}
+    />
+  );
+});
 
 const styles = ({ euiTheme }: UseEuiTheme) =>
   css({

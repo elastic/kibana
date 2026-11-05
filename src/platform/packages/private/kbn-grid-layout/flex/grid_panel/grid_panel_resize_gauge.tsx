@@ -16,7 +16,6 @@ import { useGridLayoutContext } from '../use_grid_layout_context';
 
 export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   const [width, setWidth] = useState(0);
-  const [height, setHeight] = useState(0);
   const [isResizing, setIsResizing] = useState(false);
 
   const panel$ = useGridPanelState({ panelId });
@@ -46,8 +45,7 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
 
         if (isPanelActive && isResize) {
           setIsResizing(true);
-          setWidth(currentPanel.width);
-          setHeight(currentPanel.height);
+          setWidth(Math.round(currentPanel.width));
         } else {
           setIsResizing(false);
         }
@@ -62,9 +60,9 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
     <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
       <div className="kbnFlexPanel--resizeGauge--inner">
         <span className="kbnFlexPanel--resizeGauge--text">
-          {i18n.translate('kbnFlexLayout.resizeGauge.widthByHeight', {
-            defaultMessage: '{width}x{height}',
-            values: { width, height },
+          {i18n.translate('kbnFlexLayout.resizeGauge.width', {
+            defaultMessage: '{width}',
+            values: { width },
           })}
         </span>
       </div>

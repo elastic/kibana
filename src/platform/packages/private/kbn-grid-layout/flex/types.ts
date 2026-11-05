@@ -9,6 +9,7 @@
 
 import type { BehaviorSubject, Observable } from 'rxjs';
 import type { ObservedSize } from 'use-resize-observer/polyfilled';
+import type { ScrollContainer } from '@kbn/core-chrome-layout-utils';
 import type { ActivePanelEvent, FlexPanelData } from './grid_panel';
 
 /**
@@ -36,6 +37,8 @@ export interface FlexLayoutStateManager {
   accessMode$: BehaviorSubject<GridAccessMode>;
   gridDimensions$: BehaviorSubject<ObservedSize>;
   runtimeSettings$: BehaviorSubject<RuntimeGridSettings>;
+
+  scrollContainer$: BehaviorSubject<ScrollContainer>;
 
   activePanelEvent$: BehaviorSubject<ActivePanelEvent | undefined>;
   layoutUpdated$: Observable<FlexLayoutData>;

@@ -57,15 +57,7 @@ export const FlexLayout = ({
    */
   useEffect(() => {
     if (!isEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
-      const newLayout = cloneDeep(layout);
-      /**
-       * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
-       * so, we need to loop through each row and ensure it is compacted
-       */
-      // Object.entries(newLayout).forEach(([sectionId, row]) => {
-      //   newLayout[sectionId].panels = resolveGridSection(row.panels);
-      // });
-      gridLayoutStateManager.gridLayout$.next(newLayout);
+      gridLayoutStateManager.gridLayout$.next(cloneDeep(layout));
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [layout]);
@@ -76,7 +68,6 @@ export const FlexLayout = ({
      */
     const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
       (newLayout) => {
-        console.log({ newLayout });
         onLayoutChange(newLayout);
       }
     );
@@ -88,11 +79,7 @@ export const FlexLayout = ({
 
   useEffect(() => {
     /**
-     * This subscription sets the rendered elements and the `gridTemplateString`,
-     * which defines the grid layout structure as follows:
-     * - Each grid section has two named grid lines: `start-<sectionId>` and `end-<sectionId>`,
-     *   marking the start and end of the section. Headers and footers are positioned relative to these lines.
-     * - Grid rows are named `gridRow-<sectionId>`, and panels are positioned relative to these lines.
+     * This subscription sets the rendered elements in the order they should appear
      */
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((panels) => {
       setElementsInOrder(getLayoutInOrder(panels));
@@ -100,11 +87,10 @@ export const FlexLayout = ({
 
     /**
      * This subscription adds and/or removes the necessary class names related to styling for
-     * mobile view and a static (non-interactable) grid layout
+     * mobile view and a static (non-interactable) layout
      */
     const gridLayoutClassSubscription = gridLayoutStateManager.accessMode$.subscribe(
       (currentAccessMode) => {
-        if (!layoutRef) return;
         if (currentAccessMode === 'VIEW') {
           layoutRef.current?.classList.add('kbnFlex--static');
         } else {
