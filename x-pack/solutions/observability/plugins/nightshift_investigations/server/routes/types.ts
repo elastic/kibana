@@ -68,6 +68,7 @@ export interface NightshiftInvestigationsRouteHandlerResources
   getWorkflowsManagement: GetWorkflowsManagement;
   getCortexPageStore: GetCortexPageStore;
   isCortexEnabled: () => boolean;
+  isTelemetryCutoffEnabled: () => boolean;
   listSandboxConnectors: ListSandboxConnectors;
   listSandboxConnectorTypes: ListSandboxConnectorTypes;
   sandboxAllowlistClient: SandboxAllowlistClient;

@@ -66,6 +66,13 @@ const findingsRecorderConfigSchema = schema.object({
   enabled: schema.boolean({ defaultValue: true }),
 });
 
+const telemetryCutoffConfigSchema = schema.object({
+  // Governs `telemetry_not_after`, the per-investigation upper bound on sandbox telemetry reads.
+  // Only the ORCA eval uses it, so production starts reject the field and the sandbox tool
+  // ignores a stored one unless this is on.
+  enabled: schema.boolean({ defaultValue: false }),
+});
+
 const configSchema = schema.object({
   // Reserved: Core skips loading this plugin entirely when false.
   enabled: schema.boolean({ defaultValue: true }),
@@ -74,6 +81,7 @@ const configSchema = schema.object({
   decision_trees: decisionTreesConfigSchema,
   memory: memoryConfigSchema,
   findings_recorder: findingsRecorderConfigSchema,
+  telemetry_cutoff: telemetryCutoffConfigSchema,
 });
 
 export type NightshiftInvestigationsConfig = TypeOf<typeof configSchema>;

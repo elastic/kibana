@@ -447,14 +447,18 @@ export class NightshiftInvestigationsPlugin
                 connectorId ? [connectorId] : []
               )
             ),
-            readTelemetryNotAfter: async (request, conversationId) => {
-              const agentBuilderStart = this.agentBuilder;
-              if (!agentBuilderStart) return undefined;
-              const conversations = await agentBuilderStart.conversations.getScopedClient({
-                request,
-              });
-              return readTelemetryNotAfter(conversations, conversationId);
-            },
+            ...(config.telemetry_cutoff.enabled
+              ? {
+                  readTelemetryNotAfter: async (request: KibanaRequest, conversationId: string) => {
+                    const agentBuilderStart = this.agentBuilder;
+                    if (!agentBuilderStart) return undefined;
+                    const conversations = await agentBuilderStart.conversations.getScopedClient({
+                      request,
+                    });
+                    return readTelemetryNotAfter(conversations, conversationId);
+                  },
+                }
+              : {}),
             sandboxAllowlistClient,
             logger: sandboxLogger,
           })
@@ -698,6 +702,7 @@ export class NightshiftInvestigationsPlugin
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
           isCortexEnabled: () => this.cortexEnabled,
+          isTelemetryCutoffEnabled: () => this.ctx.config.get().telemetry_cutoff.enabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
           sandboxAllowlistClient,

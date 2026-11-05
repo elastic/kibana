@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { serverUnavailable } from '@hapi/boom';
+import { badRequest, serverUnavailable } from '@hapi/boom';
 import { z, lazySchema } from '@kbn/zod/v4';
 import { MAX_TEXT_LENGTH, MAX_TITLE_LENGTH } from '@kbn/significant-events-schema';
 import {
@@ -116,9 +116,15 @@ export const startInvestigationRoute = createNightshiftInvestigationsServerRoute
     getInvestigationsClient,
     getAlertsClient,
     getEpisodeLookup,
+    isTelemetryCutoffEnabled,
   }) => {
-    const client = getInvestigationsClient(request);
     const { body } = params;
+    if ('telemetry_not_after' in body && body.telemetry_not_after && !isTelemetryCutoffEnabled()) {
+      throw badRequest(
+        'telemetry_not_after needs xpack.nightshift_investigations.telemetry_cutoff.enabled'
+      );
+    }
+    const client = getInvestigationsClient(request);
 
     // User-initiated starts are always manual.
     try {

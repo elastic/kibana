@@ -652,7 +652,10 @@ instant, read-only metadata endpoints pass through, and any other read gets a 40
 reason. If the cluster cannot be reached, the proxy returns a 502, so a failed read does not look
 like no data. The proxy bounds ordinary commands and is not a security boundary, because everything
 in the sandbox runs as one user. Customer-0 and smoke never set the field, so their telemetry reads
-are unchanged. Eight
+are unchanged. The plugin accepts the field only when
+`xpack.nightshift_investigations.telemetry_cutoff.enabled` is on, which only the
+`evals_nightshift_investigations` Scout config set does; elsewhere a start that sets it gets a 400
+and the sandbox tool ignores a stored one. Eight
 investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's

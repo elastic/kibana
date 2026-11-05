@@ -70,6 +70,8 @@ const createInvestigationConfig = (
         '--xpack.nightshift_investigations.cortex.enabled=false',
         '--xpack.nightshift_investigations.memory.enabled=false',
         '--xpack.nightshift_investigations.findings_recorder.enabled=false',
+        // ORCA bounds each investigation's telemetry reads at its task's snapshot time.
+        '--xpack.nightshift_investigations.telemetry_cutoff.enabled=true',
         `--config=${sandboxKibanaConfig}`,
         ...(telemetryConfig ? [`--config=${telemetryConfig}`] : []),
         '--uiSettings.overrides.workflows:ui:enabled=true',
