@@ -14,10 +14,15 @@ jest.mock('../../onboarding_flow_context', () => ({ useOnboardingFlow: jest.fn()
 jest.mock('./use_service_settings', () => ({ useServiceSettings: jest.fn() }));
 jest.mock('./service_settings_flyout', () => ({ ServiceSettingsFlyout: () => null }));
 jest.mock('./duplicate_service_modal', () => ({
-  DuplicateServiceModal: () => <div data-test-subj="duplicate-modal" />,
+  DuplicateServiceModal: ({ suggestedName }: { suggestedName: string }) => (
+    <div data-test-subj="duplicate-modal">{suggestedName}</div>
+  ),
 }));
 jest.mock('../service_search_filter', () => ({ ServiceSearchFilter: () => null }));
-jest.mock('./duplicate_name', () => ({ buildDuplicateName: () => 'Copy' }));
+jest.mock('./duplicate_name', () => ({
+  ...jest.requireActual('./duplicate_name'),
+  buildDuplicateName: (base: string) => `${base} [Duplicate]`,
+}));
 jest.mock('@kbn/ui-callout', () => ({ KbnWarningCallout: () => null }));
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
@@ -33,7 +38,6 @@ function makeService(
   return {
     id,
     name: `Service ${id}`,
-    category: 'security_identity_compliance',
     signalTypes: ['logs'],
     dataStreams: [],
     packageName: 'aws',
@@ -85,7 +89,11 @@ function makeInstance(
   return { instanceId, serviceId, name, isDuplicate };
 }
 
-function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsServiceMatrixEntry>) {
+function renderStep(
+  instances: ServiceInstance[],
+  servicesMap: Map<string, AwsServiceMatrixEntry>,
+  overrides: Record<string, unknown> = {}
+) {
   (useOnboardingFlow as jest.Mock).mockReturnValue({
     awsServicesMap: servicesMap,
     detectAndReviewStep: { policyIdsByInstance: {}, serviceStatuses: {} },
@@ -94,6 +102,13 @@ function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsSe
   });
   (useServiceSettings as jest.Mock).mockReturnValue({
     globalRegion: 'us-east-1',
+    integrationName: 'my-aws',
+    setIntegrationName: jest.fn(),
+    integrationNameError: undefined,
+    description: '',
+    setDescription: jest.fn(),
+    descriptionError: undefined,
+    hasPolicyServices: true,
     setGlobalRegion: jest.fn(),
     instances,
     filteredInstances: instances,
@@ -108,10 +123,14 @@ function renderStep(instances: ServiceInstance[], servicesMap: Map<string, AwsSe
     addDuplicate: jest.fn(),
     removeInstance: jest.fn(),
     allInstanceNames: instances.map((i) => i.name),
+    namespace: '',
+    setNamespace: jest.fn(),
+    namespaceError: undefined,
     globalRegionTouched: false,
     setGlobalRegionTouched: jest.fn(),
     isReady: true,
     handleNext: jest.fn(),
+    ...overrides,
   });
   render(
     <I18nProvider>
@@ -140,6 +159,28 @@ describe('ServiceSettingsStep — actions column', () => {
 
     fireEvent.click(screen.getByTestId('serviceSettingsStep-duplicateAction-agentless_svc'));
     expect(screen.getByTestId('duplicate-modal')).toBeInTheDocument();
+  });
+
+  it('suggests the policy name in the global namespace, where the duplicate starts', () => {
+    const inst = makeInstance('agentless_svc', 'agentless_svc', 'Agentless Service', false);
+    renderStep([inst], new Map([['agentless_svc', AGENTLESS_SVC]]), { namespace: 'prod' });
+
+    fireEvent.click(screen.getByTestId('serviceSettingsStep-actionsButton-agentless_svc'));
+    fireEvent.click(screen.getByTestId('serviceSettingsStep-duplicateAction-agentless_svc'));
+
+    expect(screen.getByTestId('duplicate-modal')).toHaveTextContent('my-aws-prod [Duplicate]');
+  });
+
+  it('suggests a name from the service name when there is no integration name', () => {
+    const inst = makeInstance('agentless_svc', 'agentless_svc', 'Agentless Service', false);
+    renderStep([inst], new Map([['agentless_svc', AGENTLESS_SVC]]), { integrationName: '  ' });
+
+    fireEvent.click(screen.getByTestId('serviceSettingsStep-actionsButton-agentless_svc'));
+    fireEvent.click(screen.getByTestId('serviceSettingsStep-duplicateAction-agentless_svc'));
+
+    expect(screen.getByTestId('duplicate-modal')).toHaveTextContent(
+      'Service agentless_svc [Duplicate]'
+    );
   });
 
   it('shows Duplicate in ⋮ menu for a service with both managed_integration and ecf methods', () => {
@@ -193,6 +234,13 @@ describe('ServiceSettingsStep — global region lock', () => {
     });
     (useServiceSettings as jest.Mock).mockReturnValue({
       globalRegion: 'us-east-1',
+      integrationName: 'my-aws',
+      setIntegrationName: jest.fn(),
+      integrationNameError: undefined,
+      description: '',
+      setDescription: jest.fn(),
+      descriptionError: undefined,
+      hasPolicyServices: true,
       setGlobalRegion: jest.fn(),
       instances: [],
       filteredInstances: [],
@@ -207,6 +255,9 @@ describe('ServiceSettingsStep — global region lock', () => {
       addDuplicate: jest.fn(),
       removeInstance: jest.fn(),
       allInstanceNames: [],
+      namespace: '',
+      setNamespace: jest.fn(),
+      namespaceError: undefined,
       globalRegionTouched: false,
       setGlobalRegionTouched: jest.fn(),
       isReady: true,
@@ -260,6 +311,13 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
     });
     (useServiceSettings as jest.Mock).mockReturnValue({
       globalRegion: 'us-east-1',
+      integrationName: 'my-aws',
+      setIntegrationName: jest.fn(),
+      integrationNameError: undefined,
+      description: '',
+      setDescription: jest.fn(),
+      descriptionError: undefined,
+      hasPolicyServices: true,
       setGlobalRegion: jest.fn(),
       instances: [],
       filteredInstances: [],
@@ -274,6 +332,9 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
       addDuplicate: jest.fn(),
       removeInstance: jest.fn(),
       allInstanceNames: [],
+      namespace: '',
+      setNamespace: jest.fn(),
+      namespaceError: undefined,
       globalRegionTouched: false,
       setGlobalRegionTouched: jest.fn(),
       isReady: true,
@@ -308,6 +369,13 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
     });
     (useServiceSettings as jest.Mock).mockReturnValue({
       globalRegion: 'us-east-1',
+      integrationName: 'my-aws',
+      setIntegrationName: jest.fn(),
+      integrationNameError: undefined,
+      description: '',
+      setDescription: jest.fn(),
+      descriptionError: undefined,
+      hasPolicyServices: true,
       setGlobalRegion: jest.fn(),
       instances: [],
       filteredInstances: [],
@@ -322,6 +390,9 @@ describe('ServiceSettingsStep — manifest loading gate', () => {
       addDuplicate: jest.fn(),
       removeInstance: jest.fn(),
       allInstanceNames: [],
+      namespace: '',
+      setNamespace: jest.fn(),
+      namespaceError: undefined,
       globalRegionTouched: false,
       setGlobalRegionTouched: jest.fn(),
       isReady: true,

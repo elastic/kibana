@@ -59,7 +59,11 @@ const makeDeps = ({ spaceId = 'default' }: { spaceId?: string } = {}) => {
   const asCurrentUser = { search: jest.fn() };
   const asInternalUser = { search: jest.fn() };
   const context = {
-    alertzero: Promise.resolve({ subscription: 'available', hasRequiredDependencies: true }),
+    alertzero: Promise.resolve({
+      subscription: 'available',
+      hasRequiredDependencies: true,
+      isSpaceSupported: true,
+    }),
     core: Promise.resolve({
       uiSettings: { client: { get: jest.fn().mockResolvedValue(true) } },
       elasticsearch: { client: { asCurrentUser, asInternalUser } },
@@ -144,6 +148,29 @@ describe('registerCandidatesRoute', () => {
     expect(buildCandidateQueryMock.mock.calls[0][2]).toEqual(
       expect.objectContaining({ trigger: 'manual', report_ids: ['report-1'] })
     );
+  });
+
+  it('forwards lookback_days as lookbackDays', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(
+      context,
+      requestFor({ lookback_days: 14 }),
+      httpServerMock.createResponseFactory()
+    );
+
+    expect(buildCandidateQueryMock.mock.calls[0][2]).toEqual(
+      expect.objectContaining({ lookbackDays: 14 })
+    );
+  });
+
+  // The mock bypasses zod, so the schema default never applies here; the builder owns its own.
+  it('leaves lookbackDays undefined when the body omits it', async () => {
+    const { handler, context } = makeDeps();
+
+    await handler(context, requestFor(), httpServerMock.createResponseFactory());
+
+    expect(buildCandidateQueryMock.mock.calls[0][2].lookbackDays).toBeUndefined();
   });
 
   it('returns a not_usable skip that the response schema accepts', async () => {

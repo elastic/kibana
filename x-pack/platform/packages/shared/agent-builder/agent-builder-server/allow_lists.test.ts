@@ -80,6 +80,10 @@ describe('isAllowedSkillRegistration', () => {
 });
 
 describe('isAllowedCycleHook', () => {
+  it('allows the platform cycle hooks', () => {
+    expect(isAllowedCycleHook('relevant-skills')).toBe(true);
+  });
+
   it('rejects unlisted hook ids', () => {
     expect(isAllowedCycleHook('not-a-hook')).toBe(false);
     expect(isAllowedCycleHook('')).toBe(false);

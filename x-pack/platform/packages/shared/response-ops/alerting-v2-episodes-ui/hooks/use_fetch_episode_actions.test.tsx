@@ -53,6 +53,7 @@ describe('useFetchEpisodeActions', () => {
         last_ack_actor: 'actor-1',
         last_deactivate_action: 'deactivate',
         last_deactivate_actor: 'actor-resolver',
+        last_tags: 'tag-a',
       },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
@@ -79,6 +80,7 @@ describe('useFetchEpisodeActions', () => {
       lastAckActor: 'actor-1',
       lastDeactivateAction: 'deactivate',
       lastDeactivateActor: 'actor-resolver',
+      tags: ['tag-a'],
     });
   });
 

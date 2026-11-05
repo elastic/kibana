@@ -23,9 +23,17 @@ jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: mockApplication } }),
 }));
 jest.mock('../hooks/use_developer_mode');
+jest.mock('./components/connectors_section', () => ({
+  ConnectorsSection: () => <div data-test-subj="connectorsSectionStub" />,
+}));
 jest.mock('./components/apps_section', () => ({
-  AppsSection: ({ canEdit }: { canEdit: boolean }) => (
-    <div data-test-subj="apps-section" data-can-edit={canEdit ? 'true' : 'false'} />
+  SlackChannelsSection: ({ canEdit }: { canEdit: boolean }) => (
+    <div data-test-subj="slack-channels-section" data-can-edit={canEdit ? 'true' : 'false'} />
+  ),
+}));
+jest.mock('./components/knowledge_purge_section', () => ({
+  KnowledgePurgeSection: ({ canManage }: { canManage: boolean }) => (
+    <div data-test-subj="knowledge-purge-section" data-can-manage={canManage ? 'true' : 'false'} />
   ),
 }));
 
@@ -60,7 +68,7 @@ describe('GeneralSettingsTab', () => {
       },
     });
 
-    expect(screen.getByTestId('apps-section')).toHaveAttribute('data-can-edit', 'true');
+    expect(screen.getByTestId('slack-channels-section')).toHaveAttribute('data-can-edit', 'true');
   });
 
   it.each<{
@@ -84,7 +92,7 @@ describe('GeneralSettingsTab', () => {
   ])('keeps Slack editing disabled with $name', ({ nightshift, streams }) => {
     renderTab({ nightshift, streams });
 
-    expect(screen.getByTestId('apps-section')).toHaveAttribute('data-can-edit', 'false');
+    expect(screen.getByTestId('slack-channels-section')).toHaveAttribute('data-can-edit', 'false');
   });
 
   it('shows and persists Nightshift developer mode from General settings', () => {
@@ -116,6 +124,37 @@ describe('GeneralSettingsTab', () => {
     });
 
     expect(screen.getByTestId('nightshiftDeveloperModeSwitch')).toBeDisabled();
+  });
+
+  it('hides the knowledge purge until developer mode is on', () => {
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.queryByTestId('knowledge-purge-section')).not.toBeInTheDocument();
+  });
+
+  it('shows the knowledge purge in developer mode, gated on manage and configure', () => {
+    mockUseDeveloperMode.mockReturnValue({
+      isDeveloperMode: true,
+      isSaving: false,
+      setDeveloperMode,
+    });
+    renderTab({
+      nightshift: {
+        [NIGHTSHIFT_UI_PRIVILEGES.manage]: true,
+        [NIGHTSHIFT_UI_PRIVILEGES.configure]: true,
+      },
+    });
+
+    expect(screen.getByTestId('nightshiftKnowledgeSettingsSection')).toHaveTextContent('Knowledge');
+    expect(screen.getByTestId('knowledge-purge-section')).toHaveAttribute(
+      'data-can-manage',
+      'true'
+    );
   });
 
   it('disables developer mode without permission to save advanced settings', () => {

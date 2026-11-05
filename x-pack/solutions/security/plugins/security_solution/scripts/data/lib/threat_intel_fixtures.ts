@@ -118,7 +118,7 @@ export interface PackTiScenario {
   /**
    * Browsable https article URL written into RSS `<channel>/<item><link>`.
    * Becomes report `source.url` after mustard ingestion; must be http(s) so
-   * Intelligence Hub's `isBrowsableReportUrl` renders the external link.
+   * the report links out to a real article.
    */
   articleUrl: string;
   /**
@@ -553,7 +553,8 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '192[.]0[.]2[.]31 (192.0.2.31). ATT&CK: T1059.001, T1078.004.',
         },
         {
-          title: 'Telemetry refresh: process chain fields for Tier 2 execute on WIN-ANALYST01',
+          title:
+            'Telemetry refresh: process chain fields for Behavior Hunt execute on WIN-ANALYST01',
           body:
             'Telemetry refresh for WIN-ANALYST01 reminding hunters that powershell.exe spawning ' +
             'aws.exe (T1059.001) toward escalated-role in account 123456789012 precedes the ' +
@@ -722,7 +723,7 @@ export const PACK_TI_SCENARIOS: Record<string, PackTiScenario[]> = {
             '(T1078.004) instead of those IPs.',
         },
         {
-          title: 'Telemetry refresh: AssumeRole event.provider fields for Tier 2 execute',
+          title: 'Telemetry refresh: AssumeRole event.provider fields for Behavior Hunt execute',
           body:
             'Telemetry refresh for account 123456789012 reminding hunters that sts.amazonaws.com ' +
             'AssumeRole events (aws.cloudtrail.event_name) toward escalated-role on WIN-ANALYST01 ' +
@@ -1130,7 +1131,10 @@ export const assertHistoricReportsPerPackInRange = (reportsPerPack: number): num
   return floored;
 };
 
-/** Place the single current RSS item just before endMs (pubDate is narrative-only; ingest uses now). */
+/**
+ * Place the single current RSS item just before endMs (ingest uses now). The item is only
+ * ingested when `--end-date` is within the 30-day RSS ingest window.
+ */
 const RSS_CURRENT_OFFSET_MS = 15 * 60 * 1000;
 
 /**
@@ -1228,6 +1232,7 @@ export interface HistoricThreatReportDoc {
     title: string;
     body_text: string;
     language: 'en';
+    published_at: string;
   };
   severity: { level: string; score: number };
   extracted?: {
@@ -1363,7 +1368,7 @@ export const buildPackRssReportItemsForScenario = buildPackHistoricReportItemsFo
  * Builds an inline `data:text/html` article for directly seeded (non-RSS) reports.
  * These fixtures have no real server to host the content, so the article body is
  * embedded in the URL. RSS-ingested reports use `scenario.articleUrl` (http/https)
- * as `source.url` instead and will show a browsable link in Intelligence Hub.
+ * as `source.url` instead and link out to a browsable article.
  */
 export const buildPackArticleDataUrl = (
   scenario: PackTiScenario,
@@ -1440,6 +1445,11 @@ ${itemsXml}
   return `data:application/rss+xml;charset=utf-8,${encodeURIComponent(feedBody)}`;
 };
 
+/**
+ * The target index must already carry the `content.published_at` mapping (`dynamic: 'strict'`
+ * rejects the field otherwise), so the Kibana that owns the index must have started once with
+ * that mapping before seeding.
+ */
 export const buildHistoricThreatReportDoc = ({
   scenario,
   item,
@@ -1498,6 +1508,7 @@ export const buildHistoricThreatReportDoc = ({
       title,
       body_text: bodyText,
       language: 'en',
+      published_at: item.reportTimestamp,
     },
     severity: { level: severity.level, score: severity.score },
     lineage: {

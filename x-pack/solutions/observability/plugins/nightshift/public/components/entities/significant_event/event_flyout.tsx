@@ -21,18 +21,18 @@ import { DetectionFlyout } from '../detection/detection_flyout';
 import { DetectionsList } from './detections_list';
 import { EventInvestigationCard } from './event_investigation_card';
 import { EventTimeline } from './event_timeline';
-import { TruncatableSummary } from '../../../common/truncatable_summary';
+import { TruncatableSummary } from '../../ui/truncatable_summary';
 import { SIGNIFICANT_EVENT_SEVERITY } from '../../ui/severity_badge';
-import { useFlyoutShareUrlCustomAction } from '../../../common/flyout_share_url_button';
+import { useFlyoutShareUrlCustomAction } from '../../ui/flyout_share_url_button';
 import { buildNightshiftEventFlyoutShareUrl } from '../../../common/url_params';
 import {
   buildInvestigationConversationChatOptions,
   buildNewSignificantEventChatOptions,
 } from '../../../chat/open_significant_event_in_chat';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
-import { useFetchDetectionOccurrences } from '../../../hooks/use_fetch_detection_occurrences';
-import { useFetchEventLifecycle } from '../../../hooks/use_fetch_event_lifecycle';
-import { useFetchInvestigationStatuses } from '../../../hooks/use_fetch_investigation_statuses';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
+import { useFetchDetectionOccurrences } from '../../../data/detections/use_fetch_detection_occurrences';
+import { useFetchEventLifecycle } from '../../../data/significant_events/use_fetch_event_lifecycle';
+import { useFetchInvestigationStatuses } from '../../../data/investigations/use_fetch_investigation_statuses';
 import { findDetectionSignal } from '../detection/resolve_detection_signal';
 import {
   getStatusColor,
@@ -133,7 +133,7 @@ export interface EventFlyoutProps {
 export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
-  const { agentBuilder, application, http } = useKibana().services;
+  const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
   const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
@@ -174,6 +174,11 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     setSelectedDetectionId(undefined);
     setSelectedTabId(OVERVIEW_TAB_ID);
   }, [event.event_id]);
+
+  useEffect(() => {
+    focusedSignificantEventService.setFocusedEvent(event);
+    return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
+  }, [event, focusedSignificantEventService]);
 
   useEffect(() => {
     if (
@@ -220,7 +225,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   );
   const openNewChat = useCallback(() => {
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
-  }, [agentBuilder, event]);
+    // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
+    focusedSignificantEventService.setFocusedEvent(event);
+  }, [agentBuilder, event, focusedSignificantEventService]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));

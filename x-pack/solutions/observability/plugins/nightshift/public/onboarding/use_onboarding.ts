@@ -8,9 +8,8 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetOnboardingResponse } from '@kbn/nightshift-investigations-plugin/common';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../data/query_keys';
 import { useKibana } from '../hooks/use_kibana';
-
-export const NIGHTSHIFT_ONBOARDING_QUERY_KEY = ['nightshift.onboarding'] as const;
 
 const POLL_INTERVAL_MS = 3_000;
 
@@ -24,7 +23,7 @@ export const useOnboarding = () => {
     enabled: investigationsClient != null,
     queryFn: async ({ signal }) => {
       if (!investigationsClient) {
-        return {};
+        return { agent_installed: false };
       }
       return investigationsClient.fetch('GET /internal/nightshift/onboarding', {
         signal: signal ?? null,
@@ -34,7 +33,6 @@ export const useOnboarding = () => {
   });
 };
 
-/** Starts the investigation agent's exploration run that suggests first investigations. */
 export const useStartOnboardingSuggestions = () => {
   const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;

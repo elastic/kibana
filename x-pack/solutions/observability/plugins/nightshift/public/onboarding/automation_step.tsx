@@ -6,7 +6,7 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
+import React, { useMemo } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -24,15 +24,19 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { useKibana } from '../hooks/use_kibana';
-import { useFetchSandboxSecrets } from '../sandbox_secrets/use_fetch_sandbox_secrets';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { InvestigationCardActions } from '../components/entities/investigation/investigation_card_actions';
+import { useInvestigationAssignees } from '../components/entities/investigation/use_investigation_assignees';
+import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
+import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;
   icon: string;
   title: string;
   description: string;
-  /** Only suggested when the space has this sandbox secret. */
-  requiresSecret?: string;
+  /** Only suggested once a connector is assigned to the agent. */
+  requiresConnector?: boolean;
 }
 
 const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
@@ -78,7 +82,7 @@ const SUGGESTED_AUTOMATIONS: SuggestedAutomation[] = [
       defaultMessage:
         'After a release or merged pull request, check the affected services for new errors.',
     }),
-    requiresSecret: 'GITHUB_TOKEN',
+    requiresConnector: true,
   },
 ];
 
@@ -93,9 +97,11 @@ export function OnboardingAutomationStep({
   automationsHref?: string;
   onInvestigationClick: (investigation: InvestigationSummary) => void;
 }): React.ReactElement {
-  const secretKeys = new Set(useFetchSandboxSecrets().data?.keys ?? []);
+  const { assignedIds } = useAgentConnectors();
+  const listed = useFetchSandboxConnectors().data?.connectors ?? [];
+  const hasConnector = listed.some(({ id }) => assignedIds.includes(id));
   const automations = SUGGESTED_AUTOMATIONS.filter(
-    ({ requiresSecret }) => !requiresSecret || secretKeys.has(requiresSecret)
+    ({ requiresConnector }) => !requiresConnector || hasConnector
   );
 
   return (
@@ -151,6 +157,8 @@ function TrialInvestigationCard({
   const { euiTheme } = useEuiTheme();
   const InvestigationCard = useKibana().services.agenticInvestigations?.InvestigationCard;
   const { in_progress: isActive } = investigation;
+  const investigations = useMemo(() => [investigation], [investigation]);
+  const renderAssignees = useInvestigationAssignees(investigations);
 
   return (
     <EuiPanel
@@ -161,7 +169,19 @@ function TrialInvestigationCard({
         overflow: hidden;
       `}
     >
-      {InvestigationCard && <InvestigationCard investigation={investigation} onClick={onClick} />}
+      {InvestigationCard && (
+        <InvestigationCard
+          investigation={investigation}
+          onClick={onClick}
+          actions={
+            <InvestigationCardActions
+              investigation={investigation}
+              assignees={renderAssignees(investigation)}
+              ebtElement={NIGHTSHIFT_EBT_ELEMENTS.ONBOARDING_TRIAL_INVESTIGATION}
+            />
+          }
+        />
+      )}
       <EuiFlexGroup
         alignItems="center"
         gutterSize="s"

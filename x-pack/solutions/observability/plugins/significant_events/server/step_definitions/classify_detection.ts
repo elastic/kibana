@@ -5,18 +5,8 @@
  * 2.0.
  */
 
-import type {
-  NeedsAgentReason,
-  ProbeStatus,
-  SignalVerdict,
-  SkipReason,
-} from '@kbn/significant-events-schema';
-
-/** What re-running a rule's stored query found. `hasRows` only means something when `ok`. */
-export interface ProbeOutcome {
-  status: ProbeStatus;
-  hasRows: boolean;
-}
+import type { NeedsAgentReason, SignalVerdict, SkipReason } from '@kbn/significant-events-schema';
+import type { ProbeOutcome } from '../lib/significant_events/rules/run_probe';
 
 export type DetectionClassification =
   | { decision: 'skip'; reason: SkipReason }
@@ -63,15 +53,10 @@ export const classifyDetection = ({
   }
 
   // A breach expects rows; a healthy verdict expects none.
-  const expectsRows = memberships.map((_, index) => states[index] === 'breaching');
-
-  if (expectsRows.some((expected) => expected !== probe.hasRows)) {
+  if (states.some((state) => (state === 'breaching') !== probe.hasRows)) {
     return needsAgent('state_changed');
   }
 
-  // The probe agrees with every member's expectation.
-  return {
-    decision: 'skip',
-    reason: states.includes('breaching') && probe.hasRows ? 'still_breaching' : 'still_healthy',
-  };
+  // The probe agrees with every member, so they all expect what it found.
+  return { decision: 'skip', reason: probe.hasRows ? 'still_breaching' : 'still_healthy' };
 };

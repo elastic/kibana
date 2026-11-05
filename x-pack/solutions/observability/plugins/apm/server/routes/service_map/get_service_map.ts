@@ -9,6 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import type { BoolQuery } from '@kbn/es-query';
 import type { ServiceMapSpan } from '../../../common/service_map/types';
 import { type ServiceMapResponse } from '../../../common/service_map';
+import { SERVICE_NAME } from '../../../common/es_fields/apm';
 import type { APMConfig } from '../..';
 import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import type { MlClient } from '../../lib/helpers/get_ml_client';
@@ -17,6 +18,8 @@ import { getTraceSampleIds } from './get_trace_sample_ids';
 import { DEFAULT_ANOMALIES, getServiceAnomalies } from './get_service_anomalies';
 import { getServiceStats } from './get_service_stats';
 import { fetchExitSpanSamplesFromTraceIds } from './fetch_exit_span_samples';
+import { getServiceCallGraph } from './get_service_call_graph';
+import { matchCallGraphToServices } from './match_service_call_graph';
 
 export interface IEnvOptions {
   mlClient?: MlClient;
@@ -83,7 +86,11 @@ async function getConnectionData({
 }
 
 export function getServiceMap(
-  options: IEnvOptions & { maxNumberOfServices: number }
+  options: IEnvOptions & {
+    maxNumberOfServices: number;
+    /** When off, the call graph query does not run and the map is unchanged. */
+    groupingEnabled?: boolean;
+  }
 ): Promise<ServiceMapResponse> {
   return withApmSpan('get_service_map', async () => {
     const { logger } = options;
@@ -96,11 +103,34 @@ export function getServiceMap(
       return DEFAULT_ANOMALIES;
     });
 
-    const [connectionData, servicesData, anomalies] = await Promise.all([
+    // A service page map stays ungrouped. A failed query leaves this map unchanged.
+    const callGraphPromise =
+      options.groupingEnabled && !options.serviceName
+        ? getServiceCallGraph(options).catch((error) => {
+            logger.debug(`Unable to retrieve the call graph for service maps.`, { error });
+            return undefined;
+          })
+        : Promise.resolve(undefined);
+
+    const [connectionData, servicesData, anomalies, callGraph] = await Promise.all([
       getConnectionData(options),
       getServiceStats(options),
       anomaliesPromise,
+      callGraphPromise,
     ]);
+
+    // Group selection will use this list. It stays off the response until then.
+    if (callGraph) {
+      try {
+        matchCallGraphToServices({
+          callGraph,
+          spans: connectionData.spans,
+          serviceNames: servicesData.map((service) => service[SERVICE_NAME]),
+        });
+      } catch (error) {
+        logger.debug(`Unable to match the call graph for service maps.`, { error });
+      }
+    }
 
     logger.debug('Received and parsed all responses');
 

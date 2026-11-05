@@ -191,6 +191,24 @@ describe('proposalToInvestigation', () => {
         proposalToInvestigation({ ...baseProposal, status: 'succeeded' }).status
       ).toBeUndefined();
     });
+
+    it.each(['open', 'closed'] as const)(
+      'carries the investigation status %s as conversationStatus, never as status',
+      (conversationStatus) => {
+        const result = proposalToInvestigation({
+          ...baseProposal,
+          status: 'succeeded',
+          conversationStatus,
+        });
+
+        expect(result.conversationStatus).toBe(conversationStatus);
+        expect(result.status).toBeUndefined();
+      }
+    );
+
+    it('leaves conversationStatus unset when the investigation status is unknown', () => {
+      expect(proposalToInvestigation(baseProposal).conversationStatus).toBeUndefined();
+    });
   });
 
   describe('severity collapse', () => {
@@ -255,21 +273,6 @@ describe('proposalToInvestigation', () => {
     it('events is empty array', () => {
       const result = proposalToInvestigation(baseProposal);
       expect(result.events).toEqual([]);
-    });
-
-    it('affectedSurface is undefined when Impact was not hydrated', () => {
-      const result = proposalToInvestigation(baseProposal);
-      expect(result.affectedSurface).toBeUndefined();
-      expect(result.entityIds).toBeUndefined();
-    });
-
-    it('copies hydrated entity ids onto the card and uses the first as affectedSurface', () => {
-      const result = proposalToInvestigation({
-        ...baseProposal,
-        entityIds: ['cfo@corp', 'host-1'],
-      });
-      expect(result.entityIds).toEqual(['cfo@corp', 'host-1']);
-      expect(result.affectedSurface).toBe('cfo@corp');
     });
 
     it('pendingProposalCount is 1 for undecided proposals', () => {

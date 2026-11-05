@@ -43,32 +43,77 @@ const lifecycle: EventLifecycleResponse = {
   events: [],
 };
 
-const renderTimeline = (onDetectionClick = jest.fn()) =>
+const renderTimeline = (
+  lifecycleData: EventLifecycleResponse = lifecycle,
+  onDetectionClick = jest.fn()
+) =>
   render(
     <EventTimeline
       event={event}
-      lifecycleQuery={{ data: lifecycle, isLoading: false, isError: false }}
+      lifecycleQuery={{ data: lifecycleData, isLoading: false, isError: false }}
       onDetectionClick={onDetectionClick}
       onEventClick={jest.fn()}
     />
   );
 
 describe('EventTimeline', () => {
-  it('sorts detections earliest first and keeps the raised entry last with its real time', () => {
+  it('interleaves detections and the raised entry by time, falling back to the event when the lineage is empty', () => {
     renderTimeline();
 
     const items = screen.getAllByRole('listitem');
     expect(items.map((item) => within(item).getByRole('button').textContent)).toEqual([
       'Earlier detection',
-      'Later detection',
       event.title,
+      'Later detection',
     ]);
-    expect(items[2].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
+    expect(items[1].querySelector('time')).toHaveAttribute('dateTime', event.created_at);
+    expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
+    expect(screen.getByText('Detection · Spike')).toBeInTheDocument();
+    expect(screen.getByText('Detection · Dip')).toBeInTheDocument();
+  });
+
+  it('shows one raised entry and the inactive revision with its note', () => {
+    renderTimeline({
+      ...lifecycle,
+      events: [
+        { ...event, '@timestamp': event.created_at },
+        {
+          ...event,
+          '@timestamp': '2026-07-10T13:00:00Z',
+          status: 'inactive',
+          assessment_note: 'Recovered after the rollback',
+        },
+      ],
+    });
+
+    expect(screen.getAllByText('Significant event raised')).toHaveLength(1);
+    expect(screen.getByText('Status changed to')).toBeInTheDocument();
+    expect(screen.getByText('Inactive')).toBeInTheDocument();
+    expect(screen.getByText('Recovered after the rollback')).toBeInTheDocument();
+    expect(screen.getAllByRole('listitem')).toHaveLength(4);
+  });
+
+  it('labels a same-status revision as an event update', () => {
+    renderTimeline({
+      ...lifecycle,
+      events: [
+        { ...event, '@timestamp': event.created_at },
+        {
+          ...event,
+          '@timestamp': '2026-07-10T13:00:00Z',
+          assessment_note: 'The latest check confirmed the event remains active',
+        },
+      ],
+    });
+
+    expect(screen.getByText('Significant event updated')).toBeInTheDocument();
+    expect(screen.queryByText('Status changed to')).not.toBeInTheDocument();
+    expect(screen.getAllByText('Active')).toHaveLength(2);
   });
 
   it('opens a detection through its click handler', () => {
     const onDetectionClick = jest.fn();
-    renderTimeline(onDetectionClick);
+    renderTimeline(lifecycle, onDetectionClick);
 
     fireEvent.click(screen.getByRole('button', { name: 'Earlier detection' }));
     expect(onDetectionClick).toHaveBeenCalledWith('earlier');

@@ -63,10 +63,9 @@ describe('bin/kibana Node selection', () => {
     forcePointerCompression = false
   ) => {
     jest.spyOn(config, 'getTargetPlatforms').mockReturnValue([platform]);
-    jest.replaceProperty(process, 'env', {
-      ...process.env,
-      CI_FORCE_NODE_POINTER_COMPRESSION: forcePointerCompression ? 'true' : '',
-    });
+    jest
+      .spyOn(config, 'shouldForceNodePointerCompression')
+      .mockReturnValue(forcePointerCompression);
     await CopyBinScripts.run(config, new ToolingLog(), build);
     const launcher = join(directory, 'bin', 'kibana');
     execFileSync('/bin/sh', ['-n', launcher]);
@@ -168,6 +167,10 @@ describe('bin/kibana Node selection', () => {
 
   it('preserves forced pointer compression for CI', async () => {
     expect((await runLauncher({}, DOWNLOAD_PLATFORMS[0], true))[0]).toBe('pointer-compression');
+  });
+
+  it('ignores forced pointer compression on macOS', async () => {
+    expect((await runLauncher({}, DOWNLOAD_PLATFORMS[2], true))[0]).toBe('default');
   });
 
   it('selects pointer compression with an explicit heap size', async () => {

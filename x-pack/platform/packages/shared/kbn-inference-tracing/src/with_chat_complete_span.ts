@@ -144,7 +144,12 @@ function setOutputMessages(
 
 function setTokens(
   span: Span,
-  { prompt, completion, cached }: { prompt: number; completion: number; cached?: number }
+  {
+    prompt,
+    completion,
+    cached,
+    cacheWrite,
+  }: { prompt: number; completion: number; cached?: number; cacheWrite?: number }
 ) {
   if (!span.isRecording()) {
     return;
@@ -155,6 +160,9 @@ function setTokens(
   };
   if (cached != null) {
     attributes[GenAISemanticConventions.GenAIUsageCacheReadInputTokens] = cached;
+  }
+  if (cacheWrite != null) {
+    attributes[GenAISemanticConventions.GenAIUsageCacheWriteInputTokens] = cacheWrite;
   }
   span.setAttributes(attributes);
 }

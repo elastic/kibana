@@ -25,6 +25,9 @@ export const queryKeys = {
   },
   agentProfiles: {
     all: ['agentProfiles'] as const,
+    allLists: ['agentProfiles', 'list'] as const,
+    list: ({ includeHidden }: { includeHidden: boolean }) =>
+      ['agentProfiles', 'list', { includeHidden }] as const,
     agentAiIndicesList: ['agentProfiles', 'aiIndices'] as const,
     agentAiIndicesById: (agentId: string) => ['agentProfiles', 'aiIndices', agentId] as const,
     byId: (agentProfileId?: string) => ['agentProfiles', agentProfileId],

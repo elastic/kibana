@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
 import { KnowledgeIndicatorSelectableFilter } from '../knowledge_indicator_selectable_filter';
-import { getKnowledgeIndicatorSourceId } from '../../utils/get_knowledge_indicator_source_id';
+import { getKnowledgeIndicatorSourceIds } from '../../utils/get_knowledge_indicator_source_id';
 import { useSourcesById } from '../../../../data/sources/use_sources_by_id';
 
 interface StreamFilterProps {
@@ -41,7 +41,7 @@ export function StreamFilter({
     <KnowledgeIndicatorSelectableFilter
       knowledgeIndicators={knowledgeIndicators}
       searchTerm={searchTerm}
-      getValue={getKnowledgeIndicatorSourceId}
+      getValue={getKnowledgeIndicatorSourceIds}
       getLabel={getSourceTitle}
       selected={selectedStreams}
       onSelectedChange={onSelectedStreamsChange}
