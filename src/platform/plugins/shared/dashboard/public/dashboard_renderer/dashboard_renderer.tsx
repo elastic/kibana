@@ -40,7 +40,7 @@ import { coreServices, uiActionsService } from '../services/kibana_services';
 import { Dashboard404Page } from './dashboard_404';
 import { DashboardViewport } from './viewport/dashboard_viewport';
 import { GlobalPrintStyles } from './print_styles';
-import { DashboardControlsRenderer } from '../dashboard_controls_renderer';
+import { DashboardControlsRenderer } from '../pinned_panel_renderer';
 
 /**
  * Props for the {@link DashboardRenderer} component.
