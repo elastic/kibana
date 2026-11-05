@@ -232,6 +232,21 @@ describe('SubjectView', () => {
   });
 });
 
+describe('SubjectView presentation', () => {
+  it('is presented as a significant event when its source says so', () => {
+    renderView({
+      ...base,
+      subjectType: 'alert',
+      subjectId: 'episode-1',
+      snapshot: { source: 'elastic.significant_events', rule_name: 'Checkout errors' },
+    });
+
+    expect(screen.getByTestId('investigationSubject-alert')).toHaveTextContent(
+      'Trigger · Significant event'
+    );
+  });
+});
+
 describe('SubjectView alert flyout', () => {
   const alert = {
     ...base,
@@ -283,76 +298,47 @@ describe('SubjectView alert flyout', () => {
   });
 });
 
-describe('SubjectView significant event', () => {
-  const significantEvent = {
+describe('SubjectView alert with a registered flyout', () => {
+  const sourceAlert = {
     ...base,
-    subjectType: 'significant_event' as const,
-    subjectId: 'event-1',
-    summary: 'Checkout errors spiked',
+    subjectType: 'alert' as const,
+    subjectId: 'episode-1',
+    snapshot: { source: 'elastic.example', rule_name: 'Checkout errors' },
   };
 
-  it("links to the event's flyout in Nightshift and navigates in the app on a plain click", async () => {
+  it('opens the registered flyout in place instead of navigating', async () => {
     const { services, navigate } = createShare();
-    renderView(significantEvent, services);
+    const getAlertFlyout = jest.fn((source?: string) =>
+      source === 'elastic.example' ? () => null : undefined
+    );
+    renderView(sourceAlert, { ...services, getAlertFlyout });
 
     await waitFor(() =>
-      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute(
-        'href',
-        '/located/NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR?{"eventId":"event-1"}'
-      )
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
     );
-    const row = screen.getByTestId('investigationSubject-significant_event');
+    const row = screen.getByTestId('investigationSubject-alert');
     const click = createEvent.click(row, { bubbles: true, cancelable: true });
     fireEvent(row, click);
 
     expect(click.defaultPrevented).toBe(true);
-    await waitFor(() => expect(navigate).toHaveBeenCalledWith({ eventId: 'event-1' }));
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
   });
 
   it('lets the browser handle a new-tab click', async () => {
     const { services, navigate } = createShare();
-    renderView(significantEvent, services);
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => () => null });
 
     await waitFor(() =>
-      expect(screen.getByTestId('investigationSubject-significant_event')).toHaveAttribute('href')
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
     );
-    const row = screen.getByTestId('investigationSubject-significant_event');
+    const row = screen.getByTestId('investigationSubject-alert');
     const click = createEvent.click(row, { bubbles: true, cancelable: true, metaKey: true });
     fireEvent(row, click);
 
     expect(click.defaultPrevented).toBe(false);
+    expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
     expect(navigate).not.toHaveBeenCalled();
-  });
-
-  it.each([
-    ['there is no share service', {}],
-    [
-      'the Nightshift locator is not registered',
-      { share: { url: { locators: { get: () => undefined } } } } as unknown as SubjectServices,
-    ],
-    [
-      'the locator cannot resolve a URL',
-      {
-        share: {
-          url: {
-            locators: {
-              get: () => ({
-                getUrl: () => Promise.reject(new Error('no url')),
-                navigate: jest.fn(),
-              }),
-            },
-          },
-        },
-      } as unknown as SubjectServices,
-    ],
-  ])('renders plain text without a link when %s', async (_case, services) => {
-    renderView(significantEvent, services);
-
-    const row = screen.getByTestId('investigationSubject-significant_event');
-    // Let a pending URL lookup settle before asserting that nothing became a link.
-    await waitFor(() => expect(row).toHaveTextContent('Checkout errors spiked'));
-    expect(row.tagName).toBe('DIV');
-    expect(row).not.toHaveAttribute('href');
   });
 });
 

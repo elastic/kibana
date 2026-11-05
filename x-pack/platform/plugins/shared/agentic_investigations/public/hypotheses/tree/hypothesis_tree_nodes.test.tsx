@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, render, screen, waitFor } from '@testing-library/react';
+import { createEvent, fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { I18nProvider } from '@kbn/i18n-react';
 import { ReactFlowProvider, type NodeProps } from '@xyflow/react';
@@ -26,6 +26,13 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import type { SubjectServices } from '../../subjects/attachments/subject_services';
 
 jest.mock('@kbn/proposals-plugin/public');
+// The flyout itself is covered by `subject_details_flyout.test.tsx`; here only the link's choice
+// between opening it and following its href matters.
+jest.mock('../../subjects/attachments/subject_details_flyout', () => ({
+  SubjectDetailsFlyout: ({ alertId }: { alertId: string }) => (
+    <div data-test-subj="subjectFlyoutStub">{alertId}</div>
+  ),
+}));
 
 const flags = { isSelected: false, isDimmed: false, isRunning: false, selectedActionIndex: null };
 
@@ -117,6 +124,67 @@ describe('HypothesisTreeNode', () => {
     const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
     expect(link).toHaveTextContent('View alert');
     expect(link).toHaveAttribute('href', '/app/observability/alerts/a-1');
+  });
+
+  describe('an alert trigger whose source has a registered flyout', () => {
+    const subject = {
+      type: 'alert' as const,
+      id: 'episode-1',
+      snapshot: {
+        source: 'elastic.example',
+        url: '/app/observability/alerts/episode-1',
+        data: { event_id: 'event-1' },
+      },
+      created_at: 'x',
+    };
+    const trigger = { kind: 'trigger' as const, title: 'x', subjects: [subject], ...flags };
+
+    it('opens that flyout in place, without following the link or selecting the node', async () => {
+      const actions = renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
+
+      const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+      const click = createEvent.click(link, { bubbles: true, cancelable: true });
+      fireEvent(link, click);
+
+      expect(click.defaultPrevented).toBe(true);
+      expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+      expect(actions.onSelectNode).not.toHaveBeenCalled();
+    });
+
+    it('does not select the node when the flyout is clicked', async () => {
+      const actions = renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
+
+      fireEvent.click(screen.getByTestId('investigationHypothesisTreeTriggerLink'));
+      fireEvent.click(await screen.findByTestId('subjectFlyoutStub'));
+
+      expect(actions.onSelectNode).not.toHaveBeenCalled();
+    });
+
+    it('keeps following the link for a new-tab click', () => {
+      renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
+
+      const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+      const click = createEvent.click(link, { bubbles: true, cancelable: true, metaKey: true });
+      fireEvent(link, click);
+
+      expect(click.defaultPrevented).toBe(false);
+      expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+    });
+
+    it('keeps the link for alerts without a registered flyout, as before', () => {
+      renderNode(
+        { ...trigger, subjects: [{ ...subject, snapshot: { url: subject.snapshot.url } }] },
+        undefined,
+        { http: {} as never, getAlertFlyout: () => undefined }
+      );
+
+      const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+      const click = createEvent.click(link, { bubbles: true, cancelable: true });
+      fireEvent(link, click);
+
+      expect(screen.queryByTestId('subjectFlyoutStub')).not.toBeInTheDocument();
+      expect(link).toHaveAttribute('href', '/app/observability/alerts/episode-1');
+    });
   });
 
   it('links several alert triggers to the alerts list, filtered to them', async () => {

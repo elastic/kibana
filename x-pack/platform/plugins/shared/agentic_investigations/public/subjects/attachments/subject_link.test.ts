@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import {
-  getAlertsListLocatorTarget,
-  getSubjectLocatorTarget,
-  resolveSignificantEventId,
-} from './subject_link';
+import { getAlertsListLocatorTarget, getSubjectLocatorTarget } from './subject_link';
 
 describe('getSubjectLocatorTarget', () => {
   it("opens an alert's details page by its id", () => {
@@ -38,42 +34,10 @@ describe('getSubjectLocatorTarget', () => {
     });
   });
 
-  it("opens a significant event's flyout in Nightshift by its event id", () => {
-    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toEqual({
-      locatorId: 'NIGHTSHIFT_SIGNIFICANT_EVENT_LOCATOR',
-      params: { eventId: 'se-1' },
-    });
-  });
-
-  it('keeps the alerting v2 episode page for an alert raised by a significant event', () => {
-    expect(
-      getSubjectLocatorTarget({
-        type: 'alert',
-        id: 'episode-1',
-        source: 'elastic.significant_events',
-      })
-    ).toEqual({
-      locatorId: 'ALERTING_V2_EPISODES_LOCATOR',
-      params: {
-        episodeId: 'episode-1',
-        host: { app: 'observabilityAlerting', pathPrefix: '/alerts' },
-      },
-    });
-  });
-
-  it('has no page for questions and Slack threads', () => {
+  it('has no page for significant events, questions and Slack threads', () => {
+    expect(getSubjectLocatorTarget({ type: 'significant_event', id: 'se-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'manual', id: 'q-1' })).toBeUndefined();
     expect(getSubjectLocatorTarget({ type: 'slack_thread', id: 't-1' })).toBeUndefined();
-  });
-});
-
-describe('resolveSignificantEventId', () => {
-  it('is the subject id of a significant event subject', () => {
-    expect(resolveSignificantEventId({ type: 'significant_event', id: 'se-1' })).toBe('se-1');
-  });
-
-  it.each(['alert', 'manual', 'slack_thread'] as const)('has no event id for a %s', (type) => {
-    expect(resolveSignificantEventId({ type, id: 'x-1' })).toBeUndefined();
   });
 });
 

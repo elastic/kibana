@@ -16,11 +16,10 @@ import {
 import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
+import { SIGNIFICANT_EVENTS_ALERT_SOURCE } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
-import {
-  NightshiftSettingsLocatorDefinition,
-  SignificantEventLocatorDefinition,
-} from '../common/locators';
+import { NightshiftSettingsLocatorDefinition } from '../common/locators';
+import { createLazyEventFlyout } from './components/entities/significant_event/lazy_event_flyout';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
 import type {
   NightshiftPublicSetup,
@@ -53,7 +52,6 @@ export class NightshiftPlugin
     const startServicesPromise = coreSetup.getStartServices();
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
-    pluginsSetup.share.url.locators.create(new SignificantEventLocatorDefinition());
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
@@ -139,6 +137,14 @@ export class NightshiftPlugin
 
   start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
     this.stopped = false;
+    pluginsStart.agenticInvestigations?.registerAlertFlyout(
+      SIGNIFICANT_EVENTS_ALERT_SOURCE,
+      createLazyEventFlyout({
+        coreStart,
+        pluginsStart,
+        focusedSignificantEventService: this.focusedSignificantEventService,
+      })
+    );
     void import('./start_services')
       .then(({ startNightshiftServices }) => {
         if (this.stopped) {

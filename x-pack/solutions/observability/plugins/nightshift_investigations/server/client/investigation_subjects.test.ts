@@ -67,50 +67,6 @@ describe('toStartSubjects', () => {
     ).toEqual(['alert-0', 'alert-1']);
   });
 
-  it('records a significant event under its event id, so a link can open the event', () => {
-    const subjects = toStartSubjects({
-      subject: { type: 'significant_event', id: 'event-1', summary: 'Checkout errors spiked' },
-      triggerType: 'manual',
-      investigationId: 'inv-1',
-    });
-
-    expect(subjects).toEqual([
-      {
-        type: 'significant_event',
-        id: 'event-1',
-        triggerType: 'manual',
-        summary: 'Checkout errors spiked',
-      },
-    ]);
-  });
-
-  it('records a follow-up for the same significant event under the same id', () => {
-    const [recordedSubject] = toStartSubjects({
-      subject: { type: 'significant_event', id: 'event-1' },
-      triggerType: 'manual',
-      investigationId: 'inv-1',
-    });
-    const followUp = toStartSubjects({
-      subject: { type: 'significant_event', id: 'event-1' },
-      triggerType: 'manual',
-      investigationId: 'inv-2',
-    });
-
-    expect(followUp.map(({ id }) => id)).toEqual([recordedSubject.id]);
-    expect(
-      withoutRecordedSubjects(followUp, [
-        {
-          id: 'doc-1',
-          spaceId: 'default',
-          conversationId: 'inv-1',
-          subjectType: 'significant_event',
-          subjectId: recordedSubject.id,
-          createdAt: '2026-08-24T12:00:00.000Z',
-        },
-      ])
-    ).toEqual([]);
-  });
-
   it('records a question without a subject id under the investigation id', () => {
     const subjects = toStartSubjects({
       subject: { type: 'manual', id: 'manual', summary: 'Why?' },

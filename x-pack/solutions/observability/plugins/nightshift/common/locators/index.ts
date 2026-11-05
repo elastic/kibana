@@ -9,8 +9,3 @@ export {
   NightshiftSettingsLocatorDefinition,
   type NightshiftSettingsLocator,
 } from './nightshift_settings_locator';
-
-export {
-  SignificantEventLocatorDefinition,
-  type SignificantEventLocator,
-} from './significant_event_locator';

@@ -20,6 +20,7 @@ import type { ExpressionsStart } from '@kbn/expressions-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { UnifiedDocViewerStart } from '@kbn/unified-doc-viewer-plugin/public';
+import type { AlertSubjectSnapshot } from '../common/subjects/subject';
 import type { InvestigationCardProps } from './conversation_templates/templates/investigation/card';
 
 export interface AgenticInvestigationsPublicSetupDependencies {
@@ -56,7 +57,32 @@ export interface AgenticInvestigationsPublicPluginSetup {
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
 export type ImpactEntityOpener = (entity: ImpactEntityTarget) => void;
 
+/** A flyout a solution registers for the alerts of one `source`. */
+export interface AlertFlyoutRegistration {
+  Component: ComponentType<AlertFlyoutProps>;
+  /**
+   * Whether the flyout can show this alert; without it, or when it returns false, the alert opens
+   * as it would without a registered flyout instead of a flyout that cannot resolve it.
+   */
+  canOpen?: (snapshot?: AlertSubjectSnapshot) => boolean;
+}
+
+/** The props of a flyout a solution registers for the alerts of one `source`. */
+export interface AlertFlyoutProps {
+  /** The subject id: a classic alert's uuid, or an alerting v2 alert's episode id. */
+  alertId: string;
+  /** The alert as it was when the investigation started; its `data` is the producer's own. */
+  snapshot?: AlertSubjectSnapshot;
+  onClose: () => void;
+}
+
 export interface AgenticInvestigationsPublicPluginStart {
+  /**
+   * Registers the flyout that shows the alerts of one `source` (an alerting v2 alert's producer),
+   * so an investigation opens them where the user already is instead of the default alert flyout.
+   * Read when a subject row renders, so the solution can register after this plugin starts.
+   */
+  registerAlertFlyout: (source: string, registration: AlertFlyoutRegistration) => void;
   /**
    * Registers the entity-flyout opener. Called from the solution's start, which runs after this
    * plugin's start, so the overview reads it when a row is clicked rather than at registration.

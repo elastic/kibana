@@ -128,9 +128,21 @@ const MARK_INACTIVE_LABEL = i18n.translate('xpack.nightshift.flyout.markInactive
 export interface EventFlyoutProps {
   event: SignificantEventResponse;
   onClose: () => void;
+  /**
+   * `push` shares the page with the app that opens it. `overlay` stacks over another flyout, such
+   * as an investigation, without a mask or replacing it.
+   */
+  type?: 'push' | 'overlay';
+  /** The flyout's width: an EUI size or pixels. */
+  size?: 's' | 'm' | number;
 }
 
-export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactElement {
+export function EventFlyout({
+  event,
+  onClose,
+  type = 'push',
+  size = 's',
+}: EventFlyoutProps): React.ReactElement {
   const formatTimestamp = useFormatTimestamp();
   const { euiTheme } = useEuiTheme();
   const { agentBuilder, application, focusedSignificantEventService, http } = useKibana().services;
@@ -176,9 +188,14 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
   }, [event.event_id]);
 
   useEffect(() => {
+    // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
+    // investigation, must not take it over or clear it on close.
+    if (type === 'overlay') {
+      return;
+    }
     focusedSignificantEventService.setFocusedEvent(event);
     return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
-  }, [event, focusedSignificantEventService]);
+  }, [event, focusedSignificantEventService, type]);
 
   useEffect(() => {
     if (
@@ -325,8 +342,9 @@ export function EventFlyout({ event, onClose }: EventFlyoutProps): React.ReactEl
     <>
       <FlyoutTemplate
         onClose={onClose}
-        size="s"
-        type="push"
+        size={size}
+        type={type}
+        ownFocus={type === 'overlay' ? false : undefined}
         session="start"
         historyKey={EVENT_FLYOUT_HISTORY_KEY}
         resizable
