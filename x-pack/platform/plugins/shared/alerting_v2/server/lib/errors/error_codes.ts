@@ -8,6 +8,7 @@
 import {
   ALERT_ACTION_NO_OP_CODE,
   INVALID_ALERT_STATE_TRANSITION_CODE,
+  RULE_NOT_FOUND_CODE,
 } from '@kbn/alerting-v2-schemas';
 
 /**
@@ -29,7 +30,7 @@ import {
 export const ALERTING_ERROR_CODES = {
   // ────────────────────────── Rules ──────────────────────────
   /** A rule with the given identifier does not exist. */
-  RULE_NOT_FOUND: 'RULE_NOT_FOUND',
+  RULE_NOT_FOUND: RULE_NOT_FOUND_CODE,
   /** A rule with the given identifier already exists. */
   RULE_ALREADY_EXISTS: 'RULE_ALREADY_EXISTS',
   /** A rule was modified by another writer since it was loaded. */
