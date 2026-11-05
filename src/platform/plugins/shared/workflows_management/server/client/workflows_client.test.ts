@@ -63,6 +63,7 @@ const createMockWorkflowsService = (
     }),
     getManagedWorkflowStatus,
     installManagedWorkflow: jest.fn().mockResolvedValue(undefined),
+    markManagedInstallIncomplete: jest.fn().mockResolvedValue(undefined),
     uninstallManagedWorkflow: jest.fn().mockResolvedValue(undefined),
     disableManagedWorkflow: overrides.disableManagedWorkflow ?? jest.fn().mockResolvedValue(true),
     getInstalledManagedWorkflowState:
@@ -261,6 +262,7 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     expect(client.isWorkflowsAvailable).toBe(false);
     await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, options);
     expect(installManagedWorkflow).not.toHaveBeenCalled();
+    expect(service.markManagedInstallIncomplete).toHaveBeenCalledWith('testPlugin');
     await expect(
       client.getWorkflowStatus(EXAMPLE_MANAGED_WORKFLOW_ID, { spaceId: 'default' })
     ).rejects.toThrow('Workflows is not available in this environment');
@@ -269,6 +271,25 @@ describe('createManagedWorkflowsSystemApiProvider', () => {
     expect(client.isWorkflowsAvailable).toBe(true);
     await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, options);
     expect(installManagedWorkflow).toHaveBeenCalledTimes(1);
+  });
+
+  it('should not mark the install pass incomplete when the install runs', async () => {
+    const service = createMockWorkflowsService();
+    const config = { available: true } as WorkflowsManagementConfig;
+    const provider = createManagedWorkflowsSystemApiProvider(
+      service,
+      createWorkflowsAvailabilityTracker(service, config),
+      logger
+    );
+    const client = await provider('testPlugin');
+
+    await client.install(EXAMPLE_MANAGED_WORKFLOW_ID, {
+      spaceId: 'default',
+      values: { recipient: 'test' },
+    });
+
+    expect(service.installManagedWorkflow).toHaveBeenCalledTimes(1);
+    expect(service.markManagedInstallIncomplete).not.toHaveBeenCalled();
   });
 
   it('should delegate requestless managed workflow status checks when available', async () => {

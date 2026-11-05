@@ -86,8 +86,8 @@ export const createWorkflowsClientProvider = (
 /**
  * System (requestless) managed-workflows API used by `initManagedWorkflowsClient`.
  *
- * `install` / `ready` are best-effort during Kibana teardown and when Elasticsearch
- * readiness gating skips writes: they may resolve without persisting or without
+ * `install` / `ready` are best-effort during Kibana teardown, while Workflows is unavailable,
+ * and when Elasticsearch readiness gating skips writes: they may resolve without persisting or without
  * running destructive orphan cleanup. When installs were incomplete, `ready()` still
  * runs dynamic auto upgrades once readiness has passed. See
  * {@link RegisteredManagedWorkflowsLifecycleApi}.
@@ -107,6 +107,9 @@ export const createManagedWorkflowsSystemApiProvider = (
       install: async (id, options) => {
         if (!getIsWorkflowsAvailable()) {
           logger.debug('Workflows is not available in this environment. Managed install ignored.');
+          // Availability is live, so ready() may run after a license upgrade; without this
+          // marker it would treat the skipped install's persisted docs as orphans.
+          await workflowsService.markManagedInstallIncomplete(pluginId);
           return;
         }
         await workflowsService.installManagedWorkflow(id, options, pluginId);
