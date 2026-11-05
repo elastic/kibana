@@ -363,12 +363,12 @@ const useIsShiftHeld = (enabled: boolean): boolean => {
 
 /**
  * Styles for the grid engine's drag preview, resize handle and drop target, matching Dashboard.
- * `dotStep` is how many engine cells apart the drop target's dots are, or undefined for none.
- * The drop preview only shows when snapping, since otherwise panels land where they're dropped.
+ * `dotStep` is how many engine cells apart the drop target's dots are, or undefined for none, and
+ * `inset` matches the space panels keep clear around themselves.
  */
 const getGridStyles = (
   euiTheme: UseEuiTheme['euiTheme'],
-  { snapToGrid, dotStep }: { snapToGrid: boolean; dotStep?: number }
+  { dotStep, inset }: { dotStep?: number; inset: number }
 ) => {
   const dot = (position: string) =>
     `radial-gradient(circle at ${position}, ${euiTheme.colors.accentSecondary} 1px, transparent 1px)`;
@@ -383,15 +383,14 @@ const getGridStyles = (
       background-origin: content-box;
     }
   `;
-  const dropPreview = css`
-    .kbnGridPanel--dragPreview {
-      background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
-    }
-  `;
   return css`
     padding-top: ${euiTheme.size.l};
     ${dotStep !== undefined && dots}
-    ${snapToGrid && dropPreview}
+
+    .kbnGridPanel--dragPreview {
+      margin: ${inset}px;
+      background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
+    }
 
     .kbnGridPanel--resizeHandle:after {
       display: block;
@@ -440,11 +439,12 @@ const AppGrid = ({
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement]
   );
+  const panelInset = snapToGrid ? 0 : gutterSize / 2;
   const isShiftHeld = useIsShiftHeld(!snapToGrid);
   const dotStep = snapToGrid ? 1 : isShiftHeld ? scale : undefined;
   const gridStyles = useMemo(
-    () => getGridStyles(euiTheme, { snapToGrid, dotStep }),
-    [euiTheme, snapToGrid, dotStep]
+    () => getGridStyles(euiTheme, { dotStep, inset: panelInset }),
+    [euiTheme, dotStep, panelInset]
   );
 
   const onLayoutChange = useCallback(
@@ -455,7 +455,6 @@ const AppGrid = ({
       }),
     [store, app.id, scale]
   );
-  const panelInset = snapToGrid ? 0 : gutterSize / 2;
 
   const renderPanelContents = useCallback(
     (panelId: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
