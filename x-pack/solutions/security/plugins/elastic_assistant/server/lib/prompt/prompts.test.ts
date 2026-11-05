@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT, GEMINI_SYSTEM_PROMPT } from './prompts';
+import {
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+  BEDROCK_SYSTEM_PROMPT,
+  DEFAULT_SYSTEM_PROMPT,
+  GEMINI_SYSTEM_PROMPT,
+} from './prompts';
 
 describe('prompts', () => {
   it.each([
@@ -25,4 +31,13 @@ describe('prompts', () => {
       expect((prompt.match(regex) || []).length).toBe(expectedCount);
     }
   );
+
+  // Claude Opus 5.5 returns finish_reason content_filter for "Show your reasoning" in these prompts
+  it.each([
+    ['ATTACK_DISCOVERY_DEFAULT', ATTACK_DISCOVERY_DEFAULT],
+    ['ATTACK_DISCOVERY_REFINE', ATTACK_DISCOVERY_REFINE],
+  ])('%s does not ask the model to show its reasoning', (_, prompt) => {
+    expect(prompt).not.toMatch(/show your reasoning/i);
+    expect(prompt).toMatch(/Explain your analysis before the json output section/i);
+  });
 });
