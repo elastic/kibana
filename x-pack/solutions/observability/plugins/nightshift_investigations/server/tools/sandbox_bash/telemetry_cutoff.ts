@@ -12,8 +12,9 @@ export const TELEMETRY_CUTOFF_DIR = '/workspace/.nightshift';
 export const TELEMETRY_CUTOFF_PROXY_PATH = `${TELEMETRY_CUTOFF_DIR}/telemetry_cutoff_proxy.py`;
 
 /**
- * In-sandbox proxy. `_search`, `_count` and ES|QL `_query` reads get an `@timestamp` upper bound,
- * read-only metadata endpoints pass through, and anything else is refused with a 403, so a read
+ * In-sandbox proxy. `_search`, `_count` and ES|QL `_query` reads get an `@timestamp` upper bound.
+ * Query DSL bodies may only use allowlisted search options and aggregation types, read-only
+ * metadata endpoints pass through, and anything else is refused with a 403, so a read
  * that did not happen never looks like an empty result. This bounds an ordinary command, not a
  * hostile one: everything in the sandbox runs as one user, so a command can still read the cluster
  * URL from another process's environment.
@@ -42,8 +43,30 @@ METADATA_PATH = re.compile(
     r"|^(/[^/]+)?/_mapping(/.*)?$"
 )
 ESQL_STRING = re.compile(r'"""[\\s\\S]*?"""|"(?:[^"\\\\]|\\\\.)*"')
-# Each of these selects documents without going through the top-level query.
-UNBOUNDED_CLAUSES = ("knn", "retriever", "runtime_mappings")
+# Search options that only shape, page or narrow what the bounded query matched. Anything else, such
+# as knn, retriever, suggest or runtime_mappings, can select or redefine documents past the bound.
+SEARCH_KEYS = frozenset((
+    "query", "size", "from", "sort", "search_after", "track_total_hits", "track_scores", "timeout",
+    "terminate_after", "_source", "fields", "docvalue_fields", "stored_fields", "script_fields",
+    "aggs", "aggregations", "post_filter", "highlight", "collapse", "rescore", "min_score",
+    "explain", "version", "seq_no_primary_term", "indices_boost", "profile", "pit", "stats",
+))
+COUNT_KEYS = frozenset(("query",))
+# Aggregations computed only from the documents the bounded query matched.
+AGGREGATION_TYPES = frozenset((
+    "terms", "multi_terms", "rare_terms", "composite", "histogram", "date_histogram",
+    "auto_date_histogram", "variable_width_histogram", "range", "date_range", "ip_range",
+    "ip_prefix", "filter", "filters", "adjacency_matrix", "missing", "nested", "reverse_nested",
+    "sampler", "diversified_sampler", "random_sampler", "categorize_text", "frequent_item_sets",
+    "top_hits", "top_metrics", "avg", "weighted_avg", "sum", "min", "max", "stats",
+    "extended_stats", "string_stats", "value_count", "cardinality", "percentiles",
+    "percentile_ranks", "median_absolute_deviation", "boxplot", "rate", "scripted_metric",
+    "geo_bounds", "geo_centroid", "avg_bucket", "sum_bucket", "min_bucket", "max_bucket",
+    "stats_bucket", "extended_stats_bucket", "percentiles_bucket", "derivative", "cumulative_sum",
+    "cumulative_cardinality", "bucket_script", "bucket_selector", "bucket_sort", "moving_fn",
+    "moving_percentiles", "serial_diff", "normalize",
+))
+AGGREGATION_KEYS = frozenset(("aggs", "aggregations", "meta"))
 
 
 class Refused(Exception):
@@ -81,29 +104,34 @@ def bound_esql(query):
     return query[:end] + " " + predicate + tail
 
 
-def has_global_aggregation(aggregations):
+def check_aggregations(aggregations):
+    if aggregations is None:
+        return
     if not isinstance(aggregations, dict):
-        return False
-    for aggregation in aggregations.values():
+        raise Refused("aggregations must be an object")
+    for name, aggregation in aggregations.items():
         if not isinstance(aggregation, dict):
-            continue
-        if "global" in aggregation:
-            return True
-        if has_global_aggregation(aggregation.get("aggs")):
-            return True
-        if has_global_aggregation(aggregation.get("aggregations")):
-            return True
-    return False
+            raise Refused("aggregation %s must be an object" % name)
+        kinds = [key for key in aggregation if key not in AGGREGATION_KEYS]
+        if len(kinds) != 1:
+            raise Refused("aggregation %s must have exactly one type" % name)
+        kind = kinds[0]
+        if kind not in AGGREGATION_TYPES:
+            raise Refused("the %s aggregation can read past the query, so it cannot be bounded" % kind)
+        settings = aggregation[kind]
+        if kind in ("terms", "multi_terms") and isinstance(settings, dict):
+            if settings.get("min_doc_count") == 0:
+                raise Refused("min_doc_count 0 lists terms the query did not match, so it cannot be bounded")
+        check_aggregations(aggregation.get("aggs"))
+        check_aggregations(aggregation.get("aggregations"))
 
 
-def bound_dsl(parsed):
-    for clause in UNBOUNDED_CLAUSES:
-        if clause in parsed:
-            raise Refused("%s bypasses the query, so it cannot be bounded" % clause)
-    if has_global_aggregation(parsed.get("aggs")) or has_global_aggregation(
-        parsed.get("aggregations")
-    ):
-        raise Refused("a global aggregation ignores the query, so it cannot be bounded")
+def bound_dsl(parsed, allowed_keys):
+    for key in parsed:
+        if key not in allowed_keys:
+            raise Refused("%s is not a search option the cutoff can bound" % key)
+    check_aggregations(parsed.get("aggs"))
+    check_aggregations(parsed.get("aggregations"))
     bound = {"range": {"@timestamp": {"lte": NOT_AFTER}}}
     existing = parsed.get("query")
     if existing is None:
@@ -126,7 +154,7 @@ def rewrite_search(pathname, query_string, body):
     if pathname.endswith("/_query"):
         parsed["query"] = bound_esql(parsed.get("query"))
     else:
-        bound_dsl(parsed)
+        bound_dsl(parsed, COUNT_KEYS if pathname.endswith("/_count") else SEARCH_KEYS)
     return json.dumps(parsed).encode("utf-8")
 
 

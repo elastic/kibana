@@ -304,6 +304,26 @@ describe('telemetry cutoff proxy', () => {
     ['a knn clause', '/logs-*/_search', '{"knn":{"field":"v"}}'],
     ['a retriever', '/logs-*/_search', '{"retriever":{"standard":{}}}'],
     ['runtime mappings', '/logs-*/_search', '{"runtime_mappings":{"@timestamp":{}}}'],
+    ['a suggester', '/logs-*/_search', '{"suggest":{"s":{"text":"pay","term":{"field":"x"}}}}'],
+    ['an option outside the allowlist', '/logs-*/_search', '{"slice":{"id":0,"max":2}}'],
+    ['a search option on a count', '/logs-*/_count', '{"query":{"match_all":{}},"size":1}'],
+    [
+      'a significant_terms aggregation',
+      '/logs-*/_search',
+      '{"aggs":{"s":{"significant_terms":{"field":"feature_flag.key"}}}}',
+    ],
+    [
+      'a nested significant_text aggregation',
+      '/logs-*/_search',
+      '{"aggs":{"a":{"terms":{"field":"x"},"aggs":{"s":{"significant_text":{"field":"m"}}}}}}',
+    ],
+    [
+      'a terms aggregation with min_doc_count 0',
+      '/logs-*/_search',
+      '{"aggs":{"t":{"terms":{"field":"feature_flag.key","min_doc_count":0}}}}',
+    ],
+    ['an aggregation with two types', '/logs-*/_search', '{"aggs":{"t":{"terms":{},"avg":{}}}}'],
+    ['an aggregation that is not an object', '/logs-*/_search', '{"aggs":{"t":1}}'],
     ['the q parameter', '/logs-*/_search?q=*', '{"query":{"match_all":{}}}'],
     ['a body that is not JSON', '/logs-*/_search', 'not json'],
     ['a body that is not an object', '/logs-*/_search', '[]'],
@@ -324,6 +344,37 @@ describe('telemetry cutoff proxy', () => {
       expect(upstream.seen).toEqual([]);
     })
   );
+
+  it('forwards a search that only uses allowlisted options and aggregations', () =>
+    withUpstream(async (upstream) => {
+      const body = {
+        size: 5,
+        sort: [{ '@timestamp': 'desc' }],
+        _source: ['message'],
+        track_total_hits: true,
+        query: { term: { 'service.name': 'checkout' } },
+        aggs: {
+          over_time: {
+            date_histogram: { field: '@timestamp', fixed_interval: '1m' },
+            aggs: {
+              flags: { terms: { field: 'feature_flag.key', size: 10 } },
+              latest: { top_hits: { size: 1 } },
+            },
+          },
+          errors: { filter: { term: { 'log.level': 'error' } }, meta: { note: 'x' } },
+        },
+      };
+      const result = await enforceTelemetryCutoff({
+        upstreamUrl: upstream.url,
+        path: '/logs-*/_search',
+        body: JSON.stringify(body),
+      });
+      expect(result.status).toBe(200);
+      expect(JSON.parse(upstream.seen[0])).toEqual({
+        ...body,
+        query: { bool: { must: [body.query], filter: [BOUND] } },
+      });
+    }));
 
   it('does not treat an aggregation named global as a global aggregation', () =>
     withUpstream(async (upstream) => {
