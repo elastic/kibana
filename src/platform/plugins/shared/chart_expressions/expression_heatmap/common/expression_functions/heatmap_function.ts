@@ -12,7 +12,7 @@ import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { ExpressionValueVisDimension } from '@kbn/chart-expressions-common';
 import type { Dimension } from '@kbn/visualizations-common';
 import { validateAccessor } from '@kbn/chart-expressions-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
 import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,

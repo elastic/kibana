@@ -10,7 +10,7 @@
 import type { Reference } from '@kbn/content-management-utils/src/types';
 import { transformTimeRangeOut, transformTitlesOut } from '@kbn/presentation-publishing';
 import type { DrilldownTransforms } from '@kbn/embeddable-plugin/common';
-import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common';
+import { VISUALIZE_SAVED_OBJECT_TYPE } from '@kbn/visualizations-common/constants';
 import { flow } from 'lodash';
 import { injectVisReferences } from '../../references/inject_vis_references';
 import { VIS_SAVED_OBJECT_REF_NAME } from './get_transform_in';

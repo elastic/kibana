@@ -27,8 +27,8 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import { LegendToggle } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-common';
+import { ChartTooltipFooterMessage } from '@kbn/chart-expressions-common/components/chart_tooltip_footer_message';
 import {
-  ChartTooltipFooterMessage,
   getColumnByAccessor,
   getFilterDrilldownWarningMessage,
   getOverridesFor,

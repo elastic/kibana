@@ -8,7 +8,7 @@
  */
 
 import { get, isPlainObject } from 'lodash';
-import { getValidColor } from '@kbn/coloring';
+import { getValidColor } from '@kbn/coloring/src/color_manipulation';
 import { overwrite } from '.';
 
 import { calculateLabel } from '../../../../common/calculate_label';

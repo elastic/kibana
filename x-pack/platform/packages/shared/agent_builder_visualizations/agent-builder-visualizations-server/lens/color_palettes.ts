@@ -6,7 +6,7 @@
  */
 
 import { SupportedChartType } from '@kbn/agent-builder-common/tools/tool_result';
-import { getPalettes } from '@kbn/palettes';
+import { getPalettes } from '@kbn/palettes/palettes';
 import { isPlainObject } from 'lodash';
 import { chartTypeRegistry } from './chart_type_registry';
 import type { VisualizationConfig } from './types';

@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import type { Dimension } from '@kbn/visualizations-common';
-import { prepareLogTable } from '@kbn/visualizations-common';
+import { prepareLogTable } from '@kbn/visualizations-common/prepare_log_table';
 import { validateAccessor, getColumnByAccessor } from '@kbn/chart-expressions-common';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { MetricWTrend } from '@elastic/charts';
