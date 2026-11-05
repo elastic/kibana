@@ -447,54 +447,52 @@ describe('FlyoutRiskSummary', () => {
   });
 
   it('does not render resolution risk block when neither the lookup nor prefetchedResolutionRisk has data', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          entityRiskScores={{
-            base: { ...mockHostRiskScoreState },
-            resolution: {
-              state: { ...mockHostRiskScoreState, data: undefined },
-              hasResolutionGroup: true,
-              resolutionTargetEntityId: 'host:target-entity',
-            },
-            refetch: jest.fn(),
-          }}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-          isPreviewMode={false}
-          entityType={EntityType.host}
-          entityId="host:alias-entity"
-        />
-      </TestProviders>
+    const { queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={{
+          base: { ...mockHostRiskScoreState },
+          resolution: {
+            state: { ...mockHostRiskScoreState, data: undefined },
+            hasResolutionGroup: true,
+            resolutionTargetEntityId: 'host:target-entity',
+          },
+          refetch: jest.fn(),
+        }}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+      />,
+      { newEntityAnalyticsPage: false }
     );
 
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
   });
 
   it('does not render resolution risk score block for standalone entities', () => {
-    const { queryByTestId } = render(
-      <TestProviders>
-        <FlyoutRiskSummary
-          riskScoreData={mockHostRiskScoreState}
-          entityRiskScores={{
-            base: { ...mockHostRiskScoreState },
-            resolution: {
-              state: { ...mockHostRiskScoreState },
-              hasResolutionGroup: false,
-              resolutionTargetEntityId: 'host:target-entity',
-            },
-            refetch: jest.fn(),
-          }}
-          queryId={'testQuery'}
-          openDetailsPanel={() => {}}
-          recalculatingScore={false}
-          isPreviewMode={false}
-          entityType={EntityType.host}
-          entityId="host:alias-entity"
-        />
-      </TestProviders>
+    const { queryByTestId } = renderSummary(
+      <FlyoutRiskSummary
+        riskScoreData={mockHostRiskScoreState}
+        entityRiskScores={{
+          base: { ...mockHostRiskScoreState },
+          resolution: {
+            state: { ...mockHostRiskScoreState },
+            hasResolutionGroup: false,
+            resolutionTargetEntityId: 'host:target-entity',
+          },
+          refetch: jest.fn(),
+        }}
+        queryId={'testQuery'}
+        openDetailsPanel={() => {}}
+        recalculatingScore={false}
+        isPreviewMode={false}
+        entityType={EntityType.host}
+        entityId="host:alias-entity"
+      />,
+      { newEntityAnalyticsPage: false }
     );
 
     expect(queryByTestId('resolution-risk-summary-table')).not.toBeInTheDocument();
