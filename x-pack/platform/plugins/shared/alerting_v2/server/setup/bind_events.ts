@@ -8,13 +8,19 @@
 import type { ContainerModuleLoadOptions } from 'inversify';
 import { AsyncDomainEventBus } from '../lib/events/event_bus';
 import { AlertingDomainEventBusToken } from '../lib/events/domain_events';
+import { AlertStatusChangedOptIns } from '../lib/alert_status_changed';
 import { AlertActionEventPublisher } from '../lib/events/alert_action_event_publisher/alert_action_event_publisher';
 import { AlertActionWorkflowSubscriber } from '../lib/events/alert_action_workflow_subscriber/alert_action_workflow_subscriber';
 import { RuleEventPublisher } from '../lib/events/rule_event_publisher/rule_event_publisher';
 import { RuleWorkflowSubscriber } from '../lib/events/rule_workflow_subscriber/rule_workflow_subscriber';
 import { RuleChangesHistorySubscriber } from '../lib/events/rule_changes_history_subscriber/rule_changes_history_subscriber';
+import { RuleTelemetrySubscriber } from '../lib/events/rule_telemetry_subscriber/rule_telemetry_subscriber';
 import { RuleExecutorEventPublisher } from '../lib/events/rule_executor_event_publisher/rule_executor_event_publisher';
 import { RuleExecutorWorkflowSubscriber } from '../lib/events/rule_executor_workflow_subscriber/rule_executor_workflow_subscriber';
+import { AlertStatusChangedEventPublisher } from '../lib/events/alert_status_changed_event_publisher/alert_status_changed_event_publisher';
+import { AlertStatusChangedWorkflowSubscriber } from '../lib/events/alert_status_changed_workflow_subscriber/alert_status_changed_workflow_subscriber';
+import { ActionPolicyEventPublisher } from '../lib/events/action_policy_event_publisher/action_policy_event_publisher';
+import { ActionPolicyTelemetrySubscriber } from '../lib/events/action_policy_telemetry_subscriber/action_policy_telemetry_subscriber';
 
 /**
  * DI bindings for the in-process event subsystem.
@@ -46,5 +52,20 @@ export const bindEvents = ({ bind }: ContainerModuleLoadOptions) => {
   bind(RuleWorkflowSubscriber).toSelf().inSingletonScope();
   bind(RuleExecutorEventPublisher).toSelf().inRequestScope();
   bind(RuleChangesHistorySubscriber).toSelf().inSingletonScope();
+  bind(RuleTelemetrySubscriber).toSelf().inSingletonScope();
   bind(RuleExecutorWorkflowSubscriber).toSelf().inSingletonScope();
+
+  /**
+   * Alert status changed publisher, subscriber and the opt-ins that gate
+   * publishing, filled through the setup contract.
+   */
+  bind(AlertStatusChangedEventPublisher).toSelf().inRequestScope();
+  bind(AlertStatusChangedWorkflowSubscriber).toSelf().inSingletonScope();
+  bind(AlertStatusChangedOptIns).toSelf().inSingletonScope();
+
+  /**
+   * Action policy event publishers and subscribers.
+   */
+  bind(ActionPolicyEventPublisher).toSelf().inSingletonScope();
+  bind(ActionPolicyTelemetrySubscriber).toSelf().inSingletonScope();
 };

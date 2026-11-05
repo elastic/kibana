@@ -10,8 +10,6 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { getMaintenanceWindowsMock } from '@kbn/response-ops-alerts-table/mocks/maintenance_windows.mock';
 import { CLASSIC_EPISODE_SOURCE_ID } from '../classic_alerts/constants';
 import { EMPTY_VALUE } from '../constants';
 import { ELASTIC_SOURCE_ICON } from '../source_labels';
@@ -19,7 +17,7 @@ import { EpisodeDataSourceProvider } from '../context/episode_data_source_contex
 import { createTestEpisodeSource } from '../types/episode_data_source.mock';
 import {
   EpisodeDurationCell,
-  EpisodeMaintenanceWindowsCell,
+  EpisodeSuppressedCell,
   EpisodeSourceCell,
   EpisodeStatusCell,
   EpisodeTagsCell,
@@ -872,57 +870,30 @@ describe('EpisodeRuleCell', () => {
   });
 });
 
-describe('EpisodeMaintenanceWindowsCell', () => {
-  const maintenanceWindow = (id: string, title: string): MaintenanceWindow => ({
-    ...getMaintenanceWindowsMock()[0],
-    id,
-    title,
-  });
-
-  const renderCell = (
-    maintenanceWindowIds: string[] | undefined,
-    maintenanceWindows?: Map<string, MaintenanceWindow>
-  ) =>
+describe('EpisodeSuppressedCell', () => {
+  const renderCell = (maintenanceWindowIds: string[] | undefined) =>
     renderWithI18n(
-      <EpisodeMaintenanceWindowsCell
+      <EpisodeSuppressedCell
         {...baseCellProps}
-        columnId="maintenance_windows"
-        row={
-          makeRow({
-            '@timestamp': '2026-01-01T01:00:00.000Z',
-            maintenance_window_ids: maintenanceWindowIds,
-          }) as never
-        }
-        maintenanceWindows={maintenanceWindows}
-        isLoadingMaintenanceWindows={false}
+        columnId="suppressed"
+        row={makeRow({ maintenance_window_ids: maintenanceWindowIds })}
       />
     );
 
-  it('renders the titles of the resolved maintenance windows', () => {
-    renderCell(
-      ['mw-1', 'mw-2'],
-      new Map([
-        ['mw-1', maintenanceWindow('mw-1', 'Weekend upgrade')],
-        ['mw-2', maintenanceWindow('mw-2', 'Nightly patch')],
-      ])
-    );
+  it('shows that the alert was suppressed by a maintenance window, without listing any', () => {
+    renderCell(['mw-1', 'mw-2']);
 
-    expect(screen.getByText('Weekend upgrade', { exact: false })).toBeInTheDocument();
-    expect(screen.getByText('Nightly patch', { exact: false })).toBeInTheDocument();
-  });
-
-  it('falls back to the raw id when the window cannot be resolved', () => {
-    renderCell(['mw-unknown'], new Map());
-
-    expect(screen.getByText('mw-unknown')).toBeInTheDocument();
+    expect(screen.getByText('Suppressed by maintenance window')).toBeInTheDocument();
+    expect(screen.queryByText('mw-1', { exact: false })).not.toBeInTheDocument();
   });
 
   it.each([
     ['the field is absent', undefined],
     ['the field is empty', []],
   ])('renders the empty value when %s', (_name, maintenanceWindowIds) => {
-    const { container } = renderCell(maintenanceWindowIds as string[] | undefined, new Map());
+    const { container } = renderCell(maintenanceWindowIds);
 
     expect(container).toHaveTextContent(EMPTY_VALUE);
+    expect(screen.queryByText('Suppressed by maintenance window')).not.toBeInTheDocument();
   });
 });

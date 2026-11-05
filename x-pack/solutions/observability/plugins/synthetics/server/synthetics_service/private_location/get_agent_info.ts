@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildPolicyBaseIdWithFallbackKuery } from '@kbn/fleet-plugin/common';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
 import type { SyntheticsServerSetup } from '../../types';
@@ -27,6 +28,8 @@ export interface AgentInfo {
    * monitors can run only on these agents.
    */
   complete: boolean;
+  /** Agent policy revision the agent last reported applying, or null if none yet. */
+  policyRevision: number | null;
 }
 
 interface AgentLocalMetadata {
@@ -104,7 +107,7 @@ export const getAgentInfo = async (
         showInactive: false,
         perPage,
         page,
-        kuery: `policy_id:"${agentPolicyId}"`,
+        kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
         includeStatusRuntimeField: false,
       });
 
@@ -133,6 +136,7 @@ export const getAgentInfo = async (
         lastCheckin: last,
         memoryMib,
         complete: isCompleteElasticAgent(agent.local_metadata),
+        policyRevision: agent.policy_revision ?? null,
       });
     }
 

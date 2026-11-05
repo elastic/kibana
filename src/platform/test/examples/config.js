@@ -20,11 +20,9 @@ export default async function ({ readConfigFile }) {
     rootTags: ['runOutsideOfCiGroups'],
     testFiles: [
       require.resolve('./hello_world'),
-      require.resolve('./state_sync'),
       require.resolve('./routing'),
       require.resolve('./expressions_explorer'),
       require.resolve('./response_stream'),
-      require.resolve('./esql_ux_example'),
     ],
     services: functionalConfig.get('services'),
     uiSettings: {

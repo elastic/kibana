@@ -7,7 +7,9 @@
 
 import { esql } from '@elastic/esql';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
+import { ACTIONS_SERIES_ID_EVAL } from '@kbn/alerting-v2-common-queries';
 import { ALERT_EPISODE_ACTION_TYPE } from '@kbn/alerting-v2-schemas';
+import type { DecodedSeriesId } from '@kbn/alerting-v2-utils';
 import { queryResponseToRecords } from '../../services/query_service/query_response_to_records';
 import type { QueryServiceContract } from '../../services/query_service/query_service';
 
@@ -33,7 +35,7 @@ export const EMPTY_SERIES_ACTION_STATE: SeriesActionState = {
  * `drop_null_columns` removes columns that are null for every row.
  */
 interface RawSeriesActionStateRow {
-  group_hash: string;
+  series_id: string;
   last_snooze_action?: string | null;
   snoozed_until?: string | null;
 }
@@ -55,46 +57,58 @@ const toSeriesActionState = (row: RawSeriesActionStateRow, now: number): SeriesA
 interface LoadSeriesActionStatesParams {
   queryService: QueryServiceContract;
   spaceId: string;
-  groupHashes: readonly string[];
+  series: readonly DecodedSeriesId[];
 }
 
 /**
+ * Filters `.alert-actions` to one decoded series: rule-backed series by the
+ * rule that owns them, external ones by their source, both by `group_hash`.
+ * The hash is repeated per branch because it is only unique within an owner.
+ */
+const buildSeriesCondition = (series: DecodedSeriesId) =>
+  series.kind === 'rule'
+    ? esql.exp`rule_id == ${series.rule_id} AND group_hash == ${series.group_hash}`
+    : esql.exp`source == ${series.source} AND group_hash == ${series.group_hash}`;
+
+/**
  * Reduces the snooze / unsnooze history of every requested series to its
- * current state in a single ES|QL round-trip, keyed by `group_hash`. Series
- * with no such history are absent from the map; callers fall back to
- * {@link EMPTY_SERIES_ACTION_STATE}.
+ * current state in a single ES|QL round-trip, keyed by the series' canonical
+ * id (`encodeSeriesId`). A series is identified by its owner and `group_hash`,
+ * so a snooze recorded for another rule that shares the hash is not read.
+ * The space is the request's `spaceId`, which every series passed in must
+ * already belong to. Series with no such history are absent from the map;
+ * callers fall back to {@link EMPTY_SERIES_ACTION_STATE}.
  *
  * Series actions are persisted with a null `alert_id`, which is what the
  * `alert_id IS NULL` filter selects.
  */
-export const loadSeriesActionStatesByGroupHash = async ({
+export const loadSeriesActionStatesBySeries = async ({
   queryService,
   spaceId,
-  groupHashes,
+  series,
 }: LoadSeriesActionStatesParams): Promise<Map<string, SeriesActionState>> => {
-  if (groupHashes.length === 0) {
+  if (series.length === 0) {
     return new Map();
   }
 
-  const groupHashValues = [...new Set(groupHashes)].map((groupHash) => esql.str(groupHash));
+  const conditions = series.map(buildSeriesCondition);
+  const seriesCondition = conditions.reduce(
+    (accumulated, condition) => esql.exp`${accumulated} OR ${condition}`
+  );
 
-  const query = esql`
-    FROM ${ALERT_ACTIONS_DATA_STREAM}
-    | WHERE space_id == ${spaceId}
-        AND group_hash IN (${groupHashValues})
-        AND alert_id IS NULL
-        AND action_type IN ("snooze", "unsnooze")
-    | STATS
+  const query = esql.from([ALERT_ACTIONS_DATA_STREAM])
+    .where`space_id == ${spaceId} AND alert_id IS NULL AND action_type IN ("snooze", "unsnooze")`
+    .where`${seriesCondition}`.pipe(ACTIONS_SERIES_ID_EVAL).pipe`STATS
         last_snooze_action = LAST(action_type, @timestamp),
         snoozed_until = LAST(expiry, @timestamp) WHERE action_type == "snooze"
-      BY group_hash
-    | KEEP group_hash, last_snooze_action, snoozed_until
-  `.toRequest();
+      BY series_id`
+    .keep('series_id', 'last_snooze_action', 'snoozed_until')
+    .toRequest();
 
   const rows = queryResponseToRecords<RawSeriesActionStateRow>(
     await queryService.executeQuery({ query: query.query })
   );
 
   const now = Date.now();
-  return new Map(rows.map((row) => [row.group_hash, toSeriesActionState(row, now)]));
+  return new Map(rows.map((row) => [row.series_id, toSeriesActionState(row, now)]));
 };

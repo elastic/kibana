@@ -12,6 +12,7 @@ import {
   EuiBadgeGroup,
   EuiDescriptionList,
   EuiLink,
+  EuiSkeletonText,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
@@ -28,9 +29,9 @@ import { isEpisodeSnoozed } from '../../utils/is_episode_snoozed';
 import * as i18n from './translations';
 
 /**
- * Controls the grouping row, which is derived from the rule.
+ * Controls the grouping row, which is derived from the rule and the alert data.
  */
-export type GroupingRowStatus = 'visible' | 'hidden' | 'error';
+export type GroupingRowStatus = 'visible' | 'hidden' | 'loading' | 'error';
 
 export interface AlertEpisodeOverviewListProps {
   groupingFields: string[];
@@ -64,7 +65,7 @@ export const AlertEpisodeOverviewList = ({
   const isAcked = episodeAction?.lastAckAction === ALERT_EPISODE_ACTION_TYPE.ACK;
   const isResolved = episodeAction?.lastDeactivateAction === ALERT_EPISODE_ACTION_TYPE.DEACTIVATE;
   const isSnoozed = isEpisodeSnoozed(groupAction?.lastSnoozeAction, groupAction?.snoozedUntil);
-  const tags = groupAction?.tags ?? [];
+  const tags = episodeAction?.tags ?? [];
   // Caller-controlled (data.alert_url from external ingest). Restrict to absolute
   // http(s) before putting into href — blocks javascript:/data: stored XSS.
   const rawAlertUrl =
@@ -101,6 +102,12 @@ export const AlertEpisodeOverviewList = ({
                     >
                       {i18n.METADATA_LIST_GROUPING_ERROR}
                     </EuiText>
+                  ) : groupingStatus === 'loading' ? (
+                    <EuiSkeletonText
+                      lines={1}
+                      size="s"
+                      data-test-subj="alertingV2EpisodeDetailsOverviewListGroupingLoading"
+                    />
                   ) : (
                     <AlertingEpisodeGroupingTags
                       fields={groupingFields}

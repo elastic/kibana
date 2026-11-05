@@ -615,7 +615,7 @@ describe('ManagementApp', () => {
     ).toBeInTheDocument();
     expect(screen.getByRole('heading', { name: 'ES|QL query' })).toBeInTheDocument();
     expect(
-      screen.getByText('Write a new query, or select a recently or starred query.')
+      screen.getByText('Write a new query, or select a recent or starred query.')
     ).toBeInTheDocument();
     expect(screen.getByTestId('esqlViewQueryEditor')).toHaveValue(
       'FROM kibana_sample_data_ecommerce | WHERE KQL("term")'
@@ -1223,12 +1223,17 @@ describe('ManagementApp', () => {
 
       fireEvent.click(within(getRow('logs-view')).getByRole('checkbox'));
 
+      const actionsButton = within(otherRow).getByTestId('esqlViewsActionsButton');
       await waitFor(() => {
-        expect(within(otherRow).getByTestId('esqlViewsActionsButton')).toHaveAttribute(
-          'aria-disabled',
-          'true'
-        );
+        expect(actionsButton).toHaveAttribute('aria-disabled', 'true');
       });
+      expect(actionsButton).toHaveAccessibleName(
+        'Individual item actions are disabled when rows are being selected.'
+      );
+      fireEvent.mouseOver(actionsButton.parentElement as HTMLElement);
+      expect(await screen.findByRole('tooltip')).toHaveTextContent(
+        'Individual item actions are disabled when rows are being selected.'
+      );
       expect(within(otherRow).getByTestId('esqlViewsOpenInDiscoverAction')).toHaveAttribute(
         'aria-disabled',
         'true'

@@ -13,6 +13,7 @@ const createMocks = () => {
   const stepExecutionRuntime = {
     contextManager: {
       renderValueAccordingToContext: jest.fn((v: unknown) => v),
+      renderObjectAccordingToContextAsync: jest.fn(async (v: Record<string, unknown>) => v),
     },
     abortController: new AbortController(),
     node: { configuration: {} },
@@ -656,5 +657,33 @@ describe('ConnectorStepImpl', () => {
     const callInput = connectorExecutor.execute.mock.calls[0][0].input;
     expect(callInput.fetcher).toBeDefined();
     expect(callInput.fetcher.max_content_length).toBeGreaterThan(0);
+  });
+
+  it('renders `with` with the async renderer', async () => {
+    const { stepExecutionRuntime, connectorExecutor, workflowRuntime, workflowLogger } =
+      createMocks();
+    stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync.mockResolvedValue({
+      text: 'hi Alice',
+    });
+    const step = {
+      name: 'my-connector',
+      stepId: 'my-connector',
+      type: 'slack',
+      'connector-id': 'conn-1',
+      with: { text: 'hi {{ inputs.name }}' },
+    };
+
+    const impl = new ConnectorStepImpl(
+      step,
+      stepExecutionRuntime as any,
+      connectorExecutor as any,
+      workflowRuntime as any,
+      workflowLogger as any
+    );
+
+    await expect(impl.getInput()).resolves.toEqual({ text: 'hi Alice' });
+    expect(
+      stepExecutionRuntime.contextManager.renderObjectAccordingToContextAsync
+    ).toHaveBeenCalledWith({ text: 'hi {{ inputs.name }}' });
   });
 });

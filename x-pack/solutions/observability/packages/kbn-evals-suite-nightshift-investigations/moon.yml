@@ -33,6 +33,7 @@ dependsOn:
   - '@kbn/repo-info'
   - '@kbn/nightshift-decision-trees'
   - '@kbn/nightshift-investigations-plugin'
+  - '@kbn/nightshift-shared'
   - '@kbn/agentic-investigations-plugin'
   - '@kbn/significant-events-schema'
   - '@kbn/workflows'
@@ -50,6 +51,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

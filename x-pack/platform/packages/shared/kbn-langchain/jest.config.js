@@ -16,7 +16,7 @@ module.exports = {
     '!<rootDir>/x-pack/platform/packages/shared/kbn-langchain/server/*.d.ts',
     '!<rootDir>/x-pack/platform/packages/shared/kbn-langchain/server/*.config.ts',
   ],
-  preset: '@kbn/test',
+  preset: '@kbn/jest',
   rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/packages/shared/kbn-langchain'],
 };

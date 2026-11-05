@@ -61,7 +61,9 @@ describe('ListKiFooter', () => {
       refetch: jest.fn(),
     }));
 
-    renderListKiWithProviders(<ListKiPanel aiIndex={listKiTestAiIndex} />);
+    renderListKiWithProviders(
+      <ListKiPanel aiIndex={listKiTestAiIndex} discoverHref={SAMPLE_DISCOVER_URL} />
+    );
     const loadMoreClicks = MAX_KI_PAGE_SIZE / DEFAULT_KI_PAGE_SIZE - 1;
     for (let click = 0; click < loadMoreClicks; click++) {
       fireEvent.click(screen.getByTestId('contextListKiLoadMoreButton'));

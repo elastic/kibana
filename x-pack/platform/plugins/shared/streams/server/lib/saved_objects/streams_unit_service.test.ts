@@ -17,6 +17,7 @@ import {
   EncryptionError,
   EncryptionErrorOperation,
 } from '@kbn/encrypted-saved-objects-plugin/server';
+import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { StreamsUnit } from '@kbn/streams-schema';
 import { StatusError } from '../streams/errors/status_error';
@@ -116,6 +117,7 @@ const createService = ({
   prepareCredentials = fakePrepareCredentials(),
   encryptedSavedObjectsClient,
   canEncrypt = true,
+  logger = loggerMock.create(),
 }: {
   soClient: ReturnType<typeof savedObjectsClientMock.create>;
   publishUnit?: PublishUnitConfig;
@@ -123,10 +125,11 @@ const createService = ({
   prepareCredentials?: PrepareUnitCredentials | null;
   encryptedSavedObjectsClient?: EncryptedSavedObjectsClient;
   canEncrypt?: boolean;
+  logger?: Logger;
 }) => {
   return new StreamsUnitService({
     soClient,
-    logger: loggerMock.create(),
+    logger,
     publishUnit,
     validateUnit,
     prepareCredentials: prepareCredentials ?? undefined,
@@ -171,7 +174,7 @@ describe('StreamsUnitService', () => {
     expect(soClient.get).toHaveBeenCalledWith('streams-ui-metadata', 'default-streams-ui-metadata');
   });
 
-  it('throws 404 when the unit does not exist', async () => {
+  it('throws when the unit does not exist', async () => {
     const soClient = createSoClient();
     soClient.get.mockRejectedValue(notFoundError);
 
@@ -179,6 +182,19 @@ describe('StreamsUnitService', () => {
 
     await expect(service.getUnit('default')).rejects.toMatchObject({
       statusCode: 404,
+      message: 'Streams unit [default] not found.',
+    });
+  });
+
+  it('returns an empty unit from getUnitOrEmpty when the unit does not exist', async () => {
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+
+    const service = createService({ soClient });
+
+    await expect(service.getUnitOrEmpty('default')).resolves.toEqual({
+      unit: { sources: [], destinations: [], pipelines: [] },
+      ui_metadata: {},
     });
   });
 
@@ -251,6 +267,31 @@ describe('StreamsUnitService', () => {
         initialNamespaces: ['*'],
       }
     );
+  });
+
+  it('runs onPublished after publishing, even when the UI metadata write then fails', async () => {
+    const order: string[] = [];
+    const soClient = createSoClient();
+    soClient.get.mockRejectedValue(notFoundError);
+    soClient.create.mockImplementation(async (type: string, attributes) => {
+      if (type === 'streams-ui-metadata') {
+        throw new Error('metadata write failed');
+      }
+      return asSavedObject(type, attributes);
+    });
+    const publishUnit = jest.fn().mockImplementation(async () => {
+      order.push('publish');
+    });
+    const onPublished = jest.fn().mockImplementation(async () => {
+      order.push('onPublished');
+    });
+
+    const service = createService({ soClient, publishUnit });
+
+    await expect(
+      service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets, onPublished })
+    ).resolves.toEqual({ ui_metadata_not_persisted: true });
+    expect(order).toEqual(['publish', 'onPublished']);
   });
 
   it('keeps stored secrets when the PUT omits them', async () => {
@@ -787,6 +828,493 @@ describe('StreamsUnitService', () => {
     });
   });
 
+  it('lists the ids of stored units across all spaces', async () => {
+    const soClient = createSoClient();
+    soClient.openPointInTimeForType.mockResolvedValue({ id: 'pit-1' });
+    soClient.find.mockResolvedValueOnce({
+      saved_objects: [
+        { ...storedConfiguration, score: 0 },
+        { ...storedConfiguration, id: 'unit-2', score: 0 },
+      ],
+      total: 2,
+      per_page: 100,
+      page: 1,
+      pit_id: 'pit-1',
+    });
+
+    const service = createService({ soClient });
+
+    await expect(service.listUnitIds()).resolves.toEqual(['default', 'unit-2']);
+    expect(soClient.find.mock.calls[0][0]).toMatchObject({
+      type: 'streams-configuration',
+      namespaces: ['*'],
+    });
+    expect(soClient.closePointInTime.mock.calls[0][0]).toBe('pit-1');
+  });
+
+  describe('republishUnit', () => {
+    const oldKidBlobs: StoredUnitCredential[] = [
+      { name: 'es-prod', target: 'dev', ciphertext: 'sealed-under-old-kid' },
+    ];
+
+    const storedAt = (
+      sealedCredentials?: StoredUnitCredential[],
+      attributes: Partial<StreamsConfigurationSavedObjectAttributes> = {}
+    ): SavedObject<StreamsConfigurationSavedObjectAttributes> => ({
+      ...storedConfiguration,
+      version: 'v1',
+      attributes: {
+        ...storedConfiguration.attributes,
+        ...(sealedCredentials ? { sealed_credentials: sealedCredentials } : {}),
+        ...attributes,
+      },
+    });
+
+    const decrypting = (stored: SavedObject<StreamsConfigurationSavedObjectAttributes>) =>
+      ({
+        getDecryptedAsInternalUser: jest.fn().mockResolvedValue(stored),
+      } as unknown as EncryptedSavedObjectsClient);
+
+    // `get` is the version re-read before the PUT; `create` answers a write with version v2.
+    const soClientAt = (currentVersion: string) => {
+      const soClient = createSoClient();
+      soClient.get.mockResolvedValue({ ...storedConfiguration, version: currentVersion });
+      soClient.create.mockImplementation(async (type: string, attributes) => ({
+        ...asSavedObject(type, attributes),
+        version: 'v2',
+      }));
+      return soClient;
+    };
+
+    it('publishes the stored unit and blobs without validating or writing when nothing changed', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn();
+      const validateUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        validateUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(storedFor(['es-prod']))),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('republished');
+
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+      expect(publishUnit).toHaveBeenCalledWith({
+        unitId: 'default',
+        unit,
+        credentials: sealedFor(['es-prod']),
+      });
+    });
+
+    it('does not re-seal when the stored blobs are in a different order', async () => {
+      const soClient = soClientAt('v1');
+      const validateUnit = jest.fn();
+      const twoSecrets = { 'es-prod': 's3cret', 's3-key': 'k3y' };
+
+      const service = createService({
+        soClient,
+        publishUnit: jest.fn(),
+        validateUnit,
+        encryptedSavedObjectsClient: decrypting(
+          storedAt(storedFor(['es-prod', 's3-key']).reverse(), { secrets: twoSecrets })
+        ),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('republished');
+
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('passes the run signal to validate and publish', async () => {
+      const { signal } = new AbortController();
+      const validateUnit = jest.fn().mockResolvedValue({});
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient: soClientAt('v2'),
+        validateUnit,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default', signal)).resolves.toBe('resealed');
+
+      expect(validateUnit).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+      expect(publishUnit).toHaveBeenCalledWith(expect.objectContaining({ signal }));
+    });
+
+    it('publishes a unit without secrets without calling the preparer', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn();
+      const prepareCredentials = fakePrepareCredentials();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        prepareCredentials,
+        encryptedSavedObjectsClient: decrypting(storedAt([], { secrets: {} })),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('republished');
+
+      expect(prepareCredentials).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).toHaveBeenCalledWith({ unitId: 'default', unit, credentials: [] });
+    });
+
+    it('validates, writes with the read version, then publishes when a blob was re-sealed', async () => {
+      const order: string[] = [];
+      const soClient = soClientAt('v2');
+      soClient.create.mockImplementation(async (type: string, attributes) => {
+        order.push('write');
+        return { ...asSavedObject(type, attributes), version: 'v2' };
+      });
+      const validateUnit = jest.fn(async () => {
+        order.push('validate');
+        return {};
+      });
+      const publishUnit = jest.fn(async () => {
+        order.push('publish');
+      });
+
+      const service = createService({
+        soClient,
+        validateUnit,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('resealed');
+
+      expect(order).toEqual(['validate', 'write', 'publish']);
+      expect(validateUnit).toHaveBeenCalledWith({ unit, credentials: sealedFor(['es-prod']) });
+      expect(soClient.create).toHaveBeenCalledWith(
+        'streams-configuration',
+        { unit_id: 'default', unit, secrets, sealed_credentials: storedFor(['es-prod']) },
+        expect.objectContaining({
+          id: 'default',
+          overwrite: true,
+          version: 'v1',
+          initialNamespaces: ['*'],
+        })
+      );
+      expect(publishUnit).toHaveBeenCalledWith({
+        unitId: 'default',
+        unit,
+        credentials: sealedFor(['es-prod']),
+      });
+    });
+
+    it('re-seals a document stored without a blob cache', async () => {
+      const soClient = soClientAt('v2');
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt()),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('resealed');
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(publishUnit).toHaveBeenCalledTimes(1);
+    });
+
+    it('skips the PUT when the re-seal write hits a version conflict', async () => {
+      const soClient = soClientAt('v1');
+      soClient.create.mockRejectedValue(
+        SavedObjectsErrorHelpers.createConflictError('streams-configuration', 'default')
+      );
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('conflict');
+
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('skips the PUT when the version moved before it', async () => {
+      const soClient = soClientAt('v9');
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(storedFor(['es-prod']))),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('conflict');
+
+      expect(publishUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+    });
+
+    it('skips the PUT when a save landed after the re-seal write', async () => {
+      const soClient = soClientAt('v3');
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).resolves.toBe('conflict');
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('keeps the re-sealed blobs when publish fails after a re-seal', async () => {
+      const soClient = soClientAt('v2');
+      const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).rejects.toThrow('distributor down');
+
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('rejects and touches nothing when the stored document fails to decrypt', async () => {
+      const soClient = soClientAt('v1');
+      const encryptedSavedObjectsClient = {
+        getDecryptedAsInternalUser: jest
+          .fn()
+          .mockRejectedValue(
+            new EncryptionError(
+              'Unable to decrypt attribute "secrets"',
+              'secrets',
+              EncryptionErrorOperation.Decryption
+            )
+          ),
+      } as unknown as EncryptedSavedObjectsClient;
+      const prepareCredentials = fakePrepareCredentials();
+      const validateUnit = jest.fn();
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        validateUnit,
+        prepareCredentials,
+        encryptedSavedObjectsClient,
+      });
+
+      await expect(service.republishUnit('default')).rejects.toBeInstanceOf(EncryptionError);
+
+      expect(prepareCredentials).not.toHaveBeenCalled();
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('validates, writes and publishes nothing when the run is aborted before validation', async () => {
+      const soClient = soClientAt('v1');
+      const validateUnit = jest.fn();
+      const publishUnit = jest.fn();
+      const abortController = new AbortController();
+      abortController.abort();
+
+      const service = createService({
+        soClient,
+        validateUnit,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default', abortController.signal)).resolves.toBe(
+        'aborted'
+      );
+
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('writes nothing when the run is aborted during validation', async () => {
+      const soClient = soClientAt('v1');
+      const abortController = new AbortController();
+      const validateUnit = jest.fn(async () => {
+        abortController.abort();
+        return {};
+      });
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        validateUnit,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default', abortController.signal)).resolves.toBe(
+        'aborted'
+      );
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('keeps the re-sealed write and skips the PUT when aborted after the write', async () => {
+      const soClient = soClientAt('v2');
+      const abortController = new AbortController();
+      soClient.create.mockImplementationOnce(async (type: string, attributes) => {
+        abortController.abort();
+        return { ...asSavedObject(type, attributes), version: 'v2' };
+      });
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default', abortController.signal)).resolves.toBe(
+        'aborted'
+      );
+
+      expect(publishUnit).not.toHaveBeenCalled();
+      expect(soClient.create).toHaveBeenCalledTimes(1);
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it.each([
+      ['nothing was re-sealed', storedFor(['es-prod']), 'v1', 0],
+      ['a blob was re-sealed', oldKidBlobs, 'v2', 1],
+    ])(
+      'skips the PUT when aborted during the version re-read and %s',
+      async (_, sealedCredentials, currentVersion, writes) => {
+        const soClient = soClientAt(currentVersion);
+        const abortController = new AbortController();
+        soClient.get.mockImplementation(async () => {
+          abortController.abort();
+          return { ...storedConfiguration, version: currentVersion };
+        });
+        const publishUnit = jest.fn();
+
+        const service = createService({
+          soClient,
+          publishUnit,
+          encryptedSavedObjectsClient: decrypting(storedAt(sealedCredentials)),
+        });
+
+        await expect(service.republishUnit('default', abortController.signal)).resolves.toBe(
+          'aborted'
+        );
+
+        expect(soClient.get).toHaveBeenCalledTimes(1);
+        expect(soClient.create).toHaveBeenCalledTimes(writes);
+        expect(publishUnit).not.toHaveBeenCalled();
+      }
+    );
+
+    it('skips the PUT without writing when aborted and nothing was re-sealed', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn();
+      const abortController = new AbortController();
+      abortController.abort();
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(storedFor(['es-prod']))),
+      });
+
+      await expect(service.republishUnit('default', abortController.signal)).resolves.toBe(
+        'aborted'
+      );
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('fails with 503 and touches nothing when a unit with secrets has no preparer', async () => {
+      const soClient = soClientAt('v1');
+      const validateUnit = jest.fn();
+      const publishUnit = jest.fn();
+
+      const service = createService({
+        soClient,
+        validateUnit,
+        publishUnit,
+        prepareCredentials: null,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).rejects.toMatchObject({ statusCode: 503 });
+
+      expect(validateUnit).not.toHaveBeenCalled();
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('writes nothing when publish fails and nothing was re-sealed', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn().mockRejectedValue(new Error('distributor down'));
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(storedFor(['es-prod']))),
+      });
+
+      await expect(service.republishUnit('default')).rejects.toThrow('distributor down');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(soClient.delete).not.toHaveBeenCalled();
+    });
+
+    it('writes and publishes nothing when validation of the re-sealed unit fails', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn();
+      const validateUnit = jest.fn().mockRejectedValue(new StatusError('invalid unit', 400));
+
+      const service = createService({
+        soClient,
+        publishUnit,
+        validateUnit,
+        encryptedSavedObjectsClient: decrypting(storedAt(oldKidBlobs)),
+      });
+
+      await expect(service.republishUnit('default')).rejects.toThrow('invalid unit');
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+
+    it('returns not_found when the unit was deleted after listing', async () => {
+      const soClient = soClientAt('v1');
+      const publishUnit = jest.fn();
+      const encryptedSavedObjectsClient = {
+        getDecryptedAsInternalUser: jest.fn().mockRejectedValue(notFoundError),
+      } as unknown as EncryptedSavedObjectsClient;
+
+      const service = createService({ soClient, publishUnit, encryptedSavedObjectsClient });
+
+      await expect(service.republishUnit('default')).resolves.toBe('not_found');
+
+      expect(publishUnit).not.toHaveBeenCalled();
+    });
+  });
+
   describe('with the real preparer and distributor client', () => {
     let keyDir: string;
 
@@ -804,8 +1332,8 @@ describe('StreamsUnitService', () => {
       await writeFile(join(keyDir, `streams-encryption-key.${kid}`), randomBytes(32));
     };
 
-    // Saves twice through the real sealing and hashing, feeding the first write back as the stored object.
-    const saveTwice = async (betweenSaves: () => Promise<void> = async () => {}) => {
+    // Real sealing and hashing, with the last configuration write fed back as the stored object.
+    const createRealService = () => {
       const fetchImpl = jest.fn().mockResolvedValue({
         ok: true,
         status: 200,
@@ -830,6 +1358,12 @@ describe('StreamsUnitService', () => {
         }
         return asSavedObject(type, attributes);
       });
+      soClient.get.mockImplementation(async (type: string) => {
+        if (type === 'streams-configuration' && stored) {
+          return stored;
+        }
+        throw notFoundError;
+      });
       const encryptedSavedObjectsClient = {
         getDecryptedAsInternalUser: jest.fn(async () => {
           if (!stored) {
@@ -847,15 +1381,23 @@ describe('StreamsUnitService', () => {
         encryptedSavedObjectsClient,
         canEncrypt: true,
       });
+      const unitPuts = () =>
+        fetchImpl.mock.calls
+          .filter(([, init]) => init.method === 'PUT')
+          .map(([, init]) => JSON.parse(init.body));
+
+      return { service, soClient, unitPuts };
+    };
+
+    const saveTwice = async (betweenSaves: () => Promise<void> = async () => {}) => {
+      const { service, unitPuts } = createRealService();
 
       await service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets });
       await betweenSaves();
       // The UI re-sends the same value, which must not count as a change.
       await service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets });
 
-      return fetchImpl.mock.calls
-        .filter(([url]) => String(url).includes('/v1/units/'))
-        .map(([, init]) => JSON.parse(init.body));
+      return unitPuts();
     };
 
     it('keeps the same config_hash on a no-op re-save', async () => {
@@ -870,6 +1412,32 @@ describe('StreamsUnitService', () => {
 
       expect(second.config_hash).not.toBe(first.config_hash);
       expect(second.credentials[0].ciphertext.startsWith('v1.kid-2.')).toBe(true);
+    });
+
+    it('re-seals under the new kid once after a rotation, then republishes the same hash', async () => {
+      const { service, unitPuts } = createRealService();
+      await service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets });
+      await writeKey('kid-2');
+
+      await expect(service.republishUnit('default')).resolves.toBe('resealed');
+      await expect(service.republishUnit('default')).resolves.toBe('republished');
+
+      const [saved, resealed, steady] = unitPuts();
+      expect(resealed.config_hash).not.toBe(saved.config_hash);
+      expect(resealed.credentials[0].ciphertext.startsWith('v1.kid-2.')).toBe(true);
+      expect(steady).toEqual(resealed);
+    });
+
+    it('writes and publishes nothing when current-kid is unreadable', async () => {
+      const { service, soClient, unitPuts } = createRealService();
+      await service.upsertUnit({ unitId: 'default', unit, ui_metadata: {}, secrets });
+      await rm(join(keyDir, 'current-kid'));
+      soClient.create.mockClear();
+
+      await expect(service.republishUnit('default')).rejects.toMatchObject({ statusCode: 503 });
+
+      expect(soClient.create).not.toHaveBeenCalled();
+      expect(unitPuts()).toHaveLength(1);
     });
   });
 

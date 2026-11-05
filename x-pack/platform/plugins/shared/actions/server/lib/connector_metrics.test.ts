@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ActionExecutionSourceType } from './action_execution_source';
 import Boom from '@hapi/boom';
 import {
   connectorAuthCounter,
@@ -14,6 +15,7 @@ import {
   getConnectorAuthInitiateErrorType,
   getConnectorAuthType,
   getConnectorCreateErrorType,
+  getConnectorExecuteOrigin,
   recordConnectorAuth,
   recordConnectorCreate,
   recordConnectorExecute,
@@ -45,6 +47,19 @@ describe('connector metrics', () => {
     });
   });
 
+  describe('getConnectorExecuteOrigin', () => {
+    it.each([
+      [ActionExecutionSourceType.SAVED_OBJECT, 'saved_object'],
+      [ActionExecutionSourceType.HTTP_REQUEST, 'http_request'],
+      [ActionExecutionSourceType.NOTIFICATION, 'notification'],
+      [ActionExecutionSourceType.BACKGROUND_TASK, 'background_task'],
+      [ActionExecutionSourceType.AGENT_BUILDER, 'agent_builder'],
+      [undefined, 'none'],
+    ])('maps %s to %s', (sourceType, expected) => {
+      expect(getConnectorExecuteOrigin(sourceType)).toBe(expected);
+    });
+  });
+
   describe('getConnectorCreateErrorType', () => {
     it.each([
       [Boom.badRequest('bad'), 'invalid'],
@@ -73,11 +88,12 @@ describe('connector metrics', () => {
 
   describe('recordConnectorCreate', () => {
     it('records a success without an error type', () => {
-      recordConnectorCreate({ connectorType: '.google_drive', authType: 'ears' });
+      recordConnectorCreate({ connectorType: '.google_drive', authType: 'ears', specBased: true });
 
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': '.google_drive',
         'connector.auth_type': 'ears',
+        'connector.spec_based': true,
         success: true,
       });
     });
@@ -86,12 +102,14 @@ describe('connector metrics', () => {
       recordConnectorCreate({
         connectorType: '.google_drive',
         authType: 'ears',
+        specBased: true,
         errorType: 'conflict',
       });
 
       expect(connectorCreateCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': '.google_drive',
         'connector.auth_type': 'ears',
+        'connector.spec_based': true,
         success: false,
         'error.type': 'conflict',
       });
@@ -102,12 +120,16 @@ describe('connector metrics', () => {
     it('records a success with its sub-action and duration', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'saved_object',
         subAction: 'search',
         durationMs: 120,
       });
 
       const attributes = {
         'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
         'connector.sub_action': 'search',
         success: true,
       };
@@ -118,6 +140,8 @@ describe('connector metrics', () => {
     it('records a failure with error type and source on the counter only', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'saved_object',
         subAction: 'search',
         errorType: 'unauthorized',
         errorSource: 'user',
@@ -126,6 +150,8 @@ describe('connector metrics', () => {
 
       expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
         'connector.sub_action': 'search',
         success: false,
         'error.type': 'unauthorized',
@@ -133,6 +159,8 @@ describe('connector metrics', () => {
       });
       expect(connectorExecuteDuration.record).toHaveBeenCalledWith(5, {
         'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
         'connector.sub_action': 'search',
         success: false,
         'error.type': 'unauthorized',
@@ -142,12 +170,16 @@ describe('connector metrics', () => {
     it('omits the sub-action and the duration when they are not known', () => {
       recordConnectorExecute({
         connectorType: '.sharepoint',
+        specBased: true,
+        origin: 'saved_object',
         errorType: 'rate_limited',
         errorSource: 'user',
       });
 
       expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
         'connector.type': '.sharepoint',
+        'connector.spec_based': true,
+        'connector.origin': 'saved_object',
         success: false,
         'error.type': 'rate_limited',
         'error.source': 'user',

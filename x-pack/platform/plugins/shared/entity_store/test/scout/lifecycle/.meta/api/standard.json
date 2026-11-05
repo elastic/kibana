@@ -1,5 +1,5 @@
 {
-  "sha1": "11b5e7d0cddc3354d47eae0ea4a46345a8207c69",
+  "sha1": "4eb95c8e1c9329f10d97b35e0fe9a0c39d78c3a4",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -753,7 +753,7 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
         "line": 135,
-        "column": 79
+        "column": 84
       }
     },
     {
@@ -768,7 +768,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 161,
+        "line": 162,
         "column": 18
       }
     },
@@ -784,7 +784,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 176,
+        "line": 177,
         "column": 32
       }
     },
@@ -800,7 +800,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 180,
+        "line": 181,
         "column": 89
       }
     },
@@ -816,7 +816,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 196,
+        "line": 197,
         "column": 13
       }
     },
@@ -832,7 +832,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 217,
+        "line": 218,
         "column": 16
       }
     },
@@ -848,7 +848,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 229,
+        "line": 230,
         "column": 33
       }
     },
@@ -864,7 +864,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 239,
+        "line": 240,
         "column": 16
       }
     },
@@ -880,7 +880,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 253,
+        "line": 254,
         "column": 16
       }
     },
@@ -896,7 +896,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 265,
+        "line": 266,
         "column": 17
       }
     },
@@ -912,7 +912,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 274,
+        "line": 275,
         "column": 13
       }
     },
@@ -928,7 +928,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 300,
+        "line": 301,
         "column": 24
       }
     },
@@ -944,7 +944,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 322,
+        "line": 323,
         "column": 24
       }
     },
@@ -960,7 +960,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/per_process_config.spec.ts",
-        "line": 360,
+        "line": 361,
         "column": 24
       }
     },
@@ -1095,7 +1095,7 @@
     {
       "id": "43741b84d42a6a0-c5bc8c37cddfe39",
       "title": "Entity Store Status API tests Should return status \"running\" with all 4 engine types \"started\" after a full install",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1104,14 +1104,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 40,
-        "column": 46
+        "line": 41,
+        "column": 30
       }
     },
     {
       "id": "43741b84d42a6a0-1d1c1e9c8f31ccc",
       "title": "Entity Store Status API tests Should return status \"not_installed\" and an empty engines array when the store is uninstalled",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1121,13 +1121,13 @@
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
         "line": 57,
-        "column": 16
+        "column": 24
       }
     },
     {
       "id": "43741b84d42a6a0-0ad307183e734d5",
       "title": "Entity Store Status API tests Should return overall status \"running\" when 3 engines are \"started\" and 1 is \"stopped\"",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1136,14 +1136,14 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 66,
-        "column": 30
+        "line": 67,
+        "column": 14
       }
     },
     {
       "id": "43741b84d42a6a0-d7d0ca0ad16f60f",
       "title": "Entity Store Status API tests Should return overall status \"stopped\" when all 4 engines are stopped",
-      "expectedStatus": "passed",
+      "expectedStatus": "skipped",
       "tags": [
         "@local-stateful-classic",
         "@cloud-stateful-classic",
@@ -1152,8 +1152,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/entity_store/test/scout/lifecycle/api/tests/status.spec.ts",
-        "line": 85,
-        "column": 26
+        "line": 84,
+        "column": 14
       }
     },
     {

@@ -17,6 +17,28 @@ jest.mock('../api', () => ({
   }),
 }));
 
+const mockUseRiskEnginePrivileges = jest.fn();
+jest.mock('./use_risk_engine_privileges', () => ({
+  useRiskEnginePrivileges: () => mockUseRiskEnginePrivileges(),
+}));
+
+const mockUseEntityEnginePrivileges = jest.fn();
+jest.mock('../../components/entity_store/hooks/use_entity_engine_privileges', () => ({
+  useEntityEnginePrivileges: () => mockUseEntityEnginePrivileges(),
+}));
+
+const buildRiskEnginePrivileges = ({ read, write }: { read: boolean; write: boolean }) => ({
+  data: {
+    privileges: {
+      elasticsearch: {
+        index: { 'risk-score.risk-score-*': { read, write } },
+      },
+    },
+  },
+});
+
+const grantedEntityStore = { data: { has_read_permissions: true, has_write_permissions: true } };
+
 const mockAddError = jest.fn();
 jest.mock('../../../common/hooks/use_app_toasts', () => ({
   useAppToasts: jest.fn().mockReturnValue({
@@ -36,6 +58,56 @@ describe('useCalculateEntityRiskScore', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockCalculateEntityRiskScoreV2.mockResolvedValue({});
+    mockUseRiskEnginePrivileges.mockReturnValue(
+      buildRiskEnginePrivileges({ read: true, write: true })
+    );
+    mockUseEntityEnginePrivileges.mockReturnValue(grantedEntityStore);
+  });
+
+  it.each([
+    [
+      'the user cannot write risk scores',
+      buildRiskEnginePrivileges({ read: true, write: false }),
+      grantedEntityStore,
+    ],
+    [
+      'the user cannot write to the entity store',
+      buildRiskEnginePrivileges({ read: true, write: true }),
+      { data: { has_read_permissions: true, has_write_permissions: false } },
+    ],
+  ])('does not call the API when %s', async (_, riskEnginePrivileges, entityStorePrivileges) => {
+    mockUseRiskEnginePrivileges.mockReturnValue(riskEnginePrivileges);
+    mockUseEntityEnginePrivileges.mockReturnValue(entityStorePrivileges);
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: createReactQueryWrapper(),
+    });
+
+    await act(async () => {
+      await result.current.calculateEntityRiskScore();
+    });
+
+    expect(mockCalculateEntityRiskScoreV2).not.toHaveBeenCalled();
+    expect(mockAddError).not.toHaveBeenCalled();
+    expect(params.onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('does not show an error toast when the route rejects the user with a 403', async () => {
+    mockCalculateEntityRiskScoreV2.mockRejectedValue(
+      Object.assign(new Error('Forbidden'), { request: {}, response: { status: 403 } })
+    );
+    const { result } = renderHook(() => useCalculateEntityRiskScore(params), {
+      wrapper: createReactQueryWrapper(),
+    });
+
+    act(() => {
+      result.current.calculateEntityRiskScore();
+    });
+
+    await waitFor(() => expect(mockCalculateEntityRiskScoreV2).toHaveBeenCalled());
+    // wait for the mutation to settle so the error handler has run
+    await waitFor(() => expect(result.current.isLoading).toBe(false));
+    expect(mockAddError).not.toHaveBeenCalled();
+    expect(params.onSuccess).not.toHaveBeenCalled();
   });
 
   it('calls calculateEntityRiskScoreV2 when the callback is invoked', async () => {

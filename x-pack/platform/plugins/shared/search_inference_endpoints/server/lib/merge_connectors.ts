@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type { InferenceConnector } from '@kbn/inference-common';
+import type { ApiInferenceConnector, InferenceConnector } from '@kbn/inference-common';
 import { defaultInferenceEndpoints } from '@kbn/inference-common';
-
-export interface ApiInferenceConnector extends InferenceConnector {
-  isRecommended?: boolean;
-}
 
 /**
  * Produces the ordered connector list the UI consumes.
@@ -24,7 +20,7 @@ export interface ApiInferenceConnector extends InferenceConnector {
  *   returned with the platform default chat-completion endpoint moved to the front.
  */
 export const mergeConnectors = (
-  featureEndpoints: InferenceConnector[],
+  featureEndpoints: ApiInferenceConnector[],
   allConnectors: InferenceConnector[],
   soEntryFound: boolean
 ): ApiInferenceConnector[] => {

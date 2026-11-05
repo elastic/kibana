@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import React, { Suspense, useMemo } from 'react';
+import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
@@ -24,8 +25,6 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import type { CustomCellRenderer } from '@kbn/unified-data-table';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type { MaintenanceWindow } from '@kbn/maintenance-windows-plugin/common';
-import { MaintenanceWindowBaseCell } from '@kbn/response-ops-alerts-table/components/maintenance_windows_cell';
 import type { FindRulesResponse } from '@kbn/alerting-v2-schemas';
 import { getBreachEsqlQuery } from '@kbn/alerting-v2-schemas';
 import type { AlertEpisodeStatus } from '@kbn/alerting-v2-schemas';
@@ -200,44 +199,17 @@ export const EpisodeRuleTagsCell = ({
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
 };
 
-export interface EpisodeMaintenanceWindowsCellProps extends CellRendererProps {
-  maintenanceWindows?: Map<string, MaintenanceWindow>;
-  isLoadingMaintenanceWindows: boolean;
-}
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+  const ids = row.flattened.maintenance_window_ids;
 
-export const EpisodeMaintenanceWindowsCell = ({
-  row,
-  maintenanceWindows,
-  isLoadingMaintenanceWindows,
-}: EpisodeMaintenanceWindowsCellProps) => {
-  const ids = useMemo(
-    () => (row.flattened.maintenance_window_ids as string[] | undefined) ?? [],
-    [row.flattened.maintenance_window_ids]
-  );
-
-  const resolved = useMemo(
-    () =>
-      ids
-        .map((id) => maintenanceWindows?.get(id))
-        .filter((mw): mw is MaintenanceWindow => mw != null),
-    [ids, maintenanceWindows]
-  );
-  const unresolvedIds = useMemo(
-    () => ids.filter((id) => !maintenanceWindows?.has(id)),
-    [ids, maintenanceWindows]
-  );
-
-  if (ids.length === 0) {
+  if (!Array.isArray(ids) || ids.length === 0) {
     return <>{EMPTY_VALUE}</>;
   }
 
   return (
-    <MaintenanceWindowBaseCell
-      maintenanceWindows={resolved}
-      maintenanceWindowIds={unresolvedIds}
-      isLoading={isLoadingMaintenanceWindows}
-      timestamp={row.flattened['@timestamp'] as string | undefined}
-    />
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
+      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+    </EuiBadge>
   );
 };
 

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { THREAT_REPORTS_INDEX as SHARED_THREAT_REPORTS_INDEX } from '@kbn/alertzero-common';
+import {
+  HUNT_USABLE_FILTER,
+  INDICATOR_ELIGIBLE_FILTER,
+  THREAT_REPORTS_INDEX as SHARED_THREAT_REPORTS_INDEX,
+} from '@kbn/alertzero-common';
 import type { KibanaRequest } from '@kbn/core/server';
 import {
   elasticsearchServiceMock,
@@ -16,7 +20,6 @@ import {
   DIAMOND_SUMMARY_EMBEDDING_INFERENCE_ID,
   THREAT_REPORTS_INDEX,
 } from '../../../common/threat_intel';
-import { HUNT_USABLE_FILTER, INDICATOR_ELIGIBLE_FILTER } from '../lib/usable_report_filter';
 import { getThreatIntelReadiness, type ReadinessDeps } from './readiness';
 
 const logger = loggingSystemMock.createLogger();
