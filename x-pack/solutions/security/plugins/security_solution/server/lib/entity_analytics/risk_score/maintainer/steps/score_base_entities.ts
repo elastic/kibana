@@ -24,6 +24,8 @@ import {
 import { RISK_SCORING_REQUEST_TIMEOUT } from '../../constants';
 import type { ParsedRiskScore } from './parse_esql_row';
 import { parseEsqlBaseScoreRow } from './parse_esql_row';
+import type { AlertSourceCounts } from './tally_alert_sources';
+import { mergeAlertSourceCounts, tallyAlertSources } from './tally_alert_sources';
 import { applyScoreModifiersFromEntities } from '../../modifiers/apply_modifiers_from_entities';
 import type { RiskScoreModifierEntity, ScoredEntityPage, StepResult } from './pipeline_types';
 import { fetchEntitiesByIds } from '../utils/fetch_entities_by_ids';
@@ -80,6 +82,8 @@ export interface Phase1BaseScoringSummary extends StepResult {
   entityCreationsSkipped: number;
   /** Missing scores rejected by EUID/field validation or bulk creation. */
   entityCreationsFailed: number;
+  /** Alerts per source, split by whether their entity was in the store at lookup time. */
+  alertSources: AlertSourceCounts;
 }
 
 interface EuidPageBounds {
@@ -222,6 +226,7 @@ export const scoreBaseEntities = async ({
   let entityCreationsSkipped = 0;
   let entityCreationsFailed = 0;
   const newScores: Record<string, number> = {};
+  const alertSources: AlertSourceCounts = Object.create(null);
 
   for await (const page of calculateBaseEntityScores({
     ...params,
@@ -232,6 +237,7 @@ export const scoreBaseEntities = async ({
     pageTimings.count('pagesProcessed', 1);
     scoresCalculated += page.scores.length;
     pageTimings.count('scoresCalculated', page.scores.length);
+    mergeAlertSourceCounts(alertSources, page.alertSources);
     // Scores without a canonical entity would create orphaned risk documents. Create eligible
     // entities from a representative alert when enabled; otherwise drop their scores.
     const inStoreScores = page.scores.filter((score) => page.entities.has(score.id_value));
@@ -330,6 +336,7 @@ export const scoreBaseEntities = async ({
     entitiesCreated,
     entityCreationsSkipped,
     entityCreationsFailed,
+    alertSources,
   };
 };
 
@@ -488,7 +495,12 @@ const applyBaseScoreModifiers = ({
     watchlistConfigs,
   });
 
-  return { entityIds: scores.map((score) => score.entity_id), scores: finalScores, entities };
+  return {
+    entityIds: scores.map((score) => score.entity_id),
+    scores: finalScores,
+    entities,
+    alertSources: tallyAlertSources(scores, entities),
+  };
 };
 
 /**
