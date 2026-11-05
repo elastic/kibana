@@ -303,6 +303,33 @@ describe('buildAgentTemplate', () => {
       expect(template).toContain('{{#each include_headers as |item|}}');
       expect(template).toContain('  - {{item}}');
     });
+
+    it('always maps the body under json and copies it to event.original', () => {
+      const template = buildAgentTemplate('http_endpoint');
+      expect(template).toContain('\nprefix: json\n');
+      expect(template).toContain('\npreserve_original_event: true\n');
+      expect(template).not.toContain('{{prefix}}');
+      expect(template).not.toContain('preserve_original_event: {{preserve_original_event}}');
+    });
+
+    it('drops the json copy of the body before any user processors', () => {
+      const template = buildAgentTemplate('http_endpoint');
+      expect(template).toContain(
+        'processors:\n- drop_fields:\n    fields:\n      - json\n    ignore_missing: true\n{{#if processors}}\n{{processors}}\n{{/if}}'
+      );
+      expect(template.match(/^processors:$/gm)).toHaveLength(1);
+    });
+  });
+
+  describe('processors section for other inputs', () => {
+    it.each(ALL_INPUT_TYPES.filter((inputType) => inputType !== 'http_endpoint'))(
+      '%s only renders processors when the user sets them',
+      (inputType) => {
+        const template = buildAgentTemplate(inputType);
+        expect(template).toContain('{{#if processors}}\nprocessors:\n{{processors}}\n{{/if}}');
+        expect(template).not.toContain('drop_fields');
+      }
+    );
   });
 
   describe('kafka', () => {
