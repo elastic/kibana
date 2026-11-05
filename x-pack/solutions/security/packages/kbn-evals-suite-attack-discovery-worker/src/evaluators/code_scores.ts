@@ -269,6 +269,8 @@ export const scoreInvestigationOpened: CodeScorer = (_expected, artifacts) =>
 
 /** Verdict against gold. A review with no verdict yet is a gap, not a wrong answer. */
 export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
+  if (expected.blindReason)
+    return notApplicable(`scored by BlindReviewAbstained: ${expected.blindReason}`);
   const accepted = [expected.goldVerdict, ...(expected.alsoAccepts ?? [])];
   if (artifacts.reviews.length === 0) {
     return expected.expectedDiscoveries === 'none'
@@ -282,6 +284,26 @@ export const scoreVerdictMatchesGold: CodeScorer = (expected, artifacts) => {
       return accepted.includes(review.verdict as (typeof accepted)[number])
         ? pass(`verdict ${review.verdict}`)
         : fail(`verdict ${review.verdict}, gold ${accepted.join(' or ')}`);
+    },
+    'no review ran'
+  );
+};
+
+/**
+ * For rows the review cannot see (`blindReason`): the right answer is to abstain. A definite
+ * verdict means the model claimed evidence the workflow never gave it. Reported only (threshold 0
+ * in `CODE_PASS_THRESHOLDS`), because the gap is the workflow's, not the model's.
+ */
+export const scoreBlindReviewAbstained: CodeScorer = (expected, artifacts) => {
+  if (!expected.blindReason) return notApplicable("the review can see this row's evidence");
+  if (artifacts.reviews.length === 0) return notApplicable('no review ran');
+  return foldReviews(
+    artifacts.reviews,
+    (review) => {
+      if (!review.verdict) return missing(`review is ${review.status} with no verdict`);
+      return review.verdict === 'inconclusive'
+        ? pass('abstained (inconclusive) without a source for the evidence')
+        : fail(`returned ${review.verdict} without a source for the evidence`);
     },
     'no review ran'
   );
@@ -462,6 +484,7 @@ export const CODE_SCORERS: ReadonlyArray<{ name: string; stage: Stage; scorer: C
   { name: 'OneReviewPerAttack', stage: 'pipeline', scorer: scoreOneReviewPerAttack },
   { name: 'InvestigationOpened', stage: 'review', scorer: scoreInvestigationOpened },
   { name: 'VerdictMatchesGold', stage: 'review', scorer: scoreVerdictMatchesGold },
+  { name: 'BlindReviewAbstained', stage: 'review', scorer: scoreBlindReviewAbstained },
   { name: 'ParkedAtGate', stage: 'review', scorer: scoreParkedAtGate },
   { name: 'OutcomeReported', stage: 'pipeline', scorer: scoreOutcomeReported },
 ];

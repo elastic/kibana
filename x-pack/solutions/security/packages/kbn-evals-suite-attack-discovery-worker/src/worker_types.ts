@@ -29,6 +29,12 @@ export interface WorkerExpected extends Record<string, unknown> {
   /** Other verdicts that are also correct, for rows whose evidence does not separate them. */
   alsoAccepts?: GoldVerdict[];
   expectedDiscoveries: 'none' | 'atLeastOne';
+  /**
+   * Set when the review workflow has no source for this row's evidence (it reads raw events from
+   * `logs-endpoint.events.*` only, and cloud alerts carry no host). The row then leaves the
+   * `VerdictMatchesGold` headline and is scored by `BlindReviewAbstained` instead.
+   */
+  blindReason?: string;
   /** Rubric for the review's verdict rationale (LLM judge, reported, never gated). */
   criteria: string[];
   /** Rubric for the generated discoveries' narrative (LLM judge, reported, never gated). */

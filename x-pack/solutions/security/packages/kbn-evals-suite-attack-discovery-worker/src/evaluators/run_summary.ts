@@ -31,6 +31,8 @@ export interface CodeFailure {
  */
 export const CODE_PASS_THRESHOLDS: Readonly<Record<string, number>> = {
   [AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME]: POSITIVE_CONTROL_RECALL_THRESHOLD,
+  // Reported only: a definite verdict on a row the workflow cannot see is the workflow's gap.
+  BlindReviewAbstained: 0,
 };
 
 /** N/A is never a miss; a `null` score otherwise is, and so is a score below the pass threshold. */

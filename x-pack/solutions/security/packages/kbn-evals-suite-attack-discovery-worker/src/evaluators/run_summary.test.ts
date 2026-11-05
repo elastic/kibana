@@ -48,6 +48,11 @@ const gate = async (evaluator: WorkerEvaluator) => {
 };
 
 describe('CODE gate', () => {
+  it('reports a 0 BlindReviewAbstained without failing the run, but still fails a 0 elsewhere', async () => {
+    expect(await gate(evaluatorScoring({ name: 'BlindReviewAbstained', score: 0 }))).toEqual([]);
+    expect(await gate(evaluatorScoring({ name: 'VerdictMatchesGold', score: 0 }))).toHaveLength(1);
+  });
+
   it('passes a fractional PositiveControlRecall that meets its threshold', async () => {
     const failures = await gate(
       evaluatorScoring({

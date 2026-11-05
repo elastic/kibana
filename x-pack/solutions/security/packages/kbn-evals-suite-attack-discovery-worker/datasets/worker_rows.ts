@@ -30,6 +30,8 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
     title: 'Three unrelated principals share an egress IP',
     expected: {
       goldVerdict: 'false_positive',
+      blindReason:
+        'cloud alerts carry no host, and the review reads raw events from logs-endpoint.events.* by host only',
       expectedDiscoveries: 'none',
       criteria: [
         'The rationale does not treat the shared egress IP as evidence that the principals are related.',
@@ -43,6 +45,8 @@ export const WORKER_SCENARIOS: ReadonlyArray<{
     expected: {
       goldVerdict: 'inconclusive',
       alsoAccepts: ['true_positive'],
+      blindReason:
+        'cloud alerts carry no host, and the review reads raw events from logs-endpoint.events.* by host only',
       expectedDiscoveries: 'atLeastOne',
       criteria: [
         'The rationale separates the two accounts instead of treating the shared display name as one actor.',

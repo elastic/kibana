@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { hasWorld } from './worker_world';
 import { AUDIT_SCENARIOS, getGoldForVariant } from './audit_failure_classes/registry';
 import { buildWorkerRows, WORKER_SCENARIOS } from '../datasets/worker_rows';
 import type { CohortRouting } from './cohort_routing';
@@ -48,6 +49,12 @@ describe('worker dataset contract', () => {
       if (goldVerdict === 'false_positive') expect(alsoAccepts).toEqual([]);
     }
   );
+
+  it('marks exactly the rows with no seeded world as blind', () => {
+    for (const row of rows) {
+      expect(Boolean(row.output!.blindReason)).toBe(!hasWorld(String(row.id)));
+    }
+  });
 
   it('stamps the cohort and both stage models on every row', () => {
     for (const row of rows) {

@@ -22,7 +22,9 @@
  *   the destination (contradicts).
  *
  * The cloud scenarios have no host, so the raw-event source can never hold hits for them and no
- * documents are seeded: their review stays `inconclusive` by construction.
+ * documents are seeded: their review stays `inconclusive` by construction. That is a gap in the
+ * review workflow, not something to paper over with invented endpoint hosts, so those rows carry
+ * `blindReason` and are scored by `BlindReviewAbstained` instead of `VerdictMatchesGold`.
  */
 
 export type WorldKind = 'entity' | 'event';

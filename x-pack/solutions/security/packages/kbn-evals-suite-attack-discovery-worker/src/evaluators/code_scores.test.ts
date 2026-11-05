@@ -8,12 +8,14 @@
 import type { ReviewArtifact, WorkerArtifacts, WorkerExpected } from '../worker_types';
 import {
   scoreAlertsRetrieved,
+  scoreBlindReviewAbstained,
   scoreFingerprintsDispatched,
   scoreOutcomeReported,
   scoreParkedAtGate,
   scoreReviewsSettled,
   scoreRunnerCompleted,
   scoreStageModelResolved,
+  scoreVerdictMatchesGold,
   stageUsageMetadata,
 } from './code_scores';
 
@@ -395,5 +397,36 @@ describe('scoreStageModelResolved', () => {
       'review.cached_tokens': 10,
     });
     expect(stageUsageMetadata(artifacts())).not.toHaveProperty('review.input_tokens');
+  });
+});
+
+describe('blind rows (the review has no source for the evidence)', () => {
+  const blind = {
+    goldVerdict: 'false_positive',
+    blindReason: 'no host',
+  } as unknown as WorkerExpected;
+  const sighted = { goldVerdict: 'false_positive' } as unknown as WorkerExpected;
+  const withVerdict = (verdict: string) =>
+    artifacts({ reviews: [review({ verdict: verdict as ReviewArtifact['verdict'] })] });
+
+  it('leaves a blind row out of VerdictMatchesGold, whatever the verdict', () => {
+    expect(scoreVerdictMatchesGold(blind, withVerdict('true_positive')).label).toBe('N/A');
+    expect(scoreVerdictMatchesGold(blind, withVerdict('inconclusive')).label).toBe('N/A');
+  });
+
+  it('still scores a sighted row against gold', () => {
+    expect(scoreVerdictMatchesGold(sighted, withVerdict('false_positive')).score).toBe(1);
+    expect(scoreVerdictMatchesGold(sighted, withVerdict('true_positive')).score).toBe(0);
+  });
+
+  it('passes a blind row that abstains and fails one that commits', () => {
+    expect(scoreBlindReviewAbstained(blind, withVerdict('inconclusive')).score).toBe(1);
+    expect(scoreBlindReviewAbstained(blind, withVerdict('false_positive')).score).toBe(0);
+    expect(scoreBlindReviewAbstained(blind, withVerdict('true_positive')).score).toBe(0);
+  });
+
+  it('is N/A for a sighted row and for a blind row with no review', () => {
+    expect(scoreBlindReviewAbstained(sighted, withVerdict('inconclusive')).label).toBe('N/A');
+    expect(scoreBlindReviewAbstained(blind, artifacts()).label).toBe('N/A');
   });
 });
