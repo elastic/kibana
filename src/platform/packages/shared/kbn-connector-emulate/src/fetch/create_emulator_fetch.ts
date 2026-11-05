@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { once } from 'lodash';
 import type {
   ContractProtocol,
   ContractRequest,
@@ -36,6 +37,7 @@ import { createMcpProtocol, isMcpSpec } from '../mcp/mcp_protocol';
 import type { ContractOperation, OpenApiDocument } from '../openapi';
 import { loadContractOperations } from '../openapi';
 import type { OperationMatch } from '../openapi/match_operation';
+import { createOperationMatcher } from '../openapi/match_operation';
 import { createOpenApiAdapter } from '../openapi/openapi_adapter';
 import { findTokenEndpoints, respondToTokenRequest } from '../openapi/token_endpoints';
 import { insufficientScopeChallenge } from '../openapi/validate_security';
@@ -130,6 +132,11 @@ export interface Emulator {
    * (with any method), a token URL, or a GraphQL or MCP endpoint. Records no call.
    */
   readonly answers: (method: string, url: URL) => boolean;
+  /**
+   * Like `answers`, but only through a server that names the URL's host. A relative server, as
+   * specs of self-hosted products declare, matches any host.
+   */
+  readonly namesHost: (method: string, url: URL) => boolean;
   readonly calls: ContractCall[];
   /** The operations the specs declare, which is what the emulator answers. */
   readonly operations: readonly EmulatorOperation[];
@@ -551,8 +558,29 @@ export const createEmulatorFetch = ({
       loadedProtocols.map(({ source, instance }) => ({ source, operations: instance.answerable }))
     ),
   ];
+  // Built on first use, as only combined emulators ask and large specs take time to compile.
+  const getWithHosts = once(() => {
+    const named = operations.flatMap((operation) => {
+      const servers = operation.servers.filter(({ url }) => !url.startsWith('/'));
+      return servers.length > 0 ? [{ ...operation, servers }] : [];
+    });
+    return { route: createOperationMatcher(named), tokens: findTokenEndpoints(named) };
+  });
+
   return {
     fetch: mockFetch,
+    namesHost: (method, url) => {
+      const { route, tokens } = getWithHosts();
+      if (
+        protocols.has(toEndpoint(url)) ||
+        tokens(url) !== undefined ||
+        awsJsonServices.some((service) => service.matches(url))
+      ) {
+        return true;
+      }
+      const routed = route(method, url);
+      return 'operation' in routed || routed.status === 405;
+    },
     answers: (method, url) => {
       if (
         protocols.has(toEndpoint(url)) ||

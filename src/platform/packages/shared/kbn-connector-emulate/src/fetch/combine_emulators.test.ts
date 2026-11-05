@@ -62,6 +62,35 @@ const tenantSpec: OpenApiDocument = {
   },
 };
 
+// A self-hosted product: its relative server matches any host, and `/{a}/{b}` most paths.
+const selfHostedSpec: OpenApiDocument = {
+  openapi: '3.0.3',
+  info: { title: 'Self-hosted', version: '1' },
+  servers: [{ url: '/' }],
+  paths: {
+    '/{a}/{b}': { get: { operationId: 'getItem', responses: { '204': { description: 'ok' } } } },
+  },
+};
+
+const vendorSpec: OpenApiDocument = {
+  openapi: '3.0.3',
+  info: { title: 'Vendor', version: '1' },
+  servers: [{ url: 'https://api.vendor.example/v2' }],
+  components: {
+    securitySchemes: {
+      oauth: {
+        type: 'oauth2',
+        flows: {
+          clientCredentials: { tokenUrl: 'https://auth.vendor.example/a/token', scopes: {} },
+        },
+      },
+    },
+  },
+  paths: {
+    '/scrape': { post: { operationId: 'scrape', responses: { '204': { description: 'ok' } } } },
+  },
+};
+
 const fixture = (name: string) => [
   { operation: { method: 'get', path: '/me' }, response: { status: 200, body: { name } } },
 ];
@@ -104,6 +133,58 @@ describe('combineEmulators', () => {
       ['one_drive', 'getmedrive'],
       ['tenant', 'listTickets'],
     ]);
+  });
+
+  describe('with a connector whose relative server matches any host', () => {
+    const createWithSelfHosted = () =>
+      combineEmulators({
+        self_hosted: createEmulatorFetch({ specs: [selfHostedSpec] }),
+        vendor: createEmulatorFetch({ specs: [vendorSpec] }),
+      });
+
+    it('routes to the connector whose specs name the host, even when it comes later', async () => {
+      const { fetch, calls } = createWithSelfHosted();
+
+      const response = await fetch('https://api.vendor.example/v2/scrape', { method: 'POST' });
+
+      expect(response.status).toBe(204);
+      expect(calls).toEqual([
+        expect.objectContaining({ connector: 'vendor', operation: 'scrape', status: 204 }),
+      ]);
+    });
+
+    it('routes token requests to the connector whose specs name the token host', async () => {
+      const { fetch, calls } = createWithSelfHosted();
+
+      await fetch('https://auth.vendor.example/a/token', {
+        method: 'POST',
+        headers: { 'content-type': 'application/x-www-form-urlencoded' },
+        body: 'grant_type=client_credentials&client_id=id',
+      });
+
+      expect(calls).toEqual([expect.objectContaining({ connector: 'vendor', token: true })]);
+    });
+
+    it('still reaches the relative server on hosts no spec names', async () => {
+      const { fetch, calls, answers, namesHost } = createWithSelfHosted();
+      const url = 'https://argocd.internal.example/x/y';
+
+      expect((await fetch(url)).status).toBe(204);
+
+      expect(calls).toEqual([
+        expect.objectContaining({ connector: 'self_hosted', operation: 'getItem' }),
+      ]);
+      expect(answers('GET', new URL(url))).toBe(true);
+      expect(namesHost('GET', new URL(url))).toBe(false);
+    });
+
+    it('lets the credential pick the relative server on a named host', async () => {
+      const { fetch, calls } = createWithSelfHosted();
+
+      await fetch('https://api.vendor.example/x/y', bearer(emulatorCredential('self_hosted')));
+
+      expect(calls).toEqual([expect.objectContaining({ connector: 'self_hosted' })]);
+    });
   });
 
   it('finds the credential in Basic auth, the query, the body and JWT assertions', async () => {

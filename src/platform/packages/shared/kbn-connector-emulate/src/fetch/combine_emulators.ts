@@ -122,8 +122,9 @@ const tagTokens = async (response: Response, tag: string): Promise<Response> => 
  * them all. Each connector keeps its own specs, overlay, fixtures and recordings. A request goes
  * to the connector whose `emulatorCredential` it carries, in a header, Basic auth, the query, the
  * body or a JWT assertion; the tokens that connector's token URLs issue carry the credential
- * too. Other requests go to the first connector whose specs match the URL, so connectors that
- * share a vendor host need the credential to get their own responses. Every call is recorded
+ * too. Other requests go to the first connector whose specs name the URL's host, else the first
+ * whose specs match it with a relative server, which matches any host. So connectors that share a
+ * vendor host, or have relative servers, need the credential to get their own responses. Every call is recorded
  * in `calls` with its `connector`. `onCall` gets the calls no emulator sees, which are requests no
  * connector matches; each emulator's own `onCall` gets the rest.
  */
@@ -218,6 +219,7 @@ export const combineEmulators = (
     const tagged = await findTagged(request.clone());
     const connector =
       tagged ??
+      connectors.find((name) => emulators[name].namesHost(request.method, url)) ??
       connectors.find((name) => emulators[name].answers(request.method, url)) ??
       (connectors.length === 1 ? connectors[0] : undefined);
 
@@ -255,6 +257,7 @@ export const combineEmulators = (
   return {
     fetch: combinedFetch,
     answers: (method, url) => connectors.some((name) => emulators[name].answers(method, url)),
+    namesHost: (method, url) => connectors.some((name) => emulators[name].namesHost(method, url)),
     calls,
     connectors,
     operations: connectors.flatMap((connector) =>

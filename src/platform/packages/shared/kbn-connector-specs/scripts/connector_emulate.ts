@@ -323,7 +323,7 @@ run(
         [
           `Requests go to the connector whose credential they carry, such as ${emulatorCredential(
             names[0]
-          )} as an API key, token, Basic auth user or password, or OAuth client ID; other requests go to the first connector whose specs match the URL.`,
+          )} as an API key, token, Basic auth user or password, or OAuth client ID; other requests go to the first connector whose specs name the URL's host, else the first with a relative server that matches it.`,
           ...(shared.length === 0
             ? []
             : [
@@ -345,7 +345,7 @@ run(
 
       Several connectors are served by one proxy, each from its own specs, overlay, fixtures and recordings. A request goes
       to the connector whose credential (emulate-<id>, e.g. emulate-outlook) it carries, otherwise to the first connector
-      whose specs match the URL.`,
+      whose specs name the URL's host, else the first with a relative server that matches it.`,
     flags: {
       string: ['connector', 'spec', 'port', 'host', 'ca-dir', 'fixtures', 'recordings'],
       boolean: ['all'],
