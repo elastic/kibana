@@ -43,7 +43,7 @@ FROM <index pattern> METADATA _index_mode     -- FROM plan
 | STATS `<attr>` = LAST(`<field>`, `@timestamp`) WHERE `<field>` IS NOT NULL, ...,
         `last_seen` = MAX(`@timestamp`)
     BY <identity fields>
-| EVAL [`mapped:entity.id` = `entity.id`,]      -- identity on entity.id only
+| EVAL [`mapped:entity.id` = `entity.id`,]      -- a BY key the evaluation overwrites, in practice entity.id
     <entity.id, from the store's id compiler>
 | KEEP <this plan's columns>[, `mapped:entity.id`]
 | SORT `last_seen` DESC NULLS LAST, `entity.id` ASC
@@ -86,7 +86,7 @@ No metadata API is called and no concrete index is named: the executor learns ev
 
 **Probe.** One probe per distinct pattern, concurrently: `TS <pattern> | KEEP @timestamp | LIMIT 0`. `@timestamp` of any type other than `null` means a time-series index exists and the source gets a `TS` plan. `null`, no column, or a verification error (a concrete index that is not time series, a name that does not exist) means none. Any other failure is a source error and no plan of the source runs: the `FROM` plan excludes time-series indices, so reading the failure as "none" would silently leave them out. The decision reads the error type, never the message. Elasticsearch drops indices the user cannot read like indices that do not exist.
 
-**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; for `entity.id`, which the id evaluation always types `keyword`, the witness column `mapped:entity.id` is read instead, and the response does not carry it. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
+**Reading results.** Every query runs with `unmapped_fields="nullify"`, so a field no index maps comes back as a column of type `null`. `last_seen` of type `null` means no readable index maps `@timestamp` and the plan is unusable. A plan is also unusable when no identity composition has every field mapped; a field the id evaluation overwrites, in practice `entity.id`, which the evaluation types `keyword` even when unmapped, is read from its witness column `mapped:entity.id`, which the response does not carry. An attribute of type `null` is an unavailable field, not fatal. A plan that returns its full limit is cut; `total` is the merged row count, exact, only when no plan is cut or partial, otherwise null, and `truncated` is true whenever rows were left out.
 
 Nothing is cached yet.
 

@@ -159,6 +159,14 @@ describe('buildListQuery', () => {
       );
       expect(lines.find((line) => line.startsWith('| KEEP '))).toBe(keepLine);
       expect(Parser.parse(esql).errors).toEqual([]);
+
+      // The TS plan carries the same witness lines.
+      const [ts] = generateListQueries(definition, plansOf(definition, true), window, LIMIT);
+      const tsLines = ts.esql.split('\n');
+      expect(tsLines[1]).toMatch(/^TS /);
+      expect(
+        tsLines.filter((line) => line.startsWith('| EVAL ') || line.startsWith('| KEEP '))
+      ).toEqual(lines.filter((line) => line.startsWith('| EVAL ') || line.startsWith('| KEEP ')));
     }
   );
 

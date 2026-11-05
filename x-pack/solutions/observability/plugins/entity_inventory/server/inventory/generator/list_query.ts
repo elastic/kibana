@@ -84,9 +84,10 @@ export const buildListQuery = ({
     presenceFilter,
   ];
   // The id evaluation assigns `entity.id`, so an identity on `entity.id` would lose its grouped
-  // column, and with it the `null` type that says no index maps the field: the evaluation always
-  // types it `keyword`. Each such field is copied first, in the same `EVAL`, into a witness column
-  // kept after the output columns; a copy of a `null`-typed column is itself typed `null`.
+  // column, and with it the `null` type that says no index maps the field: the evaluation types it
+  // `keyword` even then. Each such field is copied first, in the same `EVAL`, into a witness column
+  // kept after the output columns; a copy of a `null`-typed column is itself typed `null`. Both
+  // observed on 9.6, under `FROM` and `TS`.
   const witnesses = [...witnessColumns].map(
     ([field, witness]) => `${quoteIdentifier(witness)} = ${quoteIdentifier(field)}`
   );
@@ -106,7 +107,7 @@ export const buildListQuery = ({
     `| KEEP ${[...planColumnNames(columns, plan), ...witnessColumns.values()]
       .map(quoteIdentifier)
       .join(', ')}`,
-    // Ties broken on `entity.id` as the merge does, so a cut plan returns a deterministic set of rows.
+    // Ties broken on `entity.id`, the merge's tie key too, so a cut plan returns a deterministic set.
     `| SORT ${quoteIdentifier(LAST_SEEN_COLUMN)} DESC NULLS LAST, ${quoteIdentifier(
       ENTITY_ID_COLUMN
     )} ASC`,

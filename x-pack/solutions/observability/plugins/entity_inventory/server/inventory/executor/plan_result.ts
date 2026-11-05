@@ -22,9 +22,9 @@ import type { PlanResult } from './types';
 //   costs no scan: the presence predicate folds to false at planning and no shard is opened. A
 //   ranking with one mapped composition runs for that composition. The grouping-field columns are
 //   read, not `entity.id`, which the id evaluation types `keyword` even then (`TO_STRING(null)`
-//   folds to a typed literal). For the same reason an identity field the evaluation overwrites,
-//   `entity.id` itself, is read from its witness column (`mapped:entity.id`), a copy the list
-//   query takes before the evaluation.
+//   folds to a typed literal; observed on 9.6). For the same reason an identity field the
+//   evaluation overwrites, `entity.id` itself, is read from its witness column
+//   (`mapped:entity.id`), a copy the list query takes before the evaluation.
 // - An attribute typed `null` stays in the query and is reported as unavailable.
 //
 // ES|QL groups by keyword fields with `index: false` or `doc_values: false` and by `text` fields
