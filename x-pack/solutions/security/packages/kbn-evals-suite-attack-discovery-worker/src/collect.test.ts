@@ -16,10 +16,12 @@ import {
   generationUsageOf,
   isParkedAtGate,
   isReviewSettled,
+  readGenerationFault,
   splitFingerprintMatch,
   toInsights,
 } from './collect';
-import { attackDiscoveryIndexForSpace } from './constants';
+import { BATCHED_GENERATION_WORKFLOW_ID, attackDiscoveryIndexForSpace } from './constants';
+import type { WorkerOutcomeEvent } from './worker_types';
 import type { AttackDiscoveryWorkerClient } from './worker_client';
 
 const step = (
@@ -512,5 +514,158 @@ describe('collectWorkerArtifacts', () => {
         query: { terms: { 'kibana.alert.rule.execution.uuid': ['u-doc'] } },
       })
     );
+  });
+});
+
+describe('readGenerationFault', () => {
+  const REFUSAL =
+    'The model (.anthropic-claude-5.5-opus-chat_completion) refused to complete the response';
+  const run = {
+    id: 'run-1',
+    status: 'completed',
+    stepExecutions: [],
+  } as unknown as WorkflowExecutionDto;
+  const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
+
+  const runCompleted = (input: Record<string, unknown>): WorkerOutcomeEvent[] => [
+    {
+      stepId: 'report_run_completed',
+      status: 'completed',
+      runOutcome: String(input.run_outcome),
+      input,
+    },
+  ];
+  const allFailed = runCompleted({
+    run_outcome: 'failed_all_batches',
+    alerts_analyzed: 0,
+    batches_total: 1,
+    batches_failed: 1,
+  });
+  const batchChild = (
+    errors: Array<string | undefined>,
+    workflowId = BATCHED_GENERATION_WORKFLOW_ID
+  ) => ({
+    workflowId,
+    executionId: 'child-1',
+    status: 'completed',
+    stepExecutions: errors.map((message) => ({
+      stepId: 'run_batch',
+      status: message ? 'failed' : 'completed',
+      ...(message ? { error: { type: 'Error', message } } : {}),
+    })),
+  });
+  const clientWith = (getChildren: jest.Mock) =>
+    ({ getChildren } as unknown as AttackDiscoveryWorkerClient);
+  const read = (outcomes: WorkerOutcomeEvent[], getChildren = jest.fn()) =>
+    readGenerationFault({ client: clientWith(getChildren), run, spaceId: 'space', outcomes, log });
+
+  it('is refused when every failed batch was refused by the model', async () => {
+    const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL])]);
+    await expect(read(allFailed, getChildren)).resolves.toEqual({
+      kind: 'refused',
+      message: REFUSAL,
+    });
+    expect(getChildren).toHaveBeenCalledWith('space', 'run-1');
+  });
+
+  it('is failed when a batch failed for another reason', async () => {
+    const getChildren = jest.fn().mockResolvedValue([batchChild([REFUSAL, 'connector timed out'])]);
+    await expect(read(allFailed, getChildren)).resolves.toEqual({
+      kind: 'failed',
+      message: REFUSAL,
+    });
+  });
+
+  it('ignores steps of children that are not the generation workflow', async () => {
+    const getChildren = jest
+      .fn()
+      .mockResolvedValue([batchChild(['unrelated'], 'other-workflow'), batchChild([REFUSAL])]);
+    await expect(read(allFailed, getChildren)).resolves.toMatchObject({ kind: 'refused' });
+  });
+
+  it('is failed, with no message, when the children cannot be read', async () => {
+    const getChildren = jest.fn().mockRejectedValue(new Error('404'));
+    await expect(read(allFailed, getChildren)).resolves.toEqual({ kind: 'failed' });
+    expect(log.warning).toHaveBeenCalledWith(expect.stringContaining('404'));
+  });
+
+  it('is failed when no batch error was readable', async () => {
+    const getChildren = jest.fn().mockResolvedValue([batchChild([undefined])]);
+    await expect(read(allFailed, getChildren)).resolves.toEqual({ kind: 'failed' });
+  });
+
+  it('is empty when every batch succeeded over the alerts and found no attack', async () => {
+    const getChildren = jest.fn();
+    await expect(
+      read(
+        runCompleted({
+          run_outcome: 'empty_no_attacks',
+          alerts_analyzed: 10,
+          batches_total: 1,
+          batches_failed: 0,
+        }),
+        getChildren
+      )
+    ).resolves.toEqual({ kind: 'empty' });
+    expect(getChildren).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    [
+      'a healthy run',
+      { run_outcome: 'completed', alerts_analyzed: 10, batches_total: 1, batches_failed: 0 },
+    ],
+    [
+      'some batches failed',
+      { run_outcome: 'failed_all_batches', batches_total: 2, batches_failed: 1 },
+    ],
+    ['no batches ran', { run_outcome: 'failed_all_batches', batches_total: 0, batches_failed: 0 }],
+    [
+      'nothing was analyzed',
+      { run_outcome: 'empty_no_attacks', alerts_analyzed: 0, batches_total: 1, batches_failed: 0 },
+    ],
+    [
+      'an empty run with a failed batch',
+      { run_outcome: 'empty_no_attacks', alerts_analyzed: 10, batches_total: 2, batches_failed: 1 },
+    ],
+  ])('is undefined for %s', async (_case, input) => {
+    const getChildren = jest.fn();
+    await expect(read(runCompleted(input), getChildren)).resolves.toBeUndefined();
+    expect(getChildren).not.toHaveBeenCalled();
+  });
+
+  it('is undefined when the runner reported no outcome', async () => {
+    await expect(read([])).resolves.toBeUndefined();
+  });
+
+  it('is wired into the collected artifacts', async () => {
+    const reportStep = {
+      ...step('report_run_completed', 'completed'),
+      input: { run_outcome: 'failed_all_batches', batches_total: 1, batches_failed: 1 },
+    } as unknown as WorkflowStepExecutionDto;
+    const artifacts = await collectWorkerArtifacts({
+      client: {
+        track: jest.fn(),
+        getChildren: jest.fn().mockResolvedValue([batchChild([REFUSAL])]),
+      } as unknown as AttackDiscoveryWorkerClient,
+      esClient: {} as Client,
+      run: {
+        id: 'run-1',
+        status: 'completed',
+        stepExecutions: [reportStep],
+      } as unknown as WorkflowExecutionDto,
+      spaceId: 'space',
+      seeded: {
+        runMarker: 'marker',
+        spaceId: 'space',
+        goldIdBySeededId: new Map(),
+        alertCount: 0,
+        openAlertIds: [],
+        worldDocs: [],
+      },
+      fetch: jest.fn() as unknown as HttpHandler,
+      log,
+    });
+    expect(artifacts.generationFault).toEqual({ kind: 'refused', message: REFUSAL });
   });
 });

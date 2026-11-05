@@ -7,6 +7,7 @@
 
 import type { CohortRouting } from '../cohort_routing';
 import type {
+  GenerationFault,
   ReviewArtifact,
   Stage,
   WorkerArtifacts,
@@ -15,13 +16,19 @@ import type {
 } from '../worker_types';
 
 /**
+ * A generation check that missed because the model refused, failed or found nothing, while the
+ * pipeline around it worked. It is a miss, reported but not gating (`isGatingCodeFailure`).
+ */
+export const MODEL_FAULT_LABEL = 'MODEL_FAULT';
+
+/**
  * Score of one CODE check. `score: null` is never a pass: `label: 'N/A'` means the check does
  * not apply to this row, `label: 'MISSING'` means the artifact it needs was absent (a
- * measurement gap, which the gate treats as a failure).
+ * measurement gap, which the gate treats as a failure). `MODEL_FAULT` labels a 0.
  */
 export interface CodeScore {
   score: number | null;
-  label?: 'N/A' | 'MISSING';
+  label?: 'N/A' | 'MISSING' | typeof MODEL_FAULT_LABEL;
   explanation: string;
   metadata?: Record<string, unknown>;
 }
@@ -41,6 +48,26 @@ export const missing = (explanation: string): CodeScore => ({
 export const pass = (explanation: string): CodeScore => ({ score: 1, explanation });
 
 export const fail = (explanation: string): CodeScore => ({ score: 0, explanation });
+
+/**
+ * The generation fault, only when the runner itself completed cleanly: a runner that errored or
+ * timed out is a pipeline failure whatever the model did.
+ */
+const modelFaultOf = (artifacts: WorkerArtifacts): GenerationFault | undefined =>
+  artifacts.runnerStatus === 'completed' &&
+  artifacts.runnerTimedOutAfterMs === undefined &&
+  !artifacts.runnerError
+    ? artifacts.generationFault
+    : undefined;
+
+const modelFault = (fault: GenerationFault, explanation: string): CodeScore => ({
+  score: 0,
+  label: MODEL_FAULT_LABEL,
+  explanation: `${explanation}: generation ${fault.kind}${
+    fault.message ? ` (${fault.message})` : ''
+  }`,
+  metadata: { generationFault: fault.kind },
+});
 
 export type CodeScorer = (expected: WorkerExpected, artifacts: WorkerArtifacts) => CodeScore;
 
@@ -122,7 +149,8 @@ export const scoreReviewsSettled: CodeScorer = (_expected, artifacts) =>
 /**
  * Exactly the seeded alerts were read. The generation step reports a count, not ids, so the
  * check has three parts: the space held exactly the seeded ids when the row started, the step
- * analyzed exactly that many, and no attack cites an alert outside the seeded set.
+ * analyzed exactly that many, and no attack cites an alert outside the seeded set. A wrong seed
+ * always fails; a short count from a refused or failed generation is a `MODEL_FAULT`.
  */
 export const scoreAlertsRetrieved: CodeScorer = (_expected, artifacts) => {
   if (artifacts.alertsAnalyzed === undefined) {
@@ -138,7 +166,11 @@ export const scoreAlertsRetrieved: CodeScorer = (_expected, artifacts) => {
     );
   }
   if (artifacts.alertsAnalyzed !== seeded.size) {
-    return fail(`${artifacts.alertsAnalyzed} alerts analyzed, ${seeded.size} seeded`);
+    const explanation = `${artifacts.alertsAnalyzed} alerts analyzed, ${seeded.size} seeded`;
+    // A failed batch counts no alerts, so the shortfall is the model's, not retrieval's. An empty
+    // generation succeeded over its batches, so a shortfall there is still retrieval's.
+    const fault = modelFaultOf(artifacts);
+    return fault && fault.kind !== 'empty' ? modelFault(fault, explanation) : fail(explanation);
   }
   const foreign = artifacts.insights
     .flatMap(({ alertIds }) => alertIds)
@@ -156,9 +188,12 @@ export const scoreDiscoveriesPersisted: CodeScorer = (expected, artifacts) => {
   if (expected.expectedDiscoveries === 'none') {
     return notApplicable('gold expects no discoveries, so none is a valid outcome');
   }
-  return artifacts.persistedAttackIds.length > 0
-    ? pass(`${artifacts.persistedAttackIds.length} discoveries persisted`)
-    : fail('gold expects at least one discovery and none was persisted');
+  if (artifacts.persistedAttackIds.length > 0) {
+    return pass(`${artifacts.persistedAttackIds.length} discoveries persisted`);
+  }
+  const explanation = 'gold expects at least one discovery and none was persisted';
+  const fault = modelFaultOf(artifacts);
+  return fault ? modelFault(fault, explanation) : fail(explanation);
 };
 
 // The matcher stores attack ids cut to this length (`attack_discovery_id.slice(0, 512)`).

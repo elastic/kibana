@@ -15,6 +15,7 @@ import {
   AUDIT_POSITIVE_CONTROL_RECALL_EVALUATOR_NAME,
   POSITIVE_CONTROL_RECALL_THRESHOLD,
 } from './audit_positive_control_recall_evaluator';
+import { MODEL_FAULT_LABEL } from './code_scores';
 import type { WorkerEvaluator } from './dataset_evaluator';
 
 export type ScoreSink = Map<string, Array<number | null>>;
@@ -70,13 +71,23 @@ export const QUALITY_CODE_EVALUATORS: ReadonlySet<string> = new Set([
   AUDIT_CONDITIONAL_REMEDIATION_EVALUATOR_NAME,
 ]);
 
+/** The pipeline checks whose miss can be the generation model's (`MODEL_FAULT`), not the pipeline's. */
+export const MODEL_FAULT_CODE_EVALUATORS: ReadonlySet<string> = new Set([
+  'AlertsRetrieved',
+  'DiscoveriesPersisted',
+]);
+
 /**
  * A miss gates unless its evaluator is explicitly a quality check, so an evaluator nobody
  * classified fails closed. A failed row gates whichever evaluator reports it: the row has no
- * output to judge, which is a pipeline failure.
+ * output to judge, which is a pipeline failure. A generation check labelled `MODEL_FAULT` is
+ * reported, not gated: the pipeline ran and the model refused or found nothing.
  */
-export const isGatingCodeFailure = ({ evaluator, label }: CodeFailure): boolean =>
-  label === ROW_FAILED_LABEL || !QUALITY_CODE_EVALUATORS.has(evaluator);
+export const isGatingCodeFailure = ({ evaluator, label }: CodeFailure): boolean => {
+  if (label === ROW_FAILED_LABEL) return true;
+  if (label === MODEL_FAULT_LABEL && MODEL_FAULT_CODE_EVALUATORS.has(evaluator)) return false;
+  return !QUALITY_CODE_EVALUATORS.has(evaluator);
+};
 
 /** N/A is never a miss; a `null` score otherwise is, and so is a score below the pass threshold. */
 export const isCodeMiss = ({

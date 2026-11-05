@@ -15,6 +15,7 @@ import {
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { WorkflowExecutionDto, WorkflowStepExecutionDto } from '@kbn/workflows';
 import {
+  BATCHED_GENERATION_WORKFLOW_ID,
   FP_TP_ANALYSIS_STEP_ID,
   FP_TP_ANALYZE_STEP_ID,
   MATCH_FINGERPRINTS_STEP_ID,
@@ -31,6 +32,7 @@ import { apiVersion, errorMessage, httpStatus, spacePath } from './kibana_api';
 import type { SeededScenario } from './seed';
 import { isTerminal, stepsOf, type AttackDiscoveryWorkerClient } from './worker_client';
 import type {
+  GenerationFault,
   GenerationUsage,
   ReviewAnalysisUsage,
   ReviewArtifact,
@@ -420,6 +422,82 @@ const outcomeEvents = (run: WorkflowExecutionDto): WorkerOutcomeEvent[] =>
     })
   );
 
+// The run step's refusal error (`handle_model_refusal`) and the inference plugin's content-filter
+// refusal; either is the model declining, not the pipeline failing.
+const MODEL_REFUSAL_PATTERN = /refused to complete the response|finish_reason: content_filter/i;
+const RUN_BATCH_STEP_ID = 'run_batch';
+
+/**
+ * Error messages of the generation child's failed batches. `/children` omits step input and
+ * output but keeps step errors, which is where a refused batch's reason survives. Undefined when
+ * the children could not be read.
+ */
+const readBatchErrors = async ({
+  client,
+  run,
+  spaceId,
+  log,
+}: {
+  client: AttackDiscoveryWorkerClient;
+  run: WorkflowExecutionDto;
+  spaceId: string;
+  log: ToolingLog;
+}): Promise<string[] | undefined> => {
+  try {
+    const children = await client.getChildren(spaceId, run.id);
+    return children
+      .filter(({ workflowId }) => workflowId === BATCHED_GENERATION_WORKFLOW_ID)
+      .flatMap(({ stepExecutions }) => stepExecutions)
+      .filter(({ stepId }) => stepId === RUN_BATCH_STEP_ID)
+      .flatMap(({ error }) => (error?.message ? [error.message] : []));
+  } catch (error) {
+    log.warning(
+      `[ad-worker] run ${run.id}: could not read the generation batch errors: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return undefined;
+  }
+};
+
+/**
+ * Why generation produced nothing, from the runner's own `ad_worker_run_completed` event: every
+ * batch failed (`refused` only when each readable batch error is a model refusal), or every batch
+ * succeeded over the alerts and the model found no attack (`empty`). Undefined otherwise.
+ */
+export const readGenerationFault = async ({
+  client,
+  run,
+  spaceId,
+  outcomes,
+  log,
+}: {
+  client: AttackDiscoveryWorkerClient;
+  run: WorkflowExecutionDto;
+  spaceId: string;
+  outcomes: WorkerOutcomeEvent[];
+  log: ToolingLog;
+}): Promise<GenerationFault | undefined> => {
+  const event = outcomes.find(({ stepId }) => stepId === REPORT_RUN_COMPLETED_STEP_ID);
+  const total = asNumber(event?.input?.batches_total) ?? 0;
+  const failed = asNumber(event?.input?.batches_failed) ?? 0;
+  if (
+    event?.runOutcome === 'empty_no_attacks' &&
+    total > 0 &&
+    failed === 0 &&
+    (asNumber(event.input?.alerts_analyzed) ?? 0) > 0
+  ) {
+    return { kind: 'empty' };
+  }
+  if (event?.runOutcome !== 'failed_all_batches' || total === 0 || failed < total) {
+    return undefined;
+  }
+  const messages = (await readBatchErrors({ client, run, spaceId, log })) ?? [];
+  const refused =
+    messages.length > 0 && messages.every((message) => MODEL_REFUSAL_PATTERN.test(message));
+  return { kind: refused ? 'refused' : 'failed', ...(messages[0] ? { message: messages[0] } : {}) };
+};
+
 const EXECUTION_UUID_FIELD = 'kibana.alert.rule.execution.uuid';
 
 /**
@@ -659,8 +737,12 @@ export const collectWorkerArtifacts = async ({
     executionUuids: generationUuids ?? persistedExecutionUuids(docs),
     log,
   });
+  const outcomes = outcomeEvents(run);
+  const generationFault = await readGenerationFault({ client, run, spaceId, outcomes, log });
   log.info(
-    `[ad-worker] run ${run.id}: ${insights.length} discoveries, ${reviews.length} reviews dispatched`
+    `[ad-worker] run ${run.id}: ${insights.length} discoveries, ${
+      reviews.length
+    } reviews dispatched${generationFault ? ` (generation ${generationFault.kind})` : ''}`
   );
 
   return {
@@ -695,6 +777,7 @@ export const collectWorkerArtifacts = async ({
     fingerprintMatchFailed: matchFailed,
     dispatchedReviewExecutionIds: dispatches.map(({ executionId }) => executionId),
     reviews,
-    outcomes: outcomeEvents(run),
+    outcomes,
+    ...(generationFault ? { generationFault } : {}),
   };
 };

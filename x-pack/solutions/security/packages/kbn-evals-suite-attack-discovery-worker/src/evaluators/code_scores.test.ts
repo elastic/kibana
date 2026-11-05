@@ -7,8 +7,10 @@
 
 import type { ReviewArtifact, WorkerArtifacts, WorkerExpected } from '../worker_types';
 import {
+  MODEL_FAULT_LABEL,
   scoreAlertsRetrieved,
   scoreBlindReviewAbstained,
+  scoreDiscoveriesPersisted,
   scoreFingerprintsDispatched,
   scoreOutcomeReported,
   scoreParkedAtGate,
@@ -163,6 +165,107 @@ describe('scoreAlertsRetrieved', () => {
     expect(
       scoreAlertsRetrieved(expected, artifacts({ ...base, alertsAnalyzed: undefined })).label
     ).toBe('MISSING');
+  });
+
+  describe('when generation refused or failed', () => {
+    const refused = {
+      ...base,
+      alertsAnalyzed: 0,
+      generationFault: { kind: 'refused' as const, message: 'the model refused' },
+    };
+
+    it.each(['refused', 'failed'] as const)(
+      'labels a short count MODEL_FAULT on a %s generation',
+      (kind) => {
+        const result = scoreAlertsRetrieved(
+          expected,
+          artifacts({ ...refused, generationFault: { kind } })
+        );
+        expect(result).toMatchObject({ score: 0, label: MODEL_FAULT_LABEL });
+        expect(result.explanation).toContain(`generation ${kind}`);
+      }
+    );
+
+    it('carries the batch error into the explanation', () => {
+      expect(scoreAlertsRetrieved(expected, artifacts(refused)).explanation).toContain(
+        'the model refused'
+      );
+    });
+
+    it('still fails a seed that does not match, whatever the model did', () => {
+      const result = scoreAlertsRetrieved(
+        expected,
+        artifacts({ ...refused, openAlertIds: ['a', 'b', 'leftover'] })
+      );
+      expect(result).toEqual(expect.objectContaining({ score: 0 }));
+      expect(result.label).toBeUndefined();
+    });
+
+    it.each([
+      ['errored', { runnerStatus: 'failed', runnerError: 'boom' }],
+      ['timed out', { runnerStatus: 'running', runnerTimedOutAfterMs: 60_000 }],
+    ])('still fails when the runner %s', (_case, runner) => {
+      expect(
+        scoreAlertsRetrieved(expected, artifacts({ ...refused, ...runner })).label
+      ).toBeUndefined();
+    });
+
+    it('still fails a short count on an empty generation, which did read its batches', () => {
+      const result = scoreAlertsRetrieved(
+        expected,
+        artifacts({ ...base, alertsAnalyzed: 1, generationFault: { kind: 'empty' } })
+      );
+      expect(result.score).toBe(0);
+      expect(result.label).toBeUndefined();
+    });
+
+    it('passes a matching count even with a fault set', () => {
+      expect(
+        scoreAlertsRetrieved(expected, artifacts({ ...base, generationFault: { kind: 'empty' } }))
+          .score
+      ).toBe(1);
+    });
+  });
+});
+
+describe('scoreDiscoveriesPersisted', () => {
+  const expectsSome = { expectedDiscoveries: 'atLeastOne' } as WorkerExpected;
+
+  it('passes when a discovery was persisted', () => {
+    expect(
+      scoreDiscoveriesPersisted(expectsSome, artifacts({ persistedAttackIds: ['x'] })).score
+    ).toBe(1);
+  });
+
+  it('is N/A when gold expects none', () => {
+    expect(
+      scoreDiscoveriesPersisted({ expectedDiscoveries: 'none' } as WorkerExpected, artifacts())
+        .label
+    ).toBe('N/A');
+  });
+
+  it('fails when none was persisted and generation reported no fault', () => {
+    const result = scoreDiscoveriesPersisted(expectsSome, artifacts());
+    expect(result.score).toBe(0);
+    expect(result.label).toBeUndefined();
+  });
+
+  it.each(['refused', 'failed', 'empty'] as const)(
+    'labels none persisted MODEL_FAULT on a %s generation',
+    (kind) => {
+      expect(
+        scoreDiscoveriesPersisted(expectsSome, artifacts({ generationFault: { kind } }))
+      ).toMatchObject({ score: 0, label: MODEL_FAULT_LABEL, metadata: { generationFault: kind } });
+    }
+  );
+
+  it('still fails when the runner errored, whatever the model did', () => {
+    expect(
+      scoreDiscoveriesPersisted(
+        expectsSome,
+        artifacts({ runnerStatus: 'failed', generationFault: { kind: 'refused' } })
+      ).label
+    ).toBeUndefined();
   });
 });
 

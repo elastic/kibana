@@ -20,10 +20,13 @@ import {
   describeRow,
   isCodeMiss,
   logQualityMisses,
+  MODEL_FAULT_CODE_EVALUATORS,
   PIPELINE_CODE_EVALUATORS,
   QUALITY_CODE_EVALUATORS,
+  ROW_FAILED_LABEL,
   withScoreCollection,
 } from './run_summary';
+import { MODEL_FAULT_LABEL } from './code_scores';
 
 const ROW = {
   input: { scenarioId: 'positive-chain-with-noise', spaceId: 'space' },
@@ -98,6 +101,36 @@ describe('CODE gate', () => {
     it.each([...PIPELINE_CODE_EVALUATORS])('%s: a miss fails the dataset', async (name) => {
       const failures = await gate(evaluatorScoring({ name, score: 0 }));
       expect(() => assertCodeScoresPass('dataset', failures)).toThrow(new RegExp(name));
+    });
+
+    describe('a MODEL_FAULT generation miss', () => {
+      it.each([...MODEL_FAULT_CODE_EVALUATORS])('%s: is reported, not gated', async (name) => {
+        const failures = await gate(evaluatorScoring({ name, score: 0, label: MODEL_FAULT_LABEL }));
+        expect(failures).toHaveLength(1);
+        expect(() => assertCodeScoresPass('dataset', failures)).not.toThrow();
+      });
+
+      it.each(['RunnerCompleted', 'FingerprintsDispatched', 'OutcomeReported', 'BrandNewCheck'])(
+        '%s: still gates when it carries the label',
+        async (name) => {
+          const failures = await gate(
+            evaluatorScoring({ name, score: 0, label: MODEL_FAULT_LABEL })
+          );
+          expect(() => assertCodeScoresPass('dataset', failures)).toThrow(new RegExp(name));
+        }
+      );
+
+      it.each([...MODEL_FAULT_CODE_EVALUATORS])(
+        '%s: still gates an unlabelled miss and a failed row',
+        async (name) => {
+          const unlabelled = await gate(evaluatorScoring({ name, score: 0 }));
+          expect(() => assertCodeScoresPass('dataset', unlabelled)).toThrow(new RegExp(name));
+          const rowFailed = await gate(
+            evaluatorScoring({ name, score: null, label: ROW_FAILED_LABEL })
+          );
+          expect(() => assertCodeScoresPass('dataset', rowFailed)).toThrow(/ROW_FAILED/);
+        }
+      );
     });
 
     it('fails an evaluator nobody classified', async () => {

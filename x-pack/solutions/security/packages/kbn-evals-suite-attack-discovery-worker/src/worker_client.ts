@@ -10,6 +10,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import {
   ExecutionStatus,
   TerminalExecutionStatuses,
+  type ChildWorkflowExecutionItem,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
@@ -53,6 +54,14 @@ export class AttackDiscoveryWorkerClient {
       headers: apiVersion(PUBLIC_API_VERSION),
       query: { includeInput: true, includeOutput: true },
     });
+  }
+
+  /** Child executions started by `executionId`'s steps, with their step errors (no step I/O). */
+  async getChildren(spaceId: string, executionId: string): Promise<ChildWorkflowExecutionItem[]> {
+    return this.fetch<ChildWorkflowExecutionItem[]>(
+      this.executionPath(spaceId, executionId, '/children'),
+      { method: 'GET', headers: apiVersion(PUBLIC_API_VERSION) }
+    );
   }
 
   /**
@@ -102,10 +111,7 @@ export class AttackDiscoveryWorkerClient {
   }): Promise<string | undefined> {
     const deadline = Date.now() + maxWaitMs;
     for (;;) {
-      const children = await this.fetch<Array<{ workflowId: string; executionId: string }>>(
-        this.executionPath(spaceId, floorExecutionId, '/children'),
-        { method: 'GET', headers: apiVersion(PUBLIC_API_VERSION) }
-      );
+      const children = await this.getChildren(spaceId, floorExecutionId);
       const runner = children.find(({ workflowId }) => workflowId === RUNNER_WORKFLOW_ID);
       if (runner) return runner.executionId;
       const floor = await this.getExecution(spaceId, floorExecutionId);

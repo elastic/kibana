@@ -123,6 +123,17 @@ export interface WorkerOutcomeEvent {
   input?: Record<string, unknown>;
 }
 
+/**
+ * Why generation produced nothing, read from the runner's outcome event. `refused` means every
+ * failed batch was refused by the model, `failed` means a batch failed for any other reason (or
+ * the reason could not be read), and `empty` means generation succeeded but found no attack.
+ */
+export interface GenerationFault {
+  kind: 'refused' | 'failed' | 'empty';
+  /** The first batch error, when one was readable. */
+  message?: string;
+}
+
 export interface WorkerArtifacts {
   /**
    * Set only on the placeholder a failed row returns (seed, run, collect, cancel or cleanup threw,
@@ -172,4 +183,6 @@ export interface WorkerArtifacts {
   dispatchedReviewExecutionIds: string[];
   reviews: ReviewArtifact[];
   outcomes: WorkerOutcomeEvent[];
+  /** Set when the runner reported that no batch produced an attack; see `GenerationFault`. */
+  generationFault?: GenerationFault;
 }

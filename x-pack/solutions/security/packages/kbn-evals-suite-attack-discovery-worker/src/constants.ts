@@ -21,6 +21,8 @@ export const RUNNER_WORKFLOW_ID = 'system-security-attack-discovery-worker';
 export const REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
 /** The review's analysis child: its `analyze` step is where the review stage calls the model. */
 export const FP_TP_WORKFLOW_ID = 'system-security-attack-discovery-fp-tp-analysis';
+/** The runner's generation child: a refused batch leaves its error on this child's steps. */
+export const BATCHED_GENERATION_WORKFLOW_ID = 'system-security-attack-discovery-batched-generation';
 
 /** A dedicated space keeps the runner's per-space concurrency key and the seeded alerts apart. */
 export const EVAL_SPACE_ID = 'ad-worker-eval';
