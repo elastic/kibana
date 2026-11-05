@@ -329,13 +329,16 @@ export const LogCategorizationPage: FC = () => {
     [fields, loadCategories, selectedField, stateFromUrl.field]
   );
 
-  const onFieldChange = (value: EuiComboBoxOptionOption[] | undefined) => {
-    setData(null);
-    setFieldValidationResult(null);
-    const field = value && value.length ? value[0].label : undefined;
-    setSelectedField(field);
-    setUrlState({ field });
-  };
+  const onFieldChange = useCallback(
+    (value: EuiComboBoxOptionOption[] | undefined) => {
+      setData(null);
+      setFieldValidationResult(null);
+      const field = value && value.length ? value[0].label : undefined;
+      setSelectedField(field);
+      setUrlState({ field });
+    },
+    [setUrlState]
+  );
 
   const actions = getActions(true);
 

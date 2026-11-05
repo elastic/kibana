@@ -20,55 +20,54 @@ interface CategoryFieldSelectorProps {
 }
 
 /** Category field picker that exposes leftover, unselected input as an announced form error. */
-export const CategoryFieldSelector: FC<CategoryFieldSelectorProps> = ({
-  fields,
-  selectedField,
-  isDisabled,
-  onChange,
-}) => {
-  const [searchValue, setSearchValue] = useState('');
-  const [isInvalid, setIsInvalid] = useState(false);
+export const CategoryFieldSelector: FC<CategoryFieldSelectorProps> = React.memo(
+  ({ fields, selectedField, isDisabled, onChange }) => {
+    const [searchValue, setSearchValue] = useState('');
+    const [isInvalid, setIsInvalid] = useState(false);
 
-  const onSearchChange = (value: string) => {
-    setSearchValue(value);
-    if (value === '') {
+    const onSearchChange = (value: string) => {
+      setSearchValue(value);
+      if (value === '') {
+        setIsInvalid(false);
+      }
+    };
+
+    // A change event is either a valid selection or the user mid-edit (EUI removes the
+    // selection while backspacing in plain text mode), so defer any invalid flag to blur.
+    const onFieldChange = (options: EuiComboBoxOptionOption[]) => {
       setIsInvalid(false);
-    }
-  };
+      onChange(options);
+    };
 
-  const onFieldChange = (options: EuiComboBoxOptionOption[]) => {
-    setIsInvalid(false);
-    onChange(options);
-  };
+    // Mirrors EuiComboBox, which only flags leftover search text once the input loses focus.
+    const onBlur = () => {
+      setIsInvalid(searchValue !== '');
+    };
 
-  // Mirrors EuiComboBox, which only flags leftover search text once the input loses focus.
-  const onBlur = () => {
-    setIsInvalid(searchValue !== '');
-  };
-
-  return (
-    <EuiFormRow
-      label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
-        defaultMessage: 'Category field',
-      })}
-      isInvalid={isInvalid}
-      error={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelectInvalidError', {
-        defaultMessage: '{value} is not a valid category field. Select a field from the list.',
-        values: { value: searchValue },
-      })}
-    >
-      <EuiComboBox
-        compressed
-        isDisabled={isDisabled}
+    return (
+      <EuiFormRow
+        label={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelect', {
+          defaultMessage: 'Category field',
+        })}
         isInvalid={isInvalid}
-        options={fields}
-        onChange={onFieldChange}
-        onSearchChange={onSearchChange}
-        onBlur={onBlur}
-        selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
-        singleSelection={{ asPlainText: true }}
-        data-test-subj="aiopsLogPatternAnalysisCategoryField"
-      />
-    </EuiFormRow>
-  );
-};
+        error={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelectInvalidError', {
+          defaultMessage: '{value} is not a valid category field. Select a field from the list.',
+          values: { value: searchValue },
+        })}
+      >
+        <EuiComboBox
+          compressed
+          isDisabled={isDisabled}
+          isInvalid={isInvalid}
+          options={fields}
+          onChange={onFieldChange}
+          onSearchChange={onSearchChange}
+          onBlur={onBlur}
+          selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
+          singleSelection={{ asPlainText: true }}
+          data-test-subj="aiopsLogPatternAnalysisCategoryField"
+        />
+      </EuiFormRow>
+    );
+  }
+);
