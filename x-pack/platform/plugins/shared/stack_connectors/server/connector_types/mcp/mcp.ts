@@ -41,6 +41,7 @@ import type {
   PlatformServices,
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
+import { createRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { buildHeadersFromSecrets } from './auth_helpers';
 
 // TTL for list_tools cache: 15 minutes
@@ -55,6 +56,21 @@ export const LIST_TOOLS_CACHE_MAX_SIZE = 100;
 export const listToolsCache = new LRUCache<string, ListToolsResponse>({
   max: LIST_TOOLS_CACHE_MAX_SIZE,
   ttl: LIST_TOOLS_CACHE_TTL_MS,
+  allowStale: false,
+  ttlAutopurge: false,
+});
+
+/** Consecutive connection failures inside the window before a thrown error is not retryable. */
+export const CONNECTION_FAILURE_RETRY_LIMIT = 3;
+/** Window for consecutive connection failures. Each failure restarts this TTL. */
+export const CONNECTION_FAILURE_WINDOW_MS = 5 * 60 * 1000;
+
+/**
+ * Consecutive connection failures per lease key. Bounded like listToolsCache.
+ */
+export const connectionFailures = new LRUCache<string, number>({
+  max: 1000,
+  ttl: CONNECTION_FAILURE_WINDOW_MS,
   allowStale: false,
   ttlAutopurge: false,
 });
@@ -169,6 +185,7 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   /**
    * Runs `fn` against the pooled client. With `redactToolError`, tool-level failures (which embed
    * the tool arguments in their message) are logged without the error message.
+   * Consecutive connection failures on the lease key stop being retryable after the limit.
    */
   private async withPooledClient<T>(
     operation: string,
@@ -183,30 +200,53 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     );
 
     try {
-      return await fn(await promise);
+      const result = await fn(await promise);
+      connectionFailures.delete(key);
+      return result;
     } catch (err) {
       // Release first: invalidate waits for every active use, including this one, to finish.
       release();
       const isConnectionError = clientTypes.mcp.shouldInvalidateOnError?.(err) ?? false;
+      const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
       if (isConnectionError) {
         await this.pool.invalidate(key, promise);
       }
 
-      this.throwClassified(operation, err, { redact: redactToolError && !isConnectionError });
+      const retry =
+        isConnectionError && !isUserError
+          ? this.recordConnectionFailure(key) < CONNECTION_FAILURE_RETRY_LIMIT
+          : true;
+
+      this.throwClassified(operation, err, {
+        redact: redactToolError && !isConnectionError,
+        retry,
+      });
     } finally {
       release();
     }
   }
 
+  /** Increments the failure count for the lease key and restarts the window TTL. */
+  private recordConnectionFailure(key: string): number {
+    const count = (connectionFailures.get(key) ?? 0) + 1;
+    connectionFailures.set(key, count);
+    return count;
+  }
+
   private throwClassified(
     operation: string,
     err: unknown,
-    { redact = false }: { redact?: boolean } = {}
+    { redact = false, retry = true }: { redact?: boolean; retry?: boolean } = {}
   ): never {
     const isUserError = clientTypes.mcp.isUserError?.(err) ?? false;
     const detail = err instanceof Error ? err.message : String(err);
+    const retriesDisabled = retry
+      ? ''
+      : `; retries disabled after ${CONNECTION_FAILURE_RETRY_LIMIT} consecutive connection failures`;
     const message =
-      redact && !isUserError ? `MCP ${operation} failed` : `MCP ${operation} failed: ${detail}`;
+      redact && !isUserError
+        ? `MCP ${operation} failed${retriesDisabled}`
+        : `MCP ${operation} failed: ${detail}${retriesDisabled}`;
     if (isUserError) {
       this.logger.warn(message);
     } else {
@@ -218,6 +258,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
         err instanceof Error ? err : new Error(String(err)),
         TaskErrorSource.USER
       );
+    }
+
+    if (!retry) {
+      throw createRetryableError(err instanceof Error ? err : new Error(String(err)), false);
     }
 
     throw err;
