@@ -69,6 +69,15 @@ export function OutputField({
     }
   }, [value, areInputTypesLoaded, allowedOutputs, onChange]);
 
+  // Below the license Fleet requires, the field is hidden and a stored output (kept from an
+  // earlier session, before a license downgrade) could not be reset, while Fleet rejects every
+  // deploy that sends it. The license is known synchronously, so there is nothing to wait for.
+  useEffect(() => {
+    if (value && !canUseOutputPerIntegration) {
+      onChange('');
+    }
+  }, [value, canUseOutputPerIntegration, onChange]);
+
   if (!canUseOutputPerIntegration) return null;
 
   return (
