@@ -1210,17 +1210,19 @@ export class WorkflowCrudService {
         }
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
-          if (options?.force) {
-            const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-              { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-              spaceId
+          // Deleting removes the binding, so an execution that is still running or paused could
+          // never mint its service account again.
+          const executions = await this.deps.executionQueryService.getWorkflowExecutions(
+            { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+            spaceId
+          );
+          if (executions.total > 0) {
+            throw new WorkflowConflictError(
+              `Cannot ${
+                options?.force ? 'force-delete' : 'delete'
+              } workflow with running executions: ${id}`,
+              id
             );
-            if (executions.total > 0) {
-              throw new WorkflowConflictError(
-                `Cannot force-delete workflow with running executions: ${id}`,
-                id
-              );
-            }
           }
         }
         await withWorkflowBindingChange({
