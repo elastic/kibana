@@ -154,12 +154,12 @@ describe('buildUnitCanvasGraph with routing nodes', () => {
         data?.reference?.kind,
       ])
     ).toEqual([
-      ['configured-destination-es-a', true, 'streamsUnitConnection nopan', 'destinations'],
-      ['configured-routing-p-routed', true, 'streamsUnitConnection nopan', 'sources'],
-      ['configured-destination-es-a', true, 'streamsUnitConnection nopan', 'routeDestinations'],
-      ['configured-routing-child', true, 'streamsUnitConnection nopan', 'routePipelines'],
-      ['configured-destination-es-b', true, 'streamsUnitConnection nopan', 'routeDestinations'],
-      ['configured-destination-es-c', true, 'streamsUnitConnection nopan', 'destinations'],
+      ['configured-destination-es-a', 'target', 'streamsUnitConnection nopan', 'destinations'],
+      ['configured-routing-p-routed', 'target', 'streamsUnitConnection nopan', 'sources'],
+      ['configured-destination-es-a', 'target', 'streamsUnitConnection nopan', 'routeDestinations'],
+      ['configured-routing-child', 'target', 'streamsUnitConnection nopan', 'routePipelines'],
+      ['configured-destination-es-b', 'target', 'streamsUnitConnection nopan', 'routeDestinations'],
+      ['configured-destination-es-c', 'target', 'streamsUnitConnection nopan', 'destinations'],
     ]);
     edges.forEach((edge) => {
       expect(edge).toMatchObject({ deletable: false, selectable: false, type: 'animated' });
@@ -269,7 +269,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'configured-source-src',
         sourceHandle: undefined,
         target: 'configured-routing-p-src',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'p-src' },
           position: 'end',
@@ -291,7 +291,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'processing-route-p-src-0',
         sourceHandle: undefined,
         target: 'configured-destination-debug',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'route', pipelineId: 'p-src', routeIndex: 0 },
           position: 'end',
@@ -302,7 +302,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'configured-routing-p-src',
         sourceHandle: 'rule-1',
         target: 'processing-pipeline-processing-1',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'route', pipelineId: 'p-src', routeIndex: 1 },
           position: 'end',
@@ -313,7 +313,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'processing-pipeline-processing-1',
         sourceHandle: undefined,
         target: 'configured-destination-es',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'processing-1' },
           position: 'end',
@@ -324,7 +324,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'configured-source-plain',
         sourceHandle: undefined,
         target: 'processing-pipeline-p-plain',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'p-plain' },
           position: 'start',
@@ -335,7 +335,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'processing-pipeline-p-plain',
         sourceHandle: undefined,
         target: 'configured-destination-es',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'p-plain' },
           position: 'end',
@@ -346,7 +346,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'configured-source-plain',
         sourceHandle: undefined,
         target: 'processing-pipeline-p-fixed',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'pipeline', pipelineId: 'p-fixed' },
           position: 'start',
@@ -368,7 +368,7 @@ describe('buildUnitCanvasGraph with processing', () => {
         source: 'configured-routing-p-fixed',
         sourceHandle: 'rule-0',
         target: 'configured-destination-debug',
-        reconnectable: true,
+        reconnectable: 'target',
         processingTarget: {
           ref: { kind: 'route', pipelineId: 'p-fixed', routeIndex: 0 },
           position: 'end',

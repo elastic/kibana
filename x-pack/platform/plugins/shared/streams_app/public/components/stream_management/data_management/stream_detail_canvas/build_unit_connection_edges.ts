@@ -273,7 +273,7 @@ const buildEdge = (edge: UnitGraphEdge): ClassicCanvasEdge => {
     ...(sourceHandle ? { sourceHandle } : {}),
     target: endpointNodeId(target),
     type: ANIMATED_EDGE_TYPE,
-    reconnectable: editable,
+    reconnectable: editable ? 'target' : false,
     selectable: false,
     deletable: false,
     className: editable ? 'streamsUnitConnection nopan' : 'streamsRoutingConnection nopan',

@@ -79,7 +79,7 @@ describe('unit repository', () => {
     });
   });
 
-  it('keeps a routing rule without a target as staged; the canvas refuses to save it', async () => {
+  it('publishes a component save without the routing rule a user left unhooked', async () => {
     const fetch = jest.fn().mockResolvedValue({ acknowledged: true });
     const repository = createUnitRepository({ streamsRepositoryClient: { fetch } as never });
     const routedUnit: StreamsUnit.GetResponse = {
@@ -102,9 +102,26 @@ describe('unit repository', () => {
       },
     };
 
-    await expect(repository.persist(routedUnit)).resolves.toEqual(routedUnit);
+    const published: StreamsUnit.GetResponse = {
+      ...routedUnit,
+      unit: {
+        ...routedUnit.unit,
+        pipelines: [
+          {
+            id: 'main',
+            supported_telemetry: ['logs'],
+            config: [
+              { name: 'sources', value: ['otlp-input'] },
+              { name: 'routes', value: [{ destinations: ['es-prod'] }] },
+            ],
+          },
+        ],
+      },
+    };
+
+    await expect(repository.persist(routedUnit)).resolves.toEqual(published);
     expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
-      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: routedUnit },
+      params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: published },
       signal: null,
     });
   });

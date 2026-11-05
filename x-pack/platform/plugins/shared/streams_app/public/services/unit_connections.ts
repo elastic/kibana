@@ -266,7 +266,7 @@ const upstreamSignalsVisiting = (
   }
   const nextVisited = new Set(visited).add(pipelineId);
   const carried = parents.flatMap(({ pipeline: parent, ruleIndex }) =>
-    ruleSignals(unit, parent, ruleIndex, nextVisited)
+    intersectSignals(ruleSignals(unit, parent, ruleIndex, nextVisited), parent.supported_telemetry)
   );
   return carried.length > 0 ? orderSignals(carried) : [...pipeline.supported_telemetry];
 };
@@ -386,7 +386,13 @@ export const withPublishedTelemetry = (unit: Unit): Unit => {
   );
 };
 
-const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: PipelineConfig): Unit =>
+/** Like `writePipeline`, but keeps a pipeline that forwards nowhere, as a staged, unconnected node. */
+const replacePipelineConfig = (
+  unit: Unit,
+  pipelineIndex: number,
+  config: PipelineConfig,
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
+): Unit =>
   replacePipelines(
     unit,
     unit.unit.pipelines.map((pipeline, index) =>
@@ -394,7 +400,11 @@ const replacePipelineConfig = (unit: Unit, pipelineIndex: number, config: Pipeli
         ? {
             ...pipeline,
             config,
-            supported_telemetry: fitSignals(unit, pipeline.supported_telemetry, config),
+            supported_telemetry: fitSignals(
+              unit,
+              supportedTelemetry ?? pipeline.supported_telemetry,
+              config
+            ),
           }
         : pipeline
     )
@@ -887,7 +897,7 @@ const connectSourceToPipeline = (unit: Unit, sourceId: string, pipelineId: strin
     pipelineHasProcessors(pipeline.config) || !source
       ? pipeline.supported_telemetry
       : unionSignals(pipeline.supported_telemetry, source.supported_telemetry);
-  return writePipeline(
+  return replacePipelineConfig(
     unit,
     pipelineIndex,
     withIdentifiers(pipeline.config, PIPELINE_ENTRY.sources, [
@@ -1270,6 +1280,51 @@ export const getUnconnectedPipelines = (unit: Unit): UnconnectedPipeline[] => {
     }
     return [];
   });
+};
+
+/**
+ * The unit without the wiring the distributor would reject: rules left without
+ * a target, then every pipeline `getUnconnectedPipelines` reports, until none
+ * is left. The canvas Save refuses an unconnected unit; a component save
+ * persists the staged unit while lines are unhooked, so it is cleaned up here.
+ */
+export const withoutUnconnectedWiring = (unit: Unit): Unit => {
+  let current = replacePipelines(
+    unit,
+    unit.unit.pipelines.map((pipeline) => ({
+      ...pipeline,
+      config: withRoutes(
+        pipeline.config,
+        readRoutes(pipeline.config).filter((route) => routeTargets(route).length > 0)
+      ),
+    }))
+  );
+  for (;;) {
+    const unconnected = new Set(
+      getUnconnectedPipelines(current).map(({ pipeline }) => pipeline.id)
+    );
+    if (unconnected.size === 0) {
+      return current;
+    }
+    const remaining = current.unit.pipelines.filter(({ id }) => !unconnected.has(id));
+    const remainingIds = new Set(remaining.map(({ id }) => id));
+    current = replacePipelines(
+      current,
+      remaining.map((pipeline) => ({
+        ...pipeline,
+        config: withRoutes(
+          pipeline.config,
+          readRoutes(pipeline.config).flatMap((route): RouteRule[] => {
+            if (!isDelegatingRoute(route)) {
+              return [route];
+            }
+            const pipelines = route.pipelines.filter((id) => remainingIds.has(id));
+            return pipelines.length > 0 ? [{ ...route, pipelines }] : [];
+          })
+        ),
+      }))
+    );
+  }
 };
 
 const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
