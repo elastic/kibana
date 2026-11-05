@@ -22,6 +22,7 @@ import {
   removeComponentFromPipelines,
   upstreamSignals,
   withPublishedTelemetry,
+  withoutUnconnectedWiring,
   type RouteRuleRef,
   type UnitLineOrigin,
   type UnitLineTarget,
@@ -1483,6 +1484,45 @@ describe('routing rule connections', () => {
       false
     );
     expect(canConnectLine(routed, rule('grandchild', 0), pipelineTarget('other-root'))).toBe(false);
+  });
+});
+
+describe('withoutUnconnectedWiring', () => {
+  it('keeps each telemetry-scoped routes entry its own rules and returns a connected unit as is', () => {
+    const unit = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'metrics'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ destinations: ['es-logs'] }], telemetry: ['logs'] },
+          { name: 'routes', value: [{ destinations: ['es-metrics'] }], telemetry: ['metrics'] },
+        ],
+      },
+    ]);
+
+    expect(withoutUnconnectedWiring(unit)).toBe(unit);
+  });
+
+  it('drops an unhooked rule from its own entry, then the pipelines left unconnected', () => {
+    const unit = unitWith([
+      {
+        id: 'main',
+        supported_telemetry: ['logs', 'metrics'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'routes', value: [{ when: 'x', destinations: [] }], telemetry: ['logs'] },
+          { name: 'routes', value: [{ pipelines: ['child'] }], telemetry: ['metrics'] },
+        ],
+      },
+      {
+        id: 'child',
+        supported_telemetry: ['metrics'],
+        config: [{ name: 'processors', value: [] }],
+      },
+    ]);
+
+    expect(withoutUnconnectedWiring(unit).unit.pipelines).toEqual([]);
   });
 });
 

@@ -119,7 +119,8 @@ describe('unit repository', () => {
       },
     };
 
-    await expect(repository.persist(routedUnit)).resolves.toEqual(published);
+    // The body is cleaned up; the unit handed back to the canvas keeps the unhooked rule staged.
+    await expect(repository.persist(routedUnit)).resolves.toEqual(routedUnit);
     expect(fetch).toHaveBeenCalledWith('PUT /internal/streams/unit/{id}', {
       params: { path: { id: STREAMS_DEFAULT_UNIT_ID }, body: published },
       signal: null,

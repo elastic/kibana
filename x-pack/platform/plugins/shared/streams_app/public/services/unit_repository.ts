@@ -87,11 +87,16 @@ export const createUnitRepository = ({
     }
   },
   persist: async (stagedUnit, secrets) => {
-    const unit = withPublishedTelemetry(withoutUnconnectedWiring(stagedUnit));
+    // A component save (create a destination, save processing) persists the staged
+    // unit while lines may be unhooked. Wiring the schema and the distributor reject
+    // is stripped from the published body only; the unit handed back, which the
+    // canvas stores, keeps it staged. Both are narrowed to the signals routes export.
+    const unit = withPublishedTelemetry(stagedUnit);
+    const published = withPublishedTelemetry(withoutUnconnectedWiring(stagedUnit));
     const response = await streamsRepositoryClient.fetch('PUT /internal/streams/unit/{id}', {
       params: {
         path: { id: unitId },
-        body: secrets ? { ...unit, secrets } : unit,
+        body: secrets ? { ...published, secrets } : published,
       },
       signal: null,
     });

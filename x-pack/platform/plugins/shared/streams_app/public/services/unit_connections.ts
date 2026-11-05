@@ -48,6 +48,7 @@ import {
   unionSignals,
   usedComponentIds,
   type PipelineConfig,
+  type PipelineConfigEntry,
   type RouteRule,
   type RouteRuleRef,
   type UnitPipeline,
@@ -1283,48 +1284,58 @@ export const getUnconnectedPipelines = (unit: Unit): UnconnectedPipeline[] => {
 };
 
 /**
+ * Keeps the routes `keep` accepts, entry by entry so each `routes` entry keeps
+ * its own selector. An entry left empty goes. Returns the same pipeline when
+ * nothing changes.
+ */
+const keepRoutes = (
+  pipeline: UnitPipeline,
+  keep: (route: RouteRule) => RouteRule[]
+): UnitPipeline => {
+  const config = pipeline.config.flatMap((entry): PipelineConfigEntry[] => {
+    if (entry.name !== PIPELINE_ENTRY.routes) {
+      return [entry];
+    }
+    const value = entry.value.flatMap(keep);
+    if (value.length === 0) {
+      return [];
+    }
+    return [isEqual(value, entry.value) ? entry : { ...entry, value }];
+  });
+  return isEqual(config, pipeline.config) ? pipeline : { ...pipeline, config };
+};
+
+/**
  * The unit without the wiring the distributor would reject: rules left without
  * a target, then every pipeline `getUnconnectedPipelines` reports, until none
  * is left. The canvas Save refuses an unconnected unit; a component save
- * persists the staged unit while lines are unhooked, so it is cleaned up here.
+ * persists the staged unit while lines are unhooked, so the published copy is
+ * cleaned up here. A connected unit comes back as it is.
  */
 export const withoutUnconnectedWiring = (unit: Unit): Unit => {
-  let current = replacePipelines(
-    unit,
-    unit.unit.pipelines.map((pipeline) => ({
-      ...pipeline,
-      config: withRoutes(
-        pipeline.config,
-        readRoutes(pipeline.config).filter((route) => routeTargets(route).length > 0)
-      ),
-    }))
+  let pipelines = unit.unit.pipelines.map((pipeline) =>
+    keepRoutes(pipeline, (route) => (routeTargets(route).length > 0 ? [route] : []))
   );
   for (;;) {
     const unconnected = new Set(
-      getUnconnectedPipelines(current).map(({ pipeline }) => pipeline.id)
+      getUnconnectedPipelines(replacePipelines(unit, pipelines)).map(({ pipeline }) => pipeline.id)
     );
     if (unconnected.size === 0) {
-      return current;
+      break;
     }
-    const remaining = current.unit.pipelines.filter(({ id }) => !unconnected.has(id));
+    const remaining = pipelines.filter(({ id }) => !unconnected.has(id));
     const remainingIds = new Set(remaining.map(({ id }) => id));
-    current = replacePipelines(
-      current,
-      remaining.map((pipeline) => ({
-        ...pipeline,
-        config: withRoutes(
-          pipeline.config,
-          readRoutes(pipeline.config).flatMap((route): RouteRule[] => {
-            if (!isDelegatingRoute(route)) {
-              return [route];
-            }
-            const pipelines = route.pipelines.filter((id) => remainingIds.has(id));
-            return pipelines.length > 0 ? [{ ...route, pipelines }] : [];
-          })
-        ),
-      }))
+    pipelines = remaining.map((pipeline) =>
+      keepRoutes(pipeline, (route) => {
+        if (!isDelegatingRoute(route)) {
+          return [route];
+        }
+        const delegated = route.pipelines.filter((id) => remainingIds.has(id));
+        return delegated.length > 0 ? [{ ...route, pipelines: delegated }] : [];
+      })
     );
   }
+  return isEqual(pipelines, unit.unit.pipelines) ? unit : replacePipelines(unit, pipelines);
 };
 
 const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
