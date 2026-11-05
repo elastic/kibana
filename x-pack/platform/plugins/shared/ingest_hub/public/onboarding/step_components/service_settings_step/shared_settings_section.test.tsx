@@ -170,12 +170,12 @@ describe('SharedSettingsSection', () => {
       );
     });
 
-    it('notes that the OpenTelemetry template does not use the namespace', () => {
+    it('notes that some selected services do not use the namespace', () => {
       renderSection({ hasServicesIgnoringNamespace: true });
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
       expect(screen.getByTestId('sharedSettingsNamespace-note')).toHaveTextContent(
-        'do not use this setting'
+        'does not use this setting'
       );
     });
 

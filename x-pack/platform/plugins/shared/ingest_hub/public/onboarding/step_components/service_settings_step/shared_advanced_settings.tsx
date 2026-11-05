@@ -18,7 +18,7 @@ interface SharedAdvancedSettingsProps {
   hasDeployedServices: boolean;
   /** Whether an ECF stack is already launched, which only takes a new namespace once updated. */
   hasLaunchedEcfStack?: boolean;
-  /** Whether a selected service does not follow the namespace (the OTel stack). */
+  /** Whether a selected service does not follow the namespace (some ECF templates take none). */
   hasServicesIgnoringNamespace?: boolean;
 }
 
@@ -47,9 +47,9 @@ export function SharedAdvancedSettings({
     hasServicesIgnoringNamespace &&
       i18n.translate('xpack.ingestHub.integrationSettings.advanced.namespace.ignoredNote', {
         defaultMessage:
-          'Services deployed with the OpenTelemetry CloudFormation template do not use this setting.',
+          'Some selected services are deployed with a CloudFormation template that does not use this setting.',
       }),
-  ].filter(Boolean);
+  ].filter((note): note is string => Boolean(note));
 
   return (
     <EuiFlexGrid columns={2} gutterSize="l" data-test-subj="sharedAdvancedSettings">
@@ -59,7 +59,7 @@ export function SharedAdvancedSettings({
           compressed
           namespace={namespace}
           onChange={onNamespaceChange}
-          note={notes.length > 0 ? notes.join(' ') : undefined}
+          note={notes}
           data-test-subj="sharedSettingsNamespace"
         />
       </EuiFlexItem>
