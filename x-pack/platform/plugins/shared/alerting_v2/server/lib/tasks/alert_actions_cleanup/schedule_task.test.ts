@@ -65,16 +65,20 @@ describe('scheduleAlertActionsCleanupTask', () => {
     });
   });
 
-  it('logs an error if removing the task fails', async () => {
+  it('logs a warning with its own code if removing the task fails', async () => {
     taskManager.removeIfExists.mockRejectedValue(new Error('remove failed'));
 
     await run(false);
 
-    expect(mockLogger.error).toHaveBeenCalledWith(
-      'remove failed',
+    expect(mockLogger.warn).toHaveBeenCalledWith(
+      expect.any(String),
       expect.objectContaining({
-        labels: expect.objectContaining({ task_id: ALERT_ACTIONS_CLEANUP_TASK_ID }),
+        labels: {
+          code: ALERTING_LOG_CODES.TASKS_REMOVE_FAILED,
+          task_id: ALERT_ACTIONS_CLEANUP_TASK_ID,
+        },
       })
     );
+    expect(mockLogger.error).not.toHaveBeenCalled();
   });
 });

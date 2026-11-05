@@ -5964,6 +5964,40 @@ describe('Package policy service', () => {
       );
     });
 
+    it('should put item in failedPolicies when preparing the update rejects with a non-Error value', async () => {
+      const savedObjectsClient = createSavedObjectClientMock();
+      const mockPackagePolicy = createPackagePolicyMock();
+
+      savedObjectsClient.bulkGet.mockResolvedValue({
+        saved_objects: [
+          {
+            id: 'test',
+            type: 'abcd',
+            references: [],
+            version: 'test',
+            attributes: mockPackagePolicy,
+          },
+        ],
+      });
+      savedObjectsClient.bulkUpdate.mockResolvedValue({ saved_objects: [] });
+      mockedSecretsModule.isSecretStorageEnabled.mockResolvedValueOnce(true);
+      mockedSecretsModule.extractAndUpdateSecrets.mockRejectedValueOnce(undefined);
+
+      const elasticsearchClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+
+      const res = await packagePolicyService.bulkUpdate(savedObjectsClient, elasticsearchClient, [
+        mockPackagePolicy,
+      ]);
+
+      expect(res.failedPolicies).toHaveLength(1);
+      expect(res.updatedPolicies).toHaveLength(0);
+      expect(res.failedPolicies[0].packagePolicy).toEqual(mockPackagePolicy);
+      expect(res.failedPolicies[0].error).toEqual(new Error('undefined'));
+      expect(appContextService.getLogger().warn).toHaveBeenCalledWith(
+        `Preparing update to package policy [${mockPackagePolicy.id}] failed: [Error] undefined`
+      );
+    });
+
     it('should allow to update input vars that are frozen with the force flag', async () => {
       const savedObjectsClient = createSavedObjectClientMock();
       const mockPackagePolicy = createPackagePolicyMock();
@@ -8422,6 +8456,34 @@ describe('Package policy service', () => {
       expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs).toHaveLength(1);
       expect((callbackTwo as jest.Mock).mock.calls[0][0].inputs[0].config.one.value).toEqual(
         'inserted by callbackOne'
+      );
+    });
+
+    it('should keep the onboarding_deployment_id of a package policy update', async () => {
+      const soClient = createSavedObjectClientMock();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const callback: CombinedExternalCallback = jest.fn(async (ds) => ds);
+
+      appContextService.addExternalCallback('packagePolicyUpdate', callback);
+
+      // Package upgrades pass the stored package policy, which the update schema alone rejects.
+      const storedPackagePolicy = {
+        ...newPackagePolicy,
+        id: 'pp-1',
+        onboarding_deployment_id: 'deployment-1',
+      };
+      const result = await packagePolicyService.runExternalCallbacks(
+        'packagePolicyUpdate',
+        storedPackagePolicy,
+        soClient,
+        esClient,
+        coreMock.createCustomRequestHandlerContext(context),
+        request
+      );
+
+      expect(callback).toHaveBeenCalled();
+      expect(result).toEqual(
+        expect.objectContaining({ id: 'pp-1', onboarding_deployment_id: 'deployment-1' })
       );
     });
 
@@ -15165,6 +15227,78 @@ describe('Package policy service', () => {
     describe('rollback', () => {
       beforeEach(() => {
         jest.clearAllMocks();
+      });
+
+      describe('onboarding_deployment_id', () => {
+        const makePolicies = (
+          current: string | null | undefined,
+          previous: string | null | undefined
+        ): Array<SavedObjectsFindResult<PackagePolicySOAttributes>> =>
+          [
+            { id: 'onboarding-policy', version: '2.3.2', onboarding_deployment_id: current },
+            { id: 'onboarding-policy:prev', version: '2.2.0', onboarding_deployment_id: previous },
+          ].map(({ id: policyId, version, onboarding_deployment_id: deploymentId }) => ({
+            type: LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+            id: policyId,
+            namespaces: ['default'],
+            attributes: {
+              name: 'aws-1',
+              policy_ids: ['12345'],
+              enabled: true,
+              inputs: [],
+              package: { name: 'aws', title: 'AWS', version },
+              revision: 1,
+              latest_revision: !policyId.endsWith(':prev'),
+              created_at: '2024-12-22T21:28:05.380Z',
+              created_by: 'elastic',
+              updated_at: '2024-12-22T21:28:05.380Z',
+              updated_by: 'elastic',
+              ...(deploymentId !== undefined ? { onboarding_deployment_id: deploymentId } : {}),
+            },
+            references: [],
+            score: 0,
+          }));
+        const restoredAttributes = () => mockSoClient.bulkUpdate.mock.calls[0][0][0].attributes;
+
+        it('keeps the current value instead of the one in the previous revision', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-2', 'deploy-1'),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', 'deploy-2');
+        });
+
+        it('keeps the current value when the previous revision has it cleared', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-2', null),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', 'deploy-2');
+        });
+
+        it('clears a value the policy no longer has', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies(undefined, 'deploy-1'),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).toHaveProperty('onboarding_deployment_id', null);
+        });
+
+        it('leaves the field out when the previous revision has none', async () => {
+          await packagePolicyService.rollback(
+            mockSoClient,
+            makePolicies('deploy-1', undefined),
+            '2.2.0'
+          );
+
+          expect(restoredAttributes()).not.toHaveProperty('onboarding_deployment_id');
+        });
       });
 
       it('should create temporary saved objects to back up package policies before updating them', async () => {

@@ -62,11 +62,6 @@ jest.mock('./input_validation_callout', () => ({
   ),
 }));
 
-jest.mock('@kbn/workflows-ui', () => ({
-  ...jest.requireActual('@kbn/workflows-ui'),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
-
 const renderForm = (value: string) => {
   const setValue = jest.fn();
   const setErrors = jest.fn();

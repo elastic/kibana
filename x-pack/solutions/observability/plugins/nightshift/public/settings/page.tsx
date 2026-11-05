@@ -11,7 +11,7 @@ import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { Redirect, useHistory, useLocation, useParams } from 'react-router-dom';
-import { NightshiftAppHeader } from '../app/app_header';
+import { NightshiftAppHeader } from '../components/app_header';
 import { useKibana } from '../hooks/use_kibana';
 import { DetectionsSettingsTab } from './detections_settings_tab';
 import { GeneralSettingsTab } from './general_settings_tab';
@@ -99,6 +99,7 @@ export function SettingsPage({ headerProps }: { headerProps: SettingsPageHeaderP
           <InvestigationsSettingsTab
             onCustomContextClick={onCustomContextClick}
             canEditCustomContext={canManage}
+            canManageSandboxAllowlist={canManage}
           />
         )}
         {tab === 'detections' && <DetectionsSettingsTab />}

@@ -100,11 +100,11 @@ plugins:
     - serverless_vectordb
     - share
     - significant_events
-    - significant_events_app
     - slo
     - snapshot_restore
     - spaces
     - stack_connectors
+    - stateContainersExamples
     - streams
     - streams_app
     - subscription_status
@@ -126,7 +126,6 @@ plugins:
     - workflowsExtensionsExample
   disabled:
     - data_views_as_code # Not yet registered for CI; added to unblock pipelines
-    - links # Not yet registered for CI; added to unblock flaky test runner pipelines
 
 packages:
   enabled:

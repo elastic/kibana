@@ -12,10 +12,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { AuthorizationProvider } from '@kbn/es-ui-shared-plugin/public';
 import type { IngestPipelinesParams } from '../../../locator';
 import { INGEST_PIPELINES_APP_LOCATOR, INGEST_PIPELINES_PAGES } from '../../../locator';
-import { API_BASE_PATH } from '../../../../common/constants';
 import type { Pipeline } from '../../../../common/types';
 import type { IngestPipelineFlyoutWithContextProps } from './ingest_pipeline_flyout_with_context_types';
 
@@ -59,31 +57,26 @@ export const IngestPipelineFlyoutWithContext: React.FC<IngestPipelineFlyoutWithC
 
   return (
     <KibanaRenderContextProvider {...coreServices}>
-      <AuthorizationProvider
-        privilegesEndpoint={`${API_BASE_PATH}/privileges/ingest_pipelines`}
-        httpClient={coreServices.http}
-      >
-        <KibanaContextProvider services={services}>
-          <PipelineFlyout
-            ingestPipeline={ingestPipelineName}
-            onClose={onClose}
-            onCreateClick={createPipeline}
-            onEditClick={editPipeline}
-            onCloneClick={clonePipeline}
-            onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
+      <KibanaContextProvider services={services}>
+        <PipelineFlyout
+          ingestPipeline={ingestPipelineName}
+          onClose={onClose}
+          onCreateClick={createPipeline}
+          onEditClick={editPipeline}
+          onCloneClick={clonePipeline}
+          onDeleteClick={(pipelines) => setPipelinesToDelete(pipelines)}
+        />
+        {pipelinesToDelete?.length > 0 ? (
+          <PipelineDeleteModal
+            callback={() => {
+              onClose();
+              reload();
+              setPipelinesToDelete([]);
+            }}
+            pipelinesToDelete={pipelinesToDelete}
           />
-          {pipelinesToDelete?.length > 0 ? (
-            <PipelineDeleteModal
-              callback={() => {
-                onClose();
-                reload();
-                setPipelinesToDelete([]);
-              }}
-              pipelinesToDelete={pipelinesToDelete}
-            />
-          ) : null}
-        </KibanaContextProvider>
-      </AuthorizationProvider>
+        ) : null}
+      </KibanaContextProvider>
     </KibanaRenderContextProvider>
   );
 };

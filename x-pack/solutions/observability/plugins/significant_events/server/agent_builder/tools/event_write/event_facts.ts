@@ -49,7 +49,7 @@ interface EventFacts
  * reopened event does not inherit rule history from the episode it closed. A closed event keeps its
  * full history, since it can only be unchanged against what it already stored.
  */
-const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
+export const episodeHistory = (history: SignificantEvent[]): SignificantEvent[] => {
   const latest = history.at(-1);
   if (!isLiveStatus(latest?.status)) return history;
   const lastClosedIndex = history.map((version) => !isLiveStatus(version.status)).lastIndexOf(true);
@@ -72,7 +72,7 @@ export const shouldSkipAsNoOp = ({
   const { latest, priorDocs } = candidate;
   if (latest === undefined) return false;
 
-  const history = episodeHistory([...priorDocs, latest]);
+  const history = episodeHistory(priorDocs);
   const knownRuleUuids = extractRuleUuidsFromEvents(history);
   const addsRule = addsNewDetectionRules(extractRuleUuids(candidate.input.signals), knownRuleUuids);
 
@@ -195,22 +195,24 @@ export const computeEventFacts = ({
   const { event_id: _explicitId, ...rest } = candidate.input;
   const { latest, priorDocs } = candidate;
   const isContinuation = candidate.input.event_id !== undefined;
+  const currentEpisode = episodeHistory(priorDocs);
 
   // A closed series that reopens starts a new episode: its stored signals belong to the closed one.
   const reopens = isContinuation && !isLiveStatus(latest?.status) && isLiveStatus(candidate.status);
   const signals =
     isContinuation && !reopens
-      ? mergeSignalsLatestPerRule(priorDocs, candidate.input.signals ?? [], timestamp)
+      ? mergeSignalsLatestPerRule(currentEpisode, candidate.input.signals ?? [], timestamp)
       : candidate.input.signals ?? [];
 
-  const episodeContext = isContinuation
-    ? mergeEpisodeContext(priorDocs, rest, timestamp)
-    : {
-        sourceIds: rest.source_ids,
-        causalFeatures: rest.causal_features ?? [],
-        blastRadius: rest.blast_radius ?? [],
-        confidence: rest.confidence ?? 0,
-      };
+  const episodeContext =
+    isContinuation && !reopens
+      ? mergeEpisodeContext(currentEpisode, rest, timestamp)
+      : {
+          sourceIds: rest.source_ids,
+          causalFeatures: rest.causal_features ?? [],
+          blastRadius: rest.blast_radius ?? [],
+          confidence: rest.confidence ?? 0,
+        };
 
   const { status } = candidate;
 
@@ -226,11 +228,13 @@ export const computeEventFacts = ({
   // A rule that now confirms what the event stored as unconfirmed changes what the event is about:
   // its title and hypothesis must be free to say so.
   const frozenNarrative =
-    isContinuation && !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
+    isContinuation &&
+    !reopens &&
+    !escalatesStoredVerdict({ submitted: candidate.input.signals, latest })
       ? preserveStableNarrative(
           extractRuleUuids(candidate.input.signals),
           latest,
-          extractRuleUuidsFromEvents([...priorDocs, latest])
+          extractRuleUuidsFromEvents(currentEpisode)
         )
       : undefined;
 

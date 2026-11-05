@@ -30,7 +30,8 @@ export const listLabels = {
     defaultMessage: 'Enabled',
   }),
   rateLimitBody: i18n.translate('xpack.nightshift.automations.rateLimitBannerBody', {
-    defaultMessage: 'Further triggers are skipped until the limit resets at midnight (UTC).',
+    defaultMessage:
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
   }),
   showRateLimited: i18n.translate('xpack.nightshift.automations.rateLimitBannerShowRateLimited', {
     defaultMessage: 'Show rate-limited automations',
@@ -113,17 +114,19 @@ export const getDeleteConfirmTitle = (name: string) =>
 export const getRateLimitTitle = (count: number) =>
   i18n.translate('xpack.nightshift.automations.rateLimitBannerTitle', {
     defaultMessage:
-      '{count, plural, one {# automation reached its} other {# automations reached their}} daily trigger limit',
+      '{count, plural, one {# automation} other {# automations}} reached daily run limit',
     values: { count },
   });
 
 export const globalLimitLabels = {
-  title: i18n.translate('xpack.nightshift.automations.globalLimitBannerTitle', {
-    defaultMessage: 'You reached automations daily limit for this deployment',
-  }),
+  getTitle: (limit: number) =>
+    i18n.translate('xpack.nightshift.automations.globalLimitBannerTitle', {
+      defaultMessage: 'Automations reached a daily run limit of {limit} for this deployment',
+      values: { limit },
+    }),
   body: i18n.translate('xpack.nightshift.automations.globalLimitBannerBody', {
     defaultMessage:
-      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually.',
+      'Further triggers will be skipped until the limit resets at midnight (UTC). Already started investigations will continue. You can still trigger investigations manually',
   }),
   goToSettings: i18n.translate('xpack.nightshift.automations.globalLimitBannerGoToSettings', {
     defaultMessage: 'Open settings',

@@ -21,6 +21,12 @@ export type {
   ModelConnectorSummary,
 } from './types';
 export type {
+  EvaluateEvidence,
+  EvaluateFn,
+  EvaluateParams,
+} from './evaluation/create_evaluate_contract';
+export { EvaluationExecutionError } from './evaluation/evaluation_execution_error';
+export type {
   EvaluatorContext,
   EvaluatorResult,
   RegisteredEvaluatorDefinition,
@@ -54,3 +60,4 @@ export const plugin: PluginInitializer<
 };
 
 export { config } from './config';
+export type { EvalsMode } from './config';

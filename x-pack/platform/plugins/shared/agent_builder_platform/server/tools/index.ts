@@ -25,22 +25,25 @@ import { searchTool } from './search';
 export const registerTools = ({
   coreSetup,
   setupDeps,
+  isServerless,
 }: {
   coreSetup: CoreSetup<PluginStartDependencies, AgentBuilderPlatformPluginStart>;
   setupDeps: PluginSetupDependencies;
+  isServerless: boolean;
 }) => {
   const { agentBuilder, cloud } = setupDeps;
 
   const tools: Array<StaticToolRegistration<any>> = [
-    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets }),
+    searchTool({ coreSetup, topSnippetsDefaults: agentBuilder.topSnippets, isServerless }),
     getDocumentByIdTool(),
-    executeEsqlTool(),
+    executeEsqlTool({ isServerless }),
     generateEsqlTool({
       organizationId: cloud?.organizationId,
+      isServerless,
     }),
-    getIndexMappingsTool(),
+    getIndexMappingsTool({ isServerless }),
     listIndicesTool(),
-    indexExplorerTool(),
+    indexExplorerTool({ isServerless }),
     productDocumentationTool(coreSetup),
     integrationKnowledgeTool(coreSetup),
   ];

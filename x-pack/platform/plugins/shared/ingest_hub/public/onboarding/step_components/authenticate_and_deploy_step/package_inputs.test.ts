@@ -414,6 +414,51 @@ describe('toSOServiceVars', () => {
     expect(result.ec2.namespace).toBe('prod');
     expect(result['ec2__dup-1'].namespace).toBe('staging');
   });
+
+  describe('typing the vars', () => {
+    // A service with a multi-value var: the raw draft is a comma-separated string.
+    const service = makeService({
+      id: 'aws_billing',
+      packageName: 'aws_billing',
+      dataStreams: ['billing'],
+      inputs: ['aws-s3'],
+      varDefsByInput: {
+        'aws-s3': {
+          tags: { name: 'tags', type: 'text', show_user: true, multi: true } as any,
+        },
+      },
+    });
+    const servicesMap = new Map([['aws_billing', service]]);
+    const vars = (tags: string): ServiceVars => ({
+      enabledDataStreams: ['billing'],
+      varsByDataStream: {
+        billing: { enabledInputs: ['aws-s3'], varsByInput: { 'aws-s3': { tags } } },
+      },
+    });
+    const tagsOf = (result: Record<string, unknown>, instanceId: string) =>
+      (result[instanceId] as ServiceVars).varsByDataStream.billing.varsByInput['aws-s3'].tags;
+
+    it('splits a multi-value var of an original', () => {
+      const result = toSOServiceVars({ aws_billing: vars('a, b') }, servicesMap);
+
+      expect(tagsOf(result, 'aws_billing')).toEqual(['a', 'b']);
+    });
+
+    it('types a duplicate like its service, which the instance id alone does not find', () => {
+      const result = toSOServiceVars(
+        { aws_billing: vars('a, b'), 'aws_billing__dup-1': vars('c, d') },
+        servicesMap
+      );
+
+      expect(tagsOf(result, 'aws_billing__dup-1')).toEqual(['c', 'd']);
+    });
+
+    it('passes the vars of an instance of an unknown service through unchanged', () => {
+      const result = toSOServiceVars({ 'other__dup-1': vars('c, d') }, servicesMap);
+
+      expect(tagsOf(result, 'other__dup-1')).toBe('c, d');
+    });
+  });
 });
 
 describe('buildPackageInputs', () => {

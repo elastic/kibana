@@ -6,14 +6,13 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 import { getRateLimitTitle, listLabels } from './translations';
 
 export const RateLimitCallout = ({ count, onShow }: { count: number; onShow?: () => void }) => (
-  <EuiCallOut
+  <KbnWarningCallout
     announceOnMount
     size="s"
-    color="warning"
     title={getRateLimitTitle(count)}
     text={listLabels.rateLimitBody}
     actionProps={

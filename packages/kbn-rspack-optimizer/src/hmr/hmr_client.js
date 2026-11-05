@@ -381,6 +381,12 @@ if (window.__kbnHmrActive__ && module.hot) {
           return;
         }
 
+        if (data.reload) {
+          console.log(LOG_PREFIX + ' Shared bundles updated, reloading page...');
+          window.location.reload();
+          return;
+        }
+
         if (data.errors && data.errors.length > 0) {
           console.error(LOG_PREFIX + ' Build failed with ' + data.errors.length + ' error(s)');
           if (!data.replay) {

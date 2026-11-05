@@ -218,22 +218,69 @@ it('reports an investigation that finished without a conclusion, keeping its evi
 });
 
 it('flags a finished investigation whose conversation never finished persisting', async () => {
+  const clock = jest
+    .spyOn(Date, 'now')
+    .mockReturnValueOnce(0)
+    .mockReturnValue(INVESTIGATION_TIMEOUT_MS + 60_000);
+  const unfinished = {
+    rounds: [{ trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] }],
+  };
+  try {
+    const fetch = jest
+      .fn()
+      .mockImplementation((path: string) =>
+        Promise.resolve(
+          path === '/internal/nightshift/investigations'
+            ? { investigation_id: 'unpersisted' }
+            : path.startsWith('/internal/investigations/')
+            ? investigation({ id: 'unpersisted' })
+            : unfinished
+        )
+      );
+
+    expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+      workflow_status: 'complete',
+      execution_error: UNPERSISTED_CONVERSATION_ERROR,
+      conversation_round_count: 1,
+      traceId: 'partial-trace',
+    });
+  } finally {
+    clock.mockRestore();
+  }
+});
+
+it('keeps polling while a pending proposal ends in_progress before the round records its verdict', async () => {
+  const running = {
+    rounds: [{ trace_id: 'agent-trace', status: ConversationRoundStatus.inProgress, steps: [] }],
+  };
+  const finished = {
+    rounds: [{ trace_id: 'agent-trace', status: ConversationRoundStatus.completed, steps: [] }],
+  };
+  const noVerdictYet = investigation({
+    id: 'proposal-first',
+    metadata: { status: 'open' },
+    in_progress: false,
+  });
+  const recorded = investigation({ id: 'proposal-first' });
   const fetch = jest
     .fn()
-    .mockResolvedValueOnce({ investigation_id: 'unpersisted' })
-    .mockResolvedValueOnce(investigation({ id: 'unpersisted' }))
-    .mockResolvedValue({
-      rounds: [
-        { trace_id: 'partial-trace', status: ConversationRoundStatus.inProgress, steps: [] },
-      ],
-    });
+    .mockResolvedValueOnce({ investigation_id: 'proposal-first' })
+    .mockResolvedValueOnce(noVerdictYet)
+    .mockResolvedValueOnce(running)
+    .mockResolvedValueOnce(noVerdictYet)
+    .mockResolvedValueOnce(finished)
+    .mockResolvedValueOnce(recorded);
 
-  expect(await runInvestigation(fetch, example, connector)).toMatchObject({
+  const output = await runInvestigation(fetch, example, connector);
+
+  expect(output).toMatchObject({
     workflow_status: 'complete',
-    execution_error: UNPERSISTED_CONVERSATION_ERROR,
+    structured_report: { conclusion: 'Synthetic timeouts increased.' },
     conversation_round_count: 1,
-    traceId: 'partial-trace',
+    traceId: 'agent-trace',
   });
+  expect(output.execution_error).toBeUndefined();
+  expect(fetch).toHaveBeenCalledTimes(6);
 });
 
 it('reports an investigation start failure as execution evidence', async () => {
