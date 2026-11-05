@@ -61,6 +61,13 @@ the window. Thresholds are checked per branch, so a clean branch cannot hide a f
 branch a test qualified on is recorded as `flakiestBranch`. Tests that never passed in the window
 are consistently failing, not flaky, and are not reported.
 
+Breakages don't count as flakiness. A breakage is a run of at least 3 failed builds in a row in one
+pipeline, config and target, a failure that passed on a retry included, with less than a 1% chance
+for a test failing at random as often. A test in a breakage up to its latest build is broken right
+now and is left out of the report. A test whose breakages are over is checked against the
+thresholds again without their builds, and left out if it no longer clears them. Each test left out
+is logged with the breakage that left it out, or the longest one.
+
 Tests that have been skipped since are left out (`--no-omit-skipped-tests` keeps them): on every
 branch the test failed on, its latest run in every pipeline, config and target was a skip. A suite
 left with no test gets no issue (`all-tests-skipped`).

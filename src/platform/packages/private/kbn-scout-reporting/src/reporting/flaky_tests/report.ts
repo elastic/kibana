@@ -11,6 +11,12 @@ import fs from 'node:fs';
 import path from 'node:path';
 import type { Client as ESClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import {
+  branchCountsWithout,
+  describeBreakage,
+  findBreakages,
+  type SetupBuilds,
+} from './breakages';
 import { ESQL_ROW_LIMIT } from './esql';
 import {
   fetchBranchCounts,
@@ -18,6 +24,7 @@ import {
   fetchFailingFiles,
   fetchFilePipelineStats,
   fetchSampleFailures,
+  fetchSetupBuilds,
   fetchTargetStats,
   fetchTestErrors,
   fetchTestMetadata,
@@ -96,6 +103,36 @@ export const flakiestQualifyingBranch = (
     }))
     .filter((row) => row.buildFailRate >= thresholds.minFailRate)
     .sort((a, b) => b.buildFailRate - a.buildFailRate || b.failedBuilds - a.failedBuilds)[0];
+
+/**
+ * Why a flaky test is left out, if it is. A breakage, failed builds in a row too many to be
+ * chance, has one cause rather than being flakiness. A test in a breakage up to its latest build
+ * is broken right now; one that clears the thresholds only with its past breakages is not flaky.
+ */
+export const breakageReason = (
+  setups: readonly SetupBuilds[],
+  thresholds: BuildThresholds
+): string | undefined => {
+  const breakages = setups.flatMap(findBreakages);
+  if (breakages.length === 0) {
+    return undefined;
+  }
+  const ongoing = breakages.find((breakage) => breakage.ongoing);
+  if (ongoing) {
+    return `broken right now, ${describeBreakage(ongoing)}`;
+  }
+  if (flakiestQualifyingBranch(branchCountsWithout(setups, breakages), thresholds)) {
+    return undefined;
+  }
+  if (breakages.length === 1) {
+    return `below the thresholds without its breakage, ${describeBreakage(breakages[0])}`;
+  }
+  const longest = breakages.reduce((a, b) => (b.builds.length > a.builds.length ? b : a));
+  return (
+    `below the thresholds without its ${breakages.length} breakages, ` +
+    `the longest ${describeBreakage(longest)}`
+  );
+};
 
 /**
  * A qualifying test is flaky when it had at least one clean pass or recovered on an in-run
@@ -292,9 +329,36 @@ const buildReport = async (
     log.info(`Fetched metadata for ${metadata.size} failing tests in ${elapsed(startedAt)}`);
   }
 
+  // Checked before ranking, like the thresholds, so the caps are filled with flaky tests
+  const flakyRows = qualified.map(({ row }) => row).filter((row) => classifyTest(row) === 'flaky');
+  const leftOut = new Set<string>();
+  if (flakyRows.length > 0) {
+    startedAt = performance.now();
+    const { byTest, truncated } = await fetchSetupBuilds(es, scope, flakyRows);
+    if (truncated.length > 0) {
+      log.warning(
+        `Setup builds query hit the ${ESQL_ROW_LIMIT} row limit; ` +
+          `kept ${truncated.length} tests without checking them for breakages`
+      );
+    }
+    for (const row of flakyRows) {
+      const reason = breakageReason(byTest.get(row.testId) ?? [], thresholds);
+      if (reason) {
+        leftOut.add(row.testId);
+        const { filePath, title } = metadata.get(row.testId) ?? {};
+        log.info(`Left out ${filePath ?? row.testId} › ${title ?? '(unknown)'}: ${reason}`);
+      }
+    }
+    log.info(
+      `Checked ${flakyRows.length} flaky tests for breakages in ${elapsed(startedAt)}: ` +
+        `left out ${leftOut.size}`
+    );
+  }
+
   const flaky: AggregatedEntry[] = [];
   const consistentlyFailing: AggregatedEntry[] = [];
   for (const { row, flakiestBranch } of qualified) {
+    if (leftOut.has(row.testId)) continue;
     const entry = toEntry(row, flakiestBranch, metadata.get(row.testId));
     (classifyTest(row) === 'flaky' ? flaky : consistentlyFailing).push(entry);
   }
