@@ -11,6 +11,7 @@ import (
 	"net"
 	"net/http"
 	"net/http/httputil"
+	_ "net/http/pprof"
 	"os"
 	"os/signal"
 	"strings"
@@ -99,6 +100,13 @@ func main() {
 		}
 	}()
 
+	go func() {
+		log.Printf("pprof listening on :6060")
+		if err := http.ListenAndServe(":6060", nil); err != nil {
+			log.Printf("pprof server error: %v", err)
+		}
+	}()
+
 	signalReady()
 	log.Printf("kbn-sidecar listening on %s (tls=%v)", addr, config.TLS != nil)
 
@@ -131,20 +139,17 @@ func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient,
 
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/status":
-			log.Printf("[route] %s %s → Go (status)", r.Method, r.URL.Path)
 			statusHandler.ServeHTTP(w, r)
 
 		case esqlHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async")
 			id = strings.TrimPrefix(id, "/")
-			log.Printf("[route] %s %s → Go (esql_async)", r.Method, r.URL.Path)
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				esqlHandler.HandleAsync(w, r, id)
 			})(w, r)
 
 		case esqlHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async/"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async/")
-			log.Printf("[route] %s %s → Go (esql_async delete)", r.Method, r.URL.Path)
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				esqlHandler.HandleDelete(w, r, id)
 			})(w, r)
@@ -152,20 +157,17 @@ func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient,
 		case eseHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/ese"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese")
 			id = strings.TrimPrefix(id, "/")
-			log.Printf("[route] %s %s → Go (ese)", r.Method, r.URL.Path)
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				eseHandler.HandleSearch(w, r, id)
 			})(w, r)
 
 		case eseHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/ese/"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese/")
-			log.Printf("[route] %s %s → Go (ese delete)", r.Method, r.URL.Path)
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				eseHandler.HandleDelete(w, r, id)
 			})(w, r)
 
 		default:
-			log.Printf("[route] %s %s → Node", r.Method, r.URL.Path)
 			proxy.ServeHTTP(w, r)
 		}
 	})

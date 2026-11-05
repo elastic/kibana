@@ -13,6 +13,7 @@ func NewNodeProxy(socketPath string) *httputil.ReverseProxy {
 		DialContext: func(ctx context.Context, _, _ string) (net.Conn, error) {
 			return (&net.Dialer{}).DialContext(ctx, "unix", socketPath)
 		},
+		DisableCompression:    true,
 		MaxIdleConnsPerHost:   100,
 		IdleConnTimeout:       90 * time.Second,
 		ResponseHeaderTimeout: 0,
