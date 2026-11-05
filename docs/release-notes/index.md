@@ -26,6 +26,10 @@ To check for security updates, go to [Security announcements for the Elastic sta
 
 ## 9.5.6 [kibana-9.5.6-release-notes]
 
+:::{important}
+The 9.5.6 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
+
 ### Features and enhancements [kibana-9.5.6-features-enhancements]
 
 **Elastic Agent Builder**:
@@ -1073,6 +1077,10 @@ For the {{elastic-sec}} 9.5.0 release information, refer to [{{elastic-sec}} Sol
 * Fix the `max-step-size` setting of the `ai.agent` workflow step being ignored for streamed completions, which could fail large responses with a maximum content length error [#275842]({{kib-pull}}275842).
 
 ## 9.4.9 [kibana-9.4.9-release-notes]
+
+:::{important}
+The 9.4.9 release contains fixes for potential security vulnerabilities. Check our [security advisory](https://discuss.elastic.co/c/announcements/security-announcements/31) for more details.
+:::
 
 ### Features and enhancements [kibana-9.4.9-features-enhancements]
 

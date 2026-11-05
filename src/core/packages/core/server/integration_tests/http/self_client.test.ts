@@ -79,7 +79,7 @@ type TestHttpConfig = Omit<Partial<HttpConfigType>, 'selfHttp' | 'ssl' | 'versio
 
 const startServer = async (
   serverConfig: TestHttpConfig = { port: TEST_PORT },
-  { withAuth = false }: { withAuth?: boolean } = {}
+  { withAuth = false, refresher }: { withAuth?: boolean; refresher?: 'replace' | 'reject' } = {}
 ) => {
   const logger = loggingSystemMock.create();
   const server = createInternalHttpService({
@@ -106,12 +106,13 @@ const startServer = async (
     registerAuth,
     registerOnPostAuth,
     setSelfClientUnauthorizedErrorHandler,
+    setSelfClientCredentialRefresher,
   } = await server.setup(setupDeps);
   const router = createRouter('/');
   const supertest = Supertest(innerServer.listener);
   const started = { httpStart: null as InternalHttpServiceStart | null };
   // One credential rotation: the self call's first attempt carries the stale token.
-  const credentials = { current: 'Bearer fresh', minted: 0, sideEffects: 0 };
+  const credentials = { current: 'Bearer fresh', minted: 0, refreshed: 0, sideEffects: 0 };
 
   if (withAuth) {
     registerAuth((request, response, toolkit) => {
@@ -127,6 +128,19 @@ const startServer = async (
     setSelfClientUnauthorizedErrorHandler((_options, toolkit) => {
       credentials.minted += 1;
       return toolkit.retry({ authHeaders: { authorization: credentials.current } });
+    });
+  }
+
+  if (refresher) {
+    setSelfClientCredentialRefresher((_options, toolkit) => {
+      credentials.refreshed += 1;
+      return refresher === 'replace'
+        ? toolkit.replace({ authHeaders: { authorization: credentials.current } })
+        : toolkit.reject({
+            error: Object.assign(new Error('The credential was refused.'), {
+              code: 'CREDENTIAL_REFUSED',
+            }),
+          });
     });
   }
   registerOnPostAuth((request, response, toolkit) => {
@@ -466,9 +480,17 @@ const startServer = async (
           .fetch('/self/rotating_target', {
             query: { payload: 'replayed-intact' },
           });
-        return res.ok({ body: { body, minted: credentials.minted } });
+        return res.ok({
+          body: { body, minted: credentials.minted, refreshed: credentials.refreshed },
+        });
       } catch (error) {
-        return res.ok({ body: { error: (error as Error).message, minted: credentials.minted } });
+        return res.ok({
+          body: {
+            error: (error as Error).message,
+            minted: credentials.minted,
+            refreshed: credentials.refreshed,
+          },
+        });
       }
     }
   );
@@ -584,6 +606,47 @@ describe('Http self client', () => {
       expect(response.body.sideEffects).toBe(1);
       expect(response.body.minted).toBe(0);
       expect(response.body.error).toBeTruthy();
+    });
+  });
+
+  describe('credential refresh before sending', () => {
+    let server: HttpService;
+    let supertest: Supertest.Agent;
+
+    afterEach(async () => {
+      await server.stop();
+      http.globalAgent.destroy();
+      https.globalAgent.destroy();
+    });
+
+    it('authenticates the first attempt with the refreshed credential', async () => {
+      ({ server, supertest } = await startServer(
+        { port: TEST_PORT },
+        { withAuth: true, refresher: 'replace' }
+      ));
+
+      const response = await supertest.get('/self/call_rotating').expect(200);
+
+      expect(response.body.refreshed).toBe(1);
+      // The authentication lifecycle accepted the first attempt, so the 401 handler never ran.
+      expect(response.body.minted).toBe(0);
+      expect(response.body.body).toEqual({
+        payload: 'replayed-intact',
+        authorization: 'Bearer fresh',
+      });
+    });
+
+    it('fails a rejected call before it reaches the target', async () => {
+      ({ server, supertest } = await startServer(
+        { port: TEST_PORT },
+        { withAuth: true, refresher: 'reject' }
+      ));
+
+      const response = await supertest.get('/self/call_rotating').expect(200);
+
+      expect(response.body.refreshed).toBe(1);
+      expect(response.body.minted).toBe(0);
+      expect(response.body.error).toMatch(/CREDENTIAL_REFUSED: The credential was refused\.$/);
     });
   });
 

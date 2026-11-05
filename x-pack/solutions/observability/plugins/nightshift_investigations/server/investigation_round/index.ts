@@ -43,6 +43,14 @@ export {
 } from './workspace_reads';
 
 export {
+  resolveRound,
+  type InvestigationRoundKind,
+  type ResolvableConversation,
+  type RootCauseChange,
+  type RoundResolution,
+} from './round_outcome';
+
+export {
   APPLIED_WRITE_STORES,
   appliedWriteSchema,
   type AppliedWriteRecord,

@@ -37,6 +37,10 @@ into that package.
 - Managed workflow ids keep their `system-streams-ki-*` names.
 - Legacy handling that stays: the `sigevents:stream:<name>` rule ownership tag (`LEGACY_RULE_STREAM_TAG_PREFIX`) and the maintenance reset sweep.
 
+## Pull request descriptions
+
+Follow the [`nightshift-pr-description` skill](../../../../../.agents/skills/nightshift-pr-description/SKILL.md) when writing or rewriting a pull request description.
+
 ## Keeping this file current
 
 Update this file when you make a change that would mislead an agent reading it: cross-package ownership changes, pipeline restructuring, addition or removal of concepts relevant to the pipeline, or naming convention updates. Do not update it for type field additions or directory reorganisations within a package — those are discoverable from the code.
