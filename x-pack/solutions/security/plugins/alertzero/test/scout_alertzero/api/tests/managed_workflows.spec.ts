@@ -178,7 +178,7 @@ const cancelNewExecutions = async (
  *
  * Enabling a worker requires an AI model in the space (Kibana answers 400
  * otherwise), so the dynamic-worker half of this suite skips with an explicit
- * reason on a stack booted without a preconfigured inference connector. The
+ * reason on a stack booted without a preconfigured AI connector. The
  * static coverage workflows need no model and always run.
  */
 apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic] }, () => {
@@ -233,12 +233,16 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
       responseType: 'json',
     });
     expect(connectors.statusCode, JSON.stringify(connectors.body)).toBe(200);
+    // Same predicate as `listChatCompletionConnectors` in the security_solution scout_alertzero
+    // fixtures (not importable from this plugin's tests): the connector types the inference
+    // plugin accepts, `.inference` only as a `chat_completion` endpoint.
     hasChatCompletionConnector = (
       connectors.body as Array<{ connector_type_id: string; config?: { taskType?: string } }>
     ).some(
       (connector) =>
-        connector.connector_type_id === '.inference' &&
-        connector.config?.taskType === 'chat_completion'
+        ['.gen-ai', '.bedrock', '.gemini'].includes(connector.connector_type_id) ||
+        (connector.connector_type_id === '.inference' &&
+          connector.config?.taskType === 'chat_completion')
     );
     if (!hasChatCompletionConnector) {
       return;
@@ -397,7 +401,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     apiTest(`${workflowId}: is installed and valid`, async ({ apiClient, samlAuth }) => {
       apiTest.skip(
         workflowId === FLOOR_ALERT_TRIAGE_WORKFLOW_ID && !hasChatCompletionConnector,
-        'no preconfigured chat-completion inference connector on this stack; enabling the floor alert triage worker requires an AI model'
+        'no preconfigured chat-completion AI connector on this stack; enabling the floor alert triage worker requires an AI model'
       );
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       const headers = { ...PUBLIC_API_HEADERS, ...cookieHeader };

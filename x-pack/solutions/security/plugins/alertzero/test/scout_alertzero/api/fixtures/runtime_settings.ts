@@ -46,16 +46,6 @@ const isRecord = (value: unknown): value is Record<string, unknown> =>
 const isCapture = (value: unknown): value is AlertAnalysisCapture =>
   isRecord(value) && 'prior' in value && 'applied' in value;
 
-/**
- * The capture format before `applied` existed: a flat map of setting key -> prior value. An
- * interrupted run of an older checkout can leave one behind.
- */
-const isLegacyCapture = (value: unknown): value is Record<string, unknown> =>
-  isRecord(value) &&
-  !('prior' in value) &&
-  !('applied' in value) &&
-  ALERT_ANALYSIS_SETTING in value;
-
 /** The parsed file, or `undefined` when it cannot be read or is not JSON. */
 const readCaptureFile = (): unknown => {
   try {
@@ -94,20 +84,11 @@ export const applyAlertAnalysisSetting = async ({
       log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${STATE_FILE}`);
       // Teardown compares the live value with `applied`, so record what is about to be written.
       writeFileSync(STATE_FILE, JSON.stringify({ ...existing, applied: true }, null, 2));
-    } else if (isLegacyCapture(existing)) {
-      log.warning(
-        `[setup] converting a flat-map prior-value capture left by an older run: ${STATE_FILE}`
-      );
-      const capture: AlertAnalysisCapture = {
-        prior: existing[ALERT_ANALYSIS_SETTING],
-        applied: true,
-      };
-      writeFileSync(STATE_FILE, JSON.stringify(capture, null, 2));
     } else {
       // Neither writing over it nor applying without a baseline is safe, and returning would
       // leave every later run silently unconfigured: fail setup so the leftover gets resolved.
       throw new Error(
-        `[setup] unreadable prior-value capture at ${STATE_FILE}: check the live value of ${ALERT_ANALYSIS_SETTING}, restore it if needed, then delete ${STATE_FILE}`
+        `[setup] unreadable or older-format prior-value capture at ${STATE_FILE}: check the live value of ${ALERT_ANALYSIS_SETTING}, restore it if needed, then delete ${STATE_FILE}`
       );
     }
   } else {
