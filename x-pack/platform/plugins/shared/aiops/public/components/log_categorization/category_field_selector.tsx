@@ -12,7 +12,7 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-interface CategoryFieldSelectProps {
+interface CategoryFieldSelectorProps {
   fields: EuiComboBoxOptionOption[];
   selectedField: string | undefined;
   isDisabled: boolean;
@@ -20,7 +20,7 @@ interface CategoryFieldSelectProps {
 }
 
 /** Category field picker that exposes leftover, unselected input as an announced form error. */
-export const CategoryFieldSelect: FC<CategoryFieldSelectProps> = ({
+export const CategoryFieldSelector: FC<CategoryFieldSelectorProps> = ({
   fields,
   selectedField,
   isDisabled,
@@ -52,15 +52,10 @@ export const CategoryFieldSelect: FC<CategoryFieldSelectProps> = ({
         defaultMessage: 'Category field',
       })}
       isInvalid={isInvalid}
-      error={
-        isInvalid
-          ? i18n.translate('xpack.aiops.logCategorization.categoryFieldSelectInvalidError', {
-              defaultMessage:
-                '{value} is not a valid category field. Select a field from the list.',
-              values: { value: searchValue },
-            })
-          : undefined
-      }
+      error={i18n.translate('xpack.aiops.logCategorization.categoryFieldSelectInvalidError', {
+        defaultMessage: '{value} is not a valid category field. Select a field from the list.',
+        values: { value: searchValue },
+      })}
     >
       <EuiComboBox
         compressed

@@ -54,7 +54,7 @@ import { createDocumentStatsHash } from './utils';
 import { TableHeader } from './category_table/table_header';
 import { useActions } from './category_table/use_actions';
 import { AttachmentsMenu } from './attachments_menu';
-import { CategoryFieldSelect } from './category_field_select';
+import { CategoryFieldSelector } from './category_field_selector';
 
 const BAR_TARGET = 20;
 const DEFAULT_SELECTED_FIELD = 'message';
@@ -364,7 +364,7 @@ export const LogCategorizationPage: FC = () => {
       <EuiFlexGroup>
         <EuiFlexGroup gutterSize="s">
           <EuiFlexItem grow={false} css={{ minWidth: '400px' }}>
-            <CategoryFieldSelect
+            <CategoryFieldSelector
               fields={fields}
               selectedField={selectedField}
               isDisabled={loading === true}

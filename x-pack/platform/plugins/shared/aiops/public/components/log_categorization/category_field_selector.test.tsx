@@ -9,14 +9,14 @@ import React from 'react';
 import { render, screen, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { CategoryFieldSelect } from './category_field_select';
+import { CategoryFieldSelector } from './category_field_selector';
 
 const fields = [{ label: 'message' }, { label: 'error.message' }];
 
-const renderSelect = (onChange = jest.fn()) => {
+const renderSelector = (onChange = jest.fn()) => {
   render(
     <>
-      <CategoryFieldSelect
+      <CategoryFieldSelector
         fields={fields}
         selectedField={undefined}
         isDisabled={false}
@@ -28,17 +28,13 @@ const renderSelect = (onChange = jest.fn()) => {
   return screen.getByRole('combobox', { name: 'Category field' });
 };
 
-describe('CategoryFieldSelect', () => {
-  it('does not show an error initially', () => {
-    const input = renderSelect();
+describe('CategoryFieldSelector', () => {
+  it('announces an error linked to the input when unselected text is left on blur', async () => {
+    const user = userEvent.setup();
+    const input = renderSelector();
 
     expect(input).not.toHaveAttribute('aria-invalid', 'true');
     expect(screen.queryByText(/is not a valid category field/)).not.toBeInTheDocument();
-  });
-
-  it('announces an error linked to the input when unselected text is left on blur', async () => {
-    const user = userEvent.setup();
-    const input = renderSelect();
 
     await user.type(input, 'messa');
     await user.click(screen.getByRole('button', { name: 'next' }));
@@ -53,7 +49,7 @@ describe('CategoryFieldSelect', () => {
 
   it('clears the error once the text is removed', async () => {
     const user = userEvent.setup();
-    const input = renderSelect();
+    const input = renderSelector();
 
     await user.type(input, 'foo');
     fireEvent.blur(input);
@@ -66,7 +62,7 @@ describe('CategoryFieldSelect', () => {
   it('clears the error and notifies the parent when a field is selected', async () => {
     const user = userEvent.setup();
     const onChange = jest.fn();
-    const input = renderSelect(onChange);
+    const input = renderSelector(onChange);
 
     await user.type(input, 'mess');
     fireEvent.blur(input);
