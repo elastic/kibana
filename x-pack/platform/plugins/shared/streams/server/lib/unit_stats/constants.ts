@@ -38,8 +38,7 @@ export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration'
 /**
  * Source metrics come from the ingest collector, not from a unit collector. They have no scope
  * attributes, so the `scope.attributes.streams.*` paths above match nothing for a source, and no
- * config hash. The source id and the outcome are datapoint attributes. Verified against the
- * local dev stack (hosted-otel-collector git-4f5ab031f11d) on 2026-11-05.
+ * config hash. The source id and the outcome are datapoint attributes.
  */
 export const SOURCE_ID_FIELD = 'attributes.source.id';
 export const SOURCE_ITEMS_FIELD = 'metrics.streams.source.items';
