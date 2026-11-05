@@ -336,6 +336,38 @@ export const ConfigSchema = schema.object({
         }
       },
     }),
+    bindingCleanup: schema.object({
+      // How often the stale binding cleanup task runs. Each run examines a bounded number of
+      // bindings, so this also sets how long a full pass over many bindings takes.
+      interval: schema.duration({
+        defaultValue: '1h',
+        validate(value) {
+          if (value.asMilliseconds() < 60_000) {
+            return 'the value must be at least 1 minute.';
+          }
+        },
+      }),
+      // How old a binding must be before the cleanup considers it. A minimum age, not a deadline.
+      gracePeriod: schema.duration({
+        defaultValue: '24h',
+        validate(value) {
+          if (value.asMilliseconds() < 0) {
+            return 'the value must not be negative.';
+          }
+        },
+      }),
+      // How long a workload type must go unseen before its bindings are removed.
+      unregisteredTypeGracePeriod: schema.duration({
+        defaultValue: '7d',
+        validate(value) {
+          if (value.asMilliseconds() < 0) {
+            return 'the value must not be negative.';
+          }
+        },
+      }),
+      // Logs and counts what would be removed, without removing anything.
+      dryRun: schema.boolean({ defaultValue: false }),
+    }),
   }),
 
   // Setting only allowed in the Serverless offering

@@ -308,9 +308,12 @@ export interface UiamServicePublic {
 
   /**
    * Fetches one service account via the UIAM service. Only returns the account when its
-   * `assumable_by` policy names this Kibana's project.
+   * `assumable_by` policy names this Kibana's project. `signal` aborts the request.
    */
-  getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails>;
+  getServiceAccount(
+    serviceAccountId: string,
+    options?: { signal?: AbortSignal }
+  ): Promise<UiamServiceAccountDetails>;
 
   /**
    * Revokes one service account via the UIAM service. Authorized against the account's
@@ -906,7 +909,10 @@ export class UiamService implements UiamServicePublic {
   /**
    * See {@link UiamServicePublic.getServiceAccount}.
    */
-  async getServiceAccount(serviceAccountId: string): Promise<UiamServiceAccountDetails> {
+  async getServiceAccount(
+    serviceAccountId: string,
+    { signal }: { signal?: AbortSignal } = {}
+  ): Promise<UiamServiceAccountDetails> {
     try {
       this.#logger.debug(`Attempting to get service account ${serviceAccountId}.`);
 
@@ -919,6 +925,7 @@ export class UiamService implements UiamServicePublic {
             method: 'GET',
             // No credential headers on purpose, for the same reason as `listServiceAccounts`.
             headers: { 'User-Agent': this.#userAgentHeader },
+            signal,
             // @ts-expect-error Undici `fetch` supports `dispatcher` option, see https://github.com/nodejs/undici/pull/1411.
             dispatcher: this.#dispatcher,
           }

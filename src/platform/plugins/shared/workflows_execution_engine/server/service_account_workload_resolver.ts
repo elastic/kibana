@@ -15,24 +15,33 @@ import { WORKFLOWS_APP_ID } from '@kbn/deeplinks-workflows';
 import type { WorkflowRepository } from '@kbn/workflows';
 
 /**
- * Resolves workflows bound to service accounts to their name and the path of their page, for the
- * service account management page. Reads with internal access, so it also names workflows the
- * person looking cannot open.
+ * Resolves workflows bound to service accounts: whether each still exists, and for a live one its
+ * name and the path of its page. The management page shows the name and the link. The stale
+ * binding cleanup deletes the binding of a workflow reported `missing`. Reads with internal access,
+ * so it also names workflows the person looking cannot open.
  */
 export const resolveWorkflowWorkloads = async (
-  repository: Pick<WorkflowRepository, 'getWorkflowNames'>,
+  repository: Pick<WorkflowRepository, 'getWorkflowStatuses'>,
   workloads: ReadonlyArray<ServiceAccountWorkloadLocator>,
   { signal }: { signal: AbortSignal }
-): Promise<Array<ServiceAccountWorkloadDetails | undefined>> => {
-  const names = await repository.getWorkflowNames(
+): Promise<ServiceAccountWorkloadDetails[]> => {
+  const statuses = await repository.getWorkflowStatuses(
     workloads.map(({ workloadId, spaceId }) => ({ workflowId: workloadId, spaceId })),
     { signal }
   );
 
-  return workloads.map(({ workloadId, spaceId }) => {
-    const title = names.get(`${spaceId}:${workloadId}`);
-    return title === undefined
-      ? undefined
-      : { title, path: `/app/${WORKFLOWS_APP_ID}/${encodeURIComponent(workloadId)}` };
+  return workloads.map(({ workloadId, spaceId }): ServiceAccountWorkloadDetails => {
+    const workflow = statuses.get(`${spaceId}:${workloadId}`);
+    if (workflow === undefined) {
+      return { status: 'unknown' };
+    }
+    if (workflow.status !== 'present' || workflow.name === undefined) {
+      return { status: workflow.status };
+    }
+    return {
+      status: 'present',
+      title: workflow.name,
+      path: `/app/${WORKFLOWS_APP_ID}/${encodeURIComponent(workloadId)}`,
+    };
   });
 };

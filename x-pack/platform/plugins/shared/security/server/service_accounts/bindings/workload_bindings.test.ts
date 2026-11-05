@@ -92,6 +92,7 @@ describe('ServiceAccountWorkloadBindings', () => {
       releaseFakeRequest: jest.fn(),
       getFakeRequestPrincipal: jest.fn(),
       delete: jest.fn(),
+      getAccountFactsAsInternalUser: jest.fn(),
     };
 
     license = licenseMock.create();

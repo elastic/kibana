@@ -47,7 +47,8 @@ const createDelegateHandleMock = (): jest.MockedObjectDeep<CoreSecurityDelegateH
         .mockImplementation(
           async (
             bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>
-          ): Promise<ResolvedServiceAccountWorkload[]> => bindings.map(() => ({}))
+          ): Promise<ResolvedServiceAccountWorkload[]> =>
+            bindings.map(() => ({ status: 'unknown' }))
         ),
     }),
   });

@@ -129,15 +129,34 @@ export type ServiceAccountBoundWorkloadRef = Pick<
 >;
 
 /**
- * A bound workload resolved by its workload type.
+ * A bound workload resolved by its workload type. See {@link ServiceAccountWorkloadDetails} for
+ * what each status means.
  *
  * @public
  */
-export interface ResolvedServiceAccountWorkload {
-  /** Title of the workload, when its workload type could resolve it. */
-  title?: string;
-  /** Link to the workload, with the base path and the space of the binding already applied. */
-  href?: string;
+export type ResolvedServiceAccountWorkload =
+  | {
+      status: 'present';
+      /** Title of the workload, when its workload type returned one. */
+      title?: string;
+      /** Link to the workload, with the base path and the space of the binding already applied. */
+      href?: string;
+    }
+  | { status: 'missing' }
+  | { status: 'unknown' };
+
+/**
+ * Options for {@link CoreSecurityDelegateServiceAccounts.resolveBoundWorkloads}.
+ *
+ * @public
+ */
+export interface ResolveBoundWorkloadsOptions {
+  /** Aborts the resolvers still running. Their workloads come back `unknown`. */
+  signal?: AbortSignal;
+  /**
+   * What the result is for, recorded on the resolution metrics. Defaults to `display`.
+   */
+  purpose?: 'display' | 'cleanup';
 }
 
 /**
@@ -153,12 +172,13 @@ export interface CoreSecurityDelegateServiceAccounts {
   getWorkloadTypeName(pluginId: string, workloadType: string): string | undefined;
 
   /**
-   * Resolves bound workloads to a title and a link through their workload types. Returns one
-   * entry per binding, in the same order. Never rejects: a binding whose type has no resolver, or
-   * whose resolver fails or times out, gets an empty entry.
+   * Resolves bound workloads through their workload types. Returns one entry per binding, in the
+   * same order. Never rejects: a binding whose type has no resolver, or whose resolver fails, times
+   * out, is aborted or returns something malformed, comes back `unknown`.
    */
   resolveBoundWorkloads(
-    bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>
+    bindings: ReadonlyArray<ServiceAccountBoundWorkloadRef>,
+    options?: ResolveBoundWorkloadsOptions
   ): Promise<ResolvedServiceAccountWorkload[]>;
 }
 

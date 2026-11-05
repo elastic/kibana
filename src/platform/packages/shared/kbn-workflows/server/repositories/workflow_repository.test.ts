@@ -8,7 +8,7 @@
  */
 
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import { WORKFLOW_NAMES_CHUNK_SIZE, WorkflowRepository } from './workflow_repository';
+import { WORKFLOW_STATUSES_CHUNK_SIZE, WorkflowRepository } from './workflow_repository';
 import { WORKFLOW_INDEX_NAME } from '../constants';
 
 describe('stored workflow ACLs', () => {
@@ -666,9 +666,10 @@ describe('WorkflowRepository inherited execution admission', () => {
   });
 });
 
-describe('WorkflowRepository.getWorkflowNames', () => {
+describe('WorkflowRepository.getWorkflowStatuses', () => {
   let esClient: ReturnType<typeof elasticsearchServiceMock.createElasticsearchClient>;
   let repository: WorkflowRepository;
+  let logger: ReturnType<ReturnType<typeof loggingSystemMock.create>['get']>;
 
   interface StoredWorkflow {
     id: string;
@@ -694,20 +695,27 @@ describe('WorkflowRepository.getWorkflowNames', () => {
     ),
   });
 
+  const errorDoc = (id: string, type: string) => ({
+    _index: WORKFLOW_INDEX_NAME,
+    _id: id,
+    error: { type, reason: 'boom' },
+  });
+
   const requestedIds = () =>
     esClient.mget.mock.calls.map(([params]) => (params as { ids: string[] }).ids);
 
   beforeEach(() => {
     esClient = elasticsearchServiceMock.createElasticsearchClient();
-    repository = new WorkflowRepository({ esClient, logger: loggingSystemMock.create().get() });
+    logger = loggingSystemMock.create().get();
+    repository = new WorkflowRepository({ esClient, logger });
   });
 
   it('reads nothing for no workflows', async () => {
-    await expect(repository.getWorkflowNames([])).resolves.toEqual(new Map());
+    await expect(repository.getWorkflowStatuses([])).resolves.toEqual(new Map());
     expect(esClient.mget).not.toHaveBeenCalled();
   });
 
-  it('reads the workflows by id and keeps the live ones in the space asked for', async () => {
+  it('reads the workflows by id and reports each one in the space asked for', async () => {
     const signal = new AbortController().signal;
     esClient.mget.mockResolvedValue(
       mgetResponse([
@@ -716,11 +724,12 @@ describe('WorkflowRepository.getWorkflowNames', () => {
         { id: 'w-3', spaceId: 'other', name: 'In another space' },
         { id: 'w-4', spaceId: 'default', name: 'Deleted', deleted_at: '2026-10-01T00:00:00Z' },
         { id: 'w-5', spaceId: 'default', name: undefined },
+        { id: 'w-6', spaceId: undefined, name: 'No space' },
         { id: 'missing', found: false },
       ]) as never
     );
 
-    const names = await repository.getWorkflowNames(
+    const statuses = await repository.getWorkflowStatuses(
       [
         { workflowId: 'w-1', spaceId: 'default' },
         { workflowId: 'w-2', spaceId: 'marketing' },
@@ -729,22 +738,29 @@ describe('WorkflowRepository.getWorkflowNames', () => {
         { workflowId: 'w-3', spaceId: 'default' },
         { workflowId: 'w-4', spaceId: 'default' },
         { workflowId: 'w-5', spaceId: 'default' },
+        { workflowId: 'w-6', spaceId: 'default' },
         { workflowId: 'missing', spaceId: 'default' },
       ],
       { signal }
     );
 
-    expect(names).toEqual(
+    expect(statuses).toEqual(
       new Map([
-        ['default:w-1', 'Nightly report'],
-        ['marketing:w-2', 'Weekly digest'],
+        ['default:w-1', { status: 'present', name: 'Nightly report' }],
+        ['marketing:w-2', { status: 'present', name: 'Weekly digest' }],
+        ['default:w-2', { status: 'missing' }],
+        ['default:w-3', { status: 'missing' }],
+        ['default:w-4', { status: 'present' }],
+        ['default:w-5', { status: 'present' }],
+        ['default:w-6', { status: 'unknown' }],
+        ['default:missing', { status: 'missing' }],
       ])
     );
     expect(esClient.mget).toHaveBeenCalledTimes(1);
     expect(esClient.mget).toHaveBeenCalledWith(
       {
         index: WORKFLOW_INDEX_NAME,
-        ids: ['w-1', 'w-2', 'w-3', 'w-4', 'w-5', 'missing'],
+        ids: ['w-1', 'w-2', 'w-3', 'w-4', 'w-5', 'w-6', 'missing'],
         _source_includes: ['name', 'spaceId', 'deleted_at'],
       },
       { signal }
@@ -766,15 +782,15 @@ describe('WorkflowRepository.getWorkflowNames', () => {
       return mgetResponse([]);
     }) as never);
 
-    await repository.getWorkflowNames(refs);
+    await repository.getWorkflowStatuses(refs);
 
-    expect(WORKFLOW_NAMES_CHUNK_SIZE).toBe(1000);
+    expect(WORKFLOW_STATUSES_CHUNK_SIZE).toBe(1000);
     expect(requestedIds().map((ids) => ids.length)).toEqual([1000, 1000, 500]);
     expect(new Set(requestedIds().flat()).size).toBe(2500);
     expect(maxInFlight).toBe(1);
   });
 
-  it('starts no further chunk once the signal is aborted', async () => {
+  it('throws, starting no further chunk, once the signal is aborted', async () => {
     const controller = new AbortController();
     const refs = Array.from({ length: 2500 }, (_, index) => ({
       workflowId: `w-${index}`,
@@ -786,7 +802,7 @@ describe('WorkflowRepository.getWorkflowNames', () => {
     }) as never);
 
     await expect(
-      repository.getWorkflowNames(refs, { signal: controller.signal })
+      repository.getWorkflowStatuses(refs, { signal: controller.signal })
     ).rejects.toThrow();
     expect(esClient.mget).toHaveBeenCalledTimes(1);
   });
@@ -796,50 +812,75 @@ describe('WorkflowRepository.getWorkflowNames', () => {
     controller.abort(new Error('Timed out'));
 
     await expect(
-      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }], {
+      repository.getWorkflowStatuses([{ workflowId: 'w-1', spaceId: 'default' }], {
         signal: controller.signal,
       })
     ).rejects.toThrow();
     expect(esClient.mget).not.toHaveBeenCalled();
   });
 
-  it('throws when a workflow cannot be read', async () => {
+  it('reports only an unreadable workflow as unknown, and keeps its neighbours', async () => {
     esClient.mget.mockResolvedValue({
       docs: [
-        {
-          _index: WORKFLOW_INDEX_NAME,
-          _id: 'w-1',
-          error: { type: 'shard_not_available_exception', reason: 'boom' },
-        },
+        errorDoc('w-1', 'shard_not_available_exception'),
+        ...mgetResponse([
+          { id: 'w-2', spaceId: 'default', name: 'Fine' },
+          { id: 'w-3', found: false },
+        ]).docs,
       ],
     } as never);
 
     await expect(
-      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
-    ).rejects.toThrow('Could not load the name of workflow [w-1]: shard_not_available_exception');
+      repository.getWorkflowStatuses([
+        { workflowId: 'w-1', spaceId: 'default' },
+        { workflowId: 'w-2', spaceId: 'default' },
+        { workflowId: 'w-3', spaceId: 'default' },
+      ])
+    ).resolves.toEqual(
+      new Map([
+        ['default:w-1', { status: 'unknown' }],
+        ['default:w-2', { status: 'present', name: 'Fine' }],
+        ['default:w-3', { status: 'missing' }],
+      ])
+    );
   });
 
-  it('returns no names when the workflows index does not exist', async () => {
+  it('reports workflows as unknown, not missing, when the workflows index does not exist', async () => {
     esClient.mget.mockResolvedValue({
-      docs: [
-        {
-          _index: WORKFLOW_INDEX_NAME,
-          _id: 'w-1',
-          error: { type: 'index_not_found_exception', reason: 'no such index' },
-        },
-      ],
+      docs: [errorDoc('w-1', 'index_not_found_exception')],
     } as never);
+
     await expect(
-      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
-    ).resolves.toEqual(new Map());
+      repository.getWorkflowStatuses([{ workflowId: 'w-1', spaceId: 'default' }])
+    ).resolves.toEqual(new Map([['default:w-1', { status: 'unknown' }]]));
   });
 
-  it('propagates a failed request', async () => {
-    const error = Object.assign(new Error('boom'), { statusCode: 500 });
-    esClient.mget.mockRejectedValue(error);
+  it('reports a workflow the response leaves out as unknown', async () => {
+    esClient.mget.mockResolvedValue(mgetResponse([]) as never);
 
     await expect(
-      repository.getWorkflowNames([{ workflowId: 'w-1', spaceId: 'default' }])
-    ).rejects.toBe(error);
+      repository.getWorkflowStatuses([{ workflowId: 'w-1', spaceId: 'default' }])
+    ).resolves.toEqual(new Map([['default:w-1', { status: 'unknown' }]]));
+  });
+
+  it('reports only the workflows of a failed chunk as unknown, and reads the next one', async () => {
+    const refs = Array.from({ length: 1001 }, (_, index) => ({
+      workflowId: `w-${index}`,
+      spaceId: 'default',
+    }));
+    esClient.mget
+      .mockRejectedValueOnce(Object.assign(new Error('boom'), { statusCode: 500 }))
+      .mockResolvedValueOnce(
+        mgetResponse([{ id: 'w-1000', spaceId: 'default', name: 'Last' }]) as never
+      );
+
+    const statuses = await repository.getWorkflowStatuses(refs);
+
+    expect(statuses.get('default:w-0')).toEqual({ status: 'unknown' });
+    expect(statuses.get('default:w-999')).toEqual({ status: 'unknown' });
+    expect(statuses.get('default:w-1000')).toEqual({ status: 'present', name: 'Last' });
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Could not read 1000 workflow(s) to check whether they exist: Error: boom'
+    );
   });
 });

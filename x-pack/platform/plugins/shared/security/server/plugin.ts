@@ -332,6 +332,7 @@ export class SecurityPlugin
     this.elasticsearchService.setup({ license, status: core.status });
     this.featureUsageService.setup({ featureUsage: licensing.featureUsage });
     this.sessionManagementService.setup({ config, http: core.http, taskManager });
+    this.serviceAccountsService.setup({ taskManager });
     this.authenticationService.setup({
       http: core.http,
       elasticsearch: core.elasticsearch,
@@ -576,6 +577,8 @@ export class SecurityPlugin
         this.getUserProfileService().getCurrentProfileId({ request }),
       getSpaceId: (request) => spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID,
       workloadTypes: this.getWorkloadTypes(),
+      taskManager,
+      online$: watchOnlineStatus$(),
     });
 
     this.authorizationService.start({
@@ -642,6 +645,7 @@ export class SecurityPlugin
     this.auditService.stop();
     this.authorizationService.stop();
     this.sessionManagementService.stop();
+    this.serviceAccountsService.stop();
   }
 
   private registerDeprecations(core: CoreSetup, license: SecurityLicense) {
