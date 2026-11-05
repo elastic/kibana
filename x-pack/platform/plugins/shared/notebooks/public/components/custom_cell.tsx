@@ -149,7 +149,7 @@ export const CustomCanvas = ({
 };
 
 export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
-  const { core, plugins } = useNotebookServices();
+  const { plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const [isEditing, setIsEditing] = useState(false);
@@ -193,23 +193,8 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
           return;
         }
         applyDraft({ template, dataSource: 'query', query: esqlQuery });
-        core.notifications.toasts.addInfo({
-          title: i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.title', {
-            defaultMessage: '{panel} now uses its own query',
-            values: { panel: getCellDisplayName(current) },
-          }),
-          text: source
-            ? i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.text', {
-                defaultMessage:
-                  'The agent changed the query, so the panel no longer reads from {source}, which is unchanged. To switch back, edit the panel and pick {source} as its source.',
-                values: { source: getCellDisplayName(source) },
-              })
-            : i18n.translate('xpack.notebook.customCell.switchedToOwnQuery.textNoSource', {
-                defaultMessage: 'The agent wrote an ES|QL query for the panel.',
-              }),
-        });
       }),
-    [panelChat, id, store, applyDraft, core.notifications.toasts]
+    [panelChat, id, store, applyDraft]
   );
 
   const closeEditor = useCallback(() => {
