@@ -69,7 +69,6 @@ import {
   titleComparators,
   useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { getGeoPrecisionParamValues } from '@kbn/esql-utils';
 import {
   VEGA_EMBEDDABLE_TYPE,
   VEGA_STANDALONE_EMBEDDABLE_FLAG,
@@ -90,20 +89,11 @@ import type { VegaByValueState } from '../../server';
 // wait on `vega_editor_flyout` before the flyout can render.
 import { VegaEditorFlyout } from './vega_editor_flyout';
 import { openVegaEditor } from './open_vega_editor';
+import { initializeGeoPrecisionManager } from './geo_precision_manager';
 
 const LazyVegaVisComponent = lazy(() =>
   import('../async_services').then(({ VegaVisComponent }) => ({ default: VegaVisComponent }))
 );
-
-const queriesUseGeoPrecisionParam = (queries: string[]) =>
-  queries.some((query) => Object.keys(getGeoPrecisionParamValues(query, 0)).length > 0);
-
-const isSameGeoPrecisions = (queries: string[], zoomA: number, zoomB: number) =>
-  queries.every(
-    (query) =>
-      JSON.stringify(getGeoPrecisionParamValues(query, zoomA)) ===
-      JSON.stringify(getGeoPrecisionParamValues(query, zoomB))
-  );
 
 /**
  * Everything `VegaVisComponent` needs for one render, captured together so that `showWarnings` can
@@ -218,11 +208,10 @@ export const vegaEmbeddableFactory = (
       .subscribe((dataViews) => dataSources$.next(dataViews));
 
     const renderInput$ = new BehaviorSubject<VegaRenderInput | undefined>(undefined);
-    // Latest position reported by the Vega map view. A report refetches (`mapViewChange$`) only
-    // when it changes the geo precisions of ES|QL queries compared to the last fetch.
-    let mapView: VegaMapPosition | undefined;
-    let fetchedZoom: number | undefined;
-    const mapViewChange$ = new BehaviorSubject<void>(undefined);
+    const geoPrecisionManager = initializeGeoPrecisionManager({
+      esql$,
+      visData$: renderInput$.pipe(map((renderInput) => renderInput?.visData)),
+    });
     const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
     const dataLoading$ = new BehaviorSubject<boolean | undefined>(true);
     const rendered$ = new BehaviorSubject(false);
@@ -379,20 +368,9 @@ export const vegaEmbeddableFactory = (
 
     let lastSpec = spec$.getValue();
 
-    const onMapViewChange = (view: VegaMapPosition) => {
-      mapView = view;
-      const visData = renderInput$.getValue()?.visData;
-      const queries = esql$.getValue().map(({ esql }) => esql);
-      if (!visData?.useMap || !queriesUseGeoPrecisionParam(queries)) return;
-      const zoomOfFetch = fetchedZoom ?? visData.mapConfig?.zoom ?? 0;
-      if (!isSameGeoPrecisions(queries, zoomOfFetch, view.zoom)) {
-        mapViewChange$.next();
-      }
-    };
-
     const fetchSubscription = combineLatest([
       spec$,
-      mapViewChange$,
+      geoPrecisionManager.mapViewChange$,
       fetch$(api),
       panelSearchStateManager.api.query$,
       panelSearchStateManager.api.filters$,
@@ -402,10 +380,10 @@ export const vegaEmbeddableFactory = (
           // A new spec starts from its own map position and zoom.
           if (spec !== lastSpec) {
             lastSpec = spec;
-            mapView = undefined;
+            geoPrecisionManager.resetMapView();
           }
 
-          fetchedZoom = mapView?.zoom;
+          geoPrecisionManager.onFetch();
           abortController.abort();
           abortController = new AbortController();
           const { signal } = abortController;
@@ -454,7 +432,7 @@ export const vegaEmbeddableFactory = (
               projectRouting: data.projectRouting,
               isApproximate: data.isApproximate,
               esqlVariables: data.esqlVariables,
-              mapZoom: mapView?.zoom,
+              mapZoom: geoPrecisionManager.getMapView()?.zoom,
             });
 
             if (!isCurrentFetch()) {
@@ -465,7 +443,7 @@ export const vegaEmbeddableFactory = (
             renderInput$.next({
               showWarnings: getInheritedViewMode(api) === 'edit',
               visData,
-              mapView,
+              mapView: geoPrecisionManager.getMapView(),
             });
           } catch (error) {
             if (signal.aborted) {
@@ -498,6 +476,7 @@ export const vegaEmbeddableFactory = (
             abortController.abort();
             fetchSubscription.unsubscribe();
             specSubscription.unsubscribe();
+            geoPrecisionManager.cleanup();
             drilldownsManager.cleanup();
           },
           []
@@ -521,7 +500,7 @@ export const vegaEmbeddableFactory = (
                   showWarnings={renderInput.showWarnings}
                   visData={renderInput.visData}
                   mapView={renderInput.mapView}
-                  onMapViewChange={onMapViewChange}
+                  onMapViewChange={geoPrecisionManager.onMapViewChange}
                 />
               </Suspense>
             ) : null}
