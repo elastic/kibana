@@ -10,6 +10,7 @@ import type { IRouter } from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
+import type { HousekeepingServerSetup } from '@kbn/housekeeping-plugin/server';
 import type { IndexDataEnricher } from './services';
 import type { handleEsError } from './shared_imports';
 
@@ -17,6 +18,7 @@ export interface Dependencies {
   security: SecurityPluginSetup;
   licensing: LicensingPluginSetup;
   features: FeaturesPluginSetup;
+  housekeeping?: HousekeepingServerSetup;
 }
 
 export interface RouteDependencies {
