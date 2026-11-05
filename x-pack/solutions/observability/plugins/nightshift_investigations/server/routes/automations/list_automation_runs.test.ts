@@ -250,6 +250,7 @@ it('links the executed alert branch of a mixed workflow', async () => {
 
 it.each([
   ['alerting.v1.alertStatusChanged', 'trigger_investigation_alert'],
+  ['alerting.alertStatusChanged', 'trigger_investigation_alert_v2'],
   ['slack2.message', 'trigger_investigation_slack'],
   ['scheduled', 'trigger_investigation'],
 ])('links the %s branch of a workflow with all trigger kinds', async (triggeredBy, stepId) => {
@@ -406,4 +407,20 @@ it('reports global investigation-limit denials as skipped with their own reason'
   const result = await call('auto-1');
   expect(result.runs[0]).toMatchObject({ status: 'skipped', skipReason: 'investigation_limit' });
   expect(result.runs[0].dailyLimit).toBeUndefined();
+});
+
+it('returns a truncated failure reason for failed runs only', async () => {
+  mockGet.mockResolvedValue({ attributes: { workflowId: 'wf-1', runtime: {} } });
+  mockGetWorkflowExecutions.mockResolvedValue({
+    results: [
+      { id: 'exec-failed', status: 'failed', error: { type: 'Error', message: 'x'.repeat(300) } },
+      { id: 'exec-done', status: 'completed', error: { type: 'Error', message: 'ignored' } },
+    ],
+    total: 2,
+  });
+
+  const result = await call('auto-1');
+
+  expect(result.runs[0].error).toBe('x'.repeat(200));
+  expect(result.runs[1].error).toBeUndefined();
 });
