@@ -52,7 +52,7 @@ describe('DestinationNodeStats', () => {
       renderFooter({ status: 'ready', stats: statsWithRate(3700) });
 
       expect(text('streamsCanvasDestinationLive')).toBe('Live');
-      expect(text('streamsCanvasDestinationRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasDestinationRate')).toBe('3.7k/s');
       expect(isShown('streamsCanvasDestinationNotFlowing')).toBe(false);
     });
 
@@ -60,7 +60,7 @@ describe('DestinationNodeStats', () => {
       renderFooter({ status: 'stale', stats: statsWithRate(3700) });
 
       expect(text('streamsCanvasDestinationLive')).toBe('Live');
-      expect(text('streamsCanvasDestinationRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasDestinationRate')).toBe('3.7k/s');
       expect(isShown('streamsCanvasDestinationStale')).toBe(true);
     });
 

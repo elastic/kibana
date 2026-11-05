@@ -38,12 +38,12 @@ const formatRateValue = (value: number): string => {
   return formatRounded(Math.max(value, COMPACT_RATE_THRESHOLD), '0.[0]a');
 };
 
-/** Events per second, for example `3.7k eps`. */
+/** Items per second, for example `3.7k/s`. The one format of every rate on the Map. */
 export const formatEventsRate = (eventsPerSecond: number | null): string =>
   eventsPerSecond === null
     ? STATS_NO_VALUE_LABEL
     : i18n.translate('xpack.streams.stats.eventsRate', {
-        defaultMessage: '{value} eps',
+        defaultMessage: '{value}/s',
         values: { value: formatRateValue(eventsPerSecond) },
       });
 

@@ -141,14 +141,14 @@ describe('ProcessingNodeStats', () => {
     it('shows the rate and the time once the numbers are known', () => {
       renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: 3700, durationAverage: 0.008 });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
     });
 
     it('shows the last numbers with a stale mark when a refresh has failed', () => {
       renderRow(ROUTE_SLOT, { status: 'stale', eventsRate: 3700, durationAverage: 0.008 });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('8ms');
       expect(isShown('streamsCanvasProcessingNodeStale')).toBe(true);
     });
@@ -169,7 +169,7 @@ describe('ProcessingNodeStats', () => {
     it('shows a rate without a time when only the time is missing', () => {
       renderRow(ROUTE_SLOT, { status: 'ready', eventsRate: 3700, durationAverage: null });
 
-      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k eps');
+      expect(text('streamsCanvasProcessingNodeRate')).toBe('3.7k/s');
       expect(text('streamsCanvasProcessingNodeDuration')).toBe('-');
     });
 
