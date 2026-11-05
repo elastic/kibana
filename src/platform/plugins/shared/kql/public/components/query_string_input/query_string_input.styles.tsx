@@ -61,7 +61,7 @@ const queryStringInputStyles = {
         '&:not(.kbnQueryBar__textarea--autoHeight)': {
           overflowY: 'hidden',
           overflowX: 'hidden',
-          wordBreak: 'break-all',
+          whiteSpace: 'nowrap',
         },
 
         // When focused, let it scroll
