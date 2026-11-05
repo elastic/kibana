@@ -707,8 +707,9 @@ a separate read key, so no query the agent writes can bring them back. To run it
 1. Have an ORCA cluster admin create an API key whose role reads the three ORCA index patterns
    with a `query` of `{"bool": {"must_not": [<the flag documents>]}}`. The key cannot be derived
    from the read-only key above.
-2. Put that key in `nightshiftOrcaEs.apiKey` of the config the run uses, in place of the full
-   key. The Scout hook fills the `orcabench-es` connector from that block.
+2. Store that key as `nightshiftOrcaEs.noFlagsApiKey`, next to the full key's `apiKey`, in the
+   config the run uses. With the variant set, the Scout hook fills the `orcabench-es` connector
+   from `noFlagsApiKey` and refuses to start without it; every other ORCA run keeps `apiKey`.
 3. Set `NIGHTSHIFT_ORCA_TELEMETRY_VARIANT=no-flags`. The preflight then expects the flag-free
    document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts), so a run on
    the full key fails before any investigation, and every score records
