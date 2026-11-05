@@ -308,6 +308,18 @@ describe('feature identification route schemas', () => {
         body: { computedFeaturesTimeoutMs: 240_001 },
       }).success
     ).toBe(false);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: { computedFeaturesTimeoutMs: 60_000 },
+      }).success
+    ).toBe(true);
+    expect(
+      computedRoute.params.safeParse({
+        path: { sourceId: 'logs.test' },
+        body: {},
+      }).success
+    ).toBe(false);
   });
 
   it('requires maxExcludedFeaturesInPrompt on the inferred route', () => {

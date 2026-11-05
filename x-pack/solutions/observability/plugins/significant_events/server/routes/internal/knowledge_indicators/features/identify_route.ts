@@ -332,21 +332,20 @@ const identifyComputedFeaturesRoute = createServerRoute({
       requiredPrivileges: [NIGHTSHIFT_API_PRIVILEGES.manage],
     },
   },
-  params: z.object({
-    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
-    body: z
-      .object({
+  params: lazySchema(() =>
+    z.object({
+      path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
+      body: z.object({
         start: z.number().optional(),
         end: z.number().optional(),
         runId: z.string().max(MAX_ID_LENGTH).optional(),
-        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
-      })
-      .nullable()
-      .optional(),
-  }),
+        computedFeaturesTimeoutMs: z.number().int().min(1_000).max(240_000),
+      }),
+    })
+  ),
   handler: async ({ params, request, getScopedClients, server, logger, maintenanceService }) => {
     const scopedClients = await getScopedClients({ request });
-    const { streamDataEsClient, sourcesClient, licensing, tuningConfig } = scopedClients;
+    const { streamDataEsClient, sourcesClient, licensing } = scopedClients;
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
@@ -358,8 +357,8 @@ const identifyComputedFeaturesRoute = createServerRoute({
       start = now - MS_PER_DAY,
       end = now,
       runId = uuidv4(),
-      computedFeaturesTimeoutMs = tuningConfig.computed_features_timeout_ms,
-    } = params.body ?? {};
+      computedFeaturesTimeoutMs,
+    } = params.body;
 
     const { source } = await sourcesClient.get(sourceId);
     const kiClient = await scopedClients.getKnowledgeIndicatorClient(source);
