@@ -189,8 +189,6 @@ export async function continueToDeploy(page: ScoutPage) {
 export interface PackageUpdateRequests {
   /** `PUT /epm/packages/<name>/<version>` calls, which is how a namespace gets dedicated templates. */
   updates: Array<{ packageName: string; version: string; body: Record<string, any> }>;
-  /** Every request for the package in the order it arrived, to tell what came after an update. */
-  calls: Array<'GET' | 'PUT'>;
 }
 
 /**
@@ -202,7 +200,7 @@ export async function mockInstalledAwsPackage(
   page: ScoutPage,
   enabledFor: string[] = []
 ): Promise<PackageUpdateRequests> {
-  const requests: PackageUpdateRequests = { updates: [], calls: [] };
+  const requests: PackageUpdateRequests = { updates: [] };
   const installed = {
     item: {
       ...TWO_SERVICE_AWS_PACKAGE.item,
@@ -218,7 +216,6 @@ export async function mockInstalledAwsPackage(
   await page.route(
     (url) => /\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(url.pathname),
     async (route) => {
-      requests.calls.push(route.request().method() === 'PUT' ? 'PUT' : 'GET');
       if (route.request().method() === 'PUT') {
         const [packageName, version] = new URL(route.request().url()).pathname
           .split('/packages/')[1]

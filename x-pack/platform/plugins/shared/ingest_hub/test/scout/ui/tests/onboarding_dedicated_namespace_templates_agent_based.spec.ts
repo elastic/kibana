@@ -53,6 +53,16 @@ const seedDeployedAgentBasedFlow = async (
   // An uncaught error can unmount the step the test is waiting for, or only show up after it.
   const pageErrors: string[] = [];
   page.on('pageerror', (error) => pageErrors.push(error.message));
+  // The package responses as the browser received them, in order, to tell what loaded after the
+  // update. The mock answering is not enough: the page still has to receive it and render.
+  const packageResponses: string[] = [];
+  page.on('response', async (response) => {
+    if (!/\/api\/fleet\/epm\/packages\/aws(\/[^/]+)?$/.test(new URL(response.url()).pathname)) {
+      return;
+    }
+    await response.finished();
+    packageResponses.push(response.request().method());
+  });
   await page.route(
     (url) => /\/api\/fleet\/cloud_connectors/.test(url.pathname),
     (route) => route.fulfill(fulfillJson({ items: [] }))
@@ -138,7 +148,7 @@ const seedDeployedAgentBasedFlow = async (
     hash: 'authenticate-and-deploy',
   });
   await expect(page.testSubj.locator('onboardingStep-authenticate-and-deploy')).toBeVisible();
-  return { packageRequests, pageErrors };
+  return { packageRequests, pageErrors, packageResponses };
 };
 
 /**
@@ -179,19 +189,28 @@ test.describe(
       browserAuth,
       page,
     }) => {
-      const { packageRequests, pageErrors } = await seedDeployedAgentBasedFlow(browserAuth, page, [
-        'staging',
-      ]);
+      const { packageRequests, pageErrors, packageResponses } = await seedDeployedAgentBasedFlow(
+        browserAuth,
+        page,
+        ['staging']
+      );
 
       await deployWithNext(page, { namespace: 'prod', dedicatedTemplates: true });
 
       // The step is gone by now, so this fails if the opt-in only reacts to the step's own state.
       await expect.poll(() => packageRequests.updates.length).toBe(1);
       // The next step loads the installed package right after the opt-in. A page error from it can
-      // arrive after the step is already visible, so wait for that request before looking.
+      // arrive after the step is already visible, so wait until the browser has received that
+      // response and then let the page render before looking at the errors.
       await expect
-        .poll(() => packageRequests.calls.slice(packageRequests.calls.lastIndexOf('PUT')).length)
-        .toBeGreaterThan(1);
+        .poll(() => packageResponses.slice(packageResponses.lastIndexOf('PUT') + 1))
+        .toContain('GET');
+      await page.evaluate(
+        () =>
+          new Promise<void>((resolve) =>
+            requestAnimationFrame(() => requestAnimationFrame(() => resolve()))
+          )
+      );
       expect(packageRequests.updates[0]).toStrictEqual({
         packageName: 'aws',
         version: '7.1.1',
