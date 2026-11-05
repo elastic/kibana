@@ -72,9 +72,25 @@ describe('mergeResolutionGroupValues', () => {
       sources: ['okta', 'entra'],
       watchlists: ['w1', 'w2'],
       firstSeen: '2026-10-01T00:00:00.000Z',
-      lastActivity: '2026-10-29T09:00:00.000Z',
+      lastLifecycleSeen: '2026-10-29T09:00:00.000Z',
       lastSeen: '2026-10-29T11:00:00.000Z',
     });
+  });
+
+  it('takes the latest last_seen of the members, and last_activity only where last_seen is missing', () => {
+    expect(
+      mergeResolutionGroupValues([
+        {
+          entity: {
+            lifecycle: {
+              last_seen: '2026-10-29T08:00:00.000Z',
+              last_activity: '2026-11-01T00:00:00.000Z',
+            },
+          },
+        },
+        { entity: { lifecycle: { last_activity: '2026-10-29T07:00:00.000Z' } } },
+      ]).lastLifecycleSeen
+    ).toBe('2026-10-29T08:00:00.000Z');
   });
 
   it('ignores missing values, and an unassigned criticality never wins', () => {
@@ -89,7 +105,7 @@ describe('mergeResolutionGroupValues', () => {
       sources: [],
       watchlists: [],
       firstSeen: undefined,
-      lastActivity: undefined,
+      lastLifecycleSeen: undefined,
       lastSeen: undefined,
     });
   });

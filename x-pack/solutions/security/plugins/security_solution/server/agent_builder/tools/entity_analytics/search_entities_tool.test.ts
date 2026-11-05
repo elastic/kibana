@@ -56,7 +56,7 @@ const mockExperimentalFeatures = {
 } as ExperimentalFeatures;
 
 const EXPECTED_KEEP_CLAUSE =
-  'KEEP @timestamp, entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.risk.calculated_level, asset.criticality, entity.source, entity.lifecycle.first_seen, entity.lifecycle.last_activity, entity.attributes.watchlists, entity.attributes.managed, entity.attributes.mfa_enabled, entity.attributes.asset, entity.behaviors.rule_names, entity.behaviors.anomaly_job_ids';
+  'KEEP @timestamp, entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.risk.calculated_level, asset.criticality, entity.source, entity.lifecycle.first_seen, entity.lifecycle.last_seen, entity.lifecycle.last_activity, entity.attributes.watchlists, entity.attributes.managed, entity.attributes.mfa_enabled, entity.attributes.asset, entity.behaviors.rule_names, entity.behaviors.anomaly_job_ids';
 
 const EXPECTED_SORT_CLAUSE = 'SORT entity.risk.calculated_score_norm DESC';
 
@@ -474,8 +474,12 @@ describe('searchEntitiesTool', () => {
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).not.toContain('entity.lifecycle.last_activity >=');
-      expect(query).not.toContain('entity.lifecycle.last_activity <=');
+      expect(query).not.toContain(
+        'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) >='
+      );
+      expect(query).not.toContain(
+        'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) <='
+      );
     });
 
     it('still emits both lifecycle bounds when the firstSeen values differ (regression)', async () => {
@@ -578,8 +582,12 @@ describe('searchEntitiesTool', () => {
       );
 
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
-      expect(query).not.toContain('entity.lifecycle.last_activity >=');
-      expect(query).not.toContain('entity.lifecycle.last_activity <=');
+      expect(query).not.toContain(
+        'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) >='
+      );
+      expect(query).not.toContain(
+        'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) <='
+      );
     });
 
     it('keeps the genuine half when only one bound is a sentinel', async () => {
@@ -785,8 +793,12 @@ describe('searchEntitiesTool', () => {
         expect(query).not.toContain('entity.risk.calculated_score_norm <=');
         expect(query).not.toContain('entity.lifecycle.first_seen >=');
         expect(query).not.toContain('entity.lifecycle.first_seen <=');
-        expect(query).not.toContain('entity.lifecycle.last_activity >=');
-        expect(query).not.toContain('entity.lifecycle.last_activity <=');
+        expect(query).not.toContain(
+          'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) >='
+        );
+        expect(query).not.toContain(
+          'COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) <='
+        );
         expect(query).toContain('WHERE entity.EngineMetadata.Type IN ("user")');
         expect(query).toContain('LIMIT 5');
       });
@@ -1013,8 +1025,12 @@ describe('searchEntitiesTool', () => {
       const { query } = (executeEsql as jest.Mock).mock.calls[0][0];
       expect(query).toContain('WHERE entity.lifecycle.first_seen >= "2024-01-01T00:00:00Z"');
       expect(query).toContain('WHERE entity.lifecycle.first_seen <= "2024-06-30T23:59:59Z"');
-      expect(query).toContain('WHERE entity.lifecycle.last_activity >= "2024-03-01T00:00:00Z"');
-      expect(query).toContain('WHERE entity.lifecycle.last_activity <= "2024-12-31T23:59:59Z"');
+      expect(query).toContain(
+        'WHERE COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) >= "2024-03-01T00:00:00Z"'
+      );
+      expect(query).toContain(
+        'WHERE COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) <= "2024-12-31T23:59:59Z"'
+      );
     });
 
     it('uses custom maxResults in LIMIT clause', async () => {
@@ -1288,7 +1304,9 @@ describe('searchEntitiesTool', () => {
       expect(query).toContain('WHERE entity.attributes.managed == true');
       expect(query).toContain('WHERE entity.attributes.mfa_enabled == true');
       expect(query).toContain('WHERE entity.attributes.asset == true');
-      expect(query).toContain('WHERE entity.lifecycle.last_activity >= "2024-01-01T00:00:00Z"');
+      expect(query).toContain(
+        'WHERE COALESCE(entity.lifecycle.last_seen, entity.lifecycle.last_activity) >= "2024-01-01T00:00:00Z"'
+      );
       expect(query).toContain(EXPECTED_KEEP_CLAUSE);
       expect(query).toContain(EXPECTED_SORT_CLAUSE);
       expect(query).toContain('LIMIT 5');

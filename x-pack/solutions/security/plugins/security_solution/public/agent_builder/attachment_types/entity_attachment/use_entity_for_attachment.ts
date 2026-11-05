@@ -29,7 +29,7 @@ export interface EntityForAttachment {
    * Top-level `@timestamp` on the entity store record (set by the entity
    * store transform whenever the doc is upserted). Used by the multi-entity
    * attachment table's "Last seen" column because it is guaranteed to be
-   * present, unlike `entity.lifecycle.last_activity` which can be absent
+   * present, unlike `entity.lifecycle.last_seen` which can be absent
    * when the entity has not been observed in logs yet.
    */
   timestamp: string | null;
@@ -73,7 +73,7 @@ interface EntityRecordShape {
      * normaliZe downstream via `normalizeMultiValueField`.
      */
     attributes?: { watchlists?: string | string[] };
-    lifecycle?: { first_seen?: string; last_activity?: string };
+    lifecycle?: { first_seen?: string; last_seen?: string; last_activity?: string };
     risk?: Partial<RiskStats> & {
       calculated_level?: string;
       calculated_score?: number;
@@ -203,7 +203,9 @@ const shapeRecord = (
     entityId: entityField?.id,
     isEntityInStore: Boolean(record),
     firstSeen: group ? group.firstSeen ?? null : entityField?.lifecycle?.first_seen ?? null,
-    lastSeen: group ? group.lastActivity ?? null : entityField?.lifecycle?.last_activity ?? null,
+    lastSeen: group
+      ? group.lastLifecycleSeen ?? null
+      : entityField?.lifecycle?.last_seen ?? entityField?.lifecycle?.last_activity ?? null,
     timestamp: group ? group.lastSeen ?? null : record?.['@timestamp'] ?? null,
     riskScore,
     riskLevel,

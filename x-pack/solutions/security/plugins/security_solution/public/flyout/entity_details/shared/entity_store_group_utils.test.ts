@@ -376,7 +376,7 @@ describe('getEntityGroupLifecycle', () => {
         withLifecycle('2024-01-01T00:00:00.000Z', '2024-01-10T00:00:00.000Z'),
         withLifecycle(undefined, '2024-02-05T00:00:00.000Z', '2024-03-01T00:00:00.000Z'),
       ])
-    ).toEqual({ firstSeen: '2024-01-01T00:00:00.000Z', lastSeen: '2024-03-01T00:00:00.000Z' });
+    ).toEqual({ firstSeen: '2024-01-01T00:00:00.000Z', lastSeen: '2024-02-10T00:00:00.000Z' });
   });
 });
 
@@ -408,19 +408,22 @@ describe('getEntityGroupLifecycle malformed data and edge cases', () => {
     });
   });
 
-  it('falls back to last_seen when last_activity is empty or malformed', () => {
+  it('falls back to last_activity when last_seen is empty, malformed or missing', () => {
     expect(
-      getEntityGroupLifecycle([withLifecycle(undefined, '2024-01-05T00:00:00.000Z', '')])
+      getEntityGroupLifecycle([withLifecycle(undefined, '', '2024-01-05T00:00:00.000Z')])
     ).toEqual({ firstSeen: null, lastSeen: '2024-01-05T00:00:00.000Z' });
     expect(
-      getEntityGroupLifecycle([withLifecycle(undefined, '2024-01-05T00:00:00.000Z', 'garbage')])
+      getEntityGroupLifecycle([withLifecycle(undefined, 'garbage', '2024-01-05T00:00:00.000Z')])
+    ).toEqual({ firstSeen: null, lastSeen: '2024-01-05T00:00:00.000Z' });
+    expect(
+      getEntityGroupLifecycle([withLifecycle(undefined, undefined, '2024-01-05T00:00:00.000Z')])
     ).toEqual({ firstSeen: null, lastSeen: '2024-01-05T00:00:00.000Z' });
   });
 
-  it('prefers last_activity over last_seen even when it is older', () => {
+  it('prefers last_seen over last_activity even when it is older', () => {
     expect(
       getEntityGroupLifecycle([
-        withLifecycle(undefined, '2024-02-01T00:00:00.000Z', '2024-01-01T00:00:00.000Z'),
+        withLifecycle(undefined, '2024-01-01T00:00:00.000Z', '2024-02-01T00:00:00.000Z'),
       ])
     ).toEqual({ firstSeen: null, lastSeen: '2024-01-01T00:00:00.000Z' });
   });

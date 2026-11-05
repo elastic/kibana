@@ -230,16 +230,17 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
     [userDomainValue, renderCellActions, scopeId]
   );
 
+  const lastSeenValue =
+    entityRecord?.entity?.lifecycle?.last_seen ?? entityRecord?.entity?.lifecycle?.last_activity;
+
   const userLastSeen: DescriptionList[] = useMemo(
     () => [
       {
         title: LAST_SEEN,
         description:
           userName != null && userName !== '' ? (
-            entityRecord?.entity?.lifecycle?.last_activity ? (
-              <PreferenceFormattedDateFromPrimitive
-                value={entityRecord.entity.lifecycle.last_activity}
-              />
+            lastSeenValue ? (
+              <PreferenceFormattedDateFromPrimitive value={lastSeenValue} />
             ) : (
               getEmptyTagValue()
             )
@@ -248,7 +249,7 @@ export const UserEntityOverview: React.FC<UserEntityOverviewProps> = ({
           ),
       },
     ],
-    [userName, entityRecord?.entity?.lifecycle?.last_activity]
+    [userName, lastSeenValue]
   );
 
   const { euiTheme } = useEuiTheme();
