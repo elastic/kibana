@@ -9,7 +9,6 @@
 
 import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
-import type { ToolingLog } from '@kbn/tooling-log';
 
 const shortId = expect.stringMatching(/^\d{16}$/);
 const longId = expect.stringMatching(/^\d{32}$/);
@@ -28,8 +27,7 @@ describe('simple trace', () => {
 
     const range = timerange(
       new Date('2021-01-01T00:00:00.000Z'),
-      new Date('2021-01-01T00:15:00.000Z'),
-      {} as ToolingLog
+      new Date('2021-01-01T00:15:00.000Z')
     );
 
     iterable = range
