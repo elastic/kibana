@@ -42,6 +42,7 @@ import type {
 } from '@kbn/connector-specs';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { buildHeadersFromSecrets } from './auth_helpers';
+import { mcpExecutionGuard } from './execution_guard';
 
 // TTL for list_tools cache: 15 minutes
 export const LIST_TOOLS_CACHE_TTL_MS = 15 * 60 * 1000;
@@ -153,6 +154,13 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     });
   }
 
+  private guarded<T>(fn: () => Promise<T>): Promise<T> {
+    return mcpExecutionGuard.run(
+      { key: this.getLeaseKey(), connectorId: this.connector.id, logger: this.logger },
+      fn
+    );
+  }
+
   private buildClient(): Promise<McpClient> {
     return clientTypes.mcp.build({
       logger: this.logger,
@@ -232,6 +240,10 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
     _params: z.infer<typeof TestConnectorRequestSchema>,
     _connectorUsageCollector: ConnectorUsageCollector
   ): Promise<McpTestConnectorResponse> {
+    return this.guarded(() => this.runIsolatedTest());
+  }
+
+  private async runIsolatedTest(): Promise<McpTestConnectorResponse> {
     let client: McpClient;
     try {
       client = await this.buildClient();
@@ -277,7 +289,9 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
 
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.withPooledClient('listTools', (client) => client.listTools());
+    const result = await this.guarded(() =>
+      this.withPooledClient('listTools', (client) => client.listTools())
+    );
     this.logger.debug(`Listed ${result.tools.length} tools from MCP server`);
     listToolsCache.set(cacheKey, result);
     return result;
@@ -292,10 +306,12 @@ export class McpConnector extends SubActionConnector<MCPConnectorConfig, MCPConn
   ): Promise<CallToolResponse> {
     connectorUsageCollector.addRequestBodyBytes(undefined, params);
 
-    const result = await this.withPooledClient(
-      `callTool(${params.name})`,
-      (client) => client.callTool({ name: params.name, arguments: params.arguments }),
-      { redactToolError: true }
+    const result = await this.guarded(() =>
+      this.withPooledClient(
+        `callTool(${params.name})`,
+        (client) => client.callTool({ name: params.name, arguments: params.arguments }),
+        { redactToolError: true }
+      )
     );
     this.logger.debug(`Successfully called tool: ${params.name}`);
     return result;
