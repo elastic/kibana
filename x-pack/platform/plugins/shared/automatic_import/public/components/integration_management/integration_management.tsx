@@ -30,6 +30,7 @@ import {
   useKibana,
 } from '../../common';
 import { normalizeTitleName } from '../../common/lib/helper_functions';
+import { useAuthorization } from '../../common/hooks/use_authorization';
 import { useTelemetry } from '../telemetry_context';
 import { LicensePaywallCard } from '../license_paywall/license_paywall_card';
 import { AutomaticImportTelemetryEventType } from '../../../common/telemetry/types';
@@ -169,8 +170,13 @@ export const IntegrationManagement = React.memo(() => {
   const { integration, isLoading, isError } = useGetIntegrationById(integrationId);
   const { reportCancelButtonClicked, sessionId } = useTelemetry();
   const { telemetry } = services;
+  const { canCreateIntegration, canEditIntegration } = useAuthorization();
+  const hasRequiredPrivilege = integrationId ? canEditIntegration : canCreateIntegration;
 
   useEffect(() => {
+    if (!hasRequiredPrivilege) {
+      return;
+    }
     if (integrationId) {
       telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditIntegrationPageLoaded, {
         sessionId,
@@ -181,7 +187,7 @@ export const IntegrationManagement = React.memo(() => {
         sessionId,
       });
     }
-  }, [telemetry, sessionId, integrationId]);
+  }, [telemetry, sessionId, integrationId, hasRequiredPrivilege]);
   const { createUpdateIntegrationMutation } = useCreateUpdateIntegration();
 
   const integrationsHomeHref = useMemo(
@@ -247,6 +253,22 @@ export const IntegrationManagement = React.memo(() => {
         </KibanaPageTemplate>
         <ButtonsFooter hideActionButton onCancel={handlePaywallCancel} />
       </>
+    );
+  }
+
+  if (!hasRequiredPrivilege) {
+    return (
+      <EuiEmptyPrompt
+        iconType="lock"
+        title={<h2>{i18n.INSUFFICIENT_PRIVILEGES_TITLE}</h2>}
+        body={<p>{i18n.INSUFFICIENT_PRIVILEGES_DESCRIPTION}</p>}
+        data-test-subj="automaticImportInsufficientPrivileges"
+        actions={
+          <EuiButton color="primary" fill onClick={navigateToManage}>
+            {i18n.GO_BACK_BUTTON}
+          </EuiButton>
+        }
+      />
     );
   }
 
