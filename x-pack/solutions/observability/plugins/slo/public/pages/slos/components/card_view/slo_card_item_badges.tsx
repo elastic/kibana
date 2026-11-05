@@ -25,9 +25,16 @@ interface Props {
   slo: SLOWithSummaryResponse;
   rules: Array<Rule<BurnRateRuleParams>> | undefined;
   handleCreateRule?: () => void;
+  isInteractive?: boolean;
 }
 
-export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }: Props) {
+export function SloCardItemBadges({
+  slo,
+  activeAlerts,
+  rules,
+  handleCreateRule,
+  isInteractive = true,
+}: Props) {
   const { onStateChange } = useUrlSearchState();
 
   const handleTagClick = (tag: string) =>
@@ -52,11 +59,24 @@ export function SloCardItemBadges({ slo, activeAlerts, rules, handleCreateRule }
         ) : (
           <>
             <SloStateBadge slo={slo} />
-            <SloActiveAlertsBadge slo={slo} activeAlerts={activeAlerts} viewMode="compact" />
+            <SloActiveAlertsBadge
+              slo={slo}
+              activeAlerts={activeAlerts}
+              viewMode="compact"
+              isInteractive={isInteractive}
+            />
             <SLOCardItemInstanceBadge slo={slo} />
-            <SloRulesBadge rules={rules} onClick={handleCreateRule} isRemote={!!slo.remote} />
+            <SloRulesBadge
+              rules={rules}
+              onClick={isInteractive ? handleCreateRule : undefined}
+              isRemote={!!slo.remote}
+            />
             <SloRemoteBadge slo={slo} />
-            <SloTagsBadge slo={slo} onClick={handleTagClick} defaultVisibleTags={1} />
+            <SloTagsBadge
+              slo={slo}
+              onClick={isInteractive ? handleTagClick : undefined}
+              defaultVisibleTags={1}
+            />
           </>
         )}
       </EuiFlexGroup>

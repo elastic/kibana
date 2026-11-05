@@ -22,7 +22,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
   method: 'GET',
   path: SYNTHETICS_API_URLS.SYNTHETICS_MONITORS,
   options: {
-    summary: 'Get monitors',
+    summary: 'Search monitors',
     description:
       'Get a list of monitors.\n\nYou must have `read` privileges for the Synthetics feature in the Observability section of the Kibana feature privileges.',
     operationId: 'get-synthetic-monitors',
@@ -84,7 +84,7 @@ export const getAllSyntheticsMonitorRoute: SyntheticsRestApiRouteFactory = () =>
       monitors,
       absoluteTotal,
       perPage: perPageT,
-      syncErrors: syntheticsMonitorClient.syntheticsService.syncErrors,
+      syncErrors: syntheticsMonitorClient.serviceManagedLocations.syncErrors,
     };
   },
 });

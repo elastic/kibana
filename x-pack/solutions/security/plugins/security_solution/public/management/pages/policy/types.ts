@@ -21,6 +21,7 @@ import type {
   UIPolicyConfig,
   MaybeImmutable,
   DeviceControlFields,
+  AiDataCollectionFields,
 } from '../../../../common/endpoint/types';
 import type { ServerApiError } from '../../../common/types';
 import type { ImmutableMiddlewareAPI } from '../../../common/store';
@@ -134,6 +135,11 @@ export type BehaviorProtectionOSes = KeysByValueCriteria<
 export type DeviceControlOSes = KeysByValueCriteria<
   UIPolicyConfig,
   { device_control?: DeviceControlFields }
+>;
+
+export type AiDataCollectionOSes = KeysByValueCriteria<
+  UIPolicyConfig,
+  { ai_data_collection?: AiDataCollectionFields }
 >;
 
 /**

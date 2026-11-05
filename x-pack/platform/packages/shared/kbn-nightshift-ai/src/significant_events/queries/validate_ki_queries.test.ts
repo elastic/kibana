@@ -6,7 +6,12 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import { computeValidationLookback } from './validate_ki_queries';
+import type { Feature } from '@kbn/significant-events-schema';
+import {
+  computeValidationLookback,
+  validateKIQueries,
+  type CandidateKIQuery,
+} from './validate_ki_queries';
 
 const createEsClient = () => {
   const query = jest.fn();
@@ -96,5 +101,80 @@ describe('computeValidationLookback', () => {
     });
 
     expect(result).toBe('now-10m');
+  });
+});
+
+describe('validateKIQueries full-text argument gate', () => {
+  const features = [{ id: 'feature-1', run_id: 'run-1' } as Feature];
+  const context = {
+    targetSources: ['logs-test'],
+    validationLookback: 'now-10m',
+    conflictingFields: new Set<string>(),
+    normalizedStoredEsqls: new Set<string>(),
+  };
+
+  const candidate = (where: string): CandidateKIQuery => ({
+    title: 'Kafka timeouts',
+    description: 'Upsert timeouts',
+    category: 'error',
+    severity_score: 60,
+    feature_ids: ['feature-1'],
+    esql: `FROM logs-test | WHERE ${where} | STATS metric_value = COUNT(*) BY bucket = BUCKET(@timestamp, 1 minute)`,
+  });
+
+  const validate = (queries: CandidateKIQuery[]) => {
+    const { esClient, query } = createEsClient();
+    // The ES mock accepts everything, so any rejection below comes from the static gate.
+    query.mockResolvedValue({ columns: [], values: [] });
+    return {
+      query,
+      run: validateKIQueries({ queries, features, context, esClient, signal, logger }),
+    };
+  };
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('rejects a cast inside MATCH_PHRASE before reaching Elasticsearch', async () => {
+    const { query, run } = validate([
+      candidate('MATCH_PHRASE(exception.message::keyword, "i/o timeout")'),
+    ]);
+    const result = await run;
+
+    expect(query).not.toHaveBeenCalled();
+    expect(result.acceptedQueries).toEqual([]);
+    expect(result.hasNonIntentFailures).toBe(true);
+    expect(result.results[0]).toMatchObject({
+      valid: false,
+      status: 'Failed to add',
+      failureReason: 'validation_error',
+    });
+    expect(result.results[0].error).toContain('MATCH_PHRASE(exception.message::KEYWORD, ...)');
+  });
+
+  it('accepts a bare-field MATCH_PHRASE', async () => {
+    const { query, run } = validate([candidate('MATCH_PHRASE(exception.message, "i/o timeout")')]);
+    const result = await run;
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(result.acceptedQueries).toHaveLength(1);
+    expect(result.hasNonIntentFailures).toBe(false);
+  });
+
+  it('accepts an exact comparison on a cast field', async () => {
+    const { query, run } = validate([candidate('exception.message::keyword == "timeout"')]);
+    const result = await run;
+
+    expect(query).toHaveBeenCalledTimes(1);
+    expect(result.acceptedQueries).toHaveLength(1);
+    expect(result.results[0].valid).toBe(true);
+  });
+
+  it('accepts a LIKE on a cast field', async () => {
+    const { run } = validate([candidate('exception.message::keyword LIKE "*i/o timeout*"')]);
+    const result = await run;
+
+    expect(result.acceptedQueries).toHaveLength(1);
   });
 });

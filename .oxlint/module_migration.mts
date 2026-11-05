@@ -123,7 +123,7 @@ export const moduleMigrationRule: DummyRule = [
       disallowedMessage: `Prefer using @emotion/react instead. To use styled-components, ensure you plugin is enabled in packages/kbn-babel-preset/styled_components_files.js.`,
     },
     {
-      from: '@kbn/test/jest',
+      from: '@kbn/jest/jest',
       to: '@kbn/test-jest-helpers',
       disallowedMessage: `import from @kbn/test-jest-helpers instead`,
     },

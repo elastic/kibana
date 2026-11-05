@@ -15,7 +15,7 @@ import { createRuleResponse } from '../test_utils';
 import type { StateTransitionContext } from './strategies/types';
 import type { LastLifecycleActionType, LatestAlertEventState } from './queries';
 
-const DEFAULT_TIMESTAMP = '2025-01-01T00:00:00.000Z';
+export const DEFAULT_TIMESTAMP = '2025-01-01T00:00:00.000Z';
 const DEFAULT_EPISODE_ID = 'episode-1';
 const DEFAULT_GROUP_HASH = 'hash-1';
 
@@ -24,6 +24,7 @@ export const buildLatestAlertEvent = ({
   eventStatus,
   statusCount,
   previousTimestamp,
+  phaseStartedAt,
   episodeId = DEFAULT_EPISODE_ID,
   groupHash = DEFAULT_GROUP_HASH,
   lifecycleActionType = null,
@@ -32,6 +33,7 @@ export const buildLatestAlertEvent = ({
   eventStatus: AlertEventStatus;
   statusCount?: number | null;
   previousTimestamp?: string | null;
+  phaseStartedAt?: string | null;
   episodeId?: string;
   groupHash?: string;
   lifecycleActionType?: LastLifecycleActionType;
@@ -41,6 +43,8 @@ export const buildLatestAlertEvent = ({
   last_episode_status: episodeStatus,
   last_episode_status_count: statusCount ?? null,
   last_episode_timestamp: previousTimestamp ?? DEFAULT_TIMESTAMP,
+  last_episode_phase_started_at:
+    phaseStartedAt !== undefined ? phaseStartedAt : previousTimestamp ?? DEFAULT_TIMESTAMP,
   last_lifecycle_action_type: lifecycleActionType,
   group_hash: groupHash,
 });

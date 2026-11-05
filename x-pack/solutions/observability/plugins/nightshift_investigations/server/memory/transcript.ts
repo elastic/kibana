@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import Path from 'path';
-import { internalTools } from '@kbn/agent-builder-common';
-import { PROPOSALS_CREATE_TOOL_ID } from '@kbn/proposals-common';
-import { INVESTIGATION_TOOL_IDS } from '../agents/investigation';
-import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import type { InvestigationToolCall } from '../decision_trees/accessed_trees';
-import { DECISION_TREE_WORKSPACE_ROOT } from '../decision_trees/materialize';
-import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
-import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import {
+  isEvidenceToolCall,
+  isSeededWorkspaceAccess,
+  stepsFromRound as roundLoaderStepsFromRound,
+  stepsFromToolCalls as roundLoaderStepsFromToolCalls,
+  type RawRoundStep,
+  type SeededWorkspaceKind,
+} from '../investigation_round';
 
 /**
  * The text the Semantic Memory critique, extraction, and writer calls read.
@@ -56,48 +56,19 @@ const MAX_NOTE_CHARS = 400;
 // Tried in order until the investigation fits its budget.
 const RESULT_EXCERPT_CHARS = [1_500, 800, 400, 0];
 
-const SEEDED_ROOTS = [CORTEX_WORKSPACE_ROOT, DECISION_TREE_WORKSPACE_ROOT];
-const SEEDED_FILES = ['/workspace/elastic.md', '/workspace/connectors.md'];
-// A bash command names a seeded directory or file by absolute or workspace-relative path.
-const SEEDED_PATH_IN_COMMAND = new RegExp(
-  `(?:^|[\\s'"=(:<])(?:/workspace/|\\./)?(?:${[...SEEDED_ROOTS, ...SEEDED_FILES]
-    .map((path) => Path.posix.basename(path).replace('.', '\\.'))
-    .join('|')})(?:/|[\\s'";|)&>]|$)`
-);
+// Memory transcripts keep `/workspace/memories/*` reads so critique can see which recalled
+// memories were opened and followed, while dropping Cortex, decision trees, and environment docs.
+const MEMORY_SKIP_SEEDED_ROOTS: readonly SeededWorkspaceKind[] = [
+  'cortex',
+  'decision_trees',
+  'env_docs',
+];
 
-const NON_EVIDENCE_TOOL_IDS = new Set<string>([
-  // The agent records its findings with these; they are conclusions, not evidence.
-  ...INVESTIGATION_TOOL_IDS,
-  PROPOSALS_CREATE_TOOL_ID,
-  internalTools.writeTodos,
-  internalTools.listFiles,
-  internalTools.loadSkill,
-  internalTools.searchRelevantSkills,
-  internalTools.sleep,
-  internalTools.setConversationMetadata,
-  internalTools.askUserQuestion,
-  SANDBOX_WRITE_FILE_TOOL_ID,
-  SANDBOX_STR_REPLACE_TOOL_ID,
-]);
-
-export const readsSeededKnowledge = (toolId: string, params: Record<string, unknown>): boolean => {
-  const filePath = params.file_path ?? params.path;
-  if (typeof filePath === 'string') {
-    const resolved = Path.posix.resolve('/workspace', filePath);
-    return (
-      SEEDED_FILES.includes(resolved) ||
-      SEEDED_ROOTS.some((root) => resolved === root || resolved.startsWith(`${root}/`))
-    );
-  }
-  return (
-    toolId.endsWith('bash') &&
-    typeof params.command === 'string' &&
-    SEEDED_PATH_IN_COMMAND.test(params.command)
-  );
-};
+export const readsSeededKnowledge = (toolId: string, params: Record<string, unknown>): boolean =>
+  isSeededWorkspaceAccess(toolId, params, { skipRoots: MEMORY_SKIP_SEEDED_ROOTS });
 
 export const isEvidenceCall = (toolId: string, params: Record<string, unknown>): boolean =>
-  !NON_EVIDENCE_TOOL_IDS.has(toolId) && !readsSeededKnowledge(toolId, params);
+  isEvidenceToolCall(toolId, params, { skipRoots: MEMORY_SKIP_SEEDED_ROOTS });
 
 /** Whether at least one evidence call in the investigation returned output. */
 export const hasToolEvidence = (investigation: readonly TranscriptStep[] | undefined): boolean =>
@@ -228,60 +199,22 @@ export const renderMemoryTranscript = ({
   ].join('\n');
 };
 
-// --- Reading the persisted round -------------------------------------------------------------
-
-interface RoundResult {
-  type?: string;
-  data?: unknown;
-}
-
-interface RoundStep {
-  type?: string;
-  reasoning?: string;
-  tool_id?: string;
-  params?: Record<string, unknown>;
-  results?: RoundResult[];
-}
-
-const resultText = (results: RoundResult[] | undefined): { text?: string; isError: boolean } => {
-  if (!results || results.length === 0) return { isError: false };
-  const parts: string[] = [];
-  let isError = false;
-  for (const result of results) {
-    const data = result.data;
-    if (result.type === 'error') isError = true;
-    if (typeof data === 'string') {
-      parts.push(data);
-    } else if (data && typeof data === 'object') {
-      const record = data as Record<string, unknown>;
-      const known = [record.message, record.text, record.stdout, record.stderr].filter(
-        (value): value is string => typeof value === 'string' && value.length > 0
-      );
-      parts.push(known.length > 0 ? known.join('\n') : JSON.stringify(data));
-    }
-  }
-  return { text: parts.join('\n'), isError };
-};
+const toTranscriptSteps = (steps: ReturnType<typeof roundLoaderStepsFromRound>): TranscriptStep[] =>
+  steps.map((step) =>
+    step.kind === 'reasoning'
+      ? { kind: 'reasoning', text: step.text }
+      : {
+          kind: 'tool',
+          toolId: step.toolId,
+          params: step.params,
+          resultText: step.resultText,
+          isError: step.isError,
+        }
+  );
 
 /** Normalizes an Agent Builder round's steps (reasoning and tool calls) into transcript steps. */
-export const stepsFromRound = (steps: readonly RoundStep[]): TranscriptStep[] => {
-  const out: TranscriptStep[] = [];
-  for (const step of steps) {
-    if (step.type === 'reasoning' && typeof step.reasoning === 'string') {
-      out.push({ kind: 'reasoning', text: step.reasoning });
-    } else if (step.type === 'tool_call' && typeof step.tool_id === 'string') {
-      const { text, isError } = resultText(step.results);
-      out.push({
-        kind: 'tool',
-        toolId: step.tool_id,
-        params: step.params ?? {},
-        resultText: text,
-        isError,
-      });
-    }
-  }
-  return out;
-};
+export const stepsFromRound = (steps: readonly RawRoundStep[]): TranscriptStep[] =>
+  toTranscriptSteps(roundLoaderStepsFromRound(steps));
 
 /**
  * Builds the investigation from the hook's tool calls when they carry results. It has no agent
@@ -290,15 +223,6 @@ export const stepsFromRound = (steps: readonly RoundStep[]): TranscriptStep[] =>
 export const stepsFromToolCalls = (
   toolCalls: readonly InvestigationToolCall[]
 ): TranscriptStep[] | undefined => {
-  if (!toolCalls.some((call) => call.results !== undefined)) {
-    return undefined;
-  }
-  return stepsFromRound(
-    toolCalls.map((call) => ({
-      type: 'tool_call',
-      tool_id: call.tool_id ?? 'unknown_tool',
-      params: call.params,
-      results: call.results as RoundResult[] | undefined,
-    }))
-  );
+  const steps = roundLoaderStepsFromToolCalls(toolCalls);
+  return steps ? toTranscriptSteps(steps) : undefined;
 };

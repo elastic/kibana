@@ -75,6 +75,7 @@ export const mergeChunks = (chunks: ChatCompletionChunkEvent[]): UnvalidatedMess
   const message = chunks.reduce<UnvalidatedMessage>(
     (prev, chunk) => {
       prev.content += chunk.content ?? '';
+      // Refusal is only set on the terminating chunk in practice, so latest-wins is enough.
       if (chunk.refusal) {
         prev.refusal = chunk.refusal;
       }

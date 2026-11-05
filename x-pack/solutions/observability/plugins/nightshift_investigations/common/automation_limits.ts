@@ -6,3 +6,5 @@
  */
 
 export const MAX_RULE_NAMES = 100;
+// Leave room in the investigation message for trigger context, including Slack message text.
+export const MAX_AUTOMATION_INSTRUCTIONS_LENGTH = 5000;

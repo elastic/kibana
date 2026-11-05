@@ -157,6 +157,7 @@ export interface DiscoverSession {
   description: string;
   tabs: DiscoverSessionTab[];
   managed: boolean;
+  version?: string;
   tags?: string[] | undefined;
   references?: SavedObjectReference[];
   sharingSavedObjectProps?: {

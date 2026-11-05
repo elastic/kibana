@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EsqlSource, registerEsqlSourceInDataViewsCache } from '@kbn/data-source';
+import {
+  EsqlSource,
+  registerEsqlSourceInDataViewsCache,
+  unregisterFromDataViewsCache,
+} from '@kbn/data-source';
 import { getRepresentativeQuery } from '@kbn/lens-common';
 import type { AggregateQuery, Filter, Query } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
@@ -192,7 +196,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 2,
+          "version": 3,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -367,7 +371,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 2,
+          "version": 3,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -522,7 +526,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Edit visualization",
-          "version": 2,
+          "version": 3,
           "visualizationType": "lnsXY",
         },
         "requestData": Object {
@@ -703,7 +707,7 @@ describe('LensVisService attributes', () => {
             },
           },
           "title": "Heat map",
-          "version": 2,
+          "version": 3,
           "visualizationType": "lnsHeatmap",
         },
         "requestData": Object {
@@ -736,7 +740,7 @@ describe('LensVisService attributes', () => {
           'index-pattern-with-timefield-id': {},
         },
       }),
-      version: 2,
+      version: 3,
       references: [],
       title: 'Heat map',
       visualizationType: 'lnsHeatmap',
@@ -887,6 +891,52 @@ describe('LensVisService attributes', () => {
     expect(onVisContextChanged).toHaveBeenCalledWith(
       visContext,
       UnifiedHistogramExternalVisContextStatus.applied
+    );
+  });
+
+  it('keeps an ES|QL chart edit after the source data view is unregistered', async () => {
+    const timeRange = {
+      from: '2022-11-17T00:00:00.000Z',
+      to: '2022-11-17T12:00:00.000Z',
+    };
+    const dataSource = await getDefaultDataSource({
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      columns: [],
+    });
+    const { lensService, currentSuggestionContext } = await getLensVisMock({
+      filters: [],
+      query: queryEsql,
+      dataView: dataViewWithAtTimefieldMock,
+      dataSource,
+      timeInterval,
+      timeRange,
+      breakdownField: undefined,
+      columns: [],
+      allSuggestions: [],
+    });
+    const onVisContextChanged = jest.fn();
+    lensService.update({
+      queryParams: { dataSource, query: queryEsql, filters: [], timeRange, columns: [] },
+      timeInterval,
+      breakdownField: undefined,
+      externalVisContext: undefined,
+      onVisContextChanged,
+    });
+    onVisContextChanged.mockClear();
+
+    // Discover unregisters the previous source's shim as soon as the query changes,
+    // while the edit flyout can still be open on the chart built from that source.
+    unregisterFromDataViewsCache(dataSource.id);
+    lensService.onSuggestionEdited({ editedSuggestionContext: currentSuggestionContext });
+
+    expect(onVisContextChanged).toHaveBeenCalledTimes(1);
+    expect(onVisContextChanged).toHaveBeenCalledWith(
+      expect.objectContaining({
+        suggestionType: UnifiedHistogramSuggestionType.histogramForESQL,
+        requestData: expect.objectContaining({ dataViewId: dataViewWithAtTimefieldMock.id }),
+      }),
+      UnifiedHistogramExternalVisContextStatus.manuallyCustomized
     );
   });
 

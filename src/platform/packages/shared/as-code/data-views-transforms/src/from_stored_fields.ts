@@ -153,6 +153,7 @@ function fromStoredFieldFormatParams(
 
     return {
       field_type: fieldType,
+      ...(fieldType === 'number' && { pattern: params.pattern }),
       colors: colors
         .filter((color) => color !== null && color !== undefined)
         .map((color) => {

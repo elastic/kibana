@@ -376,6 +376,61 @@ describe('createSkillRegistry', () => {
     });
   });
 
+  describe('hidden skills', () => {
+    const hiddenSkill = createMockInternalSkillDefinition({
+      id: 'hidden-skill',
+      name: 'hidden-skill-name',
+      hidden: true,
+    });
+
+    const createRegistry = () =>
+      createSkillRegistry({
+        builtinProvider: createMockBuiltinProvider([builtinSkill1, hiddenSkill]),
+        persistedProvider: createMockPersistedProvider([persistedSkill1]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+    it('are left out of list()', async () => {
+      const result = await createRegistry().list();
+      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1', 'custom-skill-1']);
+    });
+
+    it('are left out of list() filtered by type', async () => {
+      const result = await createRegistry().list({ type: 'built-in' });
+      expect(result.map((s) => s.id)).toEqual(['builtin-skill-1']);
+    });
+
+    it('are included in list() when includeHidden is true', async () => {
+      const result = await createRegistry().list({ includeHidden: true });
+      expect(result.map((s) => s.id)).toEqual([
+        'builtin-skill-1',
+        'hidden-skill',
+        'custom-skill-1',
+      ]);
+    });
+
+    it('does not forward includeHidden to the providers', async () => {
+      const builtinProvider = createMockBuiltinProvider([builtinSkill1, hiddenSkill]);
+      const registry = createSkillRegistry({
+        builtinProvider,
+        persistedProvider: createMockPersistedProvider([]),
+        toolRegistry: createMockToolRegistry(),
+        experimentalFeaturesEnabled: false,
+      });
+
+      await registry.list({ includeHidden: true, summaryOnly: true });
+      expect(builtinProvider.list).toHaveBeenCalledWith({ summaryOnly: true });
+    });
+
+    it('stay resolvable by id through has, get and bulkGet', async () => {
+      const registry = createRegistry();
+      expect(await registry.has('hidden-skill')).toBe(true);
+      expect(await registry.get('hidden-skill')).toEqual(hiddenSkill);
+      expect((await registry.bulkGet(['hidden-skill'])).get('hidden-skill')).toEqual(hiddenSkill);
+    });
+  });
+
   describe('bulkGet', () => {
     it('returns all built-in skills when all IDs are built-in', async () => {
       const builtinProvider = createMockBuiltinProvider([builtinSkill1]);

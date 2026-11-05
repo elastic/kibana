@@ -1,0 +1,21 @@
+name: Changelog PR comments
+on:
+  workflow_run:
+    # Must match the `name:` field of release-notes.yml, which uploads the
+    # changelog-decision artifact. workflow_run matches by name only, not by
+    # file path. release-notes.yml carries the same warning next to its name.
+    workflows: ["release-notes"]
+    types: [completed]
+permissions:
+  pull-requests: write
+  actions: read
+# The PR number is stable; do not cancel — two upstreams can complete close
+# together and cancelling mid-upsert risks leaving the wrong comment body.
+concurrency:
+  group: changelog-comments-${{ github.event.workflow_run.head_repository.full_name }}-${{ github.event.workflow_run.head_branch }}
+  cancel-in-progress: false
+jobs:
+  comment:
+    # A skipped release-notes run (a draft PR) leaves no decision to post, so skip this job too.
+    if: github.event.workflow_run.event == 'pull_request' && github.event.workflow_run.conclusion != 'cancelled' && github.event.workflow_run.conclusion != 'skipped'
+    uses: elastic/docs-actions/.github/workflows/release-notes-comments.yml@v1

@@ -27,6 +27,5 @@ fileGroups:
     - javascript.js
     - jest.js
     - react.js
-    - restricted_globals.js
     - typescript.js
 tasks: {}

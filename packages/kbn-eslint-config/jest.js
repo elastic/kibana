@@ -14,7 +14,6 @@ module.exports = {
       },
 
       rules: {
-        'jest/no-identical-title': 'error',
         'import/order': 'off',
       },
     }

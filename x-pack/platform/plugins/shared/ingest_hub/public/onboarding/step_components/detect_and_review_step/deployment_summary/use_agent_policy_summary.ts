@@ -28,7 +28,7 @@ import {
   useGetAgentStatusQuery,
   useBulkGetAgentPoliciesQuery,
 } from '@kbn/fleet-plugin/public';
-import { getOnboardingSessionKey } from '../../../onboarding_session_storage';
+import { getOnboardingSessionKey } from '../../../core/onboarding_session_storage';
 
 interface PersistedAuthStep {
   agentPolicyId?: string;

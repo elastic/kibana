@@ -27,3 +27,12 @@ responses:
               value: your-param-value
   404:
     description: The parameter or the Kibana space does not exist.
+x-codeSamples:
+  - lang: curl
+    source: |
+      curl \
+        -X GET "${KIBANA_URL}/api/synthetics/params/param-id" \
+        -H "Authorization: ApiKey ${API_KEY}"
+  - lang: Console
+    source: |
+      GET kbn://api/synthetics/params/param-id

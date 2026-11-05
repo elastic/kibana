@@ -7,139 +7,39 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { parse } from 'yaml';
-import type { z } from '@kbn/zod/v4';
+import { CREATE_PROPOSAL_WORKFLOW } from './create_proposal';
 import CREATE_PROPOSAL_YAML from './create_proposal.yaml';
-import { isValidDuration, parseDuration } from '../../../common/utils';
 import {
-  DataSetStepSchema,
-  IfStepSchema,
-  LoopBreakStepSchema,
-  LoopContinueStepSchema,
-  WaitForApprovalStepSchema,
-  WhileStepSchema,
-  WorkflowExecuteStepSchema,
-  WorkflowOutputStepSchema,
-} from '../../../spec/schema';
+  collectNames,
+  findStep,
+  mixedConditions,
+  parseWorkflow,
+  stepsOfType,
+  unmodelledKeys,
+  VALID_STATUSES,
+} from './proposal_workflows.test_helpers';
+import { RESOLVE_PROPOSAL_WORKFLOW_ID } from './resolve_proposal';
+import RESOLVE_PROPOSAL_YAML from './resolve_proposal.yaml';
+import { isValidDuration, parseDuration } from '../../../common/utils';
 
-/** Local shape: the parsed YAML is untyped, and only these fields are asserted on. */
-interface WorkflowStep {
-  name?: string;
-  type?: string;
-  condition?: string;
-  if?: string;
-  timeout?: string;
-  'on-failure'?: {
-    continue?: boolean | string;
-    fallback?: WorkflowStep[];
-    retry?: { 'max-attempts'?: number; delay?: string; condition?: string };
-  };
-  'max-iterations'?: number | { limit?: number; 'on-limit'?: string };
-  'iteration-timeout'?: string;
-  with?: Record<string, unknown>;
-  steps?: WorkflowStep[];
-  /** An `if` step's false branch. Every traversal below has to include it. */
-  else?: WorkflowStep[];
-}
-
-/** Both branches of a step, so nothing in an `else` escapes these assertions. */
-const childrenOf = (step: WorkflowStep): WorkflowStep[] => [
-  ...(step.steps ?? []),
-  ...(step.else ?? []),
-];
-
-interface ParsedWorkflow {
-  consts?: Record<string, unknown>;
-  settings?: {
-    timeout?: string;
-    'on-failure'?: { fallback?: WorkflowStep[] };
-  };
-  triggers: Array<{
-    type: string;
-    inputs?: { properties?: Record<string, unknown>; required?: string[] };
-  }>;
-  outputs?: Array<{ name: string; type: string }>;
-  steps: WorkflowStep[];
-}
-
-const workflow = parse(CREATE_PROPOSAL_YAML) as ParsedWorkflow;
+const workflow = parseWorkflow(CREATE_PROPOSAL_YAML);
+const resolveWorkflow = parseWorkflow(RESOLVE_PROPOSAL_YAML);
 
 /** The deadline a caller gets when it does not ask for one. */
 const DEFAULT_EXPIRES_IN = '72h';
 
-const findStep = (steps: WorkflowStep[], name: string): WorkflowStep | undefined => {
-  for (const step of steps) {
-    if (step.name === name) {
-      return step;
-    }
-    const match = findStep(childrenOf(step), name);
-    if (match) {
-      return match;
-    }
-  }
-  return undefined;
-};
+const step = (name: string) => findStep(workflow.steps, name);
+const gate = () => step('await_decision')!;
+const loop = () => step('decision_loop')!;
+const loopBody = () => (loop().steps ?? []).map(({ name }) => name);
 
-/** Every descendant of a step, so containment can be asserted. */
-const collectNames = (steps: WorkflowStep[]): string[] =>
-  steps.flatMap((step) => [step.name ?? '', ...collectNames(childrenOf(step))]);
-
-const gate = () => findStep(workflow.steps, 'await_decision')!;
-const loop = () => findStep(workflow.steps, 'decision_loop')!;
-
-/**
- * Mirrors `VALID_STATUSES` in the plugin's `proposals_service`. Duplicated
- * rather than imported because a package cannot depend on a plugin, and the
- * pairing rule is worth enforcing here: the service rejects an illegal pair at
- * runtime, which in a workflow means a failed execution rather than a type
- * error.
- */
-const VALID_STATUSES: Record<string, readonly string[]> = {
-  undecided: ['pending', 'expired'],
-  dismissed: ['no_action'],
-  approved: ['no_action', 'executing', 'succeeded', 'failed'],
-};
-
-/**
- * The schemas the engine models built-in steps with. The custom `proposals.*`
- * steps are absent on purpose: this repo owns their schemas, so a key written
- * here is a key it declared.
- */
-const BUILT_IN_STEP_SCHEMAS: Record<string, z.ZodType> = {
-  'data.set': DataSetStepSchema,
-  if: IfStepSchema,
-  'loop.break': LoopBreakStepSchema,
-  'loop.continue': LoopContinueStepSchema,
-  waitForApproval: WaitForApprovalStepSchema,
-  while: WhileStepSchema,
-  'workflow.execute': WorkflowExecuteStepSchema,
-  'workflow.output': WorkflowOutputStepSchema,
-};
-
-/** Every step in the definition, including the failure handler's fallback. */
-const allSteps = (): WorkflowStep[] => {
-  const flatten = (steps: WorkflowStep[]): WorkflowStep[] =>
-    steps.flatMap((step) => [step, ...flatten(childrenOf(step))]);
-
-  return [
-    ...flatten(workflow.steps),
-    ...flatten(workflow.settings?.['on-failure']?.fallback ?? []),
-  ];
-};
-
-/** Every `proposals.updateProposal` step anywhere in the definition. */
-const updateProposalSteps = (): WorkflowStep[] => {
-  const collect = (steps: WorkflowStep[]): WorkflowStep[] =>
-    steps.flatMap((step) => [
-      ...(step.type === 'proposals.updateProposal' ? [step] : []),
-      ...collect(childrenOf(step)),
-    ]);
-
-  return [
-    ...collect(workflow.steps),
-    ...collect(workflow.settings?.['on-failure']?.fallback ?? []),
-  ];
-};
+/** Every resolution a condition in the gate tests for. */
+const handledResolutions = (): string[] =>
+  stepsOfType(workflow, 'if').flatMap(({ condition }) =>
+    [...String(condition).matchAll(/variables\.resolution == '([a-z_]+)'/g)].map(
+      ([, resolution]) => resolution
+    )
+  );
 
 describe('create-investigation-proposal workflow', () => {
   describe('contract', () => {
@@ -164,7 +64,7 @@ describe('create-investigation-proposal workflow', () => {
       // This workflow is solution-agnostic: an `origin` hardcoded here would
       // stamp every caller with one solution's name, and a `title` dropped here
       // would leave the queue showing the action's name for all of them.
-      const create = findStep(workflow.steps, 'create_proposal');
+      const create = step('create_proposal');
 
       expect(String(create?.with?.origin)).toContain('inputs.origin');
       expect(String(create?.with?.title)).toContain('inputs.title');
@@ -173,7 +73,7 @@ describe('create-investigation-proposal workflow', () => {
     it('forwards the grouping overrides, or a non-action proposal cannot be grouped', () => {
       // `category` is the only way a proposal with no action gets one, and
       // consumers drop what they cannot group.
-      const create = findStep(workflow.steps, 'create_proposal');
+      const create = step('create_proposal');
 
       expect(String(create?.with?.category)).toContain('inputs.category');
       expect(String(create?.with?.impact)).toContain('inputs.impact');
@@ -202,6 +102,10 @@ describe('create-investigation-proposal workflow', () => {
         'decision',
       ]);
     });
+
+    it('is not billable', () => {
+      expect(CREATE_PROPOSAL_WORKFLOW.billable).toBe(false);
+    });
   });
 
   describe('a caller-supplied proposalId', () => {
@@ -211,16 +115,14 @@ describe('create-investigation-proposal workflow', () => {
 
       expect(input?.type).toBe('string');
       expect(manual?.inputs?.required).not.toContain('proposalId');
-      expect(String(findStep(workflow.steps, 'create_proposal')?.with?.proposalId)).toContain(
-        'inputs.proposalId'
-      );
+      expect(String(step('create_proposal')?.with?.proposalId)).toContain('inputs.proposalId');
     });
 
     it('adds no branch of its own: a duplicate id fails the create step, before any gate', () => {
       // A duplicate is an error from the service, and the workflow does not
       // interpret it. Nothing before the create step could park a gate or
       // record a proposal id, so a failed create has nothing to settle.
-      expect(findStep(workflow.steps, 'stop_if_reused')).toBeUndefined();
+      expect(step('stop_if_reused')).toBeUndefined();
       expect(workflow.outputs?.map(({ name }) => name)).toEqual([
         'proposalId',
         'status',
@@ -251,15 +153,14 @@ describe('create-investigation-proposal workflow', () => {
       // proposal parks for a second and times out into the one branch that
       // settles an expiry.
       expect(gate().timeout).toContain('at_least: 1');
-      expect(findStep(workflow.steps, 'settle_expired')).toBeUndefined();
+      expect(step('settle_expired')).toBeUndefined();
     });
 
     it('always creates with a deadline, which the gate timeout depends on', () => {
       // `remaining_seconds` only counts down from an `expiresAt`. The caller
       // may supply one, but the default has to be a duration the service can
       // resolve, or the gate has nothing to park against.
-      const create = findStep(workflow.steps, 'create_proposal');
-      const expiresIn = String(create?.with?.expiresIn);
+      const expiresIn = String(step('create_proposal')?.with?.expiresIn);
 
       expect(expiresIn).toContain('inputs.expiresIn');
       expect(isValidDuration(DEFAULT_EXPIRES_IN)).toBe(true);
@@ -295,34 +196,11 @@ describe('create-investigation-proposal workflow', () => {
   });
 
   describe('schema parity', () => {
-    /**
-     * A zod object drops a key it does not model rather than complaining, and
-     * every other assertion in this file reads the raw YAML — so a step can
-     * declare something no schema has heard of and still look wired.
-     *
-     * Managed workflows install under `lightweightValidation`, which does not
-     * validate steps at all, so production neither rejects nor strips such a
-     * key: whether it does anything is entirely up to the engine. This keeps
-     * every key the proposal steps declare — including `on-failure` on the
-     * gate and the action, which both handlers rely on — modelled by a schema.
-     */
+    // Keeps every key the gate declares — including `on-failure` on the gate
+    // and on both resolution calls, which their handlers rely on — modelled by
+    // a schema.
     it('declares no key its step schema does not model', () => {
-      const unmodelled = allSteps().flatMap((step) => {
-        const schema = step.type ? BUILT_IN_STEP_SCHEMAS[step.type] : undefined;
-        if (!schema) {
-          return [];
-        }
-        const parsed = schema.safeParse(step);
-        if (!parsed.success) {
-          return [`${step.name} (${step.type}): does not satisfy its own schema`];
-        }
-        const modelled = new Set(Object.keys(parsed.data as object));
-        return Object.keys(step)
-          .filter((key) => !modelled.has(key))
-          .map((key) => `${step.name} (${step.type}): ${key}`);
-      });
-
-      expect(unmodelled).toEqual([]);
+      expect(unmodelledKeys(workflow)).toEqual([]);
     });
   });
 
@@ -345,7 +223,7 @@ describe('create-investigation-proposal workflow', () => {
 
       expect(maxIterations['on-limit']).toBe('continue');
       expect(maxIterations.limit).toBeGreaterThanOrEqual(200);
-      expect(findStep(workflow.steps, 'settle_exhausted')).toBeUndefined();
+      expect(step('settle_exhausted')).toBeUndefined();
       expect(workflow.consts?.max_attempts).toBeUndefined();
     });
 
@@ -356,8 +234,8 @@ describe('create-investigation-proposal workflow', () => {
       // this definition exists to prevent. The budget gets the same treatment
       // as every other way out of the loop.
       const top = workflow.steps.map(({ name }) => name);
-      const settle = findStep(workflow.steps, 'settle_unfinished');
-      const record = findStep(workflow.steps, 'record_unfinished');
+      const settle = step('settle_unfinished');
+      const record = step('record_unfinished');
 
       expect(settle?.condition).toContain('variables.completed != true');
       expect(record?.type).toBe('proposals.settleIncompleteProposal');
@@ -367,11 +245,12 @@ describe('create-investigation-proposal workflow', () => {
     });
 
     it('derives each attempt from the fixed deadline, so a retry cannot extend it', () => {
-      const init = findStep(workflow.steps, 'init_state');
-      const remaining = findStep(workflow.steps, 'compute_remaining');
-
-      expect(String(init?.with?.expires_epoch)).toContain('steps.create_proposal.output.expiresAt');
-      expect(String(remaining?.with?.remaining_seconds)).toContain('variables.expires_epoch');
+      expect(String(step('init_state')?.with?.expires_epoch)).toContain(
+        'steps.create_proposal.output.expiresAt'
+      );
+      expect(String(step('compute_remaining')?.with?.remaining_seconds)).toContain(
+        'variables.expires_epoch'
+      );
     });
 
     it('reads the clock and subtracts it in one step, only where the gate needs it', () => {
@@ -381,15 +260,13 @@ describe('create-investigation-proposal workflow', () => {
       //
       // Only the gate reads the clock, so the step lives inside `gate_branch`:
       // the autonomy path never waits, and nothing after the gate re-reads it.
-      const gateSteps = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
-        ({ name }) => name
-      );
+      const gateSteps = (step('gate_branch')?.steps ?? []).map(({ name }) => name);
 
       expect(gateSteps).toContain('compute_remaining');
-      expect(
-        String(findStep(workflow.steps, 'compute_remaining')?.with?.remaining_seconds)
-      ).toContain('times: -1 | plus: variables.expires_epoch');
-      expect(findStep(workflow.steps, 'recompute_remaining')).toBeUndefined();
+      expect(String(step('compute_remaining')?.with?.remaining_seconds)).toContain(
+        'times: -1 | plus: variables.expires_epoch'
+      );
+      expect(step('recompute_remaining')).toBeUndefined();
     });
 
     it('carries "no deadline" as a date the loop never reaches, not as a second flag', () => {
@@ -397,30 +274,18 @@ describe('create-investigation-proposal workflow', () => {
       // guard wherever the deadline is read. Defaulting the epoch to a
       // far-future date says the same thing arithmetically, and the gate just
       // parks for a very long time.
-      expect(String(findStep(workflow.steps, 'init_state')?.with?.expires_epoch)).toContain(
-        'default:'
-      );
+      expect(String(step('init_state')?.with?.expires_epoch)).toContain('default:');
     });
 
     it('avoids mixing and/or in a condition, which Liquid binds unpredictably', () => {
-      const conditions = collectNames(workflow.steps)
-        .map((name) => findStep(workflow.steps, name)?.condition)
-        .filter((condition): condition is string => typeof condition === 'string');
-
-      for (const condition of conditions) {
-        expect(condition.includes(' and ') && condition.includes(' or ')).toBe(false);
-      }
+      expect(mixedConditions(workflow)).toEqual([]);
     });
 
     it('copies the gate output into variables inside the iteration that produced it', () => {
       // A step output resolves to its latest execution, so a later iteration
       // that skipped the gate would otherwise read this pass's values.
-      const resolve = findStep(workflow.steps, 'resolve_gate');
-
-      expect(resolve?.type).toBe('data.set');
-      expect(collectNames(findStep(workflow.steps, 'gate_branch')?.steps ?? [])).toContain(
-        'resolve_gate'
-      );
+      expect(step('resolve_gate')?.type).toBe('data.set');
+      expect(collectNames(step('gate_branch')?.steps ?? [])).toContain('resolve_gate');
     });
 
     it('reads only variables after the loop, since loop step outputs are evicted', () => {
@@ -432,90 +297,239 @@ describe('create-investigation-proposal workflow', () => {
     });
   });
 
-  describe('the decision/status pairs it writes', () => {
-    it('pairs every decision it writes with a status the service accepts', () => {
-      // The service enforces this at runtime, where a violation is a failed
-      // execution rather than a type error, so it is worth catching statically.
-      // A decision written on its own leaves the record at `pending`, which is
-      // illegal under either decision — the bug this guards against.
-      const decisionWrites = updateProposalSteps().filter(
-        (step) => step.with?.decision !== undefined
-      );
+  describe('what it writes itself', () => {
+    it('checks and records no decision, since it would attribute its own identity', () => {
+      // This run may execute as the caller's service account. A decide check
+      // here would authorize that account, and a decision written here would
+      // record it, whoever answered the gate.
+      expect(stepsOfType(workflow, 'proposals.checkDecidePrivileges')).toEqual([]);
+      expect(
+        stepsOfType(workflow, 'proposals.updateProposal').filter(
+          ({ with: settings }) => settings?.decision !== undefined
+        )
+      ).toEqual([]);
+    });
 
-      expect(decisionWrites.length).toBeGreaterThan(0);
-      for (const step of decisionWrites) {
-        const decision = step.with!.decision as string;
-        const status = step.with!.status as string | undefined;
+    it('writes a recognised status everywhere it writes one', () => {
+      const known = new Set(Object.values(VALID_STATUSES).flat());
 
-        expect(VALID_STATUSES[decision]).toBeDefined();
-        expect(status).toBeDefined();
-        expect(VALID_STATUSES[decision]).toContain(status);
+      for (const write of stepsOfType(workflow, 'proposals.updateProposal')) {
+        expect(known).toContain(write.with?.status as string);
       }
     });
 
-    it('writes a recognised status everywhere else', () => {
-      // A status-only write inherits whatever decision the record already
-      // carries, which the YAML cannot know — so this only catches a status
-      // outside the vocabulary altogether.
-      const known = new Set(Object.values(VALID_STATUSES).flat());
-      const statusWrites = updateProposalSteps().filter(
-        (step) => step.with?.decision === undefined && step.with?.status !== undefined
-      );
-
-      for (const step of statusWrites) {
-        expect(known).toContain(step.with!.status as string);
-      }
+    it('creates and clones every proposal itself, so each one points at this execution', () => {
+      // `createProposal` stamps the execution it runs in, and a clone copies
+      // the original's. Both run here, where the gate is parked, so approving
+      // any proposal resumes the execution that can still act on it.
+      expect(stepsOfType(workflow, 'proposals.createProposal')).toHaveLength(1);
+      expect(stepsOfType(workflow, 'proposals.cloneProposal')).toHaveLength(1);
+      expect(stepsOfType(resolveWorkflow, 'proposals.createProposal')).toEqual([]);
+      expect(stepsOfType(resolveWorkflow, 'proposals.cloneProposal')).toEqual([]);
     });
   });
 
-  describe('privilege check', () => {
-    it('checks the resumer after the gate and before any write', () => {
-      const body = (loop().steps ?? []).map(({ name }) => name);
-      const checkIndex = body.indexOf('authorize_decision');
+  describe('resolving the answer', () => {
+    const RESOLVE_STEPS = ['resolve_as_approver', 'resolve_as_worker'];
 
-      expect(checkIndex).toBeGreaterThan(body.indexOf('gate_branch'));
-      // If a write came first and threw instead, the gate would already be
-      // spent and the proposal would strand with no way to retry.
+    it('resolves after the timeout branch and before any outcome branch', () => {
+      const body = loopBody();
+      const resolve = body.indexOf('resolve_by_approval_mode');
+
+      expect(resolve).toBeGreaterThan(body.indexOf('gate_branch'));
+      expect(resolve).toBeGreaterThan(body.indexOf('handle_gate_timeout'));
       for (const branch of [
-        'handle_gate_timeout',
-        'handle_dismissal',
-        'approve_without_action',
-        'approve_with_action',
+        'handle_resolution_failure',
+        'handle_settled',
+        'handle_action_failure',
+        'handle_unapplied_answer',
       ]) {
-        expect(body.indexOf(branch)).toBeGreaterThan(checkIndex);
+        expect(body.indexOf(branch)).toBeGreaterThan(resolve);
       }
-      // The answered-path chain read waits for the check too: an unauthorized
-      // resumer is re-parked before anything reads on its behalf. Timeout
-      // settles without this read (see below).
-      expect(body.indexOf('get_last_revision')).toBeGreaterThan(checkIndex);
     });
 
-    it('only checks when someone answered, since neither autonomy nor a timeout has a decider', () => {
-      // `gate_answered` rather than `needs_gate`: on the autonomy path the
-      // principal is the Worker, which necessarily holds the privilege — it
-      // created the proposal — and a timed-out gate has no resumer at all, so
-      // in both cases the check could only ever pass as the workflow runner,
-      // at the cost of a round trip per iteration.
-      expect(findStep(workflow.steps, 'authorize_decision')?.condition).toContain(
-        'variables.gate_answered == true'
+    it('resolves as whoever answered, and as the inherited service account otherwise', () => {
+      const branch = step('resolve_by_approval_mode');
+
+      expect(branch?.type).toBe('if');
+      expect(branch?.condition).toBe('${{ variables.gate_answered == true }}');
+      expect((branch?.steps ?? []).map(({ name }) => name)).toEqual([
+        'resolve_as_approver',
+        'adopt_approver_resolution',
+      ]);
+      expect((branch?.else ?? []).map(({ name }) => name)).toEqual([
+        'resolve_as_worker',
+        'adopt_worker_resolution',
+      ]);
+    });
+
+    it.each(RESOLVE_STEPS)(
+      '%s names the child by a literal id, which inheriting an identity requires',
+      (name) => {
+        const resolve = step(name);
+
+        expect(resolve?.type).toBe('workflow.execute');
+        expect(resolve?.with?.['workflow-id']).toBe(RESOLVE_PROPOSAL_WORKFLOW_ID);
+      }
+    );
+
+    it.each(RESOLVE_STEPS)('%s keeps a failed child inside the loop, to be recovered', (name) => {
+      expect(step(name)?.['on-failure']?.continue).toBe(true);
+    });
+
+    it.each(RESOLVE_STEPS)('%s passes exactly the inputs the child declares', (name) => {
+      const declared = Object.keys(
+        resolveWorkflow.triggers.find(({ type }) => type === 'manual')?.inputs?.properties ?? {}
+      );
+      const inputs = step(name)?.with?.inputs as Record<string, unknown>;
+
+      expect(Object.keys(inputs).sort()).toEqual(declared.sort());
+      expect(String(inputs.proposalId)).toContain('variables.current_proposal_id');
+      expect(String(inputs.actionWorkflowId)).toContain('variables.action_workflow_id');
+    });
+
+    it('runs a human answer with the default identity, so as whoever answered', () => {
+      const resolve = step('resolve_as_approver');
+      const inputs = resolve?.with?.inputs as Record<string, unknown>;
+
+      expect(resolve?.with?.['run-as-mode']).toBeUndefined();
+      expect(String(inputs.approved)).toContain('variables.gate_approved');
+      expect(String(inputs.decidedBy)).toContain('variables.decided_by');
+      expect(inputs.autoApproved).toBe(false);
+    });
+
+    it("runs an autonomous approval as the caller's service account, attributed to it", () => {
+      const resolve = step('resolve_as_worker');
+      const inputs = resolve?.with?.inputs as Record<string, unknown>;
+
+      expect(resolve?.with?.['run-as-mode']).toBe('inherit');
+      expect(inputs.approved).toBe(true);
+      expect(inputs.decidedBy).toBe('');
+      expect(inputs.autoApproved).toBe(true);
+    });
+
+    // A step that did not run this pass still returns its previous value, so
+    // each branch adopts only the result of its own step.
+    it.each([
+      ['adopt_approver_resolution', 'resolve_as_approver'],
+      ['adopt_worker_resolution', 'resolve_as_worker'],
+    ])('%s adopts only the result of %s, reading a failure as `failed`', (adopt, resolve) => {
+      const values = step(adopt)?.with ?? {};
+
+      expect(step(adopt)?.type).toBe('data.set');
+      expect(values.resolution).toBe(
+        `{{ steps.${resolve}.output.resolution | default: 'failed' }}`
+      );
+      expect(values.resolution_error).toBe(`{{ steps.${resolve}.error.message }}`);
+      for (const value of Object.values(values)) {
+        expect(String(value)).toContain(`steps.${resolve}.`);
+      }
+    });
+
+    it('handles every resolution the child reports', () => {
+      const reported = stepsOfType(resolveWorkflow, 'workflow.output').map(
+        ({ with: settings }) => settings?.resolution as string
+      );
+
+      expect(reported.length).toBeGreaterThan(0);
+      expect(new Set(handledResolutions())).toEqual(new Set([...reported, 'failed', 'unresolved']));
+    });
+  });
+
+  describe('a failed resolution', () => {
+    it('reads the live revision to find out how far the child got', () => {
+      const get = step('get_unresolved_revision');
+
+      expect(step('handle_resolution_failure')?.condition).toBe(
+        "${{ variables.resolution == 'failed' }}"
+      );
+      expect(get?.type).toBe('proposals.getLatestRevision');
+      expect(String(get?.with?.proposalId)).toContain('variables.current_proposal_id');
+    });
+
+    it('takes the revision as settled unless it finds otherwise', () => {
+      const adopt = step('adopt_unresolved_revision')?.with ?? {};
+      const recovery = (step('handle_resolution_failure')?.steps ?? []).map(({ name }) => name);
+
+      expect(adopt.resolution).toBe('settled');
+      expect(String(adopt.resolved_status)).toContain(
+        'steps.get_unresolved_revision.output.status'
+      );
+      expect(recovery.indexOf('adopt_unresolved_revision')).toBe(1);
+    });
+
+    it('re-parks an undecided revision, since the answer never landed', () => {
+      expect(step('handle_unanswered_revision')?.condition).toContain(
+        'steps.get_unresolved_revision.output.decision == blank'
+      );
+      expect(step('adopt_unanswered_revision')?.with?.resolution).toBe('unresolved');
+    });
+
+    it('records an approval caught mid-action as failed, to re-offer it', () => {
+      const record = step('record_interrupted_action');
+
+      expect(step('handle_interrupted_action')?.condition).toContain(
+        "steps.get_unresolved_revision.output.status == 'executing'"
+      );
+      expect(record?.type).toBe('proposals.updateProposal');
+      expect(record?.with?.status).toBe('failed');
+      expect(record?.with?.decision).toBeUndefined();
+      expect(String(record?.with?.proposalId)).toContain('variables.resolved_proposal_id');
+      expect(String(record?.with?.executionError)).toContain('variables.resolution_error');
+      // The approver of the clone must know the first attempt may have taken effect.
+      expect(String(record?.with?.executionError)).toContain('may have run');
+      expect(step('adopt_interrupted_action')?.with?.resolution).toBe('action_failed');
+    });
+
+    it('re-offers a failure the child recorded but did not report', () => {
+      expect(step('handle_unreported_failure')?.condition).toContain(
+        "steps.get_unresolved_revision.output.status == 'failed'"
+      );
+      expect(step('adopt_unreported_failure')?.with?.resolution).toBe('action_failed');
+    });
+  });
+
+  describe('the outcome of a resolution', () => {
+    it('completes on a settled resolution, with what the child recorded', () => {
+      const complete = step('complete_settled')?.with ?? {};
+
+      expect(step('handle_settled')?.condition).toBe("${{ variables.resolution == 'settled' }}");
+      expect(complete.completed).toBe(true);
+      expect(String(complete.current_proposal_id)).toContain('variables.resolved_proposal_id');
+      expect(String(complete.final_status)).toContain('variables.resolved_status');
+      expect(String(complete.final_decision)).toContain('variables.resolved_decision');
+      expect(step('break_settled')?.type).toBe('loop.break');
+    });
+
+    it('re-offers a failed action as a clone parked on this execution', () => {
+      expect(step('handle_action_failure')?.condition).toBe(
+        "${{ variables.resolution == 'action_failed' }}"
+      );
+      expect(step('clone_proposal')?.type).toBe('proposals.cloneProposal');
+      expect(String(step('clone_proposal')?.with?.proposalId)).toContain(
+        'variables.resolved_proposal_id'
       );
     });
 
-    it('re-parks on a denial and writes nothing', () => {
-      const reject = findStep(workflow.steps, 'reject_unprivileged');
+    it('advances the carried id inside the branch that produced the clone', () => {
+      const adopt = step('adopt_clone');
 
-      expect(reject?.condition).toContain('steps.check_privileges.output.canDecide');
-      expect(reject?.steps?.map(({ type }) => type)).toEqual(['loop.continue']);
+      expect(String(adopt?.with?.current_proposal_id)).toContain(
+        'steps.clone_proposal.output.proposalId'
+      );
+      expect(adopt?.with?.needs_gate).toBe(true);
+      expect(step('park_on_clone')?.type).toBe('loop.continue');
     });
 
-    it('passes the gate responder, or an external resume decides as the Worker', () => {
-      // An external resume carries no request, so the execution wakes under the
-      // workflow runner's key — which always holds the privilege, having
-      // created the proposal. `respondedBy` is the only thing that tells that
-      // apart from a human.
-      expect(String(findStep(workflow.steps, 'check_privileges')?.with?.respondedBy)).toContain(
-        'variables.decided_by'
-      );
+    it('waits for a human when the answer was not applied, even under autonomy', () => {
+      const handle = step('handle_unapplied_answer');
+      const adopt = step('adopt_unapplied_answer');
+
+      expect(handle?.condition).toContain("variables.resolution == 'refused'");
+      expect(handle?.condition).toContain("variables.resolution == 'unresolved'");
+      expect(String(adopt?.with?.current_proposal_id)).toContain('variables.resolved_proposal_id');
+      expect(adopt?.with?.needs_gate).toBe(true);
+      expect(step('park_again')?.type).toBe('loop.continue');
     });
   });
 
@@ -526,10 +540,9 @@ describe('create-investigation-proposal workflow', () => {
       // fires at the deadline, so that only covered the seconds before the
       // task was claimed — and the release route refuses an expired decision
       // anyway. One branch, keyed on the timeout, is the whole expiry story.
-      const body = (loop().steps ?? []).map(({ name }) => name);
-      const expiryBranches = body.filter((name) => name?.startsWith('settle_expired'));
+      const body = loopBody();
 
-      expect(expiryBranches).toEqual([]);
+      expect(body.filter((name) => name?.startsWith('settle_expired'))).toEqual([]);
       expect(body).toContain('handle_gate_timeout');
     });
 
@@ -544,206 +557,65 @@ describe('create-investigation-proposal workflow', () => {
       // `handle_gate_timeout` runs after the gate branch, where
       // `steps.await_decision` is no longer readable, so `resolve_gate` has to
       // hand the failure on the same way it hands on the answer.
-      const gateBranchOrder = (findStep(workflow.steps, 'gate_branch')?.steps ?? []).map(
-        ({ name }) => name
-      );
+      const gateBranchOrder = (step('gate_branch')?.steps ?? []).map(({ name }) => name);
       expect(gateBranchOrder).toEqual(['compute_remaining', 'await_decision', 'resolve_gate']);
 
-      const resolve = findStep(workflow.steps, 'resolve_gate');
+      const resolve = step('resolve_gate');
       expect(String(resolve?.with?.gate_timed_out)).toContain('steps.await_decision.error');
       expect(String(resolve?.with?.gate_error)).toContain('steps.await_decision.error.message');
 
       // Variables outlive an iteration, so the autonomy branch has to set
       // every one of them or a later pass reads the gated pass's answer.
-      const auto = findStep(workflow.steps, 'resolve_auto');
+      const auto = step('resolve_auto');
       expect(Object.keys(auto?.with ?? {}).sort()).toEqual(Object.keys(resolve?.with ?? {}).sort());
     });
 
     it("puts the autonomy path in the gate step's else, so the two cannot both run", () => {
       // They were two `if` steps with complementary conditions, which left the
       // mutual exclusivity to the reader and to whoever edits either condition.
-      const gateStep = findStep(workflow.steps, 'gate_branch');
+      const gateStep = step('gate_branch');
 
       expect(gateStep?.condition).toContain('variables.needs_gate == true');
       expect((gateStep?.else ?? []).map(({ name }) => name)).toEqual(['resolve_auto']);
-      expect(findStep(workflow.steps, 'auto_branch')).toBeUndefined();
+      expect(step('auto_branch')).toBeUndefined();
     });
 
     it('settles a timed-out gate as expired, on the deadline it was parked against', () => {
-      const handle = findStep(workflow.steps, 'handle_gate_timeout');
-      const record = findStep(workflow.steps, 'record_gate_expiry');
+      const record = step('record_gate_expiry');
 
-      expect(handle?.condition).toContain('variables.gate_timed_out == true');
+      expect(step('handle_gate_timeout')?.condition).toContain('variables.gate_timed_out == true');
       expect(record?.type).toBe('proposals.settleIncompleteProposal');
       expect(record?.with?.status).toBe('expired');
       expect(String(record?.with?.executionError)).toContain('variables.gate_error');
-      expect(findStep(workflow.steps, 'break_gate_expiry')?.type).toBe('loop.break');
+      expect(step('break_gate_expiry')?.type).toBe('loop.break');
     });
 
-    it('settles a timeout before the dismissal branch, which would invent a decision', () => {
-      // A timed-out gate answers blank, so `gate_approved` is false and
-      // `handle_dismissal` would record a dismissal nobody made.
-      const body = (loop().steps ?? []).map(({ name }) => name);
+    it('settles a timeout before the resolution, which would record a dismissal nobody made', () => {
+      // A timed-out gate answers blank, so `gate_approved` is false and the
+      // child would record it as a dismissal.
+      const body = loopBody();
 
-      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(body.indexOf('handle_dismissal'));
-    });
-  });
-
-  describe('dismissal', () => {
-    it('branches to dismissed unless the platform boolean is exactly true', () => {
-      const dismissal = findStep(workflow.steps, 'handle_dismissal');
-
-      expect(dismissal?.condition).toContain('variables.gate_approved');
-      expect(dismissal?.condition).toContain('!= true');
-    });
-
-    it('records dismissed with no_action, since a human answered and nothing runs', () => {
-      const record = findStep(workflow.steps, 'record_dismissal');
-
-      expect(record?.with?.decision).toBe('dismissed');
-      expect(record?.with?.status).toBe('no_action');
-      expect(findStep(workflow.steps, 'break_dismissed')?.type).toBe('loop.break');
-    });
-
-    it('adopts the live head after the gate, since a revision moves the chain under it', () => {
-      // The gate belongs to the chain, not to one revision: a revision appended
-      // while it was parked marks the row this execution created `superseded`,
-      // which is terminal, so a decision written on the carried id would be
-      // refused.
-      const get = findStep(workflow.steps, 'get_last_revision');
-      const adopt = findStep(workflow.steps, 'adopt_last_revision');
-
-      expect(get?.type).toBe('proposals.getLatestRevision');
-      expect(String(get?.with?.proposalId)).toContain('variables.current_proposal_id');
-      expect(String(adopt?.with?.current_proposal_id)).toContain(
-        'steps.get_last_revision.output.proposalId'
+      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(
+        body.indexOf('resolve_by_approval_mode')
       );
-      // The input travels with the id: resolving the head but keeping the
-      // trigger's input would approve one revision and execute another's.
-      expect(String(adopt?.with?.action_input)).toContain(
-        'steps.get_last_revision.output.actionInput'
-      );
-    });
-
-    it('routes every answered-path write through the YAML adopt; timeout settles without it', () => {
-      // Timeout must not hit `getLatestRevision`'s `assertCanRead` under a
-      // denied resumer's key — `settleIncompleteProposal` adopts itself.
-      // Answered-path writes still need the YAML adopt so they settle the live
-      // head as a plain sequence.
-      const body = (loop().steps ?? []).map(({ name }) => name);
-      const adopt = body.indexOf('adopt_last_revision');
-
-      expect(body.indexOf('handle_gate_timeout')).toBeLessThan(adopt);
-      expect(adopt).toBeGreaterThan(body.indexOf('gate_branch'));
-      for (const write of ['handle_dismissal', 'approve_without_action', 'approve_with_action']) {
-        expect(body.indexOf(write)).toBeGreaterThan(adopt);
-      }
-    });
-
-    it('reads the chain once in the YAML; the incomplete-settle step adopts internally', () => {
-      // The answered path still needs an explicit adopt before its writes.
-      // Timeout, attempt-budget exhaustion, and the workflow-level fallback
-      // adopt inside `settleIncompleteProposal` instead.
-      const reads = allSteps()
-        .filter(({ type }) => type === 'proposals.getLatestRevision')
-        .map(({ name }) => name);
-
-      expect(reads).toEqual(['get_last_revision']);
-    });
-  });
-
-  describe('approval', () => {
-    it.each([
-      ['record_approval_no_action', 'no_action'],
-      ['record_approval_executing', 'executing'],
-    ])('writes the decision and status together in %s', (step, status) => {
-      // `approved` + `pending` is not a legal pair, so writing the decision on
-      // its own would leave the record claiming an approval with no outcome.
-      const write = findStep(workflow.steps, step);
-
-      expect(write?.with?.decision).toBe('approved');
-      expect(write?.with?.status).toBe(status);
-    });
-
-    it('settles a non-action approval at no_action rather than leaving it awaiting', () => {
-      const noAction = findStep(workflow.steps, 'approve_without_action');
-
-      expect(noAction?.condition).toContain('variables.action_workflow_id == blank');
-      expect(findStep(workflow.steps, 'break_no_action')?.type).toBe('loop.break');
-    });
-
-    it('executes the action only when the proposal carries one', () => {
-      expect(findStep(workflow.steps, 'approve_with_action')?.condition).toContain(
-        'variables.action_workflow_id != blank'
-      );
-    });
-
-    it('passes the action input through under a single actionInput key', () => {
-      const execute = findStep(workflow.steps, 'execute_action');
-      const settings = execute?.with as {
-        'workflow-id'?: string;
-        inputs?: Record<string, unknown>;
-      };
-
-      // `workflow-id` is the only key the engine reads; `workflowId` is ignored.
-      expect(settings['workflow-id']).toContain('variables.action_workflow_id');
-      expect(Object.keys(settings.inputs ?? {})).toEqual(['actionInput']);
-    });
-
-    it('executes the live revision input, not the trigger input a revision may have corrected', () => {
-      // The trigger value is captured before the gate is parked, so a revision
-      // that corrected the parameters would otherwise be approved and then
-      // ignored: the analyst approves one input and the action runs another.
-      const execute = findStep(workflow.steps, 'execute_action');
-      const settings = execute?.with as { inputs?: Record<string, unknown> };
-
-      expect(String(settings.inputs?.actionInput)).toContain('variables.action_input');
-      expect(String(settings.inputs?.actionInput)).not.toContain('inputs.actionInput');
-    });
-
-    it('records the execution outcome after the action', () => {
-      expect(findStep(workflow.steps, 'record_success')?.with?.status).toBe('succeeded');
-      expect(findStep(workflow.steps, 'break_succeeded')?.type).toBe('loop.break');
-    });
-
-    it('keeps an action failure inside the loop so it can be re-offered', () => {
-      // Without the step-level continue the workflow-level handler would settle
-      // the proposal and stop, making the clone branch unreachable.
-      expect(findStep(workflow.steps, 'execute_action')?.['on-failure']?.continue).toBe(true);
-      expect(findStep(workflow.steps, 'record_action_failure')?.with?.status).toBe('failed');
-      expect(findStep(workflow.steps, 'clone_proposal')?.type).toBe('proposals.cloneProposal');
-    });
-
-    it('advances the carried id inside the branch that produced the clone', () => {
-      const adopt = findStep(workflow.steps, 'adopt_clone');
-
-      expect(String(adopt?.with?.current_proposal_id)).toContain(
-        'steps.clone_proposal.output.proposalId'
-      );
-      expect(adopt?.with?.needs_gate).toBe(true);
-      expect(findStep(workflow.steps, 'park_on_clone')?.type).toBe('loop.continue');
     });
   });
 
   describe('autonomy', () => {
     it('skips the gate when the caller already resolved autonomy for an action', () => {
-      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
-        'autoApprove'
-      );
+      expect(String(step('init_state')?.with?.needs_gate)).toContain('autoApprove');
     });
 
     it('always gates a non-action proposal, since there is no autonomy to resolve', () => {
       // Without this the flag would skip the gate and approval — the whole
       // lifecycle of a non-action proposal — would never be recorded.
-      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
-        'inputs.actionWorkflowId'
-      );
+      expect(String(step('init_state')?.with?.needs_gate)).toContain('inputs.actionWorkflowId');
     });
 
     it('always gates an action that declares always-gate, whatever the caller resolved', () => {
       // The action's own policy has to outrank the flag, or a Worker could
       // auto-approve an action whose author declared it must never be.
-      expect(String(findStep(workflow.steps, 'init_state')?.with?.needs_gate)).toContain(
+      expect(String(step('init_state')?.with?.needs_gate)).toContain(
         'steps.create_proposal.output.alwaysGate'
       );
     });
@@ -751,42 +623,34 @@ describe('create-investigation-proposal workflow', () => {
     it('combines the gating reasons with or alone, since Liquid cannot bind a mixed expression', () => {
       // No parentheses and no operator precedence: one `and` among the `or`s
       // would silently gate the wrong proposals.
-      const needsGate = String(findStep(workflow.steps, 'init_state')?.with?.needs_gate);
-
-      expect(needsGate).not.toContain(' and ');
+      expect(String(step('init_state')?.with?.needs_gate)).not.toContain(' and ');
     });
   });
 
   describe('workflow-level failure handling', () => {
+    const fallback = () => workflow.settings?.['on-failure']?.fallback ?? [];
+
     it('settles from a single incomplete-settle step, not a get-then-update chain', () => {
       // Workflow-level fallback steps are renamed
       // `workflow-level-on-failure_<failed>_<name>`, so Liquid `steps.<name>`
       // references resolve to nothing. One step that adopts and settles keeps
       // the handler working.
-      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-
-      expect(fallback.map(({ name, type }) => ({ name, type }))).toEqual([
+      expect(fallback().map(({ name, type }) => ({ name, type }))).toEqual([
         { name: 'settle_on_failure', type: 'proposals.settleIncompleteProposal' },
       ]);
     });
 
     it('settles from the carried id, not the create step output that a clone invalidates', () => {
-      const settle = findStep(
-        workflow.settings?.['on-failure']?.fallback ?? [],
-        'settle_on_failure'
+      expect(String(findStep(fallback(), 'settle_on_failure')?.with?.proposalId)).toContain(
+        'variables.current_proposal_id'
       );
-
-      expect(String(settle?.with?.proposalId)).toContain('variables.current_proposal_id');
     });
 
     it('omits status so the step discriminates decided→failed / undecided→expired', () => {
       // All three timeout sources share `type: TimeoutError`, and
       // `ExecutionError` carries nothing else to tell them apart — so the
       // record's own decision is what chooses the terminal status.
-      const settle = findStep(
-        workflow.settings?.['on-failure']?.fallback ?? [],
-        'settle_on_failure'
-      );
+      const settle = findStep(fallback(), 'settle_on_failure');
 
       expect(settle?.with?.status).toBeUndefined();
       expect(String(settle?.with?.executionError)).toContain('error.message');
@@ -796,23 +660,15 @@ describe('create-investigation-proposal workflow', () => {
       // Inside the loop `current_proposal_id` is always set — `init_state`
       // runs right after `create_proposal`, and a failed creation skips it.
       // This handler is the one place that runs with no id to settle.
-      const guarded = (workflow.settings?.['on-failure']?.fallback ?? []).every((step) =>
-        String(step.if).includes('current_proposal_id != blank')
+      const guarded = fallback().every((fallbackStep) =>
+        String(fallbackStep.if).includes('current_proposal_id != blank')
       );
       const inLoop = collectNames(loop().steps ?? [])
-        .map((name) => findStep(workflow.steps, name))
-        .filter((step) => String(step?.condition).includes('current_proposal_id != blank'));
+        .map((name) => step(name))
+        .filter((loopStep) => String(loopStep?.condition).includes('current_proposal_id != blank'));
 
       expect(guarded).toBe(true);
       expect(inLoop).toEqual([]);
-    });
-
-    it('skips every handler when creation itself failed and there is no proposal id', () => {
-      const fallback = workflow.settings?.['on-failure']?.fallback ?? [];
-
-      for (const step of fallback) {
-        expect(step.if).toContain('variables.current_proposal_id != blank');
-      }
     });
   });
 });

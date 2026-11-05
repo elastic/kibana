@@ -25,13 +25,25 @@ export const esqlEditorStyles = (
   hasOutline: boolean
 ) => {
   return {
+    // Border wraps the code surface and the footer. No overflow clip here:
+    // footer popovers and the history panel must be able to extend outside the shell.
+    outlineShell: {
+      border: euiTheme.border.thin,
+      borderRadius: euiTheme.border.radius.control,
+    },
     editorContainer: {
       position: 'relative' as const,
       left: 0,
       right: 0,
       zIndex: 4,
       height: `${editorHeight}px`,
-      border: hasOutline ? euiTheme.border.thin : 'none',
+      border: 'none',
+      // Top corners match the outline shell. The footer sits inside that shell, so the
+      // bottom edge stays square. Clip Monaco so the fill follows the top radius;
+      // suggestion widgets are portaled, so they stay outside this clip.
+      borderTopLeftRadius: hasOutline ? euiTheme.border.radius.control : undefined,
+      borderTopRightRadius: hasOutline ? euiTheme.border.radius.control : undefined,
+      overflow: hasOutline ? ('hidden' as const) : undefined,
     },
     resizableContainer: {
       display: 'flex',
@@ -50,6 +62,7 @@ export const esqlEditorStyles = (
       marginTop: 0,
       marginLeft: 0,
       marginBottom: 0,
+      borderTop: hasOutline ? euiTheme.border.thin : 'none',
       borderBottomLeftRadius: 0,
       borderBottomRightRadius: 0,
     },

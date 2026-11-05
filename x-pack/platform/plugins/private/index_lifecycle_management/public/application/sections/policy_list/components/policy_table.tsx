@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo, useCallback } from 'react';
 import type { EuiSearchBarProps, EuiInMemoryTableProps } from '@elastic/eui';
-import { EuiButtonEmpty, EuiLink, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
+import { EuiLink, EuiInMemoryTable, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
@@ -213,15 +213,14 @@ export const PolicyTable: React.FunctionComponent<Props> = ({ policies }) => {
       render: (value: string[], policy: PolicyFromES) => {
         return value && value.length > 0 ? (
           <EuiToolTip content={actionTooltips.viewIndexTemplates} position="left">
-            <EuiButtonEmpty
-              flush="both"
+            <EuiLink
               data-test-subj="viewIndexTemplates"
               onClick={() =>
                 setListAction({ selectedPolicy: policy, actionType: 'viewIndexTemplates' })
               }
             >
               {value.length}
-            </EuiButtonEmpty>
+            </EuiLink>
           </EuiToolTip>
         ) : (
           '0'

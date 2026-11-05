@@ -7,6 +7,7 @@
 
 export {
   SERVICE_MAP_ATTACHMENT_TYPE,
+  SERVICE_MAP_ATTACHMENT_DEFAULT_TIME_RANGE,
   serviceMapAttachmentDataSchema,
   type ServiceMapAttachmentData,
   type ServiceNodeMetadata,

@@ -59,6 +59,7 @@ export {
 } from './workers/update_worker_route.gen';
 export {
   AffectedAsset,
+  HostOrigin,
   HuntCompleteness,
   HuntForThreatHit,
   HuntForThreatResult,
@@ -74,6 +75,7 @@ export {
 } from './components/hunt.gen';
 export { HuntForThreatRequestBody, HuntForThreatResponse } from './hunt/hunt_for_threat_route.gen';
 export { HuntIndexScopeResponse } from './hunt/hunt_index_scope_route.gen';
+export { HuntWorkerIndexCoverageResponse } from './hunt/hunt_worker_index_coverage_route.gen';
 export {
   HuntBehaviorArticleContext,
   HuntBehaviorIoc,
@@ -89,6 +91,7 @@ export {
 export {
   HuntCoordinatorRequestBody,
   HuntCoordinatorResponse,
+  HuntCoordinatorResult,
   HuntCoordinatorStatus,
 } from './hunt/hunt_coordinator_route.gen';
 export {
@@ -99,3 +102,4 @@ export {
   WriteHuntEvidenceRequestBody,
   WriteHuntEvidenceResponse,
 } from './hunt/write_hunt_evidence_route.gen';
+export { huntResultSchema, isoDatetimeSchema, type HuntResult } from './hunt/hunt_result';

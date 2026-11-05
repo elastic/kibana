@@ -106,7 +106,16 @@ describe('executeKIQueryGenerationAgent', () => {
         connectorId: 'connector-1',
         interactionId: 'run-1',
         source,
-        existingQueries: [],
+        existingQueries: [
+          {
+            id: 'existing-1',
+            title: 'Existing query',
+            type: 'match',
+            description: 'Existing',
+            esql: 'FROM logs.test | WHERE message:"existing"',
+          },
+        ],
+        maxExistingQueriesForContext: 0,
         signal: requestSignal,
         logger: loggerMock.create(),
       })
@@ -117,6 +126,7 @@ describe('executeKIQueryGenerationAgent', () => {
           title: 'Validated query',
           description: 'Detects validated failures',
           esql: { query: 'FROM logs.test | WHERE message:"failure"' },
+          category: 'error',
           severity_score: 60,
           evidence: undefined,
           replaces: undefined,
@@ -137,6 +147,9 @@ describe('executeKIQueryGenerationAgent', () => {
       expect.objectContaining({
         abortSignal: executionSignal,
         params: expect.objectContaining({
+          nextInput: {
+            message: '`slug`: logs.test\n\n`target_description`: Test logs',
+          },
           telemetryMetadata: {
             pluginId: 'nightshift_ki_query_generation',
             aggregateBy: 'nightshift',
@@ -186,6 +199,7 @@ describe('executeKIQueryGenerationAgent', () => {
         interactionId: 'run-1',
         source,
         existingQueries: [],
+        maxExistingQueriesForContext: 50,
         logger: loggerMock.create(),
       })
     ).rejects.toThrow('KI query generation agent finalized for unexpected source "logs.other"');

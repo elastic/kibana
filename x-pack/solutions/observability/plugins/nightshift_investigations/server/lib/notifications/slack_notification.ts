@@ -9,7 +9,7 @@ import type { JsonObject } from '@kbn/utility-types';
 import { z } from '@kbn/zod/v4';
 import { InvalidNotificationDestinationError } from '../../client/errors';
 import type { NotificationHandler } from './notification_delivery';
-import { formatInvestigationSlackMessage } from './format_investigation_slack_message';
+import { renderInvestigationSlackMessage } from './format_investigation_slack_message';
 
 const slackNotificationParamsSchema = z.strictObject({
   channel: z.string().min(1).max(500),
@@ -32,25 +32,35 @@ export const slackNotificationHandler: NotificationHandler = {
   validateParams: (params) => {
     parseSlackNotificationParams(params);
   },
-  prepareDelivery: ({ notificationDestination, investigation, url, phase, reason }) => {
+  prepareDelivery: ({
+    notificationDestination,
+    investigation,
+    url,
+    phase,
+    reason,
+    messageTs: editedMessageTs,
+  }) => {
     const { channel, thread_ts: threadTs } = parseSlackNotificationParams(
       notificationDestination.params
     );
+    const { text, blocks } = renderInvestigationSlackMessage({
+      investigation,
+      url,
+      phase,
+      reason,
+      automationName: notificationDestination.automation_name,
+    });
+    const params: JsonObject = editedMessageTs
+      ? {
+          subAction: 'updateMessage',
+          subActionParams: { channel, messageTs: editedMessageTs, text, blocks },
+        }
+      : {
+          subAction: 'sendMessage',
+          subActionParams: { channel, text, blocks, ...(threadTs ? { threadTs } : {}) },
+        };
     return {
-      params: {
-        subAction: 'sendMessage',
-        subActionParams: {
-          channel,
-          text: formatInvestigationSlackMessage({
-            investigation,
-            url,
-            phase,
-            reason,
-            automationName: notificationDestination.automation_name,
-          }),
-          ...(threadTs ? { threadTs } : {}),
-        },
-      },
+      params,
       getOutcome: (response) => {
         if (response.status !== 'ok') {
           return {
@@ -69,9 +79,18 @@ export const slackNotificationHandler: NotificationHandler = {
         }
         const resolvedChannel =
           data && typeof data === 'object' && 'channel' in data ? data.channel : undefined;
+        const externalConversationId =
+          data && typeof data === 'object' && 'externalConversationId' in data
+            ? data.externalConversationId
+            : undefined;
         return {
           status: 'sent',
           message_ts: messageTs,
+          ...(typeof externalConversationId === 'string' &&
+          externalConversationId.length > 0 &&
+          externalConversationId.length <= 500
+            ? { external_conversation_id: externalConversationId }
+            : {}),
           sent_at: new Date().toISOString(),
           channel:
             typeof resolvedChannel === 'string' &&

@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import {
@@ -24,7 +24,6 @@ const investigation = {
   template_id: 'investigation',
   title: 'Impossible travel',
   createdAt: '2026-09-01T10:00:00.000Z',
-  updatedAt: '2026-09-01T10:00:00.000Z',
   worker_execution_ids: [],
   pendingProposalCount: 0,
   assignees: [],
@@ -52,11 +51,13 @@ const renderTab = ({
   investigationOverrides,
   proposedActionsContent,
   proposedActionsCount,
+  isRunning,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
   proposedActionsContent?: React.ReactNode;
   proposedActionsCount?: React.ReactNode;
+  isRunning?: boolean;
 } = {}) =>
   render(
     <OverviewTab
@@ -65,6 +66,7 @@ const renderTab = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
+      isRunning={isRunning}
     />
   );
 
@@ -173,7 +175,7 @@ describe('OverviewTab', () => {
           subjects: <span>checkout alert</span>,
           impact: <span>checkout is down</span>,
           conclusion: 'A **bad** deploy.',
-          trace: <span>hypotheses</span>,
+          reasoning: <span>hypothesis tree</span>,
         }}
       />
     );
@@ -185,10 +187,54 @@ describe('OverviewTab', () => {
       'Impact',
       'Conclusion',
       'Proposed actions',
-      'Investigation trace',
     ]);
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
     expect(screen.getByText('bad')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
+  });
+
+  it('keeps the reasoning mounted when a conclusion arrives', () => {
+    const Reasoning = () => {
+      const [isOpen, setIsOpen] = React.useState(false);
+      return (
+        <button type="button" onClick={() => setIsOpen(true)}>
+          {isOpen ? 'tree open' : 'open tree'}
+        </button>
+      );
+    };
+    const renderWith = (conclusion?: string) => (
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ conclusion, reasoning: <Reasoning /> }}
+      />
+    );
+    const { rerender } = render(renderWith());
+
+    fireEvent.click(screen.getByRole('button', { name: 'open tree' }));
+    rerender(renderWith('A bad deploy.'));
+
+    expect(screen.getByText('Conclusion')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'tree open' })).toBeInTheDocument();
+  });
+
+  it('shows the reasoning without a heading while there is no conclusion', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ reasoning: <span>hypothesis tree</span> }}
+      />
+    );
+
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
   });
 
   it('leaves out the sections an investigation has no data for', () => {
@@ -197,12 +243,27 @@ describe('OverviewTab', () => {
     expect(screen.queryByText('Subject')).not.toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
-    expect(screen.queryByText('Investigation trace')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewReasoning')).not.toBeInTheDocument();
   });
 
   it('renders no "What\'s happened" block without a narrative or attachments', () => {
     renderTab({ attachments: [], investigationOverrides: { summary: undefined } });
 
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
+  });
+
+  it('ends in a loading skeleton while the investigation is running', () => {
+    renderTab({ isRunning: true });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(
+      screen.getByText('Still investigating. This flyout will update with new findings.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once nothing works on the investigation', () => {
+    renderTab({ isRunning: false });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 });

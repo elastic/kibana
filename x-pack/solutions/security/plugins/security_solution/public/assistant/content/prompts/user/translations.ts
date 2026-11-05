@@ -13,7 +13,7 @@ export const EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE = i18n.translate
     defaultMessage: `Evaluate the security event described above and provide a structured, markdown-formatted summary suitable for inclusion in an Elastic Security case. Ensure you're using all tools available to you. Your response must include:
 1. Event Description
   - Summarize the event, including user and host risk scores from the provided context.
-  - Reference relevant MITRE ATT&CK techniques, with hyperlinks to the official MITRE pages.
+  - Reference relevant MITRE ATT&CK or MITRE ATLAS techniques, with hyperlinks to the official MITRE pages.
 2. Triage Steps
   - List clear, bulleted triage steps tailored to Elastic Security workflows (e.g., alert investigation, timeline creation, entity analytics review).
   - Highlight any relevant detection rules or anomaly findings.
@@ -23,10 +23,10 @@ export const EXPLAIN_THEN_SUMMARIZE_SUGGEST_INVESTIGATION_GUIDE = i18n.translate
     - Example ES|QL queries for further investigation, formatted as code blocks.
     - Example OSQuery Manager queries for further investigation, formatted as code blocks.
     - Guidance on using Timelines and Entity Analytics for deeper context, with documentation links.
-4. MITRE ATT&CK Context
-  - Summarize the mapped MITRE ATT&CK techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
+4. MITRE Context
+  - Summarize the mapped MITRE ATT&CK or MITRE ATLAS techniques and provide actionable recommendations based on MITRE guidance, with hyperlinks.
 5. Documentation Links
-  - Include direct links to all referenced Elastic Security documentation and MITRE ATT&CK pages.
+  - Include direct links to all referenced Elastic Security documentation and MITRE pages.
 Formatting Requirements:
   - Use markdown headers, tables, and code blocks for clarity.
   - Organize the response into visually distinct sections.

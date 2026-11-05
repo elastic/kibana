@@ -50,7 +50,7 @@ import {
   canProvideNumberSummaryForField,
 } from '../../utils/can_provide_stats';
 import { loadFieldStats } from '../../services/field_stats';
-import type { AddFieldFilterHandler } from '../../types';
+import type { AddFieldFilterHandler, AddOtherFilterHandler } from '../../types';
 import {
   FieldTopValues,
   getOtherCount,
@@ -99,6 +99,7 @@ interface FieldStatsPropsBase {
     sampledDocuments?: number;
   }) => JSX.Element;
   onAddFilter?: AddFieldFilterHandler;
+  onAddOtherFilter?: AddOtherFilterHandler;
   overrideFieldTopValueBar?: OverrideFieldTopValueBarCallback;
   onStateChange?: (s: FieldStatsState) => void;
 }
@@ -133,6 +134,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
   overrideMissingContent,
   overrideFooter,
   onAddFilter,
+  onAddOtherFilter,
   overrideFieldTopValueBar,
   onStateChange,
 }) => {
@@ -554,6 +556,7 @@ const FieldStatsComponent: React.FC<FieldStatsProps> = ({
         color={color}
         data-test-subj={dataTestSubject}
         onAddFilter={onAddFilter}
+        onAddOtherFilter={onAddOtherFilter}
         overrideFieldTopValueBar={overrideFieldTopValueBar}
       />
     );

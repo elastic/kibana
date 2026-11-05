@@ -12,10 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { AggregateQuery, Filter, Query, TimeRange, ProjectRouting } from '@kbn/es-query';
 import type { ESQLControlVariable } from '@kbn/esql-types';
 import React, { useEffect, useMemo } from 'react';
+import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { useCustomContentHtml } from './use_custom_content_html';
 import { CustomContentEmptyPrompt } from './custom_content_empty_prompt';
 import { CustomContentGeneratingPrompt } from './custom_content_generating_prompt';
 import type { CustomContentRendererServices } from './types';
+import { CUSTOM_CONTENT_IFRAME_SANDBOX } from './constants';
 
 export interface CustomContentComponentProps {
   services: CustomContentRendererServices;
@@ -34,16 +36,25 @@ export interface CustomContentComponentProps {
   isAiAvailable?: boolean;
   /** True while the agent is generating or updating this panel, to show a generating state. */
   isGenerating?: boolean;
+  /** False in a read-only view such as a dashboard preview, where nothing may navigate away. */
+  isInteractive?: boolean;
+  /** Floor for the panel height. Only lower it in a host that gives the panel a definite height. */
+  minHeight?: number;
+  /** Records the panel's ES|QL request so the host can offer Inspect. */
+  requestAdapter?: RequestAdapter;
   onLoadingChange: (isLoading: boolean) => void;
   setApproximationApplied?: (approximationApplied: boolean | undefined) => void;
   onGenerateWithChat?: () => void;
 }
 
-const iframeContainerCss = css({
-  position: 'relative',
-  flex: '1 1 0%',
-  minHeight: 200,
-});
+const DEFAULT_MIN_HEIGHT = 200;
+
+const iframeContainerCss = (minHeight: number) =>
+  css({
+    position: 'relative',
+    flex: '1 1 0%',
+    minHeight,
+  });
 
 const iframeCss = css({
   position: 'absolute',
@@ -73,6 +84,9 @@ export const CustomContentComponent = ({
   previewHtml,
   isAiAvailable = false,
   isGenerating = false,
+  isInteractive = true,
+  minHeight = DEFAULT_MIN_HEIGHT,
+  requestAdapter,
   onLoadingChange,
   setApproximationApplied,
   onGenerateWithChat,
@@ -92,6 +106,8 @@ export const CustomContentComponent = ({
     query,
     filters,
     esqlVariables,
+    isInteractive,
+    requestAdapter,
     setApproximationApplied,
   });
 
@@ -104,11 +120,13 @@ export const CustomContentComponent = ({
         display: 'flex',
         flexDirection: 'column',
         flex: '1 1 100%',
-        minHeight: 200,
+        minHeight,
         background: euiTheme.colors.emptyShade,
       }),
-    [euiTheme.colors.emptyShade]
+    [euiTheme.colors.emptyShade, minHeight]
   );
+
+  const containerCss = useMemo(() => iframeContainerCss(minHeight), [minHeight]);
 
   return (
     <div css={wrapperCss} data-shared-item data-test-subj="customContentPanel">
@@ -130,15 +148,20 @@ export const CustomContentComponent = ({
         />
       )}
       {previewHtml != null ? (
-        <div css={iframeContainerCss}>
+        <div css={containerCss}>
           <iframe css={iframeCss} srcDoc={previewHtml} sandbox="" title={IFRAME_TITLE} />
         </div>
       ) : (
         !error &&
         !noContent &&
         html && (
-          <div css={iframeContainerCss}>
-            <iframe css={iframeCss} srcDoc={html} sandbox="" title={IFRAME_TITLE} />
+          <div css={containerCss}>
+            <iframe
+              css={iframeCss}
+              srcDoc={html}
+              sandbox={isInteractive ? CUSTOM_CONTENT_IFRAME_SANDBOX : ''}
+              title={IFRAME_TITLE}
+            />
           </div>
         )
       )}

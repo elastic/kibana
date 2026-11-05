@@ -39,6 +39,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
   clearSelection,
   leadingControlColumn,
   openDocumentFlyout: contextOpenDocumentFlyout,
+  onRemoveFromCase,
 }) => {
   const license = useLicense();
   const { alertsTableRef } = useAlertsContext();
@@ -120,6 +121,7 @@ export const ActionsCellComponent: GetSecurityAlertsTableProp<'renderActionsCell
       isEventViewer={false}
       isExpandable={isExpandable}
       loadingEventIds={loadingEventIds}
+      onRemoveFromCase={onRemoveFromCase}
       onRowSelected={onRowSelected}
       rowIndex={rowIndex}
       colIndex={colIndex}

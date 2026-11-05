@@ -104,10 +104,12 @@ export const createRuleSmlType = ({
 
     try {
       const rulesClient = getScopedRulesClient(context.request);
-      const rule = await rulesClient.getRule({ id: getSmlOriginId(item) });
+      const ruleId = getSmlOriginId(item);
+      const rule = await rulesClient.getRule({ id: ruleId });
       return {
         type: RULE_ATTACHMENT_TYPE,
         data: ruleAttachmentDataSchema.parse(rule),
+        origin: ruleId,
       };
     } catch {
       return undefined;

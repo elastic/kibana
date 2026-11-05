@@ -19,6 +19,8 @@ export const ADD_TO_CASE_ACTION_IDS = {
   addToCase: 'add-to-case-action',
 } as const;
 
+export const REMOVE_FROM_CASE_ACTION_ID = 'remove-from-case-action' as const;
+
 export const ADD_TO_CHAT_ACTION_ID = 'add-to-chat-action' as const;
 
 export const ALERT_ASSIGNEE_ACTION_IDS = {

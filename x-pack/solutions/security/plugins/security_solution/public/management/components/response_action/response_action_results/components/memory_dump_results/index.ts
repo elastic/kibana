@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from '../../../../memory_dump_response_action_output_result';
+export * from './memory_dump_response_action_output_result';

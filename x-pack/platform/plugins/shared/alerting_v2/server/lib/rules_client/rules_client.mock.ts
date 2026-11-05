@@ -52,7 +52,8 @@ export function createRulesClient(): {
     ruleEventPublisher,
     loggerService,
     artifactTypeRegistry,
-    'user'
+    'user',
+    {}
   );
 
   return { rulesClient, mockSavedObjectsClient, ruleEventPublisher };

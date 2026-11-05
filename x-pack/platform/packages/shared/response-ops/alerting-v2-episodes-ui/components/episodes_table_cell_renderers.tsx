@@ -8,6 +8,7 @@
 import React, { Suspense } from 'react';
 import { css } from '@emotion/react';
 import {
+  EuiBadge,
   EuiCode,
   EuiCopy,
   EuiFlexGroup,
@@ -196,6 +197,20 @@ export const EpisodeRuleTagsCell = ({
   }
 
   return <TagBadges tags={rule?.metadata.tags ?? []} data-test-subj="episodeRuleTagsCell" />;
+};
+
+export const EpisodeSuppressedCell = ({ row }: CellRendererProps) => {
+  const ids = row.flattened.maintenance_window_ids;
+
+  if (!Array.isArray(ids) || ids.length === 0) {
+    return <>{EMPTY_VALUE}</>;
+  }
+
+  return (
+    <EuiBadge color="hollow" data-test-subj="episodeSuppressedCell">
+      {i18n.SUPPRESSED_BY_MAINTENANCE_WINDOW}
+    </EuiBadge>
+  );
 };
 
 export const EpisodeSeverityCell = ({ row }: CellRendererProps) => {
