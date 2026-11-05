@@ -231,6 +231,10 @@ export const InvestigationCardActions = ({
                   void handleSetStatus('open');
                 }}
                 data-test-subj="nightshiftInvestigationCardOpen"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.OPEN_INVESTIGATION,
+                  element: ebtElement,
+                })}
               >
                 {openLabel}
               </EuiContextMenuItem>
@@ -244,6 +248,10 @@ export const InvestigationCardActions = ({
                   void handleSetStatus('closed');
                 }}
                 data-test-subj="nightshiftInvestigationCardClose"
+                {...getEbtProps({
+                  action: NIGHTSHIFT_EBT_ACTIONS.CLOSE_INVESTIGATION,
+                  element: ebtElement,
+                })}
               >
                 {closeLabel}
               </EuiContextMenuItem>
