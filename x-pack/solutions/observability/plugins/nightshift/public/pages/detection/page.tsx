@@ -104,7 +104,7 @@ export const DetectionPage = ({
   const { timeRange, setTimeRange } = useDetectionTimeRange();
   const overview = useDetectionOverview(timeRange);
   const { view, onCreationStateChange, retryHistoryLookup } = useDetectionOnboardingState();
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManageAndConfigure } = getNightshiftCapabilities(application.capabilities.nightshift);
   const selection = useEntitySelection();
   const [isOverviewCompact, setIsOverviewCompact] = useState(false);
   const fullOverviewSlotRef = useRef<HTMLDivElement>(null);
@@ -247,7 +247,7 @@ export const DetectionPage = ({
                 `}
               >
                 <DetectionOnboarding
-                  canManage={canManage}
+                  canManage={canManageAndConfigure}
                   isDetectionEnabled={view.sourceCreation === 'enabled'}
                   onCreationStateChange={onCreationStateChange}
                 />

@@ -242,6 +242,9 @@ export const RulesTable = ({
       items={rules}
       itemId={(rule) => rule.query.id}
       columns={columns}
+      stickyHeader
+      tableLayout="auto"
+      scrollableInline
       loading={loading}
       sorting={{ sort: { field: 'query.severity_score', direction: 'desc' } }}
       pagination={{ initialPageSize: 25, pageSizeOptions: [10, 25, 50] }}
