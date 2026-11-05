@@ -47,6 +47,15 @@ describe('ORCA RCA accuracy', () => {
     ).toBe(1);
   });
 
+  it('ignores the case of a flag key and variant', () => {
+    expect(
+      scoreOrcaRcaAccuracy({
+        plausibleFlags: ['paymentFailure:50%', 'adManualGc'],
+        namedFlags: ['paymentfailure:50%', 'ADMANUALGC:On'],
+      })
+    ).toBe(1);
+  });
+
   it('rejects a different variant of the same flag', () => {
     expect(
       scoreOrcaRcaAccuracy({
@@ -74,6 +83,15 @@ describe('ORCA hallucination', () => {
         namedCauses: ['paymentServiceMemoryLeak'],
       })
     ).toBe(1);
+  });
+
+  it('does not count a differently cased true flag as a hallucination', () => {
+    expect(
+      scoreOrcaHallucination({
+        plausibleFlags: ['paymentFailure'],
+        namedCauses: ['paymentfailure'],
+      })
+    ).toBe(0);
   });
 
   it('is 0 when every named cause is in the plausible set', () => {

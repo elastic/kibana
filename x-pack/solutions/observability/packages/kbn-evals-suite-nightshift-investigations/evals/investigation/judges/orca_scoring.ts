@@ -18,9 +18,12 @@ interface FlagId {
   variant?: string;
 }
 
-/** Splits `key` or `key:variant`. A missing variant matches any variant of that key. */
+/**
+ * Splits `key` or `key:variant`. A missing variant matches any variant of that key. Matching
+ * ignores case: no two ORCA flag keys differ only by case, so a judge's casing cannot change a score.
+ */
 const parseFlagId = (value: string): FlagId => {
-  const trimmed = value.trim();
+  const trimmed = value.trim().toLowerCase();
   const separator = trimmed.indexOf(':');
   if (separator <= 0 || separator === trimmed.length - 1) return { key: trimmed };
   return { key: trimmed.slice(0, separator), variant: trimmed.slice(separator + 1) };
