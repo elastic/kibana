@@ -93,26 +93,17 @@ export const moveAction = (
   const numberOfRows = Math.floor(
     ((gridLayoutRect?.bottom ?? 0) - (gridLayoutRect?.top ?? 0)) / (rowHeight + gutterSize / 2)
   );
-  console.log({ numberOfRows });
+
   const getRow = (rect: { top: number; bottom: number }) => {
     // this section already exists, so use the wrapper element to figure out target row
     const gridTop = gridLayoutRect?.top ?? 0;
     const localYCoordinate = (rect.top ?? 0) - gridTop;
-    // console.log({
-    //   gridTop,
-    //   rect,
-    //   localYCoordinate,
-    //   ROW: Math.min(
-    //     Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
-    //     numberOfRows
-    //   ),
-    // });
     return Math.min(
       Math.max(Math.ceil(localYCoordinate / (rowHeight + gutterSize / 2)), 1),
       numberOfRows
     );
   };
-  console.log({ previewRect });
+
   if (isResize) {
     const targetWidth = previewRect.right - previewRect.left;
     requestedPanelData.width = Math.max(targetWidth, 1);
@@ -126,16 +117,10 @@ export const moveAction = (
       gridLayout$.next(nextLayout);
     }
   } else {
-    console.log({ panelElements });
     const sorted = Object.entries(panelElements)
       .map(([id, panel]) => {
         const comparison = panel?.getBoundingClientRect();
         const row = getRow(comparison);
-        console.log({
-          id,
-          row,
-          left: comparison?.left,
-        });
         return {
           id,
           ...(comparison ?? { left: 0 }),
@@ -148,7 +133,6 @@ export const moveAction = (
         // if (a.row === b.row) return a.left - b.left;
         // return a.row - b.row;
       });
-    console.log({ sorted });
 
     const nextLayout: FlexLayoutData = {};
     sorted.forEach(({ id }, index) => {
@@ -168,9 +152,8 @@ export const moveAction = (
 export const commitAction = ({ activePanelEvent$, panelRefs }: FlexLayoutStateManager) => {
   const event = activePanelEvent$.getValue();
   activePanelEvent$.next(undefined);
-
   if (!event) return;
-  console.log('!!!!!!!', { event });
+
   panelRefs.current[event.id]?.scrollIntoView({
     behavior: 'smooth',
     block: 'nearest',

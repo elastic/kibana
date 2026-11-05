@@ -33,7 +33,6 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
   const initialStyles = useMemo(() => {
     const initialPanel = panel$.getValue();
-    console.log({ initialPanel });
     if (!initialPanel) return;
     return css`
       position: relative;
@@ -47,7 +46,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       }
     `;
   }, [panel$, gridLayoutStateManager.runtimeSettings$]);
-  console.log({ initialStyles });
+
   useEffect(() => {
     return () => {
       // remove reference on unmount
@@ -100,7 +99,6 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
           }
         } else {
-          console.log({ activePanel, currentPanel });
           ref.classList.remove('kbnGridPanel--active');
           ref.style.zIndex = `auto`;
           // if the panel is not being dragged and/or resized, undo any fixed position styles

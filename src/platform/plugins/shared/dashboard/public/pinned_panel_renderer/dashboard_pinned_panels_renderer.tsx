@@ -29,7 +29,6 @@ export const DashboardPinnedPanelsRenderer = () => {
   const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
 
   const [flexLayout] = useBatchedPublishingSubjects(dashboardInternalApi.pinnedLayout$);
-  console.log({ flexLayout });
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
@@ -53,7 +52,9 @@ export const DashboardPinnedPanelsRenderer = () => {
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
-        onLayoutChange={() => {}}
+        onLayoutChange={(newLayout) => {
+          console.log({ newLayout });
+        }}
         accessMode={'EDIT'}
       />
     </span>

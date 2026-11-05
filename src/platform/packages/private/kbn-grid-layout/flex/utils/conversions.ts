@@ -48,7 +48,6 @@ export const getGridLayout = (layout: OrderedLayout): FlexLayoutData => {
 
 export const getOrderedLayout = (layout: FlexLayoutData): OrderedLayout => {
   const widgets = cloneDeep(getLayoutInOrder(layout));
-  console.log({ widgets });
   const orderedLayout: OrderedLayout = {};
   let order = 0;
   let mainRow = 0;
@@ -94,6 +93,5 @@ export const getOrderedLayout = (layout: FlexLayoutData): OrderedLayout => {
     }
     order++;
   }
-  console.log({ orderedLayout });
   return orderedLayout;
 };

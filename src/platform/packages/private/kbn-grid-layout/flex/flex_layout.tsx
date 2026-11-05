@@ -51,7 +51,7 @@ export const FlexLayout = ({
     accessMode,
   });
   const [elementsInOrder, setElementsInOrder] = useState<FlexLayoutElementsInOrder>([]);
-  console.log({ layout, elementsInOrder });
+
   /**
    * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
@@ -94,7 +94,6 @@ export const FlexLayout = ({
      * - Grid rows are named `gridRow-<sectionId>`, and panels are positioned relative to these lines.
      */
     const renderSubscription = gridLayoutStateManager.gridLayout$.subscribe((panels) => {
-      console.log({ panels, test: getLayoutInOrder(panels) });
       setElementsInOrder(getLayoutInOrder(panels));
     });
 
