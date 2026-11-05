@@ -53,7 +53,7 @@ import { CanvasShell, getCanvasContainerStyles } from './canvas_shell';
 import { ConnectionTargetsProvider } from './nodes/connection_handle';
 import { CanvasToolbar } from './canvas_toolbar';
 import { applyLayout } from './layout';
-import { getGraphNodeIds, syncCanvasNodeMetadata } from './sync_graph_nodes';
+import { getGraphNodeIds, syncCanvasNodeMetadata, syncCanvasEdgeData } from './sync_graph_nodes';
 import { useCanvasKeyboardShortcuts } from './use_canvas_a11y';
 import { useCanvasHistory } from './use_canvas_history';
 import { IndexInspectFlyout } from '../../../index_inspect/index_inspect_flyout';
@@ -119,7 +119,6 @@ import {
   removeComponentFromPipelines,
 } from '../../../../services/unit_connections';
 import {
-  addTestRouting,
   canConnectOrigin,
   canMoveOriginConnection,
   connectOrigin,
@@ -209,7 +208,7 @@ function StreamsCanvasInner() {
     saveUnit,
     changeUnitConnection,
     openProcessingFlyout,
-    closeRoutingFlyout,
+    openRoutingFlyout,
   } = useCanvasEvents();
   const unitDefinition = useCanvasUnitDefinition();
   const hasUnsavedChanges = useCanvasHasUnsavedChanges();
@@ -217,7 +216,7 @@ function StreamsCanvasInner() {
   const isInitializing = useCanvasIsInitializing();
   const isUnitUnavailable = useCanvasIsUnitUnavailable();
   const nodePositions = useCanvasNodePositions();
-  const [routingFlyout, mode] = useCanvasRoutingFlyout();
+  const routingFlyout = useCanvasRoutingFlyout();
   const processingFlyout = useCanvasProcessingFlyout();
   const nodePositionsRef = useRef(nodePositions);
   useEffect(() => {
@@ -349,6 +348,8 @@ function StreamsCanvasInner() {
       if (graphEdgeIdsRef.current !== nextEdgeIds) {
         graphEdgeIdsRef.current = nextEdgeIds;
         setEdges(graph.edges);
+      } else {
+        setEdges((current) => syncCanvasEdgeData(current, graph.edges));
       }
       return;
     }
@@ -594,31 +595,6 @@ function StreamsCanvasInner() {
     [changeUnitConnection, readConnectionOrigin, readConnectionTarget, record, unitDefinition]
   );
 
-  // Testing aid for the routing flyout: unset when the line cannot be routed. TO BE REMOVED
-  const createTestRouting = useMemo(() => {
-    const edge = routingFlyout ? graph.edges.find(({ id }) => id === routingFlyout) : undefined;
-    const origin = edge ? readConnectionOrigin(edge.source, edge.sourceHandle) : undefined;
-    const target = edge ? readConnectionTarget(edge.target) : undefined;
-    const next = origin && target ? addTestRouting(unitDefinition, origin, target) : unitDefinition;
-    if (next === unitDefinition) {
-      return undefined;
-    }
-    return () => {
-      record();
-      changeUnitConnection(next);
-      closeRoutingFlyout();
-    };
-  }, [
-    changeUnitConnection,
-    closeRoutingFlyout,
-    graph.edges,
-    readConnectionOrigin,
-    readConnectionTarget,
-    record,
-    routingFlyout,
-    unitDefinition,
-  ]);
-
   const onNodesDelete = useCallback<OnNodesDelete<ClassicCanvasNode>>(
     (deletedNodes) => {
       const removedSourceIds: string[] = [];
@@ -656,6 +632,11 @@ function StreamsCanvasInner() {
         openProcessingFlyout(node.data.ref);
         return;
       }
+      if (node.type === ROUTING_NODE_TYPE && !event.shiftKey) {
+        event.preventDefault();
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: node.data.pipelineId });
+        return;
+      }
       if (node.type === SOURCE_NODE_TYPE && node.data.sourceId && !event.shiftKey) {
         event.preventDefault();
         openSourceFlyout(node.data.sourceId);
@@ -666,7 +647,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(node.data.destinationId);
       }
     },
-    [openDestinationFlyout, openProcessingFlyout, openSourceFlyout]
+    [openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout]
   );
 
   const reopenContextMenu = useCallback(
@@ -733,6 +714,9 @@ function StreamsCanvasInner() {
       if (selectedNode.type === PROCESSING_NODE_TYPE) {
         openProcessingFlyout(selectedNode.data.ref);
       }
+      if (selectedNode.type === ROUTING_NODE_TYPE) {
+        openRoutingFlyout({ kind: 'pipeline', pipelineId: selectedNode.data.pipelineId });
+      }
       if (selectedNode.type === SOURCE_NODE_TYPE && selectedNode.data.sourceId) {
         openSourceFlyout(selectedNode.data.sourceId);
       }
@@ -740,7 +724,7 @@ function StreamsCanvasInner() {
         openDestinationFlyout(selectedNode.data.destinationId);
       }
     }
-  }, [nodes, openDestinationFlyout, openProcessingFlyout, openSourceFlyout]);
+  }, [nodes, openDestinationFlyout, openProcessingFlyout, openRoutingFlyout, openSourceFlyout]);
 
   useCanvasKeyboardShortcuts({ onUndo: handleUndo, onRedo: handleRedo, onEscape, onEnter });
 
@@ -900,8 +884,12 @@ function StreamsCanvasInner() {
               onClose={closeCreateDestinationModal}
             />
           )}
-          {routingFlyout && mode === 'routing' ? (
-            <RoutingFlyout edge={routingFlyout} onCreateTestRouting={createTestRouting} />
+          {routingFlyout ? (
+            <RoutingFlyout
+              key={routingFlyout.ref?.sessionId}
+              flyout={routingFlyout}
+              onBeforeSave={record}
+            />
           ) : null}
           {processingFlyout ? (
             <ProcessingFlyout key={processingFlyout.ref.sessionId} flyout={processingFlyout} />
@@ -1068,7 +1056,8 @@ const buildRoutingNode = (routing: RoutingViewModel): RoutingNode => {
     position: { x: 0, y: 0 },
     deletable: false,
     ariaLabel: i18n.translate('xpack.streams.canvas.routingNode.ariaLabel', {
-      defaultMessage: 'Routing: {name}, {count, plural, one {# rule} other {# rules}}',
+      defaultMessage:
+        'Routing: {name}, {count, plural, one {# rule} other {# rules}}. Press Enter to configure.',
       values: { name, count: routing.rules.length },
     }),
     data: {

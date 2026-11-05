@@ -666,46 +666,47 @@ export const isolateSourceLine = (
   };
 };
 
-/** Condition of the placeholder rule {@link addTestRoutingToLine} creates. */
-export const TEST_ROUTING_CONDITION = 'true';
+/**
+ * The rules of the routing node of `pipelineId`. A routed child pipeline with a
+ * plain destinations list reads as one rule with no condition.
+ */
+export const getPipelineRoutes = (unit: Unit, pipelineId: string): RouteRule[] => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, pipelineId)];
+  if (!pipeline) {
+    return [];
+  }
+  if (pipelineUsesRoutes(pipeline)) {
+    return readRoutes(pipeline.config);
+  }
+  const destinations = readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations);
+  return destinations.length > 0 ? [{ destinations }] : [];
+};
+
+/** Whether the routing node of `pipelineId` can have its rules replaced. */
+export const canEditPipelineRoutes = (unit: Unit, pipelineId: string): boolean => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, pipelineId)];
+  return pipeline !== undefined && !hasScopedWiring(pipeline.config);
+};
 
 /**
- * Testing aid: routes one drawn line through a routing node with a single
- * placeholder rule. A source line is first moved onto a pipeline of its own; a
- * processing line is only routed when it is its pipeline's one destination.
- * Returns `unit` unchanged when the line cannot be routed.
+ * Replaces the rules of a routing node. A routed child pipeline with a plain
+ * destinations list is turned into routes. Returns `unit` unchanged when the
+ * pipeline is missing or scoped, or `routes` is empty.
  */
-export const addTestRoutingToLine = (
+export const writePipelineRoutes = (
   unit: Unit,
-  origin: UnitConnectionOrigin,
-  destinationId: string
+  pipelineId: string,
+  routes: readonly RouteRule[]
 ): Unit => {
-  let routable = unit;
-  let pipelineIndex: number;
-  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
-    const isolated = isolateSourceLine(unit, origin.id, destinationId);
-    if (!isolated) {
-      return unit;
-    }
-    routable = isolated.unit;
-    pipelineIndex = findPipelineIndex(routable, isolated.pipelineId);
-  } else {
-    pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
-  }
-  const pipeline = routable.unit.pipelines[pipelineIndex];
-  if (
-    !pipeline ||
-    pipelineUsesRoutes(pipeline) ||
-    !isEqual(readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations), [destinationId])
-  ) {
+  const pipelineIndex = findPipelineIndex(unit, pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  if (!pipeline || hasScopedWiring(pipeline.config) || routes.length === 0) {
     return unit;
   }
   return writePipeline(
-    routable,
+    unit,
     pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), [
-      { when: TEST_ROUTING_CONDITION, destinations: [destinationId] },
-    ])
+    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes)
   );
 };
 
@@ -1023,6 +1024,113 @@ const writeRuleTargets = (
   }
   return writePipeline(unit, pipelineIndex, config);
 };
+
+/** Where a line into a destination starts: a source, pipeline processing, or one routing rule. */
+export type RoutableLineOrigin = UnitConnectionOrigin | { kind: 'route'; rule: RouteRuleRef };
+
+/** A drawn line into a destination that a routing node can be put on. */
+export interface UnitRoutableLine {
+  origin: RoutableLineOrigin;
+  destinationId: string;
+}
+
+/**
+ * Routes a source or processing line through the pipeline the line runs on. A
+ * source line is first moved onto a pipeline of its own; a processing line is
+ * only routable when it is its pipeline's one destination.
+ */
+const routePipelineLine = (
+  unit: Unit,
+  origin: UnitConnectionOrigin,
+  destinationId: string,
+  routes: readonly RouteRule[]
+): Unit => {
+  let routable = unit;
+  let pipelineIndex: number;
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    const isolated = isolateSourceLine(unit, origin.id, destinationId);
+    if (!isolated) {
+      return unit;
+    }
+    routable = isolated.unit;
+    pipelineIndex = findPipelineIndex(routable, isolated.pipelineId);
+  } else {
+    pipelineIndex = findWirableProcessingPipelineIndex(unit, origin.ref);
+  }
+  const pipeline = routable.unit.pipelines[pipelineIndex];
+  if (
+    !pipeline ||
+    pipelineUsesRoutes(pipeline) ||
+    !isEqual(readEntryIds(pipeline.config, PIPELINE_ENTRY.destinations), [destinationId])
+  ) {
+    return unit;
+  }
+  return writePipeline(
+    routable,
+    pipelineIndex,
+    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes)
+  );
+};
+
+/**
+ * Routes a rule's line through a new child routing pipeline the rule delegates
+ * to. Only a rule whose one target is the line's destination is routable, since
+ * a rule lists either destinations or pipelines.
+ */
+const routeRuleLine = (
+  unit: Unit,
+  rule: RouteRuleRef,
+  destinationId: string,
+  routes: readonly RouteRule[]
+): Unit => {
+  const pipelineIndex = findPipelineIndex(unit, rule.pipelineId);
+  const pipeline = unit.unit.pipelines[pipelineIndex];
+  const targets = pipeline ? readRuleTargets(pipeline, rule.ruleIndex) : undefined;
+  if (
+    !pipeline ||
+    !pipelineUsesRoutes(pipeline) ||
+    !isEqual(targets, [{ kind: 'destination', id: destinationId }])
+  ) {
+    return unit;
+  }
+  const childId = allocateComponentId(`${pipeline.id}-routing`, usedComponentIds(unit), {
+    bareFirst: true,
+  });
+  const config = withRuleTargets(pipeline, rule.ruleIndex, [{ kind: 'pipeline', id: childId }]);
+  if (!config) {
+    return unit;
+  }
+  const withChild = replacePipelines(unit, [
+    ...unit.unit.pipelines,
+    {
+      id: childId,
+      supported_telemetry: [...ruleSignals(pipeline, rule.ruleIndex)],
+      config: [{ name: PIPELINE_ENTRY.routes, value: [...routes] }],
+    },
+  ]);
+  return writePipeline(withChild, pipelineIndex, config);
+};
+
+/**
+ * Routes one drawn line through a new routing node with `routes`. Returns
+ * `unit` unchanged when the line cannot be routed or `routes` is empty.
+ */
+export const routeLine = (
+  unit: Unit,
+  { origin, destinationId }: UnitRoutableLine,
+  routes: readonly RouteRule[]
+): Unit => {
+  if (routes.length === 0) {
+    return unit;
+  }
+  return origin.kind === 'route'
+    ? routeRuleLine(unit, origin.rule, destinationId, routes)
+    : routePipelineLine(unit, origin, destinationId, routes);
+};
+
+/** Whether {@link routeLine} can put a routing node on the line. */
+export const canRouteLine = (unit: Unit, line: UnitRoutableLine): boolean =>
+  routeLine(unit, line, [{ destinations: [line.destinationId] }]) !== unit;
 
 export const canConnectRouteToTarget = (
   unit: Unit,
