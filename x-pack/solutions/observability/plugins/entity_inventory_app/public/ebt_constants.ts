@@ -8,7 +8,7 @@
 /** EBT click `element` values: where in the entity inventory the click happened. */
 export const ENTITY_INVENTORY_EBT_ELEMENTS = {
   NO_DATA: 'entityInventoryNoData',
-  ENTITY_TABLE: 'entityInventoryEntityTable',
+  ENTITY_TABLE: 'entityTable',
 };
 
 /** EBT click `action` values specific to the entity inventory. */
