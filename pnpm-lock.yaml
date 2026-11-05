@@ -6184,9 +6184,6 @@ importers:
       '@types/chrome-remote-interface':
         specifier: 0.31.14
         version: 0.31.14
-      '@types/chromedriver':
-        specifier: 81.0.5
-        version: 81.0.5
       '@types/cli-progress':
         specifier: 3.11.5
         version: 3.11.5
@@ -6499,9 +6496,6 @@ importers:
       chance:
         specifier: 1.1.13
         version: 1.1.13
-      chromedriver:
-        specifier: 154.0.1
-        version: 154.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
       clean-webpack-plugin:
         specifier: 4.0.0
         version: 4.0.0(webpack@5.96.1)
@@ -14688,9 +14682,6 @@ packages:
   '@tediousjs/connection-string@1.1.0':
     resolution: {integrity: sha512-z9ZBWEG+8pIB5V1zYzlRPXx0oRJ5H7coPnMQK8EZOw03UTPI9Umn6viL36f5w+CuqkKsnCM50RVStpjZmR0Bng==}
 
-  '@testim/chrome-version@1.1.4':
-    resolution: {integrity: sha512-kIhULpw9TrGYnHp/8VfdcneIcxKnLixmADtukQRtJUmsVlMg0niMkwV0xZmi8hqa57xqilIHjWFA0GKvEjVU5g==}
-
   '@testing-library/dom@10.4.0':
     resolution: {integrity: sha512-pemlzrSESWbdAloYml3bAJMEfNh1Z7EduzqPKprCH5S341frlpYnUEW0H72dLxa6IsYr+mPno20GiSm+h9dEdQ==}
     engines: {node: '>=18'}
@@ -14862,9 +14853,6 @@ packages:
 
   '@types/chrome-remote-interface@0.31.14':
     resolution: {integrity: sha512-H9hTcLu1y+Ms6GDPXXeGhgxaOSD69yEo674vjJw5EeW1tTwYo8fEkf7A9nWlnO6ArJsS7c41iZeX6mRDQ1LhEw==}
-
-  '@types/chromedriver@81.0.5':
-    resolution: {integrity: sha512-VwV+WTTFHYZotBn57QQ8gd4TE7CGJ15KPM+xJJrKbiQQSccTY7zVXuConSBlyWrO+AFpVxuzmluK3xvzxGmkCw==}
 
   '@types/cli-progress@3.11.5':
     resolution: {integrity: sha512-D4PbNRbviKyppS5ivBGyFO29POlySLmA2HyUFE4p5QGazAMM3CwkKWcvTl8gvElSuxRh6FPKL8XmidX873ou4g==}
@@ -16747,11 +16735,6 @@ packages:
     resolution: {integrity: sha512-rNjApaLzuwaOTjCiT8lSDdGN1APCiqkChLMJxJPWLunPAt5fy8xgU9/jNOchV84wfIxrA0lRQB7oCT8jrn/wrQ==}
     engines: {node: '>=6.0'}
 
-  chromedriver@154.0.1:
-    resolution: {integrity: sha512-QtK+E8xDBt6+dBOALfbILJX2VoRngV6elAh47uZCGWKVKf7n3DyO/IpBo/x5PafLgpZ0LZKTWQQtB+DYq0ixHA==}
-    engines: {node: '>=22'}
-    hasBin: true
-
   chromium-bidi@17.0.2:
     resolution: {integrity: sha512-5v9GQFhTktFvotn/OFNJBmKLKRAb6n9r0bVCwf7sHgWc3/JryK0bj1nn93L3pHFrfgcsu6Be6EWsDi+1XHTGDg==}
     engines: {node: '>=20.19.0 <22.0.0 || >=22.12.0'}
@@ -17022,9 +17005,6 @@ packages:
 
   commondir@1.0.1:
     resolution: {integrity: sha512-W9pAhw0ja1Edb5GVdIF1mjZw/ASI0AlShXM83UUGe2DVr5TdAPEA1OA8m/g8zWp9x6On7gqufY+FatDbC3MDQg==}
-
-  compare-versions@6.1.1:
-    resolution: {integrity: sha512-4hm4VPpIecmlg59CHXnRDnqGplJFrbLG4aFEl5vl6cK1u76ws3LLvX7ikFnTDl5vo39sjWD6AaDPYodJp/NNHg==}
 
   component-emitter@1.3.1:
     resolution: {integrity: sha512-T0+barUSQRTUQASh8bx02dl+DhF54GtIDY13Y3m9oWTklKbb3Wv974meRpeZ3lp1JpLVECWWNHC4vaG2XHXouQ==}
@@ -17561,15 +17541,6 @@ packages:
 
   debug@3.2.7:
     resolution: {integrity: sha512-CFjzYYAi4ThfiQvizrFQevTTXHtnCqWfe7x1AhgEscTz6ZbLbfoLRLPugTQyBth6f8ZERVUSyWHFD/7Wu4t1XQ==}
-    peerDependencies:
-      supports-color: '*'
-    peerDependenciesMeta:
-      supports-color:
-        optional: true
-
-  debug@4.3.1:
-    resolution: {integrity: sha512-doEwdvm4PCeK4K3RQN2ZC2BYUBaxwLARCqZmMjtF8a51J2Rb0xpVloFRnCODwqjpwnAoao4pelN8l3RJdv3gRQ==}
-    engines: {node: '>=6.0'}
     peerDependencies:
       supports-color: '*'
     peerDependenciesMeta:
@@ -19575,10 +19546,6 @@ packages:
     resolution: {integrity: sha512-DWBMKyeM25D70nrIiTkgQth59/G+naKOTep6huF9j+GmeK3DMD60Zvxg5d5qQnz+38AHgou6ean2LECX+lrKDg==}
     engines: {node: '>= 12'}
 
-  ip-regex@2.1.0:
-    resolution: {integrity: sha512-58yWmlHpp7VYfcdTwMTvwMmqx/Elfxjd9RXTDyMsbL7lLWmhMylLEqiYVLKuLzOZqVgiWXD9MfR62Vv89VRxkw==}
-    engines: {node: '>=4'}
-
   ipaddr.js@1.9.1:
     resolution: {integrity: sha512-0KI/607xoxSToH7GjN1FfSbLoU0+btTicjsQSWQlh/hZykN8KpmMf7uYwPW3R+akZ6R/w18ZlXSHBYXiYUPO3g==}
     engines: {node: '>= 0.10'}
@@ -19898,9 +19865,6 @@ packages:
     resolution: {integrity: sha512-GI+WjezhPPcbM+tqE9LnmsY5qqjwHzTvjJ36wxYX5ujNXefSUJ/T17r5bqDV8yLhcgB59KTPNOc9O9cmHTPWsA==}
     engines: {node: '>=10'}
 
-  is-url@1.2.4:
-    resolution: {integrity: sha512-ITvGim8FhRiYe4IQ5uHSkj7pVaPDrCTkNd3yq3cV7iZAcJdHTUMPMEHcqSOy9xZ9qFenQCvi+2wjH9a1nXqHww==}
-
   is-valid-glob@1.0.0:
     resolution: {integrity: sha512-AhiROmoEFDSsjx8hW+5sGwgKVIORcXnrlAx/R0ZSeaPw70Vw0CqkGBBhHGL58Uox2eXnU1AnvXJl1XlyedO5bA==}
     engines: {node: '>=0.10.0'}
@@ -19934,10 +19898,6 @@ packages:
   is-wsl@3.1.1:
     resolution: {integrity: sha512-e6rvdUCiQCAuumZslxRJWR/Doq4VpPR82kqclvcS0efgt430SlGIk05vdCN58+VrzgtIcfNODjozVielycD4Sw==}
     engines: {node: '>=16'}
-
-  is2@2.0.1:
-    resolution: {integrity: sha512-+WaJvnaA7aJySz2q/8sLjMb2Mw14KTplHmSwcSpZ/fWJPkUmqw3YTzSWbPJ7OAwRvdYTWF2Wg+yYJ1AdP5Z8CA==}
-    engines: {node: '>=v0.10.0'}
 
   isarray@0.0.1:
     resolution: {integrity: sha512-D2S+3GLxWH+uhrNEcoh/fnmYeP8E8/zHl644d/jdA0g2uyXvy3sb0qxotE+ne0LtccHknQzWwZEzhak7oJ0COQ==}
@@ -21314,9 +21274,6 @@ packages:
 
   ms@2.0.0:
     resolution: {integrity: sha512-Tpp60P6IUJDTuOq/5Z8cdskzJujfwqfOTkrwIwj7IRISpnkJnT6SyJ4PCPnGMoFjC9ddhal5KVIYtAt97ix05A==}
-
-  ms@2.1.2:
-    resolution: {integrity: sha512-sGkPx+VjMtmA6MX27oA4FBFELFCZZ4S4XqeGOXCv68tT+jb3vk/RyaKWP0PTKyWtmLSM0b+adUTEvbs1PEaH2w==}
 
   ms@2.1.3:
     resolution: {integrity: sha512-6FlzubTLZG3J2a/NVCAleEhjzq5oxgHyaCU9yYXvcLsvoVaHJq/s5xXI6/XXP6tz7R9xAOtHnSO/tXtF3WRTlA==}
@@ -24179,9 +24136,6 @@ packages:
 
   tcomb@3.2.29:
     resolution: {integrity: sha512-di2Hd1DB2Zfw6StGv861JoAF5h/uQVu/QJp2g8KVbtfKnoHdBQl5M32YWq6mnSYBQ1vFFrns5B1haWJL7rKaOQ==}
-
-  tcp-port-used@1.0.3:
-    resolution: {integrity: sha512-4CEQ3qRJYo+mtEbJ+OoQu3dF4TDkwaO3RDVC4UzP5cpAOIUWwuwPjD7sdxDFFqsMUjsXVVYBMlg/boAaloThMA==}
 
   tedious@20.0.0:
     resolution: {integrity: sha512-bTR0aou0Ghucf0ytvZUJjnKHGKDV8tT57jPYtEkSpfTWFe++4uR1wxJLQ4mh5wlSvAYXzmgBxbI0vaE56qigXw==}
@@ -31283,8 +31237,6 @@ snapshots:
 
   '@tediousjs/connection-string@1.1.0': {}
 
-  '@testim/chrome-version@1.1.4': {}
-
   '@testing-library/dom@10.4.0':
     dependencies:
       '@babel/code-frame': 7.29.7
@@ -31518,10 +31470,6 @@ snapshots:
   '@types/chrome-remote-interface@0.31.14':
     dependencies:
       devtools-protocol: 0.0.927104
-
-  '@types/chromedriver@81.0.5':
-    dependencies:
-      '@types/node': 24.10.13
 
   '@types/cli-progress@3.11.5':
     dependencies:
@@ -32582,7 +32530,8 @@ snapshots:
 
   agent-base@7.1.4: {}
 
-  agent-base@9.0.0: {}
+  agent-base@9.0.0:
+    optional: true
 
   agentkeepalive@3.5.3:
     dependencies:
@@ -32851,6 +32800,7 @@ snapshots:
   ast-types@0.13.4:
     dependencies:
       tslib: 2.8.1
+    optional: true
 
   ast-types@0.16.3:
     dependencies:
@@ -33140,7 +33090,8 @@ snapshots:
     dependencies:
       safe-buffer: 5.1.2
 
-  basic-ftp@5.3.1: {}
+  basic-ftp@5.3.1:
+    optional: true
 
   bcrypt-pbkdf@1.0.2:
     dependencies:
@@ -33630,20 +33581,6 @@ snapshots:
 
   chrome-trace-event@1.0.4: {}
 
-  chromedriver@154.0.1(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2):
-    dependencies:
-      '@testim/chrome-version': 1.1.4
-      adm-zip: 0.6.1
-      axios: 1.20.0(debug@4.4.3(supports-color@10.2.2))(supports-color@10.2.2)
-      compare-versions: 6.1.1
-      proxy-agent: 8.0.2(supports-color@10.2.2)
-      proxy-from-env: 2.1.0
-      tcp-port-used: 1.0.3(supports-color@10.2.2)
-    transitivePeerDependencies:
-      - debug
-      - kerberos
-      - supports-color
-
   chromium-bidi@17.0.2(devtools-protocol@0.0.1687809):
     dependencies:
       devtools-protocol: 0.0.1687809
@@ -33860,8 +33797,6 @@ snapshots:
   common-tags@1.8.2: {}
 
   commondir@1.0.1: {}
-
-  compare-versions@6.1.1: {}
 
   component-emitter@1.3.1: {}
 
@@ -34433,7 +34368,8 @@ snapshots:
     dependencies:
       assert-plus: 1.0.0
 
-  data-uri-to-buffer@8.0.0: {}
+  data-uri-to-buffer@8.0.0:
+    optional: true
 
   data-urls@3.0.2:
     dependencies:
@@ -34484,12 +34420,6 @@ snapshots:
       ms: 2.1.3
     optionalDependencies:
       supports-color: 8.1.1
-
-  debug@4.3.1(supports-color@10.2.2):
-    dependencies:
-      ms: 2.1.2
-    optionalDependencies:
-      supports-color: 10.2.2
 
   debug@4.3.7(supports-color@10.2.2):
     dependencies:
@@ -34631,6 +34561,7 @@ snapshots:
       escodegen: 2.1.0
       esprima: 4.0.1
       quickjs-wasi: 2.2.0
+    optional: true
 
   del@4.1.1:
     dependencies:
@@ -36313,6 +36244,7 @@ snapshots:
       debug: 4.4.3(supports-color@10.2.2)
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   getopts@2.2.5: {}
 
@@ -36877,6 +36809,7 @@ snapshots:
     transitivePeerDependencies:
       - kerberos
       - supports-color
+    optional: true
 
   http-proxy@1.18.1(debug@4.4.3(supports-color@10.2.2)):
     dependencies:
@@ -36923,6 +36856,7 @@ snapshots:
     transitivePeerDependencies:
       - kerberos
       - supports-color
+    optional: true
 
   human-signals@1.1.1: {}
 
@@ -37142,8 +37076,6 @@ snapshots:
       fp-ts: 2.16.11
 
   ip-address@10.7.4: {}
-
-  ip-regex@2.1.0: {}
 
   ipaddr.js@1.9.1: {}
 
@@ -37400,8 +37332,6 @@ snapshots:
 
   is-url-superb@4.0.0: {}
 
-  is-url@1.2.4: {}
-
   is-valid-glob@1.0.0: {}
 
   is-weakmap@2.0.2: {}
@@ -37428,12 +37358,6 @@ snapshots:
   is-wsl@3.1.1:
     dependencies:
       is-inside-container: 1.0.0
-
-  is2@2.0.1:
-    dependencies:
-      deep-is: 0.1.4
-      ip-regex: 2.1.0
-      is-url: 1.2.4
 
   isarray@0.0.1: {}
 
@@ -39304,8 +39228,6 @@ snapshots:
 
   ms@2.0.0: {}
 
-  ms@2.1.2: {}
-
   ms@2.1.3: {}
 
   msgpackr-extract@3.0.4:
@@ -39421,7 +39343,8 @@ snapshots:
 
   neo-async@2.6.2: {}
 
-  netmask@2.1.1: {}
+  netmask@2.1.1:
+    optional: true
 
   next-line@1.1.0: {}
 
@@ -39975,12 +39898,14 @@ snapshots:
     transitivePeerDependencies:
       - kerberos
       - supports-color
+    optional: true
 
   pac-resolver@9.0.1(quickjs-wasi@2.2.0):
     dependencies:
       degenerator: 7.0.1(quickjs-wasi@2.2.0)
       netmask: 2.1.1
       quickjs-wasi: 2.2.0
+    optional: true
 
   package-json-from-dist@1.0.1: {}
 
@@ -40464,7 +40389,8 @@ snapshots:
       forwarded: 0.2.0
       ipaddr.js: 1.9.1
 
-  proxy-agent-negotiate@1.1.0: {}
+  proxy-agent-negotiate@1.1.0:
+    optional: true
 
   proxy-agent@8.0.2(supports-color@10.2.2):
     dependencies:
@@ -40479,6 +40405,7 @@ snapshots:
     transitivePeerDependencies:
       - kerberos
       - supports-color
+    optional: true
 
   proxy-disposable@1.0.0: {}
 
@@ -40589,7 +40516,8 @@ snapshots:
       '@jitl/quickjs-wasmfile-release-sync': 0.32.0
       quickjs-emscripten-core: 0.32.0
 
-  quickjs-wasi@2.2.0: {}
+  quickjs-wasi@2.2.0:
+    optional: true
 
   quickselect@2.0.0: {}
 
@@ -42026,7 +41954,8 @@ snapshots:
 
   slide@1.1.6: {}
 
-  smart-buffer@4.2.0: {}
+  smart-buffer@4.2.0:
+    optional: true
 
   smol-toml@1.9.0: {}
 
@@ -42078,11 +42007,13 @@ snapshots:
       socks: 2.8.10
     transitivePeerDependencies:
       - supports-color
+    optional: true
 
   socks@2.8.10:
     dependencies:
       ip-address: 10.7.4
       smart-buffer: 4.2.0
+    optional: true
 
   sonic-boom@3.8.1:
     dependencies:
@@ -42680,13 +42611,6 @@ snapshots:
       tcomb: 3.2.29
 
   tcomb@3.2.29: {}
-
-  tcp-port-used@1.0.3(supports-color@10.2.2):
-    dependencies:
-      debug: 4.3.1(supports-color@10.2.2)
-      is2: 2.0.1
-    transitivePeerDependencies:
-      - supports-color
 
   tedious@20.0.0(supports-color@10.2.2):
     dependencies:

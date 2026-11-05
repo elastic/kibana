@@ -14,7 +14,6 @@ import * as Rx from 'rxjs';
 import { mergeMap, map, catchError, ignoreElements, takeWhile } from 'rxjs';
 import type { Lifecycle } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
-import chromeDriver from 'chromedriver';
 import type { WebDriver } from 'selenium-webdriver';
 import { Builder, logging } from 'selenium-webdriver';
 import chrome from 'selenium-webdriver/chrome';
@@ -49,6 +48,10 @@ const MINUTE = 60 * SECOND;
 const NO_QUEUE_COMMANDS = ['getLog', 'getStatus', 'newSession', 'quit'];
 const downloadDir = resolve(REPO_ROOT, 'target/functional-tests/downloads');
 let runtimeEnvVariables: Configuration | undefined;
+
+// Selenium Manager resolves and caches the driver matching the local browser. Opt out of the
+// usage stats it posts to plausible.io on every invocation.
+process.env.SE_AVOID_STATS = process.env.SE_AVOID_STATS ?? 'true';
 
 // ENV variables may be injected dynamically by the test runner CLI script
 // so do not read on module load, rather read on demand.
@@ -253,7 +256,7 @@ async function attemptToCreateCommand(
             .forBrowser(browserType)
             .setChromeOptions(chromeOptions)
             .setChromeService(
-              new chrome.ServiceBuilder(process.env.TEST_CHROMEDRIVER_PATH || chromeDriver.path)
+              new chrome.ServiceBuilder(process.env.TEST_CHROMEDRIVER_PATH)
                 .enableVerboseLogging()
                 .setEnvironment(driverEnv)
             )
