@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import { BasicPrettyPrinter, Builder, esql as esqlComposer, Parser } from '@elastic/esql';
+import type { ESQLCommand } from '@elastic/esql/types';
 import { getMappingConflicts } from '@kbn/ai-tools';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { ESQLSearchResponse } from '@kbn/es-types';
@@ -22,12 +24,14 @@ import {
 } from '@kbn/streams-schema';
 import type { SignificantEventType } from './types';
 
-export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 10_000;
+export const DEFAULT_QUERY_VALIDATION_TIMEOUT_MS = 15_000;
 
 const PROBE_WINDOW_MINUTES = 10;
 const TARGET_VALIDATION_DOCS = 100_000;
 const MAX_LOOKBACK_MINUTES = 10_080;
 const PROBE_TIMEOUT_MS = 5_000;
+const TIME_FIELD = '@timestamp';
+const MINUTE_MS = 60_000;
 
 const getErrorMessage = (error: unknown): string =>
   error instanceof Error ? error.message : String(error);
@@ -91,10 +95,39 @@ export interface QueryValidationResult {
 
 export interface QueryValidationContext {
   targetSources: string[];
-  validationLookback: string;
+  validationLookbackMinutes: number;
   conflictingFields: Set<string>;
   normalizedStoredEsqls: Set<string>;
 }
+
+const addInlineTimeRange = ({
+  query,
+  start,
+  end,
+}: {
+  query: string;
+  start: number;
+  end: number;
+}): string => {
+  const { root } = Parser.parse(query);
+  const sourceCommandIndex = root.commands.findIndex(
+    ({ name }) => name === 'from' || name === 'ts'
+  );
+  if (sourceCommandIndex === -1) {
+    return query;
+  }
+
+  const timeField = esqlComposer.col(TIME_FIELD);
+  const rangeStart = esqlComposer.str(new Date(start).toISOString());
+  const rangeEnd = esqlComposer.str(new Date(end).toISOString());
+  const whereCommand = Builder.command({
+    name: 'where',
+    args: [esqlComposer.exp`${timeField} >= ${rangeStart} AND ${timeField} <= ${rangeEnd}`],
+  });
+  const commands = [...root.commands];
+  commands.splice(sourceCommandIndex + 1, 0, whereCommand);
+  return BasicPrettyPrinter.print(Builder.expression.query(commands as ESQLCommand[]));
+};
 
 export async function computeValidationLookback({
   esClient,
@@ -106,43 +139,39 @@ export async function computeValidationLookback({
   sources: string[];
   signal: AbortSignal;
   logger: Logger;
-}): Promise<string> {
-  const probeWindow = `now-${PROBE_WINDOW_MINUTES}m`;
+}): Promise<number> {
+  const probeEnd = Date.now();
+  const probeStart = probeEnd - PROBE_WINDOW_MINUTES * MINUTE_MS;
   try {
     const response = (await esClient.esql.query(
       {
-        query: `FROM ${sources.join(', ')} | STATS total = COUNT(*)`,
-        filter: {
-          range: {
-            '@timestamp': {
-              gte: probeWindow,
-              lte: 'now',
-            },
-          },
-        },
+        query: addInlineTimeRange({
+          query: `FROM ${sources.join(', ')} | STATS total = COUNT(*)`,
+          start: probeStart,
+          end: probeEnd,
+        }),
       },
       { signal, requestTimeout: PROBE_TIMEOUT_MS }
     )) as unknown as ESQLSearchResponse;
 
     const total = Number(response.values[0]?.[0] ?? 0);
     if (total <= 0) {
-      return `now-${MAX_LOOKBACK_MINUTES}m`;
+      return MAX_LOOKBACK_MINUTES;
     }
 
     const ratePerMinute = total / PROBE_WINDOW_MINUTES;
-    const lookbackMinutes = Math.min(
+    return Math.min(
       MAX_LOOKBACK_MINUTES,
       Math.max(PROBE_WINDOW_MINUTES, Math.round(TARGET_VALIDATION_DOCS / ratePerMinute))
     );
-    return `now-${lookbackMinutes}m`;
   } catch (error) {
     logger.debug(
       () =>
         `Failed to probe validation volume for [${sources.join(
           ', '
-        )}]; falling back to ${probeWindow}: ${getErrorMessage(error)}`
+        )}]; falling back to ${PROBE_WINDOW_MINUTES} minutes: ${getErrorMessage(error)}`
     );
-    return probeWindow;
+    return PROBE_WINDOW_MINUTES;
   }
 }
 
@@ -160,7 +189,7 @@ export async function createQueryValidationContext({
   logger: Logger;
 }): Promise<QueryValidationContext> {
   const targetSources = sources;
-  const [validationLookback, mappingConflicts] = await Promise.all([
+  const [validationLookbackMinutes, mappingConflicts] = await Promise.all([
     computeValidationLookback({ esClient, sources: targetSources, signal, logger }),
     getMappingConflicts({
       esClient,
@@ -179,7 +208,7 @@ export async function createQueryValidationContext({
 
   return {
     targetSources,
-    validationLookback,
+    validationLookbackMinutes,
     conflictingFields: new Set(mappingConflicts.map(({ field }) => field)),
     normalizedStoredEsqls: new Set(
       existingQueries.map(({ esql }) => normalizeEsqlSafe(replaceFromSources(esql, targetSources)))
@@ -214,8 +243,11 @@ export async function validateKIQueries({
   hasNonIntentFailures: boolean;
   hasIntentFailures: boolean;
 }> {
-  const { targetSources, validationLookback, conflictingFields, normalizedStoredEsqls } = context;
+  const { targetSources, validationLookbackMinutes, conflictingFields, normalizedStoredEsqls } =
+    context;
   const featureMap = new Map(features.map(({ id, run_id: runId }) => [id, runId]));
+  const validationEnd = Date.now();
+  const validationStart = validationEnd - validationLookbackMinutes * MINUTE_MS;
   let hasNonIntentFailures = false;
   let hasIntentFailures = false;
 
@@ -312,21 +344,17 @@ export async function validateKIQueries({
           conflictingFields.size > 0 &&
           extractReferencedColumns(rewritten).some((name) => conflictingFields.has(name));
 
+        const validationQuery = validateOverFullSource
+          ? rewritten
+          : addInlineTimeRange({
+              query: rewritten,
+              start: validationStart,
+              end: validationEnd,
+            });
+
         await esClient.esql.query(
           {
-            query: `${rewritten}\n| LIMIT 0`,
-            ...(validateOverFullSource
-              ? {}
-              : {
-                  filter: {
-                    range: {
-                      '@timestamp': {
-                        gte: validationLookback,
-                        lte: 'now',
-                      },
-                    },
-                  },
-                }),
+            query: `${validationQuery}\n| LIMIT 0`,
             format: 'json',
           },
           { signal, requestTimeout: queryValidationTimeoutMs }
