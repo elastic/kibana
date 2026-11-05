@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import type {
   TraversalDirection,
   TraversalExclusion,
@@ -28,6 +29,8 @@ import {
 export interface EsqlResult {
   columns: Array<{ name: string; type: string }>;
   values: unknown[][];
+  /** Milliseconds Elasticsearch reports it spent on the query, when the response carries it. */
+  took?: number;
 }
 
 export type ExecuteHopQuery = (query: HopQuery) => Promise<EsqlResult>;
@@ -71,6 +74,12 @@ export interface RunHopStats {
   closing_edges: number;
   new_nodes: number;
   hubs_skipped: string[];
+  /** Milliseconds spent before the first query: resolving the space and the lookup index. */
+  setup_ms: number;
+  /** Milliseconds the hop's queries took round trip, from request to parsed response, summed. */
+  query_ms: number;
+  /** Milliseconds Elasticsearch reports it spent on the hop's queries (`took`), summed. */
+  es_took_ms: number;
 }
 
 export interface RunHopResult {
@@ -171,8 +180,26 @@ const parseRows = ({
 };
 
 /**
+ * The hop with every field a stop condition names added to its payload fields. A condition
+ * on a field is matched against the edge payload, so the query has to read that field, or
+ * the condition could never fire. `entity.id` is matched on the reached id and needs no
+ * payload.
+ */
+export const withStopConditionFields = (
+  hop: TraversalHop,
+  until: TraversalStopCondition[]
+): TraversalHop => {
+  const missing = until
+    .map(({ field }) => field)
+    .filter((field) => field !== TRAVERSAL_NODE_ID_FIELD && !hop.payload_fields.includes(field));
+  if (missing.length === 0) return hop;
+  return { ...hop, payload_fields: [...hop.payload_fields, ...new Set(missing)] };
+};
+
+/**
  * Whether the node an edge admits matches a stop condition: by id on `entity.id`, otherwise
- * by a value of that field in the edge payload (the hop's `payload_fields`).
+ * by a value of that field in the edge payload, which `withStopConditionFields` guarantees
+ * the hop read.
  */
 const matchesStopCondition = (
   { edge, reached }: CollectedEdge,
@@ -200,6 +227,9 @@ const findHubs = (edges: CollectedEdge[], hubDegree: number): Set<string> => {
   }
   return hubs;
 };
+
+/** Timings are reported to a tenth of a millisecond. */
+const roundMs = (ms: number): number => Math.round(ms * 10) / 10;
 
 /** Drop edges of hub frontier nodes and repeated (relation, source, target) triples. */
 const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[] => {
@@ -229,6 +259,8 @@ const dedupeEdges = (edges: CollectedEdge[], hubs: Set<string>): CollectedEdge[]
  * 5. Edges are deduplicated and capped by the remaining edge capacity.
  * 6. New nodes are capped by the remaining node capacity; nodes already visited only
  *    produce closing edges.
+ * 7. Stop conditions are tested on the admitted nodes; the fields they name are read as
+ *    payload by every query, so a condition on a field the scenario did not list still fires.
  *
  * Edges keep the stored orientation: the source is the entity whose relationship field holds
  * the edge, whichever end the hop reached it from. Nodes come back unresolved (id, hop, via,
@@ -239,16 +271,8 @@ export const runHop = async (
   input: RunHopInput,
   execute: ExecuteHopQuery
 ): Promise<RunHopResult> => {
-  const {
-    hop,
-    index,
-    lookupIndex,
-    direction,
-    limits,
-    lookback,
-    exclusions = [],
-    until = [],
-  } = input;
+  const { index, lookupIndex, direction, limits, lookback, exclusions = [], until = [] } = input;
+  const hop = withStopConditionFields(input.hop, until);
   const visitedSet = new Set(input.visited);
   const excludedIds = new Set(
     exclusions.filter((e) => e.field === TRAVERSAL_NODE_ID_FIELD).flatMap((e) => e.values)
@@ -273,6 +297,9 @@ export const runHop = async (
     closing_edges: 0,
     new_nodes: 0,
     hubs_skipped: [],
+    setup_ms: 0,
+    query_ms: 0,
+    es_took_ms: 0,
   };
 
   const untilMatches: string[] = [];
@@ -341,7 +368,10 @@ export const runHop = async (
           exclusions,
           inbound,
         });
+        const queryStartedAt = performance.now();
         const result = await execute(query);
+        stats.query_ms = roundMs(stats.query_ms + performance.now() - queryStartedAt);
+        if (typeof result.took === 'number') stats.es_took_ms += result.took;
         stats.queries += 1;
         stats.rows_returned += result.values.length;
         if (result.values.length >= limit) truncated = true;

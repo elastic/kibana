@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { performance } from 'perf_hooks';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { getLatestEntityIndexPattern } from '../../../../common';
 import { runEntityGraphTraversalHopStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/run_entity_graph_traversal_hop_step_common';
@@ -42,6 +43,7 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
     const untilMatchesSoFar = context.input.until_matches ?? [];
     const esClient = context.contextManager.getScopedEsClient();
     const { logger, abortSignal } = context;
+    const setupStartedAt = performance.now();
     // The graph is the entity store of the execution space: nodes are its entities and edges
     // their relationship ids, so every hop reads the space's latest entity index.
     const spaceId = await resolveSpaceId(context.contextManager);
@@ -76,8 +78,14 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
           `Hop "${hop.name}" ES|QL response did not contain columns and values arrays`
         );
       }
-      return { columns: typed.columns, values: typed.values };
+      return {
+        columns: typed.columns,
+        values: typed.values,
+        ...(typeof typed.took === 'number' && { took: typed.took }),
+      };
     };
+    // Everything before the first query: the space lookup and the lookup-index resolution.
+    const setupMs = Math.round((performance.now() - setupStartedAt) * 10) / 10;
 
     try {
       const output = await runHop(
@@ -109,6 +117,7 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
           edges: [...edgesSoFar, ...edges],
           nodes: [...nodesSoFar, ...output.nodes],
           until_matches: [...untilMatchesSoFar, ...output.until_matches],
+          stats: { ...output.stats, setup_ms: setupMs },
         },
       };
     } catch (error) {

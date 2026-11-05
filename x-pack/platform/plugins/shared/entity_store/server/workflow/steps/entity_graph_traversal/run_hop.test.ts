@@ -57,19 +57,21 @@ const result = (rows: Array<[string, string, number?, unknown?]>): EsqlResult =>
   ]),
 });
 
-/** One canned result per target field, in target_fields order; records each query's params and LIMIT. */
+/** One canned result per target field, in target_fields order; records each query's text, params and LIMIT. */
 const executor = (
   perField: EsqlResult[]
-): ExecuteHopQuery & { calls: string[][]; queryLimits: number[] } => {
+): ExecuteHopQuery & { calls: string[][]; queries: string[]; queryLimits: number[] } => {
   const calls: string[][] = [];
+  const queries: string[] = [];
   const queryLimits: number[] = [];
   let i = 0;
   const execute = async ({ query, params }: { query: string; params: string[] }) => {
     calls.push(params);
+    queries.push(query);
     queryLimits.push(Number(query.match(/\| LIMIT (\d+)$/)?.[1]));
     return perField[i++] ?? result([]);
   };
-  return Object.assign(execute, { calls, queryLimits });
+  return Object.assign(execute, { calls, queries, queryLimits });
 };
 
 describe('runHop', () => {
@@ -702,6 +704,91 @@ describe('runHop', () => {
     expect(out.until_matches).toEqual(['bucket-1', 'role-b']);
     expect(out.stop_reason).toBe('until_matched');
     expect(out.stats.until_matched).toBe(2);
+  });
+
+  it('reads the field a stop condition names as payload even when the hop does not list it', async () => {
+    // The hop's payload is entity.name only; the condition is on asset.criticality.
+    const withCriticality: EsqlResult = {
+      columns: [
+        { name: HOP_SOURCE_COLUMN, type: 'keyword' },
+        { name: HOP_TARGET_COLUMN, type: 'keyword' },
+        { name: HOP_COUNT_COLUMN, type: 'long' },
+        { name: hopPayloadColumn(0), type: 'keyword' },
+        { name: hopPayloadColumn(1), type: 'keyword' },
+      ],
+      values: [
+        ['role-a', 'bucket-1', 1, 'acme-data-lake', 'extreme_impact'],
+        ['role-a', 'role-b', 1, 'other', 'low_impact'],
+      ],
+    };
+    const execute = executor([withCriticality, result([])]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+        until: [{ field: 'asset.criticality', values: ['extreme_impact'] }],
+      },
+      execute
+    );
+    // Every query of the hop reads the extra field, after the scenario's own payload fields.
+    for (const query of execute.queries) {
+      expect(query).toContain(
+        '__payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`asset.criticality`)'
+      );
+    }
+    expect(out.until_matches).toEqual(['bucket-1']);
+    expect(out.stop_reason).toBe('until_matched');
+    // The input hop is not mutated.
+    expect(hop.payload_fields).toEqual(['entity.name']);
+  });
+
+  it('reports the time its queries took, round trip and as Elasticsearch measured it', async () => {
+    const execute = executor([
+      { ...result([['role-a', 'role-b']]), took: 7 },
+      { ...result([]), took: 5 },
+    ]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(out.stats.queries).toBe(2);
+    expect(out.stats.es_took_ms).toBe(12);
+    expect(out.stats.query_ms).toBeGreaterThanOrEqual(0);
+    // Setup happens in the step handler, outside runHop.
+    expect(out.stats.setup_ms).toBe(0);
+  });
+
+  it('counts no Elasticsearch time for a response that does not report took', async () => {
+    const execute = executor([result([['role-a', 'role-b']]), result([])]);
+    const out = await runHop(
+      {
+        hop,
+        index: INDEX,
+        direction: 'out',
+        frontier: ['role-a'],
+        visited: ['role-a'],
+        edgesSoFar: 0,
+        truncatedSoFar: false,
+        limits,
+      },
+      execute
+    );
+    expect(out.stats.es_took_ms).toBe(0);
   });
 
   it('does not stop on a closing edge to a node admitted earlier', async () => {

@@ -57,9 +57,9 @@ describe('entityStore.loadEntityGraphTraversalScenario', () => {
     expect(result.output?.hops).toHaveLength(2);
     expect(result.output?.limits).toMatchObject({
       max_hops: 2,
-      max_nodes: 2000,
-      max_frontier: 1000,
-      hub_degree: 500,
+      max_nodes: 1000,
+      max_frontier: 500,
+      hub_degree: 200,
     });
   });
 

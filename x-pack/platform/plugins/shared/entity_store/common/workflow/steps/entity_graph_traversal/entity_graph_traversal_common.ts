@@ -148,7 +148,8 @@ export const traversalExclusionsSchema = () =>
 /**
  * Stop the walk once a node matching one of these is admitted. On `entity.id` the values are
  * node ids; on any other field they are matched against the payload of the edge that reached
- * the node, so the field must be one of the hop's `payload_fields`. Same shape as an exclusion.
+ * the node, and the hop reads that field as payload whether or not the scenario lists it in
+ * `payload_fields`. Same shape as an exclusion.
  */
 export const traversalStopConditionSchema = traversalExclusionSchema;
 

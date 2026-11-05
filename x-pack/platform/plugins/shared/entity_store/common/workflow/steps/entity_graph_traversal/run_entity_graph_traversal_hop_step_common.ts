@@ -72,7 +72,7 @@ export const runEntityGraphTraversalHopInputSchema = lazySchema(() =>
       'Field/values pairs to leave out: documents carrying one of the values are not read, and values on entity.id are removed from the frontier and from the targets'
     ),
     until: traversalStopConditionsSchema().describe(
-      'Stop conditions: the hop ends the traversal (stop_reason until_matched) when it admits a node whose id, or whose reaching edge payload, carries one of the values'
+      'Stop conditions: the hop ends the traversal (stop_reason until_matched) when it admits a node whose id, or whose reaching edge payload, carries one of the values; a field a condition names is read as payload even when the hop does not list it'
     ),
   })
 );
@@ -109,6 +109,12 @@ export const runEntityGraphTraversalHopOutputSchema = lazySchema(() =>
       closing_edges: z.number().int(),
       new_nodes: z.number().int(),
       hubs_skipped: z.array(z.string()),
+      /** Milliseconds resolving the space and the lookup index before the first query. */
+      setup_ms: z.number(),
+      /** Milliseconds the hop's queries took round trip, summed. */
+      query_ms: z.number(),
+      /** Milliseconds Elasticsearch reports it spent on the hop's queries (`took`), summed. */
+      es_took_ms: z.number(),
     }),
   })
 );
@@ -137,7 +143,8 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
           'The step expands the given hop from the frontier: the seed on the first hop, then the nodes the previous hop admitted, unless a frontier is given. For each target field it runs one ES|QL query of the form FROM index | WHERE entity.id IN (frontier) | MV_EXPAND target | LOOKUP JOIN latest index | STATS COUNT(*), VALUES(payload) BY source, target | LIMIT n, where n is the smaller of max_edges_per_hop and the edge budget still unfilled, so the payload describes the reached node and no row that could not be admitted is read. ' +
           'The frontier is passed as query parameters, never interpolated. Frontier ids beyond max_frontier are dropped, a source with more distinct targets than hub_degree is not expanded, and edges or nodes beyond max_edges_total or max_nodes are dropped; every drop sets truncated. ' +
           'stop_reason is non-empty when the traversal cannot continue: the frontier is exhausted or a total cap was reached. Targets already in visited produce closing edges but are not added to the next frontier. ' +
-          'Nodes are returned as id, hop, via and type only; resolve them once after the loop with entityStore.resolveEntityGraphTraversalNodes.',
+          'Nodes are returned as id, hop, via and type only; resolve them once after the loop with entityStore.resolveEntityGraphTraversalNodes. ' +
+          'stats report where the hop spent its time: setup_ms before the first query, query_ms round trip over its queries, and es_took_ms as the time Elasticsearch reports for them, so query_ms minus es_took_ms is transport and client cost.',
       }
     ),
     examples: [

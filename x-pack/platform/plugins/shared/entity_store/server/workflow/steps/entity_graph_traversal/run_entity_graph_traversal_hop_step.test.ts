@@ -55,7 +55,7 @@ const result = (rows: Array<[string, string]>) => ({
 });
 
 const createContext = (rawInput: Record<string, unknown>, rows: Array<[string, string]>) => {
-  const esql = { query: jest.fn().mockResolvedValue(result(rows)) };
+  const esql = { query: jest.fn().mockResolvedValue({ ...result(rows), took: 4 }) };
   const indices = { getAlias: jest.fn().mockRejectedValue(new Error('no alias')) };
   const context = {
     input: runEntityGraphTraversalHopInputSchema.parse(rawInput),
@@ -107,6 +107,10 @@ describe('entityStore.runEntityGraphTraversalHop', () => {
     });
     expect(output?.edges.map((e) => [e.source, e.target])).toEqual([[SEED, 'group-1']]);
     expect(output?.nodes.map((n) => n.id)).toEqual(['group-1']);
+    // Timings: Elasticsearch's took is passed through, and the handler adds its setup time.
+    expect(output?.stats).toMatchObject({ queries: 1, es_took_ms: 4 });
+    expect(output?.stats.query_ms).toBeGreaterThanOrEqual(0);
+    expect(output?.stats.setup_ms).toBeGreaterThanOrEqual(0);
   });
 
   it('runs the next hop from the nodes the previous one admitted and appends to the carried state', async () => {

@@ -18,15 +18,15 @@ export const ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS = {
   /** Expanded hops (after `repeat`) per run; also the `while` iteration cap in the workflow. */
   max_hops: 20,
   /** Distinct node ids admitted, including the seed. Bounds the visited set. */
-  max_nodes: 10_000,
+  max_nodes: 5_000,
   /** Ids expanded per hop; the ES|QL `IN (...)` parameter count. */
-  max_frontier: 1_000,
+  max_frontier: 500,
   /** Rows one hop query may return (`LIMIT`). */
-  max_edges_per_hop: 10_000,
+  max_edges_per_hop: 5_000,
   /** Edges accumulated across the run. Bounds the workflow state. */
-  max_edges_total: 10_000,
+  max_edges_total: 5_000,
   /** A frontier node with more distinct targets than this is not expanded. */
-  hub_degree: 10_000,
+  hub_degree: 5_000,
 } as const;
 
 /**
@@ -34,11 +34,11 @@ export const ENTITY_GRAPH_TRAVERSAL_HARD_LIMITS = {
  */
 export const ENTITY_GRAPH_TRAVERSAL_DEFAULT_LIMITS = {
   max_hops: 6,
-  max_nodes: 2_000,
-  max_frontier: 500,
-  max_edges_per_hop: 5_000,
-  max_edges_total: 5_000,
-  hub_degree: 500,
+  max_nodes: 1_000,
+  max_frontier: 250,
+  max_edges_per_hop: 2_000,
+  max_edges_total: 2_000,
+  hub_degree: 200,
 } as const;
 
 /** Relationship keys one hop may follow, and payload fields it may read. */
@@ -195,7 +195,8 @@ export const entityGraphTraversalScenarioSchema = lazySchema(() =>
     /**
      * Stop conditions the scenario itself declares (a reachability scenario). On `entity.id`
      * the values are node ids; on another field they are matched against the payload of the
-     * edge that reached the node, so the field must be a `payload_fields` entry of some hop.
+     * edge that reached the node, and the hop step reads that field as payload whether or not
+     * it is a `payload_fields` entry.
      */
     until: z.array(entityGraphTraversalStopConditionSchema).max(50).optional(),
   })

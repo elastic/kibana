@@ -48,7 +48,7 @@ describe('buildGraphExpandStatement', () => {
           `| GRAPH EXPAND ${INDEX} ON node_id == \`entity.id\``,
           '    TO (`entity.relationships.member_of.ids`, `entity.relationships.sso_to_role.ids`, `entity.relationships.can_assume.ids`, `entity.relationships.can_connect.ids`, `entity.relationships.runs_as.ids`, `entity.relationships.grants_access_to.ids`)',
           '    STATS __count = COUNT(*), __payload_0 = VALUES(`entity.name`), __payload_1 = VALUES(`entity.sub_type`)',
-          '    WITH {"max_hops":7,"max_nodes":2000,"max_frontier":500,"hub_degree":500,"direction":"out"}',
+          '    WITH {"max_hops":7,"max_nodes":1000,"max_frontier":250,"hub_degree":200,"direction":"out"}',
           '| RENAME node_reached AS `entity.id`',
           `| LOOKUP JOIN ${LOOKUP} ON \`entity.id\``,
         ].join('\n')

@@ -55,27 +55,27 @@ triggers:
         max_nodes:
           type: integer
           minimum: 1
-          maximum: 10000
+          maximum: 5000
           description: Distinct nodes admitted, including the seed
         max_frontier:
           type: integer
           minimum: 1
-          maximum: 1000
+          maximum: 500
           description: Ids expanded per hop; the rest are dropped and the run is marked truncated
         max_edges_per_hop:
           type: integer
           minimum: 1
-          maximum: 10000
+          maximum: 5000
           description: Rows one hop query may return
         max_edges_total:
           type: integer
           minimum: 1
-          maximum: 10000
+          maximum: 5000
           description: Edges kept across the whole run
         hub_degree:
           type: integer
           minimum: 1
-          maximum: 10000
+          maximum: 5000
           description: A node with more distinct targets than this is not expanded
         exclusions:
           type: array
@@ -108,8 +108,9 @@ triggers:
           description: >-
             Stop conditions added to the scenario's own: the traversal ends (stop_reason
             until_matched) once a hop admits a node whose id (field entity.id) or whose reaching
-            edge payload carries one of the values. The output then holds the matched ids and a
-            route from the seed to each.
+            edge payload carries one of the values. A field a condition names is read as edge
+            payload by every hop, so it need not be in the scenario's payload_fields. The output
+            then holds the matched ids and a route from the seed to each.
           items:
             type: object
             required:
