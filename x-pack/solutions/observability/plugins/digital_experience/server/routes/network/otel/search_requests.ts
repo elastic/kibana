@@ -9,7 +9,6 @@ import { termQuery, termsQuery } from '@kbn/es-query';
 import { DURATION, HTTP_REQUEST_METHOD, OTEL_EVENT_NAME, URL_FULL } from '@kbn/apm-types';
 import { TOP_ROWS } from '../../../../common/top_rows';
 import {
-  EVENT_NAVIGATION_TIMING,
   EVENT_RESOURCE_TIMING,
   OTEL_LOGS_INDEX,
   OTEL_TRACES_INDEX,
@@ -23,7 +22,6 @@ import { byP75Descending, p75Of, p95Of } from '../../../lib/helpers/aggregations
 import {
   applicationDocuments,
   byEnvironment,
-  eventCount,
   failedRequests,
   httpRequestDocuments,
   otelSearchDefaults,
@@ -45,7 +43,7 @@ const listedResources = {
   },
 };
 
-/** One application's slowest resources, most loaded page and environments with browser data. */
+/** One application's slowest resources, and its environments with browser data. */
 export const resourcesSearch = ({ environment, ...application }: ApplicationSearchParams) => {
   return {
     ...otelSearchDefaults(OTEL_LOGS_INDEX),
@@ -82,10 +80,6 @@ export const resourcesSearch = ({ environment, ...application }: ApplicationSear
             },
           },
         },
-      },
-      pageLoads: {
-        ...eventCount(EVENT_NAVIGATION_TIMING),
-        aggs: { topPage: { terms: { field: URL_FULL, size: 1 } } },
       },
     }),
   };

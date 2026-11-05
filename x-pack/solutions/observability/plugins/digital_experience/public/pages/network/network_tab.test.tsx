@@ -66,7 +66,6 @@ const RESPONSE: ApplicationNetworkResponse = {
       transferSizeP75Bytes: 9000,
     },
   ],
-  pageOrigin: 'https://shop.example.com',
   environments: ['production'],
 };
 
@@ -119,8 +118,8 @@ describe('NetworkTab', () => {
     render(<NetworkTab serviceName="shop" />, { wrapper: EuiProvider });
 
     expect(await screen.findByText('https://shop.example.com/api/checkout')).toBeInTheDocument();
-    expect(screen.getByText('app.js')).toBeInTheDocument();
-    expect(screen.getByText('cdn.example.net/…/widget.js')).toBeInTheDocument();
+    expect(screen.getByText('https://shop.example.com/static/app.js')).toBeInTheDocument();
+    expect(screen.getByText('https://cdn.example.net/widget.js')).toBeInTheDocument();
     expect(screen.getAllByTestId('digitalExperienceNetworkRenderBlocking')).toHaveLength(1);
   });
 
@@ -132,6 +131,6 @@ describe('NetworkTab', () => {
 
     fireEvent.click(screen.getByTestId('digitalExperienceNetworkRetry'));
 
-    expect(await screen.findByText('app.js')).toBeInTheDocument();
+    expect(await screen.findByText('https://shop.example.com/static/app.js')).toBeInTheDocument();
   });
 });

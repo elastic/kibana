@@ -11,7 +11,7 @@ import {
   termsAggregate,
 } from '../../../lib/helpers/aggregate_fixtures.test_helpers';
 import type { HttpRequestsAggregations, ResourcesAggregations } from './search_responses';
-import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
+import { toHttpRequests, toSlowestResources } from './to_network';
 
 type RequestBucket = HttpRequestsAggregations['inEnvironment']['requests']['buckets'][number];
 type ResourceBucket =
@@ -40,13 +40,12 @@ const request = (
   };
 };
 
-const resources = (buckets: ResourceBucket[], topPages: string[] = []): ResourcesAggregations => {
+const resources = (buckets: ResourceBucket[]): ResourcesAggregations => {
   return {
     ...NO_ENVIRONMENTS,
     inEnvironment: {
       doc_count: 0,
       resources: { doc_count: 0, urls: termsAggregate(buckets) },
-      pageLoads: { doc_count: 0, topPage: termsAggregate(keyBuckets(topPages)) },
     },
   };
 };
@@ -141,23 +140,5 @@ describe('toSlowestResources', () => {
         transferSizeP75Bytes: null,
       },
     ]);
-  });
-});
-
-describe('toPageOrigin', () => {
-  const withTopPage = (keys: string[]) => {
-    return resources([], keys);
-  };
-
-  it('returns the origin of the most loaded page', () => {
-    expect(toPageOrigin(withTopPage(['https://shop.example.com/cart?id=1']))).toBe(
-      'https://shop.example.com'
-    );
-  });
-
-  it('returns null without a page load or with an invalid URL', () => {
-    expect(toPageOrigin(undefined)).toBeNull();
-    expect(toPageOrigin(withTopPage([]))).toBeNull();
-    expect(toPageOrigin(withTopPage(['not a url']))).toBeNull();
   });
 });

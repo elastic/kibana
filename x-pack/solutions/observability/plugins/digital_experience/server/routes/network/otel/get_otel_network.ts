@@ -14,7 +14,7 @@ import {
   NETWORK_RESOURCES_SEARCH_SPAN_NAME,
 } from '../constants';
 import { httpRequestsSearch, resourcesSearch } from './search_requests';
-import { toHttpRequests, toPageOrigin, toSlowestResources } from './to_network';
+import { toHttpRequests, toSlowestResources } from './to_network';
 
 /** The HTTP requests and slowest resources of one EDOT Browser application, for its Network tab. */
 export const getOtelNetwork = async ({
@@ -30,7 +30,6 @@ export const getOtelNetwork = async ({
     serviceName: searchParams.serviceName,
     httpRequests: toHttpRequests(requests),
     slowestResources: toSlowestResources(resources),
-    pageOrigin: toPageOrigin(resources),
     // Browser logs and client spans can each hold an environment the other lacks.
     environments: sortEnvironments([
       ...pickerEnvironments(resources),

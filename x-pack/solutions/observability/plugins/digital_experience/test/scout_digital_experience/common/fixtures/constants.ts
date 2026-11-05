@@ -126,7 +126,6 @@ export const OTEL_SHOP_NETWORK = {
       transferSizeP75Bytes: 4096,
     },
   ],
-  pageOrigin: 'https://otel-shop.example.com',
 } as const;
 
 export const createRole = (feature: KibanaRole['kibana'][number]['feature']): KibanaRole => ({

@@ -53,25 +53,11 @@ describe('SlowestResourcesPanel', () => {
     expect(
       screen.getByRole('heading', { level: 2, name: 'Slowest resources' })
     ).toBeInTheDocument();
-    expect(screen.getByText('app.js')).toBeInTheDocument();
-    expect(screen.getByTitle('https://cdn.example.com/app.js')).toBeInTheDocument();
+    expect(screen.getByText('https://cdn.example.com/app.js')).toBeInTheDocument();
     expect(screen.getByText('script')).toBeInTheDocument();
     expect(screen.getByText('1.80 s')).toBeInTheDocument();
     expect(screen.getByText('4 KB')).toBeInTheDocument();
-    expect(screen.getByText('logo.svg')).toBeInTheDocument();
-  });
-
-  it('shows the host of the resources of another origin than the pages', () => {
-    render(
-      <SlowestResourcesPanel
-        resources={RESOURCES}
-        pageOrigin="https://shop.example.com"
-        isLoading={false}
-      />,
-      { wrapper: EuiProvider }
-    );
-
-    expect(screen.getByText('cdn.example.com/…/app.js')).toBeInTheDocument();
+    expect(screen.getByText('https://cdn.example.com/logo.svg')).toBeInTheDocument();
   });
 
   it('flags only the render-blocking resources', () => {
@@ -91,8 +77,8 @@ describe('SlowestResourcesPanel', () => {
       'aria-pressed',
       'true'
     );
-    expect(screen.getByText('app.js')).toBeInTheDocument();
-    expect(screen.queryByText('logo.svg')).not.toBeInTheDocument();
+    expect(screen.getByText('https://cdn.example.com/app.js')).toBeInTheDocument();
+    expect(screen.queryByText('https://cdn.example.com/logo.svg')).not.toBeInTheDocument();
     expect(screen.queryByRole('searchbox')).not.toBeInTheDocument();
   });
 
@@ -114,8 +100,8 @@ describe('SlowestResourcesPanel', () => {
     });
     renderPanel(many);
 
-    expect(screen.getByText('image-0.png')).toBeInTheDocument();
-    expect(screen.queryByText('image-11.png')).not.toBeInTheDocument();
+    expect(screen.getByText('https://cdn.example.com/image-0.png')).toBeInTheDocument();
+    expect(screen.queryByText('https://cdn.example.com/image-11.png')).not.toBeInTheDocument();
   });
 
   it('shows a spinner while loading', () => {

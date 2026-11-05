@@ -42,16 +42,3 @@ export const toSlowestResources = (aggregations?: ResourcesAggregations): SlowRe
     }
   );
 };
-
-/** The origin of the most loaded page, `null` without a page load or with an invalid URL. */
-export const toPageOrigin = (aggregations?: ResourcesAggregations): string | null => {
-  const url = firstBucketKey(aggregations?.inEnvironment.pageLoads.topPage);
-  if (!url) {
-    return null;
-  }
-  try {
-    return new URL(url).origin;
-  } catch {
-    return null;
-  }
-};

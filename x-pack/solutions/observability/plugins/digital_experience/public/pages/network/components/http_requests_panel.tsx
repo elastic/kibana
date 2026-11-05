@@ -15,7 +15,7 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { formatDurationMs } from '../../../utils/format_duration';
 import { badgeColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 import { DataPanel } from '../../../components/data_panel';
-import { TruncatedCode } from '../../../components/truncated_code';
+import { TruncatedUrl } from '../../../components/truncated_url';
 
 const TITLE = i18n.translate('xpack.digitalExperience.network.httpRequests.title', {
   defaultMessage: 'HTTP requests',
@@ -73,7 +73,7 @@ export function HttpRequestsPanel({
       field: 'url',
       name: URL_LABEL,
       render: (url: string) => {
-        return <TruncatedCode value={url} />;
+        return <TruncatedUrl url={url} />;
       },
     },
     {

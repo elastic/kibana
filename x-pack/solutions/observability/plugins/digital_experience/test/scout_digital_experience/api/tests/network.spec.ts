@@ -32,11 +32,10 @@ apiTest.describe('Digital Experience network API', { tag: DIGITAL_EXPERIENCE_TAG
       });
 
       expect(response).toHaveStatusCode(200);
-      const { httpRequests, slowestResources, pageOrigin, environments } =
+      const { httpRequests, slowestResources, environments } =
         response.body as ApplicationNetworkResponse;
       expect(httpRequests).toStrictEqual(OTEL_SHOP_NETWORK.httpRequests);
       expect(slowestResources).toStrictEqual(OTEL_SHOP_NETWORK.slowestResources);
-      expect(pageOrigin).toBe(OTEL_SHOP_NETWORK.pageOrigin);
       expect(environments).toStrictEqual(['production']);
     }
   );
@@ -56,7 +55,6 @@ apiTest.describe('Digital Experience network API', { tag: DIGITAL_EXPERIENCE_TAG
         serviceName: 'no-such-application',
         httpRequests: [],
         slowestResources: [],
-        pageOrigin: null,
         environments: [],
       });
 
@@ -69,14 +67,13 @@ apiTest.describe('Digital Experience network API', { tag: DIGITAL_EXPERIENCE_TAG
         serviceName: OTEL_APPS.shop,
         httpRequests: [],
         slowestResources: [],
-        pageOrigin: null,
         environments: ['production'],
       });
     }
   );
 
   apiTest(
-    'lists an environment with page loads but no resources, with its page origin',
+    'lists an environment with page loads but no resources',
     async ({ apiClient, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('viewer');
 
@@ -90,7 +87,6 @@ apiTest.describe('Digital Experience network API', { tag: DIGITAL_EXPERIENCE_TAG
         serviceName: OTEL_APPS.docs,
         httpRequests: [],
         slowestResources: [],
-        pageOrigin: 'https://otel-docs.example.com',
         environments: [STAGING_ENVIRONMENT],
       });
     }

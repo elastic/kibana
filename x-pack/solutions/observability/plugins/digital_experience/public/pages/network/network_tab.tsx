@@ -57,11 +57,7 @@ export function NetworkTab({ serviceName }: { serviceName: string }) {
         <>
           <HttpRequestsPanel requests={response?.httpRequests ?? []} isLoading={isLoading} />
           <EuiSpacer size="m" />
-          <SlowestResourcesPanel
-            resources={resources}
-            pageOrigin={response?.pageOrigin ?? undefined}
-            isLoading={isLoading}
-          />
+          <SlowestResourcesPanel resources={resources} isLoading={isLoading} />
         </>
       )}
     </>

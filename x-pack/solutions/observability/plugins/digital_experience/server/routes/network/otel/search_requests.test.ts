@@ -33,15 +33,6 @@ describe('resourcesSearch', () => {
     ]);
   });
 
-  it('finds the most loaded page, for the page origin', () => {
-    const { pageLoads } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs;
-
-    expect(pageLoads.filter.bool.filter).toEqual([
-      { term: { event_name: 'browser.navigation_timing' } },
-    ]);
-    expect(pageLoads.aggs.topPage.terms).toEqual({ field: 'url.full', size: 1 });
-  });
-
   it('orders the resources by the p75 duration and flags the render-blocking ones', () => {
     const { urls } = resourcesSearch(PARAMS).aggs.inEnvironment.aggs.resources.aggs;
 

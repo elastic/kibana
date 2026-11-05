@@ -8,7 +8,7 @@
 import type { AggregationsOf } from '../../../lib/create_digital_experience_traced_es_client';
 import type { httpRequestsSearch, resourcesSearch } from './search_requests';
 
-/** `resourcesSearch`: the resources and top page in one environment, and every environment. */
+/** `resourcesSearch`: the resources in the selected environment, and every environment. */
 export type ResourcesAggregations = AggregationsOf<ReturnType<typeof resourcesSearch>>;
 
 /** `httpRequestsSearch`: the HTTP requests in the selected environment, and every environment. */

@@ -37,8 +37,6 @@ export interface ApplicationNetworkResponse {
   httpRequests: HttpRequestGroup[];
   /** Scripts, styles, images and fonts, by p75 duration, descending (approximate); up to 50. */
   slowestResources: SlowResource[];
-  /** The origin of the most loaded page, `null` without a page load. */
-  pageOrigin: string | null;
   /** The environments with browser data, whatever the `environment` filter, for the picker. */
   environments: string[];
 }

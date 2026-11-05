@@ -23,10 +23,9 @@ import { DIGITAL_EXPERIENCE_EBT_ACTIONS, NETWORK_EBT_ELEMENTS } from '../../../e
 import { useFormatters } from '../../../hooks/use_formatters';
 import { formatBytes } from '../../../utils/format_bytes';
 import { formatDurationMs } from '../../../utils/format_duration';
-import { toUrlFileName } from '../../../utils/url_parts';
 import { badgeColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 import { DataPanel } from '../../../components/data_panel';
-import { TruncatedCode } from '../../../components/truncated_code';
+import { TruncatedUrl } from '../../../components/truncated_url';
 
 const TITLE = i18n.translate('xpack.digitalExperience.network.slowestResources.title', {
   defaultMessage: 'Slowest resources',
@@ -77,12 +76,9 @@ const RENDER_BLOCKING_LABEL = i18n.translate(
 /** The resources with the longest load, flagging the ones that block rendering. */
 export function SlowestResourcesPanel({
   resources,
-  pageOrigin,
   isLoading,
 }: {
   resources: SlowResource[];
-  /** The origin of the application's pages; resources of other origins show their host. */
-  pageOrigin?: string;
   isLoading: boolean;
 }) {
   const { formatNumber } = useFormatters();
@@ -102,7 +98,7 @@ export function SlowestResourcesPanel({
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
             <EuiFlexItem className="eui-textTruncate">
-              <TruncatedCode value={toUrlFileName(url, pageOrigin)} title={url} />
+              <TruncatedUrl url={url} />
             </EuiFlexItem>
             {renderBlocking && (
               <EuiFlexItem grow={false}>

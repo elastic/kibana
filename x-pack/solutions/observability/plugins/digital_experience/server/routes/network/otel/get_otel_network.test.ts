@@ -51,7 +51,6 @@ describe('getOtelNetwork', () => {
       serviceName: 'shop',
       httpRequests: [],
       slowestResources: [],
-      pageOrigin: null,
       environments: [],
     });
   });
@@ -72,7 +71,6 @@ describe('getOtelNetwork', () => {
       .mockResolvedValueOnce(
         withEnvironment('production', {
           resources: { urls: { buckets: [] } },
-          pageLoads: { topPage: { buckets: [] } },
         })
       )
       .mockResolvedValueOnce(withEnvironment('staging', { requests: { buckets: [] } }));
