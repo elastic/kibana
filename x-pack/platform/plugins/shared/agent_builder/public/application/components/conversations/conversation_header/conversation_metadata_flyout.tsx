@@ -38,8 +38,7 @@ import {
 import { useToasts } from '../../../hooks/use_toasts';
 import { labels } from './conversation_metadata_i18n';
 import { getConversationVisibilityLabel } from './conversation_visibility';
-
-const FLYOUT_WIDTH = 500;
+import { useConversationFlyoutWidthProps } from '../../../../flyout/conversation_details_flyout_width';
 
 const getRenameEbtProps = (action: string) =>
   getEbtProps({
@@ -79,6 +78,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
   onClose,
 }) => {
   const flyoutSessionProps = useConversationFlyoutSessionProps(labels.flyoutTitle);
+  const widthProps = useConversationFlyoutWidthProps();
   const { rename: canRename } = useConversationPermissions();
   const { conversationActions } = useConversationContext();
   const { addErrorToast } = useToasts();
@@ -201,7 +201,7 @@ export const ConversationMetadataFlyout: React.FC<ConversationMetadataFlyoutProp
   return (
     <EuiFlyout
       type="push"
-      size={FLYOUT_WIDTH}
+      {...widthProps}
       ownFocus={false}
       onClose={onClose}
       closeButtonProps={{ 'aria-label': labels.close }}
