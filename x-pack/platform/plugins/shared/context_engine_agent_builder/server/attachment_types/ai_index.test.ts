@@ -104,9 +104,78 @@ describe('createAiIndexAttachmentType', () => {
       throw new Error('expected a text representation');
     }
     expect(representation.value).toContain('Destination: data_stream "ai-index-ds-my-ai-index"');
-    expect(representation.value).toContain('Sources: esql:FROM tickets');
-    expect(representation.value).toContain('Existing automations (workflow ids): wf-1');
+    expect(representation.value).toContain('Sources:\n- esql:FROM tickets');
+    expect(representation.value).toContain('Existing automations:\n- wf-1');
     expect(representation.value).toContain('Traces: none configured');
+  });
+
+  it('renders pre-explored context when a source, automation or trace carries it', async () => {
+    const formatted = await attachmentType.format(
+      {
+        id: 'attachment-1',
+        type: attachmentType.id,
+        data: {
+          ...validData,
+          sources: [
+            {
+              type: 'esql' as const,
+              value: 'FROM tickets',
+              row_count: 42,
+              fields: [{ path: 'subject', type: 'text', searchable: true, aggregatable: false }],
+              sample_documents: [{ subject: 'Cannot log in' }],
+            },
+          ],
+          automations: [{ type: 'workflow' as const, value: 'wf-1', yaml: 'name: wf-1' }],
+          traces: [
+            {
+              type: 'esql' as const,
+              value: 'FROM traces-*',
+              query: 'FROM traces-*',
+              row_count: 128,
+            },
+          ],
+          signals_summary: { total: 3, by_tag: [{ tag: 'coverage_gap', count: 3 }] },
+        },
+      },
+      formatContext
+    );
+    const representation = await formatted.getRepresentation?.();
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+
+    expect(representation.value).toContain('42 row(s)');
+    expect(representation.value).toContain('subject: text');
+    expect(representation.value).toContain('Cannot log in');
+    expect(representation.value).toContain('wf-1:\n  name: wf-1');
+    expect(representation.value).toContain('esql: FROM traces-* — 128 row(s)');
+    expect(representation.value).toContain('Signals: 3 (coverage_gap: 3)');
+  });
+
+  it('surfaces an inspection failure instead of pretending nothing was tried', async () => {
+    const formatted = await attachmentType.format(
+      {
+        id: 'attachment-1',
+        type: attachmentType.id,
+        data: {
+          ...validData,
+          sources: [
+            { type: 'esql' as const, value: 'FROM tickets', inspection_error: 'index not found' },
+          ],
+          automations: [
+            { type: 'workflow' as const, value: 'wf-1', fetch_error: 'workflow was deleted' },
+          ],
+        },
+      },
+      formatContext
+    );
+    const representation = await formatted.getRepresentation?.();
+    if (representation?.type !== 'text') {
+      throw new Error('expected a text representation');
+    }
+
+    expect(representation.value).toContain('could not be inspected: index not found');
+    expect(representation.value).toContain('definition could not be read: workflow was deleted');
   });
 
   it('validates attachment data with traces including derived query', async () => {

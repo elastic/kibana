@@ -84,9 +84,11 @@ const createProvider = ({
     },
   };
 
-  const provider = createSuggestAutomationProvider({ agentBuilder, application });
+  const http = coreMock.createStart().http;
 
-  return { provider, openChat, chatEvents$, getChatEvents$ };
+  const provider = createSuggestAutomationProvider({ agentBuilder, application, http });
+
+  return { provider, openChat, chatEvents$, getChatEvents$, http };
 };
 
 describe('createSuggestAutomationProvider', () => {
@@ -138,21 +140,21 @@ describe('createSuggestAutomationProvider', () => {
     expect(provider.canSuggest({ aiIndex, isManaged: false })).toBe(false);
   });
 
-  it('keeps skill ids out of the message the user reads, since the attachment carries them', () => {
+  it('keeps skill ids out of the message the user reads, since the attachment carries them', async () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
 
     const { initialMessage } = openChat.mock.calls[0][0];
     expect(initialMessage).not.toMatch(/skill:\/\//);
     expect(initialMessage).not.toMatch(/attachment/i);
   });
 
-  it('uses a short attachment label even when the AI index description is long', () => {
+  it('uses a short attachment label even when the AI index description is long', async () => {
     const { provider, openChat } = createProvider();
     const longDescription = 'a'.repeat(1500);
 
-    provider.suggestAutomation({
+    await provider.suggestAutomation({
       aiIndex: { ...aiIndex, description: longDescription },
       spaceId: 'default',
       onSaved: jest.fn(),
@@ -172,10 +174,10 @@ describe('createSuggestAutomationProvider', () => {
     );
   });
 
-  it('opens agent builder chat with the AI index attachment', () => {
+  it('opens agent builder chat with the AI index attachment', async () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
 
     expect(openChat).toHaveBeenCalledWith(
       expect.objectContaining({
@@ -202,22 +204,74 @@ describe('createSuggestAutomationProvider', () => {
     );
   });
 
-  it('does not force a new conversation, so re-opening for the same AI index reuses the session', () => {
+  it('fetches and attaches pre-explored context instead of the plain index snapshot', async () => {
+    const { provider, openChat, http } = createProvider();
+    const context = {
+      sources: [{ ...aiIndex.sources[0], row_count: 42, sample_documents: [{ subject: 'Hi' }] }],
+      automations: [{ ...aiIndex.automations[0], yaml: 'name: wf-existing' }],
+      traces: [{ ...aiIndex.traces[0], row_count: 7 }],
+      signals_summary: { total: 3, by_tag: [{ tag: 'coverage_gap', count: 3 }] },
+    };
+    (http.get as jest.Mock).mockResolvedValueOnce(context);
+
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(http.get).toHaveBeenCalledWith(
+      expect.stringContaining('my-ai-index'),
+      expect.objectContaining({ version: expect.any(String) })
+    );
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            data: expect.objectContaining(context),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('falls back to the plain index snapshot when the context fetch fails', async () => {
+    const { provider, openChat, http } = createProvider();
+    (http.get as jest.Mock).mockRejectedValueOnce(new Error('network error'));
+
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+
+    expect(openChat).toHaveBeenCalledWith(
+      expect.objectContaining({
+        attachments: [
+          expect.objectContaining({
+            data: expect.objectContaining({
+              sources: aiIndex.sources,
+              automations: aiIndex.automations,
+              traces: aiIndex.traces,
+            }),
+          }),
+        ],
+      })
+    );
+  });
+
+  it('does not force a new conversation, so re-opening for the same AI index reuses the session', async () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
 
     // `newConversation` must be left unset: `agentBuilder.openChat` restores the
     // conversation persisted under `sessionTag` when this flag is absent/false.
     expect(openChat.mock.calls[0][0]).not.toHaveProperty('newConversation');
   });
 
-  it('uses a distinct sessionTag per AI index, so different AI indexes never share a conversation', () => {
+  it('uses a distinct sessionTag per AI index, so different AI indexes never share a conversation', async () => {
     const { provider, openChat } = createProvider();
     const otherAiIndex: GetAiIndexResponse = { ...aiIndex, id: 'other-ai-index' };
 
-    provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
-    provider.suggestAutomation({ aiIndex: otherAiIndex, spaceId: 'default', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'default', onSaved: jest.fn() });
+    await provider.suggestAutomation({
+      aiIndex: otherAiIndex,
+      spaceId: 'default',
+      onSaved: jest.fn(),
+    });
 
     expect(openChat.mock.calls[0][0].sessionTag).toBe(
       buildSuggestAutomationSessionTag('default', 'my-ai-index')
@@ -227,11 +281,11 @@ describe('createSuggestAutomationProvider', () => {
     );
   });
 
-  it('scopes sessionTag to the given space so the same AI index id in different spaces does not share a conversation', () => {
+  it('scopes sessionTag to the given space so the same AI index id in different spaces does not share a conversation', async () => {
     const { provider, openChat } = createProvider();
 
-    provider.suggestAutomation({ aiIndex, spaceId: 'marketing', onSaved: jest.fn() });
-    provider.suggestAutomation({ aiIndex, spaceId: 'sales', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'marketing', onSaved: jest.fn() });
+    await provider.suggestAutomation({ aiIndex, spaceId: 'sales', onSaved: jest.fn() });
 
     expect(openChat.mock.calls[0][0].sessionTag).toBe(
       buildSuggestAutomationSessionTag('marketing', 'my-ai-index')

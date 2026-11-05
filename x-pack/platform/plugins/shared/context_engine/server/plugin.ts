@@ -32,6 +32,7 @@ import type {
 import type { KiVerifierWorkflowRunner } from './ki_verification';
 import { registerFeatures } from './features';
 import { registerAiIndexRoutes } from './routes/ai_indices';
+import { registerAutomationSuggestionRoutes } from './routes/automation_suggestions';
 import { registerSignalRoutes } from './routes/signals';
 import type {
   FeedbackAnalysisScheduleService,
@@ -83,7 +84,7 @@ export class ContextEnginePlugin
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
-    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowEnablementApi) | undefined
   > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
@@ -321,6 +322,20 @@ export class ContextEnginePlugin
       getFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
     });
 
+    registerAutomationSuggestionRoutes({
+      router,
+      getAiIndexService,
+      getSpaces: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.spaces;
+      },
+      getSecurity: async () => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        return startDeps.security;
+      },
+      getWorkflows: () => this.workflowsManagementApiPromise,
+    });
+
     return {
       registerAiIndex: (id, properties) => this.aiIndexRegistry.register(id, properties),
     };
@@ -332,7 +347,9 @@ export class ContextEnginePlugin
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
         .onSetup<{
-          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+          workflowsManagement: {
+            management: DeleteWorkflowsApi & KiVerifierWorkflowRunner & WorkflowEnablementApi;
+          };
         }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined

@@ -65,6 +65,7 @@ describe('buildFeedbackContext', () => {
     };
     selectSignalsMock.mockResolvedValue({
       patterns: [buildPattern('coverage_gap', 12)],
+      tagCounts: [{ tag: 'coverage_gap', count: 12 }],
       spaces: ['default'],
       signalCount: 40,
       window: WINDOW,
@@ -159,6 +160,7 @@ describe('buildFeedbackContext', () => {
   it('reports no signals when nothing was classified as a problem, so no LLM call is made', async () => {
     selectSignalsMock.mockResolvedValue({
       patterns: [],
+      tagCounts: [],
       spaces: ['default'],
       signalCount: 31,
       window: WINDOW,
@@ -173,6 +175,7 @@ describe('buildFeedbackContext', () => {
   it('reports no signals when the window was empty', async () => {
     selectSignalsMock.mockResolvedValue({
       patterns: [],
+      tagCounts: [],
       spaces: [],
       signalCount: 0,
       window: WINDOW,
