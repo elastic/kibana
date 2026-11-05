@@ -170,7 +170,12 @@ const onboardingExecuteRoute = createServerRoute({
 
       const inputs: SignificantEventsKIsOnboardingInputs = {
         sourceId: source.id,
-        ...(body.rootTriggeredBy && { rootTriggeredBy: body.rootTriggeredBy }),
+        // Only the continuous onboarding workflow, which runs as the service account, may mark a
+        // run as scheduled; a user could otherwise spend the scheduled extraction quota.
+        ...(body.rootTriggeredBy &&
+          server.core.security.authc.getPrincipal(request)?.type === 'service_account' && {
+            rootTriggeredBy: body.rootTriggeredBy,
+          }),
         sourceSlug: source.slug,
         features: {
           skip: skipFeatures,
