@@ -277,6 +277,32 @@ describe('preprocessAlertInputs', () => {
       expect(mockEsClient.mget).not.toHaveBeenCalled();
     });
 
+    it.each([
+      ['a non-array', 'alert-1', 'inputs.event.alertIds must be an array.'],
+      ['a null entry', [null], 'non-empty string "_id" and "_index"'],
+      [
+        'an object _id',
+        [{ _id: { nested: true }, _index: '.alerts-test-default' }],
+        'non-empty string "_id" and "_index"',
+      ],
+      [
+        'a wildcard _index',
+        [{ _id: 'alert-1', _index: '.alerts-*' }],
+        'must name a single index, alias, or data stream',
+      ],
+    ])('rejects %s as an input error without querying', async (_name, alertIds, message) => {
+      const result = preprocessAlertInputs(
+        { event: { triggerType: 'alert', alertIds } },
+        mockContext,
+        'default',
+        mockLogger
+      );
+
+      await expect(result).rejects.toBeInstanceOf(WorkflowTriggerInputError);
+      await expect(result).rejects.toThrow(message);
+      expect(mockEsClient.mget).not.toHaveBeenCalled();
+    });
+
     it('should throw error when alerts are missing rule information', async () => {
       const alertSourceWithoutRule = {
         '@timestamp': '2024-01-01T00:00:00Z',

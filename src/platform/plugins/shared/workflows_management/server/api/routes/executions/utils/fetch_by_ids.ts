@@ -33,6 +33,8 @@ export const assertWithinRunLimit = (count: number, plural: string): void => {
   }
 };
 
+const isClientErrorStatus = (status: number): boolean => status >= 400 && status < 500;
+
 const selectionKey = ({ _id, _index }: DocumentSelection) => `${_index}\u0000${_id}`;
 
 /**
@@ -139,10 +141,12 @@ export const fetchDocumentFieldsByIds = async ({
     const documents: FetchedFields[] = [];
     const found = new Set<string>();
     const failures: string[] = [];
+    const failureStatuses: number[] = [];
     responses.forEach((response, position) => {
       const [requestedIndex, requestedIds] = requestedIndices[position];
       if ('error' in response) {
         failures.push(`${requestedIndex}: ${response.error.reason ?? response.error.type}`);
+        failureStatuses.push(response.status);
         return;
       }
       // `_id` is optional on the client's hit type even though a concrete search hit always has one.
@@ -161,9 +165,14 @@ export const fetchDocumentFieldsByIds = async ({
       }
     });
 
-    // With every sub-search failed this is an Elasticsearch problem, not an empty selection.
+    // With every sub-search failed this is not an empty selection. A 4xx from every one of them
+    // means the selection itself is unusable (a missing remote cluster, no read privilege);
+    // anything else is an Elasticsearch problem the caller cannot fix.
     if (failures.length === requestedIndices.length) {
-      throw new Error(`Every index search failed (${failures.join('; ')})`);
+      const message = `Every index search failed (${failures.join('; ')})`;
+      throw failureStatuses.every(isClientErrorStatus)
+        ? new WorkflowTriggerInputError(message)
+        : new Error(message);
     }
     for (const failure of failures) {
       logger.warn(`Failed to search index ${failure}`);
@@ -177,6 +186,9 @@ export const fetchDocumentFieldsByIds = async ({
 
     return documents;
   } catch (error) {
+    if (error instanceof WorkflowTriggerInputError) {
+      throw error;
+    }
     logger.error(
       `Failed to fetch documents: ${error instanceof Error ? error.message : String(error)}`
     );

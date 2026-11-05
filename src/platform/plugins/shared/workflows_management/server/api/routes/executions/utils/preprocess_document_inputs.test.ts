@@ -24,8 +24,8 @@ const msearchResponses = (...hitsPerIndex: Hit[][]) => ({
   responses: hitsPerIndex.map((hits) => ({ status: 200, hits: { hits } })),
 });
 
-const msearchError = (reason: string) => ({
-  status: 500,
+const msearchError = (reason: string, status = 500) => ({
+  status,
   error: { type: 'search_phase_execution_exception', reason },
 });
 
@@ -248,17 +248,49 @@ describe('preprocessDocumentInputs', () => {
       expect(mockLogger.warn).toHaveBeenCalledWith('Document not found: doc-2 in index logs-b');
     });
 
-    it('surfaces a failure of every index search as an error, not an empty selection', async () => {
-      mockEsClient.msearch.mockResolvedValue({ responses: [msearchError('cluster unavailable')] });
+    // A 4xx from every sub-search means the selection is unusable, so the caller gets a 400. A
+    // 5xx is an Elasticsearch problem the caller cannot fix and must not read as bad input.
+    it.each([
+      ['an input error when every search is rejected with a 4xx', 404, true],
+      ['a server error when every search fails with a 5xx', 500, false],
+    ])('surfaces a failure of every index search as %s', async (_name, status, isInputError) => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('cluster unavailable', status)],
+      });
+
+      const error = await preprocessDocumentInputs(
+        { event: { triggerType: 'document', documentIds } },
+        mockContext,
+        mockLogger
+      ).catch((caught) => caught);
+
+      expect(error).toEqual(
+        expect.objectContaining({ message: expect.stringContaining('cluster unavailable') })
+      );
+      expect(error instanceof WorkflowTriggerInputError).toBe(isInputError);
+      expect(mockLogger.error).toHaveBeenCalledTimes(isInputError ? 0 : 1);
+    });
+
+    it('treats a mix of 4xx and 5xx sub-search failures as a server error', async () => {
+      mockEsClient.msearch.mockResolvedValue({
+        responses: [msearchError('no such remote cluster', 404), msearchError('shard failure')],
+      });
 
       const result = preprocessDocumentInputs(
-        { event: { triggerType: 'document', documentIds } },
+        {
+          event: {
+            triggerType: 'document',
+            documentIds: [
+              { _id: 'doc-1', _index: 'remote:logs' },
+              { _id: 'doc-2', _index: 'logs-b' },
+            ],
+          },
+        },
         mockContext,
         mockLogger
       );
 
       await expect(result).rejects.not.toBeInstanceOf(WorkflowTriggerInputError);
-      await expect(result).rejects.toThrow('cluster unavailable');
     });
 
     it('drops documentIds from the expanded event', async () => {
