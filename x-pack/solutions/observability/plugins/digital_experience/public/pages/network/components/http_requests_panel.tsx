@@ -13,7 +13,7 @@ import { EmptyCellValue } from '@kbn/shared-ux-column-presets';
 import type { HttpRequestGroup } from '../../../../common/types/network';
 import { useFormatters } from '../../../hooks/use_formatters';
 import { formatDurationMs } from '../../../utils/format_duration';
-import { metricColumnPreset } from '../../../utils/column_presets';
+import { badgeColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 import { DataPanel } from '../../../components/data_panel';
 import { TruncatedCode } from '../../../components/truncated_code';
 
@@ -64,7 +64,7 @@ export function HttpRequestsPanel({
     {
       field: 'method',
       name: METHOD_LABEL,
-      width: '6em',
+      ...badgeColumnPreset<HttpRequestGroup>(),
       render: (method: string) => {
         return <EuiBadge color="hollow">{method}</EuiBadge>;
       },

@@ -29,6 +29,13 @@ export const applicationColumnPreset: ColumnPreset = () => ({
   className: 'eui-textNoWrap',
 });
 
+/** A short badge, e.g. an HTTP method or a resource type. */
+export const badgeColumnPreset: ColumnPreset = () => ({
+  width: '7em',
+  minWidth: '7em',
+  className: 'eui-textNoWrap',
+});
+
 /** A relative time such as "5 minutes ago". */
 export const timeColumnPreset: ColumnPreset = () => ({
   width: '9em',

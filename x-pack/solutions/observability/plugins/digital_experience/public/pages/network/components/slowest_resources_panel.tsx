@@ -24,7 +24,7 @@ import { useFormatters } from '../../../hooks/use_formatters';
 import { formatBytes } from '../../../utils/format_bytes';
 import { formatDurationMs } from '../../../utils/format_duration';
 import { toUrlFileName } from '../../../utils/url_parts';
-import { metricColumnPreset } from '../../../utils/column_presets';
+import { badgeColumnPreset, metricColumnPreset } from '../../../utils/column_presets';
 import { DataPanel } from '../../../components/data_panel';
 import { TruncatedCode } from '../../../components/truncated_code';
 
@@ -122,7 +122,7 @@ export function SlowestResourcesPanel({
     {
       field: 'initiatorType',
       name: TYPE_LABEL,
-      width: '7em',
+      ...badgeColumnPreset<SlowResource>(),
       render: (initiatorType: string | null) => {
         return initiatorType ? (
           <EuiBadge color="hollow">{initiatorType}</EuiBadge>
