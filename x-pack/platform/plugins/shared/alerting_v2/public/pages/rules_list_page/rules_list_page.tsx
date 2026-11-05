@@ -7,6 +7,7 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { EuiEmptyPrompt } from '@elastic/eui';
+import { getRuleBuilderCreateOptions } from '@kbn/alerting-v2-rule-form';
 import { ContentList, ContentListProvider, ContentListToolbar } from '@kbn/content-list';
 import { useService } from '@kbn/core-di-browser';
 import { i18n } from '@kbn/i18n';
@@ -79,15 +80,20 @@ export const RulesListPage = () => {
     closeCreateOptionsFlyout();
     navigateToSequenceBuilder();
   };
-  const onCreateThresholdRuleFromOptionsFlyout = () => {
-    openCreateBuilderFlyout('threshold');
-  };
+  const onCreateBuilderRuleFromOptionsFlyout = useCallback(
+    (builderType: string) => {
+      openCreateBuilderFlyout(builderType);
+    },
+    [openCreateBuilderFlyout]
+  );
+  const builderOptions = useMemo(() => getRuleBuilderCreateOptions(), []);
 
   const emptyState = canWrite ? (
     <RuleCreateOptionsPanel
       onCreateEsqlRule={openCreateFlyout}
       onCreateWithAgent={navigateToAgentBuilder}
-      onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+      builderOptions={builderOptions}
+      onCreateBuilderRule={onCreateBuilderRuleFromOptionsFlyout}
     />
   ) : (
     <EuiEmptyPrompt
@@ -189,7 +195,8 @@ export const RulesListPage = () => {
           onClose={handlePickerClose}
           onCreateEsqlRule={openCreateFlyout}
           onCreateWithAgent={onCreateWithAgentFromOptionsFlyout}
-          onCreateThresholdRule={onCreateThresholdRuleFromOptionsFlyout}
+          builderOptions={builderOptions}
+          onCreateBuilderRule={onCreateBuilderRuleFromOptionsFlyout}
           onBuildSequence={showBuildSequence ? onBuildSequenceFromOptionsFlyout : undefined}
         />
       ) : null}
