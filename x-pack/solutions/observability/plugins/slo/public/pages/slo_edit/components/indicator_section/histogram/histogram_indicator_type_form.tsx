@@ -22,11 +22,14 @@ import { DataPreviewChart } from '../../common/data_preview_chart';
 import { QueryBuilder } from '../../common/query_builder';
 import { useIndicatorDataView } from '../custom_common/use_indicator_data_view';
 import { HistogramIndicator } from './histogram_indicator';
+import { HISTOGRAM_FIELD_TYPES } from '../../../constants';
 
 export function HistogramIndicatorTypeForm() {
   const { dataView, loading: isIndexFieldsLoading } = useIndicatorDataView();
 
-  const histogramFields = dataView?.fields.filter((field) => field.type === 'histogram');
+  const histogramFields = dataView?.fields.filter((field) =>
+    HISTOGRAM_FIELD_TYPES.includes(field.type)
+  );
 
   return (
     <>
