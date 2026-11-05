@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import React, { Suspense, useCallback, useEffect, useState } from 'react';
-import {
-  EuiButtonEmpty,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-  EuiSelect,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
+import React, { useCallback, useEffect, useState } from 'react';
+import { EuiButtonEmpty, EuiEmptyPrompt, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout } from '@kbn/ui-callout';
@@ -32,18 +23,14 @@ import { toQueryContext, toTemplateData } from '../model/custom_template';
 import { getCellDisplayName, getOwnQuery } from '../model/references';
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
-import { CustomCellFlyout, GenerateWithChatButton } from './custom_cell_flyout';
-import { LazyEsqlEditor } from './lazy_esql_editor';
+import {
+  CustomCellFlyout,
+  GenerateWithChatButton,
+  toDraft,
+  type CustomCellDraft,
+  type TemplatePreview,
+} from './custom_cell_flyout';
 import { useNotebook } from './notebook_context';
-
-const SOURCE_LABEL = i18n.translate('xpack.notebook.customCell.source', {
-  defaultMessage: 'Source',
-});
-
-const OWN_QUERY_OPTION = 'notebook-own-query';
-const OWN_QUERY_LABEL = i18n.translate('xpack.notebook.customCell.ownQuery', {
-  defaultMessage: 'Own ES|QL query',
-});
 
 const IFRAME_TITLE = i18n.translate('xpack.notebook.customCell.iframeTitle', {
   defaultMessage: 'Custom panel',
@@ -102,22 +89,23 @@ const useCustomHtml = (template: string, table: Datatable | undefined): Rendered
 /** The rendered custom panel, or a prompt explaining why there is none yet. */
 export const CustomCanvas = ({
   cell,
-  previewTemplate,
+  preview,
   onGenerateWithChat,
 }: {
   cell: CustomCellDefinition;
-  previewTemplate?: string;
+  /** A draft from the edit flyout, shown in place of the applied template and data. */
+  preview?: TemplatePreview;
   /** Offered in the prompt while there is no template. */
   onGenerateWithChat?: () => void;
 }) => {
   const { store } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
   const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
-  const template = previewTemplate ?? cell.template;
+  const template = preview?.template ?? cell.template;
   const ownQuery = getOwnQuery(cell);
   const hasData = ownQuery === undefined ? cell.sourceCell !== null : Boolean(ownQuery.trim());
-  const isWaiting = hasData && !table;
-  const { html, error } = useCustomHtml(template, isWaiting ? undefined : table);
+  const isWaiting = !preview && hasData && !table;
+  const { html, error } = useCustomHtml(template, preview ? preview.table : table);
 
   if (error) {
     return (
@@ -146,7 +134,7 @@ export const CustomCanvas = ({
                 defaultMessage: 'Waiting for the source cell to produce results.',
               })
             : i18n.translate('xpack.notebook.customCell.noTemplate', {
-                defaultMessage: 'Edit the panel to write an HTML template for the results.',
+                defaultMessage: 'Edit the panel to pick its data and write an HTML template.',
               })
         }
         actions={
@@ -164,102 +152,67 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
   const { plugins } = useNotebookServices();
   const { store, scheduler } = useNotebook();
   const runtime = useStateFromPublishingSubject(store.getRuntime$(cell.id));
-  const cells = useStateFromPublishingSubject(store.cells$);
   const [isEditing, setIsEditing] = useState(false);
-  const [previewTemplate, setPreviewTemplate] = useState<string>();
+  const [preview, setPreview] = useState<TemplatePreview>();
   const panelChat = plugins.customContent?.panelChat;
+  const { id } = cell;
 
-  const { id, sourceCell, template } = cell;
-  const ownQuery = getOwnQuery(cell);
-  const source = sourceCell ? cells[sourceCell] : undefined;
-  const sourceQuery = source?.type === 'esql' ? source.query : undefined;
-  const table = runtime.output?.kind === 'table' ? runtime.output.table : undefined;
-  const esqlCells = Object.values(cells).filter((candidate) => candidate.type === 'esql');
-  const [draftQuery, setDraftQuery] = useState(ownQuery ?? '');
-  const [draftBase, setDraftBase] = useState(ownQuery);
-  if (draftBase !== ownQuery) {
-    setDraftBase(ownQuery);
-    setDraftQuery(ownQuery ?? '');
-  }
-
-  useEffect(
-    () => scheduler.markEdited(id, ownQuery !== undefined && draftQuery !== ownQuery),
-    [scheduler, id, ownQuery, draftQuery]
-  );
-
-  const runQuery = useCallback(
-    async (query: string): Promise<void> => {
-      store.updateCell(id, (current) =>
-        current.type === 'custom' ? { ...current, query } : current
-      );
-      await scheduler.runCell(id);
+  /** Applies the edited fields; a changed own query is run, since editing a query alone runs nothing. */
+  const applyDraft = useCallback(
+    (draft: Partial<CustomCellDraft>) => {
+      const current = store.cells$.getValue()[id];
+      if (current?.type !== 'custom') return;
+      const next = { ...current, ...draft };
+      store.updateCell(id, () => next);
+      const nextQuery = getOwnQuery(next);
+      if (nextQuery !== undefined && nextQuery !== getOwnQuery(current)) {
+        void scheduler.runCell(id);
+      }
     },
     [store, scheduler, id]
-  );
-
-  const setTemplate = useCallback(
-    (next: string) =>
-      store.updateCell(id, (current) =>
-        current.type === 'custom' ? { ...current, template: next } : current
-      ),
-    [store, id]
   );
 
   // A query the agent proposes only applies to a cell with its own; a source cell's is left alone.
   useEffect(
     () =>
-      panelChat?.watch(id, ({ template: generated, esqlQuery }) => {
-        setTemplate(generated);
+      panelChat?.watch(id, ({ template, esqlQuery }) => {
         const current = store.cells$.getValue()[id];
         if (current?.type !== 'custom') return;
-        const currentQuery = getOwnQuery(current);
-        if (currentQuery === undefined || esqlQuery === undefined) return;
-        if (esqlQuery !== currentQuery) void runQuery(esqlQuery);
+        const takesQuery = getOwnQuery(current) !== undefined && esqlQuery !== undefined;
+        applyDraft(takesQuery ? { template, query: esqlQuery } : { template });
       }),
-    [panelChat, id, setTemplate, store, runQuery]
+    [panelChat, id, store, applyDraft]
   );
-
-  const selectSource = (value: string) =>
-    store.updateCell(id, (current) => {
-      if (current.type !== 'custom') return current;
-      return value === OWN_QUERY_OPTION
-        ? { ...current, dataSource: 'query', query: current.query ?? sourceQuery ?? '' }
-        : { ...current, dataSource: 'cell', sourceCell: value };
-    });
 
   const closeEditor = useCallback(() => {
     setIsEditing(false);
-    setPreviewTemplate(undefined);
+    setPreview(undefined);
   }, []);
 
-  const applyTemplate = useCallback(
-    (next: string) => {
-      setTemplate(next);
-      closeEditor();
-    },
-    [setTemplate, closeEditor]
-  );
-
   const generateWithChat = useCallback(
-    (draft: string) => {
+    ({ template, ...data }: CustomCellDraft) => {
       if (!panelChat) return;
       closeEditor();
+      applyDraft(data);
+      const { cells$ } = store;
+      const source = data.sourceCell ? cells$.getValue()[data.sourceCell] : undefined;
+      const sourceQuery = source?.type === 'esql' ? source.query : undefined;
       panelChat.open({
         panelId: id,
         title: getCellDisplayName(cell),
-        template: draft,
-        esqlQuery: ownQuery ?? sourceQuery,
+        template,
+        esqlQuery: data.dataSource === 'query' ? data.query : sourceQuery,
         ...toQueryContext(runtime.runParams),
       });
     },
-    [panelChat, closeEditor, id, cell, ownQuery, sourceQuery, runtime.runParams]
+    [panelChat, closeEditor, applyDraft, store, id, cell, runtime.runParams]
   );
 
   return (
     <CellFrame
       cell={cell}
       runtime={runtime}
-      onRun={() => (ownQuery === undefined ? scheduler.runCell(id) : runQuery(draftQuery))}
+      onRun={() => scheduler.runCell(id)}
       headerActions={
         <EuiFlexItem grow={false}>
           <EuiButtonEmpty
@@ -273,61 +226,21 @@ export const CustomCell = ({ cell }: { cell: CustomCellDefinition }) => {
         </EuiFlexItem>
       }
     >
-      <EuiFlexGroup gutterSize="s" responsive={false}>
-        <EuiFlexItem grow={false} css={{ minWidth: 200 }}>
-          <EuiSelect
-            compressed
-            prepend={SOURCE_LABEL}
-            aria-label={SOURCE_LABEL}
-            hasNoInitialSelection={ownQuery === undefined && !sourceCell}
-            value={ownQuery !== undefined ? OWN_QUERY_OPTION : sourceCell ?? ''}
-            options={[
-              { value: OWN_QUERY_OPTION, text: OWN_QUERY_LABEL },
-              ...esqlCells.map((esqlCell) => ({
-                value: esqlCell.id,
-                text: getCellDisplayName(esqlCell),
-              })),
-            ]}
-            onChange={(event) => selectSource(event.target.value)}
-            data-test-subj="notebookCustomSource"
-          />
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      {ownQuery !== undefined && (
-        <>
-          <EuiSpacer size="s" />
-          <Suspense fallback={<EuiLoadingSpinner />}>
-            <LazyEsqlEditor
-              query={{ esql: draftQuery }}
-              onTextLangQueryChange={({ esql }) => setDraftQuery(esql)}
-              onTextLangQuerySubmit={(query) => runQuery(query?.esql ?? draftQuery)}
-              isLoading={runtime.status === 'running'}
-              editorIsInline
-              hideRunQueryButton
-              hideQueryHistory
-              hideQuickSearch
-              disableAutoFocus
-              expandToFitQueryOnMount
-              dataTestSubj={`notebookCustomQueryEditor-${cell.name}`}
-            />
-          </Suspense>
-        </>
-      )}
-      <EuiSpacer size="s" />
       <div css={cellContainerCss} data-test-subj="notebookCustomContainer">
         <CustomCanvas
           cell={cell}
-          previewTemplate={previewTemplate}
-          onGenerateWithChat={panelChat ? () => generateWithChat('') : undefined}
+          preview={preview}
+          onGenerateWithChat={panelChat ? () => generateWithChat(toDraft(cell)) : undefined}
         />
       </div>
       {isEditing && (
         <CustomCellFlyout
-          template={template}
-          sourceName={ownQuery === undefined && source ? getCellDisplayName(source) : undefined}
-          table={table}
-          onPreview={setPreviewTemplate}
-          onApply={applyTemplate}
+          cell={cell}
+          onPreview={setPreview}
+          onApply={(draft) => {
+            applyDraft(draft);
+            closeEditor();
+          }}
           onClose={closeEditor}
           onGenerateWithChat={panelChat ? generateWithChat : undefined}
         />
