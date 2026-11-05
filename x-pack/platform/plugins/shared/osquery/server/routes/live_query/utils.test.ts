@@ -107,5 +107,21 @@ describe('getActionResponses', () => {
       expect(response.pending).toBe(1);
       expect(response.responded).toBe(1);
     });
+
+    it('never reports negative pending when the estimate exceeds the targeted agents', async () => {
+      const search = searchClient({
+        doc_count: 3,
+        rows_count: { value: 3 },
+        responding_agents: { value: 3 },
+        responses: { buckets: [{ key: 'success', doc_count: 3 }] },
+      });
+
+      const response = await lastValueFrom(
+        getActionResponses(search, 'action-1', 2, undefined, 'default')
+      );
+
+      // The details route completes a query on `pending === 0`, so an overshoot must not stall it.
+      expect(response.pending).toBe(0);
+    });
   });
 });

@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import {
+  RESULTS_MAX_READS_PER_POLL,
+  RESULTS_MAX_WINDOW,
+  RESULTS_PAGE_SIZE,
+} from '../../../common/workflows/contract/budget';
 import { apiError, createContextManager, resultEdges } from '../test_helpers';
 import { buildRow } from './build_rows';
 import { collectResults } from './collect_results';
@@ -179,6 +184,100 @@ describe('collectResults', () => {
       ]);
       expect(rows).toHaveLength(200);
       expect(readFailed).toBe(true);
+    });
+
+    it('returns to the full page size once the offset is a whole page again after one failure', async () => {
+      const pages: Array<{ page: number; pageSize: number }> = [];
+      const { result } = collect(
+        {
+          [RESULTS]: ({ query }) => {
+            const pageSize = Number(query?.pageSize);
+            pages.push({ page: Number(query?.page), pageSize });
+
+            // Only the second 200-row page fails, as one transient error would.
+            return pages.length === 2 ? apiError(503) : { data: { edges: resultEdges(pageSize) } };
+          },
+        },
+        { rowCount: 600, maxRows: 600 }
+      );
+
+      const { rows, readFailed } = await result;
+
+      // The failed page is re-read at offset 200 in 25-row pages up to offset 400, where a whole
+      // 200-row page starts again.
+      expect(pages).toEqual([
+        { page: 0, pageSize: 200 },
+        { page: 1, pageSize: 200 },
+        ...Array.from({ length: 8 }, (_, index) => ({ page: 8 + index, pageSize: 25 })),
+        { page: 2, pageSize: 200 },
+      ]);
+      expect(rows).toHaveLength(600);
+      expect(readFailed).toBe(false);
+    });
+
+    it('reads all 10000 rows within the read cap after one transient failure on the first page', async () => {
+      let call = 0;
+      const { contextManager, result } = collect(
+        {
+          [RESULTS]: ({ query }) => {
+            call += 1;
+
+            return call === 1
+              ? apiError(503)
+              : { data: { edges: resultEdges(Number(query?.pageSize)) } };
+          },
+        },
+        { rowCount: 10000, maxRows: 10000 }
+      );
+
+      const { rows, readFailed } = await result;
+
+      expect(rows).toHaveLength(10000);
+      expect(readFailed).toBe(false);
+      // 8 small pages up to the first whole 200-row page, then 200-row pages for the rest.
+      expect(contextManager.callKibanaApi.mock.calls.length).toBeLessThan(100);
+    });
+
+    it('stops after RESULTS_MAX_READS_PER_POLL reads and reports the rows read as a failed read', async () => {
+      const { contextManager, result } = collect(
+        {
+          // Only single-row pages work, so each 200 rows take 3 failed reads and 200 successful
+          // ones, and 10000 rows would take thousands of reads.
+          [RESULTS]: ({ query }) =>
+            Number(query?.pageSize) === 1 ? { data: { edges: resultEdges(1) } } : apiError(500),
+        },
+        { rowCount: 10000, maxRows: 10000 }
+      );
+
+      const { rows, readFailed } = await result;
+
+      expect(contextManager.callKibanaApi).toHaveBeenCalledTimes(RESULTS_MAX_READS_PER_POLL);
+      expect(rows.length).toBeGreaterThan(0);
+      expect(rows.length).toBeLessThan(RESULTS_MAX_READS_PER_POLL);
+      expect(readFailed).toBe(true);
+    });
+
+    it('never asks for a page past the 10k window, even when rows come back without a source', async () => {
+      const pageNumbers: number[] = [];
+      const { result } = collect(
+        {
+          [RESULTS]: ({ query }) => {
+            pageNumbers.push(Number(query?.page));
+
+            // Full pages of documents without `_source`: they are skipped, so `rows` stays empty
+            // while the offset advances, and only the window guard stops the loop.
+            return { data: { edges: Array.from({ length: 200 }, () => ({})) } };
+          },
+        },
+        { rowCount: 10000, maxRows: 10000 }
+      );
+
+      const { rows, readFailed } = await result;
+
+      expect(rows).toEqual([]);
+      expect(readFailed).toBe(false);
+      expect(pageNumbers).toHaveLength(RESULTS_MAX_WINDOW / RESULTS_PAGE_SIZE);
+      expect(Math.max(...pageNumbers)).toBe(RESULTS_MAX_WINDOW / RESULTS_PAGE_SIZE - 1);
     });
 
     it.each([401, 403])(

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { DurationSchema } from '@kbn/workflows';
 import { z } from '@kbn/zod/v4';
 import { PLATFORM_IDS } from '../../constants';
 import {
@@ -14,7 +15,6 @@ import {
   MAX_AGENT_ID_LENGTH,
   MAX_AGENT_POLICY_IDS,
   MAX_ROWS,
-  MAX_WAIT_LENGTH,
 } from './budget';
 
 export const STEP_STATUSES = ['success', 'partial', 'failed', 'timed_out'] as const;
@@ -35,12 +35,11 @@ export const commonInputShape = () => ({
   // osquery platform ids, as on saved queries and packs. The step expands `linux` to the Fleet
   // platform values (`ubuntu`, `centos`, ...) of the agents in scope before dispatch.
   agent_platforms: z.array(z.enum(PLATFORM_IDS)).min(1).max(PLATFORM_IDS.length).optional(),
-  wait_timeout: z
-    .string()
-    .max(MAX_WAIT_LENGTH)
-    .regex(/^[1-9][0-9]*(s|m|h)$/, 'Use a duration such as 30s, 5m or 30m')
-    .refine(isWithinMaxWait, 'wait_timeout cannot exceed 30m')
-    .optional(),
+  // The same format as the step-level `timeout` (`5m`, `1m30s`, `90000ms`).
+  wait_timeout: DurationSchema.refine(
+    isWithinMaxWait,
+    'wait_timeout must be above zero and at most 30m'
+  ).optional(),
   max_rows: z.number().int().min(1).max(MAX_ROWS).optional(),
 });
 

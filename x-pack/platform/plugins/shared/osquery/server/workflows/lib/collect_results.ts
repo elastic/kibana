@@ -6,7 +6,11 @@
  */
 
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
-import { RESULTS_MAX_WINDOW, RESULTS_PAGE_SIZE } from '../../../common/workflows/contract/budget';
+import {
+  RESULTS_MAX_READS_PER_POLL,
+  RESULTS_MAX_WINDOW,
+  RESULTS_PAGE_SIZE,
+} from '../../../common/workflows/contract/budget';
 import { buildRow } from './build_rows';
 import type { ResultRow } from './build_rows';
 import { PUBLIC_API_HEADERS } from './api_headers';
@@ -85,9 +89,9 @@ const isForbidden = (error: unknown): boolean =>
 /**
  * Reads up to `maxRows` rows page by page. Stops at `rowCount`, at the route's 10k window and
  * when the shared output budget is spent. A failed read steps the page size down (a page of wide
- * rows can exceed the response cap) and retries; once it cannot shrink further the rows read so far
- * are returned with `readFailed`, so the caller decides whether they are enough. A 401/403 is
- * thrown: the identity lost read access.
+ * rows can exceed the response cap) and retries; once it cannot shrink further, or after
+ * {@link RESULTS_MAX_READS_PER_POLL} reads, the rows read so far are returned with `readFailed`, so
+ * the caller decides whether they are enough. A 401/403 is thrown: the identity lost read access.
  */
 export const collectResults = async ({
   contextManager,
@@ -114,8 +118,13 @@ export const collectResults = async ({
   // `max_rows: 1` does not read 200 rows; a failed read lowers it.
   let ceiling = Math.min(RESULTS_PAGE_SIZE, maxRows);
   let offset = 0;
+  let reads = 0;
 
   while (rows.length < maxRows && rows.length < rowCount) {
+    // Bounds the time of one poll: after failed reads the pages shrink and the loop gets long.
+    if (reads >= RESULTS_MAX_READS_PER_POLL) return { rows, readFailed: true };
+    reads += 1;
+
     // The first page can be any size up to `maxRows`. Later pages shrink to what is still wanted,
     // so `max_rows: 201` reads 200 rows and then 1, not 200 rows twice.
     const wanted = Math.min(maxRows, rowCount) - rows.length;
@@ -170,6 +179,10 @@ export const collectResults = async ({
 
     if (edges.length < pageSize) return { rows, readFailed: false };
     offset += pageSize;
+
+    // A failed read shrank the pages. Once the offset is a whole standard page again, return to the
+    // full size, so one transient error costs a few small reads and not the rest of the read.
+    if (offset % RESULTS_PAGE_SIZE === 0) ceiling = Math.min(RESULTS_PAGE_SIZE, maxRows);
   }
 
   return { rows, readFailed: false };

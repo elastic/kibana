@@ -513,14 +513,14 @@ describe('buildResultsQuery', () => {
       expect(buildResultsQuery(baseOptions).preference).toBe('action-123');
     });
 
-    it('leaves a scheduled-execution read unpinned', () => {
+    it('pins a scheduled-execution read to its own execution', () => {
       const result = buildResultsQuery({
         ...baseOptions,
         scheduleId: 'schedule-1',
         executionCount: 7,
       });
 
-      expect(result.preference).toBeUndefined();
+      expect(result.preference).toBe('osquery:schedule-1:7');
     });
   });
 

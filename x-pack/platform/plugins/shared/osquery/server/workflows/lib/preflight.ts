@@ -13,7 +13,7 @@ import { agentLimitMessage } from '../../../common/workflows/contract/route_mess
 import type { TargetInput } from '../../../common/workflows/contract/schemas';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from './api_headers';
 import { stepError, toPreDispatchReadError } from './errors';
-import type { KibanaApiCaller } from './types';
+import type { KibanaApiCaller, StepLogger } from './types';
 
 const ONLINE_KUERY = '(status:online OR status:degraded)';
 
@@ -85,7 +85,8 @@ const readAgents = async (
  */
 export const resolveTarget = async (
   contextManager: KibanaApiCaller,
-  input: TargetInput
+  input: TargetInput,
+  logger?: StepLogger
 ): Promise<ResolvedTarget> => {
   if (input.agent_ids) {
     return { target: { agent_ids: input.agent_ids }, agentCount: input.agent_ids.length };
@@ -103,12 +104,21 @@ export const resolveTarget = async (
 
   const platformIds = (input.agent_platforms ?? []) as PlatformId[];
   const { groups } = await readAgents(contextManager, ONLINE_KUERY);
-  const buckets = (groups?.platforms ?? []).filter(
-    (bucket) =>
-      SAFE_FLEET_PLATFORM.test(bucket.id) &&
-      !KQL_KEYWORDS.has(bucket.id) &&
-      platformIds.some((platformId) => matchesPlatformId(bucket.id, platformId))
+  const matching = (groups?.platforms ?? []).filter((bucket) =>
+    platformIds.some((platformId) => matchesPlatformId(bucket.id, platformId))
   );
+  const buckets = matching.filter(
+    (bucket) => SAFE_FLEET_PLATFORM.test(bucket.id) && !KQL_KEYWORDS.has(bucket.id)
+  );
+  if (buckets.length < matching.length) {
+    // Their agents are left out of the target and the count: say so instead of narrowing silently.
+    logger?.warn(
+      `Skipped Fleet platform values that cannot be queried safely: ${matching
+        .filter((bucket) => !buckets.includes(bucket))
+        .map((bucket) => JSON.stringify(bucket.id))
+        .join(', ')}`
+    );
+  }
 
   if (buckets.length === 0) {
     throw stepError(

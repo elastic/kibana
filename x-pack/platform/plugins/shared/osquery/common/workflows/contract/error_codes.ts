@@ -22,6 +22,8 @@ export const OutputErrorCode = {
   DISPATCH_UNCONFIRMED: 'DISPATCH_UNCONFIRMED',
   ACTION_NOT_VISIBLE: 'ACTION_NOT_VISIBLE',
   STATUS_UNREADABLE_FORBIDDEN: 'STATUS_UNREADABLE_FORBIDDEN',
+  /** The deadline passed while the result rows could not be read: `rows` is cut short by that. */
+  RESULTS_UNREADABLE: 'RESULTS_UNREADABLE',
 } as const;
 
 export type PreDispatchErrorCodeValue =

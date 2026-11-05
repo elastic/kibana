@@ -75,7 +75,7 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
     // `start` is not idempotent: the dispatch has no idempotency key, so if the engine re-runs it
     // (a step-level `timeout` or `on-failure.retry`), the query is dispatched twice. A crash does
     // not re-run it: the execution fails instead.
-    const { target, agentCount } = await resolveTarget(contextManager, input);
+    const { target, agentCount } = await resolveTarget(contextManager, input, logger);
     // Fails closed without saved-query read: the step validates the stored SQL (no `{{…}}`
     // placeholders, exactly one match) before anything reaches the agents, and never sends a
     // bare `saved_query_id` the caller could not read.
@@ -134,10 +134,20 @@ export const runQueryStepDefinition = createPollServerStepDefinition({
       return { output: failedOutput(reading.errorCode, state.agents_total, state.action_id) };
     }
 
-    const [{ status, agents, rows, row_count: rowCount, truncated }] = reading.results;
+    const [
+      { status, agents, rows, row_count: rowCount, truncated, results_unreadable: unreadable },
+    ] = reading.results;
 
     return {
-      output: { status, action_id: state.action_id, agents, rows, row_count: rowCount, truncated },
+      output: {
+        status,
+        action_id: state.action_id,
+        agents,
+        rows,
+        row_count: rowCount,
+        truncated,
+        ...(unreadable ? { error_code: OutputErrorCode.RESULTS_UNREADABLE } : {}),
+      },
     };
   },
   policy: POLL_POLICY,

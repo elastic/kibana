@@ -7,7 +7,12 @@
 
 import type { ExecutionError } from '@kbn/workflows/server';
 import { OSQUERY_MAX_AGENTS_HEADER } from '../../../../common/constants';
-import { TARGET_AGENT_LIMIT } from '../../../../common/workflows/contract/budget';
+import {
+  DEADLINE_READ_GRACE_POLLS,
+  MAX_WAIT_MS,
+  POLL_POLICY,
+  TARGET_AGENT_LIMIT,
+} from '../../../../common/workflows/contract/budget';
 import {
   agentLimitMessage,
   NO_AGENTS_FOUND_MESSAGE,
@@ -487,6 +492,27 @@ describe('osquery.runQuery step', () => {
       expect(output).toMatchObject({ status: 'success', rows: [], row_count: 20, truncated: true });
     });
 
+    it('reports RESULTS_UNREADABLE when the rows cannot be read once the deadline passed', async () => {
+      const { result } = poll(
+        {
+          [DETAILS]: () => ({ data: { queries: [counters({ docs: 20 })] } }),
+          [RESULTS]: () => apiError(500),
+        },
+        { deadline: new Date(Date.now() - 1000).toISOString() }
+      );
+
+      const { output } = (await result) as { output: Record<string, unknown> };
+
+      // Told apart from rows cut short by `max_rows` or the byte budget, which carry no error_code.
+      expect(output).toMatchObject({
+        status: 'success',
+        rows: [],
+        row_count: 20,
+        truncated: true,
+        error_code: 'RESULTS_UNREADABLE',
+      });
+    });
+
     it('truncates at max_rows and reports the total row_count', async () => {
       const { result } = poll(
         {
@@ -692,6 +718,22 @@ describe('osquery.runQuery step', () => {
       expect(runQueryStepDefinition.ceilings).toEqual({ maxAttempts: 150, maxWaitMs: 30000 });
     });
 
+    it('allows enough polls to wait out MAX_WAIT_MS at the shortest jittered delay', () => {
+      // Jitter draws each delay between half of it and all of it. Every poll that is still pending
+      // after the attempt ceiling fails the step after the query was dispatched, so the ceiling
+      // has to cover the whole wait at the shortest delays, plus the grace polls after the deadline.
+      let waitedMs = 0;
+      let polls = 0;
+      while (waitedMs < MAX_WAIT_MS) {
+        waitedMs += Math.min(POLL_POLICY.initialMs * 2 ** polls, POLL_POLICY.maxMs) / 2;
+        polls += 1;
+      }
+
+      expect(runQueryStepDefinition.ceilings?.maxAttempts).toBeGreaterThan(
+        polls + DEADLINE_READ_GRACE_POLLS
+      );
+    });
+
     it('rejects ad-hoc SQL and requires exactly one target', () => {
       const schema = runQueryStepDefinition.inputSchema as any;
       const resolved = typeof schema === 'function' ? schema() : schema;
@@ -705,6 +747,25 @@ describe('osquery.runQuery step', () => {
       ).toBe(false);
       expect(
         resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '1h' }).success
+      ).toBe(false);
+      // The format of the step-level `timeout`: compound durations are accepted, zero is not.
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '1m30s' }).success
+      ).toBe(true);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '90000ms' }).success
+      ).toBe(true);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '29m59s' }).success
+      ).toBe(true);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '30m1s' }).success
+      ).toBe(false);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '0s' }).success
+      ).toBe(false);
+      expect(
+        resolved.safeParse({ saved_query: 'a', agent_ids: ['x'], wait_timeout: '1m1h' }).success
       ).toBe(false);
       expect(resolved.safeParse({ saved_query: 'a' }).success).toBe(false);
       expect(

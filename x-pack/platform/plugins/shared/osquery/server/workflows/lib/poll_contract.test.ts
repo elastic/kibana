@@ -107,6 +107,12 @@ describe('poll_contract', () => {
       expect(parseWaitTimeoutMs('1h', bounds)).toBe(1_800_000);
     });
 
+    it('parses the compound and millisecond forms of the step-level timeout', () => {
+      expect(parseWaitTimeoutMs('1m30s', bounds)).toBe(90_000);
+      expect(parseWaitTimeoutMs('90000ms', bounds)).toBe(90_000);
+      expect(parseWaitTimeoutMs('1m1h', bounds)).toBe(300_000);
+    });
+
     it('clamps values above the cap', () => {
       expect(parseWaitTimeoutMs('5h', bounds)).toBe(1_800_000);
     });

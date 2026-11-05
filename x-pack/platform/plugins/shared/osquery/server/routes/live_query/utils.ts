@@ -87,7 +87,9 @@ export const getActionResponses = (
           responsesByAction?.responding_agents?.value ??
           responsesByAction?.doc_count ??
           0;
-        const pending = agentsCount - responded;
+        // Never negative: an estimate above the targeted count (`cardinality` past the exact
+        // limit) must complete the query, as the details route completes on `pending === 0`.
+        const pending = Math.max(0, agentsCount - responded);
 
         return of({
           action_id: actionId,

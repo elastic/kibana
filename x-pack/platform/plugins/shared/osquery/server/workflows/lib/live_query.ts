@@ -51,6 +51,8 @@ export interface QueryResult {
   rows: ResultRow[];
   row_count: number;
   truncated: boolean;
+  /** The rows could not be read and the deadline passed, so there was no poll left to retry. */
+  results_unreadable?: boolean;
 }
 
 export type LiveQueryReading =
@@ -280,6 +282,7 @@ export const readLiveQuery = async ({
   const results: QueryResult[] = [];
   for (const { spec, status, counters, rowCount } of finished) {
     let rows: ResultRow[] = [];
+    let unreadable = false;
     if (rowCount > 0) {
       try {
         const collected = await collectResults({
@@ -300,6 +303,7 @@ export const readLiveQuery = async ({
           // The rows were countable a moment ago: read them again on the next poll. After the
           // deadline there is no next poll, so the rows already read are reported as cut short.
           if (!deadlinePassed) return pending;
+          unreadable = true;
         }
       } catch (error) {
         if (isForbidden(error)) {
@@ -310,6 +314,7 @@ export const readLiveQuery = async ({
           `Live query ${state.action_id} results read failed: ${(error as Error).message}`
         );
         if (!deadlinePassed) return pending;
+        unreadable = true;
       }
     }
 
@@ -326,6 +331,7 @@ export const readLiveQuery = async ({
       rows,
       row_count: rowCount,
       truncated: rows.length < rowCount,
+      ...(unreadable ? { results_unreadable: true } : {}),
     });
   }
 

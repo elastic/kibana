@@ -5,22 +5,23 @@
  * 2.0.
  */
 
+import { isValidDuration, parseDuration } from '@kbn/workflows';
+
 export const DEFAULT_WAIT_MS = 5 * 60 * 1000;
 export const MAX_WAIT_MS = 30 * 60 * 1000;
 
-export const WAIT_DURATION_PATTERN = /^([1-9][0-9]*)(s|m|h)$/;
-
-const WAIT_UNIT_MS = { s: 1000, m: 60 * 1000, h: 60 * 60 * 1000 } as const;
-
-/** A `wait_timeout` duration (`30s`, `5m`, `1h`) in milliseconds; `undefined` when invalid. */
+/**
+ * A `wait_timeout` in milliseconds, in the format of the step-level `timeout` (`30s`, `5m`,
+ * `1m30s`, `90000ms`); `undefined` when invalid or zero.
+ */
 export const parseWaitMs = (value: string | undefined): number | undefined => {
-  const match = value?.match(WAIT_DURATION_PATTERN);
-  if (!match) return undefined;
+  if (value === undefined || !isValidDuration(value)) return undefined;
+  const ms = parseDuration(value);
 
-  return Number(match[1]) * WAIT_UNIT_MS[match[2] as keyof typeof WAIT_UNIT_MS];
+  return ms > 0 ? ms : undefined;
 };
 
-/** False for a duration above {@link MAX_WAIT_MS}. Invalid strings are rejected by the schema regex. */
+/** True for a duration above zero and up to {@link MAX_WAIT_MS}. */
 export const isWithinMaxWait = (value: string): boolean => {
   const ms = parseWaitMs(value);
 
@@ -41,15 +42,27 @@ export const MAX_AGENT_POLICY_ID_LENGTH = 64;
 
 /** Longest accepted `agent_ids` entry: the limit Fleet itself applies to agent ids. */
 export const MAX_AGENT_ID_LENGTH = 512;
-/** Longest `wait_timeout` string (`1800s`, `30m`); the digits of the regex are unbounded. */
-export const MAX_WAIT_LENGTH = 8;
 /** Post-expansion ceiling: the live-query route has no bound of its own. */
 export const TARGET_AGENT_LIMIT = 1000;
 
 /** The results route answers 400 `PAGINATION_LIMIT_EXCEEDED` at `page * pageSize >= 10000`. */
 export const RESULTS_PAGE_SIZE = 200;
 export const RESULTS_MAX_WINDOW = 10000;
-/** `callKibanaApi` caps one response at 10MB and the step output must stay below it. */
+/**
+ * Most results reads (failed ones included) one poll makes. Nothing else bounds a poll in time, and
+ * after failed reads the page size shrinks to 25, 5 or 1 rows, which would turn `max_rows: 10000`
+ * into thousands of sequential calls. 450 lets the whole 10k window be read in 25-row pages (400
+ * reads) with room for the failed reads. Past the cap the rows read so far are returned as a failed
+ * read: the next poll starts again at the full page size.
+ */
+export const RESULTS_MAX_READS_PER_POLL = 450;
+/**
+ * Bytes of rows one run puts in its output. The engine fails a step whose output is larger than the
+ * effective `max-step-size` (10MB by default, lower when the step, the workflow or `kibana.yml`
+ * sets it), and a step cannot read that limit, so this stays under the default. A lower
+ * `max-step-size` can still fail the step after the query was dispatched; the step description says
+ * so.
+ */
 export const OUTPUT_BUDGET_BYTES = 8 * 1024 * 1024;
 
 /**

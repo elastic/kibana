@@ -52,8 +52,7 @@ export const runQueryStepCommonDefinition: BaseStepDefinition<
     defaultMessage: 'Run Osquery Saved Query',
   }),
   description: i18n.translate('xpack.osquery.workflows.steps.runQuery.description', {
-    defaultMessage:
-      'Run an osquery saved query on the given agents and wait for the answers. Once the query is dispatched the step never fails: the outcome is returned in `status` (`success`, `partial`, `failed` or `timed_out`) and every row carries the host it came from in `agent`. A dispatched query cannot be retracted: cancelling the workflow stops the wait, not the query on the agents. The dispatch is not idempotent, so a step-level `timeout` or `on-failure.retry` that re-runs the step dispatches the query again: do not retry this step.',
+    defaultMessage: 'Run an osquery saved query on a set of agents and wait for the results.',
   }),
   category: StepCategory.KibanaSecurity,
   inputSchema: runQueryInputSchema,
@@ -61,7 +60,7 @@ export const runQueryStepCommonDefinition: BaseStepDefinition<
   documentation: {
     details: i18n.translate('xpack.osquery.workflows.steps.runQuery.documentation.details', {
       defaultMessage:
-        'Finds the saved query named `saved_query` in the current space and runs it on the targets, waiting up to `wait_timeout` (default 5m, maximum 30m). Set exactly one of `agent_ids`, `agent_policy_ids` or `agent_platforms` (`linux`, `darwin` or `windows`, as on saved queries). Returns at most `max_rows` rows (default 1000); `row_count` is the total and `truncated` tells whether rows were cut. Row values are strings: use `| plus: 0` to compare them as numbers.',
+        "Finds the saved query named `saved_query` in the current space and runs it on the targets, waiting up to `wait_timeout` (default 5m, maximum 30m). Set exactly one of `agent_ids`, `agent_policy_ids` or `agent_platforms` (`linux`, `darwin` or `windows`, as on saved queries). Returns at most `max_rows` rows (default 1000); `row_count` is the total and `truncated` tells whether rows were cut. Row values are strings: use `| plus: 0` to compare them as numbers.\n\nOnce the query is dispatched the step does not fail on the query itself: the outcome is returned in `status` (`success`, `partial`, `failed` or `timed_out`) and every row carries the host it came from in `agent`. The one exception is the engine's step output limit: the rows can take up to 8MB, so do not set `max-step-size` below 8mb on this step or its workflow. `error_code` is set when the run could not read everything it should have: `DISPATCH_UNCONFIRMED`, `ACTION_NOT_VISIBLE` and `STATUS_UNREADABLE_FORBIDDEN` come with `status: failed`, while `RESULTS_UNREADABLE` comes with the real `status` and means `rows` is cut short because the rows could not be read before `wait_timeout` ended, so check `error_code` as well as `status`. A dispatched query cannot be retracted: cancelling the workflow stops the wait, not the query on the agents. The dispatch is not idempotent, so a step-level `timeout` or `on-failure.retry` that re-runs the step dispatches the query again: do not retry this step.",
     }),
     examples: [
       `## Run a saved query on one agent
