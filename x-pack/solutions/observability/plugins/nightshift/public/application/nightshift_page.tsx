@@ -136,13 +136,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const automationsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
     path: '/automations',
   });
-  const detectionsHref = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-    path: '/detections/events',
-  });
-  const navigateToDetections = useCallback(
-    () => application.navigateToUrl(detectionsHref),
-    [application, detectionsHref]
-  );
   const navigateToSettings = useCallback(
     () => application.navigateToUrl(settingsHref),
     [application, settingsHref]
@@ -158,10 +151,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const navigateToSources = useCallback(
     () => application.navigateToUrl(sourcesHref),
     [application, sourcesHref]
-  );
-  const navigateToAutomations = useCallback(
-    () => application.navigateToUrl(automationsHref),
-    [application, automationsHref]
   );
   const isKnowledgePage = pathname === '/knowledge' || pathname.startsWith('/knowledge/');
   const isSourcesPage = pathname === '/sources' || pathname.startsWith('/sources/');
@@ -206,9 +195,6 @@ export function NightshiftPage(): React.ReactElement | null {
   const onboardingFinishedThisLoad =
     onboardingFinishedSpace === spaceBasePath ||
     onboardingFinishedSpacesThisLoad.has(spaceBasePath);
-  // Before the first investigation the page is only about onboarding, as in the design.
-  const hidesHeaderActions = isOnboarding && !onboarding.latestInvestigation;
-
   // The landing page owns the start investigation modal so the header's primary action can toggle it.
   const [isStartInvestigationOpen, setIsStartInvestigationOpen] = useState(false);
   const toggleStartInvestigation = useCallback(
@@ -437,25 +423,9 @@ export function NightshiftPage(): React.ReactElement | null {
         <>
           <NightshiftAppHeader
             page={canUseAutomationsPage ? 'automations' : 'landing'}
-            onKnowledgeClick={navigateToKnowledge}
-            knowledgeHref={knowledgeHref}
             onSettingsClick={canManageAndConfigure ? navigateToSettings : undefined}
             settingsHref={canManageAndConfigure ? settingsHref : undefined}
-            onAutomationsClick={
-              canUseAutomations && !hidesHeaderActions ? navigateToAutomations : undefined
-            }
-            automationsHref={canUseAutomations && !hidesHeaderActions ? automationsHref : undefined}
-            onDetectionsClick={!hidesHeaderActions ? navigateToDetections : undefined}
-            detectionsHref={!hidesHeaderActions ? detectionsHref : undefined}
             onStartInvestigationClick={canStartInvestigation ? toggleStartInvestigation : undefined}
-            back={
-              canUseAutomationsPage
-                ? {
-                    href: application.getUrlForApp(NIGHTSHIFT_APP_ID, { path: '/' }),
-                    label: 'Nightshift',
-                  }
-                : undefined
-            }
           />
           <EuiPageTemplate.Section
             component="div"

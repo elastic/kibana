@@ -18,7 +18,7 @@ import { getWorkflowsNavPanel } from '@kbn/deeplinks-workflows';
 import { EVALS_APP_ID } from '@kbn/deeplinks-evals';
 import {
   getAlertsNavPanel,
-  NightshiftNavigationIcon,
+  getNightshiftNavPanel,
   shouldIncludeStackManagementRules,
 } from '@kbn/observability-plugin/public';
 
@@ -52,13 +52,7 @@ export const createNavigationTree = ({
 }): NavigationTreeDefinition => {
   return {
     body: [
-      ...filterForFeatureAvailability(
-        {
-          link: 'nightshift' as const,
-          icon: NightshiftNavigationIcon,
-        },
-        significantEventsAvailable
-      ),
+      ...filterForFeatureAvailability(getNightshiftNavPanel(), significantEventsAvailable),
       {
         id: 'observability_project_nav',
         ...(overviewAvailable

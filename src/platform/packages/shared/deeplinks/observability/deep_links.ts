@@ -113,7 +113,13 @@ export type ProfilingLinkId = 'stacktraces' | 'flamegraphs' | 'functions';
 
 export type StreamsLinkId = 'overview';
 
-export type NightshiftLinkId = 'detections' | 'knowledge_indicators' | 'rules' | 'sources';
+export type NightshiftLinkId =
+  | 'automations'
+  | 'detections'
+  | 'knowledge'
+  | 'knowledge_indicators'
+  | 'rules'
+  | 'sources';
 
 export type ObservabilityAlertingLinkId =
   | 'alerts'

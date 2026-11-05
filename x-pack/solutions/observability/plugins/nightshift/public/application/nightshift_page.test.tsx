@@ -345,7 +345,7 @@ describe('NightshiftPage', () => {
     });
 
     renderPage();
-    await openAppMenuOverflow();
+    await screen.findByTestId('nightshiftAppStub');
 
     expect(screen.queryByTestId('nightshiftSettingsLink')).not.toBeInTheDocument();
   });
@@ -389,15 +389,12 @@ describe('NightshiftPage', () => {
   });
 
   describe('Knowledge', () => {
-    it('links to Knowledge without requesting optional-tab availability', async () => {
+    it('leaves Knowledge to the side nav rather than the header', async () => {
       renderPage();
       await openAppMenuOverflow();
 
-      const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
-      expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
-
-      await act(async () => fireEvent.click(knowledgeLink));
-      expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
+      expect(await screen.findByTestId('nightshiftSettingsLink')).toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftKnowledgeLink')).not.toBeInTheDocument();
     });
 
     it('renders the lazy page at /knowledge', async () => {
@@ -405,6 +402,7 @@ describe('NightshiftPage', () => {
 
       expect(await screen.findByTestId('knowledgePageStub')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Knowledge');
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
     });
   });
 
@@ -445,14 +443,6 @@ describe('NightshiftPage', () => {
     expect(await screen.findByTestId('detectionPageStub')).toBeInTheDocument();
     expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Detections');
     expect(screen.queryByTestId('nightshiftAppStub')).not.toBeInTheDocument();
-
-    await openAppMenuOverflow();
-    const knowledgeLink = await screen.findByTestId('nightshiftKnowledgeLink');
-    expect(knowledgeLink).toHaveAttribute('href', '/app/nightshift/knowledge');
-    expect(screen.getAllByRole('menuitem')[0]).toBe(knowledgeLink);
-
-    await act(async () => fireEvent.click(knowledgeLink));
-    expect(navigateToUrl).toHaveBeenCalledWith('/app/nightshift/knowledge');
 
     const sourcesLink = screen.getByTestId('nightshiftSourcesLink');
     expect(sourcesLink).toBeVisible();
@@ -495,14 +485,13 @@ describe('NightshiftPage', () => {
       });
     };
 
-    it('shows the Automations button when the API and feature flag are available', async () => {
+    it('leaves Automations and Detections to the side nav rather than the header', async () => {
       withServices({ nightshiftInvestigations: { investigationsClient: { fetch: jest.fn() } } });
       renderPage();
 
-      expect(await screen.findByTestId('nightshiftAutomationsPrimaryAction')).toHaveAttribute(
-        'href',
-        '/app/nightshift/automations'
-      );
+      await screen.findByTestId('nightshiftAppStub');
+      expect(screen.queryByTestId('nightshiftAutomationsPrimaryAction')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('nightshiftDetectionsPrimaryAction')).not.toBeInTheDocument();
     });
 
     it('shows the automations list as its own page at /automations', async () => {
@@ -512,6 +501,11 @@ describe('NightshiftPage', () => {
       expect(await screen.findByTestId('automationsPageStub')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Automations');
       expect(screen.queryByTestId('nightshiftTabAutomations')).not.toBeInTheDocument();
+      expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.back)).not.toBeInTheDocument();
+      expect(screen.getByTestId('nightshiftSettingsLink')).toHaveAttribute(
+        'href',
+        '/app/nightshift/settings'
+      );
     });
 
     it('keeps the automations page mounted for a detail route', async () => {
