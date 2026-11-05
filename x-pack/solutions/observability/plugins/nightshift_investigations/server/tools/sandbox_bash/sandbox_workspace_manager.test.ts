@@ -6,7 +6,7 @@
  */
 
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession } from '../../sandbox_audit';
 import type { SandboxCallContext } from './tool_utils';
 import { createSandboxWorkspaceManager } from './sandbox_workspace_manager';
 
@@ -18,7 +18,7 @@ import { writeConnectorManifest } from './connector_manifest';
 
 const mockWriteConnectorManifest = writeConnectorManifest as jest.Mock;
 
-const createSessionMock = (isReset: boolean): SandboxSession => {
+const createSessionMock = (isReset: boolean): AuditedSandboxSession => {
   const session = {
     get isReset() {
       return isReset;
@@ -37,11 +37,11 @@ const createSessionMock = (isReset: boolean): SandboxSession => {
       }))
     ),
   };
-  return session as unknown as SandboxSession;
+  return session as unknown as AuditedSandboxSession;
 };
 
 const createMutableSessionMock = (): {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   setIsReset: (v: boolean) => void;
 } => {
   let isReset = false;
@@ -64,7 +64,7 @@ const createMutableSessionMock = (): {
     ),
   };
   return {
-    session: session as unknown as SandboxSession,
+    session: session as unknown as AuditedSandboxSession,
     setIsReset: (v: boolean) => {
       isReset = v;
     },
