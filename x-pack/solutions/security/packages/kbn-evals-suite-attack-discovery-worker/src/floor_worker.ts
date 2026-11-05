@@ -18,7 +18,15 @@ import {
   buildWorkerUrl,
   getWorkerRoleName,
 } from '@kbn/alertzero-common';
-import { EVAL_SPACE_ID, FLOOR_SCHEDULE_INTERVAL } from './constants';
+import { NonTerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  EVAL_SPACE_ID,
+  FLOOR_SCHEDULE_INTERVAL,
+  FLOOR_TICK_CANCEL_TIMEOUT_MS,
+  FLOOR_TICK_POLL_INTERVAL_MS,
+  FLOOR_TICK_WAIT_MS,
+  PUBLIC_API_VERSION,
+} from './constants';
 import { apiVersion, errorMessage, httpStatus, sleep, spacePath } from './kibana_api';
 
 export const FLOOR_WORKER_ID = SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID;
@@ -148,11 +156,81 @@ export interface EnabledFloorWorker {
   restore: () => Promise<void>;
 }
 
+const listActiveExecutionIds = async (
+  fetch: HttpHandler,
+  spaceId: string,
+  workflowId: string
+): Promise<string[]> => {
+  const { results } = await fetch<{ results: Array<{ id: string }> }>(
+    spacePath(spaceId, `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions`),
+    {
+      method: 'GET',
+      headers: apiVersion(PUBLIC_API_VERSION),
+      query: { statuses: [...NonTerminalExecutionStatuses], omitStepRuns: true, size: 50 },
+    }
+  );
+  return results.map(({ id }) => id);
+};
+
+/**
+ * Task Manager runs a new recurring task at once, so enabling the worker starts one scheduled
+ * execution whatever the interval. Its concurrency cancels in progress, so left alone it
+ * cancels the manual run (or the manual run cancels it half way, leaving a runner with no
+ * steps). Waits a bounded time for that execution, cancels it, and returns once the
+ * workflow holds no active execution. Returns whether a tick was found.
+ */
+export const settleEnableTimeRun = async ({
+  fetch,
+  log,
+  workflowId,
+  spaceId = EVAL_SPACE_ID,
+  waitMs = FLOOR_TICK_WAIT_MS,
+  cancelTimeoutMs = FLOOR_TICK_CANCEL_TIMEOUT_MS,
+}: {
+  fetch: HttpHandler;
+  log: ToolingLog;
+  workflowId: string;
+  spaceId?: string;
+  waitMs?: number;
+  cancelTimeoutMs?: number;
+}): Promise<boolean> => {
+  const waitDeadline = Date.now() + waitMs;
+  let active = await listActiveExecutionIds(fetch, spaceId, workflowId);
+  while (active.length === 0 && Date.now() < waitDeadline) {
+    await sleep(FLOOR_TICK_POLL_INTERVAL_MS);
+    active = await listActiveExecutionIds(fetch, spaceId, workflowId);
+  }
+  if (active.length === 0) {
+    log.info('[ad-worker] no enable-time scheduled run appeared; starting rows');
+    return false;
+  }
+  log.info(`[ad-worker] cancelling the enable-time scheduled run (${active.join(', ')})`);
+  await fetch(
+    spacePath(
+      spaceId,
+      `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions/cancel`
+    ),
+    { method: 'POST', headers: apiVersion(PUBLIC_API_VERSION) }
+  );
+  const cancelDeadline = Date.now() + cancelTimeoutMs;
+  while ((active = await listActiveExecutionIds(fetch, spaceId, workflowId)).length > 0) {
+    if (Date.now() >= cancelDeadline) {
+      throw new Error(
+        `The enable-time scheduled run of "${workflowId}" is still active ${cancelTimeoutMs}ms after it was cancelled (${active.join(
+          ', '
+        )}); a row would race it.`
+      );
+    }
+    await sleep(FLOOR_TICK_POLL_INTERVAL_MS);
+  }
+  return true;
+};
+
 /**
  * Enables the per-space floor worker, bound to its service account and set to manual autonomy,
  * so a run starts the way production starts it: the worker dispatches the runner as its
- * `run_as` identity. The schedule interval is long so no tick starts a run (and cancels the
- * manual one: the worker's concurrency cancels in progress).
+ * `run_as` identity. The enable-time scheduled run is cancelled before this returns (see
+ * `settleEnableTimeRun`); the long schedule interval keeps any later tick out of the rows.
  */
 export const enableFloorWorker = async ({
   fetch,
@@ -191,6 +269,7 @@ export const enableFloorWorker = async ({
     );
   }
   log.info(`[ad-worker] floor worker enabled as service account ${serviceAccountId}`);
+  await settleEnableTimeRun({ fetch, log, workflowId: after.workflowId, spaceId });
   return {
     workflowId: after.workflowId,
     restore: async () => {

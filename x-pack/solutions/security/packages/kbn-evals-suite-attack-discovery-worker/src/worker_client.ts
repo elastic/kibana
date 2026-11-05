@@ -8,8 +8,8 @@
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import {
+  ExecutionStatus,
   TerminalExecutionStatuses,
-  type ExecutionStatus,
   type WorkflowExecutionDto,
   type WorkflowStepExecutionDto,
 } from '@kbn/workflows';
@@ -147,6 +147,11 @@ export class AttackDiscoveryWorkerClient {
         `Floor worker execution ${floorExecutionId} did not start a runner; scoring its own execution`
       );
       const polled = await this.poll({ spaceId, executionId: floorExecutionId, maxWaitMs });
+      if (polled.execution.status === ExecutionStatus.CANCELLED) {
+        this.log.warning(
+          `Floor worker execution ${floorExecutionId} was cancelled before it dispatched a runner: the worker's concurrency cancels the run in progress, so another run of the floor worker (a scheduled tick) took its slot`
+        );
+      }
       if (isTerminal(polled.execution.status)) this.forget(floorExecutionId);
       return polled;
     }

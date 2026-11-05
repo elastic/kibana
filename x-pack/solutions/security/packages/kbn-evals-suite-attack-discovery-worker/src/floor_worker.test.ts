@@ -7,20 +7,40 @@
 
 import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
-import { enableFloorWorker, ensureFloorServiceAccount, FLOOR_WORKER_ID } from './floor_worker';
+import {
+  enableFloorWorker,
+  ensureFloorServiceAccount,
+  FLOOR_WORKER_ID,
+  settleEnableTimeRun,
+} from './floor_worker';
 
 jest.mock('./kibana_api', () => ({
   ...jest.requireActual('./kibana_api'),
-  sleep: jest.fn(async () => undefined),
+  // Advances the fake clock, so a bounded wait ends instead of spinning on the real one.
+  sleep: jest.fn(async (ms: number) => {
+    jest.advanceTimersByTime(ms);
+  }),
 }));
+
+beforeEach(() => {
+  jest.useFakeTimers();
+});
+
+afterEach(() => {
+  jest.useRealTimers();
+});
 
 const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
 const NAME = 'alertzero_attack_discovery';
 const usable = { id: 'sa-1', name: NAME, enabled: true, assumable: true };
 
-type Handler = (path: string, options?: { method?: string }) => unknown;
+interface CallOptions {
+  method?: string;
+  query?: { statuses?: string[] };
+}
+type Handler = (path: string, options?: CallOptions) => unknown;
 const fetchWith = (handler: Handler) =>
-  jest.fn(async (path: string, o?: { method?: string }) => handler(path, o));
+  jest.fn(async (path: string, o?: CallOptions) => handler(path, o));
 
 describe('ensureFloorServiceAccount', () => {
   it('reuses an enabled, assumable account', async () => {
@@ -82,8 +102,9 @@ describe('enableFloorWorker', () => {
 
   const run = (before: Record<string, unknown>, after: Record<string, unknown>) => {
     let reads = 0;
-    const fetch = fetchWith((_path, o) => {
+    const fetch = fetchWith((path, o) => {
       if (o?.method === 'PATCH') return {};
+      if (path.includes('/executions')) return { results: [] };
       reads += 1;
       return { workers: [reads === 1 ? worker(before) : worker(after)] };
     });
@@ -139,5 +160,89 @@ describe('enableFloorWorker', () => {
   it('fails when the worker does not come up enabled', async () => {
     const { promise } = run({}, { enabled: false });
     await expect(promise).rejects.toThrow(/did not enable/);
+  });
+});
+
+describe('settleEnableTimeRun', () => {
+  const WF = 'wf-1';
+  const isCancel = (path: string) => path.endsWith('/executions/cancel');
+
+  /** `listings` are the active executions returned by successive listings; the last one repeats. */
+  const scripted = (listings: string[][]) => {
+    let index = 0;
+    return fetchWith((path, o) => {
+      if (isCancel(path)) return {};
+      expect(o?.method).toBe('GET');
+      const ids = listings[Math.min(index, listings.length - 1)];
+      index += 1;
+      return { results: ids.map((id) => ({ id })) };
+    });
+  };
+  const settle = (fetch: jest.Mock, over: Record<string, unknown> = {}) =>
+    settleEnableTimeRun({
+      fetch: fetch as unknown as HttpHandler,
+      log,
+      workflowId: WF,
+      waitMs: 60_000,
+      cancelTimeoutMs: 60_000,
+      ...over,
+    });
+  const cancels = (fetch: jest.Mock) => fetch.mock.calls.filter(([path]) => isCancel(path));
+
+  it('cancels the scheduled run and returns once the workflow is idle', async () => {
+    const fetch = scripted([['tick-1'], ['tick-1'], []]);
+    await expect(settle(fetch)).resolves.toBe(true);
+    expect(cancels(fetch)).toHaveLength(1);
+    expect(cancels(fetch)[0][0]).toContain(`/api/workflows/workflow/${WF}/executions/cancel`);
+    const [listUrl, listOptions] = fetch.mock.calls[0] as [string, CallOptions];
+    expect(listUrl).toContain(`/api/workflows/workflow/${WF}/executions`);
+    expect(listOptions.query?.statuses).toEqual(
+      expect.arrayContaining(['pending', 'running', 'waiting', 'queued'])
+    );
+    expect(listOptions.query?.statuses).not.toContain('cancelled');
+  });
+
+  it('waits for a tick that appears after enabling', async () => {
+    const fetch = scripted([[], [], ['tick-1'], []]);
+    await expect(settle(fetch)).resolves.toBe(true);
+    expect(cancels(fetch)).toHaveLength(1);
+  });
+
+  it('does not cancel anything when no tick appears within the wait', async () => {
+    const fetch = scripted([[]]);
+    await expect(settle(fetch, { waitMs: 0 })).resolves.toBe(false);
+    expect(cancels(fetch)).toHaveLength(0);
+  });
+
+  it('fails when the cancelled run never leaves its slot', async () => {
+    const fetch = scripted([['tick-1']]);
+    await expect(settle(fetch, { cancelTimeoutMs: 0 })).rejects.toThrow(
+      /still active .* \(tick-1\); a row would race it/
+    );
+  });
+});
+
+describe('enableFloorWorker enable-time run', () => {
+  it('cancels the enable-time scheduled run before returning', async () => {
+    let listings = 0;
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') return {};
+      if (path.endsWith('/executions/cancel')) return {};
+      if (path.includes('/executions')) {
+        listings += 1;
+        return { results: listings === 1 ? [{ id: 'tick-1' }] : [] };
+      }
+      return { workers: [{ id: FLOOR_WORKER_ID, enabled: true, workflowId: 'wf-1' }] };
+    });
+    await enableFloorWorker({
+      fetch: fetch as unknown as HttpHandler,
+      log,
+      serviceAccountId: 'sa-1',
+    });
+    const order = fetch.mock.calls.map(([path, o]) =>
+      path.endsWith('/executions/cancel') ? 'cancel' : o?.method
+    );
+    expect(order.indexOf('PATCH')).toBeLessThan(order.indexOf('cancel'));
+    expect(order).toContain('cancel');
   });
 });

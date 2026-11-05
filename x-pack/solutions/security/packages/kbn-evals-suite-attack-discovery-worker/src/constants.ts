@@ -81,10 +81,17 @@ export const FP_TP_REQUIRED_STEP_IDS: readonly string[] = [FP_TP_ANALYZE_STEP_ID
 
 /**
  * Schedule interval of the floor worker. It is also the runner's lookback, and seeded alert
- * timestamps sit well inside it. It is long so no scheduled tick starts a run during a row: the
- * worker's concurrency cancels the run in progress, which would cancel the manual run.
+ * timestamps sit well inside it. It is long so the only scheduled tick is the one Task Manager
+ * runs as soon as the worker is enabled (a recurring task starts with runAt=now). The worker's
+ * concurrency cancels the run in progress, so that tick would cancel, or be cancelled by, the
+ * manual run: `enableFloorWorker` waits for it and cancels it before any row starts.
  */
 export const FLOOR_SCHEDULE_INTERVAL = '24h';
+/** How long enabling waits for the enable-time scheduled tick before assuming there is none. */
+export const FLOOR_TICK_WAIT_MS = 60_000;
+export const FLOOR_TICK_POLL_INTERVAL_MS = 2_000;
+/** How long a cancelled scheduled tick has to leave its concurrency slot. */
+export const FLOOR_TICK_CANCEL_TIMEOUT_MS = 60_000;
 export const SEED_WINDOW_MS = 20 * 60_000;
 export const SEED_WINDOW_END_OFFSET_MS = 60_000;
 

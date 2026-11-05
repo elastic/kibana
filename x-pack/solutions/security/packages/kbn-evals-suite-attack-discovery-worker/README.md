@@ -169,8 +169,10 @@ AD_WORKER_EVAL_COHORT=whole \
 - The runner needs a delegated identity, so the engine refuses to start it standalone. The preflight
   therefore finds or creates the built-in `alertzero_attack_discovery` service account (bound to
   the reserved role of the same name), enables the per-space floor worker with it
-  (`autonomy: 'manual'`, a 24h schedule so no tick cancels the run) and each row starts that worker
-  through `/s/<space>/api/workflows/workflow/<id>/run`, then follows its child runner execution.
+  (`autonomy: 'manual'`, a 24h schedule) and each row starts that worker through `/s/<space>/api/workflows/workflow/<id>/run`, then follows its child runner execution.
+  Task Manager runs a new recurring task at once, so enabling the worker starts one scheduled
+  execution whatever the interval; the concurrency key would let it and the first manual run cancel
+  each other, so the preflight cancels it (waiting for the workflow to go idle) before any row.
   The restore step disables the worker again if it was off.
 - The Scout config set `evals_attack_discovery_worker` starts the stack with
   `xpack.alertzero.enabled`, `xpack.agenticInvestigations.enabled`, `xpack.proposals.enabled` and

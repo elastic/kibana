@@ -55,6 +55,23 @@ describe('AttackDiscoveryWorkerClient timeouts', () => {
     expect(log.warning).toHaveBeenCalled();
   });
 
+  it('names the concurrency cancel when the worker was cancelled before it dispatched a runner', async () => {
+    (log.warning as jest.Mock).mockClear();
+    const client = clientReturning({ id: 'floor-1', status: 'cancelled', stepExecutions: [] }, []);
+    const polled = await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    expect(polled.execution.status).toBe('cancelled');
+    expect(log.warning).toHaveBeenCalledWith(
+      expect.stringMatching(/cancelled before it dispatched a runner.*concurrency/)
+    );
+  });
+
+  it('does not blame concurrency when the worker failed without a runner', async () => {
+    (log.warning as jest.Mock).mockClear();
+    const client = clientReturning({ id: 'floor-1', status: 'failed', stepExecutions: [] }, []);
+    await client.run({ spaceId: 's', floorWorkflowId: 'floor', maxWaitMs: 0 });
+    expect(log.warning).not.toHaveBeenCalledWith(expect.stringMatching(/concurrency/));
+  });
+
   it('tracks both executions until the runner settles, then forgets them', async () => {
     const fetch = jest.fn(async (path: string) => {
       if (path.includes('/workflow/')) return { workflowExecutionId: 'floor-1' };
