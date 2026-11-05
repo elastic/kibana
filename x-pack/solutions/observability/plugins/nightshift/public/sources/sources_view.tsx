@@ -5,7 +5,15 @@
  * 2.0.
  */
 
-import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiEmptyPrompt,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
@@ -22,7 +30,10 @@ import { useKiGeneration } from './onboarding/ki_generation_context';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { GenerateSplitButton } from './onboarding/generate_split_button';
 import { getGenerateDisabledTooltip } from './onboarding/translations';
-import { ConfirmSourceActionModal, type SourceAction } from './confirm_source_action_modal';
+import {
+  ConfirmSourceActionModal,
+  type SourceAction,
+} from '../components/entities/source/confirm_source_action_modal';
 import { SourcesTable } from './sources_table';
 import { isOnboardingInProgress } from './utils';
 import {
@@ -37,9 +48,17 @@ import {
   SOURCES_TABLE_SEARCH_PLACEHOLDER,
   SOURCE_NOT_FOUND_TOAST_TITLE,
 } from './translations';
+import {
+  INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
+  RecommendedSourcesTable,
+  type RecommendedSourcesCreationState,
+} from '../components/entities/source/recommended_sources/recommended_sources_table';
+import { ADD_RECOMMENDED_SOURCES_TITLE } from '../components/entities/source/recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
-  import('./source_flyout/source_flyout').then(({ SourceFlyout: Flyout }) => ({ default: Flyout }))
+  import('../components/entities/source/source_flyout/source_flyout').then(
+    ({ SourceFlyout: Flyout }) => ({ default: Flyout })
+  )
 );
 
 /** Source catalog with bulk onboarding controls and a routed create/edit flyout. */
@@ -50,9 +69,14 @@ export function SourcesView() {
     },
     notifications: { toasts },
   } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(nightshift);
+  const { canManage, canManageAndConfigure: canChangeSources } =
+    getNightshiftCapabilities(nightshift);
   const { blocksActivity, activityBlockTooltip } = useBlocksNewActivity();
   const [searchText, setSearchText] = useState('');
+  const [sourceCreationState, setSourceCreationState] = useState<RecommendedSourcesCreationState>(
+    INITIAL_RECOMMENDED_SOURCES_CREATION_STATE
+  );
+  const [hasShownEmptySourceSetup, setHasShownEmptySourceSetup] = useState(false);
 
   const {
     sources,
@@ -97,10 +121,10 @@ export function SourcesView() {
   const closeFlyout = () => history.push({ pathname: '/sources', search });
 
   useEffect(() => {
-    if (isCreating && !canManage) {
+    if (isCreating && !canChangeSources) {
       history.replace({ pathname: '/sources', search });
     }
-  }, [canManage, history, isCreating, search]);
+  }, [canChangeSources, history, isCreating, search]);
 
   useEffect(() => {
     // A cached list can predate the linked source, so wait for any refetch to finish too.
@@ -168,8 +192,44 @@ export function SourcesView() {
   };
 
   // With cached sources, a failed refetch keeps the table; the toast already reports it.
+  const hasSources = sources.length > 0;
   const hasSourcesLoadFailed = isSourcesError && sources.length === 0;
-  const hasNoSources = !isSourcesError && sources.length === 0;
+  const hasNoSources = sources.length === 0 && (!isSourcesError || hasShownEmptySourceSetup);
+  const shouldRetainSourceCreation =
+    sourceCreationState.isCreating || sourceCreationState.hasFailedDrafts;
+  const hasCreatedSourcesAwaitingCatalog =
+    sourceCreationState.hasCreatedSources && (isSourcesFetching || isSourcesError);
+  const showInitialSourceSetup = hasNoSources && !hasCreatedSourcesAwaitingCatalog;
+  const showSourceCreation = showInitialSourceSetup || shouldRetainSourceCreation;
+  useEffect(() => {
+    if (!isSourcesLoading && !isSourcesError) {
+      setHasShownEmptySourceSetup(sources.length === 0);
+    }
+  }, [isSourcesError, isSourcesLoading, sources.length]);
+  useEffect(() => {
+    if (
+      !sourceCreationState.hasCreatedSources ||
+      isSourcesLoading ||
+      isSourcesFetching ||
+      isSourcesError
+    ) {
+      return;
+    }
+    if (sources.length > 0 && !shouldRetainSourceCreation) {
+      setSourceCreationState(INITIAL_RECOMMENDED_SOURCES_CREATION_STATE);
+      return;
+    }
+    if (sources.length === 0) {
+      setSourceCreationState((current) => ({ ...current, hasCreatedSources: false }));
+    }
+  }, [
+    isSourcesError,
+    isSourcesFetching,
+    isSourcesLoading,
+    shouldRetainSourceCreation,
+    sourceCreationState.hasCreatedSources,
+    sources.length,
+  ]);
 
   return (
     <>
@@ -190,7 +250,7 @@ export function SourcesView() {
                 isClearable
               />
             </EuiFlexItem>
-            {canManage && (
+            {canChangeSources && !showInitialSourceSetup && (
               <EuiFlexItem grow={false}>
                 <EuiButton
                   data-test-subj="significantEventsAppCreateSourceButton"
@@ -202,7 +262,7 @@ export function SourcesView() {
                 </EuiButton>
               </EuiFlexItem>
             )}
-            {canManage && (
+            {hasSources && canManage && (
               <EuiFlexItem grow={false}>
                 <GenerateSplitButton
                   size="s"
@@ -232,16 +292,18 @@ export function SourcesView() {
                 />
               </EuiFlexItem>
             )}
-            <EuiFlexItem grow={false}>
-              <FindSignificantEventsButton
-                onRun={handleRun}
-                onCancel={handleCancel}
-                isRunning={isRunning}
-                isCanceling={isCanceling}
-                isDisabled={isRunning || blocksActivity}
-                disabledTooltip={activityBlockTooltip}
-              />
-            </EuiFlexItem>
+            {hasSources && (
+              <EuiFlexItem grow={false}>
+                <FindSignificantEventsButton
+                  onRun={handleRun}
+                  onCancel={handleCancel}
+                  isRunning={isRunning}
+                  isCanceling={isCanceling}
+                  isDisabled={isRunning || blocksActivity}
+                  disabledTooltip={activityBlockTooltip}
+                />
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlexItem>
 
@@ -249,94 +311,126 @@ export function SourcesView() {
           <EuiFlexItem data-test-subj="significantEventsAppSourcesLoading">
             <LoadingPanel size="l" />
           </EuiFlexItem>
-        ) : hasSourcesLoadFailed ? (
-          <EuiFlexItem>
-            <EuiEmptyPrompt
-              data-test-subj="significantEventsAppSourcesLoadErrorPrompt"
-              color="danger"
-              iconType="error"
-              title={<h2>{SOURCES_LOAD_ERROR_TITLE}</h2>}
-              body={<p>{SOURCES_LOAD_ERROR_BODY}</p>}
-              actions={
-                <EuiButton
-                  data-test-subj="significantEventsAppSourcesLoadErrorRetryButton"
-                  onClick={() => refetchSources()}
-                >
-                  {RETRY_LABEL}
-                </EuiButton>
-              }
-            />
-          </EuiFlexItem>
-        ) : hasNoSources ? (
-          <EuiFlexItem>
-            <EuiEmptyPrompt
-              data-test-subj="significantEventsAppSourcesEmptyPrompt"
-              iconType="database"
-              title={<h2>{canManage ? EMPTY_STATE_TITLE : READ_ONLY_EMPTY_STATE_TITLE}</h2>}
-              body={<p>{EMPTY_STATE_BODY}</p>}
-              actions={
-                canManage && (
-                  <EuiButton
-                    data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
-                    fill
-                    iconType="plus"
-                    onClick={openCreateFlyout}
-                  >
-                    {CREATE_SOURCE_BUTTON_LABEL}
-                  </EuiButton>
-                )
-              }
-            />
-          </EuiFlexItem>
         ) : (
           <>
-            <EuiFlexItem grow={false}>
-              <EuiText size="s">{getSourcesCountLabel(sources.length)}</EuiText>
-            </EuiFlexItem>
-            <EuiFlexItem>
-              <SourcesTable
-                sources={sources}
-                onboardingResultMap={sourceStatusMap}
-                searchText={searchText}
-                blocksActivity={blocksActivity}
-                generatingSourceIds={generatingSourceIds}
-                awaitingRunSourceIds={awaitingRunSourceIds}
-                activityBlockTooltip={activityBlockTooltip}
-                canManage={canManage}
-                selection={
-                  canManage
-                    ? {
-                        selected: selectedSources,
-                        onSelectionChange: (selected) =>
-                          setSelectedSourceIds(selected.map(({ id }) => id)),
-                        selectable: isSourceActionable,
-                      }
-                    : undefined
-                }
-                pendingEnabledSourceId={
-                  setSourceEnabled.isLoading ? setSourceEnabled.variables?.sourceId : undefined
-                }
-                onOpenSource={openSource}
-                onToggleSourceEnabled={(source, enabled) =>
-                  setSourceEnabled.mutate({ sourceId: source.id, enabled })
-                }
-                onOnboardSource={(onboardingSourceId) =>
-                  bulkScheduleOnboarding([onboardingSourceId])
-                }
-                onStopOnboarding={cancelOnboarding}
-                onDeleteSource={(source) => setPendingAction({ action: 'delete', source })}
-              />
-            </EuiFlexItem>
+            {showSourceCreation && (
+              <EuiFlexItem key="sourceCreation">
+                {canChangeSources ? (
+                  <EuiFlexGroup direction="column" gutterSize="xl">
+                    {showInitialSourceSetup && (
+                      <EuiFlexItem grow={false}>
+                        <EuiEmptyPrompt
+                          data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                          iconType="database"
+                          title={<h2>{EMPTY_STATE_TITLE}</h2>}
+                          body={<p>{EMPTY_STATE_BODY}</p>}
+                          actions={
+                            <EuiButton
+                              data-test-subj="significantEventsAppSourcesEmptyPromptCreateButton"
+                              fill
+                              iconType="plus"
+                              onClick={openCreateFlyout}
+                            >
+                              {CREATE_SOURCE_BUTTON_LABEL}
+                            </EuiButton>
+                          }
+                        />
+                      </EuiFlexItem>
+                    )}
+                    <EuiFlexItem grow={false}>
+                      <EuiTitle size="s">
+                        <h2 data-test-subj="nightshiftRecommendedSourcesTitle">
+                          {ADD_RECOMMENDED_SOURCES_TITLE}
+                        </h2>
+                      </EuiTitle>
+                      <EuiSpacer size="s" />
+                      <RecommendedSourcesTable
+                        entry="sources_page"
+                        onCreationStateChange={setSourceCreationState}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                ) : (
+                  <EuiEmptyPrompt
+                    data-test-subj="significantEventsAppSourcesEmptyPrompt"
+                    iconType="database"
+                    title={<h2>{READ_ONLY_EMPTY_STATE_TITLE}</h2>}
+                    body={<p>{EMPTY_STATE_BODY}</p>}
+                  />
+                )}
+              </EuiFlexItem>
+            )}
+            {hasSourcesLoadFailed && (
+              <EuiFlexItem key="sourceLoadError">
+                <EuiEmptyPrompt
+                  data-test-subj="significantEventsAppSourcesLoadErrorPrompt"
+                  color="danger"
+                  iconType="error"
+                  title={<h2>{SOURCES_LOAD_ERROR_TITLE}</h2>}
+                  body={<p>{SOURCES_LOAD_ERROR_BODY}</p>}
+                  actions={
+                    <EuiButton
+                      data-test-subj="significantEventsAppSourcesLoadErrorRetryButton"
+                      onClick={() => refetchSources()}
+                    >
+                      {RETRY_LABEL}
+                    </EuiButton>
+                  }
+                />
+              </EuiFlexItem>
+            )}
+            {hasSources && (
+              <React.Fragment key="sourceCatalog">
+                <EuiFlexItem grow={false}>
+                  <EuiText size="s">{getSourcesCountLabel(sources.length)}</EuiText>
+                </EuiFlexItem>
+                <EuiFlexItem>
+                  <SourcesTable
+                    sources={sources}
+                    onboardingResultMap={sourceStatusMap}
+                    searchText={searchText}
+                    blocksActivity={blocksActivity}
+                    generatingSourceIds={generatingSourceIds}
+                    awaitingRunSourceIds={awaitingRunSourceIds}
+                    activityBlockTooltip={activityBlockTooltip}
+                    canManage={canManage}
+                    canChangeSources={canChangeSources}
+                    selection={
+                      canManage
+                        ? {
+                            selected: selectedSources,
+                            onSelectionChange: (selected) =>
+                              setSelectedSourceIds(selected.map(({ id }) => id)),
+                            selectable: isSourceActionable,
+                          }
+                        : undefined
+                    }
+                    pendingEnabledSourceId={
+                      setSourceEnabled.isLoading ? setSourceEnabled.variables?.sourceId : undefined
+                    }
+                    onOpenSource={openSource}
+                    onToggleSourceEnabled={(source, enabled) =>
+                      setSourceEnabled.mutate({ sourceId: source.id, enabled })
+                    }
+                    onOnboardSource={(onboardingSourceId) =>
+                      bulkScheduleOnboarding([onboardingSourceId])
+                    }
+                    onStopOnboarding={cancelOnboarding}
+                    onDeleteSource={(source) => setPendingAction({ action: 'delete', source })}
+                  />
+                </EuiFlexItem>
+              </React.Fragment>
+            )}
           </>
         )}
       </EuiFlexGroup>
 
-      {((isCreating && canManage) || routedSource) && (
+      {((isCreating && canChangeSources) || routedSource) && (
         <React.Suspense fallback={null}>
           <SourceFlyout
             key={routedSource?.id ?? 'new'}
             source={routedSource}
-            readOnly={!canManage}
+            readOnly={!canChangeSources}
             onClose={closeFlyout}
           />
         </React.Suspense>

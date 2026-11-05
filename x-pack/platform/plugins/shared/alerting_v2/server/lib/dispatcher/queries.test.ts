@@ -27,6 +27,7 @@ describe('getDispatchableAlertEventsQuery', () => {
   const SCAN_WINDOW = {
     gte: '2026-01-22T07:20:00.000Z',
     lte: '2026-01-22T07:35:00.000Z',
+    limit: ESQL_QUERY_ROW_LIMIT,
   } as const;
 
   const queryOf = () => getDispatchableAlertEventsQuery(SCAN_WINDOW).query;

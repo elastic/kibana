@@ -26,6 +26,29 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { RunStatusIndicator, type Run } from './run_history';
 
+const getSkipReasonDescription = ({ skipReason, dailyLimit }: Run) => {
+  if (skipReason === 'investigation_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.investigationLimitReason', {
+      defaultMessage:
+        'The deployment-wide investigation limit was already reached, so this trigger did not start a run.',
+    });
+  }
+  if (skipReason === 'daily_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.dailyLimitReason', {
+      defaultMessage:
+        'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
+      values: { limit: dailyLimit ?? '—' },
+    });
+  }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.noOpenInvestigationReason', {
+      defaultMessage:
+        'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
+    });
+  }
+  return '—';
+};
+
 const labels = {
   automationRun: i18n.translate('xpack.nightshift.automations.detail.automationRun', {
     defaultMessage: 'Automation run',
@@ -67,6 +90,10 @@ const formatDate = (value: string) =>
   });
 
 const formatStarted = (value: string) => `${formatDate(value)} (${moment(value).fromNow()})`;
+
+const DETAIL_COLUMN_WIDTHS: [string, string] = ['auto', 'minmax(0, 1fr)'];
+
+const DETAIL_VALUE_PROPS = { css: { overflowWrap: 'anywhere' } } as const;
 
 const OpenInvestigationButton = ({ investigationId }: { investigationId: string }) => {
   const { application } = useKibana().services;
@@ -121,7 +148,9 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              data-test-subj="automationRunSkippedDetails"
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 {
                   title: labels.triggered,
@@ -131,22 +160,7 @@ export const RunDetail = ({
                 { title: labels.message, description: run.message ?? '—' },
                 {
                   title: labels.reason,
-                  description:
-                    run.skipReason === 'daily_limit'
-                      ? i18n.translate('xpack.nightshift.automations.detail.dailyLimitReason', {
-                          defaultMessage:
-                            'Daily trigger limit of {limit} was already reached, so this trigger did not start a run.',
-                          values: { limit: run.dailyLimit ?? '—' },
-                        })
-                      : run.skipReason === 'no_open_investigation'
-                      ? i18n.translate(
-                          'xpack.nightshift.automations.detail.noOpenInvestigationReason',
-                          {
-                            defaultMessage:
-                              'The alert recovered, but no open investigation holds it, so there was nothing to follow up on.',
-                          }
-                        )
-                      : '—',
+                  description: getSkipReasonDescription(run),
                 },
                 { title: labels.automation, description: automationName },
               ]}
@@ -158,10 +172,13 @@ export const RunDetail = ({
             <EuiSpacer size="s" />
             <EuiDescriptionList
               type="column"
-              columnWidths={['auto', 1]}
+              data-test-subj="automationRunDetails"
+              columnWidths={DETAIL_COLUMN_WIDTHS}
+              descriptionProps={DETAIL_VALUE_PROPS}
               listItems={[
                 { title: labels.source, description: run.triggeredBy ?? '—' },
                 { title: labels.message, description: run.message ?? '—' },
+                ...(run.error ? [{ title: labels.reason, description: run.error }] : []),
                 {
                   title: labels.started,
                   description: formatStarted(run.startedAt),

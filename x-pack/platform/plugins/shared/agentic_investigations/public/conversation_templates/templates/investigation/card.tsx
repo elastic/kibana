@@ -6,8 +6,17 @@
  */
 
 import { css } from '@emotion/react';
-import React from 'react';
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText, useEuiTheme } from '@elastic/eui';
+import React, { useState } from 'react';
+import {
+  EuiBadge,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiText,
+  EuiTextBlockTruncate,
+  useEuiTheme,
+  useResizeObserver,
+} from '@elastic/eui';
 import { ConversationMetaInfo, toPlainSummary } from '@kbn/agentic-investigations-common';
 import { useAiButtonGradientStyles } from '@kbn/shared-ux-ai-components';
 import type { InvestigationSummary } from '../../../../common';
@@ -62,7 +71,7 @@ const EntityChips = ({ investigation }: { investigation: InvestigationSummary })
 
 /**
  * A compact investigation card: age on top (with running indicator and optional trailing actions),
- * title, a two-line summary, and impacted entities. Presentational; the host supplies the
+ * title, a one-line summary, and impacted entities. Presentational; the host supplies the
  * investigation and decides what a click does.
  */
 export const InvestigationCard: React.FC<InvestigationCardProps> = ({
@@ -120,10 +129,16 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
   ) : undefined;
 
   const hasActions = actions != null;
+  const [actionsElement, setActionsElement] = useState<HTMLDivElement | null>(null);
+  const { width: actionsWidth } = useResizeObserver(actionsElement, 'width');
 
-  // Spacer matching ConversationsActionsGroup / Nightshift card actions: divider margins +
-  // two size="s" (32px) icon buttons + gutters — keeps age text from running under the icons.
-  const actionsSpacerWidth = `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
+  // The actions are positioned over the top row, so the row reserves their measured width to keep
+  // the age text from running under them. Until measured, fall back to the width of
+  // ConversationsActionsGroup: divider margins + two size="s" (32px) icon buttons + gutters.
+  const actionsSpacerWidth =
+    actionsWidth > 0
+      ? `${actionsWidth}px`
+      : `calc(${euiTheme.size.xl} * 2 + ${euiTheme.size.l} + ${euiTheme.size.s})`;
 
   return (
     <div
@@ -138,7 +153,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           : euiTheme.colors.backgroundBasePlain};
         ${isInteractive && !isSelected
           ? `&:has([data-test-subj='investigationCardButton']:hover) {
-              background: ${euiTheme.colors.backgroundBaseSubdued};
+              background: ${euiTheme.colors.backgroundBaseInteractiveHover};
             }`
           : ''}
       `}
@@ -180,6 +195,7 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
                 <EuiFlexItem
                   grow={false}
                   aria-hidden
+                  data-test-subj="investigationCardActionsSpacer"
                   css={{
                     marginBlock: `-${euiTheme.size.s}`,
                     inlineSize: actionsSpacerWidth,
@@ -210,18 +226,16 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
           {summary && (
             <EuiFlexItem grow={false}>
               <EuiText size="xs" color="subdued">
-                <p
-                  data-test-subj="investigationCardSummary"
-                  css={css`
-                    margin: 0;
-                    display: -webkit-box;
-                    -webkit-line-clamp: 2;
-                    -webkit-box-orient: vertical;
-                    overflow: hidden;
-                  `}
-                >
-                  {toPlainSummary(summary)}
-                </p>
+                <EuiTextBlockTruncate lines={1} cloneElement>
+                  <p
+                    data-test-subj="investigationCardSummary"
+                    css={css`
+                      margin: 0;
+                    `}
+                  >
+                    {toPlainSummary(summary)}
+                  </p>
+                </EuiTextBlockTruncate>
               </EuiText>
             </EuiFlexItem>
           )}
@@ -241,6 +255,8 @@ export const InvestigationCard: React.FC<InvestigationCardProps> = ({
       </div>
       {hasActions && (
         <div
+          ref={setActionsElement}
+          data-test-subj="investigationCardActions"
           css={css`
             position: absolute;
             inset-block-start: ${euiTheme.size.l};

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RunMetrics } from './utils/run_metrics_tracker';
+import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import {
   buildRiskScoreEntityMaintainerRunSummary,
   buildRiskScorePhase0EntityMaintainerRunSummary,
