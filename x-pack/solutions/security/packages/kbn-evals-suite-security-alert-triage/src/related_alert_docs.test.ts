@@ -74,14 +74,14 @@ describe('buildCaseDocs', () => {
       }
     );
 
-    it('keeps realistic names and rewrites the user name embedded in paths and command lines', () => {
+    it('keeps ordinary-looking names and rewrites the user name embedded in paths and command lines', () => {
       const malicious = RELATED_ALERT_CASES.find(({ id }) => id === 'related-malicious-control')!;
       const docs = buildCaseDocs(malicious, 'run-1', NOW);
       const { hosts, users } = names(docs);
       const [host] = [...hosts];
       const [user] = [...users];
       expect(host).toMatch(/^jdoe-mbp-[0-9a-f]{6}$/);
-      expect(user).toMatch(/^jdoe[0-9a-f]{6}$/);
+      expect(user).toMatch(/^jdoe\d{4}$/);
 
       const serialised = JSON.stringify(docs.map(({ doc }) => doc));
       expect(serialised).toContain(`/Users/${user}/`);
@@ -89,6 +89,19 @@ describe('buildCaseDocs', () => {
       docs.forEach(({ doc }) => {
         expect((doc.host as { hostname: string }).hostname).toBe(host);
       });
+    });
+
+    it('gives a hyphenated user name the same numeric suffix shape', () => {
+      const windows = RELATED_ALERT_CASES.find(
+        ({ id }) => id === 'related-lolbin-procdump-control'
+      )!;
+      const { users } = names(buildCaseDocs(windows, 'run-1', NOW));
+      expect([...users][0]).toMatch(/^svc-backup\d{4}$/);
+    });
+
+    it('defaults the clock to now', () => {
+      const [{ doc }] = buildCaseDocs(RELATED_ALERT_CASES[0], 'run-1');
+      expect(Date.now() - new Date(doc['@timestamp'] as string).getTime()).toBeLessThan(DAY_MS);
     });
 
     it('does not let a run match the alerts of another run of the same case', () => {

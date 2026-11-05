@@ -70,11 +70,7 @@ const countRelatedAlerts = (results: unknown[] | undefined): number =>
     return total + (Array.isArray(relatedAlerts) ? relatedAlerts.length : 0);
   }, 0);
 
-/**
- * Guards the premise of the eval: the related alerts must actually reach the model. Fails when
- * the tool was never called or returned nothing, so a run on an empty correlation is not read as
- * a verdict on the command lines.
- */
+/** Premise check: scores 0 when the tool was never called or returned no related alerts. */
 export const relatedAlertsRetrieved: Evaluator = {
   name: 'RelatedAlertsRetrieved',
   kind: 'CODE',
@@ -96,10 +92,7 @@ export const relatedAlertsRetrieved: Evaluator = {
   },
 };
 
-/**
- * Headline metric: the verdict is only credited when the related alerts reached the model, so a
- * correct verdict reached without the premise of the eval does not count.
- */
+/** Headline metric: credits the verdict only when related alerts were actually retrieved. */
 export const verdictAccuracyWithRelated: Evaluator = {
   name: 'VerdictAccuracyWithRelated',
   kind: 'CODE',

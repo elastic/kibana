@@ -7,15 +7,13 @@
 
 /**
  * Related-alert sensitivity eval for the alert-analysis skill, run through /converse on the
- * default agent (natural skill routing, no forced skill or agent ids).
+ * default agent (natural skill routing, no forced skill or agent ids). Each case indexes a target
+ * alert plus its related alerts, attaches the target as a `security.alerts` attachment and grades
+ * the final `Verdict:` line. Cases and documents come from the workflow-path suite, so both paths
+ * are scored against the same labels.
  *
- * Each case indexes one target alert plus its related alerts, attaches the target as a
- * `security.alerts` attachment and grades the verdict on the final `Verdict:` line. Cases and
- * documents are the ones the workflow-path suite uses (`@kbn/evals-suite-alert-analysis-workflow`),
- * so both paths are scored against the same labels. All evaluators are CODE evaluators.
- *
- * Examples run one at a time: the benign and malicious cases share `host.name` and `user.name`,
- * which is what `get-related-alerts` correlates on, so concurrent runs would see each other's alerts.
+ * Host and user names are unique per run, so runs cannot correlate with each other's alerts;
+ * examples still run one at a time as extra safety.
  */
 
 import { randomUUID } from 'crypto';

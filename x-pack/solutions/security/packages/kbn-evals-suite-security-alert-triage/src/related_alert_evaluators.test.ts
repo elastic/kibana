@@ -106,6 +106,13 @@ describe('relatedAlertsRetrieved', () => {
     expect((await run(relatedAlertsRetrieved, converseOutput('x', [errored]))).label).toBe('empty');
   });
 
+  it('treats a tool step without results as empty', async () => {
+    const noResults = { type: 'tool_call', tool_id: GET_RELATED_ALERTS_TOOL_ID };
+    expect((await run(relatedAlertsRetrieved, converseOutput('x', [noResults]))).label).toBe(
+      'empty'
+    );
+  });
+
   it('ignores other tools', async () => {
     const other = {
       type: 'tool_call',

@@ -53,23 +53,26 @@ const replaceWord = (value: unknown, from: string, to: string): unknown => {
 };
 
 /**
- * `get-related-alerts` correlates on `host.name` / `user.name` (and `source.ip` / `destination.ip`,
- * which no shared fixture sets), and those are fixed per fixture. Suffixing them with a per-run
- * token keeps a run from matching alerts a failed cleanup left behind by an earlier run.
- * The same rewrite is applied to every string that embeds the original name (home directories in
- * command lines and working directories), so the evidence still describes one consistent user.
+ * `get-related-alerts` matches on any of host.name / user.name, which are fixed per fixture, so a
+ * leftover doc from a failed cleanup would correlate with a later run. Both get a per-run suffix
+ * (an asset-tag style hex on the host, a numeric collision suffix on the user, so neither reads as
+ * an anomaly) and strings embedding the old names, such as home directories, are rewritten to match.
  */
 const withRunIdentity = (fixture: RelatedAlertFixture, runId: string): RelatedAlertFixture => {
-  const token = createHash('sha256').update(runId).digest('hex').slice(0, 6);
+  const digest = createHash('sha256').update(runId).digest('hex');
+  const hostToken = digest.slice(0, 6);
+  const userToken = String(parseInt(digest.slice(6, 14), 16) % 10_000).padStart(4, '0');
   const { observable } = fixture;
   const hostName = observable['host.name'];
   const userName = observable['user.name'];
+  // Host first: the renamed host can start with the user's name, which the word-bounded user
+  // rewrite then leaves alone because a `-` follows it.
   const renames: Array<[string, string]> = [];
   if (typeof hostName === 'string') {
-    renames.push([hostName, `${hostName}-${token}`]);
+    renames.push([hostName, `${hostName}-${hostToken}`]);
   }
   if (typeof userName === 'string') {
-    renames.push([userName, `${userName}${token}`]);
+    renames.push([userName, `${userName}${userToken}`]);
   }
   const renamed = Object.fromEntries(
     Object.entries(observable).map(([key, value]) => [
