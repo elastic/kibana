@@ -31,6 +31,12 @@ export type ActionPolicySavedObjectBulkDeleteItem =
   | { id: string }
   | { id: string; error: SavedObjectError };
 
+/** Narrows a find-all read to enabled or disabled policies and to the given spaces. */
+export interface ActionPolicyFindAllParams {
+  filter?: { enabled: boolean };
+  spaceIds?: readonly string[];
+}
+
 /** The saved object version of an action policy, read without decrypting it. */
 export interface ActionPolicyVersion {
   id: string;
@@ -73,15 +79,11 @@ export interface ActionPolicySavedObjectServiceContract {
     }>;
   }): Promise<ActionPolicySavedObjectBulkUpdateItem[]>;
   /** Decrypts the action policies in `spaceIds`, or in every space when omitted. */
-  findAllDecrypted(params?: {
-    filter?: { enabled: boolean };
-    spaceIds?: readonly string[];
-  }): Promise<ActionPolicySavedObjectBulkGetItem[]>;
+  findAllDecrypted(
+    params?: ActionPolicyFindAllParams
+  ): Promise<ActionPolicySavedObjectBulkGetItem[]>;
   /** Reads the id, version and space of the action policies in `spaceIds` without decrypting them. */
-  findAllVersions(params?: {
-    filter?: { enabled: boolean };
-    spaceIds?: readonly string[];
-  }): Promise<ActionPolicyVersion[]>;
+  findAllVersions(params?: ActionPolicyFindAllParams): Promise<ActionPolicyVersion[]>;
   /**
    * Reads the current space's action policies, up to `maxPolicies`, fetching only the fields
    * needed to group them by routing tag. `isTruncated` is true when more policies exist.

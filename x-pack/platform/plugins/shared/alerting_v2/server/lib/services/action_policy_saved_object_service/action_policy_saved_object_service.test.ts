@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { ISavedObjectsPointInTimeFinder, SavedObjectsClientContract } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { ActionPolicySavedObjectAttributes } from '../../../saved_objects';
 import { ACTION_POLICY_SAVED_OBJECT_TYPE } from '../../../saved_objects';
@@ -611,13 +611,13 @@ describe('ActionPolicySavedObjectService', () => {
     const mockFinder = (
       savedObjects: Array<{ id: string; version?: string; namespaces?: string[] }>
     ) => {
-      mockSoClient.createPointInTimeFinder.mockReturnValue({
+      const finder: ISavedObjectsPointInTimeFinder<ActionPolicySavedObjectAttributes, unknown> = {
         async *find() {
           yield {
             saved_objects: savedObjects.map((savedObject) => ({
               ...savedObject,
               type: ACTION_POLICY_SAVED_OBJECT_TYPE,
-              attributes: { enabled: true },
+              attributes: mockAttrs,
               references: [],
               score: 0,
             })),
@@ -627,7 +627,8 @@ describe('ActionPolicySavedObjectService', () => {
           };
         },
         close: mockClose,
-      } as any);
+      };
+      mockSoClient.createPointInTimeFinder.mockReturnValue(finder);
     };
 
     beforeEach(() => {

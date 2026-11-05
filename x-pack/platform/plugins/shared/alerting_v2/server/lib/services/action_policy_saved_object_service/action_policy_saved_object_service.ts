@@ -24,6 +24,7 @@ import { EncryptedSavedObjectsClientToken } from '../../dispatcher/steps/dispatc
 import { spaceIdToNamespace } from '../../space_id_to_namespace';
 import { ActionPolicySavedObjectsClientToken } from './tokens';
 import type {
+  ActionPolicyFindAllParams,
   ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
@@ -33,6 +34,7 @@ import type {
 } from './types';
 
 export type {
+  ActionPolicyFindAllParams,
   ActionPolicyRoutingTagSource,
   ActionPolicySavedObjectBulkDeleteItem,
   ActionPolicySavedObjectBulkGetItem,
@@ -43,12 +45,9 @@ export type {
 
 const ROUTING_TAG_SOURCES_PER_PAGE = 1000;
 
-interface FindAllParams {
-  filter?: { enabled: boolean };
-  spaceIds?: readonly string[];
-}
-
-const toFindAllOptions = (params?: FindAllParams): SavedObjectsCreatePointInTimeFinderOptions => ({
+const toFindAllOptions = (
+  params?: ActionPolicyFindAllParams
+): SavedObjectsCreatePointInTimeFinderOptions => ({
   type: ACTION_POLICY_SAVED_OBJECT_TYPE,
   // A space id is already its SO namespace string, `default` included.
   namespaces: params?.spaceIds ? [...params.spaceIds] : ['*'],
@@ -205,7 +204,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
   }
 
   public async findAllDecrypted(
-    params?: FindAllParams
+    params?: ActionPolicyFindAllParams
   ): Promise<ActionPolicySavedObjectBulkGetItem[]> {
     if (params?.spaceIds?.length === 0) {
       return [];
@@ -238,7 +237,7 @@ export class ActionPolicySavedObjectService implements ActionPolicySavedObjectSe
     return results;
   }
 
-  public async findAllVersions(params?: FindAllParams): Promise<ActionPolicyVersion[]> {
+  public async findAllVersions(params?: ActionPolicyFindAllParams): Promise<ActionPolicyVersion[]> {
     if (params?.spaceIds?.length === 0) {
       return [];
     }
