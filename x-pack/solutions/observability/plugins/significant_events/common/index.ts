@@ -8,6 +8,10 @@
 export { QUERY_STATUSES } from './queries';
 export type { QueryStatus } from './queries';
 export type { PaginatedResponse } from './pagination';
+export type {
+  DetectionEngineEnableBody,
+  DetectionEngineServiceAccountStatus,
+} from './service_account';
 export type { DetectionEntity, DetectionEntitiesResponse } from './detection_entities';
 export {
   isSignificantEventsSortField,

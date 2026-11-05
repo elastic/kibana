@@ -133,6 +133,7 @@ import {
 import { createSignificantEventsAvailability } from './agent_builder/tools/significant_events_availability';
 import { SIGNIFICANT_EVENT_TIERED_FEATURES } from '../common/constants';
 import { isSignificantEventsAvailable } from './routes/utils/assert_significant_events_access';
+import { registerDetectionEngineWorkloadType } from './lib/service_accounts/detection_engine_account';
 import { getRequestAbortSignal } from './routes/utils/get_request_abort_signal';
 import type { SignificantEventsKIsOnboardingClient } from './lib/workflows/onboarding_workflow_client';
 import { WorkflowExecutionService } from './lib/workflows/workflow_execution_service';
@@ -204,6 +205,8 @@ export class SignificantEventsPlugin
         release: () => releaseRunQuota({ internalRepository, group: 'investigation', date }),
       };
     });
+
+    registerDetectionEngineWorkloadType(core);
 
     core.dataStreams.registerDataStream(detectionsDataStream);
     core.dataStreams.registerDataStream(knowledgeIndicatorsDataStream);
