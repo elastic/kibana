@@ -16,7 +16,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useCreateAutomation } from '../../hooks/use_automations';
+import { useCreateAutomation } from '../../../data/automations/use_automations';
 import {
   createAutomationFormValues,
   type AutomationFormValues,

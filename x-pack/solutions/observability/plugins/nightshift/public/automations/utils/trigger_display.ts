@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { SlackTriggerKind } from '../flyouts/form/automation_form_values';
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 
 export const triggerTypeLabels = {
   alertTriggered: i18n.translate('xpack.nightshift.automations.flyout.alertTriggered', {
