@@ -46,7 +46,6 @@ export {
 } from './helpers';
 export * from './kbn';
 export * from './alertzero';
-export * from './endpoint_analysis';
 export * from './investigations';
 export { type SupplyWorkflowKey } from './supply_workflow_ids';
 export { findStepOutput, runWorkflow, waitForExecution } from './workflow_runs';

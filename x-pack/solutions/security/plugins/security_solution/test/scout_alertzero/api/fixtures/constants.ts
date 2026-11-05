@@ -77,14 +77,7 @@ export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS
 /** Backing index of the managed AI index the Attack Discovery review writes fingerprints into. */
 export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
 
-export const AI_INDEX_URL = '/api/context_engine/ai_index';
-export const PROPOSALS_URL = '/internal/proposals';
 export const CONVERSATIONS_URL = '/api/agent_builder/conversations';
-
-// --- Flow 3: endpoint analysis ---
-export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
-  'system-security-forensics-run-endpoint-analysis';
-// --- end Flow 3 ---
 
 /** Hunt for_threat and hunt_behavior live beside the other hunt URLs; not yet in the common package. */
 export const HUNT_FOR_THREAT_URL = '/internal/alertzero/hunt/hunt_for_threat' as const;

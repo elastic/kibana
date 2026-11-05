@@ -1,9 +1,20 @@
 {
-  "sha1": "0b1df81a87e8c7ca4b27da41715ce4422135ed9c",
+  "sha1": "ece38752a99e8415f3ccad8324ac975bd497f29b",
   "testChannels": [
     "ci-on-commit"
   ],
   "tests": [
+    {
+      "id": "baabcd329d899dc-93fd0fe4871e93a",
+      "title": "Turn on alert analysis for the Alert Triage worker",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.setup.ts",
+        "line": 5,
+        "column": 1
+      }
+    },
     {
       "id": "8e7b651129dfe98-247be790ba7076d",
       "title": "AlertZero managed workflows system-security-coverage-review: is installed and valid",
@@ -14,8 +25,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 148,
-        "column": 12
+        "line": 315,
+        "column": 5
       }
     },
     {
@@ -28,8 +39,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 148,
-        "column": 12
+        "line": 315,
+        "column": 5
       }
     },
     {
@@ -42,8 +53,19 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/managed_workflows.spec.ts",
-        "line": 148,
-        "column": 12
+        "line": 315,
+        "column": 5
+      }
+    },
+    {
+      "id": "a015847069f002e-14be5fbafaaef00",
+      "title": "Restore alert analysis",
+      "expectedStatus": "passed",
+      "tags": [],
+      "location": {
+        "file": "x-pack/solutions/security/plugins/alertzero/test/scout_alertzero/api/tests/global.teardown.ts",
+        "line": 5,
+        "column": 1
       }
     }
   ]

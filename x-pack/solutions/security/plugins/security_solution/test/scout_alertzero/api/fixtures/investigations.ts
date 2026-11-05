@@ -6,40 +6,8 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import type { ListProposalsResponse } from '@kbn/proposals-common';
-import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL, PROPOSALS_URL } from './constants';
-import { ok } from './kbn';
+import { AI_INDEX_KI_BACKING_INDEX, CONVERSATIONS_URL } from './constants';
 import type { AlertZeroApi } from './kbn';
-
-export interface InvestigationProposal {
-  readonly id: string;
-  readonly conversationId: string;
-  readonly title: string;
-  readonly actionWorkflowId?: string;
-  readonly actionInput?: Record<string, unknown>;
-  readonly createdAt: string;
-}
-
-/**
- * Pending containment cards, optionally scoped to one investigation. `conversationId` is what
- * keeps a run's assertions on its own cards: the queue is shared across the space.
- */
-export const listInvestigationProposals = async (
-  api: AlertZeroApi,
-  conversationId?: string
-): Promise<InvestigationProposal[]> =>
-  ok(
-    await api.internal<ListProposalsResponse>('GET', PROPOSALS_URL, {
-      query: {
-        origin: 'alertzero',
-        status: 'pending',
-        excludeSuperseded: true,
-        size: 100,
-        ...(conversationId ? { conversationId } : {}),
-      },
-    }),
-    'list pending proposals'
-  ).proposals as InvestigationProposal[];
 
 /**
  * Deletes an Investigation conversation; its attachments are deleted with it. A 404 means an
@@ -53,36 +21,6 @@ export const deleteInvestigation = async (api: AlertZeroApi, id: string): Promis
     throw new Error(
       `Delete investigation ${id} failed: ${response.statusCode} ${JSON.stringify(response.body)}`
     );
-  }
-};
-
-/**
- * Dismisses every pending proposal attached to one Investigation. The endpoint-analysis run
- * raises containment cards (isolate/collect) whose action input can carry only `endpoint_ids`
- * and a comment, so the alert- and agent-keyed run correlation cannot match them; the
- * conversation id is the one identifier every card on this Investigation shares. Dismissal —
- * not approval — releases the parked run behind each card, which then ends on its declined
- * branch while the service account still exists, so this belongs before the account teardown.
- */
-export const dismissInvestigationProposals = async (
-  api: AlertZeroApi,
-  conversationId: string
-): Promise<void> => {
-  for (const proposal of await listInvestigationProposals(api, conversationId)) {
-    const response = await api.internal(
-      'POST',
-      `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/dismiss`,
-      { body: { dismissReason: 'handled_elsewhere', rationale: 'AlertZero e2e teardown' } }
-    );
-    // A 409 means the card was decided concurrently (its spec approved it, or a teardown cancel
-    // already ended the run behind it), which teardown accepts.
-    if (response.statusCode >= 300 && response.statusCode !== 409) {
-      throw new Error(
-        `dismiss proposal ${proposal.id} of investigation ${conversationId} failed: ${
-          response.statusCode
-        } ${JSON.stringify(response.body)}`
-      );
-    }
   }
 };
 
