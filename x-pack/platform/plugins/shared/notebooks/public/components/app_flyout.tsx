@@ -389,6 +389,7 @@ const getGridStyles = (
 
     .kbnGridPanel--dragPreview {
       margin: ${inset}px;
+      border-radius: ${euiTheme.border.radius.small};
       background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};
     }
 
