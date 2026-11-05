@@ -96,7 +96,7 @@ describe('getBuiltInStepDefinition', () => {
 
   it('types data.set output as the rendered key-value object', () => {
     const { outputSchema } = getBuiltInStepDefinition('data.set')!;
-    expect(outputSchema.safeParse({ user: 'a', count: 2 }).success).toBe(true);
+    expect(outputSchema.parse({ user: 'a', count: 2 })).toEqual({ user: 'a', count: 2 });
   });
 
   it('types if output with conditionResult', () => {
