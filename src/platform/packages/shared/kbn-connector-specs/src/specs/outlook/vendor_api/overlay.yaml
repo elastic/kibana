@@ -1,0 +1,14 @@
+overlay: 1.0.0
+info:
+  title: Microsoft Graph v1.0 corrections for Outlook
+  version: 1.0.0
+actions:
+  - target: $.components.schemas['microsoft.graph.searchRequest','microsoft.graph.searchQuery'].required[?@ == '@odata.type']
+    description: >-
+      The OpenAPI converter marks @odata.type required on every type because it is the
+      discriminator (https://github.com/microsoft/OpenAPI.NET.OData/issues/243), but Graph only
+      needs it for a derived type sent where a base type is expected; Microsoft's SDKs stopped
+      sending it by default (https://github.com/microsoftgraph/msgraph-sdk-php/issues/1006).
+      The request examples omit it on the searchRequest and searchQuery of
+      https://learn.microsoft.com/en-us/graph/api/search-query?view=graph-rest-1.0.
+    remove: true

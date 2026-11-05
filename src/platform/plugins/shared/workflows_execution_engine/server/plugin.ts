@@ -57,7 +57,9 @@ import {
   MISSING_EXECUTION_IDENTITY_MESSAGE,
   UNKNOWN_EXECUTION_IDENTITY,
 } from './lib/execution_identity';
+import type { ResolvedExecutionIdentity } from './lib/get_user';
 import { getAuthenticatedUser } from './lib/get_user';
+import { getWorkflowExecutionName } from './lib/get_workflow_execution_name';
 import { checkWorkflowAccess, hasWorkflowAccess } from './lib/has_workflow_access';
 import { logWorkflowTaskFailure } from './lib/log_workflow_task_failure';
 import {
@@ -1132,6 +1134,7 @@ export class WorkflowsExecutionEnginePlugin
                   logger,
                   {
                     createSkippedForInFlightDuplicates: !deferInFlightDuplicatesToConcurrency,
+                    getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                     hasActiveTaskForExecution: (executionId) =>
                       workflowTaskManager.hasActiveTaskForExecution(executionId),
                   }
@@ -1190,6 +1193,7 @@ export class WorkflowsExecutionEnginePlugin
                   authenticatedUser: executedBy,
                   now: workflowCreatedAt,
                   maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+                  getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
                   getConcurrencyGroupKey: (execution) =>
                     this.getConcurrencyGroupKey(
                       execution,
@@ -1475,7 +1479,7 @@ export class WorkflowsExecutionEnginePlugin
       spaceId: string;
       context: Record<string, unknown>;
       defaultTriggeredBy: string;
-      authenticatedUser: string | undefined;
+      authenticatedUser: ResolvedExecutionIdentity | undefined;
       now: Date;
     }): Promise<WorkflowExecutionForInputRendering> => {
       if (!args.inheritedIdentity) {
@@ -1484,6 +1488,7 @@ export class WorkflowsExecutionEnginePlugin
       return buildWorkflowExecutionDocument({
         ...args,
         maxEventChainDepth: this.config.eventDriven.maxChainDepth,
+        getRunName: (execution) => this.getRunName(execution, coreStart, dependencies),
         getConcurrencyGroupKey: (execution) =>
           this.getConcurrencyGroupKey(
             execution,
@@ -1548,9 +1553,15 @@ export class WorkflowsExecutionEnginePlugin
         await ensureInheritedBindingCurrent(coreStart, inheritedIdentity, spaceId);
       }
 
-      const authenticatedUser =
-        options.authenticatedUser ??
-        (await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client));
+      // `options.authenticatedUser` is a pre-resolved principal (e.g. a cloud service
+      // account username from the actions plugin); use it verbatim as the identity snapshot.
+      const authenticatedUser: ResolvedExecutionIdentity | undefined =
+        options.authenticatedUser != null
+          ? {
+              executedBy: options.authenticatedUser,
+              user: { name: options.authenticatedUser, username: options.authenticatedUser },
+            }
+          : await getAuthenticatedUser(request, coreStart.security, coreStart.elasticsearch.client);
 
       const workflowExecution = await buildExecutionDocument({
         workflow,
@@ -2162,11 +2173,13 @@ export class WorkflowsExecutionEnginePlugin
           assertLicensed: () => checkLicense(plugins.licensing),
           resolveResumedBy: async (resumeRequest) =>
             resumeRequest
-              ? (await getAuthenticatedUser(
-                  resumeRequest,
-                  coreStart.security,
-                  coreStart.elasticsearch.client
-                )) ?? UNKNOWN_EXECUTION_IDENTITY
+              ? (
+                  await getAuthenticatedUser(
+                    resumeRequest,
+                    coreStart.security,
+                    coreStart.elasticsearch.client
+                  )
+                )?.executedBy ?? UNKNOWN_EXECUTION_IDENTITY
               : UNKNOWN_EXECUTION_IDENTITY,
           logger: this.logger,
         },
@@ -2258,6 +2271,14 @@ export class WorkflowsExecutionEnginePlugin
 
   public stop() {
     void this.dataClientBundle.stop();
+  }
+
+  private getRunName(
+    execution: WorkflowExecutionForInputRendering,
+    coreStart: CoreStart,
+    dependencies: ContextDependencies
+  ): string | undefined {
+    return getWorkflowExecutionName(execution, this.logger, coreStart, dependencies);
   }
 
   /**
