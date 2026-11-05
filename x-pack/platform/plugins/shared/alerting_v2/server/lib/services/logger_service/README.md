@@ -32,8 +32,8 @@ Every log line in this plugin:
    the component is constructed, never from the root.
 3. Has a short, sentence-case message that names a _class_ of event and
    contains no interpolated values.
-4. Puts every variable value in `labels` (IDs only) or `error`, never in the
-   message.
+4. Puts every variable value in `labels` (IDs or enum values only) or `error`,
+   never in the message.
 5. If `warn` or `error`, carries a `code` from `ALERTING_LOG_CODES`.
 6. Logs nothing from the [deny list](#deny-list--never-log-at-any-level).
 7. Is asserted in a unit test on `code` and `labels`.
@@ -45,12 +45,12 @@ on the contract: nothing in this plugin stops the Kibana process, and
 firehose-level detail belongs in a lazy `debug` message that is free when the
 level is off.
 
-| Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                                                                                                     |
-| ------- | ----------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
-| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`); a saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`); a background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`).        |
-| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`); a name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`); a KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`). |
-| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window (once, on cold start).                                                                                                                  |
-| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish; episode transitions; dispatch decisions; a route returning a client error.                                                                                                                             |
+| Level   | Use when                                                                                                                      | Examples in this plugin                                                                                                                                                                                                                                                                                                                  |
+| ------- | ----------------------------------------------------------------------------------------------------------------------------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
+| `error` | An operation the operator cares about failed and was not recovered. **The operator must act.**                                | A pipeline step threw (`RULE_EXECUTION_STEP_FAILED`); a saved object type failed to register (`SAVED_OBJECTS_TYPE_REGISTRATION_FAILED`); a background task could not be scheduled at boot (`TASKS_SCHEDULE_FAILED`); a new rule's task failed and the compensating delete failed too, leaving an orphan (`RULE_CREATE_ROLLBACK_FAILED`). |
+| `warn`  | An operation degraded but continued: recovered, retried, skipped, or gracefully degraded. The operator watches for a pattern. | Workflow not found on dispatch (`DISPATCH_WORKFLOW_NOT_FOUND`); a name lookup failed and the page returned with `null` names (`EXECUTION_HISTORY_RULE_LOOKUP_FAILED`); a KQL matcher failed (`POLICY_MATCHER_KQL_INVALID`); the dispatcher kill switch is on (`DISPATCHER_PAUSED`, once per start).                                      |
+| `info`  | **Rare.** A significant lifecycle event the operator must see even at rest. Never per execution, per tick, or per request.    | The dispatcher found no persisted watermark and is starting from the overlap window (once, on cold start).                                                                                                                                                                                                                               |
+| `debug` | Anything a developer or on-call needs to trace one rule or one dispatch tick. Opt-in per logger name.                         | Step start / finish; episode transitions; dispatch decisions; a route returning a client error.                                                                                                                                                                                                                                          |
 
 Rules:
 
@@ -66,8 +66,10 @@ Rules:
 - Do not log at `warn` / `error` inside a `try` that re-throws. The caller
   decides whether the failure is handled or propagated. Log once, at the
   boundary that makes that decision. The rule executor's
-  `error_handling_middleware` and the dispatcher's per-group catch are those
-  boundaries today.
+  `error_handling_middleware` (`RULE_EXECUTION_STEP_FAILED`) and the
+  dispatcher's `execution_pipeline.ts` (`DISPATCH_STEP_FAILED`) plus its
+  per-group catch (`DISPATCH_GROUP_UNHANDLED_ERROR`) are those boundaries
+  today.
 
 ### 2. Message text
 
@@ -143,6 +145,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `rulesClient`        | Rule CRUD, filter parsing, bulk operations, internal rules client.         | `lib/rules_client/`, `lib/internal_rules_client/`                                |
 | `ruleTemplateClient` | Rule template read path.                                                   | `lib/rule_templates_client/`                                                     |
 | `actionPolicyClient` | Action policy CRUD and API key handling.                                   | `lib/action_policy_client/`                                                      |
+| `actionPolicyTest`   | Test-notification preview and send for action policies.                    | `lib/action_policy_test/action_policy_test_service.ts`                           |
 | `ruleExecutor`       | Rule task runner, pipeline steps, middlewares.                             | `lib/rule_executor/task_runner.ts`                                               |
 | `director`           | Episode state transitions. Runs inside the executor but is its own domain. | `lib/director/director.ts`                                                       |
 | `dispatcher`         | Dispatch task runner, pipeline steps, workflow scheduling.                 | `lib/dispatcher/dispatcher.ts`                                                   |
@@ -155,7 +158,7 @@ on, so it must identify a bounded slice of behaviour, not a file.
 | `telemetry`          | Event-based telemetry (EBT) reporting.                                     | `lib/services/ebt_service/ebt_service.ts`                                        |
 
 The tree is split along **failure-domain** boundaries, not directory
-boundaries: 14 loggers an operator can remember, not 100+ file names. The
+boundaries: 15 loggers an operator can remember, not 100+ file names. The
 `director` runs inside the executor pipeline but gets its own logger because it
 is reasoned about independently; the `events` bus is one logger even though
 publishers and subscribers live in several directories.
@@ -194,7 +197,8 @@ Rules:
 - **Present when known, omitted when not.** No `"unknown"` sentinels; they
   break filter queries.
 - **IDs, not names.** `rule_id`, never `rule_name`. IDs are stable; names are
-  mutable and often PII.
+  mutable and often PII. The only non-ID labels are closed enums the plugin
+  itself defines (`rule_kind`, `step`, `resource`, `error_source`, ...).
 - **Low cardinality, never PII or secrets.** Values are keyword-indexed and
   searchable.
 - **Bind once, not per call.** Execution-scoped labels (`rule_id`, `space_id`,
@@ -206,8 +210,23 @@ Rules:
 Current keys: `rule_id`, `rule_kind`, `rule_template_id`, `space_id`,
 `policy_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`,
 `execution_id`, `task_id`, `skill_id`, `attachment_type`, `event_type`, `step`,
-`subsystem`, `resource`. `code` is emitted as `labels.code` but is passed as a
-top-level param (see [log codes](#5-log-codes)).
+`error_source`, `subsystem`, `resource`. `code` is emitted as `labels.code` but
+is passed as a top-level param (see [log codes](#5-log-codes)).
+
+#### Who a failure is attributed to (`error_source`)
+
+`RULE_EXECUTION_STEP_FAILED` carries the label `error_source`:
+
+| Value       | Meaning                                                                                                                 |
+| ----------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `user`      | The step tagged the error as a user error (for example an invalid rule query). Task Manager counts it in `user_errors`. |
+| `framework` | Every other failure. Task Manager counts it in `framework_errors`.                                                      |
+
+The value comes from the error source Task Manager already holds for the error
+(`resolveErrorSource` in [`../../errors/error_source.ts`](../../errors/error_source.ts)),
+so it always agrees with those counters. Filter on
+`labels.error_source: framework` to leave out failures that the rule's owner has
+to fix.
 
 Not a label:
 
@@ -274,7 +293,7 @@ is not.
 | Category                                | Examples                                                                                                           |
 | --------------------------------------- | ------------------------------------------------------------------------------------------------------------------ |
 | Opaque IDs                              | `rule_id`, `policy_id`, `group_id`, `group_hash`, `alert_id`, `workflow_id`, `task_id`, `execution_id`, `space_id` |
-| Enum values                             | `rule.kind`, `episode.status`, `event.outcome`, log codes, step names, task types, resource names                  |
+| Enum values                             | `rule.kind`, `episode.status`, `event.outcome`, `error_source`, log codes, step names, task types, resource names  |
 | Counts, cardinalities, durations        | batch size, matched-rule count, dispatch latency, retry attempt (in messages or metrics, not labels)               |
 | Error class, code, stack trace          | Ours by construction; see downstream errors below                                                                  |
 | Kibana / plugin / feature-flag versions | `plugin.version`, `alerting:v2:enabled`                                                                            |
@@ -388,7 +407,7 @@ logger.withLabels(labels); // → LoggerServiceContract
 | --------- | ---------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- |
 | `message` | `string` or `() => string`. Use the lazy form for `debug` in hot paths; it costs nothing when the level is disabled. Optional on `error`, where it defaults to the error's own message.                                |
 | `code`    | Required on `warn` / `error`. Must come from `ALERTING_LOG_CODES` (`../../errors/error_codes.ts`). Emitted as ECS `labels.code`.                                                                                       |
-| `labels`  | Optional entity identifiers from `AlertingLabels`. IDs only — never names, user input, counts, or durations.                                                                                                           |
+| `labels`  | Optional entity identifiers from `AlertingLabels`. IDs or closed enum values only — never names, user input, counts, or durations.                                                                                     |
 | `error`   | `unknown`. Non-`Error` values are wrapped internally, so `catch (err)` blocks pass `err` straight through. Emitted as ECS `error.{message,type,stack_trace}`, with `type` taken from the exception's constructor name. |
 
 Overriding `message` on `error` replaces the error's message in both the log
@@ -431,11 +450,11 @@ per-call labels are both emitted under ECS `labels.*`.
 
 #### Execution-path binding
 
-| Subsystem      | Where bound                                                                                                    | Typical labels                                                                                                        |
-| -------------- | -------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
-| `ruleExecutor` | `RuleExecutorTaskRunner` once per task; `rule_kind` re-bound after `fetch_rule`; `step` on pipeline/middleware | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`                                                 |
-| `dispatcher`   | `DispatcherTaskRunner` once per tick; `step` in pipeline/steps; entity labels on concrete log calls            | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
-| `director`     | `DirectorService.run` once per run                                                                             | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `alert_id` on transition debug)                                |
+| Subsystem      | Where bound                                                                                                                                                   | Typical labels                                                                                                        |
+| -------------- | ------------------------------------------------------------------------------------------------------------------------------------------------------------- | --------------------------------------------------------------------------------------------------------------------- |
+| `ruleExecutor` | `RuleExecutorTaskRunner` once per task; `rule_kind` re-bound after `fetch_rule`; `step` on pipeline/middleware; `error_source` in `error_handling_middleware` | `rule_id`, `space_id`, `task_id`, `execution_id`, `rule_kind`, `step`, `error_source`                                 |
+| `dispatcher`   | `DispatcherService.run` once per tick; `step` in `execution_pipeline.ts`; entity labels on concrete log calls                                                 | `task_id`, `step`, plus `rule_id` / `space_id` / `policy_id` / `group_id` / `workflow_id` / `execution_id` when known |
+| `director`     | `DirectorService.run` once per run                                                                                                                            | `rule_id`, `rule_kind`, `space_id` (and `group_hash` / `alert_id` on transition debug)                                |
 
 Pass the bound logger through pipeline `input` / `state` (or a local `const`
 in director). Steps log via `state.logger.withLabels({ step: this.name })`, not
@@ -498,7 +517,7 @@ Adding a code, a label, or a subsystem is a deliberate one-line type change:
   monitoring.
 - **Label** — add a key to `AlertingLabels` (`types.ts`) and to the list in
   [labels](#4-labels). Keys are snake_case; values must be low-cardinality
-  identifiers.
+  identifiers or closed enum values.
 - **Subsystem** — add a name to `AlertingSubsystemName` (`types.ts`) and a row
   to the table in [logger names](#3-logger-names-subsystems). A subsystem is a
   failure domain an operator would want to enable `debug` on independently,
