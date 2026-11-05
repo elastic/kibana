@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
 
-export type DecisionProviderId = 'openrouter' | 'eis' | 'fast_model';
+export type DecisionProviderId = 'eis' | 'fast_model';
 
 export interface DecisionProviderParams {
   request: KibanaRequest;

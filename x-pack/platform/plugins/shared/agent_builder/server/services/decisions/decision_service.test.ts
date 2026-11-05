@@ -47,8 +47,8 @@ describe('createDecisionService', () => {
   });
 
   it('uses the first provider that answers, in order', async () => {
-    const first = fakeProvider('openrouter', async () => answered(0.9));
-    const second = fakeProvider('eis');
+    const first = fakeProvider('eis', async () => answered(0.9));
+    const second = fakeProvider('fast_model');
     const { decide } = setup([first, second]);
 
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
@@ -56,10 +56,10 @@ describe('createDecisionService', () => {
   });
 
   it('falls through to the next provider on a retryable failure, and retries it next time', async () => {
-    const first = fakeProvider('openrouter', async () => {
+    const first = fakeProvider('eis', async () => {
       throw new Error('boom');
     });
-    const second = fakeProvider('eis', async () => answered(0.3));
+    const second = fakeProvider('fast_model', async () => answered(0.3));
     const { decide } = setup([first, second]);
 
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.3) });
@@ -86,7 +86,7 @@ describe('createDecisionService', () => {
     jest.useFakeTimers();
 
     let firstSignal: AbortSignal | undefined;
-    const first = fakeProvider('openrouter', ({ signal }) => {
+    const first = fakeProvider('eis', ({ signal }) => {
       firstSignal = signal;
       return never();
     });
@@ -129,7 +129,7 @@ describe('createDecisionService', () => {
 
   it('stops the chain when the caller aborts', async () => {
     const controller = new AbortController();
-    const first = fakeProvider('openrouter', () => {
+    const first = fakeProvider('eis', () => {
       controller.abort();
       return never();
     });
@@ -144,7 +144,7 @@ describe('createDecisionService', () => {
 
   it('fails without asking anyone when the caller already aborted', async () => {
     const controller = new AbortController();
-    const first = fakeProvider('openrouter');
+    const first = fakeProvider('eis');
     const { decide } = setup([first]);
 
     controller.abort();
@@ -186,7 +186,7 @@ describe('createDecisionService', () => {
 
   it('logs retryable failures at warn without the input text', async () => {
     const { decide, logger } = setup([
-      fakeProvider('openrouter', async () => {
+      fakeProvider('eis', async () => {
         throw new Error('boom');
       }),
       fakeProvider('fast_model', async () => answered(0.5)),
@@ -210,23 +210,14 @@ describe('createDecisionProviders', () => {
   const elasticsearch = elasticsearchServiceMock.createStart();
   const createModelProvider = jest.fn();
 
-  it('orders OpenRouter, EIS, then the fast model', () => {
+  it('orders EIS, then the fast model', () => {
     const providers = createDecisionProviders({
       elasticsearch,
       createModelProvider,
-      config: {
-        triggerThreshold: 0.5,
-        timeoutMs: 1000,
-        fastModelTimeoutMs: 2000,
-        openRouter: {
-          apiKey: 'test-key',
-          model: 'typesafe/jev-1.13',
-          url: 'https://openrouter.test',
-        },
-      },
+      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
     });
 
-    expect(providers.map(({ id }) => id)).toEqual(['openrouter', 'eis', 'fast_model']);
+    expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);
   });
 
   it('gives the fast model its own timeout', () => {
@@ -240,15 +231,5 @@ describe('createDecisionProviders', () => {
       ['eis', undefined],
       ['fast_model', 2000],
     ]);
-  });
-
-  it('leaves out OpenRouter when it is not configured', () => {
-    const providers = createDecisionProviders({
-      elasticsearch,
-      createModelProvider,
-      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
-    });
-
-    expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);
   });
 });

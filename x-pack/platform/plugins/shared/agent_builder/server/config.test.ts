@@ -7,19 +7,7 @@
 
 import { configSchema } from './config';
 
-describe('decisionModel.openRouter config', () => {
-  it('defaults to the OpenRouter API base that serves /alpha/decisions', () => {
-    const { decisionModel } = configSchema.validate({
-      decisionModel: { openRouter: { apiKey: 'test-key' } },
-    });
-
-    expect(decisionModel.openRouter).toEqual({
-      apiKey: 'test-key',
-      model: 'typesafe/jev-1.13',
-      url: 'https://openrouter.ai/api',
-    });
-  });
-
+describe('decisionModel config', () => {
   it('gives the fast model a 2s budget and the decision models 1s', () => {
     const { decisionModel } = configSchema.validate({});
 

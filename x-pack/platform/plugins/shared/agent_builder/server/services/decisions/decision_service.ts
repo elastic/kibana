@@ -12,7 +12,6 @@ import type { AgentBuilderConfig } from '../../config';
 import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
 import { createEisDecisionProvider } from './providers/eis';
 import { createFastModelDecisionProvider } from './providers/fast_model';
-import { createOpenRouterDecisionProvider } from './providers/openrouter';
 import type {
   DecisionProvider,
   DecisionProviderId,
@@ -21,8 +20,8 @@ import type {
 import { isDecisionProviderUnavailableError } from './providers/types';
 
 /**
- * The decision providers, in the order they are tried: OpenRouter when configured (temporary),
- * the Elasticsearch `decision` task (EIS), then Agent Builder's fast model as the fallback.
+ * The decision providers, in the order they are tried: the Elasticsearch `decision` task (EIS),
+ * then Agent Builder's fast model as the fallback.
  */
 export const createDecisionProviders = ({
   config,
@@ -33,7 +32,6 @@ export const createDecisionProviders = ({
   elasticsearch: ElasticsearchServiceStart;
   createModelProvider: ModelProviderFactoryFn;
 }): DecisionProvider[] => [
-  ...(config.openRouter ? [createOpenRouterDecisionProvider(config.openRouter)] : []),
   createEisDecisionProvider({ elasticsearch, inferenceId: config.inferenceId }),
   createFastModelDecisionProvider({ createModelProvider, timeoutMs: config.fastModelTimeoutMs }),
 ];

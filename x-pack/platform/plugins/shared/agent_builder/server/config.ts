@@ -35,8 +35,8 @@ export const configSchema = schema.object({
   }),
   /**
    * Decision models used for quick decisions, such as whether `trigger_mode: 'auto'` runs the agent.
-   * Providers are tried in order: OpenRouter when configured, the cluster's `decision` endpoint
-   * (`inferenceId`, else the first one listed), then Agent Builder's fast model.
+   * Providers are tried in order: the cluster's `decision` endpoint (`inferenceId`, else the first
+   * one listed), then Agent Builder's fast model.
    */
   decisionModel: schema.object({
     inferenceId: schema.maybe(schema.string({ minLength: 1, maxLength: 512 })),
@@ -45,17 +45,6 @@ export const configSchema = schema.object({
     timeoutMs: schema.number({ defaultValue: 1000, min: 100, max: 30000 }),
     /** How long the fast model gets: an LLM call is slower than a decision model. */
     fastModelTimeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
-    /**
-     * Temporary dev path: ask OpenRouter's Decisions API directly instead of Elasticsearch, until
-     * decision models are served by EIS. To be removed once they are.
-     */
-    openRouter: schema.maybe(
-      schema.object({
-        apiKey: schema.string({ minLength: 1, maxLength: 512 }),
-        model: schema.string({ defaultValue: 'typesafe/jev-1.13', minLength: 1, maxLength: 256 }),
-        url: schema.uri({ scheme: ['https'], defaultValue: 'https://openrouter.ai/api' }),
-      })
-    ),
   }),
   /**
    * Internal-only Deductive AI integration. `register` gates whether the built-in
