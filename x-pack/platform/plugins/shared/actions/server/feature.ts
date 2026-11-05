@@ -167,10 +167,7 @@ export const ACTIONS_FEATURE: KibanaFeatureConfig = {
   deprecated: {
     notice: i18n.translate('xpack.actions.featureRegistry.actionsFeatureDeprecationNotice', {
       defaultMessage:
-        'The Actions and Connectors privilege is deprecated. Use the replacement privilege, which separates connector execution. See {link}.',
-      values: {
-        link: 'x-pack/platform/plugins/shared/actions/execute_privilege_poc.md',
-      },
+        'The Actions and Connectors privilege is deprecated. Use the replacement privilege, which has a separate Execute connectors sub-feature.',
     }),
     replacedBy: [ACTIONS_V2_FEATURE_ID],
   },
