@@ -58,8 +58,8 @@ export interface AuthenticateAndDeployStepState {
 }
 
 /**
- * `unverified`: the agent runs but sends to an output outside the local cluster (remote
- * Elasticsearch, Logstash, Kafka), so no data check here can confirm it.
+ * `unverified`: the agent runs but sends to another cluster (a remote Elasticsearch output), so no
+ * data check here can confirm it.
  */
 export type ServiceChipState =
   | 'instantiating'

@@ -48,10 +48,13 @@ export function OutputField({
     () => ({ inputs: inputTypes.map((type) => ({ type, enabled: true })) }),
     [inputTypes]
   );
-  const { isLoading, canUseOutputPerIntegration, allowedOutputs, inheritedOutputName } = useOutputs(
-    packagePolicy,
-    packageName
-  );
+  const {
+    isLoading,
+    canUseOutputPerIntegration,
+    isLicenseKnown,
+    allowedOutputs,
+    inheritedOutputName,
+  } = useOutputs(packagePolicy, packageName);
 
   // A chosen output the selected services no longer accept (an OTel service added after Logstash
   // was picked, or an output deleted in Fleet) falls back to the inherited one, as Fleet would
@@ -71,12 +74,13 @@ export function OutputField({
 
   // Below the license Fleet requires, the field is hidden and a stored output (kept from an
   // earlier session, before a license downgrade) could not be reset, while Fleet rejects every
-  // deploy that sends it. The license is known synchronously, so there is nothing to wait for.
+  // deploy that sends it. Only once the license is known: `canUseOutputPerIntegration` is also
+  // false while it has not been received, which must not erase the choice of an enterprise user.
   useEffect(() => {
-    if (value && !canUseOutputPerIntegration) {
+    if (value && isLicenseKnown && !canUseOutputPerIntegration) {
       onChange('');
     }
-  }, [value, canUseOutputPerIntegration, onChange]);
+  }, [value, isLicenseKnown, canUseOutputPerIntegration, onChange]);
 
   if (!canUseOutputPerIntegration) return null;
 

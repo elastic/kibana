@@ -946,7 +946,7 @@ describe('useServiceDataDetection', () => {
       expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
     });
   });
-  describe('an output outside the local cluster', () => {
+  describe('a remote Elasticsearch output', () => {
     const withOutput = (outputId?: string): ServiceSettingsPersistedState => ({
       globalRegion: 'us-east-1',
       serviceVars: {},
@@ -964,8 +964,23 @@ describe('useServiceDataDetection', () => {
       },
     };
 
-    it.each(['remote_elasticsearch', 'logstash', 'kafka'])(
-      'reports a running agent as unverified for a %s output',
+    it('reports a running agent as unverified for a remote Elasticsearch output', () => {
+      setup({
+        serviceSettings: withOutput('out-1'),
+        serviceStatuses: { cloudtrail: 'detecting' },
+        policyIdsByInstance: { cloudtrail: 'policy-1' },
+        agentDetection: liveAgent,
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
+      });
+      const { result } = renderHook(() => useServiceDataDetection());
+
+      expect(result.current.statusByInstanceId.cloudtrail).toBe('unverified');
+      expect(result.current.unverifiedCount).toBe(1);
+      expect(result.current.receivingCount).toBe(0);
+    });
+
+    it.each(['logstash', 'kafka', 'otlp'])(
+      'keeps checking the data for a %s output, which may forward into this cluster',
       (type) => {
         setup({
           serviceSettings: withOutput('out-1'),
@@ -976,9 +991,8 @@ describe('useServiceDataDetection', () => {
         });
         const { result } = renderHook(() => useServiceDataDetection());
 
-        expect(result.current.statusByInstanceId.cloudtrail).toBe('unverified');
-        expect(result.current.unverifiedCount).toBe(1);
-        expect(result.current.receivingCount).toBe(0);
+        expect(result.current.statusByInstanceId.cloudtrail).toBe('detecting');
+        expect(result.current.unverifiedCount).toBe(0);
       }
     );
 
@@ -1015,7 +1029,7 @@ describe('useServiceDataDetection', () => {
         serviceStatuses: { cloudtrail: 'detecting' },
         policyIdsByInstance: { cloudtrail: 'policy-1' },
         agentDetection: liveAgent,
-        outputs: [{ id: 'out-1', type: 'logstash' }],
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
       });
       const { result } = renderHook(() => useServiceDataDetection());
 
@@ -1029,7 +1043,7 @@ describe('useServiceDataDetection', () => {
         serviceStatuses: { cloudtrail: 'detecting' },
         policyIdsByInstance: { cloudtrail: 'policy-1' },
         agentDetection: liveAgent,
-        outputs: [{ id: 'out-1', type: 'logstash' }],
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
       });
       const { result } = renderHook(() => useServiceDataDetection());
 
@@ -1041,7 +1055,7 @@ describe('useServiceDataDetection', () => {
         serviceSettings: withOutput('out-1'),
         serviceStatuses: { cloudtrail: 'detecting' },
         policyIdsByInstance: { cloudtrail: 'policy-1' },
-        outputs: [{ id: 'out-1', type: 'logstash' }],
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
       });
       const { result } = renderHook(() => useServiceDataDetection());
 
@@ -1059,7 +1073,7 @@ describe('useServiceDataDetection', () => {
             cloudtrail: { health: 'unhealthy', agentIds: ['a1'], liveAgentIds: ['a1'] },
           },
         },
-        outputs: [{ id: 'out-1', type: 'logstash' }],
+        outputs: [{ id: 'out-1', type: 'remote_elasticsearch' }],
       });
       const { result } = renderHook(() => useServiceDataDetection());
 

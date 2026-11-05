@@ -304,11 +304,26 @@ describe('SharedSettingsSection', () => {
       expect(screen.queryByTestId('sharedSettingsOutput')).not.toBeInTheDocument();
     });
 
+    it('keeps a stored output while the license is not known', () => {
+      const onChange = jest.fn();
+      mockUseOutputs.mockReturnValue({
+        isLoading: false,
+        canUseOutputPerIntegration: false,
+        isLicenseKnown: false,
+        allowedOutputs: [],
+        inheritedOutputName: undefined,
+      });
+      renderSection({ output: outputProps({ value: 'logstash-1', onChange }) });
+
+      expect(onChange).not.toHaveBeenCalled();
+    });
+
     it('clears a stored output below the license, where the field cannot reset it', () => {
       const onChange = jest.fn();
       mockUseOutputs.mockReturnValue({
         isLoading: false,
         canUseOutputPerIntegration: false,
+        isLicenseKnown: true,
         allowedOutputs: [],
         inheritedOutputName: undefined,
       });

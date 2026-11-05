@@ -110,9 +110,10 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
   );
   const serviceSettings = storedSettings ?? DEFAULT_SERVICE_SETTINGS;
 
-  // The data check reads the local cluster. Policies sending to any other output (remote
-  // Elasticsearch, Logstash, Kafka) never show up there, so they cannot be verified. An output
-  // that is not known (still loading, or deleted) is checked as before.
+  // The data check reads the local cluster. Policies sending to a remote Elasticsearch cluster
+  // never show up there, so they cannot be verified. Other non-Elasticsearch outputs (Logstash,
+  // Kafka, OTLP) are intermediaries that may forward into this very cluster, so their data is still
+  // checked. An output that is not known (still loading, or deleted) is checked as before.
   const { data: outputsData } = useGetOutputs();
   const outputId = deploymentMethod
     ? getPolicySettings(serviceSettings.policySettings, deploymentMethod).output_id
@@ -120,7 +121,7 @@ export function useServiceDataDetection(): ServiceDataDetectionResult {
   const outputType = outputId
     ? outputsData?.items.find(({ id }) => id === outputId)?.type
     : undefined;
-  const isDataVerifiable = outputType === undefined || outputType === 'elasticsearch';
+  const isDataVerifiable = outputType !== 'remote_elasticsearch';
 
   // Compute once on mount so the window doesn't reset on re-renders.
   const startRef = useRef<string>(new Date(Date.now() - LOOKBACK_MS).toISOString());

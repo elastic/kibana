@@ -449,7 +449,7 @@ interface InstanceChipStateParams {
   isTimedOut: boolean;
   /**
    * Whether the data of the instance lands in the local cluster, where it can be detected.
-   * Defaults to true; false for an output elsewhere (remote Elasticsearch, Logstash, Kafka).
+   * Defaults to true; false for an output that sends to another cluster (remote Elasticsearch).
    */
   isDataVerifiable?: boolean;
   /** Whether an agent running the instance is online. */
