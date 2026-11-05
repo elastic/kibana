@@ -279,11 +279,9 @@ steps:
           invocationCount: "${{ inputs.preview_invocation_count }}"
           timeframeEnd: '{{ "now" | date: "%Y-%m-%dT%H:%M:%S.%LZ", "UTC" }}'
 
-  # A backtest that errored is inconclusive. The proposal says so in one line; the error
-  # itself is long and written for engineers, so it goes on the investigation instead.
-  # The two cases the proposal already explains in words, indices the worker cannot
-  # read and indices that match nothing, keep that explanation and post nothing. The
-  # error is data to read, so it sits in a code block that it cannot close.
+  # The proposal only says a failed backtest is inconclusive; the error goes here.
+  # Skipped when the proposal already explains the failure (indices the worker cannot
+  # read, or that match nothing). The error is fenced so it cannot break out.
   - name: post_backtest_error
     type: ai.conversation.add_user_message
     if: >-
