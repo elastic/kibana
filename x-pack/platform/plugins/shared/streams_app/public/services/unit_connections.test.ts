@@ -853,6 +853,22 @@ describe('unit connections', () => {
       { name: 'destinations', value: ['debug-out'] },
     ]);
   });
+
+  it('keeps a processing pipeline the user already left unhooked when another component is deleted', () => {
+    const unhooked = unitWith([
+      {
+        id: 'p-otlp',
+        supported_telemetry: ['logs'],
+        config: [
+          { name: 'sources', value: ['otlp-input'] },
+          { name: 'processors', value: ['tag'] },
+        ],
+      },
+    ]);
+    const next = removeComponentFromPipelines(unhooked, 'es-logs');
+
+    expect(next.unit.pipelines).toEqual(unhooked.unit.pipelines);
+  });
 });
 
 describe('routing node connections', () => {

@@ -1343,6 +1343,7 @@ const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
     unit,
     unit.unit.pipelines.flatMap((pipeline) => {
       const hadSources = pipelineHasSources(pipeline.config);
+      const forwarded = pipelineForwards(pipeline.config);
       const config: PipelineConfig = [];
       for (const entry of pipeline.config) {
         if (entry.name === PIPELINE_ENTRY.sources) {
@@ -1368,7 +1369,7 @@ const removeComponentReferences = (unit: Unit, componentId: string): Unit =>
         }
         config.push(entry);
       }
-      if (config.length === 0 || !pipelineForwards(config)) {
+      if (config.length === 0 || (forwarded && !pipelineForwards(config))) {
         return [];
       }
       if (hadSources && !pipelineHasSources(config)) {

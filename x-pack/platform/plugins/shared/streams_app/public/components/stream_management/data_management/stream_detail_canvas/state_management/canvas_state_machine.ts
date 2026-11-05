@@ -296,22 +296,17 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
+        // The component machines derive their next unit.changed from this unit, so hand
+        // them the staged copy or a later create / delete would drop unhooked wiring.
+        const unitDefinition = event.output.stagedUnitDefinition;
         const componentIds = context.savingComponentIds;
         if (context.savingComponentKind === 'source' && componentIds?.length) {
-          return {
-            type: 'unit.persisted' as const,
-            sourceIds: componentIds,
-            unitDefinition: event.output.unitDefinition,
-          };
+          return { type: 'unit.persisted' as const, sourceIds: componentIds, unitDefinition };
         }
         if (context.savingComponentKind === 'destination' && componentIds?.length) {
-          return {
-            type: 'unit.persisted' as const,
-            destinationIds: componentIds,
-            unitDefinition: event.output.unitDefinition,
-          };
+          return { type: 'unit.persisted' as const, destinationIds: componentIds, unitDefinition };
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        return { type: 'unit.loaded' as const, unitDefinition };
       }
     ),
     syncSavedUnitToPeer: sendTo(
@@ -323,7 +318,7 @@ export const canvasStateMachine = setup({
         if (event.type !== 'xstate.done.actor.persistUnitDefinition') {
           throw new Error('Expected a persisted unit definition');
         }
-        return { type: 'unit.loaded' as const, unitDefinition: event.output.unitDefinition };
+        return { type: 'unit.loaded' as const, unitDefinition: event.output.stagedUnitDefinition };
       }
     ),
     syncComponentSaveFailure: sendTo(

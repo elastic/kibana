@@ -384,11 +384,24 @@ describe('canvas save', () => {
 
     expect(persisted).toEqual([withNewDestination]);
     expect(stored.unit.pipelines).toEqual([]);
-    const { unit, nextUnit, error } = canvas.getSnapshot().context;
+    const { unit, nextUnit, error, sourcesRef, destinationsRef } = canvas.getSnapshot().context;
     expect(unit).toEqual(stored);
     expect(nextUnit).toEqual(withNewDestination);
     expect(unit).not.toBe(nextUnit);
     expect(error).toBeUndefined();
+    // Both component machines build their next change from the staged unit, not the stored one.
+    expect(sourcesRef.getSnapshot().context.unitDefinition).toEqual(withNewDestination);
+    expect(destinationsRef.getSnapshot().context.unitDefinition).toEqual(withNewDestination);
+
+    // A second component mutation must not discard the unhooked processing pipeline.
+    destinationsRef.send({ type: 'destination.delete', destinationId: 'archive' });
+    await waitFor(canvas, (snapshot) => !ready(snapshot));
+    await waitForUnitReady(canvas);
+
+    expect(persisted).toHaveLength(2);
+    expect(persisted[1].unit.destinations.map(({ id }) => id)).toEqual(['es']);
+    expect(persisted[1].unit.pipelines).toEqual(unhooked.unit.pipelines);
+    expect(canvas.getSnapshot().context.nextUnit.unit.pipelines).toEqual(unhooked.unit.pipelines);
   });
 });
 
