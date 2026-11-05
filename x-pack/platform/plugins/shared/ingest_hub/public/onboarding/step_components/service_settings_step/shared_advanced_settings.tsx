@@ -83,14 +83,14 @@ export function SharedAdvancedSettings({
                 'xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.unavailable',
                 {
                   defaultMessage:
-                    'Not available while only services that deploy with ECF are selected.',
+                    'Not available when all selected services deploy through Elastic Cloud Forwarder.',
                 }
               )}
             </p>
           )}
           <FormattedMessage
             id="xpack.ingestHub.integrationSettings.advanced.dedicatedNamespaceTemplates.helpText"
-            defaultMessage="Enables independent settings and mappings for this namespace's data streams. {learnMoreLink}"
+            defaultMessage="Enables independent settings and mappings for this namespace's data streams. Also applies to other policies of the same integrations that use this namespace. {learnMoreLink}"
             values={{
               learnMoreLink: (
                 <EuiLink href={services.docLinks.links.fleet.datastreams} external target="_blank">

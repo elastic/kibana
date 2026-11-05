@@ -131,7 +131,9 @@ describe('useApplyDedicatedTemplates', () => {
     });
 
     const { text } = mockAddWarning.mock.calls[0][0];
-    expect(text).toContain('override or block the dedicated ones for: logs-aws.cloudtrail-prod');
+    expect(text).toContain(
+      "Existing index templates take priority, so the dedicated index templates don't apply to: logs-aws.cloudtrail-prod."
+    );
     expect(text).not.toContain('no longer apply');
   });
 
@@ -149,10 +151,9 @@ describe('useApplyDedicatedTemplates', () => {
 
     const { text } = mockAddWarning.mock.calls[0][0];
     expect(text).toContain(
-      'take priority over existing custom ones for: metrics-aws.ec2_metrics-prod'
+      'The dedicated index templates now take priority over your existing custom index templates, so the custom settings no longer apply to: metrics-aws.ec2_metrics-prod.'
     );
-    expect(text).toContain('no longer apply');
-    expect(text).not.toContain('override or block');
+    expect(text).not.toContain('Existing index templates take priority');
   });
 
   it('saves the switch with the deployment once it was applied', async () => {

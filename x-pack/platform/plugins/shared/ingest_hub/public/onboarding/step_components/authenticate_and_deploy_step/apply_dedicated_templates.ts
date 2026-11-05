@@ -46,6 +46,32 @@ interface PackageResult {
   overridden?: string[];
 }
 
+// Fleet does not export its conflict types to other plugins, so take the type from what the update
+// call returns.
+type UpdatePackageData = NonNullable<Awaited<ReturnType<typeof sendUpdatePackage>>['data']>;
+type ConflictType = NonNullable<
+  UpdatePackageData['warnings']
+>[number]['conflictingTemplates'][number]['conflictType'];
+
+type ConflictOutcome = 'blocked' | 'overridden';
+
+/**
+ * What each conflict type means for the dedicated template. A record over every type Fleet reports,
+ * so a new type fails to compile here instead of being counted as one of the two by default.
+ */
+const CONFLICT_OUTCOME: Record<ConflictType, ConflictOutcome> = {
+  // An existing template has a higher priority than the dedicated one, or the same priority so the
+  // dedicated one is not created: either way the dedicated template has no effect.
+  overrides_fleet: 'blocked',
+  blocked_by_same_priority: 'blocked',
+  // The dedicated template has a higher priority than an existing custom one, which stops applying.
+  overridden_by_fleet: 'overridden',
+};
+
+// A type from a newer server than this client knows is still reported, as the cautious reading.
+const getConflictOutcome = (conflictType: ConflictType): ConflictOutcome =>
+  CONFLICT_OUTCOME[conflictType] ?? 'blocked';
+
 /**
  * Opts the namespace in to dedicated index templates for each package, like Fleet's switch does
  * after a policy is saved. Only adds: a namespace that is already in the package's list is left
@@ -71,17 +97,17 @@ export const applyDedicatedNamespaceTemplates = async (
         { namespace_customization_enabled_for: [...enabledFor, namespace] }
       );
       const warnings = updated?.warnings ?? [];
-      const dataStreamsWhere = (matches: (conflictType: string) => boolean) =>
+      const dataStreamsWhere = (outcome: ConflictOutcome) =>
         warnings
           .filter(({ conflictingTemplates }) =>
-            conflictingTemplates.some(({ conflictType }) => matches(conflictType))
+            conflictingTemplates.some(({ conflictType }) => getConflictOutcome(conflictType) === outcome)
           )
           .map(({ dataStreamName }) => dataStreamName);
       return {
         packageName,
         failed: !!error,
-        blocked: dataStreamsWhere((type) => type !== 'overridden_by_fleet'),
-        overridden: dataStreamsWhere((type) => type === 'overridden_by_fleet'),
+        blocked: dataStreamsWhere('blocked'),
+        overridden: dataStreamsWhere('overridden'),
       };
     })
   );

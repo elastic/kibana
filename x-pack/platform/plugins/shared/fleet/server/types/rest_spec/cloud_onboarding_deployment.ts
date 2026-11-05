@@ -125,6 +125,13 @@ const InstanceSchema = schema.object({
 // The field shipped after the routes (`since: '9.5.0'`), so it carries its own availability.
 const INSTANCES_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
 
+// Like `instances`, this field shipped after the routes (`since: '9.5.0'`), so it carries its own
+// availability.
+const DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY = {
+  stability: 'experimental' as const,
+  since: '9.7.0',
+};
+
 const InstancesSchema = (description: string) =>
   schema.arrayOf(InstanceSchema, {
     maxSize: 1000,
@@ -218,6 +225,7 @@ const CloudOnboardingDeploymentItemSchema = schema.object({
       meta: {
         description:
           'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+        availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
       },
     })
   ),
@@ -376,6 +384,7 @@ export const CreateCloudOnboardingDeploymentRequestSchema = {
         meta: {
           description:
             'Whether the global namespace uses dedicated index templates. Applied to the installed packages after a deployment. Absent means off.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
         },
       })
     ),
@@ -590,6 +599,7 @@ export const UpdateCloudOnboardingDeploymentRequestSchema = {
         meta: {
           description:
             'Whether the global namespace uses dedicated index templates. Omit it to keep the stored value. Applied to the installed packages after a deployment.',
+          availability: DEDICATED_NAMESPACE_TEMPLATES_AVAILABILITY,
         },
       })
     ),

@@ -67,14 +67,14 @@ export const useApplyDedicatedTemplates = ({
         blockedDataStreams.length > 0
           ? i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.blockedText', {
               defaultMessage:
-                'Existing index templates override or block the dedicated ones for: {dataStreams}.',
+                "Existing index templates take priority, so the dedicated index templates don't apply to: {dataStreams}.",
               values: { dataStreams: blockedDataStreams.join(', ') },
             })
           : undefined,
         overriddenDataStreams.length > 0
           ? i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.overriddenText', {
               defaultMessage:
-                'The dedicated templates take priority over existing custom ones for: {dataStreams}, so their settings no longer apply.',
+                'The dedicated index templates now take priority over your existing custom index templates, so the custom settings no longer apply to: {dataStreams}.',
               values: { dataStreams: overriddenDataStreams.join(', ') },
             })
           : undefined,
@@ -104,7 +104,7 @@ export const useApplyDedicatedTemplates = ({
       }),
       text: i18n.translate('xpack.ingestHub.dedicatedNamespaceTemplates.applyErrorText', {
         defaultMessage:
-          'The "{namespace}" namespace was not updated for: {packages}. You can enable it in the integration settings in Fleet.',
+          'Dedicated index templates weren\'t turned on for the "{namespace}" namespace in: {packages}. Check that the namespace matches an allowed prefix for this space, then turn them on in the integration settings in Fleet.',
         values: { namespace: globalNamespace, packages: failedPackages.join(', ') },
       }),
     });

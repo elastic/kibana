@@ -160,4 +160,25 @@ describe('applyDedicatedNamespaceTemplates', () => {
       overriddenDataStreams: ['metrics-aws.ec2_metrics-prod'],
     });
   });
+
+  it('reports a conflict type it does not know as blocked, so it is still shown', async () => {
+    mockGetInfo.mockResolvedValue(info('2.1.0'));
+    mockUpdate.mockResolvedValue({
+      data: {
+        warnings: [
+          {
+            dataStreamName: 'logs-aws.cloudtrail-prod',
+            conflictingTemplates: [{ conflictType: 'a_type_from_a_newer_server' }],
+          },
+        ],
+      },
+      error: null,
+    });
+
+    expect(await applyDedicatedNamespaceTemplates(['aws'], 'prod')).toEqual({
+      failedPackages: [],
+      blockedDataStreams: ['logs-aws.cloudtrail-prod'],
+      overriddenDataStreams: [],
+    });
+  });
 });
