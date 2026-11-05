@@ -100,7 +100,9 @@ export const applyDedicatedNamespaceTemplates = async (
       const dataStreamsWhere = (outcome: ConflictOutcome) =>
         warnings
           .filter(({ conflictingTemplates }) =>
-            conflictingTemplates.some(({ conflictType }) => getConflictOutcome(conflictType) === outcome)
+            conflictingTemplates.some(
+              ({ conflictType }) => getConflictOutcome(conflictType) === outcome
+            )
           )
           .map(({ dataStreamName }) => dataStreamName);
       return {
