@@ -264,6 +264,19 @@ describe('RuleExecutionStatus', () => {
       `);
       expect(metrics).toBeNull();
     });
+
+    test('error from a revoked cloud API key gets remediation guidance prepended', () => {
+      const { status } = executionStatusFromError(
+        new ErrorWithReason(
+          RuleExecutionStatusErrorReasons.Execute,
+          new Error('security_exception: failed to authenticate cloud API key: [0xD38358]')
+        )
+      );
+      expect(status.status).toBe('error');
+      expect(status.error?.message).toBe(
+        'The API key of this rule is no longer valid; it may have been revoked, deleted, or expired. Update the API key of the rule to restore executions. security_exception: failed to authenticate cloud API key: [0xD38358]'
+      );
+    });
   });
 
   describe('ruleExecutionStatusToRaw()', () => {

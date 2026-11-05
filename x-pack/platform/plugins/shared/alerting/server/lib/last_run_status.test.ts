@@ -6,7 +6,7 @@
  */
 
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import { lastRunFromState } from './last_run_status';
+import { lastRunFromError, lastRunFromState } from './last_run_status';
 import type { RuleRunMetrics } from './rule_run_metrics_store';
 import type { RuleResultServiceResults } from '../monitoring/rule_result_service';
 import { RuleResultService } from '../monitoring/rule_result_service';
@@ -255,5 +255,25 @@ describe('lastRunFromState', () => {
       recovered: 11,
       ignored: 0,
     });
+  });
+});
+
+describe('lastRunFromError', () => {
+  it('prepends remediation guidance when the error reports a cloud API key auth failure', () => {
+    const result = lastRunFromError(
+      new Error('security_exception: failed to authenticate cloud API key: [0x28D520]')
+    );
+
+    expect(result.lastRun.outcome).toEqual('failed');
+    expect(result.lastRun.outcomeMsg).toEqual([
+      'The API key of this rule is no longer valid; it may have been revoked, deleted, or expired. Update the API key of the rule to restore executions. security_exception: failed to authenticate cloud API key: [0x28D520]',
+    ]);
+  });
+
+  it('keeps other error messages unchanged', () => {
+    const result = lastRunFromError(new Error('boom'));
+
+    expect(result.lastRun.outcome).toEqual('failed');
+    expect(result.lastRun.outcomeMsg).toEqual(['boom']);
   });
 });
