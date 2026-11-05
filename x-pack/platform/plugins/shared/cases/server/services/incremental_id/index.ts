@@ -187,13 +187,16 @@ export class CasesIncrementalIdService {
     // If changes have been made, apply the changes to the counters
     // These are done in sequence, since we cannot guarantee that `incIdSoCache` is small.
     // It might have hundreds/thousands of SO objects cached that need updating.
-    if (hasAppliedAnId && !this.isStopped) {
-      for (const [namespace, incIdSo] of incIdSoCache) {
-        await this.incrementCounterSO(incIdSo, incIdSo.attributes.last_id, namespace);
+    try {
+      if (hasAppliedAnId && !this.isStopped) {
+        for (const [namespace, incIdSo] of incIdSoCache) {
+          await this.incrementCounterSO(incIdSo, incIdSo.attributes.last_id, namespace);
+        }
       }
+    } finally {
+      // The cases keep their numbers even if a counter update throws.
+      await this.mirrorToAnalyticsV2(casesWithAppliedId);
     }
-
-    await this.mirrorToAnalyticsV2(casesWithAppliedId);
 
     return countProcessedCases;
   }
@@ -207,6 +210,10 @@ export class CasesIncrementalIdService {
    * Re-reads the cases rather than reusing the task's snapshot so a concurrent
    * user edit isn't overwritten with stale attributes, and a case deleted
    * mid-run isn't resurrected in `.cases`.
+   *
+   * Best effort: a case this misses (write failure, restart, stale overwrite
+   * by a reconciliation tick) is repaired by the incremental id pass that
+   * runs on every reconciliation tick.
    */
   private async mirrorToAnalyticsV2(cases: Array<{ id: string; namespace: string }>) {
     if (!this.analyticsV2Writer || cases.length === 0) {
@@ -222,8 +229,8 @@ export class CasesIncrementalIdService {
             namespaces: [namespace],
           }))
         );
-      // Awaited so per-item 429s are retried: reconciliation can't see this
-      // write, so a dropped doc would never get its id.
+      // Awaited so per-item 429s are retried rather than leaving the id
+      // missing until the next reconciliation tick.
       await this.analyticsV2Writer.bulkUpsertCasesAwait(
         savedObjects.filter(
           (so): so is SavedObject<CasePersistedAttributes> => !isSavedObjectErrorResult(so)

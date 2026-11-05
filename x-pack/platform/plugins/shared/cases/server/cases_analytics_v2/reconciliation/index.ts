@@ -68,8 +68,8 @@ interface RegisterReconciliationTaskArgs {
     attachmentsWriter: CasesAttachmentsV2WriterContract;
     /**
      * False when `.cases` bootstrap failed and `writer` is the no-op. The
-     * backfill is skipped then; otherwise it would record a completed pass
-     * that repaired nothing.
+     * backfill is skipped then; otherwise it would report repairs that were
+     * never written.
      */
     casesWriterEnabled: boolean;
     /** False when the Spaces plugin is disabled, so there are no `space` SOs to compare against. */
@@ -97,10 +97,10 @@ interface ReconciliationTaskState {
   /** Attachments-surface cursor (from `runAttachmentsReconciliation`). */
   attachments_last_run_at?: string;
   /**
-   * Set once `runIncrementalIdBackfill` completes a full pass. Remove in
-   * 10.0 together with `../incremental_id_backfill/`.
+   * `case.id` where an unfinished `runIncrementalIdBackfill` pass resumes.
+   * Unset once a pass completes, so the next tick starts a fresh pass.
    */
-  incremental_id_backfill_completed?: boolean;
+  incremental_id_backfill_resume_after?: string;
 }
 
 /**
@@ -150,8 +150,12 @@ export function registerReconciliationTask({
             activity_last_run_at: activityLastRunAt,
             attachments_last_run_at: attachmentsLastRunAt,
           };
-          if (previousState.incremental_id_backfill_completed === true) {
-            nextState.incremental_id_backfill_completed = true;
+          const incrementalIdBackfillResumeAfter =
+            typeof previousState.incremental_id_backfill_resume_after === 'string'
+              ? previousState.incremental_id_backfill_resume_after
+              : undefined;
+          if (incrementalIdBackfillResumeAfter != null) {
+            nextState.incremental_id_backfill_resume_after = incrementalIdBackfillResumeAfter;
           }
 
           const deps = await getRunnerDeps();
@@ -258,30 +262,27 @@ export function registerReconciliationTask({
             }
           }
 
-          // One-time repair (remove in 10.0), run last so it never delays the cursor
-          // walks. It rides this tick instead of its own task type so
-          // shipping and removing it touches no Task Manager type list.
-          // An unfinished pass leaves the flag unset; docs it already
-          // repaired drop out of its query, so the next tick only re-reads
-          // what's left.
+          // Backstop for the incremental-id task's best-effort mirror, run
+          // last so it never delays the cursor walks. Runs every tick: when
+          // nothing is missing an id it's a single empty search. A pass that
+          // hits the time budget resumes after its last `case.id` next tick;
+          // a failed pass keeps the previous resume point.
           let incrementalIdBackfillError: unknown;
-          if (
-            incrementalIdBackfillEnabled &&
-            deps.casesWriterEnabled &&
-            nextState.incremental_id_backfill_completed !== true &&
-            !signal.aborted
-          ) {
+          if (incrementalIdBackfillEnabled && deps.casesWriterEnabled && !signal.aborted) {
             try {
-              const { completed } = await runIncrementalIdBackfill({
+              const { completed, resumeAfter } = await runIncrementalIdBackfill({
                 esClient: deps.esClient,
                 savedObjectsClient: deps.savedObjectsClient,
                 writer: deps.writer,
                 logger,
                 signal,
                 deadline: tickStartedAt + INCREMENTAL_ID_BACKFILL_TICK_BUDGET_MS,
+                startAfter: incrementalIdBackfillResumeAfter,
               });
-              if (completed) {
-                nextState.incremental_id_backfill_completed = true;
+              if (completed || resumeAfter == null) {
+                delete nextState.incremental_id_backfill_resume_after;
+              } else {
+                nextState.incremental_id_backfill_resume_after = resumeAfter;
               }
             } catch (err) {
               incrementalIdBackfillError = err;

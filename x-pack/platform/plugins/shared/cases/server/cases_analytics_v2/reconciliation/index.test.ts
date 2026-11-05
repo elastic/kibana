@@ -444,7 +444,7 @@ describe('registerReconciliationTask run()', () => {
       attachments_last_run_at: 'ATTACHMENTS_NEW',
     };
 
-    it('runs after the three surfaces and marks the backfill completed', async () => {
+    it('runs after the three surfaces and leaves no resume point once the pass completes', async () => {
       const signal = new AbortController().signal;
       const { run } = setupRun({ signal, incrementalIdBackfillEnabled: true });
 
@@ -452,12 +452,12 @@ describe('registerReconciliationTask run()', () => {
 
       expect(mockRunIncrementalIdBackfill).toHaveBeenCalledTimes(1);
       expect(mockRunIncrementalIdBackfill).toHaveBeenCalledWith(
-        expect.objectContaining({ writer: V2_NOOP_WRITER, logger, signal })
+        expect.objectContaining({ writer: V2_NOOP_WRITER, logger, signal, startAfter: undefined })
       );
       expect(mockRunAttachmentsReconciliation.mock.invocationCallOrder[0]).toBeLessThan(
         mockRunIncrementalIdBackfill.mock.invocationCallOrder[0]
       );
-      expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
+      expect(state).toEqual(cursors);
       expect(taskRunError).toBeUndefined();
     });
 
@@ -489,17 +489,47 @@ describe('registerReconciliationTask run()', () => {
       );
     });
 
-    it('leaves the flag unset without an error when the backfill pauses at its budget', async () => {
-      mockRunIncrementalIdBackfill.mockResolvedValue({ repaired: 5, completed: false });
+    it('persists the resume point without an error when the backfill pauses at its budget', async () => {
+      mockRunIncrementalIdBackfill.mockResolvedValue({
+        repaired: 5,
+        completed: false,
+        resumeAfter: 'case-250',
+      });
       const { run } = setupRun({ incrementalIdBackfillEnabled: true });
 
       const { state, taskRunError } = await run();
 
-      expect(state).toEqual(cursors);
+      expect(state).toEqual({ ...cursors, incremental_id_backfill_resume_after: 'case-250' });
       expect(taskRunError).toBeUndefined();
     });
 
-    it('skips the backfill once completed and carries the flag forward', async () => {
+    it('resumes a paused pass across ticks and starts a fresh pass on every tick after it completes', async () => {
+      mockRunIncrementalIdBackfill
+        .mockResolvedValueOnce({ repaired: 5, completed: false, resumeAfter: 'case-250' })
+        .mockResolvedValueOnce({ repaired: 2, completed: true })
+        .mockResolvedValueOnce({ repaired: 0, completed: true });
+
+      const tick1 = await setupRun({ incrementalIdBackfillEnabled: true }).run();
+      const tick2 = await setupRun({
+        incrementalIdBackfillEnabled: true,
+        state: tick1.state,
+      }).run();
+      const tick3 = await setupRun({
+        incrementalIdBackfillEnabled: true,
+        state: tick2.state,
+      }).run();
+
+      expect(mockRunIncrementalIdBackfill.mock.calls.map(([args]) => args.startAfter)).toEqual([
+        undefined,
+        'case-250',
+        undefined,
+      ]);
+      expect(tick1.state.incremental_id_backfill_resume_after).toBe('case-250');
+      expect(tick2.state).not.toHaveProperty('incremental_id_backfill_resume_after');
+      expect(tick3.state).not.toHaveProperty('incremental_id_backfill_resume_after');
+    });
+
+    it('still runs when a previous version persisted the completed flag, and drops the flag', async () => {
       const { run } = setupRun({
         incrementalIdBackfillEnabled: true,
         state: { incremental_id_backfill_completed: true },
@@ -507,11 +537,11 @@ describe('registerReconciliationTask run()', () => {
 
       const { state } = await run();
 
-      expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
-      expect(state).toEqual({ ...cursors, incremental_id_backfill_completed: true });
+      expect(mockRunIncrementalIdBackfill).toHaveBeenCalledTimes(1);
+      expect(state).toEqual(cursors);
     });
 
-    it('skips the backfill when incremental ids are disabled, leaving the flag unset', async () => {
+    it('skips the backfill when incremental ids are disabled', async () => {
       const { run } = setupRun({ incrementalIdBackfillEnabled: false });
 
       const { state } = await run();
@@ -520,13 +550,17 @@ describe('registerReconciliationTask run()', () => {
       expect(state).toEqual(cursors);
     });
 
-    it('skips the backfill when the cases writer is the no-op, leaving the flag unset', async () => {
-      const { run } = setupRun({ incrementalIdBackfillEnabled: true, casesWriterEnabled: false });
+    it('skips the backfill when the cases writer is the no-op, keeping its resume point', async () => {
+      const { run } = setupRun({
+        incrementalIdBackfillEnabled: true,
+        casesWriterEnabled: false,
+        state: { incremental_id_backfill_resume_after: 'case-250' },
+      });
 
       const { state } = await run();
 
       expect(mockRunIncrementalIdBackfill).not.toHaveBeenCalled();
-      expect(state).toEqual(cursors);
+      expect(state).toEqual({ ...cursors, incremental_id_backfill_resume_after: 'case-250' });
     });
 
     it('skips the backfill when the signal trips during the surface walks', async () => {
@@ -544,13 +578,16 @@ describe('registerReconciliationTask run()', () => {
       expect(taskRunError).toBeUndefined();
     });
 
-    it('reports a failed backfill via taskRunError, leaves the flag unset, and keeps the surface cursors', async () => {
+    it('reports a failed backfill via taskRunError and keeps its resume point and the surface cursors', async () => {
       mockRunIncrementalIdBackfill.mockRejectedValue(new Error('backfill boom'));
-      const { run } = setupRun({ incrementalIdBackfillEnabled: true });
+      const { run } = setupRun({
+        incrementalIdBackfillEnabled: true,
+        state: { incremental_id_backfill_resume_after: 'case-250' },
+      });
 
       const { state, taskRunError } = await run();
 
-      expect(state).toEqual(cursors);
+      expect(state).toEqual({ ...cursors, incremental_id_backfill_resume_after: 'case-250' });
       expect(taskRunError).toBeDefined();
       expect((taskRunError as Error).message).toContain('incremental id backfill');
       expect(logger.error).toHaveBeenCalledWith(

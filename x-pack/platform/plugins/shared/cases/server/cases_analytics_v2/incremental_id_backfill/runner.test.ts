@@ -51,8 +51,16 @@ describe('runIncrementalIdBackfill', () => {
     };
   });
 
-  const run = (signal?: AbortSignal, deadline?: number) =>
-    runIncrementalIdBackfill({ esClient, savedObjectsClient, writer, logger, signal, deadline });
+  const run = (signal?: AbortSignal, deadline?: number, startAfter?: string) =>
+    runIncrementalIdBackfill({
+      esClient,
+      savedObjectsClient,
+      writer,
+      logger,
+      signal,
+      deadline,
+      startAfter,
+    });
 
   it('queries only .cases docs missing case.incremental_id, tolerating a missing index', async () => {
     esClient.search.mockResolvedValueOnce(searchResponse([]));
@@ -112,6 +120,40 @@ describe('runIncrementalIdBackfill', () => {
     );
   });
 
+  it('resumes after the given case id', async () => {
+    esClient.search.mockResolvedValueOnce(searchResponse([]));
+
+    await run(undefined, undefined, 'case-100');
+
+    expect(esClient.search.mock.calls[0][0]).toEqual(
+      expect.objectContaining({ search_after: ['case-100'] })
+    );
+  });
+
+  it('skips hits without an _id but still advances past them', async () => {
+    const fullPage = Array.from({ length: 250 }, (_, i) => ({
+      ...hit(`case-${i}`),
+      _id: undefined,
+    }));
+    esClient.search
+      .mockResolvedValueOnce(searchResponse(fullPage as never))
+      .mockResolvedValueOnce(searchResponse([]));
+
+    await expect(run()).resolves.toEqual({ repaired: 0, completed: true });
+
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+    expect(esClient.search.mock.calls[1][0]).toEqual(
+      expect.objectContaining({ search_after: ['case-249'] })
+    );
+  });
+
+  it('rejects a page whose last sort value is not a case id instead of looping', async () => {
+    esClient.search.mockResolvedValueOnce(searchResponse([{ ...hit('numbered'), sort: [] }]));
+
+    await expect(run()).rejects.toThrow('non-string case.id sort value');
+    expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
+  });
+
   it('propagates a write failure so the caller retries the pass', async () => {
     esClient.search.mockResolvedValueOnce(searchResponse([hit('numbered')]));
     savedObjectsClient.bulkGet.mockResolvedValueOnce({
@@ -158,7 +200,7 @@ describe('runIncrementalIdBackfill', () => {
     expect(savedObjectsClient.bulkGet).not.toHaveBeenCalled();
   });
 
-  it('stops before the next page once the deadline passes and reports the pass incomplete', async () => {
+  it('stops before the next page once the deadline passes and reports where to resume', async () => {
     const nowSpy = jest.spyOn(Date, 'now');
     const deadline = 1_000;
     nowSpy.mockReturnValueOnce(deadline - 1).mockReturnValue(deadline);
@@ -169,7 +211,11 @@ describe('runIncrementalIdBackfill', () => {
     } as never);
 
     try {
-      await expect(run(undefined, deadline)).resolves.toEqual({ repaired: 1, completed: false });
+      await expect(run(undefined, deadline)).resolves.toEqual({
+        repaired: 1,
+        completed: false,
+        resumeAfter: 'case-249',
+      });
     } finally {
       nowSpy.mockRestore();
     }
@@ -178,10 +224,11 @@ describe('runIncrementalIdBackfill', () => {
     expect(logger.info).toHaveBeenCalledWith(expect.stringContaining('paused at its time budget'));
   });
 
-  it('does not start a page when the deadline has already passed', async () => {
-    await expect(run(undefined, Date.now() - 1)).resolves.toEqual({
+  it('does not start a page when the deadline has already passed, keeping the resume point', async () => {
+    await expect(run(undefined, Date.now() - 1, 'case-100')).resolves.toEqual({
       repaired: 0,
       completed: false,
+      resumeAfter: 'case-100',
     });
     expect(esClient.search).not.toHaveBeenCalled();
   });

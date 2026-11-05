@@ -404,6 +404,19 @@ describe('CasesIncrementalIdService', () => {
       expect(writer.bulkUpsertCasesAwait).toHaveBeenCalledWith(freshCases);
     });
 
+    it('still mirrors the numbered cases when updating an incrementer SO throws', async () => {
+      savedObjectsClient.bulkGet.mockResolvedValue({ saved_objects: [] });
+      service.incrementCounterSO = jest.fn().mockRejectedValue(new Error('counter failed'));
+
+      // @ts-expect-error: case SO types are not correct
+      await expect(service.incrementCaseIds(cases)).rejects.toThrow('counter failed');
+
+      expect(savedObjectsClient.bulkGet).toHaveBeenCalledWith([
+        { type: CASE_SAVED_OBJECT, id: 'case-1', namespaces: ['default'] },
+        { type: CASE_SAVED_OBJECT, id: 'case-2', namespaces: ['second-life'] },
+      ]);
+    });
+
     it('does not upsert cases that could not be re-read (e.g. deleted mid-run)', async () => {
       const freshCase = {
         type: CASE_SAVED_OBJECT,

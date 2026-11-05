@@ -6,20 +6,20 @@
  */
 
 /**
- * One-time repair shipped in 9.6 alongside the incremental-id task fix that
- * mirrors newly assigned ids to `.cases`. Before that fix, a case whose
- * `.cases` doc was written before it was numbered never received
- * `case.incremental_id`, because the id is applied with a raw SO update that
- * doesn't bump the `attributes.updated_at` reconciliation filters on.
+ * Repairs `.cases` docs missing `case.incremental_id`. The id is applied with
+ * a raw SO update that doesn't bump the `attributes.updated_at` reconciliation
+ * filters on, so the cursor walks never re-emit a case just because it was
+ * numbered.
  *
- * Runs from the reconciliation tick until one pass completes. Kept through
- * the last 9.x minor because a major upgrade must pass through it, so every
- * cluster runs the repair before it's removed. Remove in 10.0: delete this
- * folder, and drop its call and the `incremental_id_backfill_completed` state
- * field from `../reconciliation`.
+ * The incremental-id task mirrors newly numbered cases to `.cases`, but that
+ * write isn't guaranteed (exhausted retries, a restart between numbering and
+ * mirroring, a no-op writer during start, a reconciliation tick overwriting
+ * the doc with an older snapshot, an older node numbering cases during a
+ * rolling upgrade). This pass runs on every reconciliation tick as the
+ * backstop for all of those, and also repairs docs written before the mirror
+ * existed.
  */
 
-import type { SortResults } from '@elastic/elasticsearch/lib/api/types';
 import type {
   ElasticsearchClient,
   Logger,
@@ -46,13 +46,26 @@ export interface RunIncrementalIdBackfillDeps {
    * other progress and resume on a later run.
    */
   deadline?: number;
+  /**
+   * `case.id` to resume after, from a previous run's `resumeAfter`. Docs that
+   * are skipped rather than repaired stay in the query, so without this a
+   * time-boxed pass could re-read the same prefix every run.
+   */
+  startAfter?: string;
+}
+
+export interface RunIncrementalIdBackfillResult {
+  repaired: number;
+  completed: boolean;
+  /** Set when `completed` is false: the `case.id` to pass as `startAfter` next run. */
+  resumeAfter?: string;
 }
 
 /**
  * Re-emits every `.cases` doc that is missing `case.incremental_id` but whose
  * case SO now has one. Only the affected docs are touched, unlike a full
  * reset. Cases that are still unnumbered are skipped; the incremental-id task
- * mirrors them when it numbers them.
+ * mirrors them when it numbers them, and a later pass catches any it misses.
  */
 export async function runIncrementalIdBackfill({
   esClient,
@@ -61,9 +74,10 @@ export async function runIncrementalIdBackfill({
   logger,
   signal,
   deadline,
-}: RunIncrementalIdBackfillDeps): Promise<{ repaired: number; completed: boolean }> {
+  startAfter,
+}: RunIncrementalIdBackfillDeps): Promise<RunIncrementalIdBackfillResult> {
   let repaired = 0;
-  let searchAfter: SortResults | undefined;
+  let searchAfter = startAfter;
 
   const throwIfAborted = () => {
     if (signal?.aborted) {
@@ -80,7 +94,7 @@ export async function runIncrementalIdBackfill({
       logger.info(
         `cases-analyticsV2: incremental id backfill paused at its time budget after repaired=${repaired}; resuming on the next run`
       );
-      return { repaired, completed: false };
+      return { repaired, completed: false, resumeAfter: searchAfter };
     }
 
     const {
@@ -95,13 +109,13 @@ export async function runIncrementalIdBackfill({
         _source: ['space_id'],
         query: { bool: { must_not: [{ exists: { field: 'case.incremental_id' } }] } },
         sort: [{ 'case.id': 'asc' }],
-        ...(searchAfter ? { search_after: searchAfter } : {}),
+        ...(searchAfter != null ? { search_after: [searchAfter] } : {}),
       },
       { signal }
     );
 
-    // A partial page would otherwise read as the end of the index and mark
-    // the one-time pass complete with cases left unrepaired.
+    // A partial page would otherwise read as the end of the index and
+    // complete the pass with cases left unrepaired.
     if (timedOut || shards?.failed) {
       throw new Error(
         `cases-analyticsV2: incremental id backfill got an incomplete search response after repaired=${repaired}`
@@ -116,33 +130,52 @@ export async function runIncrementalIdBackfill({
       break;
     }
 
-    const { saved_objects: savedObjects } =
-      await savedObjectsClient.bulkGet<CasePersistedAttributes>(
-        page.map((hit) => ({
-          type: CASE_SAVED_OBJECT,
-          // `.cases` docs are indexed with the case SO id as `_id`.
-          id: hit._id as string,
-          namespaces: [hit._source?.space_id ?? 'default'],
-        }))
+    const lastSortValue = page[page.length - 1].sort?.[0];
+    if (typeof lastSortValue !== 'string') {
+      throw new Error(
+        `cases-analyticsV2: incremental id backfill got a non-string case.id sort value after repaired=${repaired}`
       );
-    const numbered = savedObjects.filter(
-      (so): so is SavedObject<CasePersistedAttributes> =>
-        !isSavedObjectErrorResult(so) && so.attributes.incremental_id != null
-    );
-
-    if (numbered.length > 0) {
-      await writer.bulkUpsertCasesAwait(numbered);
-      repaired += numbered.length;
     }
 
-    searchAfter = page[page.length - 1].sort;
+    // `.cases` docs are indexed with the case SO id as `_id`.
+    const toRead = page.flatMap((hit) =>
+      hit._id != null
+        ? [
+            {
+              type: CASE_SAVED_OBJECT,
+              id: hit._id,
+              namespaces: [hit._source?.space_id ?? 'default'],
+            },
+          ]
+        : []
+    );
+
+    if (toRead.length > 0) {
+      const { saved_objects: savedObjects } =
+        await savedObjectsClient.bulkGet<CasePersistedAttributes>(toRead);
+      const numbered = savedObjects.filter(
+        (so): so is SavedObject<CasePersistedAttributes> =>
+          !isSavedObjectErrorResult(so) && so.attributes.incremental_id != null
+      );
+
+      if (numbered.length > 0) {
+        await writer.bulkUpsertCasesAwait(numbered);
+        repaired += numbered.length;
+      }
+    }
+
+    searchAfter = lastSortValue;
 
     if (page.length < PAGE_SIZE) {
       break;
     }
   }
 
-  logger.info(`cases-analyticsV2: incremental id backfill repaired=${repaired}`);
+  if (repaired > 0) {
+    logger.info(`cases-analyticsV2: incremental id backfill repaired=${repaired}`);
+  } else {
+    logger.debug('cases-analyticsV2: incremental id backfill found nothing to repair');
+  }
 
   return { repaired, completed: true };
 }
