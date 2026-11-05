@@ -81,7 +81,7 @@ describe('alertAnalysisSkill', () => {
       const corroboration = alertAnalysisSkill.content
         .split('\n')
         .find((line) =>
-          line.startsWith('- When multiple related alerts are each independently suspicious')
+          line.startsWith('- When multiple related alerts each carry a concrete attack indicator')
         );
 
       expect(corroboration).toBeDefined();
@@ -90,9 +90,11 @@ describe('alertAnalysisSkill', () => {
       expect(corroboration).toContain(
         'never as false_positive solely because its own command line looks benign'
       );
-      expect(corroboration).toContain(
-        'Entity correlation or alarming rule names without suspicious command lines do not count'
-      );
+      expect(corroboration).toContain('concrete attack indicator');
+      expect(corroboration).toContain('running with its normal arguments');
+      expect(corroboration).toContain('even when its rule name or description is alarming');
+      expect(corroboration).toContain('Entity correlation alone does not count');
+      expect(corroboration).toContain('C:\\Windows\\System32');
       expect(corroboration).toContain(
         'a shared generic account (root, SYSTEM, administrator) alone does not count'
       );
