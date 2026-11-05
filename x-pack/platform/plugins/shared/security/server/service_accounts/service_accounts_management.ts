@@ -6,6 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
+import { chunk } from 'lodash';
 import pMap from 'p-map';
 
 import type { KibanaRequest, Logger } from '@kbn/core/server';
@@ -26,6 +27,7 @@ import type { EnsureClusterPrivilegeParams } from './cluster_privilege';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import type { ServiceAccountsBackend } from './types';
 import type { SecurityLicense } from '../../common';
+import { SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE } from '../../common/service_accounts';
 import { ServiceAccountAuditAction, serviceAccountAuditEvent } from '../audit';
 import { getDetailedErrorMessage } from '../errors';
 
@@ -137,7 +139,14 @@ export class ServiceAccountsManagement implements ServiceAccountsManagementApi {
   }
 
   async countBoundWorkloads(serviceAccountIds: string[]): Promise<Map<string, number>> {
-    return await this.store.countByServiceAccountIds(serviceAccountIds);
+    // Counted a page's worth at a time, since each id becomes a clause of the store's filter.
+    const counts = new Map<string, number>();
+    for (const ids of chunk(serviceAccountIds, SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE)) {
+      for (const [id, count] of await this.store.countByServiceAccountIds(ids)) {
+        counts.set(id, count);
+      }
+    }
+    return counts;
   }
 
   async listWorkloads(
