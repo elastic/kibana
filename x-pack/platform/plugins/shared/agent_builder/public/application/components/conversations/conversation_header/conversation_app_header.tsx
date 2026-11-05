@@ -14,6 +14,7 @@ import {
 } from '@kbn/app-header';
 import {
   AGENT_BUILDER_UI_EBT,
+  DEFAULT_CONVERSATION_TITLE,
   isPrivatelySharedConversation,
   isPublicConversation,
   normalizeConversationAccessControl,
@@ -40,6 +41,10 @@ import { labels } from './conversation_app_header_i18n';
 import { useHeaderPanel } from './use_header_panel';
 
 const ebt = (action: string) => ({ action, detail: 'conversation' });
+
+// The server saves a new chat as "New conversation" until its generated title arrives.
+const getDisplayTitle = (title: string | undefined): string =>
+  !title || title === DEFAULT_CONVERSATION_TITLE ? labels.newChat : title;
 
 export const ConversationAppHeader: React.FC = () => {
   const { conversation, isLoading } = useConversation();
@@ -69,7 +74,7 @@ export const ConversationAppHeader: React.FC = () => {
 
   if (!savedConversation) {
     return (
-      <AppHeader spacing="compact" title={isLoading ? '' : conversation?.title || labels.newChat} />
+      <AppHeader spacing="compact" title={isLoading ? '' : getDisplayTitle(conversation?.title)} />
     );
   }
 
@@ -80,7 +85,7 @@ export const ConversationAppHeader: React.FC = () => {
 
   const title: AppHeaderTitle = canRename
     ? {
-        text: savedConversation.title,
+        text: getDisplayTitle(savedConversation.title),
         ariaLabel: labels.editTitle,
         placeholder: labels.newChat,
         onSave: async (nextTitle) => {
@@ -91,7 +96,7 @@ export const ConversationAppHeader: React.FC = () => {
           }
         },
       }
-    : savedConversation.title;
+    : getDisplayTitle(savedConversation.title);
 
   const badges: AppHeaderBadge[] = [
     {

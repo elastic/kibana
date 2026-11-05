@@ -183,6 +183,13 @@ describe('ConversationAppHeader', () => {
     expect(screen.queryByTestId('agentBuilderChatInfoButton')).not.toBeInTheDocument();
   });
 
+  it('shows "New chat" for a saved chat that still has the default title', () => {
+    setUp({ conversation: { ...baseConversation, title: 'New conversation' } as Conversation });
+    renderHeader();
+
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('New chat');
+  });
+
   it('shows the title, the visibility badge and Share for a saved chat', async () => {
     setUp();
     renderHeader();
