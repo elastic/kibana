@@ -51,6 +51,7 @@ import {
   isAdditionalType,
   isTelemetryType,
 } from '../../../components/entities/sandbox_connector/connect_sources_grid';
+import { useFetchAutomations } from '../../../data/automations/use_automations';
 
 /** A step the user went back to; otherwise the step follows from the onboarding state. */
 type StepOverride = 'addData' | 'connectSources' | 'investigate' | undefined;
@@ -121,6 +122,8 @@ export function NightshiftOnboarding({
   const startSuggestions = useStartOnboardingSuggestions();
   const { groups: connectorGroups } = useConnectorsByType();
   const [stepOverride, setStepOverride] = useState<StepOverride>();
+  const automations = useFetchAutomations({ enabled: automationsHref != null });
+  const hasAutomation = (automations.data?.automations.length ?? 0) > 0;
 
   const execution = data?.execution;
   // Step 1 is done once the space is bound to its service accounts and the agent is installed:
@@ -300,11 +303,19 @@ export function NightshiftOnboarding({
         iconType="sortRight"
         iconSide="right"
         onClick={onFinish}
-        data-test-subj="nightshiftOnboardingFinishButton"
+        data-test-subj={
+          hasAutomation
+            ? 'nightshiftOnboardingViewInvestigationsButton'
+            : 'nightshiftOnboardingFinishButton'
+        }
       >
-        {i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
-          defaultMessage: "I'll do it later",
-        })}
+        {hasAutomation
+          ? i18n.translate('xpack.nightshift.onboarding.viewInvestigationsButton', {
+              defaultMessage: 'View investigations',
+            })
+          : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
+              defaultMessage: "I'll do it later",
+            })}
       </EuiButton>
     ) : undefined;
 
