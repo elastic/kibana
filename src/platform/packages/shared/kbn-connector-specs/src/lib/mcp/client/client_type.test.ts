@@ -715,6 +715,14 @@ describe('createMcpClientType', () => {
       expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
     });
 
+    it('returns true when a connect-phase request timeout is wrapped as cause', () => {
+      // McpClient.connect() rethrows SDK errors as a plain Error with the original as cause.
+      const err = new Error('Error connecting to MCP server: MCP error -32001: Request timed out', {
+        cause: new McpError(McpErrorCode.RequestTimeout, 'Request timed out'),
+      });
+      expect(createMcpClientType().shouldInvalidateOnError?.(err)).toBe(true);
+    });
+
     it('returns false when the terminal error is nested deeper than cause', () => {
       const nested = Object.assign(new Error('closed'), { code: 'UND_ERR_CLOSED' });
       const err = new Error('wrapped', { cause: new Error('mid', { cause: nested }) });
