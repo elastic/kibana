@@ -34,6 +34,7 @@ const setup = () => {
     enabled: true,
     getTenantId: jest.fn(),
     resolve: jest.fn(),
+    getProjectName: jest.fn(),
     getClientConfig: jest.fn((tenantId: TenantId) => clientConfigs[tenantId]),
   };
   const createClient = jest.fn(() => elasticsearchClientMock.createCustomClusterClient());

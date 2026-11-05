@@ -92,6 +92,7 @@ beforeEach(() => {
       enabled: false,
       getTenantId: jest.fn(),
       resolve: jest.fn(),
+      getProjectName: jest.fn(),
       getClientConfig: jest.fn(),
     },
   };
@@ -696,6 +697,7 @@ describe('multi-tenancy', () => {
         id === tenantB ? tenantB : undefined
       ),
       resolve: jest.fn(),
+      getProjectName: jest.fn(),
       getClientConfig: jest.fn().mockReturnValue({
         hosts: ['http://localhost:9201'],
         username: 'kibana_system',

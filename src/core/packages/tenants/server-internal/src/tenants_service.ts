@@ -42,6 +42,8 @@ export interface InternalTenantsServiceSetup {
   resolve(id: string): TenantId;
   /** Returns the Elasticsearch hosts and credentials of a tenant. */
   getClientConfig(tenantId: TenantId): TenantClientConfig;
+  /** Returns the project name of a tenant, if the tenants file sets one. */
+  getProjectName(tenantId: TenantId): string | undefined;
 }
 
 /** @internal */
@@ -56,6 +58,7 @@ interface Tenant {
   clientConfig: TenantClientConfig;
   crypto: Crypto;
   sessionCrypto: Crypto;
+  projectName?: string;
 }
 
 /** @internal */
@@ -74,13 +77,15 @@ export class TenantsService
     if (file) {
       this.enabled = true;
       const tenants = await readTenantsFile(file);
-      for (const [id, { encryptionKey, securityEncryptionKey, ...clientConfig }] of Object.entries(
-        tenants
-      )) {
+      for (const [
+        id,
+        { encryptionKey, securityEncryptionKey, projectName, ...clientConfig },
+      ] of Object.entries(tenants)) {
         this.tenants.set(id, {
           clientConfig,
           crypto: nodeCrypto({ encryptionKey }),
           sessionCrypto: nodeCrypto({ encryptionKey: securityEncryptionKey }),
+          projectName,
         });
       }
     }
@@ -90,6 +95,7 @@ export class TenantsService
       getTenantId: this.getTenantId,
       resolve: this.resolve,
       getClientConfig: (tenantId) => this.getTenant(tenantId).clientConfig,
+      getProjectName: (tenantId) => this.getTenant(tenantId).projectName,
     };
   }
 

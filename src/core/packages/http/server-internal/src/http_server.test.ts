@@ -2468,6 +2468,7 @@ describe('space extraction in onRequest', () => {
         return id as TenantId | undefined;
       }),
       resolve: jest.fn(),
+      getProjectName: jest.fn(),
       getClientConfig: jest.fn(),
     };
     const { registerRouter, server: innerServer } = await server.setup({ config$, tenants });

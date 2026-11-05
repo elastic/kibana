@@ -18,6 +18,7 @@ const hosts = schema.arrayOf(schema.uri({ scheme: ['http', 'https'] }), {
 
 const encryptionKey = schema.string({ minLength: 32 });
 const securityEncryptionKey = schema.string({ minLength: 32 });
+const projectName = schema.maybe(schema.string({ minLength: 1, maxLength: 255 }));
 
 const tenantSchema = schema.oneOf([
   schema.object({
@@ -26,12 +27,14 @@ const tenantSchema = schema.oneOf([
     password: schema.string(),
     encryptionKey,
     securityEncryptionKey,
+    projectName,
   }),
   schema.object({
     hosts,
     serviceAccountToken: schema.string(),
     encryptionKey,
     securityEncryptionKey,
+    projectName,
   }),
 ]);
 

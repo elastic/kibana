@@ -35,6 +35,7 @@ describe('TenantsService', () => {
         password: 'changeme-b',
         encryptionKey: 'b'.repeat(32),
         securityEncryptionKey: 'B'.repeat(32),
+        projectName: 'Project B',
       },
       'project-c': {
         hosts: ['http://localhost:9202'],
@@ -84,6 +85,13 @@ describe('TenantsService', () => {
       hosts: ['http://localhost:9202'],
       serviceAccountToken: 'token-c',
     });
+  });
+
+  it("returns the tenant's project name, if it has one", async () => {
+    const { setup } = await setupService('/tenants.yml');
+
+    expect(setup.getProjectName(tenantB)).toBe('Project B');
+    expect(setup.getProjectName(tenantC)).toBeUndefined();
   });
 
   it("returns each tenant's own saved objects crypto", async () => {

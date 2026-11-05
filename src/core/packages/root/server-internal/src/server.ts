@@ -474,6 +474,7 @@ export class Server {
       customBranding: customBrandingSetup,
       userSettings: userSettingsServiceSetup,
       i18n: i18nServiceSetup,
+      getTenantProjectName: tenantsSetup.getProjectName,
     });
 
     const httpResourcesSetup = this.httpResources.setup({
