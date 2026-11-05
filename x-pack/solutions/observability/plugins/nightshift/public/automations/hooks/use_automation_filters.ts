@@ -6,7 +6,7 @@
  */
 
 import { useState } from 'react';
-import type { Automation } from './use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 import { TRIGGER_LABEL_ORDER } from '../utils/trigger_display';
 import {
   countFilterValues,
@@ -51,14 +51,7 @@ export const useAutomationFilters = (
     filters: activeFilters,
     setFilter: <K extends keyof AutomationFilters>(key: K, value: AutomationFilters[K]) =>
       setFilters((current) => ({ ...current, [key]: value })),
-    showOnlyStatus: (status: string) =>
-      setFilters((current) => ({
-        ...current,
-        statuses: [status],
-        tags: [],
-        authors: [],
-        triggers: [],
-      })),
+    showOnlyStatus: (status: string) => setFilters({ ...EMPTY_FILTERS, statuses: [status] }),
     clearFilterSelections: () =>
       setFilters((current) => ({ ...EMPTY_FILTERS, search: current.search })),
     clearSearchAndFilters: () => setFilters(EMPTY_FILTERS),
