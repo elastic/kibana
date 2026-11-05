@@ -11,6 +11,7 @@ import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { ConnectorContractUnion, WorkflowYaml } from '@kbn/workflows';
+import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import { resetStepConfigPanelSessionStateForTests, StepConfigPanel } from './step_config_panel';
 import { insertIntoActiveDataReferenceTarget } from '../../../shared/lib/active_data_reference_insert_target';
@@ -1149,7 +1150,8 @@ with:
       });
       const field = screen.getByTestId('workflowStepConfigField-max-iterations');
       const row = field.closest('.workflowStepConfigFieldRow') as HTMLElement;
-      expect(field).toHaveValue('10');
+      // The number way of the max-iterations choice.
+      expect(field).toHaveValue(10);
       expect(row).toHaveTextContent('Read exactly as typed');
       expect(within(row).queryByTestId('workflowStepConfigDataReference')).not.toBeInTheDocument();
       expect(
@@ -1555,6 +1557,97 @@ with:
       expect(
         screen.queryByTestId('workflowStepConfigField-foreach-source-data')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('choosing how to write a value', () => {
+    const loop = (extra: string) =>
+      renderPanel({
+        stepType: 'while',
+        initialFragment: `name: w\ntype: while\ncondition: x\n${extra}steps:\n  - name: a\n    type: console\n    with:\n      message: hi\n`,
+      });
+    const group = 'workflowStepConfigField-max-iterations-variantGroup';
+    const way = (index: number) => screen.getByTestId(`${group}-variant-variant-${index}`);
+    const isChosen = (element: HTMLElement) => element.getAttribute('aria-pressed') === 'true';
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('shows the way a stored value is written, from the value', () => {
+      loop('max-iterations: 10\n');
+      expect(isChosen(way(0))).toBe(true);
+      expect(screen.getByTestId('workflowStepConfigField-max-iterations')).toHaveValue(10);
+    });
+
+    it('infers the object way from a stored object, and shows its fields', () => {
+      loop('max-iterations:\n  limit: 5\n  on-limit: fail\n');
+      expect(isChosen(way(1))).toBe(true);
+      expect(screen.getByTestId('workflowStepConfigField-max-iterations.limit')).toHaveValue(5);
+    });
+
+    it('asks before replacing a value, and keeps it on Cancel', () => {
+      const { onFragmentChange } = loop('max-iterations: 10\n');
+      fireEvent.click(way(1));
+      const modal = screen.getByTestId(`${group}-confirm`);
+      expect(modal).toHaveTextContent('Replace current value?');
+      expect(modal).toHaveTextContent('Switching to "Limit + behavior" replaces it');
+      fireEvent.click(within(modal).getByText('Cancel'));
+      expect(screen.queryByTestId(`${group}-confirm`)).not.toBeInTheDocument();
+      expect(isChosen(way(0))).toBe(true);
+      expect(
+        onFragmentChange.mock.calls.every(([f]) => /max-iterations: 10/.test(f as string))
+      ).toBe(true);
+    });
+
+    it('replaces the value on Switch, then writes the new way’s fields', () => {
+      const { onFragmentChange } = loop('max-iterations: 10\n');
+      fireEvent.click(way(1));
+      fireEvent.click(within(screen.getByTestId(`${group}-confirm`)).getByText('Switch'));
+      expect(isChosen(way(1))).toBe(true);
+      expect(lastFragment(onFragmentChange)).not.toMatch(/max-iterations/);
+
+      fireEvent.change(screen.getByTestId('workflowStepConfigField-max-iterations.limit'), {
+        target: { value: '5' },
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(/max-iterations:\s*\n\s+limit: 5/);
+    });
+
+    it('switches without asking when there is nothing to replace', () => {
+      loop('');
+      fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalField'));
+      fireEvent.click(screen.getByTestId('workflowStepConfigAddOptionalOption-max-iterations'));
+      expect(isChosen(way(0))).toBe(true);
+      fireEvent.click(way(1));
+      expect(screen.queryByTestId(`${group}-confirm`)).not.toBeInTheDocument();
+      expect(isChosen(way(1))).toBe(true);
+      expect(
+        screen.getByTestId('workflowStepConfigField-max-iterations.limit')
+      ).toBeInTheDocument();
+    });
+
+    it('offers no references for the fixed-only fields of either way', () => {
+      loop('max-iterations:\n  limit: 5\n  on-limit: fail\n');
+      const limit = screen.getByTestId('workflowStepConfigField-max-iterations.limit');
+      const row = limit.closest('.workflowStepConfigFieldRow') as HTMLElement;
+      expect(
+        within(row).queryByTestId('workflowStepConfigField-max-iterations.limit-source-data')
+      ).not.toBeInTheDocument();
+    });
+
+    it('shows SetAlertsStatus as a choice between by IDs and by query', () => {
+      renderPanel({
+        stepType: 'kibana.SetAlertsStatus',
+        connectors: [SET_ALERTS_STATUS_CONTRACT as unknown as ConnectorContractUnion],
+        initialFragment:
+          'name: s\ntype: kibana.SetAlertsStatus\nwith:\n  status: closed\n  signal_ids:\n    - abc\n',
+      });
+      const withGroup = 'workflowStepConfigField-with-variantGroup';
+      expect(
+        screen.getByTestId(`${withGroup}-variant-variant-0`).getAttribute('aria-pressed')
+      ).toBe('true');
+      expect(screen.getByTestId('workflowStepConfigField-with.signal_ids')).toHaveTextContent(
+        'abc'
+      );
+      expect(screen.queryByTestId('workflowStepConfigField-with.query')).not.toBeInTheDocument();
+      expect(screen.getByText('Query')).toBeInTheDocument();
     });
   });
 });

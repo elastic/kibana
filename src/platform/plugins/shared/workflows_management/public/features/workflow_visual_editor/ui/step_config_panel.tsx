@@ -66,6 +66,7 @@ import {
 } from './use_reference_decorations';
 import type { ValueSource } from './value_source_toggle';
 import { ValueSourceToggle } from './value_source_toggle';
+import { VariantField } from './variant_field';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
@@ -1167,7 +1168,10 @@ function StepForm({
     [onChange, onDraftErrorChange]
   );
 
-  const renderField = (field: StepFormField, options: { removable: boolean }) => {
+  const renderField = (
+    field: StepFormField,
+    options: { removable: boolean; showOptionalMarker?: boolean }
+  ) => {
     if (stepType === 'switch' && field.key === 'cases') {
       return (
         <div key={fieldId(field)} className="workflowStepConfigFieldRow">
@@ -1186,11 +1190,14 @@ function StepForm({
         value={toJs(readFragmentValue(fragment, field.path))}
         showValidation={showValidation}
         referenceCatalog={referenceCatalog}
-        showOptionalMarker={!field.required}
+        showOptionalMarker={options.showOptionalMarker ?? !field.required}
         onRemove={options.removable ? () => removeOptionalField(field) : undefined}
         onChange={(value) => onChange(field, value)}
         onDraftErrorChange={(error) => onDraftErrorChange(fieldId(field), error)}
         onExpand={() => onExpandField(field)}
+        renderSubField={(subField, subOptions) =>
+          renderField(subField, { removable: false, ...subOptions })
+        }
       />
     );
   };
@@ -1349,6 +1356,7 @@ function StepFieldRow({
   onChange,
   onDraftErrorChange,
   onExpand,
+  renderSubField,
 }: {
   field: StepFormField;
   value: unknown;
@@ -1359,6 +1367,11 @@ function StepFieldRow({
   onChange: (value: unknown) => void;
   onDraftErrorChange: (error: string | undefined) => void;
   onExpand: () => void;
+  /** Renders a field of the chosen way of writing a `variants` field. */
+  renderSubField: (
+    field: StepFormField,
+    options: { showOptionalMarker: boolean }
+  ) => React.ReactElement;
 }) {
   const { euiTheme } = useEuiTheme();
   const switchId = useGeneratedHtmlId({ prefix: `workflowStepConfigSwitch-${fieldId(field)}` });
@@ -1744,6 +1757,20 @@ function StepFieldRow({
         </StepValidatedFormRow>
       );
     }
+    case 'variants':
+      return wrapRow(
+        <VariantField
+          field={field}
+          value={value}
+          onChange={onChange}
+          renderField={renderSubField}
+          label={labelContent}
+          labelAppend={labelAppend}
+          // The group carries the description; the fixed-only hint belongs to its control.
+          helpText={field.description}
+          data-test-subj={`${testSubj}-variantGroup`}
+        />
+      );
     case 'key-value':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>

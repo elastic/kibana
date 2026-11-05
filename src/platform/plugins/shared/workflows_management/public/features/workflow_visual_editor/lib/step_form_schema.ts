@@ -18,6 +18,7 @@ import type { ConnectorContractUnion } from '@kbn/workflows';
 import { unwrapSchema } from '@kbn/workflows/common/utils/zod';
 import { isReferenceValue } from '@kbn/workflows-yaml';
 import { z } from '@kbn/zod/v4';
+import { inferVariant } from './form_variants';
 import { prettifyCatalogKey } from '../../../shared/utils/catalog_display_name';
 
 /**
@@ -32,9 +33,24 @@ export type StepFieldKind =
   | 'code'
   | 'key-value'
   | 'list'
+  | 'variants'
   | 'switch-cases'
   | 'parallel-branches';
 export type StepFieldLanguage = 'json' | 'kuery' | 'plaintext' | 'esql';
+
+/**
+ * One way a value can be written, for a field whose schema is a union of scalars and objects
+ * (`number | { limit, on-limit }`, or a body that is "by IDs" or "by query").
+ */
+export interface FormVariant {
+  readonly id: string;
+  readonly label: string;
+  readonly kind: 'object' | 'scalar';
+  /** Validates a stored value; used to tell which variant a value is. */
+  readonly schema: z.ZodType;
+  /** An object variant's keys (with their real paths), or the one control of a scalar variant. */
+  readonly fields: readonly StepFormField[];
+}
 
 export interface StepFormField {
   /** Key inside its owner (`with.<key>` or a root step key). */
@@ -60,6 +76,8 @@ export interface StepFormField {
   readonly acceptsSingle?: boolean;
   /** `list` fields whose items aren't typed text: they usually come from earlier data. */
   readonly preferData?: boolean;
+  /** `variants` fields: the ways the value can be written. */
+  readonly variants?: readonly FormVariant[];
   /**
    * `false` when the engine reads the value exactly as typed (e.g. a loop cap), so the form
    * must not offer references for it. Declared with `.meta({ templatable: false })`.
@@ -371,13 +389,173 @@ const describe = (schema: z.ZodType): string | undefined => {
   return typeof inner === 'string' && inner.length > 0 ? inner : undefined;
 };
 
+type ScalarClass = 'number' | 'string' | 'boolean';
+
+const scalarClassOf = (schema: z.ZodType): ScalarClass | undefined => {
+  if (schema instanceof z.ZodNumber) return 'number';
+  if (schema instanceof z.ZodBoolean) return 'boolean';
+  if (schema instanceof z.ZodString || schema instanceof z.ZodEnum) return 'string';
+  if (schema instanceof z.ZodLiteral)
+    return typeof schema.value === 'string' ? 'string' : undefined;
+  return undefined;
+};
+
+/**
+ * The leaves of a (possibly nested) union, or undefined when any of them is neither a scalar nor
+ * an object. `object | null`, arrays, maps and `unknown` are not a choice of how to write a value.
+ */
+const collectVariantMembers = (schema: z.ZodType): z.ZodType[] | undefined => {
+  const inner = unwrapSchema(schema);
+  if (inner instanceof z.ZodUnion) {
+    const leaves: z.ZodType[] = [];
+    for (const member of inner.options as z.ZodType[]) {
+      const found = collectVariantMembers(member);
+      if (!found) return undefined;
+      leaves.push(...found);
+    }
+    return leaves;
+  }
+  return inner instanceof z.ZodObject || scalarClassOf(inner) ? [inner] : undefined;
+};
+
+const requiredKeysOf = (schema: z.ZodObject): string[] =>
+  Object.entries(schema.shape as Record<string, z.ZodType>)
+    .filter(([, member]) => isRequired(member))
+    .map(([key]) => key);
+
+/** Two members that differ only in an enum's choices (`status`) become one field with both. */
+const mergeFields = (a: StepFormField, b: StepFormField): StepFormField =>
+  a.kind === 'select' && b.kind === 'select'
+    ? { ...a, options: Array.from(new Set([...(a.options ?? []), ...(b.options ?? [])])) }
+    : a;
+
+const SCALAR_LABELS: Readonly<Record<ScalarClass, string>> = {
+  number: i18n.translate('workflows.stepConfigPanel.variants.number', { defaultMessage: 'Number' }),
+  string: i18n.translate('workflows.stepConfigPanel.variants.text', { defaultMessage: 'Text' }),
+  boolean: i18n.translate('workflows.stepConfigPanel.variants.boolean', {
+    defaultMessage: 'Yes / no',
+  }),
+};
+
+/**
+ * The variants of a union field, or undefined when it isn't one. Object members that require the
+ * same keys are one variant (their fields combined), so "close by IDs" and "set status by IDs"
+ * read as the single choice "by IDs".
+ */
+const buildVariants = (
+  stepType: string,
+  key: string,
+  schema: z.ZodType,
+  path: readonly string[],
+  required: boolean
+): FormVariant[] | undefined => {
+  const members = collectVariantMembers(schema);
+  if (!members || !members.some((member) => member instanceof z.ZodObject)) return undefined;
+
+  const groups = new Map<string, z.ZodType[]>();
+  members.forEach((member) => {
+    const signature =
+      member instanceof z.ZodObject
+        ? `object:${requiredKeysOf(member).sort().join(',')}`
+        : `scalar:${scalarClassOf(member)}`;
+    groups.set(signature, [...(groups.get(signature) ?? []), member]);
+  });
+  if (groups.size < 2) return undefined;
+
+  const grouped = Array.from(groups.values());
+  const requiredOfGroup = (group: z.ZodType[]): string[] =>
+    group[0] instanceof z.ZodObject ? requiredKeysOf(group[0]) : [];
+  const objectGroups = grouped.filter((group) => group[0] instanceof z.ZodObject);
+
+  return grouped.map((group, index): FormVariant => {
+    const [first] = group;
+    const meta = readFieldMeta(first);
+    const title = typeof meta?.title === 'string' && meta.title.trim() ? meta.title : undefined;
+    const variantSchema =
+      group.length === 1 ? first : z.union(group as [z.ZodType, z.ZodType, ...z.ZodType[]]);
+
+    if (first instanceof z.ZodObject) {
+      const merged = new Map<string, StepFormField>();
+      group.forEach((member) =>
+        fieldsFromObject(stepType, member, path, false).forEach((field) => {
+          const existing = merged.get(field.key);
+          merged.set(field.key, existing ? mergeFields(existing, field) : field);
+        })
+      );
+      const mine = requiredOfGroup(group);
+      const distinguishing = mine.filter((requiredKey) =>
+        objectGroups.some(
+          (other) => other !== group && !requiredOfGroup(other).includes(requiredKey)
+        )
+      );
+      const keys = distinguishing.length > 0 ? distinguishing : mine;
+      return {
+        id: `variant-${index}`,
+        label: title ?? keys.map(prettifyFieldKey).join(' + '),
+        kind: 'object',
+        schema: variantSchema,
+        fields: Array.from(merged.values()),
+      };
+    }
+
+    const scalarClass = scalarClassOf(first) as ScalarClass;
+    const { kind, options } = resolveKind(stepType, key, first);
+    return {
+      id: `variant-${index}`,
+      label: title ?? SCALAR_LABELS[scalarClass],
+      kind: 'scalar',
+      schema: variantSchema,
+      // The group already carries the field's label; this control is just its value.
+      fields: [
+        {
+          // Only the path addresses it; a `value` key keeps the label from echoing the real one.
+          key: 'value',
+          path,
+          label: i18n.translate('workflows.stepConfigPanel.variants.valueLabel', {
+            defaultMessage: 'Value',
+          }),
+          required,
+          kind,
+          options,
+        },
+      ],
+    };
+  });
+};
+
 const fieldsFromObject = (
   stepType: string,
   schema: z.ZodType | undefined,
-  basePath: readonly string[]
+  basePath: readonly string[],
+  allowVariants = true
 ) => {
   if (!schema) return [] as StepFormField[];
   const inner = unwrapSchema(schema);
+  // A step whose whole `with` is a choice between shapes (`kibana.SetAlertsStatus`): one field.
+  if (
+    allowVariants &&
+    inner instanceof z.ZodUnion &&
+    basePath.length === 1 &&
+    basePath[0] === 'with'
+  ) {
+    const label =
+      (readFieldMeta(schema)?.title as string | undefined) ??
+      i18n.translate('workflows.stepConfigPanel.recordWithLabel', { defaultMessage: 'Fields' });
+    const required = isRequired(schema);
+    const variants = buildVariants(stepType, 'with', schema, basePath, required);
+    if (variants) {
+      const withField: StepFormField = {
+        key: 'with',
+        path: basePath,
+        label,
+        description: describe(schema),
+        required,
+        kind: 'variants',
+        variants,
+      };
+      return [withField];
+    }
+  }
   // A step whose whole `with` is a map of names to values (`data.set`): one field for the map.
   if (inner instanceof z.ZodRecord && basePath.length === 1 && basePath[0] === 'with') {
     const withField: StepFormField = {
@@ -406,18 +584,42 @@ const fieldsFromObject = (
         !isNeverSchema(fieldSchema)
     )
     .map(([key, fieldSchema]): StepFormField => {
-      const { kind, language, options, acceptsSingle, preferData } = resolveKind(
-        stepType,
-        key,
-        fieldSchema
-      );
+      const path = [...basePath, key];
+      const label = resolveFieldLabel(key, fieldSchema);
+      const required = isRequired(fieldSchema);
+      const fixedOnly = readFieldMeta(fieldSchema)?.templatable === false;
+      // A union of scalars and objects is a choice of how to write the value, unless a code
+      // language (by key name or schema meta) already claims the field.
+      const claimsCode =
+        CODE_KEY_LANGUAGE[key] !== undefined || readFieldMeta(fieldSchema)?.language !== undefined;
+      const built =
+        allowVariants && !claimsCode
+          ? buildVariants(stepType, key, fieldSchema, path, required)
+          : undefined;
+      // A fixed-only field's sub-fields are fixed-only too.
+      const variants = fixedOnly
+        ? built?.map((variant) => ({
+            ...variant,
+            fields: variant.fields.map((field) => ({ ...field, templatable: false as const })),
+          }))
+        : built;
+      const { kind, language, options, acceptsSingle, preferData } = variants
+        ? {
+            kind: 'variants' as const,
+            language: undefined,
+            options: undefined,
+            acceptsSingle: undefined,
+            preferData: undefined,
+          }
+        : resolveKind(stepType, key, fieldSchema);
       const advanced = resolveAdvancedHint(stepType, key, fieldSchema);
       return {
         key,
-        path: [...basePath, key],
-        label: resolveFieldLabel(key, fieldSchema),
+        path,
+        label,
         description: describe(fieldSchema),
-        required: isRequired(fieldSchema),
+        required,
+        ...(variants ? { variants } : {}),
         ...(advanced !== undefined ? { advanced } : {}),
         kind,
         language,
@@ -425,9 +627,7 @@ const fieldsFromObject = (
         ...(acceptsSingle !== undefined ? { acceptsSingle } : {}),
         ...(preferData ? { preferData } : {}),
         defaultValue: getDefault(fieldSchema),
-        ...(readFieldMeta(fieldSchema)?.templatable === false
-          ? { templatable: false as const }
-          : {}),
+        ...(fixedOnly ? { templatable: false as const } : {}),
       };
     });
 };
@@ -532,6 +732,8 @@ export const findUnclosedTemplateExpression = (value: string): boolean => {
  * undefined when the value is acceptable. Empty optionals are always OK.
  */
 export const validateStepField = (field: StepFormField, value: unknown): string | undefined => {
+  // A choice of shapes has no value of its own: its fields are validated one by one.
+  if (field.kind === 'variants') return undefined;
   if (isEmptyFieldValue(value)) {
     if (!field.required) return undefined;
     return i18n.translate('workflows.stepConfigPanel.validation.required', {
@@ -595,6 +797,22 @@ const stepNameField = (): StepFormField => ({
   kind: 'text',
 });
 
+/**
+ * The fields that count for a step's current value: a choice of shapes stands for the fields of
+ * the shape the value is in (the first one while it is empty), and is skipped when it is optional
+ * and unset.
+ */
+const getActiveFields = (
+  fields: readonly StepFormField[],
+  step: Record<string, unknown>
+): StepFormField[] =>
+  fields.flatMap((field) => {
+    if (field.kind !== 'variants' || !field.variants) return [field];
+    const value = readPath(step, field.path);
+    if (!field.required && isEmptyFieldValue(value)) return [];
+    return [...inferVariant(field.variants, value).fields];
+  });
+
 /** Required schema fields (plus `name`) that are currently empty. */
 export const getMissingRequiredFields = (
   step: Record<string, unknown>,
@@ -603,7 +821,7 @@ export const getMissingRequiredFields = (
   const type = step.type;
   if (typeof type !== 'string') return [];
   const schema = getStepFormSchema(type, connectors);
-  const fields = [stepNameField(), ...(schema?.fields ?? [])];
+  const fields = getActiveFields([stepNameField(), ...(schema?.fields ?? [])], step);
   return fields.filter((f) => f.required && isEmptyFieldValue(readPath(step, f.path)));
 };
 
@@ -628,7 +846,7 @@ export const getStepConfigWarningReason = (
   const type = step.type;
   if (typeof type !== 'string') return undefined;
   const schema = getStepFormSchema(type, connectors);
-  const fields = [stepNameField(), ...(schema?.fields ?? [])];
+  const fields = getActiveFields([stepNameField(), ...(schema?.fields ?? [])], step);
 
   let incomplete = false;
   let misconfigured = false;
@@ -662,6 +880,12 @@ export const isFieldValueRepresentable = (field: StepFormField, value: unknown):
       return typeof value === 'object' && !Array.isArray(value);
     case 'list':
       return typeof value === 'string' || Array.isArray(value);
+    case 'variants':
+      return (
+        value === undefined ||
+        (typeof value === 'object' && value !== null && !Array.isArray(value)) ||
+        Boolean(field.variants?.some((variant) => variant.schema.safeParse(value).success))
+      );
     case 'boolean':
       return typeof value === 'boolean' || typeof value === 'string';
     case 'number':
@@ -695,6 +919,8 @@ const placeholderFor = (field: StepFormField): unknown => {
     case 'parallel-branches':
       return [];
     case 'key-value':
+      return {};
+    case 'variants':
       return {};
     case 'list':
       // A single value alone is valid for `string | string[]`; keep the old empty-string start.

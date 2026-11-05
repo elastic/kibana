@@ -251,14 +251,20 @@ export const MaxStepSizePropSchema = z.object({
 });
 export type MaxStepSizeProp = z.infer<typeof MaxStepSizePropSchema>;
 
-export const MaxIterationsObjectSchema = z.object({
-  limit: z.number().int().positive(),
-  'on-limit': z.enum(['continue', 'fail']),
-});
+export const MaxIterationsObjectSchema = lazySchema(() =>
+  z
+    .object({
+      limit: z.number().int().positive(),
+      'on-limit': z.enum(['continue', 'fail']),
+    })
+    .meta({ title: 'Limit + behavior' })
+);
 
 // The engine reads loop caps exactly as typed, so the form must not offer references for them.
 export const MaxIterationsSchema = lazySchema(() =>
-  z.union([z.number().int().positive(), MaxIterationsObjectSchema]).meta({ templatable: false })
+  z
+    .union([z.number().int().positive().meta({ title: 'Number' }), MaxIterationsObjectSchema])
+    .meta({ templatable: false })
 );
 export type MaxIterations = z.infer<typeof MaxIterationsSchema>;
 

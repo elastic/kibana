@@ -8,11 +8,13 @@
  */
 
 import type { ConnectorContractUnion } from '@kbn/workflows';
+import { SET_ALERTS_STATUS_CONTRACT } from '@kbn/workflows/spec/kibana/overrides/kibana.set_alerts_status';
 import { z } from '@kbn/zod/v4';
 import {
   buildDefaultStep,
   fieldLabelDivergesFromKey,
   findUnclosedTemplateExpression,
+  getMissingRequiredFields,
   getStepConfigWarningReason,
   getStepFormSchema,
   isFieldValueRepresentable,
@@ -137,6 +139,65 @@ describe('step_form_schema', () => {
       // Lists of anything but text keep the JSON editor.
       expect(field('ids')?.kind).toBe('code');
       expect(field('rules')?.kind).toBe('code');
+    });
+
+    it('offers max-iterations as a number or a limit with a behavior, both fixed-only', () => {
+      const field = getStepFormSchema('while', [])?.fields.find((f) => f.key === 'max-iterations');
+      expect(field).toMatchObject({ kind: 'variants', templatable: false, required: false });
+      const [number, limit] = field?.variants ?? [];
+      expect(number).toMatchObject({ label: 'Number', kind: 'scalar' });
+      expect(number.fields[0]).toMatchObject({
+        kind: 'number',
+        path: ['max-iterations'],
+        templatable: false,
+      });
+      expect(limit).toMatchObject({ label: 'Limit + behavior', kind: 'object' });
+      expect(limit.fields.map((f) => [f.path.join('.'), f.kind, f.templatable])).toEqual([
+        ['max-iterations.limit', 'number', false],
+        ['max-iterations.on-limit', 'select', false],
+      ]);
+    });
+
+    it('turns the four shapes of SetAlertsStatus into the two choices: by IDs or by query', () => {
+      const field = getStepFormSchema('kibana.SetAlertsStatus', [
+        SET_ALERTS_STATUS_CONTRACT as unknown as ConnectorContractUnion,
+      ])?.fields.find((f) => f.key === 'with');
+      expect(field).toMatchObject({ kind: 'variants', path: ['with'], required: true });
+      expect(field?.variants?.map((v) => v.label)).toEqual(['Signal ids', 'Query']);
+      const byIds = field?.variants?.[0];
+      // "close" and "set status" by IDs are one choice, so `status` offers every status.
+      expect(byIds?.fields.find((f) => f.key === 'status')?.options).toEqual(
+        expect.arrayContaining(['open', 'acknowledged', 'in-progress', 'closed'])
+      );
+      expect(byIds?.fields.map((f) => f.key)).toEqual(
+        expect.arrayContaining(['signal_ids', 'status', 'reason'])
+      );
+      expect(byIds?.fields.find((f) => f.key === 'signal_ids')?.path).toEqual([
+        'with',
+        'signal_ids',
+      ]);
+    });
+
+    it('leaves nullable objects, lists and maps alone: they are not a choice of shape', () => {
+      const oddConnectors = [
+        {
+          type: 'odd',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            maybe: z.union([z.object({ a: z.string() }), z.null()]).optional(),
+            either: z.union([z.object({ a: z.string() }), z.array(z.string())]).optional(),
+            just: z.union([z.string(), z.number()]).optional(),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const kind = (key: string) =>
+        getStepFormSchema('odd', oddConnectors)?.fields.find((f) => f.key === key)?.kind;
+      expect(kind('maybe')).toBe('code');
+      expect(kind('either')).toBe('code');
+      expect(kind('just')).not.toBe('variants');
     });
 
     it('treats foreach as a list that usually comes from earlier data', () => {
@@ -450,6 +511,41 @@ describe('step_form_schema', () => {
       expect(byKey.size).toMatchObject({ advanced: false });
       expect(byKey.timeout).toMatchObject({ advanced: true });
       expect(byKey.preference).toMatchObject({ advanced: true });
+    });
+  });
+
+  describe('required fields of a choice of shapes', () => {
+    const alerts = [SET_ALERTS_STATUS_CONTRACT as unknown as ConnectorContractUnion];
+    const missing = (step: Record<string, unknown>, list = alerts) =>
+      getMissingRequiredFields(step, list).map((f) => f.path.join('.'));
+
+    it('asks for the keys of the shape the value is in', () => {
+      const base = { name: 's', type: 'kibana.SetAlertsStatus' };
+      expect(missing({ ...base, with: { status: 'closed' } })).toEqual(['with.signal_ids']);
+      expect(missing({ ...base, with: { query: { match_all: {} }, status: 'open' } })).toEqual([]);
+      expect(missing({ ...base, with: { signal_ids: ['a'], status: 'closed' } })).toEqual([]);
+    });
+
+    it('asks for the first shape while the value is empty', () => {
+      expect(missing({ name: 's', type: 'kibana.SetAlertsStatus', with: {} })).toEqual(
+        expect.arrayContaining(['with.signal_ids', 'with.status'])
+      );
+    });
+
+    it('skips an optional choice that is unset, and requires the rest of a started one', () => {
+      const loop = {
+        name: 'w',
+        type: 'while',
+        condition: 'x',
+        steps: [{ name: 'a', type: 'wait' }],
+      };
+      expect(getMissingRequiredFields({ ...loop }, []).map((f) => f.key)).toEqual([]);
+      expect(
+        getMissingRequiredFields({ ...loop, 'max-iterations': 10 }, []).map((f) => f.key)
+      ).toEqual([]);
+      expect(
+        getMissingRequiredFields({ ...loop, 'max-iterations': { limit: 5 } }, []).map((f) => f.key)
+      ).toEqual(['on-limit']);
     });
   });
 
