@@ -6,10 +6,12 @@
  */
 
 import type { Boom } from '@hapi/boom';
+import { NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import {
   canManageSecurity,
   getDetectionEngineAccountId,
 } from '../../../lib/service_accounts/detection_engine_account';
+import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { internalMaintenanceRoutes } from './route';
 
 jest.mock('../../utils/assert_significant_events_access', () => ({
@@ -48,5 +50,73 @@ describe('resume route', () => {
 
     await expect(resumeRoute.handler(params)).resolves.toEqual({ state: 'enabled' });
     expect(canManageSecurity).not.toHaveBeenCalled();
+  });
+});
+
+describe('reset route', () => {
+  const resetRoute =
+    internalMaintenanceRoutes['POST /internal/significant_events/maintenance/_reset'];
+
+  beforeEach(() => jest.clearAllMocks());
+
+  it('requires Nightshift manage and configure and delegates with the authenticated user', async () => {
+    const request = {};
+    const licensing = {};
+    const reset = jest.fn().mockResolvedValue({ state: 'enabled' });
+    const server = {
+      core: {
+        security: {
+          authc: { getCurrentUser: jest.fn().mockReturnValue({ username: 'operator' }) },
+        },
+      },
+    };
+
+    await resetRoute.handler({
+      request,
+      server,
+      maintenanceService: { reset },
+      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+    } as unknown as Parameters<typeof resetRoute.handler>[0]);
+
+    expect(resetRoute.security.authz).toEqual({
+      requiredPrivileges: NIGHTSHIFT_MANAGE_AND_CONFIGURE_API_PRIVILEGES,
+    });
+    expect(assertSignificantEventsAccess).toHaveBeenCalledWith({ server, licensing });
+    expect(reset).toHaveBeenCalledWith({ request, updatedBy: 'operator' });
+  });
+});
+
+describe('pause, resume, and status routes', () => {
+  beforeEach(() => jest.clearAllMocks());
+
+  it('keeps pause and status reachable while the feature flag is off, but not resume', async () => {
+    const licensing = {};
+    const server = { core: { security: { authc: { getCurrentUser: jest.fn() } } } };
+    const handlerParams = {
+      request: {},
+      server,
+      getScopedClients: jest.fn().mockResolvedValue({ licensing }),
+      maintenanceService: {
+        pause: jest.fn(),
+        resume: jest.fn(),
+        getStatus: jest.fn(),
+      },
+    };
+    const accessChecks = [
+      'POST /internal/significant_events/maintenance/_pause',
+      'GET /internal/significant_events/maintenance/_status',
+      'POST /internal/significant_events/maintenance/_resume',
+    ] as const;
+
+    for (const endpoint of accessChecks) {
+      const { handler } = internalMaintenanceRoutes[endpoint];
+      await handler(handlerParams as unknown as Parameters<typeof handler>[0]);
+    }
+
+    expect(jest.mocked(assertSignificantEventsAccess).mock.calls).toEqual([
+      [{ server, licensing, ignore: ['feature_flag'] }],
+      [{ server, licensing, ignore: ['feature_flag'] }],
+      [{ server, licensing }],
+    ]);
   });
 });
