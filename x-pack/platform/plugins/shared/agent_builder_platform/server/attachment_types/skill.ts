@@ -8,7 +8,6 @@
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ComponentsNode } from '@kbn/isomer-components';
 import { AGENT_BUILDER_APP_ID, AGENT_BUILDER_MANAGE_PATHS } from '@kbn/deeplinks-agent-builder';
-import { toKibanaAppUrl } from '@kbn/agent-builder-plugin/server';
 import { i18n } from '@kbn/i18n';
 import {
   SKILL_ATTACHMENT_TYPE,
@@ -78,21 +77,18 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
    * in Management. Not to the skill's own page, which doesn't exist until the skill is saved and shows
    * the saved version, not the one in the conversation.
    */
-  toSurfaceComposition: (
-    {
-      data: {
-        skill: {
-          id,
-          name,
-          description,
-          content,
-          tool_ids: toolIds,
-          referenced_content: referencedContent,
-        },
+  toSurfaceComposition: ({
+    data: {
+      skill: {
+        id,
+        name,
+        description,
+        content,
+        tool_ids: toolIds,
+        referenced_content: referencedContent,
       },
     },
-    { kibanaUrl }
-  ) => {
+  }) => {
     const files = (referencedContent ?? []).map(
       ({ relativePath, name: fileName }) => `${relativePath}/${fileName}.md`
     );
@@ -124,26 +120,19 @@ export const createSkillAttachmentType = (): AttachmentTypeDefinition<
             },
           ]
         : []),
-      ...(kibanaUrl
-        ? [
-            {
-              type: 'actions' as const,
-              buttons: [
-                {
-                  label: i18n.translate(
-                    'xpack.agentBuilderPlatform.attachments.skill.surface.manageSkills',
-                    { defaultMessage: 'Manage skills' }
-                  ),
-                  url: toKibanaAppUrl(
-                    kibanaUrl,
-                    AGENT_BUILDER_APP_ID,
-                    AGENT_BUILDER_MANAGE_PATHS.skills
-                  ),
-                },
-              ],
-            },
-          ]
-        : []),
+      {
+        type: 'actions',
+        buttons: [
+          {
+            label: i18n.translate(
+              'xpack.agentBuilderPlatform.attachments.skill.surface.manageSkills',
+              { defaultMessage: 'Manage skills' }
+            ),
+            app: AGENT_BUILDER_APP_ID,
+            path: AGENT_BUILDER_MANAGE_PATHS.skills,
+          },
+        ],
+      },
     ];
 
     return { type: 'view', title: name, subtitle: id, body };

@@ -110,10 +110,7 @@ describe('renderPayload', () => {
 
     expect(slack).toContain('FROM logs | LIMIT 10');
     expect(slack).not.toContain('render_attachment');
-    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), {
-      ...context,
-      kibanaUrl: 'https://kibana.example.com/s/space-1',
-    });
+    expect(toSurfaceComposition).toHaveBeenCalledWith(expect.anything(), context);
   });
 
   describe('Kibana app links', () => {
