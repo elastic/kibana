@@ -25,6 +25,7 @@ jest.mock('../utils/esql', () => ({
 
 import { resolveResourceForEsqlWithSamplingStats } from '../utils/resources';
 import { executeEsql } from '../utils/esql';
+import { ESQLVariableType } from '@kbn/esql-types';
 
 const mockResolveResource = resolveResourceForEsqlWithSamplingStats as jest.MockedFn<
   typeof resolveResourceForEsqlWithSamplingStats
@@ -275,6 +276,32 @@ describe('createNlToEsqlGraph — execute_query node', () => {
           format: 'strict_date_optional_time',
         },
       },
+    });
+  });
+
+  describe('control values', () => {
+    const HOST_QUERY = 'FROM logs-test | WHERE host.name == ?host | STATS hits = COUNT(*)';
+    const HOST_RESPONSE = `\`\`\`esql\n${HOST_QUERY}\n\`\`\``;
+    const esqlVariables = [
+      { key: 'host', value: 'web-1', type: ESQLVariableType.VALUES },
+      { key: 'unused', value: 'nope', type: ESQLVariableType.VALUES },
+    ];
+
+    it("executes a query that uses a control with the control's value, after the time range", async () => {
+      const { chatModel } = createMockModel(HOST_RESPONSE);
+      const graph = buildGraph(chatModel);
+
+      await graph.invoke(
+        { ...BASE_INPUT, execute: 'schema', maxRetries: 1, esqlVariables },
+        { recursionLimit: 25 }
+      );
+
+      const { params } = mockedExecuteEsql.mock.calls[0][0];
+      expect(params?.slice(0, 2)).toEqual([
+        { _tstart: expect.any(String) },
+        { _tend: expect.any(String) },
+      ]);
+      expect(params?.slice(2)).toEqual([{ host: 'web-1' }]);
     });
   });
 

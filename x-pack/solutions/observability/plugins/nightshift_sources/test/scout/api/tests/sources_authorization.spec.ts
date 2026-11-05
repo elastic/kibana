@@ -10,6 +10,7 @@ import { tags } from '@kbn/scout-oblt';
 import type { RoleSessionCredentials } from '@kbn/scout-oblt';
 import { getNightshiftSourceViewName } from '@kbn/nightshift-shared';
 import {
+  NIGHTSHIFT_MANAGE_ONLY_ROLE,
   NIGHTSHIFT_MANAGER_ROLE,
   NIGHTSHIFT_READ_ONLY_NO_ES_ROLE,
   NIGHTSHIFT_READ_ONLY_ROLE,
@@ -23,6 +24,7 @@ import {
   deleteTestIndex,
   findListed,
   getSource,
+  listRecommendedSources,
   listSources,
   setSourceEnabled,
   testIndexName,
@@ -76,6 +78,7 @@ apiTest.describe.skip(
       );
       expect(listed).toHaveStatusCode(200);
       expect(findListed(listed.body, sourceId)?.id).toBe(sourceId);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(200);
 
       const fetched = await getSource(apiClient, cookieHeader, sourceId);
       expect(fetched).toHaveStatusCode(200);
@@ -94,6 +97,29 @@ apiTest.describe.skip(
       expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, true)).toHaveStatusCode(403);
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
     });
+
+    apiTest(
+      'lets a user with manage but not configure read sources and refuses every change',
+      async ({ apiClient, samlAuth }) => {
+        const { cookieHeader } = await samlAuth.asInteractiveUser(NIGHTSHIFT_MANAGE_ONLY_ROLE);
+
+        expect(await getSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(200);
+        expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
+        expect(
+          await validateSourceQuery(apiClient, cookieHeader, { esql: body.esql })
+        ).toHaveStatusCode(403);
+        expect(
+          await updateSource(apiClient, cookieHeader, sourceId, { ...body, tags: [] })
+        ).toHaveStatusCode(403);
+        expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, false)).toHaveStatusCode(
+          403
+        );
+        expect(await setSourceEnabled(apiClient, cookieHeader, sourceId, true)).toHaveStatusCode(
+          403
+        );
+        expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
+      }
+    );
 
     apiTest(
       'reports ok health to a reader with only the implicit view grant',
@@ -118,6 +144,7 @@ apiTest.describe.skip(
       const { cookieHeader } = await samlAuth.asInteractiveUser(NO_NIGHTSHIFT_ROLE);
 
       expect(await listSources(apiClient, cookieHeader)).toHaveStatusCode(403);
+      expect(await listRecommendedSources(apiClient, cookieHeader)).toHaveStatusCode(403);
       expect(await getSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);
       expect(await createSource(apiClient, cookieHeader, body)).toHaveStatusCode(403);
       expect(await deleteSource(apiClient, cookieHeader, sourceId)).toHaveStatusCode(403);

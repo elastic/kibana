@@ -259,6 +259,18 @@ describe('dataDedupeStepDefinition', () => {
       expect(result.error).toBeDefined();
       expect(result.error?.message).toContain('Keys must be a non-empty array');
     });
+
+    it('should return error when aborted', async () => {
+      const controller = new AbortController();
+      controller.abort();
+      const context = {
+        ...createMockContext({ items: [{ id: 1 }] }, { keys: ['id'] }),
+        abortSignal: controller.signal,
+      };
+      const result = await dataDedupeStepDefinition.handler(context);
+
+      expect(result.error?.message).toBe('Operation was aborted');
+    });
   });
 
   describe('logging', () => {

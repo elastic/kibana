@@ -10,7 +10,7 @@
     "browser": true,
     "server": true,
     "configPath": ["xpack", "entityInventoryApp"],
-    "requiredPlugins": ["observabilityShared", "share"],
+    "requiredPlugins": ["observabilityShared", "share", "unifiedSearch"],
     "optionalPlugins": [],
     "requiredBundles": ["kibanaReact"]
   }

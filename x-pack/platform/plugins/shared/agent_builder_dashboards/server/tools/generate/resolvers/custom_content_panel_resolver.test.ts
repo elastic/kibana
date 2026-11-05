@@ -7,6 +7,7 @@
 
 import type { AttachmentPanel } from '@kbn/agent-builder-dashboards-common';
 import { CUSTOM_CONTENT_EMBEDDABLE_TYPE } from '@kbn/custom-content-common';
+import { ESQLVariableType } from '@kbn/esql-types';
 import type {
   CustomContentPanelAddRequest,
   CustomContentPanelEditRequest,
@@ -136,6 +137,88 @@ describe('createCustomContentPanelResolver', () => {
         type: 'failure',
         error: 'Generated template was rejected: contains a <script> tag.',
       });
+    });
+  });
+
+  describe('control values', () => {
+    const esqlVariables = [{ key: 'host', value: 'web-1', type: ESQLVariableType.VALUES }];
+    const hostQuery = 'FROM logs | WHERE host.name == ?host | STATS n = COUNT(*)';
+    const resolveEsqlVariables = jest.fn();
+
+    beforeEach(() => {
+      resolveEsqlVariables.mockReset();
+      resolveEsqlVariables.mockResolvedValue(esqlVariables);
+    });
+
+    it('asks for those the own query of a new panel uses to sample it', async () => {
+      await resolve(addRequest({ esql: hostQuery, hasData: true, resolveEsqlVariables }));
+
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
+      expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('asks for any variable before generating a query, and for those the new query uses to sample it', async () => {
+      const existingQuery = 'FROM logs | WHERE host.name == ?host | STATS hits = COUNT(*)';
+      generateEsql.mockResolvedValue('FROM logs | STATS errors = COUNT(*)');
+
+      await resolve(
+        editRequest(
+          customContentPanel({ template: '<div>old</div>', esql_query: [existingQuery] }),
+          {
+            nlQuery: 'Also show the error count',
+            regenerateESQL: true,
+            resolveEsqlVariables,
+          }
+        )
+      );
+
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [existingQuery], {
+        anyVariable: true,
+      });
+      expect(generateEsql).toHaveBeenCalledWith(
+        expect.objectContaining({ existingQueries: [existingQuery], esqlVariables })
+      );
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(
+        2,
+        ['FROM logs | STATS errors = COUNT(*)'],
+        undefined
+      );
+      expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('gives the generator the variables, and asks for those a generated query uses to sample it', async () => {
+      generateEsql.mockResolvedValue(hostQuery);
+
+      await resolve(
+        addRequest({ nlQuery: 'hits for the selected host', hasData: true, resolveEsqlVariables })
+      );
+
+      expect(generateEsql).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+      expect(resolveEsqlVariables).toHaveBeenNthCalledWith(1, [], { anyVariable: true });
+      expect(resolveEsqlVariables).toHaveBeenLastCalledWith([hostQuery], undefined);
+      expect(resolveTemplate).toHaveBeenCalledWith(expect.objectContaining({ esqlVariables }));
+    });
+
+    it('asks for nothing when no query is run: a static panel, or an edit that keeps its query', async () => {
+      await resolve(addRequest({ resolveEsqlVariables }));
+      await resolve(
+        editRequest(customContentPanel({ template: '<div>old</div>', esql_query: [hostQuery] }), {
+          nlQuery: 'Restyle',
+          resolveEsqlVariables,
+        })
+      );
+
+      expect(resolveEsqlVariables).not.toHaveBeenCalled();
+      for (const [call] of resolveTemplate.mock.calls) {
+        expect(call.esqlVariables).toBeUndefined();
+      }
+    });
+
+    it('sends none when the request has no resolver', async () => {
+      await resolve(addRequest({ hasData: true }));
+
+      expect(generateEsql.mock.calls[0][0].esqlVariables).toBeUndefined();
+      expect(resolveTemplate.mock.calls[0][0].esqlVariables).toBeUndefined();
     });
   });
 

@@ -14,6 +14,7 @@ import {
   persistZeroBaseScore,
   scoreBaseEntities,
 } from './score_base_entities';
+import { createPageStepTimings } from '../instrumentation/page_step_timings';
 import type { ScopedLogger } from '../utils/with_log_context';
 import type { RiskEngineDataWriter } from '../../risk_engine_data_writer';
 
@@ -100,6 +101,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -135,6 +137,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -166,6 +169,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -187,6 +191,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -207,6 +212,7 @@ describe('score_base_entities', () => {
 
     await collectPages(
       calculateBaseEntityScores({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -227,6 +233,7 @@ describe('score_base_entities', () => {
     const run = () =>
       collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -306,6 +313,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -326,6 +334,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -348,6 +357,7 @@ describe('score_base_entities', () => {
 
       await collectPages(
         calculateBaseEntityScores({
+          pageTimings: createPageStepTimings(),
           esClient,
           crudClient,
           logger,
@@ -360,6 +370,57 @@ describe('score_base_entities', () => {
       expect(compositeCall.runtime_mappings.entity_id).toBeDefined();
       const [{ filter }] = (esClient.esql.query as jest.Mock).mock.calls[0];
       expect(filter).toEqual({ bool: { filter: baseParams.alertFilters } });
+    });
+  });
+
+  describe('scoreBaseEntities entity store refresh', () => {
+    const scoreOnePage = async (entityStoreRefresh?: false) => {
+      mockCompositeAggPage(esClient, ['user:a@okta']);
+      (esClient.esql.query as jest.Mock).mockResolvedValueOnce({
+        values: [esqlRow('user:a@okta')],
+      });
+      (crudClient.listEntities as jest.Mock).mockResolvedValue({
+        entities: [
+          {
+            entity: {
+              id: 'user:a@okta',
+              attributes: { watchlists: [] },
+              relationships: { resolution: { resolved_to: undefined } },
+            },
+            asset: { criticality: undefined },
+          },
+        ],
+        nextSearchAfter: undefined,
+      });
+
+      await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
+        esClient,
+        crudClient,
+        logger,
+        writer: {
+          bulk: jest.fn().mockResolvedValue({ errors: [], docs_written: 1, took: 1 }),
+        } as unknown as RiskEngineDataWriter,
+        idBasedRiskScoringEnabled: true,
+        createMissingEntities: false,
+        ...(entityStoreRefresh === undefined ? {} : { entityStoreRefresh }),
+        ...baseParams,
+      });
+    };
+
+    it('leaves the entity store refresh to its default, which waits, unless asked otherwise', async () => {
+      await scoreOnePage();
+
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(crudClient.bulkUpdateEntity).mock.calls[0][0].refresh).toBeUndefined();
+    });
+
+    it('forwards the entity store refresh option', async () => {
+      await scoreOnePage(false);
+
+      expect(crudClient.bulkUpdateEntity).toHaveBeenCalledWith(
+        expect.objectContaining({ refresh: false })
+      );
     });
   });
 
@@ -383,6 +444,44 @@ describe('score_base_entities', () => {
       asset: { criticality: undefined },
     });
 
+    it('retains acknowledged writes when a later page query fails', async () => {
+      mockCompositeAggPage(esClient, ['user:a@okta'], { entity_id: 'user:a@okta' });
+      mockCompositeAggPage(esClient, ['user:b@okta']);
+      const failure = new Error('second page failed');
+      jest
+        .mocked(esClient.esql.query)
+        .mockResolvedValueOnce({ columns: [], values: [esqlRow('user:a@okta')], is_partial: true })
+        .mockRejectedValueOnce(failure);
+      jest.mocked(crudClient.listEntities).mockResolvedValue({
+        entities: [makeStoreEntity('user:a@okta')],
+        nextSearchAfter: undefined,
+      });
+      const writer = buildWriter();
+      const pageTimings = createPageStepTimings({ profile: false });
+      await expect(
+        scoreBaseEntities({
+          ...baseParams,
+          esClient,
+          crudClient,
+          logger,
+          writer,
+          pageTimings,
+          idBasedRiskScoringEnabled: false,
+          createMissingEntities: false,
+        })
+      ).rejects.toBe(failure);
+      expect(writer.bulk).toHaveBeenCalledTimes(1);
+      expect(pageTimings.summary()).toMatchObject({
+        counters: { riskDocumentsWritten: 1, partialResponses: 1 },
+        laterPages: {
+          steps: expect.arrayContaining([
+            expect.objectContaining({ tags: ['esql'], calls: 1, failures: 1 }),
+          ]),
+        },
+      });
+      expect(jest.mocked(esClient.esql.query).mock.calls[0][0]).not.toHaveProperty('profile');
+    });
+
     it('drops scores whose entity_id is not in the entity store before persistence', async () => {
       // Composite agg + ES|QL produce two scored entities; one is in store, one is not.
       mockCompositeAggPage(esClient, ['user:in-store@okta', 'user:phantom@okta']);
@@ -399,6 +498,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -440,6 +540,7 @@ describe('score_base_entities', () => {
       });
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -459,6 +560,7 @@ describe('score_base_entities', () => {
       mockCompositeAggPage(esClient, []);
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -485,6 +587,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -522,6 +625,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -597,6 +701,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -650,6 +755,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -698,6 +804,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -744,6 +851,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,
@@ -771,6 +879,7 @@ describe('score_base_entities', () => {
       const writer = buildWriter();
 
       const summary = await scoreBaseEntities({
+        pageTimings: createPageStepTimings(),
         esClient,
         crudClient,
         logger,

@@ -6,7 +6,7 @@
  */
 
 import type { RegisterEntityMaintainerConfig } from '@kbn/entity-store/server';
-import type { RunMetrics } from './utils/run_metrics_tracker';
+import type { RunMetrics } from './instrumentation/run_metrics_tracker';
 import type { BuildLookupIndexResult } from './steps/build_lookup_index';
 import type { AlertSourceCounts } from './steps/tally_alert_sources';
 
@@ -15,7 +15,7 @@ type EntityMaintainerRunSummary = Parameters<
 >[0];
 
 export interface RiskScoreFrameworkStageSummary {
-  name: 'base' | 'resolution' | 'reset_to_zero';
+  name: 'base' | 'resolution' | 'reset_to_zero' | 'score_distributions' | 'prune';
   status: 'success' | 'error' | 'skipped';
   durationMs: number;
   applied?: number;

@@ -77,7 +77,7 @@ const result = (overrides: Partial<HuntCoordinatorCoreResult> = {}): HuntCoordin
   report_intent_targets: [],
   actionable_indices: ['logs-endpoint.events.process-*'],
   tier1: tier1(),
-  message: 'Tier 1: no_environment_hits.',
+  message: 'IOC Hunt: no_environment_hits.',
   next_step: 'n/a',
   has_confirmed_hit: false,
   completeness: 'complete',
@@ -140,7 +140,7 @@ const ctx = {
 const TECHNOLOGY_WORD = /technolog/i;
 
 describe('buildHuntNarrative', () => {
-  it('tells the Tier 1 and Tier 2 story for a run both tiers confirmed, as markdown sections', () => {
+  it('tells the IOC Hunt and Behavior Hunt story for a run both tiers confirmed, as markdown sections', () => {
     const narrative = buildHuntNarrative(
       result({
         tier1: hitTier1(),
@@ -161,18 +161,18 @@ describe('buildHuntNarrative', () => {
     expect(narrative).toBe(
       [
         '### Hunt Watch confirmed a hit',
-        'Hunt Watch confirmed a hit for threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`): Tier 1 matched the report\'s indicators in the environment and Tier 2 confirmed 1 behavior derived from the report text.',
+        'Hunt Watch confirmed a hit for threat report **"CloudTrail retrospective: AdministratorAccess attach"** (`ti-report-aws-iam-historic-01`): IOC Hunt matched the report\'s indicators in the environment and Behavior Hunt confirmed 1 behavior derived from the report text.',
         [
           '**What was searched**',
           '- **Window:** 2026-08-26T00:00:00.000Z to 2026-09-25T00:00:00.000Z',
           '- **Indices:** `logs-*` and `-logs-elastic_agent*`',
-          "- **Tier 2 targets:** `logs-aws.cloudtrail-*` and `logs-endpoint.events.process-*` (from the report's vendor or product, Tier 1 hits and process telemetry)",
+          "- **Behavior Hunt targets:** `logs-aws.cloudtrail-*` and `logs-endpoint.events.process-*` (from the report's vendor or product, IOC Hunt hits and process telemetry)",
           '- **Indicators (3):** ip `192.0.2.30` and `192.0.2.31`; email `dev-user@corp.example`',
           '- **ATT&CK techniques (2):** `T1078.004` and `T1562.008`',
         ].join('\n'),
         [
-          '**Tier 1: indicator and technique search**',
-          'Tier 1 matched 121 documents across 3 indices, which confirms the hit.',
+          '**IOC Hunt: indicator and technique search**',
+          'IOC Hunt matched 121 documents across 3 indices, which confirms the hit.',
           '- `logs-endpoint.events.f56865fe.2026.09.25`: 68',
           '- `.internal.alerts-security.alerts-default-000001`: 33',
           '- `logs-aws.cloudtrail.2026.09.25`: 20',
@@ -183,8 +183,8 @@ describe('buildHuntNarrative', () => {
           '- **Affected services:** `escalated-role` (6)',
         ].join('\n'),
         [
-          '**Tier 2: behavior hunts derived from the report**',
-          'Tier 2 derived 2 behaviors from the report text and validated them against the ATT&CK catalog; 2 executed as ES|QL against the Tier 2 targets and 1 matched live activity.',
+          '**Behavior Hunt: behaviors derived from the report**',
+          'Behavior Hunt derived 2 behaviors from the report text and validated them against the ATT&CK catalog; 2 executed as ES|QL against the Behavior Hunt targets and 1 matched live activity.',
           '- **T1078.004 Cloud Accounts** ("AssumeRole into escalated-role", critical, confidence 90%): executed and matched 5 rows involving host `WIN-ANALYST01` and users `dev-user` and `escalated-role`.',
           '- **T1562.008 Disable or Modify Cloud Logs** ("StopLogging", critical, confidence 90%): executed and matched no rows in the hunt window.',
         ].join('\n'),
@@ -194,7 +194,7 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
-  it('names the Tier 2 target sources on the searched section', () => {
+  it('names the Behavior Hunt target sources on the searched section', () => {
     const narrative = buildHuntNarrative(
       result({
         tier1: hitTier1(),
@@ -208,27 +208,27 @@ describe('buildHuntNarrative', () => {
     );
 
     expect(narrative).toContain(
-      '- **Tier 2 targets:** `logs-aws.cloudtrail-*` (from a model match)'
+      '- **Behavior Hunt targets:** `logs-aws.cloudtrail-*` (from a model match)'
     );
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
-  it('names a Tier 1 only hit and says Tier 2 found nothing to execute', () => {
+  it('names an IOC Hunt only hit and says Behavior Hunt found nothing to execute', () => {
     const narrative = buildHuntNarrative(
       result({ tier1: hitTier1(), tier2: tier2([]), has_confirmed_hit: true }),
       ctx
     );
 
     expect(narrative).toContain(
-      "Tier 1 matched the report's indicators in the environment. Tier 2 derived no executable behaviors from the report text."
+      "IOC Hunt matched the report's indicators in the environment. Behavior Hunt derived no executable behaviors from the report text."
     );
     expect(narrative).toContain(
-      '**Tier 2: behavior hunts derived from the report**\nTier 2 read the report text and derived no behaviors to hunt.'
+      '**Behavior Hunt: behaviors derived from the report**\nBehavior Hunt read the report text and derived no behaviors to hunt.'
     );
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
   });
 
-  it('names a Tier 2 only hit when Tier 1 found nothing', () => {
+  it('names a Behavior Hunt only hit when IOC Hunt found nothing', () => {
     const narrative = buildHuntNarrative(
       result({
         tier1: tier1({ resolved_techniques: ['T1078.004'], searched_techniques: 1 }),
@@ -239,10 +239,10 @@ describe('buildHuntNarrative', () => {
     );
 
     expect(narrative).toContain(
-      'Tier 1 found no indicator matches, but Tier 2 confirmed 1 behavior derived from the report text.'
+      'IOC Hunt found no indicator matches, but Behavior Hunt confirmed 1 behavior derived from the report text.'
     );
     expect(narrative).toContain(
-      '**Tier 1: indicator and technique search**\nTier 1 found no documents matching those indicators or techniques in the window.'
+      '**IOC Hunt: indicator and technique search**\nIOC Hunt found no documents matching those indicators or techniques in the window.'
     );
     expect(narrative).toContain('- **Indicators:** none searchable');
     expect(narrative).not.toMatch(TECHNOLOGY_WORD);
@@ -284,11 +284,11 @@ describe('buildHuntNarrative', () => {
         ctx
       )
     ).toContain(
-      'Tier 1 had nothing to search: no eligible indicators remained (7 indicators excluded by adjudication) and the report exposed no searchable techniques.'
+      'IOC Hunt had nothing to search: no eligible indicators remained (7 indicators excluded by adjudication) and the report exposed no searchable techniques.'
     );
   });
 
-  it('names the model tiers that were unavailable when Tier 2 could not run for want of a model', () => {
+  it('names the model tiers that were unavailable when Behavior Hunt could not run for want of a model', () => {
     const narrative = buildHuntNarrative(
       result({
         status: 'tier1_only',
@@ -305,19 +305,37 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('Balanced');
   });
 
-  it('explains every Tier 2 skip reason in plain words under the Tier 2 heading', () => {
+  it('says the dataset-match call failed, not that a model is missing, when the skip carries a detail', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        status: 'tier1_only',
+        tier2_skipped_reason: 'no_inference',
+        tier2_skip_detail: 'connector down',
+        unavailable_model_tiers: ['efficient'],
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain(
+      'the model call that chooses where to hunt failed (connector down)'
+    );
+    expect(narrative).not.toContain('no model to choose where to hunt');
+    expect(narrative).not.toContain('no GenAI connector');
+  });
+
+  it('explains every Behavior Hunt skip reason in plain words under the Behavior Hunt heading', () => {
     const skipped = (reason: HuntCoordinatorCoreResult['tier2_skipped_reason']) =>
       buildHuntNarrative(result({ status: 'tier1_only', tier2_skipped_reason: reason }), ctx);
 
     expect(skipped('configured_never')).toContain(
-      '**Tier 2: behavior hunts derived from the report**\nTier 2 behavior hunting was turned off for this run.'
+      '**Behavior Hunt: behaviors derived from the report**\nBehavior Hunt was turned off for this run.'
     );
-    expect(skipped('no_environment_hits')).toContain('only escalates to Tier 2 on a hit');
+    expect(skipped('no_environment_hits')).toContain('only escalates to Behavior Hunt on a hit');
     expect(skipped('no_inference')).toContain('no GenAI connector was available');
     expect(skipped('no_report_text')).toContain('no body text to derive behaviors from');
     expect(skipped('no_searchable_input')).toContain('exposed nothing to search for');
     expect(skipped('no_tier2_targets')).toContain(
-      'no index could be chosen for it: the report matched no dataset, Tier 1 hit no index, and no index in the default data view carries process telemetry'
+      'no index could be chosen for it: the report matched no dataset, IOC Hunt hit no index, and no index in the default data view carries process telemetry'
     );
   });
 
@@ -341,7 +359,7 @@ describe('buildHuntNarrative', () => {
     expect(headline).toContain('hunt skipped, the report has not been enriched yet');
     for (const text of [narrative, headline]) {
       expect(text).not.toContain('What was searched');
-      expect(text).not.toContain('Tier 1 had nothing to search');
+      expect(text).not.toContain('IOC Hunt had nothing to search');
       expect(text).not.toContain('not visible in this space');
     }
   });
@@ -383,13 +401,71 @@ describe('buildHuntNarrative', () => {
     expect(narrative).not.toContain('stays eligible');
   });
 
-  it('carries the Tier 2 failure message when Tier 2 threw', () => {
+  it('lists the techniques still to be searched when the run is retryable, and says they are continued', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'over budget', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+            { reason: 'collapsed', detail: 'shared', technique_id: 'T1566' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (2):** `T1059` and `T1105`.');
+    expect(narrative).toContain('while the report is still inside the sweep');
+    expect(narrative).toContain('techniques this run already searched are not repeated');
+    expect(narrative).not.toContain('`T1566`.');
+  });
+
+  it('does not promise a later search for a technique the run gave up on', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_retryable',
+        completed_successfully: false,
+        pending_technique_ids: ['T1105'],
+        tier2: tier2([], {
+          incomplete: [
+            { reason: 'generation_budget', detail: 'not returned', technique_id: 'T1059' },
+            { reason: 'execute_failed', detail: 'failed', technique_id: 'T1105' },
+          ],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).toContain('**Still to be searched (1):** `T1105`.');
+    expect(narrative).not.toContain('`T1059`.');
+    // The gap itself is still reported.
+    expect(narrative).toContain('not returned');
+  });
+
+  it('lists nothing to continue on a run that is not retryable', () => {
+    const narrative = buildHuntNarrative(
+      result({
+        completeness: 'incomplete_final',
+        tier2: tier2([], {
+          incomplete: [{ reason: 'collapsed', detail: 'shared', technique_id: 'T1566' }],
+        }),
+      }),
+      ctx
+    );
+
+    expect(narrative).not.toContain('Still to be searched');
+  });
+
+  it('carries the Behavior Hunt failure message when Behavior Hunt threw', () => {
     const narrative = buildHuntNarrative(
       result({
         status: 'tier1_only',
         tier1: hitTier1(),
         tier2_skipped_reason: 'tier2_failed',
-        message: 'Tier 1: environment_hits_found. Tier 2 failed: connector timeout',
+        message: 'IOC Hunt: environment_hits_found. Behavior Hunt failed: connector timeout',
         has_confirmed_hit: true,
         completed_successfully: false,
       }),
@@ -397,7 +473,7 @@ describe('buildHuntNarrative', () => {
     );
 
     expect(narrative).toContain(
-      'Tier 2 behavior hunting failed before it could finish. Tier 1: environment_hits_found. Tier 2 failed: connector timeout'
+      'Behavior Hunt failed before it could finish. IOC Hunt: environment_hits_found. Behavior Hunt failed: connector timeout'
     );
   });
 
@@ -499,18 +575,20 @@ describe('buildHuntHeadline', () => {
           has_confirmed_hit: true,
         })
       )
-    ).toBe('confirmed hit: Tier 1 matched 121 documents; Tier 2 confirmed 1 of 2 behaviors');
+    ).toBe(
+      'confirmed hit: IOC Hunt matched 121 documents; Behavior Hunt confirmed 1 of 2 behaviors'
+    );
   });
 
-  it('summarizes a clean run with a skipped Tier 2', () => {
+  it('summarizes a clean run with a skipped Behavior Hunt', () => {
     expect(
       buildHuntHeadline(
         result({ status: 'tier1_only', tier2_skipped_reason: 'no_environment_hits' })
       )
-    ).toBe('no confirmed hits: Tier 1 found no matches; Tier 2 skipped');
+    ).toBe('no confirmed hits: IOC Hunt found no matches; Behavior Hunt skipped');
   });
 
-  it('summarizes Tier 1 matches without optional-only wording', () => {
+  it('summarizes IOC Hunt matches without optional-only wording', () => {
     expect(
       buildHuntHeadline(
         result({
@@ -521,7 +599,7 @@ describe('buildHuntHeadline', () => {
           tier2: tier2([]),
         })
       )
-    ).toBe('no confirmed hits: Tier 1 matched 5 documents; Tier 2 derived no behaviors');
+    ).toBe('no confirmed hits: IOC Hunt matched 5 documents; Behavior Hunt derived no behaviors');
   });
 
   it('names a blocked scope and a missing report', () => {
