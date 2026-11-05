@@ -1,0 +1,272 @@
+{
+  "isomer-corpus-buckets/buckets-xy-multivalue-esql/dark": {
+    "scene": [
+      "axis 2 label count 7 vs 12",
+      "axis 2 label 2 \"10\" vs \"5\"",
+      "axis 2 label 3 \"20\" vs \"10\"",
+      "axis 2 label 4 \"30\" vs \"15\"",
+      "axis 2 label 5 \"40\" vs \"20\"",
+      "axis 2 label 6 \"50\" vs \"25\"",
+      "axis 2 label 7 \"60\" vs \"30\"",
+      "axis 2 values [0,10,20,30,40,50,60] vs [0,5,10,15,20,25,30,35,40,45,50,55]"
+    ],
+    "engine": [
+      "axis 2 label count 7 vs 12",
+      "axis 2 label 2 \"10\" vs \"5\"",
+      "axis 2 label 3 \"20\" vs \"10\"",
+      "axis 2 label 4 \"30\" vs \"15\"",
+      "axis 2 label 5 \"40\" vs \"20\"",
+      "axis 2 label 6 \"50\" vs \"25\"",
+      "axis 2 label 7 \"60\" vs \"30\"",
+      "axis 2 values [0,10,20,30,40,50,60] vs [0,5,10,15,20,25,30,35,40,45,50,55]",
+      "axis 2 gridline count 7 vs 12",
+      "axis 2 gridline 2 moves by 49.83px",
+      "axis 2 gridline 3 moves by 99.67px",
+      "axis 2 gridline 4 moves by 149.50px",
+      "axis 2 gridline 5 moves by 199.34px",
+      "axis 2 gridline 6 moves by 249.17px",
+      "axis 2 gridline 7 moves by 299.01px"
+    ]
+  },
+  "isomer-corpus-buckets/buckets-xy-multivalue-esql/light": {
+    "scene": [
+      "axis 2 label count 7 vs 12",
+      "axis 2 label 2 \"10\" vs \"5\"",
+      "axis 2 label 3 \"20\" vs \"10\"",
+      "axis 2 label 4 \"30\" vs \"15\"",
+      "axis 2 label 5 \"40\" vs \"20\"",
+      "axis 2 label 6 \"50\" vs \"25\"",
+      "axis 2 label 7 \"60\" vs \"30\"",
+      "axis 2 values [0,10,20,30,40,50,60] vs [0,5,10,15,20,25,30,35,40,45,50,55]"
+    ],
+    "engine": [
+      "axis 2 label count 7 vs 12",
+      "axis 2 label 2 \"10\" vs \"5\"",
+      "axis 2 label 3 \"20\" vs \"10\"",
+      "axis 2 label 4 \"30\" vs \"15\"",
+      "axis 2 label 5 \"40\" vs \"20\"",
+      "axis 2 label 6 \"50\" vs \"25\"",
+      "axis 2 label 7 \"60\" vs \"30\"",
+      "axis 2 values [0,10,20,30,40,50,60] vs [0,5,10,15,20,25,30,35,40,45,50,55]",
+      "axis 2 gridline count 7 vs 12",
+      "axis 2 gridline 2 moves by 49.83px",
+      "axis 2 gridline 3 moves by 99.67px",
+      "axis 2 gridline 4 moves by 149.50px",
+      "axis 2 gridline 5 moves by 199.34px",
+      "axis 2 gridline 6 moves by 249.17px",
+      "axis 2 gridline 7 moves by 299.01px"
+    ]
+  },
+  "isomer-corpus-values/values-metric-esql/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "isomer-corpus-values/values-metric-esql/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "isomer-corpus-values/values-xy-huge-esql/dark": {
+    "scene": [
+      "axis 1 label count 8 vs 7",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024 @ 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 2, 2024 @ 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 3, 2024 @ 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 4, 2024 @ 00:00:00.000\"",
+      "axis 1 label 5 \"4th\" vs \"Jan 5, 2024 @ 00:00:00.000\"",
+      "axis 1 label 6 \"5th\" vs \"Jan 6, 2024 @ 00:00:00.000\"",
+      "axis 1 label 7 \"6th\" vs \"Jan 7, 2024 @ 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000]"
+    ],
+    "engine": [
+      "axis 1 label count 8 vs 4",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024 @ 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 3, 2024 @ 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 5, 2024 @ 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 7, 2024 @ 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704240000000,1704412800000,1704585600000]",
+      "axis 1 gridline count 8 vs 4",
+      "axis 1 gridline 2 moves by 86.73px",
+      "axis 1 gridline 3 moves by 173.45px",
+      "axis 1 gridline 4 moves by 260.18px",
+      "axis 2 gridline 3 moves by 1.14px",
+      "axis 2 gridline 4 moves by 1.71px",
+      "axis 2 gridline 5 moves by 2.29px",
+      "axis 2 gridline 6 moves by 2.86px",
+      "axis 2 gridline 7 moves by 3.43px",
+      "axis 2 gridline 8 moves by 4.00px",
+      "series 1 path 1 moves by 20.04px",
+      "series 1 path 2 moves by 20.04px"
+    ]
+  },
+  "isomer-corpus-values/values-xy-huge-esql/light": {
+    "scene": [
+      "axis 1 label count 8 vs 7",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024 @ 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 2, 2024 @ 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 3, 2024 @ 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 4, 2024 @ 00:00:00.000\"",
+      "axis 1 label 5 \"4th\" vs \"Jan 5, 2024 @ 00:00:00.000\"",
+      "axis 1 label 6 \"5th\" vs \"Jan 6, 2024 @ 00:00:00.000\"",
+      "axis 1 label 7 \"6th\" vs \"Jan 7, 2024 @ 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000]"
+    ],
+    "engine": [
+      "axis 1 label count 8 vs 4",
+      "axis 1 label 1 \"1st\" vs \"Jan 1, 2024 @ 00:00:00.000\"",
+      "axis 1 label 2 \"January 2024\" vs \"Jan 3, 2024 @ 00:00:00.000\"",
+      "axis 1 label 3 \"2nd\" vs \"Jan 5, 2024 @ 00:00:00.000\"",
+      "axis 1 label 4 \"3rd\" vs \"Jan 7, 2024 @ 00:00:00.000\"",
+      "axis 1 values [1704067200000,1704067200000,1704153600000,1704240000000,1704326400000,1704412800000,1704499200000,1704585600000] vs [1704067200000,1704240000000,1704412800000,1704585600000]",
+      "axis 1 gridline count 8 vs 4",
+      "axis 1 gridline 2 moves by 86.73px",
+      "axis 1 gridline 3 moves by 173.45px",
+      "axis 1 gridline 4 moves by 260.18px",
+      "axis 2 gridline 3 moves by 1.14px",
+      "axis 2 gridline 4 moves by 1.71px",
+      "axis 2 gridline 5 moves by 2.29px",
+      "axis 2 gridline 6 moves by 2.86px",
+      "axis 2 gridline 7 moves by 3.43px",
+      "axis 2 gridline 8 moves by 4.00px",
+      "series 1 path 1 moves by 20.04px",
+      "series 1 path 2 moves by 20.04px"
+    ]
+  },
+  "sample-logs/01d8e435-91c0-484f-a11e-856747050b0a/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/01d8e435-91c0-484f-a11e-856747050b0a/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/11/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/11/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/8c1456d4-1993-4ba2-b701-04aca02c9fef/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/8c1456d4-1993-4ba2-b701-04aca02c9fef/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/bb94016e-f4a6-49ca-87a9-296a2869d570/dark": {
+    "scene": [
+      "tile 1 text 1 color \"#e3e8f2\" vs \"#b4c1d5\"",
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#e3e8f2\" vs \"#b4c1d5\""
+    ]
+  },
+  "sample-logs/bb94016e-f4a6-49ca-87a9-296a2869d570/light": {
+    "scene": [
+      "tile 1 text 1 color \"#111c2c\" vs \"#384861\"",
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ],
+    "engine": [
+      "tile 1 text 2 color \"#111c2c\" vs \"#384861\""
+    ]
+  },
+  "sample-logs/cbca842c-b9fa-4523-9ce0-14e350866e33/dark": {
+    "scene": [
+      "axis 2 label count 8 vs 9",
+      "axis 2 values [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035] vs [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04]"
+    ],
+    "engine": [
+      "axis 1 gridline 1 moves by 1.67px",
+      "axis 1 gridline 2 moves by 1.61px",
+      "axis 1 gridline 3 moves by 1.54px",
+      "axis 1 gridline 4 moves by 1.48px",
+      "axis 1 gridline 5 moves by 1.41px",
+      "axis 1 gridline 6 moves by 1.34px",
+      "axis 1 gridline 7 moves by 1.28px",
+      "axis 1 gridline 8 moves by 1.21px",
+      "axis 1 gridline 9 moves by 1.15px",
+      "axis 1 gridline 10 moves by 1.08px",
+      "axis 2 label count 8 vs 9",
+      "axis 2 values [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035] vs [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04]",
+      "axis 2 gridline count 8 vs 9",
+      "axis 2 gridline 2 moves by 4.30px",
+      "axis 2 gridline 3 moves by 8.61px",
+      "axis 2 gridline 4 moves by 12.91px",
+      "axis 2 gridline 5 moves by 17.21px",
+      "axis 2 gridline 6 moves by 21.52px",
+      "axis 2 gridline 7 moves by 25.82px",
+      "axis 2 gridline 8 moves by 30.13px"
+    ]
+  },
+  "sample-logs/cbca842c-b9fa-4523-9ce0-14e350866e33/light": {
+    "scene": [
+      "axis 2 label count 8 vs 9",
+      "axis 2 values [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035] vs [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04]"
+    ],
+    "engine": [
+      "axis 1 gridline 1 moves by 1.67px",
+      "axis 1 gridline 2 moves by 1.61px",
+      "axis 1 gridline 3 moves by 1.54px",
+      "axis 1 gridline 4 moves by 1.48px",
+      "axis 1 gridline 5 moves by 1.41px",
+      "axis 1 gridline 6 moves by 1.34px",
+      "axis 1 gridline 7 moves by 1.28px",
+      "axis 1 gridline 8 moves by 1.21px",
+      "axis 1 gridline 9 moves by 1.15px",
+      "axis 1 gridline 10 moves by 1.08px",
+      "axis 2 label count 8 vs 9",
+      "axis 2 values [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035] vs [0,0.005,0.01,0.015,0.02,0.025,0.03,0.035,0.04]",
+      "axis 2 gridline count 8 vs 9",
+      "axis 2 gridline 2 moves by 4.30px",
+      "axis 2 gridline 3 moves by 8.61px",
+      "axis 2 gridline 4 moves by 12.91px",
+      "axis 2 gridline 5 moves by 17.21px",
+      "axis 2 gridline 6 moves by 21.52px",
+      "axis 2 gridline 7 moves by 25.82px",
+      "axis 2 gridline 8 moves by 30.13px"
+    ]
+  }
+}

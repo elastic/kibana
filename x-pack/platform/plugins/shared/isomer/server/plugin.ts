@@ -20,6 +20,7 @@ import type { KibanaIsomerRuntime } from '@kbn/isomer';
 import { firstValueFrom } from 'rxjs';
 import { MATERIALIZE_FEATURE_FLAG } from '../common/constants';
 import { createScopedMaterializeClient } from './materialize/materialize_client';
+import { createHasField } from './materialize/has_field';
 import { createKitServices } from './materialize/kit/create_kit';
 import type { LensTransformOut } from './materialize/lens/materializer';
 import { LENS_TYPE, createLensMaterializer } from './materialize/lens/materializer';
@@ -155,6 +156,7 @@ export class IsomerPlugin
       isEnabled: this.isMaterializeEnabled,
       logger: this.logger.get('materialize'),
       search: data.search.asScoped(scope.request),
+      hasField: createHasField(elasticsearch.client.asScoped(scope.request).asCurrentUser),
       getKitServices: () =>
         createKitServices(uiSettings.asScopedToClient(scope.savedObjectsClient), fieldFormats),
       getSelectionServices: async () => {

@@ -30,6 +30,7 @@
     "@kbn/ui-theme",
     "@kbn/rison",
     "@kbn/data-views-plugin",
-    "@kbn/field-formats-common"
+    "@kbn/field-formats-common",
+    "@kbn/isomer-gate-a"
   ]
 }

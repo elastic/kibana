@@ -41,6 +41,11 @@ export interface EsqlDataRequest {
   params?: Record<string, EsqlParamValue>;
   /** The date field the time range filters on. Without one, only `?_tstart` and `?_tend` apply. */
   timeField?: string;
+  /**
+   * Without a `timeField`, the time range filters on this field when every index the query reads
+   * maps it, as Kibana's ES|QL time field resolution does for `@timestamp`.
+   */
+  defaultTimeField?: string;
   /** At most this many rows, below the pipeline's own cap. */
   maxRows?: number;
   /** Optional context that overrides or extends the parent's context. */

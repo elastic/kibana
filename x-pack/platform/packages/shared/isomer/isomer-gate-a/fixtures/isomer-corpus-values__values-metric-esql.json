@@ -1,0 +1,73 @@
+{
+  "dashboard": "isomer-corpus-values",
+  "panel": "values-metric-esql",
+  "config": {
+    "type": "metric",
+    "title": "Signed average (ES|QL)",
+    "sampling": 1,
+    "ignore_global_filters": false,
+    "data_source": {"type": "esql", "query": "FROM isomer-corpus-edge-cases | STATS signed = AVG(signed)"},
+    "styling": {
+      "density": "default",
+      "primary": {
+        "position": "bottom",
+        "labels": {"alignment": "left"},
+        "value": {"alignment": "right", "sizing": "auto"}
+      }
+    },
+    "metrics": [{"column": "signed", "type": "primary", "color": {"type": "auto"}}]
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {"absolute": {"from": "2024-01-01T00:00:00.000Z", "to": "2024-01-08T00:00:00.000Z"}},
+    "ui_settings": {"dateFormat:tz": "UTC"}
+  },
+  "chart_type": "metric",
+  "tables": [
+    {
+      "type": "datatable",
+      "columns": [
+        {
+          "id": "metric_accessor_metric",
+          "name": "signed",
+          "meta": {
+            "type": "number",
+            "esType": "double",
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "sourceField": "signed",
+              "isSourceFieldFilterable": false
+            },
+            "params": {"id": "number"}
+          }
+        }
+      ],
+      "rows": [{"metric_accessor_metric": -15.571428571428571}]
+    }
+  ],
+  "size": {"width": 387.15625, "height": 128},
+  "light": {
+    "metrics": [
+      {
+        "backgroundColor": "rgb(255, 255, 255)",
+        "texts": [
+          {"text": "signed", "className": "", "color": "rgb(17, 28, 44)"},
+          {"text": "-15.571", "className": "echMetricText__value", "color": "rgb(17, 28, 44)"},
+          {"text": "-", "className": "echMetricText__part", "color": "rgb(17, 28, 44)"}
+        ]
+      }
+    ]
+  },
+  "dark": {
+    "metrics": [
+      {
+        "backgroundColor": "rgb(17, 28, 44)",
+        "texts": [
+          {"text": "signed", "className": "", "color": "rgb(227, 232, 242)"},
+          {"text": "-15.571", "className": "echMetricText__value", "color": "rgb(227, 232, 242)"},
+          {"text": "-", "className": "echMetricText__part", "color": "rgb(227, 232, 242)"}
+        ]
+      }
+    ]
+  }
+}

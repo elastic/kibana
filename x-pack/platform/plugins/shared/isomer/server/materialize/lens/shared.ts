@@ -6,11 +6,9 @@
  */
 
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
-import { parseTimeFieldFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import rison from '@kbn/rison';
 import type { MaterializeContext } from '../../../common';
-import type { MaterializeLoss } from '../nodes';
 import type { ConcreteColor } from '../kit/colors';
 import { toHexColor } from '../kit/colors';
 import type { LensApiFormat, LensSavedObjectReference } from './types';
@@ -83,26 +81,3 @@ export const lensLink = (
     label: openInLensLabel(),
   };
 };
-
-/**
- * A loss when Lens would filter a query by time and materialization can't: Lens filters a query
- * without `?_tstart`/`?_tend` on `@timestamp` when every index it reads has one, which only the
- * browser checks.
- */
-export const timeFilterLoss = (
-  query: string,
-  { timeRange }: MaterializeContext,
-  path: string
-): MaterializeLoss[] =>
-  timeRange && !parseTimeFieldFromESQLQuery(query)
-    ? [
-        {
-          path,
-          kind: 'approximated',
-          note: i18n.translate('xpack.isomer.materialize.lens.noTimeField', {
-            defaultMessage:
-              'The query does not use ?_tstart or ?_tend, so the time range does not filter it. Kibana may filter it on @timestamp.',
-          }),
-        },
-      ]
-    : [];

@@ -93,6 +93,44 @@ describe('executeEsql', () => {
     });
   });
 
+  it('filters on the default time field when every index maps it, and not otherwise', async () => {
+    const timeRangeFilter = {
+      range: {
+        '@timestamp': {
+          format: 'strict_date_optional_time',
+          gte: timeRange.from,
+          lte: timeRange.to,
+        },
+      },
+    };
+    const request = {
+      kind: 'esql' as const,
+      query: 'FROM logs-* | STATS count = COUNT(*)',
+      defaultTimeField: '@timestamp',
+    };
+
+    const mapped = setup(1);
+    const hasField = jest.fn(async () => true);
+    await executeEsql(request, { timeRange }, 0, { ...deps(mapped.search), hasField });
+    expect(hasField).toHaveBeenCalledWith('logs-*', '@timestamp');
+    expect(mapped.getRequestParams().filter.bool.filter).toContainEqual(timeRangeFilter);
+
+    const unmapped = setup(1);
+    await executeEsql(request, { timeRange }, 0, {
+      ...deps(unmapped.search),
+      hasField: async () => false,
+    });
+    expect(unmapped.getRequestParams().filter).toBeUndefined();
+
+    const explicit = setup(1);
+    const unused = jest.fn(async () => true);
+    await executeEsql({ ...request, timeField: 'event.created' }, { timeRange }, 0, {
+      ...deps(explicit.search),
+      hasField: unused,
+    });
+    expect(unused).not.toHaveBeenCalled();
+  });
+
   it('binds the time range as ?_tstart and ?_tend without a time field', async () => {
     const { search, getRequestParams } = setup(1);
 

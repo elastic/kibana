@@ -1,0 +1,211 @@
+{
+  "dashboard": "isomer-corpus-buckets",
+  "panel": "buckets-xy-multivalue-esql",
+  "config": {
+    "type": "xy",
+    "title": "Documents per tag (ES|QL, multivalue expanded)",
+    "legend": {
+      "visibility": "hidden",
+      "placement": "outside",
+      "layout": {"type": "grid", "truncate": {"max_lines": 1}},
+      "position": "right"
+    },
+    "axis": {
+      "x": {
+        "title": {"visible": true},
+        "ticks": {"visible": true},
+        "grid": {"visible": true},
+        "labels": {"orientation": "horizontal"},
+        "scale": "ordinal",
+        "domain": {"type": "fit", "rounding": false}
+      },
+      "y": {
+        "title": {"visible": true},
+        "ticks": {"visible": true},
+        "grid": {"visible": true},
+        "labels": {"orientation": "horizontal"},
+        "scale": "linear",
+        "domain": {"type": "full", "rounding": true}
+      }
+    },
+    "styling": {
+      "overlays": {"partial_buckets": {"visible": false}, "current_time_marker": {"visible": false}},
+      "bars": {"minimum_height": 1, "data_labels": {"visible": false}}
+    },
+    "layers": [
+      {
+        "sampling": 1,
+        "ignore_global_filters": false,
+        "data_source": {
+          "type": "esql",
+          "query": "FROM isomer-corpus-edge-cases | MV_EXPAND tags | STATS count = COUNT(*) BY tags | SORT count DESC"
+        },
+        "type": "bar_horizontal",
+        "y": [{"column": "count", "axis": "y", "color": {"type": "auto"}}],
+        "x": {"column": "tags"}
+      }
+    ]
+  },
+  "context": {
+    "now": "2025-01-15T12:00:00.000Z",
+    "time_range": {"absolute": {"from": "2024-01-01T00:00:00.000Z", "to": "2024-01-08T00:00:00.000Z"}},
+    "ui_settings": {"dateFormat:tz": "UTC"}
+  },
+  "chart_type": "xy",
+  "tables": [
+    {
+      "type": "datatable",
+      "columns": [
+        {
+          "id": "bar_horizontal_0_y_0",
+          "name": "count",
+          "meta": {
+            "type": "number",
+            "esType": "long",
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "sourceField": "count",
+              "isSourceFieldFilterable": false
+            },
+            "params": {"id": "number"}
+          }
+        },
+        {
+          "id": "bar_horizontal_0_x",
+          "name": "tags",
+          "meta": {
+            "type": "string",
+            "esType": "keyword",
+            "sourceParams": {
+              "indexPattern": "isomer-corpus-edge-cases",
+              "sourceField": "tags",
+              "isSourceFieldFilterable": true
+            },
+            "params": {"id": "string"}
+          }
+        }
+      ],
+      "rows": [
+        {"bar_horizontal_0_y_0": 51, "bar_horizontal_0_x": "blue"},
+        {"bar_horizontal_0_y_0": 51, "bar_horizontal_0_x": "green"},
+        {"bar_horizontal_0_y_0": 50, "bar_horizontal_0_x": "red"},
+        {"bar_horizontal_0_y_0": 50, "bar_horizontal_0_x": "cyan"},
+        {"bar_horizontal_0_y_0": 50, "bar_horizontal_0_x": "magenta"},
+        {"bar_horizontal_0_y_0": 42, "bar_horizontal_0_x": null}
+      ]
+    }
+  ],
+  "size": {"width": 766.3125, "height": 288},
+  "light": {
+    "debugState": {
+      "legend": {"items": [{"name": "count", "color": "#16c5c0"}]},
+      "axes": {
+        "x": [
+          {
+            "position": "left",
+            "title": "tags",
+            "labels": ["blue", "green", "red", "cyan", "magenta", "(null)"],
+            "values": ["blue", "green", "red", "cyan", "magenta", "(null)"],
+            "gridlines": [
+              {"x": 0, "y": 18.166666666666657},
+              {"x": 0, "y": 54.49999999999999},
+              {"x": 0, "y": 90.83333333333333},
+              {"x": 0, "y": 127.16666666666666},
+              {"x": 0, "y": 163.5},
+              {"x": 0, "y": 199.83333333333334}
+            ]
+          }
+        ],
+        "y": [
+          {
+            "position": "bottom",
+            "title": "count",
+            "labels": ["0", "10", "20", "30", "40", "50", "60"],
+            "values": [0, 10, 20, 30, 40, 50, 60],
+            "gridlines": [
+              {"x": 0, "y": 0},
+              {"x": 109.63541666666666, "y": 0},
+              {"x": 219.27083333333331, "y": 0},
+              {"x": 328.90625, "y": 0},
+              {"x": 438.54166666666663, "y": 0},
+              {"x": 548.1770833333334, "y": 0},
+              {"x": 657.8125, "y": 0}
+            ]
+          }
+        ]
+      },
+      "bars": [
+        {
+          "name": "count",
+          "color": "#16c5c0",
+          "bars": [
+            {"x": "blue", "y": 51},
+            {"x": "green", "y": 51},
+            {"x": "red", "y": 50},
+            {"x": "cyan", "y": 50},
+            {"x": "magenta", "y": 50},
+            {"x": "(null)", "y": 42}
+          ]
+        }
+      ],
+      "lines": [],
+      "areas": []
+    }
+  },
+  "dark": {
+    "debugState": {
+      "legend": {"items": [{"name": "count", "color": "#16c5c0"}]},
+      "axes": {
+        "x": [
+          {
+            "position": "left",
+            "title": "tags",
+            "labels": ["blue", "green", "red", "cyan", "magenta", "(null)"],
+            "values": ["blue", "green", "red", "cyan", "magenta", "(null)"],
+            "gridlines": [
+              {"x": 0, "y": 18.166666666666657},
+              {"x": 0, "y": 54.49999999999999},
+              {"x": 0, "y": 90.83333333333333},
+              {"x": 0, "y": 127.16666666666666},
+              {"x": 0, "y": 163.5},
+              {"x": 0, "y": 199.83333333333334}
+            ]
+          }
+        ],
+        "y": [
+          {
+            "position": "bottom",
+            "title": "count",
+            "labels": ["0", "10", "20", "30", "40", "50", "60"],
+            "values": [0, 10, 20, 30, 40, 50, 60],
+            "gridlines": [
+              {"x": 0, "y": 0},
+              {"x": 109.63541666666666, "y": 0},
+              {"x": 219.27083333333331, "y": 0},
+              {"x": 328.90625, "y": 0},
+              {"x": 438.54166666666663, "y": 0},
+              {"x": 548.1770833333334, "y": 0},
+              {"x": 657.8125, "y": 0}
+            ]
+          }
+        ]
+      },
+      "bars": [
+        {
+          "name": "count",
+          "color": "#16c5c0",
+          "bars": [
+            {"x": "blue", "y": 51},
+            {"x": "green", "y": 51},
+            {"x": "red", "y": 50},
+            {"x": "cyan", "y": 50},
+            {"x": "magenta", "y": 50},
+            {"x": "(null)", "y": 42}
+          ]
+        }
+      ],
+      "lines": [],
+      "areas": []
+    }
+  }
+}
