@@ -122,6 +122,12 @@ export const createFileAttachment = async ({
   return theCase;
 };
 
+const getBulkCreateAttachmentsUrl = (caseId: string, space: string | null): string =>
+  `${getSpaceUrlPrefix(space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`;
+
+/**
+ * Bulk creates attachments, then re-reads the case so callers get it with all its attachments.
+ */
 export const bulkCreateAttachments = async ({
   supertest,
   caseId,
@@ -135,17 +141,50 @@ export const bulkCreateAttachments = async ({
   auth?: { user: User; space: string | null };
   expectedHttpCode?: number;
 }): Promise<Case> => {
-  const { body: theCase } = await supertest
-    .post(
-      `${getSpaceUrlPrefix(auth.space)}${CASES_INTERNAL_URL}/${caseId}/attachments/_bulk_create`
-    )
+  const { body } = await supertest
+    .post(getBulkCreateAttachmentsUrl(caseId, auth.space))
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'true')
     .send(params)
     .expect(expectedHttpCode);
 
+  if (expectedHttpCode !== 200) {
+    return body;
+  }
+
+  const {
+    body: { case: theCase },
+  } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${CASES_URL}/${caseId}/resolve`)
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .expect(200);
+
   return theCase;
 };
+
+/**
+ * Calls the internal bulk create route and returns the raw response (the created attachments).
+ */
+export const bulkCreateAttachmentsRaw = async ({
+  supertest,
+  caseId,
+  params,
+  auth = { user: superUser, space: null },
+  expectedHttpCode = 200,
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  params: BulkCreateUnifiedAttachmentsRequest;
+  auth?: { user: User; space: string | null };
+  expectedHttpCode?: number;
+}): Promise<{ body: UnifiedAttachment[] }> =>
+  supertest
+    .post(getBulkCreateAttachmentsUrl(caseId, auth.space))
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send(params)
+    .expect(expectedHttpCode);
 
 export const createCaseAndBulkCreateAttachments = async ({
   supertest,
