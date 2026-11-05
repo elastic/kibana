@@ -16,8 +16,16 @@ import type {
 import { SavedObjectsErrorHelpers, SavedObjectsUtils } from '@kbn/core/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import { nodeBuilder } from '@kbn/es-query';
-import { getPageTriggerId, isPageTrigger } from '@kbn/workflows';
-import type { WorkflowYaml } from '@kbn/workflows';
+import {
+  getPageTriggerId,
+  isPageTrigger,
+  WorkflowsManagementOperationPrivileges,
+} from '@kbn/workflows';
+import type {
+  WorkflowAccessOperation,
+  WorkflowsManagementApiActions,
+  WorkflowYaml,
+} from '@kbn/workflows';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import {
   getWorkflowPageSavedObjectId,
@@ -28,6 +36,7 @@ import type { WorkflowPageAccess, WorkflowPageAttributes } from './page_saved_ob
 import { computePageSecretHash, generatePageSecret, isPageSecretValid } from './page_secret';
 import type { WorkflowPageRef } from './page_secret';
 import { WorkflowPageNotFoundError } from './workflow_page_not_found_error';
+import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
 import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
 
 /** What callers see of a page. Never holds the secret or its hash. */
@@ -66,13 +75,34 @@ export interface WorkflowPagesServiceDeps {
   canEncrypt: boolean;
   /** Internal client with the page type. Only the lifecycle and the public check use it. */
   getInternalClient: () => Promise<SavedObjectsClientContract>;
-  /** Request-scoped client with the page type, so core checks privileges and sets `updated_by`. */
+  /** Request-scoped client with the page type. Writes use it, so core sets `updated_by`. */
   getScopedClient: (request: KibanaRequest) => Promise<SavedObjectsClientContract>;
   getEncryptedClient: () => Promise<EncryptedSavedObjectsClient>;
   /** The `workflows.pages.enabled` feature flag. */
   isEnabled: () => Promise<boolean>;
   audit: WorkflowPageAuditLog;
+  /** True when the caller's role grants every API action in the space. */
+  hasPrivileges: (
+    request: KibanaRequest,
+    spaceId: string,
+    apiActions: readonly WorkflowsManagementApiActions[]
+  ) => Promise<boolean>;
+  /** Throws when the workflow is missing or its ACL denies the operation to the caller. */
+  assertWorkflowAccess: (
+    workflow: { workflowId: string; spaceId: string },
+    operation: WorkflowAccessOperation,
+    request: KibanaRequest
+  ) => Promise<void>;
 }
+
+/** The page operations, keyed like `WorkflowsManagementOperationPrivileges`. */
+export type WorkflowPageOperation = 'readPage' | 'managePage';
+
+/**
+ * The workflow ACL operation that every page operation needs. Anyone who can run the
+ * workflow can serve its page, so taking a page offline needs no workflow edit access.
+ */
+const PAGE_WORKFLOW_ACCESS_OPERATION: WorkflowAccessOperation = 'execute';
 
 const FIND_PER_PAGE = 100;
 
@@ -178,16 +208,20 @@ export class WorkflowPagesService {
   }
 
   async getPage(ref: WorkflowPageRef, request: KibanaRequest): Promise<WorkflowPageDto> {
-    return this.toDto(await this.getScopedPage(ref, request));
+    await this.authorize(ref, request, 'readPage');
+    const page = await this.getOrUndefined(await this.deps.getInternalClient(), ref);
+    if (!page) {
+      throw new WorkflowPageNotFoundError(ref.pageId, ref.workflowId);
+    }
+    return this.toDto(page);
   }
 
   /** Decrypts the secret for the Share link. The only operation that decrypts. */
   async getPageSecret(ref: WorkflowPageRef, request: KibanaRequest): Promise<string> {
     this.assertCanEncrypt();
-    // The scoped read checks the caller's privileges before the internal decrypt.
-    await this.getScopedPage(ref, request);
-    const encryptedClient = await this.deps.getEncryptedClient();
     try {
+      await this.authorize(ref, request, 'readPage');
+      const encryptedClient = await this.deps.getEncryptedClient();
       const { attributes } =
         await encryptedClient.getDecryptedAsInternalUser<WorkflowPageAttributes>(
           WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
@@ -206,6 +240,7 @@ export class WorkflowPagesService {
   async rotatePageSecret(ref: WorkflowPageRef, request: KibanaRequest): Promise<string> {
     this.assertCanEncrypt();
     try {
+      await this.authorize(ref, request, 'managePage');
       const client = await this.deps.getScopedClient(request);
       const { version } = await client.get<WorkflowPageAttributes>(
         WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
@@ -256,6 +291,27 @@ export class WorkflowPagesService {
     );
   }
 
+  /**
+   * Checks the caller before a page operation, in two steps:
+   * 1. Kibana privileges: the role grants the operation in the page's space.
+   * 2. Workflow ACL: the user can run this workflow.
+   */
+  private async authorize(
+    ref: WorkflowPageRef,
+    request: KibanaRequest,
+    operation: WorkflowPageOperation
+  ): Promise<void> {
+    const privileges = WorkflowsManagementOperationPrivileges[operation];
+    if (!(await this.deps.hasPrivileges(request, ref.spaceId, privileges))) {
+      throw new WorkflowPagePrivilegesError(operation, privileges);
+    }
+    await this.deps.assertWorkflowAccess(
+      { workflowId: ref.workflowId, spaceId: ref.spaceId },
+      PAGE_WORKFLOW_ACCESS_OPERATION,
+      request
+    );
+  }
+
   private async partialUpdate(
     ref: WorkflowPageRef,
     request: KibanaRequest,
@@ -263,6 +319,7 @@ export class WorkflowPagesService {
     audit: (error?: unknown) => void
   ): Promise<WorkflowPageDto> {
     try {
+      await this.authorize(ref, request, 'managePage');
       const client = await this.deps.getScopedClient(request);
       const id = getWorkflowPageSavedObjectId(ref);
       const namespace = namespaceOf(ref.spaceId);
@@ -361,22 +418,6 @@ export class WorkflowPagesService {
           .map(({ id, error }) => `${id} (${error?.message ?? 'unknown error'})`)
           .join(', ')}`
       );
-    }
-  }
-
-  private async getScopedPage(
-    ref: WorkflowPageRef,
-    request: KibanaRequest
-  ): Promise<SavedObject<WorkflowPageAttributes>> {
-    const client = await this.deps.getScopedClient(request);
-    try {
-      return await client.get<WorkflowPageAttributes>(
-        WORKFLOW_PAGE_SAVED_OBJECT_TYPE,
-        getWorkflowPageSavedObjectId(ref),
-        { namespace: namespaceOf(ref.spaceId) }
-      );
-    } catch (error) {
-      throw this.toPageError(error, ref);
     }
   }
 

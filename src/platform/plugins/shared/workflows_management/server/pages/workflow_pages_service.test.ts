@@ -11,10 +11,12 @@ import type { KibanaRequest, SavedObject, SavedObjectsClientContract } from '@kb
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
+import { WorkflowsManagementApiActions } from '@kbn/workflows';
 import type { WorkflowYaml } from '@kbn/workflows';
 import type { WorkflowPageAttributes } from './page_saved_object';
 import { getWorkflowPageSavedObjectId, WORKFLOW_PAGE_SAVED_OBJECT_TYPE } from './page_saved_object';
 import { WorkflowPageNotFoundError } from './workflow_page_not_found_error';
+import { WorkflowPagePrivilegesError } from './workflow_page_privileges_error';
 import type { WorkflowPageAuditLog } from './workflow_pages_service';
 import { WorkflowPagesService } from './workflow_pages_service';
 import { WorkflowPagesUnavailableError } from './workflow_pages_unavailable_error';
@@ -154,7 +156,15 @@ const noPageDefinition = {
 
 const ref = { workflowId: 'workflow-1', spaceId: 'default', pageId: 'default' };
 
-const setup = ({ canEncrypt = true, enabled = true, deniedScoped = false } = {}) => {
+const setup = ({
+  canEncrypt = true,
+  enabled = true,
+  deniedScoped = false,
+  grantedActions = [
+    WorkflowsManagementApiActions.execute,
+    WorkflowsManagementApiActions.managePages,
+  ],
+} = {}) => {
   const store = createFakeStore();
   const internalClient = store.createClient();
   const scopedClient = store.createClient('profile-alice', deniedScoped);
@@ -166,6 +176,11 @@ const setup = ({ canEncrypt = true, enabled = true, deniedScoped = false } = {})
   };
   const logger = loggingSystemMock.createLogger();
   const request: KibanaRequest = httpServerMock.createKibanaRequest();
+  const hasPrivileges = jest.fn(
+    async (_request: KibanaRequest, _spaceId: string, actions: readonly string[]) =>
+      actions.every((action) => (grantedActions as string[]).includes(action))
+  );
+  const assertWorkflowAccess = jest.fn(async () => {});
   const service = new WorkflowPagesService({
     logger,
     canEncrypt,
@@ -174,6 +189,8 @@ const setup = ({ canEncrypt = true, enabled = true, deniedScoped = false } = {})
     getEncryptedClient: async () => store.encryptedClient,
     isEnabled: async () => enabled,
     audit,
+    hasPrivileges,
+    assertWorkflowAccess,
   });
   const storedPage = (pageRef = ref) =>
     store.docs.get(store.key(getWorkflowPageSavedObjectId(pageRef), undefined));
@@ -184,7 +201,19 @@ const setup = ({ canEncrypt = true, enabled = true, deniedScoped = false } = {})
       definition,
       valid: true,
     });
-  return { service, store, internalClient, scopedClient, audit, logger, request, storedPage, sync };
+  return {
+    service,
+    store,
+    internalClient,
+    scopedClient,
+    audit,
+    logger,
+    request,
+    storedPage,
+    sync,
+    hasPrivileges,
+    assertWorkflowAccess,
+  };
 };
 
 describe('WorkflowPagesService', () => {
@@ -361,14 +390,28 @@ describe('WorkflowPagesService', () => {
   });
 
   describe('page operations', () => {
-    it('reads the link only after a scoped read, and audits it', async () => {
-      const { service, scopedClient, audit, request, storedPage, sync } = setup();
+    it('decrypts the link after the checks, and audits it', async () => {
+      const {
+        service,
+        store,
+        audit,
+        request,
+        storedPage,
+        sync,
+        hasPrivileges,
+        assertWorkflowAccess,
+      } = setup();
       await sync(pageDefinition());
 
       const secret = await service.getPageSecret(ref, request);
 
-      expect(scopedClient.get).toHaveBeenCalled();
       expect(secret).toBe(storedPage()?.attributes.secret);
+      expect(hasPrivileges.mock.invocationCallOrder[0]).toBeLessThan(
+        store.encryptedClient.getDecryptedAsInternalUser.mock.invocationCallOrder[0]
+      );
+      expect(assertWorkflowAccess.mock.invocationCallOrder[0]).toBeLessThan(
+        store.encryptedClient.getDecryptedAsInternalUser.mock.invocationCallOrder[0]
+      );
       expect(audit.logPageLinkRead).toHaveBeenCalledWith(request, ref);
     });
 
@@ -435,7 +478,7 @@ describe('WorkflowPagesService', () => {
       expect(scopedClient.update).not.toHaveBeenCalled();
     });
 
-    it('fails and audits the failure when the saved object privileges deny the caller', async () => {
+    it('fails writes and audits the failure when the saved object privileges deny the caller', async () => {
       const { service, internalClient, audit, request } = setup({ deniedScoped: true });
       await service.syncWorkflowPages({
         workflowId: ref.workflowId,
@@ -446,7 +489,6 @@ describe('WorkflowPagesService', () => {
 
       await expect(service.setPageOffline(ref, true, request)).rejects.toThrow('forbidden');
       await expect(service.rotatePageSecret(ref, request)).rejects.toThrow('forbidden');
-      await expect(service.getPageSecret(ref, request)).rejects.toThrow('forbidden');
 
       expect(internalClient.update).not.toHaveBeenCalled();
       expect(audit.logPageOfflineChanged).toHaveBeenCalledWith(
@@ -489,10 +531,107 @@ describe('WorkflowPagesService', () => {
         getEncryptedClient: async () => ctx.store.encryptedClient,
         isEnabled: async () => true,
         audit: ctx.audit,
+        hasPrivileges: ctx.hasPrivileges,
+        assertWorkflowAccess: ctx.assertWorkflowAccess,
       });
 
       await expect(noKey.getPage(ref, ctx.request)).resolves.toEqual(
         expect.objectContaining({ access: { level: 'secret_link' }, online: false })
+      );
+    });
+  });
+
+  describe('authorization', () => {
+    type Operation = (service: WorkflowPagesService, request: KibanaRequest) => Promise<unknown>;
+
+    const operations: Array<[string, WorkflowsManagementApiActions, Operation]> = [
+      ['getPage', WorkflowsManagementApiActions.execute, (s, r) => s.getPage(ref, r)],
+      ['getPageSecret', WorkflowsManagementApiActions.execute, (s, r) => s.getPageSecret(ref, r)],
+      [
+        'rotatePageSecret',
+        WorkflowsManagementApiActions.managePages,
+        (s, r) => s.rotatePageSecret(ref, r),
+      ],
+      [
+        'setPageAccess',
+        WorkflowsManagementApiActions.managePages,
+        (s, r) => s.setPageAccess(ref, { level: 'secret_link' }, r),
+      ],
+      [
+        'setPageOffline',
+        WorkflowsManagementApiActions.managePages,
+        (s, r) => s.setPageOffline(ref, true, r),
+      ],
+    ];
+
+    it.each(operations)('%s checks %s in the page space', async (_, action, run) => {
+      const { service, request, sync, hasPrivileges } = setup();
+      await sync(pageDefinition());
+
+      await run(service, request);
+
+      expect(hasPrivileges).toHaveBeenCalledWith(request, ref.spaceId, [action]);
+    });
+
+    it.each(operations)('%s fails without %s and touches no page', async (_, action, run) => {
+      const { service, request, sync, store, scopedClient } = setup({
+        grantedActions: [
+          WorkflowsManagementApiActions.execute,
+          WorkflowsManagementApiActions.managePages,
+        ].filter((granted) => granted !== action),
+      });
+      await sync(pageDefinition());
+
+      await expect(run(service, request)).rejects.toBeInstanceOf(WorkflowPagePrivilegesError);
+      expect(store.encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect(scopedClient.update).not.toHaveBeenCalled();
+    });
+
+    it.each(operations)('%s checks the workflow ACL for execute', async (_, __, run) => {
+      const { service, request, sync, assertWorkflowAccess } = setup();
+      await sync(pageDefinition());
+
+      await run(service, request);
+
+      expect(assertWorkflowAccess).toHaveBeenCalledWith(
+        { workflowId: ref.workflowId, spaceId: ref.spaceId },
+        'execute',
+        request
+      );
+    });
+
+    it.each(operations)('%s fails when the workflow ACL denies the caller', async (_, __, run) => {
+      const { service, request, sync, store, scopedClient, assertWorkflowAccess } = setup();
+      await sync(pageDefinition());
+      assertWorkflowAccess.mockRejectedValue(new Error('acl denied'));
+
+      await expect(run(service, request)).rejects.toThrow('acl denied');
+      expect(store.encryptedClient.getDecryptedAsInternalUser).not.toHaveBeenCalled();
+      expect(scopedClient.update).not.toHaveBeenCalled();
+    });
+
+    it('lets a page manager take a page offline without workflow update', async () => {
+      const { service, request, sync, hasPrivileges } = setup({
+        grantedActions: [WorkflowsManagementApiActions.managePages],
+      });
+      await sync(pageDefinition());
+
+      await expect(service.setPageOffline(ref, true, request)).resolves.toEqual(
+        expect.objectContaining({ offline: true })
+      );
+      expect(hasPrivileges.mock.calls.flatMap(([, , actions]) => actions)).not.toContain(
+        WorkflowsManagementApiActions.update
+      );
+    });
+
+    it('audits a denied rotation', async () => {
+      const { service, request, sync, audit } = setup({ grantedActions: [] });
+      await sync(pageDefinition());
+
+      await expect(service.rotatePageSecret(ref, request)).rejects.toThrow();
+      expect(audit.logPageSecretRotated).toHaveBeenCalledWith(
+        request,
+        expect.objectContaining({ error: expect.any(WorkflowPagePrivilegesError) })
       );
     });
   });

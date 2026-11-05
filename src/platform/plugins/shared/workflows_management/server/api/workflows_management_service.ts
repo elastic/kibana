@@ -36,6 +36,7 @@ import type {
   WorkflowListDto,
   WorkflowStatsDto,
 } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import type {
   ExecuteManagedWorkflowOptions,
@@ -303,6 +304,12 @@ export class WorkflowsService {
       encryptedSavedObjectsStart: pluginsStart.encryptedSavedObjects,
       logger: this.logger.get('pages'),
       audit: new WorkflowManagementAuditLog({ service: this }),
+      authz: pluginsStart.security?.authz,
+      assertWorkflowAccess: async ({ workflowId, spaceId }, operation, request) => {
+        const workflow = await this.getWorkflow(workflowId, spaceId);
+        if (!workflow) throw new WorkflowNotFoundError(workflowId);
+        await (await this.getAccessControl()).assertAccess(workflow, operation, request);
+      },
     });
 
     this.crudService = new WorkflowCrudService({

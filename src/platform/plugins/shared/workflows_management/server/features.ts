@@ -78,8 +78,7 @@ export const WorkflowsManagementFeatureConfig: KibanaFeatureConfig = {
                 defaultMessage: 'Execute',
               }),
               includeIn: 'all',
-              // Reads the page status before the link is decrypted.
-              savedObject: { all: [], read: [WORKFLOW_PAGE_SAVED_OBJECT_TYPE] },
+              savedObject: { all: [], read: [] },
               api: [WorkflowsManagementApiActions.execute],
               ui: [WorkflowsManagementUiActions.execute],
             },
