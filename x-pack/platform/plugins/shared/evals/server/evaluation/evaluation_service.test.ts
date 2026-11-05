@@ -9,6 +9,7 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { ChatCompletionTokenCount, InferenceCallbacks } from '@kbn/inference-common';
+import { createInferenceProviderError } from '@kbn/inference-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { z } from '@kbn/zod/v4';
 import { createEvaluatorRegistryMock } from '../evaluators/registry.mock';
@@ -169,7 +170,7 @@ describe('createEvaluationService', () => {
   });
 
   it("reports each evaluator's own model usage, including failed calls", async () => {
-    type Outcome = { tokens?: ChatCompletionTokenCount } | { fail: true };
+    type Outcome = { tokens?: ChatCompletionTokenCount; model?: string } | { fail: true };
     const call = (inferenceClient: unknown, outcome: Outcome) =>
       (inferenceClient as { prompt: (outcome: Outcome) => Promise<void> }).prompt(outcome);
     const careful = buildEvaluator({
@@ -178,6 +179,7 @@ describe('createEvaluationService', () => {
       evaluate: jest.fn(async ({ inferenceClient }) => {
         await call(inferenceClient, {
           tokens: { prompt: 100, completion: 20, thinking: 30, cached: 40, total: 150 },
+          model: 'judge-model',
         });
         await call(inferenceClient, {});
         return { scores: [{ name: 'careful', score: 1 }] };
@@ -196,11 +198,11 @@ describe('createEvaluationService', () => {
     getClient.mockImplementation(({ callbacks }: { callbacks: InferenceCallbacks }) => ({
       prompt: async (outcome: Outcome) => {
         if ('fail' in outcome) {
-          const error = new Error('rate limited');
+          const error = createInferenceProviderError('rate limited', { status: 429 });
           [callbacks.error].flat().forEach((handler) => handler?.({ error }));
           throw error;
         }
-        [callbacks.complete].flat().forEach((handler) => handler?.({ tokens: outcome.tokens }));
+        [callbacks.complete].flat().forEach((handler) => handler?.(outcome));
       },
     }));
 
@@ -222,9 +224,29 @@ describe('createEvaluationService', () => {
           reasoning_tokens: 30,
           llm_calls: 2,
           llm_calls_without_usage: 1,
+          calls: [
+            {
+              status: 'ok',
+              model: 'judge-model',
+              input_tokens: 100,
+              cached_input_tokens: 40,
+              output_tokens: 50,
+              reasoning_tokens: 30,
+            },
+            { status: 'ok' },
+          ],
         },
       ],
-      ['flaky', { input_tokens: 0, output_tokens: 0, llm_calls: 1, llm_calls_without_usage: 1 }],
+      [
+        'flaky',
+        {
+          input_tokens: 0,
+          output_tokens: 0,
+          llm_calls: 1,
+          llm_calls_without_usage: 1,
+          calls: [{ status: 'error', error: { code: 'providerError', message: 'rate limited' } }],
+        },
+      ],
       ['latency', undefined],
     ]);
     expect(results[1].status).toBe('error');
