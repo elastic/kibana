@@ -63,6 +63,11 @@ const withComponentRegistrants = (
         ...components,
         processor: changeRegistrants(components.processor, ref.id, update),
       };
+    case 'source':
+      return {
+        ...components,
+        source: changeRegistrants(components.source, ref.id, update),
+      };
     default:
       return components;
   }
@@ -93,6 +98,7 @@ const pruneUnusedKind = <TStats>(record: ComponentRecord<TStats>): ComponentReco
 export const pruneUnusedComponents = (components: StatsComponents): StatsComponents => ({
   destination: pruneUnusedKind(components.destination),
   processor: pruneUnusedKind(components.processor),
+  source: pruneUnusedKind(components.source),
 });
 
 /**
@@ -118,6 +124,10 @@ export const isRegistered = (
     }
     case 'processor': {
       const state = getComponentState(components.processor, ref.id);
+      return state !== undefined && hasRegistrants(state);
+    }
+    case 'source': {
+      const state = getComponentState(components.source, ref.id);
       return state !== undefined && hasRegistrants(state);
     }
     default:

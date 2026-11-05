@@ -9,6 +9,7 @@ import type { StreamsUnit } from '@kbn/streams-schema';
 import type {
   DestinationStatsView,
   ProcessorStatsView,
+  SourceStatsView,
   StatsStatus,
   StatsWindow,
 } from '../../../services/unit_stats_client/types';
@@ -41,6 +42,7 @@ export type ComponentRecord<TStats> = Record<string, StatsComponentState<TStats>
 export interface StatsComponents {
   destination: ComponentRecord<DestinationStatsView>;
   processor: ComponentRecord<ProcessorStatsView>;
+  source: ComponentRecord<SourceStatsView>;
 }
 
 /** One request, for the window that was resolved at the flush. The stats client splits a large one. */

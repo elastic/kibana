@@ -15,6 +15,7 @@ import {
   useDestinationStats,
   useProcessorStats,
   useSlotStats,
+  useSourceStats,
   useStatsRefresh,
   useStatsUnitPersisted,
 } from './use_stats_manager';
@@ -118,6 +119,57 @@ describe('useProcessorStats', () => {
 
     expect(result.current?.status).toBe('ready');
     expect(result.current?.stats?.instances).toHaveLength(3);
+  });
+});
+
+describe('useSourceStats', () => {
+  it('is undefined until the first result arrives, then the accepted rate of the source', async () => {
+    const { result } = renderHook(() => useSourceStats('otlp-input'), { wrapper });
+
+    expect(result.current).toBeUndefined();
+
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+
+    expect(result.current).toMatchObject({ status: 'ready', stats: { acceptedRate: 3700 } });
+  });
+
+  it('asks the stats route of the unit for the source, and lets the request finish', async () => {
+    renderHook(() => useSourceStats('otlp-input'), { wrapper });
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch).toHaveBeenCalledWith('POST /internal/streams/unit/{id}/_stats', {
+      params: {
+        path: { id: UNIT_ID },
+        body: { components: [{ kind: 'source', id: 'otlp-input' }] },
+      },
+      signal: expect.any(AbortSignal),
+    });
+    expect(signalOfCall(0).aborted).toBe(false);
+  });
+
+  it('registers nothing and returns undefined without an id', async () => {
+    const { result } = renderHook(() => useSourceStats(undefined), { wrapper });
+    await advance(STATS_BATCH_DEBOUNCE_MS * 5);
+
+    expect(result.current).toBeUndefined();
+    expect(mockFetch).not.toHaveBeenCalled();
+  });
+
+  it('requests a source and a destination in one call', async () => {
+    renderHook(
+      () => ({ source: useSourceStats('otlp-input'), es: useDestinationStats('es-prod') }),
+      {
+        wrapper,
+      }
+    );
+    await advance(STATS_BATCH_DEBOUNCE_MS);
+
+    expect(mockFetch).toHaveBeenCalledTimes(1);
+    expect(mockFetch.mock.calls[0][1].params.body.components).toEqual([
+      { kind: 'destination', id: 'es-prod' },
+      { kind: 'source', id: 'otlp-input' },
+    ]);
   });
 });
 

@@ -18,7 +18,7 @@ const WINDOW: StatsWindow = {
   end: '2026-10-27T12:15:00.000Z',
 };
 
-const EMPTY: StatsComponents = { destination: {}, processor: {} };
+const EMPTY: StatsComponents = { destination: {}, processor: {}, source: {} };
 
 const FRESHNESS_MS = 30_000;
 const NOW = 100_000;
@@ -32,6 +32,7 @@ const plan = (components: StatsComponents, options: DueOptions = DUE_OPTIONS) =>
 
 const destination = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'destination', id });
 const processor = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'processor', id });
+const source = (id: string): StreamsUnit.StatsComponentRef => ({ kind: 'source', id });
 
 const READY_ENTRY: StatsEntry<DestinationStatsView> = {
   status: 'ready',
@@ -78,6 +79,17 @@ describe('planBatches', () => {
   it('puts destinations and processors in the same batch', () => {
     expect(plan(registerAll([processor('shout'), destination('es-prod')]))).toEqual([
       { window: WINDOW, components: [destination('es-prod'), processor('shout')] },
+    ]);
+  });
+
+  it('puts a source in the same batch as the other kinds', () => {
+    expect(
+      plan(registerAll([source('otlp-input'), processor('shout'), destination('es-prod')]))
+    ).toEqual([
+      {
+        window: WINDOW,
+        components: [destination('es-prod'), processor('shout'), source('otlp-input')],
+      },
     ]);
   });
 
@@ -239,5 +251,18 @@ describe('isBatchWanted', () => {
 
   it('is not wanted when only other components are shown', () => {
     expect(isBatchWanted(registerAll([destination('other')]), batch)).toBe(false);
+  });
+
+  it('is wanted while a source of the request is shown, and not once it is not', () => {
+    const sourceBatch = { components: [source('otlp-input')] };
+    const shown = registerAll([source('otlp-input')]);
+
+    expect(isBatchWanted(shown, sourceBatch)).toBe(true);
+    expect(
+      isBatchWanted(
+        unregisterComponent(shown, source('otlp-input'), 'registrant-source-otlp-input'),
+        sourceBatch
+      )
+    ).toBe(false);
   });
 });
