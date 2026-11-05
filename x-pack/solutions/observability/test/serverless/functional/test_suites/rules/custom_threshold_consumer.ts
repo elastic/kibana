@@ -94,8 +94,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     });
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/275253
-  describe.skip('Custom threshold rule - consumers', function () {
+  describe('Custom threshold rule - consumers', function () {
     const ruleIdList: string[] = [];
 
     before(async () => {
