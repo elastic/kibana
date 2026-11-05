@@ -18,7 +18,7 @@ interface SharedAdvancedSettingsProps {
   hasDeployedServices: boolean;
   /** Whether an ECF stack is already launched, which only takes a new namespace once updated. */
   hasLaunchedEcfStack?: boolean;
-  /** Whether a selected service does not follow the namespace (the OTel and CrowdStrike stacks). */
+  /** Whether a selected service does not follow the namespace (the OTel stack). */
   hasServicesIgnoringNamespace?: boolean;
 }
 
@@ -47,7 +47,7 @@ export function SharedAdvancedSettings({
     hasServicesIgnoringNamespace &&
       i18n.translate('xpack.ingestHub.integrationSettings.advanced.namespace.ignoredNote', {
         defaultMessage:
-          'Services deployed with the OpenTelemetry or CrowdStrike CloudFormation templates do not use this setting.',
+          'Services deployed with the OpenTelemetry CloudFormation template do not use this setting.',
       }),
   ].filter(Boolean);
 

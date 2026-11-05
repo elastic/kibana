@@ -170,7 +170,7 @@ describe('SharedSettingsSection', () => {
       );
     });
 
-    it('notes that the OpenTelemetry and CrowdStrike templates do not use the namespace', () => {
+    it('notes that the OpenTelemetry template does not use the namespace', () => {
       renderSection({ hasServicesIgnoringNamespace: true });
 
       fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
