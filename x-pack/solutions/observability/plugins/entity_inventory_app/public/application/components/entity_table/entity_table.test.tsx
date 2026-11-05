@@ -303,4 +303,97 @@ describe('EntityTable', () => {
 
     expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
   });
+  describe('pagination', () => {
+    // Newest first, as the route returns them: host-23 first and host-00 last.
+    const hostNames = (count: number) =>
+      Array.from(
+        { length: count },
+        (_, index) => `host-${String(count - 1 - index).padStart(2, '0')}`
+      );
+    const listOf = (count: number) =>
+      smallList(hostNames(count).map((name) => hostRow({ 'host.name': name })));
+
+    const goToPage = (pageNumber: number) =>
+      fireEvent.click(screen.getByTestId(`pagination-button-${pageNumber - 1}`));
+
+    const sortNameAscending = () => {
+      const sortAscending = within(openColumnActions(NAME_COLUMN_ID))
+        .getAllByRole('button')
+        .find((button) => button.textContent?.startsWith('Sort'));
+      if (!sortAscending) {
+        throw new Error('No sort action');
+      }
+      fireEvent.click(sortAscending);
+    };
+
+    // The grid numbers cells by their position in all rows, so page two starts at row 10.
+    const expectFirstPage = (pageSize = 10) => {
+      expect(getCell(0, NAME_COLUMN_ID)).toBeInTheDocument();
+      expect(
+        document.querySelector(`[data-gridcell-row-index="${pageSize}"]`)
+      ).not.toBeInTheDocument();
+    };
+
+    it('shows the next rows when a page is picked', async () => {
+      renderTable(listOf(24));
+      expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('host-23');
+      expect(getCell(9, NAME_COLUMN_ID)).toHaveTextContent('host-14');
+
+      goToPage(2);
+
+      await waitFor(() => expect(getCell(10, NAME_COLUMN_ID)).toHaveTextContent('host-13'));
+      expect(getCell(19, NAME_COLUMN_ID)).toHaveTextContent('host-04');
+      goToPage(3);
+      await waitFor(() => expect(getCell(20, NAME_COLUMN_ID)).toHaveTextContent('host-03'));
+      expect(getCell(23, NAME_COLUMN_ID)).toHaveTextContent('host-00');
+    });
+
+    it('goes back to the first page when the sort changes', async () => {
+      renderTable(listOf(24));
+      goToPage(2);
+      await waitFor(() => expect(getCell(10, NAME_COLUMN_ID)).toHaveTextContent('host-13'));
+
+      sortNameAscending();
+
+      await waitFor(() => expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('host-00'));
+      expectFirstPage();
+    });
+
+    it('goes back to the first page when the page size changes', async () => {
+      renderTable(listOf(60));
+      goToPage(2);
+      await waitFor(() => expect(getCell(10, NAME_COLUMN_ID)).toHaveTextContent('host-49'));
+
+      fireEvent.click(screen.getByRole('button', { name: 'Rows per page: 10' }));
+      fireEvent.click(await screen.findByTestId('tablePagination-25-rows'));
+
+      await waitFor(() => expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('host-59'));
+      expect(getCell(24, NAME_COLUMN_ID)).toHaveTextContent('host-35');
+      expectFirstPage(25);
+    });
+
+    it('goes back to the first page when the rows are replaced', async () => {
+      const { rerender } = renderTable(listOf(24));
+      goToPage(2);
+      await waitFor(() => expect(getCell(10, NAME_COLUMN_ID)).toHaveTextContent('host-13'));
+
+      rerender(
+        <I18nProvider>
+          <KibanaContextProvider services={createAppServicesMock()}>
+            <StatefulEntityTable
+              entityType={HOST_TYPE_FIXTURE}
+              list={smallList(
+                ['fresh-b', 'fresh-a', ...hostNames(22)].map((name) =>
+                  hostRow({ 'host.name': name })
+                )
+              )}
+            />
+          </KibanaContextProvider>
+        </I18nProvider>
+      );
+
+      await waitFor(() => expect(getCell(0, NAME_COLUMN_ID)).toHaveTextContent('fresh-b'));
+      expectFirstPage();
+    });
+  });
 });
