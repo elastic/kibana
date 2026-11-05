@@ -15,12 +15,22 @@ import type {
 } from '@kbn/discover-utils';
 import {
   STATUS_FILTER_LABEL,
+  SEVERITY_FILTER_LABEL,
   RULE_FILTER_LABEL,
 } from '@kbn/alerting-v2-episodes-ui/components/filters/translations';
 import {
+  EPISODES_LIST_COLUMN_ALERT_TAGS,
+  EPISODES_LIST_COLUMN_ASSIGNEES,
+} from '@kbn/alerting-v2-episodes-ui/components/translations';
+import {
   EpisodeStatusCell,
+  EpisodeSeverityCell,
   EpisodeRuleCell,
+  EpisodeTagsCell,
 } from '@kbn/alerting-v2-episodes-ui/components/episodes_table_cell_renderers';
+import { AlertEpisodeAssigneeCell } from '@kbn/alerting-v2-episodes-ui/components/assignee_cell';
+import { buildAlertEventsTimeRangeFilter } from '@kbn/alerting-v2-episodes-ui/utils/build_alert_events_time_range_filter';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { AlertEpisodeOverviewListSection } from '@kbn/alerting-v2-episodes-ui/components/details/overview_list_section';
 import { AlertEpisodesRelatedSection } from '@kbn/alerting-v2-episodes-ui/components/details/related_section';
 import { AlertEpisodeMetadataSection } from '@kbn/alerting-v2-episodes-ui/components/details/metadata_section';
@@ -95,6 +105,31 @@ const EpisodeActionControl: React.FC<EpisodeActionControlProps> = ({
   );
 };
 
+interface AssigneeCellRendererProps {
+  row: DataTableRecord;
+  queryClient: QueryClient;
+}
+
+const AssigneeCellRenderer: React.FC<AssigneeCellRendererProps> = ({ row, queryClient }) => {
+  const services = useAlertingV2Services();
+  if (!services) return null;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <AlertEpisodeAssigneeCell
+        assigneeUid={row.flattened.last_assignee_uid as string | undefined}
+        userProfile={services.userProfile}
+      />
+    </QueryClientProvider>
+  );
+};
+
+// ES|QL returns a single value of a multi-value field as a plain string.
+const withTagsArray = (row: DataTableRecord): DataTableRecord => {
+  const { last_tags: tags } = row.flattened;
+  if (tags == null || Array.isArray(tags)) return row;
+  return { ...row, flattened: { ...row.flattened, last_tags: [tags] } };
+};
+
 export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
   const queryClient = new QueryClient();
   let resolvedEpisodeActions: EpisodeAction[] | undefined;
@@ -122,11 +157,26 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
     profile: {
       getDefaultAppState: () => () => ({
         columns: [
+          { name: 'episode.status', width: 110 },
+          { name: 'severity', width: 100 },
           { name: '@timestamp', width: 200 },
-          { name: 'episode.status', width: 120 },
           { name: 'rule.id', width: 250 },
+          { name: 'duration', width: 110 },
+          { name: 'last_tags' },
+          { name: 'last_assignee_uid', width: 120 },
         ],
       }),
+
+      // The view aggregates action documents of any age, so the default range filter on
+      // `@timestamp` would drop them. The page's filter bounds the alert events only.
+      getEsqlSearchContext: (prev) => (params) => {
+        const { filters = [] } = prev(params);
+        const timeRangeFilter = buildAlertEventsTimeRangeFilter(params.timeRange);
+        return {
+          timeField: undefined,
+          filters: timeRangeFilter ? [...filters, timeRangeFilter] : filters,
+        };
+      },
 
       getColumnsConfiguration: (prev: any) => () => ({
         ...(prev ? prev() : {}),
@@ -139,10 +189,28 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
           displayAsText: STATUS_FILTER_LABEL,
         }),
 
+        severity: ({ column }: any) => ({
+          ...column,
+          display: undefined,
+          displayAsText: SEVERITY_FILTER_LABEL,
+        }),
+
         'rule.id': ({ column }: any) => ({
           ...column,
           display: undefined,
           displayAsText: RULE_FILTER_LABEL,
+        }),
+
+        last_tags: ({ column }: any) => ({
+          ...column,
+          display: undefined,
+          displayAsText: EPISODES_LIST_COLUMN_ALERT_TAGS,
+        }),
+
+        last_assignee_uid: ({ column }: any) => ({
+          ...column,
+          display: undefined,
+          displayAsText: EPISODES_LIST_COLUMN_ASSIGNEES,
         }),
       }),
 
@@ -152,8 +220,16 @@ export const createDiscoverProfile = (): AlertingV2DiscoverProfileProvider => {
 
           'episode.status': (props: any) => <EpisodeStatusCell {...props} />,
 
+          severity: (props: any) => <EpisodeSeverityCell {...props} />,
+
           'rule.id': (props: any) => (
             <EpisodeRuleCell {...props} rulesCache={{}} isLoadingRules={false} rowHeight={0} />
+          ),
+
+          last_tags: (props: any) => <EpisodeTagsCell {...props} row={withTagsArray(props.row)} />,
+
+          last_assignee_uid: (props: any) => (
+            <AssigneeCellRenderer row={props.row} queryClient={queryClient} />
           ),
         };
       },

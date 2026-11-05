@@ -6,6 +6,7 @@
  */
 
 import type { ComponentType } from 'react';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
 import type { AlertingV2PageProps } from './application/composable_pages';
 import type { CreateAlertingV2HostApp } from '../common/locators';
@@ -14,12 +15,24 @@ export type { CreateRuleOptionsFlyoutLegacyItem } from './create_rule_options_fl
 export type { AlertingV2PageProps } from './application/composable_pages';
 export type { PrivilegeCheck } from './application/privilege_check_context';
 
+// Structural stand-in for Discover's `EsqlSearchContextExtension`.
+interface AlertingV2EsqlSearchContext {
+  timeField?: string;
+  filters?: Filter[];
+}
+
+type GetAlertingV2EsqlSearchContext = (
+  params: AlertingV2EsqlSearchContext & { timeRange: TimeRange }
+) => AlertingV2EsqlSearchContext;
+
 // Structural stand-in for Discover's DataSourceProfileProvider.
 // Cannot use the Discover type directly because Discover already depends on alerting_v2
 // (optional plugin dep), creating a circular reference.
 export interface AlertingV2DiscoverProfileProvider {
   profileId: string;
   profile: {
+    getEsqlSearchContext?: (prev: GetAlertingV2EsqlSearchContext) => GetAlertingV2EsqlSearchContext;
+
     getCellRenderers?: (...args: any[]) => (...args: any[]) => Record<string, ComponentType<any>>;
 
     getDocViewer?: (...args: any[]) => (...args: any[]) => any;

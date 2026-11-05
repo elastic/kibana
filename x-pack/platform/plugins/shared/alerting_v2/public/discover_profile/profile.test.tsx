@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { Filter } from '@kbn/es-query';
 import { createDiscoverProfile } from './profile';
 
 const mockCreateEpisodeActions = jest.fn().mockReturnValue([
@@ -98,10 +99,61 @@ describe('createDiscoverProfile', () => {
       const provider = createDiscoverProfile();
       const appState = provider.profile.getDefaultAppState!()();
       expect(appState.columns.map((c) => c.name)).toEqual([
-        '@timestamp',
         'episode.status',
+        'severity',
+        '@timestamp',
         'rule.id',
+        'duration',
+        'last_tags',
+        'last_assignee_uid',
       ]);
+    });
+  });
+
+  describe('getEsqlSearchContext', () => {
+    const mockTimeRange = { from: '2026-11-04T10:00:00.000Z', to: '2026-11-05T10:00:00.000Z' };
+    const mockPrevFilter: Filter = { meta: {}, query: { match_all: {} } };
+    const mockPrev = jest.fn(() => ({ timeField: '@timestamp', filters: [mockPrevFilter] }));
+
+    it('drops the default time field', () => {
+      const provider = createDiscoverProfile();
+
+      const context = provider.profile.getEsqlSearchContext!(mockPrev)({
+        timeRange: mockTimeRange,
+        timeField: '@timestamp',
+      });
+
+      expect(context.timeField).toBeUndefined();
+    });
+
+    it('adds a time range filter that bounds the alert events only', () => {
+      const provider = createDiscoverProfile();
+
+      const { filters } = provider.profile.getEsqlSearchContext!(mockPrev)({
+        timeRange: mockTimeRange,
+        timeField: '@timestamp',
+      });
+
+      expect(filters).toHaveLength(2);
+      expect(filters?.[0]).toBe(mockPrevFilter);
+      expect(filters?.[1].query).toEqual({
+        bool: {
+          should: [
+            {
+              bool: {
+                filter: [
+                  { term: { type: 'alert' } },
+                  expect.objectContaining({
+                    range: expect.objectContaining({ '@timestamp': expect.anything() }),
+                  }),
+                ],
+              },
+            },
+            { exists: { field: 'action_type' } },
+          ],
+          minimum_should_match: 1,
+        },
+      });
     });
   });
 
@@ -112,7 +164,10 @@ describe('createDiscoverProfile', () => {
       const renderers = provider.profile.getCellRenderers!(() => ({}), {} as any)({} as any);
 
       expect(renderers['episode.status']).toBeDefined();
+      expect(renderers.severity).toBeDefined();
       expect(renderers['rule.id']).toBeDefined();
+      expect(renderers.last_tags).toBeDefined();
+      expect(renderers.last_assignee_uid).toBeDefined();
     });
 
     it('spreads previous renderers alongside episode renderers', () => {
