@@ -172,7 +172,13 @@ export class TelemetryConfigWatcher {
 
         try {
           const updateResult = await pRetry(
-            () => this.policyService.bulkUpdate(soClientForSpace, this.esClient, spaceUpdates),
+            () => {
+              if (this.isStopped) {
+                throw new pRetry.AbortError(STOPPED_MESSAGE);
+              }
+
+              return this.policyService.bulkUpdate(soClientForSpace, this.esClient, spaceUpdates);
+            },
             {
               onFailedAttempt: (error) =>
                 this.logger.debug(
@@ -211,6 +217,11 @@ export class TelemetryConfigWatcher {
           failed += failedPolicies.length;
           conflicts += conflictedPolicies.length;
         } catch (e) {
+          if (this.isStopped) {
+            this.logger.debug(STOPPED_MESSAGE);
+            return;
+          }
+
           this.logger.warn(
             `Unable to update telemetry config state to ${isTelemetryEnabled} in space [${spaceId}] for policies: ${spaceUpdates.map(
               (update) => update.id

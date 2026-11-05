@@ -150,38 +150,91 @@ describe('Policy-Changing license watcher', () => {
     ).not.toEqual(CustomMessage);
   });
 
-  it('abandons an in-flight check without using endpoint services once stopped', async () => {
-    const logger = endpointServiceMock.createLogger('PolicyWatcher');
-    const firstPage = Promise.withResolvers<ListResult<PackagePolicy>>();
-    packagePolicySvcMock.list.mockReturnValueOnce(firstPage.promise);
+  describe('when stopped', () => {
+    const actualPRetry = jest.requireActual<typeof pRetry>('p-retry');
 
-    const pw = new PolicyWatcher(endpointServiceMock);
-    const watching = pw.watch(Basic);
+    /** Mirrors plugin shutdown: the watcher stops, then `EndpointAppContextService.stop()` drops its start dependencies */
+    const shutdown = (pw: PolicyWatcher) => {
+      pw.stop();
+      Object.defineProperty(endpointServiceMock, 'savedObjects', {
+        get: () => {
+          throw new EndpointAppContentServicesNotStartedError();
+        },
+      });
+    };
 
-    // Plugin shutdown: watcher stops, then `EndpointAppContextService.stop()` drops its start dependencies
-    pw.stop();
-    Object.defineProperty(endpointServiceMock, 'savedObjects', {
-      get: () => {
-        throw new EndpointAppContentServicesNotStartedError();
-      },
+    const policyWithPlatinumFeatures = () =>
+      MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+        pc.windows.popup.malware.message = 'Custom string';
+        return pc;
+      });
+
+    beforeEach(() => {
+      // Retry without backoff so retries attempted after `stop()` are observable without real delays
+      pRetryMock.mockImplementation((fn, options) =>
+        actualPRetry(fn, { ...options, minTimeout: 0, maxTimeout: 0 })
+      );
     });
 
-    firstPage.resolve({
-      items: [
-        MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
-          pc.windows.popup.malware.message = 'Custom string';
-          return pc;
-        }),
-      ],
-      total: 150,
-      page: 1,
-      perPage: 100,
+    afterEach(() => {
+      pRetryMock.mockImplementation((fn, options) => actualPRetry(fn, options));
     });
-    await watching;
 
-    expect(packagePolicySvcMock.list).toHaveBeenCalledTimes(1);
-    expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
-    expect(logger.warn).not.toHaveBeenCalled();
+    it('abandons an in-flight check without using endpoint services', async () => {
+      const logger = endpointServiceMock.createLogger('PolicyWatcher');
+      const firstPage = Promise.withResolvers<ListResult<PackagePolicy>>();
+      packagePolicySvcMock.list.mockReturnValueOnce(firstPage.promise);
+
+      const pw = new PolicyWatcher(endpointServiceMock);
+      const watching = pw.watch(Basic);
+      shutdown(pw);
+
+      firstPage.resolve({
+        items: [policyWithPlatinumFeatures()],
+        total: 150,
+        page: 1,
+        perPage: 100,
+      });
+      await watching;
+
+      expect(packagePolicySvcMock.list).toHaveBeenCalledTimes(1);
+      expect(packagePolicySvcMock.update).not.toHaveBeenCalled();
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not retry fetching policies', async () => {
+      const logger = endpointServiceMock.createLogger('PolicyWatcher');
+      const pw = new PolicyWatcher(endpointServiceMock);
+      packagePolicySvcMock.list.mockImplementationOnce(async () => {
+        shutdown(pw);
+        throw new Error('connection reset');
+      });
+
+      await pw.watch(Basic);
+
+      expect(packagePolicySvcMock.list).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
+
+    it('does not retry updating a policy', async () => {
+      const logger = endpointServiceMock.createLogger('PolicyWatcher');
+      const pw = new PolicyWatcher(endpointServiceMock);
+      packagePolicySvcMock.list.mockResolvedValueOnce({
+        items: [policyWithPlatinumFeatures()],
+        total: 1,
+        page: 1,
+        perPage: 100,
+      });
+      packagePolicySvcMock.update.mockImplementationOnce(async () => {
+        shutdown(pw);
+        throw new Error('connection reset');
+      });
+
+      await pw.watch(Basic);
+
+      expect(packagePolicySvcMock.update).toHaveBeenCalledTimes(1);
+      expect(logger.warn).not.toHaveBeenCalled();
+    });
   });
 
   describe('Enterprise -> Platinum license downgrade', () => {

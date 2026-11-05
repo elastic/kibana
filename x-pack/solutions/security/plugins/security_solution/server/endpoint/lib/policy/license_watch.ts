@@ -136,6 +136,10 @@ export class PolicyWatcher {
 
             await pRetry(
               async () => {
+                if (this.isStopped) {
+                  throw new pRetry.AbortError(STOPPED_MESSAGE);
+                }
+
                 await fleetServices.packagePolicy.update(
                   soClientForPolicyUpdate,
                   esClient,
@@ -163,6 +167,11 @@ export class PolicyWatcher {
             totalUpdates++;
           }
         } catch (error) {
+          if (this.isStopped) {
+            this.logger.debug(STOPPED_MESSAGE);
+            return;
+          }
+
           this.logger.warn(
             `Failure while attempting to verify Endpoint Policy features for policy [${policy.id}]`
           );

@@ -192,6 +192,21 @@ describe('Telemetry config watcher', () => {
       expect(mockedLogger.warn).not.toHaveBeenCalled();
       expect(mockedLogger.error).not.toHaveBeenCalled();
     });
+
+    it('does not retry bulk updating package policies', async () => {
+      preparePackagePolicyMock({ isGlobalTelemetryEnabled: true });
+      packagePolicyServiceMock.bulkUpdate.mockImplementationOnce(async () => {
+        telemetryWatcher.stop();
+        stopEndpointAppContextService();
+        throw new Error('connection reset');
+      });
+
+      await telemetryWatcher.watch(false);
+
+      expect(packagePolicyServiceMock.bulkUpdate).toHaveBeenCalledTimes(1);
+      expect(mockedLogger.warn).not.toHaveBeenCalled();
+      expect(mockedLogger.error).not.toHaveBeenCalled();
+    });
   });
 
   describe('error handling', () => {
