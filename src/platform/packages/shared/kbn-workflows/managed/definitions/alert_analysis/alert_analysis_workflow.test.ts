@@ -953,7 +953,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     // be reached before Gate D, and the Tier 3/4 false_positive default must count Gate B
     // evidence; the entity/rule-name-only guard stays.
     expect(message).toContain(
-      "and share this alert's host or user (name, or ID when no name is shown; host=/user= on each related line), form a coherent attack sequence → true_positive, even if this alert's own activity looks routine; do not fall through to Gate D. Entity correlation or scary rule names without suspicious command lines do not satisfy this gate."
+      "and share this alert's host or user (name, or ID when no name is shown; an id match counts even when this alert shows only IDs; host=/user= on each related line), form a coherent attack sequence → true_positive, even if this alert's own activity looks routine; do not fall through to Gate D. Entity correlation or scary rule names without suspicious command lines do not satisfy this gate."
     );
     expect(message).toContain(
       'A shared generic account (root, SYSTEM, administrator) alone does not count.'
@@ -1257,6 +1257,14 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
                   host_id: 'hid-1',
                   user_id: 'uid-1',
                 },
+                {
+                  ...base,
+                  rule_name: 'BothNameAndId',
+                  host_name: 'jdoe-mbp',
+                  host_id: 'H42',
+                  user_name: 'jdoe',
+                  user_id: 'U4242',
+                },
                 { ...base, rule_name: 'Neither' },
               ],
             },
@@ -1267,7 +1275,8 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
 
     expect(output).toBe(
       'rule=`Neither` [high] at T; ' +
-        'rule=`NamePreferred` [high] at T host=`mac-1` user=`uid-1`; ' +
+        'rule=`BothNameAndId` [high] at T host=`jdoe-mbp` (id: `H42`) user=`jdoe` (id: `U4242`); ' +
+        'rule=`NamePreferred` [high] at T host=`mac-1` (id: `hid-1`) user=`uid-1`; ' +
         'rule=`IdOnly` [high] at T host=`hid-1` user=`uid-1`'
     );
   });
@@ -1400,18 +1409,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
     const messageStep = findStepByName(workflow.steps, 'build_agent_message') as {
       with: { message: string };
     };
-    expect(messageStep.with.message).toContain('related.summary | truncate: 4540');
+    expect(messageStep.with.message).toContain('related.summary | truncate: 5340');
     expect(messageStep.with.message).not.toContain('related.summary | escape');
     expect(messageStep.with.message).toContain('correlated by shared entities');
     expect(messageStep.with.message).not.toContain('sharing strong entity identifiers');
   });
 
   it.each([
-    ['plain', 'R', 'N', 'C', 'P', 'H'],
-    ['escape-heavy', '<&"\'', '<&"\'', '<&"\'', '<&"\'', '<&"\''],
+    ['plain', 'R', 'N', 'C', 'P', 'H', false],
+    ['escape-heavy', '<&"\'', '<&"\'', '<&"\'', '<&"\'', '<&"\'', false],
+    ['id-only', 'R', 'N', 'C', 'P', 'H', true],
   ])(
     'renders 8 whole related lines inside the cap in the final prompt for %s worst-case values',
-    (_name, rule, name, cmd, parentCmd, entity) => {
+    (_name, rule, name, cmd, parentCmd, entity, blankNames) => {
       const summaryStep = findStepByName(workflow.steps, 'build_related_summary') as {
         with: { related_summary: { summary: string } };
       };
@@ -1423,9 +1433,9 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
         rule_name: rule.repeat(500),
         severity: rule.repeat(50),
         timestamp: rule.repeat(50),
-        host_name: entity.repeat(500),
+        host_name: blankNames ? '' : entity.repeat(500),
         host_id: entity.repeat(500),
-        user_name: entity.repeat(500),
+        user_name: blankNames ? '' : entity.repeat(500),
         user_id: entity.repeat(500),
         process_name: name.repeat(500),
         process_command_line: cmd.repeat(2000),
@@ -1454,7 +1464,7 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       expect(shown).not.toMatch(/[<>"']/);
       for (const entry of entries) {
         expect(entry).toMatch(
-          /^rule=`[^`]*` \[[^\]]*\] at [^`]* host=`[^`]*` user=`[^`]*` process=`[^`]*` cmd=`[^`]*` parent_cmd=`[^`]*`$/
+          /^rule=`[^`]*` \[[^\]]*\] at [^`]* host=`[^`]*`( \(id: `[^`]*`\))? user=`[^`]*`( \(id: `[^`]*`\))? process=`[^`]*` cmd=`[^`]*` parent_cmd=`[^`]*`$/
         );
       }
     }
