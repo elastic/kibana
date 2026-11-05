@@ -11,7 +11,6 @@ import type {
 } from '@kbn/agent-builder-common/chat/conversation';
 import {
   isToolCallStep,
-  isTodosStep,
   isRelevantSkillsStep,
   isPreExecutionWorkflowStep,
   isSubstitutionStep,
@@ -38,7 +37,6 @@ export const groupSteps = (steps: ConversationRoundStep[]): GroupedStep[] => {
     if (isToolCallStep(step)) {
       toolBuffer.push(step);
     } else if (
-      !isTodosStep(step) &&
       !isRelevantSkillsStep(step) &&
       !isPreExecutionWorkflowStep(step) &&
       !isSubstitutionStep(step) &&

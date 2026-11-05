@@ -31,12 +31,10 @@ const YaraEntrySchema = schema.object({
   field: schema.literal(CUSTOM_YARA_SIGNATURE_FIELD_TYPE),
   operator: schema.literal('included'),
   type: schema.literal('match'),
-  value: schema.string({
+  value: schema.unboundedString({
+    reason:
+      'Size is enforced in bytes by validateYaraRuleContentByteLength; a character-based maxLength would return a misleading error message',
     minLength: 1,
-    // maxLength is only set for auditing purposes, the actual validation is done by validateYaraRuleContentByteLength.
-    // We set it to Infinity in order to not mix error messages between the two validatiors: this way we always show the
-    // correct error message mentioning `bytes` instead of `characters` coming from validateYaraRuleContentByteLength.
-    maxLength: Number.POSITIVE_INFINITY,
     validate: validateYaraRuleContentByteLength,
   }),
 });

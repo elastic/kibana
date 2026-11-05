@@ -150,6 +150,82 @@ describe('Search exceptions', () => {
     expect(onSearchMock).toHaveBeenCalledWith('', 'global', false);
   });
 
+  describe('enabled status filter', () => {
+    let onEnabledStatusChangeMock: jest.Mock;
+
+    beforeEach(() => {
+      onEnabledStatusChangeMock = jest.fn();
+    });
+
+    it('should not show the filter without onEnabledStatusChange', () => {
+      const element = render();
+
+      expect(element.queryByTestId('enabledStatusFilter')).toBeNull();
+    });
+
+    it('should show Enabled and Disabled buttons, none selected by default', () => {
+      const element = render({ onEnabledStatusChange: onEnabledStatusChangeMock });
+
+      expect(element.getByTestId('enabledStatusFilter-enabled')).toHaveTextContent('Enabled');
+      expect(element.getByTestId('enabledStatusFilter-enabled')).toHaveAttribute(
+        'aria-pressed',
+        'false'
+      );
+      expect(element.getByTestId('enabledStatusFilter-disabled')).toHaveTextContent('Disabled');
+      expect(element.getByTestId('enabledStatusFilter-disabled')).toHaveAttribute(
+        'aria-pressed',
+        'false'
+      );
+    });
+
+    it('should show the selected status', () => {
+      const element = render({
+        enabledStatus: 'disabled',
+        onEnabledStatusChange: onEnabledStatusChangeMock,
+      });
+
+      expect(element.getByTestId('enabledStatusFilter-enabled')).toHaveAttribute(
+        'aria-pressed',
+        'false'
+      );
+      expect(element.getByTestId('enabledStatusFilter-disabled')).toHaveAttribute(
+        'aria-pressed',
+        'true'
+      );
+    });
+
+    it.each(['enabled', 'disabled'] as const)('should select %s when clicked', (enabledStatus) => {
+      const element = render({ onEnabledStatusChange: onEnabledStatusChangeMock });
+
+      fireEvent.click(element.getByTestId(`enabledStatusFilter-${enabledStatus}`));
+
+      expect(onEnabledStatusChangeMock).toHaveBeenCalledWith(enabledStatus);
+      expect(onSearchMock).not.toHaveBeenCalled();
+    });
+
+    it('should switch to the other status when it is clicked', () => {
+      const element = render({
+        enabledStatus: 'enabled',
+        onEnabledStatusChange: onEnabledStatusChangeMock,
+      });
+
+      fireEvent.click(element.getByTestId('enabledStatusFilter-disabled'));
+
+      expect(onEnabledStatusChangeMock).toHaveBeenCalledWith('disabled');
+    });
+
+    it('should clear the status when the selected one is clicked', () => {
+      const element = render({
+        enabledStatus: 'enabled',
+        onEnabledStatusChange: onEnabledStatusChangeMock,
+      });
+
+      fireEvent.click(element.getByTestId('enabledStatusFilter-enabled'));
+
+      expect(onEnabledStatusChangeMock).toHaveBeenCalledWith(undefined);
+    });
+  });
+
   it('should show global and unassigned policy options checked', async () => {
     const element = render({ hasPolicyFilter: true, defaultIncludedPolicies: 'global,unassigned' });
     act(() => {

@@ -9,13 +9,19 @@ import { i18n } from '@kbn/i18n';
 
 export const QUEUE_PAGE_INFO = Object.freeze({
   pageTitle: i18n.translate('xpack.alertzero.queue.pageTitle', {
-    defaultMessage: 'AlertZero - Proposals queue',
+    defaultMessage: 'Proposed actions',
   }),
   assignSuccess: i18n.translate('xpack.alertzero.queue.assignSuccess', {
     defaultMessage: 'Assignees updated',
   }),
   assignError: i18n.translate('xpack.alertzero.queue.assignError', {
     defaultMessage: 'Could not update assignees',
+  }),
+  reopenSuccess: i18n.translate('xpack.alertzero.queue.reopenSuccess', {
+    defaultMessage: 'Investigation reopened',
+  }),
+  reopenError: i18n.translate('xpack.alertzero.queue.reopenError', {
+    defaultMessage: 'Could not reopen the investigation',
   }),
 });
 

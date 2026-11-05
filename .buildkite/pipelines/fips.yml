@@ -11,16 +11,6 @@ steps:
 
   - wait
 
-  - command: .buildkite/scripts/steps/store_cache.sh
-    label: Store Cache for build
-    timeout_in_minutes: 10
-    id: store_cache
-    soft_fail: true
-    depends_on:
-      - terrazzo-initial-pipeline-upload
-    agents:
-      machineType: n2-highcpu-8
-
   - command: .buildkite/scripts/steps/build_kibana.sh
     label: Build Kibana Distribution
     agents:

@@ -6,9 +6,11 @@
  */
 
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
-import type { Feature } from '@kbn/significant-events-schema';
+import type { AggregatedFeature } from '@kbn/significant-events-schema';
 
-export const getFeaturesFromKIs = (knowledgeIndicators: KnowledgeIndicator[]): Feature[] =>
+export const getFeaturesFromKIs = (
+  knowledgeIndicators: KnowledgeIndicator[]
+): AggregatedFeature[] =>
   knowledgeIndicators
     .filter((ki): ki is Extract<KnowledgeIndicator, { kind: 'feature' }> => ki.kind === 'feature')
     .map((ki) => ki.feature);

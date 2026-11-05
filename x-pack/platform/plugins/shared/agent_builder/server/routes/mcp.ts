@@ -21,6 +21,14 @@ import { AGENT_SOCKET_TIMEOUT_MS } from './utils';
 const MCP_SERVER_NAME = 'elastic-mcp-server';
 const MCP_SERVER_VERSION = '0.0.1';
 
+/**
+ * The most array elements and object keys, counted across all nesting levels, that one tool call's
+ * arguments may contain. The SDK rejects a call above it with an error result before validating
+ * the arguments against the tool's schema or running the tool. Tool inputs in practice are far
+ * smaller.
+ */
+export const MCP_MAX_TOOL_INPUT_ELEMENTS = 10_000;
+
 export function filterToolsByNamespace(
   tools: InternalToolDefinition[],
   namespaces?: string
@@ -111,10 +119,13 @@ To learn more about the Agent Builder MCP server, refer to the [MCP documentatio
           transport = new KibanaMcpHttpTransport({ sessionIdGenerator: undefined, logger });
 
           // Instantiate new MCP server upon every request, no session persistence
-          server = new McpServer({
-            name: MCP_SERVER_NAME,
-            version: MCP_SERVER_VERSION,
-          });
+          server = new McpServer(
+            {
+              name: MCP_SERVER_NAME,
+              version: MCP_SERVER_VERSION,
+            },
+            { maxToolInputElements: MCP_MAX_TOOL_INPUT_ELEMENTS }
+          );
 
           const { tools: toolService } = getInternalServices();
 

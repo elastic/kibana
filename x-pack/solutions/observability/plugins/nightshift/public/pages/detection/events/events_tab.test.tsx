@@ -20,14 +20,17 @@ const mockRefreshEvents = jest.fn();
 const mockTimeRangeChange = jest.fn();
 const mockAddWarning = jest.fn();
 
-jest.mock('../../../common/format_timestamp', () => ({
-  ...jest.requireActual('../../../common/format_timestamp'),
+jest.mock('../../../hooks/use_format_timestamp', () => ({
+  ...jest.requireActual('../../../hooks/use_format_timestamp'),
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 jest.mock('../../../components/entities/significant_event/event_flyout', () => ({
   EventFlyout: ({ event }: { event: SignificantEvent }) => (
     <div data-test-subj="eventFlyoutStub">{event.title}</div>
   ),
+}));
+jest.mock('../../../components/ui/time_range_picker', () => ({
+  NightshiftTimeRangePicker: () => <div data-test-subj="detectionTimeRangePickerStub" />,
 }));
 jest.mock('../../../data/significant_events/use_fetch_event_by_id');
 jest.mock('../../../data/significant_events/use_significant_events_list');
@@ -138,9 +141,9 @@ describe('EventsTab', () => {
     const history = renderTab();
 
     expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
-      expect.objectContaining({ sortField: 'severity', sortOrder: 'desc' })
+      expect.objectContaining({ sortField: 'updated_at', sortOrder: 'desc' })
     );
-    fireEvent.click(screen.getByRole('button', { name: /^Time/ }));
+    fireEvent.click(screen.getByRole('button', { name: /^Created at/ }));
 
     await waitFor(() =>
       expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
@@ -148,6 +151,15 @@ describe('EventsTab', () => {
       )
     );
     expect(new URLSearchParams(history.location.search).get('sortField')).toBe('created_at');
+
+    fireEvent.click(screen.getByRole('button', { name: /^Updated at/ }));
+
+    await waitFor(() =>
+      expect(mockUseSignificantEventsList).toHaveBeenLastCalledWith(
+        expect.objectContaining({ sortField: 'updated_at', page: 1 })
+      )
+    );
+    expect(new URLSearchParams(history.location.search).get('sortField')).toBe('updated_at');
   });
 
   it('sends search and filter query params and resets the page', async () => {
@@ -272,15 +284,20 @@ describe('EventsTab', () => {
     expect(screen.getByTestId('nightshiftDetectionEventsSearch')).toHaveValue('');
   });
 
-  it('keeps a pending search on the next tab when the tab switches inside the debounce', () => {
+  it('writes a pending search before a tab switch so Back restores the source tab', () => {
     const history = renderTab('/detections/events?entity=checkout');
     fireEvent.change(screen.getByTestId('nightshiftDetectionEventsSearch'), {
       target: { value: 'timeout' },
     });
-    act(() => history.push('/detections/rules?entity=checkout'));
-    cleanup();
 
-    expect(history.location.pathname).toBe('/detections/rules');
+    expect(history.location.pathname).toBe('/detections/events');
+    expect(new URLSearchParams(history.location.search).get('search')).toBe('timeout');
+
+    act(() => history.push(`/detections/rules${history.location.search}`));
+    cleanup();
+    act(() => history.goBack());
+
+    expect(history.location.pathname).toBe('/detections/events');
     const params = new URLSearchParams(history.location.search);
     expect(params.get('search')).toBe('timeout');
     expect(params.get('entity')).toBe('checkout');

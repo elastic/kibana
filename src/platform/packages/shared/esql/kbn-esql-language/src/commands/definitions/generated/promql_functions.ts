@@ -49,7 +49,7 @@ const absentOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'absent_over_time',
   description: i18n.translate('esqlLanguage.promql.definitions.absent_over_time', {
-    defaultMessage: 'Returns `1` if the range vector has no elements, and `0` otherwise.',
+    defaultMessage: 'Returns `1` if the range vector has no elements, and nothing otherwise.',
   }),
   preview: false,
   signatures: [
@@ -1498,7 +1498,7 @@ const presentOverTimeDefinition: PromQLFunctionDefinition = {
   type: PromQLFunctionDefinitionTypes.WITHIN_SERIES,
   name: 'present_over_time',
   description: i18n.translate('esqlLanguage.promql.definitions.present_over_time', {
-    defaultMessage: 'Returns `1` if the range vector has at least one element, and `0` otherwise.',
+    defaultMessage: 'Returns `1` for every series that has at least one sample in the range.',
   }),
   preview: false,
   signatures: [

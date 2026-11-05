@@ -14,6 +14,7 @@ import { DetailsBlock } from './detail_block';
 import { ImpactSection } from './impact_section';
 import { DETAILS_FLYOUT_LABELS } from './translations';
 import { OVERVIEW_SECTION_LABELS } from './overview_translations';
+import { OverviewLoadingSection } from './overview_loading_section';
 import { WhatsHappenedBlock } from './whats_happened_block';
 
 export interface OverviewTabProps {
@@ -34,6 +35,11 @@ export interface OverviewTabProps {
   sections?: OverviewSections;
   /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
   proposedActionsCount?: React.ReactNode;
+  /**
+   * Whether the tab ends in a skeleton section, saying more is coming. A host shows it while an
+   * agent works on an investigation that has nothing to show yet.
+   */
+  showLoadingSection?: boolean;
 }
 
 /** Host-rendered overview sections, in the order the tab shows them. */
@@ -63,6 +69,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsContent,
     proposedActionsCount,
     sections = {},
+    showLoadingSection = false,
   }) => {
     const { subjects, impact, conclusion, reasoning } = sections;
 
@@ -114,6 +121,12 @@ export const OverviewTab = memo<OverviewTabProps>(
             >
               {proposedActionsContent}
             </DetailsBlock>
+          </EuiFlexItem>
+        )}
+
+        {showLoadingSection && (
+          <EuiFlexItem grow={false}>
+            <OverviewLoadingSection />
           </EuiFlexItem>
         )}
       </EuiFlexGroup>

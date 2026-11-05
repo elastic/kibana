@@ -8,7 +8,7 @@
 import type { Conversation } from '@kbn/agent-builder-common';
 import type { LlmProxy } from '@kbn/ftr-llm-proxy';
 import type { ApiClientFixture } from '@kbn/scout-security';
-import { apiTest, tags } from '@kbn/scout-security';
+import { apiTest, getPlaywrightTagsFor } from '@kbn/scout-security';
 import { expect } from '@kbn/scout-security/api';
 import {
   ENTITY_LATEST,
@@ -41,7 +41,8 @@ const SPACE_USER_ID = 'user:brief-scout-space-user';
 
 apiTest.describe(
   'Entity Analytics AI brief - the brief tool bound to a captured view',
-  { tag: [...tags.stateful.classic] },
+  // Local-only: the LLM proxy binds to the runner's loopback, unreachable from a Cloud Kibana.
+  { tag: getPlaywrightTagsFor('stateful', 'classic', 'local') },
   () => {
     let headers: Record<string, string>;
     let connectorId: string;
@@ -183,7 +184,7 @@ apiTest.describe(
       expect(template).toContain('No comparison');
       // An unavailable count has nothing to say, so it gets no tile.
       expect(template).not.toContain('<div class="count-label">Entities with anomalies');
-      expect(template).toContain('Not checked, because the data couldn&#39;t be read');
+      expect(template).toContain('Entities with anomalies (data couldn&#39;t be loaded)');
       expect(template).toContain(`Start with ${SEEDED_USER_ID}.`);
 
       const submitRequests = getSubmitBriefRequests(llmProxy);
@@ -218,7 +219,7 @@ apiTest.describe(
         expect(template).toContain('Nothing in this view is flagged');
         // The summary states it, so the brief has no Priorities section repeating it.
         expect(template).not.toContain('No entity in this view has enough evidence to prioritize');
-        expect(template).not.toContain('<h2>Priorities</h2>');
+        expect(template).not.toContain('<h2>Entities to investigate first</h2>');
       }
     );
 

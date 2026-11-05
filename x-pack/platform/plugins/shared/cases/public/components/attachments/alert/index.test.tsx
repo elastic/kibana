@@ -7,7 +7,7 @@
 
 import { getStackAlertAttachmentType } from '.';
 import { STACK_ALERT_ATTACHMENT_TYPE } from '../../../../common/constants/attachments';
-import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain_zod/attachment/alert/v2';
+import { StackAlertAttachmentPayloadSchema } from '../../../../common/types/domain/attachment/alert/v2';
 
 describe('getStackAlertAttachmentType', () => {
   const registration = getStackAlertAttachmentType();

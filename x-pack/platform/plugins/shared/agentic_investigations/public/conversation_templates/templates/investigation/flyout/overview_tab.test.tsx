@@ -57,12 +57,22 @@ const investigation: Investigation = {
   proposals: [],
 };
 
-const renderOverview = () =>
+/** An investigation an agent has just started on: nothing written yet. */
+const emptyInvestigation: Investigation = {
+  ...investigation,
+  metadata: { status: 'open' },
+  in_progress: true,
+  subjects: [],
+  impact: undefined,
+  hypotheses: undefined,
+};
+
+const renderOverview = (overviewConversation: Conversation = conversation) =>
   render(
     <EuiProvider>
       <I18nProvider>
         <InvestigationOverview
-          conversation={conversation}
+          conversation={overviewConversation}
           groupedAttachments={groupedAttachments}
         />
       </I18nProvider>
@@ -102,5 +112,52 @@ describe('InvestigationOverview', () => {
     expect(screen.getByText('From the conversation')).toBeInTheDocument();
     expect(screen.queryByText('Impact')).not.toBeInTheDocument();
     expect(screen.queryByTestId('investigationHypothesisTreeButton')).not.toBeInTheDocument();
+  });
+
+  it('shows a loading skeleton while an agent works on an investigation with nothing to show yet', () => {
+    mockUseInvestigation.mockReturnValue({ data: emptyInvestigation });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton while an agent works on an investigation that has findings', () => {
+    mockUseInvestigation.mockReturnValue({ data: { ...investigation, in_progress: true } });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton when an agent resumes after a proposed action is decided', () => {
+    mockUseInvestigation.mockReturnValue({
+      data: {
+        ...emptyInvestigation,
+        proposals: [
+          {
+            id: 'proposal-1',
+            title: 'Roll back the deploy',
+            comment: 'The deploy matches the start of the spike.',
+            status: 'succeeded',
+            impact: 'medium',
+            confidence: 'high',
+            created_at: 'x',
+          },
+        ],
+      },
+    });
+
+    renderOverview({ ...conversation, metadata: { status: 'open' } });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once the investigation is no longer in progress', () => {
+    mockUseInvestigation.mockReturnValue({ data: investigation });
+
+    renderOverview();
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 });

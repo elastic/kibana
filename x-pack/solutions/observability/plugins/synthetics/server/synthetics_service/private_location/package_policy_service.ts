@@ -204,7 +204,11 @@ export class PackagePolicyService {
     // For legacy reasons, we always include the default space in addition to
     // the request's space (older package policies were created there).
     const spaceIds = [...new Set([spaceId, DEFAULT_SPACE_ID, ...(additionalSpaceIds ?? [])])];
-    const soClient = this.server.coreStart.savedObjects.getUnsafeInternalClient();
+    // `spaceIds` can contain `*` (all-spaces monitors), so read through an
+    // extension-free internal repository: getUnsafeInternalClient()'s spaces
+    // extension resolves `*` with a credential-less `_has_privileges` call that
+    // fails with a 401 (see bumpAgentPolicyRevision).
+    const soClient = this.server.coreStart.savedObjects.createInternalRepository();
 
     if (fields) {
       return this.server.fleet.packagePolicyService.getByIDs(soClient, packagePolicyIds, {
