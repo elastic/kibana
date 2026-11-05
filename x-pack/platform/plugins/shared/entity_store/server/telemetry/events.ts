@@ -107,6 +107,61 @@ interface ResolutionRulesStateEvent {
   rules: ResolutionRuleStatePayload[];
 }
 
+export interface EntitySourceStateEventPayload {
+  namespace: string;
+  entityType: string;
+  source: string;
+  sourceKind: 'integration' | 'custom';
+  entities: number;
+  resolved: number;
+  targets?: number;
+  standalone?: number;
+  withRiskScore: number;
+  onWatchlist: { managed: number; custom: number };
+  byPrimaryIdentifier?: Array<{ identifier: string; entities: number }>;
+}
+
+export type CollectionOutcomePayload = 'complete' | 'timed_out' | 'failed' | 'skipped';
+
+export interface EntityMetadataEventPayload {
+  namespace: string;
+  entityType: string;
+  totalEntities: number;
+  origin: {
+    withMultipleSources: number;
+    withoutSource: number;
+    byCreator: Array<{ creator: string; entities: number }>;
+    byIdentityProvider?: Array<{ provider: string; entities: number }>;
+  };
+  identifiers?: { byPrimaryIdentifier: Array<{ identifier: string; entities: number }> };
+  unlinkedDuplicates: {
+    sameIdDifferentCase?: { groups: number; entities: number; largestGroup: number };
+    sameValueAcrossSources?: Array<{
+      sourceA: string;
+      sourceB: string;
+      field: string;
+      sharedValues: number;
+      alreadyLinked: number;
+    }>;
+  };
+  resolution: { groupSizes: Array<{ size: number; groups: number }> };
+  activity: { seenLast24h: number; seenLast7d: number; seenLast30d: number; notSeenIn30d: number };
+  securityContext: {
+    onAnyWatchlist: number;
+    criticality: {
+      lowImpact: number;
+      mediumImpact: number;
+      highImpact: number;
+      extremeImpact: number;
+    };
+  };
+  enrichment: {
+    attributes: Array<{ attribute: string; setTrue: number; setFalse: number }>;
+    relationships: Array<{ type: string; entities: number }>;
+  };
+  collection: Array<{ part: string; outcome: CollectionOutcomePayload; durationMs: number }>;
+}
+
 interface ResolutionStateEvent {
   entityType: string;
   namespace: string;
@@ -896,6 +951,225 @@ export const ENTITY_STORE_RESOLUTION_ERROR_EVENT = {
   },
 } as const satisfies EventTypeOpts<ResolutionErrorEvent>;
 
+const countField = (description: string) => ({ type: 'long', _meta: { description } } as const);
+
+const keywordField = (description: string) =>
+  ({ type: 'keyword', _meta: { description } } as const);
+
+export const ENTITY_STORE_SOURCE_STATE_EVENT = {
+  eventType: 'entity_store_source_state',
+  schema: {
+    namespace: keywordField('Kibana space the entity store belongs to (e.g. "default")'),
+    entityType: keywordField('Entity type (e.g. "user", "host", "service", "generic")'),
+    source: keywordField(
+      'Value of entity.source (event.module, event.dataset or data_stream.dataset), the top 30 per type, the rest under "other"'
+    ),
+    sourceKind: keywordField(
+      '"integration" when the source matches a Fleet-managed package, "custom" otherwise'
+    ),
+    entities: countField('Entities of this type that have this source'),
+    resolved: countField('Entities from this source that are aliases in a resolution group'),
+    targets: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description:
+          'Entities from this source that are resolution targets. Omitted if not collected',
+      },
+    },
+    standalone: {
+      type: 'long',
+      _meta: {
+        optional: true,
+        description: 'Entities from this source in no resolution group. Omitted if not collected',
+      },
+    },
+    withRiskScore: countField('Entities from this source that have a risk score'),
+    onWatchlist: {
+      properties: {
+        managed: countField('Entities on a managed (prebuilt) watchlist'),
+        custom: countField('Entities on a custom watchlist'),
+      },
+    },
+    byPrimaryIdentifier: {
+      type: 'array',
+      items: {
+        properties: {
+          identifier: keywordField('Identifier that built the entity id (e.g. "user.email")'),
+          entities: countField('Entities whose id was built from this identifier'),
+        },
+      },
+      _meta: {
+        optional: true,
+        description: 'Only for user and host. Omitted if not collected',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntitySourceStateEventPayload>;
+
+export const ENTITY_STORE_ENTITY_METADATA_EVENT = {
+  eventType: 'entity_store_entity_metadata',
+  schema: {
+    namespace: keywordField('Kibana space the entity store belongs to (e.g. "default")'),
+    entityType: keywordField('Entity type (e.g. "user", "host", "service", "generic")'),
+    totalEntities: countField('Entities of this type in the store'),
+    origin: {
+      properties: {
+        withMultipleSources: countField('Entities seen in more than one source'),
+        withoutSource: countField('Entities with no entity.source'),
+        byCreator: {
+          type: 'array',
+          items: {
+            properties: {
+              creator: keywordField(
+                'What created the entity: "logs_extraction" or "risk_score_maintainer"'
+              ),
+              entities: countField('Entities created this way'),
+            },
+          },
+          _meta: {
+            description: 'Entities by creator. A missing entity.created_by is logs_extraction',
+          },
+        },
+        byIdentityProvider: {
+          type: 'array',
+          items: {
+            properties: {
+              provider: keywordField(
+                'entity.namespace of the user (e.g. "okta", "entra_id", "local")'
+              ),
+              entities: countField('Users with this entity.namespace'),
+            },
+          },
+          _meta: { optional: true, description: 'Only for user' },
+        },
+      },
+    },
+    identifiers: {
+      properties: {
+        byPrimaryIdentifier: {
+          type: 'array',
+          items: {
+            properties: {
+              identifier: keywordField('Identifier that built the entity id (e.g. "host.name")'),
+              entities: countField('Entities whose id was built from this identifier'),
+            },
+          },
+          _meta: { description: 'Entities by the identifier that built their id' },
+        },
+      },
+      _meta: { optional: true, description: 'Only for user and host. Omitted if not collected' },
+    },
+    unlinkedDuplicates: {
+      properties: {
+        sameIdDifferentCase: {
+          properties: {
+            groups: countField('Groups of entities whose ids are equal after lowercasing'),
+            entities: countField('Entities in those groups'),
+            largestGroup: countField('Size of the largest group'),
+          },
+          _meta: {
+            optional: true,
+            description: 'Only for user and host. Omitted if not collected',
+          },
+        },
+        sameValueAcrossSources: {
+          type: 'array',
+          items: {
+            properties: {
+              sourceA: keywordField('First source of the pair'),
+              sourceB: keywordField('Second source of the pair'),
+              field: keywordField('Field the entities share (user.email, user.name or user.id)'),
+              sharedValues: countField('Values of the field seen in both sources'),
+              alreadyLinked: countField(
+                'Shared values whose entities are already resolved together'
+              ),
+            },
+          },
+          _meta: {
+            optional: true,
+            description: 'Only for user, top 10 pairs. Omitted if not collected',
+          },
+        },
+      },
+    },
+    resolution: {
+      properties: {
+        groupSizes: {
+          type: 'array',
+          items: {
+            properties: {
+              size: countField('Entities in the group (target + aliases)'),
+              groups: countField('Resolution groups of this size'),
+            },
+          },
+          _meta: { description: 'Exact number of resolution groups per group size' },
+        },
+      },
+    },
+    activity: {
+      properties: {
+        seenLast24h: countField('Entities last seen in the last 24 hours'),
+        seenLast7d: countField('Entities last seen in the last 7 days'),
+        seenLast30d: countField('Entities last seen in the last 30 days'),
+        notSeenIn30d: countField('Entities not seen in the last 30 days'),
+      },
+    },
+    securityContext: {
+      properties: {
+        onAnyWatchlist: countField('Entities on at least one watchlist'),
+        criticality: {
+          properties: {
+            lowImpact: countField('Entities with low_impact asset criticality'),
+            mediumImpact: countField('Entities with medium_impact asset criticality'),
+            highImpact: countField('Entities with high_impact asset criticality'),
+            extremeImpact: countField('Entities with extreme_impact asset criticality'),
+          },
+        },
+      },
+    },
+    enrichment: {
+      properties: {
+        attributes: {
+          type: 'array',
+          items: {
+            properties: {
+              attribute: keywordField('entity.attributes boolean (asset, managed, mfa_enabled)'),
+              setTrue: countField('Entities where it is true'),
+              setFalse: countField('Entities where it is false'),
+            },
+          },
+          _meta: { description: 'Boolean entity attributes' },
+        },
+        relationships: {
+          type: 'array',
+          items: {
+            properties: {
+              type: keywordField('Relationship type (e.g. "owns", "communicates_with")'),
+              entities: countField('Entities with at least one relationship of this type'),
+            },
+          },
+          _meta: { description: 'Entities per relationship type' },
+        },
+      },
+    },
+    collection: {
+      type: 'array',
+      items: {
+        properties: {
+          part: keywordField('Expensive query that ran on its own (e.g. "sameIdDifferentCase")'),
+          outcome: keywordField('"complete", "timed_out", "failed" or "skipped"'),
+          durationMs: countField('How long the part took in milliseconds'),
+        },
+      },
+      _meta: {
+        description:
+          'Outcome of each isolated part. A part that did not complete is left out above',
+      },
+    },
+  },
+} as const satisfies EventTypeOpts<EntityMetadataEventPayload>;
+
 export const ENTITY_STORE_HEALTH_REPORT_EVENT = {
   eventType: 'entity_store_health_report',
   schema: {
@@ -979,6 +1253,8 @@ const events = [
   ENTITY_STORE_RESOLUTION_ERROR_EVENT,
   ENTITY_STORE_RESOLUTION_STATE_EVENT,
   ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT,
+  ENTITY_STORE_SOURCE_STATE_EVENT,
+  ENTITY_STORE_ENTITY_METADATA_EVENT,
 ] as const;
 
 export const registerTelemetry = (analytics: AnalyticsServiceSetup) =>
@@ -1003,6 +1279,8 @@ interface TelemetryEventMap {
   [ENTITY_STORE_RESOLUTION_ERROR_EVENT.eventType]: ResolutionErrorEvent;
   [ENTITY_STORE_RESOLUTION_STATE_EVENT.eventType]: ResolutionStateEvent;
   [ENTITY_STORE_RESOLUTION_RULES_STATE_EVENT.eventType]: ResolutionRulesStateEvent;
+  [ENTITY_STORE_SOURCE_STATE_EVENT.eventType]: EntitySourceStateEventPayload;
+  [ENTITY_STORE_ENTITY_METADATA_EVENT.eventType]: EntityMetadataEventPayload;
 }
 
 export type TelemetryReporter = ReturnType<typeof createReportEvent>;
