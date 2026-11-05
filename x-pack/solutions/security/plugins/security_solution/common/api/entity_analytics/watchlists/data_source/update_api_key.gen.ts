@@ -31,7 +31,7 @@ export type UpdateWatchlistEntitySourceApiKeyRequestParamsInput = z.input<
   typeof UpdateWatchlistEntitySourceApiKeyRequestParams
 >;
 
+export const UpdateWatchlistEntitySourceApiKeyResponse = lazySchema(() => MonitoringEntitySource);
 export type UpdateWatchlistEntitySourceApiKeyResponse = z.infer<
   typeof UpdateWatchlistEntitySourceApiKeyResponse
 >;
-export const UpdateWatchlistEntitySourceApiKeyResponse = lazySchema(() => MonitoringEntitySource);
