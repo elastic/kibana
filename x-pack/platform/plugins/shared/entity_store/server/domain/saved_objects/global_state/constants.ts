@@ -101,7 +101,8 @@ export type NonPriorityLogExtractionTypeOverride = z.infer<
  * Excludes `additionalIndexPatterns` and `excludedIndexPatterns` (shared with all modes via
  * logExtractionConfig), `timeout` and `fieldHistoryLength` (never read at runtime).
  *
- * Not yet wired to any saved-object field or API - reserved for a future step.
+ * Stored on the engine descriptor as `nonPriorityLogExtractionConfig`, written through
+ * `nonPriorityOverride` on internal `PUT /internal/security/entity_store/{entityType}`.
  */
 export const NonPriorityLogExtractionTypeOverride = lazySchema(() =>
   z.object({

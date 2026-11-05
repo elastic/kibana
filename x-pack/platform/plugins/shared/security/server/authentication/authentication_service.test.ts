@@ -17,6 +17,8 @@ import type {
   AuthToolkit,
   CustomBrandingSetup,
   ElasticsearchServiceSetup,
+  HttpSelfCredentialRefresher,
+  HttpSelfCredentialRefresherToolkit,
   HttpSelfUnauthorizedErrorHandler,
   HttpSelfUnauthorizedErrorHandlerToolkit,
   HttpServiceSetup,
@@ -57,6 +59,7 @@ import type { SecurityFeatureUsageServiceStart } from '../feature_usage';
 import { securityFeatureUsageServiceMock } from '../feature_usage/index.mock';
 import { securityMock } from '../mocks';
 import { ROUTE_TAG_ACCEPT_UIAM_OAUTH, ROUTE_TAG_AUTH_FLOW } from '../routes/tags';
+import { ServiceAccountCredentialRefusedError } from '../service_accounts/credential_refused_error';
 import { serviceAccountsServiceMock } from '../service_accounts/service_accounts_service.mock';
 import type { Session } from '../session_management';
 import { sessionMock } from '../session_management/session.mock';
@@ -593,6 +596,107 @@ describe('AuthenticationService', () => {
           expect(serviceAccounts.backend.reauthenticateFakeRequest).not.toHaveBeenCalled();
           expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
           expect(toolkit.retry).not.toHaveBeenCalled();
+        }
+      );
+    });
+
+    describe('self client credential refresher', () => {
+      let refresher: HttpSelfCredentialRefresher;
+      let toolkit: jest.Mocked<HttpSelfCredentialRefresherToolkit>;
+      let serviceAccounts: ReturnType<typeof serviceAccountsServiceMock.createStart>;
+      const refresherOptions = (request: KibanaRequest) => ({
+        request,
+        path: '/api/status',
+        timeoutMs: 300_000,
+      });
+
+      beforeEach(() => {
+        toolkit = { notHandled: jest.fn(), replace: jest.fn(), reject: jest.fn() };
+        service.start(mockStartAuthenticationParams);
+        refresher =
+          mockSetupAuthenticationParams.http.setSelfClientCredentialRefresher.mock.calls[0][0];
+        serviceAccounts = serviceAccountsServiceMock.createStart();
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(serviceAccounts);
+      });
+
+      it('is registered exactly once', () => {
+        expect(
+          mockSetupAuthenticationParams.http.setSelfClientCredentialRefresher
+        ).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends the credential that covers the call for a service-account-bound fake request', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockResolvedValue({
+          authorization: 'Bearer essu_fresh_token',
+        });
+        const request = httpServerMock.createFakeKibanaRequest({
+          headers: { authorization: 'Bearer essu_expiring_token' },
+        });
+
+        await refresher(refresherOptions(request), toolkit);
+
+        expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).toHaveBeenCalledWith(
+          request,
+          300_000
+        );
+        expect(toolkit.replace).toHaveBeenCalledWith({
+          authHeaders: { authorization: 'Bearer essu_fresh_token' },
+        });
+      });
+
+      it('rejects the call when the backend refuses the credential for good', async () => {
+        const refusal = new ServiceAccountCredentialRefusedError();
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockRejectedValue(refusal);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.reject).toHaveBeenCalledWith({ error: refusal });
+        expect(toolkit.replace).not.toHaveBeenCalled();
+      });
+
+      it('sends the call unchanged when the refresh fails in any other way', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockRejectedValue(
+          new Error('mint failed')
+        );
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+        expect(toolkit.reject).not.toHaveBeenCalled();
+      });
+
+      it('leaves a real request alone', async () => {
+        await refresher(refresherOptions(httpServerMock.createKibanaRequest()), toolkit);
+
+        expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).not.toHaveBeenCalled();
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it('leaves a fake request that is not service-account-bound alone', async () => {
+        serviceAccounts.backend.refreshFakeRequestBeforeUse.mockResolvedValue(null);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it('sends the call unchanged when the service accounts service is not available', async () => {
+        mockSetupAuthenticationParams.getServiceAccounts.mockReturnValue(null);
+
+        await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+        expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
+      });
+
+      it.each(['isLicenseAvailable', 'isEnabled'] as const)(
+        'does not refresh when %s is false',
+        async (method) => {
+          mockSetupAuthenticationParams.license[method].mockReturnValue(false);
+
+          await refresher(refresherOptions(httpServerMock.createFakeKibanaRequest({})), toolkit);
+
+          expect(serviceAccounts.backend.refreshFakeRequestBeforeUse).not.toHaveBeenCalled();
+          expect(toolkit.notHandled).toHaveBeenCalledTimes(1);
         }
       );
     });

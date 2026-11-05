@@ -88,15 +88,16 @@ export const ScheduledDiscoverySection = ({
       </EuiFormRow>
       {scheduledDiscovery.draft.enabled && (
         <>
-          <EuiSpacer size="s" />
+          <EuiSpacer size="m" />
           <EuiAccordion
             id="nightshiftScheduledDiscoveryAdvancedSettings"
-            buttonContent={i18n.translate(
-              'xpack.nightshift.settings.scheduledDiscoveryAdvancedSettings',
-              {
-                defaultMessage: 'Advanced schedule settings',
-              }
-            )}
+            buttonContent={
+              <strong>
+                {i18n.translate('xpack.nightshift.settings.scheduledDiscoveryAdvancedSettings', {
+                  defaultMessage: 'Advanced schedule settings',
+                })}
+              </strong>
+            }
             buttonProps={{
               'data-test-subj': 'streams-settings-scheduled-discovery-advanced-settings',
             }}

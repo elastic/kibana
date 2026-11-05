@@ -28,14 +28,18 @@ interface ConnectorSelectorProps {
   connectorTypeId: string;
   value: string | null;
   onChange: (connectorId: string | null) => void;
+  onBlur?: () => void;
   connectorCreationConfig?: ConnectorCreationConfig;
+  error?: string;
 }
 
 export const ConnectorSelector = ({
   connectorTypeId,
   value,
   onChange,
+  onBlur,
   connectorCreationConfig = { mode: 'flyout' },
+  error,
 }: ConnectorSelectorProps) => {
   const { data: connectors = [], isLoading } = useFetchConnectorsByType({ connectorTypeId });
   const triggersActionsUi = useService(
@@ -90,7 +94,7 @@ export const ConnectorSelector = ({
   return (
     <>
       <EuiFormRow
-        label={i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.label', {
+        label={i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.connector.label', {
           defaultMessage: 'Connector',
         })}
         labelAppend={
@@ -104,12 +108,14 @@ export const ConnectorSelector = ({
                 }
               : { onClick: () => setIsCreateFlyoutOpen(true) })}
           >
-            {i18n.translate('xpack.responseOps.alertingV2RuleForm.actionForm.connector.createNew', {
+            {i18n.translate('xpack.alertingV2.alertingV2RuleForm.actionForm.connector.createNew', {
               defaultMessage: '+ Create new connector',
             })}
           </EuiLink>
         }
         fullWidth
+        isInvalid={!!error}
+        error={error}
       >
         <EuiComboBox
           fullWidth
@@ -117,14 +123,16 @@ export const ConnectorSelector = ({
           singleSelection={{ asPlainText: true }}
           data-test-subj="singleStepWorkflowConnectorSelect"
           isLoading={isLoading}
+          isInvalid={!!error}
           placeholder={i18n.translate(
-            'xpack.responseOps.alertingV2RuleForm.actionForm.connector.placeholder',
+            'xpack.alertingV2.alertingV2RuleForm.actionForm.connector.placeholder',
             {
               defaultMessage: 'Select a connector',
             }
           )}
           selectedOptions={selected}
           onFocus={() => queryClient.invalidateQueries({ queryKey: ALL_CONNECTORS_KEY })}
+          onBlur={onBlur}
           onChange={(next) => onChange(next[0]?.value ?? null)}
           options={options}
         />

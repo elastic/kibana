@@ -6,8 +6,16 @@ description: Custom ESLint rules to support telemetry in the Kibana repository
 tags: ['kibana', 'dev', 'contributor', 'operations', 'eslint', 'telemetry']
 ---
 
-`@kbn/eslint-plugin-telemetry` is an ESLint plugin providing custom rules for validating JSXCode in the Kibana repo to make sure it can be instrumented for the purposes of telemetry.
+`@kbn/eslint-plugin-telemetry` provides custom lint rules for validating JSX code in the Kibana repo to make sure it can be instrumented for the purposes of telemetry.
 
-## `@kbn/telemetry/instrumentable_elements_should_be_instrumented`
+The rules run in Oxlint: `.oxlint/index.mts` loads `oxlint_plugin.js`, which registers `@kbn/swc-register` so Oxlint can load this TypeScript package, and `.oxlint/telemetry.mts` sets the files each rule checks. The rules use Oxlint's `createOnce` API and are wrapped with `eslintCompatPlugin`, so ESLint still resolves `@kbn/telemetry/*` names in disable comments.
+
+Rule test cases live in `rules/*.cases.ts` and run through Oxlint's `RuleTester` from `rules/oxlint_rules.test.ts`.
+
+## `@kbn/telemetry/event_generating_elements_should_be_instrumented`
 
 This rule warns engineers to add `data-test-subj` to instrumentable components. It currently suggests the most widely used EUI components (`EuiButton`, `EuiFieldText`, etc), but can be expanded with often-used specific components used in the Kibana repo.
+
+## `@kbn/telemetry/ebt_props_should_be_present`
+
+This rule warns when an interactive element (EUI buttons and links, `EuiSelect`, `EuiRadioGroup`, native `button`, `a`, `select` and `input`, or any element with an `onClick` prop) has no `data-ebt-action` and `data-ebt-element` attributes. Use `getEbtProps()` from `@kbn/ebt-click` to add them.

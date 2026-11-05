@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import type { VersionedAttachment } from '@kbn/agent-builder-common/attachments';
 import type { Investigation } from '../../types';
 import {
@@ -24,7 +24,6 @@ const investigation = {
   template_id: 'investigation',
   title: 'Impossible travel',
   createdAt: '2026-09-01T10:00:00.000Z',
-  updatedAt: '2026-09-01T10:00:00.000Z',
   worker_execution_ids: [],
   pendingProposalCount: 0,
   assignees: [],
@@ -52,11 +51,13 @@ const renderTab = ({
   investigationOverrides,
   proposedActionsContent,
   proposedActionsCount,
+  isRunning,
 }: {
   attachments?: VersionedAttachment[];
   investigationOverrides?: Partial<Investigation>;
   proposedActionsContent?: React.ReactNode;
   proposedActionsCount?: React.ReactNode;
+  isRunning?: boolean;
 } = {}) =>
   render(
     <OverviewTab
@@ -65,6 +66,7 @@ const renderTab = ({
       groupedAttachments={groupedAttachments}
       proposedActionsContent={proposedActionsContent}
       proposedActionsCount={proposedActionsCount}
+      isRunning={isRunning}
     />
   );
 
@@ -120,6 +122,25 @@ describe('OverviewTab', () => {
     expect(screen.queryByTestId('groupedAttachmentsSection')).not.toBeInTheDocument();
   });
 
+  it('shows a host-supplied impact instead of the impact attachment, under one heading', () => {
+    registerImpactDetailsRenderer(() => <div>from the attachment</div>);
+
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[
+          { ...attachment, id: 'impact-1', type: 'investigation_impact', hidden: true },
+        ]}
+        groupedAttachments={groupedAttachments}
+        sections={{ impact: <span>from the query API</span> }}
+      />
+    );
+
+    expect(screen.getAllByRole('heading', { name: 'Impact' })).toHaveLength(1);
+    expect(screen.getByText('from the query API')).toBeInTheDocument();
+    expect(screen.queryByText('from the attachment')).not.toBeInTheDocument();
+  });
+
   it('puts the grouped attachments under the narrative, inside "What\'s happened"', () => {
     renderTab({ attachments: [attachment] });
 
@@ -143,9 +164,106 @@ describe('OverviewTab', () => {
     expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
   });
 
+  it('renders the host sections in order and only those supplied', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[attachment]}
+        groupedAttachments={groupedAttachments}
+        proposedActionsContent={<span>proposal</span>}
+        sections={{
+          subjects: <span>checkout alert</span>,
+          impact: <span>checkout is down</span>,
+          conclusion: 'A **bad** deploy.',
+          reasoning: <span>hypothesis tree</span>,
+        }}
+      />
+    );
+
+    const headings = screen.getAllByRole('heading').map(({ textContent }) => textContent);
+    expect(headings).toEqual([
+      'Subject',
+      "What's happened",
+      'Impact',
+      'Conclusion',
+      'Proposed actions',
+    ]);
+    expect(screen.getByTestId('groupedAttachmentsSection')).toBeInTheDocument();
+    expect(screen.getByText('bad')).toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
+  });
+
+  it('keeps the reasoning mounted when a conclusion arrives', () => {
+    const Reasoning = () => {
+      const [isOpen, setIsOpen] = React.useState(false);
+      return (
+        <button type="button" onClick={() => setIsOpen(true)}>
+          {isOpen ? 'tree open' : 'open tree'}
+        </button>
+      );
+    };
+    const renderWith = (conclusion?: string) => (
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ conclusion, reasoning: <Reasoning /> }}
+      />
+    );
+    const { rerender } = render(renderWith());
+
+    fireEvent.click(screen.getByRole('button', { name: 'open tree' }));
+    rerender(renderWith('A bad deploy.'));
+
+    expect(screen.getByText('Conclusion')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'tree open' })).toBeInTheDocument();
+  });
+
+  it('shows the reasoning without a heading while there is no conclusion', () => {
+    render(
+      <OverviewTab
+        investigation={investigation}
+        attachments={[]}
+        groupedAttachments={groupedAttachments}
+        sections={{ reasoning: <span>hypothesis tree</span> }}
+      />
+    );
+
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.getByTestId('investigationOverviewReasoning')).toHaveTextContent(
+      'hypothesis tree'
+    );
+  });
+
+  it('leaves out the sections an investigation has no data for', () => {
+    renderTab({ attachments: [] });
+
+    expect(screen.queryByText('Subject')).not.toBeInTheDocument();
+    expect(screen.queryByText('Impact')).not.toBeInTheDocument();
+    expect(screen.queryByText('Conclusion')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('investigationOverviewReasoning')).not.toBeInTheDocument();
+  });
+
   it('renders no "What\'s happened" block without a narrative or attachments', () => {
     renderTab({ attachments: [], investigationOverrides: { summary: undefined } });
 
     expect(screen.queryByText("What's happened")).not.toBeInTheDocument();
+  });
+
+  it('ends in a loading skeleton while the investigation is running', () => {
+    renderTab({ isRunning: true });
+
+    expect(screen.getByTestId('investigationOverviewLoadingSection')).toBeInTheDocument();
+    expect(
+      screen.getByText('Still investigating. This flyout will update with new findings.')
+    ).toBeInTheDocument();
+  });
+
+  it('renders no loading skeleton once nothing works on the investigation', () => {
+    renderTab({ isRunning: false });
+
+    expect(screen.queryByTestId('investigationOverviewLoadingSection')).not.toBeInTheDocument();
   });
 });

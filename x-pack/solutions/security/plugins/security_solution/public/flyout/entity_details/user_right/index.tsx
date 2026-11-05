@@ -138,10 +138,12 @@ export const UserPanel = memo(function UserPanel({
     const legacyFields =
       userName != null && userName !== '' ? { 'user.name': userName } : ({} as IdentityFields);
     const fromStore =
-      euidApi?.euid?.getEntityIdentifiersFromDocument('user', entityFromStoreResult.entityRecord) ??
-      {};
+      euidApi?.euid?.getEntityIdentifiersFromDocument(
+        euidApi.getBuiltInEntityDefinition('user'),
+        entityFromStoreResult.entityRecord
+      ) ?? {};
     return mergeLegacyIdentityWhenStoreEntityMissing(fromStore, legacyFields);
-  }, [euidApi?.euid, entityFromStoreResult.entityRecord, userName]);
+  }, [euidApi, entityFromStoreResult.entityRecord, userName]);
 
   const userNameFilterQuery = useMemo(
     () => (userName ? buildUserNamesFilter([userName]) : undefined),

@@ -1,0 +1,22 @@
+{
+  "getBlob": {
+    "config": {
+      "accountUrl": "https://myaccount.blob.core.windows.net"
+    }
+  },
+  "getBlobProperties": {
+    "config": {
+      "accountUrl": "https://myaccount.blob.core.windows.net"
+    }
+  },
+  "listBlobs": {
+    "config": {
+      "accountUrl": "https://myaccount.blob.core.windows.net"
+    }
+  },
+  "listContainers": {
+    "config": {
+      "accountUrl": "https://myaccount.blob.core.windows.net"
+    }
+  }
+}

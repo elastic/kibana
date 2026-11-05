@@ -33,12 +33,7 @@ jest.mock('@kbn/esql-utils', () => ({
   }),
 }));
 
-const createPlugin = (enabled: boolean) =>
-  new EsqlViewsPlugin(
-    coreMock.createPluginInitializerContext({
-      managementUi: { enabled },
-    })
-  );
+const createPlugin = () => new EsqlViewsPlugin();
 
 const mountApp = async (capabilities: Record<string, boolean>) => {
   const core = coreMock.createSetup();
@@ -52,7 +47,7 @@ const mountApp = async (capabilities: Record<string, boolean>) => {
   const share = sharePluginMock.createStartContract();
   core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
-  createPlugin(true).setup(core, { management });
+  createPlugin().setup(core, { management });
 
   const registerApp = management.sections.section.data.registerApp as jest.MockedFunction<
     typeof management.sections.section.data.registerApp
@@ -76,15 +71,7 @@ const mountApp = async (capabilities: Record<string, boolean>) => {
 };
 
 describe('EsqlViewsPlugin', () => {
-  it('does not register the management application when the UI is disabled', () => {
-    const management = managementPluginMock.createSetupContract();
-
-    createPlugin(false).setup(coreMock.createSetup(), { management });
-
-    expect(management.sections.section.data.registerApp).not.toHaveBeenCalled();
-  });
-
-  it('registers and mounts the management application when the UI is enabled', async () => {
+  it('registers and mounts the management application', async () => {
     const core = coreMock.createSetup();
     const coreStart = coreMock.createStart();
     const data = dataPluginMock.createStartContract();
@@ -93,7 +80,7 @@ describe('EsqlViewsPlugin', () => {
     const getLocator = jest.spyOn(share.url.locators, 'get');
     core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
 
-    createPlugin(true).setup(core, { management });
+    createPlugin().setup(core, { management });
 
     expect(management.sections.section.data.registerApp).toHaveBeenCalledWith({
       id: MANAGEMENT_APP_ID,
@@ -128,6 +115,118 @@ describe('EsqlViewsPlugin', () => {
 
     act(() => unmount?.());
     expect(coreStart.chrome.docTitle.reset).toHaveBeenCalledTimes(1);
+  });
+
+  describe('telemetry', () => {
+    const setupAndGetMount = (core = coreMock.createSetup()) => {
+      const coreStart = coreMock.createStart();
+      const management = managementPluginMock.createSetupContract();
+      const data = dataPluginMock.createStartContract();
+      const share = sharePluginMock.createStartContract();
+      core.getStartServices.mockResolvedValue([coreStart, { data, share }, undefined]);
+
+      createPlugin().setup(core, { management });
+
+      const registerApp = management.sections.section.data.registerApp as jest.MockedFunction<
+        typeof management.sections.section.data.registerApp
+      >;
+      const [[registeredApp]] = registerApp.mock.calls;
+      const mountParams = () => ({
+        ...coreMock.createAppMountParameters(),
+        basePath: '/',
+        setBreadcrumbs: jest.fn(),
+        theme: coreStart.theme,
+      });
+      const mount = async () => {
+        let unmount: (() => void) | undefined;
+        await act(async () => {
+          unmount = await registeredApp.mount(mountParams());
+        });
+        return () => act(() => unmount?.());
+      };
+      const mountConcurrently = async () => {
+        let unmounts: Array<() => void> = [];
+        await act(async () => {
+          unmounts = await Promise.all([1, 2].map(() => registeredApp.mount(mountParams())));
+        });
+        return () => act(() => unmounts.forEach((unmount) => unmount()));
+      };
+
+      return { core, mount, mountConcurrently };
+    };
+
+    const getRegisteredEventTypes = (core: ReturnType<typeof coreMock.createSetup>) =>
+      core.analytics.registerEventType.mock.calls.map(([{ eventType }]) => eventType);
+
+    it('does not register event types until the application is mounted', () => {
+      const { core } = setupAndGetMount();
+
+      expect(core.analytics.registerEventType).not.toHaveBeenCalled();
+    });
+
+    it('registers event types once, however many times the application is mounted', async () => {
+      const { core, mount } = setupAndGetMount();
+
+      const unmountFirst = await mount();
+      unmountFirst();
+      const unmountSecond = await mount();
+      unmountSecond();
+
+      expect(getRegisteredEventTypes(core)).toEqual([
+        'esql.views_page_visited',
+        'esql.view_edited',
+        'esql.view_deleted',
+      ]);
+    });
+
+    it('registers event types once when the application is mounted concurrently', async () => {
+      const { core, mountConcurrently } = setupAndGetMount();
+
+      const unmount = await mountConcurrently();
+      unmount();
+
+      expect(getRegisteredEventTypes(core)).toHaveLength(3);
+    });
+
+    it('mounts without telemetry when registering event types fails', async () => {
+      const core = coreMock.createSetup();
+      core.analytics.registerEventType.mockImplementation(() => {
+        throw new Error('Event Type "esql.views_page_visited" is already registered.');
+      });
+
+      const { mount } = setupAndGetMount(core);
+      const unmount = await mount();
+
+      expect(core.analytics.reportEvent).not.toHaveBeenCalled();
+      unmount();
+    });
+
+    it('mounts without telemetry when the telemetry module fails to load', async () => {
+      jest.doMock('./telemetry', () => {
+        throw new Error('Loading chunk failed');
+      });
+      const { core, mount } = setupAndGetMount();
+
+      const unmount = await mount();
+
+      expect(core.analytics.registerEventType).not.toHaveBeenCalled();
+      expect(core.analytics.reportEvent).not.toHaveBeenCalled();
+      unmount();
+      jest.dontMock('./telemetry');
+    });
+
+    it('registers event types before the mounted application reports', async () => {
+      const { core, mount } = setupAndGetMount();
+
+      const unmount = await mount();
+
+      expect(core.analytics.reportEvent).toHaveBeenCalledWith('esql.views_page_visited', {});
+      const [firstReport] = core.analytics.reportEvent.mock.invocationCallOrder;
+      for (const registration of core.analytics.registerEventType.mock.invocationCallOrder) {
+        expect(registration).toBeLessThan(firstReport);
+      }
+      unmount();
+    });
   });
 
   // These tests mount the app via the real plugin path and read capabilities from

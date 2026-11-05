@@ -27,7 +27,6 @@ export class InspectorPage {
     readonly statisticsTab: Locator;
     readonly requestTab: Locator;
     readonly responseTab: Locator;
-    readonly timestamp: Locator;
     readonly codeViewer: Locator;
   };
 
@@ -46,7 +45,6 @@ export class InspectorPage {
       statisticsTab: page.testSubj.locator('inspectorRequestDetailStatistics'),
       requestTab: page.testSubj.locator('inspectorRequestDetailRequest'),
       responseTab: page.testSubj.locator('inspectorRequestDetailResponse'),
-      timestamp: page.testSubj.locator('inspector.statistics.requestTimestamp'),
       codeViewer: page.testSubj.locator('inspectorRequestCodeViewerContainer'),
     };
   }
@@ -82,15 +80,52 @@ export class InspectorPage {
 
   /**
    * Closes the inspector panel. No-ops if already closed.
+   *
+   * @param waitForFocusQuiet - When true, also waits for focus to settle after closing.
+   *   Closing the inspector restores focus to its trigger twice, the second time ~40ms later.
+   *   If that lands while a follow-up action is typing, the remaining keys go to the trigger
+   *   button and a space re-opens the inspector. Defaults to `false`.
    */
-  async close() {
+  async close(waitForFocusQuiet: boolean = false) {
     await this.closeButton.click();
     await this.panel.waitFor({ state: 'hidden' });
+    if (waitForFocusQuiet) {
+      await this.waitForFocusQuiet();
+    }
   }
 
-  async getRequestTimestamp(): Promise<string> {
+  private async waitForFocusQuiet() {
+    await this.page.evaluate(
+      () =>
+        new Promise<void>((resolve) => {
+          const onFocus = () => {
+            clearTimeout(timer);
+            timer = setTimeout(done, 150);
+          };
+          const done = () => {
+            document.removeEventListener('focusin', onFocus, true);
+            resolve();
+          };
+          let timer = setTimeout(done, 150);
+          document.addEventListener('focusin', onFocus, true);
+        })
+    );
+  }
+
+  /** Reads the inner text of `statLocator` once the inspector panel is visible. */
+  async getStatistic(statLocator: Locator): Promise<string> {
     await this.panel.waitFor({ state: 'visible' });
-    return this.requests.timestamp.innerText();
+    return statLocator.innerText();
+  }
+
+  /** Reads the "Request timestamp" value from the open inspector's statistics tab. */
+  async getRequestTimestamp(): Promise<string> {
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.requestTimestamp'));
+  }
+
+  /** Reads the "Hits" value from the open inspector's statistics tab. */
+  async getHits(): Promise<string> {
+    return this.getStatistic(this.page.testSubj.locator('inspector.statistics.hits'));
   }
 
   /**
@@ -134,14 +169,14 @@ export class InspectorPage {
   /**
    * The names of the requests listed by the open inspector's request chooser,
    * in the order they are offered. Leaves the chooser closed, since its open
-   * list covers the request detail tabs.
+   * list covers the request detail tabs. With a single request the chooser has
+   * no list to open, so the selected request is returned instead.
    */
   async getRequestNames(): Promise<string[]> {
-    const names = await this.page.components
-      .comboBox('inspectorRequestChooser')
-      .getAllVisibleOptions();
+    const requestChooser = this.page.components.comboBox('inspectorRequestChooser');
+    const names = await requestChooser.getAllVisibleOptions();
     await this.page.keyboard.press('Escape');
-    return names;
+    return names.length > 0 ? names : requestChooser.getSelectedOptions();
   }
 
   /** The selected request's total time, in milliseconds, as the Requests view reports it. */

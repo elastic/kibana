@@ -30,6 +30,7 @@ import { closePointInTime, getAgentsByKuery, openPointInTime } from '../agents';
 import { validatePackagePoliciesUniqueNameAcrossSpaces } from './policy_namespaces';
 
 import { isSpaceAwarenessEnabled } from './helpers';
+import { buildPolicyBaseIdWithFallbackKuery } from '../../../common/services/version_specific_policies_utils';
 
 const UPDATE_AGENT_BATCH_SIZE = 1000;
 
@@ -193,7 +194,7 @@ export async function updateAgentPolicySpaces({
       let searchAfter: SortResults | undefined;
       while (hasMore) {
         const { agents, pit } = await getAgentsByKuery(esClient, newSpaceSoClient, {
-          kuery: `policy_id:"${escapeQuotes(agentPolicyId)}"`,
+          kuery: buildPolicyBaseIdWithFallbackKuery(agentPolicyId),
           showInactive: true,
           perPage: UPDATE_AGENT_BATCH_SIZE,
           pitId,

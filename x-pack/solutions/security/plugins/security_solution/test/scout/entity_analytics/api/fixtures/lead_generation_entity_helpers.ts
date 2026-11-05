@@ -7,7 +7,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import { hashEuid } from '@kbn/entity-store/common/domain/euid';
-import { LATEST_ALIAS } from './maintainers/constants';
+import { ENTITY_LATEST, getEntitiesAlias } from '@kbn/entity-store/common';
 
 /**
  * Seeds a user entity with a Critical risk score — enough on its own to
@@ -16,12 +16,16 @@ import { LATEST_ALIAS } from './maintainers/constants';
  */
 export const seedRiskyUserEntity = async (
   esClient: Client,
-  { euid, riskScoreNorm = 95 }: { euid: string; riskScoreNorm?: number }
+  {
+    euid,
+    riskScoreNorm = 95,
+    spaceId = 'default',
+  }: { euid: string; riskScoreNorm?: number; spaceId?: string }
 ): Promise<void> => {
   const now = new Date().toISOString();
 
   await esClient.index({
-    index: LATEST_ALIAS,
+    index: getEntitiesAlias(ENTITY_LATEST, spaceId),
     id: hashEuid(euid),
     refresh: 'wait_for',
     pipeline: '_none',
@@ -39,9 +43,17 @@ export const seedRiskyUserEntity = async (
   });
 };
 
-export const cleanupEntity = async (esClient: Client, euid: string): Promise<void> => {
+export const cleanupEntity = async (
+  esClient: Client,
+  euid: string,
+  spaceId = 'default'
+): Promise<void> => {
   await esClient
-    .delete({ index: LATEST_ALIAS, id: hashEuid(euid), refresh: 'wait_for' })
+    .delete({
+      index: getEntitiesAlias(ENTITY_LATEST, spaceId),
+      id: hashEuid(euid),
+      refresh: 'wait_for',
+    })
     .catch(() => {
       // Entity may not exist — ignore
     });

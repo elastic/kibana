@@ -8,12 +8,15 @@
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { KibanaRequest } from '@kbn/core-http-server';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-server';
+import { SourceWriteConflictError } from '../../../lib/errors/source_write_conflict_error';
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { GetScopedClients, RouteHandlerScopedClients } from '../../../routes/types';
 import {
   createMockToolContext,
   createSignificantEventsServer,
   invokeHandler,
+  mockSourcesClient,
+  sourceWithSlug,
 } from '../../utils/test_helpers';
 import {
   createFeatureKnowledgeIndicatorTool,
@@ -35,7 +38,7 @@ describe('ki_feature_create tool', () => {
   } as unknown as EbtTelemetryClient;
 
   const featureParams = {
-    stream_name: 'logs.test',
+    slug: 'logs.test',
     id: 'feature-1',
     type: 'custom',
     description: 'desc',
@@ -47,17 +50,7 @@ describe('ki_feature_create tool', () => {
   const createScopedClients = (kiClient: object) =>
     jest.fn(async () => {
       return {
-        streamsClient: {
-          getStream: jest.fn().mockResolvedValue({
-            name: 'logs.test',
-            ingest: {
-              classic: { field_overrides: {} },
-              processing: [],
-              lifecycle: { inherit: {} },
-              failure_store: { inherit: {} },
-            },
-          }),
-        },
+        sourcesClient: mockSourcesClient(['logs.test']),
         getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
         licensing: {},
         uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
@@ -94,7 +87,7 @@ describe('ki_feature_create tool', () => {
 
     const confirmation = await tool.confirmation?.getConfirmation?.({
       toolParams: {
-        stream_name: 'logs.test',
+        slug: 'logs.test',
         id: 'feature-1',
         type: 'error_pattern',
         description: 'Recurring timeout pattern',
@@ -111,7 +104,7 @@ describe('ki_feature_create tool', () => {
         cancel_text: 'Cancel',
       })
     );
-    expect(confirmation?.message).toContain('stream "logs.test"');
+    expect(confirmation?.message).toContain('source "logs.test"');
     expect(confirmation?.message).toContain('id: "feature-1"');
     expect(confirmation?.message).toContain('type: "error_pattern"');
   });
@@ -176,8 +169,57 @@ describe('ki_feature_create tool', () => {
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: true,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
+      })
+    );
+  });
+
+  it('stores the feature against the source id when the slug differs', async () => {
+    (assertSignificantEventsAccess as jest.Mock).mockResolvedValue(undefined);
+
+    const featureClient = {
+      bulk: jest.fn().mockResolvedValue(undefined),
+    };
+
+    const getScopedClients = jest.fn(async () => {
+      return {
+        sourcesClient: {
+          list: jest.fn().mockResolvedValue({
+            sources: [sourceWithSlug('nginx-errors', { id: 'source-uuid', title: 'Nginx errors' })],
+            total: 1,
+          }),
+        },
+        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(featureClient),
+        licensing: {},
+        uiSettingsClient: { get: jest.fn().mockResolvedValue(false) },
+      } as unknown as RouteHandlerScopedClients;
+    }) as unknown as jest.MockedFunction<GetScopedClients>;
+
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients,
+      server,
+      logger,
+      telemetry,
+    });
+
+    await invokeHandler(
+      tool as never,
+      {
+        slug: 'nginx-errors',
+        id: 'feature-1',
+        type: 'custom',
+        description: 'desc',
+        properties: {},
+        confidence: 80,
+      },
+      createMockToolContext()
+    );
+
+    expect(featureClient.bulk).toHaveBeenCalledWith('source-uuid', expect.any(Array));
+    expect(telemetry.trackAgentBuilderKnowledgeIndicatorCreated).toHaveBeenCalledWith(
+      expect.objectContaining({
+        success: true,
+        source_id: 'source-uuid',
       })
     );
   });
@@ -206,11 +248,38 @@ describe('ki_feature_create tool', () => {
         ki_kind: 'feature',
         tool_id: 'ki_feature_create',
         success: false,
-        stream_name: 'logs.test',
-        stream_type: 'classic',
+        source_id: 'logs.test',
         error_message: 'write failed',
       })
     );
+  });
+
+  it('tells the agent whether a refused write is worth retrying', async () => {
+    jest.mocked(assertSignificantEventsAccess).mockResolvedValue(undefined);
+    const bulk = jest
+      .fn()
+      .mockRejectedValueOnce(new SourceWriteConflictError('lease_held', 'being updated'))
+      .mockRejectedValueOnce(new SourceWriteConflictError('source_disabled', 'disabled'));
+    const tool = createFeatureKnowledgeIndicatorTool({
+      getScopedClients: createScopedClients({ bulk }),
+      server,
+      logger,
+      telemetry,
+    });
+
+    if (!('handler' in tool)) {
+      throw new Error('ki_feature_create must be a builtin tool');
+    }
+
+    const retryable = await invokeHandler(tool, featureParams, createMockToolContext());
+    const final = await invokeHandler(tool, featureParams, createMockToolContext());
+
+    expect(retryable).toMatchObject({
+      results: [{ data: { metadata: { reason: 'lease_held', retryable: true } } }],
+    });
+    expect(final).toMatchObject({
+      results: [{ data: { metadata: { reason: 'source_disabled', retryable: false } } }],
+    });
   });
 
   it('does not let a Nightshift reader create a feature KI', async () => {

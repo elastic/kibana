@@ -18,6 +18,7 @@ import { DataSourcesTable } from './data_sources_table';
 import { getFlyoutSaveErrorMessage } from './get_flyout_save_error_message';
 import { mainTranslations } from './main_i18n';
 import type { DataFederationKibanaServices } from './types';
+import { getDatasourceCreateEvents, UI_COUNTER_EVENTS } from './ui_counters';
 
 type DataSourceFlyoutState =
   | { mode: 'closed' }
@@ -45,7 +46,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
   const [isDeletingDataSources, setIsDeletingDataSources] = useState(false);
   const [deleteDataSourcesError, setDeleteDataSourcesError] = useState<string | null>(null);
   const {
-    services: { dataSourcesClient, toasts },
+    services: { dataSourcesClient, toasts, reportUiCounter },
   } = useKibana<DataFederationKibanaServices>();
   const [selectedDataSources, setSelectedDataSources] = useState<DataSource[]>([]);
 
@@ -124,6 +125,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     setDeleteDataSourceError(null);
     try {
       await dataSourcesClient.delete(pendingDeleteDataSource.name);
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasourceDelete);
       setSelectedDataSources([]);
       setPendingDeleteDataSource(null);
       void refreshDataSources();
@@ -137,7 +139,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     } finally {
       setIsDeletingDataSource(false);
     }
-  }, [dataSourcesClient, pendingDeleteDataSource, refreshDataSources, toasts]);
+  }, [dataSourcesClient, pendingDeleteDataSource, refreshDataSources, reportUiCounter, toasts]);
 
   const confirmDeleteDataSources = useCallback(async () => {
     if (!pendingDeleteDataSources || pendingDeleteDataSources.length === 0) {
@@ -156,6 +158,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     setDeleteDataSourcesError(null);
     try {
       await dataSourcesClient.delete(pendingDeleteDataSources.map((ds) => ds.name));
+      reportUiCounter?.(UI_COUNTER_EVENTS.datasourceDelete, pendingDeleteDataSources.length);
       setSelectedDataSources([]);
       setPendingDeleteDataSources(null);
       void refreshDataSources();
@@ -173,6 +176,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
     dataSetsCountByDataSource,
     dataSourcesClient,
     refreshDataSources,
+    reportUiCounter,
     setSelectedDataSources,
     pendingDeleteDataSources,
     toasts,
@@ -183,8 +187,10 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
       try {
         if (flyout.mode === 'edit') {
           await dataSourcesClient.update(dataSource);
+          reportUiCounter?.(UI_COUNTER_EVENTS.datasourceUpdate);
         } else {
           await dataSourcesClient.add(dataSource);
+          reportUiCounter?.(getDatasourceCreateEvents(dataSource.type));
         }
 
         onClose({ savedChanges: true });
@@ -193,7 +199,7 @@ export const DataSourcesTabContent: FunctionComponent<DataSourcesTabContentProps
         return getFlyoutSaveErrorMessage(e);
       }
     },
-    [dataSourcesClient, flyout.mode, onClose]
+    [dataSourcesClient, flyout.mode, onClose, reportUiCounter]
   );
 
   return (

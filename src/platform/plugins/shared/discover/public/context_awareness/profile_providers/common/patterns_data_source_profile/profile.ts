@@ -81,7 +81,7 @@ export const createPatternsDataSourceProfileProvider = (
               i18n.translate('discover.docViews.patterns.cellAction.viewResults', {
                 defaultMessage: 'View matching results',
               }),
-            getIconType: () => 'discoverApp',
+            getIconType: () => 'productDiscover',
             isCompatible: (compatibleContext) => {
               const { query, field } = compatibleContext;
               const { patternColumns } = context;
@@ -157,6 +157,8 @@ export const createPatternsDataSourceProfileProvider = (
     }
 
     const sparklineColumns = getSparklineColumns(query.esql);
+
+    void services.aiops?.aiopsUsage.trackRenderEsqlCategorizationResults();
 
     return {
       isMatch: true,

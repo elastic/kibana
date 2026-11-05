@@ -9,6 +9,8 @@ import { i18n } from '@kbn/i18n';
 import { monaco } from '@kbn/code-editor';
 import { prettifyQuery } from '@kbn/esql-utils';
 
+export const PRETTIFY_ACTION_ID = 'alertingV2.esql.prettifyQuery';
+
 const PRETTIFY_LABEL = i18n.translate('xpack.alertingV2.composeDiscover.esql.prettifyQueryLabel', {
   defaultMessage: 'Prettify query',
 });
@@ -31,7 +33,7 @@ export const addPrettifyAction = (
   editor: monaco.editor.IStandaloneCodeEditor
 ): monaco.IDisposable =>
   editor.addAction({
-    id: 'alertingV2.esql.prettifyQuery',
+    id: PRETTIFY_ACTION_ID,
     label: PRETTIFY_LABEL,
     // eslint-disable-next-line no-bitwise
     keybindings: [monaco.KeyMod.CtrlCmd | monaco.KeyCode.KeyI],

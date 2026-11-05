@@ -6,8 +6,11 @@
  */
 
 import type { KibanaRequest } from '@kbn/core-http-server';
+import type { UiSettingsServiceStart } from '@kbn/core-ui-settings-server';
+import type { SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
 import type { ToolType } from '@kbn/agent-builder-common';
 import { createToolNotFoundError, createBadRequestError } from '@kbn/agent-builder-common';
+import type { ToolSchemaContext } from '@kbn/agent-builder-server/tools';
 import type {
   ToolProviderFn,
   ReadonlyToolProvider,
@@ -27,9 +30,13 @@ export const createBuiltinProviderFn =
   ({
     registry,
     toolTypes,
+    uiSettings,
+    savedObjects,
   }: {
     registry: BuiltinToolRegistry;
     toolTypes: AnyToolTypeDefinition[];
+    uiSettings: UiSettingsServiceStart;
+    savedObjects: SavedObjectsServiceStart;
   }): ToolProviderFn<true> =>
   async ({ request, space }) => {
     return createBuiltinToolProvider({
@@ -37,6 +44,8 @@ export const createBuiltinProviderFn =
       toolTypes,
       request,
       space,
+      uiSettings,
+      savedObjects,
     });
   };
 
@@ -45,11 +54,15 @@ export const createBuiltinToolProvider = ({
   toolTypes,
   request,
   space,
+  uiSettings,
+  savedObjects,
 }: {
   registry: BuiltinToolRegistry;
   toolTypes: AnyToolTypeDefinition[];
   request: KibanaRequest;
   space: string;
+  uiSettings: UiSettingsServiceStart;
+  savedObjects: SavedObjectsServiceStart;
 }): ReadonlyToolProvider => {
   const definitionMap = toolTypes
     .filter((def) => !isDisabledDefinition(def))
@@ -59,6 +72,14 @@ export const createBuiltinToolProvider = ({
     }, {} as Record<ToolType, ToolTypeDefinition | BuiltinToolTypeDefinition>);
 
   const context = { spaceId: space, request };
+  let schemaContext: ToolSchemaContext | undefined;
+  const getSchemaContext = (): ToolSchemaContext => {
+    schemaContext ??= {
+      ...context,
+      uiSettings: uiSettings.asScopedToClient(savedObjects.getScopedClient(request)),
+    };
+    return schemaContext;
+  };
   const availabilityCache = new ToolAvailabilityCache();
 
   return {
@@ -76,7 +97,13 @@ export const createBuiltinToolProvider = ({
       if (!definition) {
         throw createBadRequestError(`Unknown type for tool '${toolId}': '${tool.type}'`);
       }
-      return convertTool({ tool, definition, context, cache: availabilityCache });
+      return convertTool({
+        tool,
+        definition,
+        context,
+        getSchemaContext,
+        cache: availabilityCache,
+      });
     },
     list(filters?: ToolProviderListFilters) {
       const typeFilter =
@@ -101,7 +128,13 @@ export const createBuiltinToolProvider = ({
         })
         .map((tool) => {
           const definition = definitionMap[tool.type]!;
-          return convertTool({ tool, definition, context, cache: availabilityCache });
+          return convertTool({
+            tool,
+            definition,
+            context,
+            getSchemaContext,
+            cache: availabilityCache,
+          });
         });
     },
   };

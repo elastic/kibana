@@ -9,7 +9,7 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiSpacer, useGeneratedHtmlId } from '@elastic/eui';
 
-import type { Control, UseFormUnregister } from 'react-hook-form';
+import type { Control } from 'react-hook-form';
 import type { DataSourceType } from '../../common/datasource_types';
 import type { CreateDataSourceFlyoutFormValues } from './types';
 import { CreateDataSourceFlyoutTypeSettingsAzure } from './create_data_source_flyout_type_settings_azure';
@@ -19,22 +19,20 @@ import { CreateDataSourceFlyoutTypeSettingsS3 } from './create_data_source_flyou
 export function CreateDataSourceFlyoutTypeSettings({
   dataSourceType,
   control,
-  unregister,
 }: {
   dataSourceType: DataSourceType;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   if (dataSourceType === 's3') {
-    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} unregister={unregister} />;
+    return <CreateDataSourceFlyoutTypeSettingsS3 control={control} />;
   }
 
   if (dataSourceType === 'gcs') {
-    return <CreateDataSourceFlyoutTypeSettingsGcs control={control} unregister={unregister} />;
+    return <CreateDataSourceFlyoutTypeSettingsGcs control={control} />;
   }
 
   if (dataSourceType === 'azure') {
-    return <CreateDataSourceFlyoutTypeSettingsAzure control={control} unregister={unregister} />;
+    return <CreateDataSourceFlyoutTypeSettingsAzure control={control} />;
   }
   return null;
 }
@@ -45,7 +43,6 @@ export function CreateDataSourceFlyoutTypeSettings({
 export function CreateDataSourceFlyoutTypeSettingsBlock(props: {
   dataSourceType: DataSourceType;
   control: Control<CreateDataSourceFlyoutFormValues, any>;
-  unregister: UseFormUnregister<CreateDataSourceFlyoutFormValues>;
 }) {
   const [isOpen, setIsOpen] = useState(false);
   const contentId = useGeneratedHtmlId({ prefix: 'createDataSourceFlyoutConnectionSettings' });

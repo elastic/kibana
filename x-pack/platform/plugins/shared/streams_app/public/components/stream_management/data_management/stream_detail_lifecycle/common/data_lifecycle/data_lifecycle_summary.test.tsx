@@ -40,6 +40,19 @@ describe('DataLifecycleSummary', () => {
       expect(screen.queryByTestId('dataLifecycleSummary-skeleton')).not.toBeInTheDocument();
     });
 
+    it('exposes the stats readiness signal as loading while a preview is active', () => {
+      render(
+        <DataLifecycleSummary
+          {...defaultProps}
+          model={{ loading: false, phases: [] }}
+          uiState={{ isPreviewActive: true }}
+        />
+      );
+
+      expect(screen.getByTestId('dataLifecycleSummary-stats-loading')).toBeInTheDocument();
+      expect(screen.queryByTestId('dataLifecycleSummary-stats-loaded')).not.toBeInTheDocument();
+    });
+
     it('prefixes the stats readiness signal with testSubjPrefix when provided', () => {
       render(
         <DataLifecycleSummary

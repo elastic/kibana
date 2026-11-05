@@ -106,6 +106,8 @@ export interface FieldStatisticTableEmbeddableProps {
    * Reports `undefined` while a (re)load is in progress.
    */
   onFieldsCountChange?: (fieldsCount: number | undefined) => void;
+
+  isInteractive?: boolean;
 }
 
 export type ESQLDataVisualizerGridEmbeddableState = Omit<

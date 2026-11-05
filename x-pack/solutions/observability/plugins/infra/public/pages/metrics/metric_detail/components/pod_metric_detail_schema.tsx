@@ -13,7 +13,6 @@ import {
   useTimeRangeMetadataContext,
 } from '../../../../hooks/use_time_range_metadata';
 import { isPending } from '../../../../hooks/use_fetcher';
-import { useIsPodSchemaSelectorEnabled } from '../../../../hooks/use_is_pod_schema_selector_enabled';
 import { useAssetDetailsUrlState } from '../../../../components/asset_details/hooks/use_asset_details_url_state';
 import { MetricDetailPage } from '../metric_detail_page';
 import { useMetricsTimeContext } from '../hooks/use_metrics_time';
@@ -28,13 +27,10 @@ import { resolveDetailSchema } from '../lib/resolve_detail_schema';
 const ResolvedPodDetailSchema = ({ nodeId }: { nodeId: string }) => {
   const { data: timeRangeMetadata, status } = useTimeRangeMetadataContext();
   const [urlState] = useAssetDetailsUrlState();
-  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
 
   const schema = resolveDetailSchema({
     urlSchema: urlState?.preferredSchema,
     timeRangeMetadata,
-    nodeType: 'pod',
-    isPodSchemaSelectorEnabled,
   });
 
   const value = useMemo(
@@ -53,7 +49,6 @@ const ResolvedPodDetailSchema = ({ nodeId }: { nodeId: string }) => {
 };
 
 export const PodMetricDetailSchema = ({ nodeId }: { nodeId: string }) => {
-  const isPodSchemaSelectorEnabled = useIsPodSchemaSelectorEnabled();
   const { parsedTimeRange } = useMetricsTimeContext();
 
   const { start, end, kuery } = useMemo(() => {
@@ -64,10 +59,6 @@ export const PodMetricDetailSchema = ({ nodeId }: { nodeId: string }) => {
       kuery: `${KUBERNETES_POD_UID}:"${escapedId}" or ${K8S_POD_UID}:"${escapedId}"`,
     };
   }, [nodeId, parsedTimeRange.from, parsedTimeRange.to]);
-
-  if (!isPodSchemaSelectorEnabled) {
-    return <MetricDetailPage />;
-  }
 
   return (
     <TimeRangeMetadataProvider dataSource="pod" start={start} end={end} kuery={kuery}>

@@ -67,6 +67,26 @@ describe('obtainSandboxStepDefinition', () => {
 
   // Sandbox tools key the workspace on `<space>__<conversation>`. Hydrate writers
   // must receive that same id or they write into a workspace the agent never reads.
+  it('recovers when the first allocate attempt fails', async () => {
+    const sandboxStart = makeSandboxStart();
+    const pluginLogger = loggerMock.create();
+    const definition = obtainSandboxStepDefinition({
+      getSandboxStart: () => sandboxStart,
+      logger: pluginLogger,
+    });
+
+    statFiles.mockRejectedValueOnce(new Error('connection dropped'));
+    const result = await definition.handler(createContext('conv-1'));
+
+    expect(statFiles).toHaveBeenCalledTimes(2);
+    expect(pluginLogger.warn).toHaveBeenCalledWith(
+      expect.stringMatching(/retrying once: connection dropped/)
+    );
+    expect(result).toEqual({
+      output: { sandbox_id: 'default__conv-1', conversation_id: 'conv-1' },
+    });
+  });
+
   it('scopes the sandbox_id to the space the workflow runs in', async () => {
     const sandboxStart = makeSandboxStart();
     const definition = obtainSandboxStepDefinition({
@@ -128,7 +148,7 @@ describe('obtainSandboxStepDefinition', () => {
     [
       'workspace allocation',
       () => {
-        statFiles.mockRejectedValueOnce(new Error('sandbox API unavailable'));
+        statFiles.mockRejectedValue(new Error('sandbox API unavailable'));
         return makeSandboxStart();
       },
     ],
@@ -163,7 +183,7 @@ describe('obtainSandboxStepDefinition', () => {
     [
       'workspace allocation',
       () => {
-        statFiles.mockRejectedValueOnce(new Error('allocation failed'));
+        statFiles.mockRejectedValue(new Error('allocation failed'));
         return makeSandboxStart();
       },
     ],

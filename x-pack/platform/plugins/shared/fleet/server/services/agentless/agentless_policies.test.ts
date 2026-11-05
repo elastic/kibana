@@ -16,6 +16,7 @@ import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { createAppContextStartContractMock, createPackagePolicyServiceMock } from '../../mocks';
 import { assertSecretIdsReusable, deleteSecretsIfNotReferenced } from '../secrets';
 import { getInstallation, getPackageInfo } from '../epm/packages';
+import { getPackagePoliciesUpgradeBreakingChanges } from '../epm/packages/breaking_changes';
 import { appContextService, cloudConnectorService } from '..';
 import { agentPolicyService } from '../agent_policy';
 import { agentlessAgentService } from '../agents/agentless_agent';
@@ -23,6 +24,10 @@ import { agentlessAgentService } from '../agents/agentless_agent';
 import { AgentlessPoliciesServiceImpl } from './agentless_policies';
 
 jest.mock('../epm/packages/get');
+jest.mock('../epm/packages/breaking_changes', () => ({
+  ...jest.requireActual('../epm/packages/breaking_changes'),
+  getPackagePoliciesUpgradeBreakingChanges: jest.fn(),
+}));
 
 jest.mock('../agent_policy');
 jest.mock('../secrets', () => ({
@@ -170,6 +175,83 @@ describe('AgentlessPoliciesService', () => {
         expect.objectContaining({
           throwOnAgentlessError: true,
         })
+      );
+    });
+
+    it('should refresh the agent version conditions of the agent policy before deploying it', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+      jest.mocked(agentPolicyService.update).mockResolvedValue({} as any);
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await agentlessPoliciesService.createAgentlessPolicy({
+        id: 'test-agentless-policy-id',
+        name: 'Test Agentless Policy',
+        namespace: 'default',
+        package: {
+          name: 'agentless_integration',
+          version: '1.0.0',
+        },
+        inputs: {},
+      });
+
+      // The package policy is created without bumping the revision, which is what computes
+      // `has_agent_version_conditions` otherwise: it is refreshed without a revision bump or deploy event.
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledTimes(1);
+      expect(jest.mocked(agentPolicyService.update)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-agentless-policy-id',
+        {},
+        expect.objectContaining({ bumpRevision: false, skipValidation: true })
+      );
+      const [updateOrder] = jest.mocked(agentPolicyService.update).mock.invocationCallOrder;
+      const [packagePolicyOrder] = jest.mocked(packagePolicyService.create).mock
+        .invocationCallOrder;
+      const [deployOrder] = jest.mocked(agentPolicyService.deployPolicy).mock.invocationCallOrder;
+      expect(packagePolicyOrder).toBeLessThan(updateOrder);
+      expect(updateOrder).toBeLessThan(deployOrder);
+    });
+
+    it('should delete agent policy if the agent version conditions cannot be refreshed', async () => {
+      const soClient = savedObjectsClientMock.create();
+      const esClient = elasticsearchServiceMock.createClusterClient().asInternalUser;
+      const logger = loggingSystemMock.createLogger();
+      jest.mocked(agentPolicyService.update).mockRejectedValueOnce(new Error('update failed'));
+
+      const agentlessPoliciesService = new AgentlessPoliciesServiceImpl(
+        packagePolicyService,
+        soClient,
+        esClient,
+        logger
+      );
+
+      await expect(() =>
+        agentlessPoliciesService.createAgentlessPolicy({
+          id: 'test-agentless-policy-id',
+          name: 'Test Agentless Policy',
+          namespace: 'default',
+          package: {
+            name: 'agentless_integration',
+            version: '1.0.0',
+          },
+          inputs: {},
+        })
+      ).rejects.toThrow('update failed');
+
+      expect(jest.mocked(agentPolicyService.deployPolicy)).not.toHaveBeenCalled();
+      expect(jest.mocked(agentPolicyService.delete)).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.anything(),
+        'test-agentless-policy-id',
+        expect.objectContaining({ force: true })
       );
     });
 
@@ -1606,6 +1688,24 @@ describe('AgentlessPoliciesService', () => {
       expect(result).not.toHaveProperty('supports_agentless');
     });
 
+    it('should return the cloud onboarding instance that manages the policy, if any', async () => {
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ onboarding_deployment_id: 'deploy-1' })
+      );
+      expect(await createService().getAgentlessPolicy('agentless-policy-id')).toHaveProperty(
+        'onboarding_deployment_id',
+        'deploy-1'
+      );
+
+      // A policy the instance no longer manages has a cleared (null) value, which is left out.
+      packagePolicyService.get.mockResolvedValueOnce(
+        buildAgentlessPackagePolicy({ onboarding_deployment_id: null })
+      );
+      expect(await createService().getAgentlessPolicy('agentless-policy-id')).not.toHaveProperty(
+        'onboarding_deployment_id'
+      );
+    });
+
     it('should return null when the package policy is not agentless', async () => {
       packagePolicyService.get.mockResolvedValueOnce(
         buildAgentlessPackagePolicy({ supports_agentless: false })
@@ -1733,6 +1833,83 @@ describe('AgentlessPoliciesService', () => {
     beforeEach(() => {
       jest.resetAllMocks();
       packagePolicyService = createPackagePolicyServiceMock();
+      jest.mocked(getPackagePoliciesUpgradeBreakingChanges).mockResolvedValue([]);
+    });
+
+    describe('breaking changes', () => {
+      const breakingChanges = [
+        {
+          version: '2.0.0',
+          changes: [
+            {
+              description: 'Removed the foo input.',
+              link: 'https://github.com/elastic/integrations/pull/1',
+              type: 'breaking-change' as any,
+            },
+          ],
+        },
+      ];
+
+      beforeEach(() => {
+        jest.mocked(getInstallation).mockResolvedValue({ version: '2.0.0' } as any);
+        packagePolicyService.getByIDs.mockResolvedValue([
+          buildAgentlessPackagePolicy({ id: 'a' }),
+          buildAgentlessPackagePolicy({ id: 'b' }),
+        ]);
+        packagePolicyService.bulkUpgrade.mockResolvedValue([{ id: 'b', name: 'B', success: true }]);
+      });
+
+      it('should report policies with unacknowledged breaking changes as per-policy failures and upgrade the others', async () => {
+        jest.mocked(getPackagePoliciesUpgradeBreakingChanges).mockResolvedValue([
+          {
+            packagePolicy: buildAgentlessPackagePolicy({ id: 'a', name: 'A' }),
+            toVersion: '2.0.0',
+            breakingChanges,
+          },
+        ]);
+
+        const result = await createService().bulkUpgradeAgentlessPolicies(['a', 'b']);
+
+        expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['b'],
+          expect.objectContaining({})
+        );
+        expect(result).toEqual([
+          {
+            id: 'a',
+            name: 'A',
+            success: false,
+            statusCode: 400,
+            body: {
+              message: expect.stringContaining(
+                'Package policy a: Upgrading test_agentless from 1.0.0 to 2.0.0 includes breaking changes'
+              ),
+            },
+          },
+          { id: 'b', name: 'B', success: true },
+        ]);
+      });
+
+      it('should not check breaking changes when acknowledged', async () => {
+        packagePolicyService.bulkUpgrade.mockResolvedValue([
+          { id: 'a', name: 'A', success: true },
+          { id: 'b', name: 'B', success: true },
+        ]);
+
+        await createService().bulkUpgradeAgentlessPolicies(['a', 'b'], undefined, {
+          acknowledgeBreakingChanges: true,
+        });
+
+        expect(getPackagePoliciesUpgradeBreakingChanges).not.toHaveBeenCalled();
+        expect(packagePolicyService.bulkUpgrade).toHaveBeenCalledWith(
+          expect.anything(),
+          expect.anything(),
+          ['a', 'b'],
+          expect.objectContaining({})
+        );
+      });
     });
 
     it('should upgrade each agentless policy and let the engine schedule the deploy', async () => {

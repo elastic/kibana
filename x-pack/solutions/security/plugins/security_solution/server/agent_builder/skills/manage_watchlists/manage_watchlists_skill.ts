@@ -47,7 +47,7 @@ Do **NOT** use this skill for:
 | \`security.create_watchlist\` | required | Create a new watchlist. |
 | \`security.update_watchlist\` | required | Rename / change description / change risk modifier — pass only the fields that are changing. |
 | \`security.delete_watchlist\` | required | Permanently delete a watchlist and its linked sources. Managed watchlists cannot be deleted this way. |
-| \`security.add_entities_to_watchlist\` | required | Add specific entities (by EUID), right now, once. |
+| \`security.add_entities_to_watchlist\` | required | Add specific entities, right now, once. |
 | \`security.remove_entities_from_watchlist\` | required | Remove specific entities from **manual** membership. Source-derived entities report as \`not_found\` — use the two tools below instead. |
 | \`security.set_watchlist_rule_based_data_source\` | required | Create or update the rule-based data source (\`store\` or \`index\`) that keeps membership in sync going forward. |
 | \`security.remove_watchlist_rule_based_data_source\` | required | Remove the rule-based data source of a given type. |
@@ -87,7 +87,7 @@ User: "Create a watchlist called Compromised Accounts and add users user:jsmith1
 
 1. Call \`security.create_watchlist\` with \`{ name: "Compromised Accounts" }\`. Confirm and create.
 2. With the new watchlist's id from step 1, call \`security.add_entities_to_watchlist\` with \`{ watchlistId: "<id from step 1>", entityIds: ["user:jsmith123", "user:rjones456"] }\`. Confirm and add.
-3. Summarize both outcomes: the watchlist was created and N of M entities were added (mention \`not_found\` or \`failed\` items if any).
+3. Summarize both outcomes: the watchlist was created and N of M entities were added (mention \`not_found\`, \`failed\`, or \`unresolvedReferences\` if any).
 
 ### Query-then-add flow (one-time)
 User: "Add all critical-risk users to the Privileged Users watchlist."
@@ -95,7 +95,7 @@ User: "Add all critical-risk users to the Privileged Users watchlist."
 1. Call \`security.get_watchlist_id\` with \`{ identifier: "Privileged Users" }\` to resolve the id.
 2. Call \`security.search_entities\` with \`{ entityTypes: ["user"], riskLevels: ["Critical"] }\` to find the candidate entities. Collect each result's \`entity.id\` field.
 3. Call \`security.add_entities_to_watchlist\` with \`{ watchlistId: "<id from step 1>", entityIds: <ids from step 2> }\`. Confirm; the prompt names the watchlist and shows the entity-id preview.
-4. Summarize: how many entities were added, how many failed, how many were not found. This is a **one-time, point-in-time** add — it does not track new critical-risk users going forward. If the user wants that, see the rule-based data source flow below.
+4. Summarize: how many entities were added, how many failed, how many were not found, and any \`unresolvedReferences\` the user still needs to pick. This is a **one-time, point-in-time** add — it does not track new critical-risk users going forward. If the user wants that, see the rule-based data source flow below.
 
 ### Rule-based data source
 Sets up (or replaces) the automatic rule — a KQL query against the entity store, or a correlated index — that keeps membership in sync going forward, as opposed to a one-time add.

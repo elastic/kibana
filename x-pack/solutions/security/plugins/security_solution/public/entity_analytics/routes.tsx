@@ -151,7 +151,7 @@ const EntityAnalyticsHomePageContainer: React.FC = React.memo(() => {
         path={ENTITY_ANALYTICS_HOME_PAGE_PATH}
         exact
         render={() => (
-          <PluginTemplateWrapper>
+          <PluginTemplateWrapper paddingSize={isNewHomePageEnabled ? 'none' : undefined}>
             <PageComponent />
           </PluginTemplateWrapper>
         )}

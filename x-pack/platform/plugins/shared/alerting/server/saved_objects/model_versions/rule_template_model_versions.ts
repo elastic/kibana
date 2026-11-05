@@ -14,6 +14,9 @@ import {
   rawRuleTemplateSchemaV2,
   rawRuleTemplateSchemaV3,
   rawRuleTemplateSchemaV4,
+  alertingV1RawRuleTemplateSchemaV5,
+  alertingV2RawRuleTemplateSchemaV5,
+  rawRuleTemplateSchemaV5,
 } from '../schemas/raw_rule_template';
 
 export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
@@ -88,8 +91,8 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
   },
   /**
    * Indexes the alerting v2 template fields nested under `rule` that the v2 read
-   * APIs search, tag-filter, sort, and aggregate on. Attributes are unchanged, so
-   * the model version 4 schemas still apply and no backfill is needed.
+   * APIs search, tag-filter, sort, and aggregate on. Attributes are unchanged and no
+   * backfill is needed.
    */
   '5': {
     changes: [
@@ -125,10 +128,10 @@ export const ruleTemplateModelVersions: SavedObjectsModelVersionMap = {
     ],
     schemas: {
       forwardCompatibility: schema.oneOf([
-        alertingV1RawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
-        alertingV2RawRuleTemplateSchemaV4.extends({}, { unknowns: 'ignore' }),
+        alertingV1RawRuleTemplateSchemaV5.extends({}, { unknowns: 'ignore' }),
+        alertingV2RawRuleTemplateSchemaV5.extends({}, { unknowns: 'ignore' }),
       ]) as unknown as ObjectType,
-      create: rawRuleTemplateSchemaV4 as unknown as ObjectType,
+      create: rawRuleTemplateSchemaV5 as unknown as ObjectType,
     },
   },
 };

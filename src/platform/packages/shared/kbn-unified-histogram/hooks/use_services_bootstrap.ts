@@ -97,7 +97,7 @@ export const useServicesBootstrap = (
   const [api] = useState<UnifiedHistogramApi>(() => ({
     fetch: async (params) => {
       const fetchId = ++latestFetchIdRef.current;
-      const { fetchParams: nextFetchParams, lensDataView } = await processFetchParams({
+      const nextFetchParams = await processFetchParams({
         params,
         services,
         initialBreakdownField,
@@ -117,7 +117,7 @@ export const useServicesBootstrap = (
       }
 
       let updatedLensVisServiceState: LensVisServiceState | undefined;
-      if (updatedLensVisService && enableLensVisService && lensDataView) {
+      if (updatedLensVisService && enableLensVisService) {
         updatedLensVisServiceState = updatedLensVisService.update({
           externalVisContext: nextFetchParams.externalVisContext,
           queryParams: {
@@ -125,17 +125,17 @@ export const useServicesBootstrap = (
             query: nextFetchParams.query,
             filters: nextFetchParams.filters,
             timeRange: nextFetchParams.timeRange,
-            isPlainRecord: nextFetchParams.isESQLQuery,
             columns: nextFetchParams.columns,
             columnsMap: nextFetchParams.columnsMap,
           },
           timeInterval:
-            !nextFetchParams.isTimeBased && !nextFetchParams.isESQLQuery
+            !nextFetchParams.isTimeBased && nextFetchParams.dataSource.kind !== 'esql'
               ? undefined
               : nextFetchParams.timeInterval,
           breakdownField: nextFetchParams.breakdown?.field,
           table: nextFetchParams.table,
-          onVisContextChanged: nextFetchParams.isESQLQuery ? onVisContextChanged : undefined,
+          onVisContextChanged:
+            nextFetchParams.dataSource.kind === 'esql' ? onVisContextChanged : undefined,
           getModifiedVisAttributes: nextFetchParams.getModifiedVisAttributes
             ? (attributes) => {
                 return (

@@ -11,7 +11,7 @@ import { createHttpFetchError } from '@kbn/core-http-browser-mocks';
 import { httpServiceMock } from '@kbn/core/public/mocks';
 import {
   DISCOVER_SESSION_INTERNAL_API_BASE_PATH,
-  DISCOVER_SESSION_API_VERSION,
+  DISCOVER_SESSION_INTERNAL_API_VERSION,
 } from '../../common/constants';
 import { createDiscoverSessionClient } from './api_client';
 
@@ -30,7 +30,7 @@ describe('Discover session API client', () => {
 
     await expect(client.create(data)).resolves.toBe(response);
     expect(http.post).toHaveBeenCalledWith(DISCOVER_SESSION_INTERNAL_API_BASE_PATH, {
-      version: DISCOVER_SESSION_API_VERSION,
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
       body: JSON.stringify(data),
     });
   });
@@ -54,7 +54,7 @@ describe('Discover session API client', () => {
       },
     });
     expect(http.get).toHaveBeenCalledWith(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/session-id`, {
-      version: DISCOVER_SESSION_API_VERSION,
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
       asResponse: true,
     });
   });
@@ -66,7 +66,7 @@ describe('Discover session API client', () => {
 
     await expect(client.upsert('session-id', data)).resolves.toBe(response);
     expect(http.put).toHaveBeenCalledWith(`${DISCOVER_SESSION_INTERNAL_API_BASE_PATH}/session-id`, {
-      version: DISCOVER_SESSION_API_VERSION,
+      version: DISCOVER_SESSION_INTERNAL_API_VERSION,
       body: JSON.stringify(data),
     });
   });
@@ -103,7 +103,7 @@ describe('Discover session API client', () => {
 
     await expect(client.upsert('deleted-session', data)).rejects.toMatchObject({
       message: 'Not found',
-      cause: { response: { status: 404 } },
+      response: { status: 404 },
     });
     expect(http.post).not.toHaveBeenCalled();
   });
@@ -151,7 +151,7 @@ describe('Discover session API client', () => {
     });
   });
 
-  it('uses the server message and keeps the original cause when create fails', async () => {
+  it('preserves the HTTP error without promoting its response body when create fails', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createBadRequestError();
@@ -159,11 +159,11 @@ describe('Discover session API client', () => {
 
     const result = client.create(data);
 
-    await expect(result).rejects.toThrow('chart_interval must be a supported value');
-    await expect(result).rejects.toHaveProperty('cause', error);
+    await expect(result).rejects.toThrow('Bad Request');
+    await expect(result).rejects.toBe(error);
   });
 
-  it('uses the server message and keeps the original cause when the PUT request fails', async () => {
+  it('preserves the HTTP error without promoting its response body when PUT fails', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createBadRequestError();
@@ -171,11 +171,11 @@ describe('Discover session API client', () => {
 
     const result = client.upsert('session-id', data);
 
-    await expect(result).rejects.toThrow('chart_interval must be a supported value');
-    await expect(result).rejects.toHaveProperty('cause', error);
+    await expect(result).rejects.toThrow('Bad Request');
+    await expect(result).rejects.toBe(error);
   });
 
-  it('falls back to the HTTP error message when the response has no message body', async () => {
+  it('falls back to the HTTP error message when GET has no message body', async () => {
     const http = httpServiceMock.createStartContract();
     const client = createDiscoverSessionClient(http);
     const error = createHttpFetchError(
@@ -184,9 +184,9 @@ describe('Discover session API client', () => {
       new Request('http://localhost'),
       new Response(undefined, { status: 500 })
     );
-    http.put.mockRejectedValue(error);
+    http.get.mockRejectedValue(error);
 
-    await expect(client.upsert('session-id', data)).rejects.toMatchObject({
+    await expect(client.get('session-id')).rejects.toMatchObject({
       message: 'Internal Server Error',
       cause: error,
     });

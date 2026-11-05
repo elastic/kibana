@@ -14,32 +14,37 @@ import {
 } from '../automation_form_values';
 import { DailyLimitField } from './daily_limit_field';
 import { AlertTriggerEditor } from './editors/alert_trigger_editor';
-import { CronTriggerEditor } from './editors/cron_trigger_editor';
 import { EveryTriggerEditor } from './editors/every_trigger_editor';
 import { SlackTriggerEditor } from './editors/slack_trigger_editor';
 import { triggerLabels } from './translations';
 import { TriggerPicker } from './trigger_picker';
 import { TriggerRow } from './trigger_row';
-import { hasDailyLimit } from '../validation';
 import { SectionHeader } from '../section_header';
+import { AutomationInstructions } from '../instructions/automation_instructions';
 
 export const AutomationTriggerSection = ({
   trigger,
+  instructions,
+  onInstructionsChange,
   dailyDispatchLimit,
   onTriggerChange,
   onDailyDispatchLimitChange,
   usedToday,
   savedLimit,
   onRaiseLimit,
+  showValidationErrors = false,
   readOnly = false,
 }: {
   trigger?: TriggerFormValues;
+  instructions: string;
+  onInstructionsChange: (instructions: string) => void;
   dailyDispatchLimit: string;
   onTriggerChange: (trigger?: TriggerFormValues) => void;
   onDailyDispatchLimitChange: (value: string) => void;
   usedToday?: number;
   savedLimit?: number;
   onRaiseLimit?: (limit: number) => void;
+  showValidationErrors?: boolean;
   readOnly?: boolean;
 }) => {
   const [stashedTriggers, setStashedTriggers] = useState<
@@ -100,9 +105,6 @@ export const AutomationTriggerSection = ({
                 readOnly={readOnly}
               />
             )}
-            {trigger.kind === 'cron' && (
-              <CronTriggerEditor trigger={trigger} onChange={onTriggerChange} readOnly={readOnly} />
-            )}
             {isSlackTrigger(trigger) && (
               <SlackTriggerEditor
                 trigger={trigger}
@@ -112,7 +114,7 @@ export const AutomationTriggerSection = ({
             )}
           </TriggerRow>
         )}
-        {trigger && hasDailyLimit(trigger) && (
+        {trigger && (
           <DailyLimitField
             value={dailyDispatchLimit}
             helpText={
@@ -126,6 +128,19 @@ export const AutomationTriggerSection = ({
             onRaiseLimit={onRaiseLimit}
             readOnly={readOnly}
           />
+        )}
+        {trigger && (
+          <>
+            <EuiSpacer size="m" />
+            <AutomationInstructions
+              key={trigger.kind}
+              trigger={trigger}
+              instructions={instructions}
+              onInstructionsChange={onInstructionsChange}
+              showValidationErrors={showValidationErrors}
+              readOnly={readOnly}
+            />
+          </>
         )}
       </EuiPanel>
     </>

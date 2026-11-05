@@ -34,6 +34,20 @@ describe('runScoutHook', () => {
     });
   });
 
+  it('runs the hook with only the given env, hiding the caller environment', () => {
+    const hook = writeHook(`printf '{"env":{"SEEN":"%s"}}' "\${AMBIENT_SECRET:-unset}"`);
+    const originalEnv = process.env;
+    process.env = { ...originalEnv, AMBIENT_SECRET: 'leaked' };
+    try {
+      expect(runScoutHook(repoRoot, hook, {})).toEqual({ SEEN: 'leaked' });
+      expect(runScoutHook(repoRoot, hook, {}, { env: { PATH: originalEnv.PATH } })).toEqual({
+        SEEN: 'unset',
+      });
+    } finally {
+      process.env = originalEnv;
+    }
+  });
+
   it('returns nothing when the hook adds nothing', () => {
     expect(runScoutHook(repoRoot, writeHook(`echo '{}'`), {})).toEqual({});
   });

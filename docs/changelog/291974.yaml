@@ -1,9 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/291974
-issues:
-- https://github.com/elastic/security-team/issues/19315
-type: bug-fix
-products:
-- product: cloud-serverless
-- product: kibana
-title: 'Fix `on-failure` being rejected on `waitForApproval`, `waitForInput`, and `workflow.execute` steps'

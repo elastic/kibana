@@ -7,6 +7,7 @@
 import type { Logger } from '@kbn/core/server';
 import type { SavedObjectsUpdateResponse, SavedObject } from '@kbn/core/server';
 import { createHash } from 'crypto';
+import { isNoisyError } from '../../telemetry/error_noise';
 import type { SyntheticsTelemetry } from '../../telemetry/synthetics_telemetry';
 import type { MonitorUpdateEvent } from '../../telemetry/types';
 
@@ -46,11 +47,14 @@ export function sendErrorTelemetryEvents(
   telemetry: SyntheticsTelemetry | undefined,
   errorEvent: MonitorErrorEvent
 ) {
-  if (telemetry === undefined) {
+  if (telemetry === undefined || isNoisyError(errorEvent)) {
     return;
   }
 
   try {
+    if (!telemetry.shouldReportError(errorEvent)) {
+      return;
+    }
     telemetry.reportEvent(MONITOR_ERROR_EVENT_TYPE, errorEvent);
   } catch (error) {
     logger.error(`reporting telemetry events failed ${error.message}`, { error });

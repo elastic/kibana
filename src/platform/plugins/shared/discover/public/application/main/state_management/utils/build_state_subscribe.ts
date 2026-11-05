@@ -12,6 +12,7 @@ import {
   internalStateActions,
   type InternalStateDispatch,
   type RuntimeStateManager,
+  getTabDataView,
   selectTabRuntimeState,
   type TabState,
   type DiscoverInternalState,
@@ -120,10 +121,9 @@ export const buildStateSubscribe =
 
       const { dataView: nextDataView, fallback } = await loadAndResolveDataView({
         dataViewId,
-        currentDataView: selectTabRuntimeState(
-          runtimeStateManager,
-          getCurrentTab().id
-        )?.currentDataView$.getValue(),
+        currentDataView: getTabDataView(
+          selectTabRuntimeState(runtimeStateManager, getCurrentTab().id)
+        ),
         isEsqlMode,
         savedDataViews: getState().savedDataViews,
         runtimeStateManager,

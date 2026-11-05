@@ -12,13 +12,16 @@ import {
   CASES_INTERNAL_URL,
   CASES_URL,
   INTERNAL_BULK_CREATE_ATTACHMENTS_URL,
+  INTERNAL_BULK_DELETE_ATTACHMENTS_URL,
   SECURITY_SOLUTION_OWNER,
   INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL,
   INTERNAL_DELETE_FILE_ATTACHMENTS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
 } from '../../common/constants';
+import { SortFieldCase } from '../../common/ui/types';
 
 import {
+  bulkDeleteAttachments,
   deleteCases,
   deleteComment,
   getActionLicense,
@@ -42,6 +45,7 @@ import {
   getSimilarCases,
   patchObservable,
   deleteObservable,
+  bulkDeleteObservables,
 } from './api';
 
 import {
@@ -1171,6 +1175,43 @@ describe('Cases API', () => {
     });
   });
 
+  describe('bulkDeleteAttachments', () => {
+    const url = INTERNAL_BULK_DELETE_ATTACHMENTS_URL.replace('{case_id}', basicCaseId);
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(null);
+    });
+
+    it('leaves include_related to the server by default', async () => {
+      await bulkDeleteAttachments({ caseId: basicCaseId, request: { ids: ['attachment-1'] } });
+
+      expect(fetchMock).toHaveBeenCalledWith(url, {
+        method: 'POST',
+        body: JSON.stringify({ ids: ['attachment-1'] }),
+        signal: undefined,
+      });
+    });
+
+    it('sends include_related when given', async () => {
+      await bulkDeleteAttachments({
+        caseId: basicCaseId,
+        request: { type: 'security.attack', attachmentIds: ['attack-1'] },
+        includeRelated: false,
+      });
+
+      expect(fetchMock).toHaveBeenCalledWith(url, {
+        method: 'POST',
+        body: JSON.stringify({
+          type: 'security.attack',
+          attachmentIds: ['attack-1'],
+          include_related: false,
+        }),
+        signal: undefined,
+      });
+    });
+  });
+
   describe('getFeatureIds', () => {
     beforeEach(() => {
       postMock.mockClear();
@@ -1296,6 +1337,41 @@ describe('Cases API', () => {
           perPage: 10,
         }),
         signal: abortCtrl.signal,
+      });
+    });
+
+    it('should omit sortField and sortOrder from the body when they are undefined', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+        sortField: undefined,
+        sortOrder: undefined,
+      });
+
+      const { body } = fetchMock.mock.calls[0][1];
+
+      expect(JSON.parse(body)).toEqual({ page: 1, perPage: 10 });
+    });
+
+    it('should include sortField and sortOrder in the body when they are set', async () => {
+      await getSimilarCases({
+        caseId: mockCase.id,
+        signal: abortCtrl.signal,
+        page: 1,
+        perPage: 10,
+        sortField: SortFieldCase.title,
+        sortOrder: 'asc',
+      });
+
+      const { body } = fetchMock.mock.calls[0][1];
+
+      expect(JSON.parse(body)).toEqual({
+        page: 1,
+        perPage: 10,
+        sortField: 'title',
+        sortOrder: 'asc',
       });
     });
 
@@ -1433,6 +1509,36 @@ describe('Cases API', () => {
     it('should return correct response', async () => {
       const resp = await deleteObservable(mockCase.id, observableId, abortCtrl.signal);
       expect(resp).toEqual(undefined);
+    });
+  });
+
+  describe('bulkDeleteObservables', () => {
+    const observableIds = [
+      'afa44220-862c-4a21-b574-351ab4d0a732',
+      'bfa44220-862c-4a21-b574-351ab4d0a733',
+    ];
+
+    beforeEach(() => {
+      fetchMock.mockClear();
+      fetchMock.mockResolvedValue(basicCaseSnake);
+    });
+
+    it('should be called with correct url, method, body, and signal', async () => {
+      await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
+
+      expect(fetchMock).toHaveBeenCalledWith(
+        `${CASES_INTERNAL_URL}/${mockCase.id}/observables/_bulk_delete`,
+        {
+          method: 'POST',
+          body: JSON.stringify({ observableIds }),
+          signal: abortCtrl.signal,
+        }
+      );
+    });
+
+    it('should return correct response', async () => {
+      const resp = await bulkDeleteObservables(mockCase.id, observableIds, abortCtrl.signal);
+      expect(resp).toEqual(basicCase);
     });
   });
 });

@@ -66,6 +66,8 @@ tags:
   - group-platform
   - shared
   - jest-unit-tests
+  - jest-integration-tests
+  - scout-tests
 fileGroups:
   src:
     - server/**/*
@@ -76,6 +78,4 @@ fileGroups:
     - test/scout_uiam_local/**/*
     - test/scout_task_manager_claim_nudge/**/*
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

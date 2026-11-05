@@ -83,10 +83,12 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     ]);
   });
 
-  it('registers nothing without Agent Builder', () => {
+  it('registers nothing without Agent Builder, and still offers the investigation card', () => {
     const plugin = createPlugin();
 
-    expect(() => plugin.start(coreMock.createStart(), {})).not.toThrow();
+    expect(plugin.start(coreMock.createStart(), {}).InvestigationCard).toEqual(
+      expect.any(Function)
+    );
   });
 
   it('registers only the investigation template, without an escalate action, when escalations are disabled', () => {
@@ -116,17 +118,19 @@ describe('AgenticInvestigationsPublicPlugin conversation template UI registratio
     const open = jest.fn();
     registerImpactEntityOpener(open);
 
-    const view = renderImpactDetails({
-      id: 'impact-1',
-      spaceId: 'default',
-      conversationId: 'conv-1',
-      createdAt: '2026-09-01T00:00:00.000Z',
-      entities: [{ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' }],
-    });
+    const view = renderImpactDetails([
+      {
+        id: 'impact-1',
+        spaceId: 'default',
+        conversationId: 'conv-1',
+        createdAt: '2026-09-01T00:00:00.000Z',
+        entities: [{ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' }],
+      },
+    ]);
 
     render(React.createElement(EuiProvider, null, React.createElement(I18nProvider, null, view)));
 
-    fireEvent.click(screen.getByTestId('investigationImpactEntityFlyout'));
+    fireEvent.click(screen.getByRole('button', { name: /cfo@corp/ }));
 
     expect(open).toHaveBeenCalledWith({ id: 'user:cfo@corp', name: 'cfo@corp', type: 'user' });
   });

@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type { EuiDataGridControlColumn } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
@@ -15,7 +14,8 @@ import deepEqual from 'fast-deep-equal';
 import { InPortal } from 'react-reverse-portal';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import type { RunTimeMappings, TimelineItem } from '@kbn/timelines-plugin/common/search_strategy';
+import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { DataTableRecord } from '@kbn/discover-utils';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useFetchNotes } from '../../../../../notes/hooks/use_fetch_notes';
@@ -240,7 +240,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -315,7 +315,7 @@ export const EqlTabContentComponent: React.FC<Props> = ({
           activeTab={activeTab}
           updatedAt={refreshedAt}
           isTextBasedQuery={false}
-          leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+          rowAdditionalLeadingControls={rowAdditionalLeadingControls}
           onUpdatePageIndex={onUpdatePageIndex}
         />
       </FullWidthFlexGroup>

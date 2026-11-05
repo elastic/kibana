@@ -7,5 +7,7 @@
 
 export const investigationQueryKeys = {
   all: ['agenticInvestigations', 'investigations'] as const,
+  detail: (id: string) => [...investigationQueryKeys.all, 'detail', id] as const,
+  card: (id: string) => [...investigationQueryKeys.all, 'card', id] as const,
   privileges: () => [...investigationQueryKeys.all, 'privileges'] as const,
 };

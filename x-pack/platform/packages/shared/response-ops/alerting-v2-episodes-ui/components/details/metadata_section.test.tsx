@@ -33,7 +33,13 @@ const runEsqlAsyncSearchMock = jest.mocked(runEsqlAsyncSearch);
 const buildDataTableRecordMock = jest.mocked(buildDataTableRecord);
 const useAlertingEpisodeSourceDataViewMock = jest.mocked(useAlertingEpisodeSourceDataView);
 
-const mockTableRender = jest.fn(() => <div data-test-subj="mock-doc-viewer-table" />);
+const mockTableRender = jest.fn(
+  (_props: {
+    dataView: {
+      getFieldByName: (name: string) => { type: string } | undefined;
+    };
+  }) => <div data-test-subj="mock-doc-viewer-table" />
+);
 
 const mockUnifiedDocViewer = {
   registry: {
@@ -64,37 +70,21 @@ const mockEpisodeEventsResponse = {
   values: [['2024-01-01T00:00:00.000Z', ALERT_EPISODE_STATUS.ACTIVE, 'rule-1', 'gh-1']],
 };
 
-// Episode event-data ESQL query response template (used by useFetchEpisodeEventDataQuery)
+// Latest event data response (used by useFetchEpisodeEventDataQuery and useFetchEpisodeQuery)
 const buildEventDataResponse = (lastData: string | null) => ({
   columns: [
-    { name: 'last_data', type: 'keyword' },
-    { name: 'last_data_timestamp', type: 'date' },
-    { name: 'last_event_timestamp', type: 'date' },
+    { name: '@timestamp', type: 'date' },
+    { name: 'episode_data', type: 'keyword' },
   ],
-  values: [
-    [
-      lastData,
-      lastData ? '2026-04-29T10:00:00.000Z' : null,
-      lastData ? '2026-04-29T10:00:00.000Z' : null,
-    ],
-  ],
+  values: lastData ? [['2026-04-29T10:00:00.000Z', lastData]] : [],
 });
-
-// Group hash lookup response (used by useFetchEpisodeQuery before the episode query)
-const mockGroupHashResponse = {
-  columns: [{ name: 'group_hash', type: 'keyword' }],
-  values: [['gh-1']],
-};
 
 // The section fires its ESQL queries concurrently, so the mock dispatches on
 // the query text instead of relying on call order.
 const mockEsqlResponses = (eventData: string | null | 'error') => {
   runEsqlAsyncSearchMock.mockImplementation(async ({ params }) => {
     const query = String(params.query ?? '');
-    if (query.includes('KEEP group_hash')) {
-      return mockGroupHashResponse;
-    }
-    if (query.includes('last_data')) {
+    if (query.includes('JSON_EXTRACT')) {
       if (eventData === 'error') {
         throw new Error('boom');
       }
@@ -107,12 +97,28 @@ const mockEsqlResponses = (eventData: string | null | 'error') => {
 const queryClient = createTestQueryClient();
 const wrapper = createQueryClientWrapper(queryClient);
 
+const sourceDataView = {
+  id: 'mock-data-view',
+  toSpec: () => ({
+    id: 'mock-data-view',
+    title: 'logs-*',
+    fields: {
+      'host.name': {
+        name: 'host.name',
+        type: 'string',
+        searchable: true,
+        aggregatable: true,
+      },
+    },
+  }),
+};
+
 describe('AlertEpisodeMetadataSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     queryClient.clear();
     useAlertingEpisodeSourceDataViewMock.mockReturnValue({
-      value: { id: 'mock-data-view' },
+      value: sourceDataView,
       loading: false,
     } as never);
   });
@@ -187,11 +193,16 @@ describe('AlertEpisodeMetadataSection', () => {
       expect.objectContaining({
         hit: expect.objectContaining({
           id: 'mock-id',
-          raw: { _source: { threshold_met: true } },
+          raw: { _source: { data: { threshold_met: true } } },
         }),
-        dataView: expect.objectContaining({ id: 'mock-data-view' }),
+        dataView: expect.objectContaining({
+          id: 'mock-data-view-data-container',
+        }),
       })
     );
+    const passedDataView = mockTableRender.mock.calls.at(-1)?.[0]?.dataView;
+    expect(passedDataView?.getFieldByName('host.name')).toBeUndefined();
+    expect(passedDataView?.getFieldByName('data.host.name')?.type).toBe('string');
   });
 
   it('strips _id/_index/_score/_ignored metadata fields from the rendered hit', async () => {
@@ -199,9 +210,9 @@ describe('AlertEpisodeMetadataSection', () => {
     // view's metaFields into `flattened` even though this hit never had real values for them.
     buildDataTableRecordMock.mockReturnValueOnce({
       id: 'mock-id',
-      raw: { _source: { threshold_met: true } },
+      raw: { _source: { data: { threshold_met: true } } },
       flattened: {
-        threshold_met: true,
+        'data.threshold_met': true,
         _id: undefined,
         _index: undefined,
         _score: undefined,
@@ -224,7 +235,7 @@ describe('AlertEpisodeMetadataSection', () => {
     expect(mockTableRender).toHaveBeenCalledWith(
       expect.objectContaining({
         hit: expect.objectContaining({
-          flattened: { threshold_met: true },
+          flattened: { 'data.threshold_met': true },
         }),
       })
     );

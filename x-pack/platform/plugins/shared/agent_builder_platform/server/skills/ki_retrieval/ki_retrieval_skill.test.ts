@@ -7,6 +7,7 @@
 
 import { isAllowedBuiltinSkill } from '@kbn/agent-builder-server/allow_lists';
 import { contextEngineAiIndexTools } from '@kbn/agent-builder-common/tools';
+import { contextEngineSkillAvailability } from '../context_engine_skill_availability';
 import { kiRetrievalSkill } from './ki_retrieval_skill';
 
 describe('kiRetrievalSkill', () => {
@@ -20,8 +21,13 @@ describe('kiRetrievalSkill', () => {
     expect(isAllowedBuiltinSkill(kiRetrievalSkill.id)).toBe(true);
   });
 
-  it('is gated behind experimental features', () => {
-    expect(kiRetrievalSkill.experimental).toBe(true);
+  it('is unavailable in spaces where the Context Engine is off', () => {
+    expect(kiRetrievalSkill.experimental).toBeFalsy();
+    expect(kiRetrievalSkill.availability).toBe(contextEngineSkillAvailability);
+  });
+
+  it('is hidden from skill listings, since Agent Builder grants it at runtime', () => {
+    expect(kiRetrievalSkill.hidden).toBe(true);
   });
 
   it('ships non-empty markdown content', () => {

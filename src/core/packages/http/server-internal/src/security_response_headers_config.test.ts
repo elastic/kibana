@@ -20,7 +20,7 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
     expect(result.securityResponseHeaders).toMatchInlineSnapshot(`
       Object {
         "Cross-Origin-Opener-Policy": "same-origin",
-        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()",
+        "Permissions-Policy": "camera=(), display-capture=(), fullscreen=(self \\"https://play.vidyard.com\\"), geolocation=(self), microphone=(), web-share=()",
         "Referrer-Policy": "strict-origin-when-cross-origin",
         "X-Content-Type-Options": "nosniff",
       }
@@ -82,6 +82,16 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(permissionsPolicy);
     });
 
+    // Without these, Maps' browser location, the Canvas `location()` function and the fullscreen
+    // toggle on Security Solution's embedded Vidyard videos are blocked by Kibana's own policy.
+    it('allows the features that Kibana itself uses by default', () => {
+      const result = parse(schema.validate({}), { report_to: [] });
+      const policy = result.securityResponseHeaders['Permissions-Policy'];
+      expect(policy).toContain('geolocation=(self)');
+      expect(policy).toContain('fullscreen=(self "https://play.vidyard.com")');
+      expect(policy).toContain('camera=()');
+    });
+
     it('a null value removes the Permissions-Policy header', () => {
       const config = schema.validate({ permissionsPolicy: null });
       const result = parse(config, { report_to: [] });
@@ -95,6 +105,26 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
         'display-capture=(self);report-to=violations-endpoint'
       );
     });
+
+    // `report-to` belongs to each directive. Appended once to the end, it only covered `web-share`,
+    // and browsers dropped violations of every other directive.
+    it('attaches report-to to every directive of the default policy', () => {
+      const config = schema.validate({});
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'camera=();report-to=violations-endpoint, display-capture=();report-to=violations-endpoint, fullscreen=(self "https://play.vidyard.com");report-to=violations-endpoint, geolocation=(self);report-to=violations-endpoint, microphone=();report-to=violations-endpoint, web-share=();report-to=violations-endpoint'
+      );
+    });
+
+    it('uses only the first reporting endpoint', () => {
+      const config = schema.validate({ permissionsPolicy: 'camera=(), microphone=()' });
+      const result = parse(config, { report_to: ['first', 'second'] });
+      // The whole list used to be interpolated, which serialized as `report-to=first,second` and
+      // turned `second` into a member of the policy.
+      expect(result.securityResponseHeaders['Permissions-Policy']).toEqual(
+        'camera=();report-to=first, microphone=();report-to=first'
+      );
+    });
   });
 
   describe('permissionsPolicyReportOnly', () => {
@@ -103,6 +133,14 @@ describe('parseRawSecurityResponseHeadersConfig', () => {
       const result = parse(config, { report_to: ['violations-endpoint'] });
       expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
         'display-capture=(self);report-to=violations-endpoint'
+      );
+    });
+
+    it('attaches report-to to every directive of the report-only policy', () => {
+      const config = schema.validate({ permissionsPolicyReportOnly: 'camera=(), microphone=()' });
+      const result = parse(config, { report_to: ['violations-endpoint'] });
+      expect(result.securityResponseHeaders['Permissions-Policy-Report-Only']).toEqual(
+        'camera=();report-to=violations-endpoint, microphone=();report-to=violations-endpoint'
       );
     });
 

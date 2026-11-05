@@ -39,6 +39,14 @@ describe('PlainIndexDataClient', () => {
     });
   });
 
+  it('refresh targets the configured index', async () => {
+    const { esClient, dataAccess } = createDataAccess();
+
+    await dataAccess.refresh();
+
+    expect(esClient.indices.refresh).toHaveBeenCalledWith({ index: '.workflows-executions' });
+  });
+
   it('bulk stamps the configured index on plain items', async () => {
     const { esClient, dataAccess } = createDataAccess();
     esClient.bulk.mockResolvedValue({
@@ -107,7 +115,7 @@ describe('PlainIndexDataClient', () => {
         {
           _id: 'a',
           _index: '.workflows-executions',
-          _source: { includes: ['status'] },
+          _source: { includes: ['status', 'deleted'] },
         },
       ],
     });

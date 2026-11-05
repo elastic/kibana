@@ -203,6 +203,34 @@ describe('TableActions', () => {
       });
     });
 
+    it.each([
+      ['a URL', 'https://www.elastic.co/downloads/beats/filebeat'],
+      ['a value with quotes', 'Large "capybara"'],
+      ['a value starting with a formula character', '=HYPERLINK("https://example.com")'],
+    ])('should copy %s without CSV escaping', async (_name, value) => {
+      // Given
+      const actions = getFieldValueCellActions({
+        rows: getRows('message', value),
+        toasts: toastsMock,
+        isEsqlMode: false,
+        onFilter: undefined,
+      }).map((Action, i) => (
+        <Action
+          key={i}
+          {...EuiCellParams}
+          Component={(props: any) => <div {...props}>{props.children}</div>}
+        />
+      ));
+      render(<>{actions}</>);
+      const user = userEvent.setup();
+
+      // When
+      await user.click(screen.getByText('Copy value'));
+
+      // Then
+      expect(mockCopyToClipboard).toHaveBeenCalledWith(value);
+    });
+
     it('should allow filtering in ES|QL mode', () => {
       const actions = getFieldValueCellActions({
         rows: getRows('extension'),

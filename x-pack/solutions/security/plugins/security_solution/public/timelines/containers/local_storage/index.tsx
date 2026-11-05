@@ -13,7 +13,7 @@ import type {
   TableIdLiteral,
 } from '@kbn/securitysolution-data-table';
 import { tableEntity, TableEntityType, TableId } from '@kbn/securitysolution-data-table';
-import type { ColumnHeaderOptions } from '@kbn/timelines-plugin/common';
+import type { ColumnHeaderOptions } from '@kbn/securitysolution-timeline-common';
 import { assigneesColumn } from '../../../detections/configurations/security_solution_detections/columns';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS, VIEW_SELECTION } from '../../../../common/constants';
 import type { DataTablesStorage } from './types';
@@ -278,6 +278,36 @@ export const addAssigneesSpecsToSecurityDataTableIfNeeded = (
   }
 };
 
+const ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY = 'securityAlertsTablePageSizeMigrated_v1';
+
+const migrateAlertsTablePageSize = (
+  storage: Storage,
+  dataTableState: DataTableState['dataTable']['tableById']
+) => {
+  if (storage.get(ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY)) return;
+
+  const alertTableIds = [
+    TableId.alertsOnAlertsPage,
+    TableId.alertsOnAttacksPage,
+    TableId.alertsOnRuleDetailsPage,
+  ];
+
+  let updated = false;
+  for (const tableId of alertTableIds) {
+    const table = dataTableState[tableId];
+    if (table?.itemsPerPage === 25) {
+      dataTableState[tableId] = { ...table, itemsPerPage: 50 };
+      updated = true;
+    }
+  }
+
+  if (updated) {
+    storage.set(LOCAL_STORAGE_TABLE_KEY, dataTableState);
+  }
+
+  storage.set(ALERTS_TABLE_PAGE_SIZE_MIGRATION_KEY, true);
+};
+
 export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdLiteral[]) => {
   let allDataTables = storage.get(LOCAL_STORAGE_TABLE_KEY);
   const legacyTimelineTables = storage.get(LOCAL_STORAGE_TIMELINE_KEY_LEGACY);
@@ -294,6 +324,7 @@ export const getDataTablesInStorageByIds = (storage: Storage, tableIds: TableIdL
   migrateTriggerActionsVisibleColumnsAlertTable88xTo89(storage);
   addAssigneesSpecsToSecurityDataTableIfNeeded(storage, allDataTables);
   migrateEntityRiskLevelColumnTitle(storage, allDataTables);
+  migrateAlertsTablePageSize(storage, allDataTables);
 
   return tableIds.reduce((acc, tableId) => {
     const tableModel = allDataTables[tableId];

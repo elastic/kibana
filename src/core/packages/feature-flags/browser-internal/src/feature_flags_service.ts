@@ -26,6 +26,7 @@ import { filter, map, merge, startWith, Subject } from 'rxjs';
 import { get } from 'lodash';
 import { useObservable, type ValueObservable } from '@kbn/use-observable';
 import { buildPath } from '@kbn/core-http-browser';
+import { withTimeout } from '@kbn/std';
 
 /**
  * setup method dependencies
@@ -222,21 +223,21 @@ export class FeatureFlagsService {
    */
   private async waitForProviderInitialization() {
     // Adding a timeout here to avoid hanging the start for too long if the provider is unresponsive
-    let timeoutId: NodeJS.Timeout | undefined;
-    await Promise.race([
-      this.isProviderReadyPromise,
-      new Promise((resolve) => {
-        timeoutId = setTimeout(resolve, 2 * 1000);
-      }).then(() => {
-        const msg = `The feature flags provider took too long to initialize.
+    if (!this.isProviderReadyPromise) {
+      return;
+    }
+    const outcome = await withTimeout({
+      promise: this.isProviderReadyPromise,
+      timeoutMs: 2 * 1000,
+    });
+    if (outcome.timedout) {
+      const msg = `The feature flags provider took too long to initialize.
         Won't hold the page load any longer.
         Feature flags will return the provided fallbacks until the provider is eventually initialized.`;
-        this.logger.warn(msg);
-        // Flag the transaction as slow so that we can quantify how often it happens
-        apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
-      }),
-    ]);
-    clearTimeout(timeoutId);
+      this.logger.warn(msg);
+      // Flag the transaction as slow so that we can quantify how often it happens
+      apm.getCurrentTransaction()?.addLabels({ slow_setup: true });
+    }
   }
 
   /**

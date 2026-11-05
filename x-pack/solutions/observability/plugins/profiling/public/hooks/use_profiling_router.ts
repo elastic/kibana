@@ -5,6 +5,7 @@
  * 2.0.
  */
 import type { PathsOf, TypeOf, TypeAsArgs } from '@kbn/typed-react-router-config';
+import { useMemo } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useProfilingDependencies } from '../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import type { ProfilingRouter, ProfilingRoutes } from '../routing';
@@ -34,26 +35,28 @@ export function useProfilingRouter(): StatefulProfilingRouter {
     start: { core },
   } = useProfilingDependencies();
 
-  const link = (path: string, params: { path?: object; query?: { schema?: string } } = {}) => {
-    const query = { ...params.query, schema: params.query?.schema ?? currentSchema };
+  return useMemo(() => {
+    const link = (path: string, params: { path?: object; query?: { schema?: string } } = {}) => {
+      const query = { ...params.query, schema: params.query?.schema ?? currentSchema };
 
-    // @ts-expect-error
-    return profilingRouter.link(path, { ...params, query });
-  };
+      // @ts-expect-error
+      return profilingRouter.link(path, { ...params, query });
+    };
 
-  return {
-    ...profilingRouter,
-    push: (path, ...args) => {
-      const next = link(path, ...args);
+    return {
+      ...profilingRouter,
+      push: (path, ...args) => {
+        const next = link(path, ...args);
 
-      history.push(next);
-    },
-    replace: (path, ...args) => {
-      const next = link(path, ...args);
-      history.replace(next);
-    },
-    link: (path, ...args) => {
-      return core.http.basePath.prepend('/app/profiling' + link(path, ...args));
-    },
-  };
+        history.push(next);
+      },
+      replace: (path, ...args) => {
+        const next = link(path, ...args);
+        history.replace(next);
+      },
+      link: (path, ...args) => {
+        return core.http.basePath.prepend('/app/profiling' + link(path, ...args));
+      },
+    };
+  }, [history, currentSchema, core]);
 }

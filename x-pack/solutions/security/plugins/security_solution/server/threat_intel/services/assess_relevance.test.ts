@@ -90,10 +90,7 @@ describe('assessRelevance', () => {
     const { model } = buildModel();
     const withStructuredOutput = jest.spyOn(model.chatModel, 'withStructuredOutput');
     await assessRelevance(model, logger, { text: 'body' });
-    expect(withStructuredOutput).toHaveBeenCalledWith(
-      expect.objectContaining({ _def: expect.anything() }),
-      { includeRaw: true }
-    );
+    expect(withStructuredOutput).toHaveBeenCalledWith(relevanceOutputSchema, { includeRaw: true });
   });
 
   it('sends the full body when it fits model context', async () => {

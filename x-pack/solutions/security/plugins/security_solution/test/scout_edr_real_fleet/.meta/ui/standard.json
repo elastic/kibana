@@ -1,5 +1,5 @@
 {
-  "sha1": "155db5cfd18480f3683e929ab876c66151370210",
+  "sha1": "592caf2f1c81ae01ce089db2085900dc2403c36d",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -14,8 +14,8 @@
       ],
       "location": {
         "file": "x-pack/solutions/security/plugins/security_solution/test/scout_edr_real_fleet/ui/tests/automated_response_actions.spec.ts",
-        "line": 34,
-        "column": 16
+        "line": 38,
+        "column": 9
       }
     }
   ]

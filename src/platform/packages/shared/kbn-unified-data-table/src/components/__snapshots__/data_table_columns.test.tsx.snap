@@ -26,7 +26,9 @@ Array [
       "showMoveLeft": true,
       "showMoveRight": true,
     },
-    "cellActions": Array [],
+    "cellActions": Array [
+      [Function],
+    ],
     "display": <Memo(UnifiedDataTableSourceColumnHeader)
       columnDisplayName="Summary"
       headerRowHeight={5}
@@ -36,6 +38,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "_source",
+    "isResizable": true,
     "isSortable": false,
     "schema": "kibana-json",
     "visibleCellActions": undefined,
@@ -94,6 +97,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -144,7 +148,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -162,6 +166,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -307,6 +312,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -516,6 +522,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -707,6 +714,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -896,6 +904,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -951,7 +960,7 @@ Array [
       columnName="extension"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -969,6 +978,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -1115,6 +1125,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1165,7 +1176,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -1183,6 +1194,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -1329,6 +1341,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1520,6 +1533,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1704,6 +1718,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -1913,6 +1928,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -2103,6 +2119,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2291,6 +2308,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": false,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2502,6 +2520,7 @@ Array [
     },
     "id": "timestamp",
     "initialWidth": 212,
+    "isResizable": true,
     "isSortable": true,
     "schema": "datetime",
     "visibleCellActions": undefined,
@@ -2552,7 +2571,7 @@ Array [
       columnName="extension"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -2570,6 +2589,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2715,6 +2735,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "extension",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,
@@ -2765,7 +2786,7 @@ Array [
       columnName="message"
       dataSource={
         Object {
-          "datasetKey": "esql:mock::",
+          "datasetId": "esql-mock-",
           "fields": Array [],
           "getColumn": [Function],
           "getColumns": [Function],
@@ -2783,6 +2804,7 @@ Array [
           "serialize": [Function],
           "timeFieldName": undefined,
           "title": "mock",
+          "toFilterableSource": [Function],
           "withColumns": [Function],
         }
       }
@@ -2928,6 +2950,7 @@ Array [
       "className": "unifiedDataTable__headerCell",
     },
     "id": "message",
+    "isResizable": true,
     "isSortable": true,
     "schema": "string",
     "visibleCellActions": undefined,

@@ -21,7 +21,7 @@ import type { CPSPluginStart } from '@kbn/cps/public';
 import type { AgentBuilderPluginStart } from '@kbn/agent-builder-plugin/public';
 import type { WorkflowsExtensionsPublicPluginSetup } from '@kbn/workflows-extensions/public';
 import { WorkflowApi } from '@kbn/workflows-ui';
-import { ALERTING_V2_ENABLED_SETTING_ID } from '@kbn/alerting-v2-constants';
+import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
 import { ActionPoliciesApi } from './services/action_policies_api';
 import { ExecutionHistoryApi } from './services/execution_history_api';
 import { RuleChangeHistoryApi } from './services/rule_change_history_api';
@@ -42,7 +42,7 @@ import {
   AlertingV2ActionPoliciesLocatorDefinition,
   AlertingV2ExecutionHistoryLocatorDefinition,
   createAlertingV2HostApp,
-} from './locators';
+} from '../common/locators';
 
 const LazyCreateRuleOptionsFlyout = React.lazy(() =>
   import('./create_rule_options_flyout').then((m) => ({ default: m.CreateRuleOptionsFlyout }))
@@ -88,14 +88,18 @@ export type {
   PrivilegeCheck,
 } from './types';
 export type { CreateRuleOptionsFlyoutProps } from './create_rule_options_flyout';
-export type { AlertingV2HostApp, CreateAlertingV2HostApp } from './locator_host';
+export type { AlertingV2HostApp, CreateAlertingV2HostApp } from '../common/locators';
 export type {
   AlertingV2RulesLocatorParams,
   AlertingV2RuleLibraryLocatorParams,
   AlertingV2EpisodesLocatorParams,
   AlertingV2ActionPoliciesLocatorParams,
   AlertingV2ExecutionHistoryLocatorParams,
-} from './locators';
+} from '../common/locators';
+export {
+  useV2RulesTabNewBadge,
+  V2_RULES_TAB_NEW_BADGE_VISITED_STORAGE_KEY,
+} from './hooks/use_v2_rules_tab_new_badge';
 
 const pluginModule = new ContainerModule(({ bind }) => {
   bind(RulesApi).toSelf().inSingletonScope();
@@ -214,12 +218,7 @@ const pluginModule = new ContainerModule(({ bind }) => {
         container: diContainer,
       });
 
-      const alertingEnabled = coreStart.settings.globalClient.get<boolean>(
-        ALERTING_V2_ENABLED_SETTING_ID,
-        false
-      );
-
-      if (!alertingEnabled) {
+      if (!isAlertingV2Enabled(coreStart)) {
         return;
       }
 

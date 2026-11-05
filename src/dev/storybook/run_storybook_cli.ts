@@ -58,10 +58,12 @@ run(
     flags: {
       default: {},
       string: [],
-      boolean: ['clean', 'site'],
+      boolean: ['clean', 'site', 'shared-bundles-prebuilt'],
       help: `
       --clean            Clean Storybook build folder.
       --site             Build static version of Storybook.
+      --shared-bundles-prebuilt
+                         Reuse shared frontend bundles built by the caller.
     `,
     },
   }

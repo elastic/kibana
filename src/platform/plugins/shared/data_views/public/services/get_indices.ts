@@ -86,12 +86,15 @@ export async function getIndices({
   showAllIndices = false,
   isRollupIndex,
   projectRouting,
+  throwOnError = false,
 }: {
   http: HttpStart;
   pattern: string;
   showAllIndices?: boolean;
   isRollupIndex: (indexName: string) => boolean;
   projectRouting?: string;
+  /** Rethrow request failures instead of resolving with an empty list */
+  throwOnError?: boolean;
 }): Promise<MatchedItem[]> {
   const pattern = rawPattern.trim();
 
@@ -113,13 +116,15 @@ export async function getIndices({
     return [];
   }
 
-  return getIndicesViaResolve({
+  const indices = getIndicesViaResolve({
     http,
     pattern,
     showAllIndices,
     isRollupIndex,
     projectRouting,
-  }).catch(() => []);
+  });
+
+  return throwOnError ? indices : indices.catch(() => []);
 }
 
 export const responseToItemArray = (

@@ -12,12 +12,22 @@ import {
   sendGetPackageInfoByKey,
 } from '@kbn/fleet-plugin/public';
 
+import { getEffectiveNamespace } from '../../common/effective_namespace';
 import type { ServiceVars } from '../service_settings_step/use_service_settings';
 import { buildPackageInputs, buildPackageVars, getPackageVarNames } from './package_inputs';
-import { detectSecretRefs } from './secret_refs';
+import {
+  detectSecretRefs,
+  fetchPackagePolicySecretRefs,
+  withoutCoveredCredentials,
+} from './secret_refs';
 import type { ExistingSecretRefs } from './secret_refs';
+import { runWithSharedSecrets } from './shared_secrets';
 import type { AgentCredentialVars } from './package_inputs';
-import { computePolicyCleanupOps, resolveSurvivingMembers } from './policy_cleanup';
+import {
+  computePolicyCleanupOps,
+  resolveSurvivingMembers,
+  toOnboardingDeploymentQuery,
+} from './policy_cleanup';
 import type { BuildPolicyBodyOpts, PolicyCleanupOps } from './policy_cleanup';
 
 export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
@@ -28,6 +38,13 @@ export interface UpdateAgentBasedPolicyOpts extends BuildPolicyBodyOpts {
 export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
   pendingCleanupPolicyIds: Record<string, string>;
   currentPolicyIdsByInstance: Record<string, string>;
+  /**
+   * True when the typed credentials will be stored as new Fleet secrets. They are then stored once
+   * (on the first updated policy) and the other updates use that secret.
+   */
+  hasTypedSecrets?: boolean;
+  /** Instances joining a policy in this run: written with its surviving members, in one PUT. */
+  addedInstanceIdsByPolicy?: Record<string, string[]>;
 }
 
 /**
@@ -39,37 +56,79 @@ export interface CleanupAgentBasedOpts extends UpdateAgentBasedPolicyOpts {
  */
 export async function cleanupAgentBasedPolicies(
   opts: CleanupAgentBasedOpts
-): Promise<PolicyCleanupOps> {
-  const { pendingCleanupPolicyIds, currentPolicyIdsByInstance } = opts;
+): Promise<PolicyCleanupOps & { sharedRefs?: ExistingSecretRefs }> {
+  const {
+    pendingCleanupPolicyIds,
+    currentPolicyIdsByInstance,
+    hasTypedSecrets,
+    addedInstanceIdsByPolicy,
+    onboardingDeploymentId,
+  } = opts;
   const planned = computePolicyCleanupOps(pendingCleanupPolicyIds, currentPolicyIdsByInstance);
 
   const succeededDeletes: string[] = [];
   const succeededUpdates: Array<{ policyId: string; survivingInstanceIds: string[] }> = [];
 
-  await Promise.allSettled([
-    ...planned.toDelete.map((policyId) =>
-      sendDeletePackagePolicy({ packagePolicyIds: [policyId] })
-        .then(() => {
+  const deletes = Promise.allSettled(
+    planned.toDelete.map((policyId) =>
+      sendDeletePackagePolicy(
+        { packagePolicyIds: [policyId] },
+        toOnboardingDeploymentQuery(onboardingDeploymentId)
+      )
+        .then(({ data, error }) => {
+          // Resolves with { error } on HTTP failure, and reports a failed delete in the body. A
+          // policy that is already gone counts as deleted.
+          if (error) throw error;
+          const result = data?.find(({ id }) => id === policyId);
+          if (result && !result.success && result.statusCode !== 404) {
+            throw new Error(result.body?.message ?? 'Delete failed');
+          }
           succeededDeletes.push(policyId);
         })
         .catch((err) => {
           // eslint-disable-next-line no-console
           console.error(`Failed to delete agent-based package policy ${policyId}:`, err);
         })
-    ),
-    ...planned.toUpdate.map(({ policyId, survivingInstanceIds }) =>
-      updateAgentBasedPolicy(policyId, survivingInstanceIds, opts)
-        .then(() => {
-          succeededUpdates.push({ policyId, survivingInstanceIds });
-        })
-        .catch((err) => {
-          // eslint-disable-next-line no-console
-          console.error(`Failed to update agent-based package policy ${policyId}:`, err);
-        })
-    ),
-  ]);
+    )
+  );
+  const updates = runWithSharedSecrets({
+    items: planned.toUpdate,
+    hasTypedSecrets: Boolean(hasTypedSecrets),
+    // An update can delete the secret it replaced: finish one before starting the next.
+    sequential: true,
+    run: ({ policyId, survivingInstanceIds }, sharedRefs) =>
+      updateAgentBasedPolicy(
+        policyId,
+        [...survivingInstanceIds, ...(addedInstanceIdsByPolicy?.[policyId] ?? [])],
+        sharedRefs
+          ? {
+              ...opts,
+              authenticateAndDeployStep: {
+                ...opts.authenticateAndDeployStep,
+                existingSecretRefs: sharedRefs,
+              },
+              agentCredentials:
+                opts.agentCredentials &&
+                withoutCoveredCredentials(opts.agentCredentials, sharedRefs),
+            }
+          : opts
+      ),
+    getPolicyId: ({ policyId }) => policyId,
+    fetchRefs: fetchPackagePolicySecretRefs,
+  });
 
-  return { toDelete: succeededDeletes, toUpdate: succeededUpdates };
+  const [, { results, sharedRefs }] = await Promise.all([deletes, updates]);
+  results.forEach((result, i) => {
+    const { policyId, survivingInstanceIds } = planned.toUpdate[i];
+    if (result.status === 'fulfilled') {
+      succeededUpdates.push({ policyId, survivingInstanceIds });
+    } else {
+      // eslint-disable-next-line no-console
+      console.error(`Failed to update agent-based package policy ${policyId}:`, result.reason);
+    }
+  });
+
+  return { toDelete: succeededDeletes, toUpdate: succeededUpdates, sharedRefs };
 }
 
 export async function updateAgentBasedPolicy(
@@ -82,6 +141,7 @@ export async function updateAgentBasedPolicy(
     storedServiceVars,
     globalRegion,
     namespace,
+    globalNamespace,
     authenticateAndDeployStep,
     servicesMap,
     selectedAgentPolicyIds,
@@ -193,7 +253,11 @@ export async function updateAgentBasedPolicy(
   }
 
   const policyName = existingName ?? `${packageName.replace(/[^a-zA-Z0-9_-]/g, '_')}-${Date.now()}`;
-  const policyNamespace = existingNamespace ?? namespace;
+  // The namespace the instances now deploy into wins, so a change made while editing a deployed
+  // flow reaches the policy. Without one the policy keeps what it has, which may be inherited.
+  const policyNamespace =
+    getEffectiveNamespace(members[0].instance.instanceId, storedServiceVars, globalNamespace) ||
+    (existingNamespace ?? namespace);
 
   // Simplified-schema PUT: inputs is a record (keyed by `<ptName>-<inputType>`).
   // The legacy schema accepts `enabled` at the top level but requires inputs as an array.
@@ -201,18 +265,22 @@ export async function updateAgentBasedPolicy(
   // Use simplified consistently — `enabled` is intentionally omitted.
   // sendUpdatePackagePolicy resolves with { error } on HTTP failure rather than rejecting.
   // Throw explicitly so Promise.allSettled callers can detect the failure.
-  const updateResult = await sendUpdatePackagePolicy(policyId, {
-    name: policyName,
-    namespace: policyNamespace,
-    package: { name: packageName, version: pkgVersion },
-    ...(vars ? { vars } : {}),
-    inputs,
-    // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
-    // otherwise keep the policy's current policy_ids so agent policies attached outside the
-    // wizard are not detached.
-    policy_ids:
-      selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
-  } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1]);
+  const updateResult = await sendUpdatePackagePolicy(
+    policyId,
+    {
+      name: policyName,
+      namespace: policyNamespace,
+      package: { name: packageName, version: pkgVersion },
+      ...(vars ? { vars } : {}),
+      inputs,
+      // A non-empty selectedAgentPolicyIds is an explicit override (policy-selection drift);
+      // otherwise keep the policy's current policy_ids so agent policies attached outside the
+      // wizard are not detached.
+      policy_ids:
+        selectedAgentPolicyIds.length > 0 ? selectedAgentPolicyIds : existingPolicyIds ?? [],
+    } as unknown as Parameters<typeof sendUpdatePackagePolicy>[1],
+    { query: toOnboardingDeploymentQuery(opts.onboardingDeploymentId) }
+  );
   if (updateResult.error) {
     throw updateResult.error;
   }

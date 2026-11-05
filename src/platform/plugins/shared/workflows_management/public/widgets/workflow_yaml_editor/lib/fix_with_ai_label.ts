@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
  * target the quick fix row by its label.
  */
 export const FIX_WITH_AI_LABEL = i18n.translate(
-  'workflowsManagement.workflowYAMLEditor.fixWithAiCodeAction',
+  'workflows.workflowYAMLEditor.fixWithAiCodeAction',
   {
     defaultMessage: 'Fix with AI Agent',
   }

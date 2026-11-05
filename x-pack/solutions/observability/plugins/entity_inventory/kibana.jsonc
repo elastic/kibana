@@ -1,0 +1,17 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entity-inventory-plugin",
+  "owner": ["@elastic/obs-signals-metrics-team"],
+  "group": "observability",
+  "visibility": "private",
+  "description": "Serves entity inventory lists, details and counts from raw telemetry using queries generated from entity definitions (scaffold only for now)",
+  "plugin": {
+    "id": "entityInventory",
+    "browser": false,
+    "server": true,
+    "configPath": ["xpack", "entityInventory"],
+    "requiredPlugins": ["entityStore"],
+    "optionalPlugins": [],
+    "requiredBundles": []
+  }
+}

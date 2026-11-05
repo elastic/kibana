@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { buildAlertCaseAttachment } from '@kbn/cases-plugin/common';
 import { INTERNAL_API_HEADERS } from '@kbn/scout-security';
 import type { KbnClient } from '@kbn/scout-security';
 import { indexCase } from '../../../../../common/endpoint/data_loaders/index_case';
@@ -39,13 +40,11 @@ export const attachAlertToCase = async ({
     },
     body: [
       {
-        alertId,
-        index: `.alerts-security.alerts-${spaceId}`,
-        type: 'alert',
-        rule: {
-          id: ruleId,
-          name: ruleName,
-        },
+        ...buildAlertCaseAttachment('securitySolution', {
+          alertId,
+          index: `.alerts-security.alerts-${spaceId}`,
+          rule: { id: ruleId, name: ruleName },
+        }),
         owner: 'securitySolution',
       },
     ],

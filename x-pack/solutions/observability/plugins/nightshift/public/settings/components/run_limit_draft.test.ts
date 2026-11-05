@@ -8,8 +8,10 @@
 import {
   buildRunQuotaSettingsUpdate,
   createRunQuotaDraftState,
+  isValidLimitedRunLimitDraft,
   isValidRunLimitDraft,
   parseRunLimitDraft,
+  setRunLimitEnabled,
 } from './run_limit_draft';
 
 const response = {
@@ -22,16 +24,32 @@ const response = {
 };
 
 describe('run quota drafts', () => {
-  it('uses the suggested limits when the response omits them', () => {
+  it('normalizes legacy globally disabled settings while retaining finite restore limits', () => {
     expect(createRunQuotaDraftState({ enabled: false })).toEqual({
-      saved: response,
-      draft: response,
+      saved: {
+        enabled: false,
+        limits: {
+          detection: 0,
+          investigation: 3,
+          ki_extraction: 0,
+        },
+      },
+      draft: {
+        enabled: false,
+        limits: {
+          detection: 0,
+          investigation: 3,
+          ki_extraction: 0,
+        },
+        restoreLimits: response.limits,
+      },
     });
   });
 
-  it('treats zero as a valid unlimited value and rejects invalid limits', () => {
+  it('treats zero as unlimited but not as a valid limited value', () => {
     expect(parseRunLimitDraft('0')).toBe(0);
     expect(isValidRunLimitDraft(0)).toBe(true);
+    expect(isValidLimitedRunLimitDraft(0)).toBe(false);
     expect(isValidRunLimitDraft(10_000)).toBe(true);
     expect(isValidRunLimitDraft('')).toBe(false);
     expect(isValidRunLimitDraft(1.5)).toBe(false);
@@ -39,14 +57,75 @@ describe('run quota drafts', () => {
     expect(isValidRunLimitDraft(10_001)).toBe(false);
   });
 
+  it('restores the previous finite limit after a category limit is re-enabled', () => {
+    const state = createRunQuotaDraftState({ ...response, enabled: true });
+    const unlimited = setRunLimitEnabled(state, 'investigation', false);
+
+    expect(unlimited.draft.limits.investigation).toBe(0);
+    expect(unlimited.draft.restoreLimits.investigation).toBe(3);
+
+    const limited = setRunLimitEnabled(unlimited, 'investigation', true);
+    expect(limited.draft.limits.investigation).toBe(3);
+  });
+
   it('builds a partial update with only settings changed by the user', () => {
-    const state = createRunQuotaDraftState(response);
-    state.draft.enabled = true;
+    const state = createRunQuotaDraftState({ ...response, enabled: true });
     state.draft.limits.investigation = 0;
 
     expect(buildRunQuotaSettingsUpdate(state)).toEqual({
-      enabled: true,
-      limits: { investigation: 0 },
+      limits: { investigation: null },
+    });
+  });
+
+  it('changes the investigation limit without touching the global enabled flag', () => {
+    let state = setRunLimitEnabled(createRunQuotaDraftState(response), 'investigation', false);
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: null } });
+
+    state = setRunLimitEnabled(state, 'investigation', true);
+    state.draft.limits.investigation = 5;
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({ limits: { investigation: 5 } });
+  });
+
+  it('builds an atomic activation for legacy globally disabled settings', () => {
+    const state = setRunLimitEnabled(createRunQuotaDraftState(response), 'detection', true);
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 15 },
+    });
+  });
+
+  it('keeps an investigation edit made in the same save as a legacy activation', () => {
+    let state = setRunLimitEnabled(createRunQuotaDraftState(response), 'detection', true);
+    state.draft.limits.investigation = 5;
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 15 },
+      limits: { investigation: 5 },
+    });
+
+    state = setRunLimitEnabled(state, 'investigation', false);
+
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 15 },
+      limits: { investigation: null },
+    });
+  });
+
+  it('activates legacy enforcement after a cleared limit is repaired', () => {
+    let state = createRunQuotaDraftState(response);
+    state = setRunLimitEnabled(state, 'detection', true);
+    state = setRunLimitEnabled(state, 'ki_extraction', true);
+    state.draft.limits.detection = '';
+    state = setRunLimitEnabled(state, 'ki_extraction', false);
+    state.draft.limits.detection = 20;
+
+    expect(state.draft.enabled).toBe(false);
+    expect(buildRunQuotaSettingsUpdate(state)).toEqual({
+      activateLimits: { detection: 20 },
     });
   });
 

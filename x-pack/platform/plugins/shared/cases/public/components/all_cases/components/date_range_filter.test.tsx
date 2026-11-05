@@ -10,7 +10,7 @@ import { screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { renderWithTestingProviders } from '../../../common/mock';
 import { DateRangeFilter } from './date_range_filter';
-import { DEFAULT_FILTER_OPTIONS, DEFAULT_FROM_DATE } from '../../../containers/constants';
+import { ALL_CASES_FROM_DATE, DEFAULT_FILTER_OPTIONS } from '../../../containers/constants';
 import { useRefreshCases } from '../hooks/use_on_refresh_cases';
 import { useGetEarliestCase } from '../hooks/use_get_earliest_case';
 import { basicCase } from '../../../containers/mock';
@@ -105,21 +105,27 @@ describe('DateRangeFilter', () => {
     });
   });
 
-  it('should use DEFAULT_FROM_DATE when earliest case is not available and show all cases is clicked', async () => {
-    (useGetEarliestCase as jest.Mock).mockReturnValue({
-      earliestCase: undefined,
-      isLoading: false,
-    });
-    renderWithTestingProviders(<DateRangeFilter {...defaultProps} />);
+  it.each([
+    ['is not available', false],
+    ['is still loading', true],
+  ])(
+    'should use the all-time from date when the earliest case %s and show all cases is clicked',
+    async (_, isLoading) => {
+      (useGetEarliestCase as jest.Mock).mockReturnValue({
+        earliestCase: undefined,
+        isLoading,
+      });
+      renderWithTestingProviders(<DateRangeFilter {...defaultProps} />);
 
-    const quickMenuButton = screen.getByTestId(QUICK_MENU_BUTTON_TEST_SUBJ);
-    await userEvent.click(quickMenuButton);
+      const quickMenuButton = screen.getByTestId(QUICK_MENU_BUTTON_TEST_SUBJ);
+      await userEvent.click(quickMenuButton);
 
-    expect(screen.getByTestId('show-all-cases-link')).toBeInTheDocument();
-    await userEvent.click(screen.getByTestId('show-all-cases-link'));
-    expect(mockOnFilterOptionsChange).toHaveBeenCalledWith({
-      from: DEFAULT_FROM_DATE,
-      to: 'now',
-    });
-  });
+      expect(screen.getByTestId('show-all-cases-link')).toBeInTheDocument();
+      await userEvent.click(screen.getByTestId('show-all-cases-link'));
+      expect(mockOnFilterOptionsChange).toHaveBeenCalledWith({
+        from: ALL_CASES_FROM_DATE,
+        to: 'now',
+      });
+    }
+  );
 });

@@ -55,6 +55,91 @@ describe('DatastreamInitializer', () => {
     esClient.indices.putSettings.mockResolvedValue({ acknowledged: true });
     esClient.ingest.getPipeline.mockRejectedValue(pipelineNotFound());
     esClient.ingest.putPipeline.mockResolvedValue({ acknowledged: true });
+    esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: true });
+  });
+
+  describe('data stream lifecycle', () => {
+    const managedDefinition: ResourceDefinition = { ...resourceDefinition, manageLifecycle: true };
+
+    it('does not touch the lifecycle of a data stream that does not manage it', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, resourceDefinition);
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).not.toHaveBeenCalled();
+    });
+
+    it('applies the retention to the data stream', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+        ...managedDefinition,
+        lifecycle: { data_retention: '90d' },
+      });
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+        data_retention: '90d',
+      });
+    });
+
+    it('applies a lifecycle without retention, removing a previously applied one', async () => {
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+      });
+    });
+
+    it('applies the lifecycle when the data stream already exists', async () => {
+      esClient.indices.createDataStream.mockRejectedValueOnce(
+        new errors.ResponseError({ statusCode: 409 } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, {
+        ...managedDefinition,
+        lifecycle: { data_retention: '30d' },
+      });
+      await initializer.initialize();
+
+      expect(esClient.indices.putDataLifecycle).toHaveBeenCalledWith({
+        name: resourceDefinition.dataStreamName,
+        enabled: true,
+        data_retention: '30d',
+      });
+    });
+
+    it('fails initialization when applying the lifecycle fails, so a previous retention is not kept', async () => {
+      esClient.indices.putDataLifecycle.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 500 } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+
+      await expect(initializer.initialize()).rejects.toMatchObject({ statusCode: 500 });
+    });
+
+    it('fails initialization with a retryable error when applying the lifecycle is not acknowledged', async () => {
+      esClient.indices.putDataLifecycle.mockResolvedValue({ acknowledged: false });
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsUnacknowledgedError);
+    });
+
+    it('fails with a retryable error when another node deletes the data stream before the lifecycle is applied', async () => {
+      esClient.indices.putDataLifecycle.mockRejectedValue(
+        new errors.ResponseError({ statusCode: 404, body: {} } as DiagnosticResult)
+      );
+
+      const initializer = new DatastreamInitializer(mockLogger, esClient, managedDefinition);
+
+      await expect(initializer.initialize()).rejects.toBeInstanceOf(EsConcurrentModificationError);
+    });
   });
 
   describe('ingest pipeline', () => {

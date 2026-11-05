@@ -15,8 +15,15 @@ Scout server configuration. Role loading and service account responses are not m
     a caller without `manage_security`.
   - Renews the workload's token after it expires, and denies renewal once the
     workload is unbound. Both tests wait 65 seconds to outlive a token.
+  - Ages a workload's token for 50 seconds, then calls a 25-second route handler
+    through the self client. The handler authenticates to Elasticsearch before
+    and after waiting, proving the refreshed credential outlives the original.
   - Classifies an inbound request carrying a UIAM service account token as that
     account.
+  - Deletes an account, refuses to delete a bound one unless forced, and refuses
+    a caller without `manage_security`, a credential UIAM did not issue, and a
+    service account. A token issued before the delete keeps working until it
+    expires, so that test waits 65 seconds too.
 
 The config set loads the `service_accounts` test plugin from
 `x-pack/platform/test/security_api_integration/plugins/service_accounts`. It
@@ -43,5 +50,6 @@ node scripts/playwright test --config x-pack/platform/plugins/shared/security/te
 
 For the Security UI regression, start the stack with `--domain security_complete`
 and use `--grep local-serverless-security_complete` for the UI command.
-The tests remove their native roles, spaces, workload bindings and created UIAM
-accounts during teardown.
+The tests remove their native roles, spaces and workload bindings during teardown.
+The `uiamServiceAccounts` fixture in `api/fixtures` creates UIAM accounts and
+deletes them through Kibana when its worker shuts down.

@@ -38,7 +38,11 @@ export const serviceAccountNameSchema = z
  */
 export const serviceAccountDescriptionSchema = z
   .string()
-  .max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH)
+  .max(SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH, { abort: true })
+  // `.max()` counts code points; the route body cap and the UI `maxLength` assume UTF-16 code units.
+  .refine((description) => description.length <= SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH, {
+    message: `Too big: expected string to have <=${SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH} characters`,
+  })
   .trim()
   .transform((description) => (description === '' ? undefined : description));
 

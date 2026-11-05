@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 
 /**
  * The ID of the query.
@@ -281,18 +281,14 @@ verbatim).
     /**
      * RFC 3339 datetime string for the schedule's start.
      */
-    start_date: z
-      .string()
+    start_date: isoDateTime()
       .max(64)
-      .datetime()
       .describe("RFC 3339 datetime string for the schedule's start."),
     /**
      * Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`.
      */
-    end_date: z
-      .string()
+    end_date: isoDateTime()
       .max(64)
-      .datetime()
       .optional()
       .describe(
         "Optional RFC 3339 datetime string for the schedule's end. MUST be after `start_date`."

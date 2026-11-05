@@ -32,9 +32,13 @@ evaluate.describe(
           method: 'POST',
           version: '2023-10-31',
         }),
+        fetch('/api/sample_data/flights', {
+          method: 'POST',
+          version: '2023-10-31',
+        }),
         seedHostLoadMetrics(esClient, log),
       ]);
-      const [, , hostLoadSeed] = setupResults;
+      const [, , , hostLoadSeed] = setupResults;
       if (hostLoadSeed.status === 'fulfilled') {
         hostLoadFixture = hostLoadSeed.value;
       }
@@ -58,7 +62,7 @@ evaluate.describe(
         dataset: {
           name: 'agent builder visualizations: standalone visualization creation',
           description:
-            'Standalone visualization requests over kibana_sample_data_logs, kibana_sample_data_ecommerce, and host metrics. Scores ES|QL validity/equivalence, chart type vs intent, config vs intent, config validity, and result shape.',
+            'Standalone visualization requests over kibana_sample_data_logs, kibana_sample_data_ecommerce, kibana_sample_data_flights, and host metrics. Scores ES|QL validity/equivalence, chart type vs intent, config vs intent, config validity, and result shape.',
           examples: VISUALIZATION_CREATION_EXAMPLES,
         },
       });

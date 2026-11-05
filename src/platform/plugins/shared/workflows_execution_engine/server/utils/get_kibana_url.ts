@@ -45,15 +45,14 @@ function getServerInfoUrl(coreStart?: CoreStart): string | undefined {
   return `${protocol}://${hostname}:${port}${http.basePath.prepend('/').slice(0, -1)}`;
 }
 
-export function buildWorkflowExecutionUrl(
-  kibanaUrl: string,
+/** App path for an execution, relative to publicBaseUrl, including the space prefix. */
+export function buildWorkflowExecutionAppPath(
   spaceId: string,
   workflowId: string,
   executionId: string,
   stepExecutionId?: string
 ): string {
   const spacePrefix = spaceId === 'default' ? '' : `/s/${spaceId}`;
-  const baseUrl = `${kibanaUrl}${spacePrefix}/app/workflows/${workflowId}`;
   const params = new URLSearchParams({
     executionId,
     tab: 'executions',
@@ -63,5 +62,20 @@ export function buildWorkflowExecutionUrl(
     params.set('stepExecutionId', stepExecutionId);
   }
 
-  return `${baseUrl}?${params.toString()}`;
+  return `${spacePrefix}/app/workflows/${workflowId}?${params.toString()}`;
+}
+
+export function buildWorkflowExecutionUrl(
+  kibanaUrl: string,
+  spaceId: string,
+  workflowId: string,
+  executionId: string,
+  stepExecutionId?: string
+): string {
+  return `${kibanaUrl}${buildWorkflowExecutionAppPath(
+    spaceId,
+    workflowId,
+    executionId,
+    stepExecutionId
+  )}`;
 }
