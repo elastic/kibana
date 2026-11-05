@@ -2128,9 +2128,9 @@ describe('optimizeMemory', () => {
         },
         {
           kind: 'tool',
-          toolId: 'write_todos',
-          params: {},
-          resultText: 'todos saved',
+          toolId: 'nightshift_sandbox_write_file',
+          params: { file_path: 'notes.md', content: 'x' },
+          resultText: 'file written',
           isError: false,
         },
       ],

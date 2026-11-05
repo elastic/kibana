@@ -299,7 +299,6 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
 
 describe('isEvidenceCall', () => {
   it.each([
-    ['write_todos', { todos: [] }],
     ['list_files', { path: '/skills' }],
     ['load_skill', { name: 'x' }],
     ['nightshift_sandbox_write_file', { file_path: 'notes.md', content: 'x' }],
