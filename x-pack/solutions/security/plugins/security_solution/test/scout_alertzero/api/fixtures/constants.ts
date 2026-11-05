@@ -37,13 +37,18 @@ export const FLOOR_ATTACK_DISCOVERY_WORKER_ID = 'system-security-floor-attack-di
 export const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 export const FORENSICS_ENDPOINT_ANALYSIS_WORKER_ID = 'system-security-forensics-endpoint-analysis';
 export const ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID = 'system-security-attack-discovery-review';
+export const ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID = 'system-security-attack-discovery-attach';
 /**
- * The workflows an Attack Discovery Worker run executes besides its own: the shared runner it
- * calls and the per-attack reviews the runner dispatches. Teardown has to drain these too, or
- * they can still be mid-model-call when the service account is deleted.
+ * The workflows an Attack Discovery Worker run executes besides its own, in drain order: the
+ * shared runner it calls, the attach the runner starts with `workflow.executeAsync` (async
+ * children are not cancelled with their parent), and the per-attack reviews that the runner
+ * and the attach both dispatch asynchronously. Upstream first, so a run spawned late by an
+ * earlier drain is still caught by a later one. Teardown has to drain all of them, or they can
+ * still be mid-model-call when the service account is deleted.
  */
 export const ATTACK_DISCOVERY_RUN_WORKFLOW_IDS = [
   ATTACK_DISCOVERY_WORKER_WORKFLOW_ID,
+  ATTACK_DISCOVERY_ATTACH_WORKFLOW_ID,
   ATTACK_DISCOVERY_REVIEW_WORKFLOW_ID,
 ] as const;
 export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =

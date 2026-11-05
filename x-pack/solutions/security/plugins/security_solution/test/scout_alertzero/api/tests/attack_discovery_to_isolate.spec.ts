@@ -151,9 +151,9 @@ const deleteRunAttackRecords = async ({
  * Seeded attack chain -> Attack Discovery -> review -> Investigate proposal -> approve ->
  * forensics -> Isolate proposal -> approve -> Defend isolate action.
  *
- * Every hop is a real workflow run against a real model (via the preconfigured inference
+ * Every hop is a real workflow run against a real model (via the chat-completion AI
  * connectors of the `alertzero` server config set); nothing is stubbed. When the stack was
- * booted without a chat-completion inference connector (plain CI), the flow cannot run and the
+ * booted without a chat-completion AI connector (plain CI), the flow cannot run and the
  * test skips with an explicit reason instead of failing or silently passing.
  */
 apiTest.describe(
@@ -202,7 +202,7 @@ apiTest.describe(
 
     apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
       // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
-      // chat-completion inference connector (the `alertzero` config set only wires connectors
+      // chat-completion AI connector (the `alertzero` config set only wires connectors
       // when a connector source exists, which plain CI does not have), every workflow run
       // would fail on its first model call. Skip with an explicit reason instead of failing;
       // with a connector present the flow runs for real (see the config set's doc block).

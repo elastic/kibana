@@ -34,7 +34,7 @@ const WORKER_ID = testData.FLOOR_ATTACK_DISCOVERY_WORKER_ID;
  * worker also requires an AI model to be available in the space (Kibana answers 400
  * otherwise), so the tests that enable a worker carry the same no-connector guard as the
  * attack-discovery flow: they skip with an explicit reason when the stack was booted
- * without a preconfigured inference connector. One of them enables a worker, which Task
+ * without a chat-completion AI connector. One of them enables a worker, which Task
  * Manager immediately runs for real as its service account — a model-calling run. That run
  * outlives the disable (Task Manager keeps it going), so before the accounts are deleted
  * teardown cancels exactly the runs this suite started and waits for them to stop, per the
@@ -205,7 +205,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     async ({ apiClient, samlAuth }) => {
       const api = await getAdminApi(apiClient, samlAuth);
       // Enabling requires an available AI model in the space; skip rather than fail on a
-      // stack booted without a preconfigured inference connector.
+      // stack booted without a chat-completion AI connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
         'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'
@@ -238,7 +238,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
     async ({ apiClient, samlAuth }) => {
       const api = await getAdminApi(apiClient, samlAuth);
       // Enabling requires an available AI model in the space; skip rather than fail on a
-      // stack booted without a preconfigured inference connector.
+      // stack booted without a chat-completion AI connector.
       apiTest.skip(
         (await listChatCompletionConnectors(api)).length === 0,
         'no preconfigured chat-completion AI connector on this stack; enabling a worker requires an AI model'

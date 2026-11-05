@@ -350,25 +350,55 @@ export const waitForWorkflowExecution = async (
   }
 };
 
+const EXECUTIONS_PAGE_SIZE = 100;
+// The route rejects `page * size` past the 10k ES result window.
+const EXECUTIONS_MAX_PAGE = 100;
+
 // Newest first, and without the index's step-run docs, so a new execution is on page 1 even
 // past ~100 matching docs. Without a sort the query emits no sort and the order is arbitrary,
 // which makes waitForNewExecution time out. The per-workflow route only accepts createdAt /
 // finishedAt as sort fields, so "newest" means the latest createdAt here.
-export const listExecutions = async (
+const listExecutionPage = async (
   api: AlertZeroApi,
-  workflowId: string
+  workflowId: string,
+  page: number
 ): Promise<Array<{ id: string; status: string }>> =>
   ok(
     await api.public<{ results: Array<{ id: string; status: string }> }>(
       'GET',
       `/api/workflows/workflow/${encodeURIComponent(workflowId)}/executions` +
-        `?size=100&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
+        `?size=${EXECUTIONS_PAGE_SIZE}&page=${page}&sortField=createdAt&sortOrder=desc&omitStepRuns=true`
     ),
     `list executions of ${workflowId}`
   ).results.map((run) => ({ id: run.id, status: run.status }));
 
-export const listExecutionIds = async (api: AlertZeroApi, workflowId: string): Promise<string[]> =>
-  (await listExecutions(api, workflowId)).map((run) => run.id);
+/** The newest page only: where a run started after the caller's snapshot shows up. */
+export const listExecutions = (
+  api: AlertZeroApi,
+  workflowId: string
+): Promise<Array<{ id: string; status: string }>> => listExecutionPage(api, workflowId, 1);
+
+/**
+ * Every execution id of the workflow, paged until a short page. This is the baseline teardown
+ * compares against, so a truncated read would make an older in-flight run look like this
+ * suite's and get cancelled. Throws instead of truncating once the result window is exhausted.
+ */
+export const listExecutionIds = async (
+  api: AlertZeroApi,
+  workflowId: string
+): Promise<string[]> => {
+  const ids: string[] = [];
+  for (let page = 1; page <= EXECUTIONS_MAX_PAGE; page++) {
+    const runs = await listExecutionPage(api, workflowId, page);
+    ids.push(...runs.map((run) => run.id));
+    if (runs.length < EXECUTIONS_PAGE_SIZE) return ids;
+  }
+  throw new Error(
+    `${workflowId} has more than ${
+      EXECUTIONS_PAGE_SIZE * EXECUTIONS_MAX_PAGE
+    } executions; cannot baseline them`
+  );
+};
 
 export const isTerminalExecutionStatus = (status: string): boolean =>
   TERMINAL_EXECUTION_STATUSES.includes(status);
@@ -386,6 +416,7 @@ export const cancelNewExecutions = async (
   knownIds: readonly string[],
   { timeoutMs = DRAIN_TIMEOUT_MS }: { timeoutMs?: number } = {}
 ): Promise<void> => {
+  // Newest page only: runs started after the baseline sort first, so they are on page 1.
   const inFlightNew = async () =>
     (await listExecutions(api, workflowId)).filter(
       (run) => !knownIds.includes(run.id) && !isTerminalExecutionStatus(run.status)
@@ -430,7 +461,8 @@ export const waitForNewExecution = async (
 ): Promise<string> =>
   pollUntil(
     `a new execution of ${workflowId} (the enabled worker's immediate scheduled run)`,
-    async () => (await listExecutionIds(api, workflowId)).find((id) => !knownIds.includes(id)),
+    async () =>
+      (await listExecutions(api, workflowId)).find((run) => !knownIds.includes(run.id))?.id,
     { timeoutMs }
   );
 

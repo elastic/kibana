@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { isSupportedConnector } from '@kbn/inference-common';
 import { ALERTZERO_ENABLED_SETTING_ID } from '@kbn/alertzero-common';
 import { apiTest, INTERNAL_API_HEADERS, PUBLIC_API_HEADERS, tags } from '@kbn/scout-security';
 import type { ApiClientFixture } from '@kbn/scout-security';
@@ -32,9 +33,12 @@ const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
 /** Settings route of a space; the default space serves it without the `/s/<id>` prefix. */
 const settingsPath = (spaceId: string) =>
   spaceId === DEFAULT_SPACE_ID ? KIBANA_SETTINGS_PATH : `s/${spaceId}/${KIBANA_SETTINGS_PATH}`;
-const WORKFLOW_EXECUTIONS_PATH = (workflowId: string) =>
+const EXECUTIONS_PAGE_SIZE = 100;
+// The route rejects `page * size` past the 10k ES result window.
+const EXECUTIONS_MAX_PAGE = 100;
+const WORKFLOW_EXECUTIONS_PATH = (workflowId: string, page = 1) =>
   `api/workflows/workflow/${encodeURIComponent(workflowId)}/executions` +
-  `?size=100&sortField=createdAt&sortOrder=desc&omitStepRuns=true`;
+  `?size=${EXECUTIONS_PAGE_SIZE}&page=${page}&sortField=createdAt&sortOrder=desc&omitStepRuns=true`;
 const TERMINAL_EXECUTION_STATUSES = ['completed', 'failed', 'cancelled', 'timed_out', 'skipped'];
 /** Ceiling for draining the triage run the enable started (cancel + poll to terminal). */
 const DRAIN_TIMEOUT_MS = 60_000;
@@ -108,19 +112,31 @@ const readSpaceSolution = async ({
   return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
 };
 
-/** Execution ids of one workflow; the teardown drain cancels what is NOT in this list. */
+/**
+ * Every execution id of one workflow, paged until a short page: the teardown drain cancels what
+ * is NOT in this list, so a truncated read would make an older in-flight run look like ours.
+ * Throws instead of truncating once the result window is exhausted.
+ */
 const listExecutionIds = async (
   apiClient: ApiClientFixture,
   headers: Record<string, string>,
   workflowId: string
 ): Promise<string[]> => {
-  const response = await apiClient.get(WORKFLOW_EXECUTIONS_PATH(workflowId), {
-    headers,
-    responseType: 'json',
-  });
-  expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
-  return ((response.body as { results?: Array<{ id: string }> }).results ?? []).map(
-    (run) => run.id
+  const ids: string[] = [];
+  for (let page = 1; page <= EXECUTIONS_MAX_PAGE; page++) {
+    const response = await apiClient.get(WORKFLOW_EXECUTIONS_PATH(workflowId, page), {
+      headers,
+      responseType: 'json',
+    });
+    expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
+    const runs = (response.body as { results?: Array<{ id: string }> }).results ?? [];
+    ids.push(...runs.map((run) => run.id));
+    if (runs.length < EXECUTIONS_PAGE_SIZE) return ids;
+  }
+  throw new Error(
+    `${workflowId} has more than ${
+      EXECUTIONS_PAGE_SIZE * EXECUTIONS_MAX_PAGE
+    } executions; cannot baseline them`
   );
 };
 
@@ -233,16 +249,19 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
       responseType: 'json',
     });
     expect(connectors.statusCode, JSON.stringify(connectors.body)).toBe(200);
-    // Same predicate as `listChatCompletionConnectors` in the security_solution scout_alertzero
-    // fixtures (not importable from this plugin's tests): the connector types the inference
-    // plugin accepts, `.inference` only as a `chat_completion` endpoint.
     hasChatCompletionConnector = (
-      connectors.body as Array<{ connector_type_id: string; config?: { taskType?: string } }>
-    ).some(
-      (connector) =>
-        ['.gen-ai', '.bedrock', '.gemini'].includes(connector.connector_type_id) ||
-        (connector.connector_type_id === '.inference' &&
-          connector.config?.taskType === 'chat_completion')
+      connectors.body as Array<{
+        id: string;
+        connector_type_id: string;
+        config?: Record<string, unknown>;
+      }>
+    ).some((connector) =>
+      isSupportedConnector({
+        id: connector.id,
+        name: '',
+        actionTypeId: connector.connector_type_id,
+        config: connector.config,
+      })
     );
     if (!hasChatCompletionConnector) {
       return;
