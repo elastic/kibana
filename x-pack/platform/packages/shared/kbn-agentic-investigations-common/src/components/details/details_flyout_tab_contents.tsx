@@ -36,10 +36,10 @@ export interface OverviewTabProps {
   /** Shown beside the "Proposed actions" heading; owned by the same host as the content. */
   proposedActionsCount?: React.ReactNode;
   /**
-   * Whether an agent is still working on the investigation. While it is, the tab ends in a
-   * skeleton section: what is already there is partial, and more arrives as the agent writes it.
+   * Whether the tab ends in a skeleton section, saying more is coming. A host shows it while an
+   * agent works on an investigation that has nothing to show yet.
    */
-  isRunning?: boolean;
+  showLoadingSection?: boolean;
 }
 
 /** Host-rendered overview sections, in the order the tab shows them. */
@@ -69,7 +69,7 @@ export const OverviewTab = memo<OverviewTabProps>(
     proposedActionsContent,
     proposedActionsCount,
     sections = {},
-    isRunning = false,
+    showLoadingSection = false,
   }) => {
     const { subjects, impact, conclusion, reasoning } = sections;
 
@@ -124,7 +124,7 @@ export const OverviewTab = memo<OverviewTabProps>(
           </EuiFlexItem>
         )}
 
-        {isRunning && (
+        {showLoadingSection && (
           <EuiFlexItem grow={false}>
             <OverviewLoadingSection />
           </EuiFlexItem>
