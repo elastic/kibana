@@ -49,6 +49,7 @@ interface CellFrameProps {
   runtime?: CellRuntime;
   onRun?: () => void;
   headerActions?: ReactNode;
+  resizeHandle?: ReactNode;
 }
 
 export const CellFrame = ({
@@ -56,6 +57,7 @@ export const CellFrame = ({
   runtime,
   onRun,
   headerActions,
+  resizeHandle,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
   const { store, openFlyouts$, focusedCell$, addedCellIds } = useNotebook();
@@ -235,7 +237,7 @@ export const CellFrame = ({
           </>
         )}
         {children}
-        <CellFooter cell={cell} runtime={runtime} />
+        <CellFooter cell={cell} runtime={runtime} resizeHandle={resizeHandle} />
       </EuiPanel>
       {onRun && 'runMode' in cell && !isFlyoutOpen && (
         <div

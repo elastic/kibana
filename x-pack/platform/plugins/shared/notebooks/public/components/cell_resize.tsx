@@ -7,33 +7,24 @@
 
 import React, { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
 import { EuiResizableButton } from '@elastic/eui';
-import { css } from '@emotion/react';
+import { css, type SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const KEYBOARD_STEP = 20;
 const KEYBOARD_LARGE_STEP = 100;
 
-const handleCss = css`
-  position: relative;
-`;
-
-const RESIZE_LABEL = i18n.translate('xpack.notebook.resizableCellBody.handleLabel', {
+const RESIZE_LABEL = i18n.translate('xpack.notebook.cellResize.handleLabel', {
   defaultMessage: 'Resize cell',
 });
 
-interface ResizableCellBodyProps {
-  /** The starting height in pixels, which is also the smallest the body can be dragged to. */
-  defaultHeight: number;
-  children: React.ReactNode;
-  'data-test-subj'?: string;
+interface CellResize {
+  bodyCss: SerializedStyles;
+  /** Rendered by `CellFrame` in place of the footer divider, so the cell keeps a single border. */
+  resizeHandle: React.ReactNode;
 }
 
-/** A cell display area the user can drag taller with a handle along its bottom edge. */
-export const ResizableCellBody = ({
-  defaultHeight,
-  children,
-  'data-test-subj': dataTestSubj,
-}: ResizableCellBodyProps) => {
+/** A display height the user can drag taller, never below `defaultHeight`. */
+export const useCellResize = (defaultHeight: number): CellResize => {
   const [chosenHeight, setChosenHeight] = useState<number>();
   const drag = useRef<{ startY: number; startHeight: number }>();
   const height = Math.max(chosenHeight ?? defaultHeight, defaultHeight);
@@ -71,21 +62,15 @@ export const ResizableCellBody = ({
     }
   };
 
-  return (
-    <div>
-      <div
-        css={css`
-          height: ${height}px;
-          overflow: hidden;
-        `}
-        data-test-subj={dataTestSubj}
-      >
-        {children}
-      </div>
+  return {
+    bodyCss: css`
+      height: ${height}px;
+      overflow: hidden;
+    `,
+    resizeHandle: (
       <EuiResizableButton
         indicator="border"
         aria-label={RESIZE_LABEL}
-        css={handleCss}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
         onPointerUp={onPointerUp}
@@ -93,6 +78,6 @@ export const ResizableCellBody = ({
         onKeyDown={onKeyDown}
         data-test-subj="notebookCellResizeHandle"
       />
-    </div>
-  );
+    ),
+  };
 };

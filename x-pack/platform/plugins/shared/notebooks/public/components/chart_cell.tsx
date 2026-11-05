@@ -36,7 +36,7 @@ import {
 } from '../charts/lens_helpers';
 import { useNotebookServices } from '../services';
 import { CellFrame } from './cell_frame';
-import { ResizableCellBody } from './resizable_cell_body';
+import { useCellResize } from './cell_resize';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
 
@@ -183,6 +183,9 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
   const cellAttributes = useChartAttributes(cell);
   const attributes = preview ?? cellAttributes;
   const currentType = lensAttributes ? getChartType(lensAttributes) : undefined;
+  const { bodyCss, resizeHandle } = useCellResize(
+    currentType === ChartType.Metric ? METRIC_HEIGHT : CHART_HEIGHT
+  );
 
   const openEditor = async () => {
     const EditPanel = await plugins.lens.EditLensConfigPanelApi();
@@ -342,6 +345,7 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
     <CellFrame
       cell={cell}
       runtime={runtime}
+      resizeHandle={resizeHandle}
       onRun={() => scheduler.runCell(id)}
       headerActions={
         <EuiFlexItem grow={false}>
@@ -376,16 +380,13 @@ export const ChartCell = ({ cell }: { cell: ChartCellDefinition }) => {
           <EuiSpacer size="s" />
         </>
       )}
-      <ResizableCellBody
-        defaultHeight={currentType === ChartType.Metric ? METRIC_HEIGHT : CHART_HEIGHT}
-        data-test-subj="notebookChartContainer"
-      >
+      <div css={bodyCss} data-test-subj="notebookChartContainer">
         <ChartCanvas
           id={`notebook-chart-${id}`}
           attributes={attributes}
           hasSource={sourceCell !== null}
         />
-      </ResizableCellBody>
+      </div>
       {editFlyout}
     </CellFrame>
   );

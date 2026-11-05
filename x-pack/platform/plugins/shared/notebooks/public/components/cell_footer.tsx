@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useState, type ReactNode } from 'react';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,7 +13,9 @@ import {
   EuiIconTip,
   EuiText,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import moment from 'moment';
@@ -62,15 +64,43 @@ const LastRun = ({ lastRunAt, durationMs }: { lastRunAt: number; durationMs?: nu
   );
 };
 
-export const CellFooter = ({ cell, runtime }: { cell: CellDefinition; runtime?: CellRuntime }) => {
+export const CellFooter = ({
+  cell,
+  runtime,
+  resizeHandle,
+}: {
+  cell: CellDefinition;
+  runtime?: CellRuntime;
+  resizeHandle?: ReactNode;
+}) => {
+  const { euiTheme } = useEuiTheme();
   const outputs = getCellOutputs(cell);
   const lastRunAt = runtime?.lastRunAt;
   const showStatus = runtime !== undefined && runtime.status !== 'done';
-  if (outputs.length === 0 && lastRunAt === undefined && !showStatus) return null;
+  const isEmpty = outputs.length === 0 && lastRunAt === undefined && !showStatus;
+
+  // The resize button takes no height and draws its line through its centre, so the padding
+  // places that line where the divider would be, or over the panel's bottom border when empty.
+  const handleSlot = resizeHandle && (
+    <div
+      css={css`
+        display: flex;
+        flex-direction: column;
+        padding-top: ${euiTheme.size.s};
+        ${isEmpty
+          ? `margin-bottom: calc(${euiTheme.size.s} * -1);`
+          : `padding-bottom: ${euiTheme.size.s};`}
+      `}
+    >
+      {resizeHandle}
+    </div>
+  );
+
+  if (isEmpty) return handleSlot || null;
 
   return (
     <>
-      <EuiHorizontalRule margin="s" />
+      {handleSlot || <EuiHorizontalRule margin="s" />}
       <EuiFlexGroup
         gutterSize="s"
         alignItems="center"
