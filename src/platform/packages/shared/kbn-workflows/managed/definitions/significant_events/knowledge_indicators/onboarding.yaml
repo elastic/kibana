@@ -185,7 +185,6 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-features-identification"
-          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"
@@ -233,7 +232,6 @@ steps:
         type: workflow.execute
         with:
           workflow-id: "system-streams-ki-queries-generation"
-          run-as-mode: inherit
           inputs:
             sourceId: "${{ inputs.sourceId }}"
             sourceSlug: "${{ inputs.sourceSlug }}"

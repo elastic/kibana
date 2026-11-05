@@ -12,15 +12,13 @@ import BOUND_CLEANUP_YAML from './bound_cleanup.yaml';
 import BOUND_ONBOARDING_YAML from './knowledge_indicators/bound_onboarding.yaml';
 import BOUND_SOURCE_RECONCILIATION_YAML from './knowledge_indicators/bound_source_reconciliation.yaml';
 import BOUND_SYNC_YAML from './knowledge_indicators/bound_sync.yaml';
-import ONBOARDING_YAML from './knowledge_indicators/onboarding.yaml';
 import BOUND_ORCHESTRATOR_YAML from './significant_events/bound_orchestrator.yaml';
-import ORCHESTRATOR_YAML from './significant_events/orchestrator.yaml';
 
 interface IParsedStep {
   name: string;
   type: string;
   condition?: string;
-  steps?: IParsedStep[];
+  steps?: Array<{ type: string }>;
   with?: Record<string, unknown>;
 }
 
@@ -28,12 +26,6 @@ interface IParsedWorkflow {
   triggers?: Array<{ type: string }>;
   steps: IParsedStep[];
 }
-
-const collectChildCalls = (steps: IParsedStep[]): IParsedStep[] =>
-  steps.flatMap((step) => [
-    ...(step.type === 'workflow.execute' ? [step] : []),
-    ...collectChildCalls(step.steps ?? []),
-  ]);
 
 const startedBySchedule: Array<[string, string]> = [
   ['cleanup', BOUND_CLEANUP_YAML],
@@ -91,19 +83,5 @@ describe('bound detection engine workflows', () => {
     expect(steps.find(({ type }) => type === 'workflow.execute')).toMatchObject({
       with: { 'workflow-id': childId, 'run-as-mode': 'inherit' },
     });
-  });
-
-  // The bound entry point only covers the first hop: a child started without `inherit` runs as
-  // the original request, so the shared workflows must pass the identity on at every level.
-  it.each([
-    ['onboarding', ONBOARDING_YAML],
-    ['orchestrator', ORCHESTRATOR_YAML],
-  ])('shared %s passes the identity to every child workflow', (_name, yaml) => {
-    const { steps }: IParsedWorkflow = parse(yaml);
-
-    const children = collectChildCalls(steps);
-
-    expect(children.length).toBeGreaterThan(0);
-    expect(children.filter((step) => step.with?.['run-as-mode'] !== 'inherit')).toEqual([]);
   });
 });

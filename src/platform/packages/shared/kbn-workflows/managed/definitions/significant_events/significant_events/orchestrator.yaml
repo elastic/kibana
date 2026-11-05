@@ -32,12 +32,10 @@ steps:
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-detection"
-      run-as-mode: inherit
 
   - name: discover
     type: workflow.execute
     with:
       workflow-id: "system-significant-events-discovery"
-      run-as-mode: inherit
       inputs:
         connector_id: "{{ inputs.connector_id }}"
