@@ -12,7 +12,7 @@ import { AssigneeAvatarStack } from '../escalation_queue/assignee_avatar_stack';
 import { getEmptyValue } from '../helpers';
 import { TEMPLATE_UI_LABELS } from '../../template_ui/translations';
 
-export interface ConversationHeaderBlocksProps {
+export interface HeaderBlockValues {
   status?: string;
   /**
    * Pre-rendered interactive status widget from the consuming plugin (e.g. a toggle).
@@ -25,73 +25,67 @@ export interface ConversationHeaderBlocksProps {
   assigneeUids?: readonly string[];
   /** Pre-rendered severity widget. Adds a severity tile when present. */
   severityNode?: React.ReactNode;
+}
+
+const getStatusValue = ({ status, statusNode }: HeaderBlockValues): React.ReactNode => {
+  if (statusNode !== undefined) {
+    return statusNode;
+  }
+  return (
+    <EuiBadge color={status === 'open' ? 'primary' : 'hollow'}>
+      {status ?? getEmptyValue()}
+    </EuiBadge>
+  );
+};
+
+const getAssigneesValue = ({
+  assigneesNode,
+  assigneeUids = [],
+}: HeaderBlockValues): React.ReactNode => {
+  if (assigneesNode !== undefined) {
+    return assigneesNode;
+  }
+  if (assigneeUids.length === 0) {
+    return null;
+  }
+  const profiles = assigneeUids.map((uid) => ({
+    uid,
+    enabled: true as const,
+    user: { username: uid },
+    data: {},
+  }));
+  return <AssigneeAvatarStack profiles={profiles} />;
+};
+
+/**
+ * The status, severity (when supplied) and assignee tiles shown above the flyout tabs. Takes either
+ * a pre-rendered `assigneesNode` (interactive picker from the consuming plugin) or a list of uids
+ * to show as a read-only avatar stack.
+ */
+export const getHeaderBlocks = (values: HeaderBlockValues): InfoBlockItem[] => [
+  { id: 'status', title: TEMPLATE_UI_LABELS.status, value: getStatusValue(values) },
+  ...(values.severityNode !== undefined
+    ? [{ id: 'severity', title: TEMPLATE_UI_LABELS.severity, value: values.severityNode }]
+    : []),
+  { id: 'assignees', title: TEMPLATE_UI_LABELS.assignees, value: getAssigneesValue(values) },
+];
+
+export interface ConversationHeaderBlocksProps extends HeaderBlockValues {
   'data-test-subj'?: string;
 }
 
-/**
- * Status, severity (when supplied) and assignee tiles shown above the flyout tabs.
- *
- * Accepts either a fully pre-rendered `assigneesNode` (interactive picker from the
- * consuming plugin) or a list of uid strings to render as a read-only avatar stack.
- */
+/** The header tiles, rendered with `InfoBlocks`. */
 export const ConversationHeaderBlocks = ({
   status,
   statusNode,
   assigneesNode,
-  assigneeUids = [],
+  assigneeUids,
   severityNode,
   'data-test-subj': dataTestSubj = 'investigationHeaderBlocks',
 }: ConversationHeaderBlocksProps) => {
-  const assigneesValue = useMemo<React.ReactNode>(() => {
-    if (assigneesNode !== undefined) {
-      return assigneesNode;
-    }
-    if (assigneeUids.length === 0) {
-      return null;
-    }
-    const profiles = assigneeUids.map((uid) => ({
-      uid,
-      enabled: true as const,
-      user: { username: uid },
-      data: {},
-    }));
-    return <AssigneeAvatarStack profiles={profiles} />;
-  }, [assigneesNode, assigneeUids]);
-
-  const statusValue = useMemo<React.ReactNode>(() => {
-    if (statusNode !== undefined) {
-      return statusNode;
-    }
-    return (
-      <EuiBadge color={status === 'open' ? 'primary' : 'hollow'}>
-        {status ?? getEmptyValue()}
-      </EuiBadge>
-    );
-  }, [status, statusNode]);
-
   const items = useMemo<InfoBlockItem[]>(
-    () => [
-      {
-        id: 'status',
-        title: TEMPLATE_UI_LABELS.status,
-        value: statusValue,
-      },
-      ...(severityNode !== undefined
-        ? [
-            {
-              id: 'severity',
-              title: TEMPLATE_UI_LABELS.severity,
-              value: severityNode,
-            },
-          ]
-        : []),
-      {
-        id: 'assignees',
-        title: TEMPLATE_UI_LABELS.assignees,
-        value: assigneesValue,
-      },
-    ],
-    [statusValue, severityNode, assigneesValue]
+    () => getHeaderBlocks({ status, statusNode, assigneesNode, assigneeUids, severityNode }),
+    [status, statusNode, assigneesNode, assigneeUids, severityNode]
   );
 
   return (

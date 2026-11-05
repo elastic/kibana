@@ -106,14 +106,14 @@ export {
   type RenderSeverity,
   type SeveritySlotRenderProps,
   type RenderLinkedInvestigations,
-  type RenderSyncIndicator,
-  type SyncIndicatorSlotRenderProps,
+  type DetailsFlyoutContext,
+  type InvestigationDetailsFlyoutContext,
+  type EscalationDetailsFlyoutContext,
   type LinkedInvestigationsSlotRenderProps,
   type RenderOverview,
   type OverviewSlotRenderProps,
   type RenderLiveState,
   type LiveStateSlotRenderProps,
-  type RenderTitle,
   type TitleSlotRenderProps,
 } from './src/template_ui/types';
 export {

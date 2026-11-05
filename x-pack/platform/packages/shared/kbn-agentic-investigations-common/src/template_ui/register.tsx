@@ -14,17 +14,17 @@ import type {
 } from '@kbn/agent-builder-browser';
 import { getCopyLinkFlyoutAction } from '../components/actions/copy_link_action';
 import { DETAILS_FLYOUT_LABELS } from '../components/details/translations';
+import type { EscalationModalRenderProps } from '../components/modals/investigation_action_modals';
 import type { FlyoutGroupedAttachmentsRegistry } from '../components/grouped_attachments';
-import { ConversationTitle } from './conversation_title';
 import type {
+  EscalationDetailsFlyoutContext,
+  InvestigationDetailsFlyoutContext,
   RenderAssignees,
   RenderStatus,
   RenderSeverity,
   RenderLinkedInvestigations,
   RenderOverview,
   RenderLiveState,
-  RenderTitle,
-  RenderSyncIndicator,
 } from './types';
 
 /**
@@ -34,15 +34,6 @@ import type {
  */
 const LazyOverviewSlot = lazy(() =>
   import('./slots').then(({ OverviewSlot }) => ({ default: OverviewSlot }))
-);
-const LazyHeaderSlot = lazy(() =>
-  import('./slots').then(({ HeaderSlot }) => ({ default: HeaderSlot }))
-);
-const LazyFooterSlot = lazy(() =>
-  import('./slots').then(({ FooterSlot }) => ({ default: FooterSlot }))
-);
-const LazyEscalationHeaderSlot = lazy(() =>
-  import('./slots').then(({ EscalationHeaderSlot }) => ({ default: EscalationHeaderSlot }))
 );
 const LazyEscalationOverviewSlot = lazy(() =>
   import('./slots').then(({ EscalationOverviewSlot }) => ({ default: EscalationOverviewSlot }))
@@ -65,16 +56,18 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
   name: string;
   icon?: IconType;
   /**
-   * When provided, the flyout footer renders a dedicated "Open escalation" primary button and
-   * delegates modal rendering to this function. Supplied by the caller so the modal can use
-   * Kibana HTTP hooks unavailable in this package.
+   * When provided, the flyout footer offers "Open an escalation" as its primary action and renders
+   * the modal with this. Supplied by the caller so the modal can use Kibana HTTP hooks unavailable
+   * in this package. `loadDetailsFlyoutContext` can hide the action from a user who may not
+   * escalate.
    */
-  renderEscalationModal?: import('./slots').FooterSlotProps['onOpenEscalation'];
+  renderEscalationModal?: (props: EscalationModalRenderProps) => React.ReactNode;
   /**
-   * Wraps the footer's "Open escalation" button, so the caller can hide it once it learns at
-   * render time (for example from a privileges request) that the user may not escalate.
+   * Loads the provider and hooks the caller adds to the details flyout, such as the privilege
+   * check for "Open an escalation". Called with the flyout's own module, the first time a flyout
+   * opens.
    */
-  wrapEscalationButton?: import('./slots').FooterSlotProps['wrapEscalationButton'];
+  loadDetailsFlyoutContext?: () => Promise<InvestigationDetailsFlyoutContext>;
   /**
    * When provided, the overview tab renders a "Proposed actions" section with this as its
    * content. Supplied by the caller because listing and deciding a conversation's proposals
@@ -100,11 +93,6 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    */
   renderSeverity?: RenderSeverity;
   /**
-   * When provided, the "Close investigation" footer action renders a confirmation modal.
-   * Supplied by the caller so the modal can use HTTP hooks unavailable in this package.
-   */
-  renderCloseInvestigationModal?: import('./slots').FooterSlotProps['onCloseInvestigation'];
-  /**
    * When provided, replaces the overview tab body so the caller can add sections from data it
    * fetches. See `RenderOverview`.
    */
@@ -114,10 +102,6 @@ export interface RegisterAgenticInvestigationTemplateUIOptions {
    * next to its age. See `RenderLiveState`.
    */
   renderLiveState?: RenderLiveState;
-  /**
-   * When provided, renders the header's title, also while the header loads. See `RenderTitle`.
-   */
-  renderTitle?: RenderTitle;
   /**
    * Card Agent Builder renders for conversations on this template. Must be self-contained; see
    * `ConversationTemplateUIDefinition.briefCard`.
@@ -145,16 +129,14 @@ export const registerAgenticInvestigationTemplateUI = ({
   name,
   icon,
   renderEscalationModal,
-  wrapEscalationButton,
+  loadDetailsFlyoutContext,
   renderProposedActions,
   renderProposedActionsCount,
   renderAssignees,
   renderStatus,
   renderSeverity,
-  renderCloseInvestigationModal,
   renderOverview,
   renderLiveState,
-  renderTitle,
   briefCard,
   onCopyLink,
 }: RegisterAgenticInvestigationTemplateUIOptions): void => {
@@ -196,55 +178,29 @@ export const registerAgenticInvestigationTemplateUI = ({
             )
           ),
         ],
-        header: function InvestigationFlyoutHeader({ conversation, refetchConversation }) {
-          return (
-            // Agent Builder points the flyout's `aria-labelledby` at the header, so it must not
-            // collapse to nothing while the slot's chunk loads.
-            <Suspense
-              fallback={
-                <ConversationTitle
-                  title={
-                    renderTitle?.({ conversationId: conversation.id, title: conversation.title }) ??
-                    conversation.title
-                  }
-                />
-              }
-            >
-              <LazyHeaderSlot
-                conversation={conversation}
-                renderAssignees={renderAssignees}
-                renderStatus={renderStatus}
-                renderSeverity={renderSeverity}
-                renderLiveState={renderLiveState}
-                renderTitle={renderTitle}
-                refetchConversation={refetchConversation}
-              />
-            </Suspense>
-          );
-        },
-        footer: function InvestigationFlyoutFooter({ conversation, isOpenedFromChat }) {
-          return (
-            <Suspense fallback={null}>
-              <LazyFooterSlot
-                isOpenedFromChat={isOpenedFromChat}
-                conversation={conversation}
-                // Full screen rather than the sidebar: the chat is the investigation's own record,
-                // so it gets the whole page instead of a panel beside the flyout that opened it.
-                // The conversation list is collapsed so the investigation's chat gets the width.
-                onOpenChat={() =>
-                  openFullscreenConversation({
-                    conversationId: conversation.id,
-                    agentId: conversation.agent_id,
-                    openDetails: true,
-                    collapseSidebar: true,
-                  })
-                }
-                onOpenEscalation={renderEscalationModal}
-                wrapEscalationButton={wrapEscalationButton}
-                onCloseInvestigation={renderCloseInvestigationModal}
-              />
-            </Suspense>
-          );
+        load: async () => {
+          const [{ createInvestigationDetailsFlyoutModule }, context] = await Promise.all([
+            import('./details_flyout'),
+            loadDetailsFlyoutContext?.(),
+          ]);
+          return createInvestigationDetailsFlyoutModule({
+            renderAssignees,
+            renderStatus,
+            renderSeverity,
+            renderLiveState,
+            // Full screen rather than the sidebar: the chat is the investigation's own record, so it
+            // gets the whole page instead of a panel beside the flyout that opened it. The
+            // conversation list is collapsed so the investigation's chat gets the width.
+            onOpenChat: ({ conversationId, agentId }) =>
+              openFullscreenConversation({
+                conversationId,
+                agentId,
+                openDetails: true,
+                collapseSidebar: true,
+              }),
+            renderEscalationModal,
+            context,
+          });
         },
       },
     })
@@ -279,10 +235,11 @@ export interface RegisterEscalationTemplateUIOptions {
    */
   renderLinkedInvestigations?: RenderLinkedInvestigations;
   /**
-   * When provided, the header renders it beside the title, e.g. a spinner while the escalation's
-   * attachments sync. Supplied by the caller so it can use Kibana HTTP hooks and toasts.
+   * Loads the provider and hooks the caller adds to the details flyout, such as the attachment
+   * sync the header shows a spinner for. Called with the flyout's own module, the first time a
+   * flyout opens.
    */
-  renderSyncIndicator?: RenderSyncIndicator;
+  loadDetailsFlyoutContext?: () => Promise<EscalationDetailsFlyoutContext>;
   /**
    * Called by the flyout's "Copy link" button with the conversation's Agent Builder URL.
    * See `RegisterAgenticInvestigationTemplateUIOptions.onCopyLink`.
@@ -314,7 +271,7 @@ export const registerEscalationTemplateUI = ({
   renderAssignees,
   renderStatus,
   renderLinkedInvestigations,
-  renderSyncIndicator,
+  loadDetailsFlyoutContext,
   onCopyLink,
 }: RegisterEscalationTemplateUIOptions): void => {
   const [overviewTabId] = getEscalationTabIds(templateId);
@@ -353,18 +310,12 @@ export const registerEscalationTemplateUI = ({
           )
         ),
       ],
-      header: function EscalationFlyoutHeaderWrapper({ conversation, refetchConversation }) {
-        return (
-          <Suspense fallback={<ConversationTitle title={conversation.title} />}>
-            <LazyEscalationHeaderSlot
-              conversation={conversation}
-              renderAssignees={renderAssignees}
-              renderStatus={renderStatus}
-              renderSyncIndicator={renderSyncIndicator}
-              refetchConversation={refetchConversation}
-            />
-          </Suspense>
-        );
+      load: async () => {
+        const [{ createEscalationDetailsFlyoutModule }, context] = await Promise.all([
+          import('./details_flyout'),
+          loadDetailsFlyoutContext?.(),
+        ]);
+        return createEscalationDetailsFlyoutModule({ renderAssignees, renderStatus, context });
       },
       // No footer for escalations yet.
     },

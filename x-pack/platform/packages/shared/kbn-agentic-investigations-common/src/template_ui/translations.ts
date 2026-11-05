@@ -30,6 +30,9 @@ export const TEMPLATE_UI_LABELS = Object.freeze({
   unassigned: i18n.translate('xpack.agenticInvestigations.templateUi.unassigned', {
     defaultMessage: 'Unassigned',
   }),
+  syncing: i18n.translate('xpack.agenticInvestigations.templateUi.syncing', {
+    defaultMessage: 'Syncing attachments from linked investigations',
+  }),
 });
 
 /** One-line summaries for the conversation events the timeline surfaces. */
