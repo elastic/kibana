@@ -434,6 +434,7 @@ export class AgentBuilderPlugin
       skills,
       runnerFactory,
       execution,
+      decisions,
       plugins,
       conversations,
       conversationTemplates,
@@ -489,6 +490,9 @@ export class AgentBuilderPlugin
       },
       runtime: {
         createModelProvider: modelProviderFactory,
+      },
+      decisions: {
+        decide: decisions.decide,
       },
       conversations: {
         getScopedClient: async ({ request }) => {
