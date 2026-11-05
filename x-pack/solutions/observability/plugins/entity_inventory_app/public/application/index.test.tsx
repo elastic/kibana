@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { act, render, screen, waitFor } from '@testing-library/react';
+import { act, fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import { EuiProvider } from '@elastic/eui';
 import { createMemoryHistory } from 'history';
 import type { History } from 'history';
@@ -87,6 +87,31 @@ describe('EntityInventoryShell', () => {
       entityType
     );
     expect(screen.queryByTestId('entityInventoryPlaceholder')).not.toBeInTheDocument();
+  });
+
+  it('keeps the column choices of a type while another page is open', async () => {
+    const { history } = renderShellAt('/hosts');
+    expect(await screen.findByTestId('dataGridHeaderCell-cloud.account.id')).toBeInTheDocument();
+    fireEvent.click(screen.getByTestId('dataGridHeaderCellActionButton-cloud.account.id'));
+    const hideColumn = within(screen.getByTestId('dataGridHeaderCellActionGroup-cloud.account.id'))
+      .getAllByRole('button')
+      .find((button) => button.textContent === 'Hide column');
+    if (!hideColumn) {
+      throw new Error('No hide action');
+    }
+    fireEvent.click(hideColumn);
+    await waitFor(() =>
+      expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument()
+    );
+
+    act(() => history.push('/all-resources'));
+    expect(await screen.findByTestId('entityInventoryPlaceholder')).toBeInTheDocument();
+    expect(screen.queryByTestId('entityInventoryTable')).not.toBeInTheDocument();
+    act(() => history.push('/hosts'));
+
+    expect(await screen.findByTestId('entityInventoryTable')).toBeInTheDocument();
+    expect(screen.getByTestId('dataGridHeaderCell-entityInventory.name')).toBeInTheDocument();
+    expect(screen.queryByTestId('dataGridHeaderCell-cloud.account.id')).not.toBeInTheDocument();
   });
 
   it.each(['/', '/unknown'])('redirects the path %s to all resources', (path) => {

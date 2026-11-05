@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiProgress } from '@elastic/eui';
+import { useEntityTablePreferences } from '../../context/entity_table_preferences_context';
 import { EntityTypeNotFoundError, useEntityList } from '../../hooks/use_entity_list';
 import { EntityTable } from './entity_table';
 import type { EntityTablePreferences } from './use_entity_table_state';
-import { NO_PREFERENCES } from './use_entity_table_state';
 import {
   EntityTableDiagnosticsCallout,
   EntityTableTruncationCallout,
@@ -25,24 +25,17 @@ import {
 /**
  * The results of one entity type over the committed time range, with its loading states. Keyed by
  * type so that a type switch starts with no rows. The column, sort and page size choices are kept
- * here, per type, so an empty range, a failed load or a switch to another type and back does not
- * discard them. They last as long as this component, and are not persisted (#6330).
+ * per type above the routes, in `EntityTablePreferencesProvider`, so an empty range, a failed
+ * load, another type or another page does not discard them.
  */
 export const EntityTypeResults = ({ entityType }: { entityType: string }) => {
-  const [preferencesByType, setPreferencesByType] = useState<
-    Readonly<Record<string, EntityTablePreferences>>
-  >({});
-  const onPreferencesChange = useCallback(
-    (preferences: EntityTablePreferences) =>
-      setPreferencesByType((previous) => ({ ...previous, [entityType]: preferences })),
-    [entityType]
-  );
+  const { preferences, onPreferencesChange } = useEntityTablePreferences(entityType);
 
   return (
     <EntityTypeResultsOfType
       key={entityType}
       entityType={entityType}
-      preferences={preferencesByType[entityType] ?? NO_PREFERENCES}
+      preferences={preferences}
       onPreferencesChange={onPreferencesChange}
     />
   );

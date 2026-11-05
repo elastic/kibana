@@ -16,6 +16,7 @@ import { HOST_TYPE_FIXTURE } from '../../../inventory_api/fixture_data';
 import type { FixtureScenario } from '../../../inventory_api/fixture_scenarios';
 import { createScenarioEntityInventoryApiClient } from '../../../inventory_api/fixture_scenarios';
 import { createAppServicesMock } from '../../../mocks';
+import { EntityTablePreferencesProvider } from '../../context/entity_table_preferences_context';
 import {
   EntityInventorySearchProvider,
   useEntityInventorySearch,
@@ -52,10 +53,12 @@ const renderResults = (inventoryApi: EntityInventoryApiClient, entityType = 'hos
     <I18nProvider>
       <EuiProvider>
         <KibanaContextProvider services={createAppServicesMock({ inventoryApi })}>
-          <EntityInventorySearchProvider entityCategory="hosts">
-            <NewRangeButton />
-            <EntityTypeResults entityType={type} />
-          </EntityInventorySearchProvider>
+          <EntityTablePreferencesProvider>
+            <EntityInventorySearchProvider entityCategory="hosts">
+              <NewRangeButton />
+              <EntityTypeResults entityType={type} />
+            </EntityInventorySearchProvider>
+          </EntityTablePreferencesProvider>
         </KibanaContextProvider>
       </EuiProvider>
     </I18nProvider>
