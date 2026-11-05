@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
-import { EuiLink, EuiSpacer, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import { toMountPoint } from '@kbn/react-kibana-mount';
 import { useMutation, useQueries, useQuery, useQueryClient } from '@kbn/react-query';
 import type {
   NightshiftInvestigationsAPIClientRequestParamsOf,
@@ -145,15 +141,15 @@ export const useAutomationsRunsInRange = (
 const useAutomationMutation = <TVariables, TData = unknown>(
   mutationFn: (variables: TVariables) => Promise<TData>,
   errorTitle: string,
-  onSuccess?: (data: TData, variables: TVariables) => void
+  onSuccess?: (variables: TVariables) => void
 ) => {
   const { notifications } = useKibana().services;
   const queryClient = useQueryClient();
 
   return useMutation({
     mutationFn,
-    onSuccess: async (data, variables) => {
-      onSuccess?.(data, variables);
+    onSuccess: async (_data, variables) => {
+      onSuccess?.(variables);
       await queryClient.invalidateQueries({ queryKey: AUTOMATIONS_QUERY_KEY });
     },
     onError: (error: unknown) =>
@@ -161,12 +157,8 @@ const useAutomationMutation = <TVariables, TData = unknown>(
   });
 };
 
-const VIEW_IN_AUTOMATIONS_LABEL = i18n.translate('xpack.nightshift.automations.viewInAutomations', {
-  defaultMessage: 'View in Automations',
-});
-
 export const useCreateAutomation = (isClone = false) => {
-  const { application, nightshiftInvestigations, notifications, rendering } = useKibana().services;
+  const { nightshiftInvestigations, notifications } = useKibana().services;
   const investigationsClient = nightshiftInvestigations?.investigationsClient;
 
   return useAutomationMutation<CreateAutomationBody, { id: string }>(
@@ -180,10 +172,7 @@ export const useCreateAutomation = (isClone = false) => {
       });
     },
     errorToastTitles.create,
-    (_created, body) => {
-      const href = application.getUrlForApp(NIGHTSHIFT_APP_ID, {
-        path: `/automations?search=${encodeURIComponent(body.name)}`,
-      });
+    (body) =>
       notifications.toasts.addSuccess({
         title: isClone
           ? i18n.translate('xpack.nightshift.automations.cloneSuccess', {
@@ -192,29 +181,8 @@ export const useCreateAutomation = (isClone = false) => {
           : i18n.translate('xpack.nightshift.automations.createSuccess', {
               defaultMessage: 'Automation created',
             }),
-        text: toMountPoint(
-          React.createElement(
-            React.Fragment,
-            null,
-            React.createElement(EuiText, { size: 's' }, body.name),
-            React.createElement(EuiSpacer, { size: 's' }),
-            React.createElement(
-              EuiLink,
-              {
-                href,
-                onClick: (event: React.MouseEvent) => {
-                  event.preventDefault();
-                  void application.navigateToUrl(href);
-                },
-                'data-test-subj': 'nightshiftAutomationCreatedViewLink',
-              },
-              VIEW_IN_AUTOMATIONS_LABEL
-            )
-          ),
-          rendering
-        ),
-      });
-    }
+        text: body.name,
+      })
   );
 };
 
@@ -233,7 +201,7 @@ export const useToggleAutomation = () => {
       });
     },
     errorToastTitles.update,
-    (_data, { name, isEnabled }) =>
+    ({ name, isEnabled }) =>
       notifications.toasts.addSuccess({
         title: isEnabled
           ? i18n.translate('xpack.nightshift.automations.enabledToast', {
@@ -265,7 +233,7 @@ export const useUpdateAutomation = () => {
       });
     },
     errorToastTitles.update,
-    (_data, { body }) =>
+    ({ body }) =>
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.automations.updateSuccess', {
           defaultMessage: 'Automation updated',
@@ -290,7 +258,7 @@ export const useDeleteAutomation = () => {
       });
     },
     errorToastTitles.delete,
-    (_data, { name }) =>
+    ({ name }) =>
       notifications.toasts.addSuccess({
         title: i18n.translate('xpack.nightshift.automations.deletedToast', {
           defaultMessage: 'Automation deleted',

@@ -300,18 +300,17 @@ export function NightshiftOnboarding({
       <EuiButton
         fullWidth
         size="s"
-        iconType="sortRight"
-        iconSide="right"
+        fill={hasAutomation}
+        iconType={hasAutomation ? 'check' : 'sortRight'}
+        iconSide={hasAutomation ? 'left' : 'right'}
         onClick={onFinish}
         data-test-subj={
-          hasAutomation
-            ? 'nightshiftOnboardingViewInvestigationsButton'
-            : 'nightshiftOnboardingFinishButton'
+          hasAutomation ? 'nightshiftOnboardingDoneButton' : 'nightshiftOnboardingFinishButton'
         }
       >
         {hasAutomation
-          ? i18n.translate('xpack.nightshift.onboarding.viewInvestigationsButton', {
-              defaultMessage: 'View investigations',
+          ? i18n.translate('xpack.nightshift.onboarding.doneButton', {
+              defaultMessage: 'Done',
             })
           : i18n.translate('xpack.nightshift.onboarding.doItLaterButton', {
               defaultMessage: "I'll do it later",
