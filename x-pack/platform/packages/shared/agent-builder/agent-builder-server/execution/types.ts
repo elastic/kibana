@@ -131,7 +131,8 @@ export interface ConversationExecutionParams extends BaseExecutionParams {
   };
   /**
    * Whether the agent runs. `never` persists the user message and stops there, leaving every
-   * other option here unused. Defaults to `always`.
+   * other option here unused. `auto` asks a decision model which of the two applies in a shared
+   * conversation. Defaults to `always`.
    */
   triggerMode?: ChatTriggerMode;
 }
@@ -252,7 +253,8 @@ export interface ExecuteAgentResult {
 
 /**
  * Result of a request that may not have run the agent. The execution id is absent when
- * `trigger_mode: 'never'` persisted the user message instead of starting a run, so there is
+ * `trigger_mode: 'never'` (or an `auto` decision not to respond) persisted the user message
+ * instead of starting a run, so there is
  * nothing to address; a caller that always needs one runs the agent through
  * {@link AgentExecutionService.executeAgent}.
  */
