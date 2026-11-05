@@ -878,6 +878,7 @@ src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-dashboards
 src/platform/plugins/private/maps_ems @elastic/kibana-dashboards
 src/platform/plugins/private/url_forwarding @elastic/kibana-dashboards
+src/platform/plugins/private/user_storage_test @elastic/appex-sharedux
 src/platform/plugins/private/vis_default_editor @elastic/kibana-dashboards
 src/platform/plugins/private/vis_types/gauge @elastic/kibana-dashboards
 src/platform/plugins/private/vis_types/heatmap @elastic/kibana-dashboards
@@ -994,7 +995,6 @@ src/platform/test/plugin_functional/plugins/ui_settings_plugin @elastic/kibana-c
 src/platform/test/plugin_functional/plugins/usage_collection @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_a @elastic/kibana-core
 src/platform/test/server_integration/plugins/status_plugin_b @elastic/kibana-core
-src/platform/test/user_storage/plugins/user_storage_test @elastic/appex-sharedux
 src/setup_node_env @elastic/kibana-operations
 x-pack/examples/alerting_example @elastic/response-ops
 x-pack/examples/embedded_lens_example @elastic/kibana-dashboards
