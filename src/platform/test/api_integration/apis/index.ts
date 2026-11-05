@@ -15,7 +15,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./general'));
     loadTestFile(require.resolve('./event_annotations'));
     loadTestFile(require.resolve('./saved_objects'));
-    loadTestFile(require.resolve('./short_url'));
     // suggestions migrated to Scout: src/platform/plugins/shared/kql/test/scout/api/tests/value_suggestions*.spec.ts
     // status migrated to Scout: src/core/test/scout/api/tests/status.spec.ts
     loadTestFile(require.resolve('./stats'));
