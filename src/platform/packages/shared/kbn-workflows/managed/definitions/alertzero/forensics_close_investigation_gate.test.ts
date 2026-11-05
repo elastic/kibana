@@ -489,7 +489,7 @@ describe('Forensics close investigation gate', () => {
       expect(evaluate(decision.expired, approved)).toBe(false);
     });
 
-    it('journals each outcome, naming the analyst and what the Investigation does next', () => {
+    it('journals each outcome and what the Investigation does next', () => {
       const message = String((outcome?.with?.inputs as { message?: string })?.message);
       const render = (
         resolved: Record<string, boolean>,
@@ -509,10 +509,10 @@ describe('Forensics close investigation gate', () => {
       expect(
         render({ approved: true }, { decidedBy: { username: 'ana' } }, 'Ransomware staged.')
       ).toBe(
-        'ana approved closing this Investigation. Endpoint analysis assessed it as `resolved`: Ransomware staged.'
+        'Closing this Investigation. Endpoint analysis assessed it as `resolved`: Ransomware staged.'
       );
       expect(render({ approved: true }, { decidedBy: { username: 'ana' } })).toBe(
-        'ana approved closing this Investigation. Endpoint analysis assessed it as `resolved`.'
+        'Closing this Investigation. Endpoint analysis assessed it as `resolved`.'
       );
       expect(
         liquid.parseAndRenderSync(message, {
@@ -529,7 +529,7 @@ describe('Forensics close investigation gate', () => {
           },
         })
       ).toBe(
-        'ana approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident: Scheduled backup tooling.'
+        'Closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident: Scheduled backup tooling.'
       );
       expect(
         render(
@@ -541,10 +541,10 @@ describe('Forensics close investigation gate', () => {
           }
         )
       ).toBe(
-        'ana chose to keep this Investigation open (risk_accepted): Known tooling. Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
+        'Keeping this Investigation open (risk_accepted): Known tooling. Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
       );
       expect(render({ dismissed: true })).toBe(
-        'An analyst chose to keep this Investigation open (no reason given). Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
+        'Keeping this Investigation open (no reason given). Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.'
       );
       expect(render({ expired: true }, undefined, undefined, 'expired')).toBe(
         'The Close Investigation proposal expired with no decision. The Investigation stays open.'
@@ -552,6 +552,22 @@ describe('Forensics close investigation gate', () => {
       expect(render({}, undefined, undefined, 'failed')).toBe(
         'The Close Investigation proposal ended as `failed`. The Investigation stays open.'
       );
+    });
+
+    it('does not name the decider, even when decidedBy is present', () => {
+      const message = String(
+        (stepIn('journal_outcome')?.with?.inputs as { message?: string })?.message
+      );
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(message, {
+        inputs: { closeReason: 'resolved' },
+        steps: {
+          resolve_decision: { output: { approved: true } },
+          read_proposal_decision: { output: { decidedBy: { username: 'pEu97WGgSCeNATpE0h-Y-A' } } },
+          create_and_gate_proposal: { output: { status: 'succeeded' } },
+        },
+      });
+
+      expect(rendered).not.toContain('pEu97WGgSCeNATpE0h-Y-A');
     });
 
     it('reports whether the question was asked and how it ended', () => {

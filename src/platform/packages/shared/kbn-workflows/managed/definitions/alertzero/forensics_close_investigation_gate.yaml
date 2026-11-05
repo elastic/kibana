@@ -288,8 +288,8 @@ steps:
       investigation_id: "{{ inputs.investigationConversationId }}"
       close_reason: "{{ inputs.closeReason }}"
 
-  # The action already journaled what it closed. This note says what was decided
-  # and by whom. Best-effort.
+  # The action already journaled what it closed. This note says what was decided.
+  # Best-effort.
   - name: journal_outcome
     type: workflow.execute
     if: "${{ steps.create_and_gate_proposal.output.status != blank }}"
@@ -299,15 +299,14 @@ steps:
       inputs:
         conversation_id: "{{ inputs.investigationConversationId }}"
         message: >-
-          {%- assign who = steps.read_proposal_decision.output.decidedBy.username | default: 'An analyst' -%}
           {%- if steps.resolve_decision.output.approved == true and inputs.closeReason == 'false_positive' -%}
-          {{ who }} approved closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident
+          Closing this Investigation, the attack and its alerts as a false positive. Endpoint analysis found no real incident
           {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
           {%- elsif steps.resolve_decision.output.approved == true -%}
-          {{ who }} approved closing this Investigation. Endpoint analysis assessed it as `{{ inputs.closeReason }}`
+          Closing this Investigation. Endpoint analysis assessed it as `{{ inputs.closeReason }}`
           {%- if inputs.assessment != blank %}: {{ inputs.assessment }}{% else %}.{% endif %}
           {%- elsif steps.resolve_decision.output.dismissed == true -%}
-          {{ who }} chose to keep this Investigation open ({{ steps.read_proposal_decision.output.dismissReason | default: 'no reason given' }})
+          Keeping this Investigation open ({{ steps.read_proposal_decision.output.dismissReason | default: 'no reason given' }})
           {%- if steps.read_proposal_decision.output.rationale != blank %}: {{ steps.read_proposal_decision.output.rationale }}{% else %}.{% endif %}
           Nothing was changed. The question is asked again after the next proposal on this Investigation is decided.
           {%- elsif steps.resolve_decision.output.expired == true -%}
