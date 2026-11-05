@@ -115,8 +115,8 @@ gates:
   D10c:
     family: D
     name: execute-time-revalidation
-    status: n/a
-    reason: "The actions the hit rows propose are asset criticality updates, not Elastic Defend endpoint actions, and the suite does not assert re-validation at execution time."
+    status: tested
+    reason: "The multi-candidate hit reports propose a real Defend endpoint action (suspend-process on the seeded host's aws.exe), and the approval spec drives it end to end: the managed action POSTs /api/endpoint/action/suspend_process, the staged responder answers, and the Proposal settles succeeded only when the action reports success. Re-validation of pre-approval checks at execution time is still not asserted; the staged responder always answers success."
   D10d:
     family: D
     name: coverage-handoff-integrity

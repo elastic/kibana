@@ -138,16 +138,33 @@ export const GENERATED_AWS_IAM_REPORT_IDS: readonly string[] = AWS_IAM_REPORT_SL
 export const HUNT_REPORT_IDS = {
   /** Golden `hit`: behavior-only, smoke-proven end to end (Tier 1 clean, Tier 2 AssumeRole hit). */
   hit: buildHistoricReportId('aws-iam-behavior-only', 2),
+  /**
+   * Golden `actioned`: the assume-role report whose Investigation mints the pending
+   * suspend-process Proposal on WIN-ANALYST01's aws.exe (pid 4288). The approval spec binds to
+   * this id, not `hit`: the behavior-only report's only Proposal is the recommendation-only
+   * `no_action`, which would settle both approve and dismiss through `no_action` and never
+   * exercise the boundary the spec exists for.
+   */
+  actioned: buildHistoricReportId('aws-iam-assume-role', 1),
   /** Golden `clean`: password-spray advisory disjoint from seeded telemetry. */
   clean: buildHistoricReportId('aws-iam-clean', 1),
   /** Hard clean repeat: a second clean report on a different id. */
   cleanRepeat: buildHistoricReportId('aws-iam-clean', 2),
   /** Hard `difficult hit`: IOC-only narrative with no technique ids for Tier 2. */
   difficultHit: buildHistoricReportId('aws-iam-ioc-only', 2),
-  /** Hard `multi-candidate`: three named reports in one trigger. */
+  /**
+   * Hard `multi-candidate`: four named reports in one trigger. Reports 2 and 3 are the
+   * assume-role scenario's first two historic slots: distinct report ids and Investigations,
+   * identical principals and process chain, so packaging must mint the shared actioned subject
+   * (suspend-process on WIN-ANALYST01's aws.exe) once and converge the other Investigation onto
+   * that Proposal. Without the second slot the row had exactly one actioned subject holder, so
+   * `Proposal Convergence` could only ever observe "no duplicates" and never the convergence
+   * itself.
+   */
   multiCandidate: [
     buildHistoricReportId('aws-iam', 1),
     buildHistoricReportId('aws-iam-assume-role', 1),
+    buildHistoricReportId('aws-iam-assume-role', 2),
     buildHistoricReportId('aws-iam-ioc-only', 1),
   ],
   /** Hard `no-candidates`: an id that does not exist. Must complete with `not_found`. */

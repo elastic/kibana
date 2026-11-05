@@ -12,7 +12,7 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
 
 /**
  * Config set for the hunt-watch eval suite. The suite drives the managed Hunt Watch Worker
- * (`system-security-hunt-continuous-threat-hunt`), which needs four things that are off by
+ * (`system-security-hunt-continuous-threat-hunt`), which needs a few things that are off by
  * default.
  *
  * `xpack.alertzero.enabled` defaults to `false`. `agenticInvestigations` and `proposals` are
@@ -25,6 +25,13 @@ import { servers as evalsTracingConfig } from '../../evals_tracing/stateful/clas
  *
  * Only the service accounts flag is set here, not `serviceAccountsServerArgs`: that helper also
  * loads the security API integration test plugin, which this suite never calls.
+ *
+ * The preinstalled `endpoint` Fleet package (same flag the endpoint eval suite uses) serves the
+ * approval spec, not the scored Worker: approving the assume-role report's suspend-process
+ * Proposal runs the managed Defend action, whose request validation resolves the agent's policy
+ * through Fleet's package policies and whose action-log and response data streams are installed
+ * by that package. Without it the approve test cannot stage its Fleet policy or answer the
+ * dispatched action.
  *
  * Nothing else is needed. `workflows:ui:enabled` already defaults to `true`, and `inbox` is only
  * an optional UI provider for workflows_management; the Proposal approve and dismiss routes the
@@ -44,6 +51,8 @@ export const servers: ScoutServerConfig = {
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
       '--xpack.security.serviceAccounts.enabled=true',
+      '--xpack.fleet.packages.0.name=endpoint',
+      '--xpack.fleet.packages.0.version=latest',
     ],
   },
 };

@@ -319,8 +319,13 @@ describe('dataset bindings', () => {
     expect(canaryDataset).toHaveLength(1);
   });
 
-  it('returns three named reports for multi-candidate', () => {
-    expect(HUNT_REPORT_IDS.multiCandidate).toHaveLength(3);
+  it('returns four named reports for multi-candidate, including two assume-role slots', () => {
+    expect(HUNT_REPORT_IDS.multiCandidate).toHaveLength(4);
+    // The two assume-role slots are what make convergence observable: same principals and
+    // process chain, distinct report ids and Investigations.
+    expect(HUNT_REPORT_IDS.multiCandidate.filter((id) => id.includes('assume-role'))).toHaveLength(
+      2
+    );
   });
 
   it('returns holdout ids within the seeded historic slots', () => {

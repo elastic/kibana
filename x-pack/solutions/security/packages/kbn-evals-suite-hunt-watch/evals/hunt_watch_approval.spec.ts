@@ -9,10 +9,21 @@ import type { HttpHandler } from '@kbn/core/public';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ProposalWithMetadata } from '@kbn/proposals-common';
 import type { Client } from '@elastic/elasticsearch';
+import {
+  deleteIndexedFleetEndpointPolicies,
+  indexFleetEndpointPolicy,
+} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { IndexedFleetEndpointPolicyResponse } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
+import type { KbnClient } from '@kbn/test';
 import { evaluate, tags } from '../src/evaluate';
 import { collectHuntArtifacts } from '../src/collect';
 import { DEFAULT_EVAL_SPACE_ID, HUNT_REPORT_IDS } from '../src/constants';
 import { buildHuntInvestigationConversationId, resetHuntReport } from '../src/seed_hunt_data';
+import {
+  ensureHuntEndpointMetadata,
+  respondToOutstandingActions,
+  retargetFleetAgentPolicyId,
+} from '../src/endpoint_action_responder';
 import {
   approveProposal,
   describeSettlementProblems,
@@ -32,11 +43,20 @@ import type { HuntWatchClient } from '../src/hunt_watch_client';
  *
  * Setup requires at least one pending Proposal that carries an action. Without it both tests
  * settle entirely through `no_action` and never show an approved action running or a dismissed
- * one staying unrun, which is the boundary this spec exists to exercise.
+ * one staying unrun, which is the boundary this spec exists to exercise. The report is the
+ * assume-role one: the only seeded report whose packaging mints an actioned Proposal. Its host
+ * is seeded without a Fleet agent policy carrying an endpoint package policy, so the approve
+ * test pairs with `src/endpoint_action_responder.ts` to enroll the host and answer the action
+ * (see that module) — without it the Defend client rejects the action request with a data
+ * inconsistency before anything executes.
  */
 
 const spaceId = DEFAULT_EVAL_SPACE_ID;
-const reportId = HUNT_REPORT_IDS.hit;
+// The assume-role report, not the golden `hit`: its Investigation is the one that mints a
+// pending suspend-process Proposal (aws.exe on WIN-ANALYST01), which is what the approve path
+// needs. The behavior-only hit's Proposal is recommendation-only, so approving it settles
+// through `no_action` and never runs an action.
+const reportId = HUNT_REPORT_IDS.actioned;
 const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId });
 
 const isPending = (p: ProposalWithMetadata) => p.status === 'pending';
@@ -98,7 +118,81 @@ const dismissLeftovers = async ({ fetch, log }: { fetch: HttpHandler; log: Tooli
   if (leftovers.length > 0) log.info(`Dismissed ${leftovers.length} leftover Proposal(s)`);
 };
 
+/**
+ * Approve-path prerequisites, staged once per worker before the tests: the hunt host's endpoint
+ * metadata (so endpoint-id validation resolves the seeded agent) and a real Fleet agent policy
+ * carrying an endpoint package policy that the seeded `.fleet-agents` doc is pointed at (so the
+ * Defend client's policy lookup passes). Returns teardown that restores the agent's original
+ * policy_id and deletes the created policies.
+ */
+const stageApprovePath = async ({
+  esClient,
+  kbnClient,
+  log,
+}: {
+  esClient: Client;
+  kbnClient: KbnClient;
+  log: ToolingLog;
+}): Promise<() => Promise<void>> => {
+  await ensureHuntEndpointMetadata({ esClient, log });
+
+  const runId = String(Date.now());
+  let indexed: IndexedFleetEndpointPolicyResponse | undefined;
+  try {
+    indexed = await indexFleetEndpointPolicy(
+      kbnClient,
+      `hunt-eval-endpoint-package-policy-${runId}`,
+      undefined,
+      `hunt-eval-endpoint-agent-policy-${runId}`,
+      log
+    );
+  } catch (error) {
+    throw new Error(`approve path: creating the Fleet endpoint policy failed: ${String(error)}`);
+  }
+  const agentPolicyId = indexed.agentPolicies[0]?.id;
+  if (!agentPolicyId || indexed.integrationPolicies.length === 0) {
+    await deleteIndexedFleetEndpointPolicies(kbnClient, indexed);
+    throw new Error(
+      'approve path: indexFleetEndpointPolicy returned no agent policy or endpoint package policy'
+    );
+  }
+
+  const previousPolicyId = await retargetFleetAgentPolicyId({
+    esClient,
+    policyId: agentPolicyId,
+    log,
+  });
+  log.info(
+    `approve path: hunt agent enrolled on endpoint agent policy ${agentPolicyId}${
+      previousPolicyId ? ` (was ${previousPolicyId})` : ' (no previous policy_id)'
+    }`
+  );
+
+  return async () => {
+    if (previousPolicyId) {
+      await retargetFleetAgentPolicyId({
+        esClient,
+        policyId: previousPolicyId,
+        log,
+      }).catch((error) => {
+        log.warning(`approve path: restoring the agent's policy_id failed: ${String(error)}`);
+      });
+    }
+    await deleteIndexedFleetEndpointPolicies(kbnClient, indexed);
+  };
+};
+
 evaluate.describe('Hunt Watch proposal gate', { tag: tags.serverless.security.complete }, () => {
+  let approvePathTeardown: (() => Promise<void>) | undefined;
+
+  evaluate.beforeAll(async ({ esClient, kbnClient, log }) => {
+    approvePathTeardown = await stageApprovePath({ esClient, kbnClient, log });
+  });
+
+  evaluate.afterAll(async () => {
+    await approvePathTeardown?.();
+  });
+
   evaluate.beforeEach(async ({ esClient, fetch, log }) => {
     await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
   });
@@ -114,6 +208,12 @@ evaluate.describe('Hunt Watch proposal gate', { tag: tags.serverless.security.co
       const pending = await mintPendingProposals({ huntWatchClient, esClient, fetch, log });
       for (const { id } of pending) {
         await approveProposal({ fetch, spaceId, proposalId: id, rationale: 'eval approve path' });
+      }
+      // The seeded host cannot answer the dispatched suspend-process itself; respond for it so
+      // the action's completion poll resolves and the Proposal settles as `succeeded`.
+      const answered = await respondToOutstandingActions({ esClient, log });
+      if (answered === 0) {
+        log.warning('approve path: no outstanding endpoint action was found to respond to');
       }
 
       const conversation = await waitForInvestigationClosed({ fetch, spaceId, conversationId });

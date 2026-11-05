@@ -26,7 +26,7 @@ never part of that gate.
 | SSE Attachment | CODE | a `security.significant_security_event` attachment with a `hunt_result` exists iff expected |
 | Evidence Honesty | CODE | report `evidence[]` written iff the coordinator result's `completed_successfully` is true (`complete` or `incomplete_final`, never `incomplete_retryable`), the same flag the hunt child's `write_evidence` step reads |
 | Proposal Presence | CODE | pending Proposals on the Investigation match the exact count or minimum; a row pinned to zero checks the run created no Proposal in any status |
-| Proposal Convergence | CODE | multi-candidate only: each actioned subject (target plus criticality level, the key packaging converges on) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
+| Proposal Convergence | CODE | multi-candidate only: each actioned subject (the agent/process or identity packaging keys it by, plus the action workflow) is pending under one Investigation, and a convergence note or `Also raised by [Investigation]` line is present |
 | Investigation Status | CODE | conversation `metadata.status`, or no conversation at all |
 | Canary Inverted | CODE | 1 iff the hunt reached a verdict with Tier 1 `no_searchable_terms` and the prose-only report produced no hit, no Tier 2 execution, no Proposal, no SSE; a hunt that failed before searching scores 0 |
 | Narrative Rubric | LLM | per-row criteria over the messages the Worker posted to the Investigation; reported, not gated |
@@ -69,8 +69,9 @@ own data supports.
 ## Proposal gate (approve and dismiss)
 
 `evals/hunt_watch_approval.spec.ts` is an unscored e2e for the human side of the gate. Each test
-resets and runs the golden hit report in the default space, decides every pending Proposal it
-raised, waits for the Investigation to close, and checks the records:
+resets and runs the assume-role report in the default space — the only seeded report whose
+packaging mints an actioned Proposal (suspend-process on WIN-ANALYST01's aws.exe) — decides every
+pending Proposal it raised, waits for the Investigation to close, and checks the records:
 
 | Path | Proposal record | Investigation |
 |---|---|---|
@@ -81,6 +82,13 @@ The gate closes once nothing is pending or executing, whatever was decided, so d
 `resolved` too. `src/hitl_contract.test.ts` pins where decisions may come from: approve exists
 only in `src/proposal_gate.ts`, which only this spec imports, and dismiss exists there and in the
 pre-run reset. Scored tasks never decide a Proposal.
+
+The approve path is staged, not live: `src/endpoint_action_responder.ts` indexes endpoint
+metadata for the seeded host, enrolls it on a real Fleet agent policy carrying an endpoint
+package policy (the seeded `.fleet-agents` `policy_id` is a placeholder), and answers the
+dispatched suspend-process with a success response doc so the action's completion poll resolves.
+Teardown restores the agent's policy and deletes the created policies. The Scout config set
+preinstalls the `endpoint` Fleet package for this (same flag the endpoint eval suite uses).
 
 ## Datasets
 
