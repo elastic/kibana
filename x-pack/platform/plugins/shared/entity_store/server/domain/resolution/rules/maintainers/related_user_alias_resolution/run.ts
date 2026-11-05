@@ -166,7 +166,8 @@ const findCandidates = async ({
   const response = await esClient.search<Record<string, unknown>>(
     {
       index,
-      size: CANDIDATES_SIZE,
+      // one extra hit tells a full page apart from a truncated one
+      size: CANDIDATES_SIZE + 1,
       query: {
         bool: {
           filter: [
@@ -195,7 +196,7 @@ const findCandidates = async ({
   );
 
   const candidates = new Map<string, CandidateEntity>();
-  for (const hit of response.hits.hits) {
+  for (const hit of response.hits.hits.slice(0, CANDIDATES_SIZE)) {
     const source = hit._source;
     if (!source || !matchesValue(source, value)) {
       continue;
@@ -212,7 +213,7 @@ const findCandidates = async ({
 
   return {
     candidates: [...candidates.values()],
-    truncated: response.hits.hits.length >= CANDIDATES_SIZE,
+    truncated: response.hits.hits.length > CANDIDATES_SIZE,
   };
 };
 
