@@ -92,7 +92,9 @@ import {
 import type { CascadedDocumentsContext } from './cascaded_documents';
 import { isCascadedDocumentsVisible } from './cascaded_documents';
 import { SaveDiscoverTableButton } from './save_discover_table_button';
-import { createEditDocumentRowControl, isDocumentEditable } from './edit_document_row_control';
+import { createEditDocumentRowControl } from './edit_document_row_control';
+import { isDocumentEditable } from './edit_documents_action';
+import { createEditSelectedDocumentsBulkAction } from './edit_selected_documents_bulk_action';
 import type { RenderViewModeToggle } from '../../../../components/view_mode_toggle';
 
 // export needs for testing
@@ -188,6 +190,19 @@ function DiscoverDocumentsComponent({
   const isEmptyDataResult = !documentState.result || documentState.result.length === 0;
   const rows = useMemo(() => documentState.result || [], [documentState.result]);
 
+  // Document selection holds table-record ids; resolve them back to the current records (read via a
+  // ref so the bulk action is stable across fetches) to recover their `_id`/`_index` on click.
+  const latestRows = useLatest(rows);
+  const getRecordsByIds = useCallback(
+    (ids: string[]) => {
+      const recordsById = new Map(latestRows.current.map((record) => [record.id, record]));
+      return ids
+        .map((id) => recordsById.get(id))
+        .filter((record): record is DataTableRecord => record !== undefined);
+    },
+    [latestRows]
+  );
+
   // A leading pencil control that opens the index editor scoped to the clicked document. Renders
   // after profile-provided controls (see DiscoverGrid) so data-source actions keep their positions.
   // Registered only when at least one loaded row is editable; otherwise the control would reserve an
@@ -208,6 +223,32 @@ function DiscoverDocumentsComponent({
           ]
         : undefined,
     [rows, isEsqlMode, services.http, services.notifications, uiActions, dataStateContainer]
+  );
+
+  // A selection-menu action that opens the index editor scoped to the selected documents. The menu
+  // item hides itself (via its own `isAvailable`) when the selection is not editable, so it can be
+  // registered unconditionally.
+  const editSelectedDocumentsBulkActions = useMemo(
+    () => [
+      createEditSelectedDocumentsBulkAction({
+        isEsqlMode,
+        getRecordsByIds,
+        http: services.http,
+        notifications: services.notifications,
+        uiActions,
+        onEdited: () => {
+          dataStateContainer.fetch();
+        },
+      }),
+    ],
+    [
+      isEsqlMode,
+      getRecordsByIds,
+      services.http,
+      services.notifications,
+      uiActions,
+      dataStateContainer,
+    ]
   );
 
   const { isMoreDataLoading, totalHits, onFetchMoreRecords } = useFetchMoreRecords();
@@ -646,6 +687,7 @@ function DiscoverDocumentsComponent({
             cascadedDocumentsContext={cascadedDocumentsContext}
             columns={currentColumns}
             rowAdditionalLeadingControls={editDocumentRowControls}
+            customBulkActions={editSelectedDocumentsBulkActions}
             expandedDoc={expandedDocOwner === DEFAULT_EXPANDED_DOC_OWNER ? expandedDoc : undefined}
             dataView={dataView}
             dataSource={currentDataSource}
