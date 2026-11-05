@@ -117,7 +117,7 @@ const prepareInferredSamplingRoute = createServerRoute({
         entityFilteredRatio: z.number().min(0).max(1),
         diverseRatio: z.number().min(0).max(1),
         maxEntityFilters: z.number().int().min(1).max(50).optional(),
-        samplingTimeoutMs: z.number().int().min(1_000).max(240_000).optional(),
+        samplingTimeoutMs: z.number().int().min(1_000).max(240_000),
       }),
     })
   ),
@@ -140,7 +140,7 @@ const prepareInferredSamplingRoute = createServerRoute({
       entityFilteredRatio,
       diverseRatio,
       maxEntityFilters = tuningConfig.max_entity_filters,
-      samplingTimeoutMs = tuningConfig.sampling_timeout_ms,
+      samplingTimeoutMs,
     } = params.body;
     const resolvedRunId = runId?.trim() || uuidv4();
 
