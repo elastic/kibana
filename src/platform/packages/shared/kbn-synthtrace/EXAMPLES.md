@@ -914,6 +914,7 @@ The data is written through the `otelEsClient`, which indexes documents as-is. I
 
 - `withSessionId` (boolean, default `true`): writes `attributes.session.id`, with the tab ID and `session.start` that come with sessions. Set it to `false` to match EDOT Browser 0.3.0 and earlier, which don't emit them. The apps then report distro version `0.3.0`, and `0.4.0` otherwise.
 - `includeRawAttribution` (boolean, default `false`): writes the web-vitals attribution as a JSON string body on `browser.web_vital` events, as the web-vitals instrumentation does when its experimental `includeRawAttribution` option is on.
+- `environments` (boolean, default `false`): spreads every app over its own environments, with their share of the traffic, instead of the single `Synthtrace: <scenario>` environment. See `digital_experience_browser` for the environments of each app. In `digital_experience_mixed`, the classic RUM app then runs in `production`.
 - `scale` (number, default `1`): multiplies the number of sessions per minute of every app. Fractions of a session add up over time, so a scale below 1 thins out every app in proportion.
 - `seed` (string or number, default the start of the run, `--from` in milliseconds): makes the data reproducible. Every session, with its session, trace and span IDs, browser, page views and events, derives from the seed, its app and its number since the epoch, so the same seed generates the same sessions at the same times, however the time range is split into batches, workers or live batches. The scenarios log the seed they use. Without a seed, runs that start at a different time generate different data, while runs with the same absolute `--from` generate the same sessions. `digital_experience_mixed` generates the browser and mobile apps from the same default seed, so don't run it together with `digital_experience_browser` or `digital_experience_mobile` in one synthtrace invocation. Sessions are spread evenly over time. The classic RUM page loads of `digital_experience_mixed` take their timings from the seed too, but not their document IDs.
 
@@ -923,11 +924,18 @@ Generates EDOT Browser data for five apps in different states of health:
 
 | `service.name`       | Health   | Notes                                               |
 | -------------------- | -------- | --------------------------------------------------- |
-| `storefront-web`     | healthy  | high traffic, good vitals                           |
+| `storefront-web`     | healthy  | high traffic, good vitals, few JS errors            |
 | `checkout-web`       | erroring | failing `POST /api/payment`, frequent JS errors     |
 | `media-portal-web`   | slow     | poor LCP from large images and render-blocking CSS  |
 | `support-center-web` | critical | poor INP/CLS, high error and request failure rate   |
 | `docs-web`           | healthy  | low traffic, mostly desktop, no environment         |
+
+The data is shaped to fill the views of the Digital Experience application details:
+
+- **JS errors:** an exception thrown from one call stack always has the same stack trace, so occurrences add up in groups of type and stack trace. The erroring apps (`checkout-web`, `support-center-web`) have 10 to 15 groups in half an hour, with different counts. The same error from two call paths is two groups, and errors that happen in one environment only (see below) are groups that come and go when you switch it.
+- **Resources:** every app loads more than 10 different resources: hashed chunk names, fonts, images and third-party scripts, some of them on some page loads only (lazy chunks, `probability` in the site definition). `storefront-web` also loads a long CDN image URL with a query string, to see how long URLs are shortened.
+- **HTTP requests:** `GET /api/recommendations` of `storefront-web` has a slow tail (one request in ten takes ten times as long), `GET /api/orders/<id>` of `storefront-web` is a family of four URLs where some orders are not found (404), `GET /api/user/preferences` of `media-portal-web` often answers 404, and `POST /api/payment` of `checkout-web` fails with 5xx.
+- **Environments** (with `environments=true`): `production` and `staging` carry the traffic, and `preview` of `storefront-web`, `checkout-web` and `media-portal-web` has page loads and requests but no exceptions and no resource timings. `docs-web` has `production` and traffic with no environment at all. `storefront-web` is healthy and has few errors: use a longer range or `scale` to see more of them.
 
 With session IDs, most sessions are a single visit in a new tab. About 15% are a second visit to a session that is still running, in the same tab or in another one. Another 15% come back after the previous session expired: the tab kept sending background requests with `browser.tab.id` but no `session.id`, and the new session points to the expired one with `session.previous_id`. Each session has one `session.start` log. Earlier visits can be up to an hour and a half before the end of their session, so at the start of a run, where data before `--from` is cut off, some sessions have no `session.start` and some `session.previous_id` values point to nothing.
 
@@ -937,6 +945,7 @@ With session IDs, most sessions are a single visit in a new tab. About 15% are a
 node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
 node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
 node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts scale=3
+node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
 node scripts/synthtrace digital_experience_browser --from=2026-10-16T12:00:00Z --to=2026-10-16T13:00:00Z --scenarioOpts seed=my-seed
 ```
 

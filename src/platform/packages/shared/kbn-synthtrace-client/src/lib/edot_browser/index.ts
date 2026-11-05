@@ -19,6 +19,7 @@ export type { EdotBrowserSpanDocument } from './edot_browser_span';
 export type {
   EdotBrowserDocument,
   EdotBrowserEvent,
+  EdotBrowserExceptionTemplate,
   EdotBrowserSite,
 } from './edot_browser_session';
 

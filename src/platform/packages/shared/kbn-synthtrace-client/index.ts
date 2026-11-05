@@ -60,6 +60,7 @@ export {
   type EdotBrowserClientOptions,
   type EdotBrowserDocument,
   type EdotBrowserEvent,
+  type EdotBrowserExceptionTemplate,
   type EdotBrowserSite,
   type EdotBrowserSpanDocument,
   type HealthProfileName,

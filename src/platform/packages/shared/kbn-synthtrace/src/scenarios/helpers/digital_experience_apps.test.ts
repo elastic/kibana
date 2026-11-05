@@ -10,6 +10,7 @@
 import {
   timerange,
   type EdotBrowserDocument,
+  type EdotBrowserSpanDocument,
   type OtelLogDocument,
   type Timerange,
 } from '@kbn/synthtrace-client';
@@ -42,6 +43,7 @@ const collect = (
     from: timeRange.from.getTime(),
     withSessionId,
     includeRawAttribution,
+    environments: false,
     scale,
     // Pin the seed so the minimums the tests rely on don't depend on the range's start
     seed: 'digital-experience-test',
@@ -51,10 +53,11 @@ const collect = (
 
 describe('digital experience apps', () => {
   describe('parseDigitalExperienceScenarioOpts', () => {
-    it('defaults to session.id, no raw attribution and scale 1', () => {
+    it('defaults to session.id, no raw attribution, one environment and scale 1', () => {
       expect(parseDigitalExperienceScenarioOpts(undefined, FROM)).toEqual({
         withSessionId: true,
         includeRawAttribution: false,
+        environments: false,
         scale: 1,
         seed: getDefaultSeed(FROM),
       });
@@ -66,6 +69,7 @@ describe('digital experience apps', () => {
           {
             withSessionId: false,
             includeRawAttribution: true,
+            environments: true,
             scale: 3,
           },
           FROM
@@ -73,6 +77,7 @@ describe('digital experience apps', () => {
       ).toEqual({
         withSessionId: false,
         includeRawAttribution: true,
+        environments: true,
         scale: 3,
         seed: getDefaultSeed(FROM),
       });
@@ -84,6 +89,7 @@ describe('digital experience apps', () => {
           {
             withSessionId: 'true',
             includeRawAttribution: 'true',
+            environments: 'true',
             scale: '2.5',
           },
           FROM
@@ -91,6 +97,7 @@ describe('digital experience apps', () => {
       ).toEqual({
         withSessionId: true,
         includeRawAttribution: true,
+        environments: true,
         scale: 2.5,
         seed: getDefaultSeed(FROM),
       });
@@ -127,6 +134,9 @@ describe('digital experience apps', () => {
       expect(() =>
         parseDigitalExperienceScenarioOpts({ includeRawAttribution: 'on' }, FROM)
       ).toThrow('includeRawAttribution must be true or false');
+      expect(() => parseDigitalExperienceScenarioOpts({ environments: 'all' }, FROM)).toThrow(
+        'environments must be true or false'
+      );
     });
   });
 
@@ -196,6 +206,7 @@ describe('digital experience apps', () => {
           from,
           withSessionId,
           includeRawAttribution: false,
+          environments: false,
           scale,
           // Like the scenarios, without a seed option the parser defaults it to the run's start
           seed: parseDigitalExperienceScenarioOpts(seed === undefined ? {} : { seed }, from).seed,
@@ -485,6 +496,238 @@ describe('digital experience apps', () => {
         .filter((doc) => !doc.attributes?.['session.id'])
         .forEach((doc) => expect(doc.attributes).toHaveProperty(['browser.tab.id']));
       expect(sessionIds.size).toBeGreaterThan(DIGITAL_EXPERIENCE_APPS.length);
+    });
+  });
+
+  describe('catalogue', () => {
+    // Half an hour of every app, with the traffic of two, to see rare cases too
+    const halfHour = timerange(at(0), at(1800), {} as ToolingLog);
+    const generate = (environments: boolean) =>
+      generateEdotBrowserSessions(halfHour, {
+        environment: 'test',
+        from: halfHour.from.getTime(),
+        withSessionId: true,
+        includeRawAttribution: false,
+        environments,
+        scale: 2,
+        seed: 'digital-experience-test',
+      }).flatMap((generator) =>
+        Array.from(generator).flatMap((event): EdotBrowserDocument[] => event.serialize())
+      );
+    const docs = generate(false);
+    const withEnvironments = generate(true);
+
+    const attribute = (doc: EdotBrowserDocument, key: string) => doc.attributes?.[key];
+    const appDocs = (all: EdotBrowserDocument[], serviceName: string) =>
+      all.filter((doc) => doc.resource?.attributes?.['service.name'] === serviceName);
+    const environmentOf = (doc: EdotBrowserDocument) =>
+      doc.resource?.attributes?.['deployment.environment.name'];
+    const eventsOf = (all: EdotBrowserDocument[], eventName: string) =>
+      all.filter((doc) => 'event_name' in doc && doc.event_name === eventName);
+    const count = <TValue>(values: TValue[]) => {
+      const counts = new Map<TValue, number>();
+      values.forEach((value) => counts.set(value, (counts.get(value) ?? 0) + 1));
+      return counts;
+    };
+    const errorGroups = (all: EdotBrowserDocument[]) =>
+      count(
+        eventsOf(all, 'exception').map(
+          (doc) => `${attribute(doc, 'exception.type')}\n${attribute(doc, 'exception.stacktrace')}`
+        )
+      );
+    const pageLoadResourceUrls = (all: EdotBrowserDocument[]) =>
+      count(
+        eventsOf(all, 'browser.resource_timing')
+          .filter(
+            (doc) =>
+              !['fetch', 'xmlhttprequest'].includes(
+                String(attribute(doc, 'browser.resource_timing.initiator_type'))
+              )
+          )
+          .map((doc) => String(attribute(doc, 'url.full')))
+      );
+    const requests = (all: EdotBrowserDocument[]) =>
+      all.filter((doc): doc is EdotBrowserSpanDocument => 'kind' in doc);
+
+    describe('stack traces', () => {
+      it('groups the exceptions of an app in a few groups, each with several occurrences', () => {
+        ['checkout-web', 'support-center-web'].forEach((serviceName) => {
+          const occurrences = eventsOf(appDocs(docs, serviceName), 'exception').length;
+          const groups = [...errorGroups(appDocs(docs, serviceName)).values()];
+
+          expect(occurrences).toBeGreaterThan(50);
+          // Random stack traces make every occurrence a group of its own
+          expect(groups.length).toBeLessThan(occurrences / 3);
+          expect(Math.max(...groups)).toBeGreaterThan(5);
+          // Most groups differ in size, so that sorting them by occurrences means something
+          expect(new Set(groups).size).toBeGreaterThan(groups.length / 3);
+        });
+      });
+
+      it('has the files and function names of the app in its stack traces', () => {
+        const traces = (serviceName: string) =>
+          eventsOf(appDocs(docs, serviceName), 'exception').map((doc) =>
+            String(attribute(doc, 'exception.stacktrace'))
+          );
+
+        expect(
+          traces('checkout-web').some((trace) => trace.includes('PaymentForm.handleSubmit'))
+        ).toBe(true);
+        expect(traces('checkout-web').join('\n')).toContain('/static/js/checkout.c02e7f.js:1:');
+        expect(traces('support-center-web').join('\n')).toContain('/bundle/app.js:1:');
+        // Frames of other apps' bundles don't leak in
+        expect(traces('support-center-web').join('\n')).not.toContain('checkout.c02e7f');
+      });
+    });
+
+    describe('environments', () => {
+      it('keeps a single environment per app unless asked, with the apps without one still bare', () => {
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, withoutEnvironment }) => {
+          expect(new Set(appDocs(docs, serviceName).map(environmentOf))).toEqual(
+            new Set([withoutEnvironment ? undefined : 'test'])
+          );
+        });
+      });
+
+      it('spreads each app over its environments with the traffic of their weights', () => {
+        DIGITAL_EXPERIENCE_APPS.forEach(({ serviceName, environments = [] }) => {
+          const sessions = (environment?: string) =>
+            new Set(
+              appDocs(withEnvironments, serviceName)
+                .filter((doc) => environmentOf(doc) === environment)
+                .map((doc) => attribute(doc, 'session.id'))
+            ).size;
+          const total = environments.reduce((sum, { weight }) => sum + weight, 0);
+          const allSessions = environments.reduce((sum, { name }) => sum + sessions(name), 0);
+
+          expect(environments.length).toBeGreaterThan(1);
+          environments.forEach(({ name, weight }) => {
+            // Sessions are few for the apps with little traffic, and sampled: an equal split
+            // between environments is way off
+            expect(Math.abs(sessions(name) / allSessions - weight / total)).toBeLessThan(0.15);
+          });
+        });
+      });
+
+      it('lists production, staging and a preview for the storefront and the checkout', () => {
+        ['storefront-web', 'checkout-web'].forEach((serviceName) => {
+          expect(new Set(appDocs(withEnvironments, serviceName).map(environmentOf))).toEqual(
+            new Set(['production', 'staging', 'preview'])
+          );
+        });
+      });
+
+      it('keeps docs-web in production and without any environment', () => {
+        expect(new Set(appDocs(withEnvironments, 'docs-web').map(environmentOf))).toEqual(
+          new Set(['production', undefined])
+        );
+      });
+
+      it('has page loads but no exceptions and no resources in the preview', () => {
+        ['storefront-web', 'checkout-web', 'media-portal-web'].forEach((serviceName) => {
+          const preview = appDocs(withEnvironments, serviceName).filter(
+            (doc) => environmentOf(doc) === 'preview'
+          );
+
+          expect(eventsOf(preview, 'browser.navigation_timing').length).toBeGreaterThan(0);
+          expect(eventsOf(preview, 'browser.web_vital').length).toBeGreaterThan(0);
+          expect(requests(preview).length).toBeGreaterThan(0);
+          expect(eventsOf(preview, 'exception')).toHaveLength(0);
+          expect(eventsOf(preview, 'browser.resource_timing')).toHaveLength(0);
+        });
+      });
+
+      it('has errors that only happen in one environment, so groups come and go with it', () => {
+        const groupsIn = (environment: string) =>
+          new Set(
+            errorGroups(
+              appDocs(withEnvironments, 'checkout-web').filter(
+                (doc) => environmentOf(doc) === environment
+              )
+            ).keys()
+          );
+        const production = groupsIn('production');
+        const staging = groupsIn('staging');
+
+        expect([...production].some((group) => !staging.has(group))).toBe(true);
+        expect([...staging].some((group) => !production.has(group))).toBe(true);
+        expect([...staging].some((group) => group.includes('new-payment-flow'))).toBe(true);
+        expect([...production].some((group) => group.includes('new-payment-flow'))).toBe(false);
+      });
+
+      it('generates the sessions of every environment from the seed', () => {
+        expect(generate(true)).toEqual(withEnvironments);
+        const sessionIds = (all: EdotBrowserDocument[]) =>
+          eventsOf(all, 'session.start').map((doc) => attribute(doc, 'session.id'));
+
+        expect(new Set(sessionIds(withEnvironments)).size).toBe(
+          sessionIds(withEnvironments).length
+        );
+      });
+    });
+
+    describe('network', () => {
+      it('has more resources than a page of the table in the busiest apps', () => {
+        ['storefront-web', 'checkout-web', 'media-portal-web'].forEach((serviceName) => {
+          expect(pageLoadResourceUrls(appDocs(docs, serviceName)).size).toBeGreaterThan(10);
+        });
+      });
+
+      it('has hashed chunk names and a long CDN URL with a query string', () => {
+        const urls = [...pageLoadResourceUrls(appDocs(docs, 'storefront-web')).keys()].map(String);
+
+        expect(urls.some((url) => /\/chunk-[a-z-]+\.[0-9a-f]{6}\.js$/.test(url))).toBe(true);
+        expect(urls.some((url) => url.length > 150 && url.includes('?'))).toBe(true);
+      });
+
+      it('loads some resources on some page loads only', () => {
+        const counts = pageLoadResourceUrls(appDocs(docs, 'storefront-web'));
+        const main = counts.get('https://www.example-store.com/assets/js/main.3f9a1c.js') ?? 0;
+        const lazy =
+          counts.get('https://www.example-store.com/assets/js/chunk-zoom.e6d3c8.js') ?? 0;
+
+        expect(lazy).toBeGreaterThan(0);
+        expect(lazy).toBeLessThan(main / 2);
+      });
+
+      it('has an endpoint whose slowest requests are far slower than the median', () => {
+        const durations = requests(appDocs(docs, 'storefront-web'))
+          .filter(
+            (span) =>
+              span.attributes['url.full'] === 'https://www.example-store.com/api/recommendations'
+          )
+          .map((span) => Number(span.duration))
+          .sort((a, b) => a - b);
+
+        expect(durations.length).toBeGreaterThan(100);
+        expect(durations[Math.floor(durations.length * 0.95)]).toBeGreaterThan(
+          durations[Math.floor(durations.length * 0.5)] * 5
+        );
+      });
+
+      it('has one URL per order for the orders of the storefront, some of them not found', () => {
+        const orders = requests(appDocs(docs, 'storefront-web')).filter((span) =>
+          String(span.attributes['url.full']).includes('/api/orders/')
+        );
+        const urls = new Set(orders.map((span) => span.attributes['url.full']));
+
+        expect(urls.size).toBeGreaterThanOrEqual(3);
+        urls.forEach((url) => expect(url).not.toContain('{id}'));
+        expect(orders.some((span) => span.attributes['http.response.status_code'] === 404)).toBe(
+          true
+        );
+      });
+
+      it('has an endpoint that answers 404 in another app than the checkout', () => {
+        const statuses = count(
+          requests(appDocs(docs, 'media-portal-web'))
+            .filter((span) => String(span.attributes['url.full']).endsWith('/api/user/preferences'))
+            .map((span) => span.attributes['http.response.status_code'])
+        );
+
+        expect(statuses.get(404)).toBeGreaterThan(5);
+        expect(statuses.get(200)).toBeGreaterThan(statuses.get(404) ?? 0);
+      });
     });
   });
 

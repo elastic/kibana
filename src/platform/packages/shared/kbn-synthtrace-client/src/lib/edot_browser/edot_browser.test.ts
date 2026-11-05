@@ -8,7 +8,7 @@
  */
 
 import { BROWSER_PROFILES, pickBrowserProfile, type BrowserProfile } from './browser_profiles';
-import { planDocuments } from './edot_browser_session';
+import { planDocuments, type EdotBrowserRequest } from './edot_browser_session';
 import {
   HEALTH_PROFILES,
   getWebVitalRating,
@@ -555,7 +555,15 @@ describe('edotBrowser', () => {
       }: { hardNavigationRate?: number; health?: HealthProfile } = {}
     ) =>
       planDocuments(
-        { client: createClient(), site: SITE, health, random: seededRandom(seed), slowdown: 1 },
+        {
+          client: createClient(),
+          site: SITE,
+          health,
+          random: seededRandom(seed),
+          slowdown: 1,
+          reportExceptions: true,
+          reportResourceTimings: true,
+        },
         { pageViews, dwell: DWELL, hardNavigationRate }
       );
 
@@ -625,6 +633,8 @@ describe('edotBrowser', () => {
       site = SITE,
       dwell,
       end,
+      reportExceptions,
+      reportResourceTimings,
     }: {
       seed?: number;
       pageViews?: number;
@@ -634,6 +644,8 @@ describe('edotBrowser', () => {
       dwell?: Distribution;
       /** Anchors the session to end here instead of starting at `TIMESTAMP`. */
       end?: number;
+      reportExceptions?: boolean;
+      reportResourceTimings?: boolean;
     } = {}) =>
       edotBrowser
         .session({
@@ -643,6 +655,8 @@ describe('edotBrowser', () => {
           health,
           pageViews,
           dwell,
+          reportExceptions,
+          reportResourceTimings,
           random: seededRandom(seed),
         })
         .flatMap((event) => event.serialize());
@@ -1132,6 +1146,275 @@ describe('edotBrowser', () => {
       expect(docs.some((doc) => !('event_name' in doc))).toBe(true);
       docs.forEach((doc) => {
         expect(doc.attributes?.['session.id']).toBe('abc');
+      });
+    });
+
+    describe('exceptions', () => {
+      const exceptionSite = (
+        exceptions: NonNullable<EdotBrowserSite['exceptions']>,
+        origin: string = SITE.origin
+      ): EdotBrowserSite => ({ ...SITE, origin, exceptions });
+      // Unhealthy sessions, to have many exceptions
+      const exceptionsOf = (site: EdotBrowserSite, sessions: number = 150) =>
+        Array.from({ length: sessions }, (_, seed) =>
+          createSession({ seed, site, health: HEALTH_PROFILES.critical })
+        )
+          .flat()
+          .filter((doc) => 'event_name' in doc && doc.event_name === 'exception');
+      const groupsOf = (docs: ReturnType<typeof createSession>) => {
+        const groups = new Map<string, number>();
+        docs.forEach(({ attributes }) => {
+          const key = `${attributes?.['exception.type']}\n${attributes?.['exception.stacktrace']}`;
+          groups.set(key, (groups.get(key) ?? 0) + 1);
+        });
+        return groups;
+      };
+      const request = {
+        type: 'TypeError',
+        message: 'x is undefined',
+        stacks: [
+          [{ functionName: 'Cart.total' }, { functionName: 'Cart.render' }],
+          [{ functionName: 'Cart.total' }, { functionName: 'Checkout.render' }],
+        ],
+      };
+
+      it('gives every occurrence of an exception the stack trace of one of its stacks', () => {
+        const docs = exceptionsOf(exceptionSite([request]));
+        const traces = new Set(
+          docs
+            .filter(({ attributes }) => attributes?.['exception.message'] === request.message)
+            .map(({ attributes }) => attributes?.['exception.stacktrace'])
+        );
+
+        expect(traces.size).toBe(2);
+      });
+
+      it('groups occurrences, so that groups have several of them', () => {
+        const groups = [...groupsOf(exceptionsOf(exceptionSite([request]))).values()];
+
+        expect(groups.length).toBeGreaterThan(2);
+        // Not one group per occurrence, which is what random stack traces give
+        expect(groups.length).toBeLessThan(25);
+        expect(Math.max(...groups)).toBeGreaterThan(5);
+        expect(new Set(groups).size).toBeGreaterThan(3);
+      });
+
+      it('writes stack traces in the format of Chromium, in the main script by default', () => {
+        const [first] = exceptionsOf(exceptionSite([{ type: 'Error', message: 'boom' }]));
+        const [header, ...frames] = String(first.attributes?.['exception.stacktrace']).split('\n');
+
+        expect(header).toMatch(/^[A-Za-z]*Error: /);
+        expect(frames.length).toBeGreaterThan(0);
+        frames.forEach((frame) => {
+          expect(frame).toMatch(/^ {4}at (async )?\S+ \(https:\/\/\S+:\d+:\d+\)$/);
+        });
+        expect(frames[0]).toContain('https://shop.example.com/static/js/main.js:1:');
+      });
+
+      it('puts frames where the template says, in files of the site or of third parties', () => {
+        const site = exceptionSite([
+          {
+            type: 'TypeError',
+            message: 'x is undefined',
+            weight: 1000,
+            stacks: [
+              [
+                { functionName: 'inner', file: 'https://js.example-payments.com/v3/', column: 77 },
+                { functionName: 'outer', file: '/static/js/chunk.js', line: 3, column: 5 },
+              ],
+            ],
+          },
+        ]);
+        const trace = String(
+          exceptionsOf(site).find(
+            ({ attributes }) => attributes?.['exception.message'] === 'x is undefined'
+          )?.attributes?.['exception.stacktrace']
+        );
+
+        expect(trace.split('\n')).toEqual([
+          'TypeError: x is undefined',
+          '    at inner (https://js.example-payments.com/v3/:1:77)',
+          '    at outer (https://shop.example.com/static/js/chunk.js:3:5)',
+        ]);
+      });
+
+      it('derives the position of a frame from its file and function, per site', () => {
+        const columnsOf = (origin: string) =>
+          groupsOf(exceptionsOf(exceptionSite([request], origin)));
+        const shop = columnsOf('https://shop.example.com');
+        const other = columnsOf('https://other.example.com');
+
+        // Same site: the same stack traces, however many sessions it takes to see them
+        expect(new Set(columnsOf('https://shop.example.com').keys())).toEqual(new Set(shop.keys()));
+        // Another site has other files, and so other stack traces
+        expect([...other.keys()].filter((key) => shop.has(key))).toEqual([]);
+      });
+
+      it('repeats the positions of a frame that appears twice in a stack', () => {
+        const [first] = exceptionsOf(
+          exceptionSite([
+            {
+              type: 'RangeError',
+              message: 'Maximum call stack size exceeded',
+              weight: 1000,
+              stacks: [
+                [{ functionName: 'walk' }, { functionName: 'walk' }, { functionName: 'walk' }],
+              ],
+            },
+          ])
+        ).filter(({ attributes }) => attributes?.['exception.type'] === 'RangeError');
+        const frames = String(first.attributes?.['exception.stacktrace']).split('\n').slice(1);
+
+        expect(new Set(frames).size).toBe(1);
+      });
+
+      it('picks exceptions by weight', () => {
+        const docs = exceptionsOf(
+          exceptionSite([
+            { type: 'TypeError', message: 'heavy', weight: 50 },
+            { type: 'TypeError', message: 'light', weight: 1 },
+          ])
+        );
+        const count = (message: string) =>
+          docs.filter(({ attributes }) => attributes?.['exception.message'] === message).length;
+
+        expect(count('light')).toBeGreaterThan(0);
+        expect(count('heavy')).toBeGreaterThan(count('light') * 5);
+      });
+
+      it('gives failed requests stable stack traces too', () => {
+        const groups = groupsOf(exceptionsOf(SITE, 300));
+        const failedRequests = [...groups.keys()].filter((key) =>
+          key.startsWith('Error\nError: Request failed')
+        );
+
+        // One group per status code (500, 502, 503 and 504), and no more
+        expect(failedRequests.length).toBeGreaterThan(0);
+        expect(failedRequests.length).toBeLessThanOrEqual(4);
+        expect(Math.max(...failedRequests.map((key) => groups.get(key) ?? 0))).toBeGreaterThan(3);
+      });
+
+      it('reports no exceptions when the app is told not to', () => {
+        const count = (reportExceptions?: boolean) =>
+          Array.from({ length: 100 }, (_, seed) =>
+            createSession({ seed, health: HEALTH_PROFILES.critical, reportExceptions })
+          )
+            .flat()
+            .filter((doc) => 'event_name' in doc && doc.event_name === 'exception').length;
+
+        expect(count(true)).toBeGreaterThan(0);
+        expect(count(false)).toBe(0);
+      });
+    });
+
+    describe('resources', () => {
+      const resourceUrls = (docs: ReturnType<typeof createSession>) =>
+        docs
+          .filter(
+            (doc) =>
+              'event_name' in doc &&
+              doc.event_name === 'browser.resource_timing' &&
+              !['fetch', 'xmlhttprequest'].includes(
+                String(doc.attributes?.['browser.resource_timing.initiator_type'])
+              )
+          )
+          .map((doc) => String(doc.attributes?.['url.full']));
+      const pageLoads = (site: EdotBrowserSite, reportResourceTimings?: boolean) =>
+        Array.from({ length: 100 }, (_, seed) =>
+          resourceUrls(createSession({ seed, pageViews: 1, site, reportResourceTimings }))
+        );
+
+      it('loads a resource in the share of page loads that its probability says', () => {
+        const lazy = '/static/js/chunk-lazy.js';
+        const loads = pageLoads({
+          ...SITE,
+          resources: [
+            ...(SITE.resources ?? []),
+            { path: lazy, initiatorType: 'script', sizeBytes: 10_000, probability: 0.3 },
+          ],
+        }).filter((urls) => urls.includes(`${SITE.origin}${lazy}`)).length;
+
+        expect(loads).toBeGreaterThan(15);
+        expect(loads).toBeLessThan(50);
+      });
+
+      it('loads every resource that has no probability, up to many more than the padding adds', () => {
+        const many = Array.from({ length: 20 }, (_, i) => ({
+          path: `/static/js/chunk-${i}.js`,
+          initiatorType: 'script' as const,
+          sizeBytes: 10_000,
+        }));
+
+        pageLoads({ ...SITE, resources: many }).forEach((urls) => {
+          many.forEach(({ path }) => expect(urls).toContain(`${SITE.origin}${path}`));
+        });
+      });
+
+      it('pads pages with few resources of their own up to 8, as before', () => {
+        pageLoads({ ...SITE, resources: [], pages: [{ path: '/' }] }).forEach((urls) => {
+          expect(urls.length).toBeGreaterThanOrEqual(3);
+          expect(urls.length).toBeLessThanOrEqual(8);
+        });
+      });
+
+      it('reports no resource timings when the app is told not to, fetch and XHR included', () => {
+        const docs = Array.from({ length: 20 }, (_, seed) =>
+          createSession({ seed, reportResourceTimings: false })
+        ).flat();
+
+        expect(docs.some(isSpan)).toBe(true);
+        expect(eventNames(docs)).not.toContain('browser.resource_timing');
+        expect(eventNames(docs)).toContain('browser.navigation_timing');
+      });
+    });
+
+    describe('requests', () => {
+      const spansOf = (site: EdotBrowserSite, sessions: number = 150) =>
+        Array.from({ length: sessions }, (_, seed) =>
+          createSession({ seed, site, health: HEALTH_PROFILES.healthy })
+        )
+          .flat()
+          .filter(isSpan);
+      const siteWith = (request: EdotBrowserRequest): EdotBrowserSite => ({
+        ...SITE,
+        pages: [{ path: '/', requests: [request] }],
+      });
+      const percentile = (values: number[], p: number) =>
+        [...values].sort((a, b) => a - b)[Math.floor(values.length * p)];
+
+      it('turns {id} into one of the ids of the request, so each id is its own URL', () => {
+        const ids = ['a1', 'b2', 'c3'];
+        const urls = new Set(
+          spansOf(siteWith({ method: 'GET', url: '/api/orders/{id}', ids })).map((span) =>
+            String(span.attributes['url.full'])
+          )
+        );
+
+        expect(urls).toEqual(new Set(ids.map((id) => `${SITE.origin}/api/orders/${id}`)));
+      });
+
+      it('leaves URLs without ids as they are', () => {
+        const urls = spansOf(siteWith({ method: 'GET', url: '/api/orders/{id}' })).map((span) =>
+          String(span.attributes['url.full'])
+        );
+
+        expect(new Set(urls)).toEqual(new Set([`${SITE.origin}/api/orders/{id}`]));
+      });
+
+      it('gives a slow tail to the share of requests that the endpoint says', () => {
+        const durations = (request: EdotBrowserRequest) =>
+          spansOf(siteWith(request), 400).map((span) => Number(span.duration));
+        const plain = durations({ method: 'GET', url: '/api/a' });
+        const tailed = durations({
+          method: 'GET',
+          url: '/api/a',
+          slowTail: { rate: 0.1, factor: 10 },
+        });
+        const spread = (values: number[]) => percentile(values, 0.95) / percentile(values, 0.5);
+
+        // The p95 is far above the median with a tail, and about like the profile's without
+        expect(spread(plain)).toBeLessThan(3);
+        expect(spread(tailed)).toBeGreaterThan(6);
       });
     });
 

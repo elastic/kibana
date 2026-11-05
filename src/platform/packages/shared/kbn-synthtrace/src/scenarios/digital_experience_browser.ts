@@ -18,13 +18,28 @@
  * - `traces-generic.otel-default`: fetch/XHR CLIENT spans
  * - non-zero timings and web vital values always carry a fractional part, so they map as `float`;
  *   like EDOT Browser, phases that didn't happen are written as 0
+ * - uncaught exceptions repeat: an exception thrown from one call stack always has the same stack
+ *   trace, so occurrences add up in error groups (type and stack trace), with a few groups per app
+ * - pages load many resources, some of them only on some page loads (lazy chunks, third parties,
+ *   images), and the apps make requests to many URLs: one with a slow tail (`GET /api/recommendations`
+ *   of storefront-web), one URL per order (`GET /api/orders/<id>` of storefront-web, some not
+ *   found) and one answering 404 (`GET /api/user/preferences` of media-portal-web)
  *
  * Apps (`service.name`):
- * - storefront-web: healthy, high traffic
+ * - storefront-web: healthy, high traffic, few JS errors
  * - checkout-web: failing `POST /api/payment` and frequent JS errors
  * - media-portal-web: slow, poor LCP from large images and render-blocking CSS
  * - support-center-web: critical, poor INP/CLS and high error rate
  * - docs-web: healthy, low traffic, desktop-heavy, no environment
+ *
+ * Environment (`deployment.environment.name`): `Synthtrace: digital_experience_browser` for all
+ * apps but docs-web, which has none. With `environments=true`, every app is spread over its own:
+ * - storefront-web and checkout-web: `production` (most of the traffic), `staging` (with errors
+ *   that don't happen in production) and `preview`, which has page loads but reports no
+ *   exceptions and no resource timings
+ * - media-portal-web: `production` and `preview`
+ * - support-center-web: `production` and `staging`
+ * - docs-web: `production` and traffic with no environment
  *
  * Scenario options:
  * - withSessionId (boolean, default: true): write `attributes.session.id`, with the tab ID
@@ -33,6 +48,9 @@
  *   report distro version 0.3.0 instead of 0.4.0.
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
+ * - environments (boolean, default: false): spread every app over the environments listed above
+ *   instead of the single one. Staging and preview carry less traffic: use `scale` or a longer
+ *   range for more data in them.
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
  * - seed (string or number, default: the run's `from` in milliseconds): makes the data
  *   reproducible
@@ -40,6 +58,7 @@
  * Run:
  *   node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
  *   node scripts/synthtrace digital_experience_browser --live --scenarioOpts withSessionId=false
+ *   node scripts/synthtrace digital_experience_browser --from=now-1h --to=now --scenarioOpts environments=true
  */
 
 import type { Scenario } from '../cli/scenario';
