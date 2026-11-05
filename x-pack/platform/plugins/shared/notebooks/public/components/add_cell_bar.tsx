@@ -8,8 +8,7 @@
 import React, { useState } from 'react';
 import {
   EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiContextMenuPanel,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
@@ -26,9 +25,17 @@ interface CellKindOption {
   label: string;
 }
 
-const CELL_KIND_GROUPS: ReadonlyArray<{ id: string; title: string; kinds: CellKindOption[] }> = [
+const ROOT_PANEL_ID = 'root';
+
+const CELL_KIND_GROUPS: ReadonlyArray<{
+  id: string;
+  icon: string;
+  title: string;
+  kinds: CellKindOption[];
+}> = [
   {
     id: 'inputs',
+    icon: 'controls',
     title: i18n.translate('xpack.notebook.addCell.group.inputs', { defaultMessage: 'Inputs' }),
     kinds: [
       {
@@ -50,6 +57,7 @@ const CELL_KIND_GROUPS: ReadonlyArray<{ id: string; title: string; kinds: CellKi
   },
   {
     id: 'data',
+    icon: 'database',
     title: i18n.translate('xpack.notebook.addCell.group.data', { defaultMessage: 'Data' }),
     kinds: [
       {
@@ -61,6 +69,7 @@ const CELL_KIND_GROUPS: ReadonlyArray<{ id: string; title: string; kinds: CellKi
   },
   {
     id: 'display',
+    icon: 'eye',
     title: i18n.translate('xpack.notebook.addCell.group.display', { defaultMessage: 'Display' }),
     kinds: [
       {
@@ -139,23 +148,30 @@ export const AddCellBar = ({
             </EuiButtonEmpty>
           }
         >
-          {CELL_KIND_GROUPS.map(({ id, title, kinds }) => (
-            <EuiContextMenuPanel
-              key={id}
-              title={title}
-              data-test-subj={`notebookAddCellGroup-${id}`}
-              items={kinds.map(({ kind, icon, label }) => (
-                <EuiContextMenuItem
-                  key={kind}
-                  icon={icon}
-                  onClick={() => add(kind)}
-                  data-test-subj={`notebookAddCell-${kind}`}
-                >
-                  {label}
-                </EuiContextMenuItem>
-              ))}
-            />
-          ))}
+          <EuiContextMenu
+            initialPanelId={ROOT_PANEL_ID}
+            panels={[
+              {
+                id: ROOT_PANEL_ID,
+                items: CELL_KIND_GROUPS.map(({ id, icon, title }) => ({
+                  name: title,
+                  icon,
+                  panel: id,
+                  'data-test-subj': `notebookAddCellGroup-${id}`,
+                })),
+              },
+              ...CELL_KIND_GROUPS.map(({ id, title, kinds }) => ({
+                id,
+                title,
+                items: kinds.map(({ kind, icon, label }) => ({
+                  name: label,
+                  icon,
+                  onClick: () => add(kind),
+                  'data-test-subj': `notebookAddCell-${kind}`,
+                })),
+              })),
+            ]}
+          />
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
