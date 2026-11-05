@@ -61,6 +61,7 @@ export interface LogRateAnalysisEmbeddableWrapperProps {
   onError: (error: Error) => void;
   windowParameters?: WindowParameters;
   filtersApi?: PublishesFilters;
+  parentApi: unknown;
 }
 
 const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps> = ({
@@ -74,6 +75,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
   lastReloadRequestTime,
   windowParameters,
   filtersApi,
+  parentApi,
 }) => {
   const deps = useMemo(() => {
     const {
@@ -177,7 +179,7 @@ const LogRateAnalysisEmbeddableWrapperWithDeps: FC<LogRateAnalysisPropsWithDeps>
               >
                 <FilterQueryContextProvider timeRange={timeRange} filtersApi={filtersApi}>
                   <LogRateAnalysisReduxProvider initialAnalysisStart={windowParameters}>
-                    <LogRateAnalysisForEmbeddable timeRange={timeRange} />
+                    <LogRateAnalysisForEmbeddable timeRange={timeRange} parentApi={parentApi} />
                   </LogRateAnalysisReduxProvider>
                 </FilterQueryContextProvider>
               </DataSourceContextProvider>

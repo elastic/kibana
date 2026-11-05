@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EntityStoreEuid } from '@kbn/entity-store/public';
+import type { EntityStoreEuidApi } from '@kbn/entity-store/public';
 import type { EntityStoreRecord } from '../../../../flyout/entity_details/shared/hooks/use_entity_from_store';
 import { UsersType } from '../../../../explore/users/store/model';
 import type { CriteriaFields } from '../types';
@@ -16,18 +16,18 @@ interface GetCriteriaFromUsersTypeOptions {
   userName: string | undefined;
   entityRecord?: EntityStoreRecord | null;
   identityFields?: Record<string, string>;
-  euid?: EntityStoreEuid;
+  euidApi?: EntityStoreEuidApi;
 }
 
 export const getCriteriaFromUsersType = (
   opts: GetCriteriaFromUsersTypeOptions
 ): CriteriaFields[] => {
-  const { type, userName, entityRecord, identityFields, euid } = opts;
+  const { type, userName, entityRecord, identityFields, euidApi } = opts;
   if (type !== UsersType.details || userName == null) {
     return [];
   }
   return getCriteriaFieldsForAnomaliesTable({
-    euid,
+    euidApi,
     entityType: 'user',
     entityRecord,
     isScopedToEntity: true,

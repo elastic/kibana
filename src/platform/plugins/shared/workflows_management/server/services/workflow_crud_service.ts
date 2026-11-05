@@ -11,8 +11,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import { randomBytes } from 'node:crypto';
 
 import pMap from 'p-map';
+import { firstValueFrom } from 'rxjs';
 import type { KibanaRequest } from '@kbn/core/server';
-import { buildEntityReadAccessQuery } from '@kbn/entity-access-control';
+import { buildEntityReadAccessQuery, isEntityAccessControlAdmin } from '@kbn/entity-access-control';
 import { isNotFoundError } from '@kbn/es-errors';
 import {
   DEFAULT_MAX_RETRIES,
@@ -24,11 +25,13 @@ import {
 import {
   type CreateWorkflowCommand,
   type EsWorkflow,
+  getWorkflowAccessDecisions,
   NonTerminalExecutionStatuses,
   storedWorkflowAccessControlSchema,
   toCustomTriggerSchemaConfigs,
   type UpdatedWorkflowResponseDto,
   type WorkflowDetailDto,
+  WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG,
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { buildWorkflowFilters, GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
@@ -37,15 +40,24 @@ import type { WorkflowPartialDetailDto } from '@kbn/workflows/types/v1';
 import { InvalidYamlSchemaError, WorkflowConflictError } from '@kbn/workflows-yaml';
 import type { z } from '@kbn/zod/v4';
 import type { WorkflowCrudDeps } from './types';
-import { assertWorkflowOperation } from './workflow_access_control';
+import {
+  assertWorkflowOperation,
+  getWorkflowDeleteOperation,
+  WORKFLOW_READ_ACCESS_QUERY,
+} from './workflow_access_control';
+import type { WorkflowAccessAuditContext } from './workflow_access_control';
+import { WorkflowAccessDeniedError } from './workflow_access_denied_error';
 import type {
   IndexWorkflowDocumentOptions,
+  ManagedWorkflowOrphan,
   ReadModifyWriteWorkflowDocumentParams,
   VersionedWorkflowDocument,
   WorkflowDocumentGetOptions,
   WriteWorkflowDocumentWithOccParams,
 } from './workflow_occ_types';
 import {
+  ensureManagedOrphanDisablePreservesBinding,
+  ensureManagedOrphanUnchanged,
   ensureManagedWorkflowUpgradePreservesBinding,
   ensureWorkflowServiceAccountMutationAuthorized,
   withWorkflowBindingChange,
@@ -63,7 +75,7 @@ import { getWorkflowZodSchema } from '../../common/schema';
 import { fetchOccHitsByIds, type OccWorkflowHit } from '../api/lib/bulk_occ_index';
 import { extractBulkItemError } from '../api/lib/bulk_response_helpers';
 import { cleanupDeletedWorkflows, deleteWorkflows } from '../api/lib/workflow_deletion';
-import { disableAllWorkflows } from '../api/lib/workflow_disable_all';
+import { disableAllWorkflows, mutateWorkflowToDisabled } from '../api/lib/workflow_disable_all';
 import {
   transformStorageDocumentToWorkflowDto,
   transformStoragePartialToWorkflowDto,
@@ -93,12 +105,16 @@ import { workflowIndexName } from '../storage/workflow_storage';
 import type { WorkflowProperties } from '../storage/workflow_storage';
 import { scheduleWorkflowTriggers } from '../task_defs/schedule_workflow_triggers';
 import { syncSchedulerAfterSave } from '../task_defs/sync_scheduler_after_save';
+import { unscheduleWorkflowTasks } from '../task_defs/unschedule_workflow_tasks';
 
 // How many times to re-resolve a server-generated ID after losing a TOCTOU race
 // against `op_type: 'create'`. The id resolver itself walks up to MAX_COLLISION_RETRIES
 // candidates per call, so the practical ceiling is far higher than this number;
 // this only bounds repeated round-trips when many concurrent writers share a base ID.
 const TOCTOU_MAX_RETRIES = 5;
+
+// `OccWriter.readModifyWrite` always indexes what `mutate` returns; throwing this skips the write.
+const NOTHING_TO_DISABLE = new Error('The workflow has nothing to switch off.');
 
 const extractRestoreSnapshotYaml = (
   snapshot: Record<string, unknown> | undefined
@@ -134,6 +150,14 @@ type SuccessfullyWrittenBulkEntry = BulkWorkflowEntry & {
 export class WorkflowCrudService {
   constructor(private readonly deps: WorkflowCrudDeps) {}
 
+  private async shouldWarnIgnoredKibanaFetcher(): Promise<boolean> {
+    return firstValueFrom(
+      this.deps
+        .getCoreStart()
+        .featureFlags.getBooleanValue$(WORKFLOWS_CORE_SELF_CLIENT_ENABLED_FLAG, false)
+    );
+  }
+
   async logWorkflowChangesAfterWrite(params: {
     workflows: Array<{ id: string; document: WorkflowProperties }>;
     action?: WorkflowChangeHistoryActionType;
@@ -168,23 +192,8 @@ export class WorkflowCrudService {
     spaceId: string,
     options?: { includeDeleted?: boolean; includeGlobal?: boolean }
   ): Promise<WorkflowProperties | null> {
-    const { must, must_not } = buildWorkflowFilters({
-      ids: [id],
-      space: { id: spaceId, includeGlobal: options?.includeGlobal },
-      deleted: options?.includeDeleted ? 'all' : 'not_deleted',
-    });
-    const searchResponse = await this.deps.workflowStorage.getClient().search({
-      query: { bool: { must, must_not } },
-      size: 1,
-      track_total_hits: false,
-      allow_partial_search_results: false,
-    });
-    if (searchResponse.timed_out) {
-      throw new Error('Could not determine workflow access from an incomplete search.');
-    }
-
-    const hit = searchResponse.hits.hits[0];
-    return (hit?._source as WorkflowProperties | undefined) ?? null;
+    const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, options);
+    return versioned?.source ?? null;
   }
 
   async getWorkflowDocumentWithVersion(
@@ -202,7 +211,12 @@ export class WorkflowCrudService {
       seq_no_primary_term: true,
       size: 1,
       track_total_hits: false,
+      allow_partial_search_results: false,
     });
+    // An incomplete search with no hit would otherwise read as a missing workflow.
+    if (searchResponse.timed_out) {
+      throw new Error(`Could not read workflow ${id} from an incomplete search.`);
+    }
 
     const hit = searchResponse.hits.hits[0];
     if (!hit?._source || hit._seq_no == null || hit._primary_term == null) {
@@ -284,6 +298,10 @@ export class WorkflowCrudService {
 
       return { seqNo: response._seq_no, primaryTerm: response._primary_term };
     };
+    if (options?.managedOrphanDisable) {
+      ensureManagedOrphanDisablePreservesBinding({ document, previous, options });
+      return write();
+    }
     if (options?.managedWorkflowUpgrade) {
       if (!bindings) throw new Error('Service account bindings are unavailable.');
       await ensureManagedWorkflowUpgradePreservesBinding({
@@ -324,7 +342,8 @@ export class WorkflowCrudService {
     spaceId: string,
     maxRetries?: number,
     getOptions?: WorkflowDocumentGetOptions,
-    request?: KibanaRequest
+    request?: KibanaRequest,
+    managedOrphanDisable?: ManagedWorkflowOrphan
   ): OccWriter<WorkflowProperties> {
     const resolvedMaxRetries = maxRetries ?? DEFAULT_MAX_RETRIES;
     let previousDocument: WorkflowProperties | undefined;
@@ -348,6 +367,7 @@ export class WorkflowCrudService {
           ifPrimaryTerm,
           request,
           previousDocument,
+          managedOrphanDisable,
         }),
       logger: this.deps.logger,
       maxRetries: resolvedMaxRetries,
@@ -451,7 +471,7 @@ export class WorkflowCrudService {
     }
     const triggerDefinitions = params.lightweightValidation ? undefined : allTriggerDefinitions;
 
-    const prepared = prepareWorkflowDocumentFromYaml({
+    const prepared = await prepareWorkflowDocumentFromYaml({
       id: params.id,
       yaml: params.yaml,
       zodSchema,
@@ -459,6 +479,8 @@ export class WorkflowCrudService {
       now: params.now,
       spaceId: params.spaceId,
       triggerDefinitions,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
     const profileId = params.request
       ? (await this.deps
@@ -634,7 +656,7 @@ export class WorkflowCrudService {
       id: baseId,
       workflowData,
       definition,
-    } = prepareWorkflowDocumentFromYaml({
+    } = await prepareWorkflowDocumentFromYaml({
       id: workflow.id,
       yaml: workflow.yaml,
       zodSchema,
@@ -643,6 +665,8 @@ export class WorkflowCrudService {
       spaceId,
       triggerDefinitions,
       nameFallback: options?.nameFallback,
+      logger: this.deps.logger,
+      warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
     });
 
     const profileId =
@@ -718,6 +742,7 @@ export class WorkflowCrudService {
     const profileId = await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request });
     const now = new Date();
     const triggerDefinitions = this.deps.workflowsExtensions?.getAllTriggerDefinitions() ?? [];
+    const warnIgnoredKibanaFetcher = await this.shouldWarnIgnoredKibanaFetcher();
 
     const created: WorkflowDetailDto[] = [];
     const failed: BulkFailureEntry[] = [];
@@ -730,7 +755,7 @@ export class WorkflowCrudService {
         if (customId) {
           validateWorkflowId(customId);
         }
-        const prepared = prepareWorkflowDocumentFromYaml({
+        const prepared = await prepareWorkflowDocumentFromYaml({
           id: workflows[i].id,
           yaml: workflows[i].yaml,
           zodSchema,
@@ -738,6 +763,8 @@ export class WorkflowCrudService {
           now,
           spaceId,
           triggerDefinitions,
+          logger: this.deps.logger,
+          warnIgnoredKibanaFetcher,
         });
 
         if (profileId) {
@@ -928,11 +955,14 @@ export class WorkflowCrudService {
       workflowYaml && zodSchema && triggerDefinitions
         ? {
             workflowYaml,
-            ...applyYamlUpdate({
+            ...(await applyYamlUpdate({
               workflowYaml,
               zodSchema,
               triggerDefinitions,
-            }),
+              logger: this.deps.logger,
+              warnIgnoredKibanaFetcher: await this.shouldWarnIgnoredKibanaFetcher(),
+              workflowId: id,
+            })),
           }
         : undefined;
 
@@ -941,7 +971,12 @@ export class WorkflowCrudService {
       request,
       getOptions: { includeDeleted: true, includeGlobal: true },
       mutate: (existingSource: WorkflowProperties) => {
-        assertWorkflowOperation(existingSource, 'edit', profileId);
+        assertWorkflowOperation(
+          existingSource,
+          'edit',
+          profileId,
+          this.accessAuditContext(request, id, spaceId)
+        );
         let updatedData: Partial<WorkflowProperties> = {
           lastUpdatedBy: authenticatedUser,
           updated_at: now.toISOString(),
@@ -1105,7 +1140,10 @@ export class WorkflowCrudService {
     const profileId = request
       ? (await this.deps.getCoreStart().userProfile.getCurrentProfileId({ request })) ?? undefined
       : undefined;
-    const deletionOptions = { ...options, profileId };
+    const isAdmin =
+      options?.force === true &&
+      (await isEntityAccessControlAdmin(this.deps.getCoreStart(), request, this.deps.authz));
+    const deletionOptions = { ...options, profileId, request, isAdmin };
     const bindings = this.deps.getServiceAccountBindings?.();
     if (!bindings) return this.deleteWorkflowDocuments(ids, spaceId, deletionOptions);
     const result: DeleteWorkflowsResponse = {
@@ -1149,12 +1187,16 @@ export class WorkflowCrudService {
               includeDeleted: true,
             });
         if (!versioned) return;
+        // A workflow the caller cannot read is treated like a missing one.
+        if (getWorkflowAccessDecisions(versioned.source, profileId, isAdmin).read === 'denied') {
+          return;
+        }
         assertWorkflowOperation(
           versioned.source,
-          options?.force && versioned.source.access_control?.access_mode === 'private'
-            ? 'manage'
-            : 'edit',
-          profileId
+          getWorkflowDeleteOperation(versioned.source, options?.force),
+          profileId,
+          this.accessAuditContext(request, id, spaceId),
+          isAdmin
         );
         const accountId = versioned.source.definition?.settings?.run_as;
         if (batch && !accountId && !options?.force) {
@@ -1168,17 +1210,19 @@ export class WorkflowCrudService {
         }
         if (accountId) {
           await ensureWorkflowServiceAccountMutationAuthorized(this.deps.getCoreStart(), request);
-          if (options?.force) {
-            const executions = await this.deps.executionQueryService.getWorkflowExecutions(
-              { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
-              spaceId
+          // Deleting removes the binding, so an execution that is still running or paused could
+          // never mint its service account again.
+          const executions = await this.deps.executionQueryService.getWorkflowExecutions(
+            { workflowId: id, statuses: [...NonTerminalExecutionStatuses], size: 1 },
+            spaceId
+          );
+          if (executions.total > 0) {
+            throw new WorkflowConflictError(
+              `Cannot ${
+                options?.force ? 'force-delete' : 'delete'
+              } workflow with running executions: ${id}`,
+              id
             );
-            if (executions.total > 0) {
-              throw new WorkflowConflictError(
-                `Cannot force-delete workflow with running executions: ${id}`,
-                id
-              );
-            }
           }
         }
         await withWorkflowBindingChange({
@@ -1247,10 +1291,50 @@ export class WorkflowCrudService {
     return result;
   }
 
+  private accessAuditContext(
+    request: KibanaRequest | undefined,
+    id: string,
+    spaceId?: string
+  ): WorkflowAccessAuditContext {
+    return { core: this.deps.getCoreStart(), request, id, spaceId };
+  }
+
+  /** Reports an overwrite of a workflow the caller cannot read like an id that is already taken. */
+  private assertCanOverwrite(
+    existing: WorkflowProperties,
+    id: string,
+    spaceId: string | undefined,
+    profileId: string | undefined,
+    request: KibanaRequest | undefined
+  ): void {
+    try {
+      assertWorkflowOperation(
+        existing,
+        'edit',
+        profileId,
+        this.accessAuditContext(request, id, spaceId)
+      );
+    } catch (error) {
+      if (
+        error instanceof WorkflowAccessDeniedError &&
+        getWorkflowAccessDecisions(existing, profileId).read === 'denied'
+      ) {
+        throw new WorkflowConflictError(`Workflow with id '${id}' already exists`, id);
+      }
+      throw error;
+    }
+  }
+
   private async deleteWorkflowDocuments(
     ids: string[],
     spaceId: string,
-    options?: { force?: boolean; acknowledgeAclLoss?: boolean; profileId?: string },
+    options?: {
+      force?: boolean;
+      acknowledgeAclLoss?: boolean;
+      profileId?: string;
+      request?: KibanaRequest;
+      isAdmin?: boolean;
+    },
     versionedWorkflow?: VersionedWorkflowDocument,
     guardedBatch?: OccWorkflowHit[],
     deferCleanup = false
@@ -1281,11 +1365,13 @@ export class WorkflowCrudService {
         : {}),
       force: options?.force ?? false,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
-      assertCanDelete: (workflow) =>
+      assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
           workflow,
-          options?.force && workflow.access_control?.access_mode === 'private' ? 'manage' : 'edit',
-          options?.profileId
+          getWorkflowDeleteOperation(workflow, options?.force),
+          options?.profileId,
+          this.accessAuditContext(options?.request, id, spaceId),
+          options?.force === true && options?.isAdmin
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
@@ -1295,6 +1381,80 @@ export class WorkflowCrudService {
       getWorkflowExecutions: (params, sp) =>
         this.deps.executionQueryService.getWorkflowExecutions(params, sp),
     });
+  }
+
+  /** Disables one workflow, including a soft-deleted one, and unschedules its triggers. */
+  async disableWorkflow(id: string, spaceId: string): Promise<void> {
+    await this.readModifyWriteWorkflowDocument(id, spaceId, {
+      mutate: mutateWorkflowToDisabled,
+      getOptions: { includeDeleted: true },
+    });
+    await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+  }
+
+  /**
+   * Switches a managed workflow off without a request, refusing any write that changes more than
+   * `enabled`. Resolves to the written document, or `null` without writing when the guarded read
+   * finds the workflow missing, soft-deleted, unmanaged, or already off.
+   */
+  async disableManagedWorkflowWithoutRequest(
+    id: string,
+    spaceId: string,
+    expectedOwnership: ManagedWorkflowOrphan
+  ): Promise<WorkflowProperties | null> {
+    const written = await this.runOccWrite(id, async () => {
+      const writer = this.getReadModifyWriteOccWriter(
+        spaceId,
+        undefined,
+        undefined,
+        undefined,
+        expectedOwnership
+      );
+      try {
+        return await writer.readModifyWrite({
+          id,
+          mutate: (existing) => {
+            // Decided on every OCC attempt, so a concurrent switch-off or delete skips the write.
+            if (!existing.managed || !existing.enabled) {
+              throw NOTHING_TO_DISABLE;
+            }
+            return applyWorkflowVersion(mutateWorkflowToDisabled(existing), existing);
+          },
+        });
+      } catch (error) {
+        if (error === NOTHING_TO_DISABLE || this.isWorkflowDocumentNotFoundError(error, id)) {
+          return null;
+        }
+        throw error;
+      }
+    });
+    if (!written) {
+      return null;
+    }
+    await unscheduleWorkflowTasks([id], this.deps.getTaskScheduler());
+    return written.document;
+  }
+
+  /**
+   * Force-deletes a managed orphan without a request. Any service account binding is left for the
+   * platform to reap, since removing it requires a user request. Resolves to whether a workflow
+   * was deleted.
+   */
+  async deleteManagedOrphan(
+    id: string,
+    spaceId: string,
+    orphan: ManagedWorkflowOrphan
+  ): Promise<boolean> {
+    const versioned = await this.getWorkflowDocumentWithVersion(id, spaceId, {
+      includeDeleted: true,
+    });
+    if (!versioned) return false;
+    ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
+    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
+    if (result.deleted !== 1) {
+      throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
+    }
+    return true;
   }
 
   async disableAllWorkflows(
@@ -1321,12 +1481,15 @@ export class WorkflowCrudService {
         ? {
             accessControlFilter: buildEntityReadAccessQuery({
               profileId,
-              ownerField: 'owner_id',
-              accessControlField: 'access_control',
-              includeMissing: true,
+              ...WORKFLOW_READ_ACCESS_QUERY,
             }),
-            assertCanEdit: (workflow: WorkflowProperties) =>
-              assertWorkflowOperation(workflow, 'edit', profileId),
+            assertCanEdit: (workflow: WorkflowProperties, id: string) =>
+              assertWorkflowOperation(
+                workflow,
+                'edit',
+                profileId,
+                this.accessAuditContext(request, id, workflow.spaceId)
+              ),
           }
         : {}),
       storage: this.deps.workflowStorage,
@@ -1567,7 +1730,7 @@ export class WorkflowCrudService {
             request: params.request,
             mutate: (existing) => {
               previousVersion = existing.version;
-              assertWorkflowOperation(existing, 'edit', profileId);
+              this.assertCanOverwrite(existing, entry.id, spaceId, profileId, params.request);
               return this.buildBulkOverwriteDocument(prepared, existing);
             },
           });
@@ -1593,7 +1756,13 @@ export class WorkflowCrudService {
     if (crossSpaceOverwriteEntries.length > 0) {
       for (const { entry, occHit } of crossSpaceOverwriteEntries) {
         try {
-          assertWorkflowOperation(occHit._source, 'edit', profileId);
+          this.assertCanOverwrite(
+            occHit._source,
+            entry.id,
+            occHit._source.spaceId,
+            profileId,
+            params.request
+          );
           const document = await this.writeWorkflowDocumentWithOcc(entry.id, spaceId, {
             previousDocument: occHit._source,
             request: params.request,

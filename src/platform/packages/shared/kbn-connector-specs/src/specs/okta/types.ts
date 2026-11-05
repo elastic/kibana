@@ -17,23 +17,29 @@ const MAX_FILTER_LENGTH = 1024;
 const MAX_SEARCH_LENGTH = 512;
 const MAX_LOG_LIMIT = 1000;
 const MAX_USER_LIMIT = 200;
+const MAX_LOG_KEYWORDS = 10;
+const MAX_LOG_KEYWORD_LENGTH = 40;
 
-export const UserIdSchema = z
-  .string()
-  .min(1)
-  .max(MAX_USER_ID_LENGTH)
-  .describe(
-    'Okta user id (for example 00u1a2b3c4d5e6f7g8h9), login, or unambiguous login shortname. Prefer the id returned by getUser, listUsers, or searchUsers for write actions.'
-  );
+export const UserIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_USER_ID_LENGTH)
+    .describe(
+      'Okta user id (for example 00u1a2b3c4d5e6f7g8h9), login, or unambiguous login shortname. Prefer the id returned by getUser, listUsers, or searchUsers for write actions.'
+    )
+);
 
-export const GroupIdSchema = z
-  .string()
-  .min(1)
-  .max(MAX_GROUP_ID_LENGTH)
-  .regex(/^[A-Za-z0-9_-]+$/, {
-    message: 'Group id must contain only letters, numbers, underscores, and hyphens',
-  })
-  .describe('Okta group id (for example 00g1a2b3c4d5e6f7g8h9).');
+export const GroupIdSchema = lazySchema(() =>
+  z
+    .string()
+    .min(1)
+    .max(MAX_GROUP_ID_LENGTH)
+    .regex(/^[A-Za-z0-9_-]+$/, {
+      message: 'Group id must contain only letters, numbers, underscores, and hyphens',
+    })
+    .describe('Okta group id (for example 00g1a2b3c4d5e6f7g8h9).')
+);
 
 export const GetUserInputSchema = lazySchema(() =>
   z.object({
@@ -187,7 +193,7 @@ export const ListUsersInputSchema = lazySchema(() =>
       .min(1)
       .max(MAX_USER_LIMIT)
       .optional()
-      .describe('Page size (1-200). Okta defaults to 10 when omitted.'),
+      .describe(`Page size (1-${MAX_USER_LIMIT}). Okta defaults to 10 when omitted.`),
     after: z
       .string()
       .max(MAX_FILTER_LENGTH)
@@ -227,7 +233,7 @@ export const SearchUsersInputSchema = lazySchema(() =>
         .min(1)
         .max(MAX_USER_LIMIT)
         .optional()
-        .describe('Page size (1-200). Okta defaults to 10 when omitted.'),
+        .describe(`Page size (1-${MAX_USER_LIMIT}). Okta defaults to 10 when omitted.`),
       after: z
         .string()
         .max(MAX_FILTER_LENGTH)
@@ -282,15 +288,29 @@ export const GetLogsInputSchema = lazySchema(() =>
     q: z
       .string()
       .max(MAX_SEARCH_LENGTH)
+      .refine(
+        (value) => {
+          const keywords = value.trim().split(/\s+/).filter(Boolean);
+          return (
+            keywords.length <= MAX_LOG_KEYWORDS &&
+            keywords.every((keyword) => keyword.length <= MAX_LOG_KEYWORD_LENGTH)
+          );
+        },
+        {
+          message: `q accepts at most ${MAX_LOG_KEYWORDS} space-separated keywords of up to ${MAX_LOG_KEYWORD_LENGTH} characters each`,
+        }
+      )
       .optional()
-      .describe('Case-insensitive keyword filter across log events.'),
+      .describe(
+        `Case-insensitive keyword filter across log events. Up to ${MAX_LOG_KEYWORDS} space-separated keywords, each at most ${MAX_LOG_KEYWORD_LENGTH} characters.`
+      ),
     limit: z
       .number()
       .int()
       .min(1)
       .max(MAX_LOG_LIMIT)
       .optional()
-      .describe('Number of events to return (1-1000). Okta defaults to 100.'),
+      .describe(`Number of events to return (1-${MAX_LOG_LIMIT}). Okta defaults to 100.`),
     sortOrder: z
       .enum(['ASCENDING', 'DESCENDING'])
       .optional()

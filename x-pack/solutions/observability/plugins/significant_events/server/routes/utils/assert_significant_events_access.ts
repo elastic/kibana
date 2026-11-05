@@ -69,11 +69,10 @@ const pluginRequirements = Object.fromEntries(
 /**
  * The single source of truth for everything that must be true for significant
  * events to work. Keying by reason makes this exhaustive: TypeScript errors if
- * any `SignificantEventsUnavailableReason` lacks a check here. The declaration
- * order is the evaluation order: it only decides which reason surfaces first
- * when several are unmet, so the Technical Preview feature flag is checked first
- * as the outermost gate, then the project type, then cheaper / more-likely-to-fail
- * gates (pricing tier, license) before plugin presence.
+ * any requirement lacks a check here. The declaration order is the evaluation order:
+ * it only decides which reason surfaces first when several are unmet, so the Technical Preview
+ * feature flag is checked first as the outermost gate, then the project type, then cheaper /
+ * more-likely-to-fail gates (pricing tier, license) before plugin presence.
  */
 const significantEventsRequirements: Record<SignificantEventsUnavailableReason, RequirementCheck> =
   {

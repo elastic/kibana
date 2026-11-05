@@ -25,11 +25,6 @@ import type { AgentBuilderAgentExecutionError } from '@kbn/agent-builder-common/
 import type { BackgroundExecutionState, SubagentRosterEntry } from '@kbn/agent-builder-common/chat';
 import type { HandoverParams } from '../types';
 
-/** Number of most recent research cycles whose tool results are never compacted in-flight. */
-export const PRESERVED_RECENT_CYCLES = 2;
-
-export const IN_FLIGHT_TOKEN_THRESHOLD = 50_000;
-
 export const createCycleLimitSystemMessage = (cycle: number): BaseMessage => {
   return createUserMessage(`<system-notice>
 You action budget is almost expired for that round. You only have ${cycle} cycles (tool calls) left before the execution will be terminated.
@@ -186,6 +181,34 @@ export const formatInterruptionNotice = (interruption: ExecutionInterruption): s
   interruption.type === 'failed'
     ? formatExecutionFailedNotice(interruption.error)
     : formatExecutionAbortedNotice(interruption.aborted_by);
+
+/**
+ * The notice that stands in for the assistant answer of a round still waiting on the user. The
+ * question text comes from the model: it is XML-escaped by `generateXmlTree`.
+ */
+export const formatAwaitingPromptNotice = (questions: string[]): string =>
+  generateXmlTree({
+    tagName: 'system_notice',
+    children: [
+      {
+        tagName: 'message',
+        children: [
+          'The agent paused this round to wait for user input, and the user has not answered. The steps above were completed; tool calls waiting for a confirmation did not run, and no response was produced.',
+        ],
+      },
+      ...(questions.length > 0
+        ? [
+            {
+              tagName: 'unanswered_questions',
+              children: questions.map((question) => ({
+                tagName: 'question',
+                children: [question],
+              })),
+            },
+          ]
+        : []),
+    ],
+  });
 
 export const formatSystemNotice = (execution: BackgroundExecutionState): string => {
   const { status, execution_id: executionId } = execution;

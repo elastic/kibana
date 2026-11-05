@@ -110,10 +110,11 @@ const baseRule: RuleApiResponse = {
   id: 'rule-1',
   kind: 'alert',
   enabled: true,
-  metadata: { name: 'Test Rule', version: 1 },
+  version: 1,
+  metadata: { name: 'Test Rule' },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '10m' },
-  query: { format: 'composed' as const, base: 'FROM logs-*', breach: { segment: '' } },
+  query: { base: 'FROM logs-*' },
   created_by: { profile_uid: 'alice@example.com' },
   created_at: '2026-03-01T12:00:00.000Z',
   updated_by: { profile_uid: 'bob@example.com' },
@@ -342,6 +343,32 @@ describe('DashboardArtifactsSubsection', () => {
     );
   });
 
+  it('clears artifacts with null when the last dashboard is unselected', async () => {
+    mockSearchRelatedDashboard.mockResolvedValue([{ id: 'dash-a', title: 'Dashboard A' }]);
+    const rule = {
+      ...baseRule,
+      artifacts: [
+        { id: 'artifact-1', type: DASHBOARD_ARTIFACT_TYPE, data: { dashboard_id: 'dash-a' } },
+      ],
+    };
+
+    renderSubsection(rule);
+
+    fireEvent.click(screen.getByTestId('ruleDashboardArtifactsAddButton'));
+
+    await waitFor(() => {
+      expect(screen.getByTestId('ruleDashboardSelectableOption-dash-a')).toBeInTheDocument();
+    });
+
+    fireEvent.click(screen.getByTestId('ruleDashboardSelectableOption-dash-a'));
+    fireEvent.click(screen.getByTestId('ruleDashboardArtifactsManageSave'));
+
+    expect(mockUpdateRule).toHaveBeenCalledWith(
+      { id: 'rule-1', payload: { artifacts: null } },
+      expect.objectContaining({ onSuccess: expect.any(Function) })
+    );
+  });
+
   it('removes a dashboard artifact after delete confirmation', async () => {
     mockResolveDashboardsByIds.mockResolvedValue({
       resolved: [{ id: 'dash-1', title: 'Ops Dashboard' }],
@@ -412,10 +439,11 @@ describe('DashboardArtifactsSubsection', () => {
     fireEvent.click(screen.getByTestId('ruleDashboardArtifactDeleteButton-dash-missing'));
     fireEvent.click(screen.getByTestId('confirmModalConfirmButton'));
 
+    // Removing the last artifact clears the field, and PATCH spells a clear as `null`.
     expect(mockUpdateRule).toHaveBeenCalledWith(
       {
         id: 'rule-1',
-        payload: { artifacts: [] },
+        payload: { artifacts: null },
       },
       expect.objectContaining({ onSettled: expect.any(Function) })
     );

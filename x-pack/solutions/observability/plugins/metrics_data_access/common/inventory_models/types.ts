@@ -221,10 +221,15 @@ export const TSVBMetricModelRT = rt.intersection([
 
 export type TSVBMetricModel = rt.TypeOf<typeof TSVBMetricModelRT>;
 
+export interface TSVBMetricModelCreatorOptions {
+  schema?: DataSchemaFormat;
+}
+
 export type TSVBMetricModelCreator = (
   timeField: string,
   indexPattern: string | string[],
-  interval: string
+  interval: string,
+  options?: TSVBMetricModelCreatorOptions
 ) => TSVBMetricModel;
 
 export type MetricsUIAggregation = Record<string, estypes.AggregationsAggregate>;

@@ -5,18 +5,24 @@
  * 2.0.
  */
 
-import { render, waitFor } from '@testing-library/react';
+import { render, waitFor, fireEvent } from '@testing-library/react';
 import React, { type RefAttributes } from 'react';
+import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { Graph, type GraphProps } from './graph';
 import { TestProviders } from '../mock/test_providers';
 import type { NodeViewModel, EdgeViewModel } from '../types';
 import type { Edge, Node, ReactFlowInstance, ReactFlowProps } from '@xyflow/react';
+import { GRAPH_CONTROLS_LAYERS_ID } from '../test_ids';
 
 // Turn off the optimization that hides elements that are not visible in the viewport
 jest.mock('../constants', () => ({
   ...jest.requireActual('../constants'),
   ONLY_RENDER_VISIBLE_ELEMENTS: false,
 }));
+
+// Graph uses useLocalStorage to persist display options; return undefined so the
+// DEFAULT_GRAPH_DISPLAY_OPTIONS merge produces all-visible options in tests.
+jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue([undefined, jest.fn()]));
 
 // Mock ReactFlow's fitView function
 let mockFitView = jest.fn();
@@ -815,6 +821,115 @@ describe('<Graph />', () => {
         expect(relationshipNode).not.toBeNull();
         expect(relationshipNode).toHaveClass('non-interactive');
       });
+    });
+  });
+
+  describe('layers panel', () => {
+    const layersPanelNodes: NodeViewModel[] = [
+      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
+    ];
+
+    afterEach(() => {
+      jest.clearAllMocks();
+    });
+
+    it('should render the layers button when interactive is true', async () => {
+      const { getByTestId } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => {
+        expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument();
+      });
+    });
+
+    it('should not render the layers button when interactive is false', async () => {
+      const { queryByTestId } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: false,
+      });
+
+      await waitFor(() => {
+        expect(queryByTestId(GRAPH_CONTROLS_LAYERS_ID)).not.toBeInTheDocument();
+      });
+    });
+
+    it('should open the layers panel with all checkboxes when the layers button is clicked', async () => {
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() => {
+        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Data source' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'IP address' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Geolocation' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Source IP address' })).toBeInTheDocument();
+        expect(getByRole('checkbox', { name: 'Source geolocation' })).toBeInTheDocument();
+      });
+    });
+
+    it('should call the display options setter with the updated value when a checkbox is toggled off', async () => {
+      const mockSetStored = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, mockSetStored]);
+
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() =>
+        expect(getByRole('checkbox', { name: 'Asset criticality' })).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Asset criticality' }));
+
+      expect(mockSetStored).toHaveBeenCalledWith(
+        expect.objectContaining({
+          entity: expect.objectContaining({ assetCriticality: false }),
+        })
+      );
+    });
+
+    it('should call the display options setter with the updated value when an event checkbox is toggled off', async () => {
+      const mockSetStored = jest.fn();
+      (useLocalStorage as jest.Mock).mockReturnValue([undefined, mockSetStored]);
+
+      const { getByTestId, getByRole } = renderGraphPreview({
+        nodes: layersPanelNodes,
+        edges: [],
+        interactive: true,
+      });
+
+      await waitFor(() => expect(getByTestId(GRAPH_CONTROLS_LAYERS_ID)).toBeInTheDocument());
+
+      fireEvent.click(getByTestId(GRAPH_CONTROLS_LAYERS_ID));
+
+      await waitFor(() =>
+        expect(getByRole('checkbox', { name: 'Source IP address' })).toBeInTheDocument()
+      );
+
+      fireEvent.click(getByRole('checkbox', { name: 'Source IP address' }));
+
+      expect(mockSetStored).toHaveBeenCalledWith(
+        expect.objectContaining({
+          event: expect.objectContaining({ sourceIpAddress: false }),
+        })
+      );
     });
   });
 });

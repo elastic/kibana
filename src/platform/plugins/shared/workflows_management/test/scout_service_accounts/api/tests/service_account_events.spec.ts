@@ -22,9 +22,13 @@ apiTest.describe(
   { tag: ['@local-serverless-search', '@local-stateful-classic'] },
   () => {
     const { getContext, setup, teardown, cleanupWorkflows } = createServiceAccountSuite();
+
     apiTest.beforeAll(setup);
+
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
+
     apiTest.afterAll(teardown);
+
     apiTest(
       'SA continuation audit: binding failure dispatches the failure handler',
       async ({ apiClient }) => {

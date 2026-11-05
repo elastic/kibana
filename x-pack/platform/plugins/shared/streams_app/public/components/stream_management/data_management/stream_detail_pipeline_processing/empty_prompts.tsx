@@ -24,10 +24,10 @@ import { useAddStepActions } from './hooks/use_add_step_actions';
 import { useOptionalInteractiveModeSelector } from './state_management/stream_enrichment_state_machine';
 
 const ManualStepButtons = () => {
-  const { onAddCondition, onAddProcessor } = useAddStepActions();
+  const { onAddProcessor } = useAddStepActions();
 
   const canAddStep = useOptionalInteractiveModeSelector(
-    (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' }),
+    (state) => state.can({ type: 'step.addProcessor' }),
     false
   );
 
@@ -37,16 +37,6 @@ const ManualStepButtons = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" justifyContent="center" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          color="text"
-          data-test-subj="streamsAppStreamDetailEnrichmentCreateConditionButton"
-          onClick={onAddCondition}
-        >
-          {addConditionText}
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"
@@ -240,13 +230,6 @@ const orManuallyText = i18n.translate(
   'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.orManually',
   {
     defaultMessage: 'Or manually...',
-  }
-);
-
-const addConditionText = i18n.translate(
-  'xpack.streams.streamDetailView.processingTab.noStepsEmptyPrompt.addConditionButtonText',
-  {
-    defaultMessage: 'Add condition',
   }
 );
 

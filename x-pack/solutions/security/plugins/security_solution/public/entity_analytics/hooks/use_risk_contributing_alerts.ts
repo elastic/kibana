@@ -7,6 +7,7 @@
 
 import { useEffect } from 'react';
 import type { ALERT_RULE_NAME, ALERT_RULE_UUID } from '@kbn/rule-data-utils';
+import type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 
 import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskScoreInput } from '../../../common/api/entity_analytics/common';
@@ -19,6 +20,7 @@ import type { EntityRiskScore } from '../../../common/search_strategy/security_s
 interface UseRiskContributingAlerts<T extends EntityType> {
   entityType: T;
   riskScore: EntityRiskScore<T> | undefined;
+  executionContext?: KibanaExecutionContext;
 }
 
 interface AlertData {
@@ -52,12 +54,14 @@ export interface UseRiskContributingAlertsResult {
 export const useRiskContributingAlerts = <T extends EntityType>({
   riskScore,
   entityType,
+  executionContext,
 }: UseRiskContributingAlerts<T>): UseRiskContributingAlertsResult => {
   const { hasAlertsRead } = useAlertsPrivileges();
   const { loading, data, setQuery } = useQueryAlerts<AlertHit, unknown>({
     query: {},
     queryName: ALERTS_QUERY_NAMES.BY_ID,
     skip: !hasAlertsRead,
+    executionContext,
   });
 
   const inputs = getInputs(riskScore, entityType);

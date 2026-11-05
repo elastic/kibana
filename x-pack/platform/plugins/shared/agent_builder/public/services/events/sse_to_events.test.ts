@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { ChatEvent, ToolCallStep } from '@kbn/agent-builder-common';
+import type { ChatEvent, ConversationRoundStep, ToolCallStep } from '@kbn/agent-builder-common';
 import {
   ChatEventType,
+  ConversationRoundStepType,
   EventActorType,
   TimelineEventType,
   ToolResultType,
@@ -90,6 +91,11 @@ const streamingEvent = (state: LiveEventsState): ExecutionStreamingEvent | undef
   state.events.find(
     (event): event is ExecutionStreamingEvent => event.type === EXECUTION_STREAMING_EVENT_TYPE
   );
+
+const stepOf = (state: LiveEventsState, id: string): ConversationRoundStep | undefined => {
+  const event = state.events.find((candidate) => candidate.id === id);
+  return event?.type === TimelineEventType.executionStep ? event.data.step : undefined;
+};
 
 const stepAt = (state: LiveEventsState, id: string): ToolCallStep | undefined => {
   const event = state.events.find((candidate) => candidate.id === id);
@@ -207,6 +213,50 @@ describe('sseToEvents', () => {
 
     expect(streamingEvent(state)?.data).toMatchObject({
       time_to_first_token: 42,
+    });
+  });
+
+  it('patches the compaction step started by compaction_started with the completed counts', () => {
+    const stepId = executionStepEventId(ROUND_ID, 0, 0);
+    const started = fold(executionStarted(), {
+      type: ChatEventType.compactionStarted,
+      data: { token_count_before: 90_000 },
+    } as ChatEvent);
+
+    expect(stepOf(started, stepId)).toEqual({
+      type: ConversationRoundStepType.compaction,
+      summarized_cycle_count: 0,
+      token_count_before: 90_000,
+      token_count_after: 0,
+    });
+
+    const completed = sseToEvents(started, {
+      type: ChatEventType.compactionCompleted,
+      data: { token_count_before: 88_000, token_count_after: 20_000, summarized_cycle_count: 3 },
+    } as ChatEvent);
+
+    expect(stepOf(completed, stepId)).toEqual({
+      type: ConversationRoundStepType.compaction,
+      summarized_cycle_count: 3,
+      token_count_before: 88_000,
+      token_count_after: 20_000,
+    });
+  });
+
+  it('appends a substitution step on substitution_applied', () => {
+    const data = {
+      substituted_tool_calls: [{ round_id: 'round-1', tool_call_id: 't1' }],
+      trigger: 'intra_round',
+      threshold_tokens: 1_000,
+    };
+    const state = fold(executionStarted(), {
+      type: ChatEventType.substitutionApplied,
+      data,
+    } as ChatEvent);
+
+    expect(stepOf(state, executionStepEventId(ROUND_ID, 0, 0))).toEqual({
+      type: ConversationRoundStepType.substitution,
+      ...data,
     });
   });
 

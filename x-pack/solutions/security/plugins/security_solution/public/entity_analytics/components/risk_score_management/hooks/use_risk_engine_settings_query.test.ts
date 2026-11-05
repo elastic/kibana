@@ -75,6 +75,30 @@ describe('useRiskEngineSettingsQuery', () => {
     expect(result.current.isError).toBe(false);
   });
 
+  it('uses defaults when the risk score configuration is not initialized', async () => {
+    const notFoundError = Object.assign(new Error('Not found'), {
+      request: {},
+      response: { status: 404 },
+    });
+    mockFetchRiskEngineSettings.mockRejectedValue(notFoundError);
+
+    const { result } = renderHook(() => useRiskEngineSettingsQuery(), {
+      wrapper: createWrapper(),
+    });
+
+    await waitFor(() => {
+      expect(result.current.isLoadingRiskEngineSettings).toBe(false);
+    });
+
+    expect(result.current.savedRiskEngineSettings).toEqual({
+      includeClosedAlerts: false,
+      range: { start: 'now-30d', end: 'now' },
+      enableResetToZero: true,
+      filters: [],
+    });
+    expect(result.current.isError).toBe(false);
+  });
+
   it('should handle API errors', async () => {
     const error = new Error('API Error');
     mockFetchRiskEngineSettings.mockRejectedValue(error);

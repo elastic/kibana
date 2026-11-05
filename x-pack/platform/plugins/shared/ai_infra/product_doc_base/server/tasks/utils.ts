@@ -21,9 +21,13 @@ import {
 
 export type { InstallLockManager };
 
-// A full install or update runs in one task run; the waiter allows for scheduling and lock delays on top
-export const INSTALL_TASK_TIMEOUT = '20m';
-export const INSTALL_TASK_WAIT_TIMEOUT_MS = 25 * 60 * 1000;
+// A full install or update runs in one task run. ELSER model download plus four product
+// indices can outlast 20m on a small CI agent; killing the run there retries from scratch
+// and the HTTP waiter never sees a completed task. The waiter sits above the task timeout
+// so scheduling and install-lock delays still fit. Route idle sockets and the gen-ai FTR
+// Mocha timeout must stay above this waiter.
+export const INSTALL_TASK_TIMEOUT = '30m';
+export const INSTALL_TASK_WAIT_TIMEOUT_MS = 35 * 60 * 1000;
 
 /**
  * Params shared by the per-request install and update tasks. Each request schedules its own task

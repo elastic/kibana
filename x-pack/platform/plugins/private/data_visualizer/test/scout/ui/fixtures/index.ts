@@ -5,35 +5,10 @@
  * 2.0.
  */
 
-import type {
-  ScoutParallelTestFixtures,
-  ScoutParallelWorkerFixtures,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures,
-} from '@kbn/scout';
-import { test as baseTest, spaceTest as spaceBaseTest } from '@kbn/scout';
+import type { ScoutParallelTestFixtures, ScoutParallelWorkerFixtures } from '@kbn/scout';
+import { spaceTest as spaceBaseTest } from '@kbn/scout';
 import { getMlTestResources, type MlTestResources } from './ml_test_resources';
 import { extendPageObjects, type DataVisualizerPageObjects } from './page_objects';
-
-export interface DataVisualizerTestFixtures extends ScoutTestFixtures {
-  pageObjects: DataVisualizerPageObjects;
-}
-
-export interface DataVisualizerWorkerFixtures extends ScoutWorkerFixtures {
-  mlTestResources: MlTestResources;
-}
-
-export const test = baseTest.extend<DataVisualizerTestFixtures, DataVisualizerWorkerFixtures>({
-  pageObjects: async ({ pageObjects, page }, use) => {
-    await use(extendPageObjects(pageObjects, page));
-  },
-  mlTestResources: [
-    async ({ apiServices, kbnClient, log }, use) => {
-      await use(getMlTestResources({ apiServices, kbnClient, log }));
-    },
-    { scope: 'worker' },
-  ],
-});
 
 export interface DataVisualizerParallelTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: DataVisualizerPageObjects;

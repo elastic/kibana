@@ -9,7 +9,11 @@ applies_to:
 
 # OpenSearch (AWS OpenSearch Service) connector [opensearch-aws-opensearch-service-action-type]
 
-The OpenSearch connector calls the [Alerting](https://docs.opensearch.org/latest/observing-your-data/alerting/api/) and [Security Analytics](https://docs.opensearch.org/latest/security-analytics/api-tools/alert-finding-api/) plugin APIs, plus core document search/index APIs, so a workflow or agent can triage alerts, manage monitors, and read or write cluster data. It works against both a managed [Amazon OpenSearch Service](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html) domain and a self-managed OpenSearch (or Elasticsearch with a compatible security setup) cluster.
+The OpenSearch connector calls the [Alerting](https://docs.opensearch.org/latest/observing-your-data/alerting/api/) and [Security Analytics](https://docs.opensearch.org/latest/security-analytics/api-tools/alert-finding-api/) plugin APIs, plus core document search/index APIs, so an agent can triage alerts, manage monitors, and read or write cluster data. It works against both a managed [Amazon OpenSearch Service](https://docs.aws.amazon.com/opensearch-service/latest/developerguide/what-is.html) domain and a self-managed OpenSearch (or Elasticsearch with a compatible security setup) cluster.
+
+::::{note}
+This connector is currently available in **Agent Builder** only. Workflow support is planned for a future release. Actions marked _(not yet available)_ are not exposed to agents. Until workflow support is added, you can only run them through the [Run a connector](https://www.elastic.co/docs/api/doc/kibana/operation/operation-post-actions-connector-id-execute) API.
+::::
 
 ## Create connectors in {{kib}} [define-opensearch-aws-opensearch-service-ui]
 
@@ -69,10 +73,10 @@ The OpenSearch connector has the following actions:
 `createMonitor`
 :   Create a new query-level, bucket-level, or doc-level monitor (`monitorType`) with a `schedule`, `inputs`, and `triggers`. The `inputs`/`triggers` shape follows the [OpenSearch monitor definition](https://docs.opensearch.org/latest/observing-your-data/alerting/api/#create-a-query-level-monitor) and varies by monitor type.
 
-`updateMonitor`
+`updateMonitor` _(not yet available)_
 :   Update an existing monitor's (`monitorId`) name, schedule, inputs, or triggers. Only the fields you provide are changed. Everything else on the monitor is preserved.
 
-`deleteMonitor`
+`deleteMonitor` _(not yet available)_
 :   Permanently delete a monitor (`monitorId`). This does not delete alerts already raised by the monitor.
 
 `searchDetectors`

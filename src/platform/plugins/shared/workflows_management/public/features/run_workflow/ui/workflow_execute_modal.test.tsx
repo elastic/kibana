@@ -221,7 +221,7 @@ describe('WorkflowExecuteModal', () => {
         },
       });
 
-      const { getByTestId } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -230,7 +230,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(getByTestId('workflowExecuteModalTrigger-alert')).not.toBeDisabled();
+      expect(getByRole('radio', { name: 'Alert' })).not.toBeDisabled();
     });
 
     it('prefetches RAC alert index names on modal open', () => {
@@ -283,7 +283,7 @@ describe('WorkflowExecuteModal', () => {
         }
       );
 
-      const { getByTestId } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -293,7 +293,7 @@ describe('WorkflowExecuteModal', () => {
       );
 
       await waitFor(() => {
-        expect(getByTestId('workflowExecuteModalTrigger-alert')).toBeDisabled();
+        expect(getByRole('radio', { name: 'Alert' })).toBeDisabled();
       });
     });
 
@@ -308,7 +308,7 @@ describe('WorkflowExecuteModal', () => {
         }
       );
 
-      const { getByTestId } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -322,7 +322,7 @@ describe('WorkflowExecuteModal', () => {
       });
 
       await waitFor(() => {
-        expect(getByTestId('workflowExecuteModalTrigger-alert')).not.toBeDisabled();
+        expect(getByRole('radio', { name: 'Alert' })).not.toBeDisabled();
       });
     });
 
@@ -332,7 +332,7 @@ describe('WorkflowExecuteModal', () => {
         canReadWorkflowExecution: false,
       });
 
-      const { getByTestId } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -342,7 +342,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(getByTestId('workflowExecuteModalTrigger-historical')).toBeDisabled();
+      expect(getByRole('radio', { name: 'Historical' })).toBeDisabled();
     });
 
     it('disables the event trigger when the user lacks Read Workflow Execution', () => {
@@ -351,7 +351,7 @@ describe('WorkflowExecuteModal', () => {
         canReadWorkflowExecution: false,
       });
 
-      const { getByTestId } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -360,7 +360,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(getByTestId('workflowExecuteModalTrigger-event')).toBeDisabled();
+      expect(getByRole('radio', { name: 'Event' })).toBeDisabled();
     });
 
     it('renders trigger descriptions', () => {
@@ -399,7 +399,7 @@ describe('WorkflowExecuteModal', () => {
 
   describe('Trigger selection', () => {
     it('defaults to alert trigger when no definition is provided', () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -408,15 +408,12 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const alertButton = getByText('Alert').closest('button');
-      expect(alertButton).toHaveClass('euiButton');
-      // Check if the radio input is checked
-      const alertRadio = alertButton?.querySelector('input[type="radio"]');
+      const alertRadio = getByRole('radio', { name: 'Alert' });
       expect(alertRadio).toBeChecked();
     });
 
     it('switches to manual trigger when clicked', async () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -425,19 +422,16 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const manualButton = getByText('Manual').closest('button');
-      fireEvent.click(manualButton!);
+      const manualRadio = getByRole('radio', { name: 'Manual' });
+      fireEvent.click(manualRadio);
 
       await waitFor(() => {
-        expect(manualButton).toHaveClass('euiButton');
-        // Check if the radio input is checked
-        const manualRadio = manualButton?.querySelector('input[type="radio"]');
         expect(manualRadio).toBeChecked();
       });
     });
 
     it('switches to index trigger when clicked', async () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -446,13 +440,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const indexButton = getByText('Document').closest('button');
-      fireEvent.click(indexButton!);
+      const indexRadio = getByRole('radio', { name: 'Document' });
+      fireEvent.click(indexRadio);
 
       await waitFor(() => {
-        expect(indexButton).toHaveClass('euiButton');
-        // Check if the radio input is checked
-        const indexRadio = indexButton?.querySelector('input[type="radio"]');
         expect(indexRadio).toBeChecked();
       });
     });
@@ -476,7 +467,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('renders manual form when manual trigger is selected', async () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -489,8 +480,8 @@ describe('WorkflowExecuteModal', () => {
       expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click manual trigger
-      const manualButton = getByText('Manual').closest('button');
-      fireEvent.click(manualButton!);
+      const manualRadio = getByRole('radio', { name: 'Manual' });
+      fireEvent.click(manualRadio);
 
       await waitFor(() => {
         // Now manual form should be called
@@ -501,7 +492,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('renders index form when index trigger is selected', async () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -514,8 +505,8 @@ describe('WorkflowExecuteModal', () => {
       expect(mockWorkflowExecuteAlertForm).toHaveBeenCalledTimes(1);
 
       // Click index (Document) trigger
-      const indexButton = getByText('Document').closest('button');
-      fireEvent.click(indexButton!);
+      const indexRadio = getByRole('radio', { name: 'Document' });
+      fireEvent.click(indexRadio);
 
       await waitFor(() => {
         // Now index form should be called
@@ -527,7 +518,7 @@ describe('WorkflowExecuteModal', () => {
   });
 
   describe('Auto-run logic', () => {
-    it('auto-runs and closes modal when workflow has no alerts and no inputs', () => {
+    it('auto-runs and closes modal when workflow has no alerts and no inputs', async () => {
       renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
@@ -540,11 +531,13 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
-      expect(mockOnClose).toHaveBeenCalled();
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledWith({}, 'manual');
+        expect(mockOnClose).toHaveBeenCalled();
+      });
     });
 
-    it('auto-runs only once when onSubmit and onClose change identity', () => {
+    it('auto-runs only once when onSubmit and onClose change identity', async () => {
       const definition = {
         ...baseWorkflowDefinition,
         triggers: [{ type: 'manual' as const }],
@@ -559,8 +552,10 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      expect(mockOnSubmit).toHaveBeenCalledTimes(1);
-      expect(mockOnClose).toHaveBeenCalledTimes(1);
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalledTimes(1);
+        expect(mockOnClose).toHaveBeenCalledTimes(1);
+      });
 
       rerender(
         <WorkflowExecuteModal
@@ -621,7 +616,7 @@ describe('WorkflowExecuteModal', () => {
 
   describe('Default trigger selection based on definition', () => {
     it('selects alert trigger when definition has alert triggers', () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={{
@@ -633,15 +628,12 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const alertButton = getByText('Alert').closest('button');
-      expect(alertButton).toHaveClass('euiButton');
-      // Check if the radio input is checked
-      const alertRadio = alertButton?.querySelector('input[type="radio"]');
+      const alertRadio = getByRole('radio', { name: 'Alert' });
       expect(alertRadio).toBeChecked();
     });
 
     it('selects manual trigger when definition has inputs', () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={
@@ -660,15 +652,41 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const manualButton = getByText('Manual').closest('button');
-      expect(manualButton).toHaveClass('euiButton');
-      // Check if the radio input is checked
-      const manualRadio = manualButton?.querySelector('input[type="radio"]');
+      const manualRadio = getByRole('radio', { name: 'Manual' });
       expect(manualRadio).toBeChecked();
     });
   });
 
   describe('Form submission', () => {
+    it('does not close when onSubmit rejects', async () => {
+      mockOnSubmit.mockRejectedValue(new Error('run failed'));
+      const { getByTestId } = renderWithProviders(
+        <WorkflowExecuteModal
+          isTestRun={false}
+          definition={
+            {
+              ...baseWorkflowDefinition,
+              triggers: [
+                {
+                  type: 'manual',
+                  inputs: [{ name: 'test-input', type: 'string', required: true }],
+                },
+              ],
+            } as WorkflowYaml
+          }
+          onClose={mockOnClose}
+          onSubmit={mockOnSubmit}
+        />
+      );
+
+      fireEvent.click(getByTestId('executeWorkflowButton'));
+
+      await waitFor(() => {
+        expect(mockOnSubmit).toHaveBeenCalled();
+      });
+      expect(mockOnClose).not.toHaveBeenCalled();
+    });
+
     it('renders the execute button', () => {
       const { getByTestId } = renderWithProviders(
         <WorkflowExecuteModal
@@ -747,7 +765,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('disables execute button when there are errors', () => {
-      const { getByTestId, getByText } = renderWithProviders(
+      const { getByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -756,7 +774,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Manual').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Manual' }));
 
       const executeButton = getByTestId('executeWorkflowButton');
       expect(executeButton).not.toBeDisabled();
@@ -798,7 +816,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('disables execute button on the document tab when no rows are selected', () => {
-      const { getByTestId, getByText } = renderWithProviders(
+      const { getByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -807,13 +825,13 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Document').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Document' }));
 
       expect(getByTestId('executeWorkflowButton')).toBeDisabled();
     });
 
     it('enables execute button on the document tab when rows are selected', () => {
-      const { getByTestId, getByText } = renderWithProviders(
+      const { getByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -822,7 +840,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Document').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Document' }));
 
       const indexFormCalls = mockWorkflowExecuteIndexForm.mock.calls;
       const lastIndexFormProps = indexFormCalls[indexFormCalls.length - 1]?.[0] as
@@ -837,7 +855,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('disables execute button when the event trigger reports multiple table row selections', () => {
-      const { getByTestId, getByText } = renderWithProviders(
+      const { getByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -846,8 +864,8 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const eventTrigger = getByText('Event').closest('button');
-      fireEvent.click(eventTrigger!);
+      const eventTrigger = getByRole('radio', { name: 'Event' });
+      fireEvent.click(eventTrigger);
 
       const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
       const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
@@ -864,7 +882,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('hides trigger tabs and applies fullscreen modal class when the alert grid enters fullscreen', () => {
-      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+      const { getByTestId, queryByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -873,7 +891,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Alert').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Alert' }));
 
       const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
       const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
@@ -893,7 +911,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('exits table fullscreen instead of closing the modal when X is pressed', () => {
-      const { getByTestId, getByText, getByLabelText } = renderWithProviders(
+      const { getByTestId, getByLabelText, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -902,7 +920,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Alert').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Alert' }));
 
       const alertFormCalls = mockWorkflowExecuteAlertForm.mock.calls;
       const lastAlertFormProps = alertFormCalls[alertFormCalls.length - 1]?.[0] as
@@ -929,7 +947,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('hides trigger tabs and applies fullscreen modal class when the event grid enters fullscreen', () => {
-      const { getByTestId, getByText, queryByTestId } = renderWithProviders(
+      const { getByTestId, queryByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -938,7 +956,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      fireEvent.click(getByText('Event').closest('button')!);
+      fireEvent.click(getByRole('radio', { name: 'Event' }));
 
       const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
       const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
@@ -958,7 +976,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('disables execute for test runs when the event trigger reports multiple table row selections', () => {
-      const { getByTestId, getByText } = renderWithProviders(
+      const { getByTestId, getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={true}
           definition={null}
@@ -967,8 +985,8 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const eventTrigger = getByText('Event').closest('button');
-      fireEvent.click(eventTrigger!);
+      const eventTrigger = getByRole('radio', { name: 'Event' });
+      fireEvent.click(eventTrigger);
 
       const eventFormCalls = mockWorkflowExecuteEventForm.mock.calls;
       const lastEventFormProps = eventFormCalls[eventFormCalls.length - 1]?.[0] as
@@ -1010,7 +1028,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('defaults to historical tab when initialExecutionId is provided', () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -1020,8 +1038,7 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const historicalButton = getByText('Historical').closest('button');
-      const historicalRadio = historicalButton?.querySelector('input[type="radio"]');
+      const historicalRadio = getByRole('radio', { name: 'Historical' });
       expect(historicalRadio).toBeChecked();
     });
 
@@ -1031,7 +1048,7 @@ describe('WorkflowExecuteModal', () => {
         canReadWorkflowExecution: false,
       });
 
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -1041,13 +1058,12 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const documentButton = getByText('Document').closest('button');
-      const documentRadio = documentButton?.querySelector('input[type="radio"]');
+      const documentRadio = getByRole('radio', { name: 'Document' });
       expect(documentRadio).toBeChecked();
     });
 
     it('renders historical form when historical trigger is clicked', async () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={null}
@@ -1057,8 +1073,8 @@ describe('WorkflowExecuteModal', () => {
         />
       );
 
-      const historicalButton = getByText('Historical').closest('button');
-      fireEvent.click(historicalButton!);
+      const historicalRadio = getByRole('radio', { name: 'Historical' });
+      fireEvent.click(historicalRadio);
 
       await waitFor(() => {
         expect(mockWorkflowExecuteHistoricalForm).toHaveBeenCalled();
@@ -1066,7 +1082,7 @@ describe('WorkflowExecuteModal', () => {
     });
 
     it('should keep historical tab when initialExecutionId is set and definition has alert triggers', () => {
-      const { getByText } = renderWithProviders(
+      const { getByRole } = renderWithProviders(
         <WorkflowExecuteModal
           isTestRun={false}
           definition={{
@@ -1081,8 +1097,7 @@ describe('WorkflowExecuteModal', () => {
 
       // Without initialExecutionId, alert workflows default to the alert tab via resolveInitialSelectedTrigger.
       // With initialExecutionId, we open on historical instead.
-      const historicalButton = getByText('Historical').closest('button');
-      const historicalRadio = historicalButton?.querySelector('input[type="radio"]');
+      const historicalRadio = getByRole('radio', { name: 'Historical' });
       expect(historicalRadio).toBeChecked();
     });
   });

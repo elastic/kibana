@@ -19,9 +19,13 @@ export type {
   NightshiftInvestigationsServerSetup,
   NightshiftInvestigationsServerStart,
 } from './types';
-export type { DeleteAllInvestigationsResult } from './storage';
 
-export { alertSnapshotSchema, type AlertSnapshot } from '../common';
+export {
+  alertSnapshotSchema,
+  NIGHTSHIFT_ASSISTANT_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  type AlertSnapshot,
+} from '../common';
 
 export { InvestigationQuotaDeniedError, InvestigationUnavailableError } from './client/errors';
 

@@ -20,8 +20,7 @@ import {
 } from '@openfeature/server-sdk';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { configServiceMock } from '@kbn/config-mocks';
-import type { FeatureFlagsStart } from '@kbn/core-feature-flags-server';
-import { FeatureFlagsService } from '..';
+import { FeatureFlagsService, type InternalFeatureFlagsStart } from '..';
 import type { FeatureFlagsConfig } from './feature_flags_config';
 
 describe('FeatureFlagsService Server', () => {
@@ -187,7 +186,7 @@ describe('FeatureFlagsService Server', () => {
   });
 
   describe('flag evaluation', () => {
-    let startContract: FeatureFlagsStart;
+    let startContract: InternalFeatureFlagsStart;
     let apmSpy: jest.SpyInstance;
     let addHandlerSpy: jest.SpyInstance;
 

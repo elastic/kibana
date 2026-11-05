@@ -23,7 +23,7 @@ export interface ContinuationCycle {
   ruleName?: string;
   /** event_id(s) the agent emitted this cycle (one per produced discovery). */
   producedEventIds: string[];
-  /** Open/closed events emitted this cycle — used by continuation severity stability. */
+  /** Active/inactive events emitted this cycle — used by continuation severity stability. */
   producedEvents?: ContinuationProducedEvent[];
 
   /** Whether this cycle should reuse an established event ID. Defaults to true. */

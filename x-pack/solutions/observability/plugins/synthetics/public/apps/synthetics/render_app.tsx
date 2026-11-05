@@ -32,7 +32,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     docLinks,
     http: { basePath },
     i18n,
-    theme,
   } = kibanaService.coreStart;
 
   const { apm, infrastructure, logs } = getIntegratedAppAvailability(
@@ -41,7 +40,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
   );
 
   const canSave = (capabilities.uptime.save ?? false) as boolean; // TODO: Determine for synthetics
-  const darkMode = theme.getTheme().darkMode;
 
   return {
     isDev,
@@ -51,7 +49,6 @@ export const getSyntheticsAppProps = (): SyntheticsAppProps => {
     i18n,
     startPlugins,
     basePath: basePath.get(),
-    darkMode,
     commonlyUsedRanges: coreStart.uiSettings.get(DEFAULT_TIMEPICKER_QUICK_RANGES),
     isApmAvailable: apm,
     isInfraAvailable: infrastructure,

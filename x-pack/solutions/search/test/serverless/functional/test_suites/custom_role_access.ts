@@ -72,8 +72,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // index management, dev tools, dashboards and maps navigation links are hidden
       await testSubjects.missingOrFail('~nav-item-id-management:index_management');
       await testSubjects.missingOrFail('~nav-item-id-dev_tools');
-      // Playground should be also hidden, probably a bug
-      // await testSubjects.missingOrFail('~nav-item-id-searchPlayground');
       await testSubjects.missingOrFail('~nav-item-id-dashboards');
       await testSubjects.missingOrFail('~nav-item-id-maps');
     });

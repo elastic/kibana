@@ -8,5 +8,8 @@
 import type { LicenseServiceContract } from './license_service';
 
 export const createMockLicenseService = (): jest.Mocked<LicenseServiceContract> => ({
+  getActionPoliciesLicenseState: jest
+    .fn()
+    .mockResolvedValue({ isValid: true, type: 'enterprise', status: 'active' }),
   assertActionPoliciesLicense: jest.fn().mockResolvedValue(undefined),
 });

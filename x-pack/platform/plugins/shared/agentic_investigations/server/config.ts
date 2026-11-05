@@ -19,10 +19,22 @@ import type { PluginConfigDescriptor } from '@kbn/core/server';
  */
 const configSchema = schema.object({
   enabled: schema.boolean({ defaultValue: false }),
+  /**
+   * Escalations are AlertZero-only for now. When `false` (Observability serverless) the plugin
+   * registers no escalations sub-feature, routes, or template UI, and the privileges probe reports
+   * no escalation privileges. A config flag rather than a feature override because
+   * `xpack.features.overrides` fails at startup when it names a feature that is not registered.
+   */
+  escalations: schema.object({
+    enabled: schema.boolean({ defaultValue: true }),
+  }),
 });
 
 export type AgenticInvestigationsConfig = TypeOf<typeof configSchema>;
 
 export const config: PluginConfigDescriptor<AgenticInvestigationsConfig> = {
   schema: configSchema,
+  exposeToBrowser: {
+    escalations: { enabled: true },
+  },
 };

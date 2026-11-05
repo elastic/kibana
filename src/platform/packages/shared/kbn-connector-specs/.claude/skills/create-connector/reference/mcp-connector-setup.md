@@ -145,10 +145,12 @@ Good descriptions make typed actions discoverable and usable by LLMs. Apply desc
 
 2. **Param-level `.describe()`**: Add `.describe()` to every Zod field in the input schema. This tells the LLM what each parameter means and what values are valid.
    ```typescript
-   const SearchInputSchema = z.object({
-     query: z.string().describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
-     type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
-   });
+   const SearchInputSchema = lazySchema(() =>
+     z.object({
+       query: z.string().max(1000).describe('GitHub search query using GitHub search syntax (e.g., "repo:elastic/kibana is:open label:bug")'),
+       type: z.enum(['repositories', 'code', 'issues', 'users']).describe('The type of GitHub content to search'),
+     })
+   );
    ```
 
 3. **`skill` property** (optional): Provide a `skill` string on the connector spec to give the LLM high-level guidance on multi-step patterns and gotchas. Use the `[...].join('\n')` pattern:
@@ -166,6 +168,19 @@ Use these utilities from `src/platform/packages/shared/kbn-connector-specs/src/l
 - `with_mcp_client.ts` — wraps a handler to automatically create and manage the MCP client
 - `create_mcp_client_from_axios.ts` — creates an MCP client from an Axios-based connector context
 - `call_tool_helpers.ts` — helpers for calling MCP tools
+
+## Vendor API Contract
+
+The vendor API contract test needs `vendor_api/` artifacts or an exemption for every connector. An
+MCP-native connector calls MCP tools, not operations of an OpenAPI spec, so add it to
+`vendor_api_exemptions.json` at the package root, in the PR that adds the connector:
+
+```json
+".my_connector": "Calls the vendor's hosted MCP server, which has no OpenAPI spec to record against"
+```
+
+If some actions also call the vendor's REST API directly, record those instead; see "Record the vendor
+API contract" in the skill.
 
 ## ID Alignment
 

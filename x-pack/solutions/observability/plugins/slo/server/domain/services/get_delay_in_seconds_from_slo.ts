@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import type { SLODefinition } from '../models';
 
 export function getDelayInSecondsFromSLO(slo: SLODefinition) {
-  const fixedInterval = timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)
-    ? slo.objective.timesliceWindow!.asSeconds()
-    : 60;
+  const fixedInterval =
+    slo.budgetingMethod === 'timeslices' ? slo.objective.timesliceWindow!.asSeconds() : 60;
   const syncDelay = slo.settings.syncDelay.asSeconds();
   const frequency = slo.settings.frequency.asSeconds();
   return fixedInterval + syncDelay + frequency;

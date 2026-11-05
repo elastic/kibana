@@ -21,7 +21,7 @@ const AND_LABEL = i18n.translate('xpack.alertingV2.actionPolicyDefinition.matche
 
 const CLAUSE_LABELS = {
   tags: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.tags', {
-    defaultMessage: 'Rule tagged with',
+    defaultMessage: 'Rule routing tags include',
   }),
   expression: i18n.translate('xpack.alertingV2.actionPolicyDefinition.matcher.expression', {
     defaultMessage: 'Matches query',

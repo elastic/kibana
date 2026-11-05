@@ -25,7 +25,7 @@ const baseActionPolicyAttrs: ActionPolicySavedObjectAttributes = {
   enabled: true,
   destinations: [{ type: 'workflow', id: 'wf-critical-route' }],
   matcher: { expression: 'alert.severity = "critical"' },
-  groupingMode: 'per_episode',
+  grouping: { mode: 'per_alert' },
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: true,
   createdBy: { profile_uid: 'elastic' },
@@ -199,7 +199,7 @@ describe('createActionPolicySmlType', () => {
           'Critical alerts → Slack',
           'Route every critical-priority alert to #oncall',
           'expression: "alert.severity = "critical""',
-          'per_episode',
+          'per_alert',
           'workflow:wf-critical-route',
         ].join('\n'),
       });
@@ -315,6 +315,20 @@ describe('createActionPolicySmlType', () => {
       expect(getActionPolicy).toHaveBeenCalledWith({ id: 'policy-1' });
       expect(result?.type).toBe(ACTION_POLICY_ATTACHMENT_TYPE);
       expect(result?.data).toEqual(expect.objectContaining({ name: baseActionPolicyAttrs.name }));
+    });
+
+    it('sets the attachment origin to the raw policy id instead of the SML origin URI', async () => {
+      getActionPolicy.mockResolvedValueOnce({
+        ...baseActionPolicyAttrs,
+        id: 'policy-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('policy-1');
     });
 
     it('returns undefined when getActionPolicy throws', async () => {

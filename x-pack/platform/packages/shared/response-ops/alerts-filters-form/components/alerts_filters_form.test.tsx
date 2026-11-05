@@ -135,7 +135,7 @@ describe('AlertsFiltersForm', () => {
     render(<TestComponent />);
 
     const filterTypeSelectors = screen.getAllByRole('button', {
-      name: `${RULE_TAGS_FILTER_LABEL} , ${FORM_ITEM_FILTER_BY_LABEL}`,
+      name: `${RULE_TAGS_FILTER_LABEL} ${FORM_ITEM_FILTER_BY_LABEL}`,
     });
     await userEvent.click(filterTypeSelectors[0]);
     await userEvent.click(screen.getByRole('option', { name: RULE_TYPES_FILTER_LABEL }));

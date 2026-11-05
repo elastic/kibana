@@ -7,11 +7,12 @@
 
 import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
+import type { License } from '@kbn/license-api-guard-plugin/server';
 
 import { DATA_SOURCE_BY_ID_ROUTE_PATH } from '../../../common';
 import { DataSourcesClient } from '../../data_sources_client';
 
-export function registerGetDataSourceRoute(router: IRouter): void {
+export function registerGetDataSourceRoute(router: IRouter, license: License): void {
   router.get(
     {
       path: DATA_SOURCE_BY_ID_ROUTE_PATH,
@@ -30,14 +31,16 @@ export function registerGetDataSourceRoute(router: IRouter): void {
         }),
       },
     },
-    router.handleLegacyErrors(async (context, request, response) => {
-      const { id } = request.params;
-      const { client } = (await context.core).elasticsearch;
-      const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
-      // ES redacts secret/credential fields before returning them here, replacing
-      // their values with "::es_redacted::", so it's safe to pass the body through as-is.
-      const body = await dataSourcesClient.get(id);
-      return response.ok({ body });
-    })
+    router.handleLegacyErrors(
+      license.guardApiRoute(async (context, request, response) => {
+        const { id } = request.params;
+        const { client } = (await context.core).elasticsearch;
+        const dataSourcesClient = new DataSourcesClient(client.asCurrentUser);
+        // ES redacts secret/credential fields before returning them here, replacing
+        // their values with "::es_redacted::", so it's safe to pass the body through as-is.
+        const body = await dataSourcesClient.get(id);
+        return response.ok({ body });
+      })
+    )
   );
 }

@@ -79,6 +79,10 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
 
   const showEcsK8sDashboardCard = hasEcsSchema && !dismissedCards?.ecs;
   const showSemconvK8sDashboardCard = hasSemconvSchema && !dismissedCards?.semconv;
+  // Match NodesOverview `showLoading`: keep promotion cards mounted while
+  // auto-reload refetches so they do not unmount and shift the waffle.
+  const showK8sDashboardPromotion =
+    (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) && (!loading || isAutoReloading);
 
   const options = {
     formatter: InfraFormatterType.percent,
@@ -177,40 +181,38 @@ export const Layout = React.memo(({ interval, nodes, loading }: Props) => {
               min-height: 0;
             `}
           >
-            {nodeType === 'pod' &&
-              (showEcsK8sDashboardCard || showSemconvK8sDashboardCard) &&
-              !loading && (
-                <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
-                  {showEcsK8sDashboardCard && (
-                    <EuiFlexItem>
-                      <KubernetesDashboardCard
-                        integrationType="ecs"
-                        onClose={() =>
-                          setDismissedCards({
-                            ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
-                            ecs: true,
-                          })
-                        }
-                        hasIntegrationInstalled={hasEcsK8sIntegration}
-                      />
-                    </EuiFlexItem>
-                  )}
-                  {showSemconvK8sDashboardCard && (
-                    <EuiFlexItem>
-                      <KubernetesDashboardCard
-                        integrationType="semconv"
-                        onClose={() =>
-                          setDismissedCards({
-                            ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
-                            semconv: true,
-                          })
-                        }
-                        hasIntegrationInstalled={hasSemconvK8sIntegration}
-                      />
-                    </EuiFlexItem>
-                  )}
-                </EuiFlexGroup>
-              )}
+            {nodeType === 'pod' && showK8sDashboardPromotion && (
+              <EuiFlexGroup css={{ flexGrow: 0 }} direction="row">
+                {showEcsK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard
+                      integrationType="ecs"
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          ecs: true,
+                        })
+                      }
+                      hasIntegrationInstalled={hasEcsK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+                {showSemconvK8sDashboardCard && (
+                  <EuiFlexItem>
+                    <KubernetesDashboardCard
+                      integrationType="semconv"
+                      onClose={() =>
+                        setDismissedCards({
+                          ...(dismissedCards ?? DEFAULT_DISMISSED_CARDS),
+                          semconv: true,
+                        })
+                      }
+                      hasIntegrationInstalled={hasSemconvK8sIntegration}
+                    />
+                  </EuiFlexItem>
+                )}
+              </EuiFlexGroup>
+            )}
             <EuiFlexItem
               grow={false}
               css={css`

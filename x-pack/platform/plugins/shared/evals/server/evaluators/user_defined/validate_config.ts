@@ -32,35 +32,63 @@ export class InvalidJudgeConfigError extends Error {
 interface TemplateVariables {
   all: string[];
   escaped: string[];
+  /** Whether the template reads `{{.}}`, Mustache's "current item", rather than a name. */
+  usesImplicitIterator: boolean;
 }
 
-/** Reads variables and records interpolations that Mustache would HTML-escape. */
+const IMPLICIT_ITERATOR = '.';
+
+/**
+ * Reads variables and records interpolations that Mustache would HTML-escape.
+ *
+ * Parses through a per-call writer, whose cache is discarded with it, because the
+ * module-level `Mustache.parse` memoizes every template it sees into a process-global
+ * cache with no eviction — and validation runs on drafts that are never stored. This
+ * only covers validation; rendering a judge still goes through Mustache's default
+ * writer inside the inference plugin.
+ */
 const getTemplateVariables = (template: string): TemplateVariables => {
   const all = new Set<string>();
   const escaped = new Set<string>();
+  let usesImplicitIterator = false;
+  const writer = new Mustache.Writer();
 
-  const collect = (tokens: unknown[]): void => {
+  const collect = (tokens: unknown[], insideSection: boolean): void => {
     for (const token of tokens) {
       if (!Array.isArray(token)) {
         continue;
       }
 
       const [type, value, , , children] = token as [string, string, ...unknown[]];
-      if (type === 'name' || type === '&' || type === '#' || type === '^') {
-        all.add(value.split('.')[0]);
-      }
-      if (type === 'name') {
-        escaped.add(value.split('.')[0]);
+      const isTag = type === 'name' || type === '&' || type === '#' || type === '^';
+
+      if (isTag && value === IMPLICIT_ITERATOR) {
+        // `.` is the value of the enclosing `#` section and refers to nothing outside one.
+        // It is not a variable name, so it must not be split on "." like the others.
+        if (!insideSection) {
+          usesImplicitIterator = true;
+        } else if (type === 'name') {
+          escaped.add(IMPLICIT_ITERATOR);
+        }
+      } else {
+        if (isTag) {
+          all.add(value.split('.')[0]);
+        }
+        if (type === 'name') {
+          escaped.add(value.split('.')[0]);
+        }
       }
 
       if (Array.isArray(children)) {
-        collect(children);
+        // Only `#` pushes its value. An inverted `^` section renders its children in the same
+        // context, so a `.` inside one is still the whole view (`[object Object]`).
+        collect(children, insideSection || type === '#');
       }
     }
   };
 
-  collect(Mustache.parse(template));
-  return { all: [...all], escaped: [...escaped] };
+  collect(writer.parse(template), false);
+  return { all: [...all], escaped: [...escaped], usesImplicitIterator };
 };
 
 const findDuplicates = (values: string[]): string[] => {
@@ -162,6 +190,12 @@ export const validateJudgeConfig = (judge: LlmJudgeConfig): void => {
         `The ${label} is not a valid template: ${
           error instanceof Error ? error.message : String(error)
         }`
+      );
+    }
+
+    if (variables.usesImplicitIterator) {
+      throw new InvalidJudgeConfigError(
+        `The ${label} uses {{.}} outside a {{#…}} section, where it refers to nothing. Reference an input by name, for example {{{agent_response}}}, or use {{.}} inside that input's section, for example {{#tool_calls}}{{{.}}}{{/tool_calls}}. An inverted {{^…}} section does not count, because it renders only when its input is empty.`
       );
     }
 

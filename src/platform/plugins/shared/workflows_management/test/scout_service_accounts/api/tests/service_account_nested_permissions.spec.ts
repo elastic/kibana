@@ -28,8 +28,11 @@ apiTest.describe(
     const { setup, teardown, getContext, cleanupWorkflows } = createServiceAccountSuite({
       testWritePermissions: true,
     });
+
     apiTest.beforeAll(setup);
+
     apiTest.afterEach(async ({ apiClient }) => cleanupWorkflows(apiClient));
+
     apiTest.afterAll(teardown);
 
     apiTest(

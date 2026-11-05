@@ -66,6 +66,7 @@ export const RootSteps = ({
       <EuiPanel
         data-test-subj="streamsAppStreamDetailEnrichmentRootSteps"
         hasShadow={false}
+        hasBorder={false}
         borderRadius="none"
         css={css`
           overflow: auto;

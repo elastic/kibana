@@ -113,8 +113,8 @@ export class WorkflowsPlugin
       category: DEFAULT_APP_CATEGORIES.management, // Only for the classic navigation
       order: 9015,
       updater$: this.appUpdater$,
-      // Deep links are refined reactively in start() from global uiSettings; at bootstrap the
-      // executions link stays off (default) and the library link on, matching getDeepLinks defaults.
+      // Deep links are refined reactively in start() from global uiSettings. At bootstrap
+      // both the executions view and the template library links are on, matching getDeepLinks defaults.
       deepLinks: getDeepLinks(),
       mount: async (params: AppMountParameters) => {
         // Load application bundle
@@ -187,10 +187,10 @@ export class WorkflowsPlugin
           .then(({ failures }) => {
             if (failures.length > 0) {
               core.notifications.toasts.addWarning({
-                title: i18n.translate('workflowsManagement.disableAll.partialFailureTitle', {
+                title: i18n.translate('workflows.disableAll.partialFailureTitle', {
                   defaultMessage: 'Some workflows could not be disabled',
                 }),
-                text: i18n.translate('workflowsManagement.disableAll.partialFailureDescription', {
+                text: i18n.translate('workflows.disableAll.partialFailureDescription', {
                   defaultMessage:
                     '{count, plural, one {# workflow could} other {# workflows could}} not be disabled and may still run.',
                   values: { count: failures.length },
@@ -201,10 +201,10 @@ export class WorkflowsPlugin
           .catch((err) => {
             this.logger.error('Failed to disable all workflows on opt-out', { error: err });
             core.notifications.toasts.addDanger({
-              title: i18n.translate('workflowsManagement.disableAll.failureTitle', {
+              title: i18n.translate('workflows.disableAll.failureTitle', {
                 defaultMessage: 'Could not disable workflows',
               }),
-              text: i18n.translate('workflowsManagement.disableAll.failureDescription', {
+              text: i18n.translate('workflows.disableAll.failureDescription', {
                 defaultMessage: 'Workflows may still run. Try again.',
               }),
             });
@@ -225,11 +225,11 @@ export class WorkflowsPlugin
     const deepLinksFlags$: Observable<DeepLinksParams> = combineLatest({
       libraryEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_LIBRARY_ENABLED_SETTING_ID,
-        false
+        true
       ),
       executionsViewEnabled: core.settings.globalClient.get$<boolean>(
         WORKFLOWS_GLOBAL_EXECUTIONS_VIEW_ENABLED_SETTING_ID,
-        false
+        true
       ),
     });
 
@@ -301,6 +301,7 @@ export class WorkflowsPlugin
 
     const additionalServices: WorkflowsPublicPluginStartAdditionalServices = {
       storage: new Storage(localStorage),
+      securityUi: depsStart.security.uiApi,
       workflowsManagement: {
         availability: this.availabilityService,
         telemetry: this.telemetryService.getClient(),

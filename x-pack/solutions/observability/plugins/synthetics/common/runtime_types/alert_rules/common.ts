@@ -7,12 +7,10 @@
 
 import type { SchemaOutput } from '../schema_output';
 import type { OverviewPing } from '../monitor_management/synthetics_overview_status';
-import {
+import type {
   SyntheticsCommonStateCodec,
   SyntheticsMonitorStatusAlertStateCodec,
-} from '../zod/alert_rules_common';
-
-export { SyntheticsCommonStateCodec, SyntheticsMonitorStatusAlertStateCodec };
+} from '../schemas/alert_rules_common';
 
 export type SyntheticsCommonState = SchemaOutput<typeof SyntheticsCommonStateCodec>;
 export type SyntheticsMonitorStatusAlertState = SchemaOutput<

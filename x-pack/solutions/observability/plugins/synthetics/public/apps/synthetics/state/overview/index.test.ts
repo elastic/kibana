@@ -6,9 +6,20 @@
  */
 
 import { monitorOverviewReducer } from '.';
-import { setOverviewPageStateAction, setOverviewViewAction } from './actions';
+import { setOverviewPageStateAction, setOverviewViewAction, trendStatsBatch } from './actions';
 
 describe('monitorOverviewReducer', () => {
+  describe('trendStatsBatch.fail', () => {
+    it('returns canceled trends to a retryable state', () => {
+      const requests = [{ configId: 'monitor-1', locationIds: ['us-east'], schedule: '3' }];
+      const loading = monitorOverviewReducer(undefined, trendStatsBatch.get(requests));
+      const canceled = monitorOverviewReducer(loading, trendStatsBatch.fail(requests));
+
+      expect(canceled.trendStats['monitor-1']).toBeNull();
+      expect(canceled.trendStats['monitor-1us-east']).toBeNull();
+    });
+  });
+
   describe('setOverviewPageStateAction (no-op suppression)', () => {
     // Why this exists:
     //

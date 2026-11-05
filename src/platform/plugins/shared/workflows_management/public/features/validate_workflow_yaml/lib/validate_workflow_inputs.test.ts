@@ -124,6 +124,7 @@ describe('validateWorkflowInputs', () => {
             stepId: 'my-step',
             stepType: 'slack',
             stepYamlNode: {} as any,
+            path: ['steps', 0],
             lineStart: 1,
             lineEnd: 5,
             propInfos: {},

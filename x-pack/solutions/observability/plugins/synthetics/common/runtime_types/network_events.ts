@@ -10,10 +10,8 @@ import type {
   NetworkTimingsType,
   CertificateDataType,
   NetworkEventType,
-} from './zod/network_events';
-import { SyntheticsNetworkEventsApiResponseType } from './zod/network_events';
-
-export { SyntheticsNetworkEventsApiResponseType };
+} from './schemas/network_events';
+import type { SyntheticsNetworkEventsApiResponseType } from './schemas/network_events';
 
 export type NetworkTimings = SchemaOutput<typeof NetworkTimingsType>;
 export type CertificateData = SchemaOutput<typeof CertificateDataType>;

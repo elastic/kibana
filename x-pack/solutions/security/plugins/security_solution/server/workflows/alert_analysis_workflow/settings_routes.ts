@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { Logger, StartServicesAccessor } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
@@ -20,6 +20,7 @@ import {
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_ENABLED,
   SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX,
+  SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT,
 } from '@kbn/management-settings-ids';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import {
@@ -49,22 +50,25 @@ const LICENSE_ERROR_MESSAGE = i18n.translate(
   { defaultMessage: 'Your license does not support this feature.' }
 );
 
-// `workflowEnabled` and `createConversation` are required (not optional): the settings UI always
+// `workflowEnabled`, `createConversation` and `usePrompt` are required (not optional): the settings UI always
 // sends the full object, and defaulting a missing field to `true` would let a partial body silently
 // re-enable the workflow or conversation creation. `connectorId` stays optional because an empty
 // connector is a valid, explicit state (the workflow no-ops at run time when it is empty).
-const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = AlertAnalysisWorkflowSettings.extend({
-  connectorId: z.string().optional(),
-  workflowEnabled: z.boolean(),
-  createConversation: z.boolean(),
-})
-  // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
-  // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
-  // UI would let the user save an out-of-range pair while the server rejected it with a 400.
-  .refine(
-    (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
-    THRESHOLD_RANGE_REFINEMENT
-  );
+const AlertAnalysisWorkflowSettingsWithConnectorRequestBody = lazySchema(() =>
+  AlertAnalysisWorkflowSettings.extend({
+    connectorId: z.string().optional(),
+    workflowEnabled: z.boolean(),
+    createConversation: z.boolean(),
+    usePrompt: z.boolean(),
+  })
+    // The threshold range only applies to auto-close, so mirror the client (`index.tsx`
+    // `isThresholdRangeInvalid`) and only enforce min < max when auto-close is enabled. Otherwise the
+    // UI would let the user save an out-of-range pair while the server rejected it with a 400.
+    .refine(
+      (settings) => !settings.autoCloseEnabled || isThresholdRangeValid(settings),
+      THRESHOLD_RANGE_REFINEMENT
+    )
+);
 
 type AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType = z.infer<
   typeof AlertAnalysisWorkflowSettingsWithConnectorRequestBody
@@ -78,6 +82,7 @@ const toWorkflowSettings = ({
   agentId,
   workflowEnabled,
   createConversation,
+  usePrompt,
   tagPrefix,
 }: AlertAnalysisWorkflowSettingsWithConnectorRequestBodyType): SecurityAlertAnalysisWorkflowSettings => ({
   autoCloseEnabled,
@@ -87,6 +92,7 @@ const toWorkflowSettings = ({
   agentId,
   workflowEnabled,
   createConversation,
+  usePrompt,
   tagPrefix,
 });
 
@@ -208,6 +214,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
                 workflowEnabled: settings.workflowEnabled,
                 autoCloseEnabled: settings.autoCloseEnabled,
                 createConversation: settings.createConversation,
+                usePrompt: settings.usePrompt,
                 connectorConfigured: Boolean(settings.connectorId),
                 // Report only whether a non-default (custom) agent is used, never the agent id.
                 customAgent: settings.agentId !== agentBuilderDefaultAgentId,
@@ -242,6 +249,7 @@ export const registerAlertAnalysisWorkflowSettingsRoutes = (
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_AGENT_ID]: settings.agentId,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_CREATE_CONVERSATION]:
               settings.createConversation,
+            [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_USE_PROMPT]: settings.usePrompt,
             [SECURITY_SOLUTION_ALERT_ANALYSIS_WORKFLOW_TAG_PREFIX]: settings.tagPrefix,
           });
 

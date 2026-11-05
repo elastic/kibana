@@ -23,6 +23,13 @@ export type StringOptions = TypeOptions<string> & {
 
 export class StringType extends Type<string> {
   constructor(options: StringOptions = {}) {
+    options = { ...options };
+    super(() => StringType.createSchema(options), options);
+  }
+
+  // Keep the inline custom validators at this nesting depth: their compiled source text
+  // is hashed into Saved Object model version snapshots by `kbn-check-saved-objects-cli`.
+  private static createSchema(options: StringOptions) {
     // We want to allow empty strings, however calling `allow('')` causes
     // Joi to allow the value and skip any additional validation.
     // Instead, we reimplement the string validator manually except in the
@@ -67,7 +74,7 @@ export class StringType extends Type<string> {
     }
 
     schema.type = 'string';
-    super(schema, options);
+    return schema;
   }
 
   protected handleError(type: string, { limit, value }: Record<string, any>) {

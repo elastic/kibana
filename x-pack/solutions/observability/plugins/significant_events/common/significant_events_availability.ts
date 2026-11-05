@@ -16,7 +16,6 @@
 export const SIGNIFICANT_EVENTS_REQUIRED_PLUGINS = [
   'workflowsExtensions',
   'workflowsManagement',
-  'searchInferenceEndpoints',
   'agentBuilder',
 ] as const;
 

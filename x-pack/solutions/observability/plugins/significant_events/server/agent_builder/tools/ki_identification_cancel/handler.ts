@@ -10,26 +10,30 @@ import { SignificantEventsWorkflowStatus } from '@kbn/significant-events-schema'
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
 
 interface CancelKiIdentificationHandlerParams {
-  streamName: string;
+  sourceId: string;
+  sourceSlug: string;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   request: KibanaRequest;
 }
 
 interface CancelKiIdentificationHandlerResult {
-  stream_name: string;
   execution_id: string | null;
   status: SignificantEventsWorkflowStatus.Canceled;
 }
 
 export async function cancelKiIdentificationToolHandler({
-  streamName,
+  sourceId,
+  sourceSlug,
   streamsKIsOnboardingClient,
   request,
 }: CancelKiIdentificationHandlerParams): Promise<CancelKiIdentificationHandlerResult> {
-  const executionId = await streamsKIsOnboardingClient.cancel({ streamName, request });
+  const executionId = await streamsKIsOnboardingClient.cancel({
+    sourceId,
+    sourceSlug,
+    request,
+  });
 
   return {
-    stream_name: streamName,
     execution_id: executionId,
     status: SignificantEventsWorkflowStatus.Canceled,
   };

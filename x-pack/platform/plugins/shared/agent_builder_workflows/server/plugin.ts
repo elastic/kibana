@@ -73,10 +73,10 @@ export class AgentBuilderWorkflowsPlugin
     registerGetTriggerDefinitionsTool(agentBuilder, api);
     registerGetConnectorsTool(agentBuilder, api);
     registerGetExamplesTool(agentBuilder);
-    registerWorkflowExecuteStepTool(agentBuilder, api);
+    registerWorkflowExecuteStepTool(agentBuilder, api, getSecurity);
 
     // Workflow attachment types
-    registerWorkflowYamlAttachment(agentBuilder, api);
+    registerWorkflowYamlAttachment(agentBuilder, api, getSecurity);
     registerWorkflowYamlDiffAttachment(agentBuilder);
 
     // Workflow authoring skill
@@ -88,7 +88,7 @@ export class AgentBuilderWorkflowsPlugin
     // Platform-level workflow execution tools
     const platformTools: Array<BuiltinToolDefinition<any>> = [
       getWorkflowExecutionStatusTool({ workflowsManagement, getSecurity }),
-      resumeWorkflowExecutionTool({ workflowsManagement }),
+      resumeWorkflowExecutionTool({ workflowsManagement, getSecurity }),
       listWorkflowExecutionsTool({ workflowsManagement, getSecurity }),
       generateWorkflowTool({ workflowsManagement, aiTelemetryClient }),
       executeWorkflowTool({ workflowsManagement, getSecurity }),

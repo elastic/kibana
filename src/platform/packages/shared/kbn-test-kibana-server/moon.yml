@@ -19,6 +19,7 @@ project:
 dependsOn:
   - '@kbn/dev-cli-errors'
   - '@kbn/dev-proc-runner'
+  - '@kbn/es'
   - '@kbn/repo-info'
   - '@kbn/repo-packages'
 tags:
@@ -32,6 +33,4 @@ fileGroups:
   src:
     - '**/*.ts'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

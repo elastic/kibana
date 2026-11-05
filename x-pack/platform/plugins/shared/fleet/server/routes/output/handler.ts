@@ -135,7 +135,7 @@ export const deleteOutputHandler: RequestHandler<
   TypeOf<typeof DeleteOutputRequestSchema.params>
 > = async (context, request, response) => {
   try {
-    await outputService.delete(request.params.outputId);
+    await outputService.delete(request.params.outputId, { request });
 
     const body: DeleteOutputResponse = {
       id: request.params.outputId,

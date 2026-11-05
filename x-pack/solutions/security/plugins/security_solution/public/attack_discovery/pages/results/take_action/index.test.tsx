@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 
@@ -47,6 +48,13 @@ const mockUseAgentBuilderAvailability = jest.mocked(useAgentBuilderAvailability)
 
 jest.mock('../../../../common/lib/kibana', () => ({
   useKibana: jest.fn(),
+  useToasts: jest.fn(() => ({
+    addError: jest.fn(),
+    addInfo: jest.fn(),
+    addSuccess: jest.fn(),
+    addWarning: jest.fn(),
+    remove: jest.fn(),
+  })),
 }));
 
 jest.mock('../../use_attack_discovery_bulk', () => ({
@@ -88,6 +96,14 @@ const mockUseAlertsPrivileges = useAlertsPrivileges as jest.Mock;
 jest.mock('../use_attack_discovery_attachment', () => ({
   useAttackDiscoveryAttachment: jest.fn(() => jest.fn()),
 }));
+
+jest.mock('../../../../cases/attachments/attack/hooks/use_attack_case_attachments', () => ({
+  useAttackCaseAttachments: jest.fn(() => undefined),
+}));
+
+const mockUseAttackCaseAttachments = jest.requireMock(
+  '../../../../cases/attachments/attack/hooks/use_attack_case_attachments'
+).useAttackCaseAttachments as jest.Mock;
 
 jest.mock('../../../../agent_builder/hooks/use_report_add_to_chat', () => ({
   useReportAddToChat: jest.fn(() => jest.fn()),
@@ -203,13 +219,33 @@ describe('TakeAction', () => {
 
     render(
       <TestProviders>
-        <TakeAction {...defaultProps} />
+        <TakeAction {...defaultProps} attackDiscoveries={[getMockAttackDiscoveryAlerts()[0]]} />
       </TestProviders>
     );
 
     openPopover();
 
     expect(screen.getByTestId('viewInAgentBuilder')).toBeDisabled();
+  });
+
+  // Only a persisted discovery can be attached, so a no-op action is not offered.
+  it('does not render the Add to chat action for a discovery that is not persisted', () => {
+    mockUseAgentBuilderAvailability.mockReturnValue({
+      isAgentBuilderEnabled: true,
+      hasAgentBuilderPrivilege: true,
+      isAgentChatExperienceEnabled: true,
+      hasValidAgentBuilderLicense: true,
+    });
+
+    render(
+      <TestProviders>
+        <TakeAction {...defaultProps} />
+      </TestProviders>
+    );
+
+    openPopover();
+
+    expect(screen.queryByTestId('viewInAgentBuilder')).not.toBeInTheDocument();
   });
 
   it('does NOT render View in AI Assistant when multiple discoveries are selected', () => {
@@ -501,6 +537,8 @@ describe('TakeAction', () => {
         disabled: false,
         onAddToCase: mockOnAddToCase,
       });
+
+      mockUseAttackCaseAttachments.mockReturnValue(undefined);
     });
 
     it('calls onAddToCase when clicking add to case', async () => {
@@ -522,6 +560,120 @@ describe('TakeAction', () => {
       });
     });
 
+    it('posts the attack attachment when a single persisted attack can be attached', async () => {
+      const getAttachments = jest.fn(() => []);
+      mockUseAttackCaseAttachments.mockReturnValue({ getAttachments, onAttached: jest.fn() });
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            attackDiscoveries={[{ ...getMockAttackDiscoveryAlerts()[0], index: '.alerts-index' }]}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+
+      await waitFor(() => {
+        expect(mockOnAddToCase).toHaveBeenCalledWith({ getAttachments });
+      });
+    });
+
+    it('builds the attack to attach from the persisted attack', () => {
+      const attack = { ...getMockAttackDiscoveryAlerts()[0], index: '.alerts-index' };
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[attack]} />
+        </TestProviders>
+      );
+
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith([
+        expect.objectContaining({
+          id: attack.id,
+          index: '.alerts-index',
+          title: attack.title,
+          alertIds: attack.alertIds,
+          summaryMarkdown: attack.summaryMarkdown,
+          detailsMarkdown: attack.detailsMarkdown,
+          entitySummaryMarkdown: attack.entitySummaryMarkdown,
+          mitreAttackTactics: attack.mitreAttackTactics,
+          timestamp: attack.timestamp,
+          riskScore: attack.riskScore,
+        }),
+      ]);
+    });
+
+    it('has no attack to attach when the attack is missing the index it came from', () => {
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={[getMockAttackDiscoveryAlerts()[0]]} />
+        </TestProviders>
+      );
+
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(undefined);
+    });
+
+    it('attaches every attack when multiple persisted attacks are selected', () => {
+      const attacks = getMockAttackDiscoveryAlerts().map((attack) => ({
+        ...attack,
+        index: '.alerts-index',
+      }));
+
+      render(
+        <TestProviders>
+          <TakeAction {...defaultProps} attackDiscoveries={attacks} />
+        </TestProviders>
+      );
+
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(
+        attacks.map(({ id }) => expect.objectContaining({ id, index: '.alerts-index' }))
+      );
+    });
+
+    it('posts the attack attachments when multiple persisted attacks are selected', async () => {
+      const getAttachments = jest.fn(() => []);
+      mockUseAttackCaseAttachments.mockReturnValue({ getAttachments, onAttached: jest.fn() });
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            attackDiscoveries={getMockAttackDiscoveryAlerts().map((attack) => ({
+              ...attack,
+              index: '.alerts-index',
+            }))}
+          />
+        </TestProviders>
+      );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+
+      await waitFor(() => {
+        expect(mockOnAddToCase).toHaveBeenCalledWith({ getAttachments });
+      });
+    });
+
+    it('falls back to the markdown payload when only some of the selection is attachable', () => {
+      const [first, ...rest] = getMockAttackDiscoveryAlerts();
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            // A selection cannot be split across both payloads, so one attack without an index
+            // sends the whole selection down the markdown-comment path.
+            attackDiscoveries={[{ ...first, index: '.alerts-index' }, ...rest]}
+          />
+        </TestProviders>
+      );
+
+      expect(mockUseAttackCaseAttachments).toHaveBeenCalledWith(undefined);
+    });
+
     it('refreshes attack discoveries after adding to a case', () => {
       const refetchFindAttackDiscoveries = jest.fn();
 
@@ -535,11 +687,40 @@ describe('TakeAction', () => {
       );
 
       const { useAddToCase } = jest.requireMock('./use_add_to_case');
-      expect(useAddToCase).toHaveBeenCalledWith(
-        expect.objectContaining({
-          onSuccess: refetchFindAttackDiscoveries,
-        })
+      const { onSuccess } = useAddToCase.mock.lastCall[0];
+      onSuccess({ id: 'case-1' } as CaseUI, false);
+
+      expect(refetchFindAttackDiscoveries).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports what did not fit once the attacks are attached, not before', async () => {
+      const onAttached = jest.fn();
+      mockUseAttackCaseAttachments.mockReturnValue({
+        getAttachments: jest.fn(() => []),
+        onAttached,
+      });
+
+      render(
+        <TestProviders>
+          <TakeAction
+            {...defaultProps}
+            attackDiscoveries={[{ ...getMockAttackDiscoveryAlerts()[0], index: '.alerts-index' }]}
+          />
+        </TestProviders>
       );
+
+      openPopover();
+      fireEvent.click(screen.getByTestId('addToCase'));
+      await waitFor(() => expect(mockOnAddToCase).toHaveBeenCalled());
+      expect(onAttached).not.toHaveBeenCalled();
+
+      const { useAddToCase } = jest.requireMock('./use_add_to_case');
+      const { onSuccess } = useAddToCase.mock.lastCall[0];
+      const theCase = { id: 'case-1', totalAlerts: 3 } as CaseUI;
+      onSuccess(theCase, false);
+
+      expect(onAttached).toHaveBeenCalledTimes(1);
+      expect(onAttached).toHaveBeenCalledWith(theCase);
     });
   });
 

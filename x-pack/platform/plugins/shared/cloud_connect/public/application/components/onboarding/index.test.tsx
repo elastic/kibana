@@ -15,9 +15,9 @@ import type { CloudConnectedAppContextValue } from '../../app_context';
 
 jest.mock('../../app_context');
 jest.mock('@elastic/eui-illustrations', () => ({
-  arrowDeployCloud: {
-    id: 'arrow-deploy-cloud',
-    title: 'Arrow deploy cloud',
+  api: {
+    id: 'api',
+    title: 'API',
     light: '<svg></svg>',
     dark: '<svg></svg>',
   },

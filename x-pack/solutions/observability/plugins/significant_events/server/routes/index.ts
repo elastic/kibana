@@ -7,6 +7,8 @@
 
 import { internalAvailabilityRoutes } from './internal/availability/route';
 import { internalSlackAppRoutes } from './internal/apps/slack/route';
+import { internalDetectionOverviewRoutes } from './internal/detection_overview/route';
+import { internalDetectionEntitiesRoutes } from './internal/detection_entities/route';
 import { internalDetectionsRoutes } from './internal/detections/route';
 import { internalDetectionsWorkflowRoutes } from './internal/detections/workflow_route';
 import { internalDiscoveryRoutes } from './internal/discovery/route';
@@ -19,18 +21,20 @@ import { internalKIKeepAliveRoutes } from './internal/knowledge_indicators/keep_
 import { internalKIOnboardingRoutes } from './internal/knowledge_indicators/onboarding/route';
 import { internalKIQueriesRoutes } from './internal/knowledge_indicators/queries/route';
 import { internalKIQueryOccurrencesRoutes } from './internal/knowledge_indicators/query_occurrences/route';
-import { internalKIResetKisRoutes } from './internal/knowledge_indicators/reset_kis/route';
 import { internalMaintenanceRoutes } from './internal/maintenance/route';
 import { internalRunQuotaRoutes } from './internal/run_quotas/route';
 import { internalCostRoutes } from './internal/cost/route';
 import { reconcileRoutes } from './internal/knowledge_indicators/reconcile_route';
 import { syncRoutes } from './internal/knowledge_indicators/sync_route';
 import { internalScheduledDiscoveryRoutes } from './internal/scheduled_discovery/route';
+import { internalTopologyRoutes } from './internal/topology/route';
 
 export const significantEventsRouteRepository = {
   // internal APIs
   ...internalAvailabilityRoutes,
   ...internalSlackAppRoutes,
+  ...internalDetectionOverviewRoutes,
+  ...internalDetectionEntitiesRoutes,
   ...internalDetectionsRoutes,
   ...internalDetectionsWorkflowRoutes,
   ...internalDiscoveryRoutes,
@@ -43,13 +47,13 @@ export const significantEventsRouteRepository = {
   ...internalKIOnboardingRoutes,
   ...internalKIQueriesRoutes,
   ...internalKIQueryOccurrencesRoutes,
-  ...internalKIResetKisRoutes,
   ...internalMaintenanceRoutes,
   ...internalRunQuotaRoutes,
   ...internalCostRoutes,
   ...reconcileRoutes,
   ...syncRoutes,
   ...internalScheduledDiscoveryRoutes,
+  ...internalTopologyRoutes,
 };
 
 export type SignificantEventsRouteRepository = typeof significantEventsRouteRepository;

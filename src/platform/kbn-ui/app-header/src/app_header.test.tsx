@@ -63,6 +63,14 @@ describe('AppHeaderView', () => {
     expect(onClick.mock.calls[0][0].triggerElement).toBeUndefined();
   });
 
+  it('shows the share action with a custom label', () => {
+    render(
+      <AppHeaderView title="Workflow" share={{ label: 'Access control', onClick: jest.fn() }} />
+    );
+
+    expect(screen.getByRole('button', { name: 'Access control' })).toBeVisible();
+  });
+
   it('does not derive a title share action from a menu share item', async () => {
     const runShare = jest.fn();
 
@@ -436,16 +444,13 @@ describe('AppHeaderView', () => {
     expect(screen.getByRole('heading', { level: 1 }).className).toMatch(/euiTitle-xs/);
   });
 
-  it('uses a larger no-back title offset in compact spacing', () => {
+  it('applies the no-back title offset only in compact spacing', () => {
     const { result } = renderHook(() => useEuiTheme());
     const { rerender } = render(<AppHeaderView title="Dashboard" sticky={false} />);
 
     const titleOffsetBox = () => screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title).closest('div');
 
-    expect(titleOffsetBox()).toHaveStyleRule(
-      'padding-inline-start',
-      result.current.euiTheme.size.xs
-    );
+    expect(titleOffsetBox()).not.toHaveStyleRule('padding-inline-start', expect.any(String));
 
     rerender(<AppHeaderView title="Dashboard" sticky={false} spacing="compact" />);
     expect(titleOffsetBox()).toHaveStyleRule(

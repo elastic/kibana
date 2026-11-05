@@ -21,6 +21,12 @@ import * as AlertFlyoutComponentModule from './rule_flyout_component';
 import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 
+// Cold-loading the real flyout chunk would be charged to whichever test runs first; the real
+// `getRuleFlyoutComponent` is covered by `rule_flyout_component.test.tsx` with this same mock.
+jest.mock('@kbn/response-ops-rule-form/flyout', () => ({ RuleForm: () => null }));
+
+let mockFlyoutContent: Promise<JSX.Element | null | void> | undefined;
+
 // mock lazy flyout component
 jest.mock('@kbn/presentation-util', () => ({
   openLazyFlyout: ({
@@ -32,7 +38,8 @@ jest.mock('@kbn/presentation-util', () => ({
       closeFlyout: () => void;
     }) => Promise<JSX.Element | null | void>;
   }) => {
-    return loadContent({ closeFlyout: jest.fn() });
+    mockFlyoutContent = loadContent({ closeFlyout: jest.fn() });
+    return mockFlyoutContent;
   },
 }));
 
@@ -101,19 +108,19 @@ describe('AlertRuleFromVisAction', () => {
     startDependenciesMock
   );
 
-  // `execute` opens the flyout without awaiting its lazily-imported content, so flush pending
-  // async work after each call to ensure `getRuleFlyoutComponent` has been called before we read it.
+  // `execute` opens the flyout without awaiting its content, so await it before reading the spy.
   const executeAndFlush = async (context: Parameters<typeof action.execute>[0]) => {
     await act(async () => {
       await action.execute(context);
+      await mockFlyoutContent;
     });
-    await act(() => new Promise((resolve) => setTimeout(resolve, 0)));
   };
 
   const getCreateAlertRuleLastCalledInitialValues = () => last(spy.mock.calls ?? [])?.[5];
 
   beforeEach(() => {
     spy.mockClear();
+    mockFlyoutContent = undefined;
   });
 
   afterAll(() => {

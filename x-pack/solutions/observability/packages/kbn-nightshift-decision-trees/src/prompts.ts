@@ -91,7 +91,6 @@ export const buildReinforcementSystemPrompt = (tools: DecisionTreePromptTools): 
     dropped_node_percent: droppedNodePercent,
     retained_size_percent: retainedSizePercent,
     merge_discipline: DECISION_TREE_MERGE_DISCIPLINE,
-    abstraction_rules: DECISION_TREE_ABSTRACTION_RULES,
     format_guide: DECISION_TREE_FORMAT_GUIDE,
   }).trimEnd();
 };

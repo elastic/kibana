@@ -86,6 +86,9 @@ describe('AgentBulkActions', () => {
         isServerlessEnabled,
       },
       reporting: {},
+      featureFlags: {
+        useBooleanValue: jest.fn().mockReturnValue(true),
+      },
     });
   };
 
@@ -191,6 +194,24 @@ describe('AgentBulkActions', () => {
         results.getByText('Request diagnostics for 2 agents').closest('button')!
       ).toBeEnabled();
       expect(results.getByText('Migrate 2 agents').closest('button')!).toBeEnabled();
+    });
+
+    it('should show restart agents item as top-level action', async () => {
+      mockedUseLicence.mockReturnValue({
+        hasAtLeast: (licenseType: string) => licenseType === 'enterprise',
+      } as unknown as LicenseService);
+
+      const results = render({
+        ...defaultProps,
+        selectedAgents: [{ id: 'agent1' }, { id: 'agent2' }] as Agent[],
+      });
+
+      const bulkActionsButton = results.getByTestId('agentBulkActionsButton');
+      await act(async () => {
+        fireEvent.click(bulkActionsButton);
+      });
+
+      expect(results.getByText('Restart 2 agents').closest('button')!).toBeEnabled();
     });
 
     it('should show security and removal submenu items', async () => {

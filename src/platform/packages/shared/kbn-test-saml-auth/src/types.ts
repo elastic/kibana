@@ -28,6 +28,17 @@ export interface LocalSamlSessionParams {
   log: ToolingLog;
 }
 
+export interface CustomRealmSamlSessionParams {
+  providerName: string;
+  kbnHost: string;
+  kbnVersion: string;
+  email: string;
+  username: string;
+  fullname: string;
+  role: string;
+  log: ToolingLog;
+}
+
 export interface CreateSamlSessionParams {
   hostname: string;
   email: string;

@@ -92,7 +92,7 @@ export const Zoom: ConnectorSpec = {
   metadata: {
     id: '.zoom',
     displayName: 'Zoom',
-    description: i18n.translate('core.kibanaConnectorSpecs.zoom.metadata.description', {
+    description: i18n.translate('connectorSpecs.zoom.metadata.description', {
       defaultMessage: 'Access meetings, recordings, transcripts, and participants in Zoom',
     }),
     minimumLicense: 'enterprise',
@@ -362,6 +362,13 @@ export const Zoom: ConnectorSpec = {
       handler: async (ctx, input) => {
         const typedInput: ZoomDownloadRecordingFileInput =
           ZoomDownloadRecordingFileInputSchema.parse(input);
+        const { protocol, hostname } = new URL(typedInput.downloadUrl);
+        // ctx.client sends the Zoom bearer token, so it may only go to Zoom's own hosts.
+        if (protocol !== 'https:' || (hostname !== 'zoom.us' && !hostname.endsWith('.zoom.us'))) {
+          throw new Error(
+            `downloadRecordingFile only downloads from https://zoom.us, not ${protocol}//${hostname}. Use the download_url returned by getMeetingRecordings or listUserRecordings.`
+          );
+        }
         const sanitizedUrl = typedInput.downloadUrl.split('?')[0];
         ctx.log.debug(`Zoom downloading recording file from ${sanitizedUrl}`);
 
@@ -461,7 +468,7 @@ export const Zoom: ConnectorSpec = {
   ].join('\n'),
 
   test: {
-    description: i18n.translate('core.kibanaConnectorSpecs.zoom.test.description', {
+    description: i18n.translate('connectorSpecs.zoom.test.description', {
       defaultMessage: 'Verifies Zoom connection by checking API access',
     }),
     handler: async (ctx) => {

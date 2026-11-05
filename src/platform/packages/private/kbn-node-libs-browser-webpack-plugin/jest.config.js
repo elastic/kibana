@@ -8,7 +8,7 @@
  */
 
 module.exports = {
-  preset: '@kbn/test/jest_node',
+  preset: '@kbn/jest/jest_node',
   rootDir: '../../../../..',
   roots: ['<rootDir>/src/platform/packages/private/kbn-node-libs-browser-webpack-plugin'],
 };

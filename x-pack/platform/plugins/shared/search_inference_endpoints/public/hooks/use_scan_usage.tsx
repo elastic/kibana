@@ -21,7 +21,9 @@ export const useScanUsage = ({ type, id }: ScanUsageProps) => {
     queryKey: ['inference-endpoint-scan-usage', type, id],
     queryFn: () =>
       services.http.delete<InferenceUsageResponse>(
-        `/internal/inference_endpoint/endpoints/${type}/${id}`,
+        `/internal/inference_endpoint/endpoints/${encodeURIComponent(type)}/${encodeURIComponent(
+          id
+        )}`,
         {
           query: {
             scanUsage: true,

@@ -9,6 +9,8 @@ import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { AlertingRetryService } from './alerting_retry_service';
+import { EsConcurrentModificationError } from './es_concurrent_modification_error';
+import { EsUnacknowledgedError } from './es_unacknowledged_error';
 
 describe('AlertingRetryService', () => {
   const logger = loggingSystemMock.createLogger();
@@ -43,6 +45,55 @@ describe('AlertingRetryService', () => {
     const callback = jest
       .fn<Promise<string>, []>()
       .mockRejectedValueOnce(new errors.ResponseError({ statusCode: 503 } as DiagnosticResult))
+      .mockResolvedValueOnce('ok');
+
+    const promise = service.retry(callback);
+    const assertion = expect(promise).resolves.toBe('ok');
+    await flushTimers();
+    await assertion;
+
+    expect(callback).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries ES connection errors and eventually succeeds', async () => {
+    const service = new AlertingRetryService(logger);
+
+    const callback = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(new errors.ConnectionError('ECONNREFUSED', {} as DiagnosticResult))
+      .mockRejectedValueOnce(new errors.TimeoutError('timeout', {} as DiagnosticResult))
+      .mockResolvedValueOnce('ok');
+
+    const promise = service.retry(callback);
+    const assertion = expect(promise).resolves.toBe('ok');
+    await flushTimers(4_000);
+    await assertion;
+
+    expect(callback).toHaveBeenCalledTimes(3);
+  });
+
+  it('retries unacknowledged cluster-state mutations and eventually succeeds', async () => {
+    const service = new AlertingRetryService(logger);
+
+    const callback = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(new EsUnacknowledgedError('put pipeline'))
+      .mockResolvedValueOnce('ok');
+
+    const promise = service.retry(callback);
+    const assertion = expect(promise).resolves.toBe('ok');
+    await flushTimers();
+    await assertion;
+
+    expect(callback).toHaveBeenCalledTimes(2);
+  });
+
+  it('retries concurrent resource modifications and eventually succeeds', async () => {
+    const service = new AlertingRetryService(logger);
+
+    const callback = jest
+      .fn<Promise<string>, []>()
+      .mockRejectedValueOnce(new EsConcurrentModificationError('data stream deleted'))
       .mockResolvedValueOnce('ok');
 
     const promise = service.retry(callback);

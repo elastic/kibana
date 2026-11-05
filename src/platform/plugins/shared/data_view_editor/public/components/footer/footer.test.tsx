@@ -23,6 +23,7 @@ const props = {
   canSave: true,
   isManaged: false,
   isDuplicating: false,
+  hasCustomId: false,
 };
 
 const SAVE_AS_AD_HOC_BUTTON_TEST_ID = 'exploreIndexPatternButton';
@@ -60,6 +61,18 @@ describe('Footer', () => {
 
       fireEvent.click(getByTestId(SAVE_AS_AD_HOC_BUTTON_TEST_ID));
       expect(onSubmit).toHaveBeenCalledWith(true);
+    });
+
+    it('disables Use without saving when a custom id is set', () => {
+      const { getByTestId } = render(
+        <Footer {...props} hasEditData={false} allowAdHoc={true} hasCustomId={true} />
+      );
+
+      expect(getByTestId(SAVE_AS_AD_HOC_BUTTON_TEST_ID)).toBeDisabled();
+      expect(getByTestId(SAVE_AS_PERSISTED_BUTTON_TEST_ID)).toBeEnabled();
+
+      fireEvent.click(getByTestId(SAVE_AS_AD_HOC_BUTTON_TEST_ID));
+      expect(onSubmit).not.toHaveBeenCalled();
     });
 
     it('does not render any save buttons when canSave is false', () => {

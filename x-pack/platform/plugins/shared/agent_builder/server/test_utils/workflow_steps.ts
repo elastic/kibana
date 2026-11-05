@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import type { AttachmentPublicClient } from '@kbn/agent-builder-server';
+import type { AgentExecutionService } from '@kbn/agent-builder-server/execution';
 import type { ConversationClient } from '../services/conversation';
 import type { AgentRegistry } from '../services/agents';
 
@@ -54,6 +55,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet: jest.Mock;
     list: jest.Mock;
     search: jest.Mock;
+    addAccessControlEntries: jest.Mock;
+    removeAccessControlEntries: jest.Mock;
     patchMetadata: jest.Mock;
     create: jest.Mock;
     exists: jest.Mock;
@@ -64,6 +67,10 @@ export const createWorkflowStepConversationClientMock = (
   const bulkGet = overrides.bulkGet ?? jest.fn().mockResolvedValue(new Map());
   const list = overrides.list ?? jest.fn();
   const search = overrides.search ?? jest.fn();
+  const addAccessControlEntries =
+    overrides.addAccessControlEntries ?? jest.fn().mockResolvedValue({});
+  const removeAccessControlEntries =
+    overrides.removeAccessControlEntries ?? jest.fn().mockResolvedValue({});
   const patchMetadata = overrides.patchMetadata ?? jest.fn();
   const create = overrides.create ?? jest.fn();
   const exists = overrides.exists ?? jest.fn().mockResolvedValue(false);
@@ -73,6 +80,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    addAccessControlEntries,
+    removeAccessControlEntries,
     patchMetadata,
     create,
     exists,
@@ -84,6 +93,8 @@ export const createWorkflowStepConversationClientMock = (
     bulkGet,
     list,
     search,
+    addAccessControlEntries,
+    removeAccessControlEntries,
     patchMetadata,
     create,
     exists,
@@ -101,6 +112,17 @@ export const createWorkflowStepAgentRegistryMock = (
   } as unknown as AgentRegistry);
 
   return { get, getAgentRegistry };
+};
+
+export const createWorkflowStepExecutionServiceMock = (
+  overrides: Partial<{ maybeExecuteAgent: jest.Mock }> = {}
+) => {
+  const maybeExecuteAgent = overrides.maybeExecuteAgent ?? jest.fn();
+  const getExecutionService = jest.fn().mockReturnValue({
+    maybeExecuteAgent,
+  } as unknown as AgentExecutionService);
+
+  return { maybeExecuteAgent, getExecutionService };
 };
 
 export const createWorkflowStepAttachmentClientMock = (

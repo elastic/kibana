@@ -6,7 +6,7 @@
  */
 
 import type { ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { get, keyBy } from 'lodash';
+import { cloneDeep, get, keyBy } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type {
@@ -279,6 +279,32 @@ export async function extractAndWriteSOSecrets<T>(opts: {
   };
 }
 
+/** A secret an update removes, with the path of the reference to it in the object. */
+export interface DeletedSOSecret extends SecretReference {
+  path: string;
+}
+
+/**
+ * The saved object update merges objects: deleting a secret leaves the object pointing at a secret
+ * that no longer exists, unless the reference is explicitly set to `null`. Returns the object with
+ * a `null` at the path of every deleted secret, but those the update replaces with a new one.
+ */
+export function withClearedSecretReferences<T>(
+  soObject: Partial<T>,
+  secretsToDelete: DeletedSOSecret[]
+): Partial<T> {
+  const removed = secretsToDelete.filter(({ path }) => get(soObject, path) === undefined);
+
+  if (!removed.length) {
+    return soObject;
+  }
+
+  const result = cloneDeep(soObject);
+  removed.forEach(({ path }) => set(result, path, null));
+
+  return result;
+}
+
 /**
  * Takes a generic object T to update and its old and new secret paths
  * Updates secrets and returns the references
@@ -292,7 +318,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
 }): Promise<{
   updatedSoObject: Partial<T>;
   secretReferences: SecretReference[];
-  secretsToDelete: SecretReference[];
+  secretsToDelete: DeletedSOSecret[];
 }> {
   const { updatedSoObject, oldSecretPaths, updatedSecretPaths, esClient, secretHashes } = opts;
 
@@ -343,6 +369,7 @@ export async function extractAndUpdateSOSecrets<T>(opts: {
     secretReferences,
     secretsToDelete: toDelete.map((secretPath) => ({
       id: (secretPath.value as { id: string }).id,
+      path: secretPath.path,
     })),
   };
 }

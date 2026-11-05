@@ -403,8 +403,10 @@ describe('trace evidence reconstruction integration', () => {
       core: Promise.resolve({
         elasticsearch: {
           client: {
-            asInternalUser: esClient,
+            // These routes read the trace as the caller. The test cluster has one user, so
+            // both point at the same client.
             asCurrentUser: esClient,
+            asInternalUser: esClient,
           },
         },
       }),

@@ -34,7 +34,7 @@ export function registerSimulateRoute({ router, lib: { handleEsError } }: RouteD
       // Until ES fixes a bug on their side we need to send a fake index pattern
       // that won't match any indices.
       // Issue: https://github.com/elastic/elasticsearch/issues/59152
-      // eslint-disable-next-line @typescript-eslint/naming-convention
+      // eslint-disable-next-line @kbn/compat/typescript-naming-convention
       const index_patterns = ['a_fake_index_pattern_that_wont_match_any_indices'];
       const templateName = request.params.templateName;
 

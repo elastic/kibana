@@ -76,7 +76,11 @@ export interface SimilarFeatureHit {
   id: string;
   title: string;
   description: string;
+  type: string;
+  subtype?: string;
+  properties: Record<string, unknown>;
   confidence: number;
+  sources: string[];
 }
 
 export interface IdentifyFeaturesOptions {
@@ -151,7 +155,6 @@ export async function identifyFeatures({
     for (const feature of features) {
       const candidate = {
         ...feature,
-        stream_name: target.id,
         filter: tryParseFilter(feature.filter),
         ...(Array.isArray(feature.evidence)
           ? { evidence: feature.evidence.slice(0, MAX_EVIDENCE_ITEMS) }

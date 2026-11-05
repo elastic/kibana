@@ -17,6 +17,7 @@ import { useMemoCss } from '@kbn/css-utils/public/use_memo_css';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../../dashboard_api/use_dashboard_internal_api';
 import { DashboardGrid } from '../grid';
+import { SelectedPanelsToolbar } from '../selected_panels_toolbar';
 import { DashboardEmptyScreen } from './empty_screen/dashboard_empty_screen';
 
 export const DashboardViewport = () => {
@@ -83,10 +84,12 @@ export const DashboardViewport = () => {
         data-title={dashboardTitle}
         data-description={description}
         data-shared-items-count={visiblePanelCount}
+        data-view-mode={viewMode}
         data-test-subj={'dshDashboardViewport'}
       >
         {panelCount === 0 && sectionCount === 0 ? <DashboardEmptyScreen /> : <DashboardGrid />}
       </div>
+      <SelectedPanelsToolbar />
     </div>
   );
 };
@@ -97,9 +100,9 @@ const dashboardViewportStyles = {
     display: 'flex',
     flexDirection: 'column' as 'column',
     width: '100%',
-    backgroundColor: euiTheme.colors.backgroundBasePlain,
+    backgroundColor: euiTheme.colors.backgroundBaseRecessed,
     '&.dshDashboardViewportWrapper--defaultBg': {
-      backgroundColor: euiTheme.colors.emptyShade,
+      backgroundColor: euiTheme.colors.backgroundBaseSubdued,
     },
     '.dshDashboardViewport-controls': {
       margin: `0 ${euiTheme.size.s}`,

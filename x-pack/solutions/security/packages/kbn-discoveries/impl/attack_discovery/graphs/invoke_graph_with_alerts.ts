@@ -8,6 +8,7 @@
 import type { Document } from '@langchain/core/documents';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas';
@@ -20,7 +21,13 @@ import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
   ATTACK_DISCOVERY_TAG,
   getDefaultAttackDiscoveryGraph,
+  resolveAttackDiscoveryTemplateCompletion,
 } from '.';
+import {
+  attackDiscoveryTemplateOmissionMessage,
+  capAttackDiscoveryTemplateCount,
+  takeAttackDiscoveryTemplateAlerts,
+} from './template_completion';
 import { getLlmType } from '../../lib/helpers/get_llm_type';
 import { throwIfErrorCountsExceeded } from './throw_if_error_counts_exceeded';
 
@@ -48,6 +55,11 @@ export interface InvokeAttackDiscoveryGraphWithAlertsParams {
   replacements?: Replacements;
   size?: number;
   start?: string;
+  /**
+   * Token-usage attribution for the graph's model calls. Callers that belong to a product with its
+   * own cost rollup set it; unset leaves the calls with the default attribution.
+   */
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 export interface InvokeGraphResult {
@@ -84,6 +96,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
   replacements = {},
   size = 10,
   start,
+  telemetryMetadata,
 }: InvokeAttackDiscoveryGraphWithAlertsParams): Promise<InvokeGraphResult> => {
   const { action_type_id: actionTypeId, connector_id: connectorId, model } = apiConfig;
 
@@ -98,6 +111,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     llmType,
     logger,
     model,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
     temperature: 0,
     timeout: connectorTimeout,
     traceOptions: {
@@ -109,6 +123,34 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
       }),
     },
   });
+
+  const completeWithTemplate = await resolveAttackDiscoveryTemplateCompletion({
+    inferenceClient: isInferenceEndpoint ? inferenceClient : undefined,
+    connectorId,
+    logger,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
+    timeout: connectorTimeout,
+  });
+
+  // Cap before the graph retrieves or reports coverage. The completion also
+  // clamps, and this keeps `alertsContextCount` equal to the alerts analyzed.
+  let alertsForGraph = alerts;
+  let sizeForGraph = size;
+  if (completeWithTemplate) {
+    const requestedSize = sizeForGraph;
+    sizeForGraph = capAttackDiscoveryTemplateCount(sizeForGraph) ?? sizeForGraph;
+    if (alerts.length > 0) {
+      const limited = takeAttackDiscoveryTemplateAlerts(alerts);
+      alertsForGraph = limited.alerts;
+      if (limited.omitted > 0) {
+        logger.warn(attackDiscoveryTemplateOmissionMessage(limited.omitted, alerts.length));
+      }
+    } else if (requestedSize != null && sizeForGraph < requestedSize) {
+      logger.warn(
+        attackDiscoveryTemplateOmissionMessage(requestedSize - sizeForGraph, requestedSize)
+      );
+    }
+  }
 
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
@@ -123,8 +165,9 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
     },
     prompts,
     replacements,
-    size,
+    size: sizeForGraph,
     start,
+    ...(completeWithTemplate ? { completeWithTemplate } : {}),
   });
 
   logger.debug(() => `Invoking Attack Discovery graph with ${alerts.length} pre-retrieved alerts`);
@@ -141,7 +184,7 @@ export const invokeAttackDiscoveryGraphWithAlerts = async ({
 
   const result: AttackDiscoveryGraphState = await graph.invoke(
     {
-      anonymizedDocuments: alerts,
+      anonymizedDocuments: alertsForGraph,
       ...(promptWithAdditionalContext != null ? { prompt: promptWithAdditionalContext } : {}),
       replacements,
     },

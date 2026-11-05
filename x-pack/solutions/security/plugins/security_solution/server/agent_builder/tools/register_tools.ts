@@ -7,6 +7,7 @@
 
 import type { AgentBuilderPluginSetup } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/logging';
+import type { PageProfilingOptions } from '../../lib/entity_analytics/risk_score/maintainer/instrumentation/page_timing_types';
 import type { ExperimentalFeatures } from '../../../common';
 import { securityLabsSearchTool } from './security_labs_search_tool';
 import { attackDiscoverySearchTool } from './attack_discovery_search_tool';
@@ -25,10 +26,18 @@ import {
   removeEntitiesFromWatchlistTool,
   searchEntitiesTool,
   updateWatchlistTool,
+  setWatchlistRuleBasedDataSourceTool,
+  removeWatchlistRuleBasedDataSourceTool,
+  listWatchlistDataSourcesTool,
   generateLeadsTool,
   listLeadsTool,
   dismissLeadTool,
   setAssetCriticalityTool,
+  getResolutionGroupTool,
+  linkEntitiesTool,
+  unlinkEntitiesTool,
+  listResolutionRulesTool,
+  setResolutionRulesTool,
 } from './entity_analytics';
 import { alertsTool } from './alerts_tool';
 import { createDetectionRuleTool } from './create_detection_rule_tool';
@@ -63,6 +72,7 @@ export const registerTools = (
   rulePreviewDeps: RunRulePreviewDeps,
   isServerless: boolean = false,
   kibanaVersion: string,
+  profiling: PageProfilingOptions,
   hasEncryptionKey: boolean = false
 ) => {
   agentBuilder.tools.register(entityRiskScoreTool(core, logger));
@@ -89,9 +99,24 @@ export const registerTools = (
   agentBuilder.tools.register(removeEntitiesFromWatchlistTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(searchEntitiesTool(core, logger, experimentalFeatures));
   agentBuilder.tools.register(
-    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion)
+    setAssetCriticalityTool(core, logger, experimentalFeatures, kibanaVersion, profiling)
   );
   agentBuilder.tools.register(updateWatchlistTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(
+    setWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    removeWatchlistRuleBasedDataSourceTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+  agentBuilder.tools.register(
+    listWatchlistDataSourcesTool(core, logger, experimentalFeatures, hasEncryptionKey)
+  );
+
+  agentBuilder.tools.register(getResolutionGroupTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(linkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(unlinkEntitiesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(listResolutionRulesTool(core, logger, experimentalFeatures));
+  agentBuilder.tools.register(setResolutionRulesTool(core, logger, experimentalFeatures));
 
   if (experimentalFeatures.rulePreviewAttachmentEnabled) {
     agentBuilder.tools.register(runRulePreviewTool(rulePreviewDeps));

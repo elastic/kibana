@@ -55,7 +55,18 @@ export interface PreLayoutNodeBase {
 
 export type LayoutDirection = 'TB' | 'LR';
 
-export interface StepNodeData extends Record<string, unknown> {
+/**
+ * Present on every node inside a fallback lane. Holds the **node id** of the
+ * owner step (the step whose `on-failure.fallback` created this lane).
+ * Absent for all other nodes. Renderers use this to tint fallback nodes and
+ * the minimap; specs 03/07 use it to derive "is this node inside a fallback
+ * lane?" without a separate nodeRefs lookup.
+ */
+export interface FallbackMember {
+  fallbackOf?: string;
+}
+
+export interface StepNodeData extends FallbackMember, Record<string, unknown> {
   label: string;
   stepType: string;
   step?: Step;
@@ -67,7 +78,7 @@ export interface TriggerNodeData extends Record<string, unknown> {
   isTrigger: true;
 }
 
-export interface ForeachGroupNodeData extends Record<string, unknown> {
+export interface ForeachGroupNodeData extends FallbackMember, Record<string, unknown> {
   label: string;
   /** The original step type (e.g. `'foreach'`, `'while'`). */
   stepType: string;
@@ -111,6 +122,57 @@ export interface GraphEdge {
   branchIndex?: number;
   /** Display label rendered on the edge (e.g. 'true' / 'false' / case value). */
   label?: string;
+  /**
+   * True on the edge from a step's node to its fallback lane head. Always dashed;
+   * colour transitions from neutral to danger when any node in the lane has a
+   * step-execution record. Never set on spine edges or `if`/`switch` fork edges.
+   */
+  isFailure?: boolean;
+  /**
+   * True on edges that rejoin the spine from a `continue: true` fallback lane.
+   * These edges are emitted by the generic fan-in loop (same as structural spine
+   * edges) but must be excluded from the spine dagre run so the lane leaf is not
+   * placed as a spine node. Unlike `isFailure`, this is a structural tag owned
+   * by the transform, not a render property — renderers should not branch on it.
+   */
+  isRejoin?: boolean;
+}
+
+/**
+ * One fallback lane emitted by the transform. Used by the renderer to build
+ * owner / head / leaf sets for traversal highlighting and `mergeNodeIds` widening,
+ * and by `dagLayout` to position the lane in the +cross margin.
+ */
+export interface FallbackLane {
+  /** Node id of the step that owns this lane (has `on-failure.fallback`). */
+  readonly owner: string;
+  /** Node id of the first step in the fallback sequence. */
+  readonly head: string;
+  /** Node ids of the last steps in the fallback sequence (the rejoin sources). */
+  readonly leaves: readonly string[];
+  /**
+   * Every node of this lane that lives in `graphId` — including `foreachGroup`
+   * containers and synthetic bypass nodes (from unbalanced `if`/`switch` inside
+   * the fallback), excluding those containers' inner nodes, and excluding nodes
+   * claimed by a nested lane at a greater depth. Built from the `fallbackOf`
+   * stamping loop (for step nodes) plus an explicit bypass-claim pass (for
+   * bypass nodes, which carry no `fallbackOf`) so that exclusivity is a property
+   * of the algorithm (the innermost-wins guard), not a post-hoc assertion.
+   */
+  readonly nodes: readonly string[];
+  /**
+   * Fallback nesting depth within `graphId`. Guarantees monotonicity within a
+   * chain: a lane at depth *d* is always further in the +cross margin than the
+   * lane (if any) containing its owner. NOT a global column index — two depth-0
+   * lanes can have different inner edges (D5: local hugging).
+   */
+  readonly depth: number;
+  /**
+   * The `foreachGroup` node id whose dagre sub-graph contains this lane, or
+   * `undefined` for the root graph. Depth resets to 0 at each graph boundary
+   * (D4: gutter inside the container), so depth is always relative to this id.
+   */
+  readonly graphId?: string;
 }
 
 /**
@@ -128,6 +190,70 @@ export interface ForeachGroup {
   innerEdges: GraphEdge[];
   /** Layout-only bypass lane nodes for unbalanced branches inside this foreach body. */
   bypassLaneNodes: PreLayoutBypassLaneNode[];
+}
+
+/**
+ * The block structure of a workflow, emitted by the transform alongside the flat
+ * nodes and edges. Layout code reads forks, branches, containers and fallback lanes
+ * from here instead of re-deriving them from edge reachability.
+ *
+ * Every id is a node id from the same `TransformResult`. A sequence's items run in
+ * order, so the item after a fork is its join, and the item after a step is its
+ * successor. Every node appears exactly once in the tree.
+ */
+export type StructureItem = StructureStep | StructureFork | StructureContainer;
+
+export type StructureSequence = readonly StructureItem[];
+
+/** A plain step. `attached` holds a `merge` step's body: reached from it, never rejoined. */
+export interface StructureStep {
+  readonly kind: 'step';
+  readonly id: string;
+  readonly lanes: readonly StructureLane[];
+  readonly attached?: StructureSequence;
+}
+
+/** An `if`, `switch` or `parallel` step. Branches are in YAML declaration order. */
+export interface StructureFork {
+  readonly kind: 'fork';
+  readonly id: string;
+  readonly branches: readonly StructureBranch[];
+  readonly lanes: readonly StructureLane[];
+}
+
+/** A `foreach` or `while` step: a box around its own body graph. */
+export interface StructureContainer {
+  readonly kind: 'container';
+  readonly id: string;
+  readonly body: StructureSequence;
+  readonly lanes: readonly StructureLane[];
+}
+
+/**
+ * One branch of a fork. `head` is the branch's first node: `items[0].id`, or the id
+ * of a bypass lane node when the branch has no steps (then `items` is empty).
+ * `label` is the text on the edge into the branch (`true`, a case value, a branch name).
+ */
+export interface StructureBranch {
+  readonly head: string;
+  readonly items: StructureSequence;
+  readonly label: string;
+}
+
+/**
+ * An `on-failure.fallback` lane owned by the item it is listed on. It rejoins the
+ * spine after its owner when `continue` is set.
+ */
+export interface StructureLane {
+  readonly head: string;
+  readonly items: StructureSequence;
+  readonly rejoins: boolean;
+}
+
+export interface LayoutStructure {
+  /** Trigger node ids in YAML declaration order. */
+  readonly triggers: readonly string[];
+  readonly items: StructureSequence;
 }
 
 /**

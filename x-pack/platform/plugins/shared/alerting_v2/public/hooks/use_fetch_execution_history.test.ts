@@ -25,12 +25,12 @@ const item: PolicyExecutionHistoryItem = {
   dispatched_at: '2026-05-05T10:00:00.000Z',
   policy: { id: 'policy-1', name: 'My Policy' },
   rules: [{ id: 'rule-1', name: 'My Rule' }],
-  total_rule_count: 1,
+  rule_count: 1,
   outcome: 'success',
-  episode_count: 1,
+  alert_count: 1,
+  alerts: [],
   action_group_count: 1,
   workflows: [],
-  error: null,
 };
 
 const createWrapper = () => {
@@ -64,7 +64,6 @@ describe('useFetchExecutionHistory', () => {
       page: 2,
       per_page: 25,
       total: 0,
-      search_matches: null,
     });
 
     renderHook(
@@ -91,7 +90,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 1,
-      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 
@@ -121,7 +119,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
     const queryClient = new QueryClient({ defaultOptions: { queries: { retry: false } } });
     const wrapper = ({ children }: { children: React.ReactNode }) =>
@@ -135,7 +132,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
   });
 
@@ -145,7 +141,6 @@ describe('useFetchExecutionHistory', () => {
       page: 1,
       per_page: 50,
       total: 0,
-      search_matches: null,
     });
 
     const { rerender } = renderHook(
@@ -179,7 +174,7 @@ describe('toListExecutionHistoryRequest', () => {
       search: 'foo',
       rule_ids: ['rule-1', 'rule-2'],
       outcomes: ['success'],
-      episode_ids: ['ep-1'],
+      alert_ids: ['ep-1'],
       sort_field: 'dispatched_at',
       sort_order: 'asc',
     });

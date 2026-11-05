@@ -36,6 +36,8 @@ import { getAttachmentRoute } from './attachments/get_attachment';
 import { deleteAttachmentRoute } from './attachments/delete_attachment';
 import { deleteAllAttachmentsRoute } from './attachments/delete_all_attachments';
 import { getPublicFieldDefinitionRoutes } from './field_definitions';
+import { postAttachmentRoute } from './attachments/post_attachment';
+import { putAttachmentRoute } from './attachments/put_attachment';
 
 export const getExternalRoutes = ({
   isServerless,
@@ -74,6 +76,8 @@ export const getExternalRoutes = ({
     getAttachmentRoute,
     deleteAttachmentRoute,
     deleteAllAttachmentsRoute,
+    postAttachmentRoute,
+    putAttachmentRoute,
     ...getPublicTemplateRoutes(config),
     ...getPublicFieldDefinitionRoutes(config),
   ] as CaseRoute[];

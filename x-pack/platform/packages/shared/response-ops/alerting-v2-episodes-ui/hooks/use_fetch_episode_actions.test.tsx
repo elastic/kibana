@@ -45,7 +45,7 @@ describe('useFetchEpisodeActions', () => {
   it('fetches and builds episodeActionsMap keyed by episode id', async () => {
     const rows: AlertEpisodeAction[] = [
       {
-        episode_id: 'ep-1',
+        alert_id: 'ep-1',
         rule_id: 'rule-1',
         group_hash: 'gh-1',
         last_ack_action: 'ack',
@@ -53,6 +53,7 @@ describe('useFetchEpisodeActions', () => {
         last_ack_actor: 'actor-1',
         last_deactivate_action: 'deactivate',
         last_deactivate_actor: 'actor-resolver',
+        last_tags: 'tag-a',
       },
     ];
     fetchEpisodeActionsMock.mockResolvedValue(rows);
@@ -79,13 +80,14 @@ describe('useFetchEpisodeActions', () => {
       lastAckActor: 'actor-1',
       lastDeactivateAction: 'deactivate',
       lastDeactivateActor: 'actor-resolver',
+      tags: ['tag-a'],
     });
   });
 
   it('keeps the last row when duplicate episode ids are returned', async () => {
     const rows: AlertEpisodeAction[] = [
       {
-        episode_id: 'dup',
+        alert_id: 'dup',
         rule_id: 'r1',
         group_hash: null,
         last_ack_action: 'ack',
@@ -95,7 +97,7 @@ describe('useFetchEpisodeActions', () => {
         last_deactivate_actor: null,
       },
       {
-        episode_id: 'dup',
+        alert_id: 'dup',
         rule_id: 'r2',
         group_hash: null,
         last_ack_action: 'unack',

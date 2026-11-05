@@ -32,8 +32,10 @@ describe('Scout path globs', () => {
       'src/platform/packages/shared/my_package/test/scout',
       'src/platform/packages/private/my_package/test/scout',
       'src/core/packages/my_package/test/scout',
-      'src/core/test/scout',
-      'src/core/test/scout_custom',
+      'src/core/packages/core/test/scout',
+      'src/core/packages/core/test/scout_custom',
+      'src/dev/build/test/scout',
+      'src/dev/build/test/scout_fips',
       'x-pack/platform/plugins/shared/my_plugin/test/scout',
       'x-pack/solutions/security/plugins/my_plugin/test/scout',
       'x-pack/solutions/observability/plugins/my_plugin/test/scout',
@@ -49,6 +51,7 @@ describe('Scout path globs', () => {
       'random/path/test/scout',
       'src/platform/plugins/shared/my_plugin/src/scout',
       'not_examples/hello_world/test/scout',
+      'src/dev/other/test/scout',
     ];
 
     it.each(shouldMatch)('matches: %s', (testPath) => {
@@ -68,8 +71,9 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/api/playwright.config.ts',
       'x-pack/solutions/security/plugins/my_plugin/test/scout_custom/ui/playwright.config.ts',
       'src/core/packages/my_package/test/scout/api/playwright.config.ts',
-      'src/core/test/scout/api/playwright.config.ts',
-      'src/core/test/scout_custom/api/playwright.config.ts',
+      'src/core/packages/core/test/scout/api/playwright.config.ts',
+      'src/core/packages/core/test/scout_custom/api/playwright.config.ts',
+      'src/dev/build/test/scout_fips/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/api/playwright.config.ts',
       'examples/hello_world/test/scout_examples/ui/playwright.config.ts',
       'x-pack/examples/hello_world/test/scout_examples/api/playwright.config.ts',
@@ -102,6 +106,7 @@ describe('Scout path globs', () => {
       'x-pack/solutions/security/plugins/my_plugin/test/scout/.meta/api/standard.json',
       'examples/hello_world/test/scout_examples/.meta/api/standard.json',
       'x-pack/examples/hello_world/test/scout_examples/.meta/ui/standard.json',
+      'src/dev/build/test/scout_fips/.meta/api/standard.json',
       // namespace variants
       'x-pack/solutions/security/plugins/security_solution/test/scout/detection_engine/.meta/ui/parallel.json',
       'src/platform/plugins/shared/my_plugin/test/scout/my_area/.meta/api/standard.json',
@@ -127,7 +132,7 @@ describe('Scout path globs', () => {
       'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/index.ts',
       'src/platform/plugins/shared/my_plugin/test/scout/api/fixtures/params.ts',
       // page objects (live under fixtures/)
-      'src/platform/plugins/shared/inspector/test/scout/ui/fixtures/page_objects/inspector.ts',
+      'src/platform/plugins/shared/my_plugin/test/scout/ui/fixtures/page_objects/my_page.ts',
       // namespace nested under fixtures
       'src/platform/plugins/shared/discover/test/scout/ui/fixtures/traces_experience/page_objects/apm.ts',
       // namespace before the category (matches the second glob form)
@@ -295,6 +300,21 @@ describe('Scout path regexes', () => {
   });
 
   describe('SCOUT_UNIFIED_CONFIG_PATH_REGEX', () => {
+    it('matches build tooling with a custom server config set', () => {
+      const match = 'src/dev/build/test/scout_fips/api/playwright.config.ts'.match(
+        SCOUT_UNIFIED_CONFIG_PATH_REGEX
+      );
+      expect(match?.groups).toEqual(
+        expect.objectContaining({
+          devBuildRoot: 'src/dev/build',
+          serverConfigSet: 'fips',
+          namespace: undefined,
+          testCategory: 'api',
+          testConfigType: '',
+        })
+      );
+    });
+
     it('matches platform plugin path with correct named groups', () => {
       const match =
         'src/platform/plugins/shared/my_plugin/test/scout/api/playwright.config.ts'.match(
@@ -331,12 +351,12 @@ describe('Scout path regexes', () => {
     });
 
     it('matches src/core root path (no sub-package) with correct named groups', () => {
-      const match = 'src/core/test/scout/api/playwright.config.ts'.match(
+      const match = 'src/core/packages/core/test/scout/api/playwright.config.ts'.match(
         SCOUT_UNIFIED_CONFIG_PATH_REGEX
       );
       expect(match?.groups).toEqual(
         expect.objectContaining({
-          coreRoot: 'src/core',
+          coreRoot: 'src/core/packages/core',
           platformOrCore: undefined,
           moduleKind: undefined,
           moduleName: undefined,
@@ -348,12 +368,12 @@ describe('Scout path regexes', () => {
     });
 
     it('matches src/core root path with custom server config set', () => {
-      const match = 'src/core/test/scout_custom/api/playwright.config.ts'.match(
+      const match = 'src/core/packages/core/test/scout_custom/api/playwright.config.ts'.match(
         SCOUT_UNIFIED_CONFIG_PATH_REGEX
       );
       expect(match?.groups).toEqual(
         expect.objectContaining({
-          coreRoot: 'src/core',
+          coreRoot: 'src/core/packages/core',
           serverConfigSet: 'custom',
           testCategory: 'api',
         })

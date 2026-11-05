@@ -6,7 +6,7 @@
  */
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { getEuidSourceFields } from '@kbn/entity-store/common/domain/euid';
 
 import type { RelationshipIntegrationConfig, CompositeAfterKey, CompositeBucket } from './types';
@@ -27,15 +27,15 @@ export const buildLookbackFilter = (
 
 // TODO(#266748): actorEntityType is hardcoded to 'user' — add actorEntityType to
 // RelationshipIntegrationConfig to support host→host, host→service, and service→* relationships.
-const USER_IDENTITY_FIELDS = getEuidSourceFields('user').requiresOneOf;
+const USER_IDENTITY_FIELDS = getEuidSourceFields(getBuiltInEntityDefinition('user')).requiresOneOf;
 
 /**
  * "At least one of these fields exists and is non-empty" DSL.
  *
  * Used as the base actor-presence filter when the config supplies its own
  * `customActor.fields`. The default path (no `customActor`) keeps using
- * `euid.dsl.getEuidDocumentsContainsIdFilter('user')`, which carries the
- * full ECS user-EUID semantics (including the `event.outcome != "failure"`
+ * `euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'))`, which
+ * carries the full ECS user-EUID semantics (including the `event.outcome != "failure"`
  * baseline) — that behaviour is unchanged here. This helper exists only so
  * configs whose actor identity lives outside ECS `user.*` (e.g. Azure
  * auditlogs `…initiated_by.user.userPrincipalName`) are not silently
@@ -65,7 +65,7 @@ export const buildActorDiscoveryQuery = (
   // see those actors. Match the gate to the actor-fields the config declares.
   const actorPresenceFilter: QueryDslQueryContainer = config.customActor
     ? buildAnyActorFieldNonEmptyDsl(config.customActor.fields)
-    : euid.dsl.getEuidDocumentsContainsIdFilter('user');
+    : euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('user'));
 
   // The @timestamp lookback is a log-index assumption. Entity-index configs
   // (e.g. administers) opt out via `disableLookbackWindow` and gate freshness
@@ -76,7 +76,9 @@ export const buildActorDiscoveryQuery = (
   ];
 
   if (config.requireTargetEntityIdExists) {
-    baseFilters.push(euid.dsl.getEuidDocumentsContainsIdFilter(config.targetEntityType));
+    baseFilters.push(
+      euid.dsl.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition(config.targetEntityType))
+    );
   }
 
   if (config.compositeAggAdditionalFilters?.length) {
@@ -98,6 +100,43 @@ export const buildActorDiscoveryQuery = (
       },
     },
   };
+};
+
+const collectActorValuesByField = (
+  config: RelationshipIntegrationConfig,
+  buckets: CompositeBucket[]
+): Map<string, Set<string>> => {
+  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
+  const valuesByField = new Map<string, Set<string>>();
+  for (const bucket of buckets) {
+    for (const field of actorFields) {
+      const value = bucket.key[field];
+      if (value != null) {
+        let fieldSet = valuesByField.get(field);
+        if (!fieldSet) {
+          fieldSet = new Set();
+          valuesByField.set(field, fieldSet);
+        }
+        fieldSet.add(value);
+      }
+    }
+  }
+  return valuesByField;
+};
+
+/**
+ * Returns every distinct non-null actor-field value across the page's buckets,
+ * i.e. the values `buildActorPageFilter` narrows Step 2 to, flattened across fields.
+ */
+export const getPageActorValues = (
+  config: RelationshipIntegrationConfig,
+  buckets: CompositeBucket[]
+): string[] => {
+  const values = new Set<string>();
+  for (const fieldValues of collectActorValuesByField(config, buckets).values()) {
+    for (const value of fieldValues) values.add(value);
+  }
+  return Array.from(values);
 };
 
 /**
@@ -143,29 +182,12 @@ export const buildActorPageFilter = (
   config: RelationshipIntegrationConfig,
   buckets: CompositeBucket[]
 ): QueryDslQueryContainer => {
-  const actorFields = config.customActor?.fields ?? USER_IDENTITY_FIELDS;
-
   if (buckets.length === 0) {
     return { bool: { must_not: { match_all: {} } } };
   }
 
-  const valuesByField = new Map<string, Set<string>>();
-  for (const bucket of buckets) {
-    for (const field of actorFields) {
-      const value = bucket.key[field];
-      if (value != null) {
-        let fieldSet = valuesByField.get(field);
-        if (!fieldSet) {
-          fieldSet = new Set();
-          valuesByField.set(field, fieldSet);
-        }
-        fieldSet.add(value);
-      }
-    }
-  }
-
   const should: QueryDslQueryContainer[] = [];
-  for (const [field, values] of valuesByField) {
+  for (const [field, values] of collectActorValuesByField(config, buckets)) {
     should.push({ terms: { [field]: Array.from(values) } });
   }
 

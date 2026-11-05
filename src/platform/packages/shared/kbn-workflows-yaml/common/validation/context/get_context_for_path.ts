@@ -69,7 +69,12 @@ export function getContextSchemaForStep(
     extension.steps = stepsCollection.schema;
   }
 
-  extension.variables = getVariablesSchema(workflowGraph, stepName, predecessors);
+  extension.variables = getVariablesSchema(
+    workflowGraph,
+    stepName,
+    predecessors,
+    baseSchema.extend(extension)
+  );
 
   let schema = baseSchema.extend(extension) as typeof DynamicStepContextSchema;
 

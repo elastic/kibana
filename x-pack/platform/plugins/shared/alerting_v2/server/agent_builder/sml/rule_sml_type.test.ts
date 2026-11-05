@@ -25,17 +25,15 @@ const baseRuleAttrs: RuleSavedObjectAttributes = {
   },
   time_field: '@timestamp',
   schedule: { every: '5m', lookback: '15m' },
-  query: {
-    format: 'standalone',
-    breach: { query: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
-  },
-  state_transition: null,
+  query: { base: 'FROM metrics-* | STATS avg_cpu = AVG(cpu) BY host.name' },
+  recovery: { strategy: 'no_breach' },
+  no_data: { strategy: 'ignore' },
   enabled: true,
   createdBy: { profile_uid: 'elastic' },
   createdAt: '2026-04-01T00:00:00.000Z',
   updatedBy: { profile_uid: 'elastic' },
   updatedAt: '2026-04-10T00:00:00.000Z',
-} as RuleSavedObjectAttributes;
+};
 
 // `getRule` returns the snake_case API response, not the saved object attributes.
 const { createdBy, createdAt, updatedBy, updatedAt, ...restRuleAttrs } = baseRuleAttrs;
@@ -45,7 +43,7 @@ const baseRuleResponse = {
   created_at: createdAt,
   updated_by: updatedBy,
   updated_at: updatedAt,
-  metadata: { ...baseRuleAttrs.metadata, version: baseRuleAttrs.metadata?.version ?? 1 },
+  metadata: baseRuleAttrs.metadata,
 };
 
 const buildToAttachmentContext = () => ({
@@ -203,7 +201,7 @@ describe('createRuleSmlType', () => {
           'CPU breach detection',
           'alert',
           'ops, cpu',
-          (baseRuleAttrs.query as { breach: { query: string } }).breach.query,
+          baseRuleAttrs.query.base,
         ].join('\n'),
       });
       expect(result).not.toHaveProperty('permissions');
@@ -297,6 +295,20 @@ describe('createRuleSmlType', () => {
       expect(getRule).toHaveBeenCalledWith({ id: 'rule-1' });
       expect(result?.type).toBe(RULE_ATTACHMENT_TYPE);
       expect(result?.data).toEqual(expect.objectContaining({ id: 'rule-1', kind: 'alert' }));
+    });
+
+    it('sets the attachment origin to the raw rule id instead of the SML origin URI', async () => {
+      getRule.mockResolvedValueOnce({
+        ...baseRuleResponse,
+        id: 'rule-1',
+      });
+
+      const result = await buildDefinition().toAttachment(
+        buildSmlDocument(),
+        buildToAttachmentContext()
+      );
+
+      expect(result?.origin).toBe('rule-1');
     });
 
     it('returns undefined when getRule throws', async () => {

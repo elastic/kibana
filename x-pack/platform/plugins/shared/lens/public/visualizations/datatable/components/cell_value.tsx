@@ -65,6 +65,7 @@ export const createGridCell = (
     colorMapping?: string
   ) => CellColorFn,
   paletteService: PaletteRegistry,
+  isInteractive: boolean,
   fitRowToContent?: boolean,
   density?: DataGridDensity
 ) => {
@@ -233,7 +234,7 @@ export const createGridCell = (
         if (!progressBarProps) {
           return (
             <FormattedCell
-              content={formatter?.convertToReact(rawValue) ?? fallbackText}
+              content={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
               alignment={alignment}
               fitRowToContent={fitRowToContent}
               isColored={false}
@@ -243,7 +244,7 @@ export const createGridCell = (
         return (
           <ProgressBarCell
             value={progressBarProps.value}
-            label={formatter?.convertToReact(rawValue) ?? fallbackText}
+            label={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
             domain={progressBarProps.domain}
             fill={progressBarProps.fill}
             size={progressBarSize}
@@ -294,7 +295,7 @@ export const createGridCell = (
       default:
         return (
           <FormattedCell
-            content={formatter?.convertToReact(rawValue) ?? fallbackText}
+            content={formatter?.convertToReact(rawValue, { isInteractive }) ?? fallbackText}
             alignment={alignment}
             fitRowToContent={fitRowToContent}
             isColored={Boolean(cellStyle)}

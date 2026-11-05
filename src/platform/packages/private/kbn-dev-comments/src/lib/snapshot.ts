@@ -46,13 +46,7 @@ const flatten = (
   return target;
 };
 
-/**
- * Captures the viewport as a JPEG within the byte budget, lowering quality and then
- * resolution as needed. Throws when there is no screenshot to be had, with the reason
- * in words for the person who asked for one: the capture itself can fail (capture
- * libraries throw on cross-origin content) or come out empty, and a page can be too
- * busy to fit the budget.
- */
+/** Captures the viewport as a JPEG within the byte budget, lowering quality and then resolution as needed; throws, in words for the author, when there is no screenshot to be had. */
 export const createSnapshot = async (
   captureViewport: () => Promise<HTMLCanvasElement>
 ): Promise<NewSnapshot> => {

@@ -10,13 +10,12 @@ import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { ConnectedProps } from 'react-redux-v7';
 import { connect, useDispatch } from 'react-redux-v7';
 import deepEqual from 'fast-deep-equal';
-import { type EuiDataGridControlColumn } from '@elastic/eui';
 import { getEsQueryConfig } from '@kbn/data-plugin/common';
 import { DataLoadingState } from '@kbn/unified-data-table';
 import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
 import type { RunTimeMappings } from '@kbn/timelines-plugin/common/search_strategy';
 import type { DataTableRecord } from '@kbn/discover-utils';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import { PageScope } from '../../../../../data_view_manager/constants';
 import { useDataView } from '../../../../../data_view_manager/hooks/use_data_view';
 import { useSelectedPatterns } from '../../../../../data_view_manager/hooks/use_selected_patterns';
@@ -297,7 +296,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
     [enableNewFlyout, openNotes, openFlyout, selectedPatterns, telemetry, timelineId]
   );
 
-  const leadingControlColumns = useTimelineControlColumn({
+  const rowAdditionalLeadingControls = useTimelineControlColumn({
     timelineId,
     refetch,
     events,
@@ -380,7 +379,7 @@ export const QueryTabContentComponent: React.FC<Props> = ({
         refetch={refetch}
         dataLoadingState={dataLoadingState}
         totalCount={isBlankTimeline ? 0 : totalCount}
-        leadingControlColumns={leadingControlColumns as EuiDataGridControlColumn[]}
+        rowAdditionalLeadingControls={rowAdditionalLeadingControls}
         onFetchMoreRecords={loadNextBatch}
         activeTab={activeTab}
         updatedAt={refreshedAt}

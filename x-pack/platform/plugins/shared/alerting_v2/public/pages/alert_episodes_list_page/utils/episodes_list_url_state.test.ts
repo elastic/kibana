@@ -9,34 +9,28 @@ import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { createMemoryHistory } from 'history';
 import {
+  ALERTS_LIST_APP_STATE_KEY,
   DEFAULT_EPISODES_LIST_TIME_RANGE,
-  EPISODES_LIST_APP_STATE_KEY,
   EPISODES_LIST_STATUS_URL_ALL,
   readEpisodesListAppStateFromUrlStorage,
   writeEpisodesListAppStateToUrlStorage,
 } from './episodes_list_url_state';
 
-async function createKbnTestUrlStorage(
-  episodesListPayload?: unknown
-): Promise<IKbnUrlStateStorage> {
+async function createKbnTestUrlStorage(alertsListPayload?: unknown): Promise<IKbnUrlStateStorage> {
   const storage = createKbnUrlStateStorage({
     history: createMemoryHistory({ initialEntries: ['/'] }),
     useHash: false,
     useHashQuery: false,
   });
-  if (episodesListPayload !== undefined) {
-    await storage.set(
-      '_a',
-      { [EPISODES_LIST_APP_STATE_KEY]: episodesListPayload },
-      { replace: true }
-    );
+  if (alertsListPayload !== undefined) {
+    await storage.set('_a', { [ALERTS_LIST_APP_STATE_KEY]: alertsListPayload }, { replace: true });
   }
   return storage;
 }
 
 describe('episodes_list_url_state', () => {
   describe('readEpisodesListAppStateFromUrlStorage', () => {
-    it('reads filter + time fields as expected from _a.episodesList', async () => {
+    it('reads filter + time fields as expected from _a.alertsList', async () => {
       const storage = await createKbnTestUrlStorage({
         status: ['active', 'pending'],
         ruleId: 'r1',
@@ -119,7 +113,7 @@ describe('episodes_list_url_state', () => {
   });
 
   describe('writeEpisodesListAppStateToUrlStorage', () => {
-    it('omits episodesList when values are defaults', async () => {
+    it('omits alertsList when values are defaults', async () => {
       const storage = await createKbnTestUrlStorage({
         queryString: 'host',
       });
@@ -143,7 +137,7 @@ describe('episodes_list_url_state', () => {
       );
 
       expect(storage.get('_a')).toEqual({
-        [EPISODES_LIST_APP_STATE_KEY]: {
+        [ALERTS_LIST_APP_STATE_KEY]: {
           status: ['active', 'pending'],
         },
       });
@@ -153,7 +147,7 @@ describe('episodes_list_url_state', () => {
       ]);
     });
 
-    it('writes episodesList when there are non-default values', async () => {
+    it('writes alertsList when there are non-default values', async () => {
       const storage = await createKbnTestUrlStorage();
 
       await writeEpisodesListAppStateToUrlStorage(
@@ -163,7 +157,7 @@ describe('episodes_list_url_state', () => {
       );
 
       expect(storage.get('_a')).toEqual({
-        [EPISODES_LIST_APP_STATE_KEY]: {
+        [ALERTS_LIST_APP_STATE_KEY]: {
           status: EPISODES_LIST_STATUS_URL_ALL,
           queryString: 'host',
           timeFrom: 'now-7d',
@@ -185,7 +179,7 @@ describe('episodes_list_url_state', () => {
       );
 
       expect(storage.get('_a')).toEqual({
-        [EPISODES_LIST_APP_STATE_KEY]: {
+        [ALERTS_LIST_APP_STATE_KEY]: {
           severity: ['high', '__no_severity__'],
         },
       });
@@ -209,7 +203,7 @@ describe('episodes_list_url_state', () => {
       );
 
       expect(storage.get('_a')).toEqual({
-        [EPISODES_LIST_APP_STATE_KEY]: {
+        [ALERTS_LIST_APP_STATE_KEY]: {
           groupHash: 'xyz',
           groupingValues: { 'host.name': 'web-01', region: null },
         },

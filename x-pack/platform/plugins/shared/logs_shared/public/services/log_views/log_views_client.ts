@@ -7,13 +7,14 @@
 
 import * as rt from 'io-ts';
 import type { HttpStart } from '@kbn/core/public';
+import { buildPath } from '@kbn/core-http-browser';
 import type { ISearchGeneric } from '@kbn/search-types';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import type { DataView, DataViewLazy } from '@kbn/data-views-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { getLogViewResponsePayloadRT, putLogViewRequestPayloadRT } from '../../../common/http_api';
-import { getLogViewUrl } from '../../../common/http_api/log_views';
+import { LOG_VIEW_URL } from '../../../common/http_api/log_views';
 import type {
   LogView,
   LogViewAttributes,
@@ -52,7 +53,7 @@ export class LogViewsClient implements ILogViewsClient {
 
     const { logViewId } = logViewReference;
     const response = await this.http
-      .get(getLogViewUrl(logViewId), { version: '1' })
+      .get(buildPath(LOG_VIEW_URL, { logViewId }), { version: '1' })
       .catch((error) => {
         throw new FetchLogViewError(`Failed to fetch log view "${logViewId}": ${error}`);
       });
@@ -161,7 +162,7 @@ export class LogViewsClient implements ILogViewsClient {
     } else {
       const { logViewId } = logViewReference;
       const response = await this.http
-        .put(getLogViewUrl(logViewId), {
+        .put(buildPath(LOG_VIEW_URL, { logViewId }), {
           body: JSON.stringify(
             putLogViewRequestPayloadRT.encode({ attributes: logViewAttributes })
           ),

@@ -14,6 +14,7 @@ import { createAppRootMockRenderer } from '../../../../common/mock/endpoint';
 import { CustomYaraSignaturesList } from './custom_yara_signatures_list';
 import { exceptionsListAllHttpMocks } from '../../../mocks/exceptions_list_http_mocks';
 import { SEARCHABLE_FIELDS } from '../constants';
+import { POLICY_ASSIGNMENT_INFO_TOOLTIP } from '../translations';
 import { parseQueryFilterToKQL } from '../../../common/utils';
 import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import type { EndpointPrivileges } from '../../../../../common/endpoint/types';
@@ -86,6 +87,19 @@ describe('When on the custom YARA signatures page', () => {
         }),
       })
     );
+  });
+
+  it('should show the policy assignment info tooltip in the view flyout', async () => {
+    act(() => {
+      history.push(`${CUSTOM_YARA_SIGNATURES_PATH}?show=view&itemId=123`);
+    });
+    const { findByTestId } = render();
+
+    await user.hover(
+      await findByTestId('customYaraSignaturesList-viewFlyout-policyAssignmentInfoTooltip')
+    );
+
+    expect(await renderResult.findByText(POLICY_ASSIGNMENT_INFO_TOOLTIP)).toBeInTheDocument();
   });
 
   it('should not render when feature flag is disabled', async () => {

@@ -253,7 +253,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
 
   const { starting: isStartingJobs, startMlJobs } = useStartMlJobs();
 
-  const { indexPattern, isIndexPatternLoading } = useRuleIndexPattern({
+  const { indexPattern, isIndexPatternLoading, isIndexPatternSettled } = useRuleIndexPattern({
     dataSourceType: defineStepData.dataSourceType,
     index: memoizedIndex,
     dataViewId: defineStepData.dataViewId,
@@ -599,7 +599,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
           <NextStep
             dataTestSubj="define-continue"
             onClick={defineRuleNextStep}
-            isDisabled={isCreateRuleLoading}
+            isDisabled={isCreateRuleLoading || !isIndexPatternSettled}
           />
         </div>
         {memoDefineStepReadOnly}
@@ -615,6 +615,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       indicesConfig,
       isCreateRuleLoading,
       isIndexPatternLoading,
+      isIndexPatternSettled,
       isQueryBarValid,
       loading,
       memoDefineStepReadOnly,
@@ -794,7 +795,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill={false}
-                isDisabled={isCreateRuleLoading}
+                isDisabled={isCreateRuleLoading || !isIndexPatternSettled}
                 isLoading={isCreateRuleLoading}
                 onClick={submitRuleDisabled}
                 data-test-subj="create-enabled-false"
@@ -805,7 +806,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
             <EuiFlexItem grow={false}>
               <EuiButton
                 fill
-                isDisabled={isCreateRuleLoading}
+                isDisabled={isCreateRuleLoading || !isIndexPatternSettled}
                 isLoading={isCreateRuleLoading}
                 onClick={submitRuleEnabled}
                 data-test-subj="create-enable"
@@ -830,6 +831,7 @@ const CreateRulePageComponent: React.FC<{}> = () => {
       actionsStepForm,
       activeStep,
       isCreateRuleLoading,
+      isIndexPatternSettled,
       isStartingJobs,
       loading,
       ruleType,

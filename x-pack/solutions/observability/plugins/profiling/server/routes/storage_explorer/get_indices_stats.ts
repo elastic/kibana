@@ -7,6 +7,10 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
+// The OTel profiling events data streams also match `profiling-events-*`. Storage explorer only covers
+// Universal Profiling, so they are excluded wherever its events are targeted.
+export const universalProfilingEventsIndices = ['profiling-events-*', '-profiling-events-*.otel-*'];
+
 export const symbolsIndices = [
   'profiling-symbols-global',
   'profiling-symbols-private',
@@ -16,7 +20,7 @@ export const symbolsIndices = [
 ];
 
 export const stacktracesIndices = [
-  'profiling-events-*',
+  ...universalProfilingEventsIndices,
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-executables',
@@ -24,7 +28,7 @@ export const stacktracesIndices = [
 ];
 
 export const allIndices = [
-  'profiling-events-*',
+  ...universalProfilingEventsIndices,
   'profiling-metrics',
   'profiling-stacktraces',
   'profiling-sq-executables',

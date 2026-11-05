@@ -54,6 +54,15 @@ describe('newCommentSchema', () => {
     expect(() => newCommentSchema.validate(withRoute('/app/one/../two'))).not.toThrow();
   });
 
+  it('takes trail steps as clicks (the kind left out) or hovers, nothing else', () => {
+    const step = { anchor: valid.anchor, label: 'Save' };
+    const withTrail = (trail: unknown[]) => ({ ...valid, trail });
+    expect(() => newCommentSchema.validate(withTrail([step]))).not.toThrow();
+    expect(() => newCommentSchema.validate(withTrail([{ ...step, kind: 'click' }]))).not.toThrow();
+    expect(() => newCommentSchema.validate(withTrail([{ ...step, kind: 'hover' }]))).not.toThrow();
+    expect(() => newCommentSchema.validate(withTrail([{ ...step, kind: 'drag' }]))).toThrow(/kind/);
+  });
+
   describe('screenshots', () => {
     const snapshot = { mimeType: 'image/jpeg', width: 800, height: 600 };
     const withImage = (image?: string) => ({ ...valid, snapshot: { ...snapshot, image } });

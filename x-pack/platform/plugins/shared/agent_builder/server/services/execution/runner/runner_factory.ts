@@ -45,9 +45,10 @@ export class RunnerFactoryImpl implements RunnerFactory {
         logger: this.deps.logger.get('modelProvider'),
         inference,
         trackingService,
-        uiSettings,
-        savedObjects,
         searchInferenceEndpoints,
+        spaces: this.deps.spaces,
+        security: this.deps.security,
+        elasticsearch: this.deps.elasticsearch,
       }),
     };
   }

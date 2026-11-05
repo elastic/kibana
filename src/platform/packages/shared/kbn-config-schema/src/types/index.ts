@@ -8,7 +8,7 @@
  */
 
 export type { SchemaStructureEntry, SchemaValidationOptions, TypeOptions } from './type';
-export { Type } from './type';
+export { Type, setLazyConfigSchemaDisabled } from './type';
 export { AnyType } from './any_type';
 export type { ArrayOptions } from './array_type';
 export { ArrayType } from './array_type';

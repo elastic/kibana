@@ -9,6 +9,14 @@ export {
   RESOLUTION_RULE_CONFIGS,
   getResolutionRuleConfig,
   type ResolutionRuleConfig,
-  type EsqlMatchSpec,
+  type EsqlFieldMatchSpec,
 } from './rule_registry';
 export { ResolutionRulesClient, type EffectiveResolutionRule } from './rule_client';
+export {
+  CustomResolutionRuleCreate,
+  CustomResolutionRuleIdParams,
+  CustomResolutionRulePreviewRequest,
+  CustomResolutionRuleType,
+  CustomResolutionRuleUpdate,
+  CustomResolutionRulesClient,
+} from './custom';

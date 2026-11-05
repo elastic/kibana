@@ -32,15 +32,39 @@ const withEsRetry = async <T>(operation: () => Promise<T>, baseDelayMs: number):
   }
 };
 
+interface IEsqlViewsClientDeps {
+  /** Scoped to the current user. Reads go through it so Elasticsearch enforces the user's view privileges. */
+  userEsClient: ElasticsearchClient;
+  /**
+   * Runs as `kibana_system`. Writes go through it so end users need no write privileges on the views and cannot
+   * change them by calling Elasticsearch directly, which would let a view drift from its saved object. The caller
+   * must already have authorized the request, see the `manage` route privilege.
+   */
+  internalEsClient: ElasticsearchClient;
+  retryBaseDelayMs?: number;
+}
+
 export class EsqlViewsClient {
-  constructor(
-    private readonly esClient: ElasticsearchClient,
-    private readonly retryBaseDelayMs = RETRY_BASE_DELAY_MS
-  ) {}
+  private readonly userEsClient: ElasticsearchClient;
+  private readonly internalEsClient: ElasticsearchClient;
+  private readonly retryBaseDelayMs: number;
+
+  constructor({
+    userEsClient,
+    internalEsClient,
+    retryBaseDelayMs = RETRY_BASE_DELAY_MS,
+  }: IEsqlViewsClientDeps) {
+    this.userEsClient = userEsClient;
+    this.internalEsClient = internalEsClient;
+    this.retryBaseDelayMs = retryBaseDelayMs;
+  }
 
   async putView(name: string, query: string): Promise<void> {
     try {
-      await withEsRetry(() => this.esClient.esql.putView({ name, query }), this.retryBaseDelayMs);
+      await withEsRetry(
+        () => this.internalEsClient.esql.putView({ name, query }),
+        this.retryBaseDelayMs
+      );
     } catch (error) {
       throw toBoom(error, `Failed to write ES|QL view "${name}"`);
     }
@@ -52,7 +76,7 @@ export class EsqlViewsClient {
    */
   async getView(name: string): Promise<estypes.EsqlESQLView | undefined> {
     try {
-      const { views } = await this.esClient.esql.getView({ name }, { ignore: [404] });
+      const { views } = await this.userEsClient.esql.getView({ name }, { ignore: [404] });
       return Array.isArray(views) ? views.find((view) => view.name === name) : undefined;
     } catch (error) {
       throw toBoom(error, `Failed to read ES|QL view "${name}"`);
@@ -62,7 +86,7 @@ export class EsqlViewsClient {
   async deleteView(name: string): Promise<void> {
     try {
       await withEsRetry(
-        () => this.esClient.esql.deleteView({ name }, { ignore: [404] }),
+        () => this.internalEsClient.esql.deleteView({ name }, { ignore: [404] }),
         this.retryBaseDelayMs
       );
     } catch (error) {

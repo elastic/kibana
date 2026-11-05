@@ -14,8 +14,9 @@ const WATCHED_METHODS = new Set(['locator', '$', '$$', 'waitForSelector']);
 const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 /**
- * Collects the `*_SELECTOR` CSS classes from every `Eui*Selectors` object that
- * `@elastic/eui-test-helpers` exports. Empty if the installed version exports none.
+ * Collects the `*_SELECTOR` CSS classes from every component in the `selectors`
+ * object that `@elastic/eui-test-helpers` exports. Empty if the installed version
+ * exports none.
  */
 function loadEuiSelectors() {
   let helpers;
@@ -26,11 +27,10 @@ function loadEuiSelectors() {
   }
 
   const entries = [];
-  for (const [exportName, value] of Object.entries(helpers)) {
-    const match = /^(Eui\w+)Selectors$/.exec(exportName);
-    if (!match || !value || typeof value !== 'object') continue;
+  for (const [componentKey, value] of Object.entries(helpers.selectors ?? {})) {
+    if (!value || typeof value !== 'object') continue;
 
-    const component = match[1];
+    const component = `Eui${componentKey[0].toUpperCase()}${componentKey.slice(1)}`;
     for (const [key, selector] of Object.entries(value)) {
       if (
         key.endsWith('_SELECTOR') &&
@@ -75,13 +75,10 @@ module.exports = {
     schema: [],
   },
 
-  create(context) {
-    const entries = getEntries();
-    if (entries.length === 0) return {};
-
+  createOnce(context) {
     /** @param {string} value @param {import('estree').Node} node */
     function checkStringValue(value, node) {
-      const entry = findMatch(value, entries);
+      const entry = findMatch(value, getEntries());
       if (!entry) return;
       context.report({
         node,
@@ -94,6 +91,8 @@ module.exports = {
     }
 
     return {
+      // Nothing to check when the installed helpers export no selectors.
+      before: () => getEntries().length > 0,
       CallExpression(node) {
         const { callee } = node;
         if (

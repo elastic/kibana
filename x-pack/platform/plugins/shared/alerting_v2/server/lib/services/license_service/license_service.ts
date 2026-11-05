@@ -8,6 +8,7 @@
 import Boom from '@hapi/boom';
 import { PluginStart } from '@kbn/core-di';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import type { LicenseStatus, LicenseType } from '@kbn/licensing-types';
 import { inject, injectable } from 'inversify';
 import {
   ACTION_POLICIES_REQUIRED_LICENSE,
@@ -17,7 +18,14 @@ import type { AlertingServerStartDependencies } from '../../../types';
 import { ALERTING_ERROR_CODES } from '../../errors/error_codes';
 import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
 
+export interface ActionPoliciesLicenseState {
+  readonly isValid: boolean;
+  readonly type: LicenseType | null;
+  readonly status: LicenseStatus | null;
+}
+
 export interface LicenseServiceContract {
+  getActionPoliciesLicenseState(): Promise<ActionPoliciesLicenseState>;
   assertActionPoliciesLicense(): Promise<void>;
 }
 
@@ -28,9 +36,18 @@ export class LicenseService implements LicenseServiceContract {
     private readonly licensing: LicensingPluginStart
   ) {}
 
-  public async assertActionPoliciesLicense(): Promise<void> {
+  public async getActionPoliciesLicenseState(): Promise<ActionPoliciesLicenseState> {
     const license = await this.licensing.getLicense();
-    if (isActionPoliciesLicenseValid(license)) {
+    return {
+      isValid: isActionPoliciesLicenseValid(license),
+      type: license.type ?? null,
+      status: license.status ?? null,
+    };
+  }
+
+  public async assertActionPoliciesLicense(): Promise<void> {
+    const { isValid, type, status } = await this.getActionPoliciesLicenseState();
+    if (isValid) {
       return;
     }
 
@@ -40,8 +57,8 @@ export class LicenseService implements LicenseServiceContract {
         code: ALERTING_ERROR_CODES.ACTION_POLICY_LICENSE_NOT_SUPPORTED,
         details: {
           required_license: ACTION_POLICIES_REQUIRED_LICENSE,
-          current_license: license.type ?? null,
-          license_status: license.status ?? null,
+          current_license: type,
+          license_status: status,
         },
       }
     );

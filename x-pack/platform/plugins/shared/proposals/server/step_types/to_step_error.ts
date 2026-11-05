@@ -8,7 +8,6 @@
 import { ExecutionError } from '@kbn/workflows/server';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
@@ -26,7 +25,6 @@ import {
 const ERROR_TYPES: ReadonlyArray<[new (...args: never[]) => Error, string]> = [
   [ProposalForbiddenError, 'PermissionError'],
   [ProposalConflictError, 'ConflictError'],
-  [ProposalExpiredError, 'ExpiredError'],
   [ProposalNotFoundError, 'NotFoundError'],
   [ProposalInvalidActionInputError, 'ValidationError'],
 ];

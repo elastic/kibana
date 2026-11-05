@@ -35,7 +35,7 @@ export const snapshot: Command = {
       --license         Run with a 'basic' or 'trial' license [default: ${license}]
       --version         Version of ES to download [default: ${defaults.version}]
       --base-path       Path containing cache/installations [default: ${basePath}]
-      --install-path    Installation path, defaults to 'source' within base-path
+      --install-path    Installation path, defaults to the version folder within base-path
       --data-archive    Path to zip or tarball containing an ES data directory to seed the cluster with.
       --password        Sets password for elastic user [default: ${password}]
       --password.[user] Sets password for native realm user [default: ${password}]
@@ -113,6 +113,7 @@ export const snapshot: Command = {
         version: options.version,
         license: options.license,
         basePath: options.basePath,
+        installPath: options.installPath,
         log,
         useCached: options.useCached,
       });
@@ -136,6 +137,7 @@ export const snapshot: Command = {
         version: options.version,
         license: options.license,
         basePath: options.basePath,
+        installPath: options.installPath,
         log,
         useCached: options.useCached,
         password: options.password,

@@ -279,6 +279,16 @@ export const collectTemplateDefinitionErrors = (template: ConversationTemplate):
       errors.push(`field "${fieldName}": "options" is only valid for SELECT`);
     }
 
+    // Telemetry reports the template's options, so only SELECT fields can opt in.
+    if (def.report_changes !== undefined && inputType !== 'SELECT') {
+      errors.push(`field "${fieldName}": "report_changes" is only valid for SELECT`);
+    }
+
+    // Telemetry reports the field name as a key of `changed_fields`, where a dot would nest it.
+    if (def.report_changes !== undefined && fieldName.includes('.')) {
+      errors.push(`field "${fieldName}": "report_changes" is only valid for a name without dots`);
+    }
+
     // Validate default_value type matches input_type
     if (def.default_value !== undefined) {
       const msgs = collectFieldViolations(fieldName, def, def.default_value, true);

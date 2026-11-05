@@ -16,7 +16,7 @@ import { ACTION_POLICY_RESPONSE } from './action_policy_oas_shared_examples';
 
 export const MATCH_ACTION_POLICIES_REQUEST: MatchActionPoliciesBody = {
   rule: {
-    tags: ['production'],
+    routing_tags: ['production'],
   },
 };
 

@@ -75,14 +75,14 @@ describe('useGapAutoFillCapabilities', () => {
     mockUseUserPrivileges.mockReturnValue({
       rulesPrivileges: {
         rules: { read: true, edit: false },
-        rulesManagementSettings: { edit: true },
+        rulesManagementSettings: { edit: false },
       },
     });
 
     const { result } = renderHook(() => useGapAutoFillCapabilities());
 
     expect(result.current.canAccessGapAutoFill).toBe(true);
-    expect(result.current.canEditGapAutoFill).toBe(true);
+    expect(result.current.canEditGapAutoFill).toBe(false);
   });
 
   it('denies access when rule gaps auto-fill feature is disabled', () => {

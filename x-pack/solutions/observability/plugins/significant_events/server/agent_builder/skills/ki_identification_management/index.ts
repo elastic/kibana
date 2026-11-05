@@ -9,20 +9,26 @@ import { defineSkillType } from '@kbn/agent-builder-server/skills/type_definitio
 import type { EbtTelemetryClient } from '../../../lib/telemetry/ebt';
 import type { SignificantEventsMaintenanceService } from '../../../lib/maintenance/maintenance_service';
 import type { SignificantEventsKIsOnboardingClient } from '../../../lib/workflows/onboarding_workflow_client';
+import type { GetScopedClients } from '../../../routes/types';
 import { createKiIdentificationCancelTool } from '../../tools/ki_identification_cancel/tool';
 import { createKiIdentificationStartTool } from '../../tools/ki_identification_start/tool';
 import { createKiIdentificationStatusTool } from '../../tools/ki_identification_status/tool';
+import type { SignificantEventsServer } from '../../../types';
 import description from './description.text';
 import content from './skill.md.text';
 
 export const createKiIdentificationManagementSkill = ({
+  server,
   telemetry,
   streamsKIsOnboardingClient,
   maintenanceService,
+  getScopedClients,
 }: {
+  server: Pick<SignificantEventsServer, 'security'>;
   telemetry: EbtTelemetryClient;
   streamsKIsOnboardingClient: SignificantEventsKIsOnboardingClient;
   maintenanceService: SignificantEventsMaintenanceService;
+  getScopedClients: GetScopedClients;
 }) =>
   defineSkillType({
     id: 'ki-identification-management',
@@ -34,12 +40,14 @@ export const createKiIdentificationManagementSkill = ({
     description,
     content,
     getInlineTools: () => [
-      createKiIdentificationCancelTool({ streamsKIsOnboardingClient }),
+      createKiIdentificationCancelTool({ server, streamsKIsOnboardingClient, getScopedClients }),
       createKiIdentificationStartTool({
+        server,
         telemetry,
         streamsKIsOnboardingClient,
         maintenanceService,
+        getScopedClients,
       }),
-      createKiIdentificationStatusTool({ streamsKIsOnboardingClient }),
+      createKiIdentificationStatusTool({ server, streamsKIsOnboardingClient, getScopedClients }),
     ],
   });

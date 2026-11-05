@@ -137,6 +137,11 @@ export const useConversationReadOnly = () => {
   };
 };
 
+export const useIsSharedConversation = (): boolean => {
+  const { conversation } = useConversation();
+  return isSharedConversation(conversation?.access_control);
+};
+
 export const useHasActiveConversation = () => {
   const hasPersistedConversation = useHasPersistedConversation();
   const { conversation } = useConversation();

@@ -20,12 +20,12 @@ import type { ChangePointAnnotation, FieldConfig } from './change_point_detectio
 export const useCommonChartProps = ({
   annotation,
   fieldConfig,
-  previewMode = false,
+  isInteractive = true,
   bucketInterval,
 }: {
   fieldConfig: FieldConfig;
   annotation: ChangePointAnnotation;
-  previewMode?: boolean;
+  isInteractive?: boolean;
   bucketInterval: string;
 }): Partial<TypedLensByValueInput> => {
   const { dataView } = useDataSource();
@@ -64,7 +64,7 @@ export const useCommonChartProps = ({
     ];
   }, [dataView.id, annotation.group, resultFilters]);
 
-  const gridAndLabelsVisibility = !previewMode;
+  const gridAndLabelsVisibility = isInteractive;
 
   const attributes = useMemo<TypedLensByValueInput['attributes']>(() => {
     return {

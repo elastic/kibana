@@ -27,6 +27,7 @@ export const getT3Analyst: () => Omit<Role, 'name'> = () => {
             'host_isolation_exceptions_all',
             'blocklist_all',
             'endpoint_exceptions_all',
+            'custom_yara_signatures_all',
             'policy_management_read',
             'host_isolation_all',
             'process_operations_all',

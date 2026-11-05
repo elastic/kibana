@@ -2706,6 +2706,7 @@
         },
         "job_id": "",
         "max_empty_searches": "",
+        "max_consecutive_extraction_failures": "",
         "query": {
           "__scope_link": "GLOBAL.query"
         },
@@ -5633,6 +5634,7 @@
           },
           "job_id": "",
           "max_empty_searches": "",
+          "max_consecutive_extraction_failures": "",
           "query": {
             "__scope_link": "GLOBAL.query"
           },

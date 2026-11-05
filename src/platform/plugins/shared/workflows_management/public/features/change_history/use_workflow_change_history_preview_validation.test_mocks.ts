@@ -94,10 +94,19 @@ jest.mock('@kbn/code-editor', () => {
   const { setPreviewValidationMarkerChangeListener } = jest.requireActual(
     './use_workflow_change_history_preview_validation_test_harness'
   ) as typeof import('./use_workflow_change_history_preview_validation_test_harness');
+  // Spread the real module rather than replacing it outright: `@kbn/workflows-ui`'s barrel
+  // export pulls in `workflow_monaco_layout_options.ts`, which reads static properties off
+  // `monaco.editor` (e.g. `ShowLightbulbIconMode`) at module load time. A narrower mock here
+  // silently breaks that unrelated module the next time it starts reading something new off
+  // `monaco.editor`.
+  const actual = jest.requireActual('@kbn/code-editor') as typeof import('@kbn/code-editor');
 
   return {
+    ...actual,
     monaco: {
+      ...actual.monaco,
       editor: {
+        ...actual.monaco.editor,
         onDidChangeMarkers: jest.fn((listener: (uris: monaco.Uri[]) => void) => {
           setPreviewValidationMarkerChangeListener(listener);
           return { dispose: jest.fn() };

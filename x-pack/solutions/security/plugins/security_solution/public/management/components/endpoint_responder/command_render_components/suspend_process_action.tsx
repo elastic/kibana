@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import React, { memo, useMemo } from 'react';
-import { endpointActionResponseCodes } from '../lib/endpoint_action_response_codes';
-import { KillSuspendProcessActionResult } from '../../kill_process_action_result';
+import { memo, useMemo } from 'react';
 import type { SuspendProcessRequestBody } from '../../../../../common/api/endpoint';
 import { parsedKillOrSuspendParameter } from '../lib/utils';
 import type {
@@ -41,7 +39,7 @@ export const SuspendProcessActionResult = memo<
       : undefined;
   }, [command.args.args, command.commandDefinition?.meta]);
 
-  const { result, actionDetails } = useConsoleActionSubmitter<
+  return useConsoleActionSubmitter<
     SuspendProcessRequestBody,
     SuspendProcessActionOutputContent,
     ResponseActionParametersWithProcessData
@@ -56,25 +54,6 @@ export const SuspendProcessActionResult = memo<
     actionCreator,
     actionRequestBody,
     dataTestSubj: 'suspendProcess',
-  });
-
-  if (actionDetails?.isCompleted && actionDetails.wasSuccessful) {
-    return (
-      <ResultComponent
-        title={
-          endpointActionResponseCodes[
-            actionDetails?.outputs?.[actionDetails.agents[0]]?.content.code ?? ''
-          ]
-        }
-      >
-        <KillSuspendProcessActionResult
-          action={actionDetails}
-          data-test-subj="killProcessResponseOutput"
-        />
-      </ResultComponent>
-    );
-  }
-
-  return result;
+  }).result;
 });
 SuspendProcessActionResult.displayName = 'SuspendProcessActionResult';

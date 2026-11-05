@@ -235,23 +235,14 @@ const clearEmptyCollapseFns: NormalizerConfig<PartitionAttributes> = {
   },
 };
 
-export const normalizePartition = mergeNormalizers<PartitionAttributes>(
-  [
-    getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
-      layerRemapping: [[visualization.layers[0]?.layerId, DEFAULT_LAYER_ID]],
-      columnRemapping: getColumnRemapping(visualization),
-    })),
-    alignId,
-    clearEmptySecondaryGroups,
-    clearEmptyCollapseFns,
-    alignLegacyTypes,
-    getColorMappingNormalizer<PartitionAttributes>('state.visualization.layers.*.colorMapping'),
-  ],
-  [
-    // Re-apply at the end of the chain because alignLegacyTypes may inject a
-    // default colorMapping (with touched: false) after the common normalizer's
-    // ignore pass has already run.
-    'state.visualization.layers.*.colorMapping.assignments.*.touched',
-    'state.visualization.layers.*.colorMapping.specialAssignments.*.touched',
-  ]
-);
+export const normalizePartition = mergeNormalizers<PartitionAttributes>([
+  getCommonNormalizer<PartitionAttributes>(({ state: { visualization } }) => ({
+    layerRemapping: [[visualization.layers[0]?.layerId, DEFAULT_LAYER_ID]],
+    columnRemapping: getColumnRemapping(visualization),
+  })),
+  alignId,
+  clearEmptySecondaryGroups,
+  clearEmptyCollapseFns,
+  alignLegacyTypes,
+  getColorMappingNormalizer<PartitionAttributes>('state.visualization.layers.*.colorMapping'),
+]);

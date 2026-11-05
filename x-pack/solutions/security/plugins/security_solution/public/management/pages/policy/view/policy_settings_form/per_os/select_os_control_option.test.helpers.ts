@@ -6,6 +6,7 @@
  */
 
 import type { RenderResult } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 /**
@@ -22,4 +23,25 @@ export const selectOsControlOption = async (
 
   await user.click(renderResult.getByTestId(selectTestSubj));
   await user.click(await renderResult.findByRole('option', { name: optionName }));
+};
+
+/** Opens an OS select and scrolls after EUI's listener-registration delay, using fake timers. */
+export const openOsControlAndScrollPage = async (
+  renderResult: RenderResult,
+  selectTestSubj: string
+): Promise<void> => {
+  const user = userEvent.setup({
+    advanceTimers: jest.advanceTimersByTime,
+    pointerEventsCheck: 0,
+  });
+
+  await user.click(renderResult.getByTestId(selectTestSubj));
+  await renderResult.findByRole('listbox');
+  // EuiInputPopover waits 500ms before registering its scroll listener.
+  await act(async () => {
+    jest.advanceTimersByTime(500);
+  });
+  await act(async () => {
+    fireEvent.scroll(renderResult.container);
+  });
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { getSavedObjectKqlFilter, parseArrayFilters, QuerySchema } from './common';
+import { getSavedObjectKqlFilter, parseArrayFilters, parseMappingKey, QuerySchema } from './common';
 
 describe('common utils', () => {
   it('tests parseArrayFilters', () => {
@@ -107,5 +107,21 @@ describe('getSavedObjectKqlFilter', () => {
     expect(getSavedObjectKqlFilter({ field: 'tags', values: ['"apm', 'synthetics'] })).toBe(
       'synthetics-monitor-multi-space.attributes.tags:("\\"apm" OR "synthetics")'
     );
+  });
+});
+
+describe('parseMappingKey', () => {
+  it.each([
+    ['name', 'name.keyword'],
+    ['tags', 'tags'],
+    ['tags.keyword', 'tags'],
+    ['type', 'type.keyword'],
+    ['schedule', 'schedule.number'],
+    ['schedule.keyword', 'schedule.number'],
+    ['project_id.keyword', 'project_id'],
+    ['name.keyword', 'name.keyword'],
+    ['created_at', 'created_at'],
+  ])('maps %s to %s', (input, expected) => {
+    expect(parseMappingKey(input)).toBe(expected);
   });
 });

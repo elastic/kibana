@@ -51,13 +51,13 @@ const observabilityCapabilityMessages = [
   i18n.translate(
     'xpack.agentBuilder.conversations.newConversationPrompt.observability.correlateLogsAndMetricsDetail',
     {
-      defaultMessage: 'I can correlate logs and metrics',
+      defaultMessage: 'I can correlate logs, metrics and traces',
     }
   ),
   i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.observability.exploreApmTracesDetail',
+    'xpack.agentBuilder.conversations.newConversationPrompt.observability.troubleshootInfrastructureIssues',
     {
-      defaultMessage: 'I can explore APM traces',
+      defaultMessage: 'I can troubleshoot infrastructure issues',
     }
   ),
 ] as const;
@@ -70,21 +70,33 @@ const securityCapabilityMessages = [
     }
   ),
   i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.security.investigateDetectionsDetail',
+    'xpack.agentBuilder.conversations.newConversationPrompt.security.investigateAttacksDetail',
     {
-      defaultMessage: 'I can investigate detections',
+      defaultMessage: 'I can investigate attacks',
     }
   ),
   i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.security.analyzeThreatsDetail',
+    'xpack.agentBuilder.conversations.newConversationPrompt.security.buildDetectionRulesDetail',
     {
-      defaultMessage: 'I can analyze threats',
+      defaultMessage: 'I can build detection rules',
     }
   ),
   i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.security.exploreEndpointFindingsDetail',
+    'xpack.agentBuilder.conversations.newConversationPrompt.security.summarizeOpenCasesDetail',
     {
-      defaultMessage: 'I can explore endpoint findings',
+      defaultMessage: 'I can summarize open cases',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.security.investigateEntityOrEndpointRiskDetail',
+    {
+      defaultMessage: 'I can investigate entity or endpoint risk',
+    }
+  ),
+  i18n.translate(
+    'xpack.agentBuilder.conversations.newConversationPrompt.security.createWorkflowsDetail',
+    {
+      defaultMessage: 'I can create workflows',
     }
   ),
 ] as const;
@@ -143,40 +155,12 @@ const vectordbCapabilityMessages = [
   ),
 ] as const;
 
-const workplaceaiCapabilityMessages = [
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.searchKnowledgeBaseDetail',
-    {
-      defaultMessage: 'I can search your knowledge base',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.summarizeDocumentsDetail',
-    {
-      defaultMessage: 'I can summarize documents',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.findRelevantContentDetail',
-    {
-      defaultMessage: 'I can find relevant content',
-    }
-  ),
-  i18n.translate(
-    'xpack.agentBuilder.conversations.newConversationPrompt.workplaceai.answerFromYourDataDetail',
-    {
-      defaultMessage: 'I can answer from your data',
-    }
-  ),
-] as const;
-
 const CAPABILITY_MESSAGES_BY_SOLUTION: Record<SolutionView, readonly string[]> = {
   classic: classicCapabilityMessages,
   oblt: observabilityCapabilityMessages,
   security: securityCapabilityMessages,
   es: elasticsearchCapabilityMessages,
   vectordb: vectordbCapabilityMessages,
-  workplaceai: workplaceaiCapabilityMessages,
 };
 
 export const getCapabilityMessagesForSolution = (solution: SolutionView): readonly string[] =>

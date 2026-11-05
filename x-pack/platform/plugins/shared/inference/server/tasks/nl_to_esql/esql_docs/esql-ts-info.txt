@@ -1,0 +1,90 @@
+# TS-INFO
+
+The `TS_INFO` processing command retrieves information about individual time series available in time series data streams, along with the dimension values that identify each series. It returns one row per metric and time series combination, including `metric_name`, `data_stream`, `unit`, `metric_type`, `field_type`, `dimension_fields`, and a JSON-encoded `dimensions` column.
+
+## Syntax
+
+`TS_INFO`
+
+### Parameters
+
+`TS_INFO` takes no parameters.
+
+## Examples
+
+List every metric and time series pair in the targeted data stream, sorted by metric name and dimension values:
+
+```esql
+TS k8s
+| TS_INFO
+| SORT metric_name, dimensions
+```
+
+Discover time series matching a `cluster` filter:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| TS_INFO
+| SORT metric_name, dimensions
+```
+
+Select only metric names and dimension values:
+
+```esql
+TS k8s
+| WHERE cluster == "prod"
+| TS_INFO
+| KEEP metric_name, dimensions
+| SORT metric_name, dimensions
+```
+
+Filter metadata rows by metric type:
+
+```esql
+TS k8s
+| TS_INFO
+| WHERE metric_type == "gauge"
+| SORT metric_name, dimensions
+```
+
+Count distinct time series per metric:
+
+```esql
+TS k8s
+| TS_INFO
+| STATS series_count = COUNT(*) BY metric_name
+| SORT metric_name
+```
+
+series_count:long | metric_name:keyword
+9 | network.eth0.rx
+9 | network.eth0.tx
+9 | network.total_bytes_in
+9 | network.total_cost
+
+Count distinct metrics per time series:
+
+```esql
+TS k8s
+| TS_INFO
+| STATS metric_count = COUNT_DISTINCT(metric_name) BY dimensions
+| SORT dimensions
+```
+
+metric_count:long | dimensions:keyword
+4 | {"cluster":"prod","pod":"one","region":"[eu, us]"}
+4 | {"cluster":"prod","pod":"three","region":"[eu, us]"}
+4 | {"cluster":"prod","pod":"two","region":"[eu, us]"}
+4 | {"cluster":"qa","pod":"one"}
+4 | {"cluster":"qa","pod":"three"}
+4 | {"cluster":"qa","pod":"two"}
+4 | {"cluster":"staging","pod":"one","region":"us"}
+4 | {"cluster":"staging","pod":"three","region":"us"}
+4 | {"cluster":"staging","pod":"two","region":"us"}
+
+## Limitations
+
+- `TS_INFO` can only be used after a `TS` source command. Using it after `FROM` or other source commands produces an error.
+- `TS_INFO` must appear before pipeline-breaking commands such as `STATS`, `SORT`, or `LIMIT`.
+- The output replaces the original table: downstream commands operate on the metadata rows, not the raw time series documents.

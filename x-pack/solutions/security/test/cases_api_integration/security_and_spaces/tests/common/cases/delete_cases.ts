@@ -16,7 +16,7 @@ import {
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/alerts';
 import type { FtrProviderContext } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/ftr_provider_context';
 import {
-  getFilesAttachmentReq,
+  getUnifiedFilesAttachmentReq,
   getPostCaseRequest,
   postCommentUserReq,
 } from '@kbn/test-suites-xpack-platform/cases_api_integration/common/lib/mock';
@@ -521,8 +521,8 @@ export default ({ getService }: FtrProviderContext): void => {
             supertest: supertestWithoutAuth,
             caseId: postedCase.id,
             params: [
-              getFilesAttachmentReq({
-                externalReferenceId: createdFile.file.id,
+              getUnifiedFilesAttachmentReq({
+                attachmentId: createdFile.file.id,
                 owner: 'securitySolution',
               }),
             ],
@@ -753,12 +753,12 @@ const createCaseWithFiles = async ({
     supertest,
     caseId: postedCase.id,
     params: [
-      getFilesAttachmentReq({
-        externalReferenceId: files[0].create.file.id,
+      getUnifiedFilesAttachmentReq({
+        attachmentId: files[0].create.file.id,
         owner,
       }),
-      getFilesAttachmentReq({
-        externalReferenceId: files[1].create.file.id,
+      getUnifiedFilesAttachmentReq({
+        attachmentId: files[1].create.file.id,
         owner,
       }),
     ],

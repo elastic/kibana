@@ -10,6 +10,8 @@ import { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttri
 import { actionPolicySavedObjectAttributesSchema as actionPolicySavedObjectAttributesSchemaV2 } from './v2';
 import { actionPolicySavedObjectAttributesSchemaV3 } from './v3';
 import { actionPolicySavedObjectAttributesSchemaV4 } from './v4';
+import { actionPolicySavedObjectAttributesSchemaV5 } from './v5';
+import { actionPolicySavedObjectAttributesSchemaV6 } from './v6';
 
 export type ActionPolicySavedObjectAttributesV1 = TypeOf<
   typeof actionPolicySavedObjectAttributesSchemaV1
@@ -20,7 +22,7 @@ export type ActionPolicySavedObjectAttributesV2 = TypeOf<
 >;
 
 export type ActionPolicySavedObjectAttributes = TypeOf<
-  typeof actionPolicySavedObjectAttributesSchemaV4
+  typeof actionPolicySavedObjectAttributesSchemaV6
 >;
 
 export {
@@ -28,4 +30,6 @@ export {
   actionPolicySavedObjectAttributesSchemaV2,
   actionPolicySavedObjectAttributesSchemaV3,
   actionPolicySavedObjectAttributesSchemaV4,
+  actionPolicySavedObjectAttributesSchemaV5,
+  actionPolicySavedObjectAttributesSchemaV6,
 };

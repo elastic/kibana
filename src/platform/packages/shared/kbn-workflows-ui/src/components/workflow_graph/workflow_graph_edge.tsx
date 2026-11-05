@@ -13,6 +13,7 @@ import { EdgeLabelRenderer } from '@xyflow/react';
 import React, { memo } from 'react';
 import type { EdgeBranchType } from '@kbn/workflows';
 import { computeEdgePath } from './compute_edge_path';
+import { EDGE_LABEL_MAX_CHARS } from './edge_label_metrics';
 
 interface WorkflowEdgeData extends Record<string, unknown> {
   readonly label?: string;
@@ -32,9 +33,14 @@ interface WorkflowEdgeData extends Record<string, unknown> {
    * arrowhead so the in-edge and out-edge form one continuous line mid-lane.
    */
   readonly hideEndMarker?: boolean;
+  /**
+   * True on the edge from a step to its fallback lane head. Renders as always-
+   * dashed; stroke colour transitions from `borderBaseProminent` to `danger`
+   * once any node in the lane has a step-execution record (ADR-0010 decision 9).
+   */
+  readonly isFailure?: boolean;
 }
 
-const LABEL_TRUNCATE = 24;
 // Branch labels are annotations on the graph and must paint above the container
 // frames they sit inside — a foreach/while body is a 50%-opaque panel that would
 // otherwise veil them. `.react-flow__edgelabel-renderer` ships no z-index, and it
@@ -73,18 +79,28 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
     points: edgeData?.points,
     branchType: edgeData?.branchType,
     isMerge: edgeData?.isMerge,
+    isFailure: edgeData?.isFailure,
   });
 
   const traversed = edgeData?.traversed ?? false;
-  // Traversed edges use the `success` token to match the node's success state.
-  // Non-traversed edges use `borderBaseProminent` — two shade steps darker than
-  // `borderBasePlain` so edges read as the stronger element on the canvas.
-  const stroke = traversed ? euiTheme.colors.success : euiTheme.colors.borderBaseProminent;
+  const isFailure = edgeData?.isFailure ?? false;
+  // Failure edges: always dashed; colour = danger when the lane has run, neutral
+  // otherwise (ADR-0010 decision 9). All other edges: success when traversed.
+  const stroke = isFailure
+    ? traversed
+      ? euiTheme.colors.danger
+      : euiTheme.colors.borderBaseProminent
+    : traversed
+    ? euiTheme.colors.success
+    : euiTheme.colors.borderBaseProminent;
+  const strokeDasharray = isFailure ? '6 3' : undefined;
   const strokeWidth = 1;
 
   const fullLabel = edgeData?.label ?? '';
   const truncated =
-    fullLabel.length > LABEL_TRUNCATE ? `${fullLabel.slice(0, LABEL_TRUNCATE - 1)}…` : fullLabel;
+    fullLabel.length > EDGE_LABEL_MAX_CHARS
+      ? `${fullLabel.slice(0, EDGE_LABEL_MAX_CHARS - 1)}…`
+      : fullLabel;
 
   return (
     <>
@@ -106,7 +122,7 @@ function WorkflowGraphEdgeInner(props: EdgeProps) {
       </defs>
       <path
         id={id}
-        style={{ ...style, stroke, strokeWidth, fill: 'none' }}
+        style={{ ...style, stroke, strokeWidth, fill: 'none', strokeDasharray }}
         className="react-flow__edge-path"
         d={edgePath}
         markerEnd={edgeData?.hideEndMarker ? undefined : `url(#arrow-${id})`}
@@ -160,7 +176,8 @@ function edgePropsAreEqual(prev: EdgeProps, next: EdgeProps): boolean {
     pd?.points === nd?.points &&
     pd?.branchType === nd?.branchType &&
     pd?.isMerge === nd?.isMerge &&
-    pd?.hideEndMarker === nd?.hideEndMarker
+    pd?.hideEndMarker === nd?.hideEndMarker &&
+    pd?.isFailure === nd?.isFailure
   );
 }
 

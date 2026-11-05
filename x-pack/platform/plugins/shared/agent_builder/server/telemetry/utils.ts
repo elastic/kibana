@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RoundModelUsageStats } from '@kbn/agent-builder-common';
 import { isInternalTool, ToolType } from '@kbn/agent-builder-common/tools';
 import type {
   SkillInvocationOrigin,
@@ -120,3 +121,15 @@ function solutionAreaFromBasePath(basePath: string): SkillSolutionArea {
   }
   return 'unknown';
 }
+
+/**
+ * Distinct models behind a round's LLM calls. Reported as flat fields because the telemetry index
+ * flattens `properties`, which cannot pair per-model values (model with its tokens).
+ * Empty for rounds without the per-connector breakdown, or whose connectors report no model.
+ */
+export const getModelsForTelemetry = ({
+  connectors,
+}: RoundModelUsageStats): { models?: string[]; models_count?: number } => {
+  const models = [...new Set((connectors ?? []).flatMap(({ model }) => (model ? [model] : [])))];
+  return models.length > 0 ? { models, models_count: models.length } : {};
+};

@@ -49,6 +49,12 @@ const createStartContract = (): Start => {
 
 export { createSearchSourceMock } from '../common/search/search_source/mocks';
 export { getCalculateAutoTimeExpression } from '../common/search/aggs';
+export {
+  getPersistedSearchSessionSavedObjectAttributesMock,
+  getSearchSessionEBTManagerMock,
+  getSessionsClientMock,
+} from './search/session/mocks';
+export { createSearchUsageCollectorMock } from './search/collectors/mocks';
 
 export const dataPluginMock = {
   createSetupContract,

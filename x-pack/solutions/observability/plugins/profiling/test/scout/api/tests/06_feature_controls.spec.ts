@@ -25,8 +25,8 @@ import {
 // test is authorization (403 vs 200), so exercising it against real data is equivalent and
 // more robust across deployments.
 //
-// Time-unit caveat: the profiling routes are inconsistent. `functions`/`flamechart` divide
-// the params by 1000 (so they expect milliseconds), while the `topn/*` routes pass them
+// Time-unit caveat: the profiling routes are inconsistent. `functions`/`flamechart`/`schemas`
+// divide the params by 1000 (so they expect milliseconds), while the `topn/*` routes pass them
 // straight into an `epoch_second` range filter (so they expect seconds). Sending ms to the
 // topN routes makes the lower bound resolve to year ~55175, which overflows the `date_nanos`
 // events index on self-managed stateful and returns 500. So topN endpoints get seconds.
@@ -42,7 +42,7 @@ const buildEndpoints = (): string[] => {
     timeTo: String(TIME_TO_S),
     kuery: '',
   });
-  // functions/flamechart routes expect epoch milliseconds.
+  // functions/flamechart/schemas routes expect epoch milliseconds.
   const flameRange = new URLSearchParams({
     timeFrom: String(TIME_FROM_MS),
     timeTo: String(TIME_TO_MS),
@@ -64,6 +64,8 @@ const buildEndpoints = (): string[] => {
     `${profilingApiEndpoints.topNThreads}?${topNRange}`,
     `${profilingApiEndpoints.topNFunctions}?${functionsRange}`,
     `${profilingApiEndpoints.flamechart}?${flameRange}`,
+    `${profilingApiEndpoints.schemas}?${flameRange}`,
+    profilingApiEndpoints.status,
     profilingApiEndpoints.setupInstructions,
   ];
 };

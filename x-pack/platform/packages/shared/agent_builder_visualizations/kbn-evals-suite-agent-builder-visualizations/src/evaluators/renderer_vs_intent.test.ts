@@ -64,7 +64,7 @@ describe('createRendererVsIntentEvaluator', () => {
       visualizations: [{ esql: 'FROM a', renderer: 'vega' }],
     });
 
-    expect(result.score).toBe(1);
+    expect(result.score).toBeNull();
     expect(result.label).toBe('skipped');
   });
 });

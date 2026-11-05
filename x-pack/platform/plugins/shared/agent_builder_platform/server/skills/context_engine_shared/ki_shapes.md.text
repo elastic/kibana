@@ -30,7 +30,7 @@ Systemic kinds, one per strategy, produced by an automation over a corpus:
 | `document` | document |
 | `event` | significant document in a stream |
 | `fact` | discrete claim inside a document |
-| `entity` | recurring unit (customer, product, host, case) enriched from one or more indices |
+| `entity` | recurring unit (customer, product, host, service) enriched from one or more indices |
 | `detection` | named runnable condition |
 | `feature` | inventory entry with a subtype and a stable slug |
 
@@ -63,7 +63,6 @@ written by the template that owns the strategy:
 | `attributes.unit_key` | The field that identifies one unit of a unit profile, so a re-run replaces the same KI. | `unit-profile-template` |
 | `attributes.unit` | The value of `unit_key` this KI is about. | `unit-profile-template` |
 | `attributes.doc_count` | How many source rows the unit profile aggregated. | `unit-profile-template` |
-| `attributes.distinct_breakdown` | How many distinct values of the breakdown field the unit has. | `unit-profile-template` |
 | `attributes.prevalence` | For a targeted KI, the count, denominator and window of the finding behind it, as one string. | `targeted-ki-writer` |
 | `attributes.topics` | The themes a document KI covers, for facet filtering. | `document-template` |
 
@@ -94,8 +93,8 @@ Every entry carries `relation: derived_from`. Values that are not identifiers st
 
 A targeted KI carries at least one `trace://` or `conversation://` reference, or an
 `attributes.error_text`. A systemic KI references its source index:
-every generated template writes `index://`, the unit profile adds its catalog index when that is
-a separate one, and the document template adds `doc://` because its unit is a document.
+every generated template writes `index://`, and the document template adds `doc://` because its
+unit is a document.
 
 ## Structured values belong in both `content` and `attributes`
 
@@ -119,8 +118,9 @@ id — never by indexing into the backing store directly.
   document (a revision) carrying the same `id`, and `deleteKi` adds one more whose
   `governance.lifecycle.status` is `deleted`. One KI can therefore be several documents.
 
-To read the current state, take the newest document per `id` and drop the KI when that newest
-document's `governance.lifecycle.status` is `deleted`. A plain `FROM ... | WHERE tags == ...` on a
-data stream returns every revision, deleted ones included. Read AI indices with
-`platform.context_engine.query_ai_indices`, which adds the space filter the backing store does not
-apply on its own.
+The current state is the newest document per `id`, dropped when that newest document's
+`governance.lifecycle.status` is `deleted` or its `expires_at` has passed. Read AI indices with
+`platform.context_engine.query_ai_indices`, which applies that rule and the space filter the
+backing store does not apply on its own, and drops `governance` unless the query names it; a plain
+`FROM ... | WHERE tags == ...` through any other tool returns every revision, deleted ones
+included.

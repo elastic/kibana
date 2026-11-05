@@ -15,6 +15,7 @@ export { getElasticsearchConnectors } from './spec/elasticsearch';
 export { getKibanaConnectors } from './spec/kibana';
 export { resolveKibanaStepTypeAlias } from './spec/kibana/aliases';
 export * from './spec/schema';
+export * from './spec/ignored_kibana_fetcher';
 export {
   builtInStepDefinitions,
   getBuiltInStepDefinition,
@@ -25,6 +26,7 @@ export {
   builtInTriggerDefinitions,
   getBuiltInTriggerDefinition,
 } from './spec/builtin_trigger_definitions';
+export { getTriggerName } from './common/get_trigger_name';
 export {
   builtinWorkflowInputDefinitions,
   builtinWorkflowInputDefinitionRefValuesForZod,
@@ -61,6 +63,7 @@ export * from './common/privileges';
 export * from './common/utils';
 export * from './common/step_types';
 export * from './common/hitl';
+export * from './common/hitl_slack_interactive';
 export * from './common/wait_for_approval';
 export {
   getManagedWorkflowSelectorVisibilityContext,
@@ -119,12 +122,14 @@ export {
   actionCategorySchema,
   actionImpactSchema,
   actionMetadataSchema,
+  actionSubjectKindSchema,
 } from './managed/action_workflow';
 export type {
   ActionApprovalPolicy,
   ActionCategory,
   ActionImpact,
   ActionMetadata,
+  ActionSubjectKind,
 } from './managed/action_workflow';
 
 export {
@@ -143,6 +148,8 @@ export {
   workflowAccessControlSchema,
   storedWorkflowAccessControlSchema,
   getWorkflowPermissions,
+  getWorkflowAccessDecisions,
+  toWorkflowPermissions,
 } from './common/access_control';
 export type {
   WorkflowAccessControl,

@@ -29,6 +29,7 @@ import { isTerminalStatus } from '@kbn/workflows';
 import { useWorkflowsCapabilities } from '@kbn/workflows-ui';
 import { CancelExecutionButton } from './cancel_execution_button';
 import { StepExecutionsTruncatedCallout } from './step_executions_truncated_callout';
+import type { WaitingStepAction } from './waiting_step_action_panel';
 import { WorkflowStepExecutionTree } from './workflow_step_execution_tree';
 import { useKibana } from '../../../hooks/use_kibana';
 import type { RerunWorkflowExecutionParams } from '../../../pages/executions/build_replay_inputs_from_execution_context';
@@ -62,6 +63,7 @@ export interface WorkflowExecutionPanelProps {
   isLoadingChildExecutions?: boolean;
   /** Close step detail panel before opening Agent Builder diagnose chat. */
   onBeforeDiagnose?: () => void;
+  waitingAction?: WaitingStepAction;
 }
 export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
   ({
@@ -77,6 +79,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
     childExecutionsMap,
     isLoadingChildExecutions,
     onBeforeDiagnose,
+    waitingAction,
   }) => {
     const styles = useMemoCss(componentStyles);
     const showCancelButton = Boolean(
@@ -104,7 +107,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               aria-label={i18nTexts.backToExecutions}
               data-test-subj="workflowBackToExecutionsLink"
             >
-              <EuiPanel paddingSize="m" hasShadow={false} css={styles.linkCss}>
+              <EuiPanel
+                paddingSize="m"
+                hasShadow={false}
+                hasBorder={false}
+                borderRadius="none"
+                css={styles.linkCss}
+              >
                 <EuiFlexGroup alignItems="center" justifyContent="flexStart" gutterSize="s">
                   <EuiFlexItem grow={false}>
                     <EuiIcon type="sortLeft" aria-hidden={true} />
@@ -122,7 +131,13 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         )}
 
         <EuiFlexItem css={{ overflow: 'hidden' }}>
-          <EuiPanel paddingSize="m" hasShadow={false} css={{ overflowY: 'auto' }}>
+          <EuiPanel
+            paddingSize="m"
+            hasShadow={false}
+            hasBorder={false}
+            borderRadius="none"
+            css={{ overflowY: 'auto' }}
+          >
             {execution && (
               <StepExecutionsTruncatedCallout
                 executionId={execution.id}
@@ -139,6 +154,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
               childExecutionsMap={childExecutionsMap}
               isLoadingChildExecutions={isLoadingChildExecutions}
               onBeforeDiagnose={onBeforeDiagnose}
+              waitingAction={waitingAction}
             />
           </EuiPanel>
         </EuiFlexItem>
@@ -146,7 +162,7 @@ export const WorkflowExecutionPanel = React.memo<WorkflowExecutionPanelProps>(
         {execution && (showCancelButton || showDoneButton) && (
           <EuiFlexItem grow={false}>
             <EuiHorizontalRule margin="none" />
-            <EuiPanel paddingSize="m" hasShadow={false}>
+            <EuiPanel paddingSize="m" hasShadow={false} hasBorder={false} borderRadius="none">
               {showCancelButton ? (
                 <CancelExecutionButton
                   executionId={execution.id}

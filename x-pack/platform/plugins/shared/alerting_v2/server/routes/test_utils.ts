@@ -32,6 +32,7 @@ export function createAlertingRouteContext(): {
   const { loggerService, mockLogger } = createLoggerService();
 
   const ctx: AlertingRouteContext = {
+    request: httpServerMock.createKibanaRequest(),
     response: httpServerMock.createResponseFactory(),
     logger: loggerService.forSubsystem('routes'),
     settings: settingsService,

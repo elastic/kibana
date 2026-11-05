@@ -13,6 +13,7 @@ import type {
   TaskPriority,
   TaskCost,
   TaskTypeGroup,
+  TaskRunAsDefinition,
 } from './task';
 import { taskDefinitionSchema } from './task';
 import { CONCURRENCY_ALLOW_LIST_BY_TASK_TYPE } from './constants';
@@ -96,6 +97,10 @@ export interface TaskRegisterDefinition {
    */
   priority?: TaskPriority;
   /**
+   * Allows `runSoon({ priority })` and a successful run result to change this task's stored priority.
+   */
+  allowPriorityOverride?: boolean;
+  /**
    * An optional definition of the cost associated with running the task.
    */
   cost?: TaskCost;
@@ -132,6 +137,12 @@ export interface TaskRegisterDefinition {
 
   paramsSchema?: ObjectType;
   taskTypeGroup?: TaskTypeGroup;
+
+  /**
+   * Present when tasks of this type may run as the plugin's bound service accounts. The workload
+   * type `task_identity` is reserved for Task Manager.
+   */
+  runAs?: TaskRunAsDefinition;
 }
 
 /**

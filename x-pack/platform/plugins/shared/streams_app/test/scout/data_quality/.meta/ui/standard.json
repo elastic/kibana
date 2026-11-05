@@ -1,5 +1,5 @@
 {
-  "sha1": "8ac242f8256ee40b7137bd8231ecf5d9cfc7e578",
+  "sha1": "016e23d09b738a8f92964531bf3c372cb4daf354",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -123,8 +123,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 201,
-        "column": 7
+        "line": 204,
+        "column": 13
       }
     },
     {
@@ -139,8 +139,8 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 209,
-        "column": 25
+        "line": 212,
+        "column": 9
       }
     },
     {
@@ -155,7 +155,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 230,
+        "line": 233,
         "column": 7
       }
     },
@@ -171,7 +171,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 240,
+        "line": 243,
         "column": 24
       }
     },
@@ -187,7 +187,7 @@
       ],
       "location": {
         "file": "x-pack/platform/plugins/shared/streams_app/test/scout/data_quality/ui/tests/data_quality.spec.ts",
-        "line": 251,
+        "line": 254,
         "column": 13
       }
     },

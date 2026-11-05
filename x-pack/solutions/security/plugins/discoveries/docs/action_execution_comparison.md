@@ -31,11 +31,10 @@ The UI reads the feature flag asynchronously and swaps which CRUD API it calls:
 
 ```
 // use_schedule_api.ts
-const enabled = await featureFlags.getBooleanValue(
+const isWorkflowsEnabled = featureFlags.useBooleanValue(
   'securitySolution.attackDiscoveryWorkflowsEnabled',
-  false
+  true
 );
-setIsWorkflowsEnabled(enabled);
 ```
 
 When `isWorkflowsEnabled` is `true`, CRUD hooks target the internal `discoveries` API. When `false`, they target the public `elastic_assistant` API.

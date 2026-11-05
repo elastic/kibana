@@ -121,11 +121,8 @@ export const Navigation = ({
 
   const [isAnyPopoverLocked, setIsAnyPopoverLocked] = useState(false);
 
-  const { overflowMenuItems, primaryMenuRef, visibleMenuItems } = useResponsiveMenu(
-    isCollapsed,
-    items.primaryItems,
-    (items.overflowItems?.length ?? 0) > 0
-  );
+  const { isOverflowMeasured, overflowMenuItems, primaryMenuRef, visibleMenuItems } =
+    useResponsiveMenu(isCollapsed, items.primaryItems, (items.overflowItems?.length ?? 0) > 0);
 
   const allOverflowItems = [...overflowMenuItems, ...(items.overflowItems ?? [])];
   const hasMoreMenu = allOverflowItems.length > 0;
@@ -161,7 +158,11 @@ export const Navigation = ({
       <SideNav isCollapsed={isCollapsed}>
         {showTopSeparator && <div css={topSeparatorStyles} aria-hidden />}
 
-        <SideNav.PrimaryMenu ref={primaryMenuRef} isCollapsed={isCollapsed}>
+        <SideNav.PrimaryMenu
+          ref={primaryMenuRef}
+          isCollapsed={isCollapsed}
+          isOverflowMeasured={isOverflowMeasured}
+        >
           {({ mainNavigationInstructionsId }) => (
             <>
               {visibleMenuItems.map((item, index) => {
@@ -207,7 +208,12 @@ export const Navigation = ({
                           );
 
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={section.isPaginated}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -418,7 +424,12 @@ export const Navigation = ({
                             (s) => s.items.length > 0
                           );
                           return (
-                            <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                            <SideNav.SecondaryMenu.Section
+                              key={section.id}
+                              id={section.id}
+                              isPaginated={section.isPaginated}
+                              label={section.label}
+                            >
                               {section.items.map((subItem, subItemIndex) => {
                                 const isFirstSubItem =
                                   sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;
@@ -469,7 +480,12 @@ export const Navigation = ({
                 isNew={getIsNewSecondary(openerNode.id)}
               >
                 {openerNode.sections?.map((section, sectionIndex) => (
-                  <SideNav.SecondaryMenu.Section key={section.id} label={section.label}>
+                  <SideNav.SecondaryMenu.Section
+                    key={section.id}
+                    id={section.id}
+                    isPaginated={section.isPaginated}
+                    label={section.label}
+                  >
                     {section.items.map((subItem, subItemIndex) => {
                       const isFirstItem =
                         sectionIndex === firstNonEmptySectionIndex && subItemIndex === 0;

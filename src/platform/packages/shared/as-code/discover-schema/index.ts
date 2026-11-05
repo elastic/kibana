@@ -12,6 +12,9 @@ export {
   discoverSessionApiEmbeddableByReferenceConfigSchema,
   discoverSessionApiControlPanelSchema,
   discoverSessionApiControlPanelsSchema,
+  discoverSessionApiClassicTabSchema,
+  discoverSessionApiEsqlTabSchema,
+  discoverSessionApiMetricsTabSchema,
   discoverSessionApiTabSchema,
   discoverSessionApiDataSchema,
 } from './src/schemas';

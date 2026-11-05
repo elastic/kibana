@@ -17,8 +17,10 @@ import type {
   ExecutionOutcome,
   ExecutionPartialRunSummary,
   ExecutionRunSummary,
+  UserIdAndName,
   RoundInput,
   TimelineEvent,
+  UserPrincipalType,
 } from '@kbn/agent-builder-common';
 import {
   ConversationRoundStatus,
@@ -193,10 +195,6 @@ export const roundToEvents = (
   ];
 };
 
-/**
- * Converts a rounds-based conversation into a timeline, on read. Maps each round with
- * {@link roundToEvents}, in round order.
- */
 export const roundsToEvents = (conversation: Conversation): TimelineEvent[] =>
   conversation.rounds.flatMap((round) => roundToEvents(round, conversation));
 
@@ -211,6 +209,9 @@ const executionRunSummary = (round: ConversationRound): ExecutionRunSummary => (
     : {}),
 });
 
+const principalType = (type: UserPrincipalType | undefined) =>
+  type === 'service_account' ? { principal_type: type } : {};
+
 /** Actor for a round's `user_message`: the round author (external or user), else the owner. */
 export const userMessageActor = (
   conversation: Pick<Conversation, 'user'> | undefined,
@@ -222,6 +223,7 @@ export const userMessageActor = (
       id: round.author.id,
       ...(round.author.username ? { username: round.author.username } : {}),
       ...(round.author.full_name ? { full_name: round.author.full_name } : {}),
+      ...(round.origin ? {} : principalType(round.author.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -231,6 +233,7 @@ export const userMessageActor = (
       type: round.origin ? EventActorType.external : EventActorType.user,
       id: conversation.user.id ?? conversation.user.username,
       ...(conversation.user.username ? { username: conversation.user.username } : {}),
+      ...(round.origin ? {} : principalType(conversation.user.type)),
       ...(round.origin ? { origin: round.origin } : {}),
     };
   }
@@ -241,6 +244,17 @@ export const userMessageActor = (
     ...(round.origin ? { origin: round.origin } : {}),
   };
 };
+
+/**
+ * Actor for events a principal writes directly, outside a round: custom events the current user
+ * appends, and the activity events of the writes it makes.
+ */
+export const currentUserActor = (user: UserIdAndName): EventActor => ({
+  type: EventActorType.user,
+  id: user.id ?? user.username,
+  ...(user.username ? { username: user.username } : {}),
+  ...principalType(user.type),
+});
 
 /** Actor for a run's lifecycle events. */
 export const agentActor = (conversation: Pick<Conversation, 'agent_id'>): EventActor => ({

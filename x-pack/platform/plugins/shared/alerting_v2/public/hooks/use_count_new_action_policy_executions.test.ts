@@ -41,13 +41,12 @@ describe('useCountNewActionPolicyExecutions', () => {
     });
   });
 
-  it('reads the count from the list endpoint with perPage=0 and the provided filters', async () => {
+  it('reads the count from the list endpoint with perPage=1 and the provided filters', async () => {
     mockListActionPolicyExecutions.mockResolvedValue({
       items: [],
       page: 1,
-      per_page: 0,
+      per_page: 1,
       total: 7,
-      search_matches: null,
     });
 
     renderHook(
@@ -64,7 +63,7 @@ describe('useCountNewActionPolicyExecutions', () => {
     await waitFor(() => {
       expect(mockListActionPolicyExecutions).toHaveBeenCalledWith({
         from: '2026-01-01T00:00:00.000Z',
-        per_page: 0,
+        per_page: 1,
         search: 'foo',
         rule_ids: ['rule-1'],
         outcomes: ['throttled'],
@@ -76,9 +75,8 @@ describe('useCountNewActionPolicyExecutions', () => {
     const fakeResponse = {
       items: [],
       page: 1,
-      per_page: 0,
+      per_page: 1,
       total: 42,
-      search_matches: null,
     };
     mockListActionPolicyExecutions.mockResolvedValue(fakeResponse);
 

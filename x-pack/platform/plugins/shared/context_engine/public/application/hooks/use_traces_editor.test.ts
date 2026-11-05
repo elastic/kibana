@@ -22,6 +22,7 @@ jest.mock('./use_save_ai_index_traces', () => ({
 const aiIndex: GetAiIndexResponse = {
   id: 'my-ai-index',
   managed: false,
+  memory_enabled: true,
   dest: { type: 'data_stream', value: 'ai-index-ds-my-ai-index' },
   automations: [],
   sources: [],

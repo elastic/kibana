@@ -18,6 +18,7 @@ import type {
   DeleteAgentResponse,
   GetAgentAccessControlResponse,
   GetAgentAiIndicesResponse,
+  GetAgentModelResponse,
   GetAgentResponse,
   ListAgentAiIndicesResponse,
   ListAgentResponse,
@@ -28,8 +29,10 @@ import type {
 import { internalApiPath, publicApiPath } from '../../../common/constants';
 
 /** Static, so it does not read as a dynamic http path. */
+const AGENT_BY_ID_PATH = `${publicApiPath}/agents/{id}`;
 const AGENT_AI_INDICES_LIST_PATH = `${internalApiPath}/agents/_ai_indices`;
 const AGENT_AI_INDICES_BY_ID_PATH = `${internalApiPath}/agents/{id}/_ai_indices`;
+const AGENT_MODEL_BY_ID_PATH = `${internalApiPath}/agents/{id}/_model`;
 
 export class AgentService {
   private readonly http: HttpSetup;
@@ -42,7 +45,9 @@ export class AgentService {
    * List all agents
    */
   async list(options?: AgentListOptions): Promise<ListAgentResponseItem[]> {
-    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`);
+    const res = await this.http.get<ListAgentResponse>(`${publicApiPath}/agents`, {
+      query: { include_hidden: options?.includeHidden ?? false },
+    });
     return res.results;
   }
 
@@ -50,7 +55,7 @@ export class AgentService {
    * Get a single agent by id
    */
   async get(id: string): Promise<GetAgentResponse> {
-    return await this.http.get<GetAgentResponse>(`${publicApiPath}/agents/${id}`);
+    return await this.http.get<GetAgentResponse>(buildPath(AGENT_BY_ID_PATH, { id }));
   }
 
   /**
@@ -67,6 +72,13 @@ export class AgentService {
     return await this.http.get<GetAgentAiIndicesResponse>(
       buildPath(AGENT_AI_INDICES_BY_ID_PATH, { id })
     );
+  }
+
+  /**
+   * Returns the model the agent runs on when no connector is passed, resolved server-side.
+   */
+  async getAgentModel(id: string): Promise<GetAgentModelResponse> {
+    return await this.http.get<GetAgentModelResponse>(buildPath(AGENT_MODEL_BY_ID_PATH, { id }));
   }
 
   /**

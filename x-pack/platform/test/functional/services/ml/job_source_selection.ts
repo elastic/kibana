@@ -84,6 +84,10 @@ export function MachineLearningJobSourceSelectionProvider({ getService }: FtrPro
 
     async selectSourceForAnomalyDetectionJob(sourceName: string) {
       await this.selectSource(sourceName, 'mlPageJobTypeSelection');
+      // the preconfigured jobs section un-hides once the data recognizer settles, shifting the job type cards down
+      await testSubjects.existOrFail('mlJobTypeSelectionWizardCards loaded', {
+        timeout: 30 * 1000,
+      });
     },
 
     async selectSourceForAnalyticsJob(sourceName: string) {

@@ -11,10 +11,11 @@ import { useAvailablePackages } from '../../home/hooks/use_available_packages';
 
 import type { IntegrationCardItem } from '../../home/card_utils';
 
+import { useLocalSearch } from '../../../../../hooks';
+
 import { useBrowseIntegrationHook } from '.';
 import { useUrlFilters } from './url_filters';
 import { useUrlCategories, useUrlDefaultCategories, useSetUrlCategory } from './url_categories';
-import { useLocalSearch } from '../../../../../hooks';
 
 jest.mock('../../home/hooks/use_available_packages');
 jest.mock('./url_filters');
@@ -965,6 +966,66 @@ describe('useBrowseIntegrationHook', () => {
 
       expect(result.current.filteredCards).toHaveLength(2);
       expect(result.current.filteredCards.map((c) => c.type)).toEqual(['integration', 'input']);
+    });
+  });
+  describe('Search member match', () => {
+    const awsTile = {
+      id: 'epr:aws',
+      name: 'aws-onboarding',
+      title: 'Amazon Web Services',
+      description: 'Collect logs and metrics from Amazon Web Services (AWS).',
+      categories: ['aws'],
+      searchableContent: 'guardduty Amazon GuardDuty',
+      searchMembers: [{ name: 'guardduty', title: 'Amazon GuardDuty' }],
+    } as IntegrationCardItem;
+    const nginx = {
+      id: 'epr:nginx',
+      name: 'nginx',
+      title: 'Nginx',
+      description: 'Collect logs from Nginx.',
+      categories: ['web'],
+    } as IntegrationCardItem;
+
+    const renderWithSearch = (q: string | undefined, matches: IntegrationCardItem[]) => {
+      mockUseAvailablePackages([awsTile, nginx]);
+      (useLocalSearch as jest.Mock).mockReturnValue({
+        search: jest.fn().mockReturnValue(matches),
+      });
+      (useUrlFilters as jest.Mock).mockReturnValue({
+        q,
+        sort: undefined,
+        status: undefined,
+      });
+      return renderHook(() => useBrowseIntegrationHook({ prereleaseIntegrationsEnabled: false }));
+    };
+
+    it('records the service a search matched on the AWS tile', () => {
+      const { result } = renderWithSearch('guardduty', [awsTile]);
+
+      expect(result.current.filteredCards).toHaveLength(1);
+      expect(result.current.filteredCards[0].searchMemberMatch).toEqual({
+        memberTitles: ['Amazon GuardDuty'],
+        collectionTitle: 'Amazon Web Services',
+      });
+    });
+
+    it('leaves cards without bundled services untouched when searching', () => {
+      const { result } = renderWithSearch('nginx', [nginx]);
+
+      expect(result.current.filteredCards).toEqual([nginx]);
+    });
+
+    it('does not annotate the AWS tile without a search term', () => {
+      const { result } = renderWithSearch(undefined, []);
+
+      expect(result.current.filteredCards.map((c) => c.id)).toEqual(['epr:aws', 'epr:nginx']);
+      expect(result.current.filteredCards[0].searchMemberMatch).toBeUndefined();
+    });
+
+    it('keeps the generic description when the term is about the tile itself', () => {
+      const { result } = renderWithSearch('amazon', [awsTile]);
+
+      expect(result.current.filteredCards[0].searchMemberMatch).toBeUndefined();
     });
   });
 });

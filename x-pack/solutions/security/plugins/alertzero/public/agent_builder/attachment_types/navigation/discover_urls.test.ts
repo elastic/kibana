@@ -7,12 +7,122 @@
 
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import {
+  buildAlertDetailsUrl,
   buildDiscoverEsqlUrl,
   buildDiscoverThreatReportNestedIocUrl,
+  buildSecurityEntityUrl,
   THREAT_REPORTS_LOOKUP_DATA_VIEW_ID,
   DISCOVER_LOOKUP_TIME_RANGE,
 } from './discover_urls';
 import { THREAT_REPORTS_INDEX_PATTERN } from './esql_queries';
+
+describe('buildAlertDetailsUrl', () => {
+  const identityPrepend = (path: string) => path;
+
+  it('builds a redirect path with the index and no timestamp when none is given', () => {
+    expect(
+      buildAlertDetailsUrl({
+        prependPath: identityPrepend,
+        spaceId: 'default',
+        alertId: 'alert-1',
+      })
+    ).toBe('/app/security/alerts/redirect/alert-1?index=.alerts-security.alerts-default');
+  });
+
+  it('includes the timestamp query param when provided', () => {
+    expect(
+      buildAlertDetailsUrl({
+        prependPath: identityPrepend,
+        spaceId: 'default',
+        alertId: 'alert-1',
+        timestamp: '2023-04-20T12:00:00.000Z',
+      })
+    ).toBe(
+      '/app/security/alerts/redirect/alert-1?index=.alerts-security.alerts-default&timestamp=2023-04-20T12%3A00%3A00.000Z'
+    );
+  });
+
+  it('derives the index from spaceId and routes through the space base path', () => {
+    const prependPath = jest.fn((path: string) => `/s/soc${path}`);
+    expect(
+      buildAlertDetailsUrl({
+        prependPath,
+        spaceId: 'soc',
+        alertId: 'alert-9',
+      })
+    ).toBe('/s/soc/app/security/alerts/redirect/alert-9?index=.alerts-security.alerts-soc');
+    expect(prependPath).toHaveBeenCalled();
+  });
+});
+
+describe('buildSecurityEntityUrl', () => {
+  it('builds a hosts deep link for a host.name field', () => {
+    const getUrlForApp = jest
+      .fn()
+      .mockReturnValue('https://kbn.test/app/security/hosts/name/WIN-ANALYST01');
+    const url = buildSecurityEntityUrl({
+      getUrlForApp,
+      field: 'host.name',
+      value: 'WIN-ANALYST01',
+    });
+
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      deepLinkId: 'hosts',
+      path: '/name/WIN-ANALYST01',
+    });
+    expect(url).toBe('https://kbn.test/app/security/hosts/name/WIN-ANALYST01');
+  });
+
+  it('builds a users deep link for a user.name field', () => {
+    const getUrlForApp = jest
+      .fn()
+      .mockReturnValue('https://kbn.test/app/security/users/name/dev-user');
+    const url = buildSecurityEntityUrl({ getUrlForApp, field: 'user.name', value: 'dev-user' });
+
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      deepLinkId: 'users',
+      path: '/name/dev-user',
+    });
+    expect(url).toBe('https://kbn.test/app/security/users/name/dev-user');
+  });
+
+  it('returns undefined for a service.* field', () => {
+    const getUrlForApp = jest.fn();
+    const url = buildSecurityEntityUrl({ getUrlForApp, field: 'service.name', value: 'checkout' });
+
+    expect(url).toBeUndefined();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined for id/email entity fields, which the name route cannot resolve', () => {
+    const getUrlForApp = jest.fn();
+
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'host.id', value: 'host-euid-123' })
+    ).toBeUndefined();
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'user.id', value: 'user-euid-123' })
+    ).toBeUndefined();
+    expect(
+      buildSecurityEntityUrl({ getUrlForApp, field: 'user.email', value: 'dev@example.com' })
+    ).toBeUndefined();
+    expect(getUrlForApp).not.toHaveBeenCalled();
+  });
+
+  it('returns undefined when getUrlForApp is not provided', () => {
+    expect(buildSecurityEntityUrl({ field: 'host.name', value: 'WIN-ANALYST01' })).toBeUndefined();
+  });
+
+  it('URL-encodes the entity value', () => {
+    const getUrlForApp = jest.fn().mockReturnValue('encoded');
+    buildSecurityEntityUrl({ getUrlForApp, field: 'host.name', value: 'host name/with slash' });
+
+    expect(getUrlForApp).toHaveBeenCalledWith('securitySolutionUI', {
+      deepLinkId: 'hosts',
+      path: '/name/host%20name%2Fwith%20slash',
+    });
+  });
+});
 
 describe('buildDiscoverEsqlUrl', () => {
   it('returns undefined when share is missing', () => {

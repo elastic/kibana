@@ -29,6 +29,9 @@ export const CORTEX_PAGE_STATUSES = ['established', 'tentative', 'archived'] as 
 
 export type CortexPageStatus = (typeof CORTEX_PAGE_STATUSES)[number];
 
+/** Confirmations from later runs a tentative page needs before it is promoted to established. */
+export const CORTEX_PROMOTION_CORROBORATIONS = 1;
+
 /** Edits the post-run optimizer can apply to a page. */
 export const CORTEX_EDIT_ACTIONS = ['upsert', 'corroborate', 'archive'] as const;
 
@@ -54,11 +57,17 @@ export interface CortexPageSummary {
   corroborations: number;
   updated_at: string;
   description?: string;
+  conversation_id?: string;
+  round_id?: string;
+  workflow_execution_id?: string;
+  doc_version?: number;
 }
 
 export interface CortexPage extends CortexPageSummary {
   content: string;
   slug: string;
+  /** Opaque stored-document version; pass it back on a write to reject concurrent changes. */
+  version?: string;
 }
 
 export interface CortexStats {

@@ -72,14 +72,15 @@ describe('buildEpisodesKpisQuery', () => {
   });
 
   it('applies queryString filter when provided', () => {
-    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'alert.name: "cpu"' });
-    expect(output).toContain('QSTR(');
+    const output = buildEpisodesKpisQuery(SPACE, UID, { queryString: 'severity: critical' });
+    expect(output).toContain('| WHERE severity == "critical"');
   });
 
   it('does not include SORT or LIMIT', () => {
     const output = buildEpisodesKpisQuery(SPACE, UID);
     expect(output.toUpperCase()).not.toContain('SORT');
-    expect(output.toUpperCase()).not.toContain('LIMIT');
+    // `LIMIT 1 BY` only keeps one row per episode, it doesn't cap the counts
+    expect(output).not.toMatch(/LIMIT \d+(?! BY)/i);
   });
 
   it('applies status filter when provided', () => {

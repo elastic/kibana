@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { get } from 'lodash';
 import { apiTest } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
 import {
@@ -14,7 +15,6 @@ import {
   ENTITY_STORE_TAGS,
   LATEST_ALIAS,
 } from '../../../common/fixtures/constants';
-import { FF_ENABLE_ENTITY_STORE_V2 } from '../../../../../common';
 import {
   ENTITY_CONFIDENCE,
   USER_ENTITY_NAMESPACE,
@@ -27,21 +27,22 @@ import {
   expectedUserEntities,
 } from '../../../common/fixtures/entity_extraction_expected';
 import {
-  clearEntityStoreIndices,
+  clearInstalledEntityStoreDocuments,
   forceLogExtraction,
   ingestDoc,
   normalizeKeywordList,
+  resetLogExtractionConfig,
   searchDocById,
   setupLogsTestDataStream,
   teardownLogsTestDataStream,
+  updateLogExtractionConfig,
 } from '../../../common/fixtures/helpers';
-import { LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } from '../../../../../server/domain/saved_objects';
 
 apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }, () => {
   let defaultHeaders: Record<string, string>;
   let internalHeaders: Record<string, string>;
 
-  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, kbnClient, esArchiver }) => {
+  apiTest.beforeAll(async ({ samlAuth, apiClient, esClient, esArchiver }) => {
     const credentials = await samlAuth.asInteractiveUser('admin');
     defaultHeaders = {
       ...credentials.cookieHeader,
@@ -51,11 +52,6 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       ...credentials.cookieHeader,
       ...INTERNAL_HEADERS,
     };
-
-    // enable feature flag
-    await kbnClient.uiSettings.update({
-      [FF_ENABLE_ENTITY_STORE_V2]: true,
-    });
 
     // Pre-create the `security-solution-default` data view. In API-only test
     // environments the Security Solution sourcerer (which normally creates it
@@ -77,13 +73,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
     });
     expect(dataViewResponse.statusCode).toBe(200);
 
-    // Install the entity store
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.INSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(201);
+    await clearInstalledEntityStoreDocuments(esClient);
 
     await setupLogsTestDataStream(esClient);
     await esArchiver.loadIfNeeded(
@@ -92,14 +82,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
   });
 
   apiTest.afterAll(async ({ apiClient, esClient }) => {
-    const response = await apiClient.post(ENTITY_STORE_ROUTES.public.UNINSTALL, {
-      headers: defaultHeaders,
-      responseType: 'json',
-      body: {},
-    });
-    expect(response.statusCode).toBe(200);
-    await clearEntityStoreIndices(esClient);
-    await teardownLogsTestDataStream(esClient);
+    try {
+      await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
+    } finally {
+      await teardownLogsTestDataStream(esClient);
+    }
   });
 
   apiTest('Should extract properly extract host', async ({ apiClient, esClient, log }) => {
@@ -601,6 +588,64 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
           confidence: ENTITY_CONFIDENCE.High,
         },
       });
+    }
+  );
+
+  apiTest(
+    'Should resolve CloudTrail actors to the inventory IAM role entity via user.entity.id (aws)',
+    async ({ apiClient, esClient }) => {
+      const from = '2026-04-01T10:00:00Z';
+      const to = '2026-04-01T12:00:00Z';
+      const roleArn = 'arn:aws:iam::123456789012:role/scout/ExtractionRole';
+      const roleEntityId = `user:${roleArn}@aws`;
+      const readList = (source: Record<string, unknown>, path: string): unknown[] => {
+        const value = source[path] ?? get(source, path);
+        return Array.isArray(value) ? value : [value];
+      };
+
+      // 1. A CloudTrail event alone cannot create the user (event.kind is not asset).
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:01:00Z',
+        event: { kind: 'event', module: 'aws', action: 'AssumeRole', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-1', name: 'session-1', entity: { id: roleArn } },
+      });
+      const ext1 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext1.statusCode).toBe(200);
+      expect((await searchDocById(esClient, roleEntityId)).hits.hits).toHaveLength(0);
+
+      // 2. Cloud Asset Inventory creates the IAM role entity keyed by ARN.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:02:00Z',
+        event: { kind: 'asset', module: 'asset_discovery' },
+        cloud: { provider: 'aws' },
+        user: { id: roleArn, name: 'ExtractionRole', entity: { id: roleArn } },
+      });
+      const ext2 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext2.statusCode).toBe(200);
+      const created = await searchDocById(esClient, roleEntityId);
+      expect(created.hits.hits).toHaveLength(1);
+      expect(created.hits.hits[0]._source).toMatchObject({
+        entity: { id: roleEntityId, namespace: 'aws' },
+      });
+
+      // 3. A later CloudTrail event updates the same entity instead of creating user:<principalId>@aws.
+      await ingestDoc(esClient, {
+        '@timestamp': '2026-04-01T10:03:00Z',
+        event: { kind: 'event', module: 'aws', action: 'ListBuckets', outcome: 'success' },
+        cloud: { provider: 'aws' },
+        user: { id: 'AROAEXAMPLE:session-2', name: 'session-2', entity: { id: roleArn } },
+      });
+      const ext3 = await forceLogExtraction(apiClient, internalHeaders, 'user', from, to);
+      expect(ext3.statusCode).toBe(200);
+      const updated = await searchDocById(esClient, roleEntityId);
+      expect(updated.hits.hits).toHaveLength(1);
+      const source = updated.hits.hits[0]._source as Record<string, unknown>;
+      expect(readList(source, 'user.id')).toContain('AROAEXAMPLE:session-2');
+      expect(readList(source, 'event.kind')).toContain('event');
+      expect(
+        (await searchDocById(esClient, 'user:AROAEXAMPLE:session-2@aws')).hits.hits
+      ).toHaveLength(0);
     }
   );
 
@@ -1147,12 +1192,11 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
       const TOTAL_DOCS = 6; // > MAX_LOGS_PER_PAGE so a second outer iteration is required
 
       // Shrink the log-slice window to force multiple outer loop iterations within one run.
-      const updateResponse = await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
+      await updateLogExtractionConfig({
+        apiClient,
         headers: defaultHeaders,
-        responseType: 'json',
-        body: { logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE } },
+        logExtraction: { maxLogsPerPage: MAX_LOGS_PER_PAGE },
       });
-      expect(updateResponse.statusCode).toBe(200);
 
       try {
         // Ingest TOTAL_DOCS host documents all sharing @timestamp = fromDateISO.
@@ -1182,11 +1226,7 @@ apiTest.describe('Entity Store Main logs extraction', { tag: ENTITY_STORE_TAGS }
         }
       } finally {
         // Restore default so subsequent tests are not affected.
-        await apiClient.put(ENTITY_STORE_ROUTES.public.UPDATE, {
-          headers: defaultHeaders,
-          responseType: 'json',
-          body: { logExtraction: { maxLogsPerPage: LOG_EXTRACTION_MAX_LOGS_PER_PAGE_DEFAULT } },
-        });
+        await resetLogExtractionConfig({ apiClient, headers: defaultHeaders });
       }
     }
   );

@@ -15,6 +15,7 @@ export {
   createMainFlyoutDescriptionItems,
 } from './flyout_description_items';
 
+export { bodyCallouts } from './flyout_body_callouts';
 export { headerBlocks } from './flyout_header_blocks';
 
 export { FOOTER_MENU_PANELS } from './flyout_footer_menu';
