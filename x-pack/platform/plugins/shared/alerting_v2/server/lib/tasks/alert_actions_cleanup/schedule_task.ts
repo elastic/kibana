@@ -23,12 +23,12 @@ export async function scheduleAlertActionsCleanupTask({
   taskManager: AlertingServerStartDependencies['taskManager'];
   enabled: boolean;
 }): Promise<void> {
-  try {
-    if (!enabled) {
-      await taskManager.removeIfExists(ALERT_ACTIONS_CLEANUP_TASK_ID);
-      return;
-    }
+  if (!enabled) {
+    await removeAlertActionsCleanupTask({ logger, taskManager });
+    return;
+  }
 
+  try {
     await taskManager.ensureScheduled({
       id: ALERT_ACTIONS_CLEANUP_TASK_ID,
       taskType: ALERT_ACTIONS_CLEANUP_TASK_TYPE,
@@ -41,6 +41,26 @@ export async function scheduleAlertActionsCleanupTask({
       error,
       code: ALERTING_LOG_CODES.TASKS_SCHEDULE_FAILED,
       labels: { task_id: ALERT_ACTIONS_CLEANUP_TASK_ID },
+    });
+  }
+}
+
+async function removeAlertActionsCleanupTask({
+  logger,
+  taskManager,
+}: {
+  logger: LoggerServiceContract;
+  taskManager: AlertingServerStartDependencies['taskManager'];
+}): Promise<void> {
+  try {
+    await taskManager.removeIfExists(ALERT_ACTIONS_CLEANUP_TASK_ID);
+  } catch (error) {
+    logger.warn({
+      error,
+      code: ALERTING_LOG_CODES.TASKS_REMOVE_FAILED,
+      labels: { task_id: ALERT_ACTIONS_CLEANUP_TASK_ID },
+      message: `Failed to remove the disabled alert actions cleanup task. If it was scheduled by an
+        earlier start it keeps running until the next restart`,
     });
   }
 }

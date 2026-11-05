@@ -49,6 +49,7 @@ export interface Run {
   investigationId?: string;
   skipReason?: string | null;
   dailyLimit?: number;
+  error?: string;
 }
 
 export const statusLabels: Record<RunStatus, string> = {
@@ -94,6 +95,12 @@ const getSkippedRunSummary = (
   if (skipReason === 'investigation_limit') {
     return i18n.translate('xpack.nightshift.automations.detail.skippedInvestigationLimitSummary', {
       defaultMessage: '{source} · Deployment-wide investigation limit reached',
+      values: { source },
+    });
+  }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.skippedNoOpenInvestigationSummary', {
+      defaultMessage: '{source} · Alert recovered with no open investigations to link it to',
       values: { source },
     });
   }
@@ -578,7 +585,7 @@ export const RunHistory = ({
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
                           ? getSkippedRunSummary(run, labels.trigger)
-                          : automationName}
+                          : run.error ?? automationName}
                       </EuiText>
                     </button>
                   ))}

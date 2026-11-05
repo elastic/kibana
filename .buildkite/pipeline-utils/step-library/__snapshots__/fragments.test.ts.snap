@@ -184,7 +184,6 @@ exports[`pull_request fragments pull_request/api_contracts 1`] = `
           },
         ],
       },
-      "soft_fail": true,
       "timeout_in_minutes": 30,
     },
   ],
@@ -336,7 +335,6 @@ exports[`pull_request fragments pull_request/base 1`] = `
     },
     {
       "agents": {
-        "image": "family/kibana-minimal-ubuntu-2604",
         "machineType": "n2-standard-2",
       },
       "command": ".buildkite/scripts/steps/test/pick_test_group_run_order.sh",
@@ -545,9 +543,6 @@ exports[`pull_request fragments pull_request/check_oas_snapshot 1`] = `
         "spotZones": "asia-south2-a,asia-south2-b,asia-south2-c,europe-west2-a,europe-west2-b,europe-west2-c,northamerica-northeast2-a,northamerica-northeast2-b,northamerica-northeast2-c,southamerica-east1-a,southamerica-east1-b,southamerica-east1-c",
       },
       "command": ".buildkite/scripts/steps/checks/capture_oas_snapshot.sh",
-      "depends_on": [
-        "build",
-      ],
       "env": {
         "CHECK_GATE": "true",
       },
@@ -664,6 +659,8 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
         "preemptible": true,
       },
       "command": ".buildkite/scripts/steps/cloud/build_cloud_image.sh",
+      "concurrency": 1,
+      "concurrency_group": "kibana/cloud-image/pr-\${GITHUB_PR_NUMBER}",
       "key": "build_cloud_image",
       "label": "Build Cloud Image",
       "retry": {
@@ -682,6 +679,8 @@ exports[`pull_request fragments pull_request/deploy_cloud 1`] = `
         "preemptible": true,
       },
       "command": ".buildkite/scripts/steps/cloud/deploy.sh",
+      "concurrency": 1,
+      "concurrency_group": "kibana/cloud-deploy/pr-\${GITHUB_PR_NUMBER}",
       "depends_on": [
         "build_cloud_image",
       ],
@@ -2270,27 +2269,6 @@ exports[`pull_request fragments pull_request/security_solution/scout_edr_real_fl
         ],
       },
       "timeout_in_minutes": 120,
-    },
-  ],
-}
-`;
-
-exports[`pull_request fragments pull_request/store_moon_cache 1`] = `
-{
-  "steps": [
-    {
-      "agents": {
-        "image": "family/kibana-ubuntu-2404",
-        "imageProject": "elastic-images-prod",
-        "machineType": "n2-highcpu-4",
-        "preemptible": false,
-        "provider": "gcp",
-      },
-      "command": ".buildkite/scripts/steps/store_cache.sh",
-      "id": "store_cache",
-      "label": "Store Cache for build",
-      "soft_fail": true,
-      "timeout_in_minutes": 10,
     },
   ],
 }

@@ -206,12 +206,35 @@ describe('LensWrapper', () => {
           onFilter,
           abortController,
           withDefaultActions: true,
-          disabledActions: expect.arrayContaining([
+          disabledActions: [
             'ACTION_CUSTOMIZE_PANEL',
             'ACTION_EXPORT_CSV',
             'ACTION_FILTERS_NOTIFICATION',
+            'ACTION_ESQL_NOTIFICATION',
             'alertRule',
-          ]),
+          ],
+        }),
+        expect.anything()
+      );
+    });
+
+    it('appends extraDisabledActions after the default disabled actions', () => {
+      render(
+        <EuiThemeProvider>
+          <LensWrapper {...defaultProps} extraDisabledActions={['ACTION_OPEN_IN_DISCOVER']} />
+        </EuiThemeProvider>
+      );
+
+      expect(mockEmbeddableComponent).toHaveBeenCalledWith(
+        expect.objectContaining({
+          disabledActions: [
+            'ACTION_CUSTOMIZE_PANEL',
+            'ACTION_EXPORT_CSV',
+            'ACTION_FILTERS_NOTIFICATION',
+            'ACTION_ESQL_NOTIFICATION',
+            'alertRule',
+            'ACTION_OPEN_IN_DISCOVER',
+          ],
         }),
         expect.anything()
       );

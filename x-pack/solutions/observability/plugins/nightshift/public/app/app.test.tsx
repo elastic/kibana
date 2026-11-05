@@ -13,17 +13,23 @@ import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import React from 'react';
 import { MemoryRouter, useLocation } from 'react-router-dom';
 import { NightshiftApp } from './app';
-import type { InvestigationSectionState } from '../hooks/use_investigation_sections';
-import { useInvestigationSections } from '../hooks/use_investigation_sections';
+import type { InvestigationSectionState } from '../data/investigations/use_investigation_sections';
+import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
 import { useKibana } from '../hooks/use_kibana';
+import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
-jest.mock('../hooks/use_investigation_sections');
+jest.mock('../data/investigations/use_investigation_sections');
 jest.mock('../hooks/use_kibana');
 jest.mock('@kbn/ebt-tools');
+jest.mock('../components/entities/investigation/use_investigation_assignees', () => ({
+  useInvestigationAssignees: () => () => null,
+}));
+jest.mock('./use_detection_setup_banner');
 
 const mockUseInvestigationSections = useInvestigationSections as jest.Mock;
 const mockUseKibana = useKibana as jest.Mock;
 const mockUsePageReady = usePageReady as jest.Mock;
+const mockUseDetectionSetupBanner = useDetectionSetupBanner as jest.Mock;
 
 const makeInvestigation = (
   id: string,
@@ -72,6 +78,7 @@ const closeConversationDetails = jest.fn();
 const openConversationDetails = jest.fn();
 const reportEvent = jest.fn();
 const analytics = { reportEvent };
+const dismissDetectionSetupBanner = jest.fn();
 
 const refetchAll = jest.fn();
 
@@ -81,8 +88,8 @@ const manageCapabilities = {
 };
 
 // jsdom implements neither, and scrolling to a section is how a tile and `?severity=` both work.
-const scrollIntoView = jest.fn();
-Element.prototype.scrollIntoView = scrollIntoView;
+const scrollTo = jest.fn();
+Element.prototype.scrollTo = scrollTo;
 
 function makeSection(
   id: InvestigationSectionState['id'],
@@ -110,19 +117,16 @@ function setSections({
   isInitialLoading = false,
   isFetching = false,
   areSeverityCountsLoading = false,
-  areSeverityCountsFetching = false,
 }: {
   sections: InvestigationSectionState[];
   hasActiveInvestigations?: boolean;
   isInitialLoading?: boolean;
   isFetching?: boolean;
   areSeverityCountsLoading?: boolean;
-  areSeverityCountsFetching?: boolean;
 }) {
   const sectionTotal = (id: InvestigationSectionState['id']) =>
     sections.find((section) => section.id === id)?.total ?? 0;
-  // Mirrors the hook: the severity counts cover running investigations too, so they plus the
-  // unrated section count every matching investigation exactly once.
+  // Mirrors the hook: the counts cover the finished investigations the tier sections hold.
   const severityCounts = {
     critical: sectionTotal('critical'),
     high: sectionTotal('high'),
@@ -133,17 +137,10 @@ function setSections({
     sections,
     severityCounts,
     areSeverityCountsLoading,
-    areSeverityCountsFetching,
     hasActiveInvestigations,
     isInitialLoading,
     isFetching,
     totalCount: sections.reduce((sum, section) => sum + section.total, 0),
-    matchedCount:
-      severityCounts.critical +
-      severityCounts.high +
-      severityCounts.medium +
-      severityCounts.low +
-      sectionTotal('not-rated'),
     loadedCount: sections.reduce((sum, section) => sum + section.investigations.length, 0),
     refetchAll,
   });
@@ -183,11 +180,17 @@ describe('NightshiftApp', () => {
   beforeEach(() => {
     refetchAll.mockClear();
     reportEvent.mockClear();
-    scrollIntoView.mockClear();
+    scrollTo.mockClear();
     mockUsePageReady.mockClear();
+    dismissDetectionSetupBanner.mockClear();
+    mockUseDetectionSetupBanner.mockReturnValue({
+      isVisible: false,
+      dismiss: dismissDetectionSetupBanner,
+    });
     mockUseKibana.mockReturnValue({
       services: {
         analytics,
+        http: { basePath: { get: () => '' } },
         application: {
           capabilities: { nightshift: manageCapabilities },
           getUrlForApp: (appId: string, { path }: { path?: string } = {}) =>
@@ -232,6 +235,22 @@ describe('NightshiftApp', () => {
         }),
       })
     );
+  });
+
+  it('dismisses the detection setup banner from its dismiss button', () => {
+    mockUseDetectionSetupBanner.mockReturnValue({
+      isVisible: true,
+      dismiss: dismissDetectionSetupBanner,
+    });
+
+    renderApp();
+
+    expect(screen.getByTestId('nightshiftDetectionSetupBannerConfigureButton')).toHaveAttribute(
+      'href',
+      '/app/nightshift/detections/events'
+    );
+    fireEvent.click(screen.getByRole('button', { name: 'Dismiss' }));
+    expect(dismissDetectionSetupBanner).toHaveBeenCalledTimes(1);
   });
 
   it('shows the unavailable callout and reports ready when the optional plugin is absent', () => {
@@ -370,10 +389,10 @@ describe('NightshiftApp', () => {
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('');
-    expect(scrollIntoView).not.toHaveBeenCalled();
+    expect(scrollTo).not.toHaveBeenCalled();
   });
 
-  it('scrolls to a severity section from its tile', () => {
+  it('scrolls to a severity section from its tile', async () => {
     setSections({
       sections: defaultSections({
         critical: { investigations: [criticalInvestigation], total: 1 },
@@ -383,11 +402,38 @@ describe('NightshiftApp', () => {
     renderApp();
 
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
     expect(screen.getByTestId('locationProbe')).toHaveTextContent('?severity=critical');
   });
 
-  it('keeps a severity tile actionable when its section failed to load, since it still renders', () => {
+  it.each([
+    ['its severity tile is clicked', undefined],
+    ['a ?severity= link points at it', '/?severity=critical'],
+  ])('opens a closed section when %s', async (_how, link) => {
+    setSections({
+      sections: defaultSections({
+        critical: { investigations: [criticalInvestigation], total: 1 },
+      }),
+    });
+    window.localStorage.setItem(
+      'nightshift.investigations.collapsedSections:default',
+      JSON.stringify(['critical'])
+    );
+
+    renderApp(link ? { initialEntries: [link] } : undefined);
+    if (!link) {
+      fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
+    }
+
+    await waitFor(() =>
+      expect(screen.getByTestId('nightshiftInvestigationSectionToggle-critical')).toHaveAttribute(
+        'aria-expanded',
+        'true'
+      )
+    );
+  });
+
+  it('keeps a severity tile actionable when its section failed to load, since it still renders', async () => {
     setSections({
       sections: defaultSections({ critical: { error: new Error('boom') } }),
     });
@@ -396,7 +442,7 @@ describe('NightshiftApp', () => {
 
     expect(screen.getByTestId('nightshiftInvestigationSection-critical')).toBeInTheDocument();
     fireEvent.click(screen.getByTestId('nightshiftSeverityTile-critical'));
-    expect(scrollIntoView).toHaveBeenCalledTimes(1);
+    await waitFor(() => expect(scrollTo).toHaveBeenCalled());
   });
 
   it('does not show a count of zero on the tiles before the sections have loaded', () => {
@@ -526,12 +572,9 @@ describe('NightshiftApp', () => {
   });
 
   it('reports a search by length and result count, never by term', async () => {
-    // The running investigation is also listed in its severity section, so the section totals
-    // add up to two while only one investigation matches.
     setSections({
       sections: defaultSections({
         'in-progress': { investigations: [investigation], total: 1 },
-        critical: { investigations: [investigation], total: 1 },
       }),
       hasActiveInvestigations: true,
     });
@@ -548,14 +591,5 @@ describe('NightshiftApp', () => {
       })
     );
     expect(JSON.stringify(reportEvent.mock.calls)).not.toContain('checkout');
-  });
-
-  it('leaves the start investigation action to the page header', () => {
-    renderApp();
-
-    expect(
-      screen.queryByTestId('o11yNightshiftAppStartInvestigationButton')
-    ).not.toBeInTheDocument();
-    expect(screen.getByTestId('o11yNightshiftAppShowAllLink')).toBeInTheDocument();
   });
 });

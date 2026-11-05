@@ -13,7 +13,7 @@ import type {
   SubagentEntry,
   UserMessageEventData,
 } from '@kbn/agent-builder-common';
-import { TimelineEventType, isAttachmentEvent, isTimelineEvent } from '@kbn/agent-builder-common';
+import { isAttachmentEvent, isTimelineEvent, isUserMessageEvent } from '@kbn/agent-builder-common';
 import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { ProcessedAttachmentType, ProcessedRoundInput } from '@kbn/agent-builder-server';
@@ -155,7 +155,7 @@ export const prepareConversation = async ({
     for (const event of events) {
       if (event.id === round.userMessage.id) {
         processedTimeline.push(processedUserMessage);
-      } else if (isTimelineEvent(event) && event.type !== TimelineEventType.userMessage) {
+      } else if (isTimelineEvent(event) && !isUserMessageEvent(event)) {
         processedTimeline.push(event);
       }
     }

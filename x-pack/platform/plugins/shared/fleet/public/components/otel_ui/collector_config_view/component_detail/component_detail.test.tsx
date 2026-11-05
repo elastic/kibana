@@ -242,6 +242,35 @@ describe('OTelComponentDetail', () => {
     expect(healthPanel.textContent).toContain('StatusPermanentError');
   });
 
+  it('shows unhealthy status badge when component is stopped', () => {
+    const health: ComponentHealth = {
+      healthy: false,
+      status: 'StatusStopped',
+      component_health_map: {
+        'receiver:otlp': {
+          healthy: false,
+          status: 'StatusStopped',
+          status_time_unix_nano: 1_714_500_000_000_000_000,
+        },
+      },
+    };
+
+    const result = testRenderer.render(
+      <OTelComponentDetail
+        componentId="otlp"
+        componentType="receiver"
+        config={config}
+        health={health}
+        onClose={jest.fn()}
+      />
+    );
+
+    expect(result.getByTestId('otelComponentHealthStatus').textContent).toContain('Unhealthy');
+    const healthPanel = result.getByTestId('otelComponentDetailHealth');
+    expect(healthPanel.textContent).toContain('Unhealthy');
+    expect(healthPanel.textContent).toContain('StatusStopped');
+  });
+
   it('finds component health in nested health map', () => {
     const health: ComponentHealth = {
       healthy: true,

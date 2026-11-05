@@ -22,14 +22,12 @@ jest.mock('../../../utils/assert_significant_events_access', () => ({
 
 const mockFetchQueryLinks = jest.fn();
 const mockComputeOccurrences = jest.fn();
-const mockGetQueryOccurrences = jest.fn();
 const mockGenerateKIQueries = jest.fn();
 const mockCleanupStaleEvents = jest.fn();
 
 jest.mock('../../../../lib/significant_events/fetch_query_occurrences_from_alerts', () => ({
   fetchQueryLinks: (...args: unknown[]) => mockFetchQueryLinks(...args),
   computeOccurrences: (...args: unknown[]) => mockComputeOccurrences(...args),
-  getQueryOccurrences: (...args: unknown[]) => mockGetQueryOccurrences(...args),
   toQueryWithOccurrences: ({ queryLink }: { queryLink: QueryLink }) => ({
     ...queryLink.query,
     source_id: queryLink.source_id,
@@ -56,16 +54,11 @@ jest.mock('../../../../lib/significant_events/create_significant_events_traced_e
   createSignificantEventsTracedEsClient: jest.fn().mockReturnValue({}),
 }));
 
-const route = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
 const discoveryQueriesRoute = internalKIQueriesRoutes['GET /internal/streams/_queries'];
-const discoveryOccurrencesRoute =
-  internalKIQueriesRoutes['GET /internal/streams/_queries/_occurrences'];
 const bulkDeleteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_bulk_delete'];
 const upsertQueryRoute =
   internalKIQueriesRoutes['PUT /internal/significant_events/queries/{queryId}'];
-const RECONCILE_MAX_SOURCES = 10;
 
-type HandlerParams = Parameters<typeof route.handler>[0];
 type DiscoveryHandlerParams = Parameters<typeof discoveryQueriesRoute.handler>[0];
 type GenerateHandlerParams = Parameters<
   (typeof internalKIQueriesRoutes)['POST /internal/streams/{sourceId}/queries/_generate']['handler']
@@ -111,7 +104,7 @@ const makeServer = () =>
         },
       },
     },
-  } as unknown as HandlerParams['server']);
+  } as unknown as DiscoveryHandlerParams['server']);
 
 // Handler tests call the route function directly (no Zod transform), so dates
 // must already be `Date` instances — matching `makeIsoDateFromString` output.
@@ -121,117 +114,7 @@ const discoveryBaseQuery = {
   bucketSize: '1h',
 };
 
-describe('reconcileQueriesRoute', () => {
-  it('requires explicit source ids with a bounded batch size', () => {
-    expect(route.params.safeParse({ body: null }).success).toBe(false);
-    expect(route.params.safeParse({ body: {} }).success).toBe(false);
-    expect(
-      route.params.safeParse({
-        body: {
-          sourceIds: Array.from({ length: RECONCILE_MAX_SOURCES + 1 }, (_, i) => `logs.${i}`),
-        },
-      }).success
-    ).toBe(false);
-    expect(route.params.safeParse({ body: { sourceIds: ['logs.test'] } }).success).toBe(true);
-  });
-
-  it('replays current stream queries through replaceSourceQueries', async () => {
-    const currentLinks = [makeQueryLink('critical', 80), makeQueryLink('default', 60)];
-    const replaceSourceQueries = jest
-      .fn()
-      .mockImplementation(async (_definition, getNextQueries) => {
-        expect(getNextQueries(currentLinks)).toEqual(currentLinks.map((link) => link.query));
-      });
-    const handlerParams = {
-      params: { body: { sourceIds: ['logs.test'] } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: {
-          get: jest.fn().mockResolvedValue({ source: { id: 'logs.test', enabled: true } }),
-        },
-        licensing: {},
-        uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
-      }),
-      server: makeServer(),
-      maintenanceService: makeMaintenanceService(),
-      logger: { warn: jest.fn() },
-    } as unknown as HandlerParams;
-
-    const result = await route.handler(handlerParams);
-
-    expect(replaceSourceQueries).toHaveBeenCalledWith('logs.test', expect.any(Function));
-    expect(result).toEqual({
-      reconciled: 1,
-      failed: 0,
-      sources: [{ sourceId: 'logs.test', status: 'reconciled', queries: 2 }],
-    });
-  });
-
-  it('does not recreate rules for a disabled source', async () => {
-    const replaceSourceQueries = jest.fn();
-    const result = await route.handler({
-      params: { body: { sourceIds: ['disabled-source'] } },
-      request: {},
-      getScopedClients: async () => ({
-        sourcesClient: { get: async () => ({ source: { id: 'disabled-source', enabled: false } }) },
-        licensing: {},
-        getKnowledgeIndicatorClient: async () => ({ replaceSourceQueries }),
-      }),
-      server: makeServer(),
-      maintenanceService: makeMaintenanceService(),
-      logger: { warn: jest.fn() },
-    } as unknown as HandlerParams);
-
-    expect(replaceSourceQueries).not.toHaveBeenCalled();
-    expect(result.failed).toBe(1);
-    expect(result.reconciled).toBe(0);
-  });
-
-  it('continues when one stream fails to reconcile', async () => {
-    const replaceSourceQueries = jest
-      .fn()
-      .mockResolvedValueOnce(undefined)
-      .mockRejectedValueOnce(new Error('rules unavailable'));
-    const handlerParams = {
-      params: { body: { sourceIds: ['logs.a', 'logs.b'] } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: {
-          get: jest
-            .fn()
-            .mockResolvedValueOnce({ source: { id: 'logs.a', enabled: true } })
-            .mockResolvedValueOnce({ source: { id: 'logs.b', enabled: true } }),
-        },
-        licensing: {},
-        uiSettingsClient: {},
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue({ replaceSourceQueries }),
-      }),
-      server: makeServer(),
-      maintenanceService: makeMaintenanceService(),
-      logger: { warn: jest.fn() },
-    } as unknown as HandlerParams;
-
-    const result = await route.handler(handlerParams);
-
-    expect(result).toEqual({
-      reconciled: 1,
-      failed: 1,
-      sources: [
-        { sourceId: 'logs.a', status: 'reconciled', queries: 0 },
-        {
-          sourceId: 'logs.b',
-          status: 'failed',
-          queries: 0,
-          error: 'rules unavailable',
-        },
-      ],
-    });
-  });
-});
-
 describe('pause guard on rule-touching query routes', () => {
-  const reconcileRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_reconcile'];
   const demoteRoute = internalKIQueriesRoutes['POST /internal/streams/queries/_demote'];
   const generateRoute =
     internalKIQueriesRoutes['POST /internal/streams/{sourceId}/queries/_generate'];
@@ -260,12 +143,6 @@ describe('pause guard on rule-touching query routes', () => {
     await expect(handler(handlerParams)).rejects.toMatchObject({ output: { statusCode: 409 } });
     expect(getKnowledgeIndicatorClient).not.toHaveBeenCalled();
   };
-
-  it('rejects _reconcile with 409 while paused', async () => {
-    await expectPausedBeforeRuleWork(reconcileRoute.handler, {
-      body: { sourceIds: ['logs.test'] },
-    });
-  });
 
   it('rejects _demote with 409 while paused', async () => {
     await expectPausedBeforeRuleWork(demoteRoute.handler, { body: { queryIds: ['q1'] } });
@@ -627,91 +504,6 @@ describe('getDiscoveryQueriesRoute source resolution', () => {
     const result = await discoveryQueriesRoute.handler(params);
     expect(result.queries[0]).not.toHaveProperty('rule_enabled');
     expect(params.logger.warn).toHaveBeenCalled();
-  });
-});
-
-describe('getDiscoveryQueriesOccurrencesRoute source resolution', () => {
-  const list = jest.fn().mockResolvedValue({
-    sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
-    total: 2,
-    page: 1,
-    per_page: 100,
-  });
-  const kiClient = {};
-  const assertReadable = jest.fn();
-
-  beforeEach(() => {
-    jest.clearAllMocks();
-    assertReadable.mockResolvedValue(undefined);
-    list.mockResolvedValue({
-      sources: [{ id: 'logs.a' }, { id: 'logs.b' }],
-      total: 2,
-      page: 1,
-      per_page: 100,
-    });
-    mockGetQueryOccurrences.mockResolvedValue({
-      queryLinks: [],
-      sparseByRule: new Map(),
-      aggregatedOccurrences: [{ date: '2024-01-01T00:00:00.000Z', count: 1 }],
-      timeline: [],
-    });
-  });
-
-  it('lists streams before searching occurrences when sourceIds is omitted', async () => {
-    const handlerParams = {
-      params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { list, assertReadable },
-        licensing: {},
-        scopedClusterClient: { asCurrentUser: {} },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
-      }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
-      server: makeServer(),
-      logger: { warn: jest.fn() },
-    } as unknown as Parameters<typeof discoveryOccurrencesRoute.handler>[0];
-
-    await discoveryOccurrencesRoute.handler(handlerParams);
-
-    expect(list).toHaveBeenCalled();
-    expect(mockGetQueryOccurrences).toHaveBeenCalledWith(
-      expect.objectContaining({
-        sourceIds: ['logs.a', 'logs.b'],
-        query: 'checkout',
-      }),
-      expect.objectContaining({ kiClient })
-    );
-  });
-
-  it('computes occurrences only for the sources the caller can read', async () => {
-    assertReadable.mockImplementation(async (id: string) => {
-      if (id === 'logs.b') {
-        throw forbidden('no access');
-      }
-    });
-    const handlerParams = {
-      params: { query: { ...discoveryBaseQuery, query: 'checkout' } },
-      request: {},
-      getScopedClients: jest.fn().mockResolvedValue({
-        sourcesClient: { list, assertReadable },
-        licensing: {},
-        scopedClusterClient: { asCurrentUser: {} },
-        getKnowledgeIndicatorClient: jest.fn().mockResolvedValue(kiClient),
-        getSignificantEventsAlertingContext: jest.fn().mockResolvedValue({ alertsReader: {} }),
-      }),
-      getSpaceId: jest.fn().mockResolvedValue('default'),
-      server: makeServer(),
-      logger: { warn: jest.fn() },
-    } as unknown as Parameters<typeof discoveryOccurrencesRoute.handler>[0];
-
-    await discoveryOccurrencesRoute.handler(handlerParams);
-
-    expect(mockGetQueryOccurrences).toHaveBeenCalledWith(
-      expect.objectContaining({ sourceIds: ['logs.a'] }),
-      expect.objectContaining({ kiClient })
-    );
   });
 });
 

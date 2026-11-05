@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { EuiPanel, EuiText } from '@elastic/eui';
-import { useFormatTimestamp } from '../../../common/format_timestamp';
+import { useFormatTimestamp } from '../../../hooks/use_format_timestamp';
 
 export function ChangePointAnnotationTooltip({
   changePointLabel,

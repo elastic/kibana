@@ -36,6 +36,7 @@ import {
 } from '@kbn/agent-builder-common';
 import { isInternalTool } from '@kbn/agent-builder-common/tools';
 import { getToolResultId } from '@kbn/agent-builder-server';
+import type { ExecutionPeek } from '../../execution/persistence';
 import type {
   ConversationPermissions,
   ConversationWithPermissions,
@@ -240,7 +241,11 @@ const inferToolOrigin = (toolId: string): ToolOrigin | undefined => {
   return undefined;
 };
 
-export const fromEs = (document: Document, user: CurrentUser): NormalizedConversation => {
+export const fromEs = (
+  document: Document,
+  user: CurrentUser,
+  execution?: ExecutionPeek
+): NormalizedConversation => {
   const base = fromEsWithoutRounds(document, user);
   const perUserFlags = {
     read_by: migrateReadBy(document._source),
@@ -278,6 +283,8 @@ export const fromEs = (document: Document, user: CurrentUser): NormalizedConvers
     ...(attachmentsForRefs.length > 0 ? { attachments: attachmentsForRefs } : {}),
     ...(document._source!.state ? { state: document._source!.state } : {}),
     ...(isEventsNative ? { schema_version: storedSchemaVersion } : {}),
+    active_execution: document._source!.active_execution,
+    ...(execution ? { execution } : {}),
   };
 
   const events =
@@ -333,6 +340,7 @@ const stripInternalFields = (conversation: NormalizedConversation): Conversation
   const {
     read_by: _readBy,
     pinned_by: _pinnedBy,
+    execution: _execution,
     ...conversationWithoutInternalFields
   } = conversation;
 
@@ -430,6 +438,7 @@ export const toEs = (
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
     // Only events-native conversations persist their timeline; legacy ones keep deriving it
     // from rounds on read (see fromEs).
     ...(isEventsNative
@@ -510,7 +519,8 @@ export const createRequestToEs = ({
   creationDate,
   leadingEvents = [],
 }: {
-  conversation: ConversationCreateRequest;
+  /** `active_execution` comes from the create request's `activeExecution`, never from the request itself. */
+  conversation: ConversationCreateRequest & Pick<Conversation, 'active_execution'>;
   currentUser: UserIdAndName;
   creationDate: Date;
   space: string;
@@ -572,5 +582,6 @@ export const createRequestToEs = ({
     ...(conversation.parent_conversation
       ? { parent_conversation: conversation.parent_conversation }
       : {}),
+    active_execution: conversation.active_execution,
   };
 };

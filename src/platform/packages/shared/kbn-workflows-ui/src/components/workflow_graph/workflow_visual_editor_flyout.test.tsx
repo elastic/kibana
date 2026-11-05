@@ -13,12 +13,10 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type { WorkflowVisualEditorFlyoutTarget } from './workflow_visual_editor_flyout';
 import { WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 
-jest.mock('../../hooks/use_workflows_monaco_theme', () => ({
-  useWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'test-theme',
-}));
-
 jest.mock('@kbn/code-editor', () => ({
+  // The flyout's chrome overrides come from `workflow_monaco_layout_options`, which reads
+  // `monaco.editor.*` at module scope, so the real `monaco` has to stay in the mock.
+  ...jest.requireActual('@kbn/code-editor'),
   CodeEditor: ({ value }: any) => <div data-test-subj="editorValue">{value}</div>,
 }));
 
