@@ -12,6 +12,7 @@ import {
   type EsqlViewDefinition,
 } from '../../lib/services/resource_service/esql_view_initializer';
 import type { ResourceManagerContract } from '../../lib/services/resource_service/resource_manager';
+import { getAlertEpisodesViewDefinition } from './alert_episodes';
 
 export interface RegisterEsqlViewsOptions {
   resourceManager: ResourceManagerContract;
@@ -32,5 +33,5 @@ export function registerEsqlViews({
 }
 
 function getEsqlViewDefinitions(): EsqlViewDefinition[] {
-  return [];
+  return [getAlertEpisodesViewDefinition()];
 }
