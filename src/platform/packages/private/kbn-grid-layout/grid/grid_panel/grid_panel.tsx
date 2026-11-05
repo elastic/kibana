@@ -105,7 +105,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           const placement = `${currentPanel.sectionId}:${currentPanel.column},${currentPanel.row},${currentPanel.width},${currentPanel.height}`;
           const hasMoved = lastPlacement !== undefined && placement !== lastPlacement;
           lastPlacement = placement;
-          if (!runtimeSettings.lockActivePanelToGrid || !hasMoved || !canAnimate(ref)) {
+          const { lockActivePanelToGrid, animatePanelMoves = true } = runtimeSettings;
+          if (!lockActivePanelToGrid || !animatePanelMoves || !hasMoved || !canAnimate(ref)) {
             placeOnGrid();
             return;
           }

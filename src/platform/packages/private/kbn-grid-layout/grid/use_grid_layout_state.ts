@@ -103,6 +103,7 @@ export const useGridLayoutState = ({
           'showResizeGauge',
           'resizeGaugeScale',
           'lockActivePanelToGrid',
+          'animatePanelMoves',
         ])
       )
     )

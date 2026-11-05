@@ -441,6 +441,7 @@ const AppGrid = ({
       showResizeGauge: snapToGrid || isShiftHeld,
       resizeGaugeScale: scale,
       lockActivePanelToGrid: true,
+      animatePanelMoves: snapToGrid,
     }),
     [snapToGrid, gutterSize, scale, columns, app.freePlacement, isShiftHeld]
   );

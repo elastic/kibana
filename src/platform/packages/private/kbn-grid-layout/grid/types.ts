@@ -45,6 +45,8 @@ export interface GridSettings {
    * of following the pointer. Defaults to false.
    */
   lockActivePanelToGrid?: boolean;
+  /** With `lockActivePanelToGrid`, whether panels slide into their new cells. Defaults to true. */
+  animatePanelMoves?: boolean;
 }
 
 /** The grid settings that change how a layout is resolved. */

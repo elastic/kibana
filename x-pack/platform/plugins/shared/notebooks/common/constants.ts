@@ -20,7 +20,7 @@ export const PLUGIN_NAME = i18n.translate('xpack.notebook.pluginName', {
 });
 
 /** Without snap to grid, panels move and resize in steps of this fraction of a grid cell. */
-export const GRID_SUBDIVISIONS = 4;
+export const GRID_SUBDIVISIONS = 6;
 
 export const DEFAULT_GRID_COLUMNS = 12;
 export const MIN_GRID_COLUMNS = 1;
