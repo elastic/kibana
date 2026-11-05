@@ -139,11 +139,13 @@ export const applyRuntimeSettings = async ({
       );
       capture = { prior: existing, applied: changes };
     } else {
-      // Neither writing over it nor applying without a baseline is safe: leave both alone.
-      log.warning(
-        `[setup] unreadable prior-value capture at ${file}; leaving the settings as they are`
+      // Neither writing over it nor applying without a baseline is safe, and returning would
+      // leave every later run silently unconfigured: fail setup so the leftover gets resolved.
+      throw new Error(
+        `[setup] unreadable prior-value capture at ${file}: check the live values of ${Object.keys(
+          changes
+        ).join(', ')}, restore them if needed, then delete ${file}`
       );
-      return;
     }
     // A setting the interrupted run did not write has no baseline in the capture yet, and its
     // live value is still the user's own, so capture it now or teardown would never revert it.

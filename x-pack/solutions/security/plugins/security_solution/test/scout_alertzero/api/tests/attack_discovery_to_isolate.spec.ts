@@ -197,8 +197,23 @@ apiTest.describe(
     // break the hunt suites' baseline writes). Enable it for this suite and restore the captured
     // baseline in teardown.
     let restoreAlertZero: (() => Promise<void>) | undefined;
+    // Set when beforeAll skipped the suite before changing any state; teardown has nothing to undo.
+    let skippedBeforeSetup = false;
 
     apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+      // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
+      // chat-completion inference connector (the `alertzero` config set only wires connectors
+      // when a connector source exists, which plain CI does not have), every workflow run
+      // would fail on its first model call. Skip with an explicit reason instead of failing;
+      // with a connector present the flow runs for real (see the config set's doc block).
+      // It runs before the gate is enabled so a skipped suite leaves no state behind.
+      const api = await getAdminApi(apiClient, samlAuth);
+      const chatConnectors = await listChatCompletionConnectors(api);
+      skippedBeforeSetup = chatConnectors.length === 0;
+      apiTest.skip(
+        skippedBeforeSetup,
+        'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
+      );
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       restoreAlertZero = await withAlertZeroEnabledInSpace({
         apiClient,
@@ -208,6 +223,7 @@ apiTest.describe(
     });
 
     apiTest.afterAll(async ({ apiClient, samlAuth, esClient, config }) => {
+      if (skippedBeforeSetup) return;
       // One drain per workflow this run baselined, each up to DRAIN_BUDGET_MS, then the cleanup.
       // Without this a slow drain trips the default hook timeout before the account is deleted.
       apiTest.setTimeout(
@@ -287,17 +303,6 @@ apiTest.describe(
       async ({ apiClient, samlAuth, esClient, kbnClient, config }) => {
         apiTest.setTimeout(testData.GENERATION_TIMEOUT_MS + 3 * testData.PROPOSAL_TIMEOUT_MS);
         const api = await getAdminApi(apiClient, samlAuth);
-
-        // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
-        // chat-completion inference connector (the `alertzero` config set only wires connectors
-        // when a connector source exists, which plain CI does not have), every workflow run
-        // would fail on its first model call. Skip with an explicit reason instead of failing;
-        // with a connector present the flow runs for real (see the config set's doc block).
-        const chatConnectors = await listChatCompletionConnectors(api);
-        apiTest.skip(
-          chatConnectors.length === 0,
-          'no preconfigured chat-completion inference connector on this stack; the LLM-dependent AlertZero attack-discovery flow requires one (agent_builder_smoke-style EIS connector source)'
-        );
 
         // Explicit setup: force the per-space anonymization fields install before the workflows
         // run. On a cold space the first `anonymization_fields` read lazily installs it

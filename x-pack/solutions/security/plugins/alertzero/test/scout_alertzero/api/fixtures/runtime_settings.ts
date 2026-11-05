@@ -102,11 +102,11 @@ export const applyAlertAnalysisSetting = async ({
       };
       writeFileSync(STATE_FILE, JSON.stringify(capture, null, 2));
     } else {
-      // Neither writing over it nor applying without a baseline is safe: leave both alone.
-      log.warning(
-        `[setup] unreadable prior-value capture at ${STATE_FILE}; leaving the setting as it is`
+      // Neither writing over it nor applying without a baseline is safe, and returning would
+      // leave every later run silently unconfigured: fail setup so the leftover gets resolved.
+      throw new Error(
+        `[setup] unreadable prior-value capture at ${STATE_FILE}: check the live value of ${ALERT_ANALYSIS_SETTING}, restore it if needed, then delete ${STATE_FILE}`
       );
-      return;
     }
   } else {
     const capture: AlertAnalysisCapture = { prior: await readUserValue(kbnClient), applied: true };
