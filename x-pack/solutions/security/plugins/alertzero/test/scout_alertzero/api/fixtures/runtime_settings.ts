@@ -92,6 +92,8 @@ export const applyAlertAnalysisSetting = async ({
     const existing = readCaptureFile();
     if (isCapture(existing)) {
       log.warning(`[setup] keeping prior-value capture left by an interrupted run: ${STATE_FILE}`);
+      // Teardown compares the live value with `applied`, so record what is about to be written.
+      writeFileSync(STATE_FILE, JSON.stringify({ ...existing, applied: true }, null, 2));
     } else if (isLegacyCapture(existing)) {
       log.warning(
         `[setup] converting a flat-map prior-value capture left by an older run: ${STATE_FILE}`

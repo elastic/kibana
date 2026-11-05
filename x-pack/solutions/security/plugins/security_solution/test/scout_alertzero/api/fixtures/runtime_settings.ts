@@ -157,15 +157,15 @@ export const applyRuntimeSettings = async ({
           ...capture.prior,
           ...Object.fromEntries(uncaptured.map((key) => [key, current[key] ?? null])),
         },
-        applied: {
-          ...capture.applied,
-          ...Object.fromEntries(uncaptured.map((key) => [key, changes[key]])),
-        },
+        applied: capture.applied,
       };
       log.warning(
         `[setup] captured settings missing from the kept capture: ${uncaptured.join(', ')}`
       );
     }
+    // Teardown restores a setting only while it still holds what this suite applied, so the
+    // capture has to record the values about to be written now, not the interrupted run's.
+    capture = { ...capture, applied: { ...capture.applied, ...changes } };
     writeFileSync(file, JSON.stringify(capture, null, 2));
   } else {
     const current = await readUserValues(kbnClient);

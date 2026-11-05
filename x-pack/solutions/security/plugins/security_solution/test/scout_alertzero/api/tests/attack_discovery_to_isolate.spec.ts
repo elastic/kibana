@@ -200,7 +200,7 @@ apiTest.describe(
     // Set when beforeAll skipped the suite before changing any state; teardown has nothing to undo.
     let skippedBeforeSetup = false;
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
       // Guard: this flow is LLM-dependent end to end. When the stack was booted without a
       // chat-completion inference connector (the `alertzero` config set only wires connectors
       // when a connector source exists, which plain CI does not have), every workflow run
@@ -217,6 +217,7 @@ apiTest.describe(
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       restoreAlertZero = await withAlertZeroEnabledInSpace({
         apiClient,
+        apiServices,
         headers: cookieHeader,
         spaceId: 'default',
       });

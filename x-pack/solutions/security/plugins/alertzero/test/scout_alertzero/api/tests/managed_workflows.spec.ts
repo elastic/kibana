@@ -108,24 +108,6 @@ const readSpaceSolution = async ({
   return (response.body as { solution?: SpaceSolution }).solution ?? 'classic';
 };
 
-const setSpaceSolution = async ({
-  apiClient,
-  headers,
-  spaceId,
-  solution,
-}: {
-  apiClient: ApiClientFixture;
-  headers: Record<string, string>;
-  spaceId: string;
-  solution: SpaceSolution;
-}): Promise<void> => {
-  const response = await apiClient.put(
-    `internal/spaces/space/${encodeURIComponent(spaceId)}/solution`,
-    { headers, responseType: 'json', body: { solution } }
-  );
-  expect(response.statusCode, JSON.stringify(response.body)).toBe(200);
-};
-
 /** Execution ids of one workflow; the teardown drain cancels what is NOT in this list. */
 const listExecutionIds = async (
   apiClient: ApiClientFixture,
@@ -213,7 +195,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
   // cancels and drains the rest (see `cancelNewExecutions`).
   let knownExecutionIds: string[] = [];
 
-  apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+  apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
     const internalHeaders = { ...INTERNAL_API_HEADERS, 'kbn-xsrf': 'scout', ...cookieHeader };
 
@@ -227,12 +209,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     });
     if (solution !== 'security') {
       solutionBaseline = solution;
-      await setSpaceSolution({
-        apiClient,
-        headers: internalHeaders,
-        spaceId: DEFAULT_SPACE_ID,
-        solution: 'security',
-      });
+      await apiServices.spaces.setSolutionView({ id: DEFAULT_SPACE_ID, solution: 'security' });
     }
 
     alertZeroBaseline = {
@@ -315,7 +292,7 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     expect(enable.statusCode, JSON.stringify(enable.body)).toBe(200);
   });
 
-  apiTest.afterAll(async ({ apiClient, samlAuth }) => {
+  apiTest.afterAll(async ({ apiClient, apiServices, samlAuth }) => {
     apiTest.setTimeout(TEARDOWN_TIMEOUT_MS);
     const errors: unknown[] = [];
     const attempt = async (step: () => Promise<unknown>) => {
@@ -397,10 +374,8 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
     });
     await attempt(async () => {
       if (solutionBaseline) {
-        await setSpaceSolution({
-          apiClient,
-          headers,
-          spaceId: DEFAULT_SPACE_ID,
+        await apiServices.spaces.setSolutionView({
+          id: DEFAULT_SPACE_ID,
           solution: solutionBaseline,
         });
       }

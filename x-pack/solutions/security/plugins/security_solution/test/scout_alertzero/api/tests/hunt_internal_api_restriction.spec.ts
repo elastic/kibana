@@ -27,10 +27,11 @@ apiTest.describe(
     // exactly one thing — the missing header — instead of also depending on that ordering.
     let restoreAlertZero: (() => Promise<void>) | undefined;
 
-    apiTest.beforeAll(async ({ apiClient, samlAuth }) => {
+    apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
       const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
       restoreAlertZero = await withAlertZeroEnabledInSpace({
         apiClient,
+        apiServices,
         headers: cookieHeader,
         spaceId: 'default',
       });
