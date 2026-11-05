@@ -15,17 +15,28 @@ import {
   EuiFlexItem,
   EuiPanel,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   EuiToolTip,
 } from '@elastic/eui';
 import { ML_APP_LOCATOR } from '@kbn/ml-common-types/locator_app_locator';
 import { ML_PAGES } from '@kbn/ml-common-types/locator_ml_pages';
 import { useMlApi, useMlKibana } from '../../../../application/contexts/kibana';
-import { useSelectedJobId } from '../../../../application/components/job_suggestion/use_selected_job_id';
+import {
+  useSelectedJobId,
+  useShowAnomalies,
+} from '../../../../application/components/job_suggestion/use_selected_job_id';
 
 const deselectLabel = i18n.translate('xpack.ml.discoverADManagementFlyout.deselectJobAriaLabel', {
   defaultMessage: 'Deselect job',
 });
+
+const showAnomaliesLabel = i18n.translate(
+  'xpack.ml.discoverADManagementFlyout.showAnomaliesLabel',
+  {
+    defaultMessage: 'Show anomalies',
+  }
+);
 
 interface Props {
   indexPattern: string;
@@ -45,6 +56,7 @@ export const SelectedJob: FC<Props> = ({ indexPattern }) => {
     },
   } = useMlKibana();
   const [selectedJobId, selectJob] = useSelectedJobId(indexPattern);
+  const [showAnomalies, setShowAnomalies] = useShowAnomalies(indexPattern);
   const [description, setDescription] = useState<{ jobId: string; text: string }>();
   const [explorerUrl, setExplorerUrl] = useState<{ jobId: string; url: string }>();
 
@@ -97,6 +109,13 @@ export const SelectedJob: FC<Props> = ({ indexPattern }) => {
 
   return (
     <>
+      <EuiSwitch
+        label={showAnomaliesLabel}
+        checked={showAnomalies}
+        onChange={(e) => setShowAnomalies(e.target.checked)}
+        data-test-subj="mlDiscoverADManagementShowAnomalies"
+      />
+      <EuiSpacer size="m" />
       <EuiPanel
         hasShadow={false}
         hasBorder

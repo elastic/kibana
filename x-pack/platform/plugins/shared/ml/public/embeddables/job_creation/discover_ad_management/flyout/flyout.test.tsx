@@ -14,7 +14,9 @@ import type { SuggestionsState } from '../../../../application/components/job_su
 import { useSuggestionHistory } from '../../../../application/components/job_suggestion/use_suggestion_history';
 import {
   getSelectedJobId$,
+  getShowAnomalies$,
   setSelectedJobId,
+  setShowAnomalies,
 } from '../../../../application/components/job_suggestion/selected_job';
 import { DiscoverADManagementFlyout } from './flyout';
 
@@ -174,7 +176,10 @@ const enabledCreateButton = async () => {
 
 describe('DiscoverADManagementFlyout', () => {
   afterEach(() => {
-    act(() => setSelectedJobId('logs-*', undefined));
+    act(() => {
+      setSelectedJobId('logs-*', undefined);
+      setShowAnomalies('logs-*', true);
+    });
   });
 
   beforeEach(() => {
@@ -190,6 +195,39 @@ describe('DiscoverADManagementFlyout', () => {
     mockCalculateBounds.mockReturnValue({
       min: { valueOf: () => FULL_RANGE.start },
       max: { valueOf: () => FULL_RANGE.end },
+    });
+  });
+
+  describe('the switch to show anomalies', () => {
+    it('is hidden when no job is selected', () => {
+      renderFlyout({ openSuggestions: false });
+
+      expect(screen.queryByTestId('mlDiscoverADManagementShowAnomalies')).not.toBeInTheDocument();
+    });
+
+    it('hides the anomalies without deselecting the job, and shows them again', () => {
+      act(() => setSelectedJobId('logs-*', 'my-job'));
+      renderFlyout({ openSuggestions: false });
+
+      const toggle = screen.getByTestId('mlDiscoverADManagementShowAnomalies');
+      expect(toggle).toBeChecked();
+
+      fireEvent.click(toggle);
+      expect(getShowAnomalies$('logs-*').getValue()).toBe(false);
+      expect(getSelectedJobId$('logs-*').getValue()).toBe('my-job');
+      expect(toggle).not.toBeChecked();
+
+      fireEvent.click(toggle);
+      expect(getShowAnomalies$('logs-*').getValue()).toBe(true);
+    });
+
+    it('is hidden when the job is deselected', () => {
+      act(() => setSelectedJobId('logs-*', 'my-job'));
+      renderFlyout({ openSuggestions: false });
+
+      fireEvent.click(screen.getByTestId('mlDiscoverADManagementSelectedJobDeselect'));
+
+      expect(screen.queryByTestId('mlDiscoverADManagementShowAnomalies')).not.toBeInTheDocument();
     });
   });
 
@@ -358,8 +396,9 @@ describe('DiscoverADManagementFlyout', () => {
       expect(screen.queryByTestId('mlDiscoverADManagementViewResults')).not.toBeInTheDocument();
     });
 
-    it('selects the new job for the chart, and closes the flyout', async () => {
+    it('selects the new job for the chart, shows its anomalies, and closes the flyout', async () => {
       setSelectedJobId('logs-*', 'another-job');
+      setShowAnomalies('logs-*', false);
       const { onClose } = renderFlyout();
       await openConfigStep('a');
       fireEvent.change(screen.getByTestId('mlDiscoverADManagementJobId'), {
@@ -371,6 +410,7 @@ describe('DiscoverADManagementFlyout', () => {
       fireEvent.click(screen.getByTestId('mlDiscoverADManagementAddResultsToChart'));
 
       expect(getSelectedJobId$('logs-*').getValue()).toBe('my-own-id');
+      expect(getShowAnomalies$('logs-*').getValue()).toBe(true);
       expect(onClose).toHaveBeenCalledTimes(1);
     });
   });

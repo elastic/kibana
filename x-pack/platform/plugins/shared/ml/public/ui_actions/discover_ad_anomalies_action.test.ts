@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { setSelectedJobId } from '../application/components/job_suggestion/selected_job';
+import {
+  setSelectedJobId,
+  setShowAnomalies,
+} from '../application/components/job_suggestion/selected_job';
 import { createDiscoverADAnomaliesAction } from './discover_ad_anomalies_action';
 
 const mockLoadAnomalyRanges = jest.fn();
@@ -45,6 +48,7 @@ describe('discover anomalies action', () => {
   beforeEach(() => {
     window.localStorage.clear();
     setSelectedJobId(INDEX_PATTERN, undefined);
+    setShowAnomalies(INDEX_PATTERN, true);
     mockLoadAnomalyRanges.mockReset();
     mockLoadAnomalyRanges.mockImplementation(async ({ jobId }: { jobId: string }) => [
       { jobId, start: 0, end: 10, score: jobId === 'a' ? 50 : 90 },
@@ -87,6 +91,27 @@ describe('discover anomalies action', () => {
     setSelectedJobId(INDEX_PATTERN, undefined);
     await flushPromises();
     expect(onAnomalyRanges).toHaveBeenLastCalledWith([]);
+
+    abortController.abort();
+    await done;
+  });
+
+  it('provides no anomalies while they are hidden, without deselecting the job', async () => {
+    setSelectedJobId(INDEX_PATTERN, 'a');
+    const abortController = new AbortController();
+    const onAnomalyRanges = jest.fn();
+    const done = execute(abortController, onAnomalyRanges);
+    await flushPromises();
+
+    setShowAnomalies(INDEX_PATTERN, false);
+    await flushPromises();
+    expect(onAnomalyRanges).toHaveBeenLastCalledWith([]);
+
+    setShowAnomalies(INDEX_PATTERN, true);
+    await flushPromises();
+    expect(onAnomalyRanges).toHaveBeenLastCalledWith([
+      { jobId: 'a', start: 0, end: 10, score: 50 },
+    ]);
 
     abortController.abort();
     await done;

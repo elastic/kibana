@@ -62,3 +62,54 @@ export const setSelectedJobId = (indexPattern: string, jobId: string | undefined
   );
   getSelectedJobId$(indexPattern).next(jobId);
 };
+
+const SHOW_ANOMALIES_STORAGE_KEY = 'ml.discoverADManagement.showAnomalies';
+
+/** Whether the anomalies are shown, for each index pattern for which they are hidden. */
+type HiddenAnomalies = Record<string, boolean>;
+
+const isHiddenAnomalies = (value: unknown): value is HiddenAnomalies =>
+  typeof value === 'object' &&
+  value !== null &&
+  Object.values(value).every((hidden) => typeof hidden === 'boolean');
+
+const readHiddenAnomalies = (): HiddenAnomalies => {
+  try {
+    const stored = new Storage(window.localStorage).get(SHOW_ANOMALIES_STORAGE_KEY);
+    return isHiddenAnomalies(stored) ? stored : {};
+  } catch {
+    return {};
+  }
+};
+
+const showAnomaliesSubjects = new Map<string, BehaviorSubject<boolean>>();
+
+/**
+ * Whether the anomalies of the selected job are shown on the Discover chart for the index pattern, which
+ * they are by default. Hiding them does not deselect the job. It is remembered by the browser.
+ */
+export const getShowAnomalies$ = (indexPattern: string): BehaviorSubject<boolean> => {
+  const existing = showAnomaliesSubjects.get(indexPattern);
+  if (existing) {
+    return existing;
+  }
+  const showAnomalies$ = new BehaviorSubject<boolean>(!readHiddenAnomalies()[indexPattern]);
+  showAnomaliesSubjects.set(indexPattern, showAnomalies$);
+  return showAnomalies$;
+};
+
+/** Shows or hides the anomalies of the selected job on the chart for the index pattern. */
+export const setShowAnomalies = (indexPattern: string, show: boolean): void => {
+  // Only the index patterns for which they are hidden are kept, as showing them is the default
+  const { [indexPattern]: _previous, ...others } = readHiddenAnomalies();
+  const hidden = show ? others : { ...others, [indexPattern]: true };
+  try {
+    new Storage(window.localStorage).set(
+      SHOW_ANOMALIES_STORAGE_KEY,
+      Object.fromEntries(Object.entries(hidden).slice(-MAX_STORED_INDEX_PATTERNS))
+    );
+  } catch {
+    // The choice is kept for the page without the browser's storage
+  }
+  getShowAnomalies$(indexPattern).next(show);
+};

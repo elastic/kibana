@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { combineLatest } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import type {
   ActionExecutionContext,
@@ -28,32 +29,40 @@ export function createDiscoverADAnomaliesAction(
     async execute(context: ActionExecutionContext<DiscoverADAnomaliesContext>) {
       const { indexPattern, timeRange, chartWidth, signal, onAnomalyRanges } = context;
 
-      const [[coreStart], { mlApiProvider }, { loadAnomalyRanges }, { getSelectedJobId$ }] =
-        await Promise.all([
-          getStartServices(),
-          import('../application/services/ml_api_service'),
-          import('./load_anomaly_ranges'),
-          import('../application/components/job_suggestion/selected_job'),
-        ]);
+      const [
+        [coreStart],
+        { mlApiProvider },
+        { loadAnomalyRanges },
+        { getSelectedJobId$, getShowAnomalies$ },
+      ] = await Promise.all([
+        getStartServices(),
+        import('../application/services/ml_api_service'),
+        import('./load_anomaly_ranges'),
+        import('../application/components/job_suggestion/selected_job'),
+      ]);
 
       const mlApi = mlApiProvider(new HttpService(coreStart.http));
 
       // The anomalies of the selected job are provided, and again each time another job, or none, is selected,
       // until the result is no longer needed
       let latestLoad = 0;
-      const provideAnomalyRanges = async (jobId: string | undefined) => {
+      const provideAnomalyRanges = async (jobId: string | undefined, showAnomalies: boolean) => {
         const load = ++latestLoad;
-        const ranges = jobId
-          ? await loadAnomalyRanges({ mlApi, jobId, timeRange, chartWidth })
-          : [];
+        const ranges =
+          jobId && showAnomalies
+            ? await loadAnomalyRanges({ mlApi, jobId, timeRange, chartWidth })
+            : [];
         if (load === latestLoad && !signal?.aborted) {
           onAnomalyRanges(ranges);
         }
       };
 
       await new Promise<void>((resolve) => {
-        const subscription = getSelectedJobId$(indexPattern).subscribe((jobId) => {
-          provideAnomalyRanges(jobId).catch(() => {});
+        const subscription = combineLatest([
+          getSelectedJobId$(indexPattern),
+          getShowAnomalies$(indexPattern),
+        ]).subscribe(([jobId, showAnomalies]) => {
+          provideAnomalyRanges(jobId, showAnomalies).catch(() => {});
         });
         const stop = () => {
           subscription.unsubscribe();

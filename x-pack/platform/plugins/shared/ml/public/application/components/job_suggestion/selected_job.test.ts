@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import { getSelectedJobId$, setSelectedJobId } from './selected_job';
+import {
+  getSelectedJobId$,
+  getShowAnomalies$,
+  setSelectedJobId,
+  setShowAnomalies,
+} from './selected_job';
 
 const STORAGE_KEY = 'ml.discoverADManagement.selectedJobs';
 
@@ -62,5 +67,32 @@ describe('selected job', () => {
     expect(Object.keys(stored)).toHaveLength(20);
     expect(stored['many-0-*']).toBeUndefined();
     expect(stored['many-21-*']).toBe('job-21');
+  });
+});
+
+describe('show anomalies', () => {
+  const KEY = 'ml.discoverADManagement.showAnomalies';
+  beforeEach(() => window.localStorage.clear());
+
+  it('shows the anomalies by default', () => {
+    expect(getShowAnomalies$('show-default-*').getValue()).toBe(true);
+  });
+
+  it('emits the change, and remembers only when they are hidden', () => {
+    const emitted: boolean[] = [];
+    getShowAnomalies$('show-emit-*').subscribe((show) => emitted.push(show));
+
+    setShowAnomalies('show-emit-*', false);
+    expect(JSON.parse(window.localStorage.getItem(KEY) ?? '{}')).toEqual({ 'show-emit-*': true });
+
+    setShowAnomalies('show-emit-*', true);
+    expect(JSON.parse(window.localStorage.getItem(KEY) ?? '{}')).toEqual({});
+    expect(emitted).toEqual([true, false, true]);
+  });
+
+  it('is kept for each index pattern', () => {
+    setShowAnomalies('show-a-*', false);
+    expect(getShowAnomalies$('show-a-*').getValue()).toBe(false);
+    expect(getShowAnomalies$('show-b-*').getValue()).toBe(true);
   });
 });

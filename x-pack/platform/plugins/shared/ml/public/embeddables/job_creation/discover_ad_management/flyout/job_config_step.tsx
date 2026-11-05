@@ -40,7 +40,10 @@ import type {
   TimeRangeMs,
 } from '../../../../application/jobs/new_job/job_from_suggestion';
 import { useMlApi, useMlKibana } from '../../../../application/contexts/kibana';
-import { setSelectedJobId } from '../../../../application/components/job_suggestion/selected_job';
+import {
+  setSelectedJobId,
+  setShowAnomalies,
+} from '../../../../application/components/job_suggestion/selected_job';
 import { SuggestionBadges } from '../../../../application/components/job_suggestion/suggestion_badges';
 
 type TimeRangeMode = 'all' | 'custom';
@@ -277,6 +280,7 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
   // The results of the job are then shown on the Discover chart
   const addResultsToChart = useCallback(() => {
     setSelectedJobId(indexPattern, jobId);
+    setShowAnomalies(indexPattern, true);
     onClose();
   }, [indexPattern, jobId, onClose]);
 

@@ -7,7 +7,12 @@
 
 import { useCallback, useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
-import { getSelectedJobId$, setSelectedJobId } from './selected_job';
+import {
+  getSelectedJobId$,
+  getShowAnomalies$,
+  setSelectedJobId,
+  setShowAnomalies,
+} from './selected_job';
 
 /** The id of the job selected for the index pattern, or undefined when there is none, and a function to change it. */
 export const useSelectedJobId = (
@@ -20,4 +25,17 @@ export const useSelectedJobId = (
     [indexPattern]
   );
   return [selectedJobId, selectJob] as const;
+};
+
+/** Whether the anomalies of the selected job are shown on the chart for the index pattern, and a function to change it. */
+export const useShowAnomalies = (
+  indexPattern: string
+): readonly [boolean, (show: boolean) => void] => {
+  const showAnomalies$ = useMemo(() => getShowAnomalies$(indexPattern), [indexPattern]);
+  const showAnomalies = useObservable(showAnomalies$, showAnomalies$.getValue());
+  const setShow = useCallback(
+    (show: boolean) => setShowAnomalies(indexPattern, show),
+    [indexPattern]
+  );
+  return [showAnomalies, setShow] as const;
 };
