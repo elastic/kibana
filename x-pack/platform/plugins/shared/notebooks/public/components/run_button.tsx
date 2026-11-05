@@ -24,13 +24,13 @@ const MODES: Record<RunMode, { title: string; description: string }> = {
   auto: {
     title: i18n.translate('xpack.notebook.runButton.auto', { defaultMessage: 'Auto' }),
     description: i18n.translate('xpack.notebook.runButton.autoDescription', {
-      defaultMessage: 'Re-run automatically when upstream cells change',
+      defaultMessage: 'Runs automatically when upstream cells change',
     }),
   },
   manual: {
     title: i18n.translate('xpack.notebook.runButton.manual', { defaultMessage: 'Manual' }),
     description: i18n.translate('xpack.notebook.runButton.manualDescription', {
-      defaultMessage: 'Run only when you click Run; marked stale when upstream cells change',
+      defaultMessage: 'Runs only when clicked',
     }),
   },
 };

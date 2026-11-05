@@ -36,7 +36,7 @@ Source dashboard for reference: `src/platform/plugins/shared/home/server/service
 
 | | |
 |---|---|
-| Location | `x-pack/platform/plugins/shared/notebook` (`visibility: private`) |
+| Location | `x-pack/platform/plugins/shared/notebooks` (`visibility: shared`) |
 | Plugin id / module id | `notebook` / `@kbn/notebook-plugin` |
 | App | `notebook`, route `/app/notebook`, classic nav under Analytics (`DEFAULT_APP_CATEGORIES.kibana`); no solution navs |
 | Saved object type / feature id | `notebook` / `notebook` |
@@ -68,7 +68,7 @@ type CellDefinition =
 
 type InputDefinition =
   | { kind: 'time'; defaultValue: { from: string; to: string }; pinned?: boolean }
-  | { kind: 'dropdown'; optionsQuery: string; defaultValue: string | null }
+  | { kind: 'dropdown'; optionsSource?: 'query' | 'static' | 'cell' /* default 'query' */; optionsQuery: string; staticOptions?: string[]; optionsCell?: string | null /* ES|QL cell id */; optionsColumn?: string | null; defaultValue: string | null }
   | { kind: 'range'; min: number; max: number; step?: number; defaultValue: [number, number] | null };
 ```
 
@@ -153,7 +153,7 @@ A plain class over the store, injected with `runQuery` so it is unit-testable wi
 - Execute through the data plugin `search` with the `esql_async` strategy (as `getESQLResults` in `src/platform/packages/shared/esql/kbn-esql-utils/src/utils/run_query.ts:220` does), building the named `params` array ourselves. `getESQLResults`'s `variables` (`ESQLControlVariable`) cannot hold `null`, so do not route values through it.
 - `_tstart`/`_tend` resolution: match `getStartEndParams` (`run_query.ts:25`): `dateMath.parse(from)` and `dateMath.parse(to, { roundUp: true })` as ISO strings.
 - Empty dropdown/range binds `null` (never `undefined`, which JSON drops; ES rejects any referenced param that is missing). Queries handle it visibly: `WHERE ?country IS NULL OR geo.src == ?country`. No hidden query rewriting.
-- `truncated = rows.length >= (LIMIT in query ?? 1000)`; surfaced as a warning in the cell.
+- `truncated` only when ES capped the rows itself: no `LIMIT` and `rows.length >= 1000` (the implicit default), or a `LIMIT` above 10,000 and `rows.length >= 10000` (the hard maximum). Hitting a `LIMIT` the user wrote is not truncation. Surfaced as a warning in the cell.
 
 ## Charts via Lens
 
@@ -180,7 +180,7 @@ Discover is **not** a reference for the no-fetch path: it passes `table` to the 
 ## Inputs
 
 - **Time** (`pinned: true`): rendered in the page header next to Refresh / Run all / Save; uses the `unifiedSearch` time picker.
-- **Dropdown**: single-select; options come from its own embedded `optionsQuery` (first column, e.g. `FROM kibana_sample_data_logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS BY geo.src | LIMIT 500`). Not a separate DAG node; depends on the params in its options query. Empty = `null`.
+- **Dropdown**: single-select; options come from its own embedded `optionsQuery` (first column, e.g. `FROM kibana_sample_data_logs | WHERE @timestamp >= ?_tstart AND @timestamp <= ?_tend | STATS BY geo.src | LIMIT 500`). Not a separate DAG node; depends on the params in its options query. Alternatively `optionsSource: 'static'` offers a hand-entered `staticOptions` list, runs no query and has no dependencies; or `optionsSource: 'cell'` takes the distinct values of `optionsColumn` from the results of the ES|QL cell `optionsCell`, which becomes its parent (a cycle if that cell reads the dropdown). The options query is kept so switching back restores it. Empty = `null`.
 - **Range**: numeric `[min, max]`, exposes `?<name>_min`/`?<name>_max`; empty = `null`.
 - Unpinned inputs render inline as cells with a config popover (options query, defaults, bounds).
 
