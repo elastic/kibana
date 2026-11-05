@@ -10,8 +10,6 @@ import {
   NEEDS_ACTION_STATUSES,
   RESOLVED_STATUSES,
   byCriticalityAndUpdatedAtDesc,
-  getNeedsActionEvents,
-  getResolvedEvents,
   getInvestigationStatusLabel,
   getLatestInvestigation,
   getStatusColor,
@@ -55,19 +53,6 @@ describe('significant_event_status', () => {
     const inactive: SignificantEventStatus = 'inactive';
     expect(isNeedsActionStatus(inactive)).toBe(false);
     expect(isResolvedStatus(inactive)).toBe(true);
-  });
-
-  it('splits events into needs-action and resolved buckets, grouping dismissed with resolved', () => {
-    const events = [
-      mockEvent({ event_id: '1', status: 'active' }),
-      mockEvent({ event_id: '2', status: 'active' }),
-      mockEvent({ event_id: '3', status: 'inactive' }),
-      mockEvent({ event_id: '4', status: 'inactive' }),
-      mockEvent({ event_id: '5', status: 'inactive' }),
-    ];
-
-    expect(getNeedsActionEvents(events).map(({ event_id: id }) => id)).toEqual(['1', '2']);
-    expect(getResolvedEvents(events).map(({ event_id: id }) => id)).toEqual(['3', '4', '5']);
   });
 
   it('sorts by descending criticality, breaking ties on updated_at', () => {

@@ -460,6 +460,58 @@ describe('kuery functions', () => {
           },
         });
       });
+
+      test('should use term and wildcard queries for wildcard fields', () => {
+        const wildcardIndexPattern: DataViewBase = {
+          title: 'dataView',
+          fields: [
+            {
+              name: 'runName',
+              type: 'string',
+              esTypes: ['wildcard'],
+              scripted: false,
+            },
+          ],
+        };
+
+        const exact = nodeTypes.function.buildNode(
+          'is',
+          'runName',
+          'Deploy staging'
+        ) as KqlIsFunctionNode;
+        expect(is.toElasticsearchQuery(exact, wildcardIndexPattern)).toEqual({
+          bool: {
+            should: [
+              {
+                term: {
+                  runName: { value: 'Deploy staging' },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+
+        const pattern = nodeTypes.function.buildNode(
+          'is',
+          'runName',
+          'Deploy*'
+        ) as KqlIsFunctionNode;
+        expect(
+          is.toElasticsearchQuery(pattern, wildcardIndexPattern, { caseInsensitive: true })
+        ).toEqual({
+          bool: {
+            should: [
+              {
+                wildcard: {
+                  runName: { value: 'Deploy*', case_insensitive: true },
+                },
+              },
+            ],
+            minimum_should_match: 1,
+          },
+        });
+      });
     });
 
     describe('toKqlExpression', () => {

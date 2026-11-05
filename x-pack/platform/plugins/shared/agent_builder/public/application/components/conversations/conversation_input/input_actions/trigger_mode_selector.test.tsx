@@ -17,7 +17,7 @@ describe('TriggerModeSelector', () => {
     );
 
     expect(screen.getByTestId('agentBuilderTriggerModeSelectorButton')).toHaveAccessibleName(
-      'Include or skip the agent, Skip agent'
+      'Ask or skip the agent, Skip agent'
     );
   });
 
@@ -32,7 +32,7 @@ describe('TriggerModeSelector', () => {
       'aria-selected',
       'true'
     );
-    expect(screen.getByRole('option', { name: 'Include agent' })).toHaveAttribute(
+    expect(screen.getByRole('option', { name: 'Ask agent' })).toHaveAttribute(
       'aria-selected',
       'false'
     );

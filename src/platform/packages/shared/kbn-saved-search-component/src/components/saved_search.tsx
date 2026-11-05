@@ -212,7 +212,7 @@ const SavedSearchComponentTable: React.FC<
           timeFieldName: timestampField ?? TIMESTAMP_FIELD,
         });
         if (!abortController.signal.aborted) {
-          embeddableApi.current?.setDataViews([dataView]);
+          embeddableApi.current?.setDataSources([dataView]);
         }
       }
 

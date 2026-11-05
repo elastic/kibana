@@ -25,8 +25,8 @@ const connected = {
   isComplete: true,
 };
 const mockUseAllRelayAppBindings = jest.fn();
-jest.mock('../../../../../settings/components/apps_section/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../../settings/components/apps_section/use_relay_app_bindings'),
+jest.mock('../../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => mockUseAllRelayAppBindings(),
 }));
 jest.mock('../../../../../hooks/use_kibana', () => ({
@@ -65,21 +65,6 @@ describe('SlackTriggerEditor', () => {
   beforeEach(() => {
     onChange.mockClear();
     mockUseAllRelayAppBindings.mockReturnValue(connected);
-  });
-
-  it('describes a new message trigger', () => {
-    render(<Editor kind="slack_message" />);
-
-    expect(screen.getByText('New message')).toBeInTheDocument();
-    expect(screen.getByText('in')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerChannels')).toHaveTextContent(
-      'Select channels'
-    );
-    expect(screen.getByTestId('automationSlackTriggerMessage')).toHaveTextContent('Any message');
-    expect(screen.getByText('from')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerUsers')).toHaveTextContent('Anyone');
-    expect(screen.getByText('via')).toBeInTheDocument();
-    expect(screen.getByTestId('automationSlackTriggerBots')).toHaveTextContent('Any app');
   });
 
   it('adds an app or bot', async () => {

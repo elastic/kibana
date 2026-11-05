@@ -64,7 +64,7 @@ describe('delete', () => {
       await expect(
         deleteComment({ caseID: 'mock-id-1', savedObjectId: 'missing-id' }, clientArgs)
       ).rejects.toThrow(
-        'Failed to delete comment: mock-id-1 comment id: missing-id: Error: This comment missing-id does not exist anymore.'
+        'Failed to delete comment: mock-id-1 comment id: missing-id: Error: This attachment missing-id does not exist anymore.'
       );
 
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
@@ -73,7 +73,7 @@ describe('delete', () => {
     it('throws a not found error when the attachment belongs to another case', async () => {
       await expect(
         deleteComment({ caseID: 'other-case', savedObjectId: 'mock-comment-1' }, clientArgs)
-      ).rejects.toThrow(/This comment mock-comment-1 does not exist in other-case\./);
+      ).rejects.toThrow(/This attachment mock-comment-1 does not exist in case other-case\./);
 
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();
       expect(deleteRelatedAttachments).not.toHaveBeenCalled();
@@ -181,7 +181,7 @@ describe('delete', () => {
       clientArgs.services.attachmentService.getter.bulkGetForDeletionByType.mockResolvedValue([]);
 
       await expect(deleteAll({ caseID: 'mock-id-1' }, clientArgs)).rejects.toThrow(
-        'Failed to delete all comments case id: mock-id-1: Error: No comments found for mock-id-1.'
+        'Failed to delete all comments case id: mock-id-1: Error: No attachments found for case mock-id-1.'
       );
 
       expect(clientArgs.services.attachmentService.bulkDelete).not.toHaveBeenCalled();

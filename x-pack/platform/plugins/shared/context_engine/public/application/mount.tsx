@@ -44,6 +44,7 @@ export const mountApp = async ({
     data: plugins.data,
     share: plugins.share,
     triggersActionsUi: plugins.triggersActionsUi,
+    cloud: plugins.cloud,
     console: plugins.console,
     spaces: plugins.spaces,
     getChatOpener,

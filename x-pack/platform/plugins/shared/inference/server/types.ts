@@ -59,7 +59,7 @@ export interface InferenceStartDependencies {
 export type FeatureEndpointResolver = (
   featureId: string,
   request: KibanaRequest
-) => Promise<Pick<ChatCompleteOptions, 'connectorId' | 'temperature' | 'reasoning'> | undefined>;
+) => Promise<Pick<ChatCompleteOptions, 'connectorId' | 'reasoning'> | undefined>;
 
 /**
  * A {@link FeatureEndpointResolver} already scoped to a request.
@@ -132,7 +132,7 @@ export interface InferenceServerStart {
    * ```
    *
    * Server features can pass a `featureId` instead of a `connectorId`. The feature's top model,
-   * and its `temperature` and `reasoning`, are then resolved from the model settings.
+   * and its `reasoning`, are then resolved from the model settings.
    *
    * @example
    * ```ts

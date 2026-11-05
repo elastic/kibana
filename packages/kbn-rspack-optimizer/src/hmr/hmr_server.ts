@@ -123,6 +123,15 @@ export class HmrServer {
     }
   }
 
+  broadcastReload(files?: string[]): void {
+    // Not replayed: pages connecting after a reload already load the current shared bundles.
+    this.lastState = null;
+    const payload = `data: ${JSON.stringify({ reload: true, files })}\n\n`;
+    for (const client of this.clients) {
+      client.write(payload);
+    }
+  }
+
   broadcastErrors(errors: string[]): void {
     this.lastState = { errors };
     const payload = `data: ${JSON.stringify(this.lastState)}\n\n`;

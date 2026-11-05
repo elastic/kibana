@@ -2033,6 +2033,7 @@ describe('Connector metrics', () => {
     jest.spyOn(connectorExecuteCounter, 'add').mockImplementation(() => {});
     jest.spyOn(connectorExecuteDuration, 'record').mockImplementation(() => {});
     jest.spyOn(connectorAuthCounter, 'add').mockImplementation(() => {});
+    connectorTypeRegistry.isSpecActionType.mockReturnValue(false);
   });
 
   afterEach(() => {
@@ -2057,12 +2058,33 @@ describe('Connector metrics', () => {
     expect(connectorExecuteCounter.add).toHaveBeenCalledTimes(1);
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
     expect(connectorExecuteDuration.record).toHaveBeenCalledWith(expect.any(Number), {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: true,
     });
+  });
+
+  test('flags a spec-based connector type', async () => {
+    mockConnector();
+    connectorTypeRegistry.isSpecActionType.mockReturnValueOnce(true);
+    (
+      connectorType.executor as jest.MockedFunction<NonNullable<ConnectorType['executor']>>
+    ).mockResolvedValueOnce({ actionId: CONNECTOR_ID, status: 'ok' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(connectorExecuteCounter.add).toHaveBeenCalledWith(
+      1,
+      expect.objectContaining({ 'connector.spec_based': true })
+    );
   });
 
   test('records a failed execution with its error source', async () => {
@@ -2075,6 +2097,9 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'other',
       'error.source': 'user',
@@ -2096,6 +2121,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'disabled',
       'error.source': 'framework',
@@ -2111,6 +2138,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'rate_limited',
       'error.source': 'user',
@@ -2125,6 +2154,8 @@ describe('Connector metrics', () => {
 
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
       success: false,
       'error.type': 'invalid',
       'error.source': 'user',
@@ -2155,6 +2186,9 @@ describe('Connector metrics', () => {
     });
     expect(connectorExecuteCounter.add).toHaveBeenCalledWith(1, {
       'connector.type': 'test',
+      'connector.spec_based': false,
+      'connector.origin': 'http_request',
+      'connector.sub_action': 'default',
       success: false,
       'error.type': 'auth_failed',
       'error.source': 'user',
@@ -2852,5 +2886,107 @@ describe('execute() - spaceId override', () => {
       CONNECTOR_ID,
       { namespace: 'some-namespace' }
     );
+  });
+});
+
+describe('execute() - EARS structured logging', () => {
+  const earsExecutor = jest.fn();
+  const earsConnectorType: jest.Mocked<ConnectorType> = {
+    ...connectorType,
+    id: 'test-ears',
+    validate: {
+      config: { schema: z.object({ bar: z.boolean(), authType: z.string().optional() }) },
+      secrets: { schema: z.object({ baz: z.boolean(), authType: z.string().optional() }) },
+      params: { schema: z.object({ foo: z.boolean() }) },
+    },
+    executor: earsExecutor,
+  };
+
+  const setup = ({
+    authMode,
+    authType,
+    executorResult = { status: 'ok', actionId: CONNECTOR_ID },
+    secrets = { baz: true },
+  }: {
+    authMode?: 'per-user' | 'shared';
+    authType?: string;
+    secrets?: Record<string, unknown> | null;
+    executorResult?: Awaited<ReturnType<NonNullable<ConnectorType['executor']>>>;
+  }) => {
+    encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce({
+      id: CONNECTOR_ID,
+      type: 'action',
+      attributes: {
+        name: 'ears-connector',
+        actionTypeId: 'test-ears',
+        authMode,
+        config: { bar: true, ...(authType ? { authType } : {}) },
+        secrets,
+        isMissingSecrets: false,
+      },
+      references: [],
+    });
+    earsExecutor.mockResolvedValueOnce(executorResult);
+    connectorTypeRegistry.get.mockReturnValueOnce(earsConnectorType);
+  };
+
+  const earsLines = () =>
+    [...loggerMock.info.mock.calls, ...loggerMock.warn.mock.calls].filter(([, meta]) =>
+      (meta as { tags?: string[] } | undefined)?.tags?.includes('ears')
+    );
+
+  test('logs one line per execution for a per-user EARS connector', async () => {
+    setup({ authMode: 'per-user', authType: 'ears' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([
+      [
+        `EARS execute success: connectorId=${CONNECTOR_ID} profileUid=${mockUser.profile_uid} spaceId=some-namespace executionId=${ACTION_EXECUTION_ID} actionTypeId=test-ears`,
+        { tags: ['ears', 'execute', 'success'] },
+      ],
+    ]);
+  });
+
+  test('executes a per-user connector that has no secrets without throwing', async () => {
+    setup({ authMode: 'per-user', secrets: null });
+
+    await expect(actionExecutor.execute(executeParams)).resolves.toEqual(
+      expect.objectContaining({ status: 'ok' })
+    );
+    expect(earsLines()).toEqual([]);
+  });
+
+  test('logs a failure line when the connector execution errors', async () => {
+    setup({
+      authMode: 'per-user',
+      authType: 'ears',
+      executorResult: { status: 'error', actionId: CONNECTOR_ID, message: 'boom' },
+    });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([
+      [
+        expect.stringContaining('EARS execute failure: connectorId=1'),
+        { tags: ['ears', 'execute', 'failure'] },
+      ],
+    ]);
+  });
+
+  test('does not log for a shared-auth EARS connector', async () => {
+    setup({ authMode: 'shared', authType: 'ears' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([]);
+  });
+
+  test('does not log for a per-user connector that is not EARS', async () => {
+    setup({ authMode: 'per-user', authType: 'oauth_authorization_code' });
+
+    await actionExecutor.execute(executeParams);
+
+    expect(earsLines()).toEqual([]);
   });
 });

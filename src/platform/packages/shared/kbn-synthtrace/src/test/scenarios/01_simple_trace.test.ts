@@ -11,6 +11,9 @@ import type { ApmFields, SynthtraceGenerator } from '@kbn/synthtrace-client';
 import { apm, timerange } from '@kbn/synthtrace-client';
 import type { ToolingLog } from '@kbn/tooling-log';
 
+const shortId = expect.stringMatching(/^\d{16}$/);
+const longId = expect.stringMatching(/^\d{32}$/);
+
 describe('simple trace', () => {
   let iterable: SynthtraceGenerator<ApmFields>;
   let events: Array<Record<string, unknown>>;
@@ -87,6 +90,9 @@ describe('simple trace', () => {
     expect(span['parent.id']).toEqual(transaction['transaction.id']);
 
     expect(span['trace.id']).toEqual(transaction['trace.id']);
+
+    expect(transaction['span.id']).toEqual(transaction['transaction.id']);
+    expect(span['span.id']).not.toEqual(transaction['span.id']);
   });
 
   it('outputs transaction events', () => {
@@ -106,10 +112,10 @@ describe('simple trace', () => {
       'service.name': 'opbeans-java',
       'service.node.name': 'instance-1',
       'timestamp.us': 1609459200000000,
-      'trace.id': expect.stringContaining('00000000000000000000000241'),
+      'trace.id': longId,
       'transaction.duration.us': 1000000,
-      'transaction.id': expect.stringContaining('0000000240'),
-      'span.id': expect.stringContaining('0000000240'),
+      'transaction.id': shortId,
+      'span.id': shortId,
       'transaction.name': 'GET /api/product/list',
       'transaction.type': 'request',
       'transaction.sampled': true,
@@ -127,20 +133,20 @@ describe('simple trace', () => {
         'container.id': 'instance-1',
         'event.outcome': 'success',
         'host.name': 'instance-1',
-        'parent.id': expect.stringContaining('0000000300'),
+        'parent.id': shortId,
         'processor.event': 'span',
         'processor.name': 'transaction',
         'service.environment': 'production',
         'service.name': 'opbeans-java',
         'service.node.name': 'instance-1',
         'span.duration.us': 900000,
-        'span.id': expect.stringContaining('0000000302'),
+        'span.id': shortId,
         'span.name': 'GET apm-*/_search',
         'span.subtype': 'elasticsearch',
         'span.type': 'db',
         'timestamp.us': 1609459200050000,
-        'trace.id': expect.stringContaining('00000000000000000000000301'),
-        'transaction.id': expect.stringContaining('0000000300'),
+        'trace.id': longId,
+        'transaction.id': shortId,
       })
     );
   });

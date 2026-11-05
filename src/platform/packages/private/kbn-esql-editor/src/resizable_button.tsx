@@ -8,28 +8,34 @@
  */
 
 import React from 'react';
-import { EuiResizableButton } from '@elastic/eui';
+import { EuiResizableButton, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 export function ResizableButton({
   onMouseDownResizeHandler,
   onKeyDownResizeHandler,
+  hasOutline = false,
 }: {
   onMouseDownResizeHandler: (
     mouseDownEvent: React.MouseEvent<HTMLButtonElement, MouseEvent> | React.TouchEvent
   ) => void;
   onKeyDownResizeHandler: (keyDownEvernt: React.KeyboardEvent) => void;
   editorIsInline?: boolean;
+  hasOutline?: boolean;
 }) {
+  const { euiTheme } = useEuiTheme();
   return (
     <EuiResizableButton
       data-test-subj="ESQLEditor-resize"
       onMouseDown={onMouseDownResizeHandler}
       onKeyDown={onKeyDownResizeHandler}
       onTouchStart={onMouseDownResizeHandler}
-      indicator="border"
+      // Inside the rounded outline a full-width border line would run into the corners, so use the
+      // grab handle and inset the button by the corner radius so its hover/focus line stops short of them.
+      indicator={hasOutline ? 'handle' : 'border'}
       css={css`
         position: relative;
+        ${hasOutline ? `margin-inline: ${euiTheme.border.radius.control};` : ''}
       `}
     />
   );

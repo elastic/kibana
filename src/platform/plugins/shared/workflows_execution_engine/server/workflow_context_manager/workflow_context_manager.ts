@@ -224,6 +224,16 @@ export class WorkflowContextManager {
     return this.renderValueWithContext(obj, this.getRenderingContext(obj), additionalContext);
   }
 
+  /**
+   * Same as {@link renderValueAccordingToContext}, but yields to the event loop between values at any depth.
+   * The context is read synchronously, before the first yield.
+   */
+  public renderObjectAccordingToContextAsync(
+    obj: Record<string, unknown>
+  ): Promise<Record<string, unknown>> {
+    return this.templateEngine.renderAsync(obj, this.getRenderingContext(obj));
+  }
+
   public renderValueWithContext<T>(
     obj: T,
     context: Record<string, unknown>,

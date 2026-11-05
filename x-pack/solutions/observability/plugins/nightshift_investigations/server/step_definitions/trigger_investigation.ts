@@ -16,6 +16,10 @@ import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import { serverUnavailable } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
+import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
+import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
+import type { NightshiftSettingsLocator } from '../../common/locators';
+import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
   DEFAULT_MANUAL_INVESTIGATION_SUBJECT_ID,
   INVESTIGATION_SUBJECT_TYPES,
@@ -33,12 +37,14 @@ import type {
 import { fetchInvestigationAlertSnapshots } from '../lib/alert_snapshot';
 import { NIGHTSHIFT_AUTOMATION_SO_TYPE } from '../saved_objects/automation_saved_object';
 import type { NightshiftAutomationAttributes } from '../lib/automations/types';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { createAutomationBudget } from '../lib/automations/automation_budget';
 import { AutomationDailyLimitReachedError, InvestigationQuotaDeniedError } from '../client/errors';
 import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
+    telemetry_target: telemetryTargetNameSchema.optional(),
     automation_id: z
       .string()
       .min(1)
@@ -83,6 +89,13 @@ const inputSchema = lazySchema(() =>
       .max(MAX_TEXT_LENGTH)
       .optional()
       .describe('Caller-supplied prompt for the investigation agent'),
+    instructions: z
+      .string()
+      .max(MAX_AUTOMATION_INSTRUCTIONS_LENGTH)
+      .optional()
+      .describe(
+        'Additional operator guidance for this investigation round; empty means no additional guidance'
+      ),
     source_ids: z
       .array(z.string().max(MAX_ID_LENGTH))
       .max(MAX_ARRAY_LENGTH)
@@ -183,7 +196,9 @@ export const triggerInvestigationStepDefinition = (
   getInvestigationsClient: GetInvestigationsClient,
   getAutomationsSoClient: GetAutomationsSoClient,
   getAlertsClient: GetAlertsClient,
-  getEpisodeLookup: GetEpisodeLookup
+  getEpisodeLookup: GetEpisodeLookup,
+  getActions: () => ActionsPluginStart | undefined,
+  settingsLocator: NightshiftSettingsLocator
 ) =>
   createServerStepDefinition({
     id: 'nightshift.triggerInvestigation',
@@ -212,7 +227,7 @@ export const triggerInvestigationStepDefinition = (
       const request = context.contextManager.getFakeRequest();
       // getFakeRequest() does not carry space info, so the space ID must be extracted from the
       // workflow context explicitly. See https://github.com/elastic/kibana/issues/284786.
-      const { workflow } = context.contextManager.getContext();
+      const { workflow, kibanaUrl } = context.contextManager.getContext();
       const spaceId = workflow.spaceId;
       const input = inputSchema.parse(context.input);
       const subjectId = toSubjectId(input);
@@ -253,8 +268,12 @@ export const triggerInvestigationStepDefinition = (
               summary: input.summary,
             },
             title: input.title,
+            ...(input.telemetry_target ? { telemetry_target: input.telemetry_target } : {}),
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
+            instructions:
+              input.instructions ??
+              (input.automation_id && input.subject_type === 'alert' ? input.message : undefined),
             source_ids: input.source_ids,
             context: alerts
               ? { alerts }
@@ -265,7 +284,11 @@ export const triggerInvestigationStepDefinition = (
             notificationDestinations: input.notificationDestinations,
             slack_thread: input.slack_thread,
           },
-          { automationBudget }
+          {
+            automationBudget,
+            // A Slack thread subject means a Slack message started the run.
+            entryPoint: input.subject_type === 'slack_thread' ? 'slack' : 'automation',
+          }
         );
         return { output: result };
       } catch (error) {
@@ -279,6 +302,19 @@ export const triggerInvestigationStepDefinition = (
           context.logger.info(
             `Skipped investigation of ${input.subject_type}/${subjectId}: global investigation limit reached`
           );
+          if (input.slack_thread) {
+            await notifyInvestigationQuotaReached({
+              getSoClient: () => getAutomationsSoClient(request, spaceId),
+              getActions,
+              request,
+              spaceId,
+              slackThread: input.slack_thread,
+              settingsLocator,
+              kibanaUrl,
+              signal: context.abortSignal,
+              logger: context.logger,
+            });
+          }
           return { output: { skip_reason: 'investigation_limit' as const } };
         }
         throw error;
