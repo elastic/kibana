@@ -182,20 +182,36 @@ export const createOnboardingClient = ({
           throw new OnboardingUnavailableError('Connectors are not available');
         }
         const url = resolveLocalElasticsearchUrl({ cloud, elasticsearch, esHosts });
+        const actionsClient = await actions.getActionsClientWithRequest(request);
         const connectorId = await createLocalElasticsearchConnector({
           esClient: elasticsearch.client.asScoped(request).asCurrentUser,
-          actionsClient: await actions.getActionsClientWithRequest(request),
+          actionsClient,
           spaceId,
           url,
           logger,
         });
-        const registry = await agentBuilder.agents.getRegistry({ request });
-        const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
-        const currentConnectorIds = agent.configuration.connector_ids ?? [];
-        if (!currentConnectorIds.includes(connectorId)) {
-          await registry.update(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
-            configuration: { connector_ids: [...currentConnectorIds, connectorId] },
-          });
+        try {
+          const registry = await agentBuilder.agents.getRegistry({ request });
+          const agent = await registry.get(NIGHTSHIFT_INVESTIGATION_AGENT_ID);
+          const currentConnectorIds = agent.configuration.connector_ids ?? [];
+          if (!currentConnectorIds.includes(connectorId)) {
+            await registry.update(NIGHTSHIFT_INVESTIGATION_AGENT_ID, {
+              configuration: { connector_ids: [...currentConnectorIds, connectorId] },
+            });
+          }
+        } catch (error) {
+          // A connector nothing uses would keep its key alive; deleting it invalidates the key
+          // through the connector lifecycle listener.
+          try {
+            await actionsClient.delete({ id: connectorId });
+          } catch (deleteError) {
+            logger.warn(
+              `Could not delete unattached local Elasticsearch connector "${connectorId}": ${
+                (deleteError as Error).message
+              }`
+            );
+          }
+          throw error;
         }
         logger.info(
           `Added local Elasticsearch connector "${connectorId}" to the investigation agent in space "${spaceId}"`

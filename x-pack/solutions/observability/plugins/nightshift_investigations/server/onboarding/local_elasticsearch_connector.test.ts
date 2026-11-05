@@ -184,11 +184,14 @@ describe('createLocalElasticsearchConnector', () => {
 
 describe('createLocalElasticsearchConnectorLifecycleListener', () => {
   const connectorId = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
-  const deleteParams = { connectorId, connectorType: '.elasticsearch' } as never;
+  const paramsFor = (id: string) => ({ connectorId: id, connectorType: '.elasticsearch' } as never);
+  const deleteParams = paramsFor(connectorId);
 
   const setup = () => {
     const logger = loggingSystemMock.createLogger();
-    const invalidateApiKey = jest.fn().mockResolvedValue({ invalidated_api_keys: ['key-1'] });
+    const invalidateApiKey = jest
+      .fn()
+      .mockResolvedValue({ invalidated_api_keys: ['key-1'], error_count: 0 });
     const esClient = { security: { invalidateApiKey } } as unknown as ElasticsearchClient;
     const listener = createLocalElasticsearchConnectorLifecycleListener({
       getInternalEsClient: async () => esClient,
@@ -217,7 +220,7 @@ describe('createLocalElasticsearchConnectorLifecycleListener', () => {
     async (id) => {
       const { listener, invalidateApiKey } = setup();
 
-      await listener.onPostDelete!({ ...deleteParams, connectorId: id });
+      await listener.onPostDelete!(paramsFor(id));
 
       expect(invalidateApiKey).not.toHaveBeenCalled();
     }
@@ -225,10 +228,26 @@ describe('createLocalElasticsearchConnectorLifecycleListener', () => {
 
   it('does not log an invalidation when the connector had no key', async () => {
     const { listener, invalidateApiKey, logger } = setup();
-    invalidateApiKey.mockResolvedValue({ invalidated_api_keys: [] });
+    invalidateApiKey.mockResolvedValue({ invalidated_api_keys: [], error_count: 0 });
 
     await listener.onPostDelete!(deleteParams);
 
+    expect(logger.info).not.toHaveBeenCalled();
+  });
+
+  it('logs the failures Elasticsearch reports in a successful invalidation response', async () => {
+    const { listener, invalidateApiKey, logger } = setup();
+    invalidateApiKey.mockResolvedValue({
+      invalidated_api_keys: [],
+      error_count: 1,
+      error_details: [{ type: 'exception', reason: 'key is owned by another realm' }],
+    });
+
+    await listener.onPostDelete!(deleteParams);
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('key is owned by another realm')
+    );
     expect(logger.info).not.toHaveBeenCalled();
   });
 

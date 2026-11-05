@@ -164,11 +164,23 @@ describe('createOnboardingClient', () => {
     });
   });
 
-  it('still enables when the connector cannot be added to the existing agent', async () => {
-    const { client, registry, logger, request } = setup({ agentConnectorIds: [] });
+  it('still enables, and deletes the unattached connector, when it cannot be added to the agent', async () => {
+    const { client, registry, actionsClient, logger, request } = setup({ agentConnectorIds: [] });
     registry.update.mockRejectedValue(new Error('forbidden'));
 
     expect(await client.enable(request)).toEqual({ agent_installed: true });
+    // Deleting the connector invalidates its key through the connector lifecycle listener.
+    expect(actionsClient.delete).toHaveBeenCalledWith({ id: 'local-es' });
+    expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
+  });
+
+  it('still enables when the unattached connector cannot be deleted either', async () => {
+    const { client, registry, actionsClient, logger, request } = setup({ agentConnectorIds: [] });
+    registry.update.mockRejectedValue(new Error('forbidden'));
+    actionsClient.delete.mockRejectedValue(new Error('gone'));
+
+    expect(await client.enable(request)).toEqual({ agent_installed: true });
+    expect(logger.warn).toHaveBeenCalledWith(expect.stringContaining('gone'));
     expect(logger.error).toHaveBeenCalledWith(expect.stringContaining('forbidden'));
   });
 

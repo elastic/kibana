@@ -157,10 +157,17 @@ export const createLocalElasticsearchConnectorLifecycleListener = ({
     const name = getLocalElasticsearchApiKeyName(connectorId);
     try {
       const esClient = await getInternalEsClient();
-      const { invalidated_api_keys: invalidated } = await esClient.security.invalidateApiKey({
-        name,
-      });
-      if (invalidated.length > 0) {
+      const {
+        invalidated_api_keys: invalidated,
+        error_count: errorCount,
+        error_details: errorDetails,
+      } = await esClient.security.invalidateApiKey({ name });
+      if (errorCount > 0) {
+        const reasons = (errorDetails ?? []).map((detail) => detail.reason).join('; ');
+        logger.warn(
+          `Could not invalidate API key "${name}" of deleted connector "${connectorId}": ${reasons}`
+        );
+      } else if (invalidated.length > 0) {
         logger.info(
           `Invalidated the API key of deleted local Elasticsearch connector "${connectorId}"`
         );
