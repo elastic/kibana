@@ -13,6 +13,8 @@ import {
   MISSING_UIAM_API_KEY_TAG,
 } from '../../application/rule/constants';
 import { ApiKeyType } from '../../task_runner/types';
+import { toRuleApiKeys } from '../../api_keys/create_api_key_result';
+import { ruleApiKeyStorage } from '../../api_keys/storage';
 
 /**
  * Stale API key attributes to remove from a rule's stored attributes before spreading in a newly
@@ -41,17 +43,14 @@ interface ApiKeyRuleProperties {
   uiamApiKeyExternal?: boolean | null;
 }
 
-const encodeApiKey = (id?: string, key?: string): string | null => {
-  return id && key ? Buffer.from(`${id}:${key}`).toString('base64') : null;
-};
-
 const getApiKeyRuleProperties = (
   apiKey: CreateAPIKeyResult | null,
   username: string | null,
   createdByUser: boolean,
   profileUid: string | null
 ): ApiKeyRuleProperties => {
-  if (!apiKey || !apiKey.apiKeysEnabled) {
+  const keys = apiKey ? toRuleApiKeys(apiKey, createdByUser) : undefined;
+  if (!keys) {
     return {
       apiKeyOwner: null,
       apiKeyOwnerProfileUid: null,
@@ -60,36 +59,18 @@ const getApiKeyRuleProperties = (
     };
   }
 
-  const esApiKey = apiKey.result?.api_key;
-  const esApiKeyId = apiKey.result?.id;
-  const uiamApiKey = apiKey.uiamResult?.api_key;
-  const uiamApiKeyId = apiKey.uiamResult?.id;
-
-  if (esApiKey && uiamApiKey && createdByUser) {
+  if (keys.es && keys.uiam && createdByUser) {
     throw new Error(
       'Both ES and UIAM API keys were created for a rule, but only one should be created when the API key is created by a user. This should never happen.'
     );
   }
 
-  const encodedApiKey = encodeApiKey(esApiKeyId, esApiKey);
-  // Framework-granted UIAM keys are stored as `base64(id:key)`. User-created Cloud API
-  // keys are raw `essu_` credentials with no key id — store them as-is; alerting never
-  // invalidates them, so no id is needed.
-  const encodedUiamApiKey =
-    encodeApiKey(uiamApiKeyId, uiamApiKey) ?? (createdByUser && uiamApiKey ? uiamApiKey : null);
-
   return {
     apiKeyOwner: username,
     apiKeyOwnerProfileUid: profileUid,
-    apiKey: encodedApiKey,
+    apiKey: null,
     apiKeyCreatedByUser: createdByUser,
-    ...(encodedUiamApiKey ? { uiamApiKey: encodedUiamApiKey } : {}),
-    // UIAM's verdict on whether the key is an external (user-created Cloud) API key, captured
-    // at authentication time. Rule runs use it to withhold the UIAM shared secret, which UIAM
-    // rejects for external keys. Written whenever a UIAM key is written, not only when true,
-    // so that it can never disagree with the key it describes: a stale `true` would withhold
-    // the shared secret from a freshly granted internal key.
-    ...(encodedUiamApiKey ? { uiamApiKeyExternal: apiKey.uiamResult?.external === true } : {}),
+    ...ruleApiKeyStorage.write(keys),
   };
 };
 

@@ -29,13 +29,12 @@ import { backfillClientMock } from './backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { SecurityStartMock } from '@kbn/core-security-server-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
-import { bulkMarkApiKeysForInvalidation } from './invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation';
 import { UIAM_LOGS_INVALIDATE_TAGS } from './constants';
 import type { ConstructorOptions } from './rules_client';
+import { API_KEY_PENDING_INVALIDATION_TYPE } from './saved_objects';
 
 jest.mock('./rules_client');
 jest.mock('./authorization/alerting_authorization');
-jest.mock('./invalidate_pending_api_keys/bulk_mark_api_keys_for_invalidation');
 
 const encode = (value: string) => Buffer.from(value).toString('base64');
 const ES_KEY = encode('es-id:es-secret');
@@ -47,10 +46,21 @@ const emptyInvalidateResult = {
   error_count: 0,
 };
 
+const pending = (attributes: Record<string, string>) => ({
+  type: API_KEY_PENDING_INVALIDATION_TYPE,
+  attributes: { ...attributes, createdAt: expect.any(String) },
+});
+
 describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
   let securityService: SecurityStartMock;
   let rulesClientFactoryParams: jest.Mocked<RulesClientFactoryOpts>;
   let uiamInvalidate: jest.Mock;
+  let repository: ReturnType<typeof savedObjectsRepositoryMock.create>;
+
+  const queued = () =>
+    repository.bulkCreate.mock.calls.flatMap(([objects]) =>
+      objects.map(({ type, attributes }) => ({ type, attributes }))
+    );
 
   const setup = async (): Promise<ConstructorOptions> => {
     const factory = new RulesClientFactory();
@@ -83,6 +93,16 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       invalidate: uiamInvalidate,
     } as never;
 
+    repository = savedObjectsRepositoryMock.create();
+    repository.bulkCreate.mockImplementation(async (objects) => ({
+      saved_objects: objects.map(({ type, attributes }, index) => ({
+        id: `so-${index}`,
+        type,
+        attributes,
+        references: [],
+      })),
+    }));
+
     const getSpaceId = jest.fn().mockReturnValue(asSpaceId('default'));
     const uiSettings = uiSettingsServiceMock.createStartContract();
     uiSettings.asScopedToClient = uiSettingsServiceMock.createStartContract().asScopedToClient;
@@ -95,7 +115,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       spaceIdToNamespace: jest.fn().mockReturnValue('default'),
       maxScheduledPerMinute: 10000,
       minimumScheduleInterval: { value: '1m', enforce: false },
-      internalSavedObjectsRepository: savedObjectsRepositoryMock.create(),
+      internalSavedObjectsRepository: repository,
       encryptedSavedObjectsClient: encryptedSavedObjectsMock.createClient(),
       actions: actionsMock.createStart(),
       eventLog: eventLogMock.createStart(),
@@ -130,7 +150,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     expect(uiamInvalidate).toHaveBeenCalledTimes(1);
     expect(uiamInvalidate.mock.calls[0][1]).toEqual({ id: 'uiam-id' });
     expect(uiamInvalidate.mock.calls[0][0].headers.authorization).toBe('ApiKey essu_uiam_secret');
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([]);
   });
 
   test('queues only the ES key (not the UIAM key) when ES invalidation finds nothing', async () => {
@@ -140,11 +160,9 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
 
     await invalidateNow({ apiKey: ES_KEY, uiamApiKey: UIAM_KEY });
 
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledTimes(1);
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: [ES_KEY] },
-      rulesClientFactoryParams.logger,
-      rulesClientFactoryParams.internalSavedObjectsRepository
+    expect(queued()).toEqual([pending({ apiKeyId: 'es-id' })]);
+    expect(rulesClientFactoryParams.logger.warn).toHaveBeenCalledWith(
+      'Synchronous API key invalidation did not complete for alerting rule : rule-x; queueing for delayed invalidation.'
     );
   });
 
@@ -160,11 +178,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
       'Failed to synchronously invalidate ES API key for alerting rule : rule-x: boom'
     );
-    expect(bulkMarkApiKeysForInvalidation).toHaveBeenCalledWith(
-      { apiKeys: [ES_KEY] },
-      rulesClientFactoryParams.logger,
-      rulesClientFactoryParams.internalSavedObjectsRepository
-    );
+    expect(queued()).toEqual([pending({ apiKeyId: 'es-id' })]);
   });
 
   test('does not queue when ES invalidation returns null', async () => {
@@ -172,10 +186,10 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
 
     await invalidateNow({ apiKey: ES_KEY });
 
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([]);
   });
 
-  test('logs and does not queue or throw when ES invalidation throws', async () => {
+  test('logs and queues, without throwing, when ES invalidation throws (current behavior)', async () => {
     const error = new Error('es down');
     securityService.authc.apiKeys.invalidateAsInternalUser.mockRejectedValueOnce(error);
 
@@ -185,10 +199,10 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       'Failed to synchronously invalidate ES API key for alerting rule : rule-x: es down',
       { error: { stack_trace: error.stack } }
     );
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([pending({ apiKeyId: 'es-id' })]);
   });
 
-  test('logs and does not queue or throw when UIAM invalidation throws', async () => {
+  test('logs and queues, without throwing, when UIAM invalidation throws (current behavior)', async () => {
     const error = new Error('uiam down');
     uiamInvalidate.mockRejectedValueOnce(error);
 
@@ -199,7 +213,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
       { tags: UIAM_LOGS_INVALIDATE_TAGS, error: { stack_trace: error.stack } }
     );
     expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([pending({ apiKeyId: 'uiam-id', uiamApiKey: 'essu_uiam_secret' })]);
   });
 
   test('logs a non-UIAM credential error for a raw essu_ uiamApiKey and invalidates nothing', async () => {
@@ -207,7 +221,7 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
 
     expect(uiamInvalidate).not.toHaveBeenCalled();
     expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([]);
     expect(rulesClientFactoryParams.logger.error).toHaveBeenCalledWith(
       'Failed to synchronously invalidate UIAM API key for alerting rule : rule-x: stored credential is not a UIAM API key',
       { tags: UIAM_LOGS_INVALIDATE_TAGS }
@@ -218,6 +232,6 @@ describe('RulesClientFactory invalidateApiKeyNow() characterization', () => {
     await invalidateNow({ apiKey: encode(' :secret') });
 
     expect(securityService.authc.apiKeys.invalidateAsInternalUser).not.toHaveBeenCalled();
-    expect(bulkMarkApiKeysForInvalidation).not.toHaveBeenCalled();
+    expect(queued()).toEqual([]);
   });
 });

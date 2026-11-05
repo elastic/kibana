@@ -158,14 +158,14 @@ export const grant = async (
       refreshOption(refresh)
     );
   } catch (err) {
-    if (uiam) {
+    if (uiam?.id) {
       await rollbackUiamApiKey(context, request, subject, uiam.id);
     }
     throw err;
   }
 
   if (!es) {
-    if (uiam) {
+    if (uiam?.id) {
       await rollbackUiamApiKey(context, request, subject, uiam.id);
     }
     return null;

@@ -564,7 +564,7 @@ describe('RulesClientFactory API key characterization', () => {
       }
     );
 
-    test('logs the UIAM rollback failure reasons (with two trailing spaces) and still rethrows the ES error (current behavior)', async () => {
+    test('logs the UIAM rollback failure reasons and still rethrows the ES error (current behavior)', async () => {
       const esError = new Error('ES grant failed');
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
@@ -579,32 +579,36 @@ describe('RulesClientFactory API key characterization', () => {
       await expect(context.createAPIKey('test')).rejects.toBe(esError);
       expect(logger.error.mock.calls).toEqual([
         [
-          'Failed to invalidate UIAM API key for alerting rule : test: reason a, reason b  ',
+          'Failed to invalidate UIAM API key for alerting rule : test: reason a, reason b',
           { tags: UIAM_LOGS_INVALIDATE_TAGS },
         ],
       ]);
     });
 
-    test('a rejected UIAM rollback replaces the ES error (current behavior)', async () => {
-      const invalidateError = new Error('UIAM invalidate failed');
+    test('a rejected UIAM rollback is logged and the ES error is still rethrown (current behavior)', async () => {
+      const esError = new Error('ES grant failed');
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
-      uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
-      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(
-        new Error('ES grant failed')
-      );
+      uiamApiKeys.invalidate.mockRejectedValue(new Error('UIAM invalidate failed'));
+      securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(esError);
 
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
+      await expect(context.createAPIKey('test')).rejects.toBe(esError);
+      expect(logger.error.mock.calls).toEqual([
+        [
+          'Failed to invalidate UIAM API key for alerting rule : test: UIAM invalidate failed',
+          { tags: UIAM_LOGS_INVALIDATE_TAGS, error: { stack_trace: expect.any(String) } },
+        ],
+      ]);
     });
 
-    test('a rejected UIAM rollback rejects createAPIKey when the ES grant returned null (current behavior)', async () => {
-      const invalidateError = new Error('UIAM invalidate failed');
+    test('a rejected UIAM rollback is logged and API keys read as disabled when the ES grant returned null (current behavior)', async () => {
       const { context } = await setup({ config: 'uiamGrantEsRun', credential: 'rawUiamApiKey' });
       uiamApiKeys.grant.mockResolvedValue(UIAM_GRANTED);
-      uiamApiKeys.invalidate.mockRejectedValue(invalidateError);
+      uiamApiKeys.invalidate.mockRejectedValue(new Error('UIAM invalidate failed'));
       securityService.authc.apiKeys.grantAsInternalUser.mockResolvedValue(null);
 
-      await expect(context.createAPIKey('test')).rejects.toBe(invalidateError);
+      expect(await context.createAPIKey('test')).toEqual({ apiKeysEnabled: false });
+      expect(logger.error).toHaveBeenCalledTimes(1);
     });
 
     test('skips the rollback when the granted UIAM key has no id (current behavior)', async () => {
@@ -651,6 +655,11 @@ describe('RulesClientFactory API key characterization', () => {
           'Failed to parse API key credentials from authorization header for alerting rule : test',
       },
     };
+    const EXTRACT_ERROR = {
+      error: {
+        message: 'Failed to extract API key from authorization header for alerting rule : test',
+      },
+    };
     const CLOUD_KEY_BOOM = {
       error: {
         message:
@@ -677,21 +686,21 @@ describe('RulesClientFactory API key characterization', () => {
         label: 'no authorization header',
         shouldGrantUiam,
         readsCurrentUser: false,
-        ...same({ value: { apiKeysEnabled: false } }),
+        ...same(EXTRACT_ERROR),
       },
       {
         label: 'scheme without credentials',
         header: 'ApiKey',
         shouldGrantUiam,
         readsCurrentUser: false,
-        ...same({ value: { apiKeysEnabled: false } }),
+        ...same(EXTRACT_ERROR),
       },
       {
-        label: 'Basic credentials parsed as id:key',
+        label: 'Basic credentials',
         header: CREDENTIALS.basic.headers.authorization,
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...esResult('basic-user', 'basic-pass'),
+        readsCurrentUser: false,
+        ...same(EXTRACT_ERROR),
       },
       {
         label: 'ES API key',
@@ -761,9 +770,7 @@ describe('RulesClientFactory API key characterization', () => {
             header: CREDENTIALS.encodedUiamApiKey.headers.authorization,
             shouldGrantUiam,
             readsCurrentUser: true,
-            ...same({
-              error: { message: 'UIAM API keys should only be used in serverless environments' },
-            }),
+            ...same(CLOUD_KEY_BOOM),
           },
       {
         label: 'raw essu_ API key',
@@ -773,11 +780,11 @@ describe('RulesClientFactory API key characterization', () => {
         ...(shouldGrantUiam ? rawUiam('essu_raw_user_secret') : same(CLOUD_KEY_BOOM)),
       },
       {
-        label: 'Bearer essu_ token (scheme ignored)',
+        label: 'Bearer essu_ token',
         header: 'Bearer essu_access_token',
         shouldGrantUiam,
-        readsCurrentUser: true,
-        ...(shouldGrantUiam ? rawUiam('essu_access_token') : same(CLOUD_KEY_BOOM)),
+        readsCurrentUser: false,
+        ...same(EXTRACT_ERROR),
       },
       {
         label: 'lowercase apikey scheme with raw essu_',
@@ -840,35 +847,41 @@ describe('RulesClientFactory API key characterization', () => {
       });
     });
 
-    test('reads shouldGrantUiam from the `this` it is invoked on, not from the factory (current behavior)', async () => {
+    test('reads shouldGrantUiam from the factory, not from the `this` it is invoked on (current behavior)', async () => {
       const { context } = await setup({ config: 'esOnly', credential: 'rawUiamApiKey' });
       const { getAuthenticationAPIKey } = context;
 
-      expect(getAuthenticationAPIKey.call({ shouldGrantUiam: true }, 'test')).toEqual({
-        apiKeysEnabled: true,
-        uiamResult: { name: 'uiam-test', api_key: 'essu_raw_user_secret' },
-      });
-      expect(() => getAuthenticationAPIKey('test')).toThrow(TypeError);
+      expectError(
+        await captureError(() => getAuthenticationAPIKey.call({ shouldGrantUiam: true }, 'test')),
+        CLOUD_KEY_BOOM.error
+      );
     });
   });
 
   describe('cloneAPIKey() matrix', () => {
     type UiamOutcome = 'granted' | 'null' | 'throws' | 'serviceMissing';
     type CloneOutcome = 'cloned' | 'null' | 'throws';
-    const GENERIC_CLONE_UIAM_ERROR = 'Failed to grant UIAM API key for cloned alerting rule';
+    const GENERIC_CLONE_UIAM_ERROR = 'Failed to grant UIAM API key for alerting rule : test';
+    const CLOUD_KEY_NOT_SUPPORTED =
+      'Cannot use a Cloud API key to create or enable rule "test". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.';
 
     describe('requests carrying a raw essu_ credential mint a UIAM key', () => {
       interface Row {
         credential: CredentialName;
         config: ConfigName;
         uiam: UiamOutcome;
-        rejects?: 'generic' | 'cloudKeyNull' | 'uiamError';
+        rejects?: 'generic' | 'cloudKeyNotSupported' | 'cloudKeyNull' | 'uiamError';
         grantLog?: 'null' | 'throws';
       }
       const table: Row[] = (['rawUiamApiKey', 'uiamBearer'] as const).flatMap(
         (credential): Row[] => [
-          { credential, config: 'esOnly', uiam: 'granted', rejects: 'generic' },
-          { credential, config: 'uiamTypeWithoutUiam', uiam: 'granted', rejects: 'generic' },
+          { credential, config: 'esOnly', uiam: 'granted', rejects: 'cloudKeyNotSupported' },
+          {
+            credential,
+            config: 'uiamTypeWithoutUiam',
+            uiam: 'granted',
+            rejects: 'cloudKeyNotSupported',
+          },
           { credential, config: 'uiamGrantEsRun', uiam: 'granted' },
           {
             credential,
@@ -939,6 +952,12 @@ describe('RulesClientFactory API key characterization', () => {
           const outcome = context.cloneAPIKey('test');
           if (rejects === 'generic') {
             expectError(await captureError(() => outcome), { message: GENERIC_CLONE_UIAM_ERROR });
+          }
+          if (rejects === 'cloudKeyNotSupported') {
+            expectError(await captureError(() => outcome), {
+              message: CLOUD_KEY_NOT_SUPPORTED,
+              boomStatus: 400,
+            });
           }
           if (rejects === 'cloudKeyNull') {
             expectError(await captureError(() => outcome), { message: CLOUD_KEY_NULL_MESSAGE });
@@ -1273,7 +1292,7 @@ describe('RulesClientFactory API key characterization', () => {
         config: 'esOnly',
         internal: false,
         expected: {
-          boom: 'Error creating API key for rule - UIAM API keys should only be used in serverless environments',
+          boom: 'Error creating API key for rule - Cannot use a Cloud API key to create or enable rule "Alerting: 123/rule-name-user-created". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.',
         },
       },
       {
@@ -1363,7 +1382,7 @@ describe('RulesClientFactory API key characterization', () => {
         config: 'esOnly',
         apiKeyOwnership: frameworkManaged,
         expected: {
-          boom: 'Error creating API key for rule - Failed to grant UIAM API key for cloned alerting rule',
+          boom: 'Error creating API key for rule - Cannot use a Cloud API key to create or enable rule "Alerting: 123/rule-name". Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.',
         },
       },
       {

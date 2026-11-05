@@ -9,19 +9,21 @@ import type { CoreStart } from '@kbn/core/server';
 import { coreMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import type { RunContext } from '@kbn/task-manager-plugin/server';
-import { runInvalidate } from '@kbn/response-ops-api-keys';
+import type { InvalidationRunnerOptions } from '@kbn/response-ops-api-keys';
+import { createInvalidationRunner } from '@kbn/response-ops-api-keys';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 import type { AlertingConfig } from '../config';
 import type { AlertingPluginsStart } from '../plugin';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../saved_objects';
+import { emptyState } from './task_state';
 import { taskRunner } from './task';
 
 jest.mock('@kbn/response-ops-api-keys', () => ({
   ...jest.requireActual('@kbn/response-ops-api-keys'),
-  runInvalidate: jest.fn(),
+  createInvalidationRunner: jest.fn(),
 }));
 
-const runInvalidateMock = runInvalidate as jest.Mock;
+const createInvalidationRunnerMock = createInvalidationRunner as jest.Mock;
 
 const config = {
   invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' },
@@ -43,10 +45,25 @@ function getRunner() {
   } as unknown as RunContext);
 }
 
+const getRunnerOptions = (): InvalidationRunnerOptions =>
+  createInvalidationRunnerMock.mock.calls[0][0];
+
 describe('alerts_invalidate_api_keys task runner', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    runInvalidateMock.mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} });
+    createInvalidationRunnerMock.mockReturnValue({
+      run: jest.fn().mockResolvedValue({ ...emptyState, runs: 1 }),
+    });
+  });
+
+  it('returns the runner state on the configured interval', async () => {
+    expect(await getRunner().run()).toEqual({
+      state: { ...emptyState, runs: 1 },
+      schedule: { interval: '5m' },
+    });
+    expect(getRunnerOptions()).toEqual(
+      expect.objectContaining({ pluginTag: 'alerting', removalDelay: '1h' })
+    );
   });
 
   it('queries uiamApiKeyId alongside apiKeyId so pending jobs holding a UIAM key count as in use', async () => {
@@ -54,7 +71,7 @@ describe('alerts_invalidate_api_keys task runner', () => {
 
     // A UIAM key is queued for invalidation under its own id, which pending jobs record in
     // `uiamApiKeyId` — without these paths the guard can never see them and revokes a live key.
-    expect(runInvalidateMock).toHaveBeenCalledWith(
+    expect(await getRunnerOptions().getRunDependencies()).toEqual(
       expect.objectContaining({
         savedObjectTypesToQuery: [
           {
@@ -75,6 +92,17 @@ describe('alerts_invalidate_api_keys task runner', () => {
           },
         ],
       })
+    );
+  });
+
+  it('logs a failed run as a warning', async () => {
+    const logger = loggingSystemMock.createLogger();
+    taskRunner(logger, Promise.resolve([] as never), config);
+
+    getRunnerOptions().onError?.(new Error('boom'));
+
+    expect(logger.warn).toHaveBeenCalledWith(
+      'Error executing alerting apiKey invalidation task: boom'
     );
   });
 });
