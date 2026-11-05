@@ -261,6 +261,7 @@ describe('Data stream routes - apply edits', () => {
   let mockResponse: { ok: jest.Mock; custom: jest.Mock };
 
   const request = {
+    headers: { 'x-session-id': 'session-1' },
     params: { integration_id: 'int_1', data_stream_id: 'ds_1' },
     body: {
       ingest_pipeline: { processors: [] },
@@ -337,9 +338,26 @@ describe('Data stream routes - apply edits', () => {
         version: 'WzEsMV0=',
         dryRun: false,
         acknowledgeBreakingChanges: false,
+        sessionId: 'session-1',
       })
     );
     expect(mockResponse.ok).toHaveBeenCalledWith({ body: failure });
+  });
+
+  it('caps the session ID header and ignores a missing one', async () => {
+    mockApplyDataStreamEdits.mockResolvedValue({ status: 'saved' });
+
+    await routeHandler(
+      createMockContext(),
+      { ...request, headers: { 'x-session-id': 'x'.repeat(100) } },
+      mockResponse
+    );
+    await routeHandler(createMockContext(), { ...request, headers: {} }, mockResponse);
+
+    expect(mockApplyDataStreamEdits.mock.calls.map(([params]) => params.sessionId)).toEqual([
+      'x'.repeat(64),
+      undefined,
+    ]);
   });
 
   it('passes acknowledge_breaking_changes through', async () => {

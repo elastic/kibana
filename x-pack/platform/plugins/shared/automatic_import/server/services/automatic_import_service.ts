@@ -20,6 +20,7 @@ import type {
   CoreSetup,
   KibanaRequest,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Pipeline } from '@kbn/ingest-pipelines-plugin/common/types';
 import type {
@@ -34,11 +35,15 @@ import type {
   DataStreamResponse,
   TaskStatus,
   InputType,
+  DataStreamEditsFailure,
+  DataStreamEditsOutcome,
+  DataStreamEditsSubmittedPayload,
   DataStreamResults,
   FieldTypeChange,
   PipelineErrors,
 } from '../../common';
 import {
+  AutomaticImportTelemetryEventType,
   readBackFieldTypeProcessors,
   stripFieldTypeProcessors,
   syncFieldTypeProcessors,
@@ -82,6 +87,8 @@ import {
   toApprovedFieldTypes,
 } from './field_types/approved_field_types';
 import { groupErrors, processSimulationResults } from '../agents/tools/pipeline_utils';
+import { MAX_TELEMETRY_FIELD_ERROR_ISSUES, MAX_TELEMETRY_TYPE_CHANGES } from '../telemetry/events';
+import { describeTypeChanges } from '../telemetry/describe_type_changes';
 
 const MAX_PERSISTED_PREVIEW_DOCUMENTS = 100;
 const MAX_INGEST_PIPELINE_PROCESSORS = 10_000;
@@ -255,6 +262,7 @@ export class AutomaticImportService {
   private savedObjectsServiceSetup: SavedObjectsServiceSetup;
   private taskManagerSetup: TaskManagerSetupContract;
   private taskManagerService: TaskManagerService;
+  private analytics: AnalyticsServiceSetup;
   private logger: Logger;
   constructor(
     loggerFactory: LoggerFactory,
@@ -264,6 +272,7 @@ export class AutomaticImportService {
     analytics: AnalyticsServiceSetup
   ) {
     this.pluginStop$ = new ReplaySubject(1);
+    this.analytics = analytics;
     this.loggerFactory = loggerFactory;
     this.logger = loggerFactory.get('automaticImportService');
     this.savedObjectsServiceSetup = savedObjectsServiceSetup;
@@ -792,6 +801,7 @@ export class AutomaticImportService {
     acknowledgeBreakingChanges?: boolean;
     esClient: ElasticsearchClient;
     fieldsMetadataClient: IFieldsMetadataClient;
+    sessionId?: string;
   }): Promise<ApplyDataStreamEditsResponse> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const {
@@ -804,6 +814,7 @@ export class AutomaticImportService {
       acknowledgeBreakingChanges = false,
       esClient,
       fieldsMetadataClient,
+      sessionId = 'unknown',
     } = params;
     const pipeline = parseIngestPipeline(ingestPipeline);
 
@@ -826,6 +837,40 @@ export class AutomaticImportService {
       );
     }
 
+    const savedOverrides = dataStreamSO.attributes.field_type_overrides ?? [];
+    const report = (
+      outcome: DataStreamEditsOutcome,
+      details: Partial<DataStreamEditsSubmittedPayload> = {}
+    ): void => {
+      if (dryRun) return;
+      this.reportEditsSubmitted({
+        sessionId,
+        integrationId,
+        dataStreamId,
+        outcome,
+        dataStreamApproved: isApproved,
+        pipelineChanged: !isEqual(
+          stripFieldTypeProcessors(pipeline),
+          stripFieldTypeProcessors(result.ingest_pipeline as Pipeline)
+        ),
+        fieldTypeChangeCount: 0,
+        typeChanges: [],
+        fieldTypeOverrideCount: savedOverrides.length,
+        removedApprovedFieldCount: 0,
+        breakingChangesAcknowledged: acknowledgeBreakingChanges,
+        approvalReset: false,
+        fieldErrorIssues: [],
+        ...details,
+      });
+    };
+    const fail = (response: DataStreamEditsFailure): DataStreamEditsFailure => {
+      const issues = response.field_errors.map(({ issue }) => issue ?? 'unknown');
+      report(response.pipeline_errors ? 'pipeline_errors' : 'field_errors', {
+        fieldErrorIssues: [...new Set(issues)].slice(0, MAX_TELEMETRY_FIELD_ERROR_ISSUES),
+      });
+      return response;
+    };
+
     const samples = await this.getSamplesOrThrow(integrationId, dataStreamId);
 
     const basePipeline = stripFieldTypeProcessors(pipeline);
@@ -838,7 +883,7 @@ export class AutomaticImportService {
       savedPipeline: result.ingest_pipeline as Pipeline,
     });
     if (pipelineErrors) {
-      return { status: 'failure', field_errors: [], pipeline_errors: pipelineErrors };
+      return fail({ status: 'failure', field_errors: [], pipeline_errors: pipelineErrors });
     }
 
     const baseDocuments = getSimulatedDocuments(baseResponse);
@@ -866,7 +911,7 @@ export class AutomaticImportService {
       : [];
     const readBackErrors = [...readBack.errors, ...lockedReadBackErrors];
     if (readBackErrors.length > 0) {
-      return { status: 'failure', field_errors: readBackErrors };
+      return fail({ status: 'failure', field_errors: readBackErrors });
     }
     const knownFields = new Set(baseFieldMapping.map(({ name }) => name));
     const knownChanges = changes.filter(({ name }) => knownFields.has(name));
@@ -875,7 +920,7 @@ export class AutomaticImportService {
       approvedTypes
     );
     if (approvedChangeErrors.length > 0) {
-      return { status: 'failure', field_errors: approvedChangeErrors };
+      return fail({ status: 'failure', field_errors: approvedChangeErrors });
     }
 
     const draft = mergeFieldTypeChanges(baseFieldMapping, storedOverrides, readBack.changes);
@@ -889,7 +934,7 @@ export class AutomaticImportService {
     const pinned = pinApprovedFieldTypes(overriddenMapping, approvedTypes, baseDocuments);
     const ruleErrors = [...collectRuleErrors(edited.overrides, baseDocuments), ...pinned.errors];
     if (ruleErrors.length > 0) {
-      return { status: 'failure', field_errors: ruleErrors };
+      return fail({ status: 'failure', field_errors: ruleErrors });
     }
     const { fieldMapping } = pinned;
     const finalPipeline = syncFieldTypeProcessors(pipeline, overrides, basePipelineDocs);
@@ -898,7 +943,7 @@ export class AutomaticImportService {
       : await this.simulatePipeline(esClient, finalPipeline, samples);
     const conversionErrors = collectConversionErrors({ overrides, baseDocuments, finalResponse });
     if (conversionErrors.length > 0) {
-      return { status: 'failure', field_errors: conversionErrors };
+      return fail({ status: 'failure', field_errors: conversionErrors });
     }
 
     await this.assertValidFieldMappings(esClient, fieldMapping, dataStreamId);
@@ -933,7 +978,15 @@ export class AutomaticImportService {
         version: dataStreamSO.version,
       };
     }
+    const typeChanges = describeTypeChanges(savedOverrides, overrides, droppedFieldTypes);
+    const saveDetails = {
+      fieldTypeChangeCount: typeChanges.length,
+      typeChanges: typeChanges.slice(0, MAX_TELEMETRY_TYPE_CHANGES),
+      fieldTypeOverrideCount: overrides.length,
+      removedApprovedFieldCount: removedApprovedFields.length,
+    };
     if (removedApprovedFields.length > 0 && !acknowledgeBreakingChanges) {
+      report('breaking_changes_unacknowledged', saveDetails);
       return {
         status: 'failure',
         field_errors: [],
@@ -941,19 +994,25 @@ export class AutomaticImportService {
       };
     }
 
-    await this.savedObjectService.updateDataStreamSavedObjectAttributes({
-      integrationId,
-      dataStreamId,
-      expectedVersion: version,
-      ingestPipeline: finalPipeline,
-      pipelineDocs,
-      fieldMapping,
-      fieldTypeOverrides: overrides,
-      approvedFieldTypes,
-      status: TASK_STATUSES.completed,
-    });
+    try {
+      await this.savedObjectService.updateDataStreamSavedObjectAttributes({
+        integrationId,
+        dataStreamId,
+        expectedVersion: version,
+        ingestPipeline: finalPipeline,
+        pipelineDocs,
+        fieldMapping,
+        fieldTypeOverrides: overrides,
+        approvedFieldTypes,
+        status: TASK_STATUSES.completed,
+      });
+    } catch (error) {
+      if (SavedObjectsErrorHelpers.isConflictError(error)) report('conflict', saveDetails);
+      throw error;
+    }
 
-    await this.resetApprovedStatus(integrationId);
+    const approvalReset = await this.resetApprovedStatus(integrationId);
+    report('saved', { ...saveDetails, approvalReset });
 
     return {
       status: 'saved',
@@ -1118,24 +1177,37 @@ export class AutomaticImportService {
     }
   }
 
-  private async resetApprovedStatus(integrationId: string): Promise<void> {
+  /** Resolves to true when an approved integration was sent back for approval. */
+  private async resetApprovedStatus(integrationId: string): Promise<boolean> {
     assert(this.savedObjectService, 'Saved Objects service not initialized.');
     const integration = await this.savedObjectService.getIntegration(integrationId);
-    if (integration.status === TASK_STATUSES.approved) {
-      const currentVersion = integration.metadata?.version || '0.1.0';
-      const newVersion = bumpMinorVersion(currentVersion);
-      const title = integration.metadata?.title ?? integrationId;
-      const changelogEntry = this.createChangelogEntry(newVersion, title, integration.changelog);
-      const updateData: IntegrationAttributes = {
-        ...integration,
-        status: TASK_STATUSES.completed,
-        changelog: [changelogEntry, ...(integration.changelog ?? [])],
-      };
+    if (integration.status !== TASK_STATUSES.approved) return false;
 
-      await this.savedObjectService.updateIntegration(updateData, newVersion);
-      this.logger.debug(
-        `Integration ${integrationId} status reset from approved to completed after data stream mutation`
+    const currentVersion = integration.metadata?.version || '0.1.0';
+    const newVersion = bumpMinorVersion(currentVersion);
+    const title = integration.metadata?.title ?? integrationId;
+    const changelogEntry = this.createChangelogEntry(newVersion, title, integration.changelog);
+    const updateData: IntegrationAttributes = {
+      ...integration,
+      status: TASK_STATUSES.completed,
+      changelog: [changelogEntry, ...(integration.changelog ?? [])],
+    };
+
+    await this.savedObjectService.updateIntegration(updateData, newVersion);
+    this.logger.debug(
+      `Integration ${integrationId} status reset from approved to completed after data stream mutation`
+    );
+    return true;
+  }
+
+  private reportEditsSubmitted(payload: DataStreamEditsSubmittedPayload): void {
+    try {
+      this.analytics.reportEvent(
+        AutomaticImportTelemetryEventType.DataStreamEditsSubmitted,
+        payload
       );
+    } catch (error) {
+      this.logger.warn(`Failed to report data stream edits telemetry: ${error}`);
     }
   }
 

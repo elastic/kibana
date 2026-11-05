@@ -21,6 +21,12 @@ import type { DataStreamResponse, DataStreamResults } from '../../../../../commo
 
 const render = (ui: React.ReactElement) => rtlRender(ui, { wrapper: I18nProvider });
 
+const stageType = async (fieldName: string, type: string) => {
+  await userEvent.click(screen.getByTestId(`mappingEditorEditType-${fieldName}`));
+  await userEvent.click(screen.getByTestId(`mappingEditorInlineTypeSelect-${fieldName}`));
+  await userEvent.click(screen.getByTestId(`mappingEditorTypeOption-${type}`));
+};
+
 const mockSetModelMarkers = jest.fn();
 const mockRevealLine = jest.fn();
 const mockEditorValue = { current: '' };
@@ -131,6 +137,11 @@ jest.mock('../../contexts', () => ({
 const mockReportCodeEditorCopyClicked = jest.fn();
 const mockReportPipelineEdited = jest.fn();
 const mockReportEditPipelineTabOpened = jest.fn();
+const mockReportFieldTypeStaged = jest.fn();
+const mockReportSyncToTableBlocked = jest.fn();
+const mockReportPipelineCheckFailed = jest.fn();
+const mockReportBreakingChangesModalClosed = jest.fn();
+const mockReportEditsDiscarded = jest.fn();
 jest.mock('../../../telemetry_context', () => ({
   useTelemetry: () => ({
     sessionId: 'test-session-id',
@@ -140,6 +151,11 @@ jest.mock('../../../telemetry_context', () => ({
     reportEditPipelineTabOpened: mockReportEditPipelineTabOpened,
     reportCodeEditorCopyClicked: mockReportCodeEditorCopyClicked,
     reportPipelineEdited: mockReportPipelineEdited,
+    reportFieldTypeStaged: mockReportFieldTypeStaged,
+    reportSyncToTableBlocked: mockReportSyncToTableBlocked,
+    reportPipelineCheckFailed: mockReportPipelineCheckFailed,
+    reportBreakingChangesModalClosed: mockReportBreakingChangesModalClosed,
+    reportEditsDiscarded: mockReportEditsDiscarded,
   }),
 }));
 
@@ -479,12 +495,6 @@ describe('EditPipelineFlyout', () => {
       expect(screen.getByTestId('mappingEditorEditType-test.boolean')).toBeEnabled();
     });
 
-    const stageType = async (fieldName: string, type: string) => {
-      await userEvent.click(screen.getByTestId(`mappingEditorEditType-${fieldName}`));
-      await userEvent.click(screen.getByTestId(`mappingEditorInlineTypeSelect-${fieldName}`));
-      await userEvent.click(screen.getByTestId(`mappingEditorTypeOption-${type}`));
-    };
-
     it('saves only the changed fields to the server and closes the flyout', async () => {
       const onClose = jest.fn();
       render(<EditPipelineFlyout {...defaultProps} onClose={onClose} />);
@@ -504,8 +514,23 @@ describe('EditPipelineFlyout', () => {
         changes: [{ name: 'test.number', type: 'integer' }],
         dryRun: false,
         acknowledgeBreakingChanges: false,
+        sessionId: 'test-session-id',
       });
       expect(onClose).toHaveBeenCalledTimes(1);
+    });
+
+    it('reports staged type changes without field names', async () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await stageType('test.number', 'integer');
+
+      expect(mockReportFieldTypeStaged).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        fromType: 'long',
+        toType: 'integer',
+        isRevert: false,
+      });
     });
 
     it('marks rows that failed the server check and keeps save enabled', async () => {
@@ -857,6 +882,7 @@ describe('EditPipelineFlyout', () => {
         changes: [],
         dryRun: false,
         acknowledgeBreakingChanges: false,
+        sessionId: 'test-session-id',
       });
       expect(onClose).toHaveBeenCalledTimes(1);
     });
@@ -911,6 +937,22 @@ describe('EditPipelineFlyout', () => {
       expect(editor).toHaveTextContent('"type": "string"');
       expect(screen.getByTestId('editPipelineFlyoutSaveButton')).toBeEnabled();
       expect(mockApplyEdits).not.toHaveBeenCalled();
+      expect(mockReportEditPipelineTabOpened).toHaveBeenCalledWith(
+        expect.objectContaining({ pendingTypeChangeCount: 1 })
+      );
+    });
+
+    it('does not report a pipeline edit for a type change saved from the pipeline tab', async () => {
+      const { rerender } = render(<EditPipelineFlyout {...defaultProps} />);
+
+      await stageType('test.number', 'keyword');
+      await userEvent.click(screen.getByRole('tab', { name: 'Ingest pipeline' }));
+      mockUIState.selectedPipelineTab = 'pipeline';
+      rerender(<EditPipelineFlyout {...defaultProps} />);
+      await userEvent.click(screen.getByTestId('editPipelineFlyoutSaveButton'));
+
+      expect(mockApplyEdits).toHaveBeenCalledWith(expect.objectContaining({ dryRun: false }));
+      expect(mockReportPipelineEdited).not.toHaveBeenCalled();
     });
 
     it('previews pipeline edits before switching to the table tab', async () => {
@@ -950,6 +992,22 @@ describe('EditPipelineFlyout', () => {
         'field [x] not present (2 samples)'
       );
       expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+      expect(mockReportSyncToTableBlocked).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        reason: 'pipeline_errors',
+      });
+    });
+
+    it('does not report a successful switch to the table tab', async () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await userEvent.click(screen.getByTestId('code-editor-change'));
+      await userEvent.click(screen.getByRole('tab', { name: 'Table' }));
+
+      await waitFor(() => expect(mockSelectPipelineTab).toHaveBeenCalledWith('table'));
+      expect(mockReportSyncToTableBlocked).not.toHaveBeenCalled();
     });
 
     it('lists field type errors from the preview on the pipeline tab', async () => {
@@ -981,6 +1039,9 @@ describe('EditPipelineFlyout', () => {
       );
       expect(mockApplyEdits).not.toHaveBeenCalled();
       expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+      expect(mockReportSyncToTableBlocked).toHaveBeenCalledWith(
+        expect.objectContaining({ reason: 'invalid_json' })
+      );
     });
 
     describe('when typing stops', () => {
@@ -1037,6 +1098,25 @@ describe('EditPipelineFlyout', () => {
         );
         expect(screen.getByTestId('code-editor')).toHaveTextContent('set_x');
         expect(mockSelectPipelineTab).not.toHaveBeenCalled();
+        expect(mockReportPipelineCheckFailed).toHaveBeenCalledWith({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
+          kind: 'pipeline_errors',
+          failingSampleGroups: 1,
+        });
+      });
+
+      it('reports a failing check once until it passes again', async () => {
+        mockApplyEdits.mockResolvedValue(regression);
+        render(<EditPipelineFlyout {...defaultProps} />);
+
+        fireEvent.click(screen.getByTestId('code-editor-set'));
+        await stopTyping();
+        fireEvent.click(screen.getByTestId('code-editor-change'));
+        await stopTyping();
+
+        expect(mockApplyEdits).toHaveBeenCalledTimes(2);
+        expect(mockReportPipelineCheckFailed).toHaveBeenCalledTimes(1);
       });
 
       it('marks the failing processor and jumps to its line', async () => {
@@ -1294,6 +1374,12 @@ describe('EditPipelineFlyout', () => {
           expect.objectContaining({ dryRun: false, acknowledgeBreakingChanges: true })
         );
         expect(onClose).toHaveBeenCalledTimes(1);
+        expect(mockReportBreakingChangesModalClosed).toHaveBeenCalledWith({
+          integrationId: 'integration-123',
+          dataStreamId: 'ds-1',
+          action: 'save_anyway',
+          removedApprovedFieldCount: 1,
+        });
       });
 
       it('keeps the draft when the confirmation is cancelled', async () => {
@@ -1312,6 +1398,9 @@ describe('EditPipelineFlyout', () => {
         expect(screen.getByTestId('code-editor')).toHaveTextContent('"updated"');
         expect(mockApplyEdits).toHaveBeenCalledTimes(1);
         expect(onClose).not.toHaveBeenCalled();
+        expect(mockReportBreakingChangesModalClosed).toHaveBeenCalledWith(
+          expect.objectContaining({ action: 'cancel', removedApprovedFieldCount: 1 })
+        );
       });
     });
 
@@ -1420,6 +1509,28 @@ describe('EditPipelineFlyout', () => {
 
       await userEvent.click(screen.getByRole('button', { name: 'Discard changes' }));
       expect(onClose).toHaveBeenCalledTimes(1);
+      expect(mockReportEditsDiscarded).toHaveBeenCalledWith({
+        integrationId: 'integration-123',
+        dataStreamId: 'ds-1',
+        trigger: 'close',
+        pendingTypeChangeCount: 0,
+        pipelineDirty: true,
+      });
+    });
+
+    it('reports discarded type changes when the draft is reset', async () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      await stageType('test.number', 'integer');
+      await userEvent.click(screen.getByRole('button', { name: 'Reset' }));
+
+      expect(mockReportEditsDiscarded).toHaveBeenCalledWith(
+        expect.objectContaining({
+          trigger: 'reset',
+          pendingTypeChangeCount: 1,
+          pipelineDirty: false,
+        })
+      );
     });
 
     it('warns before closing when a field type change is staged', async () => {

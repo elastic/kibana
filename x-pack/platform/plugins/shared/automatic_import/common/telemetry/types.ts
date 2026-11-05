@@ -25,10 +25,16 @@ export enum AutomaticImportTelemetryEventType {
   DataStreamRefreshConfirmed = 'automatic_import_data_stream_refresh_confirmed',
   CancelButtonClicked = 'automatic_import_cancel_button_clicked',
   DoneButtonClicked = 'automatic_import_done_button_clicked',
+  FieldTypeStaged = 'automatic_import_field_type_staged',
+  SyncToTableBlocked = 'automatic_import_sync_to_table_blocked',
+  PipelineCheckFailed = 'automatic_import_pipeline_check_failed',
+  BreakingChangesModalClosed = 'automatic_import_breaking_changes_modal_closed',
+  EditsDiscarded = 'automatic_import_edits_discarded',
 
   // Server events
   DataStreamCreationComplete = 'automatic_import_data_stream_creation_complete',
   IntegrationInstalled = 'automatic_import_integration_installed',
+  DataStreamEditsSubmitted = 'automatic_import_data_stream_edits_submitted',
 
   // Fleet Events
   ManageIntegrationsTableViewed = 'automatic_import_manage_integrations_table_viewed',
@@ -72,6 +78,7 @@ export interface EditPipelineTabOpenedPayload {
   sessionId?: string;
   integrationId?: string;
   dataStreamId?: string;
+  pendingTypeChangeCount?: number;
 }
 
 export interface CodeEditorCopyClickedPayload {
@@ -159,6 +166,78 @@ export interface PipelineEditedPayload {
   netLineChange: number;
 }
 
+export interface FieldTypeStagedPayload {
+  sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
+  fromType: string;
+  toType: string;
+  isRevert: boolean;
+}
+
+export type SyncToTableBlockedReason =
+  | 'pipeline_errors'
+  | 'field_errors'
+  | 'invalid_json'
+  | 'request_error';
+
+export interface SyncToTableBlockedPayload {
+  sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
+  reason: SyncToTableBlockedReason;
+}
+
+export type PipelineCheckFailureKind = 'pipeline_errors' | 'field_errors' | 'invalid_json';
+
+export interface PipelineCheckFailedPayload {
+  sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
+  kind: PipelineCheckFailureKind;
+  failingSampleGroups: number;
+}
+
+export interface BreakingChangesModalClosedPayload {
+  sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
+  action: 'cancel' | 'save_anyway';
+  removedApprovedFieldCount: number;
+}
+
+export interface EditsDiscardedPayload {
+  sessionId?: string;
+  integrationId?: string;
+  dataStreamId?: string;
+  trigger: 'reset' | 'close';
+  pendingTypeChangeCount: number;
+  pipelineDirty: boolean;
+}
+
+export type DataStreamEditsOutcome =
+  | 'saved'
+  | 'field_errors'
+  | 'pipeline_errors'
+  | 'breaking_changes_unacknowledged'
+  | 'conflict';
+
+export interface DataStreamEditsSubmittedPayload {
+  sessionId: string;
+  integrationId: string;
+  dataStreamId: string;
+  outcome: DataStreamEditsOutcome;
+  dataStreamApproved: boolean;
+  pipelineChanged: boolean;
+  fieldTypeChangeCount: number;
+  typeChanges: string[];
+  fieldTypeOverrideCount: number;
+  removedApprovedFieldCount: number;
+  breakingChangesAcknowledged: boolean;
+  approvalReset: boolean;
+  fieldErrorIssues: string[];
+}
+
 export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTelemetryEventType> =
   T extends AutomaticImportTelemetryEventType.CreateIntegrationPageLoaded
     ? CreateIntegrationPageLoadedPayload
@@ -202,4 +281,16 @@ export type AutomaticImportTelemetryEventPayload<T extends AutomaticImportTeleme
     ? DataStreamRefreshConfirmedPayload
     : T extends AutomaticImportTelemetryEventType.PipelineEdited
     ? PipelineEditedPayload
+    : T extends AutomaticImportTelemetryEventType.FieldTypeStaged
+    ? FieldTypeStagedPayload
+    : T extends AutomaticImportTelemetryEventType.SyncToTableBlocked
+    ? SyncToTableBlockedPayload
+    : T extends AutomaticImportTelemetryEventType.PipelineCheckFailed
+    ? PipelineCheckFailedPayload
+    : T extends AutomaticImportTelemetryEventType.BreakingChangesModalClosed
+    ? BreakingChangesModalClosedPayload
+    : T extends AutomaticImportTelemetryEventType.EditsDiscarded
+    ? EditsDiscardedPayload
+    : T extends AutomaticImportTelemetryEventType.DataStreamEditsSubmitted
+    ? DataStreamEditsSubmittedPayload
     : never;

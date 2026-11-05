@@ -9,7 +9,11 @@ import { SavedObjectsErrorHelpers, type IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers/v4';
 import type { AutomaticImportPluginRequestHandlerContext } from '../types';
-import { buildAutomaticImportResponse, isSecurityExceptionError } from './utils';
+import {
+  buildAutomaticImportResponse,
+  getSessionIdHeader,
+  isSecurityExceptionError,
+} from './utils';
 import { withAvailability } from './with_availability';
 import { AUTOMATIC_IMPORT_API_PRIVILEGES } from '../feature';
 import {
@@ -219,6 +223,7 @@ const applyDataStreamEditsRoute = (
             acknowledgeBreakingChanges,
             esClient: automaticImport.esClient,
             fieldsMetadataClient: automaticImport.fieldsMetadataClient,
+            sessionId: getSessionIdHeader(request.headers),
           });
 
           return response.ok({ body: result });

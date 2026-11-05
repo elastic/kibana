@@ -132,9 +132,10 @@ export const EditPipelineFlyout = ({
 
   const handleDiscardAndClose = useCallback(() => {
     if (isBusy) return;
+    draft.discardOnClose();
     setIsCloseConfirmVisible(false);
     onClose();
-  }, [isBusy, onClose]);
+  }, [draft, isBusy, onClose]);
 
   const showFooter = isEditable && (isTableVisible || isEditorVisible);
   const pipelineNotice = isEditable ? undefined : (
@@ -163,6 +164,7 @@ export const EditPipelineFlyout = ({
           isBusy={isBusy}
           integrationId={integrationId}
           dataStreamId={dataStream.dataStreamId}
+          pendingTypeChangeCount={Object.keys(draft.pendingTypes).length}
           onSelectTable={handleSelectTable}
           onSelectPipeline={handleSelectPipeline}
         />

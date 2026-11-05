@@ -261,6 +261,8 @@ export interface ApplyDataStreamEditsRequest {
   version: string;
   dryRun: boolean;
   acknowledgeBreakingChanges?: boolean;
+  /** Telemetry session ID, so server events can be joined with browser events. */
+  sessionId?: string;
 }
 
 export const applyDataStreamEdits = async ({
@@ -273,6 +275,7 @@ export const applyDataStreamEdits = async ({
   version,
   dryRun,
   acknowledgeBreakingChanges = false,
+  sessionId,
 }: RequestDeps & ApplyDataStreamEditsRequest): Promise<ApplyDataStreamEditsResponse> =>
   http.put<ApplyDataStreamEditsResponse>(
     `${AUTOMATIC_IMPORT_INTEGRATIONS_PATH}/${encodeURIComponent(
@@ -280,6 +283,7 @@ export const applyDataStreamEdits = async ({
     )}/data_streams/${encodeURIComponent(dataStreamId)}/edits`,
     {
       version: '1',
+      ...(sessionId ? { headers: { 'x-session-id': sessionId } } : {}),
       body: JSON.stringify({
         ingest_pipeline: ingestPipeline,
         changes,

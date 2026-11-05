@@ -116,6 +116,15 @@ export {
   type DataStreamDeleteConfirmedPayload,
   type DataStreamRefreshConfirmedPayload,
   type PipelineEditedPayload,
+  type FieldTypeStagedPayload,
+  type SyncToTableBlockedReason,
+  type SyncToTableBlockedPayload,
+  type PipelineCheckFailureKind,
+  type PipelineCheckFailedPayload,
+  type BreakingChangesModalClosedPayload,
+  type EditsDiscardedPayload,
+  type DataStreamEditsOutcome,
+  type DataStreamEditsSubmittedPayload,
   type AutomaticImportTelemetryEventPayload,
 } from './telemetry/types';
 

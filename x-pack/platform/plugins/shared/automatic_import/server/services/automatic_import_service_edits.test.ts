@@ -17,6 +17,8 @@ import type {
 } from '@kbn/core/server';
 import type { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
 import type { IFieldsMetadataClient } from '@kbn/fields-metadata-plugin/server/services/fields_metadata/types';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import { AutomaticImportTelemetryEventType } from '../../common';
 import { AutomaticImportService } from './automatic_import_service';
 import type { AutomaticImportPluginStartDependencies } from '../types';
 import { InvalidFieldTypeChangeError } from '../errors';
@@ -79,6 +81,7 @@ describe('AutomaticImportService data stream edits', () => {
   let dataStreamAttributes: Record<string, unknown>;
   let integrationAttributes: Record<string, unknown>;
   let parsedSamples: Doc[];
+  let reportEvent: jest.Mock;
 
   const fieldsMetadataClient = {
     find: jest.fn().mockResolvedValue({ toPlain: () => ({}) }),
@@ -127,12 +130,14 @@ describe('AutomaticImportService data stream edits', () => {
     dryRun = false,
     acknowledgeBreakingChanges = false,
     ingestPipeline,
+    sessionId,
   }: {
     processors?: Array<Record<string, unknown>>;
     changes?: Array<{ name: string; type: string }>;
     dryRun?: boolean;
     acknowledgeBreakingChanges?: boolean;
     ingestPipeline?: string;
+    sessionId?: string;
   } = {}) =>
     service.applyDataStreamEdits({
       integrationId: 'int_1',
@@ -142,9 +147,17 @@ describe('AutomaticImportService data stream edits', () => {
       version: VERSION,
       dryRun,
       acknowledgeBreakingChanges,
+      sessionId,
       esClient: esClient as unknown as ElasticsearchClient,
       fieldsMetadataClient,
     });
+
+  const getReportedEdits = () => {
+    expect(reportEvent).toHaveBeenCalledTimes(1);
+    const [[eventType, payload]] = reportEvent.mock.calls;
+    expect(eventType).toBe(AutomaticImportTelemetryEventType.DataStreamEditsSubmitted);
+    return payload;
+  };
 
   const getSaved = () => {
     const [[saved]] = savedObjectService.updateDataStreamSavedObjectAttributes.mock.calls;
@@ -152,12 +165,13 @@ describe('AutomaticImportService data stream edits', () => {
   };
 
   beforeEach(() => {
+    reportEvent = jest.fn();
     service = new AutomaticImportService(
       loggerMock.create(),
       savedObjectsServiceMock.createSetupContract(),
       { registerTaskDefinitions: jest.fn() } as unknown as TaskManagerSetupContract,
       createCoreSetupMock() as unknown as CoreSetup<AutomaticImportPluginStartDependencies>,
-      { reportEvent: jest.fn(), registerEventType: jest.fn() } as unknown as AnalyticsServiceSetup
+      { reportEvent, registerEventType: jest.fn() } as unknown as AnalyticsServiceSetup
     );
 
     parsedSamples = [
@@ -401,6 +415,14 @@ describe('AutomaticImportService data stream edits', () => {
           removed_approved_fields: ['label', 'event.severity'],
         });
         expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
+        expect(getReportedEdits()).toEqual(
+          expect.objectContaining({
+            outcome: 'breaking_changes_unacknowledged',
+            dataStreamApproved: true,
+            removedApprovedFieldCount: 2,
+            breakingChangesAcknowledged: false,
+          })
+        );
       });
 
       it('saves an acknowledged save and keeps the removed fields pinned', async () => {
@@ -856,6 +878,95 @@ describe('AutomaticImportService data stream edits', () => {
       });
       expect(savedObjectService.updateDataStreamSavedObjectAttributes).not.toHaveBeenCalled();
       expect(savedObjectService.updateIntegration).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('telemetry', () => {
+    it('reports a saved type change without field names', async () => {
+      await applyEdits({ changes: [{ name: 'bytes', type: 'long' }], sessionId: 'session-1' });
+
+      expect(getReportedEdits()).toEqual({
+        sessionId: 'session-1',
+        integrationId: 'int_1',
+        dataStreamId: 'ds_1',
+        outcome: 'saved',
+        dataStreamApproved: false,
+        pipelineChanged: false,
+        fieldTypeChangeCount: 1,
+        typeChanges: ['keyword:long'],
+        fieldTypeOverrideCount: 1,
+        removedApprovedFieldCount: 0,
+        breakingChangesAcknowledged: false,
+        approvalReset: false,
+        fieldErrorIssues: [],
+      });
+    });
+
+    it('reports pipeline edits that reset approval', async () => {
+      integrationAttributes = {
+        integration_id: 'int_1',
+        status: 'approved',
+        metadata: { version: '1.0.0', last_approved_data_stream_ids: ['ds_1'] },
+      };
+      const renamed = { rename: { field: 'label', target_field: 'name' } };
+
+      await applyEdits({ processors: [USER_PROCESSOR, renamed] });
+
+      expect(getReportedEdits()).toEqual(
+        expect.objectContaining({
+          sessionId: 'unknown',
+          outcome: 'saved',
+          dataStreamApproved: true,
+          pipelineChanged: true,
+          fieldTypeChangeCount: 0,
+          approvalReset: true,
+        })
+      );
+    });
+
+    it('does not report previews', async () => {
+      await applyEdits({ changes: [{ name: 'bytes', type: 'long' }], dryRun: true });
+
+      expect(reportEvent).not.toHaveBeenCalled();
+    });
+
+    it('reports pipeline errors', async () => {
+      await applyEdits({ processors: [USER_PROCESSOR, { fail: { tag: 'fail_on_purpose' } }] });
+
+      expect(getReportedEdits()).toEqual(
+        expect.objectContaining({ outcome: 'pipeline_errors', pipelineChanged: true })
+      );
+    });
+
+    it('reports field error issue codes', async () => {
+      await applyEdits({ changes: [{ name: 'port', type: 'long' }] });
+
+      const { outcome, fieldErrorIssues } = getReportedEdits();
+      expect(outcome).toBe('field_errors');
+      expect(fieldErrorIssues).toHaveLength(1);
+      expect(fieldErrorIssues[0]).not.toContain('port');
+    });
+
+    it('reports a version conflict and rethrows it', async () => {
+      const conflict = SavedObjectsErrorHelpers.createConflictError('data-stream', 'ds_1');
+      savedObjectService.updateDataStreamSavedObjectAttributes.mockRejectedValue(conflict);
+
+      await expect(applyEdits({ changes: [{ name: 'bytes', type: 'long' }] })).rejects.toBe(
+        conflict
+      );
+      expect(getReportedEdits()).toEqual(
+        expect.objectContaining({ outcome: 'conflict', fieldTypeChangeCount: 1 })
+      );
+    });
+
+    it('still saves when reporting fails', async () => {
+      reportEvent.mockImplementation(() => {
+        throw new Error('telemetry down');
+      });
+
+      expect(await applyEdits({ changes: [{ name: 'bytes', type: 'long' }] })).toEqual(
+        expect.objectContaining({ status: 'saved' })
+      );
     });
   });
 
