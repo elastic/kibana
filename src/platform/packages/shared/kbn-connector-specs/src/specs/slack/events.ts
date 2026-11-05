@@ -215,8 +215,6 @@ const SlackMemberJoinedChannelEventSchema = lazySchema(() =>
   })
 );
 
-const SLACK_RESPONSE_URL_MAX = 2048;
-
 const SlackHitlActionEventSchema = lazySchema(() =>
   z.object({
     executionId: slackId('Workflow execution id from the HITL correlation payload.'),
