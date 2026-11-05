@@ -57,7 +57,9 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
   },
   markdown: {
     namePrefix: 'notes',
-    labelPrefix: i18n.translate('xpack.notebook.cell.label.markdown', { defaultMessage: 'Notes' }),
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.markdown', {
+      defaultMessage: 'Markdown',
+    }),
     build: (base) => ({ ...base, type: 'markdown', content: '' }),
   },
   'input:time': {
