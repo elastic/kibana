@@ -1,0 +1,17 @@
+{
+  "extends": "@kbn/tsconfig-base/tsconfig.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "types": ["jest", "node"]
+  },
+  "include": ["**/*.ts"],
+  "exclude": ["target/**/*"],
+  "kbn_references": [
+    "@kbn/as-code-dashboard-schema",
+    "@kbn/as-code-shared-schemas",
+    "@kbn/datemath",
+    "@kbn/dev-cli-runner",
+    "@kbn/lens-embeddable-utils",
+    "@kbn/zod"
+  ]
+}
