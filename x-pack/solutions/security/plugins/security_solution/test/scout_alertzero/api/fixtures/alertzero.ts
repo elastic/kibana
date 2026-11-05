@@ -13,6 +13,10 @@ import {
   buildAd2SeedPlan,
   getAd2ScenarioAlertIds,
 } from '@kbn/evals-suite-attack-discovery-agent-builder';
+import type {
+  Ad2IndexedAlert,
+  Ad2IndexedRawEvent,
+} from '@kbn/evals-suite-attack-discovery-agent-builder';
 import { ATTACK_SCENARIO_KEY, DRAIN_TIMEOUT_MS } from './constants';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
@@ -23,13 +27,53 @@ const SERVICE_ACCOUNT_URL = '/internal/security/service_account';
 export interface SeededScenario {
   readonly runMarker: string;
   readonly alertIds: readonly string[];
+  /**
+   * Host and user names of the seeded scenario, rewritten to be owned by this run (see
+   * `seedAttackScenario`): teardown discovers this run's Investigations by them.
+   */
+  readonly entityNames: readonly string[];
   readonly cleanup: () => Promise<void>;
 }
 
 /**
- * Indexes one AD2 attack chain (alerts + raw endpoint events) whose ids derive from a marker owned
- * by this run, so cleanup removes only what this run wrote.
+ * Rewrites every host and user name in the plan to one owned by this run: `<name>-<runMarker>`.
+ * Attack Discovery fingerprint matching correlates attacks by host/user names within a 24h
+ * window, so scenario-canonical names are shared by every run that seeds the same scenario in
+ * the shared space — a previous run's investigation can absorb this run's attack and its
+ * teardown then misses it. Document ids need no rewrite: they already derive from the run
+ * marker. The rewrite is a plain substring replacement over the serialized documents, so the
+ * names also disappear from messages, command lines and file paths that spell them out; longer
+ * names are replaced first so one name that prefixes another is never half-rewritten.
  */
+const runOwnEntityNames = (
+  docs: ReadonlyArray<Ad2IndexedAlert | Ad2IndexedRawEvent>,
+  runMarker: string
+): Map<string, string> => {
+  const names = new Set<string>();
+  for (const doc of docs) {
+    const source = doc.source as {
+      host?: { name?: unknown; hostname?: unknown };
+      user?: { name?: unknown };
+    };
+    for (const value of [source.host?.name, source.host?.hostname, source.user?.name]) {
+      if (typeof value === 'string' && value.length > 0) {
+        names.add(value);
+      }
+    }
+  }
+  const replacements = [...names]
+    .map((name) => [name, `${name}-${runMarker}`] as const)
+    .sort(([a], [b]) => b.length - a.length);
+  for (const doc of docs) {
+    let encoded = JSON.stringify(doc.source);
+    for (const [name, runOwned] of replacements) {
+      encoded = encoded.split(name).join(runOwned);
+    }
+    doc.source = JSON.parse(encoded);
+  }
+  return new Map(replacements);
+};
+
 export const seedAttackScenario = async (
   esClient: EsClient,
   api: AlertZeroApi,
@@ -42,6 +86,7 @@ export const seedAttackScenario = async (
     .toString(36)
     .slice(2, 8)}`;
   const plan = buildAd2SeedPlan({ scenarioKey, runMarker, baseTime: new Date(), agentIdByHost });
+  const entityNames = runOwnEntityNames([...plan.alerts, ...plan.rawEvents], runMarker);
 
   // Creates the alerts index + mappings the seeded alerts are written into.
   ok(await api.public('POST', '/api/detection_engine/index'), 'create the detection alerts index');
@@ -102,6 +147,7 @@ export const seedAttackScenario = async (
   return {
     runMarker,
     alertIds: getAd2ScenarioAlertIds(scenarioKey, 'clean', runMarker),
+    entityNames,
     cleanup: removeSeeded,
   };
 };

@@ -22,6 +22,7 @@ import {
   testData,
   createServiceAccount,
   deleteInvestigation,
+  discoverRunInvestigations,
   deleteServiceAccount,
   dismissRunProposals,
   getAdminApi,
@@ -262,6 +263,29 @@ apiTest.describe(
       await attempt(async () =>
         deleteSubmittedHostActions({ esClient, config, actionIds: submittedActionIds })
       );
+      // Re-query at teardown time: `submittedActionIds` is only populated once the
+      // post-approval poll succeeds, so a spec that fails between the approval and that
+      // poll leaks the isolate action against the seeded host. The agent id is minted by
+      // `seedEndpointHosts` for this spec alone, so every action the query returns is
+      // this run's — including any the product filed after the capture.
+      await attempt(async () => {
+        if (!api || !runReferences?.agentId) {
+          return;
+        }
+        const agentId = runReferences.agentId;
+        const all = okOrIndexMissing(
+          await api.public<{ data: ActionDetails[] }>(
+            'GET',
+            `/api/endpoint/action?pageSize=100&agentIds=${encodeURIComponent(agentId)}`
+          ),
+          "list this run's endpoint actions at teardown",
+          { data: [] }
+        ).data;
+        const leakedIds = all.map(({ id }) => id).filter((id) => !submittedActionIds.includes(id));
+        if (leakedIds.length > 0) {
+          await deleteSubmittedHostActions({ esClient, config, actionIds: leakedIds });
+        }
+      });
       await attempt(async () => cleanupHosts?.());
       // Dismiss this run's leftover pending proposals before the resources they point at are
       // deleted: a spec that fails between a proposal's creation and its approval otherwise
@@ -270,10 +294,20 @@ apiTest.describe(
       await attempt(async () => {
         if (api && runReferences) await dismissRunProposals(api, runReferences);
       });
-      // The Investigation the Investigate approval created, deleted while the account that owned
-      // the runs maintaining it still exists, then the service account itself.
+      // The Investigations the flow created, deleted while the account that owned the runs
+      // maintaining them still exists, then the service account itself. Discovery, not just the
+      // captured id: the review opens one Investigation per discovered attack, and only the one
+      // behind the approved proposal is captured during the run — the rest point at seed data
+      // this teardown removes. The captured id is deleted too (idempotent) in case discovery's
+      // read raced its deletion.
       await attempt(async () => {
-        if (api && investigationId) await deleteInvestigation(api, investigationId);
+        if (!api) {
+          return;
+        }
+        const discovered = await discoverRunInvestigations(api, scenario?.entityNames ?? []);
+        for (const id of new Set([...discovered, ...(investigationId ? [investigationId] : [])])) {
+          await deleteInvestigation(api, id);
+        }
       });
       await attempt(async () => {
         if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
