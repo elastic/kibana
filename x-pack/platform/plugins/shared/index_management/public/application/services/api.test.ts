@@ -121,6 +121,38 @@ describe('WHEN running index actions', () => {
     expect(sentIndexNames.flat()).toEqual(indexNames);
   });
 
+  it('SHOULD reject with an error body WHEN the client fails to load', async () => {
+    esClientService.setup({
+      getClient: () => Promise.reject(new Error('Loading chunk 42 failed')),
+    });
+
+    await expect(closeIndices(['my-index'])).rejects.toMatchObject({
+      name: 'EsRequestError',
+      body: { error: 'Error', message: 'Loading chunk 42 failed' },
+    });
+  });
+
+  it('SHOULD reject with an error body WHEN the request gets no response', async () => {
+    const { fetch } = setup();
+    fetch.mockRejectedValue(
+      Object.assign(new Error('Failed to fetch'), { name: 'HttpFetchError', request: {} })
+    );
+
+    await expect(closeIndices(['my-index'])).rejects.toMatchObject({
+      name: 'EsRequestError',
+      body: { message: 'Failed to fetch' },
+    });
+  });
+
+  it('SHOULD reject with the abort error WHEN the request is aborted', async () => {
+    const { fetch } = setup();
+    fetch.mockRejectedValue(
+      Object.assign(new Error('Request was aborted'), { name: 'AbortError', request: {} })
+    );
+
+    await expect(closeIndices(['my-index'])).rejects.toMatchObject({ name: 'AbortError' });
+  });
+
   it('SHOULD reject with the Elasticsearch error WHEN the action fails', async () => {
     const { fetch } = setup();
     fetch.mockRejectedValue(

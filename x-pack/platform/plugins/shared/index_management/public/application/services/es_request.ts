@@ -57,32 +57,38 @@ export const toEsUiError = ({ body, response, message }: IHttpFetchError): EsUiE
   };
 };
 
-/** Error thrown for Elasticsearch requests that failed with a response. */
+/** Error thrown for failed Elasticsearch requests, with a body in the shape of Kibana route errors. */
 export class EsRequestError extends Error {
   public readonly status?: number;
   public readonly body: EsUiError;
 
-  constructor(error: IHttpFetchError) {
-    const body = toEsUiError(error);
+  constructor(error: unknown) {
+    const body = isHttpFetchError(error)
+      ? toEsUiError(error)
+      : { error: 'Error', message: error instanceof Error ? error.message : String(error) };
     super(body.message);
     this.name = 'EsRequestError';
-    this.status = error.response?.status;
+    this.status = isHttpFetchError(error) ? error.response?.status : undefined;
     this.body = body;
   }
 }
 
+const isAbortError = (error: unknown): boolean =>
+  error instanceof Error && error.name === 'AbortError';
+
 /**
- * Sends a request through the Elasticsearch proxy. Errors with a response reject as `EsRequestError`.
+ * Sends a request through the Elasticsearch proxy. Failures, including loading the client, reject
+ * as `EsRequestError`; aborted requests reject with their `AbortError`.
  */
 export const esRequest = async <T>(call: EsCall<T>): Promise<T> => {
-  const client = await esClientService.esClient.getClient();
   try {
+    const client = await esClientService.esClient.getClient();
     return await call(client);
   } catch (error) {
-    if (isHttpFetchError(error) && error.response) {
-      throw new EsRequestError(error);
+    if (isAbortError(error)) {
+      throw error;
     }
-    throw error;
+    throw new EsRequestError(error);
   }
 };
 
@@ -95,10 +101,7 @@ export const sendEsRequest = async <T>(
   try {
     return { data: await esRequest(call), error: null };
   } catch (error) {
-    const body: EsUiError =
-      error instanceof EsRequestError
-        ? error.body
-        : { error: 'Error', message: error instanceof Error ? error.message : String(error) };
+    const { body } = error instanceof EsRequestError ? error : new EsRequestError(error);
     return { data: null, error: body };
   }
 };
