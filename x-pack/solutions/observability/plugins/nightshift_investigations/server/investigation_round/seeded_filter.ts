@@ -61,7 +61,6 @@ export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   'platform.streams.investigation_progress_report',
   PROPOSALS_CREATE_TOOL_ID,
   TIME_CONVERTER_TOOL_ID,
-  internalTools.writeTodos,
   internalTools.listFiles,
   internalTools.loadSkill,
   internalTools.searchRelevantSkills,
@@ -80,8 +79,8 @@ export interface SeededFilterOptions {
    */
   skipRoots?: readonly SeededWorkspaceKind[];
   /**
-   * When true, also filters out non-evidence process/recording tools (`write_todos`,
-   * `record_hypothesis`, `str_replace`, `write_file`, etc.).
+   * When true, also filters out non-evidence process/recording tools (`record_hypothesis`,
+   * `str_replace`, `write_file`, etc.).
    */
   skipNonEvidenceTools?: boolean;
   /**
