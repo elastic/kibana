@@ -309,6 +309,22 @@ export const enableFloorWorker = async ({
       )}.`
     );
   }
+  const restore = async (): Promise<void> => {
+    const current = await readFloorWorker(fetch, spaceId);
+    if (before.enabled) {
+      // Put back the settings the setup replaced, using the current revision.
+      await patchFloorWorker(fetch, spaceId, {
+        settingsRevision: current.settingsRevision ?? null,
+        settings: before.settings,
+      });
+      log.info('[ad-worker] floor worker settings restored');
+      return;
+    }
+    await patchFloorWorker(fetch, spaceId, { enabled: false });
+    log.info(
+      `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
+    );
+  };
   await patchFloorWorker(fetch, spaceId, {
     enabled: true,
     settingsRevision: before.settingsRevision ?? null,
@@ -318,33 +334,28 @@ export const enableFloorWorker = async ({
       scheduleInterval: FLOOR_SCHEDULE_INTERVAL,
     },
   });
-  const after = await readFloorWorker(fetch, spaceId);
-  if (!after.enabled || !after.workflowId) {
-    throw new Error(
-      `The floor Attack Discovery worker did not enable in "${spaceId}" (enabled=${String(
-        after.enabled
-      )}, workflowId=${String(after.workflowId)}).`
-    );
-  }
-  log.info(`[ad-worker] floor worker enabled as service account ${serviceAccountId}`);
-  await settleEnableTimeRun({ fetch, log, workflowId: after.workflowId, spaceId });
-  return {
-    workflowId: after.workflowId,
-    restore: async () => {
-      const current = await readFloorWorker(fetch, spaceId);
-      if (before.enabled) {
-        // Put back the settings the setup replaced, using the current revision.
-        await patchFloorWorker(fetch, spaceId, {
-          settingsRevision: current.settingsRevision ?? null,
-          settings: before.settings,
-        });
-        log.info('[ad-worker] floor worker settings restored');
-        return;
-      }
-      await patchFloorWorker(fetch, spaceId, { enabled: false });
-      log.info(
-        `[ad-worker] floor worker disabled again (revision ${String(current.settingsRevision)})`
+  // The caller only receives `restore` when this resolves, so a failure after the PATCH must put the
+  // worker back itself or it stays enabled in the eval space.
+  try {
+    const after = await readFloorWorker(fetch, spaceId);
+    if (!after.enabled || !after.workflowId) {
+      throw new Error(
+        `The floor Attack Discovery worker did not enable in "${spaceId}" (enabled=${String(
+          after.enabled
+        )}, workflowId=${String(after.workflowId)}).`
       );
-    },
-  };
+    }
+    log.info(`[ad-worker] floor worker enabled as service account ${serviceAccountId}`);
+    await settleEnableTimeRun({ fetch, log, workflowId: after.workflowId, spaceId });
+    return { workflowId: after.workflowId, restore };
+  } catch (error) {
+    await restore().catch((restoreError) =>
+      log.error(
+        `[ad-worker] could not put the floor worker back after a failed enable: ${errorMessage(
+          restoreError
+        )}`
+      )
+    );
+    throw error;
+  }
 };

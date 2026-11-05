@@ -31,7 +31,12 @@ afterEach(() => {
   jest.useRealTimers();
 });
 
-const log = { info: jest.fn(), warning: jest.fn(), debug: jest.fn() } as unknown as ToolingLog;
+const log = {
+  info: jest.fn(),
+  warning: jest.fn(),
+  debug: jest.fn(),
+  error: jest.fn(),
+} as unknown as ToolingLog;
 const NAME = 'alertzero_attack_discovery';
 const usable = { id: 'sa-1', name: NAME, enabled: true, assumable: true };
 
@@ -161,6 +166,54 @@ describe('enableFloorWorker', () => {
   it('fails when the worker does not come up enabled', async () => {
     const { promise } = run({}, { enabled: false });
     await expect(promise).rejects.toThrow(/did not enable/);
+  });
+
+  it('puts the worker back and rethrows the original error when the enable-time settle throws', async () => {
+    let reads = 0;
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') return {};
+      if (path.includes('/executions')) throw new Error('listing failed');
+      reads += 1;
+      return {
+        workers: [
+          reads === 1
+            ? worker({})
+            : worker({ enabled: true, workflowId: 'wf-1', settingsRevision: 4 }),
+        ],
+      };
+    });
+    await expect(
+      enableFloorWorker({ fetch: fetch as unknown as HttpHandler, log, serviceAccountId: 'sa-1' })
+    ).rejects.toThrow(/listing failed/);
+    expect(patches(fetch)).toHaveLength(2);
+    expect(patches(fetch)[1]).toEqual({ enabled: false });
+  });
+
+  it('puts the worker back when the read-back says it did not enable', async () => {
+    const { fetch, promise } = run({}, { enabled: false });
+    await expect(promise).rejects.toThrow(/did not enable/);
+    expect(patches(fetch)[1]).toEqual({ enabled: false });
+  });
+
+  it('rethrows the original error when the restore itself fails', async () => {
+    let reads = 0;
+    const fetch = fetchWith((path, o) => {
+      if (o?.method === 'PATCH') {
+        if (JSON.parse((o as { body: string }).body).enabled === false) {
+          throw new Error('restore refused');
+        }
+        return {};
+      }
+      if (path.includes('/executions')) throw new Error('listing failed');
+      reads += 1;
+      return {
+        workers: [reads === 1 ? worker({}) : worker({ enabled: true, workflowId: 'wf-1' })],
+      };
+    });
+    await expect(
+      enableFloorWorker({ fetch: fetch as unknown as HttpHandler, log, serviceAccountId: 'sa-1' })
+    ).rejects.toThrow(/listing failed/);
+    expect(log.error).toHaveBeenCalledWith(expect.stringContaining('restore refused'));
   });
 });
 
