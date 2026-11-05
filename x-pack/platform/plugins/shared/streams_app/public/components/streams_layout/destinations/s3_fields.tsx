@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
+import { useController } from 'react-hook-form';
 import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFieldPassword,
@@ -20,16 +21,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AMAZON_S3_LABEL } from './destination_type_config';
-import type { S3DestinationFormData, S3FieldsErrors } from './types';
+import type { DestinationCreationFormData, S3DestinationFormData, S3FieldsErrors } from './types';
 
 type S3Field = keyof S3DestinationFormData;
 
 interface S3FieldsProps {
-  values: S3DestinationFormData;
   errors: S3FieldsErrors;
   disabled: boolean;
-  onChange: (changes: Partial<S3DestinationFormData>) => void;
-  onBlur: () => void;
 }
 
 const PROVIDER_OPTIONS: Array<EuiSuperSelectOption<string>> = [
@@ -63,7 +61,7 @@ const BUCKET_ERROR_MESSAGES: Record<NonNullable<S3FieldsErrors['bucket']>, strin
   }),
 };
 
-const FIELDS: ReadonlyArray<{
+interface S3FieldDefinition {
   field: S3Field;
   label: string;
   helpText?: string;
@@ -71,7 +69,9 @@ const FIELDS: ReadonlyArray<{
   placeholder?: string;
   getErrorMessage?: (errors: S3FieldsErrors) => string | undefined;
   testSubject: string;
-}> = [
+}
+
+const FIELDS: readonly S3FieldDefinition[] = [
   {
     field: 'region',
     label: i18n.translate('xpack.streams.destinations.s3RegionLabel', {
@@ -139,74 +139,80 @@ const FIELDS: ReadonlyArray<{
   },
 ];
 
-/** Fields for an Amazon S3 destination (`s3.schema.yaml`). */
-export const S3Fields = ({ values, errors, disabled, onChange, onBlur }: S3FieldsProps) => {
-  const [touched, setTouched] = useState<ReadonlySet<S3Field>>(new Set());
-
+const S3FieldRow = ({
+  definition: { field, label, helpText, optional, placeholder, getErrorMessage, testSubject },
+  errors,
+  disabled,
+}: S3FieldsProps & { definition: S3FieldDefinition }) => {
+  const {
+    field: { value, onChange, onBlur, ref },
+  } = useController<DestinationCreationFormData, `s3.${S3Field}`>({ name: `s3.${field}` });
+  const errorMessage = getErrorMessage?.(errors);
+  const inputProps = {
+    fullWidth: true,
+    value,
+    placeholder,
+    disabled,
+    isInvalid: Boolean(errorMessage),
+    onChange,
+    onBlur,
+    inputRef: ref,
+    'data-test-subj': testSubject,
+  };
   return (
-    <>
-      <EuiFormRow fullWidth label={PROVIDER_LABEL}>
-        <EuiSuperSelect
-          fullWidth
-          options={PROVIDER_OPTIONS}
-          valueOfSelected="s3"
-          onChange={() => undefined}
-          disabled={disabled}
-          data-test-subj="streamsCreateDestinationS3Provider"
-        />
-      </EuiFormRow>
-      {FIELDS.map(
-        ({ field, label, helpText, optional, placeholder, getErrorMessage, testSubject }) => {
-          const errorMessage = touched.has(field) ? getErrorMessage?.(errors) : undefined;
-          const inputProps = {
-            fullWidth: true,
-            value: values[field],
-            placeholder,
-            disabled,
-            isInvalid: Boolean(errorMessage),
-            onChange: (event: React.ChangeEvent<HTMLInputElement>) =>
-              onChange({ [field]: event.target.value }),
-            onBlur: () => {
-              setTouched((previous) => new Set(previous).add(field));
-              onBlur();
-            },
-            'data-test-subj': testSubject,
-          };
-          return (
-            <EuiFormRow
-              key={field}
-              fullWidth
-              label={
-                helpText ? (
-                  <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
-                    <EuiFlexItem grow={false}>{label}</EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      <EuiIconTip content={helpText} type="question" size="s" color="subdued" />
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                ) : (
-                  label
-                )
-              }
-              labelAppend={
-                optional ? (
-                  <EuiText size="xs" color="subdued">
-                    {OPTIONAL_LABEL}
-                  </EuiText>
-                ) : undefined
-              }
-              isInvalid={Boolean(errorMessage)}
-              error={errorMessage}
-            >
-              {field === 'secretAccessKey' ? (
-                <EuiFieldPassword {...inputProps} type="dual" autoComplete="new-password" />
-              ) : (
-                <EuiFieldText {...inputProps} autoComplete="off" />
-              )}
-            </EuiFormRow>
-          );
-        }
+    <EuiFormRow
+      fullWidth
+      label={
+        helpText ? (
+          <EuiFlexGroup gutterSize="xs" alignItems="center" responsive={false}>
+            <EuiFlexItem grow={false}>{label}</EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiIconTip content={helpText} type="question" size="s" color="subdued" />
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        ) : (
+          label
+        )
+      }
+      labelAppend={
+        optional ? (
+          <EuiText size="xs" color="subdued">
+            {OPTIONAL_LABEL}
+          </EuiText>
+        ) : undefined
+      }
+      isInvalid={Boolean(errorMessage)}
+      error={errorMessage}
+    >
+      {field === 'secretAccessKey' ? (
+        <EuiFieldPassword {...inputProps} type="dual" autoComplete="new-password" />
+      ) : (
+        <EuiFieldText {...inputProps} autoComplete="off" />
       )}
-    </>
+    </EuiFormRow>
   );
 };
+
+/** Fields for an Amazon S3 destination (`s3.schema.yaml`). */
+export const S3Fields = ({ errors, disabled }: S3FieldsProps) => (
+  <>
+    <EuiFormRow fullWidth label={PROVIDER_LABEL}>
+      <EuiSuperSelect
+        fullWidth
+        options={PROVIDER_OPTIONS}
+        valueOfSelected="s3"
+        onChange={() => undefined}
+        disabled={disabled}
+        data-test-subj="streamsCreateDestinationS3Provider"
+      />
+    </EuiFormRow>
+    {FIELDS.map((definition) => (
+      <S3FieldRow
+        key={definition.field}
+        definition={definition}
+        errors={errors}
+        disabled={disabled}
+      />
+    ))}
+  </>
+);

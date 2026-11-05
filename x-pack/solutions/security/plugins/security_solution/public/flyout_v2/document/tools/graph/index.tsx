@@ -98,13 +98,12 @@ export const GraphDetails = memo(
       (
         params: Omit<
           GraphGroupedNodePreviewPanelProps,
-          'scopeId' | 'showLoadingState' | 'onShowDocument' | 'onShowEntity'
+          'showLoadingState' | 'onShowDocument' | 'onShowEntity'
         >
       ) =>
         open(
           <GraphGroupedNodePreviewPanel
             {...params}
-            scopeId={GRAPH_SCOPE_ID}
             onShowDocument={onShowDocument}
             onShowEntity={onShowEntity}
           />,

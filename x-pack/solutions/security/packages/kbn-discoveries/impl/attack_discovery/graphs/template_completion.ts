@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import type { Logger } from '@kbn/core/server';
 import { isTemplateRequiredConnector, MessageRole } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-common';
@@ -132,11 +133,14 @@ export const createAttackDiscoveryTemplateCompletion = ({
   inferenceClient,
   connectorId,
   logger,
+  telemetryMetadata,
   timeout,
 }: {
   inferenceClient: InferenceClient;
   connectorId: string;
   logger?: Logger;
+  /** Token-usage attribution for the completion; unset leaves the call untagged. */
+  telemetryMetadata?: TelemetryMetadata;
   /** Connector timeout, in milliseconds. The messages path already forwards this. */
   timeout?: number;
 }): AttackDiscoveryTemplateCompletion => {
@@ -162,6 +166,7 @@ export const createAttackDiscoveryTemplateCompletion = ({
         },
       },
       ...(timeout !== undefined ? { timeout } : {}),
+      ...(telemetryMetadata != null ? { metadata: { connectorTelemetry: telemetryMetadata } } : {}),
     });
     throwIfModelRefusal({ connectorId, content: response.content, refusal: response.refusal });
 
@@ -177,11 +182,13 @@ export const resolveAttackDiscoveryTemplateCompletion = async ({
   inferenceClient,
   connectorId,
   logger,
+  telemetryMetadata,
   timeout,
 }: {
   inferenceClient?: Pick<InferenceClient, 'chatComplete' | 'getConnectorById'>;
   connectorId: string;
   logger?: Logger;
+  telemetryMetadata?: TelemetryMetadata;
   timeout?: number;
 }): Promise<AttackDiscoveryTemplateCompletion | undefined> => {
   if (inferenceClient?.getConnectorById == null) {
@@ -201,6 +208,7 @@ export const resolveAttackDiscoveryTemplateCompletion = async ({
     inferenceClient: inferenceClient as InferenceClient,
     connectorId,
     logger,
+    ...(telemetryMetadata != null ? { telemetryMetadata } : {}),
     timeout,
   });
 };
