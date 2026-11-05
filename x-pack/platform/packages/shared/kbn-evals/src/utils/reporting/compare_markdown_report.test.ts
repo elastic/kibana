@@ -389,6 +389,20 @@ describe('formatMarkdownCompareReport', () => {
       expect(output).not.toContain('**Significant changes**');
     });
 
+    it('sizes the Holm family by rows with a finite p-value, not by every row', () => {
+      const output = formatMarkdownCompareReport({
+        targetExperimentId: 'exp-a',
+        baselineExperimentId: 'exp-b',
+        results: applyHolmCorrection([
+          makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+          makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+          makeResult({ evaluatorName: 'C', pValue: null }),
+        ]),
+      });
+
+      expect(output).toContain('across 2 comparisons;');
+    });
+
     it('keeps the single-p-value layout when no correction was applied', () => {
       const output = formatMarkdownCompareReport({
         targetExperimentId: 'exp-a',

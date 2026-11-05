@@ -27,6 +27,9 @@ import {
 
 const DEFAULT_EVAL_KBN_URL = 'http://elastic:changeme@localhost:5601';
 
+// `createFailError` defaults to exit code 1, which is reserved for a tripped gate.
+const GATE_INCONCLUSIVE_EXIT_CODE = 2;
+
 export const compareCmd: Command<void> = {
   name: 'compare',
   description: `
@@ -51,7 +54,9 @@ export const compareCmd: Command<void> = {
   Regression gate:
     --fail-on-regression            Exit non-zero if any evaluator got significantly worse
                                     (direction-aware; higher-is-better and lower-is-better
-                                    evaluators are both handled, neutral ones never trip)
+                                    evaluators are both handled, neutral ones never trip).
+                                    Exit codes: 0 passed, 1 regression, 2 inconclusive or not
+                                    evaluated (no baseline, no results, or nothing checkable)
     --regression-evaluators         Comma-separated evaluator names that can trip the gate
                                     (default: all). Names absent from the
                                     comparison warn; if none match, the run fails.
@@ -89,7 +94,7 @@ export const compareCmd: Command<void> = {
       --output           Append markdown output to a file instead of stdout
       --refresh-url      URL to include as a "Refresh Baseline" link in markdown output
       --space-ids        Spaces the experiments were run in
-      --fail-on-regression            Exit non-zero if any evaluator got significantly worse
+      --fail-on-regression            Exit 1 if any evaluator got significantly worse, 2 if the gate was inconclusive or not evaluated
       --regression-evaluators         Comma-separated evaluator names that can trip the gate (default: all)
       --min-pairs                     Minimum paired scores for an evaluator to be gated (default: ${DEFAULT_REGRESSION_MIN_PAIRS})
       --no-multiplicity-correction    Use raw p-values instead of Holm-Bonferroni adjusted ones
@@ -207,11 +212,17 @@ export const compareCmd: Command<void> = {
       });
 
       if (!baselineMetadata) {
-        log.warning(
-          `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.${
-            failOnRegression ? ' --fail-on-regression: regression gate was NOT evaluated.' : ''
-          }`
-        );
+        const message = `No baseline experiment found for suite ${suiteId} on branch ${baselineBranch}. Nothing to compare.`;
+        if (failOnRegression) {
+          // A missing baseline must not look like a clean pass in CI.
+          throw createFailError(
+            `${message} --fail-on-regression: regression gate was NOT evaluated.`,
+            {
+              exitCode: GATE_INCONCLUSIVE_EXIT_CODE,
+            }
+          );
+        }
+        log.warning(message);
         return;
       }
 
@@ -323,11 +334,13 @@ export const compareCmd: Command<void> = {
 
     const comparisonResults = compareScores(pairs);
     if (comparisonResults.length === 0) {
-      log.warning(
-        `No comparison results returned.${
-          failOnRegression ? ' --fail-on-regression: regression gate was NOT evaluated.' : ''
-        }`
-      );
+      if (failOnRegression) {
+        throw createFailError(
+          'No comparison results returned. --fail-on-regression: regression gate was NOT evaluated.',
+          { exitCode: GATE_INCONCLUSIVE_EXIT_CODE }
+        );
+      }
+      log.warning('No comparison results returned.');
       return;
     }
 
@@ -335,11 +348,13 @@ export const compareCmd: Command<void> = {
       const known = new Set(comparisonResults.map((result) => result.evaluatorName));
       const unknown = regressionEvaluators.filter((name) => !known.has(name));
       if (failOnRegression && unknown.length === regressionEvaluators.length) {
-        // Every name missing means the gate would check nothing and pass vacuously, most likely a typo.
-        throw createFlagError(
+        // Every name missing means the gate would check nothing and pass vacuously. The flag is
+        // well-formed, so this is a mismatch with the data (often a typo or the wrong suite).
+        throw createFailError(
           `--regression-evaluators matches no evaluator in this comparison. Available: ${[...known]
             .sort()
-            .join(', ')}`
+            .join(', ')}`,
+          { exitCode: GATE_INCONCLUSIVE_EXIT_CODE }
         );
       }
       if (unknown.length > 0) {
@@ -410,8 +425,11 @@ export const compareCmd: Command<void> = {
       });
       const gateReport = formatRegressionGateReport({ decision, minPairs });
 
-      if (decision.tripped) {
+      if (decision.status === 'tripped') {
         throw createFailError(gateReport);
+      }
+      if (decision.status === 'inconclusive') {
+        throw createFailError(gateReport, { exitCode: GATE_INCONCLUSIVE_EXIT_CODE });
       }
       log.info(gateReport);
     }

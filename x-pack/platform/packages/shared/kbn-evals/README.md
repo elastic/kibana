@@ -348,11 +348,13 @@ EVAL_SLACK_NOTIFICATION_CHANNEL=#my-test-channel
 | `--min-pairs <n>`              | Minimum paired scores for an evaluator to be gated (default: 10). Evaluators below it are listed as `insufficient pairs`, can't trip the gate, and are called out in a warning: they were not checked. |
 | `--no-multiplicity-correction` | Use raw p-values instead of Holm-Bonferroni adjusted ones.                                                                                                                                   |
 
-Exit semantics (with `--fail-on-regression`):
+Exit codes (with `--fail-on-regression`):
 
-- **Exit 0** and a `Regression gate passed` line: nothing in scope got significantly worse. Any `insufficient pairs` warning means those evaluators were not checked, not that they passed.
-- **Exit non-zero** with `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs.
-- **Exit 0 without evaluating the gate** when there is nothing to compare (for example no baseline found on `--baseline-branch`); a warning says so. Missing scores or overlapping datasets are errors, as before.
+- **0, passed**: at least one evaluator comparison was actually checked and none got significantly worse. The `Regression gate passed` line says how many were checked. Any `insufficient pairs` or `no usable p-value` warning means those evaluators were not checked, not that they passed.
+- **1, regression**: `Regression gate tripped`, listing each regressed dataset / evaluator with delta, raw (and adjusted) p-value, the test used and the number of pairs.
+- **2, inconclusive or not evaluated**: the gate could not rule regressions in or out, so it fails instead of passing silently. This happens when no baseline is found on `--baseline-branch`, when the comparison returns no results, when `--regression-evaluators` matches no evaluator, and when nothing was checkable (every row has too few pairs or no usable p-value, or only neutral evaluators are in scope). Missing scores or overlapping datasets are errors, as before.
+
+Without `--fail-on-regression`, `compare` keeps its old behavior: a missing baseline or empty comparison logs a warning and exits 0.
 
 The gate decision is a pure function (`evaluateRegressionGate` in `src/utils/reporting/regression_gate.ts`); the Holm adjustment is in `holm_correction.ts`.
 

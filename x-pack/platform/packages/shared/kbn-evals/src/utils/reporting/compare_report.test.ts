@@ -243,4 +243,20 @@ describe('formatCompareReport', () => {
     expect(corrected.tableOutput).toContain('Adj. p-value');
     expect(corrected.header[2]).toContain('Holm-Bonferroni adjusted p < 0.05');
   });
+
+  it('sizes the Holm family by rows with a finite p-value, not by every row', () => {
+    const results = [
+      makeResult({ evaluatorName: 'A', pValue: 0.01 }),
+      makeResult({ evaluatorName: 'B', pValue: 0.5 }),
+      makeResult({ evaluatorName: 'C', pValue: null }),
+    ];
+
+    const report = formatCompareReport({
+      targetExperimentId: 'experiment-1',
+      baselineExperimentId: 'experiment-2',
+      results: applyHolmCorrection(results),
+    });
+
+    expect(report.header[2]).toContain('across 2 comparisons');
+  });
 });

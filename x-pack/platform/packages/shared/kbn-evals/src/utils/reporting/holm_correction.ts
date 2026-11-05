@@ -21,19 +21,29 @@ const isUsablePValue = (value: number | null): value is number =>
 /**
  * Holm-Bonferroni step-down adjustment. Returns adjusted p-values in the input order, capped at 1.
  * Controls the family-wise error rate without assuming the tests are independent.
+ *
+ * Non-finite inputs (NaN, +/-Infinity) are not valid p-values: they are left out of the family,
+ * so they do not inflate the correction, and come back as NaN at their positions.
  */
 export const holmBonferroniAdjust = (pValues: readonly number[]): number[] => {
-  const m = pValues.length;
-  const order = pValues.map((p, index) => ({ p, index })).sort((a, b) => a.p - b.p);
+  const family = pValues
+    .map((p, index) => ({ p, index }))
+    .filter(({ p }) => Number.isFinite(p))
+    .sort((a, b) => a.p - b.p);
+  const m = family.length;
 
-  const adjusted = new Array<number>(m);
+  const adjusted = new Array<number>(pValues.length).fill(NaN);
   let runningMax = 0;
-  order.forEach(({ p, index }, rank) => {
+  family.forEach(({ p, index }, rank) => {
     runningMax = Math.max(runningMax, Math.min(1, (m - rank) * p));
     adjusted[index] = runningMax;
   });
   return adjusted;
 };
+
+/** Number of rows that take part in the Holm family: those with a finite p-value. */
+export const countHolmFamily = (results: readonly ComparisonResult[]): number =>
+  results.filter((result) => isUsablePValue(result.pValue)).length;
 
 /**
  * Adds `adjustedPValue` to every row. The family is all rows with a usable p-value; rows whose

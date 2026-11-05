@@ -9,7 +9,7 @@ import chalk from 'chalk';
 import { table } from 'table';
 import { isImproved } from '@kbn/evals-common';
 import type { Direction } from '@kbn/evals-common';
-import { getEffectivePValue } from './holm_correction';
+import { countHolmFamily, getEffectivePValue } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
@@ -125,7 +125,9 @@ export function formatCompareReport({
     `Target: ${targetExperimentId}`,
     `Baseline: ${baselineExperimentId}`,
     multiplicityCorrected
-      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${sortedResults.length} comparisons)`
+      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${countHolmFamily(
+          sortedResults
+        )} comparisons)`
       : `Significance threshold: p < ${significanceThreshold}`,
   ];
   const summary = `Significant differences: ${significantCount}/${sortedResults.length}`;

@@ -224,12 +224,12 @@ node scripts/evals compare <run-id> --baseline-branch main --suite <suite-id> --
 
 | Flag                           | Description                                                                                                  |
 | ------------------------------ | ------------------------------------------------------------------------------------------------------------ |
-| `--fail-on-regression`         | Exit non-zero if any evaluator is significantly worse (direction-aware)                                      |
+| `--fail-on-regression`         | Exit 1 if any evaluator is significantly worse (direction-aware), 2 if the gate was inconclusive or not evaluated |
 | `--regression-evaluators a,b`  | Only these evaluators can trip the gate (default: all)                                                       |
 | `--min-pairs <n>`              | Evaluators with fewer pairs are reported as "insufficient pairs" and cannot trip the gate (default: 10)      |
 | `--no-multiplicity-correction` | Judge significance on raw p-values; by default p-values are Holm-Bonferroni adjusted across all comparisons |
 
-See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for the exit semantics.
+Exit codes with `--fail-on-regression`: 0 passed, 1 regression, 2 inconclusive or not evaluated (no baseline, no results, or nothing checkable). See the [README](./README.md#14-comparing-experiments-and-gating-on-regressions) for details.
 
 ### `env` -- List environment variables
 

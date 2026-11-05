@@ -31,10 +31,24 @@ export interface InsufficientPairsFinding {
   sampleSize: number;
 }
 
+export interface UntestableFinding {
+  datasetName: string;
+  evaluatorName: string;
+  sampleSize: number;
+}
+
+export type RegressionGateStatus = 'passed' | 'tripped' | 'inconclusive';
+
 export interface RegressionGateDecision {
+  /** `tripped` when a regression was found, `inconclusive` when no row could be checked at all. */
+  status: RegressionGateStatus;
   tripped: boolean;
+  /** Rows that were actually tested: in scope, directional, enough pairs and a usable p-value. */
+  checked: number;
   regressions: RegressionFinding[];
   insufficientPairs: InsufficientPairsFinding[];
+  /** Rows with enough pairs but a null or non-finite p-value, so no test result to judge. */
+  untestable: UntestableFinding[];
 }
 
 const toFinite = (value: number | null | undefined): number | null =>
@@ -47,6 +61,9 @@ const toFinite = (value: number | null | undefined): number | null =>
  * p-value (Holm-adjusted when a correction was applied) is below `significanceThreshold`.
  *
  * `evaluators` limits which evaluator names are considered; omitted or empty means all.
+ *
+ * "Nothing tripped" is not "passed": when no row could be checked (too few pairs, no usable
+ * p-value, or only neutral evaluators in scope) the status is `inconclusive`.
  */
 export const evaluateRegressionGate = ({
   results,
@@ -62,6 +79,8 @@ export const evaluateRegressionGate = ({
   const scope = evaluators && evaluators.length > 0 ? new Set(evaluators) : undefined;
   const regressions: RegressionFinding[] = [];
   const insufficientPairs: InsufficientPairsFinding[] = [];
+  const untestable: UntestableFinding[] = [];
+  let checked = 0;
 
   for (const result of results) {
     if (scope && !scope.has(result.evaluatorName)) continue;
@@ -78,8 +97,16 @@ export const evaluateRegressionGate = ({
 
     const pValue = toFinite(result.pValue);
     const effectivePValue = toFinite(getEffectivePValue(result));
-    if (pValue === null || effectivePValue === null) continue;
+    if (pValue === null || effectivePValue === null) {
+      untestable.push({
+        datasetName: result.datasetName,
+        evaluatorName: result.evaluatorName,
+        sampleSize: result.sampleSize,
+      });
+      continue;
+    }
 
+    checked += 1;
     const delta = result.meanTarget - result.meanBaseline;
     const isWorse = delta !== 0 && !isImproved(delta, result.direction);
     if (!isWorse || effectivePValue >= significanceThreshold) continue;
@@ -96,7 +123,14 @@ export const evaluateRegressionGate = ({
     });
   }
 
-  return { tripped: regressions.length > 0, regressions, insufficientPairs };
+  const tripped = regressions.length > 0;
+  const status: RegressionGateStatus = tripped
+    ? 'tripped'
+    : checked === 0
+    ? 'inconclusive'
+    : 'passed';
+
+  return { status, tripped, checked, regressions, insufficientPairs, untestable };
 };
 
 const formatP = (value: number): string => (value < 0.001 ? '<0.001' : value.toFixed(3));
@@ -131,8 +165,14 @@ export const formatRegressionGateReport = ({
         } pairs`
       );
     }
+  } else if (decision.status === 'inconclusive') {
+    lines.push(
+      'Regression gate inconclusive: no evaluator could be checked, so regressions can be neither confirmed nor ruled out.'
+    );
   } else {
-    lines.push('Regression gate passed: no evaluator got significantly worse.');
+    lines.push(
+      `Regression gate passed: no evaluator got significantly worse (${decision.checked} evaluator comparison(s) checked).`
+    );
   }
 
   if (decision.insufficientPairs.length > 0) {
@@ -142,6 +182,17 @@ export const formatRegressionGateReport = ({
     for (const finding of decision.insufficientPairs) {
       lines.push(
         `  - ${finding.datasetName} / ${finding.evaluatorName}: insufficient pairs (n=${finding.sampleSize})`
+      );
+    }
+  }
+
+  if (decision.untestable.length > 0) {
+    lines.push(
+      `Warning: ${decision.untestable.length} evaluator(s) have no usable p-value and were NOT checked for regressions:`
+    );
+    for (const finding of decision.untestable) {
+      lines.push(
+        `  - ${finding.datasetName} / ${finding.evaluatorName}: no usable p-value (n=${finding.sampleSize})`
       );
     }
   }

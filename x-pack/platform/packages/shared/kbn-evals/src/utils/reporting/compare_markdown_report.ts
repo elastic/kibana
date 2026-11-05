@@ -7,7 +7,7 @@
 
 import { isImproved, PARAMETRIC_UPGRADE_MIN_PAIRS } from '@kbn/evals-common';
 import type { Direction } from '@kbn/evals-common';
-import { getEffectivePValue } from './holm_correction';
+import { countHolmFamily, getEffectivePValue } from './holm_correction';
 import type { CorrectableComparisonResult } from './holm_correction';
 import { formatDiscordantPairs, getTestLabel } from './test_label';
 
@@ -128,7 +128,9 @@ export function formatMarkdownCompareReport({
 
   lines.push(
     multiplicityCorrected
-      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${sortedResults.length} comparisons; raw p-values shown alongside)`
+      ? `Significance threshold: Holm-Bonferroni adjusted p < ${significanceThreshold} (across ${countHolmFamily(
+          sortedResults
+        )} comparisons; raw p-values shown alongside)`
       : `Significance threshold: p < ${significanceThreshold}`
   );
   lines.push(

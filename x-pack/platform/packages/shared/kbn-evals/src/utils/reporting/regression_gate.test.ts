@@ -165,6 +165,92 @@ describe('evaluateRegressionGate', () => {
   });
 });
 
+describe('evaluateRegressionGate inconclusive outcomes', () => {
+  it('is inconclusive, not passed, when every row has too few pairs', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'A', sampleSize: 3 }),
+        makeResult({ evaluatorName: 'B', sampleSize: 9 }),
+      ],
+      minPairs: 10,
+    });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.tripped).toBe(false);
+    expect(decision.insufficientPairs).toHaveLength(2);
+
+    const report = formatRegressionGateReport({ decision, minPairs: 10 });
+    expect(report).not.toContain('passed');
+    expect(report).toContain('inconclusive');
+    expect(report).toContain('A: insufficient pairs (n=3)');
+  });
+
+  it('is inconclusive when every row with enough pairs has a null or NaN p-value', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'NullP', pValue: null }),
+        makeResult({ evaluatorName: 'NanP', pValue: NaN, sampleSize: 12 }),
+      ],
+    });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.untestable).toEqual([
+      { datasetName: 'Dataset One', evaluatorName: 'NullP', sampleSize: 20 },
+      { datasetName: 'Dataset One', evaluatorName: 'NanP', sampleSize: 12 },
+    ]);
+
+    const report = formatRegressionGateReport({ decision });
+    expect(report).not.toContain('passed');
+    expect(report).toContain('NullP: no usable p-value (n=20)');
+    expect(report).toContain('NanP: no usable p-value (n=12)');
+  });
+
+  it('is inconclusive when the scope matches only neutral evaluators', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'Neutral', direction: 'neutral' }),
+        makeResult({ evaluatorName: 'Correctness' }),
+      ],
+      evaluators: ['Neutral'],
+    });
+
+    expect(decision.status).toBe('inconclusive');
+    expect(decision.checked).toBe(0);
+    expect(decision.tripped).toBe(false);
+    expect(formatRegressionGateReport({ decision })).not.toContain('passed');
+  });
+
+  it('counts checked rows and reports passed only when something was actually tested', () => {
+    const decision = evaluateRegressionGate({
+      results: [
+        makeResult({ evaluatorName: 'Fine', pValue: 0.5 }),
+        makeResult({ evaluatorName: 'Skipped', sampleSize: 2 }),
+        makeResult({ evaluatorName: 'NoP', pValue: null }),
+      ],
+    });
+
+    expect(decision.status).toBe('passed');
+    expect(decision.checked).toBe(1);
+    const report = formatRegressionGateReport({ decision });
+    expect(report).toContain('Regression gate passed');
+    expect(report).toContain('1 evaluator comparison(s) checked');
+    expect(report).toContain('NoP: no usable p-value');
+    expect(report).toContain('Skipped: insufficient pairs');
+  });
+
+  it('reports a tripped status alongside untestable rows', () => {
+    const decision = evaluateRegressionGate({
+      results: [makeResult(), makeResult({ evaluatorName: 'NoP', pValue: null })],
+    });
+
+    expect(decision.status).toBe('tripped');
+    expect(decision.checked).toBe(1);
+    expect(decision.untestable).toHaveLength(1);
+  });
+});
+
 describe('formatRegressionGateReport', () => {
   it('lists each regression with delta, p-values, test and pair count', () => {
     const decision = evaluateRegressionGate({
@@ -180,7 +266,9 @@ describe('formatRegressionGateReport', () => {
   });
 
   it('warns about unchecked evaluators instead of claiming a clean pass for them', () => {
-    const decision = evaluateRegressionGate({ results: [makeResult({ sampleSize: 3 })] });
+    const decision = evaluateRegressionGate({
+      results: [makeResult({ sampleSize: 3 }), makeResult({ evaluatorName: 'Fine', pValue: 0.5 })],
+    });
 
     const report = formatRegressionGateReport({ decision, minPairs: 10 });
 

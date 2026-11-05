@@ -6,7 +6,12 @@
  */
 
 import type { ComparisonResult } from '@kbn/evals-common';
-import { applyHolmCorrection, getEffectivePValue, holmBonferroniAdjust } from './holm_correction';
+import {
+  applyHolmCorrection,
+  countHolmFamily,
+  getEffectivePValue,
+  holmBonferroniAdjust,
+} from './holm_correction';
 
 const makeResult = (overrides: Partial<ComparisonResult> = {}): ComparisonResult => ({
   datasetId: 'ds-1',
@@ -35,6 +40,21 @@ describe('holmBonferroniAdjust', () => {
     // sorted: 0.005*5=0.025, 0.01*4=0.04, 0.03*3=0.09, 0.04*2=0.08 -> 0.09, 0.5*1=0.5
     const expected = [0.04, 0.09, 0.09, 0.025, 0.5];
     adjusted.forEach((value, i) => expect(value).toBeCloseTo(expected[i], 10));
+  });
+
+  it('leaves non-finite inputs out of the family and returns NaN at their positions', () => {
+    const adjusted = holmBonferroniAdjust([0.01, NaN, 0.04, Infinity, -Infinity]);
+
+    // family is {0.01, 0.04}: 0.01*2 = 0.02, 0.04*1 = 0.04
+    expect(adjusted[0]).toBeCloseTo(0.02, 10);
+    expect(adjusted[1]).toBeNaN();
+    expect(adjusted[2]).toBeCloseTo(0.04, 10);
+    expect(adjusted[3]).toBeNaN();
+    expect(adjusted[4]).toBeNaN();
+  });
+
+  it('returns only NaN when no input is finite', () => {
+    expect(holmBonferroniAdjust([NaN, Infinity])).toEqual([NaN, NaN]);
   });
 
   it('caps adjusted p-values at 1', () => {
@@ -91,5 +111,18 @@ describe('getEffectivePValue', () => {
       getEffectivePValue({ ...makeResult({ pValue: 0.01 }), adjustedPValue: null })
     ).toBeNull();
     expect(getEffectivePValue(makeResult({ pValue: 0.01 }))).toBe(0.01);
+  });
+});
+
+describe('countHolmFamily', () => {
+  it('counts only rows with a finite p-value', () => {
+    expect(
+      countHolmFamily([
+        makeResult({ pValue: 0.01 }),
+        makeResult({ pValue: null }),
+        makeResult({ pValue: NaN }),
+        makeResult({ pValue: 0.5 }),
+      ])
+    ).toBe(2);
   });
 });
