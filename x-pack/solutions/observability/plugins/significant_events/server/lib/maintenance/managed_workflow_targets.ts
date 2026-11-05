@@ -6,6 +6,7 @@
  */
 
 import { DEFAULT_SPACE_ID, type SpaceId } from '@kbn/core-spaces-common';
+import type { ManagedWorkflowId } from '@kbn/workflows/managed';
 import {
   NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID,
@@ -84,6 +85,19 @@ export const ALL_INSTALLABLE_WORKFLOW_IDS = [
 export const isInstalledWorkflowDocumentId = (id: string): boolean =>
   id === LEGACY_KI_SYNC_WORKFLOW_ID ||
   ALL_INSTALLABLE_WORKFLOW_IDS.some((baseId) => id === baseId || id.startsWith(`${baseId}-`));
+
+/**
+ * The managed workflow type behind a per-space target document id, or `undefined` for a target that
+ * is not an installed per-space workflow (such as the legacy sync document).
+ */
+export const getManagedWorkflowTypeId = ({
+  id,
+  spaceId,
+}: {
+  id: string;
+  spaceId: string;
+}): ManagedWorkflowId | undefined =>
+  ALL_INSTALLABLE_WORKFLOW_IDS.find((baseId) => id === `${baseId}-${spaceId}`);
 
 export interface MaintenanceWorkflowTarget {
   /** Workflow saved-object document id (matches the persisted `disabledWorkflows[].id`). */

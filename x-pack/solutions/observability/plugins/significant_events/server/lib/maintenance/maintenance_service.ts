@@ -52,7 +52,13 @@ import {
   type LoadedMaintenanceState,
   type MaintenanceRuleTarget,
 } from './state_store';
-import { reEnableWorkflow, sweepWorkflows, mergeTargets, targetKey } from './workflows';
+import {
+  createDisableManagedWorkflow,
+  reEnableWorkflow,
+  sweepWorkflows,
+  mergeTargets,
+  targetKey,
+} from './workflows';
 
 /**
  * `mode` is how the snapshot is treated, not where the pause came from: `pause` records a
@@ -355,7 +361,13 @@ export const createSignificantEventsMaintenanceService = ({
   }> => {
     const failures: SignificantEventsMaintenanceFailure[] = [];
     const mgmt = server.workflowsManagement?.management;
-    const newlyDisabled = await sweepWorkflows({ mgmt, spaceIds: [spaceId], request, failures });
+    const newlyDisabled = await sweepWorkflows({
+      mgmt,
+      spaceIds: [spaceId],
+      request,
+      failures,
+      disableManaged: createDisableManagedWorkflow(server),
+    });
 
     const newlyDisabledRules = (
       await disableBackedRules(requestForSpace(request, spaceId), access, spaceId, failures)
