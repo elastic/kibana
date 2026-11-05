@@ -221,6 +221,18 @@ describe('AutomationTriggerSection', () => {
     expect(screen.queryByTestId('automationAlertSeverity')).not.toBeInTheDocument();
   });
 
+  it('omits severity details when a saved automation has no severity filter', () => {
+    render(<TriggerSection initialTrigger={legacyPatternTrigger} readOnly />);
+
+    expect(screen.queryByText('with severity')).not.toBeInTheDocument();
+    expect(screen.queryByText('Any severity')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        'Severity is checked when the alert becomes active. Later severity changes do not trigger an investigation.'
+      )
+    ).not.toBeInTheDocument();
+  });
+
   it('replaces the legacy name pattern when rules are picked', async () => {
     render(<TriggerSection initialTrigger={legacyPatternTrigger} />);
     fireEvent.click(screen.getByTestId('automationRulePicker'));

@@ -27,6 +27,7 @@ export const AlertTriggerEditor = ({
 }) => {
   const { data: catalog = [] } = useRuleCatalog();
   const { ruleNamePattern, ruleNames, ruleTags } = trigger;
+  const showSeverity = !readOnly || trigger.severities.length > 0;
   const rulesLabel =
     ruleNamePattern.trim() && ruleNames.length === 0 && ruleTags.length === 0
       ? ruleNamePattern.trim()
@@ -53,7 +54,7 @@ export const AlertTriggerEditor = ({
         )}
         <EuiText size="s">{triggerLabels.changesTo}</EuiText>
         <EuiBadge>{triggerLabels.active}</EuiBadge>
-        {(!readOnly || trigger.severities.length > 0) && (
+        {showSeverity && (
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiText size="s">{alertSeverityLabels.withSeverity}</EuiText>
@@ -68,10 +69,14 @@ export const AlertTriggerEditor = ({
           </EuiFlexGroup>
         )}
       </Sentence>
-      <EuiSpacer size="s" />
-      <EuiText size="xs" color="subdued">
-        {alertSeverityLabels.help}
-      </EuiText>
+      {showSeverity && (
+        <>
+          <EuiSpacer size="s" />
+          <EuiText size="xs" color="subdued">
+            {alertSeverityLabels.help}
+          </EuiText>
+        </>
+      )}
     </>
   );
 };
