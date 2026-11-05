@@ -8,7 +8,7 @@
 export { type ComponentsNode, componentsPack, componentsPrimitives } from './src/pack';
 export type { ComponentsRenderContext } from './src/lib';
 export { CODE_COPY_ENHANCEMENT } from './src/primitives/code';
-export { TABLE_SORT_ENHANCEMENT } from './src/primitives/table';
+export { MAX_TABLE_CELLS, MAX_TABLE_ROWS, TABLE_SORT_ENHANCEMENT } from './src/primitives/table';
 export {
   type ActionsNode,
   type CodeNode,

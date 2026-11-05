@@ -17,7 +17,8 @@ import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { noRowsNote, tableView, textTable } from './table_model';
 
-const MAX_ROWS = 1000;
+/** The most rows a table takes, so a full one stays within the SDK's input budget, like `MAX_TABLE_CELLS`. */
+export const MAX_TABLE_ROWS = 1000;
 
 /**
  * Rows times columns. The SDK refuses a composition of more than 20,000 values (`MAX_INPUT_VALUES`),
@@ -87,9 +88,9 @@ const tableSchema = z
       'row',
       z
         .array(z.array(cellSchema).max(SLACK_LIMITS.tableColumns))
-        .max(MAX_ROWS)
+        .max(MAX_TABLE_ROWS)
         .describe(
-          `The rows, one cell per column: plain text, a number, or null when empty. At most ${MAX_ROWS} rows and ${MAX_TABLE_CELLS} cells.`
+          `The rows, one cell per column: plain text, a number, or null when empty. At most ${MAX_TABLE_ROWS} rows and ${MAX_TABLE_CELLS} cells.`
         ),
       { toItem: rowFromProps }
     ),
@@ -105,7 +106,7 @@ const tableSchema = z
       .number()
       .int()
       .min(1)
-      .max(MAX_ROWS)
+      .max(MAX_TABLE_ROWS)
       .optional()
       .describe('The most rows to show. A note says how many were left out.'),
     totalRows: z
