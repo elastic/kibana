@@ -133,19 +133,18 @@ export const ImportJsonEditor = ({
     <EuiForm fullWidth>
       <EuiFormRow
         fullWidth
-        label={label}
+        label={`${label}` + (labelAppend ? ` (${labelAppend})` : '')}
         labelAppend={
-          <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
+          <EuiFlexGroup
+            gutterSize="s"
+            alignItems="center"
+            responsive={false}
+            // Keeps the row as tall as the Clear button, so the editor doesn't move when it appears
+            css={{ minHeight: euiTheme.size.l }}
+          >
             {isValidating && (
               <EuiFlexItem grow={false}>
                 <EuiLoadingSpinner size="s" />
-              </EuiFlexItem>
-            )}
-            {labelAppend && (
-              <EuiFlexItem grow={false}>
-                <EuiText size="xs" color="subdued">
-                  {labelAppend}
-                </EuiText>
               </EuiFlexItem>
             )}
             {!isEmpty && (
