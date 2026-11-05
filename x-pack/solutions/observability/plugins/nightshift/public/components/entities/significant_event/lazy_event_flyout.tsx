@@ -39,16 +39,20 @@ export const createLazyEventFlyout = ({
   pluginsStart,
   focusedSignificantEventService,
   ensureEbtEvents,
+  canOpen,
 }: {
   coreStart: CoreStart;
   pluginsStart: NightshiftStartDependencies;
   focusedSignificantEventService: FocusedSignificantEventService;
   /** Registers Nightshift's analytics event types; the app does it on mount, this host may not. */
   ensureEbtEvents: () => Promise<void>;
+  /** Whether Significant Events is available to the current user. */
+  canOpen: () => boolean;
 }): AlertFlyoutRegistration => {
-  const EventFlyoutForAlert = ({ snapshot, onClose }: AlertFlyoutProps) => (
+  const EventFlyoutForAlert = ({ snapshot, detailsHref, onClose }: AlertFlyoutProps) => (
     <LazyEventFlyoutHost
       eventId={getEventId(snapshot)}
+      detailsHref={detailsHref}
       onClose={onClose}
       coreStart={coreStart}
       pluginsStart={pluginsStart}
@@ -58,7 +62,7 @@ export const createLazyEventFlyout = ({
   );
   return {
     Component: EventFlyoutForAlert,
-    canOpen: (snapshot) => getEventId(snapshot) !== undefined,
+    canOpen: (snapshot) => canOpen() && getEventId(snapshot) !== undefined,
   };
 };
 

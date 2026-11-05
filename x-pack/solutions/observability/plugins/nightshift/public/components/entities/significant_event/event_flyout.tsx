@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import {
@@ -154,6 +154,7 @@ export function EventFlyout({
   const [selectedDetectionId, setSelectedDetectionId] = useState<string>();
   const [selectedTabId, setSelectedTabId] = useState(OVERVIEW_TAB_ID);
   const [isMarkInactiveModalOpen, setIsMarkInactiveModalOpen] = useState(false);
+  const hasStagedOverlayEvent = useRef(false);
   const lifecycleQuery = useFetchEventLifecycle(event.event_id);
   const { triggerInvestigation, triggeringEventId } = useTriggerEventInvestigation({
     onTriggered: () => {
@@ -192,12 +193,15 @@ export function EventFlyout({
 
   useEffect(() => {
     // The focused event belongs to Nightshift's own chat; an overlay over another page, such as an
-    // investigation, must not take it over or clear it on close.
-    if (type === 'overlay') {
-      return;
+    // investigation, must not take it over unless its New chat action explicitly stages the event.
+    if (type !== 'overlay') {
+      focusedSignificantEventService.setFocusedEvent(event);
     }
-    focusedSignificantEventService.setFocusedEvent(event);
-    return () => focusedSignificantEventService.clearFocusedEvent(event.event_id);
+    return () => {
+      if (type !== 'overlay' || hasStagedOverlayEvent.current) {
+        focusedSignificantEventService.clearFocusedEvent(event.event_id);
+      }
+    };
   }, [event, focusedSignificantEventService, type]);
 
   useEffect(() => {
@@ -252,7 +256,8 @@ export function EventFlyout({
     agentBuilder?.openChat(buildNewSignificantEventChatOptions(event));
     // An open sidebar replaces its draft on openChat without a new conversation id, so re-stage the event.
     focusedSignificantEventService.setFocusedEvent(event);
-  }, [agentBuilder, event, focusedSignificantEventService]);
+    hasStagedOverlayEvent.current = type === 'overlay';
+  }, [agentBuilder, event, focusedSignificantEventService, type]);
   const openInvestigationChat = useCallback(() => {
     if (conversationId) {
       agentBuilder?.openChat(buildInvestigationConversationChatOptions(conversationId));

@@ -65,25 +65,35 @@ jest.mock('@kbn/alerting-v2-episodes-ui/components/details/use_alert_details_fly
 const useFetch = useFetchEventById as jest.MockedFunction<typeof useFetchEventById>;
 const result = (value: object) => value as ReturnType<typeof useFetchEventById>;
 
-const registration = (ensureEbtEvents: () => Promise<void> = () => Promise.resolve()) =>
+const registration = (
+  ensureEbtEvents: () => Promise<void> = () => Promise.resolve(),
+  canOpen: () => boolean = () => true
+) =>
   createLazyEventFlyout({
     coreStart: {} as CoreStart,
     pluginsStart: {} as NightshiftStartDependencies,
     focusedSignificantEventService: {} as FocusedSignificantEventService,
     ensureEbtEvents,
+    canOpen,
   });
 
 const renderFlyout = (
   data: Record<string, unknown> | undefined,
   onClose = jest.fn(),
-  ensureEbtEvents?: () => Promise<void>
+  ensureEbtEvents?: () => Promise<void>,
+  detailsHref?: string
 ) => {
   const { Component } = registration(ensureEbtEvents);
   render(
     <EuiProvider>
       <I18nProvider>
         <React.Suspense fallback={null}>
-          <Component alertId="episode-1" snapshot={data ? { data } : undefined} onClose={onClose} />
+          <Component
+            alertId="episode-1"
+            snapshot={data ? { data } : undefined}
+            detailsHref={detailsHref}
+            onClose={onClose}
+          />
         </React.Suspense>
       </I18nProvider>
     </EuiProvider>
@@ -116,6 +126,12 @@ describe('createLazyEventFlyout', () => {
     expect(canOpen?.({ data: { event_id: 'event-1' } })).toBe(true);
     expect(canOpen?.({ data: {} })).toBe(false);
     expect(canOpen?.(undefined)).toBe(false);
+  });
+
+  it('falls back to the alert flyout when Significant Events is unavailable', () => {
+    const { canOpen } = registration(undefined, () => false);
+
+    expect(canOpen?.({ data: { event_id: 'event-1' } })).toBe(false);
   });
 
   it('shows the event as an overlay at the alert flyout width', async () => {
@@ -157,6 +173,21 @@ describe('createLazyEventFlyout', () => {
 
     fireEvent.click(screen.getByTestId('flyoutClose'));
     expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('links to the alert when the event cannot be loaded', async () => {
+    useFetch.mockReturnValue(result({ data: null, isError: false }));
+    renderFlyout(
+      { event_id: 'event-1' },
+      jest.fn(),
+      undefined,
+      '/app/observability/alerts/episode-1'
+    );
+
+    expect(await screen.findByRole('link', { name: 'View alert' })).toHaveAttribute(
+      'href',
+      '/app/observability/alerts/episode-1'
+    );
   });
 
   it('keeps the loading state until the analytics event types are registered', async () => {

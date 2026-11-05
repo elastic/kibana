@@ -53,7 +53,14 @@ export const SubjectDetailsFlyout = ({
   // A solution that registered a flyout for this source owns it and brings its own providers.
   const RegisteredFlyout = services.getAlertFlyout?.(source, snapshot);
   if (RegisteredFlyout) {
-    return <RegisteredFlyout alertId={alertId} snapshot={snapshot} onClose={onClose} />;
+    return (
+      <RegisteredFlyout
+        alertId={alertId}
+        snapshot={snapshot}
+        detailsHref={detailsHref}
+        onClose={onClose}
+      />
+    );
   }
 
   if (isUniversalAlertSnapshot({ source })) {

@@ -15,6 +15,7 @@ import {
 } from '@kbn/core/public';
 import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
+import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { BehaviorSubject, type Subscription } from 'rxjs';
 import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
@@ -40,6 +41,7 @@ export class NightshiftPlugin
   private readonly focusedSignificantEventService = new FocusedSignificantEventService();
   private servicesSubscription?: Subscription;
   private stopped = false;
+  private isSignificantEventsAvailable = false;
   private ebtEventsRegistration?: Promise<void>;
   private ensureEbtEvents: () => Promise<void> = () => Promise.resolve();
 
@@ -148,6 +150,7 @@ export class NightshiftPlugin
 
   start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
     this.stopped = false;
+    this.isSignificantEventsAvailable = false;
     void import('./start_services')
       .then(({ startNightshiftServices }) => {
         if (this.stopped) {
@@ -159,6 +162,9 @@ export class NightshiftPlugin
           context: this.context,
           chrome: coreStart.chrome,
           focusedSignificantEventService: this.focusedSignificantEventService,
+          onAvailabilityChange: (isAvailable) => {
+            this.isSignificantEventsAvailable = isAvailable;
+          },
         });
       })
       .catch((error) => {
@@ -189,6 +195,9 @@ export class NightshiftPlugin
             pluginsStart,
             focusedSignificantEventService: this.focusedSignificantEventService,
             ensureEbtEvents: this.ensureEbtEvents,
+            canOpen: () =>
+              this.isSignificantEventsAvailable &&
+              getNightshiftCapabilities(coreStart.application.capabilities.nightshift).canShow,
           });
         }
       })

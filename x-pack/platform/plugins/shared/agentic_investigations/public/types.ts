@@ -79,6 +79,8 @@ export interface AlertFlyoutProps {
   alertId: string;
   /** The alert as it was when the investigation started; its `data` is the producer's own. */
   snapshot?: AlertSubjectSnapshot;
+  /** The alert's details page, for a registered flyout fallback. */
+  detailsHref?: string;
   onClose: () => void;
 }
 
