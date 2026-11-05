@@ -482,9 +482,13 @@ const AppGrid = ({
   const measureFillHeight = useCallback(
     ({ currentTarget }: React.SyntheticEvent<HTMLDivElement>) => {
       if (!scrollContainer) return;
-      const { bottom } = scrollContainer.getBoundingClientRect();
+      // Stop short of the scroll area's edge: overflowing it would show a scrollbar mid-drag,
+      // narrowing every column until the drag ends.
+      const { top } = scrollContainer.getBoundingClientRect();
+      const { clientTop, clientHeight } = scrollContainer;
       const paddingBottom = parseFloat(getComputedStyle(scrollContainer).paddingBottom) || 0;
-      const fillHeight = bottom - paddingBottom - currentTarget.getBoundingClientRect().top;
+      const contentBottom = top + clientTop + clientHeight - paddingBottom;
+      const fillHeight = Math.floor(contentBottom - currentTarget.getBoundingClientRect().top);
       currentTarget.style.setProperty(GRID_FILL_HEIGHT_VAR, `${Math.max(0, fillHeight)}px`);
     },
     [scrollContainer]
