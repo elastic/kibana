@@ -120,7 +120,7 @@ Array [
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | WHERE user.name IN (\\"alice\\", \\"bob\\") OR host.id IN (\\"h-1\\") OR user.email IN (\\"bob@corp.com\\") OR host.name IN (\\"web-1\\", \\"web-2\\") OR service.name IN (\\"payments\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
@@ -480,7 +480,7 @@ exports[`entities grid query builders sort by alert_count builds the sort query 
 
 exports[`entities grid query builders sort by anomaly_count builds the sort query 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -564,7 +564,7 @@ FROM entities-latest-default
 
 exports[`entities grid query builders sort by anomaly_count builds the sort query with entity filters and no search 1`] = `
 "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -1749,7 +1749,7 @@ FROM .alerts-security.alerts-default
 exports[`entities grid query builders sort page by anomaly_count with value rows runs the queries of the first page ascending 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -1835,7 +1835,7 @@ TRUE, _euid_branch_2_formula, NULL))
 exports[`entities grid query builders sort page by anomaly_count with value rows runs the queries of the first page descending 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -1934,7 +1934,7 @@ Array [
 | EVAL entity.risk.calculated_score_norm = COALESCE(entity.relationships.resolution.risk.calculated_score_norm, entity.risk.calculated_score_norm)
 | KEEP entity.id, entity.name, entity.EngineMetadata.Type, entity.risk.calculated_score_norm, entity.relationships.resolution.resolved_to, asset.criticality, entity.source, entity.attributes.watchlists, entity.lifecycle.first_seen, \`@timestamp\`, user.name, host.id, user.email, user.id, user.domain, event.module, data_stream.dataset, host.name, host.hostname, service.name, entity.namespace",
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
@@ -2005,7 +2005,7 @@ TRUE, _euid_branch_2_formula, NULL))
 exports[`entities grid query builders sort page by anomaly_count with value rows runs the queries of the first page with entity filters 1`] = `
 Array [
   "SET unmapped_fields=\\"nullify\\";
-FROM .ml-anomalies-shared*
+FROM .ml-anomalies-*
 | WHERE result_type == \\"record\\" AND is_interim == false AND record_score >= 1 AND \`@timestamp\` >= NOW() - 7 days AND job_id IN (\\"security_auth_rare_user\\")
 | EVAL _src_entity_source0 = MV_FIRST(TO_STRING(event.module)),
  _src_entity_source1 = MV_FIRST(TO_STRING(event.dataset)),
