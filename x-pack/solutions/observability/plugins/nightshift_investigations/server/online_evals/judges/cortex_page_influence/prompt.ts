@@ -20,6 +20,7 @@ export const MAX_JUDGE_INPUT_CHARS = 90_000;
 
 export const cortexPageInfluenceOutputSchema = lazySchema(() =>
   z.object({
+    pages_used: z.array(z.string().max(512)).max(1_000),
     influence: gradeSchema,
     influence_reasoning: z.string().max(MAX_JUDGE_TEXT_LENGTH),
     missed_influence: gradeSchema,
@@ -60,6 +61,12 @@ export const cortexPageInfluencePrompt = createPrompt({
         schema: {
           type: 'object',
           properties: {
+            pages_used: {
+              type: 'array',
+              items: { type: 'string' },
+              description:
+                'Ids of the pages whose content the answer relies on, named or paraphrased. Use only ids from the provided pages.',
+            },
             influence: {
               type: 'number',
               description: 'Integer 0-3: how much the pages actually shaped the answer.',
@@ -81,6 +88,7 @@ export const cortexPageInfluencePrompt = createPrompt({
             },
           },
           required: [
+            'pages_used',
             'influence',
             'influence_reasoning',
             'missed_influence',

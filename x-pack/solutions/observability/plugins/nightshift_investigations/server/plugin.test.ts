@@ -135,7 +135,6 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift_conclusion_quality@1.0.0',
         'nightshift_alert_outcome_rca_accuracy@1.0.0',
         'nightshift_cortex_pages_read@1.0.0',
-        'nightshift_cortex_pages_referenced@1.0.0',
         'nightshift_cortex_page_influence@1.0.0',
       ]
     );

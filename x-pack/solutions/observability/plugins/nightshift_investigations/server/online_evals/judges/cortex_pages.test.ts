@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { EvidenceRound } from '@kbn/evals-plugin/server';
 import type { BoundInferenceClient } from '@kbn/inference-common';
 import { cortexPageInfluenceJudge } from './cortex_page_influence';
-import { cortexPagesReadJudge, cortexPagesReferencedJudge } from './cortex_pages_usage';
+import { cortexPagesReadJudge } from './cortex_pages_read';
 
 const view = (path: string, text: string, extra: object = {}) => ({
   tool_id: 'nightshift_sandbox_view_file',
@@ -58,46 +58,16 @@ describe('cortex page judges', () => {
     });
   });
 
-  describe('nightshift_cortex_pages_referenced', () => {
-    it('counts pages whose id or slug the answer names', async () => {
-      const { scores } = await cortexPagesReferencedJudge.evaluate({
-        round: readTwoPages('Per the checkout page, the pool exhaustion runbook was not followed.'),
-        log,
-      });
-
-      expect(scores[0]).toEqual(
-        expect.objectContaining({ name: 'cortex_pages_referenced', score: 2, label: '2/2 pages' })
-      );
-    });
-
-    it('does not count pages the answer does not name', async () => {
-      const { scores } = await cortexPagesReferencedJudge.evaluate({
-        round: readTwoPages('The cache was cold after cortex_service_checkout restarted.'),
-        log,
-      });
-
-      expect(scores[0]).toEqual(expect.objectContaining({ score: 1, label: '1/2 pages' }));
-    });
-
-    it('is not applicable when nothing was read', async () => {
-      const result = await cortexPagesReferencedJudge.evaluate({ round: round('a'), log });
-
-      expect(result).toEqual({
-        scores: [],
-        notApplicable: { reason: 'no Cortex pages were read' },
-      });
-    });
-  });
-
   describe('nightshift_cortex_page_influence', () => {
     const judgeOutput = {
+      pages_used: ['cortex_service_checkout', 'cortex_service_checkout', 'cortex_service_made_up'],
       influence: 2,
       influence_reasoning: 'The dependency note framed the search.',
       missed_influence: 1,
       missed_influence_reasoning: 'The pool-size advice went unused.',
     };
 
-    it('sends the page contents and grades influence and missed influence', async () => {
+    it('sends the page contents and counts the pages the model says were used, and grades influence', async () => {
       const prompt = jest.fn().mockResolvedValue({
         toolCalls: [{ function: { arguments: judgeOutput } }],
       });
@@ -114,6 +84,13 @@ describe('cortex page judges', () => {
       expect(input.pages).toContain('## cortex_runbook_pool-exhaustion\nRaise the pool size.');
       expect(input.answer).toBe('Payments was slow.');
       expect(scores).toEqual([
+        {
+          name: 'cortex_pages_referenced',
+          score: 1,
+          label: '1/2 pages',
+          explanation: 'cortex_service_checkout',
+          metadata: { page_ids: ['cortex_service_checkout'], pages_read: 2 },
+        },
         {
           name: 'cortex_page_influence',
           score: 0.667,

@@ -2,7 +2,9 @@ You are evaluating how organisational knowledge pages influenced an AI alert-inv
 
 Cortex pages are curated notes about the entities in an environment (services, teams, dependencies, known failure modes). You are given the investigation task, the full text of the Cortex pages the agent opened, and the agent's final answer. You do not see the rest of the investigation.
 
-Grade two things, each as an integer 0-3.
+First list pages_used: the ids of the pages whose content the answer relies on. A page is used when a fact, relationship, threshold or known failure mode from it appears in the answer, whether the answer names the page or paraphrases it. Do not list a page the answer merely shares a topic with. Use only the ids given above; list none if no page was used.
+
+Then grade two things, each as an integer 0-3.
 
 influence: how much the pages actually shaped the answer. Look for facts, relationships, thresholds or known failure modes from the pages that appear in the answer, whether named or paraphrased.
   0 = Nothing in the answer traces back to the pages.

@@ -22,7 +22,7 @@ export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
   kind: 'llm',
   direction: 'maximize',
   description:
-    'Reference-free: how the Cortex pages an investigation read shaped its final answer, and how much more they could have.',
+    'Reference-free: which of the Cortex pages an investigation read its final answer used, how they shaped it, and how much more they could have.',
   evidenceSchema: roundEvidenceSchema,
   async evaluate({ round, inferenceClient }) {
     if (!inferenceClient) {
@@ -53,8 +53,19 @@ export const cortexPageInfluenceJudge: RegisteredEvaluatorDefinition = {
       outputSchema: cortexPageInfluenceOutputSchema,
     });
 
+    // The judge may echo ids it was not given; count only pages that were read.
+    const readIds = new Set(pages.map(({ id }) => id));
+    const usedIds = [...new Set(output.pages_used)].filter((id) => readIds.has(id));
+
     return {
       scores: [
+        {
+          name: 'cortex_pages_referenced',
+          score: usedIds.length,
+          label: `${usedIds.length}/${pages.length} pages`,
+          explanation: capExplanation(usedIds.join(', ') || 'none'),
+          metadata: { page_ids: usedIds, pages_read: pages.length },
+        },
         {
           name: 'cortex_page_influence',
           score: gradeToScore(output.influence),

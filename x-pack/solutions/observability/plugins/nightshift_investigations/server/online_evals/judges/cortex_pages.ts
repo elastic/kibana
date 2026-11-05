@@ -68,18 +68,3 @@ export const collectCortexPageReads = (round: EvidenceRound): CortexPageRead[] =
   }
   return [...pages.values()];
 };
-
-/**
- * Whether the answer names the page: its id, or its slug written with hyphens, underscores or
- * spaces. A page the answer only paraphrases, without naming, does not count.
- */
-export const isPageReferenced = (page: CortexPageRead, answer: string): boolean => {
-  const haystack = answer.toLowerCase();
-  if (haystack.includes(page.id.toLowerCase())) {
-    return true;
-  }
-  const slug = page.slug.toLowerCase();
-  return [slug, slug.replace(/-/g, '_'), slug.replace(/[-_]/g, ' ')].some(
-    (variant) => variant.length > 0 && haystack.includes(variant)
-  );
-};
