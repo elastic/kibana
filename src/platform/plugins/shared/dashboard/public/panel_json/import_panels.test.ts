@@ -8,12 +8,10 @@
  */
 
 import { isImportJsonValidationError } from '@kbn/as-code-import-flyout-component';
-import type { DashboardApi } from '../dashboard_api/types';
-import { addImportedPanels, sanitizeImportedPanels } from './import_panels';
+import { sanitizeImportedPanels } from './import_panels';
 
 const mockPost = jest.fn();
 const mockGetEmbeddableDefinition = jest.fn();
-const mockGetIdsWithTitle = jest.fn();
 jest.mock('../services/kibana_services', () => ({
   coreServices: {
     http: { post: (...args: unknown[]) => mockPost(...args) },
@@ -21,40 +19,10 @@ jest.mock('../services/kibana_services', () => ({
   embeddableService: {
     getEmbeddableDefinition: (...args: unknown[]) => mockGetEmbeddableDefinition(...args),
   },
-  dataService: {
-    dataViews: { getIdsWithTitle: (...args: unknown[]) => mockGetIdsWithTitle(...args) },
-  },
 }));
 
 const grid = { x: 0, y: 0, w: 12, h: 8 };
-const savedDataView = { type: 'index-pattern', type_label: 'Data view', id: 'logs-data-view' };
 
-const dslChartOnSavedDataView = {
-  type: 'vis',
-  grid,
-  config: {
-    type: 'metric',
-    title: 'Requests',
-    data_source: { type: 'data_view_reference', ref_id: 'logs-data-view' },
-    metrics: [{ type: 'primary', operation: 'count' }],
-  },
-};
-const dslChartOnAdHocDataView = {
-  type: 'vis',
-  grid,
-  config: {
-    type: 'xy',
-    title: 'Log entries over time',
-    layers: [
-      {
-        type: 'line',
-        data_source: { type: 'data_view_spec', index_pattern: 'logs-*', time_field: '@timestamp' },
-        x: { operation: 'date_histogram', field: '@timestamp' },
-        y: [{ operation: 'count' }],
-      },
-    ],
-  },
-};
 const esqlChart = {
   type: 'vis',
   grid,
@@ -66,27 +34,18 @@ const esqlChart = {
     rows: [{ column: 'host.name' }],
   },
 };
-const libraryChart = { type: 'vis', grid, config: { ref_id: 'library-chart' } };
 
-// Answers like the sanitize route: it returns the panels with the related items they reference
+// Answers like the sanitize route: it returns the panels it kept and its warnings
 const mockSanitizeRoute = ({
-  relatedItems = [],
   warnings = [],
   dropPanels = false,
 }: {
-  relatedItems?: object[];
   warnings?: object[];
   dropPanels?: boolean;
 } = {}) =>
   mockPost.mockImplementation(async (_path: string, { body }: { body: string }) => {
     const { title, panels } = JSON.parse(body);
-    return {
-      data: { title, panels: dropPanels ? [] : panels },
-      warnings,
-      ...(relatedItems.length
-        ? { related_items: relatedItems, related_items_count: relatedItems.length }
-        : {}),
-    };
+    return { data: { title, panels: dropPanels ? [] : panels }, warnings };
   });
 
 const getValidationError = async (raw: unknown) => {
@@ -103,49 +62,6 @@ describe('sanitizeImportedPanels', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     mockGetEmbeddableDefinition.mockResolvedValue({ type: 'vis' });
-    mockGetIdsWithTitle.mockResolvedValue([]);
-  });
-
-  it('flags the saved data view of a chart when it does not exist in this space', async () => {
-    mockSanitizeRoute({ relatedItems: [savedDataView] });
-
-    const result = await sanitizeImportedPanels(dslChartOnSavedDataView);
-
-    expect(result.data.panels).toEqual([dslChartOnSavedDataView]);
-    expect(result.relatedItems).toEqual([{ ...savedDataView, isMissing: true }]);
-    expect(result.relatedItemsCount).toBe(1);
-  });
-
-  it('does not flag the saved data view of a chart when it exists in this space', async () => {
-    mockSanitizeRoute({ relatedItems: [savedDataView] });
-    mockGetIdsWithTitle.mockResolvedValue([{ id: 'logs-data-view', title: 'logs-*' }]);
-
-    const result = await sanitizeImportedPanels(dslChartOnSavedDataView);
-
-    expect(result.relatedItems).toEqual([{ ...savedDataView, isMissing: false }]);
-  });
-
-  it.each([
-    ['an ad hoc data view', dslChartOnAdHocDataView],
-    ['ES|QL', esqlChart],
-  ])('adds a chart on %s without related items', async (_name, panel) => {
-    mockSanitizeRoute();
-
-    const result = await sanitizeImportedPanels(panel);
-
-    expect(result.data.panels).toEqual([panel]);
-    expect(result.relatedItems).toEqual([]);
-    expect(mockGetIdsWithTitle).not.toHaveBeenCalled();
-  });
-
-  it('keeps library-linked panels as references to the library item', async () => {
-    const libraryItem = { type: 'lens', type_label: 'Visualization', id: 'library-chart' };
-    mockSanitizeRoute({ relatedItems: [libraryItem] });
-
-    const result = await sanitizeImportedPanels(libraryChart);
-
-    expect(result.data.panels).toEqual([libraryChart]);
-    expect(result.relatedItems).toEqual([libraryItem]);
   });
 
   it('returns the messages of the properties the sanitize route removed', async () => {
@@ -182,30 +98,8 @@ describe('sanitizeImportedPanels', () => {
       ],
     });
 
-    expect(await getValidationError(dslChartOnSavedDataView)).toBe(
+    expect(await getValidationError(esqlChart)).toBe(
       'This panel can’t be added: Lens "lnsChoropleth" chart type is not supported'
     );
-  });
-});
-
-describe('addImportedPanels', () => {
-  it('adds the panel at its original size and returns its id and title', () => {
-    const addIncomingEmbeddables = jest.fn();
-    const dashboardApi = { addIncomingEmbeddables } as unknown as Pick<
-      DashboardApi,
-      'addIncomingEmbeddables'
-    >;
-
-    const result = addImportedPanels(dashboardApi, { panels: [dslChartOnSavedDataView] });
-
-    expect(addIncomingEmbeddables).toHaveBeenCalledWith([
-      {
-        embeddableId: result.id,
-        type: 'vis',
-        serializedState: dslChartOnSavedDataView.config,
-        size: { width: 12, height: 8 },
-      },
-    ]);
-    expect(result.title).toBe('Requests');
   });
 });

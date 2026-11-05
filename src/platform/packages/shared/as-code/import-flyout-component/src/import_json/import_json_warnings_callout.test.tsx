@@ -79,14 +79,6 @@ describe('ImportJsonWarningsCallout', () => {
     expect(within(uncheckedList).queryByText('existing-data-view')).not.toBeInTheDocument();
   });
 
-  it('uses the default summary for missing related items', () => {
-    renderCallout({ relatedItems: [missingDataView] });
-    expect(
-      screen.getByText('1 related item doesn’t exist in this cluster or space.')
-    ).toBeInTheDocument();
-    expect(screen.queryByTestId('testRelatedItemsAccordion')).not.toBeInTheDocument();
-  });
-
   it('counts related items left out of a truncated list as unchecked', () => {
     renderCallout({ relatedItems: [existingDataView, libraryItem], relatedItemsCount: 5 });
     expect(

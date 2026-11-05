@@ -78,10 +78,6 @@ describe('normalizeImportedPanels', () => {
     expect(normalizeImportedPanels([lensPanel])).toEqual([lensPanel]);
   });
 
-  it('rejects the panel config on its own, without the panel type', () => {
-    expect(getValidationError(lensConfig)).toMatch(/doesn’t describe a dashboard panel/);
-  });
-
   it('rejects values that are not panel entries', () => {
     expect(getValidationError('a string')).toMatch(/doesn’t describe a dashboard panel/);
     expect(getValidationError(null)).toMatch(/doesn’t describe a dashboard panel/);

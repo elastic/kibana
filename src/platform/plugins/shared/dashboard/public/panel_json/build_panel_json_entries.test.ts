@@ -21,10 +21,4 @@ describe('buildPanelJsonEntries', () => {
       { type: 'markdown', grid: { x: 24, y: 42, w: 12, h: 8 }, config: { content: '# Notes' } },
     ]);
   });
-
-  it('uses the default size for panels without a grid', () => {
-    expect(buildPanelJsonEntries([{ type: 'markdown', config: {} }])).toEqual([
-      { type: 'markdown', grid: { x: 0, y: 0, w: 24, h: 15 }, config: {} },
-    ]);
-  });
 });

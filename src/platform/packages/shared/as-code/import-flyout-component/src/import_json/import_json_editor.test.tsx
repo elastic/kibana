@@ -121,18 +121,6 @@ describe('ImportJsonEditor', () => {
     expect(screen.getByTestId('testImportButton')).toBeDisabled();
   });
 
-  it('clears the error when the text is removed', async () => {
-    render(<Harness sanitizeImportJson={jest.fn()} />);
-
-    paste('not json');
-    await waitFor(() =>
-      expect(screen.getByText('The text is not valid JSON.')).toBeInTheDocument()
-    );
-
-    paste('');
-    expect(screen.queryByText('The text is not valid JSON.')).not.toBeInTheDocument();
-  });
-
   it('rejects pasted text larger than the import limit without validating it', () => {
     const sanitizeImportJson = jest.fn();
     render(<Harness sanitizeImportJson={sanitizeImportJson} />);

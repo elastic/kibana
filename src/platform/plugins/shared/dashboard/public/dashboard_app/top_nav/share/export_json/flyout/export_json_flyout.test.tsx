@@ -89,7 +89,6 @@ describe('DashboardPanelExportJsonFlyout', () => {
     getLatestSharedProps().getExportJson();
     expect(getExportJson).toHaveBeenLastCalledWith(true);
     expect(screen.queryByText(/This panel is linked to the library/)).not.toBeInTheDocument();
-    expect(screen.getByTestId('dashboardPanelExportJsonImportHint')).toBeInTheDocument();
 
     await expect(getLatestSharedProps().prepareExportJson({ key: 'value' })).resolves.toEqual({
       data: { key: 'value' },

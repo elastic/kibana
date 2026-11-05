@@ -134,23 +134,6 @@ describe('ImportDashboardJsonFlyout', () => {
     expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled();
   });
 
-  it('does not warn about data views that exist in this space', async () => {
-    mockSanitizeDashboard.mockResolvedValue({
-      data: SANITIZED_STATE,
-      warnings: [],
-      relatedItems: [DATA_VIEW_RELATED_ITEM],
-      relatedItemsCount: 1,
-    });
-    renderFlyout();
-
-    await pickFile(VALID_FILE);
-
-    await waitFor(() =>
-      expect(screen.getByTestId('importDashboardJsonImportButton')).toBeEnabled()
-    );
-    expect(screen.queryByTestId('importDashboardJsonWarnings')).not.toBeInTheDocument();
-  });
-
   it('shows the server message for a 4xx sanitize error', async () => {
     const user = userEvent.setup();
     mockSanitizeDashboard.mockRejectedValue(

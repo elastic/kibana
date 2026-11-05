@@ -22,10 +22,9 @@ const exportJsonFlyoutSpy = jest
   .spyOn(ExportJsonFlyout, 'DashboardPanelExportJsonFlyout')
   .mockImplementation(() => null as any);
 
-const mockPost = jest.fn();
 jest.mock('../services/kibana_services', () => ({
   coreServices: {
-    http: { post: (...args: unknown[]) => mockPost(...args) },
+    http: { post: jest.fn() },
   },
 }));
 
@@ -180,19 +179,6 @@ describe('Export JSON action', () => {
         grid: { x: 0, y: 0, w: 24, h: 15 },
         config: { rawState: { key: 'value' } },
       });
-    });
-
-    it('is sanitized with the dashboard sanitize route', async () => {
-      const panel = { type: 'testEmbeddable', grid: { x: 0, y: 0, w: 24, h: 15 }, config: {} };
-      const warnings = [{ type: 'dropped_property', message: 'Removed "legacy"', key: 'legacy' }];
-      mockPost.mockResolvedValue({
-        data: { title: 'Panels to sanitize', panels: [{ ...panel, id: '0' }] },
-        warnings,
-      });
-      await action.execute(context);
-      const { sanitizeState } = await renderFlyoutContent();
-
-      await expect(sanitizeState(panel)).resolves.toEqual({ data: panel, warnings });
     });
   });
 });

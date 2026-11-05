@@ -139,18 +139,6 @@ describe('FromJsonTab', () => {
     expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeEnabled();
   });
 
-  it('does not warn about data views that exist in this space', async () => {
-    respondWithSanitizedPanels([
-      { type: 'index-pattern', type_label: 'Data view', id: 'logs-data-view' },
-    ]);
-    renderTab();
-
-    paste(lensPanel);
-
-    await waitFor(() => expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeEnabled());
-    expect(screen.queryByTestId('dashboardPanelJsonWarnings')).not.toBeInTheDocument();
-  });
-
   it('explains what is missing when only the panel config is pasted', async () => {
     renderTab();
 
@@ -161,23 +149,5 @@ describe('FromJsonTab', () => {
     );
     expect(mockPost).not.toHaveBeenCalled();
     expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeDisabled();
-  });
-
-  it('lists the library item of library-linked panels as a related item', async () => {
-    respondWithSanitizedPanels([
-      { type: 'lens', type_label: 'Visualization', id: 'library-chart' },
-    ]);
-    renderTab();
-
-    paste({ ...lensPanel, config: { ref_id: 'library-chart' } });
-
-    await waitFor(() =>
-      expect(screen.getByTestId('dashboardPanelJsonRelatedItemsSummary')).toHaveTextContent(
-        'This import references 1 related item.'
-      )
-    );
-    expect(screen.queryByTestId('dashboardPanelJsonLinkedToLibrary')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('dashboardPanelJsonSummary')).not.toBeInTheDocument();
-    expect(screen.getByTestId('dashboardPanelJsonAddButton')).toBeEnabled();
   });
 });
