@@ -25,8 +25,7 @@ describe('buildEpisodeConnectorSourceOptionsQuery', () => {
     expect(queryString).toContain('source != "internal"');
     expect(queryString).not.toContain('source != "v1"');
     expect(queryString).not.toContain('source != "v2"');
-    expect(queryString).toContain('INLINE STATS last_timestamp = MAX(@timestamp) BY episode.id');
-    expect(queryString).toContain('WHERE @timestamp == last_timestamp');
+    expect(queryString).not.toContain('last_timestamp');
     expect(queryString).toContain('STATS BY source');
     expect(queryString).toContain('SORT source ASC');
     expect(queryString).toContain(`LIMIT ${CONNECTOR_SOURCE_OPTIONS_LIMIT + 1}`);

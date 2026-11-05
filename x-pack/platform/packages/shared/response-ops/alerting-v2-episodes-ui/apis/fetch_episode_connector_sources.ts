@@ -32,8 +32,7 @@ export interface EpisodeConnectorSourcesResult {
 const EMPTY_CONNECTOR_SOURCES: EpisodeConnectorSourcesResult = { sources: [], truncated: false };
 
 /**
- * Connector slugs on the latest alert event of each episode in the time range.
- * Empty and native sources are dropped.
+ * Connector slugs on alert events in the time range. Empty and native sources are dropped.
  */
 export const fetchEpisodeConnectorSources = async ({
   spaceId,
