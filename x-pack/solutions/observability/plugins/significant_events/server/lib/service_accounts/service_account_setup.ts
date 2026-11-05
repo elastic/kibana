@@ -41,8 +41,11 @@ export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
+// Boom errors, which the workflows plugin throws, keep their status in `output.statusCode`.
 const getStatusCode = (error: unknown): number | undefined =>
-  typeof error === 'object' && error !== null && 'statusCode' in error
+  isBoom(error)
+    ? error.output.statusCode
+    : typeof error === 'object' && error !== null && 'statusCode' in error
     ? (error as { statusCode?: number }).statusCode
     : undefined;
 

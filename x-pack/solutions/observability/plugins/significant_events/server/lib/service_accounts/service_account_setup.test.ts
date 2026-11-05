@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { CoreStart } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extensions/server';
@@ -298,7 +299,7 @@ describe('createDetectionEngineSetupService.enable workflows', () => {
   it('keeps the status of an install error and only suggests a retry for server errors', async () => {
     const { core } = createCore();
     const { install, ...workflows } = createWorkflowsExtensions();
-    install.mockRejectedValueOnce(Object.assign(new Error('forbidden'), { statusCode: 403 }));
+    install.mockRejectedValueOnce(Boom.forbidden('forbidden'));
 
     const error = await createDetectionEngineSetupService({
       core,
