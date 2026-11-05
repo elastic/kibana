@@ -135,7 +135,15 @@ const NoData = ({ message }: { message: string }) => (
 );
 
 /** A source cell's latest results; keyed by cell id so it subscribes to the right runtime. */
-const SourceCellData = ({ cellId }: { cellId: string }) => {
+const SourceCellData = ({
+  cellId,
+  isOpen,
+  onToggle,
+}: {
+  cellId: string;
+  isOpen: boolean;
+  onToggle: (isOpen: boolean) => void;
+}) => {
   const { store } = useNotebook();
   const { output, durationMs } = useStateFromPublishingSubject(store.getRuntime$(cellId));
   return output?.kind === 'table' ? (
@@ -144,6 +152,8 @@ const SourceCellData = ({ cellId }: { cellId: string }) => {
       table={output.table}
       truncated={output.truncated}
       durationMs={durationMs}
+      isOpen={isOpen}
+      onToggle={onToggle}
     />
   ) : (
     <NoData
@@ -191,6 +201,7 @@ export const CustomCellFlyout = ({
   const [draft, setDraft] = useState(saved);
   const [queryRun, setQueryRun] = useState<QueryRun>();
   const [isRunning, setIsRunning] = useState(false);
+  const [isDataOpen, setIsDataOpen] = useState(false);
   const controller = useRef<AbortController>();
   const runCount = useRef(0);
   const [editorHeight, setEditorHeight] = useState(EDITOR_DEFAULT_HEIGHT);
@@ -230,6 +241,7 @@ export const CustomCellFlyout = ({
       if (current.signal.aborted) return;
       runCount.current += 1;
       setQueryRun({ query, runId: runCount.current, table, truncated, durationMs });
+      setIsDataOpen(true);
       return table;
     } catch (runError) {
       if (current.signal.aborted) return;
@@ -529,7 +541,8 @@ export const CustomCellFlyout = ({
                 table={knownQueryRun.table}
                 truncated={knownQueryRun.truncated ?? false}
                 durationMs={knownQueryRun.durationMs}
-                initialIsOpen={knownQueryRun.runId !== undefined}
+                isOpen={isDataOpen}
+                onToggle={setIsDataOpen}
               />
             </>
           )}
@@ -537,7 +550,12 @@ export const CustomCellFlyout = ({
             <>
               <EuiSpacer size="s" />
               {draft.sourceCell ? (
-                <SourceCellData key={draft.sourceCell} cellId={draft.sourceCell} />
+                <SourceCellData
+                  key={draft.sourceCell}
+                  cellId={draft.sourceCell}
+                  isOpen={isDataOpen}
+                  onToggle={setIsDataOpen}
+                />
               ) : (
                 <NoData
                   message={i18n.translate('xpack.notebook.customCell.flyout.pickSource', {

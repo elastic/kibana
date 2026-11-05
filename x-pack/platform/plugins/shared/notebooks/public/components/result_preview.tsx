@@ -69,13 +69,16 @@ export const ResultPreview = ({
   table,
   truncated,
   durationMs,
-  initialIsOpen = false,
+  isOpen,
+  onToggle,
 }: {
   id: string;
   table: Datatable;
   truncated: boolean;
   durationMs?: number;
-  initialIsOpen?: boolean;
+  /** Controls whether the rows show; collapsed and uncontrolled when omitted. */
+  isOpen?: boolean;
+  onToggle?: (isOpen: boolean) => void;
 }) => (
   <>
     {truncated && (
@@ -96,7 +99,9 @@ export const ResultPreview = ({
     <EuiAccordion
       id={`notebookResult-${id}`}
       buttonContent={getResultSummary(table, durationMs)}
-      initialIsOpen={initialIsOpen}
+      initialIsOpen={false}
+      forceState={isOpen === undefined ? undefined : isOpen ? 'open' : 'closed'}
+      onToggle={onToggle}
       paddingSize="s"
       data-test-subj="notebookResultPreview"
     >
