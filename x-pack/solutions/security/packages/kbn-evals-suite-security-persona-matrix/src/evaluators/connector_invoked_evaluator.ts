@@ -46,20 +46,23 @@ const messagePartsOf = (output: unknown): string[] => {
   return parts;
 };
 
-const RENDER_ATTACHMENT_ID_PATTERN = /<render_attachment\s+id="([^"]+)"/g;
+// `id` may follow other attributes (`<render_attachment version="1" id="…"/>`).
+const RENDER_ATTACHMENT_ID_PATTERN = /<render_attachment\b[^>]*\bid\s*=\s*["']([^"']+)["']/g;
 
 /**
  * Pull the text that can contain the delivered workflow. In Agent Builder runs
  * the YAML is NOT in the `generate_workflow` result (it returns only
  * attachment/proposal ids plus a prose comment) and `validate_workflow`
- * returns only `{ result }`, so the artifact is read from, in order:
+ * returns only `{ result }`, so exactly one artifact is read, the first of:
  *  - the conversation's current `workflow.yaml` attachments
  *    (`workflowAttachments`, read back by the chat client). When several exist,
- *    only the one the final message rendered (`<render_attachment id=…>`) is
+ *    only the one the final message rendered (`<render_attachment … id=…>`) is
  *    scored, falling back to the last one — a leftover draft must not rescue
  *    the run;
- *  - `data.yaml` of `generate_workflow` results (the shape the tool returns to
- *    non-agent callers);
+ *  - the last `data.yaml` of `generate_workflow` results (the shape the tool
+ *    returns to non-agent callers). Never combined with an attachment: an
+ *    intermediate generation must not rescue a delivered workflow that
+ *    dropped the connector;
  *  - the LAST `validate_workflow` `params.yaml`: the candidate the agent
  *    finished on. Earlier validation inputs are superseded drafts.
  * The final answer messages are scored only when none of these yields YAML
@@ -95,7 +98,8 @@ export const collectDeliveredArtifact = (output: unknown): string | undefined =>
     Array.from(messageParts.join('\n').matchAll(RENDER_ATTACHMENT_ID_PATTERN), ([, id]) => id)
   );
   const rendered = attachments.filter(({ id }) => id !== undefined && renderedIds.has(id));
-  const deliveredAttachment = (rendered.length ? rendered : attachments).slice(-1);
+  const candidates = rendered.length ? rendered : attachments;
+  const deliveredAttachment = candidates[candidates.length - 1];
 
   const generated: string[] = [];
   let lastValidatedYaml: string | undefined;
@@ -119,11 +123,7 @@ export const collectDeliveredArtifact = (output: unknown): string | undefined =>
     });
   }
 
-  const delivered = [...deliveredAttachment.map(({ yaml }) => yaml), ...generated];
-  if (delivered.length === 0 && lastValidatedYaml !== undefined) {
-    delivered.push(lastValidatedYaml);
-  }
-  return delivered.length > 0 ? delivered.join('\n') : undefined;
+  return deliveredAttachment?.yaml ?? generated[generated.length - 1] ?? lastValidatedYaml;
 };
 
 export const collectProducedText = (output: unknown): string =>

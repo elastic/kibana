@@ -228,6 +228,35 @@ describe('ConnectorInvoked evaluator', () => {
     expect(result.score).toBe(1);
   });
 
+  it('finds the rendered attachment when id is not the first tag attribute', async () => {
+    const result = await run({
+      messages: [{ message: 'Done. <render_attachment version="1" id="att-good"/>' }],
+      steps: [agentGenerateStep()],
+      workflowAttachments: [
+        { id: 'att-good', version: 1, yaml: WORKFLOW_WITH_SLACK },
+        { id: 'att-draft', version: 1, yaml: WORKFLOW_WITHOUT_SLACK },
+      ],
+    });
+    expect(result.score).toBe(1);
+  });
+
+  it('does not let generated data.yaml rescue a rendered attachment that dropped the connector', async () => {
+    const result = await run({
+      ...renderOnlyMessage,
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { query: 'post to Slack' },
+          results: [{ type: 'other', data: { yaml: WORKFLOW_WITH_SLACK } }],
+        },
+      ],
+      workflowAttachments: [{ id: 'att-1', version: 2, yaml: WORKFLOW_WITHOUT_SLACK }],
+    });
+    expect(result.score).toBe(0);
+    expect(result.metadata).toMatchObject({ connectorPresent: false });
+  });
+
   it('passes when generate_workflow returns the YAML itself (non-agent callers)', async () => {
     const result = await run({
       messages: [{ message: 'Here is your workflow.' }],
@@ -338,7 +367,7 @@ describe('ConnectorInvoked evaluator', () => {
       expect(collectProducedText({ messages: [{ message: 'inline-yaml' }] })).toBe('inline-yaml');
     });
 
-    it('gathers attachments and generate data.yaml; messages and validate params.yaml only as fallbacks', () => {
+    it('reads only the delivered attachment; generate data.yaml, validate params.yaml and messages are fallbacks', () => {
       const text = collectProducedText({
         messages: [{ message: 'one' }],
         workflowAttachments: [{ id: 'a', version: 1, yaml: 'attachment-yaml' }],
@@ -359,7 +388,7 @@ describe('ConnectorInvoked evaluator', () => {
       expect(text).not.toContain('one');
       expect(text).toContain('attachment-yaml');
       expect(text).not.toContain('validated-yaml');
-      expect(text).toContain('generated-yaml');
+      expect(text).not.toContain('generated-yaml');
       ['validate-result-only', 'generate-param', 'comment-only', 'analysis-only'].forEach(
         (excluded) => expect(text).not.toContain(excluded)
       );

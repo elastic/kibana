@@ -16,6 +16,7 @@ import {
   type DefaultEvaluators,
   type EvalsExecutorClient,
   type EvaluationDataset,
+  type EvaluationResult,
   type Evaluator,
   type TaskOutput,
 } from '@kbn/evals';
@@ -192,39 +193,114 @@ const hasRenderedArtifact = (output: TaskOutput): boolean => {
   });
 };
 
+// The skill prose calls the tool `attachment_update`; the registered id is
+// `attachments.update`.
+const ATTACHMENT_UPDATE_TOOLS: ReadonlySet<string> = new Set([
+  'attachments.update',
+  'attachment_update',
+]);
+
+const isRecord = (value: unknown): value is Record<string, unknown> =>
+  typeof value === 'object' && value !== null && !Array.isArray(value);
+
+/**
+ * The version the last `<render_attachment>` tag for `attachmentId` pinned, or
+ * undefined when it pinned none — the UI then shows the latest version.
+ */
+const renderedVersionFor = (texts: string[], attachmentId: string): number | undefined => {
+  let version: number | undefined;
+  texts.forEach((text) => {
+    Array.from(text.matchAll(/<render_attachment\b[^>]*>/g), ([tag]) => tag)
+      .filter((tag) => isRenderTagFor(tag, attachmentId))
+      .forEach((tag) => {
+        const pinned = tag.match(/\bversion\s*=\s*["']?(\d+)/);
+        version = pinned ? Number(pinned[1]) : undefined;
+      });
+  });
+  return version;
+};
+
+const parseUpdatedPayload = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
 /**
  * The rendered artifact's own payload, when the run rendered one — the rule
  * object or the workflow YAML the user actually saw. Used as the judged answer
  * for fallback runs that end on a rendered artifact.
+ *
+ * A rule attachment can be changed after creation (the skill raises the
+ * default severity via `attachment_update`), so the payload is the version the
+ * render tag pinned, else the latest: the creation payload plus any later
+ * updates to that attachment, in order.
  */
 const renderedArtifactPayload = (output: TaskOutput): unknown => {
   const texts = messageTexts(output);
-  const renderedResult = getToolCallSteps(output).flatMap((step) => {
-    const payloadKey = step.tool_id ? ARTIFACT_PRODUCING_TOOLS.get(step.tool_id) : undefined;
+  const rawSteps = (output as { steps?: unknown }).steps;
+  const steps = (Array.isArray(rawSteps) ? rawSteps : []).filter(
+    (step): step is Record<string, unknown> => isRecord(step) && step.type === 'tool_call'
+  );
+  const rendered = steps.flatMap((step, stepIndex) => {
+    const payloadKey =
+      typeof step.tool_id === 'string' ? ARTIFACT_PRODUCING_TOOLS.get(step.tool_id) : undefined;
     if (payloadKey === undefined) {
       return [];
     }
     const results = Array.isArray(step.results) ? step.results : [];
     return results.flatMap((result) => {
-      const data = (result as { data?: Record<string, unknown> } | undefined)?.data;
+      const data = isRecord(result) && isRecord(result.data) ? result.data : undefined;
       const attachmentId = data?.attachment_id;
       if (
-        data?.success !== true ||
+        !data ||
+        data.success !== true ||
         typeof attachmentId !== 'string' ||
         !texts.some((text) => isRenderTagFor(text, attachmentId))
       ) {
         return [];
       }
-      return [{ payloadKey, data }];
+      return [{ payloadKey, data, attachmentId, stepIndex }];
     });
   });
-  const first = renderedResult[0];
-  if (!first) {
+  const last = rendered[rendered.length - 1];
+  if (!last) {
     return undefined;
   }
-  return first.payloadKey === null
-    ? collectDeliveredArtifact(output)
-    : first.data[first.payloadKey];
+  if (last.payloadKey === null) {
+    return collectDeliveredArtifact(output);
+  }
+
+  const versions: Array<{ version: number; payload: unknown }> = [
+    {
+      version: typeof last.data.version === 'number' ? last.data.version : 1,
+      payload: last.data[last.payloadKey],
+    },
+  ];
+  steps.slice(last.stepIndex + 1).forEach((step) => {
+    const params = isRecord(step.params) ? step.params : undefined;
+    const updated = isRecord(params?.data) ? params?.data.text : undefined;
+    if (
+      typeof step.tool_id !== 'string' ||
+      !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
+      params?.attachment_id !== last.attachmentId ||
+      typeof updated !== 'string'
+    ) {
+      return;
+    }
+    const result = Array.isArray(step.results) ? step.results[0] : undefined;
+    const reported = isRecord(result) && isRecord(result.data) ? result.data.version : undefined;
+    versions.push({
+      version: typeof reported === 'number' ? reported : versions[versions.length - 1].version + 1,
+      payload: parseUpdatedPayload(updated),
+    });
+  });
+
+  const pinned = renderedVersionFor(texts, last.attachmentId);
+  const visible = versions.filter(({ version }) => pinned === undefined || version <= pinned);
+  return (visible[visible.length - 1] ?? versions[0]).payload;
 };
 
 /**
@@ -554,6 +630,28 @@ export function createEvaluatePersonaMatrixDataset({
     const toolCalls = createPersonaMatrixToolCallsEvaluator(traceDeps);
     const latency = createPersonaMatrixLatencyEvaluator(traceDeps);
 
+    // The criteria judge runs inside the task on the same judged submission as
+    // the correctness/groundedness judges; the registered evaluator only reads
+    // the precomputed result back, so it never grades fallback narration.
+    const criteriaJudge = evaluators.criteria([
+      'Relevance: The response directly addresses the user security question.',
+      'Clarity: The response is well-structured and easy to follow.',
+      'Accuracy: Security concepts and recommendations are technically correct.',
+      'Completeness: The response covers the key aspects of the question.',
+    ]);
+    const precomputedCriteriaEvaluator: Evaluator = {
+      name: criteriaJudge.name,
+      kind: criteriaJudge.kind,
+      direction: criteriaJudge.direction,
+      getModel: criteriaJudge.getModel,
+      evaluate: async ({ output }) =>
+        (output as { criteriaAnalysis?: EvaluationResult } | undefined)?.criteriaAnalysis ?? {
+          score: null,
+          label: 'unavailable',
+          explanation: 'Criteria judge did not produce a result for this example.',
+        },
+    };
+
     // Quantitative correctness/groundedness evaluators are pure functions of
     // the precomputed analyses attached to task output below — no LLM calls
     // at evaluate time. Mirrors `buildAlertsRagEvaluators`.
@@ -566,12 +664,7 @@ export function createEvaluatePersonaMatrixDataset({
       connectorInvokedEvaluator,
       ...createQuantitativeCorrectnessEvaluators(),
       createQuantitativeGroundednessEvaluator(),
-      evaluators.criteria([
-        'Relevance: The response directly addresses the user security question.',
-        'Clarity: The response is well-structured and easy to follow.',
-        'Accuracy: Security concepts and recommendations are technically correct.',
-        'Completeness: The response covers the key aspects of the question.',
-      ]),
+      precomputedCriteriaEvaluator,
       inputTokens,
       outputTokens,
       toolCalls,
@@ -613,6 +706,10 @@ export function createEvaluatePersonaMatrixDataset({
             traceId: response.traceId ?? null,
             sampling: response.sampling,
             trajectoryFingerprint: response.trajectoryFingerprint,
+            // The rendered workflow's YAML, read back from the conversation:
+            // `generate_workflow` results carry only ids, so without this a
+            // rendered workflow has no deliverable to judge or score.
+            workflowAttachments: response.workflowAttachments,
           };
 
           // Precompute the qualitative analyses inside the task once, so the
@@ -649,28 +746,38 @@ export function createEvaluatePersonaMatrixDataset({
           // example's qualitative scores to "unavailable" (the quantitative
           // evaluators handle a missing analysis) rather than discarding the
           // agent's real trajectory, which the deterministic evaluators can score.
-          const [correctnessSettled, groundednessSettled] = await Promise.allSettled([
-            withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
-              evaluators.correctnessAnalysis().evaluate({
-                input,
-                expected,
-                output: judgedOutput,
-                metadata: example.metadata,
-              })
-            ),
-            withEvaluatorSpan('GroundednessAnalysis', {}, () =>
-              evaluators.groundednessAnalysis().evaluate({
-                input,
-                expected,
-                output: judgedOutput,
-                metadata: example.metadata,
-              })
-            ),
-          ]);
+          const [correctnessSettled, groundednessSettled, criteriaSettled] =
+            await Promise.allSettled([
+              withEvaluatorSpan('CorrectnessAnalysis', {}, () =>
+                evaluators.correctnessAnalysis().evaluate({
+                  input,
+                  expected,
+                  output: judgedOutput,
+                  metadata: example.metadata,
+                })
+              ),
+              withEvaluatorSpan('GroundednessAnalysis', {}, () =>
+                evaluators.groundednessAnalysis().evaluate({
+                  input,
+                  expected,
+                  output: judgedOutput,
+                  metadata: example.metadata,
+                })
+              ),
+              withEvaluatorSpan('Criteria', {}, () =>
+                criteriaJudge.evaluate({
+                  input,
+                  expected,
+                  output: judgedOutput,
+                  metadata: example.metadata,
+                })
+              ),
+            ]);
 
           for (const [name, settled] of [
             ['CorrectnessAnalysis', correctnessSettled],
             ['GroundednessAnalysis', groundednessSettled],
+            ['Criteria', criteriaSettled],
           ] as const) {
             if (settled.status === 'rejected') {
               const reason = settled.reason;
@@ -691,6 +798,8 @@ export function createEvaluatePersonaMatrixDataset({
             ...(taskOutput as object),
             correctnessAnalysis: correctnessResult?.metadata,
             groundednessAnalysis: groundednessResult?.metadata,
+            criteriaAnalysis:
+              criteriaSettled.status === 'fulfilled' ? criteriaSettled.value : undefined,
           } as TaskOutput;
         },
       },

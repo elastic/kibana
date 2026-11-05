@@ -131,6 +131,92 @@ describe('personaMatrixJury.toArgs', () => {
     );
   });
 
+  const fallbackAnswer = (taskOutput: Record<string, unknown>) =>
+    (
+      personaMatrixJury.toArgs(
+        cell({
+          agentResponse: 'narration',
+          taskOutput: { messageSource: 'last_assistant_step', ...taskOutput },
+        })
+      )!.output.messages as Array<{ message: string }>
+    )[0].message;
+
+  const generateStep = (attachmentId: string) => ({
+    type: 'tool_call',
+    tool_id: 'platform.core.generate_workflow',
+    results: [{ data: { success: true, attachment_id: attachmentId } }],
+  });
+
+  it('judges the rendered workflow attachment, not the last one', () => {
+    expect(
+      fallbackAnswer({
+        messages: [{ message: 'Done. <render_attachment version="1" id="wf-a"/>' }],
+        steps: [generateStep('wf-a')],
+        workflowAttachments: [
+          { id: 'wf-a', version: 1, yaml: 'rendered-yaml' },
+          { id: 'wf-b', version: 1, yaml: 'leftover-draft-yaml' },
+        ],
+      })
+    ).toBe('rendered-yaml');
+  });
+
+  it('falls back to the last validate_workflow yaml when no attachment or generated yaml exists', () => {
+    expect(
+      fallbackAnswer({
+        messages: [{ message: '<render_attachment id="wf-a" version="1"/>' }],
+        steps: [
+          generateStep('wf-a'),
+          {
+            type: 'tool_call',
+            tool_id: 'platform.workflows.validate_workflow',
+            params: { yaml: 'draft-yaml' },
+            results: [],
+          },
+          {
+            type: 'tool_call',
+            tool_id: 'platform.workflows.validate_workflow',
+            params: { yaml: 'final-yaml' },
+            results: [],
+          },
+        ],
+      })
+    ).toBe('final-yaml');
+  });
+
+  const createRuleStep = {
+    type: 'tool_call',
+    tool_id: 'security.create_detection_rule',
+    params: {},
+    results: [
+      { data: { success: true, attachment_id: 'att-r', rule: { name: 'r', severity: 'low' } } },
+    ],
+  };
+  const updateRuleStep = {
+    type: 'tool_call',
+    tool_id: 'attachments.update',
+    params: {
+      attachment_id: 'att-r',
+      data: { text: JSON.stringify({ name: 'r', severity: 'high' }) },
+    },
+    results: [{ data: { attachment_id: 'att-r', previous_version: 1, version: 2 } }],
+  };
+
+  it('judges the rule as updated after creation when the render tag shows the latest', () => {
+    const answer = fallbackAnswer({
+      messages: [{ message: '<render_attachment id="att-r"/>' }],
+      steps: [createRuleStep, updateRuleStep],
+    });
+    expect(answer).toContain('"severity":"high"');
+  });
+
+  it('judges the rule version the render tag pinned', () => {
+    const answer = fallbackAnswer({
+      messages: [{ message: '<render_attachment id="att-r" version="1"/>' }],
+      steps: [createRuleStep, updateRuleStep],
+    });
+    expect(answer).toContain('"severity":"low"');
+  });
+
   it('still grades a normal closing answer in full', () => {
     const args = personaMatrixJury.toArgs(cell({ taskOutput: { messageSource: 'response' } }));
     expect(args!.output.messages).toEqual([{ message: 'An agent answer.' }]);

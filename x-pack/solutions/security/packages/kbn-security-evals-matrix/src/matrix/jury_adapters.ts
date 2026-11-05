@@ -80,30 +80,12 @@ const ARTIFACT_PRODUCING_TOOLS: ReadonlyMap<string, string | null> = new Map([
   ['platform.core.generate_workflow', null],
 ]);
 
-/** The workflow YAML the run actually delivered, for generate_workflow runs. */
-const deliveredWorkflowYaml = (output: Record<string, unknown>): unknown => {
-  const attachments = Array.isArray(output.workflowAttachments)
-    ? (output.workflowAttachments as unknown[])
-    : [];
-  const fromAttachment = attachments
-    .map((a) => (isRecord(a) && typeof a.yaml === 'string' ? a.yaml : undefined))
-    .filter((yaml): yaml is string => yaml !== undefined);
-  if (fromAttachment.length > 0) {
-    return fromAttachment[fromAttachment.length - 1];
-  }
-  const steps = Array.isArray(output.steps) ? (output.steps as Array<Record<string, unknown>>) : [];
-  for (const step of steps) {
-    if (step.tool_id === 'platform.core.generate_workflow' && Array.isArray(step.results)) {
-      for (const result of step.results) {
-        const data = isRecord(result) ? (result.data as Record<string, unknown>) : undefined;
-        if (isRecord(data) && typeof data.yaml === 'string') {
-          return data.yaml;
-        }
-      }
-    }
-  }
-  return undefined;
-};
+// The skill prose calls the tool `attachment_update`; the registered id is
+// `attachments.update`.
+const ATTACHMENT_UPDATE_TOOLS: ReadonlySet<string> = new Set([
+  'attachments.update',
+  'attachment_update',
+]);
 
 const isRecord = (v: unknown): v is Record<string, unknown> =>
   typeof v === 'object' && v !== null && !Array.isArray(v);
@@ -116,6 +98,79 @@ const isRenderTagFor = (text: string, attachmentId: string): boolean =>
     text
   );
 
+const messageTextsOf = (output: Record<string, unknown>): string[] =>
+  (Array.isArray(output.messages) ? (output.messages as unknown[]) : [])
+    .map((entry) => (isRecord(entry) ? entry.message : undefined))
+    .filter((message): message is string => typeof message === 'string');
+
+const toolCallStepsOf = (output: Record<string, unknown>): Array<Record<string, unknown>> =>
+  (Array.isArray(output.steps) ? (output.steps as unknown[]) : []).filter(
+    (step): step is Record<string, unknown> => isRecord(step) && step.type === 'tool_call'
+  );
+
+/**
+ * The workflow YAML the run actually delivered, for generate_workflow runs.
+ * Mirrors `collectDeliveredArtifact` in the persona-matrix suite: exactly one
+ * artifact, the first of the rendered attachment, the last attachment, the
+ * last generated `data.yaml`, the last `validate_workflow` `params.yaml`.
+ */
+const deliveredWorkflowYaml = (output: Record<string, unknown>): string | undefined => {
+  const texts = messageTextsOf(output);
+  const attachments = (
+    Array.isArray(output.workflowAttachments) ? (output.workflowAttachments as unknown[]) : []
+  ).filter((a): a is { id?: unknown; yaml: string } => isRecord(a) && typeof a.yaml === 'string');
+  const rendered = attachments.filter(
+    ({ id }) => typeof id === 'string' && texts.some((text) => isRenderTagFor(text, id))
+  );
+  const candidates = rendered.length > 0 ? rendered : attachments;
+  if (candidates.length > 0) {
+    return candidates[candidates.length - 1].yaml;
+  }
+
+  let generated: string | undefined;
+  let validated: string | undefined;
+  toolCallStepsOf(output).forEach((step) => {
+    if (step.tool_id === 'platform.core.generate_workflow' && Array.isArray(step.results)) {
+      step.results.forEach((result) => {
+        const data = isRecord(result) ? result.data : undefined;
+        if (isRecord(data) && typeof data.yaml === 'string') {
+          generated = data.yaml;
+        }
+      });
+    }
+    if (
+      step.tool_id === 'platform.workflows.validate_workflow' &&
+      isRecord(step.params) &&
+      typeof step.params.yaml === 'string'
+    ) {
+      validated = step.params.yaml;
+    }
+  });
+  return generated ?? validated;
+};
+
+/** The version the last render tag for `attachmentId` pinned; undefined = latest. */
+const renderedVersionFor = (texts: string[], attachmentId: string): number | undefined => {
+  let version: number | undefined;
+  texts.forEach((text) => {
+    Array.from(text.matchAll(/<render_attachment\b[^>]*>/g), ([tag]) => tag)
+      .filter((tag) => isRenderTagFor(tag, attachmentId))
+      .forEach((tag) => {
+        const pinned = tag.match(/\bversion\s*=\s*["']?(\d+)/);
+        version = pinned ? Number(pinned[1]) : undefined;
+      });
+  });
+  return version;
+};
+
+const parseUpdatedPayload = (text: string): unknown => {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return text;
+  }
+};
+
 /**
  * Mirrors `renderedArtifactPayload` from the persona-matrix suite
  * (evaluate_dataset.ts), which cannot be imported from this platform package.
@@ -123,37 +178,70 @@ const isRenderTagFor = (text: string, attachmentId: string): boolean =>
  * A fallback run the live suite judges on its rendered artifact -- an
  * artifact-producing tool result with `success: true`, an `attachment_id`, and
  * a matching `<render_attachment>` tag in a message -- must be replayed with
- * that same payload (the rule object, or the workflow YAML) instead of an
- * empty answer, or the rejudge grades a different submission than the live
- * run did.
+ * that same payload (the rule object at the rendered version, or the workflow
+ * YAML) instead of an empty answer, or the rejudge grades a different
+ * submission than the live run did.
  */
 const renderedArtifactPayload = (output: Record<string, unknown>): unknown => {
-  const texts = ((output.messages as Array<{ message?: unknown }> | undefined) ?? [])
-    .map((entry) => entry?.message)
-    .filter((message): message is string => typeof message === 'string');
-  const steps = Array.isArray(output.steps) ? (output.steps as Array<Record<string, unknown>>) : [];
-  for (const step of steps) {
+  const texts = messageTextsOf(output);
+  const steps = toolCallStepsOf(output);
+  const rendered = steps.flatMap((step, stepIndex) => {
     const payloadKey =
       typeof step.tool_id === 'string' ? ARTIFACT_PRODUCING_TOOLS.get(step.tool_id) : undefined;
-    if (payloadKey !== undefined) {
-      const results = Array.isArray(step.results) ? step.results : [];
-      const rendered = results.find((result) => {
-        const data = isRecord(result) ? (result.data as Record<string, unknown>) : undefined;
-        const attachmentId = data?.attachment_id;
-        return (
-          data?.success === true &&
-          typeof attachmentId === 'string' &&
-          texts.some((text) => isRenderTagFor(text, attachmentId))
-        );
-      });
-      if (rendered !== undefined) {
-        return payloadKey === null
-          ? deliveredWorkflowYaml(output)
-          : (rendered as { data: Record<string, unknown> }).data[payloadKey];
-      }
+    if (payloadKey === undefined) {
+      return [];
     }
+    const results = Array.isArray(step.results) ? step.results : [];
+    return results.flatMap((result) => {
+      const data = isRecord(result) && isRecord(result.data) ? result.data : undefined;
+      const attachmentId = data?.attachment_id;
+      if (
+        !data ||
+        data.success !== true ||
+        typeof attachmentId !== 'string' ||
+        !texts.some((text) => isRenderTagFor(text, attachmentId))
+      ) {
+        return [];
+      }
+      return [{ payloadKey, data, attachmentId, stepIndex }];
+    });
+  });
+  const last = rendered[rendered.length - 1];
+  if (!last) {
+    return undefined;
   }
-  return undefined;
+  if (last.payloadKey === null) {
+    return deliveredWorkflowYaml(output);
+  }
+
+  const versions: Array<{ version: number; payload: unknown }> = [
+    {
+      version: typeof last.data.version === 'number' ? last.data.version : 1,
+      payload: last.data[last.payloadKey],
+    },
+  ];
+  steps.slice(last.stepIndex + 1).forEach((step) => {
+    const params = isRecord(step.params) ? step.params : undefined;
+    const updated = isRecord(params?.data) ? params?.data.text : undefined;
+    if (
+      typeof step.tool_id !== 'string' ||
+      !ATTACHMENT_UPDATE_TOOLS.has(step.tool_id) ||
+      params?.attachment_id !== last.attachmentId ||
+      typeof updated !== 'string'
+    ) {
+      return;
+    }
+    const result = Array.isArray(step.results) ? step.results[0] : undefined;
+    const reported = isRecord(result) && isRecord(result.data) ? result.data.version : undefined;
+    versions.push({
+      version: typeof reported === 'number' ? reported : versions[versions.length - 1].version + 1,
+      payload: parseUpdatedPayload(updated),
+    });
+  });
+
+  const pinned = renderedVersionFor(texts, last.attachmentId);
+  const visible = versions.filter(({ version }) => pinned === undefined || version <= pinned);
+  return (visible[visible.length - 1] ?? versions[0]).payload;
 };
 
 /**

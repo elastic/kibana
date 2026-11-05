@@ -6,6 +6,7 @@
  */
 
 import { createPlaywrightEvalsConfig } from '@kbn/evals';
+import { resolveWorkers } from './src/resolve_workers';
 
 // Default 30min covers a single-pass 21-example run (frontier models finish in
 // single-digit minutes; a local vLLM L4 can take 45+). Determinism runs with
@@ -18,7 +19,9 @@ const TIMEOUT_MINUTES = Number(process.env.PERSONA_MATRIX_TIMEOUT_MINUTES) || 30
 // default: `beforeAll` seeds shared indices that `afterAll` deletes, so extra
 // workers inside one suite tear down data the others are still using. Safe
 // only when each worker gets its own stack.
-const WORKERS = Number(process.env.PERSONA_MATRIX_WORKERS);
+const WORKERS = resolveWorkers(process.env.PERSONA_MATRIX_WORKERS, (message) =>
+  process.emitWarning(message)
+);
 
 export default createPlaywrightEvalsConfig({
   testDir: `${__dirname}/evals`,
@@ -26,5 +29,5 @@ export default createPlaywrightEvalsConfig({
   // (attack_discovery.playwright.config.ts) with the evals_tracing server config.
   testIgnore: '**/attack_discovery.spec.ts',
   timeout: TIMEOUT_MINUTES * 60_000,
-  workers: WORKERS === 2 || WORKERS === 3 ? WORKERS : 1,
+  workers: WORKERS,
 });

@@ -7,7 +7,7 @@
 
 import type { Client as EsClient } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { DefaultEvaluators, EvalsExecutorClient, TaskOutput } from '@kbn/evals';
+import type { DefaultEvaluators, EvalsExecutorClient, Evaluator, TaskOutput } from '@kbn/evals';
 import {
   toDatasetExample,
   createEvaluatePersonaMatrixDataset,
@@ -680,7 +680,7 @@ describe('task output shape', () => {
           toolCalls: { name: 'toolCalls' },
           latency: { name: 'latency' },
         },
-        criteria: jest.fn(),
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
         correctnessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
         groundednessAnalysis: () => ({ evaluate: jest.fn().mockResolvedValue({ metadata: {} }) }),
       } as unknown as DefaultEvaluators,
@@ -704,10 +704,19 @@ describe('task output shape', () => {
 });
 
 describe('task judges and the last-assistant-step fallback', () => {
-  const runTask = async (response: Record<string, unknown>) => {
+  const runTask = async (
+    response: Record<string, unknown>,
+    { criteriaRejects = false }: { criteriaRejects?: boolean } = {}
+  ) => {
     const correctnessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
     const groundednessEvaluate = jest.fn().mockResolvedValue({ metadata: { verdict: 'ok' } });
+    const criteriaEvaluate = criteriaRejects
+      ? jest.fn().mockRejectedValue(new Error('criteria judge down'))
+      : jest
+          .fn()
+          .mockResolvedValue({ score: 0.75, label: null, explanation: 'criteria-explanation' });
     let capturedTask: ((example: unknown) => Promise<unknown>) | undefined;
+    let capturedEvaluators: Evaluator[] = [];
     const evaluateDataset = createEvaluatePersonaMatrixDataset({
       chatClient: {
         query: jest
@@ -721,13 +730,19 @@ describe('task judges and the last-assistant-step fallback', () => {
           toolCalls: { name: 'toolCalls' },
           latency: { name: 'latency' },
         },
-        criteria: jest.fn(),
+        criteria: () => ({
+          name: 'criteria',
+          kind: 'LLM',
+          direction: 'maximize',
+          evaluate: criteriaEvaluate,
+        }),
         correctnessAnalysis: () => ({ evaluate: correctnessEvaluate }),
         groundednessAnalysis: () => ({ evaluate: groundednessEvaluate }),
       } as unknown as DefaultEvaluators,
       executorClient: {
-        runExperiment: jest.fn(async (params: { task: unknown }) => {
+        runExperiment: jest.fn(async (params: { task: unknown }, evaluators: Evaluator[]) => {
           capturedTask = params.task as (example: unknown) => Promise<unknown>;
+          capturedEvaluators = evaluators;
         }),
       } as unknown as EvalsExecutorClient,
       traceEsClient: {} as EsClient,
@@ -737,7 +752,13 @@ describe('task judges and the last-assistant-step fallback', () => {
       dataset: { name: 'ds', description: 'desc', examples: [baseExample] },
     });
     const output = (await capturedTask!(toDatasetExample(baseExample))) as Record<string, unknown>;
-    return { output, correctnessEvaluate, groundednessEvaluate };
+    return {
+      output,
+      correctnessEvaluate,
+      groundednessEvaluate,
+      criteriaEvaluate,
+      capturedEvaluators,
+    };
   };
 
   const judgedAnswer = (evaluate: jest.Mock) => {
@@ -785,6 +806,127 @@ describe('task judges and the last-assistant-step fallback', () => {
     expect(answer).not.toContain('preview');
   });
 
+  it('runs the criteria judge on the judged submission, not the fallback narration', async () => {
+    const { output, criteriaEvaluate, capturedEvaluators } = await runTask({
+      messages: [{ message: 'I will now preview the detection rule.' }],
+      messageSource: 'last_assistant_step',
+    });
+    expect(judgedAnswer(criteriaEvaluate)).toBe('');
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe(
+      'I will now preview the detection rule.'
+    );
+
+    // The registered criteria evaluator reads the precomputed result back and
+    // never calls the judge itself.
+    const criteria = capturedEvaluators.find(({ name }) => name === 'criteria');
+    expect(criteria).toBeDefined();
+    const result = await criteria!.evaluate({
+      input: {},
+      expected: {},
+      output: output as TaskOutput,
+      metadata: {},
+    });
+    expect(result).toMatchObject({ score: 0.75, explanation: 'criteria-explanation' });
+    expect(criteriaEvaluate).toHaveBeenCalledTimes(1);
+  });
+
+  it('reports criteria as unavailable when the criteria judge fails', async () => {
+    const { output, criteriaEvaluate, capturedEvaluators } = await runTask(
+      { messages: [{ message: 'the real answer' }], messageSource: 'response' },
+      { criteriaRejects: true }
+    );
+    expect(criteriaEvaluate).toHaveBeenCalledTimes(1);
+    expect((output.messages as Array<{ message: string }>)[0].message).toBe('the real answer');
+    const criteria = capturedEvaluators.find(({ name }) => name === 'criteria');
+    const result = await criteria!.evaluate({
+      input: {},
+      expected: {},
+      output: output as TaskOutput,
+      metadata: {},
+    });
+    expect(result).toMatchObject({ score: null, label: 'unavailable' });
+  });
+
+  it('forwards workflowAttachments and judges a rendered workflow on its attachment YAML', async () => {
+    const workflowAttachments = [{ id: 'wf-7', version: 1, yaml: 'name: chrysalis-workflow' }];
+    const { output, correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Done. <render_attachment id="wf-7" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      workflowAttachments,
+      steps: [
+        {
+          type: 'tool_call',
+          tool_id: 'platform.core.generate_workflow',
+          params: { query: 'post to Slack' },
+          results: [{ data: { success: true, attachment_id: 'wf-7', attachment_version: 1 } }],
+        },
+      ],
+    });
+    expect(output.workflowAttachments).toEqual(workflowAttachments);
+    expect(judgedAnswer(correctnessEvaluate)).toBe('name: chrysalis-workflow');
+  });
+
+  const createRuleStep = (attachmentId: string) => ({
+    type: 'tool_call',
+    tool_id: 'security.create_detection_rule',
+    params: {},
+    results: [
+      {
+        data: {
+          success: true,
+          attachment_id: attachmentId,
+          rule: { name: 'chrysalis-beacon', severity: 'low' },
+        },
+      },
+    ],
+  });
+  const updateRuleStep = (attachmentId: string, toolId = 'attachments.update') => ({
+    type: 'tool_call',
+    tool_id: toolId,
+    params: {
+      attachment_id: attachmentId,
+      data: { text: JSON.stringify({ name: 'chrysalis-beacon', severity: 'high' }) },
+    },
+    results: [
+      {
+        data: {
+          attachment_id: attachmentId,
+          type: 'security.rule',
+          previous_version: 1,
+          version: 2,
+          version_created: true,
+        },
+      },
+    ],
+  });
+
+  it('judges the updated rule when the render tag shows the latest version', async () => {
+    const { correctnessEvaluate } = await runTask({
+      messages: [{ message: 'Updated. <render_attachment id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r')],
+    });
+    const answer = judgedAnswer(correctnessEvaluate);
+    expect(answer).toContain('"severity":"high"');
+    expect(answer).not.toContain('"severity":"low"');
+  });
+
+  it('judges the version the render tag pinned', async () => {
+    const pinnedFirst = await runTask({
+      messages: [{ message: 'Draft. <render_attachment id="att-r" version="1"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r', 'attachment_update')],
+    });
+    expect(judgedAnswer(pinnedFirst.correctnessEvaluate)).toContain('"severity":"low"');
+
+    const pinnedSecond = await runTask({
+      messages: [{ message: 'Final. <render_attachment version="2" id="att-r"/>' }],
+      messageSource: 'last_assistant_step',
+      steps: [createRuleStep('att-r'), updateRuleStep('att-r', 'attachment_update')],
+    });
+    expect(judgedAnswer(pinnedSecond.correctnessEvaluate)).toContain('"severity":"high"');
+  });
+
   it('still judges a real closing answer', async () => {
     const { correctnessEvaluate, groundednessEvaluate } = await runTask({
       messages: [{ message: 'the real answer' }],
@@ -819,7 +961,7 @@ describe('task judge failure isolation', () => {
           toolCalls: { name: 'toolCalls' },
           latency: { name: 'latency' },
         },
-        criteria: jest.fn(),
+        criteria: () => ({ evaluate: jest.fn().mockResolvedValue({ score: 1 }) }),
         correctnessAnalysis: () => ({
           evaluate: jest.fn().mockRejectedValue(new Error('toolValidationError')),
         }),
