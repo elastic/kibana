@@ -162,7 +162,7 @@ describe('TaskPollingLifecycle', () => {
       kibanaDiscoveryService: {} as KibanaDiscoveryService,
       kibanasPerPartition: DEFAULT_KIBANAS_PER_PARTITION,
     }),
-    apiKeyStrategy: new EsApiKeyStrategy(),
+    apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
     eventLogger: eventLoggerMock,
   };
 

@@ -18,7 +18,10 @@ export const isUiamRequest = (request: KibanaRequest): boolean => {
   return !!authorizationHeader && isUiamCredential(authorizationHeader);
 };
 
-const isUiamServiceAccount = ({ security }: ClientContext, request: KibanaRequest): boolean => {
+export const isUiamServiceAccount = (
+  { security }: Pick<ClientContext, 'security'>,
+  request: KibanaRequest
+): boolean => {
   const principal = security.authc.getPrincipal(request);
   return principal?.type === 'service_account' && principal.variant === 'uiam';
 };

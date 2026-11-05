@@ -76,6 +76,7 @@ describe('chooseApiKeySource', () => {
     [{ apiKeyAuthenticated: true, clone: false, reuse: true }, 'reuse'],
     [{ apiKeyAuthenticated: true, clone: true, reuse: true }, 'clone'],
     [{ apiKeyAuthenticated: true, clone: false, reuse: false }, 'clone'],
+    [{ apiKeyAuthenticated: true, clone: true, reuse: true, uiamServiceAccount: true }, 'grant'],
   ])('%j is %s', (input, expected) => {
     expect(chooseApiKeySource(input)).toBe(expected);
   });
@@ -424,6 +425,20 @@ describe('ApiKeysClient', () => {
       await client.resolve(request(`ApiKey ${callerEsKey}`), { name, subject });
 
       expect(apiKeys.cloneAsInternalUser).toHaveBeenCalled();
+    });
+
+    it('grants a UIAM key to a UIAM service account authenticated with an API key', async () => {
+      const { client, security, apiKeys, setCurrentUser } = setup();
+      setCurrentUser({ authentication_type: 'api_key' });
+      security.authc.getPrincipal.mockReturnValue({
+        type: 'service_account',
+        variant: 'uiam',
+      } as ReturnType<typeof security.authc.getPrincipal>);
+
+      await expect(
+        client.resolve(request('ApiKey essu_caller'), { name, subject, clone: true })
+      ).resolves.toEqual({ createdByUser: false, uiam: uiamKeys });
+      expect(apiKeys.cloneAsInternalUser).not.toHaveBeenCalled();
     });
 
     it('grants keys for a caller not authenticated with an API key', async () => {

@@ -4574,7 +4574,7 @@ describe('TaskManagerRunner', () => {
       }),
       allowReadingInvalidState: opts.allowReadingInvalidState || false,
       getPollInterval: () => 500,
-      apiKeyStrategy: new EsApiKeyStrategy(),
+      apiKeyStrategy: new EsApiKeyStrategy(mockLogger()),
       eventLogger: eventLoggerMock,
       enrichFakeRequest: opts.enrichFakeRequest,
     });

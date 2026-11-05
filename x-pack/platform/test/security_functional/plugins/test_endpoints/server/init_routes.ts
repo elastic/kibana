@@ -22,13 +22,13 @@ import {
   UIAM_INTERNAL_CALLER_ATTESTATION_HEADER,
   type UiamAPIKeysType,
 } from '@kbn/core-security-server';
+import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
 import { ROUTE_TAG_AUTH_FLOW } from '@kbn/security-plugin/server';
 import { restApiKeySchema } from '@kbn/security-plugin-types-server';
-import {
-  type BulkUpdateTaskResult,
-  type ConcreteTaskInstance,
-  getUiamApiKeySecret,
-  type TaskManagerStartContract,
+import type {
+  BulkUpdateTaskResult,
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 
 import type { PluginStartDependencies } from '.';

@@ -29,11 +29,7 @@ const mockTaskInstance = (overrides: Partial<ConcreteTaskInstance> = {}): Concre
 });
 
 describe('EsApiKeyStrategy', () => {
-  const strategy = new EsApiKeyStrategy();
-
-  test('shouldGrantUiam is false', () => {
-    expect(strategy.shouldGrantUiam).toBe(false);
-  });
+  const strategy = new EsApiKeyStrategy(loggingSystemMock.createLogger());
 
   test('typeToUse is ES', () => {
     expect(strategy.typeToUse).toBe(ApiKeyType.ES);
@@ -200,7 +196,8 @@ describe('EsApiKeyStrategy', () => {
       await strategy.markForInvalidation([{ apiKeyId: 'key-1' }], logger, soClient);
 
       expect(logger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to bulk mark 1 API keys for invalidation')
+        expect.stringContaining('Failed to bulk mark list of API keys ["key-1"] for invalidation'),
+        expect.anything()
       );
     });
   });

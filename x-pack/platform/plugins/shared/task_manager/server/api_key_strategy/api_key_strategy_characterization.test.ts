@@ -37,14 +37,22 @@ const REQUEST = '<request>';
 
 const CREDENTIALS_TAGS = ['serverless', 'task-manager', 'uiam', 'uiam-api-key-invalid-credentials'];
 const GRANT_TAGS = ['serverless', 'task-manager', 'uiam', 'uiam-api-key-grant'];
+const GRANT_FAILURE_META = { tags: GRANT_TAGS, error: { stack_trace: expect.any(String) } };
 const USAGE_TAGS = ['serverless', 'task-manager', 'uiam', 'uiam-api-key-missing'];
 
-const NOT_UIAM_COMPATIBLE_LOG = [
-  'Request credential is not UIAM-compatible, skipping UIAM API key grant. Only ES API keys will be used.',
+const missingUiamCredentialsLog = (taskType: string) => [
+  `Failed to create UIAM API key for task type: ${taskType}: Invalid or missing UIAM credentials`,
   { tags: CREDENTIALS_TAGS },
 ];
+const MISSING_UIAM_CREDENTIALS_LOGS = [
+  missingUiamCredentialsLog('report'),
+  missingUiamCredentialsLog('alert'),
+];
 const CLOUD_KEY_NOT_SUPPORTED =
-  'Cannot use a user-provided Cloud (UIAM) API key to schedule tasks in this environment; an Elasticsearch API key is required.';
+  'Cannot use a Cloud API key for task type: report. Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.';
+const UIAM_NOT_ENABLED = 'Failed to create UIAM API key for task type: report: UIAM is not enabled';
+const cloudKeyNotCreated = (taskType: string) =>
+  `Failed to create a Cloud API key for task type: ${taskType}`;
 
 const b64 = (value: string) => Buffer.from(value).toString('base64');
 
@@ -331,10 +339,24 @@ const esCloneSequence = (cloneOptions: { withUser?: boolean; refresh?: boolean }
 ];
 
 const uiamGrantSequence = (withUser = true) => [
+  API_KEYS_ENABLED_CALL,
   uiamGrantCall('report', withUser),
   uiamCreated(1),
   uiamGrantCall('alert', withUser),
   uiamCreated(2),
+];
+
+/** Each task type gets its UIAM key, then its ES key. */
+const esAndUiamGrantSequence = (options: { refresh?: boolean } = {}) => [
+  API_KEYS_ENABLED_CALL,
+  uiamGrantCall('report'),
+  uiamCreated(1),
+  esGrantCall('report', options),
+  created('es-granted-1'),
+  uiamGrantCall('alert'),
+  uiamCreated(2),
+  esGrantCall('alert', options),
+  created('es-granted-2'),
 ];
 
 const NULL_USER = { userProfileId: undefined, userName: undefined };
@@ -380,13 +402,7 @@ const CALLER_ES_KEY: ApiKeySOFields = {
   userScope: scope('es-user-id', { apiKeyCreatedByUser: true }),
 };
 
-const CALLER_UIAM_ENCODED_AS_ES_KEY: ApiKeySOFields = {
-  apiKey: b64('uiam-user-id:essu_uiam-user-secret'),
-  userScope: scope('uiam-user-id', { apiKeyCreatedByUser: true }),
-};
-
-const CALLER_UIAM_ENCODED_KEYS: ApiKeySOFields = {
-  apiKey: b64('uiam-user-id:essu_uiam-user-secret'),
+const CALLER_UIAM_ENCODED_KEY: ApiKeySOFields = {
   uiamApiKey: 'essu_uiam-user-secret',
   userScope: scope('uiam-user-id', { uiamApiKeyId: 'uiam-user-id', apiKeyCreatedByUser: true }),
 };
@@ -467,7 +483,7 @@ const GRANT_ROWS: GrantRow[] = [
           invalidation: ES_GRANTED_INVALIDATION,
           calls: esGrantSequence(),
           ...(isEsAndUiam(strategy) && !('onEsKey' in opts)
-            ? { logs: { debug: [NOT_UIAM_COMPATIBLE_LOG] } }
+            ? { logs: { debug: MISSING_UIAM_CREDENTIALS_LOGS } }
             : {}),
         }
       )
@@ -480,7 +496,7 @@ const GRANT_ROWS: GrantRow[] = [
         result: byTask(esGranted(1), esGranted(2)),
         invalidation: ES_GRANTED_INVALIDATION,
         calls: esGrantSequence({ refresh: false }),
-        ...(isEsAndUiam(strategy) ? { logs: { debug: [NOT_UIAM_COMPATIBLE_LOG] } } : {}),
+        ...(isEsAndUiam(strategy) ? { logs: { debug: MISSING_UIAM_CREDENTIALS_LOGS } } : {}),
       }
     )
   ),
@@ -497,7 +513,13 @@ const GRANT_ROWS: GrantRow[] = [
         credential: 'session',
         failure: { mock: 'grantAsInternalUser', call: 1, kind: 'null' },
       },
-      { error: 'Could not create API key.', calls: [API_KEYS_ENABLED_CALL, esGrantCall('report')] }
+      {
+        error: 'Could not create API key.',
+        calls: [API_KEYS_ENABLED_CALL, esGrantCall('report')],
+        ...(isEsAndUiam(strategy)
+          ? { logs: { debug: [missingUiamCredentialsLog('report')] } }
+          : {}),
+      }
     )
   ),
   ...ALL_STRATEGIES.map((strategy) =>
@@ -515,11 +537,12 @@ const GRANT_ROWS: GrantRow[] = [
           created('es-granted-1'),
           esGrantCall('alert'),
         ],
+        ...(isEsAndUiam(strategy) ? { logs: { debug: MISSING_UIAM_CREDENTIALS_LOGS } } : {}),
       }
     )
   ),
 
-  // UIAM session (Bearer essu_): ES keys first, then one UIAM key per task type.
+  // UIAM session (Bearer essu_): a UIAM key, then an ES key, per task type.
   row(
     { strategy: 'es', credential: 'uiam_session' },
     {
@@ -538,10 +561,7 @@ const GRANT_ROWS: GrantRow[] = [
             { apiKeyId: 'es-granted-1' },
             { apiKeyId: 'uiam-granted-1', uiamApiKey: 'essu_uiam-granted-secret-1' },
           ],
-          calls: [
-            ...esGrantSequence('refreshApiKey' in opts ? { refresh: false } : {}),
-            ...uiamGrantSequence(),
-          ],
+          calls: esAndUiamGrantSequence('refreshApiKey' in opts ? { refresh: false } : {}),
         }
       )
     )
@@ -567,20 +587,22 @@ const GRANT_ROWS: GrantRow[] = [
         result: byTask(esGranted(1), withUiamGranted(esGranted(2), 2)),
         invalidation: ES_GRANTED_INVALIDATION,
         calls: [
-          ...esGrantSequence(),
+          API_KEYS_ENABLED_CALL,
           uiamGrantCall('report'),
+          esGrantCall('report'),
+          created('es-granted-1'),
           uiamGrantCall('alert'),
           uiamCreated(2),
+          esGrantCall('alert'),
+          created('es-granted-2'),
         ],
         logs: {
           error: [
             [
               `Failed to create UIAM API key for task type: report: ${
-                kind === 'null'
-                  ? 'Failed to create a Cloud API key for task type : report'
-                  : 'uiam.grant boom'
+                kind === 'null' ? cloudKeyNotCreated('report') : 'uiam.grant boom'
               }`,
-              { tags: GRANT_TAGS },
+              GRANT_FAILURE_META,
             ],
           ],
         },
@@ -594,13 +616,13 @@ const GRANT_ROWS: GrantRow[] = [
       failure: { mock: 'uiam.grant', call: 1, kind: 'null' },
     },
     {
-      error: 'Failed to create a Cloud API key for task type : report',
-      calls: [...esGrantSequence(), uiamGrantCall('report')],
+      error: cloudKeyNotCreated('report'),
+      calls: [API_KEYS_ENABLED_CALL, uiamGrantCall('report')],
       logs: {
         error: [
           [
-            'Failed to create UIAM API key for task type: report: Failed to create a Cloud API key for task type : report',
-            { tags: GRANT_TAGS },
+            `Failed to create UIAM API key for task type: report: ${cloudKeyNotCreated('report')}`,
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -615,16 +637,18 @@ const GRANT_ROWS: GrantRow[] = [
     {
       error: 'uiam.grant boom',
       calls: [
-        ...esGrantSequence(),
+        API_KEYS_ENABLED_CALL,
         uiamGrantCall('report'),
         uiamCreated(1),
+        esGrantCall('report'),
+        created('es-granted-1'),
         uiamGrantCall('alert'),
       ],
       logs: {
         error: [
           [
             'Failed to create UIAM API key for task type: alert: uiam.grant boom',
-            { tags: GRANT_TAGS },
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -654,12 +678,7 @@ const GRANT_ROWS: GrantRow[] = [
   ...ALL_STRATEGIES.map((strategy) =>
     row(
       { strategy, credential: 'es_api_key', apiKeyInternal: false },
-      {
-        result: byTask(isEsAndUiam(strategy) ? withExternal(CALLER_ES_KEY) : CALLER_ES_KEY),
-        invalidation: [],
-        calls: [API_KEYS_ENABLED_CALL],
-      },
-      isEsAndUiam(strategy)
+      { result: byTask(CALLER_ES_KEY), invalidation: [], calls: [API_KEYS_ENABLED_CALL] }
     )
   ),
   ...ALL_STRATEGIES.flatMap((strategy) =>
@@ -670,7 +689,6 @@ const GRANT_ROWS: GrantRow[] = [
           result: byTask(esCloned(1), esCloned(2)),
           invalidation: ES_CLONED_INVALIDATION,
           calls: esCloneSequence({ refresh: !('refreshApiKey' in opts) }),
-          ...(isEsAndUiam(strategy) ? { logs: { debug: [NOT_UIAM_COMPATIBLE_LOG] } } : {}),
         }
       )
     )
@@ -683,7 +701,10 @@ const GRANT_ROWS: GrantRow[] = [
         opts: { cloneApiKey: true },
         failure: { mock: 'cloneAsInternalUser', call: 1, kind: 'null' },
       },
-      { error: 'Could not create API key.', calls: [API_KEYS_ENABLED_CALL, esCloneCall('report')] }
+      {
+        error: 'API key clone returned null (security feature may be disabled)',
+        calls: [API_KEYS_ENABLED_CALL, esCloneCall('report')],
+      }
     )
   ),
   ...ALL_STRATEGIES.map((strategy) =>
@@ -706,36 +727,27 @@ const GRANT_ROWS: GrantRow[] = [
     )
   ),
 
-  // UIAM key encoded as `base64(id:essu_...)`: the header is not recognized as UIAM.
+  // UIAM key encoded as `base64(id:essu_...)`: reused as a UIAM key, which needs UIAM.
   row(
     { strategy: 'es', credential: 'uiam_encoded_api_key' },
-    {
-      result: byTask(CALLER_UIAM_ENCODED_AS_ES_KEY),
-      invalidation: [],
-      calls: [API_KEYS_ENABLED_CALL],
-    },
-    true
+    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     row(
       { strategy, credential: 'uiam_encoded_api_key' },
-      { result: byTask(CALLER_UIAM_ENCODED_KEYS), invalidation: [], calls: [API_KEYS_ENABLED_CALL] }
+      { result: byTask(CALLER_UIAM_ENCODED_KEY), invalidation: [], calls: [API_KEYS_ENABLED_CALL] }
     ),
     row(
       { strategy, credential: 'uiam_encoded_api_key', apiKeyInternal: false },
       {
-        result: byTask(withExternal(CALLER_UIAM_ENCODED_KEYS)),
+        result: byTask(withExternal(CALLER_UIAM_ENCODED_KEY)),
         invalidation: [],
         calls: [API_KEYS_ENABLED_CALL],
       }
     ),
     row(
       { strategy, credential: 'uiam_encoded_api_key', opts: { onEsKey: true } },
-      {
-        result: byTask(CALLER_UIAM_ENCODED_AS_ES_KEY),
-        invalidation: [],
-        calls: [API_KEYS_ENABLED_CALL],
-      }
+      { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
     ),
   ]),
   ...ALL_STRATEGIES.map((strategy) =>
@@ -745,38 +757,34 @@ const GRANT_ROWS: GrantRow[] = [
         result: byTask(esCloned(1), esCloned(2)),
         invalidation: ES_CLONED_INVALIDATION,
         calls: esCloneSequence(),
-        ...(isEsAndUiam(strategy) ? { logs: { debug: [NOT_UIAM_COMPATIBLE_LOG] } } : {}),
       },
       isEsAndUiam(strategy)
     )
   ),
 
   // Raw user-created Cloud key `essu_...`.
-  row(
-    { strategy: 'es', credential: 'uiam_raw_api_key' },
-    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
-  ),
-  row(
-    { strategy: 'es', credential: 'uiam_raw_api_key', opts: { cloneApiKey: true } },
-    {
-      result: byTask(esCloned(1), esCloned(2)),
-      invalidation: ES_CLONED_INVALIDATION,
-      calls: esCloneSequence(),
-    },
-    true
+  ...[{}, { cloneApiKey: true }].map((opts) =>
+    row(
+      { strategy: 'es', credential: 'uiam_raw_api_key', opts },
+      { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
+    )
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     row(
       { strategy, credential: 'uiam_raw_api_key' },
-      { result: byTask(CALLER_UIAM_RAW_KEY), invalidation: [], calls: [] }
+      { result: byTask(CALLER_UIAM_RAW_KEY), invalidation: [], calls: [API_KEYS_ENABLED_CALL] }
     ),
     row(
       { strategy, credential: 'uiam_raw_api_key', apiKeyInternal: false },
-      { result: byTask(withExternal(CALLER_UIAM_RAW_KEY)), invalidation: [], calls: [] }
+      {
+        result: byTask(withExternal(CALLER_UIAM_RAW_KEY)),
+        invalidation: [],
+        calls: [API_KEYS_ENABLED_CALL],
+      }
     ),
     row(
       { strategy, credential: 'uiam_raw_api_key', apiKeyInternal: true },
-      { result: byTask(CALLER_UIAM_RAW_KEY), invalidation: [], calls: [] }
+      { result: byTask(CALLER_UIAM_RAW_KEY), invalidation: [], calls: [API_KEYS_ENABLED_CALL] }
     ),
     ...[
       { opts: { cloneApiKey: true } },
@@ -799,20 +807,13 @@ const GRANT_ROWS: GrantRow[] = [
         opts: { cloneApiKey: true },
         uiamAbsentAtGrant: true,
       },
-      { error: 'Failed to grant UIAM API key for task "task-1"', calls: [] }
-    ),
-    row(
-      { strategy, credential: 'uiam_raw_api_key', opts: { onEsKey: true } },
       { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
     ),
-    row(
-      { strategy, credential: 'uiam_raw_api_key', opts: { onEsKey: true, cloneApiKey: true } },
-      {
-        result: byTask(esCloned(1), esCloned(2)),
-        invalidation: ES_CLONED_INVALIDATION,
-        calls: esCloneSequence(),
-      },
-      true
+    ...[{ onEsKey: true }, { onEsKey: true, cloneApiKey: true }].map((opts) =>
+      row(
+        { strategy, credential: 'uiam_raw_api_key', opts },
+        { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
+      )
     ),
   ]),
   row(
@@ -823,13 +824,13 @@ const GRANT_ROWS: GrantRow[] = [
       failure: { mock: 'uiam.grant', call: 1, kind: 'null' },
     },
     {
-      error: 'Failed to grant UIAM API key for task "task-1"',
-      calls: [uiamGrantCall('report'), uiamGrantCall('alert'), uiamCreated(2)],
+      error: 'Failed to grant UIAM API key for task type: report',
+      calls: [API_KEYS_ENABLED_CALL, uiamGrantCall('report')],
       logs: {
         error: [
           [
-            'Failed to create UIAM API key for task type: report: Failed to create a Cloud API key for task type : report',
-            { tags: GRANT_TAGS },
+            `Failed to create UIAM API key for task type: report: ${cloudKeyNotCreated('report')}`,
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -843,13 +844,18 @@ const GRANT_ROWS: GrantRow[] = [
       failure: { mock: 'uiam.grant', call: 2, kind: 'throw' },
     },
     {
-      error: 'Failed to grant UIAM API key for task "task-3"',
-      calls: [uiamGrantCall('report'), uiamCreated(1), uiamGrantCall('alert')],
+      error: 'Failed to grant UIAM API key for task type: alert',
+      calls: [
+        API_KEYS_ENABLED_CALL,
+        uiamGrantCall('report'),
+        uiamCreated(1),
+        uiamGrantCall('alert'),
+      ],
       logs: {
         error: [
           [
             'Failed to create UIAM API key for task type: alert: uiam.grant boom',
-            { tags: GRANT_TAGS },
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -864,20 +870,15 @@ const GRANT_ROWS: GrantRow[] = [
         failure: { mock: 'uiam.grant', call: 1, kind },
       },
       {
-        error:
-          kind === 'null'
-            ? 'Failed to create a Cloud API key for task type : report'
-            : 'uiam.grant boom',
-        calls: [uiamGrantCall('report')],
+        error: kind === 'null' ? cloudKeyNotCreated('report') : 'uiam.grant boom',
+        calls: [API_KEYS_ENABLED_CALL, uiamGrantCall('report')],
         logs: {
           error: [
             [
               `Failed to create UIAM API key for task type: report: ${
-                kind === 'null'
-                  ? 'Failed to create a Cloud API key for task type : report'
-                  : 'uiam.grant boom'
+                kind === 'null' ? cloudKeyNotCreated('report') : 'uiam.grant boom'
               }`,
-              { tags: GRANT_TAGS },
+              GRANT_FAILURE_META,
             ],
           ],
         },
@@ -894,9 +895,6 @@ const GRANT_ROWS: GrantRow[] = [
           result: byTask(esCloned(1, NULL_USER), esCloned(2, NULL_USER)),
           invalidation: ES_CLONED_INVALIDATION,
           calls: esCloneSequence({ withUser: false, refresh: !('refreshApiKey' in opts) }),
-          ...(isEsAndUiam(strategy) && !('onEsKey' in opts)
-            ? { logs: { debug: [NOT_UIAM_COMPATIBLE_LOG] } }
-            : {}),
         }
       )
     )
@@ -905,12 +903,7 @@ const GRANT_ROWS: GrantRow[] = [
   // Fake request carrying a UIAM credential (no resolved user).
   row(
     { strategy: 'es', credential: 'fake_uiam_api_key' },
-    {
-      result: byTask(esCloned(1, NULL_USER), esCloned(2, NULL_USER)),
-      invalidation: ES_CLONED_INVALIDATION,
-      calls: esCloneSequence({ withUser: false }),
-    },
-    true
+    { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     ...[{}, { cloneApiKey: true }].map((opts) =>
@@ -925,23 +918,14 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'fake_uiam_api_key', opts: { onEsKey: true } },
-      {
-        result: byTask(esCloned(1, NULL_USER), esCloned(2, NULL_USER)),
-        invalidation: ES_CLONED_INVALIDATION,
-        calls: esCloneSequence({ withUser: false }),
-      },
-      true
+      { error: CLOUD_KEY_NOT_SUPPORTED, calls: [API_KEYS_ENABLED_CALL] }
     ),
   ]),
 
-  // UIAM service account principal.
+  // UIAM service account principal: Elasticsearch can't grant keys for it, so it needs UIAM.
   row(
     { strategy: 'es', credential: 'uiam_service_account' },
-    {
-      result: byTask(esGranted(1), esGranted(2)),
-      invalidation: ES_GRANTED_INVALIDATION,
-      calls: esGrantSequence(),
-    }
+    { error: UIAM_NOT_ENABLED, calls: [API_KEYS_ENABLED_CALL] }
   ),
   ...ES_AND_UIAM_STRATEGIES.flatMap((strategy) => [
     ...[{}, { cloneApiKey: true }].map((opts) =>
@@ -964,7 +948,7 @@ const GRANT_ROWS: GrantRow[] = [
     ),
     row(
       { strategy, credential: 'uiam_service_account', uiamAbsentAtGrant: true },
-      { error: 'Failed to create UIAM API key for task: UIAM is not enabled', calls: [] }
+      { error: UIAM_NOT_ENABLED, calls: [API_KEYS_ENABLED_CALL] }
     ),
   ]),
   row(
@@ -974,13 +958,13 @@ const GRANT_ROWS: GrantRow[] = [
       failure: { mock: 'uiam.grant', call: 1, kind: 'null' },
     },
     {
-      error: 'Failed to create a Cloud API key for task type : report',
-      calls: [uiamGrantCall('report')],
+      error: cloudKeyNotCreated('report'),
+      calls: [API_KEYS_ENABLED_CALL, uiamGrantCall('report')],
       logs: {
         error: [
           [
-            'Failed to create UIAM API key for task type: report: Failed to create a Cloud API key for task type : report',
-            { tags: GRANT_TAGS },
+            `Failed to create UIAM API key for task type: report: ${cloudKeyNotCreated('report')}`,
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -994,12 +978,17 @@ const GRANT_ROWS: GrantRow[] = [
     },
     {
       error: 'uiam.grant boom',
-      calls: [uiamGrantCall('report'), uiamCreated(1), uiamGrantCall('alert')],
+      calls: [
+        API_KEYS_ENABLED_CALL,
+        uiamGrantCall('report'),
+        uiamCreated(1),
+        uiamGrantCall('alert'),
+      ],
       logs: {
         error: [
           [
             'Failed to create UIAM API key for task type: alert: uiam.grant boom',
-            { tags: GRANT_TAGS },
+            GRANT_FAILURE_META,
           ],
         ],
       },
@@ -1025,12 +1014,12 @@ describe('API key strategy characterization', () => {
   });
 
   describe('createApiKeyStrategy', () => {
-    const ES_STRATEGY = { esAndUiam: false, shouldGrantUiam: false, typeToUse: ApiKeyType.ES };
+    const ES_STRATEGY = { esAndUiam: false, typeToUse: ApiKeyType.ES };
     const CASES: Array<{
       apiKeyType: ApiKeyType;
       grantUiamApiKeys: boolean;
       uiamPresent: boolean;
-      expected: { esAndUiam: boolean; shouldGrantUiam: boolean; typeToUse: ApiKeyType };
+      expected: { esAndUiam: boolean; typeToUse: ApiKeyType };
     }> = [
       {
         apiKeyType: ApiKeyType.ES,
@@ -1072,13 +1061,13 @@ describe('API key strategy characterization', () => {
         apiKeyType: ApiKeyType.ES,
         grantUiamApiKeys: true,
         uiamPresent: true,
-        expected: { esAndUiam: true, shouldGrantUiam: true, typeToUse: ApiKeyType.ES },
+        expected: { esAndUiam: true, typeToUse: ApiKeyType.ES },
       },
       {
         apiKeyType: ApiKeyType.UIAM,
         grantUiamApiKeys: true,
         uiamPresent: true,
-        expected: { esAndUiam: true, shouldGrantUiam: true, typeToUse: ApiKeyType.UIAM },
+        expected: { esAndUiam: true, typeToUse: ApiKeyType.UIAM },
       },
     ];
 
@@ -1101,7 +1090,6 @@ describe('API key strategy characterization', () => {
         );
         expect({
           esAndUiam: strategy instanceof EsAndUiamApiKeyStrategy,
-          shouldGrantUiam: strategy.shouldGrantUiam,
           typeToUse: strategy.typeToUse,
         }).toStrictEqual(expected);
       }
@@ -1285,8 +1273,8 @@ describe('API key strategy characterization', () => {
         task: { apiKey: '', userScope: taskScope(false) },
         expected: {
           es: NOT_SET(''),
-          'es_and_uiam:es': NOT_SET(''),
-          'es_and_uiam:uiam': NOT_SET(''),
+          'es_and_uiam:es': NOT_SET(undefined),
+          'es_and_uiam:uiam': NOT_SET(undefined),
         },
       },
       {
@@ -1490,9 +1478,8 @@ describe('API key strategy characterization', () => {
           uiamApiKey: 'essu_uiam-key',
           userScope: userScope({ apiKeyId: 'uiam-key-id', uiamApiKeyId: 'uiam-key-id' }),
         },
-        es: [{ apiKeyId: 'uiam-key-id' }, { apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' }],
+        es: [{ apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' }],
         esAndUiam: [{ apiKeyId: 'uiam-key-id', uiamApiKey: 'essu_uiam-key' }],
-        currentBehavior: true,
       },
       {
         title: 'uiamApiKeyId without uiamApiKey',
@@ -1509,32 +1496,24 @@ describe('API key strategy characterization', () => {
       {
         title: 'uiamApiKey only without uiamApiKeyId',
         source: { uiamApiKey: 'essu_uiam-key', userScope: userScope() },
-        es: [{ apiKeyId: 'es-key-id' }],
+        es: [],
         esAndUiam: [],
-        currentBehavior: true,
       },
       {
         title: 'userScope only (no key material)',
         source: { userScope: userScope() },
-        es: [{ apiKeyId: 'es-key-id' }],
+        es: [],
         esAndUiam: [],
-        currentBehavior: true,
       },
       {
-        title: 'base64(id:essu_) uiamApiKey is emitted as stored',
+        title: 'base64(id:essu_) uiamApiKey is emitted as the raw secret',
         source: {
           apiKey: 'es-key',
           uiamApiKey: b64('uiam-key-id:essu_uiam-key'),
           userScope: userScope({ uiamApiKeyId: 'uiam-key-id' }),
         },
-        es: [
-          { apiKeyId: 'es-key-id' },
-          { apiKeyId: 'uiam-key-id', uiamApiKey: b64('uiam-key-id:essu_uiam-key') },
-        ],
-        esAndUiam: [
-          { apiKeyId: 'es-key-id' },
-          { apiKeyId: 'uiam-key-id', uiamApiKey: b64('uiam-key-id:essu_uiam-key') },
-        ],
+        es: BOTH_TARGETS,
+        esAndUiam: BOTH_TARGETS,
       },
     ];
 
@@ -1571,6 +1550,14 @@ describe('API key strategy characterization', () => {
       const strategyLogger = loggingSystemMock.createLogger();
       const logger = loggingSystemMock.createLogger();
       const soClient = savedObjectsClientMock.create();
+      soClient.bulkCreate.mockImplementation(async (objects) => ({
+        saved_objects: objects.map(({ type, attributes }, index) => ({
+          id: `so-${index}`,
+          type,
+          attributes,
+          references: [],
+        })),
+      }));
       const strategy = createStrategy(kind, security, strategyLogger);
 
       await expect(
@@ -1660,7 +1647,12 @@ describe('API key strategy characterization', () => {
         ).resolves.toBeUndefined();
 
         expect(collectLogs(logger)).toStrictEqual({
-          error: [['Failed to bulk mark 2 API keys for invalidation: SO error']],
+          error: [
+            [
+              'Failed to bulk mark list of API keys ["a", "b"] for invalidation: SO error',
+              { error: { stack_trace: expect.any(String) } },
+            ],
+          ],
         });
         expect(collectLogs(strategyLogger)).toStrictEqual({});
       }
@@ -1820,7 +1812,7 @@ describe('API key strategy characterization', () => {
       [
         { strategy: 'es_and_uiam:uiam', credential: 'es_api_key', apiKeyInternal: false },
         `ApiKey ${b64('es-user-id:es-user-secret')}`,
-        true,
+        false,
       ],
       [
         { strategy: 'es_and_uiam:es', credential: 'uiam_raw_api_key', opts: { cloneApiKey: true } },

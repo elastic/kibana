@@ -14,18 +14,21 @@ export type ApiKeySource = 'reuse' | 'clone' | 'grant';
 /**
  * The one place that decides where a plugin's API keys come from. A caller authenticated with an
  * API key has its key reused, or cloned when the key is borrowed or the plugin never reuses keys.
- * Every other caller gets freshly granted keys.
+ * Every other caller, and a UIAM service account, which Elasticsearch can't clone, gets freshly
+ * granted keys.
  */
 export const chooseApiKeySource = ({
   apiKeyAuthenticated,
   clone,
   reuse,
+  uiamServiceAccount = false,
 }: {
   apiKeyAuthenticated: boolean;
   clone: boolean;
   reuse: boolean;
+  uiamServiceAccount?: boolean;
 }): ApiKeySource => {
-  if (!apiKeyAuthenticated) {
+  if (!apiKeyAuthenticated || uiamServiceAccount) {
     return 'grant';
   }
   return clone || !reuse ? 'clone' : 'reuse';

@@ -13,7 +13,7 @@ import type {
 } from '@kbn/core/server';
 import { ApiKeyType } from '../config';
 import type { ConcreteTaskInstance, TaskInstance } from '../task';
-import { getApiKeyAndUserScope } from '../lib/api_key_utils';
+import { getApiKeyAndUserScope } from '../api_keys/api_key_utils';
 import type {
   ApiKeyInvalidationSource,
   ApiKeySOFields,
@@ -21,11 +21,16 @@ import type {
   GrantApiKeysOpts,
   InvalidationTarget,
 } from './api_key_strategy';
-import { markApiKeysForInvalidation, recordTaskRunCredentialUsage } from './api_key_strategy';
+import {
+  getTaskInvalidationTargets,
+  markApiKeysForInvalidation,
+  recordTaskRunCredentialUsage,
+} from './api_key_strategy';
 
 export class EsApiKeyStrategy implements ApiKeyStrategy {
-  public readonly shouldGrantUiam = false;
   public readonly typeToUse = ApiKeyType.ES;
+
+  constructor(private readonly logger: Logger) {}
 
   async grantApiKeys(
     taskInstances: TaskInstance[],
@@ -33,7 +38,13 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
     security: SecurityServiceStart,
     opts?: GrantApiKeysOpts
   ): Promise<Map<string, ApiKeySOFields>> {
-    return getApiKeyAndUserScope(taskInstances, request, security, opts);
+    return getApiKeyAndUserScope(
+      taskInstances,
+      request,
+      security,
+      { logger: this.logger, uiamEnabled: false, uiamRequired: false },
+      opts
+    );
   }
 
   getApiKeyForFakeRequest(taskInstance: ConcreteTaskInstance): string | undefined {
@@ -46,27 +57,10 @@ export class EsApiKeyStrategy implements ApiKeyStrategy {
     return taskInstance.apiKey;
   }
 
+  // UIAM keys left on tasks by an earlier ES and UIAM configuration are still invalidated, so a
+  // rollback doesn't orphan them.
   getApiKeyIdsForInvalidation(source: ApiKeyInvalidationSource): InvalidationTarget[] {
-    const { userScope, uiamApiKey } = source;
-    if (!userScope || userScope.apiKeyCreatedByUser) {
-      return [];
-    }
-
-    const targets: InvalidationTarget[] = [{ apiKeyId: userScope.apiKeyId }];
-
-    // Defense-in-depth for rollbacks / config changes: a deployment may have
-    // previously run with `EsAndUiamApiKeyStrategy` and persisted a UIAM key
-    // alongside the ES key on existing tasks. If the deployment later falls
-    // back to `EsApiKeyStrategy` (e.g., `api_key_type` flipped back to `es`,
-    // or UIAM disabled), those UIAM keys would otherwise become orphaned and
-    // never be invalidated. Still emit an invalidation target for them so the
-    // invalidation task can clean them up. Invalidation is best-effort and
-    // idempotent, so it is safe to always emit when both values are present.
-    if (userScope.uiamApiKeyId && uiamApiKey) {
-      targets.push({ apiKeyId: userScope.uiamApiKeyId, uiamApiKey });
-    }
-
-    return targets;
+    return getTaskInvalidationTargets(source);
   }
 
   async markForInvalidation(

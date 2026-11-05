@@ -8,7 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { ApiKeys } from '../store/api_keys';
 import { chooseApiKeySource, isApiKeyAuthenticated } from './choose_source';
-import { clone, grant } from './grant';
+import { clone, grant, isUiamServiceAccount } from './grant';
 import { reuse } from './reuse';
 import type { ClientContext, ResolveOptions } from './types';
 
@@ -25,6 +25,7 @@ export const resolve = async (
     apiKeyAuthenticated: isApiKeyAuthenticated(context.security, request),
     clone: options.clone === true,
     reuse: context.profile.reuse,
+    uiamServiceAccount: isUiamServiceAccount(context, request),
   });
 
   switch (source) {

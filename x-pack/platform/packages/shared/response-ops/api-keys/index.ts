@@ -36,7 +36,10 @@ export { queueInvalidationTargets } from './src/invalidate/queue';
 export type { QueueResult } from './src/invalidate/queue';
 export { runInvalidate } from './src/invalidate/task/run_invalidate';
 export { createInvalidationRunner } from './src/invalidate/task/create_invalidation_runner';
-export type { InvalidationRunner } from './src/invalidate/task/create_invalidation_runner';
+export type {
+  InvalidationRunner,
+  InvalidationRunnerOptions,
+} from './src/invalidate/task/create_invalidation_runner';
 export type {
   ApiKeyInvalidationFn,
   PendingApiKeyInvalidation,

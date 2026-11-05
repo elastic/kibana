@@ -8,8 +8,18 @@
 import type { Logger } from '@kbn/logging';
 import type { CoreStart } from '@kbn/core-lifecycle-server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-shared';
-import type { ApiKeyInvalidationFn, UiamApiKeyInvalidationFn } from '@kbn/response-ops-api-keys';
-import { runInvalidate } from '@kbn/response-ops-api-keys';
+import type {
+  ApiKeyInvalidationFn,
+  ApiKeyInvalidationTaskState,
+  InvalidationRunner,
+  UiamApiKeyInvalidationFn,
+} from '@kbn/response-ops-api-keys';
+import {
+  apiKeyInvalidationTaskStateSchemaByVersion,
+  createInvalidationRunner,
+  emptyApiKeyInvalidationTaskState,
+} from '@kbn/response-ops-api-keys';
+import { TASK_MANAGER_PLUGIN_TAG } from '../api_keys/client';
 import type { TaskScheduling } from '../task_scheduling';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import { INVALIDATE_API_KEY_SO_NAME, TASK_SO_NAME } from '../saved_objects';
@@ -32,7 +42,7 @@ export async function scheduleInvalidateApiKeyTask(
       id: TASK_ID,
       taskType: TASK_TYPE,
       schedule: { interval },
-      state: {},
+      state: emptyApiKeyInvalidationTaskState,
       params: {},
     });
   } catch (e) {
@@ -65,6 +75,7 @@ export function registerInvalidateApiKeyTask(opts: RegisterInvalidateApiKeyTaskO
   taskTypeDictionary.registerTaskDefinitions({
     [TASK_TYPE]: {
       title: 'Invalidate task manager API keys',
+      stateSchemaByVersion: apiKeyInvalidationTaskStateSchemaByVersion,
       createTaskRunner: taskRunner({
         logger,
         configInterval,
@@ -89,76 +100,62 @@ type InvalidateApiKeysTaskRunnerOpts = Pick<
   | 'removalDelay'
 >;
 
-interface InvalidateApiKeysTaskState {
-  missing_api_key_retries?: Record<string, number>;
-}
-
-export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
+function createTaskManagerInvalidationRunner(
+  opts: Omit<InvalidateApiKeysTaskRunnerOpts, 'configInterval'>
+): InvalidationRunner {
   const {
     logger,
-    configInterval,
     coreStartServices,
     getEncryptedSavedObjectsClient,
     invalidateApiKeyFn,
     invalidateUiamApiKeyFn,
     removalDelay,
   } = opts;
-  return ({ taskInstance }: { taskInstance: { state: InvalidateApiKeysTaskState } }) => {
-    return {
-      async run() {
-        let missingApiKeyRetries = { ...(taskInstance.state.missing_api_key_retries ?? {}) };
-        try {
-          const [{ savedObjects }] = await coreStartServices();
-          const savedObjectsClient = savedObjects.createInternalRepository([
-            INVALIDATE_API_KEY_SO_NAME,
-            TASK_SO_NAME,
-          ]);
+  return createInvalidationRunner({
+    logger,
+    pluginTag: TASK_MANAGER_PLUGIN_TAG,
+    removalDelay,
+    getRunDependencies: async () => {
+      const [{ savedObjects }] = await coreStartServices();
+      const savedObjectsClient = savedObjects.createInternalRepository([
+        INVALIDATE_API_KEY_SO_NAME,
+        TASK_SO_NAME,
+      ]);
+      return {
+        encryptedSavedObjectsClient: getEncryptedSavedObjectsClient(),
+        getIdsUsedByRunningTasks: (runningTasks) =>
+          getSOIdsUsedByRunningTasks(runningTasks, savedObjectsClient),
+        invalidateApiKeyFn,
+        invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
+        savedObjectsClient,
+        savedObjectType: INVALIDATE_API_KEY_SO_NAME,
+        savedObjectTypesToQuery: [
+          {
+            type: TASK_SO_NAME,
+            apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.apiKeyId`,
+          },
+          // UIAM key ids live in their own attribute, so they are invisible to the
+          // `apiKeyId` query above. Without this entry a UIAM key that is still
+          // referenced by a live task would be invalidated: keys are granted per task
+          // type, so a single UIAM key is routinely shared by several tasks.
+          {
+            type: TASK_SO_NAME,
+            apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.uiamApiKeyId`,
+          },
+        ],
+      };
+    },
+  });
+}
 
-          const result = await runInvalidate({
-            encryptedSavedObjectsClient: getEncryptedSavedObjectsClient(),
-            getIdsUsedByRunningTasks: (runningTasks) =>
-              getSOIdsUsedByRunningTasks(runningTasks, savedObjectsClient),
-            invalidateApiKeyFn,
-            invalidateUiamApiKeyFn: invalidateUiamApiKeyFn?.(),
-            logger,
-            missingApiKeyRetries,
-            pluginTag: 'task-manager',
-            removalDelay,
-            savedObjectsClient,
-            savedObjectType: INVALIDATE_API_KEY_SO_NAME,
-            savedObjectTypesToQuery: [
-              {
-                type: TASK_SO_NAME,
-                apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.apiKeyId`,
-              },
-              // UIAM key ids live in their own attribute, so they are invisible to the
-              // `apiKeyId` query above. Without this entry a UIAM key that is still
-              // referenced by a live task would be invalidated: keys are granted per task
-              // type, so a single UIAM key is routinely shared by several tasks.
-              {
-                type: TASK_SO_NAME,
-                apiKeyAttributePath: `${TASK_SO_NAME}.attributes.userScope.uiamApiKeyId`,
-              },
-            ],
-          });
-          missingApiKeyRetries = result.missingApiKeyRetries;
-
-          logger.debug(`Invalidated a total of ${result.totalInvalidated} API keys.`);
-
-          return {
-            state: { missing_api_key_retries: missingApiKeyRetries },
-            schedule: { interval: configInterval },
-          };
-        } catch (e) {
-          logger.error(`Error invalidating task manager API keys - ${e.message}`, {
-            error: { stack_trace: e.stack },
-          });
-          return {
-            state: { missing_api_key_retries: missingApiKeyRetries },
-            schedule: { interval: configInterval },
-          };
-        }
-      },
-    };
-  };
+export function taskRunner(opts: InvalidateApiKeysTaskRunnerOpts) {
+  const runner = createTaskManagerInvalidationRunner(opts);
+  return ({ taskInstance }: { taskInstance: { state: Partial<ApiKeyInvalidationTaskState> } }) => ({
+    async run() {
+      return {
+        state: await runner.run(taskInstance.state),
+        schedule: { interval: opts.configInterval },
+      };
+    },
+  });
 }
