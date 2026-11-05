@@ -12,6 +12,7 @@ import { getFormattedError } from '../../common/errors';
 import { useKibana } from '../../hooks/use_kibana';
 import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../investigations/use_fetch_investigations';
 import { invalidateSignificantEventQueries } from './invalidate_significant_event_queries';
+import { markInvestigationStarted } from './recent_investigation_start';
 
 const TRIGGER_SUCCESS_TOAST_TITLE = i18n.translate(
   'xpack.nightshift.triggerEventInvestigation.successToastTitle',
@@ -74,6 +75,7 @@ export const useTriggerEventInvestigation = ({
       });
     },
     onSuccess: ({ investigation_id: investigationId }) => {
+      markInvestigationStarted(queryClient);
       toasts.addSuccess({
         title: TRIGGER_SUCCESS_TOAST_TITLE,
         text: TRIGGER_SUCCESS_TOAST_TEXT,
