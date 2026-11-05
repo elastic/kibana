@@ -7,6 +7,7 @@
 
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ComponentsNode } from '@kbn/isomer-components';
+import { MAX_TABLE_CELLS, MAX_TABLE_ROWS } from '@kbn/isomer-components';
 import { i18n } from '@kbn/i18n';
 import type { GraphAttachment, GraphAttachmentData, GraphEdge } from '../../common/attachments';
 import { GRAPH_ATTACHMENT_TYPE, graphAttachmentDataSchema } from '../../common/attachments';
@@ -76,11 +77,14 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
                     ),
                   },
                 ],
-                rows: edges.map(({ source, target, label }) => [
-                  toCell(source),
-                  ...(hasRelationshipLabels ? [label || null] : []),
-                  toCell(target),
-                ]),
+                ...fitRows(
+                  edges.map(({ source, target, label }) => [
+                    toCell(source),
+                    ...(hasRelationshipLabels ? [label || null] : []),
+                    toCell(target),
+                  ]),
+                  hasRelationshipLabels ? 3 : 2
+                ),
               },
             ]
           : [];
@@ -109,7 +113,10 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
                           ),
                   },
                 ],
-                rows: unconnected.map(({ id }) => [toCell(id)]),
+                ...fitRows(
+                  unconnected.map(({ id }) => [toCell(id)]),
+                  1
+                ),
               },
             ]
           : [];
@@ -130,6 +137,13 @@ export const createGraphAttachmentType = (): AttachmentTypeDefinition<
     },
     getTools: () => [],
   };
+};
+
+/** The first rows a table takes, with the total when some are left out, for its note. */
+const fitRows = (rows: Array<Array<string | null>>, columnCount: number) => {
+  const limit = Math.min(MAX_TABLE_ROWS, Math.floor(MAX_TABLE_CELLS / columnCount));
+
+  return rows.length > limit ? { rows: rows.slice(0, limit), totalRows: rows.length } : { rows };
 };
 
 const formatGraphAttachment = (data: GraphAttachmentData): string => {

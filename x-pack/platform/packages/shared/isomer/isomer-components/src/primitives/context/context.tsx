@@ -10,7 +10,6 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
 import { contextSlackRenderer } from './context_slack';
@@ -25,11 +24,7 @@ const contextSchema = z.object({
   type: z.literal('context'),
   items: fromChildren(
     'item',
-    z
-      .array(itemSchema)
-      .min(1)
-      .max(SLACK_LIMITS.contextElements)
-      .describe('Facts shown on one line, in order. 1 to 10.'),
+    z.array(itemSchema).min(1).describe('Facts shown on one line, in order. At least 1.'),
     { text: 'text' }
   ),
 });

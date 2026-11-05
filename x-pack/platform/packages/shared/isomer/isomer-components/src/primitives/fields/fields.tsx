@@ -10,7 +10,6 @@ import type { PrimitiveNode } from '@elastic/isomer-sdk';
 import { nodeAnchor, structuredValueSchema, z } from '@elastic/isomer-sdk';
 import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
-import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
 import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
@@ -32,11 +31,7 @@ const fieldsSchema = z.object({
   type: z.literal('fields'),
   items: fromChildren(
     'item',
-    z
-      .array(itemSchema)
-      .min(1)
-      .max(SLACK_LIMITS.fieldsPerSection)
-      .describe('Labeled values, in order. 1 to 10.'),
+    z.array(itemSchema).min(1).describe('Labeled values, in order. At least 1.'),
     { text: 'value' }
   ),
 });
