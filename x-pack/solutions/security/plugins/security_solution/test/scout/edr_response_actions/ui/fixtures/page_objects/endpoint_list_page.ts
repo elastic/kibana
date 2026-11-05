@@ -6,7 +6,7 @@
  */
 
 import { APP_LOAD_TIMEOUT_MS } from '@kbn/scout-security';
-import type { Locator, ScoutPage } from '@kbn/scout-security';
+import type { Locator, ScoutPage, SecurityPageObjects } from '@kbn/scout-security';
 
 const ENDPOINTS_APP_PATH = 'security/administration/endpoints';
 
@@ -27,6 +27,25 @@ export class EndpointListPage {
     // Until the user privileges and the list init (metadata list, then the search-bar
     // fields) finish, the page shows "Loading Endpoint Management" and no table. On a
     // cold first load that took over the default 10s action timeout in CI.
+    await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
+  }
+
+  /**
+   * Opens the list through the global search, without a page load, so in-memory state such
+   * as a running response console survives the navigation.
+   */
+  async openFromGlobalSearch(
+    chrome: SecurityPageObjects['chrome'],
+    spaceId: string
+  ): Promise<void> {
+    const spacePath = spaceId === 'default' ? '' : `/s/${spaceId}`;
+    await chrome.openSearch();
+    await chrome.search('endpoints');
+    // Two results link to this URL: "Assets / Endpoints" and its "Endpoints" child page.
+    await chrome
+      .getSearchOptionByUrl(`${spacePath}/app/${ENDPOINTS_APP_PATH}`)
+      .filter({ hasText: 'Assets / Endpoints / Endpoints' })
+      .click();
     await this.table.waitFor({ state: 'visible', timeout: APP_LOAD_TIMEOUT_MS });
   }
 
