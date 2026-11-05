@@ -17,7 +17,7 @@ const MAX_ROUND_TEXT_LENGTH = 65_536;
 
 /**
  * Shared Zod input schema for post-execution optimizer steps that inspect a completed
- * Nightshift investigation round (`cortexOptimize`, `memoryOptimize`, `decisionTreePrepare`,
+ * Nightshift investigation round (`wikiOptimize`, `memoryOptimize`, `decisionTreePrepare`,
  * `decisionTreeReinforce`).
  */
 export const investigationRoundInputsSchema = {

@@ -19,7 +19,7 @@ const createPlugin = (memoryEnabled = false) =>
   new NightshiftInvestigationsPlugin(
     coreMock.createPluginInitializerContext({
       enabled: true,
-      cortex: { enabled: false },
+      wiki: { enabled: false },
       decision_trees: { enabled: true },
       memory: { enabled: memoryEnabled },
       findings_recorder: { enabled: true },
@@ -37,7 +37,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     const plugin = new NightshiftInvestigationsPlugin(
       coreMock.createPluginInitializerContext({
         enabled: true,
-        cortex: { enabled: false },
+        wiki: { enabled: false },
         decision_trees: { enabled: false },
         memory: { enabled: false },
       })
@@ -138,7 +138,7 @@ describe('NightshiftInvestigationsPlugin setup', () => {
     );
   });
 
-  it('registers investigation steps when Cortex, memory, and decision trees are disabled', () => {
+  it('registers investigation steps when Wiki, memory, and decision trees are disabled', () => {
     const registerStepDefinition = jest.fn();
     const dependencies = {
       ...createSetupDeps(),
@@ -159,10 +159,10 @@ describe('NightshiftInvestigationsPlugin setup', () => {
         'nightshift.onlineEvals.score',
         'nightshift.sendNotifications',
         'nightshift.obtainSandbox',
-        'nightshift.cortexHydrate',
+        'nightshift.wikiHydrate',
         'nightshift.memoryMaterializeToSandbox',
         'nightshift.composeHydrateNotifications',
-        'nightshift.cortexOptimize',
+        'nightshift.wikiOptimize',
         'nightshift.memoryOptimize',
       ])
     );

@@ -10,12 +10,12 @@ import { configDeprecationsMock } from '@kbn/core/server/mocks';
 import { config } from './config';
 
 describe('Nightshift investigations configuration', () => {
-  it('enables Cortex by default', () => {
-    expect(config.schema.validate({ cortex: {} }).cortex.enabled).toBe(true);
+  it('enables Wiki by default', () => {
+    expect(config.schema.validate({ wiki: {} }).wiki.enabled).toBe(true);
   });
 
-  it('preserves an explicit Cortex opt-out', () => {
-    expect(config.schema.validate({ cortex: { enabled: false } }).cortex.enabled).toBe(false);
+  it('preserves an explicit Wiki opt-out', () => {
+    expect(config.schema.validate({ wiki: { enabled: false } }).wiki.enabled).toBe(false);
   });
 });
 
@@ -27,7 +27,7 @@ describe('Nightshift investigations configuration deprecations', () => {
       {
         xpack: {
           nightshift_investigations: {
-            cortex: { enabled: false },
+            wiki: { enabled: false },
             sandbox: {
               telemetry_connector_id: 'elasticsearch',
               telemetry_readable_indices: 'logs-*',
@@ -49,7 +49,7 @@ describe('Nightshift investigations configuration deprecations', () => {
 
     expect(levels).toEqual(['warning']);
     const { nightshift_investigations: migratedConfig } = migrated.xpack;
-    expect(migratedConfig).toEqual({ cortex: { enabled: false } });
+    expect(migratedConfig).toEqual({ wiki: { enabled: false } });
     expect(() => config.schema.validate(migratedConfig)).not.toThrow();
   });
 });

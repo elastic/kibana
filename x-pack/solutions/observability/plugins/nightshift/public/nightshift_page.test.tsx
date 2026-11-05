@@ -401,7 +401,7 @@ describe('NightshiftPage', () => {
     });
 
     it('renders the lazy page at /knowledge', async () => {
-      renderPage('/knowledge/cortex');
+      renderPage('/knowledge/wiki');
 
       expect(await screen.findByTestId('knowledgePageStub')).toBeInTheDocument();
       expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Knowledge');

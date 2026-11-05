@@ -182,7 +182,7 @@ The `evals_nightshift_investigations` server config extends `evals_tracing` when
 exports sandbox credentials. Otherwise it is plain `evals_tracing`, so the smoke eval needs no
 sandbox credentials. It enables the investigation engine, its `nightshift.enabled` feature flag
 and sandbox, pauses online evals (`nightshift.onlineEvals.paused`) so investigations are judged
-only by the suite, disables Cortex, and exports full Agent Builder payloads (user messages, system
+only by the suite, disables Wiki, and exports full Agent Builder payloads (user messages, system
 instructions, responses, tool arguments/results and conversation IDs) to the profile's configured
 destination. Trace-exporter headers and connector credentials reach Kibana through
 environment references in committed YAML, without generated secret files or credential arguments.
@@ -336,10 +336,10 @@ workflow.
 
 `NIGHTSHIFT_DATASETS=connector-probe` asks the hidden **Nightshift Assistant** agent
 (`nightshift.assistant`) each question in one `POST /api/agent_builder/converse` call. The
-assistant has the investigator's tools, connectors, Cortex and Semantic Memory hooks, but a short
+assistant has the investigator's tools, connectors, Wiki and Semantic Memory hooks, but a short
 direct-answer prompt that reads the workspace `.md` files only when needed, and no decision trees,
 so a probe takes a few model turns instead of a full investigation. Use it to iterate quickly on
-how the agent queries Elasticsearch. Cortex and memory optimize still run after each reply, so
+how the agent queries Elasticsearch. Wiki and memory optimize still run after each reply, so
 probes update the space's wiki and memories like investigations do.
 
 It is opt-in: unset and `all` never select it, because it needs a
