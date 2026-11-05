@@ -1249,6 +1249,19 @@ describe('useEcfDeployment staleness', () => {
         expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
       });
 
+      it('is stale with the template default when the namespace is cleared after launch', () => {
+        const setter = launched({ unified: 'prod' });
+        const { result } = renderNamespaceHook('');
+        expect(result.current.sectionProps.staleNamespaceByFamily?.unified).toBe('default');
+        act(() => {
+          result.current.sectionProps.onUpdateOpened('unified');
+        });
+        act(() => {
+          result.current.advanceStaleSnapshots();
+        });
+        expect(setter.mock.calls.at(-1)?.[0].launchedNamespaces).toEqual({ unified: 'default' });
+      });
+
       it('treats a stack without a namespace snapshot as launched with the template default', () => {
         launched(undefined);
         expect(renderNamespaceHook('').result.current.sectionProps.isStaleByFamily.unified).toBe(
