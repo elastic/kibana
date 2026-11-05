@@ -69,7 +69,7 @@ const triggerIcon = (automation: Automation): string => {
   const kind = automation.trigger.rows[0]?.kind;
   if (kind === 'slack') return 'logoSlack';
   if (kind === 'schedule') return 'clock';
-  return 'warning';
+  return 'bolt';
 };
 
 /** Step 3: the trial investigation, then the first automation and any that follow. */
