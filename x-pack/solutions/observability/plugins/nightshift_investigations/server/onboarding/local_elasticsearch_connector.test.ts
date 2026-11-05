@@ -16,7 +16,7 @@ import {
   resolveLocalElasticsearchUrl,
 } from './local_elasticsearch_connector';
 
-jest.mock('uuid', () => ({ v4: () => 'connector-1' }));
+jest.mock('uuid', () => ({ ...jest.requireActual('uuid'), v4: () => 'connector-1' }));
 
 const URL = 'https://es.example.com:9243';
 
@@ -183,7 +183,8 @@ describe('createLocalElasticsearchConnector', () => {
 });
 
 describe('createLocalElasticsearchConnectorLifecycleListener', () => {
-  const deleteParams = { connectorId: 'connector-1', connectorType: '.elasticsearch' } as never;
+  const connectorId = 'a1b2c3d4-e5f6-4a7b-8c9d-0e1f2a3b4c5d';
+  const deleteParams = { connectorId, connectorType: '.elasticsearch' } as never;
 
   const setup = () => {
     const logger = loggingSystemMock.createLogger();
@@ -206,10 +207,21 @@ describe('createLocalElasticsearchConnectorLifecycleListener', () => {
     await listener.onPostDelete!(deleteParams);
 
     expect(invalidateApiKey).toHaveBeenCalledWith({
-      name: 'nightshift-local-elasticsearch-connector-1',
+      name: `nightshift-local-elasticsearch-${connectorId}`,
     });
     expect(logger.info).toHaveBeenCalled();
   });
+
+  it.each(['*', 'nightshift-*', 'my-connector'])(
+    'ignores connectors whose id onboarding could not have generated, such as "%s"',
+    async (id) => {
+      const { listener, invalidateApiKey } = setup();
+
+      await listener.onPostDelete!({ ...deleteParams, connectorId: id });
+
+      expect(invalidateApiKey).not.toHaveBeenCalled();
+    }
+  );
 
   it('does not log an invalidation when the connector had no key', async () => {
     const { listener, invalidateApiKey, logger } = setup();

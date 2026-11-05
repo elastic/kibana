@@ -6,7 +6,7 @@
  */
 
 import { badRequest, forbidden } from '@hapi/boom';
-import { v4 as uuidv4 } from 'uuid';
+import { v4 as uuidv4, validate as isUuid } from 'uuid';
 import type { ActionsClient, ConnectorLifecycleListener } from '@kbn/actions-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { connectorsSpecs } from '@kbn/connector-specs';
@@ -153,6 +153,7 @@ export const createLocalElasticsearchConnectorLifecycleListener = ({
 }): ConnectorLifecycleListener => ({
   connectorTypes: [LOCAL_ELASTICSEARCH_CONNECTOR_TYPE_ID],
   onPostDelete: async ({ connectorId }) => {
+    if (!isUuid(connectorId)) return;
     const name = getLocalElasticsearchApiKeyName(connectorId);
     try {
       const esClient = await getInternalEsClient();
