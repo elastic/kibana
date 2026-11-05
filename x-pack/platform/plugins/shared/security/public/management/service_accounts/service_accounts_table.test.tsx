@@ -41,22 +41,27 @@ describe('ServiceAccountsTable', () => {
     hasMore = false,
     hasLoadMoreError = false,
     onDeleteAccount,
+    onViewWorkloads,
+    serviceAccounts = [firstAccount, secondAccount],
   }: {
     hasMore?: boolean;
     hasLoadMoreError?: boolean;
     onDeleteAccount?: (account: ServiceAccountTableItem) => void;
+    onViewWorkloads?: (account: ServiceAccountTableItem) => void;
+    serviceAccounts?: ServiceAccountTableItem[];
   } = {}) => {
     const onLoadMore = jest.fn();
 
     renderWithI18n(
       <EuiProvider>
         <ServiceAccountsTable
-          serviceAccounts={[firstAccount, secondAccount]}
+          serviceAccounts={serviceAccounts}
           hasMore={hasMore}
           isLoadingMore={false}
           hasLoadMoreError={hasLoadMoreError}
           onLoadMore={onLoadMore}
           onDeleteAccount={onDeleteAccount}
+          onViewWorkloads={onViewWorkloads}
         />
       </EuiProvider>
     );
@@ -171,20 +176,47 @@ describe('ServiceAccountsTable', () => {
     });
   });
 
-  it('explains the unavailable workload count on keyboard focus', async () => {
+  it('explains a workload count that could not be taken on keyboard focus', async () => {
     renderTable();
-    const row = screen.getByRole('row', { name: /incident-responder/ });
-    const cells = within(row).getAllByRole('cell');
-    const workloadCell = cells[cells.length - 1];
-    const unavailableCount = within(workloadCell).getByText('—');
+    const unavailableCount = screen.getByTestId('serviceAccountWorkloadCountUnavailable');
 
     expect(unavailableCount).toHaveAttribute('tabindex', '0');
     act(() => unavailableCount.focus());
 
     expect(unavailableCount).toHaveFocus();
     expect(await screen.findByRole('tooltip')).toHaveTextContent(
-      'Workload associations are not available yet.'
+      'Unable to count the workloads bound to this account.'
     );
+  });
+
+  describe('workload counts', () => {
+    it('opens the workloads of a bound account from its View link', () => {
+      const onViewWorkloads = jest.fn();
+      renderTable({ onViewWorkloads });
+
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('3');
+      const viewWorkloads = screen.getByTestId('serviceAccountViewWorkloads');
+      expect(viewWorkloads).toHaveAccessibleName('View the workloads bound to nightshift-relay');
+      fireEvent.click(viewWorkloads);
+
+      expect(onViewWorkloads).toHaveBeenCalledWith(firstAccount);
+    });
+
+    it('shows a plain zero, with no View link, for an account with no workloads', () => {
+      renderTable({
+        onViewWorkloads: jest.fn(),
+        serviceAccounts: [{ ...secondAccount, workloadCount: 0 }],
+      });
+
+      expect(screen.getByTestId('serviceAccountWorkloadCount')).toHaveTextContent('0');
+      expect(screen.queryByTestId('serviceAccountViewWorkloads')).toBeNull();
+    });
+
+    it('shows no View link when viewing is not offered', () => {
+      renderTable();
+
+      expect(screen.queryByTestId('serviceAccountViewWorkloads')).not.toBeInTheDocument();
+    });
   });
 
   it('loads the next cursor page on demand', async () => {

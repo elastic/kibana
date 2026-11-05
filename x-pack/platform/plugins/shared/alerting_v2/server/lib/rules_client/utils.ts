@@ -113,7 +113,7 @@ export const ruleDisabledError = (ruleId: string, name?: string): BulkOperationE
 
 /**
  * Whether a skipped executor task is worth a retry. `bulkUpdateSchedules` only
- * touches `idle` tasks, so a skipped task is in some non-idle state — but only a
+ * touches updatable tasks, so a skipped task is in some other state — but only a
  * mid-run task (`running`/`claiming`) frees up on its own and rotates on the
  * next attempt. A `failed`/`unrecognized`/`dead_letter`/`should_delete` task
  * will not, so it must not be reported as `RULE_ALREADY_RUNNING` ("try again
@@ -227,8 +227,11 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     updatedBy: RuleSavedObjectAttributes['updatedBy'];
     updatedAt: string;
     version: number;
+    template?: RuleSavedObjectAttributes['metadata']['template'];
   }
 ): RuleSavedObjectAttributes {
+  const { template, ...fields } = serverFields;
+
   return {
     kind: data.kind,
     metadata: {
@@ -237,6 +240,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
       tags: data.metadata.tags,
       routing_tags: data.metadata.routing_tags,
       builder_type: data.metadata.builder?.type,
+      template,
     },
     time_field: data.time_field,
     schedule: {
@@ -248,7 +252,7 @@ export function transformCreateRuleBodyToRuleSoAttributes(
     state_transition: data.state_transition,
     grouping: data.grouping,
     artifacts: data.artifacts,
-    ...serverFields,
+    ...fields,
   };
 }
 
@@ -352,6 +356,7 @@ export function buildUpdateRuleAttributes(
       tags: next.metadata.tags,
       routing_tags: next.metadata.routing_tags,
       builder_type: next.metadata.builder?.type,
+      template: existingAttrs.metadata.template,
     },
     time_field: next.time_field,
     schedule: { every: next.schedule.every, lookback: next.schedule.lookback },
@@ -473,6 +478,7 @@ export function transformRuleSoAttributesToRuleApiResponse(
       tags: attrs.metadata.tags,
       routing_tags: attrs.metadata.routing_tags,
       builder: attrs.metadata.builder_type ? { type: attrs.metadata.builder_type } : undefined,
+      // `metadata.template` stays in storage but is not part of the public response.
     },
     time_field: attrs.time_field,
     schedule: {

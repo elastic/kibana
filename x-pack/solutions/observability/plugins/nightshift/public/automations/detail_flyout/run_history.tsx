@@ -49,6 +49,7 @@ export interface Run {
   investigationId?: string;
   skipReason?: string | null;
   dailyLimit?: number;
+  error?: string;
 }
 
 export const statusLabels: Record<RunStatus, string> = {
@@ -84,6 +85,29 @@ const labels = {
   trigger: i18n.translate('xpack.nightshift.automations.detail.trigger', {
     defaultMessage: 'Trigger',
   }),
+};
+
+const getSkippedRunSummary = (
+  { skipReason, triggeredBy, dailyLimit }: Run,
+  fallbackSource: string
+) => {
+  const source = triggeredBy ?? fallbackSource;
+  if (skipReason === 'investigation_limit') {
+    return i18n.translate('xpack.nightshift.automations.detail.skippedInvestigationLimitSummary', {
+      defaultMessage: '{source} · Deployment-wide investigation limit reached',
+      values: { source },
+    });
+  }
+  if (skipReason === 'no_open_investigation') {
+    return i18n.translate('xpack.nightshift.automations.detail.skippedNoOpenInvestigationSummary', {
+      defaultMessage: '{source} · Alert recovered with no open investigations to link it to',
+      values: { source },
+    });
+  }
+  return i18n.translate('xpack.nightshift.automations.detail.skippedRunSummary', {
+    defaultMessage: '{source} · Daily trigger limit of {limit} reached',
+    values: { source, limit: dailyLimit ?? '—' },
+  });
 };
 
 export const STATUSES: RunStatus[] = ['succeeded', 'running', 'failed', 'skipped'];
@@ -560,17 +584,8 @@ export const RunHistory = ({
                       </EuiText>
                       <EuiText size="xs" color="subdued" className="eui-textTruncate">
                         {run.status === 'skipped'
-                          ? i18n.translate(
-                              'xpack.nightshift.automations.detail.skippedRunSummary',
-                              {
-                                defaultMessage: '{source} · Daily trigger limit of {limit} reached',
-                                values: {
-                                  source: run.triggeredBy ?? labels.trigger,
-                                  limit: run.dailyLimit ?? '—',
-                                },
-                              }
-                            )
-                          : automationName}
+                          ? getSkippedRunSummary(run, labels.trigger)
+                          : run.error ?? automationName}
                       </EuiText>
                     </button>
                   ))}

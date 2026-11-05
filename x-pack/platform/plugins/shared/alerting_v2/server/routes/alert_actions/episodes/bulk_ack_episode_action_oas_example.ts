@@ -12,17 +12,17 @@ import { buildOasOperation, invalidResponseExample } from '../../oas_utils';
 import type { AlertingOasOperationObject } from '../../oas_types';
 
 export const BULK_ACK_EPISODE_ACTION_REQUEST: BulkAckEpisodeActionBody = {
-  items: [{ alert_id: 'episode-1' }, { alert_id: 'episode-2' }],
+  items: [{ alert_id: 'alert-1' }, { alert_id: 'alert-2' }],
 };
 
 export const BULK_ACK_EPISODE_ACTION_RESPONSE: BulkResponse = {
   affected_count: 1,
   errors: [
     {
-      id: 'episode-2',
+      id: 'alert-2',
       error: {
         code: ALERTING_ERROR_CODES.ALERT_EPISODE_NOT_FOUND,
-        message: getAlertEpisodeNotFoundMessage('episode-2'),
+        message: getAlertEpisodeNotFoundMessage('alert-2'),
       },
     },
   ],
@@ -37,14 +37,14 @@ const INVALID_BULK_ACK_EPISODE_ACTION_RESPONSE = invalidResponseExample({
 export const bulkAckEpisodeActionOasExamples = (): AlertingOasOperationObject =>
   buildOasOperation({
     requestBody: {
-      name: 'bulkAckEpisodeActionRequest',
-      summary: 'Acknowledge two alert episodes',
+      name: 'bulkAckAlertActionRequest',
+      summary: 'Acknowledge two alerts',
       value: BULK_ACK_EPISODE_ACTION_REQUEST,
     },
     responses: {
       200: {
-        name: 'bulkAckEpisodeActionResponse',
-        summary: 'One action created, one episode not found',
+        name: 'bulkAckAlertActionResponse',
+        summary: 'One action created, one alert not found',
         value: BULK_ACK_EPISODE_ACTION_RESPONSE,
       },
       400: INVALID_BULK_ACK_EPISODE_ACTION_RESPONSE,

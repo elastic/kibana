@@ -15,6 +15,7 @@ import type {
   TestResult,
 } from '@playwright/test/reporter';
 import { BROWSER_CONSOLE_ERRORS_ATTACHMENT } from '@kbn/scout-info';
+import type { ScoutReportEvent } from '../../report';
 import { ScoutReportEventAction } from '../../report';
 import { ScoutPlaywrightReporter } from './playwright_reporter';
 
@@ -113,6 +114,46 @@ describe('ScoutPlaywrightReporter', () => {
 
   const getRunEndEvent = () =>
     getLoggedEvents().find((event) => event.event?.action === ScoutReportEventAction.RUN_END);
+
+  describe('test target attributes', () => {
+    const originalTargetAttributes = process.env.SCOUT_TARGET_ATTRIBUTES;
+
+    afterEach(() => {
+      if (originalTargetAttributes === undefined) {
+        delete process.env.SCOUT_TARGET_ATTRIBUTES;
+      } else {
+        process.env.SCOUT_TARGET_ATTRIBUTES = originalTargetAttributes;
+      }
+    });
+
+    const emitTestEndWith = (rawAttributes: string | undefined) => {
+      if (rawAttributes === undefined) {
+        delete process.env.SCOUT_TARGET_ATTRIBUTES;
+      } else {
+        process.env.SCOUT_TARGET_ATTRIBUTES = rawAttributes;
+      }
+
+      // Attributes are read in the constructor, so build the reporter after setting the env.
+      const attributeReporter = new ScoutPlaywrightReporter({ runId: 'attributes-run-id' });
+      const spy = jest
+        .spyOn((attributeReporter as any).report, 'logEvent')
+        .mockImplementation(() => {});
+      attributeReporter.onBegin(createMockConfig(), createMockSuite());
+      attributeReporter.onTestEnd(createMockTest(), createMockResult());
+
+      return (spy.mock.calls as Array<[ScoutReportEvent]>)
+        .map(([event]) => event)
+        .find((event) => event.event?.action === ScoutReportEventAction.TEST_END);
+    };
+
+    it('records the attributes declared via SCOUT_TARGET_ATTRIBUTES', () => {
+      expect(emitTestEndWith('fips')?.test_run?.target?.attributes).toEqual(['fips']);
+    });
+
+    it('records no attributes when none are declared', () => {
+      expect(emitTestEndWith(undefined)?.test_run?.target?.attributes).toEqual([]);
+    });
+  });
 
   describe('getScoutConfigInfo', () => {
     const getInfo = (configPath: string) => (reporter as any).getScoutConfigInfo(configPath);

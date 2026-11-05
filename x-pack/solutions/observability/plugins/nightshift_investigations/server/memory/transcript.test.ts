@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID } from '../tools/investigation_progress_report/tool';
+import { SET_HYPOTHESES_TOOL_ID } from '@kbn/agentic-investigations-plugin/common';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import {
   isEvidenceCall,
@@ -240,7 +240,9 @@ describe('readsSeededKnowledge', () => {
     ['nightshift_sandbox_bash', { command: 'cat /workspace/cortex/INDEX.md' }],
     ['nightshift_sandbox_bash', { command: 'grep -r redis cortex/ decision-trees/' }],
     ['nightshift_sandbox_bash', { command: 'ls /workspace/decision-trees' }],
-    ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.md' }],
+    ['nightshift_sandbox_bash', { command: 'cat /workspace/.connector-docs/elastic.md' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '.connector-docs/github.md' }],
+    ['nightshift_sandbox_bash', { command: 'ls /workspace/.connector-docs' }],
     [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: 'connectors.md' }],
     ['read_file', { path: '/workspace/decision-trees/decision_tree_checkout-redis-lag.md' }],
   ])('matches %s %j', (toolId, params) => {
@@ -255,6 +257,7 @@ describe('readsSeededKnowledge', () => {
       { command: 'esql "FROM traces-* | WHERE service.name == \\"cortex\\""' },
     ],
     ['nightshift_sandbox_bash', { command: 'cat /workspace/elastic.mdx' }],
+    [SANDBOX_VIEW_FILE_TOOL_ID, { file_path: '/workspace/.connector-docs-notes.md' }],
   ])('does not match %s %j', (toolId, params) => {
     expect(readsSeededKnowledge(toolId, params)).toBe(false);
   });
@@ -268,15 +271,11 @@ describe('renderMemoryTranscript with evidenceOnly', () => {
       'CORTEX_PAGE'
     ),
     tool('nightshift_sandbox_bash', { command: 'cat /workspace/decision-trees/x.md' }, 'TREE_BODY'),
-    tool(
-      SIGNIFICANT_EVENTS_INVESTIGATION_PROGRESS_REPORT_TOOL_ID,
-      { summary: 'PROGRESS_SUMMARY' },
-      'ok'
-    ),
+    tool(SET_HYPOTHESES_TOOL_ID, { hypotheses: [{ candidate: 'PROGRESS_SUMMARY' }] }, 'ok'),
     tool('nightshift_sandbox_bash', { command: 'esql "FROM metrics-redis*"' }, 'evicted_keys=4210'),
   ];
 
-  it('drops seeded reads and progress reports with their results, keeping the other calls', () => {
+  it('drops seeded reads and recorded findings with their results, keeping the other calls', () => {
     const text = renderMemoryTranscript({
       task: 't',
       investigation,

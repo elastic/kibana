@@ -6,17 +6,17 @@
  */
 
 import { z } from '@kbn/zod/v4';
-import { MAX_STREAM_NAME_LENGTH } from '@kbn/streams-schema';
+import { MAX_ID_LENGTH } from '@kbn/significant-events-schema';
 import { NIGHTSHIFT_API_PRIVILEGES } from '@kbn/nightshift-shared';
 import { createServerRoute } from '../../create_server_route';
 import { assertSignificantEventsAccess } from '../../utils/assert_significant_events_access';
 import { assertNotPaused } from '../../utils/assert_not_paused';
 
 const reconcileKnowledgeIndicatorsRoute = createServerRoute({
-  endpoint: 'POST /internal/streams/{streamName}/knowledge_indicators/_reconcile',
+  endpoint: 'POST /internal/streams/{sourceId}/knowledge_indicators/_reconcile',
   options: {
     access: 'internal',
-    summary: 'Reconcile knowledge indicators for a stream',
+    summary: 'Reconcile knowledge indicators for a source',
   },
   security: {
     authz: {
@@ -24,19 +24,19 @@ const reconcileKnowledgeIndicatorsRoute = createServerRoute({
     },
   },
   params: z.object({
-    path: z.object({ streamName: z.string().max(MAX_STREAM_NAME_LENGTH) }),
+    path: z.object({ sourceId: z.string().max(MAX_ID_LENGTH) }),
   }),
   handler: async ({ params, request, getScopedClients, server, maintenanceService }) => {
-    const { getKnowledgeIndicatorClient, licensing, streamsClient } = await getScopedClients({
+    const { getKnowledgeIndicatorClient, licensing, sourcesClient } = await getScopedClients({
       request,
     });
 
     await assertSignificantEventsAccess({ server, licensing });
     await assertNotPaused({ maintenanceService, request });
 
-    const definition = await streamsClient.getStream(params.path.streamName);
+    const { source } = await sourcesClient.get(params.path.sourceId);
     const kiClient = await getKnowledgeIndicatorClient();
-    return kiClient.reconcileStream(definition);
+    return kiClient.reconcileSource(source.id);
   },
 });
 

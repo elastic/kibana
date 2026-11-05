@@ -5,8 +5,10 @@
  * 2.0.
  */
 
+import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/ui';
 import { test, RULES_V1_READ_ROLE, RULES_V1_AND_V2_READ_ROLE } from '../fixtures';
+import { setAlertingV2Enabled } from '../../../common/ui/fixtures/alerting_v2_setting';
 
 const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/|$|\?|#)/;
 
@@ -19,33 +21,17 @@ const RULES_URL_RE = /\/app\/management\/insightsAndAlerting\/triggersActions(\/
  * Logs always moves from a tab into the "More" menu instead — that placement
  * is gated on the flag alone, not on any privilege (v2 rules or otherwise).
  * See `rules_page_logs_visibility.spec.ts` for the menu-item assertions.
- *
- * Custom-role auth (`browserAuth.loginWithCustomRole`) is not yet supported on
- * Elastic Cloud Hosted, so this suite only runs on local stateful (classic)
- * until ECH support lands.
  */
-const ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH = '/api/kibana/global_settings/alerting:v2:enabled';
-
 test.describe(
   'Rules page heading tabs - alerting v2 privileges',
-  { tag: '@local-stateful-classic' },
+  { tag: tags.stateful.classic },
   () => {
     test.beforeAll(async ({ kbnClient }) => {
-      await kbnClient.request({
-        method: 'POST',
-        path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-        headers: { 'kbn-xsrf': 'scout' },
-        body: { value: true },
-      });
+      await setAlertingV2Enabled(kbnClient, true);
     });
 
     test.afterAll(async ({ kbnClient }) => {
-      await kbnClient.request({
-        method: 'DELETE',
-        path: ALERTING_V2_ENABLED_GLOBAL_SETTING_PATH,
-        headers: { 'kbn-xsrf': 'scout' },
-        ignoreErrors: [404],
-      });
+      await setAlertingV2Enabled(kbnClient, false);
     });
 
     test('hides the V2 rules tab when the user can read both surfaces', async ({

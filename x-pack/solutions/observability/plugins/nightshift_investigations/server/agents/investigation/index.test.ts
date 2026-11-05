@@ -8,13 +8,15 @@
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import { platformCoreTools, platformSignificantEventsTools } from '@kbn/agent-builder-common/tools';
+import { platformCoreTools } from '@kbn/agent-builder-common/tools';
 import type { AgentBaseConfiguration, AgentTypeDefinition } from '@kbn/agent-builder-server/agents';
 import {
   getInvestigationAgentType,
   registerInvestigationAgentType,
   NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '.';
+import { TIME_CONVERTER_TOOL_ID } from '../../tools/time_converter/tool';
+import { SLACK_READ_TOOL_ID } from '../../tools/slack_read/tool';
 import { SANDBOX_BASH_TOOL_ID } from '../../tools/sandbox_bash/tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../../tools/sandbox_bash/str_replace_tool';
@@ -27,53 +29,59 @@ const SANDBOX_TOOL_IDS = [
   SANDBOX_WRITE_FILE_TOOL_ID,
 ];
 
-const staticBase = (type: AgentTypeDefinition): AgentBaseConfiguration => {
-  if (typeof type.baseConfiguration === 'function') {
-    throw new Error('expected a static base configuration');
+const baseFor = async (
+  type: AgentTypeDefinition,
+  spaceId = 'default'
+): Promise<AgentBaseConfiguration> => {
+  if (typeof type.baseConfiguration !== 'function') {
+    throw new Error('expected a per-space base configuration');
   }
-  return type.baseConfiguration;
+  return type.baseConfiguration({ request: httpServerMock.createKibanaRequest(), spaceId });
 };
 
 describe('Nightshift investigation agent type', () => {
   it('registers under the Nightshift investigation type id', () => {
     const agentBuilder = agentBuilderMocks.createSetup();
 
-    registerInvestigationAgentType(agentBuilder, { sandboxEnabled: false, cortexEnabled: false });
+    registerInvestigationAgentType(agentBuilder, {
+      sandboxEnabled: false,
+      cortexEnabled: false,
+    });
 
     expect(agentBuilder.agents.registerType).toHaveBeenCalledWith(
       expect.objectContaining({ id: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID })
     );
   });
 
-  it('carries a standalone sandbox prompt and no Elastic tools', () => {
-    const base = staticBase(
+  it('carries a standalone sandbox prompt and no Elastic tools', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
     );
 
     expect(base).toMatchObject({
       enable_elastic_capabilities: false,
       skill_ids: [],
-      workflow_ids: ['system-nightshift-sandbox-materialize-workspace'],
-      post_execution_workflow_ids: ['system-nightshift-agent-optimize'],
+      workflow_ids: ['system-nightshift-sandbox-materialize-workspace-bound-default'],
+      post_execution_workflow_ids: ['system-nightshift-agent-optimize-bound-default'],
     });
     expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
       ...SANDBOX_TOOL_IDS,
+      TIME_CONVERTER_TOOL_ID,
+      SLACK_READ_TOOL_ID,
     ]);
     expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeEsql);
+    expect(base.tools?.[0]?.tool_ids).not.toContain(platformCoreTools.executeConnectorSubAction);
     // Its own prompt, not the significant-events one: it documents the sandbox query path.
-    expect(base.instructions).toContain('/workspace/elastic.md');
+    expect(base.instructions).toContain('/workspace/.connector-docs/elastic.md');
     expect(base.instructions).not.toContain('platform_core_execute_esql');
     expect(base.instructions).not.toContain('/workspace/decision-trees/monitors.md');
-    expect(base.instructions).toContain('<alert_data>');
-    expect(base.instructions).toContain('Affected entity');
-    expect(base.instructions).not.toContain('inputs.context.alerts');
-    expect(base.instructions).toContain('FROM $.<stream-name>');
-    expect(base.instructions).toContain('FROM <stream-name>, <stream-name>.*');
+    expect(base.instructions).toContain('KNOWLEDGE CORTEX');
+    expect(base.instructions).toContain('/workspace/cortex/README.md');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
-  it('adds Semantic Memory context and workflows when memory is enabled', () => {
-    const base = staticBase(
+  it('adds Semantic Memory context and workflows when memory is enabled', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: false,
@@ -81,14 +89,17 @@ describe('Nightshift investigation agent type', () => {
       })
     );
 
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
     expect(base.instructions).toContain('/workspace/memories/.index.json');
-    expect(base.instructions).not.toContain('{{semantic_memory_load_step}}');
   });
 
-  it('hydrates and reinforces decision trees through the combined workflows', () => {
-    const base = staticBase(
+  it('hydrates and reinforces decision trees through the combined workflows', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
@@ -98,46 +109,96 @@ describe('Nightshift investigation agent type', () => {
 
     // One pre-hook, not two: decision trees hydrate as a third parallel branch of the
     // combined materialize workflow, which already carries the sandbox_id they need.
-    expect(base.workflow_ids).toEqual(['system-nightshift-sandbox-materialize-workspace']);
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-default',
+    ]);
     // One post-hook, not two: reinforcement is the tail phase of the combined optimize
     // workflow. Listing both would reinforce every round twice.
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
+    ]);
     expect(base.instructions).toContain('/workspace/decision-trees/monitors.md');
-    expect(base.instructions).not.toContain('{{decision_trees_load_step}}');
     expect(base.instructions).not.toContain('{{decision_trees_section}}');
   });
 
-  it('drops both cortex workflows when cortex is disabled', () => {
-    const base = staticBase(
+  it('drops both cortex workflows when cortex is disabled', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
     );
 
     expect(base.workflow_ids).toBeUndefined();
     expect(base.post_execution_workflow_ids).toBeUndefined();
+    expect(base.instructions).not.toContain('/workspace/cortex/');
+    expect(base.instructions).not.toContain('KNOWLEDGE CORTEX');
+    expect(base.instructions).not.toContain('{{cortex_load_step}}');
+    expect(base.instructions).not.toContain('{{knowledge_cortex_section}}');
   });
 
-  it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', () => {
-    const base = staticBase(
+  it('drops the pre-execution workflow when cortex is on but the sandbox is not configured', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: true })
     );
 
     expect(base.workflow_ids).toBeUndefined();
-    expect(base.post_execution_workflow_ids).toEqual(['system-nightshift-agent-optimize']);
-    expect(base.tools?.[0]?.tool_ids).toEqual([
-      platformSignificantEventsTools.reportInvestigationProgress,
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-default',
     ]);
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
   });
 
-  it('allow-lists the telemetry connector when one is configured', () => {
-    const base = staticBase(
+  it('adds inherited connectors to the allow-list when a resolver is given', async () => {
+    const base = await baseFor(
       getInvestigationAgentType({
         sandboxEnabled: true,
         cortexEnabled: true,
-        telemetryConnectorId: 'elasticsearch-telemetry',
+        getInheritedConnectorIds: async () => ['github', 'elasticsearch', 'github'],
       })
     );
 
-    expect(base.connector_ids).toEqual(['elasticsearch-telemetry']);
+    expect(base.connector_ids).toEqual(['github', 'elasticsearch']);
+  });
+
+  it('offers only the time converter and the Slack read tool when the sandbox is not configured', async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: false, cortexEnabled: false })
+    );
+
+    expect(base.tools?.[0]?.tool_ids).toEqual([TIME_CONVERTER_TOOL_ID, SLACK_READ_TOOL_ID]);
+  });
+
+  it('instructs the agent to answer in its final message and not to record findings', async () => {
+    const { instructions } = await baseFor(
+      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
+    );
+
+    expect(instructions).not.toContain('reply_user');
+    expect(instructions).toContain('untrusted data');
+    expect(instructions).toContain('final message');
+    for (const tool of [
+      'set_conversation_metadata',
+      'agentic_investigations.set_impact',
+      'agentic_investigations.set_hypotheses',
+      'proposals.create',
+    ]) {
+      expect(instructions).not.toContain(tool);
+    }
+  });
+
+  it("runs its hooks through the space's bound hook entry points", async () => {
+    const base = await baseFor(
+      getInvestigationAgentType({
+        sandboxEnabled: true,
+        cortexEnabled: true,
+      }),
+      'sa-a'
+    );
+
+    expect(base.workflow_ids).toEqual([
+      'system-nightshift-sandbox-materialize-workspace-bound-sa-a',
+    ]);
+    expect(base.post_execution_workflow_ids).toEqual([
+      'system-nightshift-agent-optimize-bound-sa-a',
+    ]);
   });
 
   describe('custom context', () => {
@@ -161,26 +222,27 @@ describe('Nightshift investigation agent type', () => {
       return type.baseConfiguration(ctx);
     };
 
-    const staticInstructions = staticBase(
-      getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })
-    ).instructions;
+    const baseWithoutCustomContext = async (): Promise<AgentBaseConfiguration> =>
+      baseFor(
+        getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true }),
+        ctx.spaceId
+      );
 
     it("appends the space's custom context to the instructions on every resolve", async () => {
       const getCustomContextInstructions = jest.fn().mockResolvedValue(CUSTOM_CONTEXT);
 
       const base = await resolveBase(getCustomContextInstructions);
 
+      const plain = await baseWithoutCustomContext();
       expect(getCustomContextInstructions).toHaveBeenCalledWith(ctx);
-      expect(base.instructions).toBe(`${staticInstructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
-      expect(base.tools).toEqual(
-        staticBase(getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: true })).tools
-      );
+      expect(base.instructions).toBe(`${plain.instructions?.trimEnd()}\n\n${CUSTOM_CONTEXT}\n`);
+      expect(base.tools).toEqual(plain.tools);
     });
 
     it('keeps the base instructions when the space has no custom context', async () => {
       const base = await resolveBase(jest.fn().mockResolvedValue(''));
 
-      expect(base.instructions).toBe(staticInstructions);
+      expect(base.instructions).toBe((await baseWithoutCustomContext()).instructions);
     });
 
     it('keeps the base instructions and logs a warning when custom context cannot be read', async () => {
@@ -188,10 +250,17 @@ describe('Nightshift investigation agent type', () => {
 
       const base = await resolveBase(jest.fn().mockRejectedValue(new Error('boom')), logger);
 
-      expect(base.instructions).toBe(staticInstructions);
+      expect(base.instructions).toBe((await baseWithoutCustomContext()).instructions);
       expect(logger.warn).toHaveBeenCalledWith(
         'Failed to load custom context for space "space-a": boom'
       );
     });
   });
+});
+
+it('starts with no connectors: they come from the connectors users assign', async () => {
+  const base = await baseFor(
+    getInvestigationAgentType({ sandboxEnabled: true, cortexEnabled: false })
+  );
+  expect(base.connector_ids).toEqual([]);
 });

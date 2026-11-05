@@ -5,9 +5,18 @@
  * 2.0.
  */
 
+import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
-import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiToolTip,
+  useEuiTheme,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 
 const labels = {
   save: i18n.translate('xpack.nightshift.automations.flyout.save', { defaultMessage: 'Save' }),
@@ -46,22 +55,31 @@ export const AutomationFlyoutFooter = ({
             isEnabled: true,
             testSubject: 'submitAndEnableAutomation',
           },
-        ].map(({ label, isEnabled, testSubject }) => (
-          <EuiFlexItem key={testSubject} grow={false}>
-            <EuiToolTip content={saveBlocker}>
-              <EuiButton
-                fill={isEnabled}
-                size="s"
-                isDisabled={!canSave}
-                isLoading={isSaving}
-                onClick={() => onSave(isEnabled)}
-                data-test-subj={testSubject}
-              >
-                {label}
-              </EuiButton>
-            </EuiToolTip>
-          </EuiFlexItem>
-        ))}
+        ].map(({ label, isEnabled, testSubject }) => {
+          const SaveButton = isEnabled ? EuiButton : EuiButtonEmpty;
+          return (
+            <EuiFlexItem key={testSubject} grow={false}>
+              <EuiToolTip content={saveBlocker}>
+                <SaveButton
+                  {...(isEnabled && { fill: true })}
+                  size="s"
+                  isDisabled={!canSave}
+                  isLoading={isSaving}
+                  onClick={() => onSave(isEnabled)}
+                  data-test-subj={testSubject}
+                  {...getEbtProps({
+                    action: isEnabled
+                      ? NIGHTSHIFT_EBT_ACTIONS.SAVE_AND_ENABLE_AUTOMATION
+                      : NIGHTSHIFT_EBT_ACTIONS.SAVE_AUTOMATION,
+                    element: NIGHTSHIFT_EBT_ELEMENTS.AUTOMATIONS_CREATE_FLYOUT,
+                  })}
+                >
+                  {label}
+                </SaveButton>
+              </EuiToolTip>
+            </EuiFlexItem>
+          );
+        })}
       </EuiFlexGroup>
     </footer>
   );

@@ -33,6 +33,7 @@ import { WorkflowExecutionState } from '../workflow_execution_state';
 function buildHarness(opts: { evictionMinBytes?: number; logger?: Logger } = {}) {
   const workflowExecutionRepository = {
     updateWorkflowExecution: jest.fn(),
+    getWorkflowExecutionCancelState: jest.fn().mockResolvedValue(undefined),
   } as unknown as jest.Mocked<WorkflowExecutionRepository>;
 
   const stepExecutionRepository = {

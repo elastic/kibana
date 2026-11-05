@@ -10,7 +10,8 @@ import { expect } from '@kbn/scout-oblt/ui';
 import { test } from '../../../fixtures';
 import { deleteRuleByName } from '../../../fixtures/helpers';
 
-test.describe(
+// Failing: See https://github.com/elastic/kibana/issues/247693
+test.describe.skip(
   'Custom Threshold Rule - Ad-hoc Data View',
   { tag: [...tags.stateful.classic, ...tags.serverless.observability.complete] },
   () => {

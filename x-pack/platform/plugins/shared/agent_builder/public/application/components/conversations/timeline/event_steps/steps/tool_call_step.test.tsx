@@ -86,6 +86,21 @@ describe('ToolCallStep', () => {
     expect(badge?.className).toContain('danger');
   });
 
+  it('shows a stopped flyout when the turn is aborted and the step has no results', async () => {
+    const user = userEvent.setup();
+    const step = createToolCallStep({
+      tool_call_id: 'call-1',
+      tool_id: internalTools.runSubagent,
+      params: {},
+      results: [],
+    });
+    renderWithProviders(<ToolCallStep step={step} isAborted />);
+    expect(screen.getByRole('status')).toHaveTextContent('stopped');
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Stopped');
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+  });
+
   describe('with FlyoutStackContext', () => {
     it('delegates click to context and renders no flyout', async () => {
       const user = userEvent.setup();

@@ -25,6 +25,7 @@ dependsOn:
   - '@kbn/profiler'
   - '@kbn/workspaces'
   - '@kbn/utility-types'
+  - '@kbn/std'
 tags:
   - shared-server
   - package
@@ -37,6 +38,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.js'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

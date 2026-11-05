@@ -9,6 +9,7 @@ import React, { memo } from 'react';
 import { EuiFlyoutBody, EuiFlyoutHeader } from '@elastic/eui';
 import type { EntityType } from '@kbn/entity-store/public';
 import type { EntityType as SecurityEntityType } from '../../../../../../common/entity_analytics/types';
+import type { EntityViewMode } from '../../../../../../common/entity_analytics/entity_store/resolution_group';
 import { EntityIconByType } from '../../../../../entity_analytics/components/entity_store/entity_icon_by_type';
 import { ResolutionGroupTab } from '../../../../../entity_analytics/components/entity_resolution/resolution_group_tab';
 import { ToolsFlyoutHeader } from '../../../../shared/components/tools_flyout_header';
@@ -25,6 +26,11 @@ export interface ResolutionProps {
   entityName: string;
   /** Scope id for downstream containers and queries. */
   scopeId: string;
+  /**
+   * View mode of the originating entity flyout. In `resolved` mode the target entity's row is
+   * openable too (it opens the target's single-entity view).
+   */
+  mode?: EntityViewMode;
   /** Opens the originating entity flyout as a child. */
   onShowEntity?: () => void;
   /** Opens a related entity flyout as a child (used instead of the legacy expandable flyout). */
@@ -46,6 +52,7 @@ export const Resolution = memo(
     entityType,
     entityName,
     scopeId,
+    mode,
     onShowEntity,
     onShowRelatedEntity,
   }: ResolutionProps) => (
@@ -63,6 +70,7 @@ export const Resolution = memo(
           entityId={entityId}
           entityType={entityType}
           scopeId={scopeId}
+          mode={mode}
           onShowEntity={onShowRelatedEntity}
         />
       </EuiFlyoutBody>

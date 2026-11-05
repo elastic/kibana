@@ -7,10 +7,8 @@
 
 import React from 'react';
 import {
-  EuiBadge,
   EuiButton,
   EuiButtonEmpty,
-  EuiCallOut,
   EuiFlexGrid,
   EuiFlexGroup,
   EuiFlexItem,
@@ -21,16 +19,17 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useLocation } from 'react-router-dom';
 
 import { ServiceRow } from './service_row';
 import { SIGNAL_TYPE_LABELS } from './signal_type_badge';
 import { useServicesStep } from './use_services_step';
-import { getCategoryTitle } from '../../service_categories';
 import { ServiceSearchFilter } from '../service_search_filter';
-import { DataFormatSelect } from './data_format_select';
+import { DataSchemaSection } from './data_schema_section';
 import { useOnboardingFlow } from '../../onboarding_flow_context';
+import { StepFooter } from '../step_footer';
 
 interface ServicesStepProps {
   onContinue: () => void;
@@ -43,25 +42,30 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
     setSignalFilter,
     searchQuery,
     setSearchQuery,
-    categories,
-    activeCategory,
-    setSelectedCategory,
-    servicesInCategory,
-    duplicateNamesInCategory,
+    filteredServices,
+    duplicateNames,
     selectedSet,
-    categoryStats,
     isReady,
     handleToggle,
-    allInCategorySelected,
-    handleSelectAllInCategory,
-    handleDeselectAllInCategory,
+    allVisibleSelected,
+    handleSelectAllVisible,
+    handleDeselectAllVisible,
     handleNext,
     dataFormat,
     setDataFormat,
     agentBasedOnlySelected,
+    ecfOnlySelected,
+    isUnavailableForMethod,
   } = useServicesStep({ onContinue });
 
-  const { detectAndReviewStep } = useOnboardingFlow();
+  const { detectAndReviewStep, defaultDataFormat } = useOnboardingFlow();
+  const unavailableForMethodReason = i18n.translate(
+    'xpack.ingestHub.servicesStep.ecfOnlyDisabledTooltip',
+    {
+      defaultMessage:
+        "Agent-based deployment doesn't support this service. Switch to Elastic Managed Integrations to select it.",
+    }
+  );
   const location = useLocation();
   // Lock format when in edit mode (SO persisted) OR when deploy has started without a persisted SO
   // (SO create is best-effort — policies may exist even if ?deploymentId= was never added to URL).
@@ -72,25 +76,21 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
   return (
     <div data-test-subj="onboardingStep-services">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
-        <EuiFlexItem>
-          <EuiTitle size="m">
-            <h2>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.title"
-                defaultMessage="Which AWS services do you want to monitor?"
-              />
-            </h2>
-          </EuiTitle>
-        </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <DataFormatSelect
-            dataFormat={dataFormat}
-            onChange={setDataFormat}
-            disabled={isFormatDisabled}
+      <DataSchemaSection
+        dataFormat={dataFormat}
+        onChange={setDataFormat}
+        disabled={isFormatDisabled}
+        recommendedFormat={defaultDataFormat}
+      />
+      <EuiSpacer size="xl" />
+      <EuiTitle size="m">
+        <h2>
+          <FormattedMessage
+            id="xpack.ingestHub.servicesStep.title"
+            defaultMessage="Which AWS services do you want to monitor?"
           />
-        </EuiFlexItem>
-      </EuiFlexGroup>
+        </h2>
+      </EuiTitle>
       <EuiSpacer size="s" />
       <EuiText color="subdued">
         <p>
@@ -104,26 +104,52 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       {agentBasedOnlySelected.length > 0 && (
         <>
-          <EuiCallOut
+          <KbnWarningCallout
             announceOnMount
             title={i18n.translate('xpack.ingestHub.servicesStep.agentBasedOnlyCallout.title', {
               defaultMessage: 'Some services require a self-managed Elastic Agent',
             })}
-            color="warning"
-            iconType="warning"
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
+                  defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
+                  values={{
+                    count: agentBasedOnlySelected.length,
+                    services: (
+                      <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>
+                    ),
+                  }}
+                />
+              </p>
+            }
             data-test-subj="servicesStep-agentBasedOnlyCallout"
-          >
-            <p>
-              <FormattedMessage
-                id="xpack.ingestHub.servicesStep.agentBasedOnlyCallout.body"
-                defaultMessage="{services} {count, plural, one {does} other {do}} not support Managed Integrations and can only be collected via a self-managed Elastic Agent. You will configure this in the next steps."
-                values={{
-                  count: agentBasedOnlySelected.length,
-                  services: <strong>{agentBasedOnlySelected.map((s) => s.name).join(', ')}</strong>,
-                }}
-              />
-            </p>
-          </EuiCallOut>
+          />
+          <EuiSpacer size="m" />
+        </>
+      )}
+
+      {ecfOnlySelected.length > 0 && (
+        <>
+          <KbnWarningCallout
+            announceOnMount
+            title={i18n.translate('xpack.ingestHub.servicesStep.ecfOnlyCallout.title', {
+              defaultMessage: 'Some services do not support agent-based deployment',
+            })}
+            text={
+              <p>
+                <FormattedMessage
+                  id="xpack.ingestHub.servicesStep.ecfOnlyCallout.body"
+                  defaultMessage="{services} can only be deployed through Elastic Cloud Forwarder. If you choose agent-based deployment in a later step, {count, plural, one {it is} other {they are}} removed from your selection."
+                  values={{
+                    count: ecfOnlySelected.length,
+                    services: <strong>{ecfOnlySelected.map((s) => s.name).join(', ')}</strong>,
+                  }}
+                />
+              </p>
+            }
+            data-test-subj="servicesStep-ecfOnlyCallout"
+          />
           <EuiSpacer size="m" />
         </>
       )}
@@ -139,153 +165,88 @@ export function ServicesStep({ onContinue, onBack }: ServicesStepProps) {
 
       <EuiSpacer size="s" />
 
-      <EuiFlexGroup gutterSize="l" alignItems="flexStart" responsive={false}>
-        <EuiFlexItem grow={false} style={{ maxWidth: 350 }}>
-          {categories.map((cat) => {
-            const isActive = cat === activeCategory;
-            const stats = categoryStats.get(cat);
-            const selected = stats?.selected ?? 0;
-            const total = stats?.total ?? 0;
-            const preview = stats?.preview ?? '';
-
-            return (
-              <EuiPanel
-                key={cat}
-                paddingSize="s"
-                hasBorder={false}
-                hasShadow={false}
-                color={isActive ? 'subdued' : 'transparent'}
-                onClick={() => setSelectedCategory(cat)}
-                style={{ cursor: 'pointer' }}
-                data-test-subj={`servicesStep-category-${cat}`}
-              >
-                <EuiFlexGroup alignItems="center" gutterSize="m" responsive={false}>
-                  <EuiFlexItem>
-                    <EuiText size="s">
-                      <strong>{getCategoryTitle(cat)}</strong>
-                    </EuiText>
-                    <EuiText size="xs" color="subdued">
-                      {preview}
-                    </EuiText>
-                  </EuiFlexItem>
-                  <EuiFlexItem grow={false}>
-                    <EuiBadge
-                      color="default"
-                      aria-label={i18n.translate(
-                        'xpack.ingestHub.servicesStep.categoryBadgeAriaLabel',
-                        {
-                          defaultMessage: '{selected} of {total} services selected',
-                          values: { selected, total },
-                        }
-                      )}
-                    >
-                      {selected > 0 ? `${selected}/${total}` : total}
-                    </EuiBadge>
-                  </EuiFlexItem>
-                </EuiFlexGroup>
-              </EuiPanel>
-            );
-          })}
-        </EuiFlexItem>
-
-        <EuiFlexItem>
-          <EuiPanel paddingSize="none" hasBorder>
-            {activeCategory ? (
-              <>
-                <EuiPanel
-                  color="subdued"
-                  hasBorder={false}
-                  hasShadow={false}
-                  paddingSize="m"
-                  borderRadius="none"
-                >
-                  <EuiFlexGroup
-                    alignItems="center"
-                    justifyContent="spaceBetween"
-                    responsive={false}
-                  >
-                    <EuiFlexItem grow={false}>
-                      <EuiTitle size="xs">
-                        <h3>{getCategoryTitle(activeCategory)}</h3>
-                      </EuiTitle>
-                    </EuiFlexItem>
-                    <EuiFlexItem grow={false}>
-                      {allInCategorySelected ? (
-                        <EuiButtonEmpty
-                          size="s"
-                          onClick={handleDeselectAllInCategory}
-                          data-test-subj="servicesStep-deselectAllButton"
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestHub.servicesStep.deselectAll"
-                            defaultMessage="Deselect all"
-                          />
-                        </EuiButtonEmpty>
-                      ) : (
-                        <EuiButtonEmpty
-                          size="s"
-                          onClick={handleSelectAllInCategory}
-                          data-test-subj="servicesStep-selectAllButton"
-                        >
-                          <FormattedMessage
-                            id="xpack.ingestHub.servicesStep.selectAll"
-                            defaultMessage="Select all"
-                          />
-                        </EuiButtonEmpty>
-                      )}
-                    </EuiFlexItem>
-                  </EuiFlexGroup>
-                </EuiPanel>
-                <EuiPanel paddingSize="m" hasBorder={false} hasShadow={false}>
-                  <EuiFlexGrid columns={2} gutterSize="m">
-                    {servicesInCategory.map((service) => (
-                      <EuiFlexItem key={service.id}>
-                        <ServiceRow
-                          service={service}
-                          isSelected={selectedSet.has(service.id)}
-                          onToggle={handleToggle}
-                          displayName={
-                            duplicateNamesInCategory.has(service.name)
-                              ? `${service.name} ${service.signalTypes
-                                  .map((t) => SIGNAL_TYPE_LABELS[t])
-                                  .join(' & ')}`
-                              : undefined
-                          }
-                        />
-                      </EuiFlexItem>
-                    ))}
-                  </EuiFlexGrid>
-                </EuiPanel>
-              </>
-            ) : null}
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-
-      <EuiSpacer size="l" />
-
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" responsive={false}>
         <EuiFlexItem grow={false}>
-          {onBack && (
-            <EuiButtonEmpty iconType="chevronSingleLeft" iconSide="left" onClick={onBack}>
+          <EuiText size="s" color="subdued" data-test-subj="servicesStep-selectedCount">
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.selectedCount"
+              defaultMessage="{count, plural, =0 {None selected} other {# selected}}"
+              values={{ count: selectedSet.size }}
+            />
+          </EuiText>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          {allVisibleSelected ? (
+            <EuiButtonEmpty
+              size="s"
+              onClick={handleDeselectAllVisible}
+              data-test-subj="servicesStep-deselectAllButton"
+            >
               <FormattedMessage
-                id="xpack.ingestHub.servicesStep.backButton"
-                defaultMessage="Back"
+                id="xpack.ingestHub.servicesStep.deselectAll"
+                defaultMessage="Deselect all"
+              />
+            </EuiButtonEmpty>
+          ) : (
+            <EuiButtonEmpty
+              size="s"
+              onClick={handleSelectAllVisible}
+              data-test-subj="servicesStep-selectAllButton"
+            >
+              <FormattedMessage
+                id="xpack.ingestHub.servicesStep.selectAll"
+                defaultMessage="Select all"
               />
             </EuiButtonEmpty>
           )}
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            onClick={handleNext}
-            isDisabled={!isReady}
-            data-test-subj="servicesStep-continueButton"
-          >
-            <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
-          </EuiButton>
-        </EuiFlexItem>
       </EuiFlexGroup>
+
+      <EuiSpacer size="s" />
+
+      <EuiPanel paddingSize="m" hasBorder>
+        {filteredServices.length > 0 ? (
+          <EuiFlexGrid columns={2} gutterSize="m">
+            {filteredServices.map((service) => (
+              <EuiFlexItem key={service.id}>
+                <ServiceRow
+                  service={service}
+                  isSelected={selectedSet.has(service.id)}
+                  onToggle={handleToggle}
+                  disabledReason={
+                    isUnavailableForMethod(service) ? unavailableForMethodReason : undefined
+                  }
+                  displayName={
+                    duplicateNames.has(service.name)
+                      ? `${service.name} ${service.signalTypes
+                          .map((t) => SIGNAL_TYPE_LABELS[t])
+                          .join(' & ')}`
+                      : undefined
+                  }
+                />
+              </EuiFlexItem>
+            ))}
+          </EuiFlexGrid>
+        ) : (
+          <EuiText size="s" color="subdued" textAlign="center" data-test-subj="servicesStep-empty">
+            <FormattedMessage
+              id="xpack.ingestHub.servicesStep.noServices"
+              defaultMessage="No services match your search."
+            />
+          </EuiText>
+        )}
+      </EuiPanel>
+
+      <StepFooter onBack={onBack}>
+        <EuiButton
+          fill
+          onClick={handleNext}
+          isDisabled={!isReady}
+          data-test-subj="servicesStep-continueButton"
+        >
+          <FormattedMessage id="xpack.ingestHub.servicesStep.nextButton" defaultMessage="Next" />
+        </EuiButton>
+      </StepFooter>
     </div>
   );
 }

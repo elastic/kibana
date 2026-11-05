@@ -18,6 +18,7 @@ import {
 } from '../../lib/api_key/resolve_api_key_factory';
 import { hasLogMonitoringPrivileges } from '../../lib/api_key/has_log_monitoring_privileges';
 import { hasApiKeyPrivileges } from '../../lib/api_key/has_api_key_privileges';
+import { hasIngestPrivileges } from '../../lib/api_key/has_ingest_privileges';
 import {
   APM_EVENT_WRITE_APPLICATION,
   INDEX_OTLP_LOGS_METRICS_AND_TRACES,
@@ -136,12 +137,20 @@ const apiEndpointsRoute = createObservabilityOnboardingServerRoute({
   security: {
     authz: {
       enabled: false,
-      reason:
-        'This route only returns deployment-level configuration URLs (Elasticsearch and managed OTLP service) that are already exposed by other onboarding routes',
+      reason: 'Authorization is checked by custom logic using the Elasticsearch client',
     },
   },
   async handler(resources): Promise<ApiEndpointsRouteResponse> {
-    const { plugins, services } = resources;
+    const { context, plugins, services } = resources;
+    const {
+      elasticsearch: { client },
+    } = await context.core;
+
+    if (!(await hasIngestPrivileges(client.asCurrentUser))) {
+      throw Boom.forbidden(
+        "You don't have enough privileges to view the endpoint details. Contact your system administrator to grant you the required privileges."
+      );
+    }
 
     const elasticsearchUrlList = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud.setup.elasticsearchUrl]

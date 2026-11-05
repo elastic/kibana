@@ -18,6 +18,7 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataSource } from '@kbn/data-source';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
+import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 export type { DataGridDensity } from './constants';
 
 /**
@@ -66,6 +67,13 @@ export type CustomGridColumnsConfiguration = Record<
 
 export type DataGridPaginationMode = 'multiPage' | 'singlePage' | 'infinite';
 
+/**
+ * Render mode of the grid: 'interactive' (default), 'non-interactive', which renders it without
+ * interactive controls (sorting, column actions/resizing, drag-and-drop, etc.) but keeps pagination
+ * and the full screen selector, or 'print', which additionally removes those and the footer.
+ */
+export type DataGridRenderMode = 'interactive' | 'non-interactive' | 'print';
+
 export type DocumentsDisplayMode = 'table' | 'json';
 
 /**
@@ -87,9 +95,38 @@ export type CustomBulkActions = Array<
      * If omitted, the action is always shown.
      */
     isAvailable?: (payload: { selectedDocIds: string[] }) => boolean;
+    /**
+     * Optional reason the action cannot run on the current selection. Renders the action
+     * disabled, with the reason as its tooltip.
+     */
+    getDisabledReason?: (payload: { selectedDocIds: string[] }) => string | undefined;
     label: React.ReactElement | string;
     key: string;
   }
 >;
 
 export type DocMap = Map<string, { doc: DataTableRecord; docIndex: number }>;
+
+/**
+ * The query and filters the rows were fetched with.
+ */
+export interface UnifiedDataTableQueryContext {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** An additional KQL/Lucene query applied on top of `query`, e.g. a dashboard's query */
+  filterQuery?: Query;
+  /** The time range of the rows, when it differs from the global time range */
+  timeRange?: TimeRange;
+}
+
+/**
+ * Opens a query, with optional filters, in a new Discover tab.
+ */
+export type UnifiedDataTableOpenInNewTab = (params: {
+  query?: Query | AggregateQuery;
+  filters?: Filter[];
+  /** Data view to use for a classic (DSL) query */
+  dataViewId?: string;
+  timeRange?: TimeRange;
+  tabLabel?: string;
+}) => Promise<void>;

@@ -8,6 +8,7 @@
 import type { RouteDependencies } from '../types';
 import { registerApproveProposalRoute } from './approve_proposal';
 import { registerDismissProposalRoute } from './dismiss_proposal';
+import { registerReopenProposalRoute } from './reopen_proposal';
 import { registerGetProposalRoute } from './get_proposal';
 import { registerListProposalsRoute } from './list_proposals';
 import { registerProposalStatsRoute } from './proposal_charts_summary';
@@ -22,6 +23,7 @@ export const registerRoutes = (deps: RouteDependencies) => {
   registerGetProposalRoute(deps);
   registerApproveProposalRoute(deps);
   registerDismissProposalRoute(deps);
+  registerReopenProposalRoute(deps);
   registerProposalStatsRoute(deps);
   registerReviseProposalRoute(deps);
 };

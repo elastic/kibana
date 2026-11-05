@@ -17,6 +17,8 @@ import {
 
 export { MAX_RUN_LIMIT, MIN_RUN_LIMIT, RUN_QUOTA_GROUPS };
 
+const isGloballyGated = (group: RunQuotaGroup): boolean => group !== 'investigation';
+
 export type RunLimitDraft = number | '';
 
 interface SavedRunQuotaSettings {
@@ -29,17 +31,21 @@ export interface RunQuotaDraftState {
   draft: {
     enabled: boolean;
     limits: Record<RunQuotaGroup, RunLimitDraft>;
+    restoreLimits: Record<RunQuotaGroup, number>;
   };
 }
 
 export const parseRunLimitDraft = (value: string): RunLimitDraft =>
   value === '' ? '' : Number(value);
 
-export const isValidRunLimitDraft = (value: unknown): value is number =>
+export const isValidLimitedRunLimitDraft = (value: unknown): value is number =>
   typeof value === 'number' &&
   Number.isInteger(value) &&
-  value >= MIN_RUN_LIMIT &&
+  value > MIN_RUN_LIMIT &&
   value <= MAX_RUN_LIMIT;
+
+export const isValidRunLimitDraft = (value: unknown): value is number =>
+  value === MIN_RUN_LIMIT || isValidLimitedRunLimitDraft(value);
 
 export const createRunQuotaDraftState = ({
   enabled,
@@ -53,15 +59,29 @@ export const createRunQuotaDraftState = ({
       return [group, isValidRunLimitDraft(limit) ? limit : DEFAULT_RUN_LIMITS[group]];
     })
   ) as Record<RunQuotaGroup, number>;
+  const effectiveLimits = Object.fromEntries(
+    RUN_QUOTA_GROUPS.map((group) => [
+      group,
+      enabled || !isGloballyGated(group) ? resolvedLimits[group] : MIN_RUN_LIMIT,
+    ])
+  ) as Record<RunQuotaGroup, number>;
 
   return {
     saved: {
       enabled,
-      limits: resolvedLimits,
+      limits: effectiveLimits,
     },
     draft: {
       enabled,
-      limits: { ...resolvedLimits },
+      limits: { ...effectiveLimits },
+      restoreLimits: Object.fromEntries(
+        RUN_QUOTA_GROUPS.map((group) => [
+          group,
+          isValidLimitedRunLimitDraft(resolvedLimits[group])
+            ? resolvedLimits[group]
+            : DEFAULT_RUN_LIMITS[group],
+        ])
+      ) as Record<RunQuotaGroup, number>,
     },
   };
 };
@@ -70,8 +90,54 @@ export const hasRunQuotaDraftChanges = ({ saved, draft }: RunQuotaDraftState): b
   saved.enabled !== draft.enabled ||
   RUN_QUOTA_GROUPS.some((group) => saved.limits[group] !== draft.limits[group]);
 
-export const isRunQuotaDraftValid = ({ draft }: RunQuotaDraftState): boolean =>
-  RUN_QUOTA_GROUPS.every((group) => isValidRunLimitDraft(draft.limits[group]));
+export const isRunQuotaDraftValid = (
+  state: RunQuotaDraftState
+): state is RunQuotaDraftState & {
+  draft: { limits: Record<RunQuotaGroup, number> };
+} => RUN_QUOTA_GROUPS.every((group) => isValidRunLimitDraft(state.draft.limits[group]));
+
+export const setRunLimitEnabled = (
+  state: RunQuotaDraftState,
+  group: RunQuotaGroup,
+  enabled: boolean
+): RunQuotaDraftState => {
+  if (enabled) {
+    return {
+      ...state,
+      draft: {
+        ...state.draft,
+        enabled: isGloballyGated(group) ? true : state.draft.enabled,
+        limits: {
+          ...state.draft.limits,
+          [group]: state.draft.restoreLimits[group],
+        },
+      },
+    };
+  }
+
+  const currentLimit = state.draft.limits[group];
+  const limits = {
+    ...state.draft.limits,
+    [group]: MIN_RUN_LIMIT,
+  };
+  return {
+    ...state,
+    draft: {
+      ...state.draft,
+      enabled:
+        state.saved.enabled ||
+        RUN_QUOTA_GROUPS.some(
+          (quotaGroup) =>
+            isGloballyGated(quotaGroup) && isValidLimitedRunLimitDraft(limits[quotaGroup])
+        ),
+      limits,
+      restoreLimits: {
+        ...state.draft.restoreLimits,
+        ...(isValidLimitedRunLimitDraft(currentLimit) ? { [group]: currentLimit } : {}),
+      },
+    },
+  };
+};
 
 export const buildRunQuotaSettingsUpdate = (
   state: RunQuotaDraftState
@@ -80,18 +146,47 @@ export const buildRunQuotaSettingsUpdate = (
     return undefined;
   }
 
+  const hasActiveDraftLimits = RUN_QUOTA_GROUPS.some(
+    (group) => isGloballyGated(group) && isValidLimitedRunLimitDraft(state.draft.limits[group])
+  );
+  if (!state.saved.enabled && hasActiveDraftLimits) {
+    const activateLimits = Object.fromEntries(
+      RUN_QUOTA_GROUPS.flatMap((group) =>
+        isGloballyGated(group) && isValidLimitedRunLimitDraft(state.draft.limits[group])
+          ? [[group, state.draft.limits[group]]]
+          : []
+      )
+    ) as Partial<Record<RunQuotaGroup, number>>;
+
+    const investigationLimit = state.draft.limits.investigation;
+    return Object.keys(activateLimits).length > 0
+      ? {
+          activateLimits,
+          ...(state.saved.limits.investigation === investigationLimit
+            ? {}
+            : {
+                limits: {
+                  investigation: investigationLimit === MIN_RUN_LIMIT ? null : investigationLimit,
+                },
+              }),
+        }
+      : undefined;
+  }
+
   const update: RunQuotaSettingsUpdate = {};
   if (state.saved.enabled !== state.draft.enabled) {
     update.enabled = state.draft.enabled;
   }
 
   const changedLimits = Object.fromEntries(
-    RUN_QUOTA_GROUPS.flatMap((group) =>
-      state.saved.limits[group] === state.draft.limits[group]
-        ? []
-        : [[group, state.draft.limits[group]]]
-    )
-  ) as Partial<Record<RunQuotaGroup, number>>;
+    RUN_QUOTA_GROUPS.flatMap((group) => {
+      const next = state.draft.limits[group];
+      if (state.saved.limits[group] === next) {
+        return [];
+      }
+      return [[group, group === 'investigation' && next === MIN_RUN_LIMIT ? null : next]];
+    })
+  ) as NonNullable<RunQuotaSettingsUpdate['limits']>;
 
   if (Object.keys(changedLimits).length > 0) {
     update.limits = changedLimits;

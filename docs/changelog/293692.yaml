@@ -1,8 +1,0 @@
-prs:
-- https://github.com/elastic/kibana/pull/293692
-type: enhancement
-products:
-- product: cloud-serverless
-- product: kibana
-title: Update the model card layout
-description: Improves Elastic Inference Service model cards so the provider, model name, and end-of-life date are easier to scan.

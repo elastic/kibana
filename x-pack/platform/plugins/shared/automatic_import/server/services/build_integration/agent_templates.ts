@@ -657,6 +657,9 @@ timeout: {{timeout}}
 {{#if keep_null}}
 keep_null: {{keep_null}}
 {{/if}}
+{{#if ssl}}
+ssl: {{ssl}}
+{{/if}}
 `.trim();
 
 const UDP_TEMPLATE = `

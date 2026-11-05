@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Automation } from '../hooks/use_automations';
+import type { Automation } from '../../data/automations/use_automations';
 import {
   countFilterValues,
   EMPTY_FILTERS,
@@ -24,7 +24,7 @@ const buildAutomation = (overrides: Partial<Automation> = {}): Automation => ({
   tags: ['oncall'],
   trigger: { rows: [{ kind: 'slack', event: 'message' }] },
   execution: {},
-  completion: {},
+  completions: [],
   runtime: { dailyDispatchLimit: 5 },
   createdAt: '2026-10-01T00:00:00.000Z',
   updatedAt: '2026-10-01T00:00:00.000Z',

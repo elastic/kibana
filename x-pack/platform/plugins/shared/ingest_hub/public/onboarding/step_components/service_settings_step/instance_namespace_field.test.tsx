@@ -17,14 +17,21 @@ jest.mock('@kbn/fleet-plugin/public', () => ({
     namespace,
     validationError,
     onNamespaceChange,
+    helpTextAsTooltip,
+    tooltipContent,
     'data-test-subj': dataTestSubj,
   }: {
     namespace?: string;
     validationError?: string[] | null;
     onNamespaceChange: (ns: string) => void;
+    helpTextAsTooltip?: boolean;
+    tooltipContent?: string;
     'data-test-subj'?: string;
   }) => (
-    <div>
+    <div
+      data-help-as-tooltip={String(!!helpTextAsTooltip)}
+      data-tooltip-content={tooltipContent ?? ''}
+    >
       <input
         data-test-subj={dataTestSubj}
         value={namespace ?? ''}
@@ -79,17 +86,38 @@ describe('InstanceNamespaceField', () => {
     expect(screen.getByTestId('namespaceError')).toHaveTextContent('Namespace must be lowercase');
   });
 
-  it('renders a read-only value once the instance is deployed', () => {
-    renderField({ namespace: 'prod', isLocked: true });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toBeDisabled();
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveValue('prod');
+  it('shows the help text as a tooltip next to the label', () => {
+    renderField();
+    expect(screen.getByTestId('serviceSettings-namespaceField').parentElement).toHaveAttribute(
+      'data-help-as-tooltip',
+      'true'
+    );
   });
 
-  it('says the namespace is inherited when locked with no namespace', () => {
-    renderField({ namespace: '', isLocked: true });
-    expect(screen.getByTestId('serviceSettings-namespaceField-locked')).toHaveAttribute(
-      'placeholder',
-      'Inherited from the agent policy'
+  it('keeps the default tooltip text for the global namespace', () => {
+    renderField();
+    expect(screen.getByTestId('serviceSettings-namespaceField').parentElement).toHaveAttribute(
+      'data-tooltip-content',
+      ''
     );
+  });
+
+  it('says an empty namespace uses the global one for a duplicate', () => {
+    renderField({ emptyUsesGlobal: true });
+    expect(
+      screen.getByTestId('serviceSettings-namespaceField').parentElement?.dataset.tooltipContent
+    ).toContain('Leave empty to use the global namespace');
+  });
+
+  it('shows the note under the field', () => {
+    renderField({ note: 'Existing data stays in the old namespace.' });
+    expect(screen.getByTestId('serviceSettings-namespaceField-note')).toHaveTextContent(
+      'Existing data stays in the old namespace.'
+    );
+  });
+
+  it('shows no note by default', () => {
+    renderField();
+    expect(screen.queryByTestId('serviceSettings-namespaceField-note')).not.toBeInTheDocument();
   });
 });

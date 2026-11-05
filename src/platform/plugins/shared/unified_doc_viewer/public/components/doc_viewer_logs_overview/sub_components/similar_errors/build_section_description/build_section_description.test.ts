@@ -70,6 +70,19 @@ describe('buildSectionDescription', () => {
     );
   });
 
+  it('lists the level field after type and before groupingName', () => {
+    const result = buildSectionDescription({
+      serviceName: { value: 'test-service', field: fieldConstants.SERVICE_NAME_FIELD },
+      type: { value: 'test-type', field: 'exception.type' },
+      level: { value: 'error', field: fieldConstants.LOG_LEVEL_FIELD },
+      groupingName: { value: 'test-grouping', field: fieldConstants.ERROR_GROUPING_NAME_FIELD },
+    });
+
+    expect(result).toBe(
+      `These errors are based on the following fields: ${fieldConstants.SERVICE_NAME_FIELD}, exception.type, ${fieldConstants.LOG_LEVEL_FIELD}, ${fieldConstants.ERROR_GROUPING_NAME_FIELD}.`
+    );
+  });
+
   it('includes groupingName when present', () => {
     const result = buildSectionDescription({
       serviceName: { value: 'test-service', field: fieldConstants.SERVICE_NAME_FIELD },

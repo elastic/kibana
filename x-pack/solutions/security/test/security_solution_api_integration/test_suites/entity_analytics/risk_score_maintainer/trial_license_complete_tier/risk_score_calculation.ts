@@ -130,8 +130,8 @@ export default ({ getService }: FtrProviderContext): void => {
 
         expect(score.calculated_level).to.eql('Unknown');
         expect(score.calculated_score).to.eql(21);
-        expect(score.calculated_score_norm).to.be.within(8.1006017, 8.100602);
-        expect(score.category_1_score).to.be.within(8.1006017, 8.100602);
+        expect(score.calculated_score_norm).to.be.within(8.3234992, 8.3234993);
+        expect(score.category_1_score).to.be.within(8.3234992, 8.3234993);
         expect(score.category_1_count).to.eql(1);
         expect(score.id_value).to.eql(host.expectedEuid);
       });
@@ -500,8 +500,8 @@ export default ({ getService }: FtrProviderContext): void => {
           expect(score.criticality_modifier).to.eql(1.5);
           expect(score.calculated_level).to.eql('Unknown');
           expect(score.calculated_score).to.eql(21);
-          expect(score.calculated_score_norm).to.be.within(11.677912, 11.6779121);
-          expect(score.category_1_score).to.be.within(8.1006017, 8.100602);
+          expect(score.calculated_score_norm).to.be.within(11.9864047, 11.9864048);
+          expect(score.category_1_score).to.be.within(8.3234992, 8.3234993);
           expect(score.category_1_count).to.eql(1);
           expect(score.id_value).to.eql(testHost.expectedEuid);
         });

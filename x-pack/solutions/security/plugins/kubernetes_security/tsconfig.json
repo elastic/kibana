@@ -36,6 +36,7 @@
     "@kbn/shared-ux-router",
     "@kbn/securitysolution-es-utils",
     "@kbn/react-query",
+    "@kbn/app-header",
   ],
   "exclude": [
     "target/**/*",

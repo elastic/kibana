@@ -139,12 +139,12 @@ test.describe(
       await dataGrid.openDocumentDetails({ rowIndex: 1 });
       await expect(discover.isShowingDocViewer()).resolves.toBe(true);
       await discoverEbt.openSurroundingDocuments();
-      await discover.waitUntilSearchingHasFinished();
+      await discoverEbt.waitForSurroundingDocuments();
       await setEbtOptIn(page, true);
       await dataGrid.openDocumentDetails({ rowIndex: 0 });
       await expect(discover.isShowingDocViewer()).resolves.toBe(true);
 
-      const waitForSearch = () => discover.waitUntilSearchingHasFinished();
+      const waitForSearch = () => discoverEbt.waitForSurroundingDocuments();
       await discoverEbt.toggleColumnInFlyout('service.name', true, waitForSearch);
       await discoverEbt.toggleColumnInFlyout('log.level', false, waitForSearch);
       await discoverEbt.clickFlyoutFieldAction('log.level', 'addFilterOutValueButton');

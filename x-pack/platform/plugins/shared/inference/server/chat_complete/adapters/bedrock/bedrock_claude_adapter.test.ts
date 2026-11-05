@@ -845,4 +845,85 @@ Human:`,
       );
     });
   });
+
+  describe('forced tool choice', () => {
+    const tools = { set_title: { description: 'set the title' } };
+
+    const mockConnectorModel = (defaultModel: string) => {
+      executorMock.getConnector.mockReturnValue({
+        type: InferenceConnectorType.Bedrock,
+        name: 'bedrock-connector',
+        connectorId: 'test-connector-id',
+        config: { defaultModel },
+        capabilities: {},
+        isInferenceEndpoint: false,
+        isPreconfigured: false,
+      });
+    };
+
+    it('sends `auto` instead of a named tool for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-sonnet-5-5');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
+    });
+
+    it('sends `auto` instead of `any` for a Claude model that rejects forced tool choice', () => {
+      mockConnectorModel('eu.anthropic.claude-opus-5-5');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: ToolChoiceType.required,
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
+    });
+
+    it('keeps the named tool for a Claude model that accepts forced tool choice', () => {
+      mockConnectorModel('us.anthropic.claude-sonnet-4-6');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ tool: { name: 'set_title' } });
+    });
+
+    it('prefers the request model name over the connector default model', () => {
+      mockConnectorModel('us.anthropic.claude-sonnet-4-6');
+
+      bedrockClaudeAdapter
+        .chatComplete({
+          executor: executorMock,
+          logger,
+          messages: [{ role: MessageRole.User, content: 'question' }],
+          modelName: 'eu.anthropic.claude-sonnet-5-5',
+          tools,
+          toolChoice: { function: 'set_title' },
+        })
+        .subscribe(noop);
+
+      expect(getCallParams().toolChoice).toEqual({ auto: {} });
+    });
+  });
 });

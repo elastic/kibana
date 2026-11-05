@@ -57,7 +57,8 @@ export class TaskManagerDependenciesPlugin {
     plugin.taskManager.registerEncryptedSavedObjectsClient(
       plugin.encryptedSavedObjects.getClient({
         includedHiddenTypes: ['task', 'api_key_to_invalidate'],
-      })
+      }),
+      plugin.encryptedSavedObjects.isEncryptionError
     );
     plugin.taskManager.registerApiKeyInvalidateFn(
       plugin.security?.authc.apiKeys.invalidateAsInternalUser

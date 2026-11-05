@@ -12,7 +12,7 @@ import { appContextService } from '../app_context';
 import * as commonServices from '../../../common/services';
 
 import { createAgentAction, createErrorActionResults } from './actions';
-import { getHostedPolicies, isHostedAgent } from './hosted_agent';
+import { getAgentPolicyRestrictions, isAgentlessAgent, isHostedAgent } from './hosted_agent';
 import { restartBatch } from './restart_action_runner';
 
 jest.mock('./actions', () => ({
@@ -21,8 +21,9 @@ jest.mock('./actions', () => ({
 }));
 
 jest.mock('./hosted_agent', () => ({
-  getHostedPolicies: jest.fn(),
+  getAgentPolicyRestrictions: jest.fn(),
   isHostedAgent: jest.fn(),
+  isAgentlessAgent: jest.fn(),
 }));
 
 jest.mock('../app_context', () => ({
@@ -40,7 +41,10 @@ const mockCreateAgentAction = createAgentAction as jest.MockedFunction<typeof cr
 const mockCreateErrorActionResults = createErrorActionResults as jest.MockedFunction<
   typeof createErrorActionResults
 >;
-const mockGetHostedPolicies = getHostedPolicies as jest.MockedFunction<typeof getHostedPolicies>;
+const mockGetAgentPolicyRestrictions = getAgentPolicyRestrictions as jest.MockedFunction<
+  typeof getAgentPolicyRestrictions
+>;
+const mockIsAgentlessAgent = isAgentlessAgent as jest.MockedFunction<typeof isAgentlessAgent>;
 const mockIsHostedAgent = isHostedAgent as jest.MockedFunction<typeof isHostedAgent>;
 const mockIsAgentRestartSupported = commonServices.isAgentRestartSupported as jest.MockedFunction<
   typeof commonServices.isAgentRestartSupported
@@ -65,8 +69,9 @@ describe('restartBatch', () => {
     soClient = savedObjectsClientMock.create();
     internalSoClient = savedObjectsClientMock.create();
     mockGetInternalSOClient.mockReturnValue(internalSoClient);
-    mockGetHostedPolicies.mockResolvedValue({} as any);
+    mockGetAgentPolicyRestrictions.mockResolvedValue({} as any);
     mockIsHostedAgent.mockReturnValue(false);
+    mockIsAgentlessAgent.mockReturnValue(false);
     mockIsAgentRestartSupported.mockReturnValue(true);
     mockCreateAgentAction.mockResolvedValue({ id: 'action-1' } as any);
     mockCreateErrorActionResults.mockResolvedValue(undefined);
@@ -99,9 +104,9 @@ describe('restartBatch', () => {
     const hostedAgent = makeAgent('hosted-1', 'managed-policy');
     const eligibleAgent = makeAgent('eligible-1', 'normal-policy');
     const agents = [hostedAgent, eligibleAgent];
-    const hostedPolicies = { 'managed-policy': true } as any;
+    const restrictions = { 'managed-policy': { is_managed: true } } as any;
 
-    mockGetHostedPolicies.mockResolvedValue(hostedPolicies);
+    mockGetAgentPolicyRestrictions.mockResolvedValue(restrictions);
     mockIsHostedAgent.mockImplementation((policies, agent) => agent.id === 'hosted-1');
 
     const result = await restartBatch(esClient, soClient, agents, { spaceId: 'default' });
@@ -117,6 +122,25 @@ describe('restartBatch', () => {
     const errorsArg = (mockCreateErrorActionResults as jest.Mock).mock.calls[0][2];
     expect(Object.keys(errorsArg)).toEqual(['hosted-1']);
     expect(errorsArg['hosted-1'].message).toMatch(/hosted agent policy/i);
+  });
+
+  it('excludes agentless agents from the action and writes error results for them', async () => {
+    const agentlessAgent = makeAgent('agentless-1', 'agentless-policy');
+    const eligibleAgent = makeAgent('eligible-1', 'normal-policy');
+    mockIsAgentlessAgent.mockImplementation((_, agent) => agent.id === 'agentless-1');
+
+    await restartBatch(esClient, soClient, [agentlessAgent, eligibleAgent], {
+      spaceId: 'default',
+    });
+
+    expect(mockCreateAgentAction).toHaveBeenCalledWith(
+      esClient,
+      internalSoClient,
+      expect.objectContaining({ agents: ['eligible-1'] })
+    );
+    const errorsArg = (mockCreateErrorActionResults as jest.Mock).mock.calls[0][2];
+    expect(Object.keys(errorsArg)).toEqual(['agentless-1']);
+    expect(errorsArg['agentless-1'].message).toMatch(/managed agent/i);
   });
 
   it('creates empty action when all agents are hosted', async () => {

@@ -1024,7 +1024,28 @@ To catch these conflicts, check `error.statusCode === 409`, which all three APIs
 
 To change `runAs`, remove the task and schedule it again.
 
-This version of Kibana doesn't run these tasks yet: the task runner reports an error for any task that has a `credential`.
+Before the task runs, Task Manager reads its `credential` again through the Encrypted Saved Objects plugin, which verifies it. The task runner then gets `runAs` instead of `fakeRequest` and `enrichRequest`, which are undefined. Do all work that needs credentials inside `runAs.withScopedRequest`: its request is authenticated as the service account bound to the workload, and stops working once `fn` settles.
+
+```js
+createTaskRunner({ taskInstance, runAs }: RunContext) {
+  return {
+    async run() {
+      return runAs.withScopedRequest(async (request) => {
+        const scopedClusterClient = elasticsearch.client.asScoped(request);
+        await scopedClusterClient.asCurrentUser.search({ query });
+      });
+    },
+  };
+},
+```
+
+Pass `{ expectedServiceAccountId }` as the second argument to reject the run before a token is minted if the workload is bound to another account. `null` is the same as omitting it. A task scheduled with a non-null `expectedServiceAccountId` always uses that one, and rejects a different one with a 403.
+
+`security.authc.getCurrentUser` returns `null` for this request. Use `security.authc.getPrincipal` to identify the service account.
+
+Errors thrown before `fn` is called are tagged as user errors if the workload isn't bound, is bound to another account, or its token can't be minted, and as framework errors otherwise (for example, when service accounts are disabled). They're handled like any other error from `run`. Errors thrown by `fn` are the task's own.
+
+Task Manager doesn't start the run, and tries again later (in 5 minutes for a one-time task, or on its schedule for a recurring one), if the task type doesn't define `runAs` or doesn't list the task's workload type, if the credential type isn't supported by this version of Kibana, or if the credential can't be read. If `credential` was changed outside Task Manager, or `encryptedCredential` is missing or can't be decrypted, Task Manager sets the task's status to `failed` instead of deleting it, and doesn't claim it again. Once the cause is fixed, `runSoon` runs it again.
 
 ### API Key Invalidation
 

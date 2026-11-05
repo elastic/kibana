@@ -6,14 +6,21 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type { CommonTriggerDefinition } from '@kbn/workflows-extensions/common';
 
 /**
  * `manual` is the subject for an investigation that is not about a stored entity: the caller's
  * question is the whole subject, so there is no significant event or alert to bind the run to.
+ * `slack_thread` is a Slack thread, keyed by the Relay's thread key, so a mention in that thread
+ * finds the investigation.
  */
-export const INVESTIGATION_SUBJECT_TYPES = ['significant_event', 'alert', 'manual'] as const;
+export const INVESTIGATION_SUBJECT_TYPES = [
+  'significant_event',
+  'alert',
+  'manual',
+  'slack_thread',
+] as const;
 export type InvestigationSubjectType = (typeof INVESTIGATION_SUBJECT_TYPES)[number];
 
 export const INVESTIGATION_TRIGGER_TYPES = ['automatic', 'manual'] as const;
@@ -31,17 +38,26 @@ const subjectSchema = z.object({
   id: z.string().describe('Identifier of the investigated entity.'),
 });
 
-const baseInvestigationSchema = z.object({
-  investigation_id: z.string().describe('ID of the investigation (the workflow execution ID).'),
-  status: z
-    .enum(EMITTED_INVESTIGATION_STATUSES)
-    .describe('Lifecycle status of the investigation at emit time.'),
-  subject: subjectSchema.describe('The entity this investigation is about.'),
-  trigger_type: z
-    .enum(INVESTIGATION_TRIGGER_TYPES)
-    .describe('What initiated the investigation: automatic or manual.'),
-  started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
-});
+const baseInvestigationSchema = lazySchema(() =>
+  z.object({
+    execution_id: z
+      .string()
+      .max(500)
+      .optional()
+      .describe('Original investigation workflow execution ID.'),
+    investigation_id: z
+      .string()
+      .describe('ID of the investigation, which is the id of its Agent Builder conversation.'),
+    status: z
+      .enum(EMITTED_INVESTIGATION_STATUSES)
+      .describe('Lifecycle status of the investigation at emit time.'),
+    subject: subjectSchema.describe('The entity this investigation is about.'),
+    trigger_type: z
+      .enum(INVESTIGATION_TRIGGER_TYPES)
+      .describe('What initiated the investigation: automatic or manual.'),
+    started_at: z.string().describe('When the investigation started (ISO 8601 timestamp).'),
+  })
+);
 
 export type InvestigationsTriggerBasePayload = z.infer<typeof baseInvestigationSchema>;
 
@@ -104,7 +120,7 @@ export const investigationStartedTriggerCommonDefinition: CommonTriggerDefinitio
       'xpack.nightshiftInvestigations.workflowTriggers.investigationStarted.documentation.details',
       {
         defaultMessage:
-          'Emitted when an investigation begins for any subject (significant event, alert or manual). Filter with KQL on event.* (e.g. event.subject.type).',
+          'Emitted when an investigation begins for any subject (significant event, alert, manual or Slack thread). Filter with KQL on event.* (e.g. event.subject.type).',
       }
     ),
     examples: [

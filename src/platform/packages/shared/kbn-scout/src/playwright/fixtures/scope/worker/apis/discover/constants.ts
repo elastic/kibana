@@ -11,4 +11,4 @@
 export const DISCOVER_SESSION_API_PATH = 'api/discover_sessions';
 
 /** `elastic-api-version` header value for the Discover Sessions API. */
-export const DISCOVER_SESSION_API_VERSION = '1';
+export const DISCOVER_SESSION_API_VERSION = '2023-10-31';

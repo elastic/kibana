@@ -1,6 +1,6 @@
 version: '1'
 name: Significant Events Investigation Completed
-description: Attaches completed Nightshift investigations to their Significant Event.
+description: Attaches completed or failed Nightshift investigations to their Significant Event.
 enabled: true
 tags:
   - observability
@@ -10,6 +10,9 @@ tags:
 
 triggers:
   - type: nightshift-investigations.completed
+    on:
+      condition: 'event.subject.type: "significant_event"'
+  - type: nightshift-investigations.failed
     on:
       condition: 'event.subject.type: "significant_event"'
 
@@ -22,9 +25,13 @@ steps:
       headers:
         x-elastic-internal-origin: 'kibana'
       body:
+        # The investigation id is its Agent Builder conversation id. The field keeps its name so
+        # stored significant events stay valid; readers resolve it through the shared
+        # investigations API.
         workflow_execution_id: '{{ event.investigation_id }}'
         started_at: '{{ event.started_at }}'
         completed_at: '{{ event.completed_at }}'
+        outcome: '{{ event.status }}'
     # Completion attachment is best effort. The investigation result and trigger event must not be
     # retried or queued again just because this source-owned write-back cannot be applied.
     on-failure:

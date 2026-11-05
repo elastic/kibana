@@ -27,21 +27,26 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     await unmockInferenceEndpoints(page);
   });
 
-  test('opens flyout with model details, task badges, and author', async ({ pageObjects }) => {
+  test('opens flyout with model details, documentation link, and author', async ({
+    pageObjects,
+  }) => {
     const { eisModels } = pageObjects;
 
     await test.step('click a model card to open the flyout', async () => {
       await eisModels.modelCard('Anthropic Claude Sonnet 3.7').click();
     });
 
-    await test.step('flyout is visible with model name', async () => {
+    await test.step('flyout header shows the model name and provider', async () => {
       await expect(eisModels.flyout).toBeVisible();
-      await expect(eisModels.flyout).toContainText('Anthropic Claude Sonnet 3.7');
+      await expect(eisModels.flyoutTitle).toHaveText('Claude Sonnet 3.7');
+      await expect(eisModels.flyoutProvider).toHaveText('Anthropic');
     });
 
-    await test.step('flyout header shows task type badges', async () => {
-      await expect(eisModels.flyoutTaskBadges).toContainText('chat_completion');
-      await expect(eisModels.flyoutTaskBadges).toContainText('completion');
+    await test.step('flyout header shows the EIS documentation link', async () => {
+      await expect(eisModels.flyoutViewEisDocumentationLink).toBeVisible();
+      await expect(eisModels.flyoutViewEisDocumentationLink).toContainText(
+        'View EIS documentation'
+      );
     });
 
     await test.step('flyout body shows model author', async () => {
@@ -129,9 +134,7 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
     });
   });
 
-  test('deprecated model flyout shows the deprecated badge and enables Add endpoint', async ({
-    pageObjects,
-  }) => {
+  test('deprecated model flyout enables Add endpoint', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the deprecated model', async () => {
@@ -139,28 +142,18 @@ test.describe('Model Detail Flyout', { tag: [...INFERENCE_LOCAL_TAGS] }, () => {
       await expect(eisModels.flyout).toBeVisible();
     });
 
-    await test.step('flyout header shows the deprecated status badge', async () => {
-      await expect(eisModels.modelStatusBadge('openai-gpt-3.5', 'deprecated')).toBeVisible();
-    });
-
     await test.step('Add endpoint remains enabled for a deprecated (non-EOL) model', async () => {
       await expect(eisModels.flyoutAddEndpointButton).toBeEnabled();
     });
   });
 
-  test('EOL model flyout shows the EOL badge and disables Add endpoint', async ({
-    pageObjects,
-  }) => {
+  test('EOL model flyout disables Add endpoint', async ({ pageObjects }) => {
     const { eisModels } = pageObjects;
 
     await test.step('open flyout for the EOL model', async () => {
       await eisModels.showEndOfLifeModels();
       await eisModels.modelCard('OpenAI Davinci').click();
       await expect(eisModels.flyout).toBeVisible();
-    });
-
-    await test.step('flyout header shows the EOL status badge', async () => {
-      await expect(eisModels.modelStatusBadge('openai-davinci', 'eol')).toBeVisible();
     });
 
     await test.step('Add endpoint is disabled for an EOL model', async () => {

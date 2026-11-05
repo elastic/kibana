@@ -22,6 +22,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
     type: 'command',
     name: 'dedup',
   },
+  dense_vector: {
+    type: 'command',
+    name: 'dense_vector',
+  },
   dissect: {
     type: 'command',
     name: 'dissect',
@@ -41,6 +45,10 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
   explain: {
     type: 'command',
     name: 'explain',
+  },
+  fillnull: {
+    type: 'command',
+    name: 'fillnull',
   },
   fork: {
     type: 'command',
@@ -762,11 +770,13 @@ export const commandsMetadata: Record<string, ElasticsearchCommandDefinition> = 
 export enum EsqlCommandNames {
   CHANGE_POINT = 'change_point',
   DEDUP = 'dedup',
+  DENSE_VECTOR = 'dense_vector',
   DISSECT = 'dissect',
   DROP = 'drop',
   ENRICH = 'enrich',
   EVAL = 'eval',
   EXPLAIN = 'explain',
+  FILLNULL = 'fillnull',
   FORK = 'fork',
   GROK = 'grok',
   HIGHLIGHT = 'highlight',

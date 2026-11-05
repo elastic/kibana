@@ -37,9 +37,12 @@
     "@kbn/deeplinks-workflows",
     "@kbn/deeplinks-evals",
     "@kbn/scout-oblt",
+    "@kbn/alerting-v2-constants",
     "@kbn/workflows-management-plugin",
     "@kbn/significant-events-plugin",
     "@kbn/nightshift-shared",
     "@kbn/navigation-plugin",
+    "@kbn/profiling-plugin",
+    "@kbn/entity-inventory-app-plugin",
   ]
 }

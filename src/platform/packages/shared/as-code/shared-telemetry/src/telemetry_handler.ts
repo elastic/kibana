@@ -11,12 +11,42 @@ import type { IKibanaResponse, KibanaRequest } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 
-export const ELASTIC_AGENTIC_USER_AGENT = 'elastic-agentic';
+export const ELASTIC_CLI_USER_AGENT_PREFIX = 'elastic-cli/';
+export const ELASTIC_CLIENT_META_HEADER = 'x-elastic-client-meta';
 export const AGENTIC_COUNTER_TYPE = 'agentic';
+export const ELASTIC_CLI_COUNTER_TYPE_PREFIX = 'elastic-cli:';
+export const UNKNOWN_AGENT_CODE = 'unknown';
 
-const isAgenticRequest = (request: KibanaRequest): boolean => {
-  const userAgent = [request.headers['user-agent'] ?? ''].flat();
-  return userAgent.some((v) => v.toLowerCase().includes(ELASTIC_AGENTIC_USER_AGENT));
+// Agent codes come from `AGENT_SHORT_CODES` in `@elastic/agent-env` and are intentionally
+// not enumerated so new codes are counted without a Kibana change. The header is
+// client-controlled, so only the shape is validated to bound counter cardinality.
+const AGENT_CODE_PATTERN = /^[a-z0-9-]{1,16}$/;
+
+const getHeaderValues = (request: KibanaRequest, name: string): string[] =>
+  [request.headers[name] ?? ''].flat();
+
+/**
+ * Returns the agent harness code (`ag=<code>` in `x-elastic-client-meta`) for requests
+ * sent by the Elastic CLI, or undefined when the request is not an agent-driven CLI request.
+ */
+export const getElasticCliAgentCode = (request: KibanaRequest): string | undefined => {
+  const isElasticCli = getHeaderValues(request, 'user-agent').some((value) =>
+    value.toLowerCase().startsWith(ELASTIC_CLI_USER_AGENT_PREFIX)
+  );
+  if (!isElasticCli) {
+    return;
+  }
+
+  const agentEntry = getHeaderValues(request, ELASTIC_CLIENT_META_HEADER)
+    .flatMap((value) => value.split(','))
+    .map((entry) => entry.trim())
+    .find((entry) => entry.startsWith('ag='));
+  const agentCode = agentEntry?.slice('ag='.length).toLowerCase();
+  if (!agentCode) {
+    return;
+  }
+
+  return AGENT_CODE_PATTERN.test(agentCode) ? agentCode : UNKNOWN_AGENT_CODE;
 };
 
 /**
@@ -27,9 +57,9 @@ const isAgenticRequest = (request: KibanaRequest): boolean => {
  * @param request - The incoming Kibana request.
  * @param options - Telemetry options.
  * @param options.usageCounter - Counter to increment on each tracked request.
- * @param options.trackAgentic - When true, also increments the counter with
- *   `counterType: AGENTIC_COUNTER_TYPE` for requests whose User-Agent contains
- *   the {@link ELASTIC_AGENTIC_USER_AGENT} string.
+ * @param options.trackAgentic - When true, requests from the Elastic CLI that carry an
+ *   agent harness code (see {@link getElasticCliAgentCode}) also increment the counter
+ *   with `counterType: AGENTIC_COUNTER_TYPE` and `counterType: 'elastic-cli:<code>'`.
  * @param handler - The route handler to execute.
  */
 export async function telemetryHandler<TResponse extends IKibanaResponse>(
@@ -53,8 +83,13 @@ export async function telemetryHandler<TResponse extends IKibanaResponse>(
   if (usageCounter) {
     usageCounter.incrementCounter({ counterName });
 
-    if (trackAgentic && isAgenticRequest(request)) {
+    const agentCode = trackAgentic ? getElasticCliAgentCode(request) : undefined;
+    if (agentCode) {
       usageCounter.incrementCounter({ counterName, counterType: AGENTIC_COUNTER_TYPE });
+      usageCounter.incrementCounter({
+        counterName,
+        counterType: `${ELASTIC_CLI_COUNTER_TYPE_PREFIX}${agentCode}`,
+      });
     }
   }
 

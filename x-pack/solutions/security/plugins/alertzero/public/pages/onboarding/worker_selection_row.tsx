@@ -52,15 +52,12 @@ export const WorkerSelectionRow: React.FC<Props> = ({
     ? workerScheduleCadenceLabel(scheduleInterval)
     : i18n.onboardingWorkerEventTrigger(id);
   return (
-    <>
-      <EuiFlexGroup
-        alignItems="flexStart"
-        gutterSize="m"
-        responsive={false}
-        css={css`
-          padding: ${euiTheme.size.l};
-        `}
-      >
+    <div
+      css={css`
+        padding: ${euiTheme.size.l};
+      `}
+    >
+      <EuiFlexGroup alignItems="flexStart" gutterSize="m" responsive={false}>
         <EuiFlexItem>
           <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false} wrap>
             <EuiFlexItem grow={false}>
@@ -87,26 +84,50 @@ export const WorkerSelectionRow: React.FC<Props> = ({
             ) : null}
           </EuiFlexGroup>
           {description ? (
-            <EuiText size="s" color="subdued">
+            <EuiText
+              size="s"
+              color="subdued"
+              css={css`
+                margin-top: ${euiTheme.size.xs};
+              `}
+            >
               <p id={`alertZeroOnboardingWorkerDescription-${id}`}>{description}</p>
             </EuiText>
           ) : null}
-          <WorkerDependenciesCallout worker={serverWorker ?? { id }} surface="onboarding" />
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <EuiSwitch
-            label={workerName(id, name)}
-            showLabel={false}
-            checked={checked}
-            disabled={disabled}
-            onChange={(e) => onToggle(id, e.target.checked)}
-            data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
-            aria-describedby={
-              description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
-            }
-          />
+          <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+            <EuiFlexItem grow={false}>
+              <EuiSwitch
+                label={workerName(id, name)}
+                showLabel={false}
+                checked={checked}
+                disabled={disabled}
+                onChange={(e) => onToggle(id, e.target.checked)}
+                data-test-subj={`alertZeroOnboardingWorkerToggle-${id}`}
+                aria-describedby={
+                  description ? `alertZeroOnboardingWorkerDescription-${id}` : undefined
+                }
+              />
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {/* The switch is named after the Worker; this is the visible state only. */}
+              <EuiText
+                size="s"
+                color="subdued"
+                aria-hidden
+                css={css`
+                  min-width: ${euiTheme.size.xl};
+                `}
+              >
+                {checked ? i18n.ONBOARDING_WORKER_TOGGLE_ON : i18n.ONBOARDING_WORKER_TOGGLE_OFF}
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
         </EuiFlexItem>
       </EuiFlexGroup>
-    </>
+      {/* Full width so each dependency's action lines up with the toggle column. */}
+      <WorkerDependenciesCallout worker={serverWorker ?? { id }} surface="onboarding" />
+    </div>
   );
 };

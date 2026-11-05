@@ -11,13 +11,22 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { ChatCompleteCacheControl, InferenceConnector } from '@kbn/inference-common';
 import { ChatCompletionErrorCode, InferenceTaskError } from '@kbn/inference-common';
 import type { InferenceChatModel } from '@kbn/inference-langchain';
-import { ConversationRoundStepType, type ConversationRoundStep } from '@kbn/agent-builder-common';
+import type { AttachmentTimelineEvent } from '@kbn/agent-builder-common';
+import {
+  ConversationRoundStepType,
+  ToolCallInvocation,
+  createInjectedContextStep,
+  type ConversationRoundStep,
+} from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import { internalTools } from '@kbn/agent-builder-common/tools';
 import type { AgentEventEmitter } from '@kbn/agent-builder-server';
 import type { ToolManager } from '@kbn/agent-builder-server/runner';
 import { createAgentGraph } from './graph';
+import type { CycleHookRuntime } from './cycle_hooks/cycle_hook_runtime';
+import { stepUpdates } from './step_state';
 import type { PromptFactory } from './prompts';
+import type { RunAttachmentEvents } from './run_attachment_events';
 import { RunTracker, type ToolExecutionBuffer } from './run_tracker';
 import type { StateType } from './state';
 import type { ProcessedConversation } from './utils/prepare_conversation';
@@ -48,12 +57,16 @@ const createTestGraph = ({
   sessionId,
   cacheControl,
   toolExecutionBuffer,
+  runAttachmentEvents,
+  cycleHooks,
 }: {
   structuredOutput?: boolean;
   outputSchema?: Record<string, unknown>;
   sessionId?: string;
   cacheControl?: ChatCompleteCacheControl;
   toolExecutionBuffer?: ToolExecutionBuffer;
+  runAttachmentEvents?: RunAttachmentEvents;
+  cycleHooks?: CycleHookRuntime;
 } = {}) => {
   const researchInvoke = jest.fn();
   const structuredInvoke = jest.fn();
@@ -100,6 +113,8 @@ const createTestGraph = ({
     sessionId,
     cacheControl,
     toolExecutionBuffer,
+    runAttachmentEvents,
+    cycleHooks,
     contextManagement: {
       connector: { connectorId: 'test-connector' } as InferenceConnector,
       resultStore: createToolResultStoreMock(),
@@ -213,6 +228,30 @@ describe('createAgentGraph', () => {
     expect(result.finalAnswer).toBe('done');
   });
 
+  it('drains the attachment events of the executed tool calls into the run', async () => {
+    const event = { id: 'att-evt', type: 'attachment_added' } as unknown as AttachmentTimelineEvent;
+    const drainToolCalls = jest.fn(() => [event]);
+    const { graph, researchInvoke, promptFactory } = createTestGraph({
+      runAttachmentEvents: { drainToolCalls } as unknown as RunAttachmentEvents,
+    });
+    researchInvoke
+      .mockResolvedValueOnce(
+        new AIMessage({ content: '', tool_calls: [{ id: 'c1', name: 'my_tool', args: {} }] })
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    mockToolNodeOnce([
+      new ToolMessage({ tool_call_id: 'c1', content: '{}', artifact: { results: [] } }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(drainToolCalls).toHaveBeenCalledWith(['c1']);
+    expect(result.attachmentEvents).toEqual([event]);
+    expect(promptFactory.getMainPrompt).toHaveBeenLastCalledWith({
+      run: expect.objectContaining({ attachmentEvents: [event] }),
+    });
+  });
+
   it('lets the model repair an ask_user_question call whose arguments failed validation', async () => {
     const { graph, researchInvoke } = createTestGraph();
     researchInvoke
@@ -285,6 +324,33 @@ describe('createAgentGraph', () => {
     await expect(graph.invoke({ cycleLimit: 2 }, { recursionLimit: 50 })).rejects.toMatchObject({
       meta: { errCode: AgentExecutionErrorCode.cycleLimitExceeded },
     });
+  });
+
+  it('spans five nodes per tool-calling cycle: a run that spends its whole budget fits in 5n + 7', async () => {
+    // `getRecursionLimit` in run_chat_agent relies on this count; adding a node to the cycle must bump it.
+    const cycleLimit = 3;
+    const { graph, researchInvoke } = createTestGraph();
+    let call = 0;
+    researchInvoke.mockImplementation(async () => {
+      call += 1;
+      return call <= cycleLimit
+        ? new AIMessage({
+            content: '',
+            tool_calls: [{ id: `c${call}`, name: 'my_tool', args: {} }],
+          })
+        : new AIMessage({ content: 'done' });
+    });
+    // the hidden start node counts, then init, the cycles, the answering cycle and finalize
+    const nodes = 5 * cycleLimit + 7;
+
+    await expect(graph.invoke({ cycleLimit }, { recursionLimit: nodes - 1 })).rejects.toThrow(
+      /recursion limit/i
+    );
+    call = 0;
+    const result = await graph.invoke({ cycleLimit }, { recursionLimit: nodes });
+
+    expect(result.finalAnswer).toBe('done');
+    expect(researchInvoke).toHaveBeenCalledTimes(2 * (cycleLimit + 1));
   });
 
   it('forcefully hands over to the answer agent past the budget in structured mode', async () => {
@@ -630,5 +696,179 @@ describe('createAgentGraph', () => {
       });
       expect(researchInvoke).toHaveBeenCalledTimes(1);
     });
+  });
+});
+
+describe('createAgentGraph cycle hooks', () => {
+  const note = createInjectedContextStep({ hook_id: 'memory', text: 'remember this' });
+
+  it('folds the dispatched rows into the prompt and the steps, and keeps them through a retry', async () => {
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke, promptFactory } = createTestGraph({ cycleHooks });
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '' }))
+      .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+    const result = await graph.invoke({ cycleLimit: 10 });
+
+    expect(dispatch).toHaveBeenNthCalledWith(1, {
+      cycle: 0,
+      attempt: 0,
+      steps: [],
+      summary: undefined,
+    });
+    // the empty response bumps the cycle and the attempt; the note is already in the state
+    expect(dispatch).toHaveBeenNthCalledWith(2, {
+      cycle: 1,
+      attempt: 1,
+      steps: [note],
+      summary: undefined,
+    });
+    expect(promptFactory.getMainPrompt).toHaveBeenNthCalledWith(1, {
+      run: expect.objectContaining({ steps: [note] }),
+    });
+    expect(promptFactory.getMainPrompt).toHaveBeenNthCalledWith(2, {
+      run: expect.objectContaining({ steps: [note] }),
+    });
+    expect(result.steps).toEqual([note]);
+    expect(result.finalAnswer).toBe('the answer');
+  });
+
+  it('keeps the rows dispatched before a context-length error for the compacted retry', async () => {
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke } = createTestGraph({ cycleHooks });
+    const summary = {
+      summarized_up_to: { round_id: 'round-0', tool_call_id: 'x1' },
+      summarized_round_count: 0,
+      created_at: 't',
+      token_count: 1,
+      structured_data: {},
+    };
+    compactContextMock.mockResolvedValue({
+      summary,
+      tokensBefore: 100,
+      tokensAfter: 10,
+      summarizedCycleCount: 1,
+    });
+    researchInvoke
+      .mockRejectedValueOnce(
+        new InferenceTaskError(ChatCompletionErrorCode.ContextLengthExceededError, 'too long', {})
+      )
+      .mockResolvedValueOnce(new AIMessage({ content: 'the answer' }));
+
+    const result = await graph.invoke({ cycleLimit: 10 }, { recursionLimit: 30 });
+
+    // the retry sees the note, the compaction step the node appended, and the new summary
+    expect(dispatch).toHaveBeenNthCalledWith(
+      2,
+      expect.objectContaining({
+        cycle: 0,
+        attempt: 1,
+        steps: [note, expect.objectContaining({ type: ConversationRoundStepType.compaction })],
+        summary,
+      })
+    );
+    expect(result.steps[0]).toEqual(note);
+    expect(result.finalAnswer).toBe('the answer');
+  });
+
+  it('commits the dispatched rows before the model call, so a fatal research error keeps them', async () => {
+    const graphName = 'cycle-hooks-fatal-graph';
+    const tracker = new RunTracker({ graphName });
+    const dispatch = jest
+      .fn()
+      .mockResolvedValueOnce([stepUpdates.append(note)])
+      .mockResolvedValue([]);
+    const cycleHooks = { dispatch } as unknown as CycleHookRuntime;
+    const { graph, researchInvoke } = createTestGraph({ cycleHooks, toolExecutionBuffer: tracker });
+    researchInvoke.mockRejectedValueOnce(new Error('fatal'));
+    tracker.seed({ steps: [] });
+
+    const stream = graph.streamEvents(
+      { cycleLimit: 5 },
+      { version: 'v2', streamMode: 'values', runName: graphName, recursionLimit: 50 }
+    );
+    await expect(
+      (async () => {
+        for await (const event of stream) {
+          tracker.observeGraphEvent(event);
+        }
+      })()
+    ).rejects.toThrow('fatal');
+
+    // the note landed in its own super-step, so the last streamed state and the projection have it
+    expect(tracker.latestState().steps).toEqual([note]);
+    expect(tracker.executionProjection()).toEqual([note]);
+  });
+});
+
+describe('createAgentGraph - execute_dynamic_tool', () => {
+  const dynamicCall = (id: string) => ({
+    id,
+    name: internalTools.executeDynamicTool,
+    args: { tool_id: 'skill.tool', params: { q: 1 } },
+  });
+
+  it('interrupts the run on a prompt from the inner tool, with the step keyed on the inner tool', async () => {
+    const { graph, researchInvoke, toolManager } = createTestGraph();
+    researchInvoke.mockResolvedValueOnce(
+      new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] })
+    );
+    const prompt = { id: 'p1', type: 'confirmation', title: 't', message: 'm' };
+    mockToolNodeOnce([new ToolMessage({ tool_call_id: 'c1', content: '', artifact: { prompt } })]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.interrupted).toBe(true);
+    expect(result.prompts).toEqual([prompt]);
+    expect(result.pendingToolCallIds).toEqual(['c1']);
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      params: { q: 1 },
+      invocation: ToolCallInvocation.dynamic,
+      results: [],
+    });
+    // the render state keeps the outer name so the paused call is re-rendered as the model made it
+    expect(result.toolRenderState.c1).toMatchObject({
+      toolName: internalTools.executeDynamicTool,
+      kind: 'server',
+    });
+    // the outer call is what reached the tool node
+    expect(toolManager.recordToolUse).toHaveBeenCalledWith(internalTools.executeDynamicTool);
+  });
+
+  it('resolves the result under the inner tool id and completes the run', async () => {
+    const { graph, researchInvoke } = createTestGraph();
+    researchInvoke
+      .mockResolvedValueOnce(new AIMessage({ content: '', tool_calls: [dynamicCall('c1')] }))
+      .mockResolvedValueOnce(new AIMessage({ content: 'done' }));
+    const results = [{ tool_result_id: 'r1', type: 'other', data: { ok: true } }];
+    mockToolNodeOnce([
+      new ToolMessage({
+        tool_call_id: 'c1',
+        content: JSON.stringify({ results }),
+        artifact: { results },
+      }),
+    ]);
+
+    const result = await graph.invoke({ cycleLimit: 5 });
+
+    expect(result.finalAnswer).toBe('done');
+    expect(result.steps[0]).toMatchObject({
+      tool_call_id: 'c1',
+      tool_id: 'skill.tool',
+      invocation: ToolCallInvocation.dynamic,
+      results,
+    });
+    expect(result.pendingToolCallIds).toEqual([]);
   });
 });

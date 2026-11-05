@@ -12,9 +12,7 @@ import { createEntityDefinitionsClient } from './entity_definitions_client';
 const makeDefinition = (type: string): RegistrableEntityDefinition => ({
   type,
   name: `Test '${type}' definition`,
-  fields: [],
   identityField: { singleField: `${type}.name` },
-  indexPatterns: ['logs-*'],
   managedBy: { kind: 'plugin', id: 'testPlugin' },
 });
 

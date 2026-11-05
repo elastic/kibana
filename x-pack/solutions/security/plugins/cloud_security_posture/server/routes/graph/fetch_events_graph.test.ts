@@ -142,6 +142,28 @@ describe('fetchEvents', () => {
     expect(args.query).not.toContain('EVAL user.id = TO_STRING(user.id)');
   });
 
+  it('expands and casts user.entity.id and user.target.entity.id for EUID resolution', async () => {
+    await fetchEvents({
+      esClient,
+      logger,
+      start: 0,
+      end: 1000,
+      originEventIds: [] as OriginEventId[],
+      showUnknownTarget: true,
+      indexPatterns: ['valid_index'],
+      spaceId: 'default',
+      esQuery: undefined,
+    });
+
+    const [args] = esClient.asCurrentUser.helpers.esql.mock.calls[0];
+    expect(args.query).toContain('| MV_EXPAND `user.entity.id`');
+    expect(args.query).toContain('| MV_EXPAND `user.target.entity.id`');
+    expect(args.query).toContain('| EVAL `user.entity.id` = TO_STRING(`user.entity.id`)');
+    expect(args.query).toContain(
+      '| EVAL `user.target.entity.id` = TO_STRING(`user.target.entity.id`)'
+    );
+  });
+
   it('should include origin event parameters when originEventIds are provided', async () => {
     const originEventIds: OriginEventId[] = [
       { id: '1', isAlert: true },

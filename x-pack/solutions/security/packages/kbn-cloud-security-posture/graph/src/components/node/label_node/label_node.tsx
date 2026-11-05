@@ -25,6 +25,7 @@ import {
   NodeButton,
   ACTUAL_LABEL_HEIGHT,
   NODE_LABEL_WIDTH,
+  LABEL_BORDER_RADIUS,
   getLabelColors,
 } from '../styles';
 import type { LabelNodeViewModel, NodeProps, NodeToolbarItem } from '../../types';
@@ -41,6 +42,7 @@ export const TEST_SUBJ_STACKED_SHAPE = 'label-node-stacked-shape';
 export const TEST_SUBJ_HANDLE = 'label-node-handle';
 export const TEST_SUBJ_EXPAND_BTN = 'label-node-expand-btn';
 export const TEST_SUBJ_LABEL_TEXT = 'label-node-text';
+export const TEST_SUBJ_ORIGIN_HIGHLIGHT = 'label-node-origin-highlight';
 
 export const LabelNode = memo<NodeProps>((props: NodeProps) => {
   const {
@@ -58,11 +60,14 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
     ipClickHandler,
     countryClickHandler,
     eventClickHandler,
+    isOrigin,
+    isOriginAlert,
   } = props.data as LabelNodeViewModel;
 
   const { euiTheme } = useEuiTheme();
   const shadow = useEuiShadow('m', { property: 'filter' });
-  const { event: eventDisplayOpts } = useGraphDisplayOptions();
+  const { event: eventDisplayOpts, highlightOrigin } = useGraphDisplayOptions();
+  const showOriginHighlight = highlightOrigin && Boolean(isOrigin || isOriginAlert);
 
   const text = label ? label : id;
 
@@ -116,7 +121,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
               align-items: center;
               gap: 2px;
               position: absolute;
-              bottom: calc(100% + 4px);
+              bottom: calc(100% + ${euiTheme.size.s} + ${euiTheme.size.xs});
               left: 50%;
               transform: translateX(-50%);
               z-index: ${euiTheme.levels.content};
@@ -177,6 +182,19 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
             </EuiText>
           </div>
         </LabelShape>
+        {showOriginHighlight && (
+          <div
+            aria-hidden="true"
+            data-test-subj={TEST_SUBJ_ORIGIN_HIGHLIGHT}
+            css={css`
+              position: absolute;
+              inset: -${euiTheme.size.s};
+              border-radius: ${LABEL_BORDER_RADIUS}px;
+              border: ${euiTheme.border.width.thin} solid ${euiTheme.colors.primary};
+              pointer-events: none;
+            `}
+          />
+        )}
         {showStackedShape(numEvents + numAlerts) && (
           <LabelStackedShape
             data-test-subj={TEST_SUBJ_STACKED_SHAPE}
@@ -234,6 +252,7 @@ export const LabelNode = memo<NodeProps>((props: NodeProps) => {
         countryCodes={eventDisplayOpts.sourceGeolocation ? countryCodes : undefined}
         onIpClick={ipClickHandler}
         onCountryClick={countryClickHandler}
+        hasOriginHighlight={showOriginHighlight}
       />
     </>
   );

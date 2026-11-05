@@ -42,6 +42,7 @@ import {
   huntRuleId,
   indexAndInstallPack,
   legacyHuntRuleId,
+  legacyDottedPackIndexName,
   legacyPackIndexName,
   packIndexName,
   packTag,
@@ -52,7 +53,14 @@ import {
   resolveThreatIntelPackIds,
   seedThreatIntelForPacks,
   THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_DEFAULT,
+  THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX,
+  assertHistoricReportsPerPackInRange,
 } from './lib/threat_intel_fixtures';
+import {
+  cleanPackHostCorrelation,
+  seedPackHostCorrelation,
+  PACK_HOST_CORRELATION_CONFIGS,
+} from './lib/pack_host_correlation';
 import { listPacks } from './packs';
 import {
   generateAndIndexAttackDiscoveries,
@@ -584,14 +592,13 @@ const cleanGeneratedData = async ({
             packHuntRuleIds.push(legacyHuntRuleId(packId, hunt.name));
           }
           const dataStream = pack.eventSources[0]?.dataStream ?? 'unknown';
+          // Alerts over a data stream record the backing index (`.ds-<stream>-<date>-<gen>`) as
+          // their ancestor; pack alerts are matched by rule id and tags above, so the stream
+          // name here only covers the stream itself.
+          ancestorIndices.push(packIndexName({ dataStream }));
           for (const suffix of suffixes) {
             ancestorIndices.push(
-              packIndexName({
-                packId,
-                dataStream,
-                endMs,
-                dateSuffixOverride: suffix,
-              })
+              legacyDottedPackIndexName({ dataStream, endMs, dateSuffixOverride: suffix })
             );
             ancestorIndices.push(
               legacyPackIndexName({
@@ -909,10 +916,13 @@ export const cli = () => {
       let historicReportsPerPack: number | undefined;
       if (threatIntelReports) {
         if (threatIntelReportCountRaw !== undefined && threatIntelReportCountRaw !== '') {
-          historicReportsPerPack = Number(threatIntelReportCountRaw);
-          if (!Number.isFinite(historicReportsPerPack) || historicReportsPerPack < 1) {
+          try {
+            historicReportsPerPack = assertHistoricReportsPerPackInRange(
+              Number(threatIntelReportCountRaw)
+            );
+          } catch {
             throw new Error(
-              `Invalid --threat-intel-report-count "${threatIntelReportCountRaw}" (expected integer >= 1)`
+              `Invalid --threat-intel-report-count "${threatIntelReportCountRaw}" (expected integer 1-${THREAT_INTEL_HISTORIC_REPORTS_PER_PACK_MAX})`
             );
           }
         } else {
@@ -1087,6 +1097,18 @@ export const cli = () => {
             log,
             packIds: packIds.length > 0 ? packIds : undefined,
           });
+          for (const packId of packIds) {
+            const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+            if (hostCorrelationConfig) {
+              await cleanPackHostCorrelation({
+                esClient,
+                log,
+                startMs,
+                endMs,
+                config: hostCorrelationConfig,
+              });
+            }
+          }
         }
 
         const fileSets = listEpisodeFileSets(episodes);
@@ -1137,6 +1159,19 @@ export const cli = () => {
           });
           assertPackProvenanceAuthored(result.pack);
           packResults.push(result);
+        }
+
+        for (const packId of packIds) {
+          const hostCorrelationConfig = PACK_HOST_CORRELATION_CONFIGS[packId];
+          if (hostCorrelationConfig) {
+            await seedPackHostCorrelation({
+              esClient,
+              log,
+              startMs,
+              endMs,
+              config: hostCorrelationConfig,
+            });
+          }
         }
 
         if (threatIntel) {
@@ -1357,7 +1392,7 @@ export const cli = () => {
         --max-preview-invocations         Max rule preview invocations per rule (Default: 12). Lower = faster for large time ranges.
         --threat-intel                   Seed per-pack RSS sources for mustard TI workflows. Defaults --packs to all four when omitted. Environment data is the packs (not logs-aws.local).
         --threat-intel-reports           Also seed historic Hub reports into .kibana-threat-reports from --start-date through --end-date minus 24h (implies --threat-intel). Leaves the last day empty for real workflow ingest. RSS stays current-only.
-        --threat-intel-report-count      Historic reports per pack when --threat-intel-reports is set (Default: 12)
+        --threat-intel-report-count      Historic reports per pack when --threat-intel-reports is set (Default: 12, max: 99)
         --attacks                         Generate synthetic Attack Discoveries (opt-in)
         --cases                          Create cases from ~50% of generated Attack Discoveries (implies --attacks)
         --no-validate-fixtures            Disable fixture validation (default: validation enabled)

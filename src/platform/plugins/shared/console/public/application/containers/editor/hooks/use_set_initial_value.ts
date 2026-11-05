@@ -113,7 +113,7 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     };
 
     // Support for loading a console snippet from a remote source, like support docs.
-    const loadFromUrl = debounce(async () => {
+    const loadFromUrl = async () => {
       const url = readLoadFromParam();
       if (!url) {
         return;
@@ -128,9 +128,12 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
       // request on every later page load, resurrecting requests the user has since cleared.
       // Replace rather than push, so Back cannot return to the URL and re-consume it.
       removeLoadFromParameter({ replace: true });
-    }, 200);
+    };
+    // Debounced for hash-change bursts only: the initial read must not be cancellable by the
+    // cleanup below, which runs whenever one of this effect's dependencies changes.
+    const debouncedLoadFromUrl = debounce(loadFromUrl, 200);
 
-    window.addEventListener('hashchange', loadFromUrl);
+    window.addEventListener('hashchange', debouncedLoadFromUrl);
 
     // Only set the value in the editor if an initial value hasn't been set yet
     if (!isInitialValueSet.current) {
@@ -141,8 +144,8 @@ export const useSetInitialValue = (params: SetInitialValueParams) => {
     }
 
     return () => {
-      window.removeEventListener('hashchange', loadFromUrl);
-      loadFromUrl.cancel();
+      window.removeEventListener('hashchange', debouncedLoadFromUrl);
+      debouncedLoadFromUrl.cancel();
     };
   }, [localStorageValue, setValue, toasts, editorDispatch, defaultEditorContent]);
 };

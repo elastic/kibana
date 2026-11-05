@@ -60,6 +60,7 @@ const mockQuery = {} as Query;
 describe('SortRenderer', () => {
   beforeEach(() => {
     jest.clearAllMocks();
+    localStorage.clear();
   });
 
   describe('rendering', () => {

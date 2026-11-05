@@ -16,8 +16,10 @@ import {
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { EuiSpacer } from '@elastic/eui';
 import type { ConnectorFormSchema } from '@kbn/alerts-ui-shared';
+import { connectorTypePublishesKeys } from '@kbn/connector-specs';
 import type { ActionTypeModel, ConnectorValidationFunc } from '../../../types';
 import { ConnectorFormFields } from './connector_form_fields';
+import { ConnectorPublicKeys } from './connector_public_keys';
 import { EncryptedFieldsCallout } from './encrypted_fields_callout';
 
 export interface ConnectorFormState {
@@ -110,7 +112,19 @@ const ConnectorFormComponent: React.FC<Props> = ({
         isEdit={isEdit}
         registerPreSubmitValidator={registerPreSubmitValidator}
         authMode={connector.authMode}
-        settingsContent={settingsContent}
+        settingsContent={
+          connectorTypePublishesKeys(connector.actionTypeId) ? (
+            <>
+              {settingsContent}
+              <ConnectorPublicKeys
+                connectorTypeId={connector.actionTypeId}
+                connectorId={connector.id}
+              />
+            </>
+          ) : (
+            settingsContent
+          )
+        }
         showInboundEvents={showInboundEvents}
         savedIsInboundEventsEnabled={connector.isInboundEventsEnabled === true}
       />

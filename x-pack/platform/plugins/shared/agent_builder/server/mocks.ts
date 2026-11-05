@@ -40,6 +40,7 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     hooks: {
       register: jest.fn(),
+      registerCycleHook: jest.fn(),
     },
     plugins: {
       register: jest.fn(),
@@ -49,6 +50,10 @@ const createSetupContractMock = (): AgentBuilderPluginSetupMock => {
     },
     conversations: {
       enableUpdatedTrigger: jest.fn(),
+    },
+    callbacks: {
+      registerConversationResolver: jest.fn(),
+      registerTransport: jest.fn(),
     },
     topSnippets: { numSnippets: 2, numWords: 750 },
   };

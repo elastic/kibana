@@ -25,6 +25,7 @@ describe('createSignificantEventsClients', () => {
       dataStreams: { initializeClient } as never,
       esClient: {} as never,
       space: 'default',
+      getAlertEventsClient: jest.fn(),
     });
 
     expect(initializeClient).not.toHaveBeenCalled();
@@ -39,6 +40,7 @@ describe('createSignificantEventsClients', () => {
       dataStreams: { initializeClient: jest.fn() } as never,
       esClient: {} as never,
       space: 'default',
+      getAlertEventsClient: jest.fn(),
     });
 
     await expect(clients.getEventSearchClient()).resolves.toBeInstanceOf(RuleEventsClient);
@@ -51,9 +53,45 @@ describe('createSignificantEventsClients', () => {
       dataStreams: { initializeClient: jest.fn() } as never,
       esClient: {} as never,
       space: 'default',
+      getAlertEventsClient: jest.fn(),
       triggerEmitter,
     });
 
     expect(clients.emitTrigger).toBe(triggerEmitter);
+  });
+
+  it('gives the event client the writer lazily, and the trigger emitter, to write with', async () => {
+    const createAlertEvent = jest.fn().mockResolvedValue(undefined);
+    const getAlertEventsClient = jest.fn().mockResolvedValue({ createAlertEvent });
+    const triggerEmitter = jest.fn();
+    const clients = createSignificantEventsClients({
+      services: { detection: { getClient: jest.fn() } as never },
+      dataStreams: { initializeClient: jest.fn() } as never,
+      esClient: {} as never,
+      space: 'default',
+      getAlertEventsClient,
+      triggerEmitter,
+    });
+
+    const eventClient = await clients.getEventSearchClient();
+    expect(getAlertEventsClient).not.toHaveBeenCalled();
+
+    await eventClient.createEvent({
+      event: {
+        '@timestamp': '2026-01-01T00:00:00.000Z',
+        event_id: 'event-1',
+        status: 'active',
+        source_ids: ['logs.test'],
+        title: 'Test event',
+        summary: 'Test summary',
+        severity: 'medium',
+        confidence: 0.8,
+      },
+    });
+
+    expect(createAlertEvent).toHaveBeenCalledWith(
+      expect.objectContaining({ fingerprint: 'event-1' })
+    );
+    expect(triggerEmitter).toHaveBeenCalledTimes(1);
   });
 });

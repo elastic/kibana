@@ -43,6 +43,7 @@ import {
   useOverviewActivityStats,
 } from './overview/overview_activity_chart';
 import { AlertingCallout } from '../../common/alerting_callout/alerting_callout';
+import { BrowserCompleteAgentOverviewCallout } from '../../common/components/browser_complete_agent_overview_callout';
 import { useSyntheticsPageReady } from '../../../hooks/use_synthetics_page_ready';
 import { CLIENT_DEFAULTS_SYNTHETICS } from '../../../../../../common/constants/synthetics/client_defaults';
 import { LastRefreshed } from '../../common/components/last_refreshed';
@@ -109,8 +110,14 @@ export const OverviewPage: React.FC = () => {
   // filter that excludes every monitor makes `allConfigs` empty even when monitors exist.
   // The date range is intentionally excluded: it scopes each monitor's status, not which
   // monitors exist, so it must not suppress the Getting Started redirect.
+  // Hiding autodiscovered monitors is a client filter, not a URL param. With only
+  // Heartbeat monitors it empties `allConfigs`, and the display-options toggle
+  // lives on the grid — treat it as active so we stay on Overview and can turn
+  // them back on.
+  const heartbeatMonitorsHidden = pageState.includeHeartbeatMonitors === false;
   const hasActiveOverviewFilter = Boolean(
-    pageState.query ||
+    heartbeatMonitorsHidden ||
+      pageState.query ||
       pageState.tags?.length ||
       pageState.locations?.length ||
       pageState.monitorTypes?.length ||
@@ -155,7 +162,8 @@ export const OverviewPage: React.FC = () => {
     return <Redirect to={MONITORS_ROUTE} />;
   }
 
-  const hasMonitors = !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
+  const hasMonitors =
+    heartbeatMonitorsHidden || !(monitorsLoaded && overviewLoaded && allConfigs?.length === 0);
 
   return (
     <MonitorsListingPage
@@ -168,6 +176,7 @@ export const OverviewPage: React.FC = () => {
       }
     >
       <DisabledCallout total={absoluteTotal} />
+      <BrowserCompleteAgentOverviewCallout />
       <AlertingCallout />
       <EuiFlexGroup gutterSize="s" wrap={true}>
         <EuiFlexItem>

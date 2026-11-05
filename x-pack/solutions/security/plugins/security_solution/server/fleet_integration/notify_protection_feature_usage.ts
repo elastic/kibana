@@ -6,8 +6,8 @@
  */
 
 import type { NewPackagePolicy } from '@kbn/fleet-plugin/common';
-import type { PolicyConfig, PolicyData, ProtectionModes } from '../../common/endpoint/types';
-import { PolicyOperatingSystem } from '../../common/endpoint/types';
+import type { PolicyConfig, PolicyData } from '../../common/endpoint/types';
+import { PolicyOperatingSystem, ProtectionModes } from '../../common/endpoint/types';
 import type { FeatureUsageService } from '../endpoint/services/feature_usage/service';
 
 const OS_KEYS = Object.values(PolicyOperatingSystem);
@@ -19,6 +19,17 @@ function isNewlyEnabled(current: ProtectionModes, next: ProtectionModes) {
   }
 
   return false;
+}
+
+/**
+ * Ransomware is optional on Linux (absent on legacy policies or wherever the feature is gated
+ * off); an absent branch on either side of a comparison must read as `off`.
+ */
+function getRansomwareMode(
+  policyConfig: PolicyConfig,
+  osKey: PolicyOperatingSystem
+): ProtectionModes {
+  return policyConfig[osKey].ransomware?.mode ?? ProtectionModes.off;
 }
 
 function notifyProtection(type: string, featureUsageService: FeatureUsageService) {
@@ -50,13 +61,14 @@ export async function notifyProtectionFeatureUsage(
   const newPolicyConfig = newPackagePolicy.inputs[0].config?.policy?.value as PolicyConfig;
   const currentPolicyConfig = currentPackagePolicy.inputs[0].config.policy.value;
 
-  // ransomware is windows only
-  if (
+  const ransomwareNewlyEnabled = OS_KEYS.some((osKey) =>
     isNewlyEnabled(
-      currentPolicyConfig.windows.ransomware.mode,
-      newPolicyConfig.windows.ransomware.mode
+      getRansomwareMode(currentPolicyConfig, osKey),
+      getRansomwareMode(newPolicyConfig, osKey)
     )
-  ) {
+  );
+
+  if (ransomwareNewlyEnabled) {
     notifyProtection('ransomware', featureUsageService);
   }
 

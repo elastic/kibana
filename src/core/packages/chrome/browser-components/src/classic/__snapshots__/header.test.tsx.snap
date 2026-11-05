@@ -18,13 +18,6 @@ exports[`Header renders 1`] = `
         <div
           class="euiHeaderSectionItem emotion-euiHeaderSectionItem"
         >
-          <div
-            aria-atomic="true"
-            aria-label="Page change announcements"
-            aria-live="polite"
-            class="emotion-euiScreenReaderOnly"
-            role="status"
-          />
           <a
             class="euiButton euiSkipLink emotion-euiButtonDisplay-s-fill-primary-euiSkipLink-fixed-euiScreenReaderOnly-showOnFocus"
             data-test-subj="skipToMainButton"

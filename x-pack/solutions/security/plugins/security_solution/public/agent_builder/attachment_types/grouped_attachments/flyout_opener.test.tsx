@@ -9,6 +9,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { useFlyoutApi } from '../../../flyout_v2/use_flyout_api';
 import { createFlyoutApiMock } from '../../../flyout_v2/use_flyout_api.mock';
+import { useFlyoutSessionContext } from '../../../flyout_v2/session_context';
 import { openDescriptorAsStart } from '../../../flyout_v2/shared/url_state/use_flyout_v2_restore';
 import { FLYOUT_ORIGIN } from '../../../common/lib/telemetry/events/flyout_v2/types';
 import type { FlyoutDescriptor } from '../../../flyout_v2/shared/url_state/flyout_v2_url_param';
@@ -16,6 +17,9 @@ import { GroupedAttachmentFlyoutOpener } from './flyout_opener';
 
 jest.mock('../../../flyout_v2/use_flyout_api');
 jest.mock('../../../flyout_v2/shared/url_state/use_flyout_v2_restore');
+jest.mock('../../../common/hooks/is_in_security_app', () => ({
+  useIsInSecurityApp: () => true,
+}));
 
 // The real bundle mounts the whole Security provider stack; the opener only needs to be inside it.
 jest.mock('../../../flyout_v2/shared/components/flyout_provider', () => ({
@@ -50,10 +54,17 @@ describe('GroupedAttachmentFlyoutOpener', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     dataViewStatus = 'ready';
+    document.body.innerHTML = '';
     jest.mocked(useFlyoutApi).mockReturnValue(createFlyoutApiMock());
   });
 
   it('opens the flyout for the given descriptor, attributed to the attachment summary', async () => {
+    let pinnedSize: number | string | undefined;
+    jest.mocked(useFlyoutApi).mockImplementation(() => {
+      pinnedSize = useFlyoutSessionContext().size;
+      return createFlyoutApiMock();
+    });
+
     renderOpener();
 
     await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));
@@ -61,9 +72,37 @@ describe('GroupedAttachmentFlyoutOpener', () => {
       descriptor,
       {},
       expect.anything(),
-      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY,
-      { originFlyoutSize: 's' }
+      FLYOUT_ORIGIN.ATTACHMENT_SUMMARY
     );
+    expect(pinnedSize).toBeUndefined();
+  });
+
+  it('opens at the measured conversation flyout width', async () => {
+    const flyout = document.createElement('div');
+    flyout.setAttribute('data-test-subj', 'agentBuilderConversationDetailsFlyout-live');
+    jest.spyOn(flyout, 'getBoundingClientRect').mockReturnValue({
+      width: 640,
+      height: 0,
+      top: 0,
+      left: 0,
+      right: 0,
+      bottom: 0,
+      x: 0,
+      y: 0,
+      toJSON: () => ({}),
+    });
+    document.body.appendChild(flyout);
+
+    let pinnedSize: number | string | undefined;
+    jest.mocked(useFlyoutApi).mockImplementation(() => {
+      pinnedSize = useFlyoutSessionContext().size;
+      return createFlyoutApiMock();
+    });
+
+    renderOpener();
+
+    await waitFor(() => expect(openDescriptorAsStart).toHaveBeenCalledTimes(1));
+    expect(pinnedSize).toBe(640);
   });
 
   it('initialises the data view manager when nothing else has', async () => {

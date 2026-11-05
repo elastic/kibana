@@ -77,10 +77,10 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     }
   ),
   terms_date_histogram_not_supported: i18n.translate(
-    'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramTooltip',
+    'xpack.lens.config.cannotConvertToEsqlTermsDateHistogramNestingTooltip',
     {
       defaultMessage:
-        'Top values combined with a date histogram will be supported in an upcoming update.',
+        'This arrangement of Top values and date histogram dimensions is not supported yet.',
     }
   ),
   terms_multi_level_not_supported: i18n.translate(
@@ -112,7 +112,7 @@ export const esqlConversionFailureReasonMessages: Record<EsqlConversionFailureRe
     'xpack.lens.config.cannotConvertToEsqlTermsOtherBucketTooltip',
     {
       defaultMessage:
-        'Grouping remaining values as "Other" will be supported in an upcoming update.',
+        'Grouping remaining values as "Other" is only supported for a single Top values dimension that is not nested under another bucket and does not include documents without the selected field.',
     }
   ),
   terms_order_by_not_supported: i18n.translate(

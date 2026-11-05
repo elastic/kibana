@@ -10,13 +10,23 @@ import { render, screen, fireEvent, waitFor, within } from '@testing-library/rea
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { useRelayAppBindings, useBindChannel, useUnbindChannel } from './use_relay_app_bindings';
+import {
+  useRelayAppBindings,
+  useBindChannel,
+  useUnbindChannel,
+} from '../../../data/relay_apps/use_relay_app_bindings';
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('./use_relay_app_bindings');
+jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
+  useRelayAppBindings: jest.fn(),
+  useBindChannel: jest.fn(),
+  useUnbindChannel: jest.fn(),
+}));
 const mockDisconnectWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockConnectWorkspace = jest.fn().mockResolvedValue(undefined);
+const mockConfirmWorkspace = jest.fn().mockResolvedValue(undefined);
 const mockRetryStatusRequest = jest.fn();
 const mockUseRelayAppConnection = jest.fn();
 jest.mock('./use_relay_app_connection', () => ({
@@ -30,12 +40,25 @@ const mockUseRelayAppBindings = useRelayAppBindings as jest.MockedFunction<
 const mockUseBindChannel = useBindChannel as jest.MockedFunction<typeof useBindChannel>;
 const mockUseUnbindChannel = useUnbindChannel as jest.MockedFunction<typeof useUnbindChannel>;
 
-// AppsSection pulls the whole card + bindings together.
+// SlackChannelsSection pulls the connection state and the bindings together.
 // eslint-disable-next-line @typescript-eslint/no-var-requires
-const { AppsSection } = require('.');
+const { SlackChannelsSection } = require('.');
 
 const bindChannel = jest.fn().mockResolvedValue(undefined);
 const unbindChannel = jest.fn().mockResolvedValue(undefined);
+
+const connected = () => ({
+  isLoading: false,
+  hasStatusRequestError: false,
+  available: true,
+  status: 'connected',
+  error: undefined,
+  isMutating: false,
+  retryStatusRequest: mockRetryStatusRequest,
+  connect: mockConnectWorkspace,
+  confirm: mockConfirmWorkspace,
+  disconnect: mockDisconnectWorkspace,
+});
 
 function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
   mockUseRelayAppBindings.mockReturnValue({
@@ -44,7 +67,11 @@ function makeBindings(bindings: SlackChannelBinding[], nextCursor?: string) {
     isFetching: false,
     nextCursor,
   });
-  mockUseBindChannel.mockReturnValue({ bind: bindChannel, isLoading: false });
+  mockUseBindChannel.mockReturnValue({
+    bind: bindChannel,
+    isLoading: false,
+    clearFailure: jest.fn(),
+  });
   mockUseUnbindChannel.mockReturnValue({ unbind: unbindChannel, isLoading: false });
 }
 
@@ -55,83 +82,212 @@ function setup(canEdit = true) {
   return render(
     <I18nProvider>
       <QueryClientProvider client={queryClient}>
-        <AppsSection canEdit={canEdit} />
+        <SlackChannelsSection canEdit={canEdit} />
       </QueryClientProvider>
     </I18nProvider>
   );
 }
 
-// The channel bindings are hidden by default; reveal them via the toggle button.
-const revealChannels = () =>
-  fireEvent.click(screen.getByTestId('streamsSlackAppToggleChannelsButton'));
-
-describe('AppsSection', () => {
+describe('SlackChannelsSection', () => {
   beforeEach(() => {
     jest.clearAllMocks();
-    mockUseRelayAppConnection.mockReturnValue({
-      isLoading: false,
-      hasStatusRequestError: false,
-      available: true,
-      status: 'connected',
-      error: undefined,
-      isMutating: false,
-      retryStatusRequest: mockRetryStatusRequest,
-      connect: mockConnectWorkspace,
-      disconnect: mockDisconnectWorkspace,
+    mockUseRelayAppConnection.mockReturnValue(connected());
+    makeBindings([]);
+  });
+
+  describe('when a workspace is awaiting confirmation', () => {
+    const mockPendingConfirmation = (workspace: {
+      tenantKey: string;
+      name?: string;
+      url?: string;
+    }) =>
+      mockUseRelayAppConnection.mockReturnValue({
+        ...connected(),
+        status: 'pending_confirmation',
+        workspace,
+      });
+
+    it('shows the workspace URL, name, and team ID, and hides the channel controls', () => {
+      mockPendingConfirmation({
+        tenantKey: 'T0123ABC',
+        name: 'Acme',
+        url: 'https://acme.slack.com/',
+      });
+      setup();
+
+      const callout = screen.getByTestId('streamsSlackAppConfirmWorkspace');
+      expect(callout).toHaveTextContent('https://acme.slack.com/');
+      expect(callout).toHaveTextContent('Acme');
+      expect(callout).toHaveTextContent('T0123ABC');
+      expect(screen.queryByTestId('streamsSlackAppChannelIdInput')).not.toBeInTheDocument();
+      expect(screen.queryByTestId('streamsSlackAppDisconnectButton')).not.toBeInTheDocument();
+    });
+
+    it('still shows the team ID when the Relay reports no name or URL', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
+      setup();
+
+      expect(screen.getByTestId('streamsSlackAppConfirmWorkspace')).toHaveTextContent('T0123ABC');
+    });
+
+    it('confirms the workspace that was shown', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC', url: 'https://acme.slack.com/' });
+      setup();
+
+      fireEvent.click(screen.getByTestId('streamsSlackAppConfirmWorkspaceButton'));
+      expect(mockConfirmWorkspace).toHaveBeenCalledWith('T0123ABC');
+    });
+
+    it('rejects the workspace by disconnecting it', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC', url: 'https://acme.slack.com/' });
+      setup();
+
+      fireEvent.click(screen.getByTestId('streamsSlackAppRejectWorkspaceButton'));
+      expect(mockDisconnectWorkspace).toHaveBeenCalledWith('T0123ABC');
+      expect(mockConfirmWorkspace).not.toHaveBeenCalled();
+    });
+
+    it('disables confirm and reject when canEdit is false', () => {
+      mockPendingConfirmation({ tenantKey: 'T0123ABC' });
+      setup(false);
+
+      expect(screen.getByTestId('streamsSlackAppConfirmWorkspaceButton')).toBeDisabled();
+      expect(screen.getByTestId('streamsSlackAppRejectWorkspaceButton')).toBeDisabled();
     });
   });
 
-  it('explains when apps are unavailable in this deployment', () => {
+  it('renders nothing while the status is loading', () => {
+    mockUseRelayAppConnection.mockReturnValue({ ...connected(), isLoading: true });
+
+    setup();
+
+    expect(screen.queryByTestId('nightshiftSlackChannelsSection')).not.toBeInTheDocument();
+  });
+
+  it('renders nothing when the Slack App is unavailable in this deployment', () => {
     mockUseRelayAppConnection.mockReturnValue({
-      isLoading: false,
-      hasStatusRequestError: false,
+      ...connected(),
       available: false,
       status: 'not_connected',
-      error: undefined,
-      isMutating: false,
-      retryStatusRequest: mockRetryStatusRequest,
-      connect: mockConnectWorkspace,
-      disconnect: mockDisconnectWorkspace,
     });
 
     setup();
 
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
-      'Apps are unavailable'
-    );
-    expect(screen.getByTestId('nightshiftAppsUnavailable')).toHaveTextContent(
-      'Apps require Agent Builder and a configured Relay service.'
-    );
+    expect(screen.queryByTestId('nightshiftSlackChannelsSection')).not.toBeInTheDocument();
   });
 
-  it('distinguishes a status request failure from app unavailability', () => {
+  it('shows a retry when the status request failed, instead of hiding the section', () => {
     mockUseRelayAppConnection.mockReturnValue({
-      isLoading: false,
+      ...connected(),
       hasStatusRequestError: true,
       available: false,
       status: 'not_connected',
-      error: undefined,
-      isMutating: false,
-      retryStatusRequest: mockRetryStatusRequest,
-      connect: mockConnectWorkspace,
-      disconnect: mockDisconnectWorkspace,
     });
 
     setup();
 
-    expect(screen.getByTestId('nightshiftAppsStatusError')).toHaveTextContent(
-      'Unable to check app availability'
+    expect(screen.getByTestId('nightshiftSlackStatusError')).toHaveTextContent(
+      'Unable to check the Slack App status'
     );
-    expect(screen.queryByTestId('nightshiftAppsUnavailable')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppConnectButton')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSlackConnectedBadge')).not.toBeInTheDocument();
 
-    fireEvent.click(screen.getByTestId('nightshiftAppsStatusRetryButton'));
+    fireEvent.click(screen.getByTestId('nightshiftSlackStatusRetryButton'));
     expect(mockRetryStatusRequest).toHaveBeenCalledTimes(1);
   });
 
-  it('binds a channel by entering an id and clicking the Bind button', async () => {
-    makeBindings([]);
+  it('offers to connect Slack when no workspace is connected', () => {
+    mockUseRelayAppConnection.mockReturnValue({ ...connected(), status: 'not_connected' });
+
     setup();
-    revealChannels();
+
+    expect(screen.getByTestId('nightshiftSlackChannelsSection')).toHaveTextContent(
+      'Slack channels'
+    );
+    expect(screen.getByTestId('streamsSlackAppPrivateChannelsNote')).toBeInTheDocument();
+    expect(screen.queryByTestId('nightshiftSlackConnectedBadge')).not.toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppChannelIdInput')).not.toBeInTheDocument();
+
+    fireEvent.click(screen.getByTestId('streamsSlackAppConnectButton'));
+    expect(mockConnectWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  it('disables connect when canEdit is false', () => {
+    mockUseRelayAppConnection.mockReturnValue({ ...connected(), status: 'not_connected' });
+
+    setup(false);
+
+    expect(screen.getByTestId('streamsSlackAppConnectButton')).toBeDisabled();
+  });
+
+  it('lets the user cancel while authorization is in progress', () => {
+    mockUseRelayAppConnection.mockReturnValue({ ...connected(), status: 'oauth_in_progress' });
+
+    setup();
+
+    expect(screen.getByTestId('nightshiftSlackChannelsSection')).toHaveTextContent(
+      'Waiting for authorization'
+    );
+    fireEvent.click(screen.getByTestId('streamsSlackAppCancelButton'));
+    expect(mockDisconnectWorkspace).toHaveBeenCalledTimes(1);
+  });
+
+  it('shows the channels with a connected badge once the workspace is connected', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup();
+
+    expect(screen.getByTestId('nightshiftSlackConnectedBadge')).toHaveTextContent('Connected');
+    expect(await screen.findByTestId('streamsSlackAppChannelIdInput')).toBeInTheDocument();
+    expect(screen.getByText('C123')).toBeInTheDocument();
+    expect(screen.queryByTestId('streamsSlackAppConnectButton')).not.toBeInTheDocument();
+  });
+
+  it('shows who connected the workspace and when', () => {
+    mockUseRelayAppConnection.mockReturnValue({
+      ...connected(),
+      workspace: { tenantKey: 'T0123ABC', name: 'Acme' },
+      createdBy: 'alice',
+      createdAt: '2026-10-19T12:00:00.000Z',
+    });
+
+    setup();
+
+    expect(screen.getByTestId('streamsSlackAppWorkspace')).toHaveTextContent('Workspace: Acme');
+    expect(screen.getByTestId('streamsSlackAppConnectedBy')).toHaveTextContent(
+      'Set up by alice on Oct 19, 2026'
+    );
+  });
+
+  it('shows only the date when the install had no username', () => {
+    mockUseRelayAppConnection.mockReturnValue({
+      ...connected(),
+      workspace: { tenantKey: 'T0123ABC' },
+      createdAt: '2026-10-19T12:00:00.000Z',
+    });
+
+    setup();
+
+    expect(screen.getByTestId('streamsSlackAppConnectedBy')).toHaveTextContent(
+      'Set up on Oct 19, 2026'
+    );
+  });
+
+  it('shows the workspace name with its host', () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    mockUseRelayAppConnection.mockReturnValue({
+      ...connected(),
+      workspace: { tenantKey: 'T0123ABC', name: 'Acme Corp', url: 'https://acme-corp.slack.com/' },
+    });
+
+    setup();
+
+    expect(screen.getByTestId('streamsSlackAppWorkspace')).toHaveTextContent(
+      'Workspace: Acme Corp (acme-corp.slack.com)'
+    );
+  });
+
+  it('binds a channel by entering an id and clicking the Bind button', async () => {
+    setup();
 
     const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
     const bindBtn = screen.getByTestId('streamsSlackAppBindChannelButton');
@@ -139,11 +295,11 @@ describe('AppsSection', () => {
     // Empty input keeps the button disabled.
     expect(bindBtn).toBeDisabled();
 
-    fireEvent.change(input, { target: { value: '  C789  ' } });
+    fireEvent.change(input, { target: { value: '  C0123456789  ' } });
     expect(bindBtn).toBeEnabled();
 
     fireEvent.click(bindBtn);
-    expect(bindChannel).toHaveBeenCalledWith('C789');
+    expect(bindChannel).toHaveBeenCalledWith('C0123456789');
 
     // The field is cleared once the bind resolves.
     await waitFor(() => expect(input).toHaveValue(''));
@@ -152,7 +308,6 @@ describe('AppsSection', () => {
   it('shows an Unbind button for a connected channel and opens a confirm modal', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup();
-    revealChannels();
 
     const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
     expect(btn).toBeInTheDocument();
@@ -169,7 +324,7 @@ describe('AppsSection', () => {
     await waitFor(() => expect(unbindChannel).toHaveBeenCalledWith('C123'));
   });
 
-  it('opens a confirm modal and disconnects the workspace on confirm', async () => {
+  it('opens a confirm modal from the section header and disconnects the workspace on confirm', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup();
 
@@ -205,7 +360,6 @@ describe('AppsSection', () => {
   it('cancel on the unbind confirm modal does not call unbind', async () => {
     makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
     setup();
-    revealChannels();
 
     const btn = await screen.findByTestId('streamsSlackAppUnbindChannelButton');
     fireEvent.click(btn);
@@ -222,17 +376,53 @@ describe('AppsSection', () => {
     );
   });
 
-  it('disables the Bind and Unbind controls when canEdit is false', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup(false /* canEdit = false */);
-    revealChannels();
+  it('keeps the Bind button disabled for input that is not a channel id or link', async () => {
+    setup();
 
     const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
-    fireEvent.change(input, { target: { value: 'C789' } });
+    fireEvent.change(input, { target: { value: '#general' } });
+
+    expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
+    expect(screen.getByTestId('streamsSlackAppChannelInputHelp')).toHaveTextContent(
+      'Enter a channel ID'
+    );
+  });
+
+  it('offers to reconnect Slack when private channel access is missing', async () => {
+    mockUseBindChannel.mockReturnValue({
+      bind: bindChannel,
+      isLoading: false,
+      clearFailure: jest.fn(),
+      failure: { reason: 'private_channel_access_required', message: 'ignored' },
+    });
+    setup();
+
+    expect(await screen.findByTestId('streamsSlackAppBindFailure')).toHaveTextContent(
+      'Reconnect Slack and allow it'
+    );
+    expect(screen.getByTestId('streamsSlackAppBindFailureReconnect')).toBeInTheDocument();
+    expect(screen.getByTestId('streamsSlackAppBindFailureRetry')).toBeInTheDocument();
+  });
+
+  it('shows a private channel as an accessible lock icon with its id and no name', async () => {
+    makeBindings([{ channel: 'G0123456789', visibility: 'private', status: 'bound_to_self' }]);
+    setup();
+
+    expect(await screen.findByTestId('slackPrivateChannelIcon')).toBeInTheDocument();
+    expect(screen.getByText('G0123456789')).toBeInTheDocument();
+  });
+
+  it('disables the Bind, Unbind and Disconnect controls when canEdit is false', async () => {
+    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
+    setup(false /* canEdit = false */);
+
+    const input = await screen.findByTestId('streamsSlackAppChannelIdInput');
+    fireEvent.change(input, { target: { value: 'C0123456789' } });
 
     expect(input).toBeDisabled();
     expect(screen.getByTestId('streamsSlackAppBindChannelButton')).toBeDisabled();
     expect(screen.getByTestId('streamsSlackAppUnbindChannelButton')).toBeDisabled();
+    expect(screen.getByTestId('streamsSlackAppDisconnectButton')).toBeDisabled();
   });
 
   it('renders one row per connected channel', async () => {
@@ -241,7 +431,6 @@ describe('AppsSection', () => {
       { channel: 'C002', status: 'bound_to_self' },
     ]);
     setup();
-    revealChannels();
 
     expect(await screen.findByText('C001')).toBeInTheDocument();
     expect(screen.getByText('C002')).toBeInTheDocument();
@@ -250,7 +439,6 @@ describe('AppsSection', () => {
   it('hides pagination controls when there is a single page', async () => {
     makeBindings([{ channel: 'C001', status: 'bound_to_self' }] /* no nextCursor */);
     setup();
-    revealChannels();
 
     await screen.findByText('C001');
     expect(screen.queryByTestId('streamsSlackAppChannelsNextPage')).not.toBeInTheDocument();
@@ -260,7 +448,6 @@ describe('AppsSection', () => {
   it('shows pagination controls and steps forward using the relay cursor', async () => {
     makeBindings([{ channel: 'C001', status: 'bound_to_self' }], 'cursor-2');
     setup();
-    revealChannels();
 
     const next = await screen.findByTestId('streamsSlackAppChannelsNextPage');
     expect(screen.getByTestId('streamsSlackAppChannelsPageLabel')).toHaveTextContent('Page 1');
@@ -275,24 +462,5 @@ describe('AppsSection', () => {
     expect(screen.getByTestId('streamsSlackAppChannelsPreviousPage')).toBeEnabled();
     // The next page is fetched with the cursor returned by the previous page.
     expect(mockUseRelayAppBindings).toHaveBeenLastCalledWith(true, 'cursor-2');
-  });
-
-  it('hides the channels section by default and toggles it via the Show/Hide button', async () => {
-    makeBindings([{ channel: 'C123', status: 'bound_to_self' }]);
-    setup();
-
-    // Hidden by default.
-    const toggle = await screen.findByTestId('streamsSlackAppToggleChannelsButton');
-    expect(screen.queryByTestId('streamsSlackAppChannelIdInput')).not.toBeInTheDocument();
-
-    // Clicking reveals the bindings.
-    fireEvent.click(toggle);
-    expect(await screen.findByTestId('streamsSlackAppChannelIdInput')).toBeInTheDocument();
-
-    // Clicking again hides them.
-    fireEvent.click(toggle);
-    await waitFor(() =>
-      expect(screen.queryByTestId('streamsSlackAppChannelIdInput')).not.toBeInTheDocument()
-    );
   });
 });

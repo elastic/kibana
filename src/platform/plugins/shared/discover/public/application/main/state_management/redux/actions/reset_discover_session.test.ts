@@ -10,7 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { createDiscoverServicesMock } from '../../../../../__mocks__/services';
 import { getDiscoverInternalStateMock } from '../../../../../__mocks__/discover_state.mock';
-import { internalStateActions, selectTab, selectTabRuntimeState } from '..';
+import { getTabDataView, internalStateActions, selectTab, selectTabRuntimeState } from '..';
 import type { InternalStateStore } from '../internal_state';
 import { internalStateSlice } from '../internal_state';
 import { getPersistedTabMock } from '../__mocks__/internal_state.mocks';
@@ -170,9 +170,9 @@ describe('resetDiscoverSession', () => {
     expect(tab2.forceFetchOnSelect).toBe(true);
     expect(tab3.forceFetchOnSelect).toBe(true);
 
-    expect(tab1RuntimeState.currentDataView$.getValue()).toBe(dataViewWithTimefieldMock);
-    expect(tab2RuntimeState.currentDataView$.getValue()).toBe(dataViewWithNoTimefieldMock);
-    expect(tab3RuntimeState.currentDataView$.getValue()).toBeUndefined();
+    expect(getTabDataView(tab1RuntimeState)).toBe(dataViewWithTimefieldMock);
+    expect(getTabDataView(tab2RuntimeState)).toBe(dataViewWithNoTimefieldMock);
+    expect(getTabDataView(tab3RuntimeState)).toBeUndefined();
   });
 
   it('should use provided discover session and next selected tab', async () => {

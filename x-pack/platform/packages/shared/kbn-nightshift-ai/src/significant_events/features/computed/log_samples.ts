@@ -16,11 +16,11 @@ const SAMPLE_SIZE = 5;
 export const logSamplesGenerator: ComputedFeatureGenerator = {
   type: LOG_SAMPLES_FEATURE_TYPE,
 
-  description: 'Raw sample log documents from the stream',
+  description: 'Raw sample log documents from the source',
 
-  llmInstructions: `Contains raw sample log documents from the stream.
+  llmInstructions: `Contains raw sample log documents from the source.
 Use the \`properties.samples\` array to see actual log entries and their field values.
-This is useful for understanding the format of logs, identifying patterns, and seeing real examples of data in the stream.`,
+This is useful for understanding the format of logs, identifying patterns, and seeing real examples of data in the source.`,
 
   generate: async ({ target, start, end, esClient, signal }) => {
     const { hits } = await getSampleDocumentsEsql({

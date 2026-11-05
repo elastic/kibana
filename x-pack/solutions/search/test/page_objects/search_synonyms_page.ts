@@ -205,17 +205,24 @@ export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
           throw new Error(`Badge with index ${index} not found`);
         }
         const expectedCount = initialBadges.length - 1;
-        await retry.try(async () => {
-          const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
-          if (badges.length === expectedCount) {
-            return;
+        const termToRemove = await initialBadges[index].getVisibleText();
+
+        // Click the remove button exactly once. Re-clicking while waiting for the DOM to update
+        // removes whichever term has shifted into this position, deleting more than one term.
+        const deleteButton = await initialBadges[index].findByTagName('button');
+        await deleteButton.click();
+
+        await retry.waitFor(
+          `term "${termToRemove}" to be removed (expecting ${expectedCount} badges)`,
+          async () => {
+            const badges = await testSubjects.findAll(this.TEST_IDS.FLYOUT_FROM_BADGE);
+            if (badges.length !== expectedCount) {
+              return false;
+            }
+            const terms = await Promise.all(badges.map((badge) => badge.getVisibleText()));
+            return !terms.includes(termToRemove);
           }
-          const deleteButton = await badges[index].findByTagName('button');
-          await deleteButton.click();
-          throw new Error(
-            `Clicked remove on badge ${index}, waiting for badge count to drop to ${expectedCount}`
-          );
-        });
+        );
       },
     },
   };

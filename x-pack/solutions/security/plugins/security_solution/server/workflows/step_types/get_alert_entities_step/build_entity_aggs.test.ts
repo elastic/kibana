@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import { buildEntityAggs } from './build_entity_aggs';
 
 describe('buildEntityAggs', () => {
@@ -16,8 +16,8 @@ describe('buildEntityAggs', () => {
 
   it('derives one id per requested type with the Entity Store generator, as the Attack Discovery badges do', () => {
     expect(runtimeMappings).toEqual({
-      entity_host: euid.painless.getEuidRuntimeMapping('host'),
-      entity_user: euid.painless.getEuidRuntimeMapping('user'),
+      entity_host: euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition('host')),
+      entity_user: euid.painless.getEuidRuntimeMapping(getBuiltInEntityDefinition('user')),
     });
   });
 

@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import * as rt from 'io-ts';
-import { CaseCustomFieldsRt } from '../../custom_field/v1';
+import { z } from '@kbn/zod/v4';
+import { CaseCustomFieldsSchema } from '../../custom_field/v1';
 import { UserActionTypes } from '../action/v1';
 
-export const CustomFieldsUserActionPayloadRt = rt.strict({
-  customFields: CaseCustomFieldsRt,
+export const CustomFieldsUserActionPayloadSchema = z.object({
+  customFields: CaseCustomFieldsSchema,
 });
 
-export const CustomFieldsUserActionRt = rt.strict({
-  type: rt.literal(UserActionTypes.customFields),
-  payload: CustomFieldsUserActionPayloadRt,
+export const CustomFieldsUserActionSchema = z.object({
+  type: z.literal(UserActionTypes.customFields),
+  payload: CustomFieldsUserActionPayloadSchema,
 });

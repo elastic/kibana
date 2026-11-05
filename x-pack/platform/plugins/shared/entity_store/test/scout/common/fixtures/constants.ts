@@ -73,6 +73,9 @@ export const ENTITY_STORE_ROUTES = {
     ENTITY_MAINTAINERS_START: (id: string) => `${INTERNAL_BASE}/entity_maintainers/start/${id}`,
     ENTITY_MAINTAINERS_STOP: (id: string) => `${INTERNAL_BASE}/entity_maintainers/stop/${id}`,
     ENTITY_MAINTAINERS_RUN: (id: string) => `${INTERNAL_BASE}/entity_maintainers/run/${id}`,
+    RESOLUTION_CUSTOM_RULES: `${INTERNAL_BASE}/resolution/custom_rules`,
+    RESOLUTION_CUSTOM_RULE: (id: string) => `${INTERNAL_BASE}/resolution/custom_rules/${id}`,
+    RESOLUTION_CUSTOM_RULES_PREVIEW: `${INTERNAL_BASE}/resolution/custom_rules/_preview`,
   },
 } as const;
 

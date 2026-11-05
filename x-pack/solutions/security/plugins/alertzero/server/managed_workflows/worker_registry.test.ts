@@ -47,8 +47,16 @@ interface ExpectedWorkerSettings {
 const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSettings> = {
   'system-security-floor-alert-triage': {
     settingsVersion: 1,
-    flatSettings: { autoCloseConfidenceScoreMinThreshold: 0.85 },
-    triggerTypes: ['alert', 'manual'],
+    scheduleInterval: '15m',
+    extras: {
+      autoCloseConfidenceScoreMinThreshold: 0.85,
+      budgetPerHour: 1300,
+      lookbackHours: 24,
+      minSeverity: 'low',
+      excludeBuildingBlocks: false,
+      excludedRuleTags: [],
+    },
+    triggerTypes: ['scheduled', 'manual'],
   },
   'system-security-floor-attack-discovery': {
     settingsVersion: 1,
@@ -66,10 +74,8 @@ const EXPECTED_WORKER_SETTINGS: Record<RegisteredWorkerId, ExpectedWorkerSetting
     settingsVersion: 1,
     scheduleInterval: '4h',
     // No extras: tier2When/candidateLimit/fanOutMax are fixed implementation constants,
-    // not settings.
-    // Default autonomy is manual, so the scheduled trigger is omitted even though
-    // scheduleInterval is a setting (assisted/supervised re-render it in).
-    triggerTypes: ['manual'],
+    // not settings. Manual autonomy is fixed; schedule still runs every 4h.
+    triggerTypes: ['scheduled', 'manual'],
   },
   // Keeps manual alongside the schedule so a sweep can be kicked on demand.
   'system-security-detection-rule-tuning': {
@@ -153,20 +159,20 @@ describe('workerRegistry', () => {
 
   it.each(SYSTEM_SECURITY_WORKER_CATALOG)(
     '$id renders YAML that passes the workflow schema',
-    (catalog) => {
+    async (catalog) => {
       const registration = workerRegistry.get(catalog.id);
       if (!registration) {
         throw new Error(`Worker "${catalog.id}" is not registered`);
       }
       const yaml = getYamlTemplate(catalog.id)(registration.settings.createDefaultValues());
 
-      expect(workflowSchemaFailure(yaml)).toBeUndefined();
+      expect(await workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 
   it.each(['1m', '7d'])(
     'attack discovery renders and validates a %s schedule interval',
-    (scheduleInterval) => {
+    async (scheduleInterval) => {
       const registration = workerRegistry.get(SYSTEM_SECURITY_WORKER_FLOOR_ATTACK_DISCOVERY_ID);
       if (!registration) {
         throw new Error('Attack Discovery worker is not registered');
@@ -178,7 +184,7 @@ describe('workerRegistry', () => {
       const parsed = parse(yaml) as { triggers?: Array<{ with?: { every?: string } }> };
 
       expect(parsed.triggers?.[0]?.with?.every).toBe(scheduleInterval);
-      expect(workflowSchemaFailure(yaml)).toBeUndefined();
+      expect(await workflowSchemaFailure(yaml)).toBeUndefined();
     }
   );
 });

@@ -23,7 +23,11 @@ import {
 import type {
   RenderAssignees,
   RenderStatus,
+  RenderSeverity,
   RenderLinkedInvestigations,
+  RenderOverview,
+  RenderLiveState,
+  RenderTitle,
   RenderSyncIndicator,
 } from './types';
 
@@ -46,6 +50,8 @@ export interface OverviewSlotProps extends InvestigationSlotProps {
    * host can fetch its proposals; omitted entirely (see `OverviewTab`) when the caller has none.
    */
   renderProposedActions?: (props: { conversationId: string }) => React.ReactNode;
+  /** Replaces the tab body; see `RenderOverview`. */
+  renderOverview?: RenderOverview;
   /** Renders a count shown beside the "Proposed actions" heading. */
   renderProposedActionsCount?: (props: { conversationId: string }) => React.ReactNode;
 }
@@ -54,26 +60,49 @@ export const OverviewSlot = ({
   conversation,
   groupedAttachments,
   renderProposedActions,
+  renderOverview,
   renderProposedActionsCount,
-}: OverviewSlotProps) => (
-  <OverviewTab
-    investigation={conversationToInvestigation(conversation)}
-    attachments={conversation.attachments}
-    groupedAttachments={groupedAttachments}
-    proposedActionsContent={renderProposedActions?.({ conversationId: conversation.id })}
-    proposedActionsCount={renderProposedActionsCount?.({ conversationId: conversation.id })}
-  />
-);
+}: OverviewSlotProps) => {
+  const proposedActionsContent = renderProposedActions?.({ conversationId: conversation.id });
+  const proposedActionsCount = renderProposedActionsCount?.({ conversationId: conversation.id });
+  if (renderOverview) {
+    return (
+      <>
+        {renderOverview({
+          conversation,
+          groupedAttachments,
+          proposedActionsContent,
+          proposedActionsCount,
+        })}
+      </>
+    );
+  }
+  return (
+    <OverviewTab
+      investigation={conversationToInvestigation(conversation)}
+      attachments={conversation.attachments}
+      groupedAttachments={groupedAttachments}
+      proposedActionsContent={proposedActionsContent}
+      proposedActionsCount={proposedActionsCount}
+    />
+  );
+};
 
 export interface HeaderSlotProps extends InvestigationSlotProps {
   renderAssignees?: RenderAssignees;
   renderStatus?: RenderStatus;
+  renderSeverity?: RenderSeverity;
+  renderLiveState?: RenderLiveState;
+  renderTitle?: RenderTitle;
 }
 
 export const HeaderSlot = ({
   conversation,
   renderAssignees,
   renderStatus,
+  renderSeverity,
+  renderLiveState,
+  renderTitle,
   refetchConversation,
 }: HeaderSlotProps) => {
   const investigation = conversationToInvestigation(conversation);
@@ -94,11 +123,27 @@ export const HeaderSlot = ({
         refetchConversation,
       })
     : undefined;
+  // Shown once the investigation has a severity: one that never got one (AlertZero's, today) has
+  // nothing to show or change.
+  const severityNode =
+    renderSeverity && investigation.severity
+      ? renderSeverity({
+          conversationId: conversation.id,
+          severity: investigation.severity,
+          refetchConversation,
+        })
+      : undefined;
   return (
     <ConversationDetailsFlyoutHeader
       investigation={investigation}
       assigneesNode={assigneesNode}
       statusNode={statusNode}
+      severityNode={severityNode}
+      liveStateNode={renderLiveState?.({
+        conversationId: conversation.id,
+        severity: investigation.severity,
+      })}
+      titleNode={renderTitle?.({ conversationId: conversation.id, title: conversation.title })}
     />
   );
 };
