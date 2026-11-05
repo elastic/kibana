@@ -139,7 +139,7 @@ export const AddCellBar = ({
         opacity: ${alwaysVisible || isOpen ? 1 : 0};
         transition: opacity ${euiTheme.animation.fast};
         &:hover,
-        &:focus-within {
+        &:has(:focus-visible) {
           opacity: 1;
         }
       `}
