@@ -88,3 +88,8 @@ export const CLOSE = i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotif
 export const SEND = i18n.translate('xpack.alertingV2.actionPolicy.sendTestNotification.send', {
   defaultMessage: 'Send',
 });
+
+export const RESULTS_TITLE = i18n.translate(
+  'xpack.alertingV2.actionPolicy.sendTestNotification.results.title',
+  { defaultMessage: 'Test runs' }
+);
