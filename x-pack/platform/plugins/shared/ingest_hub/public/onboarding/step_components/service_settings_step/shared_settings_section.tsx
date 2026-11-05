@@ -52,6 +52,10 @@ interface SharedSettingsSectionProps {
   namespaceError?: string;
   /** Whether services are already deployed, which changes what a new namespace means. */
   hasDeployedServices?: boolean;
+  /** Whether an ECF stack is already launched. */
+  hasLaunchedEcfStack?: boolean;
+  /** Whether a selected service does not follow the namespace. */
+  hasServicesIgnoringNamespace?: boolean;
 }
 
 /**
@@ -75,6 +79,8 @@ export function SharedSettingsSection({
   onNamespaceChange,
   namespaceError,
   hasDeployedServices = false,
+  hasLaunchedEcfStack = false,
+  hasServicesIgnoringNamespace = false,
 }: SharedSettingsSectionProps) {
   // Show errors once the field was edited, so the prefilled form does not open with errors.
   const [nameTouched, setNameTouched] = useState(false);
@@ -254,6 +260,8 @@ export function SharedSettingsSection({
             namespace={namespace}
             onNamespaceChange={onNamespaceChange}
             hasDeployedServices={hasDeployedServices}
+            hasLaunchedEcfStack={hasLaunchedEcfStack}
+            hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
           />
         </div>
       </div>

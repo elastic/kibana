@@ -16,7 +16,10 @@ import type { AwsServiceMatrixEntry } from '../../aws_service_matrix';
 
 const INHERITED_NAMESPACE_PLACEHOLDER = 'default';
 
-/** Namespace only applies to services deployed as a policy; ECF has no namespace. */
+/**
+ * Whether a service can have a namespace of its own. Only a service deployed as a policy can: an
+ * ECF stack has one namespace for all its services, so there only the global namespace applies.
+ */
 export const supportsNamespace = (service: AwsServiceMatrixEntry): boolean =>
   !service.deploymentMethods.every((dm) => dm.method === 'ecf');
 

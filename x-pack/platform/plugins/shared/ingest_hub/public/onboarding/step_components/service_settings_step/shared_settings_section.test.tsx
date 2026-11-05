@@ -161,6 +161,24 @@ describe('SharedSettingsSection', () => {
       expect(screen.getByTestId('sharedSettingsNamespace-note')).toBeInTheDocument();
     });
 
+    it('notes that a launched ECF stack has to be updated in AWS', () => {
+      renderSection({ hasLaunchedEcfStack: true });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsNamespace-note')).toHaveTextContent(
+        'A launched CloudFormation stack takes the new value once you update it in AWS.'
+      );
+    });
+
+    it('notes that the OpenTelemetry and CrowdStrike templates do not use the namespace', () => {
+      renderSection({ hasServicesIgnoringNamespace: true });
+
+      fireEvent.click(screen.getByTestId('sharedSettingsAdvancedToggle'));
+      expect(screen.getByTestId('sharedSettingsNamespace-note')).toHaveTextContent(
+        'do not use this setting'
+      );
+    });
+
     it('has no deployed note before anything is deployed', () => {
       renderSection();
 

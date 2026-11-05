@@ -30,6 +30,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 
 import { useOnboardingFlow } from '../../onboarding_flow_context';
 import { supportsNamespace } from './instance_namespace_field';
+import { followsGlobalNamespace } from '../../common/effective_namespace';
 import { getRegionFieldName, hasConfigurableFlyoutFields } from './field_config';
 import type { ServiceInstance } from './use_service_settings';
 import { useServiceSettings } from './use_service_settings';
@@ -106,6 +107,12 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
     Object.values(detectAndReviewStep.serviceStatuses).some(
       (s) => s !== 'error' && s !== 'timeout'
     );
+
+  const hasLaunchedEcfStack = (detectAndReviewStep.ecfStacks?.length ?? 0) > 0;
+  const hasServicesIgnoringNamespace = selectedServiceIds.some((id) => {
+    const entry = awsServicesMap?.get(id);
+    return entry !== undefined && !followsGlobalNamespace(entry, deploymentMethod);
+  });
 
   const [activeFlyoutInstanceId, setActiveFlyoutInstanceId] = useState<string | null>(null);
   const [openMenuInstanceId, setOpenMenuInstanceId] = useState<string | null>(null);
@@ -450,6 +457,8 @@ export function ServiceSettingsStep({ onContinue, onBack }: ServiceSettingsStepP
         onNamespaceChange={setNamespace}
         namespaceError={namespaceError}
         hasDeployedServices={isRegionDisabled}
+        hasLaunchedEcfStack={hasLaunchedEcfStack}
+        hasServicesIgnoringNamespace={hasServicesIgnoringNamespace}
       />
       <EuiSpacer size="m" />
 
