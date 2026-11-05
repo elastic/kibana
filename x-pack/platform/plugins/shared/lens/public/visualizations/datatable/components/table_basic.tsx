@@ -177,12 +177,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
 
   const formatters: Record<string, IFieldFormat> = useMemo(
     () =>
-      firstLocalTable.columns.reduce(
-        (map, column) => ({
-          ...map,
-          [column.id]: formatFactory(column.meta?.params),
-        }),
-        {}
+      Object.fromEntries(
+        firstLocalTable.columns.map((column) => [column.id, formatFactory(column.meta?.params)])
       ),
     [firstLocalTable, formatFactory]
   );
