@@ -55,6 +55,7 @@ const costSettings = [
   profilingCostPervCPUPerHour,
 ];
 const miscSettings = [profilingShowErrorFrames];
+const SETTINGS_KEYS = [...co2Settings, ...costSettings, ...miscSettings];
 
 export function Settings() {
   const trackProfilingEvent = useUiTracker({ app: 'profiling' });
@@ -65,10 +66,7 @@ export function Settings() {
   } = useProfilingDependencies();
 
   const { fields, handleFieldChange, unsavedChanges, saveAll, isSaving, cleanUnsavedChanges } =
-    useEditableSettings({
-      settingsKeys: [...co2Settings, ...costSettings, ...miscSettings],
-      settingsClient: settings.client,
-    });
+    useEditableSettings({ settingsKeys: SETTINGS_KEYS, settingsClient: settings.client });
 
   async function handleSave() {
     try {
