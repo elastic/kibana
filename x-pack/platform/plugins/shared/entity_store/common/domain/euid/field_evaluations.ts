@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import { get } from 'lodash';
 import type { Condition } from '@kbn/streamlang';
 import type {
   EntityDefinitionWithoutId,
@@ -15,7 +14,9 @@ import type {
   FieldEvaluationWhenClauseFieldMappingThen,
 } from '../definitions/entity_schema';
 import { isSingleFieldIdentity } from '../definitions/entity_schema';
-import { evaluateStreamlangCondition } from './commons';
+import { evaluateStreamlangCondition, getFieldValue } from './commons';
+
+export { getFieldValue };
 
 /** Result of resolving document + field evaluation into a filter-friendly spec (no EVAL). */
 export type SourceMatchSpec =
@@ -66,22 +67,6 @@ function resolveConditionThen(
   const mapped = then.mapping[raw];
   if (mapped === undefined) return undefined;
   return { value: mapped, matchedKey: raw };
-}
-
-export function getFieldValue(doc: any, field: string): string | undefined {
-  const flattened = doc[field];
-  const value = isNotEmpty(flattened) ? flattened : get(doc, field);
-  if (!isNotEmpty(value)) {
-    return undefined;
-  }
-  if (Array.isArray(value)) {
-    const first = value[0];
-    return first !== undefined && first !== null ? String(first) : undefined;
-  }
-  if (typeof value === 'object') {
-    return undefined;
-  }
-  return String(value);
 }
 
 function resolveSourceValue(doc: any, source: FieldEvaluationSource): string | undefined {
@@ -275,8 +260,4 @@ export function getIdentityFieldEvaluations(
     return [];
   }
   return entityDefinition.identityField.fieldEvaluations ?? [];
-}
-
-function isNotEmpty(value: string): boolean {
-  return value !== undefined && value !== null && value !== '';
 }

@@ -10,6 +10,7 @@ import { getIdentityFields } from '@kbn/entity-store/common';
 import type { EntityDefinitionWithoutId } from '@kbn/entity-store/common';
 import { euid } from '@kbn/entity-store/common/euid_helpers';
 import { getDynamicBlock } from './dynamic';
+import { quoteIdentifier } from './esql_syntax';
 
 /** The column the id evaluation assigns. */
 export const ENTITY_ID_COLUMN = 'entity.id';
@@ -18,6 +19,12 @@ export const ENTITY_ID_COLUMN = 'entity.id';
 export interface IdentityPlan {
   /** The `BY` keys: the single field, or every field of the ranking, in order of first appearance. */
   groupingFields: string[];
+  /**
+   * ES|QL `EVAL` assignments run before the `STATS ... BY`: each grouping field is replaced, under
+   * its own name, by its identity value (the lowest non-empty value). A multi-valued key would
+   * otherwise fan out into one group per value, and the store derives one identity from it.
+   */
+  normalization: string;
   /** Parenthesised ES|QL boolean expression requiring an identity to be present on a document. */
   presenceFilter: string;
   /**
@@ -52,9 +59,13 @@ const assignedColumns = (idEvaluation: string): string[] => {
 export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): IdentityPlan => {
   getDynamicBlock(definition);
   const { identityField } = definition;
+  const groupingFields = getIdentityFields(identityField);
   const idEvaluation = euid.esql.getEuidEvaluation(definition, ENTITY_ID_COLUMN);
   return {
-    groupingFields: getIdentityFields(identityField),
+    groupingFields,
+    normalization: groupingFields
+      .map((field) => `${quoteIdentifier(field)} = ${euid.esql.getIdentityValue(field)}`)
+      .join(', '),
     // The store leaves a composed filter unparenthesised (`a AND b OR c AND d`); wrap it so it can
     // be ANDed with other predicates.
     presenceFilter: `(${euid.esql.getEuidDocumentsContainsIdFilter(definition)})`,
