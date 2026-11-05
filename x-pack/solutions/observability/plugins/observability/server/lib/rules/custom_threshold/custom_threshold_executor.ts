@@ -33,6 +33,7 @@ import type { AlertsLocatorParams } from '../../../../common';
 import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { getDataViewId } from '../../../../common/custom_threshold_rule/helpers/get_data_view_id';
+import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import {
@@ -108,7 +109,7 @@ export const createCustomThresholdExecutor = ({
       startedAt,
       executionId,
       spaceId,
-      rule: { id: ruleId },
+      rule: { id: ruleId, schedule },
       getTimeRange,
     } = options;
 
@@ -187,7 +188,8 @@ export const createCustomThresholdExecutor = ({
       esQueryConfig,
       runtimeMappings,
       state.lastRunTimestamp,
-      previousMissingGroups
+      previousMissingGroups,
+      getIntervalInSeconds(schedule.interval) * 1000
     );
 
     const alertResults = criterionResults.map((r) => r.evaluations);
