@@ -33,7 +33,7 @@ const CELL_KINDS: ReadonlyArray<{ kind: NewCellKind; icon: string; label: string
   },
   {
     kind: 'custom',
-    icon: 'code',
+    icon: 'sparkles',
     label: i18n.translate('xpack.notebook.addCell.custom', { defaultMessage: 'Custom' }),
   },
   {

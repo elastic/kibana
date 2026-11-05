@@ -14,7 +14,7 @@ import type { CellStatus } from '../model/types';
 export const TYPE_ICONS: Record<CellType, string> = {
   esql: 'database',
   chart: 'visBarVertical',
-  custom: 'code',
+  custom: 'sparkles',
   markdown: 'text',
   input: 'controls',
 };
