@@ -54,7 +54,10 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
           'crowdstrikeConnectorOn',
           'microsoftDefenderEndpointOn',
         ])}`,
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths([
+          path.resolve(__dirname, 'plugins'),
+          path.resolve(__dirname, '../../plugins/private/test/response_ops/plugin_api_integration'),
+        ]),
       ],
     },
   };

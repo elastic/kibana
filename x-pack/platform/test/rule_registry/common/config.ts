@@ -88,7 +88,10 @@ export function createTestConfig(name: string, options: CreateTestConfigOptions)
             .filter((k) => k !== 'security')
             .map((key) => `--xpack.${key}.enabled=false`),
           ...findTestPluginPaths([
-            path.resolve(__dirname, '../../alerting_api_integration/common/plugins'),
+            path.resolve(
+              __dirname,
+              '../../../plugins/private/test/response_ops/alerting_api_integration'
+            ),
           ]),
           '--xpack.ruleRegistry.write.enabled=true',
           `--server.xsrf.allowlist=${JSON.stringify(getAllExternalServiceSimulatorPaths())}`,

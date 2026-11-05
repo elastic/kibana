@@ -30,11 +30,17 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--plugin-path=${path.resolve(
           __dirname,
           '..',
-          'plugin_api_integration',
+          '..',
           'plugins',
+          'private',
+          'test',
+          'response_ops',
+          'plugin_api_integration',
           'sample_task_plugin'
         )}`,
-        ...findTestPluginPaths(path.resolve(__dirname, 'plugins')),
+        ...findTestPluginPaths(
+          path.resolve(__dirname, '../../plugins/private/test/response_ops/plugin_api_perf')
+        ),
       ],
     },
   };
