@@ -6,7 +6,6 @@
  */
 
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
-import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
 import {
   getBreachEsqlQuery,
@@ -17,6 +16,7 @@ import {
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { formatDuration } from '../../utils/format_duration';
 import {
   EMPTY_VALUE,
   formatAlertDelay,
