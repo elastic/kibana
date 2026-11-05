@@ -58,7 +58,7 @@ export const CellFrame = ({
   headerActions,
   children,
 }: PropsWithChildren<CellFrameProps>) => {
-  const { store, openFlyouts$, focusedCell$ } = useNotebook();
+  const { store, openFlyouts$, focusedCell$, addedCellIds } = useNotebook();
   const isFlyoutOpen = useStateFromPublishingSubject(openFlyouts$) > 0;
   const { euiTheme } = useEuiTheme();
   const borderColor = getStatusBorderColor(runtime?.status, euiTheme);
@@ -68,6 +68,17 @@ export const CellFrame = ({
   useEffect(() => {
     const border = `inset 0 0 0 ${euiTheme.border.width.thin} ${borderColor}`;
     const glowColor = transparentize(euiTheme.colors.primary, 0.6);
+    const flash = () => {
+      if (window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
+      panelRef.current?.animate(
+        [
+          { boxShadow: `${border}, 0 0 16px 4px ${glowColor}` },
+          { boxShadow: `${border}, 0 0 16px 4px transparent` },
+        ],
+        { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
+      );
+    };
+    if (addedCellIds.delete(cell.id)) flash();
     // Skip the current value so a re-subscription doesn't replay an old focus.
     const subscription = focusedCell$
       .pipe(
@@ -76,17 +87,10 @@ export const CellFrame = ({
       )
       .subscribe(() => {
         frameRef.current?.focus({ preventScroll: true });
-        if (window.matchMedia(REDUCED_MOTION_QUERY).matches) return;
-        panelRef.current?.animate(
-          [
-            { boxShadow: `${border}, 0 0 16px 4px ${glowColor}` },
-            { boxShadow: `${border}, 0 0 16px 4px transparent` },
-          ],
-          { duration: FOCUS_FADE_DURATION_MS, easing: 'ease-out' }
-        );
+        flash();
       });
     return () => subscription.unsubscribe();
-  }, [focusedCell$, cell.id, borderColor, euiTheme]);
+  }, [focusedCell$, addedCellIds, cell.id, borderColor, euiTheme]);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isRunMenuOpen, setIsRunMenuOpen] = useState(false);
   const closeMenu = () => setIsMenuOpen(false);
@@ -125,7 +129,9 @@ export const CellFrame = ({
       onClick={() => {
         closeMenu();
         const index = store.cellOrder$.getValue().indexOf(cell.id) + 1;
-        store.addCell(duplicateCell(cell, store.cells$.getValue()), index);
+        const duplicate = duplicateCell(cell, store.cells$.getValue());
+        addedCellIds.add(duplicate.id);
+        store.addCell(duplicate, index);
       }}
     >
       {i18n.translate('xpack.notebook.cell.duplicate', { defaultMessage: 'Duplicate' })}

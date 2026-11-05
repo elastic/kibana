@@ -87,6 +87,7 @@ export const NotebookEditor = ({ attributes, onSave }: NotebookEditorProps) => {
       scheduler,
       openFlyouts$: new BehaviorSubject(0),
       focusedCell$: new BehaviorSubject<string | undefined>(undefined),
+      addedCellIds: new Set(),
       sidePanel$: new BehaviorSubject<SidePanel | undefined>(undefined),
       activeAppId$: new BehaviorSubject<string | undefined>(undefined),
     };

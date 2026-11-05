@@ -102,7 +102,7 @@ export const AddCellBar = ({
   index: number;
   alwaysVisible?: boolean;
 }) => {
-  const { store } = useNotebook();
+  const { store, addedCellIds } = useNotebook();
   const { euiTheme } = useEuiTheme();
   const [isOpen, setIsOpen] = useState(false);
 
@@ -115,7 +115,9 @@ export const AddCellBar = ({
       .reverse()
       .find((id) => cells[id]?.type === 'esql');
     const takesSource = kind === 'chart' || kind === 'custom';
-    store.addCell(createCell(kind, cells, takesSource ? previousEsql ?? null : null), index);
+    const cell = createCell(kind, cells, takesSource ? previousEsql ?? null : null);
+    addedCellIds.add(cell.id);
+    store.addCell(cell, index);
   };
 
   return (
