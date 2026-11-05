@@ -26,6 +26,7 @@
     "@kbn/data-plugin",
     "@kbn/data-views-plugin",
     "@kbn/date-range-picker",
+    "@kbn/date-range-picker-presets",
     "@kbn/datemath",
     "@kbn/deeplinks-analytics",
     "@kbn/deeplinks-observability",
