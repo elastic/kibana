@@ -258,7 +258,7 @@ describe('SeededOfrepWebProvider', () => {
     }
   });
 
-  test('fails initialization when there is no injected flag and the fetch fails', async () => {
+  test('serves fallbacks when the seed is empty and the first request fails', async () => {
     const { delegate, rejectInit } = createDelegate();
     const provider = new SeededOfrepWebProvider({
       ofrep,
@@ -268,7 +268,10 @@ describe('SeededOfrepWebProvider', () => {
 
     const starting = provider.initialize();
     rejectInit(new Error('network down'));
-    await expect(starting).rejects.toThrow('network down');
+    await expect(starting).resolves.toBeUndefined();
+    expect(provider.resolveBooleanEvaluation('my.flag', false, {})).toEqual(
+      expect.objectContaining({ value: false, errorCode: 'FLAG_NOT_FOUND' })
+    );
     await provider.onClose();
   });
 
@@ -293,7 +296,7 @@ describe('SeededOfrepWebProvider', () => {
 
       const starting = provider.initialize();
       rejectInit(new Error('network down'));
-      await expect(starting).rejects.toThrow('network down');
+      await expect(starting).resolves.toBeUndefined();
 
       await jest.advanceTimersByTimeAsync(10_000);
       rejectInit(new Error('still down'));

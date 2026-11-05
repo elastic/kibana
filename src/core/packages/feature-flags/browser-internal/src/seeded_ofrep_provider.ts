@@ -162,13 +162,13 @@ export class SeededOfrepWebProvider implements Provider {
     this.forwardEvents();
   }
 
-  async initialize(context?: EvaluationContext, domain?: string): Promise<void> {
+  initialize(context?: EvaluationContext, domain?: string): Promise<void> {
     this.context = context;
     this.domain = domain;
-    const starting = this.activate();
-    if (Object.keys(this.initialFlags).length === 0) {
-      await starting;
-    }
+    // The seed is served until the first response. An empty seed evaluates to fallbacks,
+    // so startup does not wait for that request.
+    void this.activate();
+    return Promise.resolve();
   }
 
   onContextChange(
@@ -276,9 +276,7 @@ export class SeededOfrepWebProvider implements Provider {
         if (!this.closed && !(error instanceof ProviderFatalError)) {
           this.scheduleRetry();
         }
-        if (Object.keys(this.initialFlags).length === 0) {
-          throw error;
-        }
+        // Keep the seed, or fallbacks when the seed is empty. A failed request must not reject startup.
       });
   }
 
@@ -292,8 +290,7 @@ export class SeededOfrepWebProvider implements Provider {
       if (this.closed || this.delegating) {
         return;
       }
-      // A retry has no caller. Swallow the rejection activate() rethrows when there is no seed; it has already been logged.
-      void this.activate().catch(() => undefined);
+      void this.activate();
     }, this.retryDelayMs);
   }
 
