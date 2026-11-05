@@ -77,7 +77,9 @@ steps:
 
 #### Expressions in provided input values
 
-A caller can pass a `${{ }}` string as an input value when it starts a run. The engine evaluates that value only when a person or API caller started the run directly (`triggeredBy: manual`). Every other source keeps the value as a literal string. This includes child runs (`workflow-step`), scheduled runs, alerts, event triggers, HITL, workflow pages (`page`), and plugin callers. A `page` visitor is anonymous, and an expression can read `consts` and the rest of the render context.
+A caller can pass a `${{ }}` string as an input value when it starts a run. The engine evaluates that value only when the execution's `triggeredBy` is `manual`. Every other `triggeredBy` keeps the value as a literal string, for example child runs (`workflow-step`), scheduled runs, alerts, event triggers, Agent Builder hooks (`agent-builder-hook`), and workflow pages (`page`). A `page` visitor is anonymous, and an expression can read `consts` and the rest of the render context.
+
+The engine records `triggeredBy: manual` when a caller does not set it. This includes runs from the Run API and the UI, and plugin callers that call `runWorkflow` or `executeWorkflow` without `triggeredBy`. A plugin that passes values it does not control, such as LLM output, must set its own `triggeredBy` to keep them literal.
 
 The rule applies only to values the caller provides. Expressions that the workflow author writes still render:
 
