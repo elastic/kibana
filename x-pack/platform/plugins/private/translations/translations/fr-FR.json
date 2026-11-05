@@ -4249,8 +4249,6 @@
     "discover.dataCascade.grouping.function": "<bold>{selectedColumn}:</bold> <badge></badge>",
     "discover.dataCascade.header.groupBySelectorAriaLabel": "Sélectionner les groupes à regrouper",
     "discover.dataCascade.header.layoutSwitchLabel": "Regrouper par",
-    "discover.dataCascade.header.techPreviewLabel": "Résultats regroupés (version d'évaluation technique)",
-    "discover.dataCascade.header.techPreviewTooltip": "Les résultats sont regroupés pendant l'exécution de la fonction Stats BY",
     "discover.dataCascade.inspector.cascadeQueryDescription": "Cette requête interroge Elasticsearch pour récupérer les documents correspondant à la valeur de la ligne en cascade développée.",
     "discover.dataCascade.inspector.cascadeQueryTitle": "Requête de données de ligne en cascade",
     "discover.dataCascade.row.action.copyToClipboard": "Copier dans le presse-papiers",

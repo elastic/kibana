@@ -154,6 +154,7 @@ function CascadeRowPrimitiveComponent<G extends GroupNode, L extends LeafNode>({
         direction="column"
         gutterSize={!isGroupNode && rowIsExpanded ? 'none' : size}
         css={styles.rowInner}
+        responsive={false}
       >
         <React.Fragment>
           {enableStickyGroupHeader &&
