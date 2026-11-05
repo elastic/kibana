@@ -131,6 +131,37 @@ describe('HmrServer', () => {
     res.destroy();
   });
 
+  it('broadcastReload() sends shared bundle reload events', async () => {
+    server = new HmrServer();
+    const port = await server.start();
+    const { res, data } = await connectClient(port);
+
+    await new Promise((r) => setTimeout(r, 50));
+    server.broadcastReload(['src/shared.ts']);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const payload = data.join('');
+    expect(payload).toContain('"reload":true');
+    expect(payload).toContain('"files":["src/shared.ts"]');
+    res.destroy();
+  });
+
+  it('does not replay a reload to clients that connect afterward', async () => {
+    server = new HmrServer();
+    const port = await server.start();
+
+    server.broadcastErrors(['stale error']);
+    server.broadcastReload(['src/shared.ts']);
+
+    const { res, data } = await connectClient(port);
+    await new Promise((r) => setTimeout(r, 50));
+
+    const payload = data.join('');
+    expect(payload).not.toContain('"reload":true');
+    expect(payload).not.toContain('"replay":true');
+    res.destroy();
+  });
+
   it('broadcastErrors() with no connected clients does not throw', async () => {
     server = new HmrServer();
     await server.start();

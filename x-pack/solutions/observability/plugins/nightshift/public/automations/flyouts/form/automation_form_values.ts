@@ -9,10 +9,10 @@ import {
   parsePresetSchedule,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
+import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
 export type ScheduleUnit = 'hour' | 'day' | 'week';
-export type InstructionMode = 'ask' | 'investigate';
 export type SlackTarget = 'channel' | 'self' | 'thread';
 const SLACK_TARGETS: SlackTarget[] = ['channel', 'self', 'thread'];
 
@@ -72,7 +72,6 @@ export interface AutomationFormValues {
   trigger?: TriggerFormValues;
   dailyDispatchLimit: string;
   instructions: string;
-  mode: InstructionMode;
   slackAction?: SlackActionFormValues;
   isEnabled: boolean;
 }
@@ -106,7 +105,6 @@ export const createAutomationFormValues = (): AutomationFormValues => ({
   trigger: undefined,
   dailyDispatchLimit: '20',
   instructions: '',
-  mode: 'investigate',
   slackAction: undefined,
   isEnabled: false,
 });
@@ -185,9 +183,11 @@ export const toAutomationFormValues = (automation: Automation): AutomationFormVa
     tags: automation.tags ?? [],
     description: automation.description ?? '',
     trigger,
-    dailyDispatchLimit: String(automation.runtime.dailyDispatchLimit ?? 20),
+    dailyDispatchLimit:
+      automation.runtime.dailyDispatchLimit === undefined
+        ? UNLIMITED_DAILY_LIMIT
+        : String(automation.runtime.dailyDispatchLimit),
     instructions: automation.execution.promptTemplate ?? '',
-    mode: automation.execution.reasoningMode === 'investigate' ? 'investigate' : 'ask',
     slackAction:
       completion?.action === 'post_to_slack'
         ? {

@@ -388,18 +388,18 @@ export function hydrateEsqlMetricTrendlineAfterSuggestion({
     return rebuilt;
   }
 
-  if (!previousTrendlineLayer || !canReusePreviousDataset) {
-    return undefined;
-  }
-
+  const layers = { ...textBasedState.layers };
+  delete layers[trendlineLayerId];
   return {
-    visualizationState: visualizationWithTrendline,
-    textBasedState: {
-      ...textBasedState,
-      layers: {
-        ...textBasedState.layers,
-        [trendlineLayerId]: previousTrendlineLayer,
-      },
+    visualizationState: {
+      ...visualizationState,
+      trendlineLayerId: undefined,
+      trendlineLayerType: undefined,
+      trendlineMetricAccessor: undefined,
+      trendlineTimeAccessor: undefined,
+      trendlineSecondaryMetricAccessor: undefined,
+      trendlineBreakdownByAccessor: undefined,
     },
+    textBasedState: { ...textBasedState, layers },
   };
 }

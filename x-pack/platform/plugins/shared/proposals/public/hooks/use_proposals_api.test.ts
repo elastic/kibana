@@ -11,6 +11,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import {
+  RETRY_WAIT_MS,
+  isInFlux,
   retryOnTransientError,
   useConversationProposals,
   usePendingProposals,
@@ -25,12 +27,19 @@ import {
   PROPOSALS_INTERNAL_URL,
   PROPOSALS_API_VERSION,
   MAX_PROPOSALS_PAGE_SIZE,
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS,
 } from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn(),
+}));
+
+// A short poll interval keeps the polling tests fast. They use real timers.
+jest.mock('@kbn/proposals-common', () => ({
+  ...jest.requireActual('@kbn/proposals-common'),
+  PROPOSAL_SETTLING_POLL_INTERVAL_MS: 50,
 }));
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
@@ -151,6 +160,41 @@ describe('usePendingProposals', () => {
   });
 });
 
+describe('isInFlux', () => {
+  afterEach(() => jest.restoreAllMocks());
+
+  it('is true while an approved action runs', () => {
+    expect(isInFlux({ id: 'run-1', decision: 'approved', status: 'executing' })).toBe(true);
+  });
+
+  it('is true for a failed action with no new action (retry) yet, until the wait is over', () => {
+    const failed = { id: 'fail-1', decision: 'approved', status: 'failed' } as const;
+    const now = jest.spyOn(Date, 'now').mockReturnValue(1_000_000);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS - 1);
+    expect(isInFlux(failed)).toBe(true);
+
+    now.mockReturnValue(1_000_000 + RETRY_WAIT_MS);
+    expect(isInFlux(failed)).toBe(false);
+  });
+
+  it('times each failed action from when it was first seen', () => {
+    const now = jest.spyOn(Date, 'now').mockReturnValue(2_000_000);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(true);
+
+    now.mockReturnValue(2_000_000 + RETRY_WAIT_MS * 2);
+    expect(isInFlux({ id: 'fail-b', decision: 'approved', status: 'failed' })).toBe(true);
+    expect(isInFlux({ id: 'fail-a', decision: 'approved', status: 'failed' })).toBe(false);
+  });
+
+  it('is false once the new action (retry) has replaced the failed action', () => {
+    expect(
+      isInFlux({ id: 'fail-2', decision: 'approved', status: 'failed', supersededBy: 'retry' })
+    ).toBe(false);
+  });
+});
+
 describe('useConversationProposals', () => {
   it('calls GET on the proposals URL scoped to the conversation, with no status filter', async () => {
     const http = makeHttp();
@@ -230,6 +274,60 @@ describe('useConversationProposals', () => {
     });
     await waitFor(() => expect(result.current.data?.pages).toEqual([firstPage, secondPage]));
     expect(result.current.hasNextPage).toBe(false);
+  });
+
+  describe('polling', () => {
+    const failedOriginal = { id: 'p-1', status: 'failed', decision: 'approved' };
+    const retry = { id: 'p-2', status: 'pending', rootProposalId: 'p-1' };
+
+    it('keeps polling after a failure until its retry replaces the original', async () => {
+      const http = makeHttp();
+      http.get
+        .mockResolvedValueOnce({ proposals: [failedOriginal], total: 1 })
+        .mockResolvedValue({ proposals: [retry], total: 1 });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper, queryClient } = createWrapper();
+      const { result } = renderHook(() => useConversationProposals('conv-42'), {
+        wrapper: Wrapper,
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      // Read the cache, not the rendered result: the poll refetches outside React's batching.
+      await waitFor(() =>
+        expect(
+          queryClient.getQueryData<{ pages: Array<{ proposals: unknown[] }> }>(
+            queryKeys.proposals.forConversation('conv-42')
+          )?.pages[0].proposals
+        ).toEqual([retry])
+      );
+      expect(http.get).toHaveBeenCalledTimes(2);
+    });
+
+    it('stops polling once a failed proposal has its retry', async () => {
+      const http = makeHttp();
+      http.get.mockResolvedValue({
+        proposals: [{ ...failedOriginal, supersededBy: 'p-2' }],
+        total: 1,
+      });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper } = createWrapper();
+      const { result } = renderHook(() => useConversationProposals('conv-42'), {
+        wrapper: Wrapper,
+      });
+      await waitFor(() => expect(result.current.isSuccess).toBe(true));
+
+      await act(async () => {
+        await new Promise((resolve) => setTimeout(resolve, PROPOSAL_SETTLING_POLL_INTERVAL_MS * 3));
+      });
+
+      expect(http.get).toHaveBeenCalledTimes(1);
+    });
   });
 
   it('uses a query key distinct from usePendingProposals, so the two caches never collide', () => {

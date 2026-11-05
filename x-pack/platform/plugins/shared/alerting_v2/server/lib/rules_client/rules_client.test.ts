@@ -155,6 +155,7 @@ describe('RulesClient', () => {
         ruleEvents: { enabled: false, dataRetention: '90d' },
         alertActions: { dispatcher: { enabled: false, dataRetention: '90d' } },
       },
+      dispatcher: { paused: false, run: { timeout: '1m', alerts: { max: 10000 } } },
       rules: {
         minimumScheduleInterval: '1m',
         maxScheduledPerMinute: 400,
@@ -230,7 +231,7 @@ describe('RulesClient', () => {
       );
     });
 
-    it('stores the server-provided template and returns it', async () => {
+    it('stores the server-provided template without returning it', async () => {
       const client = createClient();
 
       const res = await client.createRule({
@@ -245,7 +246,7 @@ describe('RulesClient', () => {
           }),
         }),
       ]);
-      expect(res.metadata.template).toEqual({ id: 'template-1' });
+      expect(res.metadata).not.toHaveProperty('template');
     });
 
     it('rejects metadata.template in the request body', async () => {
@@ -656,6 +657,12 @@ describe('RulesClient', () => {
       ]);
       expect(rulesSavedObjectService.bulkDelete).toHaveBeenCalledWith(['rule-on']);
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-on']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('rule-off');
       expect(res.errors).toEqual([
@@ -684,6 +691,7 @@ describe('RulesClient', () => {
       expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
+          index: 0,
           id: 'rule-dup',
           error: {
             code: 'RULE_ALREADY_EXISTS',
@@ -710,6 +718,7 @@ describe('RulesClient', () => {
       expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
+          index: 0,
           id: 'rule-dup',
           error: {
             code: 'RULE_ALREADY_EXISTS',
@@ -737,6 +746,7 @@ describe('RulesClient', () => {
       expect(res.items).toEqual([]);
       expect(res.errors).toEqual([
         {
+          index: 0,
           id: 'rule-fail',
           error: {
             code: 'INTERNAL_SERVER_ERROR',
@@ -850,11 +860,64 @@ describe('RulesClient', () => {
       expect(res.items).toHaveLength(1);
       expect(res.items[0].id).toBe('rule-ok');
       expect(res.errors).toEqual([
-        expect.objectContaining({
+        {
+          index: 0,
           id: 'rule-short',
           error: expect.objectContaining({ code: 'SCHEDULE_INTERVAL_TOO_SHORT' }),
-        }),
+        },
       ]);
+    });
+
+    it('reports a failed item without a client id by its request position and never mints one', async () => {
+      const client = createClient();
+      mockBulkCreateEcho();
+
+      const res = await client.bulkCreateRules({
+        items: [
+          { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
+          {
+            ...baseCreateData,
+            metadata: { name: 'short' },
+            schedule: { every: '5s', lookback: '1m' },
+          },
+        ],
+      });
+
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-ok']);
+      expect(res.errors).toEqual([
+        {
+          index: 1,
+          error: expect.objectContaining({ code: 'SCHEDULE_INTERVAL_TOO_SHORT' }),
+        },
+      ]);
+      expect(res.errors[0]).not.toHaveProperty('id');
+    });
+
+    it('maps a persist-time failure of an item without a client id back to its request position', async () => {
+      const client = createClient();
+      rulesSavedObjectService.bulkCreate.mockImplementationOnce(async (items) =>
+        items.map((item, position) =>
+          position === 1
+            ? {
+                id: item.id,
+                error: { statusCode: 500, error: 'Internal Server Error', message: 'boom' },
+              }
+            : { id: item.id, attributes: item.attrs, references: item.references ?? [] }
+        )
+      );
+
+      const res = await client.bulkCreateRules({
+        items: [
+          { ...baseCreateData, id: 'rule-ok', metadata: { name: 'ok' } },
+          { ...baseCreateData, metadata: { name: 'generated-id' } },
+        ],
+      });
+
+      expect(res.items.map((rule) => rule.id)).toEqual(['rule-ok']);
+      expect(res.errors).toEqual([
+        { index: 1, error: expect.objectContaining({ message: 'boom' }) },
+      ]);
+      expect(res.errors[0]).not.toHaveProperty('id');
     });
 
     it('rejects duplicate client-supplied ids for the whole request', async () => {
@@ -2020,7 +2083,7 @@ describe('RulesClient', () => {
   });
 
   describe('getRules', () => {
-    it('returns rules for the provided ids', async () => {
+    it('returns rules for the provided ids with no errors', async () => {
       const client = createClient();
       const so1Attrs = createRuleSoAttributes({ metadata: { name: 'rule-get-many-1' } });
       const so2Attrs = createRuleSoAttributes({ metadata: { name: 'rule-get-many-2' } });
@@ -2036,14 +2099,15 @@ describe('RulesClient', () => {
         'rule-id-get-many-1',
         'rule-id-get-many-2',
       ]);
-      expect(res).toHaveLength(2);
-      expect(res[0]).toEqual(
+      expect(res.errors).toEqual([]);
+      expect(res.items).toHaveLength(2);
+      expect(res.items[0]).toEqual(
         expect.objectContaining({
           id: 'rule-id-get-many-1',
           metadata: expect.objectContaining({ name: 'rule-get-many-1' }),
         })
       );
-      expect(res[1]).toEqual(
+      expect(res.items[1]).toEqual(
         expect.objectContaining({
           id: 'rule-id-get-many-2',
           metadata: expect.objectContaining({ name: 'rule-get-many-2' }),
@@ -2062,31 +2126,10 @@ describe('RulesClient', () => {
 
       const res = await client.getRules(['rule-z', 'rule-a', 'rule-m']);
 
-      expect(res.map((r) => r.id)).toEqual(['rule-z', 'rule-a', 'rule-m']);
+      expect(res.items.map((r) => r.id)).toEqual(['rule-z', 'rule-a', 'rule-m']);
     });
 
-    it('skips missing rules when their ids are omitted from the request', async () => {
-      const client = createClient();
-
-      rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
-        {
-          id: 'rule-id-present',
-          attributes: createRuleSoAttributes({ metadata: { name: 'present' } }),
-        },
-      ]);
-
-      const res = await client.getRules(['rule-id-present', 'rule-id-absent']);
-
-      expect(res).toHaveLength(1);
-      expect(res[0]).toEqual(
-        expect.objectContaining({
-          id: 'rule-id-present',
-          metadata: expect.objectContaining({ name: 'present' }),
-        })
-      );
-    });
-
-    it('throws with the SO error status when a requested id is missing', async () => {
+    it('reports a missing rule as a per-item RULE_NOT_FOUND error beside the found ones', async () => {
       const client = createClient();
 
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -2104,12 +2147,22 @@ describe('RulesClient', () => {
         },
       ]);
 
-      await expect(client.getRules(['rule-id-present', 'rule-id-missing'])).rejects.toMatchObject({
-        output: { statusCode: 404 },
-      });
+      const res = await client.getRules(['rule-id-present', 'rule-id-missing']);
+
+      expect(res.items.map((r) => r.id)).toEqual(['rule-id-present']);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-id-missing',
+          error: {
+            code: 'RULE_NOT_FOUND',
+            message: 'Rule with id "rule-id-missing" not found',
+            details: { rule_id: 'rule-id-missing' },
+          },
+        },
+      ]);
     });
 
-    it('throws with the SO error status when bulkGet reports a non-404 error', async () => {
+    it('reports a non-404 bulkGet error per item with its status code', async () => {
       const client = createClient();
 
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -2127,12 +2180,21 @@ describe('RulesClient', () => {
         },
       ]);
 
-      await expect(client.getRules(['rule-id-valid', 'rule-id-failure'])).rejects.toMatchObject({
-        output: { statusCode: 500 },
-      });
+      const res = await client.getRules(['rule-id-valid', 'rule-id-failure']);
+
+      expect(res.items.map((r) => r.id)).toEqual(['rule-id-valid']);
+      expect(res.errors).toEqual([
+        {
+          id: 'rule-id-failure',
+          error: expect.objectContaining({
+            message: 'bulk get failed',
+            details: { statusCode: 500 },
+          }),
+        },
+      ]);
     });
 
-    it('throws on the first encountered error', async () => {
+    it('reports every failed id, in response order, when none is found', async () => {
       const client = createClient();
 
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
@@ -2154,12 +2216,13 @@ describe('RulesClient', () => {
         },
       ]);
 
-      // 'first error wins': the 404 surfaces, not the later 500.
-      await expect(
-        client.getRules(['rule-id-first-missing', 'rule-id-second-failure'])
-      ).rejects.toMatchObject({
-        output: { statusCode: 404 },
-      });
+      const res = await client.getRules(['rule-id-first-missing', 'rule-id-second-failure']);
+
+      expect(res.items).toEqual([]);
+      expect(res.errors.map((e) => e.id)).toEqual([
+        'rule-id-first-missing',
+        'rule-id-second-failure',
+      ]);
     });
   });
 
@@ -2492,7 +2555,11 @@ describe('RulesClient', () => {
     it('finds the alert rules with any of the matcher tags, sorted by name', async () => {
       const client = createClient();
 
-      await client.findMatchingRules({ matcher: { tags: ['cpu', 'prod'] }, page: 2, perPage: 10 });
+      await client.findMatchingRules({
+        matcher: { tags: ['cpu', 'prod'] },
+        page: 2,
+        perPage: 10,
+      });
 
       expect(rulesSavedObjectService.find).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -2791,6 +2858,12 @@ describe('RulesClient', () => {
         { id: 'rule-2', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
       ]);
       expect(mockLogger.error).toHaveBeenCalledTimes(1);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_MANAGER_DRIFT },
+        })
+      );
     });
 
     it('surfaces TASK_MANAGER_DRIFT for per-task failures in the bulkRemove statuses (no throw)', async () => {
@@ -2979,6 +3052,12 @@ describe('RulesClient', () => {
 
       expect(rulesSavedObjectService.bulkUpdate).not.toHaveBeenCalled();
       expect(taskManager.bulkRemove).toHaveBeenCalledWith(['task:rule-1', 'task:rule-2']);
+      expect(mockLogger.error).toHaveBeenCalledWith(
+        expect.anything(),
+        expect.objectContaining({
+          labels: { code: ALERTING_LOG_CODES.RULE_TASK_SCHEDULE_FAILED },
+        })
+      );
       expect(res.affected_count).toBe(0);
       expect(res.errors).toEqual([
         { id: 'rule-1', error: expect.objectContaining({ code: 'TASK_MANAGER_DRIFT' }) },
@@ -3238,10 +3317,17 @@ describe('RulesClient', () => {
 
       // Rotation updates the existing task in place (preserving its schedule
       // interval) and regenerates the key while invalidating the old one.
+      // `includeRunningTasks` keeps the rotation independent of the rule's run
+      // cadence: a task that is mid-run rotates instead of being skipped.
       expect(taskManager.bulkUpdateSchedules).toHaveBeenCalledWith(
         ['task:fallback'],
         { interval: '5m' },
-        expect.objectContaining({ request, regenerateApiKey: true, cloneApiKey: true })
+        expect.objectContaining({
+          request,
+          regenerateApiKey: true,
+          cloneApiKey: true,
+          includeRunningTasks: true,
+        })
       );
 
       // Only audit metadata is stamped — no rule state is changed.
@@ -3335,8 +3421,10 @@ describe('RulesClient', () => {
       rulesSavedObjectService.bulkGetByIds.mockResolvedValueOnce([
         { id: 'rule-1', attributes: baseSoAttrs, version: 'v1' },
       ]);
-      // A running task is skipped by bulkUpdateSchedules — absent from both
-      // `tasks` and `errors`. Its real status is then observed via bulkGet.
+      // `includeRunningTasks` means a mid-run task is normally rotated, but it can
+      // still be skipped if it moved into `running` after the update read it.
+      // A skipped task is absent from both `tasks` and `errors`, so its real
+      // status is then observed via bulkGet.
       taskManager.bulkUpdateSchedules.mockResolvedValueOnce(rotationResult([]));
       taskManager.bulkGet.mockResolvedValueOnce(
         taskStatusResult([{ id: 'task:fallback', status: 'running' }])

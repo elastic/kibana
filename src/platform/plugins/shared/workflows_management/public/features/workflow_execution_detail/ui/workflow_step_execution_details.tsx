@@ -51,6 +51,8 @@ interface WorkflowStepExecutionDetailsProps {
   resumeSchema?: JsonModelSchemaType;
   approvalLabels?: ApprovalLabels;
   shouldAutoResume?: boolean;
+  /** Shared with the tree-row Provide action so one submit disables both. */
+  submitState?: React.ComponentProps<typeof ResumeExecutionButton>['submitState'];
   waitingStepExecutionId?: string;
   /** Run that owns `stepExecution`. Differs from `workflowExecutionId` for an injected child step. */
   resumeExecutionId?: string;
@@ -76,6 +78,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
     resumeSchema,
     approvalLabels,
     shouldAutoResume = false,
+    submitState,
     waitingStepExecutionId,
     resumeExecutionId,
     hasResumeError,
@@ -144,10 +147,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
           stepExecution={stepExecution}
           workflowExecutionDuration={workflowExecutionDuration}
           workflowExecutionUsage={workflowExecutionUsage}
-          showResumeUI={
-            workflowExecutionStatus === ExecutionStatus.WAITING_FOR_INPUT &&
-            Boolean(waitingStepExecutionId)
-          }
+          showResumeUI={false}
           executionId={workflowExecutionId}
           resumeMessage={resumeMessage}
           resumeSchema={resumeSchema}
@@ -197,6 +197,7 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                     <EuiFlexItem grow={false}>
                       {isWaitingForInput && (
                         <>
+                          {/* Tree row owns auto-open. This button shares submit state so it cannot open a second modal or resume again. */}
                           <ResumeExecutionButton
                             executionId={resumeExecutionId ?? workflowExecutionId}
                             workflowId={stepExecution?.workflowId}
@@ -216,8 +217,8 @@ export const WorkflowStepExecutionDetails = React.memo<WorkflowStepExecutionDeta
                                 ? approvalLabels
                                 : approvalLabelsForStepExecution(stepExecution) ?? approvalLabels
                             }
-                            autoOpen={shouldAutoResume}
                             waitingStepExecutionId={stepExecution?.id}
+                            submitState={submitState}
                           />
                           <EuiSpacer size="m" />
                         </>

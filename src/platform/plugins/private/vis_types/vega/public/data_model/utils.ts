@@ -39,7 +39,10 @@ export class Utils {
   }
 
   static formatErrorToStr(...args: unknown[]) {
-    const error: string = args[0] instanceof Error ? args[0].message : 'Error';
+    const [value] = args;
+    // Other values are not stringified, so a spec-supplied object cannot run its toJSON here.
+    const error =
+      value instanceof Error ? value.message : typeof value === 'string' ? value : 'Error';
     return Utils.formatWarningToStr(error, ...Array.from(args).slice(1));
   }
 }

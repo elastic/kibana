@@ -38,7 +38,6 @@ type CapturedHandler = (
 const rule = createRuleResponse({
   id: 'rule-1',
   enabled: true,
-  metadata: { template: { id: 'template-1' } },
 });
 
 const eventOfType = (type: RuleEvent['type'], payload: RuleEventPayload): RuleEvent => ({
@@ -105,7 +104,12 @@ describe('RuleTelemetrySubscriber', () => {
         subscriber.start();
 
         await handler(type)(
-          eventOfType(type, { ruleId: 'rule-1', spaceId: 'default', rule }),
+          eventOfType(type, {
+            ruleId: 'rule-1',
+            spaceId: 'default',
+            rule,
+            templateId: 'template-1',
+          }),
           context
         );
 
@@ -164,7 +168,8 @@ describe('RuleTelemetrySubscriber', () => {
       await handler()(createdEvent({ ruleId: 'rule-1', spaceId: 'default', rule }), context);
 
       const [, data] = ebtService.reportEvent.mock.calls[0];
-      expect(data.origin).not.toHaveProperty('app');
+      expect(data).toHaveProperty('origin');
+      expect(data).not.toHaveProperty('origin.app');
     });
 
     it('omits template_id and builder_type for rules without them', async () => {

@@ -38,6 +38,9 @@ describe('Nightshift bound investigation workflow', () => {
       {
         name: 'investigate',
         type: 'workflow.execute',
+        // A bound workflow only runs its saved definition, so a caller's timeout arrives as an
+        // input and caps this step instead of the run's `settings.timeout`.
+        timeout: '{{ inputs.timeout_seconds }}s',
         with: {
           'workflow-id': NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
           'run-as-mode': 'inherit',
@@ -46,6 +49,17 @@ describe('Nightshift bound investigation workflow', () => {
       },
     ]);
     expect(WorkflowSchema.safeParse(rendered).success).toBe(true);
+  });
+
+  it('defaults the investigation timeout for a run that does not set one', () => {
+    const rendered = parse(render('kibana/nightshift_agent'));
+
+    expect(rendered.triggers[0].inputs.properties.timeout_seconds).toEqual({
+      type: 'number',
+      default: 3600,
+      maximum: 3600,
+      description: expect.any(String),
+    });
   });
 
   it('fails every run the investigations client did not start', () => {

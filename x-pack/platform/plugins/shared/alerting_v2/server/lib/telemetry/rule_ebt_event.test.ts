@@ -101,9 +101,9 @@ describe('buildRuleChangedEventData', () => {
 
   it('includes template_id and builder_type when present', () => {
     const rule = createRuleResponse({
-      metadata: { template: { id: 'template-1' }, builder: { type: 'threshold' } },
+      metadata: { builder: { type: 'threshold' } },
     });
-    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id);
+    const data = buildRuleChangedEventData(rule, apiUserOrigin, rule.id, 'template-1');
 
     expect(data).toEqual(
       expect.objectContaining({ template_id: 'template-1', builder_type: 'threshold' })

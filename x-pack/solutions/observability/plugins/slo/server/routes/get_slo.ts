@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import path from 'path';
 import { getSLOParamsSchema } from '@kbn/slo-schema';
 import { DefaultBurnRatesClient, DefaultSummaryClient, GetSLO } from '../services';
 import { SLODefinitionClient } from '../services/slo_definition_client';
@@ -13,7 +14,14 @@ import { assertPlatinumLicense } from './utils/assert_platinum_license';
 
 export const getSLORoute = createSloServerRoute({
   endpoint: 'GET /api/observability/slos/{id} 2023-10-31',
-  options: { access: 'public' },
+  options: {
+    access: 'public',
+    summary: 'Get an SLO',
+    description:
+      'You must have the `read` privileges for the **SLOs** feature in the **Observability** section of the Kibana feature privileges.',
+    operationId: 'getSloOp',
+    oasOperationObject: () => path.join(__dirname, 'examples/get_slo.yaml'),
+  },
   security: {
     authz: {
       requiredPrivileges: ['slo_read'],

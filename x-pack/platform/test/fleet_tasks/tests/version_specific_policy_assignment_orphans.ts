@@ -12,6 +12,7 @@ import {
   AGENT_POLICY_VERSION_SEPARATOR,
 } from '@kbn/fleet-plugin/common/constants';
 import type { FtrProviderContextWithServices } from '../ftr_provider_context';
+import { waitForPolicyBaseIdBackfill } from '../../fleet_api_integration/helpers';
 import { cleanupAgentDocs, createAgentDoc } from '../helpers';
 
 export default function (providerContext: FtrProviderContextWithServices) {
@@ -61,6 +62,8 @@ export default function (providerContext: FtrProviderContextWithServices) {
 
     before(async () => {
       await supertest.post(`/api/fleet/setup`).set('kbn-xsrf', 'xxxx').expect(200);
+      // Otherwise the setup backfill can set policy_base_id on the agents of the tests
+      await waitForPolicyBaseIdBackfill(providerContext);
       // Fail fast with a clear message instead of two opaque timeouts: a leftover policy with
       // version conditions makes Phase 1 run a wildcard query that fails with expensive queries off.
       const versionConditioned = await es.search({

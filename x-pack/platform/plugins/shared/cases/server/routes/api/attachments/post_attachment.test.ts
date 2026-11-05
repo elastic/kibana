@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import { createCasesClientMock } from '../../../client/mocks';
 import type { CaseError } from '../../../common/error';
 import { mockCaseUnifiedAttachments } from '../../../mocks';
@@ -22,11 +23,18 @@ describe('postAttachmentRoute', () => {
     body: { type: 'comment', data: { content: 'hello' }, owner: 'securitySolution' },
   };
 
-  const callHandler = () =>
-    postAttachmentRoute.handler({ context, request, response } as unknown as HandlerArgs);
+  const incrementAttachmentTypeCounters = jest.fn();
 
-  const getHandlerError = () =>
-    callHandler().then(
+  const callHandler = (body: object = request.body) =>
+    postAttachmentRoute.handler({
+      context,
+      request: { ...request, body },
+      response,
+      incrementAttachmentTypeCounters,
+    } as unknown as HandlerArgs);
+
+  const getHandlerError = (body?: object) =>
+    callHandler(body).then(
       () => {
         throw new Error('Expected the handler to throw');
       },
@@ -35,30 +43,47 @@ describe('postAttachmentRoute', () => {
 
   afterEach(() => jest.clearAllMocks());
 
-  it('returns the created attachment', async () => {
-    casesClientMock.attachments.add.mockImplementation(
-      async ({ id }) =>
-        ({
-          comments: [{ id, version: '1', ...attachmentSO.attributes }],
-        } as never)
-    );
+  it('returns the attachment from the client', async () => {
+    const attachment = { id: attachmentSO.id, version: '1', ...attachmentSO.attributes };
+    casesClientMock.attachments.add.mockResolvedValue(attachment as never);
 
     await callHandler();
 
-    expect(response.created).toHaveBeenCalledWith({
-      body: expect.objectContaining({ type: 'comment', data: { content: 'test' } }),
+    expect(casesClientMock.attachments.add).toHaveBeenCalledWith({
+      caseId: 'case-1',
+      comment: request.body,
     });
+    expect(response.created).toHaveBeenCalledWith({ body: attachment });
+    expect(incrementAttachmentTypeCounters).toHaveBeenCalledWith(['comment']);
   });
 
-  it('throws a 500 when the created attachment is missing from the case', async () => {
-    casesClientMock.attachments.add.mockResolvedValue({ comments: [] } as never);
+  it('does not count the attachment when the create fails', async () => {
+    casesClientMock.attachments.add.mockRejectedValue(new Error('create failed'));
+
+    await getHandlerError();
+
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
+  });
+
+  it('rejects a file attachment with a 400 before calling the client', async () => {
+    const error = await getHandlerError({
+      type: 'file',
+      attachmentId: 'file-1',
+      owner: 'securitySolution',
+    });
+
+    expect(error.boomify().output.statusCode).toBe(400);
+    expect(casesClientMock.attachments.add).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
+  });
+
+  it('keeps the status code of a client error', async () => {
+    casesClientMock.attachments.add.mockRejectedValue(Boom.notFound('missing'));
 
     const error = await getHandlerError();
 
-    expect(error.wrappedError?.message).toMatch(
-      /^Failed to locate created attachment .+ on case case-1$/
-    );
-    expect(error.boomify().output.statusCode).toBe(500);
+    expect(error.boomify().output.statusCode).toBe(404);
     expect(response.created).not.toHaveBeenCalled();
+    expect(incrementAttachmentTypeCounters).not.toHaveBeenCalled();
   });
 });
