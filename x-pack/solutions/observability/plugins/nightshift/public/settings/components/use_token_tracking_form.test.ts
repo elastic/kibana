@@ -42,7 +42,7 @@ const setup = ({
         },
       },
       settings: {
-        client: {
+        globalClient: {
           get: jest.fn().mockReturnValue(savedEnabled),
           get$: jest.fn().mockReturnValue(tracking$),
           getUpdateErrors$: jest.fn().mockReturnValue(updateErrors$),

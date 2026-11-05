@@ -110,6 +110,10 @@ describe('GenAiSettingsApp', () => {
 
     // Mock settings client with default settings
     coreStart.settings.client.getAll.mockReturnValue(createSettingsMock() as any);
+    coreStart.settings.globalClient.getAll.mockReturnValue({
+      [GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING]:
+        createSettingsMock()[GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING],
+    } as any);
     coreStart.http.fetch.mockResolvedValue({
       page: 1,
       perPage: 20,
@@ -535,6 +539,33 @@ describe('GenAiSettingsApp', () => {
           { signal: null }
         );
       });
+    });
+
+    it('saves token usage tracking to the global setting', async () => {
+      mockUseEnabledFeatures.mockReturnValue(createFeatureFlagsMock());
+
+      const genAiSettingsApi = jest.fn().mockResolvedValue({ installed: true });
+
+      renderComponent({}, { genAiSettingsApi });
+
+      const tokenUsageSwitch = await screen.findByTestId(
+        `management-settings-editField-${GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING}`
+      );
+      fireEvent.click(tokenUsageSwitch);
+
+      const saveButton = await screen.findByTestId('genAiSettingsSaveBarBottomBarActionsButton');
+      fireEvent.click(saveButton);
+
+      await waitFor(() => {
+        expect(coreStart.settings.globalClient.set).toHaveBeenCalledWith(
+          GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+          true
+        );
+      });
+      expect(coreStart.settings.client.set).not.toHaveBeenCalledWith(
+        GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING,
+        expect.anything()
+      );
     });
 
     it('does not install the dashboard when token usage tracking is not changed', async () => {
