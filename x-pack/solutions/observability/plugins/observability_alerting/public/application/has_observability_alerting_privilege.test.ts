@@ -9,7 +9,6 @@ import type { Capabilities } from '@kbn/core/public';
 import {
   hasObservabilityAlertingCapabilities,
   hasObservabilityAlertsV1Capability,
-  hasObservabilityRulesV1Capability,
 } from './has_observability_alerting_privilege';
 
 const capabilities = (features: Record<string, unknown>): Capabilities =>
@@ -19,52 +18,6 @@ const capabilities = (features: Record<string, unknown>): Capabilities =>
     catalogue: {},
     ...features,
   } as Capabilities);
-
-describe('hasObservabilityRulesV1Capability', () => {
-  it('returns true for apm navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { apm: true } }))).toBe(true);
-  });
-
-  it('returns true for metrics navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { metrics: true } }))).toBe(
-      true
-    );
-  });
-
-  it('returns true for uptime navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { uptime: true } }))).toBe(
-      true
-    );
-  });
-
-  it('returns true for synthetics navLink', () => {
-    expect(
-      hasObservabilityRulesV1Capability(capabilities({ navLinks: { synthetics: true } }))
-    ).toBe(true);
-  });
-
-  it('returns true for slo navLink', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ navLinks: { slo: true } }))).toBe(true);
-  });
-
-  it('returns true for logs.show', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({ logs: { show: true } }))).toBe(true);
-  });
-
-  it('returns true for stack rules (triggersActionsRules)', () => {
-    expect(
-      hasObservabilityRulesV1Capability(
-        capabilities({
-          management: { insightsAndAlerting: { triggersActionsRules: true } },
-        })
-      )
-    ).toBe(true);
-  });
-
-  it('returns false without any observability capability', () => {
-    expect(hasObservabilityRulesV1Capability(capabilities({}))).toBe(false);
-  });
-});
 
 describe('hasObservabilityAlertsV1Capability', () => {
   it('returns true for observabilityAlerts.show', () => {
@@ -150,14 +103,23 @@ describe('hasObservabilityAlertingCapabilities', () => {
       expect(result).toEqual({ v1: true, v2: false });
     });
 
-    it('returns v1: true for stack rules (triggersActionsRules)', () => {
+    it('returns v1: true for stack rules show', () => {
+      const result = hasObservabilityAlertingCapabilities(
+        capabilities({ stackAlerts: { show: true } }),
+        'rules'
+      );
+      expect(result).toEqual({ v1: true, v2: false });
+    });
+
+    it('returns v1: false when only the Stack Management Rules capability is granted', () => {
       const result = hasObservabilityAlertingCapabilities(
         capabilities({
+          actions: { show: true },
           management: { insightsAndAlerting: { triggersActionsRules: true } },
         }),
         'rules'
       );
-      expect(result).toEqual({ v1: true, v2: false });
+      expect(result).toEqual({ v1: false, v2: false });
     });
 
     it('returns v2: true for alerting_v2_rules read', () => {

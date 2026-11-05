@@ -8,7 +8,7 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { canAccessTriggersActionsRules } from './rule_capabilities';
+import { canAccessTriggersActionsRules, hasClassicRulesReadCapability } from './rule_capabilities';
 
 describe('canAccessTriggersActionsRules', () => {
   it('returns true when the triggersActionsRules capability is granted', () => {
@@ -37,5 +37,62 @@ describe('canAccessTriggersActionsRules', () => {
     const capabilities = {} as Capabilities;
 
     expect(canAccessTriggersActionsRules(capabilities)).toBe(false);
+  });
+});
+
+describe('hasClassicRulesReadCapability', () => {
+  const capabilities = (features: Record<string, unknown>): Capabilities =>
+    ({
+      navLinks: {},
+      management: {},
+      catalogue: {},
+      ...features,
+    } as Capabilities);
+
+  it.each([
+    ['an observability nav link', { navLinks: { apm: true } }],
+    ['logs show', { logs: { show: true } }],
+    ['stack rules show', { stackAlerts: { show: true } }],
+    ['machine learning alerts', { ml: { canUseMlAlerts: true } }],
+    ['data set quality show', { dataQuality: { show: true } }],
+    ['security rules read', { securitySolutionRulesV4: { read_rules: true } }],
+    ['a legacy security rules feature', { securitySolutionRulesV1: { read_rules: true } }],
+  ])('returns true for %s', (_label, features) => {
+    expect(hasClassicRulesReadCapability(capabilities(features))).toBe(true);
+  });
+
+  it('returns false for the Stack Management Rules capability alone', () => {
+    expect(
+      hasClassicRulesReadCapability(
+        capabilities({
+          management: { insightsAndAlerting: { triggersActionsRules: true } },
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('returns false for Actions and Connectors and Classic Rules Settings', () => {
+    expect(
+      hasClassicRulesReadCapability(
+        capabilities({
+          actions: { show: true },
+          rulesSettings: { show: true },
+          management: {
+            insightsAndAlerting: {
+              triggersActionsRules: true,
+              triggersActionsConnectors: true,
+            },
+          },
+        })
+      )
+    ).toBe(false);
+  });
+
+  it('returns false for the Machine Learning APM sub-privilege', () => {
+    expect(hasClassicRulesReadCapability(capabilities({ ml: { canGetJobs: true } }))).toBe(false);
+  });
+
+  it('returns false without any rules capability', () => {
+    expect(hasClassicRulesReadCapability(capabilities({}))).toBe(false);
   });
 });

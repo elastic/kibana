@@ -551,6 +551,19 @@ test.describe(
       );
     });
 
+    test('hides Rules when the user only has Actions and Connectors read', async ({
+      browserAuth,
+      pageObjects,
+      kbnClient,
+      scoutSpace,
+    }) => {
+      await expectPanelForRole(
+        { browserAuth, pageObjects, kbnClient, scoutSpace },
+        observabilityAlertingNavRole({ actions: ['read'] }),
+        []
+      );
+    });
+
     test('shows Alerts and Alerts V1 when the user has v1 observability alerts read and the V1 alerts table is on', async ({
       browserAuth,
       pageObjects,

@@ -178,6 +178,11 @@ describe('Stack Alerts Feature Privileges', () => {
       expect.arrayContaining(['rac', 'bulkGetUserProfiles'])
     );
   });
+
+  test('both privileges grant the show UI capability used to detect classic rules read', () => {
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.all.ui).toContain('show');
+    expect(BUILT_IN_ALERTS_FEATURE.privileges?.read.ui).toContain('show');
+  });
 });
 
 describe('Stack Alerts Only Feature Privileges', () => {
