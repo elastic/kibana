@@ -46,13 +46,20 @@ const editBackingDocumentLabel = i18n.translate('discover.editDocumentRowControl
 const isReservedIndexName = (indexName: string): boolean => indexName.startsWith('.');
 
 /**
- * A row is editable when it carries a stable `_id`/`_index` identity on a non-reserved index.
+ * A cross-cluster index carries its cluster alias as a `<cluster>:<index>` prefix. Elasticsearch
+ * forbids `:` in real index names, so its presence unambiguously marks a remote index. Writes target
+ * the local cluster and cannot reach remote indices, so these are not editable here.
+ */
+const isRemoteIndexName = (indexName: string): boolean => indexName.includes(':');
+
+/**
+ * A row is editable when it carries a stable `_id`/`_index` identity on a local, non-reserved index.
  * Exported so callers can avoid registering the control (and reserving an empty leading column) when
  * no row qualifies, e.g. an ES|QL result without `METADATA _id, _index`.
  */
 export const isDocumentEditable = (record: DataTableRecord): boolean => {
   const ref = getExpandedDocRef(record);
-  return ref !== undefined && !isReservedIndexName(ref.index);
+  return ref !== undefined && !isReservedIndexName(ref.index) && !isRemoteIndexName(ref.index);
 };
 
 /** Best-effort write-privilege check; a failure is treated as "no access" rather than opening. */

@@ -82,6 +82,12 @@ describe('createEditDocumentRowControl', () => {
       const backingDoc = makeRecord({ _id: 'doc1', _index: '.ds-logs-prod-2024.01.01-000003' });
       expect(control.isAvailable?.(rowProps(backingDoc))).toBe(false);
     });
+
+    it('is hidden for remote cross-cluster indices, which cannot be written to locally', () => {
+      const { control } = setup();
+      const remoteDoc = makeRecord({ _id: 'doc1', _index: 'my_remote:customers-2' });
+      expect(control.isAvailable?.(rowProps(remoteDoc))).toBe(false);
+    });
   });
 
   describe('rendering', () => {
