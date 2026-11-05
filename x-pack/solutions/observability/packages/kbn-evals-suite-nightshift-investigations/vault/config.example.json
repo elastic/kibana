@@ -6,8 +6,7 @@
   "nightshift": {
     "telemetry": {
       "url": "https://REPLACE_ME",
-      "apiKey": "REPLACE_ME",
-      "readableIndices": "REPLACE_ME"
+      "apiKey": "REPLACE_ME"
     }
   },
   "nightshiftOrcaEs": {

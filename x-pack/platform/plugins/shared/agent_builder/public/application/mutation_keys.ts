@@ -11,6 +11,7 @@
 export const mutationKeys = {
   sendMessage: ['sendMessage'] as const,
   resumeRound: ['resumeRound'] as const,
+  attachExecution: ['attachExecution'] as const,
   sendUserMessage: (conversationId?: string) => ['sendUserMessage', conversationId] as const,
   createConversation: ['createConversation'] as const,
   updateAgentAccessControl: (agentId: string) =>

@@ -1,5 +1,5 @@
 {
-  "sha1": "b1be5946fc021e07842ecd90fbc9e6a2b23770d6",
+  "sha1": "4e5dcb4af6f096d880c8e7cce16e895623b82302",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -2450,6 +2450,102 @@
         "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/embeddable/overview.spec.ts",
         "line": 236,
         "column": 29
+      }
+    },
+    {
+      "id": "ef91d9997601086-09a34757d767b4d",
+      "title": "SLOs on exponential_histogram fields computes a histogram indicator with range and value_count aggregations",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 236,
+        "column": 7
+      }
+    },
+    {
+      "id": "ef91d9997601086-0be8fdfa9f8b2ff",
+      "title": "SLOs on exponential_histogram fields computes a custom metric indicator with a sum aggregation",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 242,
+        "column": 24
+      }
+    },
+    {
+      "id": "ef91d9997601086-0d93defd07604d6",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (avg) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-c9af89dee5cd4ce",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (max) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-a070120315f2af3",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (min) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
+      }
+    },
+    {
+      "id": "ef91d9997601086-4ecfc8daf553801",
+      "title": "SLOs on exponential_histogram fields computes \"Timeslice metric SLO (percentile) on exponential_histogram\"",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic",
+        "@local-serverless-observability_complete",
+        "@cloud-serverless-observability_complete"
+      ],
+      "location": {
+        "file": "x-pack/solutions/observability/plugins/slo/test/scout/api/tests/exponential_histogram_indicators.spec.ts",
+        "line": 317,
+        "column": 31
       }
     },
     {

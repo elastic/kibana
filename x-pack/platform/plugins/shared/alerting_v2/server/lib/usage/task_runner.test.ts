@@ -12,6 +12,7 @@ import { getRuleStats } from './lib/get_rule_stats';
 import { getExecutionStats } from './lib/get_execution_stats';
 import { getActionPolicyStats } from './lib/get_action_policy_stats';
 import { getAlertStats } from './lib/get_alert_stats';
+import { getDispatcherStats } from './lib/get_dispatcher_stats';
 import { TelemetryTaskRunner } from './task_runner';
 import { emptyState } from './task_state';
 
@@ -19,11 +20,13 @@ jest.mock('./lib/get_rule_stats');
 jest.mock('./lib/get_execution_stats');
 jest.mock('./lib/get_action_policy_stats');
 jest.mock('./lib/get_alert_stats');
+jest.mock('./lib/get_dispatcher_stats');
 
 const getRuleStatsMock = jest.mocked(getRuleStats);
 const getExecutionStatsMock = jest.mocked(getExecutionStats);
 const getActionPolicyStatsMock = jest.mocked(getActionPolicyStats);
 const getAlertStatsMock = jest.mocked(getAlertStats);
+const getDispatcherStatsMock = jest.mocked(getDispatcherStats);
 
 const elasticsearch = elasticsearchServiceMock.createStart();
 const esClient = elasticsearch.client.asInternalUser;
@@ -42,6 +45,7 @@ describe('TelemetryTaskRunner', () => {
     getExecutionStatsMock.mockResolvedValue({ executions_count_24hr: 20 });
     getActionPolicyStatsMock.mockResolvedValue({ action_policies_count: 3 });
     getAlertStatsMock.mockResolvedValue({ alerts_count: 42 });
+    getDispatcherStatsMock.mockResolvedValue({ dispatcher_uncovered_rules_count_24hr: 1 });
   });
 
   it('marks has_errors false and persists every stat when all stat collectors succeed', async () => {
@@ -59,6 +63,7 @@ describe('TelemetryTaskRunner', () => {
       executions_count_24hr: 20,
       action_policies_count: 3,
       alerts_count: 42,
+      dispatcher_uncovered_rules_count_24hr: 1,
     });
     expect(mockLogger.warn).not.toHaveBeenCalled();
   });
@@ -79,6 +84,7 @@ describe('TelemetryTaskRunner', () => {
     expect(state.count_enabled).toBe(5);
     expect(state.executions_count_24hr).toBe(20);
     expect(state.alerts_count).toBe(42);
+    expect(state.dispatcher_uncovered_rules_count_24hr).toBe(1);
 
     // The failed stat's fields are absent rather than reset to emptyState.
     expect(state.action_policies_count).toBeUndefined();

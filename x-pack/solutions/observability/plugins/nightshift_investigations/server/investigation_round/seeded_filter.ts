@@ -23,6 +23,7 @@ import {
 import { SANDBOX_STR_REPLACE_TOOL_ID } from '../tools/sandbox_bash/str_replace_tool';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from '../tools/sandbox_bash/view_file_tool';
 import { SANDBOX_WRITE_FILE_TOOL_ID } from '../tools/sandbox_bash/write_file_tool';
+import { TIME_CONVERTER_TOOL_ID } from '../tools/time_converter/tool';
 import type { InvestigationTranscriptStep } from './round_loader';
 
 export const SEEDED_WORKSPACE_KINDS = ['cortex', 'memories', 'decision_trees', 'env_docs'] as const;
@@ -59,7 +60,7 @@ export const NON_EVIDENCE_TOOL_IDS = new Set<string>([
   ...INVESTIGATION_TOOL_IDS,
   'platform.streams.investigation_progress_report',
   PROPOSALS_CREATE_TOOL_ID,
-  internalTools.writeTodos,
+  TIME_CONVERTER_TOOL_ID,
   internalTools.listFiles,
   internalTools.loadSkill,
   internalTools.searchRelevantSkills,
@@ -78,8 +79,8 @@ export interface SeededFilterOptions {
    */
   skipRoots?: readonly SeededWorkspaceKind[];
   /**
-   * When true, also filters out non-evidence process/recording tools (`write_todos`,
-   * `record_hypothesis`, `str_replace`, `write_file`, etc.).
+   * When true, also filters out non-evidence process/recording tools (`record_hypothesis`,
+   * `str_replace`, `write_file`, etc.).
    */
   skipNonEvidenceTools?: boolean;
   /**
