@@ -245,36 +245,6 @@ export const ParameterValuesEditor = ({
     });
   }, []);
 
-  // Browsers blur the field on mousedown. Re-masking a tall value right then moves the pressed
-  // button away, so the click is lost; wait until the pointer is released.
-  const isPointerDown = useRef(false);
-  const idsToStopEditing = useRef(new Set<string>());
-
-  useEffect(() => {
-    let timeout: ReturnType<typeof setTimeout> | undefined;
-    const handlePointerDown = () => {
-      isPointerDown.current = true;
-    };
-    const handlePointerRelease = () => {
-      isPointerDown.current = false;
-      if (idsToStopEditing.current.size === 0) {
-        return;
-      }
-      const ids = [...idsToStopEditing.current];
-      idsToStopEditing.current.clear();
-      timeout = setTimeout(() => ids.forEach(stopEditing), 0);
-    };
-    document.addEventListener('pointerdown', handlePointerDown, true);
-    document.addEventListener('pointerup', handlePointerRelease, true);
-    document.addEventListener('pointercancel', handlePointerRelease, true);
-    return () => {
-      document.removeEventListener('pointerdown', handlePointerDown, true);
-      document.removeEventListener('pointerup', handlePointerRelease, true);
-      document.removeEventListener('pointercancel', handlePointerRelease, true);
-      clearTimeout(timeout);
-    };
-  }, [stopEditing]);
-
   const modeToggle = isJsonMode ? (
     <EuiToolTip content={canUsePairs ? undefined : PAIRS_UNAVAILABLE_LABEL}>
       <EuiButtonEmpty
@@ -385,11 +355,7 @@ export const ParameterValuesEditor = ({
               };
               const handleValueBlur = () => {
                 if (paramValue) {
-                  if (isPointerDown.current) {
-                    idsToStopEditing.current.add(id);
-                  } else {
-                    stopEditing(id);
-                  }
+                  stopEditing(id);
                 }
                 onBlur?.();
               };
@@ -451,7 +417,12 @@ export const ParameterValuesEditor = ({
                       )}
                     </EuiFlexItem>
                     <EuiFlexItem grow={false}>
-                      <EuiFlexGroup gutterSize="xs" responsive={false}>
+                      {/* Keeps focus in the value on press, so it isn't re-masked (and the row resized) before the click lands. */}
+                      <EuiFlexGroup
+                        gutterSize="xs"
+                        onMouseDown={(event) => event.preventDefault()}
+                        responsive={false}
+                      >
                         <EuiFlexItem grow={false}>
                           <EuiToolTip content={visibilityLabel} disableScreenReaderOutput>
                             <EuiButtonIcon
