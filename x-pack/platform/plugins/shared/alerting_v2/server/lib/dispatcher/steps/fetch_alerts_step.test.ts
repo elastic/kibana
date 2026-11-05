@@ -16,8 +16,8 @@ import { createDispatchableAlertEventsResponse } from '../fixtures/dispatcher';
 import {
   createAlert,
   createDispatcherConfigAccessor,
-  createDispatcherTelemetryMock,
   createDispatcherPipelineState,
+  createDispatcherTelemetryMock,
   createStepLogger,
   MOCK_KIBANA_BASE_URL,
 } from '../fixtures/test_utils';
