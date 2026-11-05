@@ -20,6 +20,8 @@ export interface EvalsSuiteShard {
   id: string;
   specFiles: string[];
   optIn?: boolean;
+  /** Evaluation connector for this shard's steps, overriding the suite-wide judge. */
+  judge?: string;
 }
 
 export interface EvalsSuiteSpecModelGroup {
