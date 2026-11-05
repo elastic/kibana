@@ -82,14 +82,14 @@ describe('<Graph />', () => {
       });
     });
 
-    it('should render hexagon node', async () => {
+    it('should render entity node', async () => {
       const { container } = renderGraphPreview({
         nodes: [
           {
             id: '1',
             label: 'Node 1',
             color: 'primary',
-            shape: 'hexagon',
+            shape: 'entity',
           },
         ],
         edges: [],
@@ -151,7 +151,7 @@ describe('<Graph />', () => {
             id: '1',
             label: 'Node 1',
             color: 'primary',
-            shape: 'hexagon',
+            shape: 'entity',
           },
           {
             id: '2',
@@ -195,7 +195,7 @@ describe('<Graph />', () => {
         id: 'entity1',
         label: 'Entity Node 1',
         color: 'primary',
-        shape: 'hexagon',
+        shape: 'entity',
       },
       {
         id: 'label1',
@@ -207,7 +207,7 @@ describe('<Graph />', () => {
         id: 'entity2',
         label: 'Entity Node 2',
         color: 'primary',
-        shape: 'ellipse',
+        shape: 'entity',
       },
     ];
 
@@ -304,7 +304,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -363,7 +363,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -421,7 +421,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -477,7 +477,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -531,7 +531,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -582,7 +582,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -604,9 +604,9 @@ describe('<Graph />', () => {
     it('should center on origin relationship nodes for entity origin scenario', async () => {
       const props = {
         nodes: [
-          { id: 'originEntity', label: 'Origin Entity', color: 'primary', shape: 'ellipse' },
-          { id: 'target1', label: 'Target 1', color: 'primary', shape: 'hexagon' },
-          { id: 'target2', label: 'Target 2', color: 'primary', shape: 'rectangle' },
+          { id: 'originEntity', label: 'Origin Entity', color: 'primary', shape: 'entity' },
+          { id: 'target1', label: 'Target 1', color: 'primary', shape: 'entity' },
+          { id: 'target2', label: 'Target 2', color: 'primary', shape: 'entity' },
           { id: 'rel-owns', label: 'Owns', shape: 'relationship', isOrigin: true },
           {
             id: 'rel-communicates',
@@ -637,7 +637,7 @@ describe('<Graph />', () => {
       });
 
       const newNodes: NodeViewModel[] = [
-        { id: 'target1a', label: 'Target 1a', color: 'primary', shape: 'diamond' },
+        { id: 'target1a', label: 'Target 1a', color: 'primary', shape: 'entity' },
       ];
 
       rerender(
@@ -689,7 +689,7 @@ describe('<Graph />', () => {
           id: 'newEntity1',
           label: 'New Entity 1',
           color: 'danger',
-          shape: 'pentagon',
+          shape: 'entity',
         },
       ];
 
@@ -718,7 +718,7 @@ describe('<Graph />', () => {
         id: 'entity1',
         label: 'Entity Node',
         color: 'primary',
-        shape: 'hexagon',
+        shape: 'entity',
       },
       {
         id: 'label1',
@@ -826,7 +826,7 @@ describe('<Graph />', () => {
 
   describe('layers panel', () => {
     const layersPanelNodes: NodeViewModel[] = [
-      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'hexagon' },
+      { id: 'entity1', label: 'Entity', color: 'primary', shape: 'entity' },
     ];
 
     afterEach(() => {

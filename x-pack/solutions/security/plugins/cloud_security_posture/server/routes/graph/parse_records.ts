@@ -36,7 +36,7 @@ import {
   NON_ENRICHED_ENTITY_TYPE_SINGULAR,
 } from './types';
 import {
-  transformEntityTypeToIconAndShape,
+  getEntityTypeIcon,
   compareConnectorNodes,
   hashIds,
   addValuesToSet,
@@ -162,22 +162,19 @@ export const parseRecords = (
 };
 
 const deriveEntityAttributesFromType = (entityGroupType: string): NodeVisualProps => {
-  const mappedProps: Partial<NodeVisualProps> = {
-    shape: 'rectangle',
+  const mappedProps: NodeVisualProps = {
+    shape: 'entity',
   };
 
   if (entityGroupType) {
-    const { icon, shape } = transformEntityTypeToIconAndShape(entityGroupType);
+    const icon = getEntityTypeIcon(entityGroupType);
     if (icon) {
       mappedProps.icon = icon;
-    }
-    if (shape) {
-      mappedProps.shape = shape;
     }
     mappedProps.tag = entityGroupType;
   }
 
-  return mappedProps as NodeVisualProps;
+  return mappedProps;
 };
 
 /**

@@ -26,11 +26,7 @@ import type {
 } from './types';
 
 export const isEntityNode = (node: NodeViewModel): node is EntityNodeViewModel =>
-  node.shape === 'ellipse' ||
-  node.shape === 'pentagon' ||
-  node.shape === 'rectangle' ||
-  node.shape === 'diamond' ||
-  node.shape === 'hexagon';
+  node.shape === 'entity';
 
 export const isLabelNode = (node: NodeViewModel): node is LabelNodeViewModel =>
   node.shape === 'label';

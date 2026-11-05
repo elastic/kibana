@@ -9,7 +9,7 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { getEntitiesLatestIndexName } from '@kbn/cloud-security-posture-common/utils/helpers';
 import { resolveLatestEntitiesIndexName } from '@kbn/entity-store/server';
-import { transformEntityTypeToIconAndShape, compareConnectorNodes } from './utils';
+import { getEntityTypeIcon, compareConnectorNodes } from './utils';
 import { resolveEntitiesIndexName } from './enrichment_utils';
 
 jest.mock('@kbn/entity-store/server', () => ({
@@ -17,26 +17,23 @@ jest.mock('@kbn/entity-store/server', () => ({
 }));
 
 describe('utils', () => {
-  describe('transformEntityTypeToIconAndShape', () => {
-    it('should return empty object for undefined input', () => {
-      expect(transformEntityTypeToIconAndShape(undefined as unknown as string)).toEqual({});
+  describe('getEntityTypeIcon', () => {
+    it('should return undefined for undefined input', () => {
+      expect(getEntityTypeIcon(undefined as unknown as string)).toBeUndefined();
     });
 
-    it('should return empty object for null input', () => {
-      expect(transformEntityTypeToIconAndShape(null as unknown as string)).toEqual({});
+    it('should return undefined for null input', () => {
+      expect(getEntityTypeIcon(null as unknown as string)).toBeUndefined();
     });
 
     // Unknown or non-existent entity types
-    it('should return undefined icon and shape for entity types that do not match any mappings', () => {
+    it('should return undefined for entity types that do not match any mappings', () => {
       ['NonExistentType', 'Unknown', '123456', 'CustomEntityType'].forEach((type) => {
-        expect(transformEntityTypeToIconAndShape(type)).toEqual({
-          icon: undefined,
-          shape: undefined,
-        });
+        expect(getEntityTypeIcon(type)).toBeUndefined();
       });
     });
 
-    it('should correctly map user-related entity types to the user icon and ellipse shape', () => {
+    it('should correctly map user-related entity types to the user icon', () => {
       const userTypes = [
         'User',
         'user',
@@ -49,14 +46,11 @@ describe('utils', () => {
       ];
 
       userTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'user',
-          shape: 'ellipse',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('user');
       });
     });
 
-    it('should correctly map database-related entity types to the database icon and rectangle shape', () => {
+    it('should correctly map database-related entity types to the database icon', () => {
       const databaseTypes = [
         'Database',
         'database',
@@ -69,21 +63,15 @@ describe('utils', () => {
       ];
 
       databaseTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'database',
-          shape: 'rectangle',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('database');
       });
     });
 
-    it('should correctly map host-related entity types to the host icon and rectangle shape', () => {
+    it('should correctly map host-related entity types to the host icon', () => {
       const hostTypes = ['Host', 'Virtual Desktop', 'Virtual Workstation', 'Virtual Machine Image'];
 
       hostTypes.forEach((entityType) => {
-        expect(transformEntityTypeToIconAndShape(entityType)).toEqual({
-          icon: 'storage',
-          shape: 'hexagon',
-        });
+        expect(getEntityTypeIcon(entityType)).toBe('storage');
       });
     });
   });

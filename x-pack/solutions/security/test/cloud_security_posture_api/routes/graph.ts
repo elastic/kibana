@@ -1084,7 +1084,7 @@ export default function (providerContext: FtrProviderContext) {
         // Find actor node (should have count: 2 for 2 actor IDs)
         const actorNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 2);
         expect(actorNode).to.not.be(undefined);
-        expect(actorNode).to.have.property('shape', 'rectangle');
+        expect(actorNode).to.have.property('shape', 'entity');
         expect(actorNode).to.have.property('color', 'primary');
         expect(actorNode).to.have.property('tag', 'Entities');
         expect(actorNode).to.have.property('icon', 'magnifyExclamation');
@@ -1121,7 +1121,7 @@ export default function (providerContext: FtrProviderContext) {
         // Same as actors: generic entities, EUID column used directly for sourceFields.
         const targetNode = entityNodes.find((node: EntityNodeDataModel) => node.count === 3);
         expect(targetNode).to.not.be(undefined);
-        expect(targetNode).to.have.property('shape', 'rectangle');
+        expect(targetNode).to.have.property('shape', 'entity');
         expect(targetNode).to.have.property('color', 'primary');
         expect(targetNode).to.have.property('tag', 'Entities');
         expect(targetNode).to.have.property('icon', 'magnifyExclamation');
@@ -1868,7 +1868,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorNode.label).to.equal('AdminExample');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.shape).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
 
               // Verify other nodes
@@ -1938,7 +1938,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('ServiceAccount123');
               expect(actorNode.icon).to.equal('cloudStormy');
-              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.shape).to.equal('entity');
               expect(actorNode.tag).to.equal('Service');
               expect(actorNode.count).to.be(undefined); // No count for single entity
               expect(actorNode.documentsData).to.have.length(1);
@@ -1969,7 +1969,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(targetNode).not.to.be(undefined);
               expect(targetNode.label).to.equal('GCP Compute Instance'); // Should show sub_type for grouped entities
               expect(targetNode.icon).to.equal('container'); // Default icon for unmapped entity type
-              expect(targetNode.shape).to.equal('rectangle'); // Default shape for grouped entities
+              expect(targetNode.shape).to.equal('entity');
               expect(targetNode.tag).to.equal('Container');
               expect(targetNode.count).to.equal(2);
               expect(targetNode.documentsData).to.have.length(2);
@@ -2054,7 +2054,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('EntityTestUser');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.shape).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
               expect(actorNode!.documentsData!.length).to.equal(1);
               expectExpect(actorNode!.documentsData).toContainEqual(
@@ -2086,7 +2086,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('ComputeServiceTarget');
-              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.shape).to.equal('entity');
               expect(serviceTargetNode.tag).to.equal('Compute');
               expect(serviceTargetNode!.documentsData!.length).to.be.greaterThan(0);
 
@@ -2175,7 +2175,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               expect(actorNode.label).to.equal('MultiTargetUser');
               expect(actorNode.icon).to.equal('user');
-              expect(actorNode.shape).to.equal('ellipse');
+              expect(actorNode.shape).to.equal('entity');
               expect(actorNode.tag).to.equal('Identity');
               expect(actorNode.count).to.be(undefined); // Single entity, no count
               expect(actorNode.documentsData).to.have.length(1);
@@ -2203,7 +2203,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(storageGroupNode).not.to.be(undefined);
               expect(storageGroupNode.label).to.equal('GCP Storage Bucket'); // Shows sub_type for grouped entities
-              expect(storageGroupNode.shape).to.equal('rectangle');
+              expect(storageGroupNode.shape).to.equal('entity');
               expect(storageGroupNode.tag).to.equal('Storage');
               expect(storageGroupNode.count).to.equal(3);
               expect(storageGroupNode.documentsData).to.have.length(3);
@@ -2265,7 +2265,7 @@ export default function (providerContext: FtrProviderContext) {
               expect(serviceNode).not.to.be(undefined);
               expect(serviceNode.label).to.equal('TargetServiceDifferent');
               expect(serviceNode.icon).to.equal('cloudStormy'); // Service type icon
-              expect(serviceNode.shape).to.equal('rectangle');
+              expect(serviceNode.shape).to.equal('entity');
               expect(serviceNode.tag).to.equal('Service');
               expect(serviceNode.count).to.be(undefined); // Single entity, no count
               expect(serviceNode.documentsData).to.have.length(1);
@@ -2340,9 +2340,9 @@ export default function (providerContext: FtrProviderContext) {
               expect(actorNode).not.to.be(undefined);
               // Label should be the entity name since it exists
               expect(actorNode.label).to.equal('user:partial-user@example.com@gcp');
-              // Icon and shape should be defaults since type is missing
+              // Icon should be the default since type is missing
               expect(actorNode.icon).to.equal('magnifyExclamation');
-              expect(actorNode.shape).to.equal('rectangle');
+              expect(actorNode.shape).to.equal('entity');
               expect(actorNode.documentsData).to.have.length(1);
               expectExpect(actorNode.documentsData).toContainEqual(
                 expectExpect.objectContaining({
@@ -2367,9 +2367,9 @@ export default function (providerContext: FtrProviderContext) {
                 (node: NodeDataModel) => node.id === 'host:partial-host-instance-1'
               ) as EntityNodeDataModel;
               expect(targetNode).not.to.be(undefined);
-              // Icon and shape should be based on type since it exists
+              // Icon should be based on type since it exists
               expect(targetNode.icon).to.equal('container');
-              expect(targetNode.shape).to.equal('rectangle');
+              expect(targetNode.shape).to.equal('entity');
               expect(targetNode.tag).to.equal('Container');
               expect(targetNode.documentsData).to.have.length(1);
               expectExpect(targetNode.documentsData).toContainEqual(
@@ -2429,7 +2429,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with single ip');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.shape).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(1);
@@ -2465,7 +2465,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with no ip');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.shape).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity).not.to.have.property('host');
@@ -2501,7 +2501,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(entityNode.label).to.equal('Host with multiple ips');
               expect(entityNode.icon).to.equal('storage');
-              expect(entityNode.shape).to.equal('hexagon');
+              expect(entityNode.shape).to.equal('entity');
               expect(entityNode.tag).to.equal('Host');
               expect(entityNode.documentsData).to.have.length(1);
               expect(entityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2537,7 +2537,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.shape).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2552,7 +2552,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.shape).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2588,7 +2588,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.shape).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2603,7 +2603,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.shape).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2638,7 +2638,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(actorEntityNode.label).to.equal('Actor Host with multiple ips');
               expect(actorEntityNode.icon).to.equal('storage');
-              expect(actorEntityNode.shape).to.equal('hexagon');
+              expect(actorEntityNode.shape).to.equal('entity');
               expect(actorEntityNode.tag).to.equal('Host');
               expect(actorEntityNode.documentsData).to.have.length(1);
               expect(actorEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2653,7 +2653,7 @@ export default function (providerContext: FtrProviderContext) {
               // For single enriched entities, label should be entity.name
               expect(targetEntityNode.label).to.equal('Target Host with multiple ips');
               expect(targetEntityNode.icon).to.equal('storage');
-              expect(targetEntityNode.shape).to.equal('hexagon');
+              expect(targetEntityNode.shape).to.equal('entity');
               expect(targetEntityNode.tag).to.equal('Host');
               expect(targetEntityNode.documentsData).to.have.length(1);
               expect(targetEntityNode.documentsData![0].entity?.host?.ip).to.have.length(3);
@@ -2849,7 +2849,7 @@ export default function (providerContext: FtrProviderContext) {
 
               expect(userActorNode).not.to.be(undefined);
               expect(userActorNode.label).to.equal('Relationships Test User');
-              expect(userActorNode.shape).to.equal('ellipse');
+              expect(userActorNode.shape).to.equal('entity');
               expect(userActorNode.tag).to.equal('Identity');
               expect(userActorNode.icon).to.equal('user');
               expect(userActorNode!.documentsData!.length).to.equal(1);
@@ -2876,7 +2876,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(serviceTargetNode).not.to.be(undefined);
               expect(serviceTargetNode.label).to.equal('Relationships Target Service');
-              expect(serviceTargetNode.shape).to.equal('rectangle');
+              expect(serviceTargetNode.shape).to.equal('entity');
               expect(serviceTargetNode.tag).to.equal('Service');
               expect(serviceTargetNode.icon).to.equal('cloudStormy');
               expect(serviceTargetNode!.documentsData!.length).to.equal(1);
@@ -2903,7 +2903,7 @@ export default function (providerContext: FtrProviderContext) {
               ) as EntityNodeDataModel;
               expect(relationshipGroupedNodeTarget).not.to.be(undefined);
               expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
-              expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+              expect(relationshipGroupedNodeTarget.shape).to.equal('entity');
               expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
               expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
 
@@ -2971,10 +2971,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Should have entity nodes for source and targets
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.shape === 'entity'
                 );
                 expect(entityNodes.length).to.equal(2);
 
@@ -2984,7 +2981,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 expect(userActorNode).not.to.be(undefined);
                 expect(userActorNode.label).to.equal('Relationships Test User');
-                expect(userActorNode.shape).to.equal('ellipse');
+                expect(userActorNode.shape).to.equal('entity');
                 expect(userActorNode.tag).to.equal('Identity');
                 expect(userActorNode.icon).to.equal('user');
                 expect(userActorNode!.documentsData!.length).to.equal(1);
@@ -3019,7 +3016,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(relationshipGroupedNodeTarget).not.to.be(undefined);
                 expect(relationshipGroupedNodeTarget.label).to.equal('AWS EC2 Instance');
-                expect(relationshipGroupedNodeTarget.shape).to.equal('hexagon');
+                expect(relationshipGroupedNodeTarget.shape).to.equal('entity');
                 expect(relationshipGroupedNodeTarget.tag).to.equal('Host');
                 expect(relationshipGroupedNodeTarget.icon).to.equal('storage');
 
@@ -3156,10 +3153,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Check for entity nodes - should have actors and targets
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.shape === 'entity'
                 );
                 expect(entityNodes.length).to.be.greaterThan(0);
 
@@ -3171,7 +3165,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(actorNode1).not.to.be(undefined);
                 expect(actorNode1.label).to.equal('GCP Admin User');
-                expect(actorNode1.shape).to.equal('ellipse');
+                expect(actorNode1.shape).to.equal('entity');
                 expect(actorNode1.icon).to.equal('user');
                 expect(actorNode1.tag).to.equal('Service Account');
                 expect(actorNode1.documentsData!.length).to.equal(1);
@@ -3201,7 +3195,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(actorNode2).not.to.be(undefined);
                 expect(actorNode2.label).to.equal('GCP Compute Operator');
-                expect(actorNode2.shape).to.equal('ellipse');
+                expect(actorNode2.shape).to.equal('entity');
                 expect(actorNode2.icon).to.equal('user');
                 expect(actorNode2.tag).to.equal('Identity');
                 expect(actorNode2.documentsData!.length).to.equal(1);
@@ -3230,7 +3224,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(serviceTargetNode).not.to.be(undefined);
                 expect(serviceTargetNode.label).to.equal('data-pipeline Service Account');
-                expect(serviceTargetNode.shape).to.equal('ellipse');
+                expect(serviceTargetNode.shape).to.equal('entity');
                 expect(serviceTargetNode.icon).to.equal('user');
                 expect(serviceTargetNode.tag).to.equal('Service Account');
                 expect(serviceTargetNode.documentsData!.length).to.equal(1);
@@ -3260,7 +3254,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(hostTargetNode).not.to.be(undefined);
                 expect(hostTargetNode.label).to.equal('database-server-prod-1');
-                expect(hostTargetNode.shape).to.equal('hexagon');
+                expect(hostTargetNode.shape).to.equal('entity');
                 expect(hostTargetNode.icon).to.equal('storage');
                 expect(hostTargetNode.tag).to.equal('Host');
                 expect(hostTargetNode.documentsData!.length).to.equal(1);
@@ -3287,7 +3281,7 @@ export default function (providerContext: FtrProviderContext) {
                     node.id === 'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932'
                 ) as EntityNodeDataModel;
                 expect(relationshipsTargetNode.label).to.equal('GCP Compute Instance');
-                expect(relationshipsTargetNode.shape).to.equal('hexagon');
+                expect(relationshipsTargetNode.shape).to.equal('entity');
                 expect(relationshipsTargetNode.icon).to.equal('storage');
                 expect(relationshipsTargetNode.tag).to.equal('Host');
                 expect(relationshipsTargetNode.count).to.equal(2);
@@ -3351,8 +3345,7 @@ export default function (providerContext: FtrProviderContext) {
 
               // --- Entity nodes ---
               const entityNodes = allNodes.filter(
-                (n: NodeDataModel) =>
-                  n.shape === 'hexagon' || n.shape === 'ellipse' || n.shape === 'rectangle'
+                (n: NodeDataModel) => n.shape === 'entity'
               ) as EntityNodeDataModel[];
 
               const entityIds = entityNodes.map((n) => n.id).sort();
@@ -3460,10 +3453,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // Verify entity nodes count
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.shape === 'entity'
                 );
                 // 1 root + 3 intermediate (host, service, identity) + 3 grouped targets + 1 delegate + 1 external-caller = 9
                 expect(entityNodes.length).to.equal(9);
@@ -3524,7 +3514,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(rootNode).not.to.be(undefined);
                 expect(rootNode.label).to.equal('Hierarchy Root User');
-                expect(rootNode.shape).to.equal('ellipse');
+                expect(rootNode.shape).to.equal('entity');
                 expect(rootNode.tag).to.equal('Identity');
                 expect(rootNode.icon).to.equal('user');
                 expect(rootNode.documentsData!.length).to.equal(1);
@@ -3551,7 +3541,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(hostNode).not.to.be(undefined);
                 expect(hostNode.label).to.equal('Hierarchy Host 1');
-                expect(hostNode.shape).to.equal('hexagon');
+                expect(hostNode.shape).to.equal('entity');
                 expect(hostNode.tag).to.equal('Host');
                 expect(hostNode.icon).to.equal('storage');
                 expect(hostNode.count).to.be(undefined); // Single entity, no count
@@ -3563,7 +3553,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(serviceNode).not.to.be(undefined);
                 expect(serviceNode.label).to.equal('Hierarchy Service 1');
-                expect(serviceNode.shape).to.equal('rectangle');
+                expect(serviceNode.shape).to.equal('entity');
                 expect(serviceNode.tag).to.equal('Service');
                 expect(serviceNode.icon).to.equal('cloudStormy');
                 expect(serviceNode.count).to.be(undefined);
@@ -3574,7 +3564,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(identityNode).not.to.be(undefined);
                 expect(identityNode.label).to.equal('Hierarchy Identity 1');
-                expect(identityNode.shape).to.equal('ellipse');
+                expect(identityNode.shape).to.equal('entity');
                 expect(identityNode.tag).to.equal('Identity');
                 expect(identityNode.icon).to.equal('user');
                 expect(identityNode.count).to.be(undefined);
@@ -3585,7 +3575,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(storageGroupedNode).not.to.be(undefined);
                 expect(storageGroupedNode.label).to.equal('AWS S3 Bucket'); // Shows sub_type for grouped
-                expect(storageGroupedNode.shape).to.equal('rectangle');
+                expect(storageGroupedNode.shape).to.equal('entity');
                 expect(storageGroupedNode.documentsData!.length).to.equal(2);
                 expectExpect(storageGroupedNode.documentsData).toContainEqual(
                   expectExpect.objectContaining({
@@ -3616,7 +3606,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(databaseGroupedNode).not.to.be(undefined);
                 expect(databaseGroupedNode.label).to.equal('AWS RDS Instance');
-                expect(databaseGroupedNode.shape).to.equal('rectangle');
+                expect(databaseGroupedNode.shape).to.equal('entity');
                 expect(databaseGroupedNode.documentsData!.length).to.equal(2);
 
                 // Verify grouped network target (2 VPCs with same type/subtype)
@@ -3625,7 +3615,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(networkGroupedNode).not.to.be(undefined);
                 expect(networkGroupedNode.label).to.equal('AWS VPC');
-                expect(networkGroupedNode.shape).to.equal('rectangle');
+                expect(networkGroupedNode.shape).to.equal('entity');
                 expect(networkGroupedNode.icon).to.equal('globe');
                 expectExpect(networkGroupedNode.ips).toEqual(
                   expectExpect.arrayContaining(['172.16.0.1', '172.16.0.2'])
@@ -3639,7 +3629,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(delegateNode).not.to.be(undefined);
                 expect(delegateNode.label).to.equal('Hierarchy Delegate Agent');
-                expect(delegateNode.shape).to.equal('ellipse');
+                expect(delegateNode.shape).to.equal('entity');
                 expect(delegateNode.tag).to.equal('User');
                 expect(delegateNode.icon).to.equal('user');
                 expect(delegateNode.count).to.be(undefined); // Single entity
@@ -3667,7 +3657,7 @@ export default function (providerContext: FtrProviderContext) {
                 ) as EntityNodeDataModel;
                 expect(externalCallerNode).not.to.be(undefined);
                 expect(externalCallerNode.label).to.equal('Hierarchy External Caller');
-                expect(externalCallerNode.shape).to.equal('rectangle');
+                expect(externalCallerNode.shape).to.equal('entity');
                 expect(externalCallerNode.tag).to.equal('Service');
                 expect(externalCallerNode.icon).to.equal('cloudStormy');
                 expect(externalCallerNode.count).to.be(undefined);
@@ -3769,10 +3759,7 @@ export default function (providerContext: FtrProviderContext) {
                 ).expect(result(200, logger));
 
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.shape === 'entity'
                 ) as EntityNodeDataModel[];
 
                 // 4 entity nodes total: origin-pinned-server (single), grouped-actor-server-1+3 (grouped),
@@ -3852,10 +3839,7 @@ export default function (providerContext: FtrProviderContext) {
 
                 // The merged actor node has count=2 (both actors collapsed)
                 const entityNodes = response.body.nodes.filter(
-                  (node: NodeDataModel) =>
-                    node.shape === 'ellipse' ||
-                    node.shape === 'rectangle' ||
-                    node.shape === 'hexagon'
+                  (node: NodeDataModel) => node.shape === 'entity'
                 );
                 const actorNode = entityNodes.find(
                   (node: EntityNodeDataModel) => node.count === 2

@@ -30,16 +30,7 @@ import type { CommonProps } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { SvgDefsMarker } from '../edge/markers';
-import {
-  HexagonNode,
-  PentagonNode,
-  EllipseNode,
-  RectangleNode,
-  DiamondNode,
-  LabelNode,
-  EdgeGroupNode,
-  RelationshipNode,
-} from '../node';
+import { EntityCardNode, LabelNode, EdgeGroupNode, RelationshipNode } from '../node';
 import { layoutGraph } from './layout_graph';
 import { DefaultEdge } from '../edge';
 import { Minimap } from '../minimap/minimap';
@@ -99,11 +90,7 @@ export interface GraphProps extends CommonProps {
 }
 
 const nodeTypes = {
-  hexagon: HexagonNode,
-  pentagon: PentagonNode,
-  ellipse: EllipseNode,
-  rectangle: RectangleNode,
-  diamond: DiamondNode,
+  entity: EntityCardNode,
   label: LabelNode,
   group: EdgeGroupNode,
   relationship: RelationshipNode,

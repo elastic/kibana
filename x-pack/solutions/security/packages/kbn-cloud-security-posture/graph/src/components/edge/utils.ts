@@ -9,18 +9,9 @@ import type { NodeShape } from '@kbn/cloud-security-posture-common/types/graph/l
 
 export function getShapeHandlePosition(shape?: NodeShape) {
   switch (shape) {
-    // Entity shapes (hexagon, pentagon, ellipse, rectangle, diamond) all render as rectangular
-    // EntityCardNode cards. A small inset (3 px) tucks the arrowhead tip just behind the card
-    // border so the base of the arrow sits flush with the card edge — this prevents a visual
-    // gap where the arrowhead appears to float outside the card.
-    // The old values (14–21 px) were designed for SVG-circle/hexagon shapes whose handle was
-    // deeply inset from the bounding-box edge; those were far too large for rectangular cards.
-    case 'hexagon':
-    case 'pentagon':
-    case 'ellipse':
-    case 'rectangle':
-    case 'diamond':
-      return 3;
+    // A small inset (3 px) tucks the arrowhead tip just behind the card border so the base of
+    // the arrow sits flush with the card edge instead of floating outside it.
+    case 'entity':
     case 'label':
     case 'relationship':
       return 3;

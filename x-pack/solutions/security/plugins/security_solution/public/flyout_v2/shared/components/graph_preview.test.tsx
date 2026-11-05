@@ -45,7 +45,7 @@ describe('<GraphPreview />', () => {
           {
             id: '1',
             color: 'primary',
-            shape: 'ellipse',
+            shape: 'entity',
           },
         ],
         edges: [],

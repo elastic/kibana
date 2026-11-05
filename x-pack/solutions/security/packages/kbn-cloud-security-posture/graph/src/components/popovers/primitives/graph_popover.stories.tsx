@@ -199,18 +199,19 @@ const Template = () => {
 
   const nodes: Array<EntityNodeViewModel | LabelNodeViewModel> = useMemo(
     () => [
-      ...(
-        ['hexagon', 'ellipse', 'rectangle', 'pentagon', 'diamond'] as const
-      ).map<EntityNodeViewModel>((shape, idx) => ({
-        id: `${idx}`,
-        label: `Node ${idx}`,
-        color: 'primary',
-        icon: 'okta',
-        interactive: true,
-        shape,
-        expandButtonClick: expandButtonClickHandler,
-        nodeClick: nodeClickHandler,
-      })),
+      ...Array.from(
+        { length: 5 },
+        (_, idx): EntityNodeViewModel => ({
+          id: `${idx}`,
+          label: `Node ${idx}`,
+          color: 'primary',
+          icon: 'okta',
+          interactive: true,
+          shape: 'entity',
+          expandButtonClick: expandButtonClickHandler,
+          nodeClick: nodeClickHandler,
+        })
+      ),
       {
         id: 'label',
         label: 'Node 5',

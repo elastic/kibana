@@ -25,7 +25,7 @@ export const groupedActorMockData = {
     {
       id: 'mixed-entities',
       color: 'primary',
-      shape: 'rectangle',
+      shape: 'entity',
       icon: 'users',
       count: 4,
       label: 'Mixed Entities',
@@ -80,7 +80,7 @@ export const groupedActorMockData = {
     {
       id: 'target-role',
       color: 'primary',
-      shape: 'hexagon',
+      shape: 'entity',
       icon: 'question',
       label: 'Target Role',
       tag: 'Role',
@@ -156,7 +156,7 @@ export const groupedTargetMockData = {
     {
       id: 'single-actor',
       color: 'primary',
-      shape: 'ellipse',
+      shape: 'entity',
       icon: 'user',
       label: 'Single Actor',
       tag: 'User',
@@ -181,7 +181,7 @@ export const groupedTargetMockData = {
     {
       id: 'mixed-targets',
       color: 'primary',
-      shape: 'rectangle',
+      shape: 'entity',
       icon: 'storage',
       count: 4,
       label: 'Mixed Targets',
@@ -282,7 +282,7 @@ export const singleActorMockData = {
     {
       id: 'admin@example.com',
       color: 'primary',
-      shape: 'ellipse',
+      shape: 'entity',
       icon: 'user',
       label: 'admin@example.com',
       tag: 'User',
@@ -301,7 +301,7 @@ export const singleActorMockData = {
     {
       id: 'projects/your-project-id/roles/customRole',
       color: 'primary',
-      shape: 'hexagon',
+      shape: 'entity',
       icon: 'question',
       label: 'Custom Role',
       tag: 'Role',

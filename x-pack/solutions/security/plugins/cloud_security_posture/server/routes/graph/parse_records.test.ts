@@ -81,14 +81,14 @@ describe('parseRecords', () => {
     expect(actorNode.label).toBe('John Doe');
     expect(actorNode).toHaveProperty('tag', 'user');
     expect(actorNode).toHaveProperty('icon', 'user');
-    expect(actorNode).toHaveProperty('shape', 'ellipse');
+    expect(actorNode).toHaveProperty('shape', 'entity');
 
     // Verify target node uses entity ID (single entity)
     expect(targetNode.id).toBe('target1');
     expect(targetNode.label).toBe('Server 01');
     expect(targetNode).toHaveProperty('tag', 'host');
     expect(targetNode).toHaveProperty('icon', 'storage');
-    expect(targetNode).toHaveProperty('shape', 'hexagon');
+    expect(targetNode).toHaveProperty('shape', 'entity');
 
     // Label node should reference the actor and target by their entity IDs
     expect(labelNode.id).toContain('label(login)ln(doc-id-1)oe(1)oa(0)');
@@ -732,7 +732,7 @@ describe('parseRecords', () => {
       expect(unknownNode).toBeDefined();
       expect(unknownNode!.id.startsWith('unknown')).toBe(true);
       expect(unknownNode).toHaveProperty('documentsData', []);
-      expect(unknownNode).toHaveProperty('shape', 'rectangle');
+      expect(unknownNode).toHaveProperty('shape', 'entity');
 
       // Should have actor node
       const actorNode = result.nodes.find((n) => n.label === 'Threat Actor') as EntityNodeDataModel;
@@ -1272,14 +1272,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('non-enriched-actor-123'); // group ID (entity ID for single)
       expect(actorNode.tag).toBe('Entity');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('non-enriched-target-456'); // group ID (entity ID for single)
       expect(targetNode.tag).toBe('Entity');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBeUndefined();
     });
 
@@ -1336,14 +1336,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(actorNode.tag).toBe('Entities');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBeUndefined(); // UI will fallback to node ID
       expect(targetNode.tag).toBe('Entities');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
 
@@ -1390,14 +1390,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('John Doe'); // entity.name
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBeUndefined();
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('web-server-01'); // entity.name
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBeUndefined();
     });
 
@@ -1456,14 +1456,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBe('service_account');
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBe('server');
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
 
@@ -1520,14 +1520,14 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined(); // No label when only type exists
       expect(actorNode.tag).toBe('user');
       expect(actorNode.icon).toBe('user');
-      expect(actorNode.shape).toBe('ellipse');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       expect(targetNode).toBeDefined();
       expect(targetNode.label).toBeUndefined(); // No label when only type exists
       expect(targetNode.tag).toBe('host');
       expect(targetNode.icon).toBe('storage');
-      expect(targetNode.shape).toBe('hexagon');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
   });
@@ -1737,7 +1737,7 @@ describe('parseRecords', () => {
       expect(actorNode.label).toBeUndefined();
       expect(actorNode.tag).toBe('Entities');
       expect(actorNode.icon).toBe('magnifyExclamation');
-      expect(actorNode.shape).toBe('rectangle');
+      expect(actorNode.shape).toBe('entity');
       expect(actorNode.count).toBe(3);
 
       const targetNode = result.nodes.find(
@@ -1764,7 +1764,7 @@ describe('parseRecords', () => {
       expect(targetNode.label).toBeUndefined();
       expect(targetNode.tag).toBe('Entities');
       expect(targetNode.icon).toBe('magnifyExclamation');
-      expect(targetNode.shape).toBe('rectangle');
+      expect(targetNode.shape).toBe('entity');
       expect(targetNode.count).toBe(2);
     });
   });

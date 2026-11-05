@@ -81,12 +81,10 @@ type Story = StoryObj<GraphCenteringStoryProps>;
 
 const createEntityNode = ({
   id,
-  shape = 'ellipse',
   color = 'primary',
   isOrigin = false,
 }: {
   id: string;
-  shape?: NodeViewModel['shape'];
   color?: NodeViewModel['color'];
   isOrigin?: boolean;
 }): NodeViewModel =>
@@ -94,17 +92,10 @@ const createEntityNode = ({
     id,
     label: `Entity ${id}`,
     color,
-    shape,
+    shape: 'entity',
     isOrigin,
     isOriginAlert: false,
-    icon:
-      shape === 'ellipse'
-        ? 'user'
-        : shape === 'hexagon'
-        ? 'storage'
-        : shape === 'diamond'
-        ? 'globe'
-        : 'globe',
+    icon: 'user',
     toolbarItemsFn: storybookToolbarItems,
   } as NodeViewModel);
 
@@ -166,9 +157,9 @@ export const NoOriginNodes: Story = {
     description:
       'Graph with no origin / origin alert label nodes. The center control is hidden since there are no origin nodes.',
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),
@@ -188,10 +179,10 @@ export const SingleOriginEvent: Story = {
     title: 'Single Origin Event',
     description: 'Graph with one origin event',
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
-      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
+      createEntityNode({ id: 'node4' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),
@@ -217,15 +208,15 @@ export const SingleOriginEntity: Story = {
       'Graph with one origin entity that has two relationship nodes to two targets. Each target has another relationship to a further target. Relationship nodes connected to the origin entity are marked as origin for centering.',
     nodes: [
       // Origin entity
-      createEntityNode({ id: 'originEntity', shape: 'ellipse', isOrigin: true }),
+      createEntityNode({ id: 'originEntity', isOrigin: true }),
 
       // First-level targets
-      createEntityNode({ id: 'target1', shape: 'hexagon' }),
-      createEntityNode({ id: 'target2', shape: 'rectangle' }),
+      createEntityNode({ id: 'target1' }),
+      createEntityNode({ id: 'target2' }),
 
       // Second-level targets
-      createEntityNode({ id: 'target1a', shape: 'diamond' }),
-      createEntityNode({ id: 'target2a', shape: 'pentagon' }),
+      createEntityNode({ id: 'target1a' }),
+      createEntityNode({ id: 'target2a' }),
 
       // Relationship nodes from origin entity (marked as origin for centering)
       createRelationshipStoryNode({ id: 'rel-owns', label: 'Owns', isOrigin: true }),
@@ -264,10 +255,10 @@ export const SingleOriginAlert: Story = {
     title: 'Single Origin Alert',
     description: 'Graph with one origin alert',
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
-      createEntityNode({ id: 'node4', shape: 'pentagon' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
+      createEntityNode({ id: 'node4' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),
@@ -291,11 +282,11 @@ export const MultipleOriginNodes: Story = {
     title: 'Multiple origin nodes',
     description: 'Graph with one origin event and one origin alert.',
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
-      createEntityNode({ id: 'node4', shape: 'pentagon' }),
-      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
+      createEntityNode({ id: 'node4' }),
+      createEntityNode({ id: 'node5' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),
@@ -325,11 +316,11 @@ export const NonInteractiveGraph: Story = {
       'Graph in non-interactive mode. Controls are hidden since the user cannot interact; also no origin label nodes are present.',
     interactive: false,
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
-      createEntityNode({ id: 'node4', shape: 'pentagon' }),
-      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
+      createEntityNode({ id: 'node4' }),
+      createEntityNode({ id: 'node5' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),
@@ -360,11 +351,11 @@ export const LockedGraph: Story = {
     interactive: true,
     isLocked: true,
     nodes: [
-      createEntityNode({ id: 'node1', shape: 'hexagon' }),
-      createEntityNode({ id: 'node2', shape: 'diamond' }),
-      createEntityNode({ id: 'node3', shape: 'hexagon' }),
-      createEntityNode({ id: 'node4', shape: 'pentagon' }),
-      createEntityNode({ id: 'node5', shape: 'rectangle' }),
+      createEntityNode({ id: 'node1' }),
+      createEntityNode({ id: 'node2' }),
+      createEntityNode({ id: 'node3' }),
+      createEntityNode({ id: 'node4' }),
+      createEntityNode({ id: 'node5' }),
 
       createLabelNode({ id: 'noOriginEvent' }),
       createLabelNode({ id: 'noOriginAlert' }),

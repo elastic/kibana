@@ -298,11 +298,7 @@ export const edgeColorSchema = schema.oneOf([
 ]);
 
 export const nodeShapeSchema = schema.oneOf([
-  schema.literal('hexagon'),
-  schema.literal('pentagon'),
-  schema.literal('ellipse'),
-  schema.literal('rectangle'),
-  schema.literal('diamond'),
+  schema.literal('entity'),
   schema.literal('label'),
   schema.literal('group'),
   schema.literal('relationship'),
@@ -318,13 +314,7 @@ export const entityNodeDataSchema = schema.allOf([
   nodeBaseDataSchema,
   schema.object({
     color: nodeColorSchema,
-    shape: schema.oneOf([
-      schema.literal('hexagon'),
-      schema.literal('pentagon'),
-      schema.literal('ellipse'),
-      schema.literal('rectangle'),
-      schema.literal('diamond'),
-    ]),
+    shape: schema.literal('entity'),
     tag: schema.maybe(schema.string()),
     count: schema.maybe(schema.number()),
     ips: schema.maybe(schema.arrayOf(schema.string(), { maxSize: IPS_MAX_SIZE })),
