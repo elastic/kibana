@@ -31,7 +31,9 @@ for n in $(jq -r 'keys[]' "$state"); do
 done
 cas="[$(IFS=,; echo "${ca_paths[*]}")]"
 
-tenants=$(jq '[.[] | {key: .id, value: {hosts: [.es], serviceAccountToken, encryptionKey, securityEncryptionKey}}] | from_entries' "$state")
+# projectName is what the project picker shows, for example mt-b.
+tenants=$(jq '[to_entries[] | .key as $n | .value | {key: .id, value: {hosts: [.es], serviceAccountToken,
+  encryptionKey, securityEncryptionKey, projectName: "mt-\($n)"}}] | from_entries' "$state")
 kibana_yml=$(jq -r --arg sec "$(openssl rand -hex 16)" --arg rep "$(openssl rand -hex 16)" --arg cas "$cas" \
   --arg mt "$mt" '.home as $h | [
   "server.host: 0.0.0.0",

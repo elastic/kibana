@@ -106,8 +106,8 @@ The devenv auto-hibernates. Before a demo, run `devctl wake <name>`.
 
 ## Gaps found
 
-- **DNS:** there's no public DNS for these hostnames, and the wildcard cert doesn't cover `*.<app>.<domain>` for a new app id.
-- **Per-project Kibana config:** `server.publicBaseUrl`, `xpack.cloud.serverless.project_id`, and the other per-project values in kibana-controller's config have one value per process.
+- **DNS:** there's no public DNS for these hostnames, and the wildcard cert doesn't cover `*.<app>.<domain>`. [BROWSER_SETUP.md](BROWSER_SETUP.md) reaches them by deploying with `APP_ID=kb` and adding the three names to `/etc/hosts`. Chrome warns about the certificate.
+- **Per-project Kibana config:** `server.publicBaseUrl`, `xpack.cloud.serverless.project_id`, and the other per-project values in kibana-controller's config have one value per process. The project name is the exception: `deploy.sh` sets a `projectName` per tenant (`mt-home`, `mt-a`, `mt-b`), and Kibana shows it in the project picker for that project.
 - **Tenant init:** each tenant needs a single-tenant Kibana boot before the multi-tenant Kibana can serve it.
 - **CAs:** tenant clients inherit `elasticsearch.ssl` from the base config, so every tenant's CA goes in one list, and any tenant's CA is trusted for every tenant.
 - **Image version:** the multi-tenant Kibana and every tenant must agree on saved object model versions.
