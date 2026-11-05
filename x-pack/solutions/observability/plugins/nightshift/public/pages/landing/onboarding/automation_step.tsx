@@ -6,7 +6,7 @@
  */
 
 import { css, keyframes } from '@emotion/react';
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiButton,
   EuiCallOut,
@@ -23,6 +23,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
+import { CreateAutomationFlyout } from '../../automations/flyouts/create_flyout/create_automation_flyout';
 import { useKibana } from '../../../hooks/use_kibana';
 
 const flow = keyframes`
@@ -67,7 +68,7 @@ export function OnboardingAutomationStep({
       </EuiTitle>
       <EuiSpacer size="m" />
       {automationsHref ? (
-        <FirstAutomationCard href={`${automationsHref}/new`} />
+        <FirstAutomationCard />
       ) : (
         <EuiCallOut
           announceOnMount
@@ -166,51 +167,55 @@ function TrialInvestigationCard({
   );
 }
 
-function FirstAutomationCard({ href }: { href: string }): React.ReactElement {
-  const { application } = useKibana().services;
+function FirstAutomationCard(): React.ReactElement {
+  const [isCreateOpen, setIsCreateOpen] = useState(false);
   return (
-    <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
-      <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={false}>
-          <AutomationIllustration />
-        </EuiFlexItem>
-        <EuiFlexItem>
-          <EuiTitle size="xs">
-            <h4>
-              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationTitle', {
-                defaultMessage: 'Let Elastic nightshift investigate for you, automatically',
-              })}
-            </h4>
-          </EuiTitle>
-          <EuiSpacer size="s" />
-          <EuiText size="s" color="subdued">
-            <p>
-              {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationDescription', {
-                defaultMessage:
-                  'Automations let you choose what gets investigated without you asking, such as alerts that fire or Slack notifications in a channel. When one arrives, the agent starts investigating straight away.',
-              })}
-            </p>
-          </EuiText>
-          <EuiSpacer size="m" />
-          <div>
-            <EuiButton
-              size="s"
-              iconType="plus"
-              href={href}
-              onClick={(event: React.MouseEvent) => {
-                event.preventDefault();
-                void application.navigateToUrl(href);
-              }}
-              data-test-subj="nightshiftOnboardingCreateAutomation"
-            >
-              {i18n.translate('xpack.nightshift.onboarding.automate.createAutomationButton', {
-                defaultMessage: 'Create automation',
-              })}
-            </EuiButton>
-          </div>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiPanel>
+    <>
+      <EuiPanel hasBorder paddingSize="l" data-test-subj="nightshiftOnboardingFirstAutomation">
+        <EuiFlexGroup alignItems="center" gutterSize="xl">
+          <EuiFlexItem grow={false}>
+            <AutomationIllustration />
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <EuiTitle size="xs">
+              <h4>
+                {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationTitle', {
+                  defaultMessage: 'Let Elastic nightshift investigate for you, automatically',
+                })}
+              </h4>
+            </EuiTitle>
+            <EuiSpacer size="s" />
+            <EuiText size="s" color="subdued">
+              <p>
+                {i18n.translate('xpack.nightshift.onboarding.automate.firstAutomationDescription', {
+                  defaultMessage:
+                    'Automations let you choose what gets investigated without you asking, such as alerts that fire or Slack notifications in a channel. When one arrives, the agent starts investigating straight away.',
+                })}
+              </p>
+            </EuiText>
+            <EuiSpacer size="m" />
+            <div>
+              <EuiButton
+                size="s"
+                iconType="plus"
+                onClick={() => setIsCreateOpen(true)}
+                data-test-subj="nightshiftOnboardingCreateAutomation"
+              >
+                {i18n.translate('xpack.nightshift.onboarding.automate.createAutomationButton', {
+                  defaultMessage: 'Create automation',
+                })}
+              </EuiButton>
+            </div>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiPanel>
+      {isCreateOpen && (
+        <CreateAutomationFlyout
+          onClose={() => setIsCreateOpen(false)}
+          onCreated={() => setIsCreateOpen(false)}
+        />
+      )}
+    </>
   );
 }
 

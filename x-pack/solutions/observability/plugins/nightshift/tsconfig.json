@@ -62,6 +62,7 @@
     "@kbn/observability-shared-plugin",
     "@kbn/proposals-common",
     "@kbn/react-hooks",
+    "@kbn/react-kibana-mount",
     "@kbn/react-query",
     "@kbn/rule-data-utils",
     "@kbn/scout-oblt",
