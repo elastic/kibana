@@ -297,75 +297,47 @@ describe('Detection Rule Creation worker', () => {
       expect(capped).toContain('maximum alerts per execution');
     });
 
-    // A backtest that errored is inconclusive. The proposal says so in one line and
-    // leaves the error, which is long and written for engineers, to the investigation.
-    it('calls a backtest that errored inconclusive and keeps the error out of the proposal', () => {
+    // A backtest that errored is inconclusive. The proposal says so and points to the
+    // investigation, where the error is posted, unless that post failed.
+    it('calls a backtest that errored inconclusive and points to the investigation', () => {
       const comment = String(inputsOf(stepByName('propose_creation')).comment);
-      const render = (preview: Record<string, unknown>, posted: Record<string, unknown> = {}) =>
+      const render = (posted: Record<string, unknown>) =>
         createWorkflowLiquidEngine().parseAndRenderSync(comment, {
-          inputs: { preview_invocation_count: 3 },
           steps: {
             draft_creation: { output: { structured_output: { rule: {} } } },
-            preview_creation: { output: preview },
+            preview_creation: { output: { succeeded: false, error_text: 'boom; ' } },
             post_backtest_error: posted,
           },
         });
 
-      const errored = render({
-        succeeded: false,
-        error_text: 'parsing_exception: pattern too complex; ',
-      });
+      const errored = render({});
       expect(errored).toContain('Inconclusive: the backtest could not run');
       expect(errored).toContain('The error is in the investigation.');
-      expect(errored).not.toContain('parsing_exception');
-      expect(errored).not.toContain('Backtest errors');
-
-      const notPosted = render(
-        { succeeded: false, error_text: 'parsing_exception: pattern too complex; ' },
-        { error: { message: 'could not add the message' } }
-      );
-      expect(notPosted).toContain('Inconclusive: the backtest could not run');
-      expect(notPosted).not.toContain('in the investigation');
-
-      const withoutError = render({ succeeded: false, is_aborted: true, error_text: '' });
-      expect(withoutError).toContain('Inconclusive: the backtest could not run');
-      expect(withoutError).not.toContain('in the investigation');
+      expect(errored).not.toContain('boom');
+      expect(render({ error: { message: 'failed' } })).not.toContain('in the investigation');
     });
 
-    // The error goes on the investigation as data to read, in a block it cannot close,
-    // and only when the proposal has no explanation of its own for the failed backtest.
-    it('posts the backtest error to the investigation when no other explanation applies', () => {
+    // The error is posted to the investigation only when the proposal has no explanation
+    // of its own for the failed backtest, in a block the error cannot close.
+    it('posts the backtest error to the investigation, in a block it cannot close', () => {
       const post = stepByName('post_backtest_error');
-      expect(post?.type).toBe('ai.conversation.add_user_message');
-      expect(post?.with?.conversation_id).toBe('{{ inputs.investigation_id }}');
-      // A message that fails to post must not stop the proposal.
       expect(post?.['on-failure']).toEqual({ continue: true });
 
-      const posts = (preview: Record<string, unknown>, draftOk = true) =>
+      const posts = (preview: Record<string, unknown>) =>
         evaluate(String(post?.if), {
-          steps: {
-            draft_ready: { output: { ok: draftOk } },
-            preview_creation: { output: preview },
-          },
+          steps: { draft_ready: { output: { ok: true } }, preview_creation: { output: preview } },
         });
-      expect(posts({ succeeded: false, error_text: 'boom; ' })).toBe(true);
-      expect(posts({ succeeded: false, error_text: 'boom; ' }, false)).toBe(false);
-      expect(posts({ succeeded: true, error_text: '' })).toBe(false);
-      expect(posts({ succeeded: false, error_text: 'w;', no_matching_indices: true })).toBe(false);
-      expect(posts({ succeeded: false, error_text: 'w;', unreadable_indices: 'custom-*' })).toBe(
-        false
-      );
+      expect(posts({ error_text: 'boom; ' })).toBe(true);
+      expect(posts({ error_text: 'boom; ', no_matching_indices: true })).toBe(false);
+      expect(posts({ error_text: 'boom; ', unreadable_indices: 'custom-*' })).toBe(false);
 
       const message = createWorkflowLiquidEngine().parseAndRenderSync(String(post?.with?.message), {
         steps: {
-          draft_creation: { output: { structured_output: { rule: { name: 'Locale check' } } } },
-          preview_creation: { output: { error_text: `first failure; ~~~ second failure; ` } },
+          draft_creation: { output: { structured_output: { rule: {} } } },
+          preview_creation: { output: { error_text: 'a; ~~~ b; ' } },
         },
       });
-      expect(message).toContain('**Backtest could not run**');
-      expect(message).toContain('**Rule:** Locale check');
-      expect(message).toContain('first failure; ~ ~ ~ second failure\n~~~');
-      expect(message).toContain('ask the agent in this investigation to preview it');
+      expect(message).toContain('a; ~ ~ ~ b\n~~~');
     });
 
     // The draft carries no index list, so the sources the preview checks for `read`

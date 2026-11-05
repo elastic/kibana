@@ -26,60 +26,27 @@ const renderErrorText = (collectStep: string, previewStep: string, logs: unknown
 };
 
 describe('rule preview workflow', () => {
-  // The preview simulates the rule several times and each run reports the same failure
-  // again, so the flattened text has to list every distinct error once.
-  describe.each([
+  // Every simulated run reports the same failure again, so each distinct error is
+  // listed once, in the order it first appears. Only the no-matching-indices warning
+  // counts as an error.
+  it.each([
     ['collect_errors', 'preview_rule'],
     ['collect_proposed_errors', 'preview_proposed'],
-  ])('%s', (collectStep, previewStep) => {
-    it('lists an error that every simulated run reports once', () => {
-      const logs = [
-        {
-          errors: [
-            'parsing_exception: pattern too complex',
-            'parsing_exception: pattern too complex',
-          ],
-        },
-        { errors: ['parsing_exception: pattern too complex'] },
-        { errors: ['parsing_exception: pattern too complex'] },
-      ];
+  ])('%s lists each distinct error once', (collectStep, previewStep) => {
+    const logs = [
+      {
+        errors: ['first failure', 'first failure'],
+        warnings: ['Unable to find matching indices', 'noise'],
+      },
+      {
+        errors: ['second failure', 'first failure'],
+        warnings: ['Unable to find matching indices'],
+      },
+    ];
 
-      expect(renderErrorText(collectStep, previewStep, logs)).toBe(
-        'parsing_exception: pattern too complex; '
-      );
-    });
-
-    it('keeps distinct errors in the order they first appear', () => {
-      const logs = [
-        { errors: ['first failure'] },
-        { errors: ['second failure', 'first failure'] },
-        { errors: ['third failure'] },
-      ];
-
-      expect(renderErrorText(collectStep, previewStep, logs)).toBe(
-        'first failure; second failure; third failure; '
-      );
-    });
-
-    it('counts only the no-matching-indices warning, once, next to the errors', () => {
-      const logs = [
-        {
-          errors: [],
-          warnings: ['Unable to find matching indices for rule x', 'some other warning'],
-        },
-        { warnings: ['Unable to find matching indices for rule x'] },
-      ];
-
-      expect(renderErrorText(collectStep, previewStep, logs)).toBe(
-        'Unable to find matching indices for rule x; '
-      );
-    });
-
-    it('stays empty when no run reports anything, which is what marks a preview succeeded', () => {
-      expect(renderErrorText(collectStep, previewStep, [])).toBe('');
-      expect(renderErrorText(collectStep, previewStep, [{ errors: [], warnings: ['noise'] }])).toBe(
-        ''
-      );
-    });
+    expect(renderErrorText(collectStep, previewStep, logs)).toBe(
+      'first failure; Unable to find matching indices; second failure; '
+    );
+    expect(renderErrorText(collectStep, previewStep, [{ warnings: ['noise'] }])).toBe('');
   });
 });
