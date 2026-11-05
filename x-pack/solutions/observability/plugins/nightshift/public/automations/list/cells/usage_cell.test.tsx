@@ -28,4 +28,19 @@ describe('AutomationUsageCell', () => {
     expect(screen.getByTestId('automationUsage')).toHaveTextContent('3 / No limit');
     expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
+
+  it('keeps the meter when the deployment daily limit is reached', () => {
+    const { rerender } = render(
+      <AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached />
+    );
+
+    expect(screen.getByTestId('automationUsage')).toHaveTextContent('8 / 10');
+    expect(screen.getByTestId('automationLimitReached')).toBeInTheDocument();
+    expect(screen.getByRole('progressbar')).toBeInTheDocument();
+
+    rerender(<AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached={false} />);
+
+    expect(screen.getByTestId('automationUsage')).toHaveTextContent('8 / 10');
+    expect(screen.getByTestId('automationLimitReached')).toBeInTheDocument();
+  });
 });
