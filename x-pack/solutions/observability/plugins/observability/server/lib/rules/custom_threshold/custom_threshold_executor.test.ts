@@ -3240,7 +3240,6 @@ describe('The custom threshold alert type', () => {
             services,
             params: {
               ...mockOptions.params,
-              groupBy: ['groupByField'],
               criteria: [customThresholdNonCountCriterion],
             },
           });

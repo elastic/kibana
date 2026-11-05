@@ -20,7 +20,7 @@ import {
   type AlertSeverity,
 } from '@kbn/rule-data-utils';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { parseDuration, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type { IBasePath, Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { RuleExecutorOptions } from '@kbn/alerting-plugin/server';
@@ -33,7 +33,6 @@ import type { AlertsLocatorParams } from '../../../../common';
 import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import { getDataViewId } from '../../../../common/custom_threshold_rule/helpers/get_data_view_id';
-import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import type { ObservabilityConfig } from '../../..';
 import { getEvaluationValues, getThreshold } from './lib/get_values';
 import {
@@ -189,7 +188,7 @@ export const createCustomThresholdExecutor = ({
       runtimeMappings,
       state.lastRunTimestamp,
       previousMissingGroups,
-      getIntervalInSeconds(schedule.interval) * 1000
+      parseDuration(schedule.interval)
     );
 
     const alertResults = criterionResults.map((r) => r.evaluations);

@@ -12,7 +12,7 @@ export const createTimerange = (
   timeframe: { end: string; start: string },
   lastPeriodEnd?: number,
   isRateAgg?: boolean,
-  scheduleInterval?: number
+  scheduleInterval: number = 0
 ): { start: number; end: number } => {
   const end = moment(timeframe.end).valueOf();
   let start = moment(timeframe.start).valueOf();
@@ -24,11 +24,10 @@ export const createTimerange = (
 
   if (lastPeriodEnd && lastPeriodEnd - interval < start) {
     const maxAllowedLookBack = moment(start).subtract(
-      3 * Math.max(interval, scheduleInterval ?? 0),
+      3 * Math.max(interval, scheduleInterval),
       'ms'
     );
-    // Calculate the maximum allowable look-back time (3 times the larger of the execution window
-    // and the rule schedule interval before the current 'start' time).
+    // Runs are one schedule interval apart, so bound the look-back by the window or the schedule, whichever is longer.
     if (moment(lastPeriodEnd).isAfter(maxAllowedLookBack)) {
       // Ensure lastPeriodEnd is within the allowable look-back range.
       start = lastPeriodEnd - interval;

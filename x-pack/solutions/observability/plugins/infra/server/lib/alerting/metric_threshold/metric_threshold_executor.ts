@@ -24,7 +24,7 @@ import type {
   AlertInstanceContext as AlertContext,
   AlertInstanceState as AlertState,
 } from '@kbn/alerting-plugin/common';
-import { RecoveredActionGroup } from '@kbn/alerting-plugin/common';
+import { parseDuration, RecoveredActionGroup } from '@kbn/alerting-plugin/common';
 import type { RuleExecutorOptions, RuleTypeState } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { TimeUnitChar } from '@kbn/observability-plugin/common';
@@ -44,7 +44,6 @@ import { getOriginalActionGroup } from '../../../utils/get_original_action_group
 import { Aggregators, AlertStates } from '../../../../common/alerting/metrics';
 import type { MetricExpressionParams } from '../../../../common/alerting/metrics';
 import { createFormatter } from '../../../../common/formatters';
-import { getIntervalInSeconds } from '../../../../common/utils/get_interval_in_seconds';
 import type { InfraBackendLibs, InfraLocators } from '../../infra_types';
 import {
   buildFiredAlertReason,
@@ -303,7 +302,7 @@ export const createMetricThresholdExecutor =
       state.lastRunTimestamp,
       { end: startedAt.valueOf() },
       convertStringsToMissingGroupsRecord(previousMissingGroups),
-      getIntervalInSeconds(schedule.interval) * 1000
+      parseDuration(schedule.interval)
     );
 
     const resultGroupSet = new Set<string>();

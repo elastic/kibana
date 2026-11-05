@@ -162,13 +162,6 @@ describe('createTimerange(interval, aggType, timeframe)', () => {
       );
       expect(subject.end - subject.start).toEqual(60000);
     });
-  });
-  describe('With lastPeriodEnd and scheduleInterval', () => {
-    const end = moment();
-    const timeframe = {
-      start: end.clone().valueOf(),
-      end: end.valueOf(),
-    };
     it('should extend the range to the lastPeriodEnd when the schedule is more than 3x the execution window', () => {
       const subject = createTimerange(
         60000,
