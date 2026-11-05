@@ -73,12 +73,14 @@ export async function replaceSlackHitlMessage(params: {
       return;
     }
 
+    // The path is the secret. The agent helper logs this URL when custom-host SSL is set.
+    const responseOrigin = new URL(params.responseUrl).origin;
     const { httpsAgent } = getCustomAgents({
-      customHostSettings: params.configurationUtilities.getCustomHostSettings(params.responseUrl),
+      customHostSettings: params.configurationUtilities.getCustomHostSettings(responseOrigin),
       logger: params.logger,
       proxySettings: params.configurationUtilities.getProxySettings(),
       sslSettings: params.configurationUtilities.getSSLSettings(),
-      url: params.responseUrl,
+      url: responseOrigin,
     });
 
     const body = params.ephemeral

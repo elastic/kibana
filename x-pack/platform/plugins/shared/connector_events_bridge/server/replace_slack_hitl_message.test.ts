@@ -108,6 +108,33 @@ describe('replace_slack_hitl_message', () => {
       );
     });
 
+    it('passes only the response URL origin to Actions connection settings', async () => {
+      const configurationUtilities = createConfig();
+      configurationUtilities.getCustomHostSettings.mockReturnValue({
+        url: 'https://hooks.slack.com:443',
+        ssl: { verificationMode: 'full' },
+      });
+
+      await replaceSlackHitlMessage({
+        responseUrl: 'https://hooks.slack.com/actions/T/B/mamba',
+        text: 'Approved.',
+        configurationUtilities,
+        logger,
+      });
+
+      expect(configurationUtilities.getCustomHostSettings).toHaveBeenCalledWith(
+        'https://hooks.slack.com'
+      );
+      expect(logger.debug.mock.calls.map((call) => String(call[0])).join('\n')).not.toContain(
+        'mamba'
+      );
+      expect(requestMock).toHaveBeenCalledWith(
+        'https://hooks.slack.com/actions/T/B/mamba',
+        expect.any(Object),
+        expect.any(Function)
+      );
+    });
+
     it('sends a GovSlack response_url through the Actions proxy agent', async () => {
       const configurationUtilities = createConfig();
       configurationUtilities.getProxySettings.mockReturnValue({
