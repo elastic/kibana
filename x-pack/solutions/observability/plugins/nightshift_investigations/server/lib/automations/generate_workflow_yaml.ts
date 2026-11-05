@@ -549,6 +549,13 @@ const ALERT_V2_STATUS_CONDITION =
 function buildRowCondition(row: AlertRow, statusCondition: string): string {
   const parts: string[] = [statusCondition];
 
+  if (row.severities?.length) {
+    // Recoveries carry no severity and must still reach the investigation's follow-up step.
+    parts.push(
+      `(NOT event.alert.status: "active" OR ${kqlOneOf('event.alert.severity', row.severities)})`
+    );
+  }
+
   if (row.ruleNamePattern) {
     parts.push(`event.rule.name: *${escapeKqlWildcardTerm(row.ruleNamePattern)}*`);
   }
