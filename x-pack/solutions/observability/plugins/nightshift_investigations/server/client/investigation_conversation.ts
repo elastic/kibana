@@ -21,8 +21,6 @@ import { InvestigationNotFoundError } from './errors';
 export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
-  /** `metadata.telemetry_not_after`: the investigation's telemetry cutoff, when it has one. */
-  telemetryNotAfter?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
@@ -52,9 +50,6 @@ const toInvestigationConversation = (
   }
   return {
     id: conversation.id,
-    ...(typeof conversation.metadata?.telemetry_not_after === 'string'
-      ? { telemetryNotAfter: conversation.metadata.telemetry_not_after }
-      : {}),
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
     workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
@@ -94,16 +89,6 @@ export const findInvestigationConversation = async (
   return conversation ? toInvestigationConversation(conversation, false) : undefined;
 };
 
-/** Latest inclusive telemetry timestamp stored on this conversation, when one is set. */
-export const readTelemetryNotAfter = async (
-  conversations: Pick<ConversationPublicClient, 'bulkGet'>,
-  conversationId: string
-): Promise<string | undefined> => {
-  const metadata = (await conversations.bulkGet([conversationId])).get(conversationId)?.metadata;
-  const value = metadata?.telemetry_not_after;
-  return typeof value === 'string' ? value : undefined;
-};
-
 /** Severity a new investigation starts at, until the investigating agent rates it. */
 export const INITIAL_INVESTIGATION_SEVERITY = 'medium' as const;
 
@@ -121,7 +106,6 @@ export const getOrCreateInvestigationConversation = async ({
   conversations,
   id,
   workflowExecutionId,
-  telemetryNotAfter,
   beforeCreate,
 }: {
   conversations: ConversationPublicClient;
@@ -131,19 +115,10 @@ export const getOrCreateInvestigationConversation = async ({
    * in progress between its creation and the run being recorded on it.
    */
   workflowExecutionId?: string;
-  /**
-   * Latest inclusive `@timestamp` this investigation's telemetry queries may return. Immutable once
-   * stored, so the agent cannot move it. A conversation that already exists must hold this value:
-   * the patch throws rather than leave a different bound in place.
-   */
-  telemetryNotAfter?: string;
   beforeCreate?: () => Promise<void>;
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
-    if (telemetryNotAfter && telemetryNotAfter !== existing.telemetryNotAfter) {
-      await conversations.patchMetadata(existing.id, { telemetry_not_after: telemetryNotAfter });
-    }
     return existing;
   }
 
@@ -159,7 +134,6 @@ export const getOrCreateInvestigationConversation = async ({
           // the agent re-rates it from its findings when it concludes.
           severity: INITIAL_INVESTIGATION_SEVERITY,
           ...(workflowExecutionId ? { workflow_execution_ids: [workflowExecutionId] } : {}),
-          ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
         },
         accessControl: { access_mode: ConversationAccessControlMode.Public },
       });

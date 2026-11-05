@@ -111,7 +111,6 @@ const makeConversation = ({
   status,
   owner = true,
   templateId = 'investigation',
-  telemetryNotAfter,
   workflowExecutionIds,
 }: {
   id: string;
@@ -119,14 +118,12 @@ const makeConversation = ({
   status?: 'open' | 'closed';
   owner?: boolean;
   templateId?: string;
-  telemetryNotAfter?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
   title,
   template_id: templateId,
   metadata: {
-    ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
   },
@@ -1280,39 +1277,99 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     mockManagement.runWorkflow.mockResolvedValue('exec-1');
   });
 
-  it.each([
-    ['a different cutoff', '2026-04-19T16:20:00.000Z'],
-    ['no cutoff', undefined],
-  ])(
-    'rejects a follow-up cutoff when the matched investigation has %s, before launching it',
-    async (_name, storedCutoff) => {
-      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-      withConversations(makeConversation({ id: 'inv-1', telemetryNotAfter: storedCutoff }));
+  describe('telemetry cutoff', () => {
+    const CUTOFF = '2026-04-19T16:27:00.000Z';
+    const makeCutoffs = (stored?: string) => ({
+      get: jest.fn().mockResolvedValue(stored),
+      set: jest.fn().mockResolvedValue(undefined),
+    });
+
+    it('records the cutoff of a new investigation before its run starts', async () => {
+      const telemetryCutoffs = makeCutoffs();
+      telemetryCutoffs.set.mockImplementation(async () => {
+        expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      });
+
+      await startFromApi(makeClient({ telemetryCutoffs }), {
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+        telemetry_not_after: CUTOFF,
+      });
+
+      expect(telemetryCutoffs.set).toHaveBeenCalledWith('inv-new', CUTOFF);
+      expect(mockManagement.runWorkflow).toHaveBeenCalled();
+      // The cutoff is not a workflow input or conversation field the agent could change.
+      expect(runInputs()).not.toHaveProperty('telemetry_not_after');
+      expect(conversations.create).toHaveBeenCalledWith(
+        expect.objectContaining({
+          metadata: expect.not.objectContaining({ telemetry_not_after: expect.anything() }),
+        })
+      );
+    });
+
+    it('does not run an investigation whose cutoff cannot be recorded', async () => {
+      const telemetryCutoffs = makeCutoffs();
+      telemetryCutoffs.set.mockRejectedValue(new Error('index unavailable'));
+
+      await expect(
+        startFromApi(makeClient({ telemetryCutoffs }), {
+          subject: { type: 'manual', id: 'question' },
+          trigger_type: 'manual',
+          telemetry_not_after: CUTOFF,
+        })
+      ).rejects.toThrow('index unavailable');
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+    });
+
+    it('rejects a cutoff where the deployment does not record cutoffs', async () => {
       await expect(
         startFromApi(makeClient(), {
           subject: { type: 'manual', id: 'question' },
           trigger_type: 'manual',
-          telemetry_not_after: '2026-04-19T16:27:00.000Z',
+          telemetry_not_after: CUTOFF,
         })
-      ).rejects.toThrow('cannot change its telemetry cutoff');
+      ).rejects.toThrow('Telemetry cutoffs are not enabled');
       expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
-      expect(conversations.patchMetadata).not.toHaveBeenCalled();
-    }
-  );
+    });
 
-  it('continues a matched investigation that already holds the same cutoff', async () => {
-    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
-    withConversations(
-      makeConversation({ id: 'inv-1', telemetryNotAfter: '2026-04-19T16:27:00.000Z' })
+    it.each([
+      ['a different cutoff', '2026-04-19T16:20:00.000Z'],
+      ['no cutoff', undefined],
+    ])(
+      'rejects a follow-up cutoff when the matched investigation has %s, before launching it',
+      async (_name, storedCutoff) => {
+        agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+        withConversations(makeConversation({ id: 'inv-1' }));
+        const telemetryCutoffs = makeCutoffs(storedCutoff);
+
+        await expect(
+          startFromApi(makeClient({ telemetryCutoffs }), {
+            subject: { type: 'manual', id: 'question' },
+            trigger_type: 'manual',
+            telemetry_not_after: CUTOFF,
+          })
+        ).rejects.toThrow('cannot change its telemetry cutoff');
+        expect(telemetryCutoffs.get).toHaveBeenCalledWith('inv-1');
+        expect(telemetryCutoffs.set).not.toHaveBeenCalled();
+        expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      }
     );
-    await expect(
-      startFromApi(makeClient(), {
-        subject: { type: 'manual', id: 'question' },
-        trigger_type: 'manual',
-        telemetry_not_after: '2026-04-19T16:27:00.000Z',
-      })
-    ).resolves.toEqual({ investigation_id: 'inv-1' });
-    expect(mockManagement.runWorkflow).toHaveBeenCalled();
+
+    it('continues a matched investigation that already holds the same cutoff', async () => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+      withConversations(makeConversation({ id: 'inv-1' }));
+      const telemetryCutoffs = makeCutoffs(CUTOFF);
+
+      await expect(
+        startFromApi(makeClient({ telemetryCutoffs }), {
+          subject: { type: 'manual', id: 'question' },
+          trigger_type: 'manual',
+          telemetry_not_after: CUTOFF,
+        })
+      ).resolves.toEqual({ investigation_id: 'inv-1' });
+      expect(telemetryCutoffs.set).not.toHaveBeenCalled();
+      expect(mockManagement.runWorkflow).toHaveBeenCalled();
+    });
   });
 
   it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
@@ -1959,30 +2016,6 @@ describe('NightshiftInvestigationsClient.ensureOrCreate()', () => {
     // A conversation this call created holds no subjects yet.
     expect(subjectsClient.listByConversationIds).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).toHaveBeenCalledWith('inv-1', subjects);
-    expect(conversations.patchMetadata).not.toHaveBeenCalled();
-  });
-
-  it('records a telemetry cutoff on the new conversation', async () => {
-    withExecution({
-      inputs: {
-        title: 'Latency is too high',
-        investigation_id: 'inv-1',
-        subjects,
-        telemetry_not_after: '2026-04-19T16:27:00.000Z',
-      },
-    });
-
-    await makeClient().ensureOrCreate('inv-1', 'exec-1');
-
-    expect(conversations.create).toHaveBeenCalledWith(
-      expect.objectContaining({
-        metadata: expect.objectContaining({
-          severity: 'medium',
-          workflow_execution_ids: ['exec-1'],
-          telemetry_not_after: '2026-04-19T16:27:00.000Z',
-        }),
-      })
-    );
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
   });
 

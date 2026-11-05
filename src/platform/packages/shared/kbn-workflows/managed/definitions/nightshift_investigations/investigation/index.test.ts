@@ -367,15 +367,3 @@ describe('Nightshift investigation workflow', () => {
     expect(NIGHTSHIFT_INVESTIGATION_WORKFLOW.yaml).not.toMatch(/slack/i);
   });
 });
-
-it('accepts the telemetry cutoff the start API forwards and still rejects unknown inputs', () => {
-  const validator = buildFieldsZodValidator(
-    getInputsFromDefinition(WorkflowSchema.parse(investigation))
-  );
-  const inputs = { message: 'Why did checkout fail?' };
-
-  expect(
-    validator.safeParse({ ...inputs, telemetry_not_after: '2026-04-19T16:27:00.000Z' }).success
-  ).toBe(true);
-  expect(validator.safeParse({ ...inputs, not_declared: 'x' }).success).toBe(false);
-});

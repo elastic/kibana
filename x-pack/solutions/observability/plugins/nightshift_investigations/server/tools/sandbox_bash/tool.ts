@@ -10,7 +10,7 @@ import { z } from '@kbn/zod/v4';
 import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { CONNECTOR_ENV_PREFIX, redactSecrets } from './connector_credentials';
@@ -116,10 +116,7 @@ export const createSandboxBashTool = ({
    * Unset for investigations that do not bound telemetry. A thrown read does not run the command: the
    * caller cannot tell a missing cutoff from a cutoff that failed to load.
    */
-  readTelemetryNotAfter?: (
-    request: KibanaRequest,
-    conversationId: string
-  ) => Promise<string | undefined>;
+  readTelemetryNotAfter?: (conversationId: string) => Promise<string | undefined>;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
   logger: Logger;
 }): BuiltinToolDefinition<typeof sandboxBashSchema> => ({
@@ -248,7 +245,7 @@ export const createSandboxBashTool = ({
       ) {
         let notAfter: string | undefined;
         try {
-          notAfter = await readTelemetryNotAfter(context.request, rawConversationId);
+          notAfter = await readTelemetryNotAfter(rawConversationId);
         } catch (error) {
           logger.warn(
             `Could not read the telemetry cutoff for conversation ${rawConversationId}: ${

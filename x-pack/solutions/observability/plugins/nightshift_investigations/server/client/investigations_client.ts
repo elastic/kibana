@@ -90,6 +90,7 @@ import {
 } from './errors';
 import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
+import type { TelemetryCutoffStore } from '../lib/telemetry_cutoffs';
 import {
   findInvestigationConversation,
   findInvestigationConversations,
@@ -376,6 +377,8 @@ export interface NightshiftInvestigationsClientDeps {
   ensureFailureSweep?: () => Promise<void>;
   /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
   isServiceAccountExecutionEnabled?: () => boolean;
+  /** Where a start records its telemetry cutoff. Set only when the cutoff is enabled. */
+  telemetryCutoffs?: TelemetryCutoffStore;
 }
 
 export class NightshiftInvestigationsClient {
@@ -396,6 +399,7 @@ export class NightshiftInvestigationsClient {
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
   private readonly isServiceAccountExecutionEnabled: () => boolean;
+  private readonly telemetryCutoffs?: TelemetryCutoffStore;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
@@ -415,6 +419,7 @@ export class NightshiftInvestigationsClient {
     this.checkAvailability = deps.isAvailable;
     this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
     this.isServiceAccountExecutionEnabled = deps.isServiceAccountExecutionEnabled ?? (() => false);
+    this.telemetryCutoffs = deps.telemetryCutoffs;
   }
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
@@ -567,12 +572,12 @@ export class NightshiftInvestigationsClient {
       await this.releaseBudget(globalBudget);
       await this.releaseBudget(automationBudget);
     }
-    if (isFollowUp && telemetryNotAfterInput) {
-      // Checked here so a start that would fail in the run's `_ensure` step is refused up front.
-      const existing = await findInvestigationConversation(conversations, investigationId);
-      if (existing && telemetryNotAfterInput !== existing.telemetryNotAfter) {
-        throw badRequest('An investigation cannot change its telemetry cutoff');
-      }
+    const telemetryNotAfter =
+      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
+        ? telemetryNotAfterInput
+        : undefined;
+    if (telemetryNotAfter) {
+      await this.recordTelemetryCutoff(investigationId, telemetryNotAfter, isFollowUp);
     }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -584,10 +589,6 @@ export class NightshiftInvestigationsClient {
 
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
-    const telemetryNotAfter =
-      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
-        ? telemetryNotAfterInput
-        : undefined;
 
     const roundMessage = isFollowUp
       ? buildFollowUpMessage({
@@ -622,7 +623,6 @@ export class NightshiftInvestigationsClient {
         entry_point: entryPoint,
         ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
-      ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
     };
 
     const executionId = await this.runInvestigationWorkflow(
@@ -633,12 +633,7 @@ export class NightshiftInvestigationsClient {
     );
 
     if (!isFollowUp) {
-      await this.createAcceptedInvestigation({
-        conversations,
-        investigationId,
-        executionId,
-        telemetryNotAfter,
-      });
+      await this.createAcceptedInvestigation({ conversations, investigationId, executionId });
     }
 
     this.logger.info(
@@ -648,6 +643,27 @@ export class NightshiftInvestigationsClient {
     );
 
     return { investigation_id: investigationId };
+  }
+
+  /**
+   * Records a new investigation's cutoff before its run starts, so its first sandbox read is
+   * already bounded. A follow-up must carry the cutoff its investigation started with.
+   */
+  private async recordTelemetryCutoff(
+    investigationId: string,
+    telemetryNotAfter: string,
+    isFollowUp: boolean
+  ): Promise<void> {
+    if (!this.telemetryCutoffs) {
+      throw badRequest('Telemetry cutoffs are not enabled in this deployment');
+    }
+    if (!isFollowUp) {
+      await this.telemetryCutoffs.set(investigationId, telemetryNotAfter);
+      return;
+    }
+    if ((await this.telemetryCutoffs.get(investigationId)) !== telemetryNotAfter) {
+      throw badRequest('An investigation cannot change its telemetry cutoff');
+    }
   }
 
   /**
@@ -663,12 +679,10 @@ export class NightshiftInvestigationsClient {
     conversations,
     investigationId,
     executionId,
-    telemetryNotAfter,
   }: {
     conversations: ConversationPublicClient;
     investigationId: string;
     executionId: string;
-    telemetryNotAfter?: string;
   }): Promise<void> {
     try {
       // Records the run in the creating write. If the run's `_ensure` step created the
@@ -677,7 +691,6 @@ export class NightshiftInvestigationsClient {
         conversations,
         id: investigationId,
         workflowExecutionId: executionId,
-        telemetryNotAfter,
       });
     } catch (error) {
       this.logger.warn(
@@ -956,16 +969,10 @@ export class NightshiftInvestigationsClient {
         throw new InvestigationNotFoundError(investigationId);
       }
     }
-    const telemetryNotAfterInput = asString(inputs?.telemetry_not_after);
-    const telemetryNotAfter =
-      telemetryNotAfterInput && isTelemetryNotAfter(telemetryNotAfterInput)
-        ? telemetryNotAfterInput
-        : undefined;
     const conversation = await getOrCreateInvestigationConversation({
       conversations,
       id: investigationId,
       workflowExecutionId: executionId,
-      telemetryNotAfter,
       // A raw workflow can fail before ensuring its agent, which conversation creation requires.
       ...(!reopen
         ? {
