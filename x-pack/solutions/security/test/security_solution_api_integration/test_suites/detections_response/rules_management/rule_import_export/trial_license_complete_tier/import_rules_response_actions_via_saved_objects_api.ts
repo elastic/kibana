@@ -17,7 +17,7 @@ import {
   getRuleSOById,
 } from '../../../utils';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
-import type { CustomRole } from '../../../../../config/services/types';
+import type { Role } from '../../../../../config/services/types';
 
 /**
  * Imports a hidden `alert` saved object with a privileged response action via the
@@ -25,7 +25,7 @@ import type { CustomRole } from '../../../../../config/services/types';
  * via the generic enable routes.
  */
 
-const RULE_ENABLE_ONLY_ROLE: CustomRole = {
+const RULE_ENABLE_ONLY_ROLE: Role = {
   name: 'rule_enable_object_management_all',
   privileges: {
     elasticsearch: {},
@@ -59,7 +59,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     after(async () => {
-      await utils.cleanUpCustomRoles();
+      await utils.cleanUpCustomRole();
     });
 
     beforeEach(async () => {
