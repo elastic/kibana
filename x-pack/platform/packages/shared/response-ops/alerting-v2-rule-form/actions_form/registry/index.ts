@@ -12,3 +12,4 @@ export {
   getDefaultInlineActionStepDefinition,
 } from './registry';
 export { getContextVariables } from './payload_variables';
+export { getPayloadTemplateVariables } from './payload_template_variables';

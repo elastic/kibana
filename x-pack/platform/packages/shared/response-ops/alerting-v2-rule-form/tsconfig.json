@@ -46,6 +46,8 @@
     "@kbn/cps",
     "@kbn/core-ui-settings-browser-mocks",
     "@kbn/ui-callout",
-    "@kbn/zod"
+    "@kbn/zod",
+    "@kbn/alerting-types",
+    "@kbn/alerts-ui-shared"
   ]
 }
