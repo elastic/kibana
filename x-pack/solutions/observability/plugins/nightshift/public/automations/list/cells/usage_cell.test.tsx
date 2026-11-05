@@ -40,7 +40,9 @@ describe('AutomationUsageCell', () => {
     await focusEuiToolTipTrigger(screen.getByTestId('automationUsage'));
     expect(await screen.findByText('Deployment daily limit reached')).toBeInTheDocument();
 
-    rerender(<AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached={false} />);
+    rerender(
+      <AutomationUsageCell used={8} limit={10} isRateLimited isGlobalLimitReached={false} />
+    );
 
     await focusEuiToolTipTrigger(screen.getByTestId('automationUsage'));
     expect(await screen.findByText('8 of 10 triggers used today')).toBeInTheDocument();
