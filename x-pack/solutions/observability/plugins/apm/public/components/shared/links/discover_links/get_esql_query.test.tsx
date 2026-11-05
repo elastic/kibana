@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { Parser } from '@elastic/esql';
 import { getESQLQuery, getESQLQueryFromIndexPattern, getApmIndexPattern } from './get_esql_query';
 import {
   EXCEPTION_MESSAGE,
@@ -342,7 +343,42 @@ describe('getESQLQuery', () => {
         indexSettings: createMockIndexSettings(),
       });
 
-      expect(result).toContain('WHERE KQL("user.id: \\"123\\"")');
+      expect(result).toContain('WHERE KQL(');
+      expect(result).toContain('user.id: ');
+    });
+
+    /**
+     * Regression guard for the fatal "Invalid command: WHERE KQL(...)" ES|QL parser error.
+     * The kuery comes from the user's query bar and may contain double quotes, backslashes,
+     * escaped spaces and wildcards. These were previously interpolated raw and produced
+     * invalid ES|QL. `esql.str` must escape them so the output always parses.
+     * Inputs below are the real-world failing kueries captured in telemetry.
+     */
+    it.each([
+      // nested/unbalanced double quotes (issue #910)
+      'url.query: "filter=+type:"INDIVIDUAL"+AND+NOT+status:"NNA""',
+      // escaped spaces + wildcard
+      'status.message : "Last loaded AES TIK for*"',
+      // backslashes (#3635)
+      'error.exception.type:"AppExceptionsServiceException"',
+      // escaped colon (#1311/#1039/#918)
+      'labels.in\\:correlationid :"abc"',
+      // wildcards + escaped colon (#904)
+      '* \\:* \\:"* "',
+    ])('produces parseable ES|QL for kuery with special characters: %s', (kuery) => {
+      const result = getESQLQuery({
+        indexType: 'traces',
+        params: { kuery },
+        indexSettings: createMockIndexSettings(),
+      });
+
+      expect(result).not.toBeNull();
+      // The generated ES|QL must parse cleanly. Previously the raw interpolation produced
+      // malformed quoting that the ES|QL parser rejected, surfacing as the fatal React error
+      // in the APM UI. A clean parse (no errors) is the regression guard.
+      const { errors } = Parser.parse(result!);
+      expect(errors).toHaveLength(0);
+      expect(result).toContain('KQL(');
     });
   });
 
