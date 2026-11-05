@@ -10,18 +10,12 @@ import type { DreamingScheduleService } from './schedule';
 
 export const DREAMING_CHANGE_HANDLER_ID = 'dreaming_schedule';
 
-/**
- * Keeps the dreaming workflow of an AI index in line with its dreaming config. The workflow reads
- * memories from the AI index backing store, so a change to it reinstalls the workflow too.
- */
+/** Reconciles the dreaming workflow of an AI index when its dreaming config or dest is saved. */
 export const createDreamingChangeHandler = (
   getScheduleService: () => DreamingScheduleService
 ): AiIndexChangeHandler => ({
   id: DREAMING_CHANGE_HANDLER_ID,
   fields: ['dreaming', 'dest'],
-  // Saving the dreaming config unchanged through its own route still reconciles: it retries an
-  // install that failed, and enabling re-mints the API key the scheduled runs use, so they
-  // follow whoever last saved it. Reinstalling unchanged values leaves the workflow as it is.
   when: 'saved',
   onChange: async ({ aiIndexId, spaceId, request, current }) => {
     if (!current) {

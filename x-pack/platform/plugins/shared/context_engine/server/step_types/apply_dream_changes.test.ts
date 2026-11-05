@@ -61,7 +61,6 @@ const changes = {
   ],
 };
 
-/** An ES client whose searches find the stored KIs by `id`, and whose writes store them. */
 const createEsClient = (stored: Record<string, Record<string, unknown>>) => ({
   search: jest.fn(async ({ query }: { query: { term?: { id?: string } } }) => {
     const kiId = JSON.stringify(query).match(/"id":"([^"]+)"/)?.[1];

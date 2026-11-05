@@ -28,25 +28,23 @@ export const ENTITY_TYPE_PREFIX = 'entity.';
 export const isDreamedKiType = (type: string): boolean =>
   type.startsWith(FACT_TYPE_PREFIX) || type.startsWith(ENTITY_TYPE_PREFIX);
 
-/** The KI types of the memories dreaming reads: what agents saved with the `remember` tool. */
+/** The KI types of the memories dreaming reads. */
 export const DREAMING_MEMORY_KI_TYPES: readonly string[] = [
   'memory.session_fact',
   'memory.session',
 ];
 
-/**
- * Attributes dreaming keeps on every fact and entity: how many memories it was seen in, and when
- * the latest of them was recorded.
- */
+/** How many memories a fact or entity was seen in. */
 export const OCCURRENCES_ATTRIBUTE = 'memory.number_of_occurrences';
+/** When the latest memory a fact or entity was seen in was recorded. */
 export const LAST_SEEN_AT_ATTRIBUTE = 'memory.last_seen_at';
 
-/** Cap on each list in a change set returned by the model. */
+/** Maximum items in each list of a change set. */
 export const MAX_DREAMING_CHANGE_SET_ITEMS = 200;
-/** Memories one dreaming step may be given. */
+/** Maximum memories one dreaming step takes. */
 export const MAX_DREAMING_STEP_MEMORIES = 200;
 
-/** Access patterns one entity or fact may carry, and the bounds on each of their fields. */
+/** Maximum access patterns on one entity or fact, and the bounds on their fields. */
 export const MAX_DREAMING_ACCESS_PATTERNS = 5;
 export const MAX_ACCESS_PATTERN_LABEL_LENGTH = 256;
 export const MAX_ACCESS_PATTERN_RETURNS_LENGTH = 1024;

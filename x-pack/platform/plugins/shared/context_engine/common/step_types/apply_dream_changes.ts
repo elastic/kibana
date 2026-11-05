@@ -52,11 +52,7 @@ const accessPatternsSchema = lazySchema(() =>
   z.array(accessPatternSchema).max(MAX_DREAMING_ACCESS_PATTERNS)
 );
 
-/**
- * What the dreaming model returns: entities, facts and relationships to create, update or delete.
- * Structured output has no null or free-form object keys, so a delete is `delete: true` and
- * attributes are key/value pairs.
- */
+/** Entities, facts and relationships the dreaming model creates, updates or deletes. */
 export const dreamChangeSetSchema = lazySchema(() =>
   z.object({
     entities: z

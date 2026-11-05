@@ -17,7 +17,7 @@ import {
 import type { DreamedKi, DreamedKiAttributes } from './dreamed_ki';
 import type { DreamingOperation } from './resolve_change_set';
 
-/** Holds each pattern as JSON, so a later run can show the model what the KI already carries. */
+/** Attribute holding the access patterns as JSON. */
 export const ACCESS_PATTERNS_ATTRIBUTE = 'access_patterns';
 
 const SECTION_HEADING = '## Access patterns';
@@ -44,7 +44,7 @@ const renderPattern = ({
     '\n'
   );
 
-/** Content with the access patterns appended, the way the automation templates render them. */
+/** Content with the access patterns appended. */
 export const renderContent = (
   base: string | undefined,
   patterns: readonly AccessPattern[]
@@ -79,7 +79,7 @@ export const accessPatternsOf = (ki: DreamedKi | undefined): AccessPattern[] => 
   });
 };
 
-/** The attributes that carry the patterns: every example under `esql`, which verifiers check. */
+/** Attributes carrying the access patterns. */
 export const accessPatternAttributes = (patterns: readonly AccessPattern[]): DreamedKiAttributes =>
   patterns.length > 0
     ? {
@@ -88,7 +88,7 @@ export const accessPatternAttributes = (patterns: readonly AccessPattern[]): Dre
       }
     : {};
 
-/** Attributes without the ones that carry access patterns, so new patterns replace them. */
+/** Attributes without the ones carrying access patterns. */
 export const withoutAccessPatternAttributes = (
   attributes: DreamedKiAttributes | undefined
 ): DreamedKiAttributes =>
@@ -117,10 +117,7 @@ export const createVerifyEsql =
       )
     ).passed;
 
-/**
- * Drops access patterns whose example does not run. An item whose new patterns all fail keeps
- * the ones it has, rather than losing verified patterns to broken replacements.
- */
+/** Drops access patterns whose example does not run, keeping the current ones if all fail. */
 export const keepVerifiedPatterns = async (
   operations: readonly DreamingOperation[],
   verifyEsql: VerifyEsql

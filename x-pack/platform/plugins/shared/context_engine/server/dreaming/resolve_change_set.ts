@@ -20,7 +20,7 @@ import { batchKeyOf, entityId, factId } from './ids';
 
 const NEW_REF_PREFIX = 'new:';
 
-/** Which types the model may write. An empty kind is off. */
+/** The fact, entity and relationship types the model may write. */
 export interface DreamingVocabulary {
   factTypes: ReadonlySet<string>;
   /** Each entity type with its attribute keys. */
@@ -103,7 +103,7 @@ export interface ResolvedChangeSet {
   rejected: Array<{ item: string; reason: string }>;
 }
 
-/** The ids of existing KIs a change set names, which must be loaded before it is resolved. */
+/** The ids of the existing KIs a change set refers to. */
 export const referencedIds = ({ entities, facts, relationships }: DreamChangeSet): string[] => {
   const refs = [
     ...entities.map(({ ref }) => ref),
@@ -115,16 +115,11 @@ export const referencedIds = ({ entities, facts, relationships }: DreamChangeSet
 
 class RejectedItemError extends Error {}
 
-// Annotated so control flow narrows after a call.
 const reject: (reason: string) => never = (reason) => {
   throw new RejectedItemError(reason);
 };
 
-/**
- * Checks a change set against the dreaming config and the memories the model was shown, and
- * resolves every ref to its final KI id. Invalid items are rejected one by one; the rest still
- * apply.
- */
+/** Validates a change set and resolves its refs to KI ids, rejecting invalid items. */
 export const resolveChangeSet = (
   changeSet: DreamChangeSet,
   { executionId, vocabulary, memories, existing }: ResolveContext
@@ -132,7 +127,6 @@ export const resolveChangeSet = (
   const operations: DreamingOperation[] = [];
   const rejected: ResolvedChangeSet['rejected'] = [];
   const batchKey = batchKeyOf(memories.keys());
-  /** New entity keys, and existing entity ids, to their final id. */
   const entityRefs = new Map<string, string>();
   for (const [id, ki] of existing) {
     if (kindOf(ki) === 'entity') {
@@ -181,7 +175,6 @@ export const resolveChangeSet = (
     return ki;
   };
 
-  // Entities first, so facts and relationships can refer to new entity keys.
   for (const entity of changeSet.entities) {
     attempt(`entity ${entity.ref}`, () => {
       if (vocabulary.entityTypes.size === 0) {
@@ -195,8 +188,6 @@ export const resolveChangeSet = (
         operations.push({ op: 'delete', id: entity.ref });
         return;
       }
-      // Any other ref is a new key: models label new entities in their own way, and an entity's id
-      // comes from its type and name, so a new key can never duplicate one.
       const type = entity.type ?? current?.type.slice(ENTITY_TYPE_PREFIX.length);
       const name = entity.name ?? current?.title;
       if (!type || !name) {
@@ -267,7 +258,6 @@ export const resolveChangeSet = (
       if (!vocabulary.factTypes.has(type)) {
         reject(`fact type '${type}' is not configured`);
       }
-      // Without entities a fact is about nothing; its current `about` references are kept.
       const about = vocabulary.entityTypes.size > 0 ? fact.about?.map(resolveEntityRef) : undefined;
       const sourceMemoryIds = resolveSources(fact.source_memory_ids, current);
       operations.push({

@@ -463,7 +463,6 @@ export class ContextEnginePlugin
       logger: this.logger,
       getManagedWorkflowsClient: () =>
         startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
-      // A runtime dependency, so only its setup contract, resolved after setup, carries it.
       getWorkflowsManagement: () => this.workflowsManagementApiPromise,
       getAiIndexService: () => aiIndexService,
     });

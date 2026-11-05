@@ -56,13 +56,13 @@ export const CONTEXT_ENGINE_DREAMING_WORKFLOW_ID = 'system-context-engine-dreami
 export interface ContextEngineDreamingWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
   /** The AI index this instance dreams for. */
   aiIndexId: string;
-  /** Tells instances of AI indices with the same id in different spaces apart. */
+  /** Unique per AI index and space. */
   instanceKey: string;
-  /** The AI index backing store, which holds its memories. */
+  /** The AI index backing store. */
   memoriesIndex: string;
   /** How often the workflow runs. */
   intervalMinutes: number;
-  /** The AI connector dreaming prompts; empty for Context Engine's default model. */
+  /** The AI connector id; empty for Context Engine's default model. */
   connectorId: string;
   instructions: string;
   factTypes: Array<{ type: string; description?: string }>;
@@ -72,10 +72,6 @@ export interface ContextEngineDreamingWorkflowTemplateValues extends ManagedWork
 
 const TEMPLATE_TOKEN = /__[A-Z_]+__/g;
 
-/**
- * Replaces every token in one pass, so a value that happens to contain a token is not rendered
- * again. Strings and lists are written as JSON, which YAML reads as the same value.
- */
 const renderJsonTemplate = (template: string, values: Record<string, unknown>): string =>
   template.replace(TEMPLATE_TOKEN, (token) =>
     token in values
@@ -85,11 +81,7 @@ const renderJsonTemplate = (template: string, values: Record<string, unknown>): 
       : token
   );
 
-/**
- * Consolidates the memories of one AI index into long-term facts, entities and relationships.
- * Context Engine installs it from the AI index dreaming config, and installs it again when that
- * config changes; `context-engine.applyDreamChanges` writes what the model returns.
- */
+/** Consolidates the memories of one AI index into long-term facts, entities and relationships. */
 export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
   id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
   pluginId: 'contextEngine',

@@ -22,7 +22,7 @@ import { parseIntervalMinutes } from '../../common/validation';
 import type { AiIndexService } from '../ai_indices/service';
 import type { WorkflowEnablementApi } from '../feedback_analysis/schedule';
 
-/** The workflows management calls dreaming makes, declared structurally like {@link WorkflowEnablementApi}. */
+/** The workflows management API dreaming uses. */
 export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
   cancelAllActiveWorkflowExecutions(
     workflowId: string,
@@ -34,34 +34,30 @@ export interface DreamingWorkflowsApi extends WorkflowEnablementApi {
 const CANCELLED_RUN_RETRIES = 5;
 const CANCELLED_RUN_RETRY_MS = 1000;
 
-/** Workflows management refuses to delete a workflow while one of its runs is in progress. */
 const isRunInProgressError = (error: unknown): boolean =>
   error instanceof Error && error.message.includes('running executions');
 import { managedWorkflowIdSuffixFor } from '../utils/managed_workflow_suffix';
 
 export interface DreamingScheduleService {
-  /**
-   * Brings the dreaming workflow of an AI index in line with its saved config: installs it with
-   * the config as its consts and enables it as the caller, or removes it when dreaming is off.
-   */
+  /** Installs and enables the dreaming workflow of an AI index, or removes it. */
   reconcile(params: {
     aiIndex: AiIndexHttpItem;
     spaceId: string;
     request: KibanaRequest;
   }): Promise<void>;
-  /** Removes the dreaming workflow of an AI index that was deleted. */
+  /** Removes the dreaming workflow of an AI index. */
   remove(params: { aiIndexId: string; spaceId: string; request: KibanaRequest }): Promise<void>;
 }
 
-/** The id of the dreaming workflow Context Engine installs for an AI index. */
+/** The id of the dreaming workflow of an AI index. */
 export const dreamingWorkflowIdFor = (aiIndexId: string, spaceId: string): string =>
   `${CONTEXT_ENGINE_DREAMING_WORKFLOW_ID}-${managedWorkflowIdSuffixFor(aiIndexId, spaceId)}`;
 
-/** Whether an AI index should have a dreaming workflow: dreaming is on and builds something. */
+/** Whether an AI index has dreaming on and configured to build something. */
 export const shouldDream = ({ dreaming }: { dreaming?: AiIndexDreamingConfig }): boolean =>
   dreaming?.enabled === true && dreamingBuildsAnything(dreaming);
 
-/** The dreaming workflow's template values: the saved config, as consts. */
+/** The dreaming workflow template values for an AI index. */
 export const dreamingTemplateValuesFor = (
   aiIndex: AiIndexHttpItem,
   dreaming: AiIndexDreamingConfig,
@@ -91,13 +87,12 @@ export const createDreamingScheduleService = ({
 }: {
   logger: Logger;
   getManagedWorkflowsClient: () => Promise<PluginScopedManagedWorkflowsApi>;
-  /** Resolves to nothing in a deployment without workflows management, which cannot dream. */
+  /** Resolves to `undefined` without workflows management. */
   getWorkflowsManagement: () => Promise<DreamingWorkflowsApi | undefined>;
   getAiIndexService: () => AiIndexService;
 }): DreamingScheduleService => {
   const log = logger.get('dreaming_schedule');
 
-  /** Uninstalls the workflow, first stopping a run in progress, which blocks the uninstall. */
   const uninstall = async (aiIndexId: string, spaceId: string, request: KibanaRequest) => {
     const client = await getManagedWorkflowsClient();
     const run = () =>
@@ -119,7 +114,6 @@ export const createDreamingScheduleService = ({
         request
       );
     }
-    // Cancelling signals the run, which stops at its next step.
     await pRetry(run, {
       retries: CANCELLED_RUN_RETRIES,
       minTimeout: CANCELLED_RUN_RETRY_MS,
@@ -166,13 +160,9 @@ export const createDreamingScheduleService = ({
         values,
       });
 
-      // Enabling registers the scheduled trigger and mints the API key the runs execute under, so
-      // the schedule follows whoever last changed the config.
       const workflowId = dreamingWorkflowIdFor(aiIndexId, spaceId);
       await workflowsManagement.updateWorkflow(workflowId, { enabled: true }, spaceId, request);
 
-      // Attached so the AI index lists it with its other automations, where it can be run and its
-      // runs followed. A managed AI index takes no automations.
       if (!aiIndex.managed) {
         await getAiIndexService().addAutomation(
           aiIndexId,

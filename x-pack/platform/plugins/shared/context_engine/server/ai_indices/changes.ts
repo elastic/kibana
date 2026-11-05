@@ -48,9 +48,8 @@ export interface AiIndexChangeHandler {
   /** The fields the handler reacts to. Missing: it runs on every save and delete. */
   fields?: readonly AiIndexChangeField[];
   /**
-   * `changed` (default) runs the handler when one of `fields` changed value. `saved` also runs
-   * it on every delete, and when a partial save wrote one of them with the value it already had;
-   * a save of the whole AI index runs it only when one of them changed.
+   * `changed` (default) runs the handler when one of `fields` changed value. `saved` also runs it
+   * on delete and when a partial save wrote one of them.
    */
   when?: 'changed' | 'saved';
   onChange: (event: AiIndexChangeEvent) => Promise<void>;

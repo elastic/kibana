@@ -1,10 +1,6 @@
 version: '1'
 name: __NAME__
 description: 'Turns the memories agents save in a Context Engine AI index into long-term facts, entities and relationships, as the AI index dreaming config describes.'
-# Context Engine installs one instance per AI index from its dreaming config, and installs it again
-# whenever that config changes, so the consts always hold the saved config. It is installed
-# disabled, then enabled with the request of whoever saved the config, so scheduled runs execute
-# under an API key minted from that request.
 enabled: false
 tags:
   - context-engine
@@ -19,9 +15,7 @@ settings:
     max: 1
 consts:
   ai_index_id: __AI_INDEX_ID__
-  # The AI index backing store: it holds the memories dreaming reads and the KIs it writes.
   memories_index: __MEMORIES_INDEX__
-  # The AI connector dreaming prompts. "" uses Context Engine's default model.
   connector_id: __CONNECTOR_ID__
   instructions: __INSTRUCTIONS__
   fact_types: __FACT_TYPES__
@@ -36,15 +30,11 @@ triggers:
       every: '__INTERVAL_MINUTES__m'
   - type: manual
 steps:
-  # Stops before reading memories or calling a model when Context Engine or the global memory
-  # setting is off, or the AI index no longer dreams.
   - name: status
     type: context-engine.getDreamingStatus
     with:
       ai_index_id: '{{ consts.ai_index_id }}'
 
-  # A cancelled run does not move the window workflow.getLastRun reads, so the memories saved
-  # while dreaming is paused are read once it resumes.
   - name: paused
     type: if
     condition: '${{ steps.status.output.dream != true }}'
@@ -56,17 +46,12 @@ steps:
           memories: 0
           reason: '{{ steps.status.output.reason }}'
 
-  # Everything recorded since the last successful run started, so a failed run's memories are
-  # read again by the next one. A first run reads the last week.
   - name: last_run
     type: workflow.getLastRun
     with:
       default_hours: 168
       max_hours: 720
 
-  # The newest revision of each memory: a data stream keeps every revision of a KI. Deleted
-  # memories are not filtered out here: on a data stream that would drop the tombstone and let
-  # collapse return an older, active revision. They are dropped next, and by applyDreamChanges.
   - name: read_memories
     type: elasticsearch.search
     with:
@@ -107,8 +92,6 @@ steps:
     type: if
     condition: '${{ variables.memories.size > 0 }}'
     steps:
-      # Oldest first, 50 memories a prompt. Batches run one after another, and each reads the
-      # long-term memory the previous one wrote.
       - name: batches
         type: foreach
         foreach: '{{ variables.memories | reverse | chunk: 50 | json }}'
@@ -140,7 +123,6 @@ steps:
                         type: 'entity.'
                   minimum_should_match: 1
 
-          # `== blank` covers an empty `connector_id`; an empty `connector-id` is unset.
           - name: consolidate
             type: ai.prompt
             connector-id: '{{ consts.connector_id }}'

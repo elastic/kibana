@@ -15,10 +15,7 @@ export type DreamedKiAttributes = Record<string, string | number | boolean | str
 export interface DreamedKiReference {
   uri: string;
   relation?: KiReferenceRelation;
-  /**
-   * On an entity's `relates_to` reference, the relationship type. On a fact's, `about`: the
-   * entity the fact is about.
-   */
+  /** The relationship type on an entity's `relates_to` reference; `about` on a fact's. */
   description?: string;
 }
 

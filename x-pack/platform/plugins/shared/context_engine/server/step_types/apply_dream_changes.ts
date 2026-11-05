@@ -48,7 +48,6 @@ export const getApplyDreamChangesStepDefinition = ({
       await assertKiWritePrivilege(checkWritePrivilege, request, spaceId);
 
       const { ai_index_id: aiIndexId, memories } = context.input;
-      // The engine hands handlers the rendered input without parsing it.
       const parsed = dreamChangeSetSchema.safeParse(context.input.changes);
       if (!parsed.success) {
         throw new ExecutionError({
@@ -98,7 +97,6 @@ export const getApplyDreamChangesStepDefinition = ({
       const resolved = resolveChangeSet(changeSet, {
         executionId: stepContext.execution.id,
         vocabulary: vocabularyOf(aiIndex.dreaming),
-        // A deleted memory's latest revision is its tombstone: nothing may be written from it.
         memories: new Map(
           memories
             .filter(({ governance }) => !isInactiveStatus(governance?.lifecycle?.status))

@@ -67,12 +67,7 @@ export interface ApplyContext {
 const referenceKey = ({ uri, relation, description }: DreamedKiReference): string =>
   `${relation ?? ''}\u0000${relation === 'relates_to' ? description ?? '' : ''}\u0000${uri}`;
 
-/**
- * Adds references without duplicates. Over the cap, the oldest `derived_from` citations go first:
- * relationships and the entities a fact is about are the graph, while a sighting is already
- * counted in `memory.number_of_occurrences`. A memory whose citation was dropped counts again if
- * it is seen again.
- */
+/** Adds references without duplicates, dropping the oldest `derived_from` ones over the cap. */
 export const addReferences = (
   current: readonly DreamedKiReference[] | undefined,
   additions: readonly DreamedKiReference[]
@@ -99,10 +94,6 @@ const sourceReferences = (sourceMemoryIds: readonly string[]): DreamedKiReferenc
 
 type BuildDocument = (current: DreamedKi | undefined) => Omit<DreamedKi, 'governance'> | undefined;
 
-/**
- * Writes a whole new revision of a KI built from its current one, retrying on a concurrent
- * write. `build` returning `undefined` skips the write.
- */
 const writeDocument = async (
   { esClient, aiIndexId, dest, writer, abortSignal }: ApplyContext,
   kiId: string,
@@ -145,8 +136,6 @@ const writeDocument = async (
         } satisfies StoredKi,
         existing: dest.type === 'data_stream' ? undefined : revision,
         failIfExists: revision === undefined,
-        // Later writes of the same run read this one back: a relationship on a new entity, and the
-        // next batch's existing facts and entities.
         refresh: true,
         abortSignal,
       });
@@ -168,10 +157,6 @@ const latest = (...dates: Array<string | undefined>): string | undefined =>
     .sort((a, b) => Date.parse(a) - Date.parse(b))
     .pop();
 
-/**
- * Counts each source the KI does not cite yet as one more sighting, and moves its last sighting
- * forward. A source it already cites is not counted again, so a retried write counts nothing.
- */
 const sightingAttributes = (
   current: DreamedKi | undefined,
   sourceMemoryIds: readonly string[],
@@ -190,10 +175,6 @@ const sightingAttributes = (
   };
 };
 
-/**
- * Content with the access patterns rendered after it, and attributes that carry them. Content or
- * patterns the operation leaves out are kept from the current revision.
- */
 const withAccessPatterns = (
   current: DreamedKi | undefined,
   content: string | undefined,
@@ -256,7 +237,6 @@ const upsertFact = (context: ApplyContext, operation: UpsertFactOperation) =>
     };
   });
 
-/** A relationship is a `relates_to` reference on its source entity, typed by `description`. */
 const applyRelationship = (context: ApplyContext, operation: RelationshipOperation) =>
   writeDocument(context, operation.sourceId, (current) => {
     if (!current) {
@@ -301,7 +281,7 @@ const deleteKi = async (context: ApplyContext, kiId: string): Promise<boolean> =
   }
 };
 
-/** Applies operations in order. Writes are idempotent, so a retried step can apply them again. */
+/** Applies dreaming operations in order. */
 export const applyOperations = async (
   context: ApplyContext,
   operations: readonly DreamingOperation[]
