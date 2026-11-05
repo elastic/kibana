@@ -6,16 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import {
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPageHeader,
-  EuiSpacer,
-  EuiText,
-} from '@elastic/eui';
+import { EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText } from '@elastic/eui';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+import { SecurityAppHeader } from '@kbn/security-solution-plugin/public/common/components/app_header';
+import { useKibana } from '@kbn/security-solution-plugin/public/common/lib/kibana';
 import { UpgradeActions } from '../attack_discovery/upgrade_actions';
 import * as i18n from './translations';
 
@@ -66,10 +61,18 @@ const AIValueUpsellingPageESSComponent: React.FC = () => {
     []
   );
 
+  const {
+    services: { docLinks },
+  } = useKibana();
+
   return (
     <KibanaPageTemplate restrictWidth={false} contentBorder={false} grow={true}>
+      <SecurityAppHeader
+        title={i18n.PAGE_TITLE}
+        spacing="largeBleed"
+        docLink={docLinks.links.siem.valueReport}
+      />
       <KibanaPageTemplate.Section>
-        <EuiPageHeader bottomBorder pageTitle={i18n.PAGE_TITLE} />
         <EuiSpacer size="xxl" />
         <EuiEmptyPrompt title={title} body={body} actions={actions} />
       </KibanaPageTemplate.Section>
