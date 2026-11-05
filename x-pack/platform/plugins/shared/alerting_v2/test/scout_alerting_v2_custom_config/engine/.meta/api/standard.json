@@ -1,0 +1,34 @@
+{
+  "sha1": "484c12b1b6c1ee2b8ca4fb3b267fbb8b02f38300",
+  "testChannels": [
+    "ci-on-commit"
+  ],
+  "tests": [
+    {
+      "id": "6990a4f8525f004-38a863d2228c7ae",
+      "title": "Alert actions cleanup task is scheduled to run daily",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 39,
+        "column": 49
+      }
+    },
+    {
+      "id": "6990a4f8525f004-e72c64b0c42bb49",
+      "title": "Alert actions cleanup task deletes expired dispatcher docs and keeps every other action",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "x-pack/platform/plugins/shared/alerting_v2/test/scout_alerting_v2_custom_config/engine/api/tests/alert_actions_cleanup.spec.ts",
+        "line": 43,
+        "column": 29
+      }
+    }
+  ]
+}

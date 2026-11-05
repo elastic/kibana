@@ -297,6 +297,19 @@ describe('plugin context service accounts', () => {
     );
   });
 
+  it('hands back what Core returns when the security delegate registers', () => {
+    const coreSetup = coreInternalLifecycleMock.createInternalSetup();
+    const handle = securityServiceMock.createDelegateHandle();
+    coreSetup.security.registerSecurityDelegate.mockReturnValue(handle);
+    const setupContext = createPluginSetupContext({ deps: coreSetup, plugin, runtimeResolver });
+    const api = Symbol('api') as unknown as Parameters<
+      typeof setupContext.security.registerSecurityDelegate
+    >[0];
+
+    expect(setupContext.security.registerSecurityDelegate(api)).toBe(handle);
+    expect(coreSetup.security.registerSecurityDelegate).toHaveBeenCalledWith(api);
+  });
+
   it('exposes the service accounts contract scoped to plugin.name at start', () => {
     const coreStart = coreInternalLifecycleMock.createInternalStart();
     const scopedServiceAccounts = securityServiceMock.createServiceAccounts();

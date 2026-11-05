@@ -19,7 +19,13 @@ export const getRouteConfig = () => {
     basePath: DISCOVER_SESSION_API_BASE_PATH,
     routeConfig: {
       access: DISCOVER_SESSION_API_ACCESS,
-      enableQueryVersion: true,
+      options: {
+        tags: ['oas-tag:Discover sessions'],
+        availability: {
+          stability: 'stable',
+          since: '9.6.0',
+        },
+      },
       security: {
         authz: AuthzDisabled.delegateToSOClient,
       },

@@ -8,7 +8,11 @@
 import type { Logger } from '@kbn/core/server';
 import type { AttachmentTypeDefinition } from '@kbn/agent-builder-server/attachments';
 import type { ProposalAttachmentData, ProposalWithMetadata } from '@kbn/proposals-common';
-import { PROPOSAL_ATTACHMENT_TYPE, proposalAttachmentDataSchema } from '@kbn/proposals-common';
+import {
+  isExpired,
+  PROPOSAL_ATTACHMENT_TYPE,
+  proposalAttachmentDataSchema,
+} from '@kbn/proposals-common';
 import type { ProposalPrivilegesChecker } from '../services/check_proposal_privileges';
 import type { ProposalsService } from '../services/proposals_service';
 
@@ -23,11 +27,18 @@ export interface ProposalAttachmentTypeDeps {
  *
  * Expiry is reported by the banner instead: an expired proposal has no decision
  * to report, and `Decision: pending` underneath `EXPIRED` told the agent one was
- * still coming. That is reachable on every read now that `expired` is evaluated
- * live rather than snapshotted when the attachment was written.
+ * still coming.
  */
-const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): string => {
-  if (isExpired) {
+const describeOutcome = (proposal: ProposalWithMetadata, expired: boolean): string => {
+  if (proposal.supersededBy !== undefined || proposal.status === 'superseded') {
+    return (
+      'REPLACED: this proposal is historical and cannot be acted on.' +
+      (proposal.supersededBy !== undefined
+        ? ` Replacement proposal ID: ${proposal.supersededBy}. Consult that proposal's attachment for its current state; it may also have been replaced or settled.`
+        : '')
+    );
+  }
+  if (expired) {
     return '';
   }
   if (proposal.status === 'pending') {
@@ -38,43 +49,53 @@ const describeOutcome = (proposal: ProposalWithMetadata, isExpired: boolean): st
   }`;
 };
 
-/**
- * Format a proposal for the LLM.  Keep it terse: the human decision is the
- * only action the agent can request — it cannot run the action itself.
- */
+/** Formats the complete revision content and state the agent needs to read and revise it. */
 const formatProposalForAgent = (proposal: ProposalWithMetadata): string => {
-  // Deliberately NOT `PROPOSAL_WITHOUT_ACTION_LABEL`: this string is LLM prompt input
-  // and must stay untranslated and carry the analyst-directive clause. The UI badge
-  // ("No automated action") lives in public/translations.ts.
-  const label =
-    proposal.action?.name ??
-    proposal.actionWorkflowId ??
-    'No automated action — analyst carries this out themselves';
-
-  // Both, because they can disagree: `expired` is the deadline evaluated on
-  // read, while `status: 'expired'` is the settlement the gate writes when
-  // nobody answered — which it can do before the deadline itself passes.
-  const isExpired = proposal.expired || proposal.status === 'expired';
+  const expired = isExpired(proposal);
 
   const lines: string[] = [
-    `## Proposal: ${label}`,
+    `## Proposal: ${proposal.title}`,
+    `Proposal ID: ${proposal.id}`,
     `Status: ${proposal.status}`,
+    // Its own line now that every proposal carries a title: the agent still has
+    // to know that nothing runs unless the analyst does it themselves.
+    proposal.actionWorkflowId ? '' : 'No automated action — analyst carries this out themselves',
     // Not "the deadline has passed": the gate can settle a proposal as expired
     // before its deadline, and `Decision deadline` below would then print a
     // future date directly under a banner claiming it was behind us.
-    isExpired ? 'EXPIRED: this proposal can no longer be decided.' : '',
-    '',
-    proposal.comment,
-    '',
-    `Impact: ${proposal.impact} | Confidence: ${proposal.confidence} | Category: ${
-      proposal.action?.category ?? proposal.category ?? 'unknown'
-    }`,
-    proposal.action?.reversible !== undefined
-      ? `Reversible: ${proposal.action.reversible ? 'yes' : 'no'}`
-      : '',
-    proposal.expiresAt ? `Decision deadline: ${proposal.expiresAt}` : '',
-    '',
-    describeOutcome(proposal, isExpired),
+    expired ? 'EXPIRED: this proposal can no longer be decided.' : '',
+    describeOutcome(proposal, expired),
+    'Proposal data (comment and actionInput describe this complete revision):',
+    JSON.stringify(
+      {
+        id: proposal.id,
+        title: proposal.title,
+        rootProposalId: proposal.rootProposalId,
+        revision: proposal.revision,
+        supersedes: proposal.supersedes,
+        supersededBy: proposal.supersededBy,
+        status: proposal.status,
+        decision: proposal.decision,
+        expired,
+        comment: proposal.comment,
+        actionWorkflowId: proposal.actionWorkflowId,
+        actionInput: proposal.actionInput,
+        action: proposal.action,
+        impact: proposal.impact,
+        confidence: proposal.confidence,
+        category: proposal.category,
+        origin: proposal.origin,
+        createdAt: proposal.createdAt,
+        expiresAt: proposal.expiresAt,
+        decidedAt: proposal.decidedAt,
+        decidedBy: proposal.decidedBy,
+        dismissReason: proposal.dismissReason,
+        rationale: proposal.rationale,
+        executionError: proposal.executionError,
+      },
+      null,
+      2
+    ),
   ];
 
   return lines.filter((l) => l !== '').join('\n');
@@ -121,7 +142,7 @@ export const createProposalAttachmentType = ({
         // proposal id here, which without this check would read it back to the
         // LLM for someone holding no proposals privilege at all.
         await privileges.assertCanRead(request);
-        const proposal = await getProposalsService().get(proposalId, spaceId);
+        const proposal = await getProposalsService().get(proposalId, spaceId, request);
         return { type: 'text', value: formatProposalForAgent(proposal) };
       } catch (error) {
         logger.warn(`Failed to read proposal ${proposalId} for its attachment: ${error}`);
@@ -136,9 +157,12 @@ export const createProposalAttachmentType = ({
     'A proposal is a structured recommendation from an agent that requires a human decision ' +
     'before any action is taken.\n\n' +
     'Rules:\n' +
-    "- Never approve, dismiss, or re-create a proposal yourself — that is exclusively the analyst's decision.\n" +
+    '- Use the Proposal ID from the attachment content when calling proposal tools. The attachment ID is a separate identifier used to render the card.\n' +
+    "- Never approve, dismiss, or execute a proposal yourself — that is exclusively the analyst's decision.\n" +
+    '- When the analyst requests changes, use a revision tool: create a new pending proposal in the same rootProposalId chain, increment revision, and link supersedes/supersededBy. The predecessor becomes superseded, not dismissed. Preserve the full comment and actionInput, applying only the requested edits.\n' +
     '- Whenever you mention or summarise a proposal in your response, render it inline with ' +
     '`<render_attachment id="ATTACHMENT_ID" />` (replace ATTACHMENT_ID with the actual id) so ' +
     'the analyst can act on it directly in the chat.\n' +
+    '- Replaced proposals are historical and non-actionable. Consult the replacement attachment for its current state before describing any next steps.\n' +
     '- If the proposal is expired or already decided, say so in your response but still render the card.',
 });

@@ -83,6 +83,10 @@
     "mayChangeFiles": true
   },
   {
+    "script": ".buildkite/scripts/steps/checks/sync_pull_request_fragments.sh",
+    "mayChangeFiles": true
+  },
+  {
     "script": ".buildkite/scripts/steps/checks/buildkite_unit_tests.sh"
   },
   {

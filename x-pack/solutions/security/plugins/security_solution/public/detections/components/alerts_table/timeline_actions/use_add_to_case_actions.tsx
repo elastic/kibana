@@ -19,7 +19,6 @@ import { ADD_TO_CASE_ACTION_IDS } from '../../../../common/constants/action_ids'
 
 export interface UseAddToCaseActions {
   onMenuItemClick: () => void;
-  ariaLabel?: string;
   ecsData: Ecs;
   nonEcsData: TimelineNonEcsData[];
   onSuccess?: () => Promise<void>;
@@ -29,7 +28,6 @@ export interface UseAddToCaseActions {
 
 export const useAddToCaseActions = ({
   onMenuItemClick,
-  ariaLabel,
   ecsData,
   nonEcsData,
   onSuccess,
@@ -101,14 +99,13 @@ export const useAddToCaseActions = ({
 
     return [
       {
-        'aria-label': ariaLabel,
         'data-test-subj': ADD_TO_CASE_ACTION_IDS.addToCase,
         key: ADD_TO_CASE_ACTION_IDS.addToCase,
         onClick: handleAddToCaseClick,
         name: ADD_TO_CASE,
       },
     ];
-  }, [ariaLabel, handleAddToCaseClick, canAttach]);
+  }, [handleAddToCaseClick, canAttach]);
 
   return {
     addToCaseActionItems,

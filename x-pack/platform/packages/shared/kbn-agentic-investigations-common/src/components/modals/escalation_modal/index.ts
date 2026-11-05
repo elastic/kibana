@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export type { EscalationModalMode, EscalationIncidentSummary } from './types';
+export type { EscalationModalMode, EscalationSummary } from './types';

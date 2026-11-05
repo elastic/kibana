@@ -6,8 +6,9 @@
  */
 
 import { createAsyncAction } from '../utils/actions';
-import type { MonitorsHealthResponse } from './models';
+import type { MonitorHealthQuery, MonitorsHealthResponse } from './models';
 
-export const fetchMonitorHealthAction = createAsyncAction<string[], MonitorsHealthResponse>(
-  '[MONITOR HEALTH] GET'
-);
+export const fetchMonitorHealthAction = createAsyncAction<
+  MonitorHealthQuery,
+  MonitorsHealthResponse
+>('[MONITOR HEALTH] GET');

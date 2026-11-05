@@ -23,6 +23,7 @@ import { TOOLTIP } from '../../../../screens/common';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
 import {
   deleteGapAutoFillScheduler,
+  enableGapAutoFillScheduler,
   getGapAutoFillSchedulerApi,
 } from '../../../../tasks/api_calls/gaps';
 import { RULES_MONITORING_TAB } from '../../../../screens/alerts_detection_rules';
@@ -206,8 +207,11 @@ describe(
         createRule(
           getCustomQueryRuleParams({ rule_id: '1', name: 'Rule 1', interval: '1m', from: 'now-1m' })
         );
-        login();
-        ensureAutoGapFillEnabledViaUi();
+        // Set up via API so the browser only ever loads the app once, as the read-only user.
+        // Rendering the app as an admin and then swapping the session cookie to another user
+        // left a live page polling with a stale session, which intermittently produced a blank
+        // page on the next visit (https://github.com/elastic/kibana/issues/275080).
+        enableGapAutoFillScheduler();
         login(ROLES.t1_analyst);
       });
 
@@ -216,8 +220,7 @@ describe(
       });
 
       it('shows the modal but disables edits for users without CRUD permissions', () => {
-        visitRulesManagementTable();
-        cy.get(RULES_MONITORING_TAB).click();
+        visitMonitoringTab();
 
         cy.get(GAP_AUTO_FILL_STATUS_BADGE).click();
         cy.get(RULE_SETTINGS_MODAL).should('exist');

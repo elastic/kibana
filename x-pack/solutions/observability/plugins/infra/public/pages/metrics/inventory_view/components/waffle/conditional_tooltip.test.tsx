@@ -232,7 +232,7 @@ describe('ConditionalToolTip', () => {
     expect(useSnapshotCall.kuery).toBe(`"aws.rds.db_instance.arn": "${escapeQuotes(arn)}"`);
   });
 
-  it('keeps leftover Hosts OpenTelemetry schema off Kubernetes Pod tooltip requests', () => {
+  it('queries Kubernetes Pod tooltips with k8s.pod.uid when OpenTelemetry is selected', () => {
     const POD_NODE: InfraWaffleMapNode = {
       pathId: 'pod-01',
       id: 'pod-01',
@@ -253,7 +253,7 @@ describe('ConditionalToolTip', () => {
 
     // Intentional `as UseSnapshotRequest` type assertion as Jest's toHaveBeenCalledWith matcher is untyped relative to the hook request;
     expect(mockedUseSnapshot).toHaveBeenCalledWith({
-      kuery: '"kubernetes.pod.uid": "pod-01"',
+      kuery: '"k8s.pod.uid": "pod-01"',
       metrics: [
         { type: 'cpu' },
         { type: 'memory' },
@@ -268,7 +268,7 @@ describe('ConditionalToolTip', () => {
       currentTime,
       accountId: '',
       region: '',
-      schema: 'ecs',
+      schema: 'semconv',
     } as UseSnapshotRequest);
   });
 });

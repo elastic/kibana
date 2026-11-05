@@ -8,7 +8,7 @@ import React from 'react';
 import { stringify } from 'querystring';
 import { encode } from '@kbn/rison';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiButtonEmpty } from '@elastic/eui';
+import { EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { HOST_NAME } from '@kbn/apm-types';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -33,21 +33,17 @@ export const LinkToApmServices = ({ entityId }: LinkToApmServicesProps) => {
   const linkToApmServices = http.basePath.prepend(`/app/apm/services?${queryString}`);
 
   return (
-    <EuiButtonEmpty
+    <EuiLink
       aria-label={i18n.translate('xpack.infra.assetDetails.apmServicesLink.ariaLabel', {
         defaultMessage: 'Show all APM services',
       })}
       data-test-subj="infraAssetDetailsViewAPMShowAllServicesButton"
-      size="xs"
-      flush="both"
       href={linkToApmServices}
-      iconSide="right"
-      iconType="sortRight"
     >
       <FormattedMessage
         id="xpack.infra.hostsViewPage.flyout.viewApmServicesLinkLabel"
         defaultMessage="Show all"
       />
-    </EuiButtonEmpty>
+    </EuiLink>
   );
 };

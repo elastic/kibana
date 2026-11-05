@@ -13,6 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEsqlColumns } from '@kbn/esql-utils';
 import { EuiComboBox, EuiFormRow, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { getRuleProjectRouting } from '../../../utils/get_rule_project_routing';
 import type { ComposeDiscoverAction, ComposeDiscoverState } from '../types';
 import type { FormValues } from '../../../form/types';
 import { EsqlQuerySummarySection, getEsqlSummaryState } from './esql_query_summary_section';
@@ -46,11 +47,15 @@ export function AlertConditionStep({
 
   // Committed pipeline query for output-column lookup and STATS BY auto-populate.
   const committedQuery = useMemo(
-    () => getTimeFieldResolutionQuery(query, isAlert, state.queryCommitted),
-    [query, isAlert, state.queryCommitted]
+    () => getTimeFieldResolutionQuery(query, state.queryCommitted),
+    [query, state.queryCommitted]
   );
 
-  const { timeFieldOptions, isTimeFieldResolved } = useComposeDiscoverTimeField();
+  const { timeFieldOptions, isTimeFieldResolved, isResolvingTimeField } =
+    useComposeDiscoverTimeField();
+  // Resolution reports unresolved while the date fields are still loading.
+  // Showing that as a validation error flashes the time field on every remount.
+  const timeFieldInvalid = !isResolvingTimeField && !isTimeFieldResolved;
 
   // Time field and grouping depend on a resolved query. Disable them until a
   // non-empty query is committed (no committed query, or committed-but-empty).
@@ -74,6 +79,7 @@ export function AlertConditionStep({
       const cols = await getEsqlColumns({
         esqlQuery: committedQuery,
         search: services.data.search.search,
+        projectRouting: getRuleProjectRouting(committedQuery, services.cps),
       });
       return cols.map((c) => c.name);
     },
@@ -86,9 +92,15 @@ export function AlertConditionStep({
    * Auto-populate group fields from the STATS BY clause whenever the committed
    * query changes. Re-derives on every new Apply so switching indices updates
    * the group fields instead of leaving stale values from the previous query.
-   * Skips the first run when editing to preserve API-seeded grouping defaults.
+   * In edit mode the first non-empty query is the saved rule: seed the ref
+   * during render so that query is never treated as a change. Capturing an
+   * empty first paint (the flyout remounts before watch() has the query)
+   * would otherwise re-seed and drop the user's group fields.
    */
-  const autoPopulatedForRef = useRef<string | null>(isEditing ? committedQuery : null);
+  const autoPopulatedForRef = useRef<string | null>(null);
+  if (isEditing && autoPopulatedForRef.current === null && committedQuery) {
+    autoPopulatedForRef.current = committedQuery;
+  }
   useEffect(() => {
     if (!state.queryCommitted || !committedQuery) return;
     if (autoPopulatedForRef.current === committedQuery) return;
@@ -151,9 +163,9 @@ export function AlertConditionStep({
           defaultMessage: 'Time field',
         })}
         fullWidth
-        isInvalid={!isTimeFieldResolved}
+        isInvalid={timeFieldInvalid}
         error={
-          !isTimeFieldResolved ? (
+          timeFieldInvalid ? (
             <span data-test-subj="composeDiscoverTimeFieldError">
               {i18n.translate('xpack.alertingV2.composeDiscover.alertCondition.timeFieldError', {
                 defaultMessage:
@@ -169,7 +181,7 @@ export function AlertConditionStep({
           options={timeFieldOptions}
           value={currentTimeFieldIsOption ? timeField : ''}
           hasNoInitialSelection={!currentTimeFieldIsOption}
-          isInvalid={!isTimeFieldResolved}
+          isInvalid={timeFieldInvalid}
           onChange={(e) => setValue('timeField', e.target.value, { shouldDirty: true })}
           disabled={queryDependentFieldsDisabled}
           data-test-subj="composeDiscoverTimeField"

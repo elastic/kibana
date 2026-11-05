@@ -35,6 +35,12 @@ import type { ExportRequestBody } from './export_request_body_schema';
 export interface ExportRouteParams {
   /** KQL base filter (e.g. `action_id: "abc"` or `schedule_id: "x" AND ...`) */
   baseFilter: string;
+  /**
+   * Live-query `action_id` already matched against its parent action. Lets the
+   * search strategy verify it on the actions index and read unstamped documents.
+   * Scheduled exports MUST leave it unset.
+   */
+  actionId?: string;
   /** Metadata fields specific to this export type */
   metadata: Pick<ExportMetadata, 'action_id' | 'query' | 'execution_count'>;
   /** Filename prefix (e.g. `osquery-results-{id}` or `osquery-scheduled-results-{id}-{count}`) */
@@ -61,6 +67,7 @@ export const createExportRouteHandler =
     params: ExportRouteParams
   ) => {
     const {
+      actionId,
       baseFilter,
       metadata: routeMetadata,
       fileNamePrefix,
@@ -189,7 +196,8 @@ export const createExportRouteHandler =
     // provided, so the PIT itself must carry the correct index scope.
     // ignore_unavailable mirrors query.all_results.dsl.ts.
     // If openPointInTime throws, there is no PIT to close — handle separately.
-    const ccsEnabled = await hasConnectedRemoteClusters(internalEsClient);
+    // A fanned-out CPS read does not also add CCS `*:` remote expressions.
+    const ccsEnabled = !cpsActive && (await hasConnectedRemoteClusters(internalEsClient));
 
     let pitId: string;
     try {
@@ -265,6 +273,7 @@ export const createExportRouteHandler =
         closePit,
         baseRequest: {
           factoryQueryType: OsqueryQueries.exportResults,
+          ...(actionId !== undefined ? { actionId } : {}),
           baseFilter,
           kuery,
           agentIds,

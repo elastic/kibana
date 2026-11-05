@@ -15,7 +15,7 @@ import type {
 import { ACTION_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server';
 import type { ConfigurationAttributes } from '../../../common/types/domain';
 import { CONNECTOR_ID_REFERENCE_NAME } from '../../common/constants';
-import { decodeOrThrow } from '../../common/runtime_types';
+import { decodeOrThrowZod } from '../../common/runtime_types';
 import { CASE_CONFIGURE_SAVED_OBJECT } from '../../../common/constants';
 import {
   transformFieldsToESModel,
@@ -36,9 +36,11 @@ import type {
   ConfigurationPersistedAttributes,
 } from '../../common/types/configure';
 import {
-  ConfigurationPartialAttributesRt,
-  ConfigurationTransformedAttributesRt,
+  ConfigurationPartialAttributesSchema,
+  ConfigurationTransformedAttributesSchema,
 } from '../../common/types/configure';
+import { OWNER_INFO } from '../../../common/constants/owners';
+import type { Owner } from '../../../common/constants/types';
 
 export class CaseConfigureService {
   constructor(private readonly log: Logger) {}
@@ -95,7 +97,7 @@ export class CaseConfigureService {
 
       const validatedConfigs: ConfigurationSavedObjectTransformed[] = [];
       for (const config of transformedConfigs.saved_objects) {
-        const validatedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(
+        const validatedAttributes = decodeOrThrowZod(ConfigurationTransformedAttributesSchema)(
           config.attributes
         );
 
@@ -118,7 +120,9 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to POST a new case configuration`);
 
-      const decodedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(attributes);
+      const decodedAttributes = decodeOrThrowZod(ConfigurationTransformedAttributesSchema)(
+        attributes
+      ) as ConfigurationTransformedAttributes;
 
       const esConfigInfo = transformAttributesToESModel(decodedAttributes);
 
@@ -148,7 +152,9 @@ export class CaseConfigureService {
     try {
       this.log.debug(`Attempting to UPDATE case configuration ${configurationId}`);
 
-      const decodedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(updatedAttributes);
+      const decodedAttributes = decodeOrThrowZod(ConfigurationPartialAttributesSchema)(
+        updatedAttributes
+      ) as Partial<ConfigurationTransformedAttributes>;
 
       const esUpdateInfo = transformAttributesToESModel(decodedAttributes);
 
@@ -172,7 +178,7 @@ export class CaseConfigureService {
 
       const transformedConfig = transformUpdateResponseToExternalModel(updatedConfiguration);
 
-      const validatedAttributes = decodeOrThrow(ConfigurationPartialAttributesRt)(
+      const validatedAttributes = decodeOrThrowZod(ConfigurationPartialAttributesSchema)(
         transformedConfig.attributes
       );
 
@@ -188,7 +194,7 @@ const transformToExternalAndValidate = (
   configuration: SavedObject<ConfigurationPersistedAttributes>
 ) => {
   const transformedConfig = transformToExternalModel(configuration);
-  const validatedAttributes = decodeOrThrow(ConfigurationTransformedAttributesRt)(
+  const validatedAttributes = decodeOrThrowZod(ConfigurationTransformedAttributesSchema)(
     transformedConfig.attributes
   );
 
@@ -242,7 +248,13 @@ function transformToExternalModel(
     : (configuration.attributes
         .observableTypes as ConfigurationTransformedAttributes['observableTypes']);
 
-  const extractObservables = configuration.attributes.extractObservables ?? true;
+  const ownerAutoExtractDefault =
+    OWNER_INFO[configuration.attributes.owner as Owner]?.features.observables.autoExtractDefault ??
+    false;
+  const extractObservables = configuration.attributes.extractObservables ?? ownerAutoExtractDefault;
+  const workflowTags = !configuration.attributes.workflowTags
+    ? []
+    : (configuration.attributes.workflowTags as ConfigurationTransformedAttributes['workflowTags']);
 
   return {
     ...configuration,
@@ -253,6 +265,7 @@ function transformToExternalModel(
       templates,
       observableTypes,
       extractObservables,
+      workflowTags,
     },
   };
 }

@@ -10,9 +10,9 @@ import { useEffect, useMemo } from 'react';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type { InfraTimerangeInput } from '../../../../../common/http_api/snapshot_api';
 import type { UseSnapshotRequest } from './use_snaphot';
-import { getInventoryRequestSchema } from '../lib/get_inventory_request_schema';
 import { useSnapshot } from './use_snaphot';
 import { useWaffleOptionsContext } from './use_waffle_options';
+import { getInventoryRequestSchema } from '../lib/get_inventory_request_schema';
 
 const ONE_MINUTE = 60;
 const ONE_HOUR = ONE_MINUTE * 60;
@@ -61,6 +61,7 @@ export function useTimeline({
   shouldReload: boolean;
 }) {
   const { preferredSchema } = useWaffleOptionsContext();
+  const requestSchema = getInventoryRequestSchema(preferredSchema);
   const displayInterval = useMemo(() => getDisplayInterval(interval), [interval]);
   const timeLengthResult = useMemo(
     () => getTimeLengthFromInterval(displayInterval),
@@ -89,7 +90,7 @@ export function useTimeline({
       accountId,
       region,
       includeTimeseries: true,
-      schema: getInventoryRequestSchema(nodeType, preferredSchema),
+      schema: requestSchema,
     },
     { sendRequestImmediately: false }
   );

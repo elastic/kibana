@@ -6,7 +6,7 @@
  */
 
 import { ToolResultType } from '@kbn/agent-builder-common';
-import { euid } from '@kbn/entity-store/common/euid_helpers';
+import { euid, getBuiltInEntityDefinition } from '@kbn/entity-store/common/euid_helpers';
 import type { EntityType } from '../../../../../../common/entity_analytics/types';
 import { createToolHandlerContext, createToolTestMocks } from '../../../../__mocks__/test_helpers';
 import { assetCriticalityDynamicInlineToolHandler } from './asset_criticality_esql';
@@ -136,7 +136,7 @@ describe('assetCriticalityDynamicInlineToolHandler', () => {
         index: ASSET_CRITICALITY_INDEX,
         nlQuery: 'What is the asset criticality?',
         additionalContext: expect.stringContaining(
-          `${euid.esql.getEuidDocumentsContainsIdFilter('host')}`
+          `${euid.esql.getEuidDocumentsContainsIdFilter(getBuiltInEntityDefinition('host'))}`
         ),
         execute: 'data',
       })

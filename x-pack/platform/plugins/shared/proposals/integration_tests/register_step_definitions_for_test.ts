@@ -8,11 +8,13 @@
 import type { WorkflowRunFixture } from '@kbn/workflows-execution-engine/test_helpers';
 import type { ProposalsService } from '../server/services/proposals_service';
 import type { ProposalPrivilegesChecker } from '../server/services/check_proposal_privileges';
+import type { ResolveProposalUser } from '../server/services/resolve_proposal_user';
 import { getCheckDecidePrivilegesStepDefinition } from '../server/step_types/check_decide_privileges_step';
 import { getCloneProposalStepDefinition } from '../server/step_types/clone_proposal_step';
 import { getCreateProposalStepDefinition } from '../server/step_types/create_proposal_step';
 import { getGetLatestRevisionStepDefinition } from '../server/step_types/get_latest_revision_step';
 import { getGetProposalStepDefinition } from '../server/step_types/get_proposal_step';
+import { getSettleIncompleteProposalStepDefinition } from '../server/step_types/settle_incomplete_proposal_step';
 import { getUpdateProposalStepDefinition } from '../server/step_types/update_proposal_step';
 
 /**
@@ -27,20 +29,32 @@ export const registerStepDefinitionsForTest = ({
   engine,
   getProposalsService,
   privileges,
+  // The execution runs under a fake request with no principal by default, so
+  // the step's own resolution yields nothing and `decidedBy` falls back to the
+  // username the workflow carries from the gate output.
+  resolveUser = async () => undefined,
 }: {
   engine: WorkflowRunFixture;
   getProposalsService: () => ProposalsService;
   privileges: ProposalPrivilegesChecker;
+  resolveUser?: ResolveProposalUser;
 }) => {
-  // The execution runs under a fake request with no principal, so the step's
-  // own resolution yields nothing and `decidedBy` falls back to the username
-  // the workflow carries from the gate output — the same degradation a resume
-  // by an API key takes.
-  const resolveUser = async () => undefined;
+  const resolveWorkerUser = async () => undefined;
 
   const definitions = [
-    getCreateProposalStepDefinition({ getProposalsService, resolveUser, privileges }),
-    getUpdateProposalStepDefinition({ getProposalsService, resolveUser, privileges }),
+    getCreateProposalStepDefinition({
+      getProposalsService,
+      resolveUser,
+      resolveWorkerUser,
+      privileges,
+    }),
+    getUpdateProposalStepDefinition({
+      getProposalsService,
+      resolveUser,
+      resolveWorkerUser,
+      privileges,
+    }),
+    getSettleIncompleteProposalStepDefinition({ getProposalsService }),
     getCheckDecidePrivilegesStepDefinition({ privileges }),
     getGetProposalStepDefinition({ getProposalsService, privileges }),
     getCloneProposalStepDefinition({ getProposalsService, privileges }),

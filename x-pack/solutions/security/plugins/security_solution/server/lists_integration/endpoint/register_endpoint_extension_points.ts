@@ -12,6 +12,7 @@ import { getExceptionsPreUpdateItemHandler } from './handlers/exceptions_pre_upd
 import { getExceptionsPreGetOneHandler } from './handlers/exceptions_pre_get_one_handler';
 import { getExceptionsPreSummaryHandler } from './handlers/exceptions_pre_summary_handler';
 import { getExceptionsPreDeleteItemHandler } from './handlers/exceptions_pre_delete_item_handler';
+import { getExceptionsPreDeleteListHandler } from './handlers/exceptions_pre_delete_list_handler';
 import { getExceptionsPreExportHandler } from './handlers/exceptions_pre_export_handler';
 import { getExceptionsPreMultiListFindHandler } from './handlers/exceptions_pre_multi_list_find_handler';
 import { getExceptionsPreSingleListFindHandler } from './handlers/exceptions_pre_single_list_find_handler';
@@ -49,6 +50,12 @@ export const registerListsPluginEndpointExtensionPoints = (
   registerListsExtensionPoint({
     type: 'exceptionsListPreDeleteItem',
     callback: getExceptionsPreDeleteItemHandler(endpointAppContextService),
+  });
+
+  // PRE-DELETE list
+  registerListsExtensionPoint({
+    type: 'exceptionsListPreDeleteList',
+    callback: getExceptionsPreDeleteListHandler(endpointAppContextService),
   });
 
   // PRE-EXPORT

@@ -8,17 +8,16 @@
 import type { KibanaResponseFactory, Logger } from '@kbn/core/server';
 import {
   ProposalConflictError,
-  ProposalExpiredError,
   ProposalForbiddenError,
   ProposalInvalidActionInputError,
   ProposalNotFoundError,
 } from '../services/errors';
 
 /**
- * Maps service errors to the outcomes the queue UI distinguishes: gone for an
- * expired deadline, conflict for "someone decided first", bad request for an
- * action input the action could never accept, forbidden for a missing
- * privilege.
+ * Maps service errors to the outcomes the queue UI distinguishes: conflict for
+ * "someone decided first" (including an expired deadline — see
+ * `ProposalsService.assertDecidable`), bad request for an action input the
+ * action could never accept, forbidden for a missing privilege.
  */
 export const handleRouteError = (
   error: unknown,
@@ -27,9 +26,6 @@ export const handleRouteError = (
 ) => {
   if (error instanceof ProposalNotFoundError) {
     return response.notFound({ body: { message: error.message } });
-  }
-  if (error instanceof ProposalExpiredError) {
-    return response.customError({ statusCode: 410, body: { message: error.message } });
   }
   if (error instanceof ProposalConflictError) {
     return response.conflict({ body: { message: error.message } });

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import simpleGit from 'simple-git';
+import { simpleGit } from 'simple-git';
 
 import { run } from '@kbn/dev-cli-runner';
 import type { CodeOwnersEntry } from '@kbn/code-owners';

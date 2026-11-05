@@ -5,73 +5,90 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 
 import {
   BULK_FILTER_MAX_RESOURCES,
   BULK_QUERY_SAMPLE_SIZE,
-  ID_MAX_LENGTH,
   MAX_BULK_ITEMS,
   MAX_KQL_LENGTH,
   MAX_SEARCH_LENGTH,
 } from './constants';
+import { entityIdSchema } from './common';
 import { errorResponseSchema } from './error_response_schema';
 
-export const bulkByIdsSchema = z
-  .object({
-    ids: z
-      .array(z.string().min(1).max(ID_MAX_LENGTH))
-      .min(1)
-      .max(MAX_BULK_ITEMS)
-      .describe('Explicit list of IDs to operate on.'),
-  })
-  .strict()
-  .meta({ id: 'alerting_bulk_by_ids_request' });
+export const bulkByIdsSchema = lazySchema(() =>
+  z
+    .object({
+      ids: z
+        .array(entityIdSchema)
+        .min(1)
+        .max(MAX_BULK_ITEMS)
+        .superRefine((ids, ctx) => {
+          const seen = new Set<string>();
+          ids.forEach((id, index) => {
+            if (seen.has(id)) {
+              ctx.addIssue({
+                code: 'custom',
+                message: `Each id can appear at most once per request; [${id}] is repeated`,
+                path: [index],
+              });
+            }
+            seen.add(id);
+          });
+        })
+        .describe('Explicit list of IDs to operate on. Each id can appear at most once.'),
+    })
+    .strict()
+    .meta({ id: 'alerting_bulk_by_ids_request' })
+);
 
 export type BulkByIdsParams = z.infer<typeof bulkByIdsSchema>;
 
-export const bulkByQuerySchema = z
-  .object({
-    filter: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_KQL_LENGTH)
-      .optional()
-      .describe(
-        `KQL filter string to match target resources. At most ${BULK_FILTER_MAX_RESOURCES} matching resources are processed per request. Cannot be empty; to target every resource use \`match_all: true\`.`
-      ),
-    search: z
-      .string()
-      .trim()
-      .min(1)
-      .max(MAX_SEARCH_LENGTH)
-      .optional()
-      .describe(
-        'Free-text search string matched against the resource-defined searchable fields. Cannot be empty; to target every resource use `match_all: true`.'
-      ),
-    match_all: z
-      .literal(true)
-      .optional()
-      .describe(
-        'When true, targets every resource. Requires an explicit opt-in. Omitted by default.'
-      ),
-    force: z
-      .boolean()
-      .optional()
-      .default(false)
-      .describe(
-        'When true, executes the operation. When false (default), returns a dry-run preview with `match_count` and a `sample` of matching resource IDs so the client can verify before committing.'
-      ),
-  })
-  .strict()
-  .refine((data) => data.filter != null || data.search != null || data.match_all === true, {
-    message: 'At least one of filter, search, or match_all must be provided.',
-  })
-  .refine((data) => data.match_all !== true || (data.filter == null && data.search == null), {
-    message: '`match_all` cannot be combined with `filter` or `search`.',
-  })
-  .meta({ id: 'alerting_bulk_by_query_request' });
+export const bulkByQuerySchema = lazySchema(() =>
+  z
+    .object({
+      filter: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_KQL_LENGTH)
+        .optional()
+        .describe(
+          `KQL filter string to match target resources. At most ${BULK_FILTER_MAX_RESOURCES} matching resources are processed per request. Cannot be empty; to target every resource use \`match_all: true\`.`
+        ),
+      search: z
+        .string()
+        .trim()
+        .min(1)
+        .max(MAX_SEARCH_LENGTH)
+        .optional()
+        .describe(
+          'Free-text search string matched against the resource-defined searchable fields. Cannot be empty; to target every resource use `match_all: true`.'
+        ),
+      match_all: z
+        .literal(true)
+        .optional()
+        .describe(
+          'When true, targets every resource. Requires an explicit opt-in. Omitted by default.'
+        ),
+      force: z
+        .boolean()
+        .optional()
+        .default(false)
+        .describe(
+          'When true, executes the operation. When false (default), returns a dry-run preview with `match_count` and a `sample` of matching resource IDs so the client can verify before committing.'
+        ),
+    })
+    .strict()
+    .refine((data) => data.filter != null || data.search != null || data.match_all === true, {
+      message: 'At least one of filter, search, or match_all must be provided.',
+    })
+    .refine((data) => data.match_all !== true || (data.filter == null && data.search == null), {
+      message: '`match_all` cannot be combined with `filter` or `search`.',
+    })
+    .meta({ id: 'alerting_bulk_by_query_request' })
+);
 
 // Use `z.input` so `force` (which has a `.default(false)`) is optional at the
 // call site. The server applies the default via the route's Zod parser.
@@ -94,27 +111,31 @@ export type BulkByQueryParams = z.input<typeof bulkByQuerySchema>;
  * issues, the conflicting version, the resource id) that clients can
  * surface without having to parse `message`.
  */
-export const bulkErrorSchema = z.object({
-  id: z.string().describe('The identifier of the resource that failed.'),
-  error: errorResponseSchema.pick({ code: true, message: true, details: true }),
-});
+export const bulkErrorSchema = lazySchema(() =>
+  z.object({
+    id: z.string().describe('The identifier of the resource that failed.'),
+    error: errorResponseSchema.pick({ code: true, message: true, details: true }),
+  })
+);
 
 /**
  * Response shape for an executed bulk operation. Identical across the
  * by-ID bulk routes and the executed (`force: true`) variant of each
  * by-query endpoint, regardless of the underlying resource kind.
  */
-export const bulkResponseSchema = z
-  .object({
-    affected_count: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe('Number of resources the operation successfully touched.'),
-    errors: z.array(bulkErrorSchema).describe('Errors encountered during the operation.'),
-  })
-  .describe('Result of an executed bulk operation.')
-  .meta({ id: 'alerting_bulk_operation_response' });
+export const bulkResponseSchema = lazySchema(() =>
+  z
+    .object({
+      affected_count: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe('Number of resources the operation successfully touched.'),
+      errors: z.array(bulkErrorSchema).describe('Errors encountered during the operation.'),
+    })
+    .describe('Result of an executed bulk operation.')
+    .meta({ id: 'alerting_bulk_operation_response' })
+);
 
 export type BulkResponse = z.infer<typeof bulkResponseSchema>;
 
@@ -123,28 +144,32 @@ export type BulkResponse = z.infer<typeof bulkResponseSchema>;
  * Callers can inspect `match_count` and `sample` to confirm the query
  * targets the intended resources before re-sending with `force: true`.
  */
-export const dryRunResponseSchema = z
-  .object({
-    match_count: z
-      .number()
-      .int()
-      .nonnegative()
-      .describe(
-        `Total number of resources matching the query. A dry run never fails on size, but if this exceeds ${BULK_FILTER_MAX_RESOURCES}, re-sending the same query with \`force: true\` is rejected with \`BULK_QUERY_MATCH_LIMIT_EXCEEDED\`; narrow the query before executing.`
-      ),
-    sample: z
-      .array(z.string())
-      .max(BULK_QUERY_SAMPLE_SIZE)
-      .describe(
-        `Sample of matching resource IDs (up to ${BULK_QUERY_SAMPLE_SIZE}) for spot-checking before executing.`
-      ),
-  })
-  .describe('Dry-run preview returned by a by-query bulk endpoint when `force` is false.')
-  .meta({ id: 'alerting_bulk_dry_run_response' });
+export const dryRunResponseSchema = lazySchema(() =>
+  z
+    .object({
+      match_count: z
+        .number()
+        .int()
+        .nonnegative()
+        .describe(
+          `Total number of resources matching the query. A dry run never fails on size, but if this exceeds ${BULK_FILTER_MAX_RESOURCES}, re-sending the same query with \`force: true\` is rejected with \`BULK_QUERY_MATCH_LIMIT_EXCEEDED\`; narrow the query before executing.`
+        ),
+      sample: z
+        .array(z.string())
+        .max(BULK_QUERY_SAMPLE_SIZE)
+        .describe(
+          `Sample of matching resource IDs (up to ${BULK_QUERY_SAMPLE_SIZE}) for spot-checking before executing.`
+        ),
+    })
+    .describe('Dry-run preview returned by a by-query bulk endpoint when `force` is false.')
+    .meta({ id: 'alerting_bulk_dry_run_response' })
+);
 
 export type DryRunResponse = z.infer<typeof dryRunResponseSchema>;
 
 /** Union of dry-run and executed responses returned by the by-query endpoints. */
-export const bulkByQueryResultSchema = z.union([dryRunResponseSchema, bulkResponseSchema]);
+export const bulkByQueryResultSchema = lazySchema(() =>
+  z.union([dryRunResponseSchema, bulkResponseSchema])
+);
 
 export type BulkByQueryResult = z.infer<typeof bulkByQueryResultSchema>;

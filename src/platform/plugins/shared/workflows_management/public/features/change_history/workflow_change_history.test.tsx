@@ -113,50 +113,55 @@ jest.mock('./use_workflow_change_history_preview_validation', () => ({
   })),
 }));
 
-jest.mock('@kbn/code-editor', () => ({
-  monaco: {
-    MarkerSeverity: { Error: 8 },
-    editor: {
-      createModel: jest.fn(() => ({ dispose: jest.fn() })),
-      create: jest.fn(() => ({
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        getModel: jest.fn(() => ({ dispose: jest.fn() })),
-        updateOptions: jest.fn(),
-        createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
-      })),
-      createDiffEditor: jest.fn(() => ({
-        setModel: jest.fn(),
-        dispose: jest.fn(),
-        layout: jest.fn(),
-        updateOptions: jest.fn(),
-        getLineChanges: jest.fn(() => [
-          {
-            originalStartLineNumber: 1,
-            originalEndLineNumber: 1,
-            modifiedStartLineNumber: 1,
-            modifiedEndLineNumber: 1,
-          },
-        ]),
-        onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
-        getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
-        getModifiedEditor: jest.fn(() => ({
-          updateOptions: jest.fn(),
-          revealLineInCenter: jest.fn(),
+jest.mock('@kbn/code-editor', () => {
+  const actual = jest.requireActual('@kbn/code-editor');
+
+  return {
+    CODE_EDITOR_DEFAULT_THEME_ID: actual.CODE_EDITOR_DEFAULT_THEME_ID,
+    initializeRegisteredLanguagesTheme: jest.fn(),
+    applyKbnCodeEditorChromeOverrides: jest.fn(() => ({ dispose: jest.fn() })),
+    monaco: {
+      MarkerSeverity: { Error: 8 },
+      editor: {
+        ...actual.monaco.editor,
+        createModel: jest.fn(() => ({ dispose: jest.fn() })),
+        create: jest.fn(() => ({
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          getDomNode: jest.fn(() => document.createElement('div')),
           getModel: jest.fn(() => ({ dispose: jest.fn() })),
+          updateOptions: jest.fn(),
           createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
         })),
-      })),
-      setModelMarkers: jest.fn(),
-      onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+        createDiffEditor: jest.fn(() => ({
+          setModel: jest.fn(),
+          dispose: jest.fn(),
+          layout: jest.fn(),
+          getContainerDomNode: jest.fn(() => document.createElement('div')),
+          updateOptions: jest.fn(),
+          getLineChanges: jest.fn(() => [
+            {
+              originalStartLineNumber: 1,
+              originalEndLineNumber: 1,
+              modifiedStartLineNumber: 1,
+              modifiedEndLineNumber: 1,
+            },
+          ]),
+          onDidUpdateDiff: jest.fn(() => ({ dispose: jest.fn() })),
+          getOriginalEditor: jest.fn(() => ({ updateOptions: jest.fn() })),
+          getModifiedEditor: jest.fn(() => ({
+            updateOptions: jest.fn(),
+            revealLineInCenter: jest.fn(),
+            getModel: jest.fn(() => ({ dispose: jest.fn() })),
+            createDecorationsCollection: jest.fn(() => ({ clear: jest.fn() })),
+          })),
+        })),
+        setModelMarkers: jest.fn(),
+        onDidChangeMarkers: jest.fn(() => ({ dispose: jest.fn() })),
+      },
     },
-  },
-}));
-
-jest.mock('@kbn/workflows-ui', () => ({
-  useDefineWorkflowsMonacoTheme: jest.fn(),
-  WORKFLOWS_MONACO_EDITOR_THEME: 'workflows-theme',
-}));
+  };
+});
 
 jest.mock('../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),

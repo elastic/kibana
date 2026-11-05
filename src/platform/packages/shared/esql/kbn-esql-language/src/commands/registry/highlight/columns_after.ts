@@ -13,7 +13,7 @@ import { getHighlightColumnNames } from './utils';
 
 export const columnsAfter = (command: ESQLCommand, previousColumns: ESQLColumnData[]) => {
   const highlightCommand = command as ESQLAstHighlightCommand;
-  const highlightColumnNames = getHighlightColumnNames(highlightCommand);
+  const highlightColumnNames = getHighlightColumnNames(highlightCommand, previousColumns);
 
   // Build a map from previous columns so we can replace on collision.
   // ES replaces same-named columns: empty prefix (`prefix = ""`) overwrites the source column.

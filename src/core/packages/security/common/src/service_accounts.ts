@@ -15,11 +15,16 @@
 export interface CreateServiceAccountParams {
   name: string;
   /**
-   * Role names to bound the new account's privileges by, on backends that support them. Omit to
-   * have them derived from the creating user's own roles where possible. An empty list is
-   * rejected rather than treated as "derive them for me", because the two mean different things.
+   * Free text of up to 1,000 characters that describes the account. Kibana trims leading and
+   * trailing whitespace, and treats a blank description as no description.
    */
-  roles?: string[];
+  description?: string;
+  /**
+   * Role names that bound the new account's privileges. Required and non-empty: an account is
+   * never given its creator's privileges by default, since a workload inheriting whatever its
+   * last editor could do is the model service accounts exist to replace.
+   */
+  roles: string[];
 }
 
 /**
@@ -84,6 +89,46 @@ export interface ServiceAccountWorkloadCoordinates extends ServiceAccountWorkloa
 }
 
 /**
+ * A workload bound to a service account, as reported to the account's management surfaces. The
+ * workload type is scoped to the plugin that registered it, so `pluginId` and `workloadType` name
+ * the type together.
+ *
+ * @public
+ */
+export interface ServiceAccountBoundWorkload {
+  pluginId: string;
+  workloadType: string;
+  workloadId: string;
+  /**
+   * What to call the workload in the UI: the title its workload type resolved, or the workload id
+   * when there is none.
+   */
+  displayName: string;
+  /**
+   * The name the owning plugin registered for the workload type. Absent when that plugin is not
+   * loaded, in which case the UI shows `workloadType`.
+   */
+  typeName?: string;
+  /**
+   * Link to the workload. It already carries the base path and the space of the binding, so use
+   * it as is.
+   */
+  href?: string;
+}
+
+/** Parameters for minting credentials for a workload, optionally pinned to an account. @public */
+export interface ServiceAccountWorkloadRequestParams extends ServiceAccountWorkloadCoordinates {
+  /** Reject before minting if the verified binding points to another account. */
+  expectedServiceAccountId?: string;
+  /**
+   * The id of this run of the workload in the calling plugin's own records, such as a workflow
+   * execution id. Recorded on the run's `service_account_assume` audit events; the other events of
+   * the run share their `trace.id`. Held to the same length limit as a workload ID.
+   */
+  executionId?: string;
+}
+
+/**
  * Parameters for binding a service account to a workload. The binding is created in the space of
  * the request, and the returned {@link ServiceAccountWorkloadBinding} reports which space that
  * was, for a caller that has to name it again later.
@@ -107,4 +152,8 @@ export interface ServiceAccount {
   id: string;
   /** The name the account was created with. */
   name: string;
+  /** The description the account was created with. It is absent when the account has none. */
+  description?: string;
+  /** The role names the account was created with. See {@link CreateServiceAccountParams.roles}. */
+  roles: string[];
 }

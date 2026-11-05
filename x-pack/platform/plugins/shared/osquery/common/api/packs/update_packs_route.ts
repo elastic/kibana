@@ -12,7 +12,7 @@ import {
   resultTypeRt,
   rruleScheduleConfigPartialRt,
   nonEmptyBoundedString,
-  MIN_OSQUERY_VERSION_MAX_LENGTH,
+  nonEmptyOsqueryVersionString,
   PLATFORM_MAX_LENGTH,
 } from './shared_schemas';
 
@@ -27,7 +27,7 @@ export const updatePacksRequestBodySchema = t.partial({
   interval: t.union([toNumberRt, t.null]),
   rrule_schedule: t.union([rruleScheduleConfigPartialRt, t.null]),
   // V5: pack-level execution defaults (nullable to allow explicit clear)
-  min_osquery_version: t.union([nonEmptyBoundedString(MIN_OSQUERY_VERSION_MAX_LENGTH), t.null]),
+  min_osquery_version: t.union([nonEmptyOsqueryVersionString, t.null]),
   result_type: t.union([resultTypeRt, t.null]),
   platform: t.union([nonEmptyBoundedString(PLATFORM_MAX_LENGTH), t.null]),
 });

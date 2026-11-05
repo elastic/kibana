@@ -90,7 +90,6 @@ const baseProps: DataGridCellValueElementProps = {
   colIndex: 0,
   fieldFormats: fieldFormatsMock,
   closePopover: jest.fn(),
-  columnsMeta: undefined,
 };
 
 describe('RuleNameCellRenderer', () => {

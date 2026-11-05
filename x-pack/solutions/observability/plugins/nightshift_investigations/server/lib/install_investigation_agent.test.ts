@@ -8,35 +8,39 @@
 import { AgentAccessControlMode } from '@kbn/agent-builder-common';
 import { agentBuilderMocks } from '@kbn/agent-builder-plugin/server/mocks';
 import {
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-  SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+  NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
 } from '../agents/investigation';
 import { installInvestigationAgent } from './install_investigation_agent';
 
 describe('installInvestigationAgent', () => {
-  it('ensures a system-owned persisted typed agent in the requested space', async () => {
-    const agentBuilder = agentBuilderMocks.createStart();
-    const availability = { cacheMode: 'space' as const, handler: jest.fn() };
+  it.each([true, false, undefined])(
+    'ensures a system-owned persisted typed agent in the requested space with hidden: %s',
+    async (hidden) => {
+      const agentBuilder = agentBuilderMocks.createStart();
+      const availability = { cacheMode: 'space' as const, handler: jest.fn() };
 
-    await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability });
+      await installInvestigationAgent({ agentBuilder, spaceId: 'space-1', availability, hidden });
 
-    expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
-      spaceId: 'space-1',
-      availability,
-      agent: {
-        id: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_ID,
-        type: SIGNIFICANT_EVENTS_INVESTIGATION_AGENT_TYPE_ID,
-        name: 'Nightshift Investigator',
-        description: expect.any(String),
-        labels: ['observability', 'streams', 'significant-events', 'investigation', 'root-cause'],
-        avatar_symbol: 'NI',
-        access_control: { access_mode: AgentAccessControlMode.Public },
-        configuration: {
-          tools: [],
-          skill_ids: [],
-          connector_ids: [],
+      expect(agentBuilder.agents.ensure).toHaveBeenCalledWith({
+        spaceId: 'space-1',
+        availability,
+        hidden,
+        agent: {
+          id: NIGHTSHIFT_INVESTIGATION_AGENT_ID,
+          type: NIGHTSHIFT_INVESTIGATION_AGENT_TYPE_ID,
+          name: 'Nightshift Investigator',
+          description: expect.any(String),
+          labels: ['observability', 'significant-events', 'investigation', 'cortex', 'sandbox'],
+          avatar_symbol: 'NI',
+          access_control: { access_mode: AgentAccessControlMode.Public },
+          configuration: {
+            tools: [],
+            skill_ids: [],
+            connector_ids: [],
+          },
         },
-      },
-    });
-  });
+      });
+    }
+  );
 });

@@ -29,6 +29,7 @@ export class HooksService {
 
     return {
       register: (bundle) => this.registry.register(bundle),
+      registerCycleHook: (definition) => this.registry.registerCycleHook(definition),
     };
   }
 
@@ -40,6 +41,7 @@ export class HooksService {
     return createHooksRunner({
       logger: this.setupDeps.logger.get('hooks'),
       getHooksForLifecycle: (lifecycle) => this.registry.getHooksForLifecycle(lifecycle),
+      getCycleHooks: () => this.registry.getCycleHooks(),
     });
   }
 }

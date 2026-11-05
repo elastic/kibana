@@ -67,6 +67,7 @@ export const setupMockCoreStartServices = (
       entityStore: {
         createCRUDClient: jest.fn().mockReturnValue({}),
         createResolutionClient: undefined,
+        createResolutionRulesClient: undefined,
         getMaintainerStatus: jest.fn().mockResolvedValue([]),
       },
       security: mockSecurityStart,

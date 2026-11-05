@@ -11,6 +11,8 @@ applies_to:
 
 The Sublime Security connector enables searching flagged and user-reported email, retrieving message details and machine-learning verdicts, and remediating email threats by quarantining, trashing, or restoring message groups in Sublime Security.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-sublime-security-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.
@@ -67,7 +69,7 @@ List mailboxes
 
 Quarantine message groups
 :   Quarantine one or more message groups, removing the messages from user mailboxes and catching late-arriving copies. Requires a Sublime Enterprise plan. Returns a `task_id`.
-    - `messageGroupIds` (required): Canonical IDs of the groups to quarantine (1-500).
+    - `messageGroupIds` (required): Canonical IDs of the groups to quarantine (1-10,000).
     - `classification` (optional): For example, `malicious`. `reportLabel` (optional): For example, `phishing`.
     - `reviewComment` (optional): Comment recorded in the Sublime audit trail.
 

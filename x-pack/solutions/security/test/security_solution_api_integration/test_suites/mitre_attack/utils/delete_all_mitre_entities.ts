@@ -10,8 +10,11 @@ import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-se
 import { MITRE_ATTACK_ENTITY_SO_TYPE } from '@kbn/security-mitre-attack-common';
 
 /**
- * Removes MITRE entity saved objects for a specific framework version.
- * Use this for cleanup after seeding a fixture version (e.g. OLDER_MOCK_FRAMEWORK_VERSION).
+ * Removes MITRE entity saved objects for a specific framework version across
+ * every framework (the filter does not constrain `framework`, so seeding
+ * enterprise and atlas rows at the same version and deleting that version
+ * removes both). Use this for cleanup after seeding a fixture version
+ * (e.g. OLDER_MOCK_FRAMEWORK_VERSION or ATLAS_MOCK_FRAMEWORK_VERSION).
  */
 export const deleteMitreEntitiesByVersion = async (
   es: Client,

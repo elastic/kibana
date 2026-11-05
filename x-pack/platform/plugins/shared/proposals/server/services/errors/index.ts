@@ -5,8 +5,9 @@
  * 2.0.
  */
 
+export { ProposalAlreadyExistsError } from './proposal_already_exists_error';
 export { ProposalConflictError } from './proposal_conflict_error';
-export { ProposalExpiredError } from './proposal_expired_error';
 export { ProposalForbiddenError } from './proposal_forbidden_error';
 export { ProposalInvalidActionInputError } from './proposal_invalid_action_input_error';
+export { ProposalLookupTruncatedError } from './proposal_lookup_truncated_error';
 export { ProposalNotFoundError } from './proposal_not_found_error';

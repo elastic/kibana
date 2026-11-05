@@ -5,19 +5,26 @@
  * 2.0.
  */
 
+import { memoize, once } from 'lodash';
 import type { FieldValue, QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { z } from '@kbn/zod/v4';
 import { platformCoreTools, ToolType } from '@kbn/agent-builder-common';
-import { hasStartEndParams } from '@kbn/esql-utils';
+import { getAnySourceCommandFromESQLQuery, hasStartEndParams } from '@kbn/esql-utils';
 import {
   executeEsql,
   buildTimeRangeParams,
   interpolateEsqlQuery,
 } from '@kbn/agent-builder-genai-utils/tools/utils/esql';
+import { sanitizeToolId } from '@kbn/agent-builder-genai-utils/langchain';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
-import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
+import type { DynamicSchemaBuiltinToolDefinition } from '@kbn/agent-builder-server';
 import { getToolResultId } from '@kbn/agent-builder-server/tools';
 import { resolveTimeRange } from './screen_context_utils';
+import {
+  createIncludeFrozenSchema,
+  getIncludeFrozenByDefault,
+  getIncludeFrozenParam,
+} from './include_frozen_schema';
 
 /**
  * Elasticsearch caps a request body at 100MB; this is a courtesy bound well under it. It has to be
@@ -26,7 +33,15 @@ import { resolveTimeRange } from './screen_context_utils';
  */
 const MAX_FILTER_LENGTH = 100_000;
 
-const executeEsqlToolSchema = z.object({
+const getTimeRangeNotAppliedWarning = (query: string): string => {
+  const example =
+    getAnySourceCommandFromESQLQuery(query) === 'PROMQL'
+      ? 'PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>). Do not add a WHERE clause on @timestamp after PROMQL: its output has no @timestamp column.'
+      : 'WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.';
+  return `The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. ${example}`;
+};
+
+const createExecuteEsqlToolSchemaShape = () => ({
   query: z.string().describe('The ES|QL query to execute'),
   params: z
     .record(z.string(), z.union([z.string(), z.number(), z.boolean()]))
@@ -41,7 +56,7 @@ const executeEsqlToolSchema = z.object({
     })
     .optional()
     .describe(
-      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend; otherwise the query runs without it and a warning is returned.'
+      '(Optional) Time range for named parameters ?_tstart and ?_tend. Falls back to screen context or last 24 hours. Only applied when the query references ?_tstart / ?_tend, e.g. `WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend`, or `PROMQL index=<target> start=?_tstart end=?_tend <name>=(<expression>)`; otherwise the query runs without it and a warning is returned.'
     ),
   limit: z
     .number()
@@ -57,9 +72,47 @@ const executeEsqlToolSchema = z.object({
     .describe(
       '(Optional) An Elasticsearch Query DSL object combined with the query using AND, e.g. {"term": {"status": "open"}}. It can only narrow the results, never widen them. This is not a WHERE clause: it is pushed down to the data source, so it removes documents before any ES|QL command sees them, and it is parsed separately from the query text, so it cannot reference ?named parameters.'
     ),
+  timeout_seconds: z
+    .number()
+    .int()
+    .min(1)
+    .max(300)
+    .optional()
+    .describe(
+      "(Optional) The maximum seconds to wait for this query before giving up. It can only shorten the wait: the deployment's own request timeout (30 seconds by default) still applies, so a larger value has no effect beyond it, and when omitted that timeout applies alone. A short value makes a query over a large or frozen-tier data set time out, and `limit` does not shorten a scan."
+    ),
 });
 
-export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolSchema> => {
+const createExecuteEsqlToolSchema = memoize((includeFrozenByDefault: boolean) =>
+  z.object({
+    ...createExecuteEsqlToolSchemaShape(),
+    include_frozen: createIncludeFrozenSchema(includeFrozenByDefault),
+  })
+);
+
+const createServerlessExecuteEsqlToolSchema = once(() =>
+  z.object(createExecuteEsqlToolSchemaShape())
+);
+
+type ExecuteEsqlToolSchema =
+  | ReturnType<typeof createExecuteEsqlToolSchema>
+  | ReturnType<typeof createServerlessExecuteEsqlToolSchema>;
+
+const generateEsqlTool = sanitizeToolId(platformCoreTools.generateEsql);
+
+const dataTiersSection = `### Data tiers
+
+The \`include_frozen\` parameter controls whether indices on the frozen tier are queried; its description states the default.
+Querying the frozen tier requires recovering searchable snapshots from object storage and can take several minutes, so expect such queries to be slow or to time out.
+If results look incomplete for a time range that reaches far into the past and frozen tier data was excluded, tell the user that frozen tier data was not searched.
+
+`;
+
+export const executeEsqlTool = ({
+  isServerless = false,
+}: {
+  isServerless?: boolean;
+} = {}): DynamicSchemaBuiltinToolDefinition<ExecuteEsqlToolSchema> => {
   return {
     id: platformCoreTools.executeEsql,
     type: ToolType.builtin,
@@ -67,15 +120,19 @@ export const executeEsqlTool = (): BuiltinToolDefinition<typeof executeEsqlToolS
 
 ## Usage
 
-**IMPORTANT**: This tool only **runs** queries; it does not write them.
-Think of this as the final step after a query has been prepared.
+This tool runs an ES|QL query; it does not write one.
 
-You **must** get the query from one of two sources before calling this tool:
-1.  The output of the \`${platformCoreTools.generateEsql}\` tool (if the tool is available).
-2.  A verbatim query provided directly by the user.
+### Where the query comes from
 
-Under no circumstances should you invent, guess, or modify a query yourself for this tool.
-If you need a query, use the \`${platformCoreTools.generateEsql}\` tool first.
+By default, when you need a new query, use the \`${generateEsqlTool}\` tool rather than writing it yourself: it inspects the target data and applies ES|QL guidance that is easy to get wrong when writing a query from memory.
+Adapting an earlier query to a new question, such as another metric or field, counts as writing a new query: call \`${generateEsqlTool}\` again for each new question.
+
+You can run a query as-is when it comes from:
+- the user,
+- your instructions or a skill you loaded, such as a query template,
+- the result of another tool, or an attachment.
+
+These are default guidelines. If your instructions or a skill you loaded tell you to write ES|QL queries yourself and run them with this tool, do so. Do the same if the \`${generateEsqlTool}\` tool is not available to you.
 
 ### Using a limit
 
@@ -90,12 +147,11 @@ Use it only when something outside the query itself requires the results to be n
 It is parsed separately from the query text, so it cannot reference \`?named\` parameters.
 Prefer a filter that every targeted index can match: against a wildcard pattern such as \`FROM logs-*\`, a clause naming a field that only some indices have will drop the others from the results.
 
-### Data tiers
+### Waiting time
 
-Indices on the frozen tier are always excluded, because querying them requires recovering searchable snapshots from object storage and can take several minutes.
-If results look incomplete for a time range that reaches far into the past, tell the user that frozen tier data was not searched.
+Set \`timeout_seconds\` to fail fast on exploratory queries over large or frozen-tier data; a query that hits it returns an error.
 
-## API documentation
+${isServerless ? '' : dataTiersSection}## API documentation
 - ES|QL reference: https://www.elastic.co/docs/reference/query-languages/esql
 - Query DSL reference (for the filter parameter): https://www.elastic.co/docs/reference/query-languages/querydsl`,
     annotations: {
@@ -105,17 +161,19 @@ If results look incomplete for a time range that reaches far into the past, tell
       idempotentHint: true,
       openWorldHint: false,
     },
-    schema: executeEsqlToolSchema,
-    handler: async (
-      {
+    getSchema: async (schemaContext) =>
+      isServerless
+        ? createServerlessExecuteEsqlToolSchema()
+        : createExecuteEsqlToolSchema(await getIncludeFrozenByDefault(schemaContext)),
+    handler: async (toolParams, { esClient, attachments }) => {
+      const {
         query: esqlQuery,
         params: esqlParams = {},
         time_range: explicitTimeRange,
         limit = 100,
         filter: esqlFilter,
-      },
-      { esClient, attachments }
-    ) => {
+        timeout_seconds: timeoutSeconds,
+      } = toolParams;
       const usesTimeRangeParams = hasStartEndParams(esqlQuery);
       const timeRange = resolveTimeRange(attachments, explicitTimeRange);
       const timeRangeParams = usesTimeRangeParams ? buildTimeRangeParams(timeRange) ?? [] : [];
@@ -133,6 +191,8 @@ If results look incomplete for a time range that reaches far into the past, tell
         esClient: esClient.asCurrentUser,
         limit,
         filter: esqlFilter as QueryDslQueryContainer | undefined,
+        includeFrozen: getIncludeFrozenParam(toolParams),
+        ...(timeoutSeconds !== undefined ? { timeoutMs: timeoutSeconds * 1000 } : {}),
       });
 
       // need the interpolated query to return in the results / to display in the UI
@@ -168,8 +228,7 @@ If results look incomplete for a time range that reaches far into the past, tell
                 {
                   type: ToolResultType.other as const,
                   data: {
-                    warning:
-                      'The provided time_range was not applied: the query does not reference the ?_tstart / ?_tend named parameters, so it ran without that time filter. To apply a time range, reference the parameters in the query, e.g. WHERE @timestamp >= ?_tstart AND @timestamp < ?_tend.',
+                    warning: getTimeRangeNotAppliedWarning(esqlQuery),
                   },
                 },
               ]

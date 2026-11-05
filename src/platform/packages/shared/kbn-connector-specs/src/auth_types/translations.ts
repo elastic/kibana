@@ -428,6 +428,10 @@ export const API_KEY_HEADER_WITH_TLS_AUTH_LABEL = i18n.translate(
   }
 );
 
+export const BASIC_WITH_TLS_AUTH_LABEL = i18n.translate('connectorSpecs.basicWithTlsAuth.label', {
+  defaultMessage: 'Basic authentication (with TLS)',
+});
+
 export const BEARER_WITH_TLS_AUTH_CA_LABEL = i18n.translate(
   'connectorSpecs.bearerWithTlsAuth.ca.label',
   {

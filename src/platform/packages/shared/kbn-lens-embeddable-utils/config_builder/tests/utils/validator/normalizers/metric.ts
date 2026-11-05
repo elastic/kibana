@@ -13,10 +13,10 @@
 
 import {
   LENS_METRIC_BREAKDOWN_DEFAULT_MAX_COLUMNS,
+  LENS_METRIC_DEFAULT_COLOR_STEPS,
   type DataType,
   type MetricVisualizationState,
 } from '@kbn/lens-common';
-
 import type { LensAttributes } from '../../../../types';
 import {
   DEFAULT_PRIMARY_ICON_ALIGNMENT,
@@ -129,7 +129,7 @@ const alignVisualizationDefaults: NormalizerConfig<MetricAttributes> = {
       }
     }
 
-    // Icons with no API mapping (e.g. legacy `empty`/`popout`) are dropped by the transform.
+    // Icons with no API mapping (e.g. legacy `empty`) are dropped by the transform.
     if (viz.icon && iconCompat.toAPI(viz.icon) === undefined) {
       delete viz.icon;
     }
@@ -499,7 +499,11 @@ export const normalizeMetric = mergeNormalizers([
     columnRemapping: getColumnRemapping(visualization),
     inferColumnDataType,
   })),
-  getPaletteNormalizer<MetricAttributes>('state.visualization.palette', isSingleValueMetric),
+  getPaletteNormalizer<MetricAttributes>(
+    'state.visualization.palette',
+    LENS_METRIC_DEFAULT_COLOR_STEPS,
+    isSingleValueMetric
+  ),
   alignIds,
   alignStaticValueMax,
   alignEmptyLinkedLayers,

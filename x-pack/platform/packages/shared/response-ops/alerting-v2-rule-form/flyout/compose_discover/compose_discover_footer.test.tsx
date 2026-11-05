@@ -49,7 +49,7 @@ const Wrapper = ({
     metadata: { name: '', enabled: true },
     timeField: '@timestamp',
     schedule: { every: '1m', lookback: '5m' },
-    query: { format: 'composed', base: '', breach: { segment: '' } },
+    query: { base: '', breach: { segment: '' } },
     stateTransitionAlertDelayMode: 'immediate',
     stateTransitionRecoveryDelayMode: 'immediate',
     ...formValues,
@@ -129,7 +129,7 @@ describe('ComposeDiscoverFooter', () => {
     it('calls onNext when Next is clicked', () => {
       const { onNext } = renderFooter({
         formValues: {
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       fireEvent.click(screen.getByTestId('composeDiscoverNext'));
@@ -142,7 +142,7 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       fireEvent.click(screen.getByTestId('composeDiscoverSubmit'));
@@ -187,20 +187,20 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { yamlMode: true, queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       fireEvent.click(screen.getByTestId('composeDiscoverYamlSubmit'));
       expect(onYamlSave).toHaveBeenCalledTimes(1);
     });
 
-    it('enables YAML save for a non-representable alert + standalone rule', () => {
+    it('enables YAML save for a non-representable alert rule', () => {
       const { onYamlSave } = renderFooter({
         stateOverrides: { yamlMode: true, queryCommitted: true },
         propsOverrides: { isCreate: false },
         formValues: {
           kind: 'alert',
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverYamlSubmit')).not.toBeDisabled();
@@ -244,7 +244,7 @@ describe('ComposeDiscoverFooter', () => {
       renderFooter({
         stateOverrides: { childOpen: true },
         formValues: {
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
@@ -255,34 +255,34 @@ describe('ComposeDiscoverFooter', () => {
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
-    it('enables Next for a conditionless standalone alert (no WHERE clause)', () => {
+    it('enables Next for a conditionless alert (no WHERE clause)', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
     });
 
-    it('disables Next for an empty standalone alert in edit mode', () => {
+    it('disables Next for an empty alert in edit mode', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'standalone', breach: { query: '' } },
+          query: { base: '', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
     });
 
-    it('enables Next for a composed alert with base but no breach segment (conditionless rule)', () => {
+    it('enables Next for an alert with base but no breach segment (conditionless rule)', () => {
       renderFooter({
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
@@ -293,7 +293,7 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: '', breach: { segment: '| WHERE x > 1' } },
+          query: { base: '', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
@@ -304,7 +304,7 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: '', breach: { segment: '' } },
+          query: { base: '', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
@@ -315,7 +315,7 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
@@ -326,7 +326,7 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'signal',
-          query: { format: 'standalone', breach: { query: 'FROM logs-*' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
@@ -338,7 +338,7 @@ describe('ComposeDiscoverFooter', () => {
         propsOverrides: { currentStep: DETAILS_STEP },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
@@ -350,7 +350,7 @@ describe('ComposeDiscoverFooter', () => {
         formValues: {
           kind: 'alert',
           timeField: '',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).toBeDisabled();
@@ -363,7 +363,7 @@ describe('ComposeDiscoverFooter', () => {
         formValues: {
           kind: 'alert',
           timeField: '',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverNext')).not.toBeDisabled();
@@ -435,19 +435,19 @@ describe('ComposeDiscoverFooter', () => {
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
+          query: { base: 'FROM logs-*', breach: { segment: '| WHERE x > 1' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverSubmit')).not.toBeDisabled();
     });
 
-    it('enables Submit for a composed alert with base but no breach segment (conditionless rule)', () => {
+    it('enables Submit for an alert with base but no breach segment (conditionless rule)', () => {
       renderFooter({
         propsOverrides: { isLastStep: true, isCreate: false },
         stateOverrides: { queryCommitted: true },
         formValues: {
           kind: 'alert',
-          query: { format: 'composed', base: 'FROM logs-*', breach: { segment: '' } },
+          query: { base: 'FROM logs-*', breach: { segment: '' } },
         },
       });
       expect(screen.getByTestId('composeDiscoverSubmit')).not.toBeDisabled();

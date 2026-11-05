@@ -13,7 +13,6 @@ import type {
   StopTransformsRequestSchema,
   StopTransformsResponseSchema,
 } from '../../../server/routes/api_schemas/stop_transforms';
-import { addInternalBasePath } from '../../../common/constants';
 import { getErrorMessage } from '../../../common/utils/errors';
 
 import { useAppDependencies, useToastNotifications } from '../app_dependencies';
@@ -29,7 +28,7 @@ export const useStopTransforms = () => {
 
   const mutation = useMutation({
     mutationFn: (reqBody: StopTransformsRequestSchema) =>
-      http.post<StopTransformsResponseSchema>(addInternalBasePath('stop_transforms'), {
+      http.post<StopTransformsResponseSchema>('/internal/transform/stop_transforms', {
         body: JSON.stringify(reqBody),
         version: '1',
       }),

@@ -19,8 +19,7 @@ const LANGUAGE_MENU_LABEL: Record<QueryBarLanguage, string> = {
 /**
  * Page object for the global query text input (`queryInput`) shared by
  * Discover, Dashboard, Maps, Visualize/Lens and other apps that embed
- * `unified_search`. Covers setting and clearing the live query without
- * submitting; callers own the submit step when they need it.
+ * `unified_search`.
  */
 export class QueryBar {
   constructor(private readonly page: ScoutPage) {}
@@ -33,6 +32,10 @@ export class QueryBar {
 
   async getQuery(): Promise<string> {
     return this.page.testSubj.locator('queryInput').inputValue();
+  }
+
+  async submitQuery(): Promise<void> {
+    await this.page.testSubj.click('querySubmitButton');
   }
 
   async clearQuery(): Promise<void> {

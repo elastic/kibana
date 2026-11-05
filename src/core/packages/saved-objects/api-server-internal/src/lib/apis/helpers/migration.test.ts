@@ -74,7 +74,10 @@ describe('MigrationHelper', () => {
       });
 
       expect(migrator.migrateDocument).toHaveBeenCalledTimes(1);
-      expect(migrator.migrateDocument).toHaveBeenCalledWith(doc, { allowDowngrade: true });
+      expect(migrator.migrateDocument).toHaveBeenCalledWith(doc, {
+        allowDowngrade: true,
+        allowSkipClone: true,
+      });
     });
 
     it('calls encryptionHelper.optionallyDecryptAndRedactSingleResult with the correct parameters', async () => {
@@ -153,7 +156,10 @@ describe('MigrationHelper', () => {
 
       expect(encryptionCallOrder).toBeLessThan(migrateCallOrder);
 
-      expect(migrator.migrateDocument).toHaveBeenCalledWith(decryptedDoc, { allowDowngrade: true });
+      expect(migrator.migrateDocument).toHaveBeenCalledWith(decryptedDoc, {
+        allowDowngrade: true,
+        allowSkipClone: true,
+      });
     });
   });
 });

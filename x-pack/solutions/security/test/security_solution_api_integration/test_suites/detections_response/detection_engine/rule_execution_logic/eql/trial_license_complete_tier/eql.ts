@@ -228,11 +228,11 @@ export default ({ getService }: FtrProviderContext) => {
       });
     });
 
-    // FLAKY: https://github.com/elastic/kibana/issues/180641
-    it.skip('classifies verification_exception errors as user errors', async () => {
+    // Task Manager metrics are held in memory per Kibana node, so MKI can serve them from a node that did not run the rule.
+    it('@skipInServerlessMKI classifies verification_exception errors as user errors', async () => {
       await getMetricsRequest(request, true);
       const rule: EqlRuleCreateProps = {
-        ...getEqlRuleForAlertTesting(['auditbeat-*']),
+        ...getEqlRuleForAlertTesting(['auditbeat-*'], 'eql-verification-exception-rule'),
         query: 'file where field.doesnt.exist == true',
       };
       const createdRule = await createRule(supertest, log, rule);
@@ -256,7 +256,7 @@ export default ({ getService }: FtrProviderContext) => {
         retry,
         false,
         (metrics) =>
-          metrics.metrics?.task_run?.value.by_type['alerting:siem__eqlRule'].user_errors === 1
+          metrics.metrics?.task_run?.value.by_type['alerting:siem__eqlRule']?.user_errors === 1
       );
       kbnExpect(
         metricsResponse.metrics?.task_run?.value.by_type['alerting:siem__eqlRule'].user_errors

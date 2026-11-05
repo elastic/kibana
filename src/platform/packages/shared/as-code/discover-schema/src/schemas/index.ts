@@ -15,4 +15,10 @@ export {
   discoverSessionApiEmbeddableByValueConfigSchema,
   discoverSessionApiEmbeddableByReferenceConfigSchema,
 } from './embeddable';
-export { discoverSessionApiTabSchema, discoverSessionApiDataSchema } from './session_data';
+export {
+  discoverSessionApiClassicTabSchema,
+  discoverSessionApiEsqlTabSchema,
+  discoverSessionApiMetricsTabSchema,
+  discoverSessionApiTabSchema,
+  discoverSessionApiDataSchema,
+} from './session_data';

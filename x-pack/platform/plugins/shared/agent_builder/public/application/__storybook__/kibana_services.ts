@@ -29,6 +29,48 @@ const INFERENCE_CONNECTORS_PATH = '/internal/search_inference_endpoints/connecto
 const getUiSetting = (key: string) =>
   key === AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID ? true : undefined;
 
+/** The user the stories act as. Matches the actor id of the user message event factory. */
+export const STORYBOOK_CURRENT_USER_ID = 'user-1';
+
+/** People that user profile lookups and suggestions return. */
+export const STORYBOOK_TEAMMATES = [
+  { uid: 'user-bran', fullName: 'Bran Castellano' },
+  { uid: 'user-brian', fullName: 'Brian Pierce' },
+  { uid: 'user-brianna', fullName: 'Brianna Thornton' },
+  { uid: 'user-phoebe', fullName: 'Phoebe Brix' },
+  { uid: 'user-julian', fullName: 'Julian Rosado' },
+  { uid: 'user-andrew', fullName: 'Andrew Kim' },
+  { uid: 'user-maria', fullName: 'Maria Lopez' },
+  { uid: 'user-samir', fullName: 'Samir Patel' },
+  { uid: 'user-olga', fullName: 'Olga Novak' },
+  { uid: 'user-tomas', fullName: 'Tomas Horak' },
+] as const;
+
+const getStorybookFullName = (uid: string): string => {
+  if (uid === STORYBOOK_CURRENT_USER_ID) {
+    return 'Test User';
+  }
+  return STORYBOOK_TEAMMATES.find((teammate) => teammate.uid === uid)?.fullName ?? uid;
+};
+
+const createStorybookUserProfile = (uid: string) => {
+  const fullName = getStorybookFullName(uid);
+  return {
+    uid,
+    enabled: true,
+    user: { username: uid, full_name: fullName },
+    data: {
+      avatar: {
+        initials: fullName
+          .split(' ')
+          .map((word) => word[0])
+          .join('')
+          .toUpperCase(),
+      },
+    },
+  };
+};
+
 export const createStorybookKibanaServices = (): StartServices =>
   ({
     analytics: { reportEvent: noOp },
@@ -87,6 +129,25 @@ export const createStorybookKibanaServices = (): StartServices =>
       getUrlForApp: () => '/',
       navigateToUrl: () => Promise.resolve(),
     },
+    userProfile: {
+      getCurrent: () => Promise.resolve(createStorybookUserProfile(STORYBOOK_CURRENT_USER_ID)),
+      bulkGet: ({ uids }: { uids: Set<string> }) =>
+        Promise.resolve([...uids].map(createStorybookUserProfile)),
+      suggest: (_path: string, { name }: { name: string }) =>
+        Promise.resolve(
+          STORYBOOK_TEAMMATES.filter(({ fullName }) =>
+            fullName.toLowerCase().includes(name.toLowerCase())
+          ).map(({ uid }) => createStorybookUserProfile(uid))
+        ),
+    },
     appParams: { history: {} },
-    plugins: {},
+    plugins: {
+      // Minimal stub so components like ConnectorTypeIcon can read the action type registry.
+      triggersActionsUi: {
+        actionTypeRegistry: {
+          has: () => false,
+          get: () => ({ iconClass: 'plugs' }),
+        },
+      },
+    },
   } as unknown as StartServices);

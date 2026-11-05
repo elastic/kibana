@@ -150,7 +150,6 @@ const fetchPage = async (
     liveHits,
     osqueryContext: mockOsqueryContext,
     request: mockRequest,
-    spaceId: 'default',
     cpsActive: false,
     logger: mockLogger,
   });

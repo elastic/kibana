@@ -28,7 +28,6 @@ import {
   LOGS_ECS_STREAM_NAME,
   ROOT_STREAM_NAMES,
 } from '@kbn/streams-schema';
-import type { KnowledgeIndicatorClientContract } from '@kbn/significant-events-schema';
 import type { StreamSummary } from '../../../common';
 import type { AttachmentClient } from './attachments/attachment_client';
 import {
@@ -84,7 +83,6 @@ export class StreamsClient {
       esClientAsInternalUser: ElasticsearchClient;
       esClient: ElasticsearchClient;
       attachmentClient: AttachmentClient;
-      getKnowledgeIndicatorClient?: () => Promise<KnowledgeIndicatorClientContract>;
       storageClient: StreamsStorageClient;
       logger: Logger;
       isServerless: boolean;

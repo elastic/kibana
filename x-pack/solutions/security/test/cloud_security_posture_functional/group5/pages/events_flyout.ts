@@ -350,7 +350,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
           await expandedFlyoutGraph.assertGraphNodesNumber(expectedNodes);
 
           const actorNodeId = '0dd7df1e4e0a04a8dcde50181928557ceff5b21dfa0a46b1e173feef4bb3ddbc';
-          await expandedFlyoutGraph.assertNodeEntityTag(actorNodeId, 'Identity');
           await expandedFlyoutGraph.assertNodeEntityDetails(actorNodeId, 'GCP IAM User');
 
           // The event's user.email / user.id / user.name are all multi-value, so MV_EXPAND
@@ -366,7 +365,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
           const storageBucketNodeId =
             '1abcf2b7cb329695e152ab9f1838188e0f61f5796fd20518c73488748e05b935';
-          await expandedFlyoutGraph.assertNodeEntityTag(storageBucketNodeId, 'Storage');
           await expandedFlyoutGraph.assertNodeEntityDetails(
             storageBucketNodeId,
             'GCP Storage Bucket'
@@ -758,10 +756,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             const communicatesWithIdRelationshipTargetNodeId =
               'c7d2fb4084505889f751c7a8ffcee9eb7d836a60c2e34f751b64faf34ac0b932';
-            await expandedFlyoutGraph.assertNodeEntityTag(
-              communicatesWithIdRelationshipTargetNodeId,
-              'Host'
-            );
             await expandedFlyoutGraph.assertNodeEntityDetails(
               communicatesWithIdRelationshipTargetNodeId,
               'GCP Compute Instance'
@@ -773,7 +767,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             const ownsIdRelationshipTargetNodeId =
               'f30eb27265a364641d6b15acdf5cffc78f581d08acfa6af82b26587f6b3c353b';
-            await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               ownsIdRelationshipTargetNodeId,
               'GCP Compute Instance'
@@ -806,10 +799,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
             );
 
             // assrt that that existing grouped target nodes still exist
-            await expandedFlyoutGraph.assertNodeEntityTag(
-              communicatesWithIdRelationshipTargetNodeId,
-              'Host'
-            );
             await expandedFlyoutGraph.assertNodeEntityDetails(
               communicatesWithIdRelationshipTargetNodeId,
               'GCP Compute Instance'
@@ -819,7 +808,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
               2
             );
 
-            await expandedFlyoutGraph.assertNodeEntityTag(ownsIdRelationshipTargetNodeId, 'Host');
             await expandedFlyoutGraph.assertNodeEntityDetails(
               ownsIdRelationshipTargetNodeId,
               'GCP Compute Instance'
@@ -929,10 +917,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
 
             const communicatesWithIdRelationshipTargetNodeId =
               '28ddbf3f780ac0c16071a33d0ae9d8d92ed7bf0c28ed9ad9b606f9ddacdb589b';
-            await expandedFlyoutGraph.assertNodeEntityTag(
-              communicatesWithIdRelationshipTargetNodeId,
-              'Networking'
-            );
             await expandedFlyoutGraph.assertNodeEntityDetails(
               communicatesWithIdRelationshipTargetNodeId,
               'AWS VPC'

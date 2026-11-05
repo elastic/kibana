@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { z } from '@kbn/zod/v4';
+import { z, lazySchema } from '@kbn/zod/v4';
 import type {
   AgentFormattedAttachment,
   AttachmentFormatContext,
@@ -14,9 +14,11 @@ import type {
 import type { Attachment } from '@kbn/agent-builder-common/attachments';
 import { DIAGNOSTIC_REPORT_ATTACHMENT_TYPE } from '../../../../common/constants';
 
-const diagnosticReportDataSchema = z.object({
-  content: z.string(),
-});
+const diagnosticReportDataSchema = lazySchema(() =>
+  z.object({
+    content: z.string(),
+  })
+);
 
 type DiagnosticReportData = z.infer<typeof diagnosticReportDataSchema>;
 

@@ -51,7 +51,7 @@ export const SemanticUniquenessPrompt = createPrompt({
   name: 'semantic_uniqueness_analysis',
   description: 'Evaluate semantic uniqueness of extracted KIs',
   input: z.object({
-    stream_name: z.string(),
+    source_id: z.string(),
     totals: z.string(),
     unique_kis_by_id: z.string(),
   }),

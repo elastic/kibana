@@ -16,12 +16,21 @@ jest.mock('@kbn/agent-builder-genai-utils', () => ({
 
 import { getIndexFields } from '@kbn/agent-builder-genai-utils';
 import { getIndexMappingsTool } from './get_index_mapping';
+import { createSchemaContext, resolveToolSchema } from './test_utils';
 
 const getIndexFieldsMock = getIndexFields as jest.MockedFunction<typeof getIndexFields>;
 
-const runTool = async (indices: string[], raw: boolean) => {
-  const result = (await getIndexMappingsTool().handler(
-    { indices, raw },
+const runTool = async (
+  indices: string[],
+  raw: boolean,
+  includeFrozen?: boolean,
+  includeFrozenByDefault = false,
+  isServerless = false
+) => {
+  const tool = getIndexMappingsTool({ isServerless });
+  const schema = await resolveToolSchema(tool, includeFrozenByDefault);
+  const result = (await tool.handler(
+    schema.parse({ indices, raw, include_frozen: includeFrozen }),
     agentBuilderMocks.tools.createHandlerContext()
   )) as ToolHandlerStandardReturn;
 
@@ -57,6 +66,92 @@ describe('getIndexMappingsTool', () => {
         resources: {
           'logs-aged-out': { warning: expect.stringContaining('frozen tier') },
         },
+      });
+    });
+
+    it('suggests opting in to the frozen tier', async () => {
+      const result = await runTool(['logs-aged-out'], false);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { fields: expect.stringContaining('include_frozen') },
+        },
+      });
+    });
+
+    it('omits the frozen tier explanation when frozen tier indices were included', async () => {
+      const result = await runTool(['logs-aged-out'], true, true);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { warning: 'No fields found.' },
+        },
+      });
+    });
+
+    it('omits the frozen tier explanation in serverless', async () => {
+      const result = await runTool(['logs-aged-out'], true, undefined, false, true);
+
+      expect(result?.data).toMatchObject({
+        resources: {
+          'logs-aged-out': { warning: 'No fields found.' },
+        },
+      });
+    });
+  });
+
+  describe('include_frozen', () => {
+    beforeEach(() => {
+      getIndexFieldsMock.mockResolvedValue({});
+    });
+
+    it('excludes frozen tier indices by default', async () => {
+      await runTool(['logs-*'], false);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
+
+    it('includes frozen tier indices when opted in', async () => {
+      await runTool(['logs-*'], false, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('includes frozen tier indices by default when the space setting is enabled', async () => {
+      await runTool(['logs-*'], false, undefined, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: true })
+      );
+    });
+
+    it('lets the agent override the default', async () => {
+      await runTool(['logs-*'], false, false, true);
+
+      expect(getIndexFieldsMock).toHaveBeenCalledWith(
+        expect.objectContaining({ includeFrozen: false })
+      );
+    });
+
+    describe('in serverless', () => {
+      it('does not expose include_frozen or read the space setting', async () => {
+        const context = createSchemaContext(true);
+        const schema = await getIndexMappingsTool({ isServerless: true }).getSchema(context);
+
+        expect(schema.shape).not.toHaveProperty('include_frozen');
+        expect(context.uiSettings.get).not.toHaveBeenCalled();
+      });
+
+      it('excludes frozen tier indices even when include_frozen is passed', async () => {
+        await runTool(['logs-*'], false, true, true, true);
+
+        expect(getIndexFieldsMock).toHaveBeenCalledWith(
+          expect.objectContaining({ includeFrozen: false })
+        );
       });
     });
   });

@@ -10,6 +10,11 @@ import { EuiBadge, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { isAlertingV2Enabled } from '@kbn/alerting-v2-utils';
+import {
+  OBSERVABILITY_ALERTING_APP_ID,
+  OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+} from '@kbn/deeplinks-observability';
+import type { LocatorHost } from '@kbn/rule-data-utils';
 
 import { useAlertingV2RuleLibraryLocator, useStartServices } from '../../../../../hooks';
 import { KibanaAssetType } from '../../../../../types';
@@ -27,17 +32,17 @@ const ALERTING_ENGINE_CLASSIC_BADGE = i18n.translate(
 
 const ALERTING_ENGINE_V2_BADGE = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeLabel',
-  { defaultMessage: 'v2' }
+  { defaultMessage: 'Universal' }
 );
 
 const ALERTING_ENGINE_CLASSIC_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineClassicBadgeAriaLabel',
-  { defaultMessage: 'Classic Alerting' }
+  { defaultMessage: 'Classic rules' }
 );
 
 const ALERTING_ENGINE_V2_ARIA_LABEL = i18n.translate(
   'xpack.fleet.epm.assets.alertingEngineV2BadgeAriaLabel',
-  { defaultMessage: 'Alerting v2' }
+  { defaultMessage: 'Universal rules' }
 );
 
 const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaLabel: string } => {
@@ -48,13 +53,20 @@ const getAlertingEngineBadge = (engine?: AlertingEngine): { label: string; ariaL
   return { label: ALERTING_ENGINE_CLASSIC_BADGE, ariaLabel: ALERTING_ENGINE_CLASSIC_ARIA_LABEL };
 };
 
+const OBSERVABILITY_RULE_LIBRARY_HOST: LocatorHost = {
+  app: OBSERVABILITY_ALERTING_APP_ID,
+  pathPrefix: OBSERVABILITY_ALERTING_RULE_LIBRARY_PATH,
+};
+
 const getAlertingAssetTitleHref = (
   asset: Pick<AlertingAsset, 'id' | 'attributes' | 'appLink'>,
   type: DisplayedAssetType,
-  getRuleLibraryRedirectUrl?: (params: { templateId?: string }) => string | undefined
+  getRuleLibraryUrl: (templateId: string) => string | undefined
 ): string | undefined => {
   if (type === KibanaAssetType.alertingRuleTemplate && isV2AlertingAsset(asset)) {
-    return getRuleLibraryRedirectUrl?.({ templateId: asset.id });
+    // Alerting v2 rule templates have no management destination; link them to the rule library.
+    // v2 templates are only listed where the Observability rule library exists.
+    return getRuleLibraryUrl(asset.id);
   }
   return asset.appLink;
 };
@@ -85,8 +97,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v2'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.alertingV2TabLabel"
-          defaultMessage="Alerting v2"
+          id="xpack.fleet.epm.assets.kibanaEsqlRulesTabLabel"
+          defaultMessage="Universal rules"
         />
       </EuiTab>
       <EuiTab
@@ -95,8 +107,8 @@ const AlertingEngineTabs: React.FunctionComponent<{
         isSelected={selectedEngineTab === 'v1'}
       >
         <FormattedMessage
-          id="xpack.fleet.epm.assets.classicAlertingTabLabel"
-          defaultMessage="Classic Alerting"
+          id="xpack.fleet.epm.assets.kibanaStandardRulesTabLabel"
+          defaultMessage="Classic rules"
         />
       </EuiTab>
     </EuiTabs>
@@ -121,16 +133,19 @@ const AlertingEngineBadge: React.FunctionComponent<{
 
 const useAlertingEngineAssets = (savedObjects: AlertingAsset[], type: DisplayedAssetType) => {
   const startServices = useStartServices();
+  const projectType = startServices.cloud?.serverless?.projectType;
   const isAlertingRuleTemplate = type === KibanaAssetType.alertingRuleTemplate;
   const hasV2Templates = savedObjects.some(isV2AlertingAsset);
-  const alertingV2Enabled = isAlertingV2Enabled(startServices);
-  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && alertingV2Enabled;
+  // Universal rules are only offered on Observability projects among serverless project types.
+  const isUniversalRulesAvailable =
+    isAlertingV2Enabled(startServices) && (!projectType || projectType === 'observability');
+  const showEngineUi = isAlertingRuleTemplate && hasV2Templates && isUniversalRulesAvailable;
   const [selectedEngineTab, setSelectedEngineTab] = useState<AlertingEngine>(
     hasV2Templates ? 'v2' : 'v1'
   );
 
   const listedSavedObjects = listAlertingAssets(savedObjects, {
-    hideV2: isAlertingRuleTemplate && !alertingV2Enabled,
+    hideV2: isAlertingRuleTemplate && !isUniversalRulesAvailable,
   });
   const visibleSavedObjects = showEngineUi
     ? filterAlertingAssetsByEngine(listedSavedObjects, selectedEngineTab)
@@ -150,6 +165,8 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
   savedObjects: AlertingAsset[];
 }> = ({ savedObjects, type }) => {
   const ruleLibraryLocator = useAlertingV2RuleLibraryLocator();
+  const getRuleLibraryUrl = (templateId: string) =>
+    ruleLibraryLocator?.getRedirectUrl({ templateId, host: OBSERVABILITY_RULE_LIBRARY_HOST });
   const {
     listedSavedObjects,
     visibleSavedObjects,
@@ -180,11 +197,7 @@ export const AlertingAssetsAccordion: React.FunctionComponent<{
           ? (asset) => <AlertingEngineBadge engine={asset.attributes?.engine} />
           : undefined
       }
-      getTitleHref={(asset) =>
-        getAlertingAssetTitleHref(asset, type, (params) =>
-          ruleLibraryLocator?.getRedirectUrl(params)
-        )
-      }
+      getTitleHref={(asset) => getAlertingAssetTitleHref(asset, type, getRuleLibraryUrl)}
     />
   );
 };

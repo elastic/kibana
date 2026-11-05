@@ -10,6 +10,7 @@
 import type { IRouter } from '@kbn/core/server';
 import { httpServerMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { WorkflowsManagementApiActions } from '@kbn/workflows';
+import { WorkflowNotFoundError } from '@kbn/workflows/common/errors';
 import {
   getManagedWorkflowSelectorVisibilityContext,
   getManagedWorkflowSolutionVisibilityContext,
@@ -18,7 +19,11 @@ import { registerWorkflowRoutes } from '.';
 import { ManagedWorkflowReadForbiddenError } from '../../managed_workflow_read_error';
 import type { RouteDependencies } from '../types';
 import { handleRouteError } from '../utils/route_error_handlers';
-import { WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY } from '../utils/route_security';
+import {
+  WORKFLOW_READ_WITH_EXECUTION_EXTENDED_SECURITY,
+  WORKFLOW_READ_WITH_MANAGED_SECURITY,
+  WORKFLOW_UPDATE_SECURITY,
+} from '../utils/route_security';
 import { createWorkflowManagementAuditLogMock } from '../utils/workflow_audit_logging.mock';
 
 jest.mock('../utils/route_error_handlers', () => ({
@@ -63,7 +68,9 @@ describe('Workflow routes', () => {
   let routeHandlers: Record<string, { handler: (...args: any[]) => Promise<any> }>;
   let routeSecurity: Record<string, unknown>;
   let mockApi: Record<string, jest.Mock>;
+  let mockBulkGetProfiles: jest.Mock;
   let mockSpaces: { getSpaceId: jest.Mock };
+  let mockAudit: ReturnType<typeof createWorkflowManagementAuditLogMock>;
   let mockLogger: ReturnType<typeof loggingSystemMock.createLogger>;
 
   const mockResponse = () => httpServerMock.createResponseFactory();
@@ -80,7 +87,10 @@ describe('Workflow routes', () => {
     routeSecurity = {};
     mockSpaces = { getSpaceId: jest.fn().mockReturnValue('default-space') };
     mockLogger = loggingSystemMock.createLogger();
+    mockAudit = createWorkflowManagementAuditLogMock();
+    jest.spyOn(mockAudit, 'logWorkflowUpdated');
 
+    mockBulkGetProfiles = jest.fn();
     mockApi = {
       getWorkflows: jest.fn(),
       getWorkflow: jest.fn(),
@@ -89,6 +99,7 @@ describe('Workflow routes', () => {
       findExistingWorkflowIds: jest.fn(),
       createWorkflow: jest.fn(),
       updateWorkflow: jest.fn(),
+      updateAccessControl: jest.fn(),
       deleteWorkflows: jest.fn(),
       bulkCreateWorkflows: jest.fn(),
       cloneWorkflow: jest.fn(),
@@ -114,6 +125,29 @@ describe('Workflow routes', () => {
     });
 
     const mockRouter = {
+      get: jest
+        .fn()
+        .mockImplementation(
+          (
+            config: Parameters<IRouter['get']>[0],
+            handler: (typeof routeHandlers)[string]['handler']
+          ) => {
+            routeSecurity[`GET:${config.path}`] = config.security;
+            routeHandlers[`GET:${config.path}`] = { handler };
+          }
+        ),
+      put: jest
+        .fn()
+        .mockImplementation(
+          (
+            config: Parameters<IRouter['put']>[0],
+            handler: (typeof routeHandlers)[string]['handler']
+          ) => {
+            routeSecurity[`PUT:${config.path}`] = config.security;
+            routeHandlers[`PUT:${config.path}`] = { handler };
+          }
+        ),
+      post: jest.fn(),
       versioned: {
         get: jest.fn().mockImplementation((config: { path: string; security?: unknown }) => {
           routeSecurity[`GET:${config.path}`] = config.security;
@@ -137,9 +171,14 @@ describe('Workflow routes', () => {
     registerWorkflowRoutes({
       router: mockRouter,
       api: mockApi as any,
+      workflowsService: {
+        getCoreStart: jest
+          .fn()
+          .mockResolvedValue({ userProfile: { bulkGet: mockBulkGetProfiles } }),
+      },
       logger: mockLogger,
       spaces: mockSpaces as any,
-      audit: createWorkflowManagementAuditLogMock(),
+      audit: mockAudit,
     } as unknown as RouteDependencies);
   });
 
@@ -181,7 +220,7 @@ describe('Workflow routes', () => {
           managedFilter: 'unmanaged',
         },
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
       expect(response.ok).toHaveBeenCalledWith({ body: list });
     });
@@ -203,7 +242,7 @@ describe('Workflow routes', () => {
           sortOrder: 'asc',
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -223,6 +262,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflows).toHaveBeenCalledWith(expect.any(Object), 'default-space', {
         includeExecutionHistory: true,
         includeManagedExecutionHistory: false,
+        request,
       });
     });
 
@@ -249,7 +289,7 @@ describe('Workflow routes', () => {
           visibilityContext: [getManagedWorkflowSelectorVisibilityContext('rule_action')],
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -280,7 +320,7 @@ describe('Workflow routes', () => {
           visibilityContext,
         }),
         'default-space',
-        { includeExecutionHistory: false, includeManagedExecutionHistory: false }
+        { includeExecutionHistory: false, includeManagedExecutionHistory: false, request }
       );
     });
 
@@ -333,7 +373,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
       expect(response.ok).toHaveBeenCalledWith({ body: workflow });
     });
 
@@ -423,6 +463,141 @@ describe('Workflow routes', () => {
     });
   });
 
+  describe('PUT:/internal/workflows/{id}/access_control', () => {
+    const key = 'PUT:/internal/workflows/{id}/access_control';
+
+    it('returns access metadata to an owner with Update but no Read privilege', async () => {
+      const result = {
+        owner_id: 'owner',
+        access_control: { access_mode: 'private', entries: [] },
+        lastUpdatedAt: '2026-09-14T00:00:00.000Z',
+        lastUpdatedBy: 'owner',
+        version: 7,
+      };
+      mockApi.updateAccessControl.mockResolvedValue(result);
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        body: { access_mode: 'private' },
+      });
+      Object.defineProperty(request, 'authzResult', {
+        value: {
+          [WorkflowsManagementApiActions.update]: true,
+          [WorkflowsManagementApiActions.read]: false,
+        },
+      });
+      const response = mockResponse();
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+      expect(routeSecurity[key]).toEqual(WORKFLOW_UPDATE_SECURITY);
+      expect(mockApi.updateAccessControl).toHaveBeenCalledWith(
+        'wf-1',
+        'default-space',
+        request.body,
+        request
+      );
+      expect(response.ok).toHaveBeenCalledWith({ body: result });
+      expect(response.ok.mock.calls[0][0]?.body).not.toHaveProperty('yaml');
+      expect(response.ok.mock.calls[0][0]?.body).not.toHaveProperty('definition');
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledWith(request, { id: 'wf-1' });
+    });
+
+    it('audits a failed access update, including failure after persistence', async () => {
+      const error = new Error('SML deletion failed after the ACL was saved');
+      mockApi.updateAccessControl.mockRejectedValue(error);
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        body: { access_mode: 'private' },
+      });
+      const response = mockResponse();
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledTimes(1);
+      expect(mockAudit.logWorkflowUpdated).toHaveBeenCalledWith(request, { id: 'wf-1', error });
+      expect(handleRouteError).toHaveBeenCalledWith(response, error);
+      expect(response.ok).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('GET:/internal/workflows/{id}/access_control/_profiles', () => {
+    const key = 'GET:/internal/workflows/{id}/access_control/_profiles';
+    const createRequest = (authzResult: Record<string, boolean> = defaultAuthzResult) => {
+      const request = httpServerMock.createKibanaRequest({ params: { id: 'wf-1' } });
+      Object.defineProperty(request, 'authzResult', { value: authzResult });
+      return request;
+    };
+
+    it('resolves only the owner and entries of a workflow the caller can read', async () => {
+      const profiles = [{ uid: 'owner', user: { username: 'jdoe' } }];
+      mockBulkGetProfiles.mockResolvedValue(profiles);
+      mockApi.getWorkflow.mockResolvedValue({
+        id: 'wf-1',
+        owner_id: 'owner',
+        access_control: { access_mode: 'private', entries: [{ id: 'entry', role: 'viewer' }] },
+      });
+      const request = createRequest();
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+
+      expect(routeSecurity[key]).toEqual(WORKFLOW_READ_WITH_MANAGED_SECURITY);
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
+      expect(mockBulkGetProfiles).toHaveBeenCalledWith({
+        uids: new Set(['owner', 'entry']),
+        dataPath: 'avatar',
+      });
+      expect(response.ok).toHaveBeenCalledWith({ body: profiles });
+    });
+
+    it('does not resolve entries of a public workflow, which are stored without validation', async () => {
+      mockBulkGetProfiles.mockResolvedValue([]);
+      mockApi.getWorkflow.mockResolvedValue({
+        id: 'wf-1',
+        owner_id: 'owner',
+        access_control: { access_mode: 'public', entries: [{ id: 'any-uid', role: 'viewer' }] },
+      });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).toHaveBeenCalledWith({
+        uids: new Set(['owner']),
+        dataPath: 'avatar',
+      });
+    });
+
+    it('does not look up profiles when the caller is not shown the owner or entries', async () => {
+      // `getWorkflow` strips them for callers who cannot manage the workflow.
+      mockApi.getWorkflow.mockResolvedValue({ id: 'wf-1' });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).not.toHaveBeenCalled();
+      expect(response.ok).toHaveBeenCalledWith({ body: [] });
+    });
+
+    it('answers not found for a workflow the caller cannot read', async () => {
+      mockApi.getWorkflow.mockResolvedValue(null);
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), createRequest(), response);
+
+      expect(mockBulkGetProfiles).not.toHaveBeenCalled();
+      expect(response.notFound).toHaveBeenCalled();
+    });
+
+    it('is forbidden without the workflow read privilege', async () => {
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(
+        createLicensingContext(),
+        createRequest({ [WorkflowsManagementApiActions.read]: false }),
+        response
+      );
+
+      expect(mockApi.getWorkflow).not.toHaveBeenCalled();
+      expect(response.forbidden).toHaveBeenCalled();
+    });
+  });
+
   describe('PUT:/api/workflows/managed/workflow/{id}', () => {
     const key = 'PUT:/api/workflows/managed/workflow/{id}';
 
@@ -458,7 +633,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
       const request = httpServerMock.createKibanaRequest({
         params: { id: 'wf-1' },
-        query: { force: false },
+        query: { force: false, acknowledgeAclLoss: false },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -467,6 +642,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
         force: false,
+        acknowledgeAclLoss: false,
       });
       expect(response.ok).toHaveBeenCalledWith();
     });
@@ -475,7 +651,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 1, failures: [] });
       const request = httpServerMock.createKibanaRequest({
         params: { id: 'wf-1' },
-        query: { force: true },
+        query: { force: true, acknowledgeAclLoss: true },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -484,8 +660,31 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['wf-1'], 'default-space', request, {
         force: true,
+        acknowledgeAclLoss: true,
       });
       expect(response.ok).toHaveBeenCalledWith();
+    });
+
+    it('should answer a delete that matched no workflow with a not-found error', async () => {
+      mockApi.deleteWorkflows.mockResolvedValue({ total: 1, deleted: 0, failures: [] });
+      jest.spyOn(mockAudit, 'logWorkflowDeleted');
+      const request = httpServerMock.createKibanaRequest({
+        params: { id: 'wf-1' },
+        query: { force: false, acknowledgeAclLoss: false },
+      });
+      const response = mockResponse();
+
+      await routeHandlers[key].handler(createLicensingContext(), request, response);
+
+      const error = new WorkflowNotFoundError('wf-1');
+      expect(handleRouteError).toHaveBeenCalledWith(response, error);
+      expect(mockAudit.logWorkflowDeleted).toHaveBeenCalledTimes(1);
+      expect(mockAudit.logWorkflowDeleted).toHaveBeenCalledWith(request, {
+        id: 'wf-1',
+        force: false,
+        error,
+      });
+      expect(response.ok).not.toHaveBeenCalled();
     });
   });
 
@@ -632,7 +831,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
-        query: { force: false },
+        query: { force: false, acknowledgeAclLoss: false },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -641,6 +840,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: false,
+        acknowledgeAclLoss: false,
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: { total: 2, deleted: 2, failures: [] },
@@ -657,7 +857,7 @@ describe('Workflow routes', () => {
       mockApi.deleteWorkflows.mockResolvedValue(apiResult);
       const request = httpServerMock.createKibanaRequest({
         body: { ids: ['a', 'b'] },
-        query: { force: true },
+        query: { force: true, acknowledgeAclLoss: true },
       });
       const response = mockResponse();
       const context = createLicensingContext() as any;
@@ -666,6 +866,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.deleteWorkflows).toHaveBeenCalledWith(['a', 'b'], 'default-space', request, {
         force: true,
+        acknowledgeAclLoss: true,
       });
       expect(response.ok).toHaveBeenCalledWith({
         body: { total: 2, deleted: 2, failures: [] },
@@ -690,11 +891,12 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['a'], 'default-space');
+      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['a'], 'default-space', request);
       expect(mockApi.getWorkflowsSourceByIds).toHaveBeenCalledWith(
         ['a'],
         'default-space',
-        undefined
+        undefined,
+        request
       );
       expect(response.ok).toHaveBeenCalledWith({ body: workflows });
     });
@@ -718,7 +920,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space');
+      expect(mockApi.getWorkflow).toHaveBeenCalledWith('wf-1', 'default-space', request);
       expect(mockApi.cloneWorkflow).toHaveBeenCalledWith(wf, 'default-space', request);
       expect(response.ok).toHaveBeenCalledWith({ body: cloned });
     });
@@ -790,7 +992,7 @@ describe('Workflow routes', () => {
 
       await routeHandlers[key].handler(context, request, response);
 
-      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['w1'], 'default-space');
+      expect(mockApi.getWorkflowsByIds).toHaveBeenCalledWith(['w1'], 'default-space', request);
       expect(response.ok).toHaveBeenCalled();
     });
 
@@ -925,6 +1127,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: false,
         includeManagedExecutionStats: false,
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: stats });
     });
@@ -949,6 +1152,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: true,
         includeManagedExecutionStats: false,
+        request,
       });
     });
 
@@ -969,6 +1173,7 @@ describe('Workflow routes', () => {
       expect(mockApi.getWorkflowStats).toHaveBeenCalledWith('default-space', {
         includeExecutionStats: true,
         includeManagedExecutionStats: true,
+        request,
       });
     });
   });
@@ -991,6 +1196,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'unmanaged',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });
@@ -1006,6 +1212,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'unmanaged',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });
@@ -1023,6 +1230,7 @@ describe('Workflow routes', () => {
 
       expect(mockApi.getWorkflowAggs).toHaveBeenCalledWith(['tags'], 'default-space', {
         managedFilter: 'all',
+        request,
       });
       expect(response.ok).toHaveBeenCalledWith({ body: aggs });
     });

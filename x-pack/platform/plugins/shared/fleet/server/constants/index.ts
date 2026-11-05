@@ -116,8 +116,6 @@ export {
   OUTPUT_HEALTH_DATA_STREAM,
   FLEET_SETUP_LOCK_TYPE,
   CLOUD_CONNECTOR_SAVED_OBJECT_TYPE,
-  // data streams
-  DATA_STREAM_INDEX_PATTERN_REGEX,
   type PrivilegeMapObject,
 } from '../../common/constants';
 
@@ -148,4 +146,5 @@ export {
 export { FILE_STORAGE_DATA_AGENT_INDEX } from './fleet_es_assets';
 export { FILE_STORAGE_METADATA_AGENT_INDEX } from './fleet_es_assets';
 export * from '../../common/constants/mappings';
+export * from '../../common/constants/schema_field_limits';
 export * from './max_concurrency_constants';

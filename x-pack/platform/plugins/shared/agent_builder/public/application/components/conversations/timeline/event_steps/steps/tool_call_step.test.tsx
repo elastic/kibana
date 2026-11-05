@@ -17,6 +17,10 @@ import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import { ToolCallStep } from './tool_call_step';
 import { FlyoutStackContext } from '../flyouts/flyout_stack_context';
 
+jest.mock('../../../../../context/conversation/conversation_context', () => ({
+  useConversationContext: () => ({ isEmbeddedContext: false }),
+}));
+
 const renderWithProviders = (ui: React.ReactElement) =>
   render(
     <I18nProvider>
@@ -80,6 +84,21 @@ describe('ToolCallStep', () => {
     const badge = screen.getByRole('status').querySelector('.euiBadge');
     expect(badge).toHaveTextContent('tool: search');
     expect(badge?.className).toContain('danger');
+  });
+
+  it('shows a stopped flyout when the turn is aborted and the step has no results', async () => {
+    const user = userEvent.setup();
+    const step = createToolCallStep({
+      tool_call_id: 'call-1',
+      tool_id: internalTools.runSubagent,
+      params: {},
+      results: [],
+    });
+    renderWithProviders(<ToolCallStep step={step} isAborted />);
+    expect(screen.getByRole('status')).toHaveTextContent('stopped');
+    await user.click(screen.getByRole('button'));
+    expect(screen.getByRole('dialog')).toHaveTextContent('Stopped');
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
   });
 
   describe('with FlyoutStackContext', () => {

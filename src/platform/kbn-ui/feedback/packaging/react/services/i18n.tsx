@@ -14,26 +14,114 @@ import React from 'react';
  *
  * Source components call `i18n.translate()` and render `<FormattedMessage>` for
  * internal labels. Without the Kibana i18n runtime, these stubs render the
- * `defaultMessage` (with `{placeholder}` interpolation) so the component works
- * out of the box for non-Kibana consumers.
+ * `defaultMessage` (with `{placeholder}` interpolation and `<tag>…</tag>`
+ * rendering by calling the matching function) so the component works out of the
+ * box for non-Kibana consumers.
  */
+
+type TagRenderer = (chunks: React.ReactNode[]) => React.ReactNode;
+
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const isTagRenderer = (value: unknown): value is TagRenderer => typeof value === 'function';
+
+/** Replaces `{placeholder}` values. Function values are rich-text tags and are left in place. */
+const interpolate = (template: string, values?: Record<string, unknown>): string => {
+  if (!values) {
+    return template;
+  }
+
+  return Object.entries(values).reduce((result, [key, val]) => {
+    if (isTagRenderer(val)) {
+      return result;
+    }
+    return result.replace(new RegExp(`\\{${escapeRegExp(key)}\\}`, 'g'), String(val));
+  }, template);
+};
+
+interface TagMatch {
+  key: string;
+  renderTag: TagRenderer;
+  start: number;
+  end: number;
+}
+
+/** Finds the first `<tag>…</tag>` in the template whose name is a function in `values`. */
+const findLeftmostTag = (
+  template: string,
+  values: Record<string, unknown>
+): TagMatch | undefined => {
+  const openingTag = /<([A-Za-z0-9_]+)>/g;
+  let found: RegExpExecArray | null;
+
+  while ((found = openingTag.exec(template)) !== null) {
+    const key = found[1];
+    const renderTag = values[key];
+    if (!isTagRenderer(renderTag)) {
+      continue;
+    }
+
+    const end = template.indexOf(`</${key}>`, found.index + found[0].length);
+    if (end === -1) {
+      continue;
+    }
+
+    return { key, renderTag, start: found.index, end };
+  }
+
+  return undefined;
+};
+
+/** Applies `{placeholder}` and `<tag>…</tag>` values to a default message. */
+export const renderDefaultMessage = (
+  template: string,
+  values?: Record<string, unknown>
+): React.ReactNode => {
+  if (!values) {
+    return template;
+  }
+
+  const parts: React.ReactNode[] = [];
+  let remaining = interpolate(template, values);
+  let tag = findLeftmostTag(remaining, values);
+
+  while (tag) {
+    const openLength = `<${tag.key}>`.length;
+    const closeLength = `</${tag.key}>`.length;
+    const before = remaining.slice(0, tag.start);
+    const inner = remaining.slice(tag.start + openLength, tag.end);
+
+    if (before) {
+      parts.push(before);
+    }
+    parts.push(tag.renderTag([inner]));
+
+    remaining = remaining.slice(tag.end + closeLength);
+    tag = findLeftmostTag(remaining, values);
+  }
+
+  if (remaining) {
+    parts.push(remaining);
+  }
+
+  if (parts.length === 1) {
+    return parts[0];
+  }
+
+  return (
+    <>
+      {parts.map((part, index) => (
+        <React.Fragment key={index}>{part}</React.Fragment>
+      ))}
+    </>
+  );
+};
 
 /** No-op `i18n.translate` that returns `defaultMessage` with interpolated values. */
 export const translate = (
   _id: string,
   options?: { defaultMessage?: string; values?: Record<string, unknown> }
-) => {
-  const msg = options?.defaultMessage ?? _id;
-
-  if (options?.values) {
-    return Object.entries(options.values).reduce(
-      (result, [key, val]) => result.replace(new RegExp(`\\{${key}\\}`, 'g'), String(val)),
-      msg
-    );
-  }
-
-  return msg;
-};
+): string => interpolate(options?.defaultMessage ?? _id, options?.values);
 
 /** No-op `FormattedMessage` component that renders `defaultMessage`. */
 export const FormattedMessage: React.FC<{
@@ -42,14 +130,7 @@ export const FormattedMessage: React.FC<{
   values?: Record<string, unknown>;
 }> = ({ id, defaultMessage, values }) => {
   if (values && defaultMessage) {
-    return (
-      <>
-        {Object.entries(values).reduce(
-          (msg, [key, val]) => msg.replace(new RegExp(`\\{${key}\\}`, 'g'), String(val)),
-          defaultMessage
-        )}
-      </>
-    );
+    return <>{renderDefaultMessage(defaultMessage, values)}</>;
   }
   return <>{defaultMessage ?? id}</>;
 };

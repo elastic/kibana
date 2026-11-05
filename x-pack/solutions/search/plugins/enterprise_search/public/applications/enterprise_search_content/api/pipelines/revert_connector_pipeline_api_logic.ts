@@ -14,7 +14,7 @@ export interface RevertConnectorPipelineArgs {
 }
 
 export const revertConnectorPipeline = async ({ indexName }: RevertConnectorPipelineArgs) => {
-  const route = `/internal/enterprise_search/indices/${indexName}/pipelines`;
+  const route = `/internal/enterprise_search/indices/${encodeURIComponent(indexName)}/pipelines`;
 
   return await HttpLogic.values.http.delete(route);
 };

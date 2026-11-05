@@ -72,6 +72,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context,
   actionsClient,
   username,
+  profileUid,
   item,
   original,
   allowMissingConnectorSecrets,
@@ -81,6 +82,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
   context: RulesClientContext;
   actionsClient: Awaited<ReturnType<RulesClientContext['getActionsClient']>>;
   username: string | null;
+  profileUid: string | null;
   item: BulkUpdateRulesItem<Params>;
   original: SavedObject<RawRule>;
   allowMissingConnectorSecrets?: boolean;
@@ -169,6 +171,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       id: ruleType.id,
       ruleName: data.name,
       username,
+      profileUid,
       shouldUpdateApiKey: originalRule.enabled,
       errorMessage: 'Error updating rule: could not create API key',
       apiKeyOwnership: { apiKeyCreatedByUser: originalRule.apiKeyCreatedByUser },
@@ -195,6 +198,7 @@ export const prepareUpdate = async <Params extends RuleParams>({
       notifyWhen,
       revision,
       updatedBy: username,
+      updatedByProfileUid: profileUid,
       updatedAt: new Date().toISOString(),
       artifacts: artifactsWithRefs,
       enabled: originalRule.enabled,

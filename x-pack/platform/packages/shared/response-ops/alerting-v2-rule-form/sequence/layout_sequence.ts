@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { RuleKind } from '@kbn/alerting-v2-schemas';
 import dagre, { graphlib } from '@dagrejs/dagre';
 import { MarkerType, Position } from '@xyflow/react';
 import { getNodeHeight, type SequenceNodeType } from './sequence_node';
@@ -57,7 +58,7 @@ export interface LayoutSequenceOptions {
   onOperatorChange?: (stepId: string, op: 'and' | 'or') => void;
   onDropRule?: (
     stepId: string,
-    payload: { id: string; name: string; groupingFields: string[]; kind: 'alert' | 'signal' }
+    payload: { id: string; name: string; groupingFields: string[]; kind: RuleKind }
   ) => void;
   onHopWindowChange?: (hopIndex: number, value: string) => void;
   closeAllTick?: number;

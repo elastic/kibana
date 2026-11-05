@@ -18,7 +18,12 @@ project:
   sourceRoot: x-pack/platform/packages/shared/kbn-proposals-ui
 dependsOn:
   - '@kbn/i18n'
+  - '@kbn/core-http-browser'
+  - '@kbn/core-spaces-common'
   - '@kbn/proposals-common'
+  - '@kbn/i18n-react'
+  - '@kbn/ui-callout'
+  - '@kbn/test-jest-helpers'
 tags:
   - shared-browser
   - package
@@ -31,6 +36,4 @@ fileGroups:
     - '**/*.ts'
     - '**/*.tsx'
     - '!target/**/*'
-  jest-config:
-    - jest.config.js
 tasks: {}

@@ -7,6 +7,7 @@
 import { useQuery, useMutation, useQueryClient } from '@kbn/react-query';
 
 import type { GetAutoUpgradeAgentsStatusResponse } from '../../../common/types';
+import type { SimplifiedVars } from '../../../common/services/simplified_package_policy_helper';
 
 import { agentPolicyRouteService } from '../../services';
 import { API_VERSIONS, AGENT_POLICY_API_ROUTES } from '../../../common/constants';
@@ -25,6 +26,8 @@ import type {
   DeleteAgentPolicyRequest,
   DeleteAgentPolicyResponse,
   BulkGetAgentPoliciesResponse,
+  GetAgentPoliciesPackagePoliciesSummaryRequest,
+  GetAgentPoliciesPackagePoliciesSummaryResponse,
   GetAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsResponse,
   GetListAgentPolicyOutputsRequest,
@@ -61,17 +64,35 @@ export const useGetAgentPoliciesQuery = (
   });
 };
 
+export const useGetAgentPoliciesPackagePoliciesSummaryQuery = (
+  ids: GetAgentPoliciesPackagePoliciesSummaryRequest['body']['ids'],
+  options?: { enabled?: boolean }
+) => {
+  return useQuery<GetAgentPoliciesPackagePoliciesSummaryResponse, RequestError>({
+    // Prefixed with `agentPolicies` so that invalidating the agent policies refreshes the summaries
+    queryKey: ['agentPolicies', 'packagePoliciesSummary', ids],
+    queryFn: () =>
+      sendRequestForRq<GetAgentPoliciesPackagePoliciesSummaryResponse>({
+        path: agentPolicyRouteService.getPackagePoliciesSummaryPath(),
+        method: 'post',
+        body: JSON.stringify({ ids }),
+        version: API_VERSIONS.internal.v1,
+      }),
+    enabled: options?.enabled,
+  });
+};
+
 export const useBulkGetAgentPoliciesQuery = (
   ids: string[],
   options?: { full?: boolean; ignoreMissing?: boolean; enabled?: boolean }
 ) => {
   return useQuery<BulkGetAgentPoliciesResponse, RequestError>(
-    ['agentPolicies', ids],
+    ['agentPolicies', ids, { full: options?.full, ignoreMissing: options?.ignoreMissing }],
     () =>
       sendRequestForRq<BulkGetAgentPoliciesResponse>({
         path: agentPolicyRouteService.getBulkGetPath(),
         method: 'post',
-        body: JSON.stringify({ ids, full: options?.full }),
+        body: JSON.stringify({ ids, full: options?.full, ignoreMissing: options?.ignoreMissing }),
         version: API_VERSIONS.public.v1,
       }),
     {
@@ -322,7 +343,7 @@ export const sendCreateAgentPolicyWithPackagePolicies = (
     package_policies: Array<{
       name: string;
       package: { name: string; version: string };
-      vars?: Record<string, string>;
+      vars?: SimplifiedVars;
       inputs?: Record<string, unknown>;
       namespace?: string;
     }>;

@@ -9,6 +9,12 @@ import type { ProposalWithMetadata } from '@kbn/proposals-common';
 
 export const CLOSED_GROUP_KEY = 'closed' as const;
 
+/** The categories of the open queue; each is a section of the conversations page. */
+export const OPEN_PROPOSAL_CATEGORIES = ['respond', 'investigate', 'configure'] as const;
+
+/** Fixed window for the closed-proposals queue: decisions older than this are not shown. */
+export const CLOSED_DECIDED_WITHIN_HOURS = 72;
+
 export interface ProposalItem extends ProposalWithMetadata {
   // Absent when the server cannot read the conversation (access control, not found, etc.)
   conversationTitle?: string;
@@ -18,13 +24,13 @@ export interface ProposalItem extends ProposalWithMetadata {
    * conversation redirect, which resolves the agent itself.
    */
   conversationAgentId?: string;
+  /** Status of the investigation, from conversation metadata. Absent when unset or unreadable. */
+  conversationStatus?: 'open' | 'closed';
   /**
    * User ids assigned to the investigation, from conversation metadata. Always an array —
    * empty when unset or the conversation is unreadable — so callers need no fallback.
    */
   conversationAssignees: string[];
-  /** Absent when the conversation has no Impact document. */
-  entityIds?: string[];
 }
 
 export interface ProposalsPageResponse {
@@ -35,7 +41,12 @@ export interface ProposalsPageResponse {
 export interface ProposalsPageParams {
   size: number;
   from: number;
+  /** Only proposals whose conversation's impact lists this entity id. */
+  entity?: string;
 }
+
+/** Bound on the Impact entity id a list can be filtered by. */
+export const MAX_ENTITY_FILTER_LENGTH = 256;
 
 /** Rows per request. `from` walks the queue; this only bounds one page of it. */
 export const MAX_QUEUE_PAGE_SIZE = 100;

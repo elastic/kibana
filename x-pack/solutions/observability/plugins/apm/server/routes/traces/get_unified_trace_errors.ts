@@ -37,7 +37,7 @@ export async function getUnifiedTraceErrors({
   const commonParams = { traceId, docId, start, end };
 
   const [apmErrors, unprocessedOtelErrors] = await Promise.all([
-    getApmTraceError({ apmEventClient, ...commonParams }),
+    getApmTraceError({ apmEventClient, logger, ...commonParams }),
     getUnprocessedOtelErrors({ logsClient, logger, ...commonParams }),
   ]);
 

@@ -10,7 +10,7 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
 import { basename, dirname } from 'path';
 import parseArgs from 'minimist';
-import { BuildkiteClient, upsertComment } from '#pipeline-utils';
+import { upsertComment } from '#pipeline-utils';
 
 /**
  * SOURCE OF TRUTH: src/platform/packages/shared/kbn-core-server-benchmarks/ci_warm_start_memory/memory_regression_report.ts
@@ -53,7 +53,6 @@ export interface WarmStartMemoryReport {
 }
 
 const COMMENT_CONTEXT = 'warm-start-memory-bench';
-const ANNOTATION_CONTEXT = 'warm-start-memory-bench';
 const CI_STATS_GROUP = 'warm start memory';
 const PROFILING_DOCS =
   'https://github.com/elastic/kibana/blob/main/dev_docs/tutorials/performance/peak_memory_profiling.mdx';
@@ -153,18 +152,6 @@ export function buildCiStatsMetrics(
     }));
 }
 
-function annotateInconclusive(report: WarmStartMemoryReport): void {
-  const { comparison } = report;
-  const body = `Warm-start memory comparison was inconclusive: only ${comparison.validPairs} of ${comparison.requestedPairs} required pairs completed after ${comparison.attemptedPairs} attempts. No memory comparison was made for this PR.`;
-
-  try {
-    new BuildkiteClient().setAnnotation(ANNOTATION_CONTEXT, 'warning', body);
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    console.error(`Warning: failed to annotate the build (${message})`);
-  }
-}
-
 async function main() {
   const args = parseArgs(process.argv.slice(2), {
     string: ['report-path', 'metrics-path'],
@@ -186,7 +173,7 @@ async function main() {
     report = JSON.parse(readFileSync(reportPath, 'utf-8'));
   } catch (error) {
     console.error(`Failed to parse report at ${reportPath}:`, error);
-    return;
+    process.exit(1);
   }
 
   const metricsPath = args['metrics-path'];
@@ -198,8 +185,7 @@ async function main() {
   }
 
   if (report.outcome === 'inconclusive') {
-    console.log('Warm-start memory comparison was inconclusive; annotating instead of commenting.');
-    annotateInconclusive(report);
+    console.log('Warm-start memory comparison was inconclusive.');
     return;
   }
 

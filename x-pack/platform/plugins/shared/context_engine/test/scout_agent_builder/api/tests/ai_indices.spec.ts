@@ -7,6 +7,7 @@
 
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
+import { CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID } from '@kbn/management-settings-ids';
 import type { RoleApiCredentials } from '@kbn/scout';
 import { tags } from '@kbn/scout';
 import { expect } from '@kbn/scout/api';
@@ -118,6 +119,82 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
     }
   });
 
+  apiTest('round-trips the toggle', async ({ apiClient, esClient, kbnClient, requestAuth }) => {
+    const id = 'scout_memory_toggle_ai_index';
+    const path = aiIndexPath(id);
+    const dest = 'ai-index-ds-scout-memory-toggle';
+    const credentials = await requestAuth.getApiKey('admin');
+    const headers = { ...credentials.apiKeyHeader, ...API_HEADERS };
+    const body = {
+      description: 'Memory toggle integration test',
+      dest: dataStreamDest(dest),
+      automations: [],
+      sources: [],
+    };
+
+    await kbnClient.uiSettings.updateGlobal({
+      [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+    });
+    await kbnClient.uiSettings.waitForEventualCacheRefresh();
+    await apiClient.delete(path, { headers, responseType: 'json' });
+    await esClient.indices.createDataStream({ name: dest }, { ignore: [400] });
+
+    try {
+      const rejectedResponse = await apiClient.post(COLLECTION, {
+        headers,
+        responseType: 'json',
+        body: { id, ...body, memory_enabled: true },
+      });
+      expect(rejectedResponse).toHaveStatusCode(400);
+
+      const missingResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(missingResponse).toHaveStatusCode(404);
+
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: true,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+
+      const createResponse = await apiClient.post(COLLECTION, {
+        headers,
+        responseType: 'json',
+        body: { id, ...body },
+      });
+      expect(createResponse).toHaveStatusCode(201);
+
+      const defaultResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(defaultResponse).toHaveStatusCode(200);
+      expect(defaultResponse.body.memory_enabled).toBe(true);
+
+      const updateResponse = await apiClient.put(path, {
+        headers,
+        responseType: 'json',
+        body: { ...body, memory_enabled: false },
+      });
+      expect(updateResponse).toHaveStatusCode(200);
+
+      const disabledResponse = await apiClient.get(path, {
+        headers,
+        responseType: 'json',
+      });
+      expect(disabledResponse).toHaveStatusCode(200);
+      expect(disabledResponse.body.memory_enabled).toBe(false);
+    } finally {
+      await apiClient.delete(path, { headers, responseType: 'json' });
+      await esClient.indices.deleteDataStream({ name: dest }, { ignore: [404] });
+      await kbnClient.uiSettings.updateGlobal({
+        [CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID]: false,
+      });
+      await kbnClient.uiSettings.waitForEventualCacheRefresh();
+    }
+  });
+
   apiTest('manages an AI index through its full lifecycle', async ({ apiClient }) => {
     let dateCreated: string;
     const path = aiIndexPath(AI_INDEX.lifecycle);
@@ -151,6 +228,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
 
       expect(response).toHaveStatusCode(200);
       expect(response.body).toMatchObject({ id: AI_INDEX.lifecycle, ...aiIndexBody });
+      expect(response.body.memory_enabled).toBe(true);
       expect(response.body.date_created).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       expect(response.body.date_modified).toMatch(/^\d{4}-\d{2}-\d{2}T/);
       dateCreated = response.body.date_created;
@@ -172,7 +250,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
       const response = await apiClient.put(path, {
         headers: { ...adminApiCredentials.apiKeyHeader, ...API_HEADERS },
         responseType: 'json',
-        body: { ...aiIndexBody, description: 'Updated description' },
+        body: { ...aiIndexBody, description: 'Updated description', memory_enabled: false },
       });
 
       expect(response).toHaveStatusCode(200);
@@ -183,6 +261,7 @@ apiTest.describe('context engine AI indices API', { tag: tags.stateful.classic }
         responseType: 'json',
       });
       expect(updatedResponse.body.description).toBe('Updated description');
+      expect(updatedResponse.body.memory_enabled).toBe(false);
       expect(updatedResponse.body.date_created).toBe(dateCreated);
     });
 

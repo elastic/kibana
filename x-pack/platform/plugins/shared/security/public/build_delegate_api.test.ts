@@ -98,7 +98,7 @@ describe('buildSecurityApi', () => {
   });
 
   describe('serviceAccounts.create', () => {
-    const params = { name: 'nightshift-relay' };
+    const params = { name: 'nightshift-relay', roles: ['viewer'] };
 
     it('properly delegates to the API client', async () => {
       await api.serviceAccounts.create(params);
@@ -110,7 +110,11 @@ describe('buildSecurityApi', () => {
     it('returns the result from the API client', async () => {
       // Annotated, so a change to the contract shape fails here rather than sliding through:
       // passing an un-annotated variable to `mockResolvedValue` skips the excess-property check.
-      const created: ServiceAccount = { id: 'service-account-id', name: 'nightshift-relay' };
+      const created: ServiceAccount = {
+        id: 'service-account-id',
+        name: 'nightshift-relay',
+        roles: ['viewer'],
+      };
       serviceAccounts.create.mockResolvedValue(created);
 
       await expect(api.serviceAccounts.create(params)).resolves.toBe(created);

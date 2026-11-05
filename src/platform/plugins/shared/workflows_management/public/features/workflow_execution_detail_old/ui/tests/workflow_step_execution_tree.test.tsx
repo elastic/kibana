@@ -358,6 +358,57 @@ describe('WorkflowStepExecutionTree', () => {
       expect(screen.getByTestId('step-execution-tree-item-label')).toBeInTheDocument();
     });
 
+    it('labels foreach iteration rows as Iteration #N instead of the raw step id', () => {
+      isTerminalStatus.mockReturnValue(true);
+
+      const foreachExec = createMockStepExecution({
+        id: 'foreach-exec',
+        stepId: 'loop',
+        stepType: 'foreach',
+      });
+      const iterationExec = createMockStepExecution({
+        id: 'iter-exec',
+        stepId: 'iteration-0',
+        stepType: 'foreach-iteration',
+      });
+
+      buildStepExecutionsTree.mockReturnValue([
+        {
+          stepExecutionId: 'foreach-exec',
+          stepId: 'loop',
+          stepType: 'foreach',
+          executionIndex: 0,
+          children: [
+            {
+              stepExecutionId: 'iter-exec',
+              stepId: 'iteration-0',
+              stepType: 'foreach-iteration',
+              executionIndex: 0,
+              children: [],
+            },
+          ],
+        },
+      ]);
+
+      render(
+        <TestWrapper>
+          <WorkflowStepExecutionTree
+            execution={createMockExecution({
+              status: ExecutionStatus.COMPLETED,
+              stepExecutions: [foreachExec, iterationExec],
+            })}
+            definition={createMockDefinition()}
+            error={null}
+            onStepExecutionClick={mockOnStepExecutionClick}
+            selectedId={null}
+          />
+        </TestWrapper>
+      );
+
+      expect(screen.getByText('Iteration #0')).toBeInTheDocument();
+      expect(screen.queryByText('iteration-0')).not.toBeInTheDocument();
+    });
+
     it('should render tree with nested step executions', () => {
       isTerminalStatus.mockReturnValue(true);
 

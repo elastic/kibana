@@ -24,9 +24,6 @@ const createFeatureFlagsSetup = (): jest.Mocked<FeatureFlagsSetup> => {
 const createFeatureFlagsStart = (): jest.Mocked<FeatureFlagsStart> => {
   return lazyObject({
     appendContext: jest.fn().mockImplementation(Promise.resolve),
-    getBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
-    getNumberValue: jest.fn().mockImplementation((_, fallback) => fallback),
-    getStringValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getBooleanValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),
     useBooleanValue: jest.fn().mockImplementation((_, fallback) => fallback),
     getStringValue$: jest.fn().mockImplementation((_, fallback) => of(fallback)),

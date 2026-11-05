@@ -34,11 +34,11 @@ export const toListExecutionHistoryArgs = ({
   per_page: perPage,
   search,
   rule_ids: ruleIds,
-  outcome,
-  episode_ids: episodeIds,
+  outcomes,
+  alert_ids: alertIds,
   from,
   to,
-  sort,
+  sort_field: sortField,
   sort_order: sortOrder,
   ...rest
 }: ListPolicyExecutionHistoryRequest): Complete<Omit<ListExecutionHistoryArgs, 'request'>> => {
@@ -48,11 +48,11 @@ export const toListExecutionHistoryArgs = ({
     perPage,
     search,
     ruleIds,
-    outcome,
-    episodeIds,
+    outcomes,
+    alertIds,
     from,
     to,
-    sort,
+    sortField,
     sortOrder,
   };
 };
@@ -71,7 +71,7 @@ export const toListExecutionHistoryResponse = ({
     page,
     per_page: perPage,
     total,
-    search_matches: searchMatches,
+    search_matches: searchMatches ?? undefined,
   };
 };
 
@@ -86,6 +86,7 @@ export class ListActionPolicyExecutionsRoute extends BaseAlertingRoute {
   };
   static routeOptions = {
     access: 'public' as const,
+    availability: { stability: 'stable', since: '9.6.0' },
     summary: 'List action policy executions',
     description:
       'Get a paginated list of dispatcher summary events for action policies in the current space.',

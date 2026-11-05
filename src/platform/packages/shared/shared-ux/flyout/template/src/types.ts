@@ -10,16 +10,18 @@
 import type { CSSProperties, MouseEventHandler, ReactNode } from 'react';
 import type {
   DataAttributeProps,
+  DistributiveOmit,
   EuiBadgeProps,
+  EuiButtonPropsForButton,
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
   EuiContextMenuProps,
   EuiFlyoutProps,
   EuiIconProps,
   EuiTabProps,
+  EuiTabsProps,
+  EuiToolTipProps,
 } from '@elastic/eui';
-// FIXME: change to import from `@elastic/eui` once https://github.com/elastic/eui/pull/10064 is merged.
-import type { EuiButtonPropsForButton } from '@elastic/eui/src/components/button/button';
 import type { InfoBlockItem } from '@kbn/flyout-info-blocks';
 import type { MetaBlock } from '@kbn/flyout-meta-blocks';
 import type {
@@ -28,6 +30,7 @@ import type {
   FlyoutSubsectionProps,
   FlyoutAccordionProps,
 } from '@kbn/flyout-sections';
+import type { KbnCalloutProps } from '@kbn/ui-callout';
 
 type TabBarOwnedProps = 'aria-controls' | 'children' | 'id' | 'isSelected' | 'onClick';
 
@@ -46,6 +49,9 @@ export type FlyoutTabProps = Omit<EuiTabProps, TabBarOwnedProps> &
     label: ReactNode;
   };
 
+/** Props forwarded to the `EuiTabs` bar that wraps the root `tabs`. */
+export type FlyoutTabBarProps = Pick<EuiTabsProps, 'aria-label' | 'data-test-subj'>;
+
 /** Props for the declarative `FlyoutTemplate.Body.TabPanel` part. */
 export interface FlyoutBodyTabPanelProps {
   /** The `id` of the root `tabs` entry this panel belongs to. Non-matching ids are silently ignored in tabbed mode. */
@@ -58,6 +64,12 @@ export interface FlyoutBodyTabPanelProps {
 export interface FlyoutHeaderProps {
   /** Title rendered by the header. Rendered as an `<h3>` (heading level is owned by the template). */
   title: ReactNode;
+  /**
+   * Plain-text form of `title`, used to name the flyout in EUI's flyout menu. Set it when `title`
+   * is a `ReactNode`. `flyoutMenuProps.title` wins when both are set. With a string `title`, it also
+   * replaces the collapsed title's hover text.
+   */
+  titleText?: string;
   'data-test-subj'?: string;
   /**
    * `Header.MetaBlock`, `Header.Badge`, and `Header.InfoBlock` parts.
@@ -68,6 +80,11 @@ export interface FlyoutHeaderProps {
   titleIcon?: EuiIconProps['type'];
   /** Tooltip shown from the title icon. */
   titleTooltip?: ReactNode;
+  /**
+   * Shows a loading spinner after the title. It renders outside the heading, so it does not
+   * become part of the flyout's accessible name.
+   */
+  isLoading?: boolean;
   /** Subdued text below the title. */
   description?: ReactNode;
   /**
@@ -89,29 +106,27 @@ export type FlyoutHeaderMetaBlockProps = Omit<MetaBlock, BlockPartOwnedProps> &
     children: ReactNode;
   };
 
-/** Props owned by the template. `children` is the badge label and `id` identifies the part instance. */
-type BadgePartOwnedProps = 'children' | 'id';
+/**
+ * A badge's icon is decorative here, so it gets no separate click target. Offering one would also
+ * put a second control inside the badge, which the tab-stop handling in the header does not expect.
+ */
+type BadgeIconActionProps = 'iconOnClick' | 'iconOnClickAriaLabel';
 
 /**
- * Props that would turn the badge into a control. Badges in a flyout header are meant to label the
- * subject, not act as controls.
+ * Props for the declarative `FlyoutTemplate.Header.Badge` part. `DistributiveOmit` keeps
+ * `EuiBadgeProps`' `ExclusiveUnion` intact (a plain `Omit` would collapse it and drop
+ * `onClick`/`href`), so a badge can still act as a label or a whole-badge control.
  */
-type BadgeControlProps =
-  | 'onClick'
-  | 'onClickAriaLabel'
-  | 'iconOnClick'
-  | 'iconOnClickAriaLabel'
-  | 'href'
-  | 'target'
-  | 'rel';
-
-/** Props for the declarative `FlyoutTemplate.Header.Badge` part. */
-export type FlyoutHeaderBadgeProps = Omit<EuiBadgeProps, BadgePartOwnedProps | BadgeControlProps> &
+export type FlyoutHeaderBadgeProps = DistributiveOmit<EuiBadgeProps, BadgeIconActionProps> &
   DataAttributeProps & {
     /** Optional explicit instance id; auto-generated when omitted. */
     id?: string;
     /** Badge label. */
     children: ReactNode;
+    /** When set, the badge is wrapped in an `EuiToolTip` showing this content on hover and focus. */
+    toolTipContent?: ReactNode;
+    /** Position of the badge tooltip; defaults to EUI's default. Only used with `toolTipContent`. */
+    toolTipPosition?: EuiToolTipProps['position'];
   };
 
 /** Props for the declarative `FlyoutTemplate.Header.InfoBlock` part. */
@@ -135,12 +150,31 @@ export type FlyoutBodySubsectionProps = Omit<FlyoutSubsectionProps, 'hasBorder'>
 /** Props for the declarative `FlyoutTemplate.Body.Accordion` part. */
 export type FlyoutBodyAccordionProps = Omit<FlyoutAccordionProps, 'hasBorder'>;
 
+/** Severity of a `Body.Callout`; each maps to exactly one `@kbn/ui-callout` component. */
+export type FlyoutBodyCalloutLevel = 'info' | 'success' | 'warning' | 'danger';
+
+/**
+ * The template owns every banner callout's size and styling so they look the same. `heading` is
+ * owned too: callout titles stay `<p>` and out of the flyout's heading outline.
+ */
+type CalloutOwnedProps = 'size' | 'heading' | 'className' | 'css' | 'style';
+
+/** Props for the declarative `FlyoutTemplate.Body.Callout` part. */
+export type FlyoutBodyCalloutProps = Omit<KbnCalloutProps, CalloutOwnedProps | 'id'> &
+  DataAttributeProps & {
+    /** Selects `KbnInfoCallout`, `KbnSuccessCallout`, `KbnWarningCallout`, or `KbnDangerCallout`. */
+    level: FlyoutBodyCalloutLevel;
+    /** Optional explicit instance id; auto-generated when omitted. */
+    id?: string;
+  };
+
 /** Props for the declarative `FlyoutTemplate.Body` zone. */
 export interface FlyoutBodyProps {
   'data-test-subj'?: string;
   /**
-   * `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
-   * content (callouts, search bars, data grids) rendered as-is in source order.
+   * `Body.Callout`, `Body.Section`, `Body.Accordion`, or `Body.TabPanel` parts, and/or arbitrary
+   * content (search bars, data grids) rendered as-is in source order. `Body.Callout` parts render
+   * in the body's banner, above everything else.
    */
   children?: ReactNode;
 }
@@ -161,6 +195,12 @@ interface FlyoutFooterActionBaseProps extends DataAttributeProps {
   /** Button label. */
   label: string;
   onClick: MouseEventHandler<HTMLButtonElement>;
+  /**
+   * Tooltip shown on hover and focus, e.g. to explain why the action is disabled. An action with a
+   * tooltip defaults `hasAriaDisabled` to true, so the tooltip still opens while the action is
+   * disabled or loading.
+   */
+  tooltip?: ReactNode;
 }
 
 /** Props for the declarative `FlyoutTemplate.Footer.PrimaryAction` part. */
@@ -177,14 +217,54 @@ export type FlyoutFooterSecondaryActionProps = Omit<
 > &
   FlyoutFooterActionBaseProps;
 
-/**
- * A single item in a footer action menu (either a clickable action or a separator).
- */
 type WithStringName<T> = T extends { name: ReactNode } ? Omit<T, 'name'> & { name: string } : T;
 
-export type FlyoutFooterMenuItem = WithStringName<
-  Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>
->;
+/**
+ * @deprecated Only for {@link FlyoutFooterMenuCustomItem}, which is deprecated.
+ */
+export interface FlyoutFooterMenuItemRenderContext {
+  /** Closes the footer action menu. */
+  closeMenu: () => void;
+}
+
+/**
+ * A menu item that renders its own content and handles its own clicks. The menu does not close
+ * when it is clicked; call `closeMenu` from the render context instead.
+ *
+ * @deprecated Interactive content inside a context menu conflicts with the menu's keyboard
+ * navigation, and the template does not work around it:
+ * - The menu claims the arrow keys. Arrow keys pressed in the item's own controls, including a
+ *   text field or a nested popover, move focus through the menu or go back a panel.
+ * - EUI opens a sub-panel on ArrowRight by matching the focused element's position against the
+ *   panel's items, so a custom item can make ArrowRight open the wrong sub-panel, or none.
+ * - The item gets no `menuitem` role, icon, or click-to-close behavior.
+ *
+ * This is a temporary allowance for menus that already have such items. Redesign them as plain
+ * items and nested panels so it can be removed.
+ */
+export interface FlyoutFooterMenuCustomItem {
+  key: string;
+  /**
+   * Called while rendering the item, and again whenever `panels` changes. Content that depends on
+   * other state should be a component that reads that state itself.
+   *
+   * @deprecated See {@link FlyoutFooterMenuCustomItem}.
+   */
+  renderItem: (context: FlyoutFooterMenuItemRenderContext) => ReactNode;
+  name?: never;
+  onClick?: never;
+  href?: never;
+  panel?: never;
+  isSeparator?: never;
+}
+
+/**
+ * A single item in a footer action menu (a clickable action, a separator, or a deprecated custom
+ * item).
+ */
+export type FlyoutFooterMenuItem =
+  | WithStringName<Extract<EuiContextMenuPanelItemDescriptor, { renderItem?: never }>>
+  | FlyoutFooterMenuCustomItem;
 
 /**
  * A sub-menu panel inside a footer action menu.
@@ -257,9 +337,10 @@ export interface FlyoutFooterProps {
 /**
  * `children` represents the declarative zones rather than free-form flyout content.
  * `flyoutMenuDisplayMode` is always set to `auto`.
+ * `paddingSize` is always set to `m`, so every flyout pads its zones by 16px.
  * `ref` is omitted because the template does not forward it.
  */
-type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'ref';
+type TemplateOwnedFlyoutProps = 'children' | 'flyoutMenuDisplayMode' | 'paddingSize' | 'ref';
 
 /**
  * Props for the root `FlyoutTemplate` component. Any props not explicitly named by the template,
@@ -271,6 +352,8 @@ export type FlyoutTemplateProps = Omit<EuiFlyoutProps, TemplateOwnedFlyoutProps>
     children?: ReactNode;
     /** Tabs rendered in the header bar. Omit for a flyout with no tabs. */
     tabs?: FlyoutTabProps[];
+    /** Accessible name and test subject for the tab bar. */
+    tabBarProps?: FlyoutTabBarProps;
     /** Initial selected tab id (uncontrolled); ignored when `selectedTabId` is provided. */
     defaultSelectedTabId?: string;
     /** Currently selected tab id (controlled); `onTabChange` fires on every click either way. */

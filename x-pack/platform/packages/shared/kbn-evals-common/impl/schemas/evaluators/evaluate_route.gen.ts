@@ -16,7 +16,7 @@
 
 import { z, lazySchema } from '@kbn/zod/v4';
 
-import { InstrumentationProfile, Model } from '../common_attributes.gen';
+import { EvaluationSubject, Model, Direction } from '../common_attributes.gen';
 
 export const EvaluateResultEvaluator = lazySchema(() =>
   z.object({
@@ -49,13 +49,27 @@ export const EvaluateResultScore = lazySchema(() =>
     label: z.string().max(1024).optional(),
     explanation: z.string().max(8192).optional(),
     metadata: z.object({}).catchall(z.unknown()).optional(),
+    /**
+     * This score's own direction, for evaluators whose scores do not all share one. Absent means the evaluator's `direction` applies.
+     */
+    direction: Direction.optional().describe(
+      "This score's own direction, for evaluators whose scores do not all share one. Absent means the evaluator's `direction` applies."
+    ),
   })
 );
 export type EvaluateResultScore = z.infer<typeof EvaluateResultScore>;
 
 export const EvaluateResultError = lazySchema(() =>
   z.object({
-    code: z.literal('evidence_unmet').optional(),
+    /**
+     * `evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.
+     */
+    code: z
+      .enum(['evidence_unmet', 'not_applicable'])
+      .optional()
+      .describe(
+        '`evidence_unmet`: the round lacks the evidence the evaluator requires. `not_applicable`: the evaluator read the round and reported that it does not apply.'
+      ),
     message: z.string().max(8192),
   })
 );
@@ -73,29 +87,7 @@ export type EvaluateResult = z.infer<typeof EvaluateResult>;
 
 export const EvaluateRequestBody = lazySchema(() =>
   z.object({
-    subject: z.object({
-      mode: z.enum(['single-turn', 'multi-turn']).optional().default('single-turn'),
-      traces: z
-        .array(
-          z.object({
-            trace_id: z.string().max(256),
-            reference_data: z.object({}).catchall(z.unknown()).optional(),
-          })
-        )
-        .min(1)
-        .max(1),
-      /**
-       * Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.
-       */
-      instrumentation: z
-        .object({
-          profile: InstrumentationProfile.default('elastic-inference'),
-        })
-        .optional()
-        .describe(
-          'Optional instrumentation profile selection. When omitted, the elastic-inference profile is used.'
-        ),
-    }),
+    subject: EvaluationSubject,
     evaluators: z
       .array(
         z.object({

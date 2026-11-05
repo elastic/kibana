@@ -14,7 +14,7 @@
  *   version: 2023-10-31
  */
 
-import { z, lazySchema } from '@kbn/zod/v4';
+import { z, lazySchema, isoDateTime } from '@kbn/zod/v4';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import {
@@ -27,7 +27,7 @@ import { AssetCriticalityLevel } from '../asset_criticality/common.gen';
 
 export const RiskScoreHistoryEntry = lazySchema(() =>
   z.object({
-    '@timestamp': z.string().max(33).datetime(),
+    '@timestamp': isoDateTime().max(33),
     calculated_score_norm: z.number().min(0).max(100),
     calculated_level: EntityRiskLevels,
     calculated_score: z.number().optional(),

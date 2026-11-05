@@ -8,7 +8,12 @@
 import { EuiCodeBlock, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { formatDuration } from '@kbn/alerting-plugin/common';
 import { RULE_KIND_LABELS } from '@kbn/alerting-v2-constants';
-import { getRootEsqlQuery } from '@kbn/alerting-v2-schemas';
+import {
+  getBreachEsqlQuery,
+  getRootEsqlQuery,
+  hasBreachCondition,
+  noDataStrategy,
+} from '@kbn/alerting-v2-schemas';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -18,9 +23,8 @@ import {
   formatNoDataStrategy,
   formatRecoveryDelay,
   formatRecoveryStrategy,
-  getDisplayQueryParts,
   getQueryOverflowHeight,
-  getDisplayRecoveryCondition,
+  getRecoverEsqlSegment,
 } from '../../utils/rule_display';
 import { RuleDetailsTable } from './rule_details_table';
 import type { RuleSummaryData } from './types';
@@ -64,8 +68,12 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
   const isAlertKind = rule.kind === 'alert';
   const isSummary = variant === 'summary';
   const dataSource = getIndexPatternFromESQLQuery(getRootEsqlQuery(rule.query)) || EMPTY_VALUE;
-  const recoveryCondition = getDisplayRecoveryCondition(rule.query, rule.recovery_strategy);
-  const { baseQuery, alertCondition } = getDisplayQueryParts(rule.query);
+  const recoveryCondition = getRecoverEsqlSegment(rule.recovery);
+  const { base, breach } = rule.query;
+  // A signal breaches on nothing, so a segment is part of the single query it
+  // runs rather than a condition of its own.
+  const baseQuery = isAlertKind ? base : getBreachEsqlQuery(rule.query);
+  const alertCondition = isAlertKind && hasBreachCondition(breach) ? breach.segment : undefined;
 
   const conditionItems = [
     {
@@ -126,7 +134,7 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
             title: i18n.translate('xpack.alertingV2.ruleDetails.recovery', {
               defaultMessage: 'Recovery',
             }),
-            description: formatRecoveryStrategy(rule.recovery_strategy),
+            description: formatRecoveryStrategy(rule.recovery?.strategy),
             'data-test-subj': 'alertingV2RuleDetailsRecovery',
           },
           {
@@ -158,7 +166,7 @@ export const RuleConditions: React.FC<RuleConditionsProps> = ({ rule, variant = 
             title: i18n.translate('xpack.alertingV2.ruleDetails.noDataBehavior', {
               defaultMessage: 'No data behavior',
             }),
-            description: formatNoDataStrategy(rule.no_data_strategy ?? 'none'),
+            description: formatNoDataStrategy(rule.no_data?.strategy ?? noDataStrategy.ignore),
             'data-test-subj': 'alertingV2RuleDetailsNoDataStrategy',
           },
         ]

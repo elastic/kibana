@@ -5,23 +5,19 @@
  * 2.0.
  */
 
-import { EuiProvider } from '@elastic/eui';
-import { screen } from '@testing-library/react';
-import user from '@testing-library/user-event';
+import { fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
-import { renderWithI18n } from '@kbn/test-jest-helpers';
+import { renderWithKibanaRenderContext } from '@kbn/test-jest-helpers';
 
 import { ServiceAccountsEmptyPrompt } from './service_accounts_empty_prompt';
 
 describe('ServiceAccountsEmptyPrompt', () => {
-  it('renders the empty state and starts account creation', async () => {
+  it('renders the empty state and starts account creation', () => {
     const onCreateAccount = jest.fn();
 
-    renderWithI18n(
-      <EuiProvider>
-        <ServiceAccountsEmptyPrompt canCreate onCreateAccount={onCreateAccount} />
-      </EuiProvider>
+    renderWithKibanaRenderContext(
+      <ServiceAccountsEmptyPrompt canCreate onCreateAccount={onCreateAccount} />
     );
 
     expect(screen.getByRole('heading', { name: 'No service accounts available' })).toBeVisible();
@@ -29,16 +25,14 @@ describe('ServiceAccountsEmptyPrompt', () => {
     expect(screen.getByTestId('serviceAccountsEmptyPromptIllustration')).toBeVisible();
     expect(screen.queryByRole('link')).not.toBeInTheDocument();
 
-    await user.click(screen.getByTestId('serviceAccountsEmptyPromptCreateButton'));
+    fireEvent.click(screen.getByTestId('serviceAccountsEmptyPromptCreateButton'));
 
     expect(onCreateAccount).toHaveBeenCalledTimes(1);
   });
 
   it('does not offer account creation without the save capability', () => {
-    renderWithI18n(
-      <EuiProvider>
-        <ServiceAccountsEmptyPrompt canCreate={false} onCreateAccount={jest.fn()} />
-      </EuiProvider>
+    renderWithKibanaRenderContext(
+      <ServiceAccountsEmptyPrompt canCreate={false} onCreateAccount={jest.fn()} />
     );
 
     expect(screen.getByRole('heading', { name: 'No service accounts available' })).toBeVisible();

@@ -8,7 +8,10 @@
 import { Readable } from 'stream';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { Attachment, ImageAttachmentData } from '@kbn/agent-builder-common/attachments';
-import { AttachmentType } from '@kbn/agent-builder-common/attachments';
+import {
+  AttachmentType,
+  CHAT_ATTACHMENT_IMAGES_FILE_KIND,
+} from '@kbn/agent-builder-common/attachments';
 import { FileNotFoundError, type FilesStart } from '@kbn/files-plugin/server';
 import { createImageAttachmentType } from './image';
 
@@ -31,9 +34,12 @@ const buildAttachment = (
   data,
 });
 
-const createFilesPluginStub = (bytes: Buffer) => {
+const createFilesPluginStub = (
+  bytes: Buffer,
+  fileKind: string = CHAT_ATTACHMENT_IMAGES_FILE_KIND
+) => {
   const downloadContent = jest.fn(async () => Readable.from(bytes));
-  const getById = jest.fn(async () => ({ downloadContent }));
+  const getById = jest.fn(async () => ({ downloadContent, data: { fileKind } }));
   const asScoped = jest.fn(() => ({ getById }));
   const plugin = {
     fileServiceFactory: { asScoped },
@@ -41,8 +47,8 @@ const createFilesPluginStub = (bytes: Buffer) => {
   return { plugin, asScoped, getById, downloadContent };
 };
 
-const createValidateFilesPluginStub = () => {
-  const getById = jest.fn(async () => ({ data: {} }));
+const createValidateFilesPluginStub = (fileKind: string = CHAT_ATTACHMENT_IMAGES_FILE_KIND) => {
+  const getById = jest.fn(async () => ({ data: { fileKind } }));
   const asScoped = jest.fn(() => ({ getById }));
   const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
   return { plugin, asScoped, getById };
@@ -76,6 +82,14 @@ describe('image attachment type', () => {
       });
       const asScoped = jest.fn(() => ({ getById }));
       const plugin = { fileServiceFactory: { asScoped } } as unknown as FilesStart;
+      const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
+      const result = await definition.validate(validImage, validateContext);
+      expect(result.valid).toBe(false);
+      if (!result.valid) expect(result.error).toBe('image file not found');
+    });
+
+    it('rejects a file_id that belongs to a different file kind', async () => {
+      const { plugin } = createValidateFilesPluginStub('cases');
       const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
       const result = await definition.validate(validImage, validateContext);
       expect(result.valid).toBe(false);
@@ -123,6 +137,15 @@ describe('image attachment type', () => {
       expect(asScoped).toHaveBeenCalledWith(formatContext.request);
       expect(getById).toHaveBeenCalledWith({ id: 'file-abc' });
       expect(base64).toBe(Buffer.from('hello').toString('base64'));
+    });
+
+    it('rejects getBase64 when the attachment points at a file of a different kind', async () => {
+      const { plugin } = createFilesPluginStub(Buffer.from('hello'), 'cases');
+      const definition = createImageAttachmentType({ getFilesPlugin: async () => plugin });
+      const formatted = await definition.format(buildAttachment(validImage), formatContext);
+      const repr = await formatted.getRepresentation?.();
+      if (repr?.type !== 'image') throw new Error('expected image representation');
+      await expect(repr.getBase64()).rejects.toThrow('image file not found');
     });
   });
 });

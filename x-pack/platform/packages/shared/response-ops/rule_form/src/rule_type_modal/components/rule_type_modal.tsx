@@ -8,6 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
 import {
+  EuiBadge,
   EuiPageHeader,
   EuiModal,
   EuiPanel,
@@ -52,6 +53,7 @@ export interface RuleTypeModalProps {
   hasMoreTemplates: boolean;
   onLoadMoreTemplates: () => void;
   cps?: CPSPluginStart;
+  showClassicBadge?: boolean;
 }
 
 export interface RuleTypeModalState {
@@ -90,6 +92,11 @@ const ruleTypeModalTitle = i18n.translate('responseOpsRuleForm.components.ruleTy
   defaultMessage: 'Create new rule',
 });
 
+const ruleTypeModalBadgeLabel = i18n.translate(
+  'responseOpsRuleForm.components.ruleTypeModal.classicBadge',
+  { defaultMessage: 'Classic' }
+);
+
 export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = ({
   onClose,
   onSelectRuleType,
@@ -110,6 +117,7 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
   hasMoreTemplates,
   onLoadMoreTemplates,
   cps,
+  showClassicBadge = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const currentBreakpoint = useCurrentEuiBreakpoint() ?? 'm';
@@ -162,9 +170,20 @@ export const RuleTypeModal: React.FC<RuleTypeModalProps & RuleTypeModalState> = 
           <EuiFlexItem grow={0}>
             <EuiPageHeader bottomBorder="extended" paddingSize="m">
               <EuiPageHeaderSection style={{ width: '100%' }}>
-                <EuiTitle size="s">
-                  <h1>{ruleTypeModalTitle}</h1>
-                </EuiTitle>
+                <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+                  <EuiFlexItem grow={false}>
+                    <EuiTitle size="s">
+                      <h1>{ruleTypeModalTitle}</h1>
+                    </EuiTitle>
+                  </EuiFlexItem>
+                  {showClassicBadge && (
+                    <EuiFlexItem grow={false}>
+                      <EuiBadge color="hollow" data-test-subj="ruleTypeModalClassicBadge">
+                        {ruleTypeModalBadgeLabel}
+                      </EuiBadge>
+                    </EuiFlexItem>
+                  )}
+                </EuiFlexGroup>
                 <EuiSpacer size="m" />
                 <EuiFlexGroup alignItems="center">
                   <EuiFlexItem

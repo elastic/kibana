@@ -62,19 +62,29 @@ const EXTRACTED_AT = '2024-05-31T12:00:00.000Z';
 const makeReport = ({
   id,
   iocs,
-  sourceName = 'maltrail',
+  sourceName = 'indicator list',
   sourceUrl = 'https://example.com/trail.txt',
   trailLabel,
   extractedAt = EXTRACTED_AT,
   spaceId = 'default',
+  isIntelligence,
+  extractionMethod,
 }: {
   id: string;
-  iocs: Array<{ type: string; value: string; reference?: string }>;
+  iocs: Array<{
+    type: string;
+    value: string;
+    reference?: string;
+    tier?: string;
+    deferred_unreviewed?: boolean;
+  }>;
   sourceName?: string;
   sourceUrl?: string;
   trailLabel?: string;
   extractedAt?: string;
   spaceId?: string;
+  isIntelligence?: boolean;
+  extractionMethod?: string;
 }) => ({
   _id: id,
   sort: [extractedAt, 0],
@@ -86,8 +96,14 @@ const makeReport = ({
     severity: { level: 'low' },
     // Only promotable tiers reach the index, so an IOC in a fixture that is not
     // about tiering needs one. Tier-specific cases pass it explicitly.
-    extracted: { iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })) },
-    lineage: { extracted_at: extractedAt },
+    extracted: {
+      iocs: iocs.map((ioc) => ({ tier: 'discriminating', ...ioc })),
+      ...(isIntelligence !== undefined ? { gate: { is_intelligence: isIntelligence } } : {}),
+    },
+    lineage: {
+      extracted_at: extractedAt,
+      ...(extractionMethod !== undefined ? { extraction_method: extractionMethod } : {}),
+    },
   },
 });
 
@@ -259,12 +275,12 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('maltrail report', () => {
+  describe('indicator-list report', () => {
     it('carries trail label + per-IOC reference in scriptParams when present', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail',
+            id: 'r-indicator-list',
             iocs: [
               {
                 type: 'ip',
@@ -272,10 +288,9 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
                 reference: 'https://blog.example.com/malware-analysis',
               },
             ],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
@@ -283,8 +298,8 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
 
       expect(ops).toHaveLength(1);
       const { scriptParams } = ops[0];
-      expect(scriptParams.provider).toBe('maltrail');
-      expect(scriptParams.trail).toBe('cobaltstrike');
+      expect(scriptParams.provider).toBe('indicator list');
+      expect(scriptParams.trail).toBe('test-indicators');
       // Per-IOC reference wins over source.url
       expect(scriptParams.reference).toBe('https://blog.example.com/malware-analysis');
     });
@@ -293,20 +308,17 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
       const ops = buildBulkOpsForTest(
         [
           makeReport({
-            id: 'r-maltrail-noref',
+            id: 'r-indicator-list-noref',
             iocs: [{ type: 'ip', value: '9.9.9.9' }],
-            sourceName: 'maltrail',
-            sourceUrl:
-              'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt',
-            trailLabel: 'cobaltstrike',
+            sourceName: 'indicator list',
+            sourceUrl: 'https://feeds.example.test/indicators.txt',
+            trailLabel: 'test-indicators',
           }),
         ],
         NOW
       );
 
-      expect(ops[0].scriptParams.reference).toBe(
-        'https://raw.githubusercontent.com/stamparm/trails/main/malware/cobaltstrike.txt'
-      );
+      expect(ops[0].scriptParams.reference).toBe('https://feeds.example.test/indicators.txt');
     });
 
     it('removes credentials from report and IOC provenance before promotion', () => {
@@ -352,7 +364,7 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
-  describe('non-maltrail report (back-compat)', () => {
+  describe('report without indicator-list metadata (back-compat)', () => {
     it('produces a valid op with a single sources[] entry and no trail field', () => {
       const ops = buildBulkOpsForTest(
         [
@@ -398,6 +410,56 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
     });
   });
 
+  describe('deferred and rejected reports are kept out of promotion', () => {
+    it('does not upsert an IOC that semantic review deferred', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-deferred',
+            iocs: [
+              { type: 'ip', value: '1.2.3.4', deferred_unreviewed: true },
+              { type: 'ip', value: '5.6.7.8' },
+            ],
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(1);
+      expect(ops[0]._id).toBe('default:ip:5.6.7.8');
+    });
+
+    it('produces no ops for a report the relevance gate rejected', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-not-intel',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            isIntelligence: false,
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
+
+    it('produces no ops for a report the workflow marked rejected', () => {
+      const ops = buildBulkOpsForTest(
+        [
+          makeReport({
+            id: 'r-workflow-rejected',
+            iocs: [{ type: 'ip', value: '1.2.3.4' }],
+            extractionMethod: 'workflow_v4_rejected',
+          }),
+        ],
+        NOW
+      );
+
+      expect(ops).toHaveLength(0);
+    });
+  });
+
   describe('space isolation', () => {
     it('keys the same IOC value in different spaces as separate docs', () => {
       const ops = buildBulkOpsForTest(
@@ -435,7 +497,10 @@ describe('buildBulkOpsForTest — scripted upsert op shape', () => {
  * tests drive the real runner so that regression cannot come back silently.
  */
 describe('promote task runner', () => {
-  const setupRunner = (searchResponses: Array<Record<string, unknown>>) => {
+  const setupRunner = (
+    searchResponses: Array<Record<string, unknown>>,
+    getBootstrapReady: () => Promise<void> = () => Promise.resolve()
+  ) => {
     const coreStart = coreMock.createStart();
     const esClient = coreStart.elasticsearch.client.asInternalUser;
     let call = 0;
@@ -461,6 +526,7 @@ describe('promote task runner', () => {
       coreSetup,
       logger: loggingSystemMock.createLogger(),
       getReconcileAttributeWorkflows: jest.fn().mockResolvedValue(undefined),
+      getBootstrapReady,
     });
 
     const definition = definitions[PROMOTE_THREAT_INDICATORS_TASK_TYPE];
@@ -484,7 +550,7 @@ describe('promote task runner', () => {
     _id: id,
     sort: [extractedAt, 1],
     _source: {
-      source: { name: 'maltrail', url: 'https://example.com/trail.txt' },
+      source: { name: 'indicator list', url: 'https://example.com/trail.txt' },
       severity: { level: 'high' },
       // Needs a promotable tier: only `discriminating` and `contextual` reach the
       // index, so an untiered IOC produces no bulk operations at all.
@@ -506,6 +572,70 @@ describe('promote task runner', () => {
     expect(result.state).toEqual(
       expect.objectContaining({ lastSyncedAt: EXTRACTED_AT, totalReportsProcessed: 1 })
     );
+  });
+
+  describe('when bootstrap has not completed', () => {
+    const run = async () => {
+      const { definition, esClient } = setupRunner([{ hits: { hits: [reportHit('r-1')] } }], () =>
+        Promise.reject(new Error('bootstrap failed'))
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+        })
+      );
+      const result = await runner.run();
+      return { result, esClient };
+    };
+
+    it('returns the previous state', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
+
+    it('does not write indicators', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.bulk).not.toHaveBeenCalled();
+    });
+  });
+
+  describe('when the task is aborted while waiting for bootstrap', () => {
+    const run = async () => {
+      const controller = new AbortController();
+      const { definition, esClient } = setupRunner(
+        [{ hits: { hits: [reportHit('r-1')] } }],
+        () => new Promise<void>(() => {})
+      );
+      const runner = definition.createTaskRunner(
+        runContext({
+          taskInstance: { state: { lastSyncedAt: 'now-30d' }, params: {} } as never,
+          signal: controller.signal,
+        })
+      );
+      const pending = runner.run();
+      controller.abort();
+      return { result: await pending, esClient };
+    };
+
+    it('returns the previous state instead of timing out', async () => {
+      const { result } = await run();
+
+      expect(result.state).toEqual({ lastSyncedAt: 'now-30d' });
+    });
+
+    it('does not search reports', async () => {
+      const { esClient } = await run();
+
+      expect(esClient.search).not.toHaveBeenCalled();
+    });
   });
 
   it('holds the cursor when the run is aborted mid-scan', async () => {
@@ -630,9 +760,16 @@ describe('promote task runner', () => {
         .createTaskRunner(runContext({ taskInstance: { state: {}, params: {} } as never }))
         .run();
 
-      expect(esClient.openPointInTime).toHaveBeenCalledWith(
-        expect.objectContaining({ index: THREAT_REPORTS_INDEX_PATTERN })
-      );
+      const pitArg = (esClient.openPointInTime as jest.Mock).mock.calls[0][0];
+      expect(pitArg.index).toBe(THREAT_REPORTS_INDEX_PATTERN);
+      // `allow_no_indices` is search-only; ES rejects it on PIT open with
+      // x_content_parse_exception (the promotion task used to spread the full
+      // HIDDEN_INDEX_SEARCH_OPTIONS object and fail before scanning reports).
+      expect(pitArg.allow_no_indices).toBeUndefined();
+      expect(pitArg).toMatchObject({
+        expand_wildcards: ['open', 'hidden'],
+        ignore_unavailable: true,
+      });
 
       // The PIT pins the indices, so the search must not also pass `index`.
       const searchArg = (esClient.search as jest.Mock).mock.calls[0][0];

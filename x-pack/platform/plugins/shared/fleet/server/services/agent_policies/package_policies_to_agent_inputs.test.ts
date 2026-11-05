@@ -1632,6 +1632,62 @@ describe('Fleet - storedPackagePoliciesToAgentInputs - version specific inputs b
       expect.stringContaining('the saved object changed concurrently')
     );
   });
+
+  it('scopes soClient.get and soClient.update to the packagePoliciesNamespace for a custom-space policy', async () => {
+    const soClient = makeSoClient(undefined);
+
+    await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true,
+      'my-space'
+    );
+
+    expect(soClient.get).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      { namespace: 'my-space' }
+    );
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      expect.anything(),
+      expect.objectContaining({ namespace: 'my-space' })
+    );
+  });
+
+  it('omits namespace from soClient.get and soClient.update for a shared (all-spaces) policy', async () => {
+    const soClient = makeSoClient(undefined);
+
+    await storedPackagePoliciesToAgentInputs(
+      [versionedPackagePolicy],
+      packageInfoCache,
+      undefined,
+      undefined,
+      undefined,
+      '9.6',
+      soClient,
+      true,
+      undefined
+    );
+
+    expect(soClient.get).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      undefined
+    );
+    expect(soClient.update).toHaveBeenCalledWith(
+      LEGACY_PACKAGE_POLICY_SAVED_OBJECT_TYPE,
+      versionedPackagePolicy.id,
+      expect.anything(),
+      expect.not.objectContaining({ namespace: expect.anything() })
+    );
+  });
 });
 
 describe('storedPackagePolicyToAgentInputs - dynamic_signal_types handling', () => {

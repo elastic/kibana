@@ -14,10 +14,9 @@ const baseAttributes = {
   metadata: { name: 'My rule' },
   time_field: '@timestamp',
   schedule: { every: '5m' },
-  query: {
-    format: 'standalone' as const,
-    breach: { query: 'FROM logs-* | LIMIT 1' },
-  },
+  query: { base: 'FROM logs-* | LIMIT 1' },
+  recovery: { strategy: 'no_breach' as const },
+  no_data: { strategy: 'ignore' as const },
   enabled: true,
   createdBy: { profile_uid: 'elastic' },
   updatedBy: { profile_uid: 'elastic' },

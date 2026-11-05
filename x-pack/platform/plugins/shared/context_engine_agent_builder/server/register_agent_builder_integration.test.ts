@@ -18,7 +18,6 @@ import {
   KI_RETRIEVAL_SKILL_ID,
   CONTEXT_ENGINE_SIGNALS_SKILL_ID,
 } from '../common/agent_builder_skills';
-import { SELF_AGENT_ID } from '@kbn/agent-builder-common';
 import type {
   ContextEngineAgentBuilderPluginStart,
   ContextEngineAgentBuilderStartDependencies,
@@ -131,22 +130,34 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
           id: 'my-custom',
           dest: { type: 'index', value: 'ai-index-idx-custom' },
           description: 'Support tickets.',
+          memory_enabled: true,
         },
       ],
     });
 
     expect(await resolver({ ids: ['my-custom'], request })).toEqual([
-      { id: 'my-custom', esqlTarget: 'ai-index-idx-custom', description: 'Support tickets.' },
+      {
+        id: 'my-custom',
+        esqlTarget: 'ai-index-idx-custom',
+        description: 'Support tickets.',
+        memoryEnabled: true,
+      },
     ]);
   });
 
   it('asks the service for the requested ids only, so just those are probed', async () => {
     const { resolver, list } = setup({
-      aiIndices: [{ id: 'wanted', dest: { type: 'index', value: 'idx-wanted' } }],
+      aiIndices: [
+        {
+          id: 'wanted',
+          dest: { type: 'index', value: 'idx-wanted' },
+          memory_enabled: false,
+        },
+      ],
     });
 
     expect(await resolver({ ids: ['wanted', 'unknown'], request })).toEqual([
-      { id: 'wanted', esqlTarget: 'idx-wanted' },
+      { id: 'wanted', esqlTarget: 'idx-wanted', memoryEnabled: false },
     ]);
     expect(list).toHaveBeenCalledTimes(1);
     expect(list).toHaveBeenCalledWith(['wanted', 'unknown']);
@@ -197,7 +208,6 @@ describe('registerContextEngineAgentBuilderIntegration', () => {
         }),
         configuration: expect.objectContaining({
           enable_elastic_capabilities: false,
-          subagent_ids: [SELF_AGENT_ID],
           skill_ids: expect.arrayContaining([
             ANALYZE_AND_IMPROVE_SKILL_ID,
             AI_INDEX_AUTOMATIONS_SKILL_ID,

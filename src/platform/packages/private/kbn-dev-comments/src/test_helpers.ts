@@ -148,6 +148,10 @@ export const createLocation = (initialPath = '/page') => {
   return { location, navigate };
 };
 
+/** Dates as the browser formats them for the test's locale. */
+export const formatDateLocally: CommentsHostServices['formatDate'] = (iso, options) =>
+  new Date(iso).toLocaleString(undefined, options);
+
 /** Host services for the page `/page`: an empty in-memory API, no-op navigation */
 export const createHostServices = (
   overrides: Partial<CommentsHostServices> = {}
@@ -156,5 +160,6 @@ export const createHostServices = (
   location: createLocation().location,
   navigateToPath: async () => {},
   getCurrentUser: async () => ({ username: 'capybara', fullName: 'Capybara' }),
+  formatDate: formatDateLocally,
   ...overrides,
 });

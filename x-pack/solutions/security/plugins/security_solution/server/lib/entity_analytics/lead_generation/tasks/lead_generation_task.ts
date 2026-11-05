@@ -28,6 +28,7 @@ import type { SetupPlugins, StartPlugins } from '../../../../plugin_contract';
 import { RiskScoreDataClient } from '../../risk_score/risk_score_data_client';
 import { buildScopedInternalSavedObjectsClientUnsafe } from '../../risk_score/tasks/helpers';
 import { TYPE, VERSION, TIMEOUT, SCOPE, INTERVAL } from './constants';
+import { buildEaExecutionContext, EA_EXECUTION_CONTEXT_NAMES } from '../../execution_context';
 import {
   defaultState,
   stateSchemaByVersion,
@@ -129,16 +130,20 @@ const createLeadGenerationTaskRunnerFactory =
     return {
       run: async () => {
         const [core, startPlugins] = await deps.getStartServices();
-        return runLeadGenerationTask({
-          isCancelled,
-          logger: deps.logger,
-          taskInstance,
-          fakeRequest,
-          core,
-          startPlugins,
-          kibanaVersion: deps.kibanaVersion,
-          ml: deps.ml,
-        });
+        return core.executionContext.withContext(
+          buildEaExecutionContext(EA_EXECUTION_CONTEXT_NAMES.LEAD_GENERATION_TASK, taskInstance.id),
+          () =>
+            runLeadGenerationTask({
+              isCancelled,
+              logger: deps.logger,
+              taskInstance,
+              fakeRequest,
+              core,
+              startPlugins,
+              kibanaVersion: deps.kibanaVersion,
+              ml: deps.ml,
+            })
+        );
       },
       cancel: async () => {
         cancelled = true;
@@ -201,6 +206,10 @@ const runLeadGenerationTask = async ({
     // Use the scoped client so the task runs with the user's privileges.
     // Entity Store indices (entities-latest-*) are not accessible to kibana_system.
     const esClient = core.elasticsearch.client.asScoped(fakeRequest).asCurrentUser;
+    // The leads index is shared, per-space infrastructure, so provisioning it shouldn't
+    // depend on the enabling user's own `create_index`/`manage` privileges.
+    // Use the unscoped internal client for provisioning the leads index only.
+    const internalEsClient = core.elasticsearch.client.asInternalUser;
     const crudClient = startPlugins.entityStore.createCRUDClient(esClient, state.namespace);
     const relationshipsClient = startPlugins.entityStore.createRelationshipsClient(
       esClient,
@@ -233,6 +242,7 @@ const runLeadGenerationTask = async ({
     await runLeadGenerationPipeline({
       listEntities: () => fetchCandidateEntities(crudClient, logger),
       esClient,
+      internalEsClient,
       logger,
       spaceId: state.namespace,
       riskScoreDataClient,

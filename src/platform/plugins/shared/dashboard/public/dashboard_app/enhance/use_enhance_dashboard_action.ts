@@ -9,7 +9,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-import { catchError, EMPTY, from, of, startWith, switchMap } from 'rxjs';
+import { catchError, EMPTY, from, map, of, startWith, switchMap } from 'rxjs';
 import type { DashboardApi } from '../../dashboard_api/types';
 import { uiActionsService } from '../../services/kibana_services';
 import {
@@ -22,14 +22,22 @@ const getEnhanceAction = async (): Promise<Action<EnhanceDashboardActionContext>
     ENHANCE_DASHBOARD_ACTION_ID
   )) as Action<EnhanceDashboardActionContext>;
 
+interface CompatibleEnhanceAction {
+  action: Action<EnhanceDashboardActionContext>;
+  isDisabled: boolean;
+  tooltip: string;
+}
+
 export interface UseEnhanceDashboardAction {
   execute: () => Promise<void>;
+  isDisabled: boolean;
+  tooltip: string;
 }
 
 export const useEnhanceDashboardAction = (
   dashboardApi: DashboardApi
 ): UseEnhanceDashboardAction | null => {
-  const [action, setAction] = useState<Action<EnhanceDashboardActionContext> | null>(null);
+  const [compatibleAction, setCompatibleAction] = useState<CompatibleEnhanceAction | null>(null);
   const context = useMemo(
     () => ({
       dashboardApi,
@@ -40,7 +48,7 @@ export const useEnhanceDashboardAction = (
 
   useEffect(() => {
     if (!uiActionsService.hasAction(ENHANCE_DASHBOARD_ACTION_ID)) {
-      setAction(null);
+      setCompatibleAction(null);
       return;
     }
 
@@ -51,16 +59,28 @@ export const useEnhanceDashboardAction = (
             startWith(undefined),
             switchMap(async () => {
               try {
-                return (await nextAction.isCompatible(context)) ? nextAction : null;
+                return await nextAction.isCompatible(context);
               } catch {
-                return null;
+                return false;
               }
-            })
+            }),
+            switchMap((isCompatible) =>
+              isCompatible
+                ? (nextAction.getDisabledStateChangesSubject?.(context) ?? EMPTY).pipe(
+                    startWith(undefined),
+                    map(() => ({
+                      action: nextAction,
+                      isDisabled: nextAction.isDisabled?.(context) ?? false,
+                      tooltip: nextAction.getDisplayNameTooltip?.(context) ?? '',
+                    }))
+                  )
+                : of(null)
+            )
           )
         ),
         catchError(() => of(null))
       )
-      .subscribe(setAction);
+      .subscribe(setCompatibleAction);
 
     return () => {
       subscription.unsubscribe();
@@ -69,11 +89,13 @@ export const useEnhanceDashboardAction = (
 
   return useMemo(
     () =>
-      action
+      compatibleAction
         ? {
-            execute: () => action.execute(context),
+            execute: () => compatibleAction.action.execute(context),
+            isDisabled: compatibleAction.isDisabled,
+            tooltip: compatibleAction.tooltip,
           }
         : null,
-    [action, context]
+    [compatibleAction, context]
   );
 };

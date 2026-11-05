@@ -11,8 +11,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { queryKeys as platformQueryKeys } from '@kbn/proposals-plugin/public';
 import { MAX_QUEUE_REACH } from '../../common/proposals/list';
+import { queryKeys } from '../query_keys';
 import {
-  PROPOSALS_POLL_INTERVAL_MS,
   useClosedProposals,
   useClosedProposalsCount,
   useProposalsByCategory,
@@ -57,6 +57,29 @@ describe('useProposalsByCategory', () => {
 
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryOf(0)).toEqual({ from: 0, size: 10 });
+  });
+
+  it('sends the entity filter, and keys the cache by it', async () => {
+    http.get.mockResolvedValue(page(10, 10));
+    const { Wrapper, queryClient } = createWrapper();
+
+    const { result } = renderHook(
+      () =>
+        useProposalsByCategory('respond', {
+          firstPageSize: 10,
+          step: 10,
+          enabled: true,
+          entity: 'host-1',
+        }),
+      { wrapper: Wrapper }
+    );
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 10, entity: 'host-1' });
+    expect(
+      queryClient.getQueryData(queryKeys.proposals.byCategory('respond', 'host-1'))
+    ).toBeDefined();
+    expect(queryClient.getQueryData(queryKeys.proposals.byCategory('respond'))).toBeUndefined();
   });
 
   it('steps later pages by the step size, from the rows already loaded', async () => {
@@ -120,45 +143,29 @@ describe('useProposalsByCategory', () => {
     expect(http.get).not.toHaveBeenCalled();
   });
 
-  it('polls only the leading page, however many the analyst has opened', async () => {
-    // Before the render, or the poll's interval is scheduled on the real clock.
+  it('does not poll on its own, so a just-decided row stays dropped between page heartbeats', async () => {
+    // Deliberate: a faster poll here would refetch the row `useDropDecidedProposal` just
+    // removed optimistically. Search consistency for a just-written decision can lag behind
+    // the plain GET the decision is confirmed with, so a too-soon refetch reads the row as
+    // still pending and restores it. Only the slow 60s baseline should ever re-check.
     jest.useFakeTimers();
-    http.get.mockResolvedValue(page(10, 30));
-    const { Wrapper, queryClient } = createWrapper();
-
-    const { result } = renderHook(
-      () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
-      { wrapper: Wrapper }
-    );
-    await waitFor(() => expect(result.current.isSuccess).toBe(true));
-    await result.current.fetchNextPage();
-    expect(http.get).toHaveBeenCalledTimes(2);
-
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
-
-    // Settled, not merely started: a replay of the second page trails the first and
-    // would slip past a check that stops at the request it expected.
-    await waitFor(() => expect(queryClient.isFetching()).toBe(0));
-
-    // One request, not two: replaying every opened page would make each Show more
-    // cost another request a minute, for as long as the page stays open.
-    expect(http.get.mock.calls.map(([, options]) => options.query.from)).toEqual([0, 10, 0]);
-    jest.useRealTimers();
-  });
-
-  it('polls, so a worker adding a proposal shows up without a reload', async () => {
-    jest.useFakeTimers();
-    http.get.mockResolvedValue(page(10, 30));
+    http.get.mockResolvedValue({
+      proposals: [{ id: 'prop-0', decision: 'approved', status: 'executing' }],
+      total: 1,
+    });
 
     const { result } = renderHook(
       () => useProposalsByCategory('respond', { firstPageSize: 10, step: 10, enabled: true }),
       { wrapper: createWrapper().Wrapper }
     );
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(http.get).toHaveBeenCalledTimes(1);
 
-    jest.advanceTimersByTime(PROPOSALS_POLL_INTERVAL_MS);
+    // Well short of the 60s baseline — long enough that a settling-triggered fast poll (were
+    // one wired here) would have fired several times over by now.
+    jest.advanceTimersByTime(10_000);
+    expect(http.get).toHaveBeenCalledTimes(1);
 
-    await waitFor(() => expect(http.get).toHaveBeenCalledTimes(2));
     jest.useRealTimers();
   });
 });
@@ -252,5 +259,16 @@ describe('useClosedProposalsCount', () => {
     await waitFor(() => expect(result.current.isSuccess).toBe(true));
     expect(queryOf(0)).toEqual({ from: 0, size: 0 });
     expect(result.current.data?.total).toBe(42);
+  });
+
+  it('narrows the total to the entity filter', async () => {
+    http.get.mockResolvedValue(page(0, 3));
+
+    const { result } = renderHook(() => useClosedProposalsCount(true, 'host-1'), {
+      wrapper: createWrapper().Wrapper,
+    });
+
+    await waitFor(() => expect(result.current.isSuccess).toBe(true));
+    expect(queryOf(0)).toEqual({ from: 0, size: 0, entity: 'host-1' });
   });
 });

@@ -13,7 +13,7 @@ import { createMockStore, mockGlobalState, TestProviders } from '../../../../com
 import { useUpdateTimeline } from '../../../../timelines/components/open_timeline/use_update_timeline';
 import { useCreateTimeline } from '../../../../timelines/hooks/use_create_timeline';
 import { sendBulkEventsToTimelineAction } from '../actions';
-import type { TimelineItem } from '@kbn/timelines-plugin/common';
+import type { TimelineItem } from '@kbn/securitysolution-timeline-common';
 import type { State } from '../../../../common/store/types';
 import { TimelineId } from '../../../../../common/types/timeline';
 
@@ -137,6 +137,36 @@ describe('useSendBulkToTimeline', () => {
         [],
         'KqlFilter'
       );
+    });
+
+    it('enriches ecs with kibana.alert.rule.type and kibana.alert.group.id from data', () => {
+      // Bulk selections only populate `item.ecs` with `_id`/`_index`; the real
+      // field values live in `item.data`. See https://github.com/elastic/kibana/issues/288404.
+      const eqlTimelineItems: TimelineItem[] = [
+        {
+          _id: 'eql-alert-a',
+          _index: 'test-index',
+          data: [
+            { field: 'kibana.alert.rule.type', value: ['eql'] },
+            { field: 'kibana.alert.group.id', value: ['group-a'] },
+          ],
+          ecs: { _id: 'eql-alert-a', _index: 'test-index' },
+        },
+      ];
+      const { result } = renderHookWithProviders();
+
+      act(() => {
+        result.current.sendBulkEventsToTimelineHandler(eqlTimelineItems);
+      });
+
+      const ecsData = mockSendBulkEventsToTimelineAction.mock.calls[0][1];
+      expect(ecsData).toEqual([
+        {
+          _id: 'eql-alert-a',
+          _index: 'test-index',
+          kibana: { alert: { rule: { type: ['eql'] }, group: { id: ['group-a'] } } },
+        },
+      ]);
     });
   });
 

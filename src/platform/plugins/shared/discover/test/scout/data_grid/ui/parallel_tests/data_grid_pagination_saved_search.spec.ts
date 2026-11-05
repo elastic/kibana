@@ -12,8 +12,8 @@
  */
 
 import { expect } from '@kbn/scout/ui';
-import { spaceTest } from '@kbn/scout';
-import { testData } from '../fixtures';
+
+import { spaceTest, testData } from '../fixtures';
 
 const ESQL_ROWS_PER_PAGE = 5;
 const SAMPLE_SIZE = 12;

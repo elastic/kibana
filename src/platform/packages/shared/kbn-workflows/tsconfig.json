@@ -6,6 +6,7 @@
   },
   "include": ["**/*.ts"],
   "kbn_references": [
+    "@kbn/entity-access-control",
     "@kbn/i18n",
     "@kbn/zod",
     "@kbn/es-query",
@@ -14,6 +15,8 @@
     "@kbn/repo-info",
     "@kbn/human-readable-id",
     "@kbn/std",
+    "@kbn/core-user-profile-common",
+    "@kbn/core-user-settings-types"
   ],
   "exclude": ["target/**/*"]
 }

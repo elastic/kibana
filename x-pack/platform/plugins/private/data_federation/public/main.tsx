@@ -6,9 +6,9 @@
  */
 
 import type { FunctionComponent } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { Redirect, useHistory, useLocation } from 'react-router-dom';
-import { EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiSpacer } from '@elastic/eui';
 
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
@@ -17,11 +17,17 @@ import type { DataSetWithName, DataSource } from '../common';
 import { mainTranslations } from './main_i18n';
 import { DataSourcesTabContent } from './data_sources_tab_content';
 import { DatasetsTabContent } from './datasets_tab_content';
+import { CreateDatasetWizardPage } from './create_dataset_wizard';
 import type { DataFederationKibanaServices } from './types';
 import { useLoadList } from './use_load_list';
 
-const DATASETS_PATH = '/datasets' as const;
-const DATA_SOURCES_PATH = '/data_sources' as const;
+import {
+  CREATE_DATASET_PATH,
+  DATASETS_PATH,
+  DATA_SOURCES_PATH,
+  EDIT_DATASET_PATH,
+  isDatasetWizardPath,
+} from './app_paths';
 
 export const Main: FunctionComponent = () => {
   const {
@@ -33,11 +39,7 @@ export const Main: FunctionComponent = () => {
   const history = useHistory();
   const { pathname } = useLocation();
 
-  const {
-    items: dataSources,
-    hasLoaded: hasLoadedDataSources,
-    reload: reloadDataSources,
-  } = useLoadList<DataSource>(
+  const { items: dataSources, reload: reloadDataSources } = useLoadList<DataSource>(
     useCallback(async () => await dataSourcesClient.get(), [dataSourcesClient])
   );
 
@@ -49,32 +51,12 @@ export const Main: FunctionComponent = () => {
     useCallback(async () => await datasetsClient.get(), [datasetsClient])
   );
 
+  const isWizardPath = isDatasetWizardPath(pathname);
   const selectedTabId = useMemo<'datasets' | 'data_sources'>(() => {
     return pathname.startsWith(DATA_SOURCES_PATH) ? 'data_sources' : 'datasets';
   }, [pathname]);
-  const [hasUserSelectedTab, setHasUserSelectedTab] = useState(false);
-
-  useEffect(() => {
-    if (hasUserSelectedTab || !hasLoadedDataSources || !hasLoadedDataSets) {
-      return;
-    }
-
-    if (dataSources.length === 0 && dataSets.length === 0 && selectedTabId !== 'data_sources') {
-      history.replace(DATA_SOURCES_PATH);
-    }
-  }, [
-    dataSets.length,
-    history,
-    hasLoadedDataSets,
-    hasLoadedDataSources,
-    hasUserSelectedTab,
-    dataSources.length,
-    selectedTabId,
-  ]);
-
   const onTabClick = useCallback(
     (id: 'datasets' | 'sources') => {
-      setHasUserSelectedTab(true);
       history.push(id === 'sources' ? DATA_SOURCES_PATH : DATASETS_PATH);
     },
     [history]
@@ -102,34 +84,70 @@ export const Main: FunctionComponent = () => {
 
   return (
     <>
-      <AppHeader
-        title={mainTranslations.pageTitle}
-        badges={[{ label: mainTranslations.experimental }]}
-        tabs={tabs}
-        spacing="bleed"
-        docLink={dataFederationLinks.overview}
-        menu={{
-          items: [
-            {
-              id: 'quickstart',
-              label: mainTranslations.quickstartLink,
-              iconType: 'rocket',
-              href: dataFederationLinks.quickstart,
-              target: '_blank',
-              overflow: true,
-              order: 3,
-            },
-          ],
-        }}
-      />
-      <EuiSpacer size="l" />
-
-      <EuiText color="subdued" size="s">
-        <p>{mainTranslations.pageDescription}</p>
-      </EuiText>
-      <EuiSpacer size="m" />
+      {!isWizardPath && (
+        <>
+          <AppHeader
+            title={mainTranslations.pageTitle}
+            badges={[{ label: mainTranslations.experimental }]}
+            tabs={tabs}
+            description={mainTranslations.pageDescription}
+            spacing="bleed"
+            docLink={dataFederationLinks.overview}
+            menu={{
+              items: [
+                {
+                  id: 'quickstart',
+                  label: mainTranslations.quickstartLink,
+                  iconType: 'rocket',
+                  href: dataFederationLinks.quickstart,
+                  target: '_blank',
+                  overflow: true,
+                  order: 3,
+                },
+              ],
+            }}
+          />
+          <EuiSpacer size="l" />
+        </>
+      )}
 
       <Routes>
+        <Route
+          exact
+          path={CREATE_DATASET_PATH}
+          render={() => (
+            <CreateDatasetWizardPage
+              dataSources={dataSources}
+              existingDataSetNames={dataSets.map((ds) => ds.name)}
+              loadDataSets={reloadDataSets}
+              loadDataSources={reloadDataSources}
+            />
+          )}
+        />
+        <Route
+          exact
+          path={EDIT_DATASET_PATH}
+          render={({ match }) => {
+            const datasetName = decodeURIComponent(match.params.datasetName);
+            const initialDataSet = dataSets.find((dataSet) => dataSet.name === datasetName);
+            if (!hasLoadedDataSets) {
+              return null;
+            }
+            if (!initialDataSet) {
+              return <Redirect to={DATASETS_PATH} />;
+            }
+            return (
+              <CreateDatasetWizardPage
+                key={initialDataSet.name}
+                initialDataSet={initialDataSet}
+                dataSources={dataSources}
+                existingDataSetNames={dataSets.map((ds) => ds.name)}
+                loadDataSets={reloadDataSets}
+                loadDataSources={reloadDataSources}
+              />
+            );
+          }}
+        />
         <Route
           exact
           path={DATASETS_PATH}

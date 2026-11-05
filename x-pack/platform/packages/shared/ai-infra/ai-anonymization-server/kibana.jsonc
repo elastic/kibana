@@ -1,0 +1,9 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/ai-anonymization-server",
+  "owner": [
+    "@elastic/security-investigations"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

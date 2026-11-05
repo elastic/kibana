@@ -11,6 +11,8 @@ applies_to:
 
 The Google Cloud Storage connector enables searching and accessing objects in Google Cloud Storage buckets.
 
+You can use this connector in **Agent Builder** and **Workflows**.
+
 ## Create connectors in {{kib}} [define-google-cloud-storage-ui]
 
 You can create connectors in **{{stack-manage-app}} > {{connectors-ui}}**.

@@ -73,6 +73,7 @@ describe('groupIntoSuites', () => {
           failedBuilds: 2,
           suiteTitle: undefined,
           configPath: undefined,
+          configCategory: undefined,
           owners: ['elastic/team-a'],
         }),
         flakyTest({
@@ -81,6 +82,7 @@ describe('groupIntoSuites', () => {
           failedBuilds: 9,
           suiteTitle: 'suite a',
           configPath: 'a.config.ts',
+          configCategory: 'api-test',
           owners: ['elastic/team-b', 'elastic/team-a'],
         }),
       ],
@@ -95,6 +97,7 @@ describe('groupIntoSuites', () => {
       framework: 'playwright',
       suiteTitle: 'suite a',
       configPath: 'a.config.ts',
+      configCategory: 'api-test',
       owners: ['elastic/team-b', 'elastic/team-a'],
       byPipeline,
     });

@@ -42,7 +42,7 @@ export const SYSTEM_LABEL = i18n.translate(
 export const STARTED_EPISODE_AS = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timeline.startedEpisodeAs',
   {
-    defaultMessage: 'started the episode as',
+    defaultMessage: 'started the alert as',
   }
 );
 
@@ -77,19 +77,19 @@ export const getAfterNEventsLabel = (count: number, prevStatus: string): string 
 /** Complete sentences for actions that carry no inline details. */
 export const ACTION_LABELS: Record<string, string> = {
   ack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.ack', {
-    defaultMessage: 'acknowledged the episode',
+    defaultMessage: 'acknowledged the alert',
   }),
   unack: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unack', {
-    defaultMessage: 'unacknowledged the episode',
+    defaultMessage: 'unacknowledged the alert',
   }),
   unsnooze: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.unsnooze', {
-    defaultMessage: 'unsnoozed the episode',
+    defaultMessage: 'unsnoozed the alert',
   }),
   deactivate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.deactivate', {
-    defaultMessage: 'resolved the episode',
+    defaultMessage: 'resolved the alert',
   }),
   activate: i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.actionLabel.activate', {
-    defaultMessage: 'reopened the episode',
+    defaultMessage: 'reopened the alert',
   }),
 };
 
@@ -126,19 +126,19 @@ export const STATUS_LABELS: Record<string, string> = {
 export const SNOOZED_INDEFINITELY = i18n.translate(
   'xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeIndefinitely',
   {
-    defaultMessage: 'snoozed the episode indefinitely',
+    defaultMessage: 'snoozed the alert indefinitely',
   }
 );
 
 export const getSnoozedUntilLabel = (date: string): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeUntil', {
-    defaultMessage: 'snoozed the episode until {date}',
+    defaultMessage: 'snoozed the alert until {date}',
     values: { date },
   });
 
 export const getSnoozedForLabel = (duration: string, date: string): string =>
   i18n.translate('xpack.alertingV2EpisodesUi.details.timeline.snoozedEpisodeForDuration', {
-    defaultMessage: 'snoozed the episode for {duration}, until {date}',
+    defaultMessage: 'snoozed the alert for {duration}, until {date}',
     values: { duration, date },
   });
 

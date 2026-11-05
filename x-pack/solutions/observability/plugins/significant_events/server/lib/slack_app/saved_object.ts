@@ -14,10 +14,8 @@ export const RELAY_APP_CONNECTION_SO_TYPE = 'relay-app-connection';
  * A single, deployment-wide connection document. The Slack workspace binding is
  * deployment-level (not per-space), so a fixed id + `agnostic` namespace is used.
  *
- * No secrets are stored here: the managed ES API key secret is handed to the Relay
- * during install, and Kibana -> Relay calls authenticate at the transport layer
- * (mTLS proxy, identity from XFCC). Only the key *id* is kept so it can be
- * invalidated on disconnect.
+ * No secrets are stored here: only the managed API key's id (so it can be invalidated) and the
+ * UIAM service-account id, which is an identifier rather than a credential.
  */
 export const RELAY_APP_CONNECTION_SO_ID = 'relay-app-connection';
 
@@ -44,7 +42,18 @@ const relayAppConnectionAttributesV1 = schema.object({
   updatedAt: schema.maybe(schema.string()),
 });
 
-export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV1>;
+const relayAppConnectionAttributesV2 = relayAppConnectionAttributesV1.extends({
+  // Workspace name and URL the Relay reported for `tenantKey`, shown to the admin to confirm.
+  tenantName: schema.maybe(schema.string()),
+  tenantUrl: schema.maybe(schema.string()),
+});
+
+const relayAppConnectionAttributesV3 = relayAppConnectionAttributesV2.extends({
+  // UIAM service-account id. Not a secret.
+  serviceAccountId: schema.maybe(schema.oneOf([schema.string(), schema.literal(null)])),
+});
+
+export type RelayAppConnectionAttributes = TypeOf<typeof relayAppConnectionAttributesV3>;
 
 export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
   name: RELAY_APP_CONNECTION_SO_TYPE,
@@ -68,6 +77,20 @@ export const getRelayAppConnectionSavedObjectType = (): SavedObjectsType => ({
       schemas: {
         forwardCompatibility: relayAppConnectionAttributesV1.extends({}, { unknowns: 'ignore' }),
         create: relayAppConnectionAttributesV1,
+      },
+    },
+    '2': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: relayAppConnectionAttributesV2.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV2,
+      },
+    },
+    '3': {
+      changes: [],
+      schemas: {
+        forwardCompatibility: relayAppConnectionAttributesV3.extends({}, { unknowns: 'ignore' }),
+        create: relayAppConnectionAttributesV3,
       },
     },
   },

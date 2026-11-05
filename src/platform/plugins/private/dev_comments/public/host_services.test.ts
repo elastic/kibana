@@ -12,7 +12,15 @@ import { createCommentsHostServices, routeOf } from './host_services';
 
 describe('createCommentsHostServices', () => {
   const core = coreMock.createStart({ basePath: '/kbn' });
-  const services = createCommentsHostServices(core);
+  const formatDate = jest.fn(() => 'Sep 29, 2026');
+  const services = createCommentsHostServices(core, { formatDate });
+
+  it("formats dates with the host's intl", () => {
+    expect(services.formatDate('2026-09-29T21:26:05.000Z', { month: 'short' })).toBe(
+      'Sep 29, 2026'
+    );
+    expect(formatDate).toHaveBeenCalledWith('2026-09-29T21:26:05.000Z', { month: 'short' });
+  });
 
   it('keeps routes relative to the server base path, with the space they are in', () => {
     expect(

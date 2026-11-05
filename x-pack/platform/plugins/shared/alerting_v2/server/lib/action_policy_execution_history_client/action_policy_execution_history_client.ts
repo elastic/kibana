@@ -36,10 +36,20 @@ import {
   buildExecutionHistoryItem,
   type NameMaps,
 } from './build_execution_history_item';
+import { toEventActions } from './outcome';
 
 // Default lower bound on the event timestamp when the caller does not pass an
 // explicit `from`.
 const DEFAULT_TIME_WINDOW_HOURS = 24;
+
+// Default lower bound when the caller does not pass `from`: 24 hours before
+// `to`, or before now when `to` is omitted — the same rolling window the rule
+// execution history applies. Anchoring on `to` keeps a caller-supplied upper
+// bound from producing an empty or inverted window.
+const defaultFrom = (to?: string): string =>
+  new Date(
+    (to ? Date.parse(to) : Date.now()) - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000
+  ).toISOString();
 
 // Pagination defaults applied when the caller omits them
 const DEFAULT_PAGE = 1;
@@ -55,8 +65,8 @@ export interface ListExecutionHistoryArgs {
   perPage?: number;
   search?: string;
   ruleIds?: string[];
-  outcome?: PolicyExecutionOutcomeFilter;
-  episodeIds?: string[];
+  outcomes?: PolicyExecutionOutcomeFilter;
+  alertIds?: string[];
   /**
    * Inclusive ISO timestamp lower bound for `@timestamp`. When provided it
    * replaces the default rolling {@link DEFAULT_TIME_WINDOW_HOURS}-hour window.
@@ -69,7 +79,7 @@ export interface ListExecutionHistoryArgs {
    * `@timestamp`, which the event log query always sorts on; only `sortOrder`
    * is forwarded.
    */
-  sort?: ListPolicyExecutionHistoryRequest['sort'];
+  sortField?: ListPolicyExecutionHistoryRequest['sort_field'];
   /** Sort direction. Defaults to `desc` (newest first). */
   sortOrder?: 'asc' | 'desc';
 }
@@ -105,14 +115,13 @@ export class ActionPolicyExecutionHistoryClient {
     perPage = EXECUTION_HISTORY_DEFAULT_PER_PAGE,
     search,
     ruleIds,
-    outcome,
-    episodeIds,
+    outcomes,
+    alertIds,
     from,
     to,
     sortOrder,
   }: ListExecutionHistoryArgs): Promise<ListExecutionHistoryResult> {
-    const effectiveFrom =
-      from ?? new Date(Date.now() - DEFAULT_TIME_WINDOW_HOURS * 60 * 60 * 1000).toISOString();
+    const effectiveFrom = from ?? defaultFrom(to);
     const spaceId = this.spaces.spacesService.getSpaceId(request);
     const searchIsActive = search !== undefined && search.trim() !== '';
 
@@ -135,14 +144,14 @@ export class ActionPolicyExecutionHistoryClient {
       sortOrder,
       page,
       perPage,
-      outcomes: outcome,
+      actions: toEventActions(outcomes),
       policyIds: matchingSearchIds.policyIds,
       ruleIds: matchingSearchIds.ruleIds,
       mandatoryRuleIds: ruleIds,
-      episodeIds,
+      alertIds,
     });
 
-    const nameMaps = await this.resolveNames(result.events, spaceId);
+    const nameMaps = await this.resolveNames(result.events, spaceId, request);
     const items = result.events
       .map((event) =>
         buildExecutionHistoryItem(
@@ -193,20 +202,24 @@ export class ActionPolicyExecutionHistoryClient {
       ruleIds: [...ruleIds],
       hasMatches: policyIds.size > 0 || ruleIds.size > 0,
       matches: {
-        policies: policies.total,
-        rules: rules.total,
+        policy_count: policies.total,
+        rule_count: rules.total,
         is_truncated: policies.total > SEARCH_ID_CAP || rules.total > SEARCH_ID_CAP,
       },
     };
   }
 
-  private async resolveNames(events: IValidatedEvent[], spaceId: string): Promise<NameMaps> {
+  private async resolveNames(
+    events: IValidatedEvent[],
+    spaceId: string,
+    request: KibanaRequest
+  ): Promise<NameMaps> {
     const { policyIds, ruleIds, workflowIds } = collectIdsFromEvents(events);
 
     const [policiesRes, rulesRes, workflowsRes] = await Promise.allSettled([
       this.actionPolicyClient.getActionPolicies({ ids: policyIds }),
       this.lookupRulesByIds(ruleIds),
-      this.workflowsManagement.getWorkflowsByIds(workflowIds, spaceId),
+      this.workflowsManagement.getClient(request).getWorkflowsByIds(workflowIds, spaceId),
     ]);
 
     const policies = this.unwrapArray(

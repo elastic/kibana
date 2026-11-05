@@ -48,7 +48,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText emotion-euiText-m"
+                class="euiText emotion-euiText-s"
               >
                 Auditbeat
               </div>
@@ -218,7 +218,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText emotion-euiText-m"
+                class="euiText emotion-euiText-s"
               >
                 Filebeat
               </div>
@@ -632,7 +632,7 @@ exports[`Overview Network Stat Data rendering it renders the default OverviewNet
               class="euiFlexItem emotion-euiFlexItem-growZero"
             >
               <div
-                class="euiText emotion-euiText-m"
+                class="euiText emotion-euiText-s"
               >
                 Packetbeat
               </div>

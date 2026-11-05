@@ -11,26 +11,24 @@ import {
 } from './get_inventory_rule_schema';
 
 describe('getInventoryRuleSchema', () => {
-  it('forces a pod rule to ecs for every stored schema', () => {
-    expect(getInventoryRuleSchema('pod', 'semconv')).toBe('ecs');
-    expect(getInventoryRuleSchema('pod', 'ecs')).toBe('ecs');
-    expect(getInventoryRuleSchema('pod', undefined)).toBe('ecs');
-    expect(getInventoryRuleSchema('pod', null)).toBe('ecs');
+  it('returns the stored schema unchanged', () => {
+    expect(getInventoryRuleSchema('semconv')).toBe('semconv');
+    expect(getInventoryRuleSchema('ecs')).toBe('ecs');
   });
 
-  it('keeps a host schema, including an omission', () => {
-    expect(getInventoryRuleSchema('host', 'semconv')).toBe('semconv');
-    expect(getInventoryRuleSchema('host', 'ecs')).toBe('ecs');
-    expect(getInventoryRuleSchema('host', undefined)).toBeUndefined();
-    expect(getInventoryRuleSchema('host', null)).toBeUndefined();
+  it('leaves an omitted schema omitted', () => {
+    // Hosts parity: do not substitute DEFAULT_SCHEMA (semconv).
+    expect(getInventoryRuleSchema(undefined)).toBeUndefined();
+    expect(getInventoryRuleSchema(null)).toBeUndefined();
   });
 });
 
 describe('getInventoryAlertGroupingField', () => {
-  it('groups a stored semconv pod rule on kubernetes.pod.uid', () => {
-    // Same ecs coerce as rule evaluation. Becomes k8s.pod.uid when that pod branch is removed.
-    expect(getInventoryAlertGroupingField('pod', 'semconv')).toBe('kubernetes.pod.uid');
+  it('groups a pod rule by its stored schema, defaulting to ecs identity when omitted', () => {
+    expect(getInventoryAlertGroupingField('pod', 'semconv')).toBe('k8s.pod.uid');
+    expect(getInventoryAlertGroupingField('pod', 'ecs')).toBe('kubernetes.pod.uid');
     expect(getInventoryAlertGroupingField('pod', undefined)).toBe('kubernetes.pod.uid');
+    expect(getInventoryAlertGroupingField('pod', null)).toBe('kubernetes.pod.uid');
   });
 
   it('keeps host.name for a SemConv host rule', () => {

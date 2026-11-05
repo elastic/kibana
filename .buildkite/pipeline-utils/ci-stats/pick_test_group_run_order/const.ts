@@ -28,7 +28,7 @@
  *
  * Optional feature flags / filters (absent means "not set" / disabled):
  *   LIMIT_CONFIG_TYPE            — comma-separated subset of: unit, integration, functional
- *   LIMIT_SOLUTIONS              — comma-separated subset of: observability, search, security, workplaceai
+ *   LIMIT_SOLUTIONS              — comma-separated subset of: observability, search, security, vectordb
  *   FTR_CONFIG_PATTERNS          — glob patterns to restrict which FTR configs run
  *   FUNCTIONAL_MINIMUM_ISOLATION_MIN — minimum expected isolation time for FTR groups
  *   FTR_CONFIGS_DEPS             — comma-separated Buildkite step keys this step depends on
@@ -96,12 +96,17 @@ export const DURATION_PERCENTILE = 75;
 /** Timeout applied to every test step regardless of type. */
 export const TEST_STEP_TIMEOUT_MINUTES = 50;
 
-/** Agent disk sizes (GiB) per step type. */
-export const AGENT_DISK_GIB = {
-  JEST_UNIT: 130,
-  JEST_INTEGRATION: 130,
-  FTR: 130,
-} as const;
+/**
+ * Agent disk sizes (GiB) per step type. `undefined` uses `DEFAULT_AGENT_IMAGE_CONFIG.diskSizeGb`;
+ * set a number to override it.
+ */
+export const AGENT_DISK_GIB: Readonly<
+  Record<'JEST_UNIT' | 'JEST_INTEGRATION' | 'FTR', number | undefined>
+> = {
+  JEST_UNIT: undefined,
+  JEST_INTEGRATION: undefined,
+  FTR: undefined,
+};
 
 /** Well-known Buildkite pipeline slugs referenced in source prioritization. */
 export const PIPELINES = {
@@ -111,11 +116,13 @@ export const PIPELINES = {
   ES_SERVERLESS_VERIFY: 'kibana-elasticsearch-serverless-verify-and-promote',
 } as const;
 
-/** Buildkite step/group keys registered for cancel-on-gate-failure. */
+/** Buildkite step/group keys of the picker and the test steps it uploads. */
 export const STEP_KEYS = {
+  PICK_TEST_GROUP_RUN_ORDER: 'pick_test_group_run_order',
   JEST_UNIT: 'jest',
   JEST_INTEGRATION: 'jest-integration',
   FTR_GROUP: 'ftr-configs',
+  FTR_CONFIG_PREFIX: 'ftr_configs_',
 } as const;
 
 /** PR label that prevents selective testing. */

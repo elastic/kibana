@@ -24,8 +24,8 @@ export const getConfirmedDetectionRuleUuids = (event: {
  * 1. Exact event_id match (when the key carries an event_id)
  * 2. Highest count of shared confirming detection-signal rule UUIDs
  *
- * Non-confirming signals are excluded from overlap so dismissed events
- * do not compete against the correct open event when both share a rule UUID.
+ * Non-confirming signals are excluded from overlap so inactive events
+ * do not compete against the correct active event when both share a rule UUID.
  *
  * Returns an array of matched actuals (or undefined) in the same order as `expected`.
  */

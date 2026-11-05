@@ -27,6 +27,63 @@ const buildSearchResponse = (
   },
 });
 
+describe('MatcherSuggestionsService.getSuggestions', () => {
+  let esClient: ReturnType<typeof createMockEsClient>;
+  let service: MatcherSuggestionsService;
+
+  beforeEach(() => {
+    jest.resetAllMocks();
+    esClient = createMockEsClient();
+    service = new MatcherSuggestionsService(esClient);
+  });
+
+  it('suggests the alert statuses for alert_status without querying', async () => {
+    expect(await service.getSuggestions('alert_status', 'rec')).toEqual(['recovering']);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it.each(['episode_status', 'episode_id'])('suggests nothing for %s', async (field) => {
+    expect(await service.getSuggestions(field, '')).toEqual([]);
+    expect(esClient.search).not.toHaveBeenCalled();
+  });
+
+  it.each(['constructor', 'toString', '__proto__'])(
+    'does not treat Object.prototype field %s as a configured suggestion field',
+    async (field) => {
+      await expect(service.getSuggestions(field, '')).resolves.toEqual([]);
+      expect(esClient.search).not.toHaveBeenCalled();
+    }
+  );
+
+  it('suggests the alert.id values for alert_id', async () => {
+    esClient.search.mockResolvedValue({
+      ...buildSearchResponse([]),
+      aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
+    } as SearchResponse<unknown>);
+
+    expect(await service.getSuggestions('alert_id', 'al')).toEqual(['alert-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
+      })
+    );
+  });
+
+  it('suggests alert.id values using the v2 search field', async () => {
+    esClient.search.mockResolvedValue({
+      ...buildSearchResponse([]),
+      aggregations: { suggestions: { buckets: [{ key: 'alert-1' }] } },
+    } as SearchResponse<unknown>);
+
+    expect(await service.getSuggestions('alert.id', 'al')).toEqual(['alert-1']);
+    expect(esClient.search).toHaveBeenCalledWith(
+      expect.objectContaining({
+        aggs: { suggestions: { terms: expect.objectContaining({ field: 'alert.id' }) } },
+      })
+    );
+  });
+});
+
 describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
   let esClient: ReturnType<typeof createMockEsClient>;
   let service: MatcherSuggestionsService;
@@ -56,13 +113,13 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
     expect(filters[0]).toEqual({ term: { type: 'alert' } });
     expect(filters[1]).toEqual({ range: { '@timestamp': { gte: 'now-24h' } } });
     expect(filters[2]).toEqual({ exists: { field: 'data' } });
-    expect(filters[3]).toMatchObject({ terms: { 'episode.status': expect.any(Array) } });
+    expect(filters[3]).toMatchObject({ terms: { 'alert.status': expect.any(Array) } });
   });
 
   it('appends matcher-derived filters to bool.filter when a valid matcher is provided', async () => {
     esClient.search.mockResolvedValue(buildSearchResponse([]));
 
-    await service.getRuleEventFieldNames('episode_id: "abc"');
+    await service.getRuleEventFieldNames('alert_id: "abc"');
 
     const filters = getSearchFilters();
     expect(filters.length).toBeGreaterThan(4);
@@ -115,5 +172,21 @@ describe('MatcherSuggestionsService.getRuleEventFieldNames', () => {
     esClient.search.mockRejectedValue(error);
 
     await expect(service.getRuleEventFieldNames()).rejects.toBe(error);
+  });
+});
+
+describe('MatcherSuggestionsService.getSuggestions for episode fields', () => {
+  const service = new MatcherSuggestionsService(createMockEsClient());
+
+  it('suggests episode status values using the episode index field name', async () => {
+    await expect(service.getSuggestions('episode.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests episode status values using the canonical alert field name', async () => {
+    await expect(service.getSuggestions('alert.status', 'act')).resolves.toEqual(['active']);
+  });
+
+  it('suggests severity values', async () => {
+    await expect(service.getSuggestions('severity', 'h')).resolves.toContain('high');
   });
 });

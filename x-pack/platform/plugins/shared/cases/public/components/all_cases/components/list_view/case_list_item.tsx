@@ -87,7 +87,7 @@ export const CaseListItem: React.FC<{
           position: relative;
           isolation: isolate;
           min-height: ${LIST_ITEM_HEIGHT}px;
-          border-radius: ${euiTheme.border.radius.medium};
+          border-radius: ${euiTheme.border.radius.panel};
           transition: background-color 150ms ease-in-out;
 
           &:hover,

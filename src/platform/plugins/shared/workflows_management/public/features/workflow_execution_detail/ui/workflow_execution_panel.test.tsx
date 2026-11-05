@@ -200,7 +200,9 @@ describe('WorkflowExecutionPanel', () => {
       expect(
         screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout')
       ).toBeInTheDocument();
-      expect(screen.getByText(/842 step executions were not loaded/)).toBeInTheDocument();
+      expect(
+        screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout__message')
+      ).toHaveTextContent('842 step executions were not loaded');
     });
 
     it('should not show a truncation warning for mget gaps on a single page', () => {
@@ -305,7 +307,9 @@ describe('WorkflowExecutionPanel', () => {
         expect(mockGetExecutionSteps).toHaveBeenCalledTimes(1);
       });
       expect(store.getState().detail.stepExecutionPages).toHaveLength(1);
-      expect(screen.getByText(/842 step executions were not loaded/)).toBeInTheDocument();
+      expect(
+        screen.getByTestId('workflowExecutionStepExecutionsTruncatedCallout__message')
+      ).toHaveTextContent('842 step executions were not loaded');
       expect(
         screen.getByTestId('workflowExecutionShowMoreStepExecutionsButton')
       ).toBeInTheDocument();

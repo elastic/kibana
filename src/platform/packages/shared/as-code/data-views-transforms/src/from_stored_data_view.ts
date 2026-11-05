@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DataViewSpec } from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-types';
 import type { AsCodeSavedDataView } from '@kbn/as-code-data-views-schema';
 import {
   AS_CODE_DATA_VIEW_REFERENCE_TYPE,

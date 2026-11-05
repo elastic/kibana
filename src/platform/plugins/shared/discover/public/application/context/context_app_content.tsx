@@ -9,7 +9,7 @@
 
 import type { FC } from 'react';
 import React, { Fragment, useCallback, useMemo } from 'react';
-import { EuiSpacer, useEuiPaddingSize } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
@@ -43,9 +43,11 @@ import type { DocViewerApi } from '@kbn/unified-doc-viewer';
 import { DISCOVER_CELL_ACTIONS_TRIGGER_ID } from '@kbn/ui-actions-plugin/common/trigger_ids';
 import { DiscoverGrid } from '../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../common/constants';
+import type { LoadingStatusEntry } from './services/context_query_state';
 import { LoadingStatus } from './services/context_query_state';
 import { ActionBar } from './components/action_bar/action_bar';
 import { ActionBarWarning } from './components/action_bar/action_bar_warning';
+import { ContextErrorMessage } from './components/context_error_message';
 import type { AppState } from './services/context_state';
 import { SurrDocType } from './services/context';
 import { MAX_CONTEXT_SIZE, MIN_CONTEXT_SIZE } from './services/constants';
@@ -68,8 +70,8 @@ export interface ContextAppContentProps {
   predecessors: DataTableRecord[];
   successors: DataTableRecord[];
   anchorStatus: LoadingStatus;
-  predecessorsStatus: LoadingStatus;
-  successorsStatus: LoadingStatus;
+  predecessorsStatus: LoadingStatusEntry;
+  successorsStatus: LoadingStatusEntry;
   interceptedWarnings: SearchResponseWarning[];
   isWarningCalloutDismissed: boolean;
   onDismissWarningCallout: () => void;
@@ -120,16 +122,25 @@ export function ContextAppContent({
   const isAnchorLoading =
     anchorStatus === LoadingStatus.LOADING || anchorStatus === LoadingStatus.UNINITIALIZED;
   const arePredecessorsLoading =
-    predecessorsStatus === LoadingStatus.LOADING ||
-    predecessorsStatus === LoadingStatus.UNINITIALIZED;
+    predecessorsStatus.value === LoadingStatus.LOADING ||
+    predecessorsStatus.value === LoadingStatus.UNINITIALIZED;
   const areSuccessorsLoading =
-    successorsStatus === LoadingStatus.LOADING || successorsStatus === LoadingStatus.UNINITIALIZED;
+    successorsStatus.value === LoadingStatus.LOADING ||
+    successorsStatus.value === LoadingStatus.UNINITIALIZED;
+  const havePredecessorsFailed = predecessorsStatus.value === LoadingStatus.FAILED;
+  const haveSuccessorsFailed = successorsStatus.value === LoadingStatus.FAILED;
 
   const showInterceptedWarning = Boolean(interceptedWarnings.length) && !isWarningCalloutDismissed;
   const showPredecessorsWarning =
-    !isAnchorLoading && !arePredecessorsLoading && predecessors.length < predecessorCount;
+    !isAnchorLoading &&
+    !arePredecessorsLoading &&
+    !havePredecessorsFailed &&
+    predecessors.length < predecessorCount;
   const showSuccessorsWarning =
-    !isAnchorLoading && !areSuccessorsLoading && successors.length < successorCount;
+    !isAnchorLoading &&
+    !areSuccessorsLoading &&
+    !haveSuccessorsFailed &&
+    successors.length < successorCount;
 
   const showTimeCol = useMemo(
     () => !config.get(DOC_HIDE_TIME_COLUMN_SETTING, false) && !!dataView.timeFieldName,
@@ -229,27 +240,36 @@ export function ContextAppContent({
     [defaultStepSize, predecessorCount, onChangeCount, arePredecessorsLoading, isAnchorLoading]
   );
 
+  // Rendered inside the grid toolbar so it stays visible in full-screen mode, where the "load newer documents" control is still available
+  const predecessorsErrorMessage = useMemo(
+    () =>
+      havePredecessorsFailed ? (
+        <WrapperWithPadding>
+          <ContextErrorMessage type={SurrDocType.PREDECESSORS} status={predecessorsStatus} />
+        </WrapperWithPadding>
+      ) : undefined,
+    [havePredecessorsFailed, predecessorsStatus]
+  );
+
   const renderCustomToolbar = useMemo(
     () =>
       getRenderCustomToolbarWithElements({
         leftSide: predecessorsActionBar,
+        bottomSection: predecessorsErrorMessage,
       }),
-    [predecessorsActionBar]
+    [predecessorsActionBar, predecessorsErrorMessage]
   );
 
   return (
     <Fragment>
       {(showInterceptedWarning || showPredecessorsWarning) && (
-        <WrapperWithPadding direction="horizontal">
+        <WrapperWithPadding>
           {showInterceptedWarning && (
-            <>
-              <SearchResponseWarningsCallout
-                warnings={interceptedWarnings}
-                isDismissed={isWarningCalloutDismissed}
-                onDismiss={onDismissWarningCallout}
-              />
-              <EuiSpacer size="s" />
-            </>
+            <SearchResponseWarningsCallout
+              warnings={interceptedWarnings}
+              isDismissed={isWarningCalloutDismissed}
+              onDismiss={onDismissWarningCallout}
+            />
           )}
           {showPredecessorsWarning && (
             <ActionBarWarning docCount={predecessors.length} type={SurrDocType.PREDECESSORS} />
@@ -291,12 +311,12 @@ export function ContextAppContent({
           />
         </CellActionsProvider>
       </div>
-      <WrapperWithPadding direction="all">
+      <WrapperWithPadding>
         {showSuccessorsWarning && (
-          <>
-            <ActionBarWarning docCount={successors.length} type={SurrDocType.SUCCESSORS} />
-            <EuiSpacer size="s" />
-          </>
+          <ActionBarWarning docCount={successors.length} type={SurrDocType.SUCCESSORS} />
+        )}
+        {haveSuccessorsFailed && (
+          <ContextErrorMessage type={SurrDocType.SUCCESSORS} status={successorsStatus} />
         )}
         <ActionBarMemoized
           type={SurrDocType.SUCCESSORS}
@@ -311,16 +331,16 @@ export function ContextAppContent({
   );
 }
 
-const WrapperWithPadding: FC<React.PropsWithChildren<{ direction: 'horizontal' | 'all' }>> = ({
-  children,
-  direction,
-}) => {
-  const padding = useEuiPaddingSize('s');
+const WrapperWithPadding: FC<React.PropsWithChildren> = ({ children }) => {
+  const { euiTheme } = useEuiTheme();
 
   return (
     <div
       css={css`
-        padding: ${direction === 'horizontal' ? `0 ${padding}` : padding};
+        display: flex;
+        flex-direction: column;
+        gap: ${euiTheme.size.s};
+        padding: ${euiTheme.size.s};
       `}
     >
       {children}

@@ -21,6 +21,10 @@ export const GENERATED_AT = new Date('2026-09-09T09:04:41.000Z');
 export const SUITE_PATH =
   'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/tests/default_status_alert.spec.ts';
 
+/** `count` distinct Buildkite build ids: `<prefix>-1`, `<prefix>-2`, ... */
+export const buildIds = (prefix: string, count: number): string[] =>
+  Array.from({ length: count }, (_, index) => `${prefix}-${index + 1}`);
+
 export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEntry => ({
   testId: 'playwright:default_status_alert:creates default alert',
   framework: 'playwright',
@@ -28,7 +32,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   filePath: SUITE_PATH,
   configPath:
     'x-pack/solutions/observability/plugins/synthetics/test/scout/ui/playwright.config.ts',
-  owners: ['elastic/obs-ux-management-team'],
+  configCategory: 'ui-test',
+  owners: ['elastic/obs-signals-logs-team'],
   areas: [],
   runs: 509,
   fails: 49,
@@ -46,6 +51,8 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       failedBuilds: 49,
       buildFailRate: 49 / 509,
       lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
       latestRun: {
         status: 'passed',
         timestamp: new Date('2026-09-09T06:04:41.000Z'),
@@ -53,7 +60,25 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
       },
     },
   ],
-  byTarget: [],
+  byTarget: [
+    {
+      mode: 'stateful-classic',
+      type: 'local',
+      builds: 509,
+      failedBuilds: 49,
+      buildFailRate: 49 / 509,
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
+    },
+    {
+      mode: 'serverless-observability_complete',
+      type: 'local',
+      builds: 426,
+      failedBuilds: 0,
+      buildFailRate: 0,
+    },
+  ],
   firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   latestRun: {
@@ -65,8 +90,27 @@ export const flakyTest = (overrides: Partial<FlakyTestEntry> = {}): FlakyTestEnt
   sampleFailures: [
     {
       message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
-      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345#0199-abcd',
+      buildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      jobId: '0199-abcd',
+      stepLabel: 'Scout Lane #3 - stateful-classic / default',
       timestamp: new Date('2026-09-09T06:12:00.000Z'),
+    },
+  ],
+  errors: [
+    {
+      key: 'Error: Timed out Nms waiting for expect(locator).toBeVisible()',
+      message: 'Error: Timed out 30000ms waiting for expect(locator).toBeVisible()',
+      buildsCount: 49,
+      byPipeline: [
+        { pipeline: 'kibana-on-merge', buildsCount: 40, buildIds: buildIds('merge', 40) },
+        { pipeline: 'kibana-pull-request', buildsCount: 9, buildIds: buildIds('pr', 9) },
+      ],
+      branches: ['main', 'someone:fix-it'],
+      targets: ['stateful-classic'],
+      firstFailedAt: new Date('2026-09-02T10:00:00.000Z'),
+      lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
+      lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+      lastFailedJobId: '0199-abcd',
     },
   ],
   suiteTitle: 'Default status alert',
@@ -81,8 +125,11 @@ export const pipelineStats = (
   failedBuilds: 49,
   buildFailRate: 49 / 509,
   failedBranches: 1,
+  failedBranchNames: ['main'],
   lastFailedAt: new Date('2026-09-09T06:12:00.000Z'),
   lastFailedBuildUrl: 'https://buildkite.com/elastic/kibana-on-merge/builds/12345',
+  lastFailedJobId: '0199-abcd',
+  lastFailedStepLabel: 'Scout Lane #3 - stateful-classic / default',
   ...overrides,
 });
 
@@ -90,7 +137,7 @@ export const flakyReport = (
   flaky: FlakyTestEntry[],
   files: FlakyTestFileStats[] = []
 ): FlakyTestReport => ({
-  schemaVersion: 1,
+  schemaVersion: 2,
   generatedAt: GENERATED_AT,
   window: {
     lookbackDays: 7,

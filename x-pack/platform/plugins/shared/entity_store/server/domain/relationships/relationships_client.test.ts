@@ -11,6 +11,7 @@ import type { RelationshipMetadataDoc } from '../../../common/domain/entity_meta
 import { RELATIONSHIP_KINDS } from '../../../common/domain/entity_metadata/relationship_metadata';
 import { ENTITY_METADATA, getEntitiesAlias } from '../../../common/domain/entity_index';
 import { RelationshipsClient } from './relationships_client';
+import { EntityStoreNotInstalledError } from '../errors';
 
 const makeDoc = (overrides: Partial<RelationshipMetadataDoc> = {}): RelationshipMetadataDoc =>
   ({
@@ -248,6 +249,71 @@ describe('RelationshipsClient', () => {
 
       expect(result.get('host:dc-01')).toBe(earliest);
       expect(result.has('host:dc-02')).toBe(false);
+    });
+  });
+
+  describe('clearRelationshipIds', () => {
+    beforeEach(() => {
+      esClient.indices.exists.mockResolvedValue(true);
+      // Runs as a background task: updateByQuery returns a task id, which is
+      // then polled to completion.
+      esClient.updateByQuery.mockResolvedValue({ task: 'task-1' } as never);
+      esClient.tasks.get.mockResolvedValue({
+        completed: true,
+        response: { updated: 3, total: 3 },
+      } as never);
+    });
+
+    it('throws EntityStoreNotInstalledError when the latest index does not exist', async () => {
+      esClient.indices.exists.mockResolvedValue(false);
+
+      await expect(
+        client.clearRelationshipIds({ entitySource: 'workday', relationshipKey: 'supervises' })
+      ).rejects.toThrow(EntityStoreNotInstalledError);
+      expect(esClient.updateByQuery).not.toHaveBeenCalled();
+    });
+
+    it('clears the relationship on the resolved latest index', async () => {
+      const result = await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as {
+        query: { bool: { filter: unknown[] } };
+      };
+      expect(body.query.bool.filter).toContainEqual({
+        term: { 'entity.source': 'workday' },
+      });
+      expect(result).toEqual({ updated: 3, total: 3 });
+    });
+
+    it('submits as a background task rather than blocking on the request', async () => {
+      // A synchronous update-by-query over a full index can exceed the client's
+      // request timeout on a large tenant, abandoning the reset half-applied.
+      await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as { wait_for_completion: boolean };
+      expect(body.wait_for_completion).toBe(false);
+      expect(esClient.tasks.get).toHaveBeenCalled();
+    });
+
+    it('passes the relationship key as a param rather than interpolating it', async () => {
+      // The key is config-supplied; interpolating it into the script body would
+      // make it evaluable as Painless.
+      await client.clearRelationshipIds({
+        entitySource: 'workday',
+        relationshipKey: 'supervises',
+      });
+
+      const body = esClient.updateByQuery.mock.calls[0][0] as {
+        script: { source: string; params: Record<string, unknown> };
+      };
+      expect(body.script.params).toEqual({ relationshipKey: 'supervises' });
+      expect(body.script.source).not.toContain('supervises');
     });
   });
 });

@@ -11,7 +11,9 @@
  */
 export const TRANSACTION_DETAIL_FLYOUT_EBT_ELEMENTS = {
   TITLE: 'transactionDetailFlyoutTitle',
+  ALERTS_BADGE: 'transactionDetailFlyoutAlertsBadge',
   FOOTER: 'transactionDetailFlyoutFooter',
+  ACTIONS_MENU: 'transactionDetailFlyoutActionsMenu',
   VIEW_FULL_TRACE: 'transactionDetailFlyoutViewFullTrace',
   WATERFALL_ROW: 'transactionDetailFlyoutWaterfallRow',
   WATERFALL_ERROR_BADGE: 'transactionDetailFlyoutWaterfallErrorBadge',

@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import {
-  SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  WATCH_AUTONOMY_MANUAL,
-} from '../../constants';
+import { ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS } from '@kbn/workflows/managed/definitions/alertzero/worker_settings_defaults';
+import { SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID } from '../../constants';
 import type { WorkerSettingsDeclaration } from './types';
 
 export const ENDPOINT_ANALYSIS_SETTINGS: WorkerSettingsDeclaration = {
   workerId: SYSTEM_SECURITY_WORKER_FORENSICS_ENDPOINT_ANALYSIS_ID,
-  allowedAutonomyLevels: WATCH_AUTONOMY_MANUAL,
+  allowedAutonomyLevels: ENDPOINT_ANALYSIS_WORKER_SETTINGS_DEFAULTS.allowedAutonomyLevels,
 };

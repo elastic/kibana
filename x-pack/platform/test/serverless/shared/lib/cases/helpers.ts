@@ -47,15 +47,15 @@ export const createAndNavigateToCase = async (
   owner: string
 ) => {
   const cases = getService('cases');
-
+  const common = getPageObject('common');
   const header = getPageObject('header');
-
-  await navigateToCasesApp(getPageObject, getService, owner);
+  const app = owner === SECURITY_SOLUTION_OWNER ? 'securitySolution' : 'observability';
 
   const theCase = await cases.api.createCase({ owner });
-  await cases.casesTable.waitForCasesToBeListed();
-  await cases.casesTable.goToFirstListedCase();
+  await common.navigateToUrlWithBrowserHistory(app, `/cases/${theCase.id}`);
+  await cases.common.waitForCaseViewToLoad();
   await header.waitUntilLoadingHasFinished();
+  await cases.common.assertCaseTitle(theCase.title);
 
   return theCase;
 };
@@ -66,15 +66,21 @@ export const navigateToCasesApp = async (
   owner: string
 ) => {
   const common = getPageObject('common');
+  const header = getPageObject('header');
   const svlCommonNavigation = getPageObject('svlCommonNavigation');
+  const retry = getService('retry');
+  const testSubjects = getService('testSubjects');
 
   await common.navigateToApp('landingPage');
+  await header.waitUntilLoadingHasFinished();
 
-  if (owner === SECURITY_SOLUTION_OWNER) {
-    await svlCommonNavigation.sidenav.clickLink({
-      deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId,
-    });
-  } else {
-    await svlCommonNavigation.sidenav.clickLink({ deepLinkId: 'observability-overview:cases' });
-  }
+  const link =
+    owner === SECURITY_SOLUTION_OWNER
+      ? { deepLinkId: 'securitySolutionUI:cases' as AppDeepLinkId }
+      : { deepLinkId: 'observability-overview:cases' as AppDeepLinkId };
+
+  await retry.tryForTime(30000, async () => {
+    await svlCommonNavigation.sidenav.clickLink(link);
+    await testSubjects.existOrFail('createNewCaseBtn', { timeout: 5000 });
+  });
 };

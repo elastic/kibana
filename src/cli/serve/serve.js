@@ -272,7 +272,7 @@ export default function (program) {
         'Adds plugin paths for all the Kibana example plugins and runs with no base path'
       )
       .option(
-        '--serverless [oblt|security|es|workplaceai|vectordb]',
+        '--serverless [oblt|security|es|vectordb]',
         'Start Kibana in a specific serverless project mode. ' +
           'If no mode is provided, it starts Kibana in the most recent serverless project mode (default is es)'
       );
@@ -504,12 +504,20 @@ function tryConfigureServerlessSamlProvider(rawConfig, opts, extraCliOptions) {
   if (opts.uiam !== false && DEV_UTILS_SUPPORTED) {
     // Ensure the key/cert pair is loaded dynamically to exclude it from the production build.
     // eslint-disable-next-line import/no-dynamic-require
-    const { KBN_CERT_PATH, KBN_KEY_PATH } = require(DEV_UTILS_PATH);
+    const { getKbnServerlessUiamCert } = require(DEV_UTILS_PATH);
+
+    // UIAM reads Kibana's project type from the client certificate, and refuses what Kibana does
+    // on behalf of the project when the certificate names another type: listing service accounts
+    // comes back empty, and assuming one is denied. So the certificate has to match
+    // `xpack.cloud.serverless.project_type`, which the project's config file sets.
+    const { certPath, keyPath } = getKbnServerlessUiamCert(
+      _.get(rawConfig, 'xpack.cloud.serverless.project_type')
+    );
 
     console.info('Kibana will be configured to support UIAM.');
     lodashSet(rawConfig, 'xpack.security.uiam.enabled', true);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', KBN_CERT_PATH);
-    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', KBN_KEY_PATH);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.certificate', certPath);
+    lodashSet(rawConfig, 'xpack.security.uiam.ssl.key', keyPath);
     lodashSet(rawConfig, 'xpack.security.uiam.ssl.verificationMode', 'none');
     lodashSet(rawConfig, 'mockIdpPlugin.uiam.enabled', true);
 

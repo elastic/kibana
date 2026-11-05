@@ -12,19 +12,9 @@ import { useAddStepActions } from './hooks/use_add_step_actions';
 import { useOptionalInteractiveModeSelector } from './state_management/stream_enrichment_state_machine';
 import { selectIsSuggestionVisible } from './state_management/interactive_mode_machine/selectors';
 
-const conditionLabel = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.addConditionButtonText',
-  { defaultMessage: 'Condition' }
-);
-
 const processorLabel = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.enrichment.addProcessorButtonText',
   { defaultMessage: 'Processor' }
-);
-
-const createConditionText = i18n.translate(
-  'xpack.streams.streamDetailView.managementTab.enrichment.createConditionButtonText',
-  { defaultMessage: 'Create condition' }
 );
 
 const createProcessorText = i18n.translate(
@@ -33,10 +23,10 @@ const createProcessorText = i18n.translate(
 );
 
 export const AddStepButtons = () => {
-  const { onAddCondition, onAddProcessor } = useAddStepActions();
+  const { onAddProcessor } = useAddStepActions();
 
   const canAddStep = useOptionalInteractiveModeSelector(
-    (state) => state.can({ type: 'step.addProcessor' }) || state.can({ type: 'step.addCondition' }),
+    (state) => state.can({ type: 'step.addProcessor' }),
     false
   );
   const isSuggestionVisible = useOptionalInteractiveModeSelector(selectIsSuggestionVisible, false);
@@ -49,18 +39,6 @@ export const AddStepButtons = () => {
 
   return (
     <EuiFlexGroup gutterSize="s" responsive={false}>
-      <EuiFlexItem grow={false}>
-        <EuiButton
-          size="s"
-          color="text"
-          iconType="plus"
-          aria-label={createConditionText}
-          data-test-subj="streamsAppProcessingToolbarAddConditionButton"
-          onClick={onAddCondition}
-        >
-          {conditionLabel}
-        </EuiButton>
-      </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButton
           size="s"

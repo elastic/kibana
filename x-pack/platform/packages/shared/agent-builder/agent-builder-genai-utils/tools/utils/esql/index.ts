@@ -10,4 +10,5 @@ export { extractEsqlQueries, esqlResponseToJson } from './misc';
 export { interpolateEsqlQuery } from './interpolate_query';
 export { applyLimit } from './apply_limit';
 export { validateEsqlQuery, type ValidateEsqlQueryCallbacks } from './validate_esql';
-export { buildTimeRangeParams } from './build_time_range_params';
+export { buildTimeRangeParams, buildTimeSeriesTimeRangeFilter } from './build_time_range_params';
+export { buildEsqlParams } from './build_esql_params';

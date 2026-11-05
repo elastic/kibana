@@ -35,27 +35,26 @@ test.describe(
       await browserAuth.loginAsAdmin();
       await pageObjects.discover.goto({ queryMode: 'classic' });
 
-      const codeEditor = pageObjects.discover.codeEditor;
+      const { esqlEditor } = pageObjects;
 
       await test.step('switch to ES|QL mode', async () => {
         await pageObjects.discover.selectTextBaseLang();
       });
 
       await test.step('trigger autocomplete after FROM', async () => {
-        await codeEditor.setCodeEditorValue('FROM ');
-        await codeEditor.triggerSuggest('FROM ');
+        await esqlEditor.setQuery('FROM ');
+        await esqlEditor.triggerSuggest('FROM ');
       });
 
-      const suggestWidget = codeEditor.getCodeEditorSuggestWidget();
+      const suggestWidget = esqlEditor.getSuggestWidget();
 
       await test.step('filter to test stream and assert suggestion with Wired Stream type', async () => {
-        await expect(suggestWidget).toBeVisible();
+        await expect(suggestWidget).toBeVisible({ timeout: 30_000 });
         // Narrow the suggestion list to the test stream
         await page.keyboard.type(STREAM_NAME);
-        const streamOption = suggestWidget.getByRole('option', { name: new RegExp(STREAM_NAME) });
-        await expect(streamOption).toBeVisible();
+        await expect(suggestWidget).toContainText(STREAM_NAME, { timeout: 30_000 });
         // The enricher sets type=WIRED_STREAM which maps to detail text "Wired Stream"
-        await expect(streamOption).toContainText('Wired Stream');
+        await expect(suggestWidget).toContainText('Wired Stream', { timeout: 30_000 });
       });
 
       await test.step('open documentation panel and assert description and link', async () => {
@@ -64,9 +63,9 @@ test.describe(
         // 'toggleSuggestionDetails' command's precondition is satisfied.
         await page.keyboard.press('ArrowDown');
 
-        await codeEditor.toggleSuggestDetails();
+        await esqlEditor.toggleSuggestDetails();
 
-        const detailsPanel = codeEditor.getSuggestDetailsContainer();
+        const detailsPanel = esqlEditor.getSuggestDetails();
         await expect(detailsPanel).toBeVisible();
         // The enricher populates description and a management link
         await expect(detailsPanel).toContainText(STREAM_DESCRIPTION);

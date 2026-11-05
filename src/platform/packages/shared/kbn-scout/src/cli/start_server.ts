@@ -12,10 +12,10 @@ import type { FlagsReader } from '@kbn/dev-cli-runner';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 import { initLogsDir } from './init_logs_dir';
-import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
+import { startServers, parseStartServerFlags, START_SERVER_FLAG_OPTIONS } from '../servers';
 
 export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) => {
-  const options = parseServerFlags(flagsReader);
+  const options = parseStartServerFlags(flagsReader);
 
   if (options.logsDir) {
     await initLogsDir(log, options.logsDir);
@@ -29,7 +29,7 @@ export const runStartServer = async (flagsReader: FlagsReader, log: ToolingLog) 
 export const startServerCmd: Command<void> = {
   name: 'start-server',
   description: 'Start Elasticsearch & Kibana for testing purposes',
-  flags: SERVER_FLAG_OPTIONS,
+  flags: START_SERVER_FLAG_OPTIONS,
   run: async ({ flagsReader, log }) => {
     await runStartServer(flagsReader, log);
   },

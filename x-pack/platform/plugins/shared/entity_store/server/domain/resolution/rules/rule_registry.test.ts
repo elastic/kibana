@@ -6,10 +6,12 @@
  */
 
 import {
+  ACCOUNT_DOMAIN_SID_INCLUSION,
   ENTRA_GUID_INCLUSION,
-  NT_AUTHORITY_SID_INCLUSION,
   WINDOWS_NON_PERSON_SID_EXCLUSION,
+  getResolutionRuleConfig,
 } from './rule_registry';
+import { RESOLUTION_RULE_IDS } from '../../../../common/domain/resolution_rules/constants';
 
 /**
  * ES|QL `RLIKE` compiles through Lucene's automaton (`RegExp.ALL`). `^` / `$`
@@ -22,7 +24,7 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
   const patterns = [
     ['Windows non-person SID exclusion', WINDOWS_NON_PERSON_SID_EXCLUSION],
     ['Entra GUID inclusion', ENTRA_GUID_INCLUSION],
-    ['NT-authority SID inclusion', NT_AUTHORITY_SID_INCLUSION],
+    ['Account-domain SID inclusion', ACCOUNT_DOMAIN_SID_INCLUSION],
   ] as const;
 
   it.each(patterns)('%s does not use ^ or $ anchors', (_name, pattern) => {
@@ -31,8 +33,8 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
     expect(pattern.includes('$')).toBe(false);
   });
 
-  it('expresses the NT-authority SID prefix with an explicit wildcard', () => {
-    expect(NT_AUTHORITY_SID_INCLUSION).toBe('S-1-5-.*');
+  it('expresses the account-domain SID prefix with an explicit wildcard', () => {
+    expect(ACCOUNT_DOMAIN_SID_INCLUSION).toBe('S-1-5-21-.*');
   });
 
   it('matches well-known SIDs as whole strings', () => {
@@ -43,5 +45,16 @@ describe('RLIKE value gates use Lucene automaton syntax', () => {
 
   it('matches a GUID as a whole string', () => {
     expect(ENTRA_GUID_INCLUSION).toBe('[0-9a-fA-F]{8}-([0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}');
+  });
+});
+
+describe('OOTB rule enablement', () => {
+  it('disables the CrowdStrike and UPN rules whose feeders no longer create entities', () => {
+    expect(
+      getResolutionRuleConfig(RESOLUTION_RULE_IDS.CROWDSTRIKE_SID_BRIDGE)?.defaultEnabled
+    ).toBe(false);
+    expect(
+      getResolutionRuleConfig(RESOLUTION_RULE_IDS.UPN_CROSS_FIELD_BRIDGE)?.defaultEnabled
+    ).toBe(false);
   });
 });

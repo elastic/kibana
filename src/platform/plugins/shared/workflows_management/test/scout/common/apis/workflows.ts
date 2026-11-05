@@ -132,7 +132,7 @@ export class WorkflowsApiService {
   async hardDelete(workflowId: string): Promise<void> {
     await this.kbnClient.request({
       method: 'DELETE',
-      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true`,
+      path: `/s/${this.spaceId}/api/workflows/workflow/${workflowId}?force=true&acknowledgeAclLoss=true`,
     });
   }
 

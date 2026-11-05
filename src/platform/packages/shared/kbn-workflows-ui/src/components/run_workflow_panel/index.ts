@@ -17,3 +17,9 @@ export type {
 export { RunWorkflowInputsModal } from './run_workflow_inputs_modal';
 export type { RunWorkflowInputsModalProps } from './run_workflow_inputs_modal';
 export { requiresUserSuppliedInputs } from './run_workflow_panel_helpers';
+export {
+  RUN_WORKFLOW_EXECUTED_EVENT_TYPE,
+  UNKNOWN_RUN_WORKFLOW_TELEMETRY_VALUE,
+  runWorkflowExecutedEventType,
+} from './telemetry';
+export type { RunWorkflowExecutedEvent, RunWorkflowTelemetry } from './telemetry';
