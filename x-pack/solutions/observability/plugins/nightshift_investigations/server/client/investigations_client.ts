@@ -582,7 +582,13 @@ export class NightshiftInvestigationsClient {
     const existing = isFollowUp
       ? await findInvestigationConversation(conversations, investigationId)
       : undefined;
-    if (existing) this.assertConversationTarget(existing.telemetryTarget, telemetry_target);
+    if (existing) {
+      this.assertConversationTarget(existing.telemetryTarget, telemetry_target);
+      // Checked here so a start that would fail in the run's `_ensure` step is refused up front.
+      if (telemetryNotAfterInput && telemetryNotAfterInput !== existing.telemetryNotAfter) {
+        throw badRequest('An investigation cannot change its telemetry cutoff');
+      }
+    }
     // A pending claim holder may not have its conversation yet. Its queued follow-up must
     // inherit that conversation's binding rather than receive a new-conversation default.
     const telemetryTarget = isFollowUp

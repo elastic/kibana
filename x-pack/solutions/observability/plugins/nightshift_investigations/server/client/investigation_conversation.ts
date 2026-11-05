@@ -23,6 +23,8 @@ export interface InvestigationConversation {
   /** The investigation id, which is the conversation id. */
   id: string;
   telemetryTarget?: string;
+  /** `metadata.telemetry_not_after`: the investigation's telemetry cutoff, when it has one. */
+  telemetryNotAfter?: string;
   /** Agent Builder's placeholder until Agent Builder titles it on the first round. */
   title: string;
   /** `metadata.status`; a missing status reads as open. */
@@ -55,6 +57,9 @@ const toInvestigationConversation = (
     telemetryTarget: telemetryTargetNameSchema
       .optional()
       .parse(conversation.metadata?.telemetry_target),
+    ...(typeof conversation.metadata?.telemetry_not_after === 'string'
+      ? { telemetryNotAfter: conversation.metadata.telemetry_not_after }
+      : {}),
     title: conversation.title,
     status: conversation.metadata?.status === 'closed' ? 'closed' : 'open',
     workflowExecutionIds: toWorkflowExecutionIds(conversation.metadata),
@@ -143,7 +148,7 @@ export const getOrCreateInvestigationConversation = async ({
 }): Promise<InvestigationConversation> => {
   const existing = await findInvestigationConversation(conversations, id);
   if (existing) {
-    if (telemetryNotAfter) {
+    if (telemetryNotAfter && telemetryNotAfter !== existing.telemetryNotAfter) {
       await conversations.patchMetadata(existing.id, { telemetry_not_after: telemetryNotAfter });
     }
     return existing;

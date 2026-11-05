@@ -112,6 +112,7 @@ const makeConversation = ({
   owner = true,
   templateId = 'investigation',
   telemetryTarget,
+  telemetryNotAfter,
   workflowExecutionIds,
 }: {
   id: string;
@@ -120,6 +121,7 @@ const makeConversation = ({
   owner?: boolean;
   templateId?: string;
   telemetryTarget?: string;
+  telemetryNotAfter?: string;
   workflowExecutionIds?: string[];
 }) => ({
   id,
@@ -128,6 +130,7 @@ const makeConversation = ({
   agent_id: 'nightshift.investigation',
   metadata: {
     ...(telemetryTarget ? { telemetry_target: telemetryTarget } : {}),
+    ...(telemetryNotAfter ? { telemetry_not_after: telemetryNotAfter } : {}),
     ...(status ? { status } : {}),
     ...(workflowExecutionIds ? { workflow_execution_ids: workflowExecutionIds } : {}),
   },
@@ -1406,6 +1409,41 @@ describe('NightshiftInvestigationsClient.start() on investigations', () => {
     expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
     expect(conversations.patchMetadata).not.toHaveBeenCalled();
     expect(subjectsClient.upsertSubjects).not.toHaveBeenCalled();
+  });
+
+  it.each([
+    ['a different cutoff', '2026-04-19T16:20:00.000Z'],
+    ['no cutoff', undefined],
+  ])(
+    'rejects a follow-up cutoff when the matched investigation has %s, before launching it',
+    async (_name, storedCutoff) => {
+      agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+      withConversations(makeConversation({ id: 'inv-1', telemetryNotAfter: storedCutoff }));
+      await expect(
+        startFromApi(makeClient(), {
+          subject: { type: 'manual', id: 'question' },
+          trigger_type: 'manual',
+          telemetry_not_after: '2026-04-19T16:27:00.000Z',
+        })
+      ).rejects.toThrow('cannot change its telemetry cutoff');
+      expect(mockManagement.runWorkflow).not.toHaveBeenCalled();
+      expect(conversations.patchMetadata).not.toHaveBeenCalled();
+    }
+  );
+
+  it('continues a matched investigation that already holds the same cutoff', async () => {
+    agenticInvestigationsClient.findOpenBySubjects.mockResolvedValue([{ id: 'inv-1' }]);
+    withConversations(
+      makeConversation({ id: 'inv-1', telemetryNotAfter: '2026-04-19T16:27:00.000Z' })
+    );
+    await expect(
+      startFromApi(makeClient(), {
+        subject: { type: 'manual', id: 'question' },
+        trigger_type: 'manual',
+        telemetry_not_after: '2026-04-19T16:27:00.000Z',
+      })
+    ).resolves.toEqual({ investigation_id: 'inv-1' });
+    expect(mockManagement.runWorkflow).toHaveBeenCalled();
   });
 
   it('claims the subjects, runs the workflow, and leaves recording the subjects to it', async () => {
