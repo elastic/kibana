@@ -949,16 +949,19 @@ describe('SECURITY_ALERT_ANALYSIS_WORKFLOW yaml', () => {
       findStepByName(workflow.steps, 'build_agent_message') as { with: { message: string } }
     ).with.message;
 
-    // Gate B must not depend on the investigated alert's own activity looking suspicious, and
-    // Gate D must not be able to set the alert aside; the entity/rule-name-only guard stays.
-    expect(message).toContain("This alert's own activity does NOT need to look suspicious");
+    // Gate B must not depend on the investigated alert's own activity looking suspicious, must
+    // be reached before Gate D, and the Tier 3/4 false_positive default must count Gate B
+    // evidence; the entity/rule-name-only guard stays.
     expect(message).toContain(
-      "This gate does NOT require this alert's own activity to look suspicious"
+      "form a coherent attack sequence → true_positive, even if this alert's own activity looks routine; do not fall through to Gate D. Entity correlation or scary rule names without suspicious command lines do not satisfy this gate."
     );
-    expect(message).toContain('Gate D must not be used to set it aside');
     expect(message).toContain(
-      'Entity correlation or scary rule names without suspicious command lines do not satisfy this gate.'
+      'default to false_positive when positive anomaly evidence (on this alert or, per Gate B, in its related alerts) is absent.'
     );
+    expect(message).toContain('or Gate B corroboration) to classify as TP.');
+    expect(message).toContain('(or Gate B corroboration) before TP classification.');
+    expect(message.indexOf('- Gate B')).toBeGreaterThan(-1);
+    expect(message.indexOf('- Gate B')).toBeLessThan(message.indexOf('- Gate D'));
   });
 
   it('puts the related alert process and truncated command lines on each summary line', () => {
