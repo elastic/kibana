@@ -10,9 +10,9 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { isValidTraceId } from '@opentelemetry/api';
 import pRetry from 'p-retry';
 import type { Direction } from '@kbn/evals-common';
-import type { Evaluator } from '../../types';
+import type { EvaluationResult, Evaluator } from '../../types';
 
-interface EsqlResponse {
+export interface EsqlResponse {
   columns: Array<{ name: string; type: string }>;
   values: any[][];
 }
@@ -37,6 +37,14 @@ export interface TraceBasedEvaluatorConfig {
     buildQuery: (traceId: string) => string;
     isTraceComplete: (response: EsqlResponse) => boolean;
   };
+  // A narrower query to run when the main one is rejected for a known, permanent reason (e.g. a
+  // column that is unmapped for this provider). Its response goes through the same extraction.
+  fallbackQuery?: {
+    matchesQueryError: (error: unknown) => boolean;
+    buildQuery: (traceId: string) => string;
+  };
+  // Context attached to a scored or unreported result, e.g. why it could not be scored.
+  describeResult?: (response: EsqlResponse) => Pick<EvaluationResult, 'explanation' | 'metadata'>;
   /**
    * Whether a higher score is an improvement (`maximize`), a lower score is
    * an improvement (`minimize`), or the score cannot be compared across arms
@@ -61,6 +69,8 @@ export function createTraceBasedEvaluator({
     isResultValid,
     isNotReported,
     notReportedProbe,
+    fallbackQuery,
+    describeResult,
     direction,
   } = config;
 
@@ -90,6 +100,11 @@ export function createTraceBasedEvaluator({
       }
 
       let lastResult: number | null | undefined;
+      let lastResponse: EsqlResponse | undefined;
+      // The response `lastResult` came from, so an incomplete result is described consistently.
+      let lastResultResponse: EsqlResponse | undefined;
+      // The rejection is permanent for the cluster, so retries skip straight to the fallback.
+      let useFallbackQuery = false;
 
       async function runQuery(query: string): Promise<EsqlResponse> {
         return (await traceEsClient.esql.query({ query })) as unknown as EsqlResponse;
@@ -119,15 +134,31 @@ export function createTraceBasedEvaluator({
         return NOT_REPORTED;
       }
 
+      async function runMainQuery(): Promise<EsqlResponse> {
+        if (fallbackQuery && useFallbackQuery) {
+          return runQuery(fallbackQuery.buildQuery(traceId));
+        }
+        try {
+          return await runQuery(buildQuery(traceId));
+        } catch (error) {
+          if (!fallbackQuery?.matchesQueryError(error)) {
+            throw error;
+          }
+          useFallbackQuery = true;
+          return runQuery(fallbackQuery.buildQuery(traceId));
+        }
+      }
+
       async function fetchStats(): Promise<number | typeof NOT_REPORTED> {
-        const query = buildQuery(traceId);
+        lastResponse = undefined;
 
         let response: EsqlResponse;
         try {
-          response = await runQuery(query);
+          response = await runMainQuery();
         } catch (error) {
           return probeNotReported(error);
         }
+        lastResponse = response;
 
         const { values } = response;
 
@@ -141,6 +172,7 @@ export function createTraceBasedEvaluator({
 
         const result = extractResult(response);
         lastResult = result;
+        lastResultResponse = response;
 
         const valid = isResultValid ? isResultValid(result) : result !== null;
         if (!valid) {
@@ -163,16 +195,20 @@ export function createTraceBasedEvaluator({
           },
         });
 
+        const description = lastResponse && describeResult?.(lastResponse);
+
         if (score === NOT_REPORTED) {
           return {
             score: null,
             label: 'unavailable',
             explanation: `${name} was not reported for trace ${traceId}`,
+            ...description,
           };
         }
 
         return {
           score,
+          ...description,
         };
       } catch (error) {
         const errorMessage = error instanceof Error ? error.message : String(error);
@@ -183,11 +219,15 @@ export function createTraceBasedEvaluator({
           log.warning(
             `${name} returning potentially incomplete result for trace ${traceId}: ${lastResult} (${errorMessage})`
           );
+          const description = lastResultResponse && describeResult?.(lastResultResponse);
+          const incompleteExplanation = `${name} may be based on incomplete trace data`;
           return {
             score: lastResult,
             label: 'potentially_incomplete',
-            explanation: `${name} may be based on incomplete trace data`,
-            metadata: { incomplete: true },
+            explanation: description?.explanation
+              ? `${incompleteExplanation}. ${description.explanation}`
+              : incompleteExplanation,
+            metadata: { ...description?.metadata, incomplete: true },
           };
         }
 
