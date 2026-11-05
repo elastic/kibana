@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import {
   AppHeader,
   type AppHeaderBadge,
@@ -38,7 +38,7 @@ import { ConversationShareFlyout } from './conversation_share_button';
 import { ConversationMetadataFlyout } from './conversation_metadata_flyout';
 import { getConversationVisibilityLabel } from './conversation_visibility';
 import { labels } from './conversation_app_header_i18n';
-import { useHeaderPanel } from './use_header_panel';
+import { useHeaderPanel, type MenuRunParams } from './use_header_panel';
 
 const ebt = (action: string) => ({ action, detail: 'conversation' });
 
@@ -69,6 +69,8 @@ export const ConversationAppHeader: React.FC = () => {
   const chatDetails = useHeaderPanel();
   const activityLog = useHeaderPanel();
   const deleteModal = useHeaderPanel();
+  // Summary's open state lives in the URL, so it keeps its own way back to the menu.
+  const summaryReturnFocusRef = useRef<() => void>();
 
   const savedConversation = hasPersistedConversation ? conversation : undefined;
 
@@ -186,7 +188,10 @@ export const ConversationAppHeader: React.FC = () => {
             label: labels.summary,
             iconType: 'transitionLeftOut',
             testId: 'agentBuilderChatInfoButton',
-            run: () => setSummaryParam('true'),
+            run: (params?: MenuRunParams) => {
+              summaryReturnFocusRef.current = params?.returnFocus;
+              setSummaryParam('true');
+            },
           },
         }
       : {}),
@@ -194,7 +199,13 @@ export const ConversationAppHeader: React.FC = () => {
 
   return (
     <>
-      <AppHeader spacing="compact" title={title} badges={badges} menu={menu} />
+      <AppHeader
+        key={savedConversation.id}
+        spacing="compact"
+        title={title}
+        badges={badges}
+        menu={menu}
+      />
       {share.isOpen && (
         <ConversationShareFlyout
           key={savedConversation.id}
@@ -210,7 +221,14 @@ export const ConversationAppHeader: React.FC = () => {
         />
       )}
       {activityLog.isOpen && <ActivityLogFlyout onClose={activityLog.close} />}
-      {isSummaryOpen && <ConversationDetailsFlyout onClose={() => setSummaryParam(null)} />}
+      {isSummaryOpen && (
+        <ConversationDetailsFlyout
+          onClose={() => {
+            setSummaryParam(null);
+            summaryReturnFocusRef.current?.();
+          }}
+        />
+      )}
       <DeleteConversationModal isOpen={deleteModal.isOpen} onClose={deleteModal.close} />
     </>
   );

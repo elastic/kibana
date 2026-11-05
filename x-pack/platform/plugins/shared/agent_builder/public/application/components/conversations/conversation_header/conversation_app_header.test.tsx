@@ -75,7 +75,13 @@ jest.mock('./conversation_metadata_flyout', () => ({
 }));
 
 jest.mock('../../../../flyout/conversation_details_flyout', () => ({
-  ConversationDetailsFlyout: () => <div data-test-subj="stubSummaryFlyout" />,
+  ConversationDetailsFlyout: ({ onClose }: { onClose: () => void }) => (
+    <div data-test-subj="stubSummaryFlyout">
+      <button type="button" onClick={onClose}>
+        Close summary
+      </button>
+    </div>
+  ),
 }));
 
 jest.mock('../activity_log/activity_log_flyout', () => ({
@@ -294,6 +300,21 @@ describe('ConversationAppHeader', () => {
     expect(setSummaryParam).toHaveBeenCalledWith('true');
   });
 
+  it('returns focus to the menu when the summary flyout closes', async () => {
+    const user = setUpUser();
+    const typedChat = { ...baseConversation, template_id: 'investigation' } as Conversation;
+    setUp({ templateName: 'Investigation', conversation: typedChat });
+    const { rerender } = renderHeader();
+    await user.click(screen.getByTestId('agentBuilderChatInfoButton'));
+
+    setUp({ templateName: 'Investigation', conversation: typedChat, summaryParam: 'true' });
+    rerender(renderHeaderTree());
+    await user.click(screen.getByRole('button', { name: 'Close summary' }));
+
+    expect(setSummaryParam).toHaveBeenLastCalledWith(null);
+    expect(document.activeElement).not.toBe(document.body);
+  });
+
   it('shows the read-only badge and a plain title on a read-only chat', () => {
     setUp({
       isReadOnly: true,
@@ -323,6 +344,23 @@ describe('ConversationAppHeader', () => {
     );
   });
 
+  it('drops an unsaved title draft when switching chats', async () => {
+    const user = setUpUser();
+    setUp();
+    const { rerender } = renderHeader();
+    await user.click(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleButton));
+    fireEvent.change(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.titleInput), {
+      target: { value: 'Draft for the first chat' },
+    });
+
+    setUp({ conversation: { ...baseConversation, id: 'conversation-2', title: 'Second chat' } });
+    rerender(renderHeaderTree());
+
+    expect(screen.queryByTestId(APP_HEADER_TEST_SUBJECTS.titleInput)).not.toBeInTheDocument();
+    expect(screen.getByTestId(APP_HEADER_TEST_SUBJECTS.title)).toHaveTextContent('Second chat');
+    expect(renameConversation).not.toHaveBeenCalled();
+  });
+
   it('opens the sharing flyout from Share', async () => {
     const user = setUpUser();
     setUp();
@@ -340,6 +378,9 @@ describe('ConversationAppHeader', () => {
     const { rerender } = renderHeader();
     await openAppMenuOverflow(user);
     await user.click(screen.getByTestId('agentBuilderConversationShareButton'));
+    await waitFor(() =>
+      expect(screen.queryByTestId('agentBuilderConversationDownloadButton')).not.toBeInTheDocument()
+    );
 
     setUp({ conversation: { ...baseConversation, id: 'conversation-2' } });
     rerender(renderHeaderTree());
