@@ -20,6 +20,7 @@ import {
 import { css } from '@emotion/react';
 import { AlertZeroIcon } from '@kbn/security-solution-navigation';
 import { useKibanaTimeZone } from '../../hooks/use_kibana_time_zone';
+import { QueueGreetingIcon, useQueueGreetingMotion } from './queue_greeting_icon';
 
 /**
  * `timeZone` rather than `new Date().getHours()`: the OS timezone is not
@@ -116,6 +117,11 @@ export interface AlertZeroPageHeaderProps {
   title?: string;
   /** Supporting line under the heading. */
   subtitle?: string;
+  /**
+   * Plays the greeting icon's one-shot turn while `isLoading` is true.
+   * Only the Investigations queue sets this. Onboarding uses this header and stays static.
+   */
+  animateQueueGreeting?: boolean;
 }
 /**
  * Page header for AlertZero routes.
@@ -133,9 +139,11 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
   greeting,
   title: titleOverride,
   subtitle,
+  animateQueueGreeting = false,
 }) => {
   const { euiTheme } = useEuiTheme();
   const timeZone = useKibanaTimeZone();
+  const greetingMotion = useQueueGreetingMotion(animateQueueGreeting, isLoading);
   const title =
     titleOverride ??
     getAlertZeroHeroTitle({
@@ -180,7 +188,19 @@ export const AlertZeroPageHeader: React.FC<AlertZeroPageHeaderProps> = ({
                   border-color ${euiTheme.animation.slow} ease;
               `}
             >
-              <EuiIcon type={AlertZeroIcon} size="m" aria-hidden={true} />
+              {greetingMotion.showAnimated ? (
+                <QueueGreetingIcon
+                  runId={greetingMotion.runId}
+                  onTurnHolding={greetingMotion.onTurnHolding}
+                />
+              ) : (
+                <EuiIcon
+                  type={AlertZeroIcon}
+                  size="m"
+                  aria-hidden={true}
+                  data-test-subj="alertZeroStaticIcon"
+                />
+              )}
               <span
                 style={{
                   display: 'inline-block',
