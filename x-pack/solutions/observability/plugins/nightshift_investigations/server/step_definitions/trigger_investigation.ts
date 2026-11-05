@@ -18,7 +18,6 @@ import { isBoom, serverUnavailable } from '@hapi/boom';
 import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
-import { telemetryTargetNameSchema } from '../../common/telemetry_targets';
 import type { NightshiftSettingsLocator } from '../../common/locators';
 import { notifyInvestigationQuotaReached } from '../lib/notifications/notify_investigation_quota_reached';
 import {
@@ -45,7 +44,6 @@ import type { AutomationBudget } from '../types';
 
 const inputSchema = lazySchema(() =>
   z.object({
-    telemetry_target: telemetryTargetNameSchema.optional(),
     automation_id: z
       .string()
       .min(1)
@@ -279,7 +277,6 @@ export const triggerInvestigationStepDefinition = (
               summary: input.summary,
             },
             title: input.title,
-            ...(input.telemetry_target ? { telemetry_target: input.telemetry_target } : {}),
             trigger_type: input.trigger_type ?? 'automatic',
             message: input.message,
             instructions:

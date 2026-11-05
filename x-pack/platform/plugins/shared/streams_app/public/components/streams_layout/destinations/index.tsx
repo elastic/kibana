@@ -76,7 +76,9 @@ export const DestinationsTab = () => {
             destination.description,
             ...(destination.type === 'elasticsearch'
               ? [...getDestinationIndices(destination), destination.mode]
-              : [destination.bucket]),
+              : destination.type === 's3'
+              ? [destination.bucket]
+              : [destination.endpoint, ...Object.values(destination.indexBySignal)]),
             destination.signals.join(' '),
             getDestinationTypeLabel(destination.type),
           ]
