@@ -59,7 +59,7 @@ export const buildListQuery = ({
 }: ListQueryInput): GeneratedQuery => {
   assertValidLimit(limit);
   const { engine, indexPattern, filter } = plan;
-  const { groupingFields, presenceFilter, idEvaluation, witnessColumns } = identity;
+  const { groupingFields, presenceFilter, idEvaluation, rawIdentityColumns } = identity;
 
   // One source becomes two plans that together read every index behind the pattern exactly once.
   // Both name the pattern as the author wrote it, so Elasticsearch applies index privileges, alias
@@ -85,11 +85,11 @@ export const buildListQuery = ({
   ];
   // The id evaluation assigns `entity.id`, so an identity on `entity.id` would lose its grouped
   // column, and with it the `null` type that says no index maps the field: the evaluation types it
-  // `keyword` even then. Each such field is copied first, in the same `EVAL`, into a witness column
+  // `keyword` even then. Each such field is copied first, in the same `EVAL`, into a raw column
   // kept after the output columns; a copy of a `null`-typed column is itself typed `null`. Both
   // observed on 9.6, under `FROM` and `TS`.
-  const witnesses = [...witnessColumns].map(
-    ([field, witness]) => `${quoteIdentifier(witness)} = ${quoteIdentifier(field)}`
+  const rawAssignments = [...rawIdentityColumns].map(
+    ([field, column]) => `${quoteIdentifier(column)} = ${quoteIdentifier(field)}`
   );
   const aggregations = [
     ...attributeAggregations(columns, plan),
@@ -103,8 +103,8 @@ export const buildListQuery = ({
     `| STATS ${aggregations.join(`,${CONTINUATION}`)}${CONTINUATION}BY ${groupingFields
       .map(quoteIdentifier)
       .join(', ')}`,
-    `| EVAL ${[...witnesses, idEvaluation].join(', ')}`,
-    `| KEEP ${[...planColumnNames(columns, plan), ...witnessColumns.values()]
+    `| EVAL ${[...rawAssignments, idEvaluation].join(', ')}`,
+    `| KEEP ${[...planColumnNames(columns, plan), ...rawIdentityColumns.values()]
       .map(quoteIdentifier)
       .join(', ')}`,
     // Ties broken on `entity.id`, the merge's tie key too, so a cut plan returns a deterministic set.

@@ -35,9 +35,9 @@ const outputColumns: OutputColumn[] = [
   { name: 'last_seen', kind: 'last_seen' },
 ];
 
-const noWitnesses: ReadonlyMap<string, string> = new Map();
-const identity = { compositions: [['host.id'], ['host.name']], witnessColumns: noWitnesses };
-const entityIdWitness: ReadonlyMap<string, string> = new Map([['entity.id', 'mapped:entity.id']]);
+const noRawColumns: ReadonlyMap<string, string> = new Map();
+const identity = { compositions: [['host.id'], ['host.name']], rawIdentityColumns: noRawColumns };
+const rawEntityId: ReadonlyMap<string, string> = new Map([['entity.id', 'raw:entity.id']]);
 
 describe('interpretPlanResult', () => {
   it('is usable when a composition is mapped and every attribute is', () => {
@@ -109,7 +109,7 @@ describe('interpretPlanResult', () => {
         }),
         {
           compositions: [['host.id', 'host.name'], ['host.hostname']],
-          witnessColumns: noWitnesses,
+          rawIdentityColumns: noRawColumns,
         },
         outputColumns
       )
@@ -156,7 +156,7 @@ describe('interpretPlanResult', () => {
     expect(
       interpretPlanResult(
         result({ 'host.id': 'null', os: 'null', os_again: 'null', last_seen: 'date' }),
-        { compositions: [['host.id']], witnessColumns: noWitnesses },
+        { compositions: [['host.id']], rawIdentityColumns: noRawColumns },
         columns
       )
     ).toEqual({
@@ -166,16 +166,16 @@ describe('interpretPlanResult', () => {
     });
   });
 
-  // The id evaluation types `entity.id` keyword even when no index maps it; the witness keeps the
+  // The id evaluation types `entity.id` keyword even when no index maps it; the raw column keeps the
   // grouped column's type.
-  const entityIdResult = (witnessType: string) =>
+  const entityIdResult = (rawType: string) =>
     interpretPlanResult(
-      result({ 'entity.id': 'keyword', 'mapped:entity.id': witnessType, last_seen: 'date' }),
-      { compositions: [['entity.id']], witnessColumns: entityIdWitness },
+      result({ 'entity.id': 'keyword', 'raw:entity.id': rawType, last_seen: 'date' }),
+      { compositions: [['entity.id']], rawIdentityColumns: rawEntityId },
       []
     );
 
-  it('is unusable when the witness of an entity.id identity is null', () => {
+  it('is unusable when the raw column of an entity.id identity is null', () => {
     expect(entityIdResult('null')).toEqual({
       usable: false,
       reason: 'no index behind "p" maps every field of an identity composition (entity.id)',
@@ -183,20 +183,20 @@ describe('interpretPlanResult', () => {
     });
   });
 
-  it('is usable when the witness of an entity.id identity is mapped', () => {
+  it('is usable when the raw column of an entity.id identity is mapped', () => {
     expect(entityIdResult('keyword')).toEqual({ usable: true, unavailableFields: [] });
   });
 
-  it('is usable through a ranked composition when the entity.id witness is null', () => {
+  it('is usable through a ranked composition when the entity.id raw column is null', () => {
     expect(
       interpretPlanResult(
         result({
           'entity.id': 'keyword',
-          'mapped:entity.id': 'null',
+          'raw:entity.id': 'null',
           'host.hostname': 'keyword',
           last_seen: 'date',
         }),
-        { compositions: [['entity.id'], ['host.hostname']], witnessColumns: entityIdWitness },
+        { compositions: [['entity.id'], ['host.hostname']], rawIdentityColumns: rawEntityId },
         outputColumns
       ).usable
     ).toBe(true);

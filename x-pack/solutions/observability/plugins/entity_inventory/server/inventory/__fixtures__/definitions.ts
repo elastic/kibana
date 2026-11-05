@@ -115,7 +115,7 @@ export const INVENTORY_DEFINITION_FIXTURES: readonly InventoryDefinitionFixture[
 
 /**
  * An identity on `entity.id`, like the built-in `generic` but keeping the type prefix, with the
- * `k8s.node` sources. Left out of the list above: its list query carries a witness column.
+ * `k8s.node` sources. Left out of the list above: its list query carries a raw column.
  */
 export const entityIdFixture: InventoryDefinitionFixture = {
   ...k8sNodeFixture,

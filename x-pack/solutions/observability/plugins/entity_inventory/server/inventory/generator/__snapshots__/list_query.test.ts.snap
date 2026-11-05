@@ -228,7 +228,7 @@ FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
 }
 `;
 
-exports[`buildListQuery keeps entity.id once for inventory_generic, with its witness copied before the id evaluation 1`] = `
+exports[`buildListQuery keeps entity.id once for inventory_generic, with its raw value copied before the id evaluation 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
 | WHERE \`_index_mode\` != \\"time_series\\"
@@ -239,13 +239,13 @@ FROM metrics-kubeletstatsreceiver.otel-default METADATA _index_mode
     \`os.type\` = LAST(\`host.os.type\`, \`@timestamp\`) WHERE \`host.os.type\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`entity.id\`
-| EVAL \`mapped:entity.id\` = \`entity.id\`, entity.id = CONCAT(\\"inventory_generic:\\", TO_STRING(entity.id))
-| KEEP \`entity.id\`, \`cluster\`, \`os\`, \`os.type\`, \`last_seen\`, \`mapped:entity.id\`
+| EVAL \`raw:entity.id\` = \`entity.id\`, entity.id = CONCAT(\\"inventory_generic:\\", TO_STRING(entity.id))
+| KEEP \`entity.id\`, \`cluster\`, \`os\`, \`os.type\`, \`last_seen\`, \`raw:entity.id\`
 | SORT \`last_seen\` DESC NULLS LAST, \`entity.id\` ASC
 | LIMIT 10000"
 `;
 
-exports[`buildListQuery keeps entity.id once for inventory_ranked_generic, with its witness copied before the id evaluation 1`] = `
+exports[`buildListQuery keeps entity.id once for inventory_ranked_generic, with its raw value copied before the id evaluation 1`] = `
 "SET unmapped_fields=\\"nullify\\";
 FROM metrics-system.* METADATA _index_mode
 | WHERE \`_index_mode\` != \\"time_series\\"
@@ -254,12 +254,12 @@ FROM metrics-system.* METADATA _index_mode
 | STATS \`os\` = LAST(\`host.os.name\`, \`@timestamp\`) WHERE \`host.os.name\` IS NOT NULL,
     \`last_seen\` = MAX(\`@timestamp\`)
     BY \`entity.id\`, \`host.hostname\`
-| EVAL \`mapped:entity.id\` = \`entity.id\`, entity_id_present = TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != \\"\\",
+| EVAL \`raw:entity.id\` = \`entity.id\`, entity_id_present = TO_STRING(entity.id) IS NOT NULL AND TO_STRING(entity.id) != \\"\\",
  host_hostname_present = TO_STRING(host.hostname) IS NOT NULL AND TO_STRING(host.hostname) != \\"\\",
  entity_id_present_or_null = CASE(entity_id_present, TO_STRING(entity.id)),
  host_hostname_present_or_null = CASE(host_hostname_present, TO_STRING(host.hostname)),
  entity.id = CONCAT(\\"inventory_ranked_generic:\\", COALESCE(entity_id_present_or_null, host_hostname_present_or_null))
-| KEEP \`entity.id\`, \`host.hostname\`, \`os\`, \`last_seen\`, \`mapped:entity.id\`
+| KEEP \`entity.id\`, \`host.hostname\`, \`os\`, \`last_seen\`, \`raw:entity.id\`
 | SORT \`last_seen\` DESC NULLS LAST, \`entity.id\` ASC
 | LIMIT 10000"
 `;

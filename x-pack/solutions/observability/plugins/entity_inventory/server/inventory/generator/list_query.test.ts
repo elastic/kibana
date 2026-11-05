@@ -136,16 +136,16 @@ describe('buildListQuery', () => {
       entityIdFixture.type,
       entityIdFixture,
       'BY `entity.id`',
-      '| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`, `mapped:entity.id`',
+      '| KEEP `entity.id`, `cluster`, `os`, `os.type`, `last_seen`, `raw:entity.id`',
     ],
     [
       rankedEntityIdFixture.type,
       rankedEntityIdFixture,
       'BY `entity.id`, `host.hostname`',
-      '| KEEP `entity.id`, `host.hostname`, `os`, `last_seen`, `mapped:entity.id`',
+      '| KEEP `entity.id`, `host.hostname`, `os`, `last_seen`, `raw:entity.id`',
     ],
   ] as const)(
-    'keeps entity.id once for %s, with its witness copied before the id evaluation',
+    'keeps entity.id once for %s, with its raw value copied before the id evaluation',
     (_type, definition, byLine, keepLine) => {
       const [{ esql }] = generateListQueries(definition, plansOf(definition, false), window, LIMIT);
       const lines = esql.split('\n');
@@ -153,14 +153,14 @@ describe('buildListQuery', () => {
       expect(esql).toMatchSnapshot();
       expect(lines.find((line) => line.trimStart().startsWith('BY '))?.trim()).toBe(byLine);
       expect(esql).toContain(
-        `\n| EVAL \`mapped:entity.id\` = \`entity.id\`, ${
+        `\n| EVAL \`raw:entity.id\` = \`entity.id\`, ${
           resolveIdentityPlan(definition).idEvaluation
         }\n`
       );
       expect(lines.find((line) => line.startsWith('| KEEP '))).toBe(keepLine);
       expect(Parser.parse(esql).errors).toEqual([]);
 
-      // The TS plan carries the same witness lines.
+      // The TS plan carries the same raw column lines.
       const [ts] = generateListQueries(definition, plansOf(definition, true), window, LIMIT);
       const tsLines = ts.esql.split('\n');
       expect(tsLines[1]).toMatch(/^TS /);

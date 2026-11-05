@@ -33,16 +33,17 @@ export interface IdentityPlan {
    */
   compositions: string[][];
   /**
-   * Grouping field to witness column, for each grouping field the id evaluation overwrites (in
-   * practice an identity on `entity.id`). The witness copies the grouped column before the id
-   * evaluation so the executor can still read whether an index maps the field.
+   * Grouping field to the column that keeps its raw value, for each grouping field the id
+   * evaluation overwrites (in practice an identity on `entity.id`). The list query copies the
+   * grouped column there before the id evaluation, so the executor can still read whether an index
+   * maps the field.
    */
-  witnessColumns: ReadonlyMap<string, string>;
+  rawIdentityColumns: ReadonlyMap<string, string>;
 }
 
 // A `:` is outside the store's field-path pattern (`^[A-Za-z0-9_@-]+(\.[A-Za-z0-9_@-]+)*$`) that
-// attribute, identity and helper column names follow, so a witness cannot collide with any of them.
-const witnessColumnOf = (field: string): string => `mapped:${field}`;
+// attribute, identity and helper column names follow, so a raw column cannot collide with any.
+const rawIdentityColumnOf = (field: string): string => `raw:${field}`;
 
 // Reads the assignment targets from the generated text so the names never drift from the store.
 const assignedColumns = (idEvaluation: string): string[] => {
@@ -79,10 +80,10 @@ export const resolveIdentityPlan = (definition: EntityDefinitionWithoutId): Iden
     idEvaluation,
     helperColumns: assigned.filter((name) => name !== ENTITY_ID_COLUMN),
     compositions: getIdentityCompositions(identityField),
-    witnessColumns: new Map(
+    rawIdentityColumns: new Map(
       groupingFields
         .filter((field) => assignedNames.has(field))
-        .map((field) => [field, witnessColumnOf(field)])
+        .map((field) => [field, rawIdentityColumnOf(field)])
     ),
   };
 };

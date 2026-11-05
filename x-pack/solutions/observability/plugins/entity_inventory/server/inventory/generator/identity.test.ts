@@ -93,16 +93,19 @@ describe('resolveIdentityPlan', () => {
 
   it.each(
     [entityIdFixture, rankedEntityIdFixture].map((definition) => [definition.type, definition])
-  )('gives %s a witness of entity.id, which the id evaluation overwrites', (_type, definition) => {
-    expect(resolveIdentityPlan(definition).witnessColumns).toEqual(
-      new Map([['entity.id', 'mapped:entity.id']])
-    );
-  });
+  )(
+    'gives %s a raw column of entity.id, which the id evaluation overwrites',
+    (_type, definition) => {
+      expect(resolveIdentityPlan(definition).rawIdentityColumns).toEqual(
+        new Map([['entity.id', 'raw:entity.id']])
+      );
+    }
+  );
 
   it.each(INVENTORY_DEFINITION_FIXTURES.map((definition) => [definition.type, definition]))(
-    'gives %s no witness when the id evaluation overwrites no grouping field',
+    'gives %s no raw column when the id evaluation overwrites no grouping field',
     (_type, definition) => {
-      expect(resolveIdentityPlan(definition).witnessColumns.size).toBe(0);
+      expect(resolveIdentityPlan(definition).rawIdentityColumns.size).toBe(0);
     }
   );
 
