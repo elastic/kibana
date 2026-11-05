@@ -8,10 +8,10 @@
 import React from 'react';
 import { act, fireEvent, render, screen, within } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useSignificantEventsMaintenanceActions } from '../../data/maintenance/use_significant_events_maintenance';
+import { useSignificantEventsMaintenanceActions } from '../../../data/maintenance/use_significant_events_maintenance';
 import { ResetSection } from './reset_section';
 
-jest.mock('../../data/maintenance/use_significant_events_maintenance');
+jest.mock('../../../data/maintenance/use_significant_events_maintenance');
 const reset = jest.fn();
 const actions = {
   pause: jest.fn(),

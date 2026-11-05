@@ -20,7 +20,7 @@ import {
 } from '@elastic/eui';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SignificantEventsTuningConfigEditor } from './significant_events_tuning_config_editor';
 import { SettingsSectionRow } from './settings_section';
 import type { DetectionSettingsForm } from './use_detection_settings_form';

@@ -9,14 +9,14 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { DeveloperModeBadge } from '../components/ui/developer_mode_badge';
-import { useKibana } from '../hooks/use_kibana';
+import { DeveloperModeBadge } from '../../components/ui/developer_mode_badge';
+import { useKibana } from '../../hooks/use_kibana';
 import { SlackChannelsSection } from './components/apps_section';
 import { ConnectorsSection } from './components/connectors_section';
 import { DeveloperModeSection } from './components/developer_mode_section';
 import { KnowledgePurgeSection } from './components/knowledge_purge_section';
 import { SettingsSection } from './components/settings_section';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 
 export const GeneralSettingsTab = () => {
   const { application } = useKibana().services;

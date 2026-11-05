@@ -29,11 +29,11 @@ const mockBulkOnboarding = {
 let mockSources: NightshiftSource[] = [];
 let mockIsPaused = false;
 
-jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: mockIsPaused }),
 }));
 
-jest.mock('../../data/sources/use_fetch_sources', () => ({
+jest.mock('../../../data/sources/use_fetch_sources', () => ({
   useFetchSources: () => ({
     data: mockSources,
     isLoading: false,

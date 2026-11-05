@@ -14,13 +14,13 @@ import { OnboardingFirstInvestigationStep } from './first_investigation_step';
 const mockStartInvestigation = jest.fn();
 const mockRetry = jest.fn();
 
-jest.mock('../data/investigations/use_start_investigation', () => ({
+jest.mock('../../../data/investigations/use_start_investigation', () => ({
   useStartInvestigation: () => ({ startInvestigation: mockStartInvestigation, isStarting: false }),
 }));
 jest.mock('./use_onboarding', () => ({
   useStartOnboardingSuggestions: () => ({ mutate: mockRetry, isLoading: false }),
 }));
-jest.mock('../components/entities/sandbox_connector/connect_sources_grid', () => ({
+jest.mock('../../../components/entities/sandbox_connector/connect_sources_grid', () => ({
   ConnectSourcesGrid: ({ group }: { group: string }) => <div data-test-subj={`grid-${group}`} />,
 }));
 

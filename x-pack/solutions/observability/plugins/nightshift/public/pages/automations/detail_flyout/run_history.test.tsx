@@ -9,9 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { RunHistory, type Run } from './run_history';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
-jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const skippedRun = (skipReason: string, dailyLimit?: number): Run => ({
   id: 'run-1',

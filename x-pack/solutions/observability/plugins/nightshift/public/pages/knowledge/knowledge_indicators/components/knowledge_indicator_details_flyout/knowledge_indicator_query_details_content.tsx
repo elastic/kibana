@@ -19,9 +19,9 @@ import { i18n } from '@kbn/i18n';
 import type { Feature, StreamQuery } from '@kbn/significant-events-schema';
 import { COMPUTED_FEATURE_TYPES } from '@kbn/significant-events-schema';
 import React, { useMemo } from 'react';
-import { SeverityBadge } from '../../../../components/ui/severity_badge';
-import { InfoPanel } from '../../../../components/ui/info_panel';
-import { SparkPlot } from '../../../../components/ui/spark_plot';
+import { SeverityBadge } from '../../../../../components/ui/severity_badge';
+import { InfoPanel } from '../../../../../components/ui/info_panel';
+import { SparkPlot } from '../../../../../components/ui/spark_plot';
 
 const COMPUTED_FEATURE_TYPE_SET = new Set<string>(COMPUTED_FEATURE_TYPES);
 

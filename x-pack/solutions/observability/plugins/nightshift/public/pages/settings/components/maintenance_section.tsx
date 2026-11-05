@@ -24,11 +24,11 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { KbnDangerCallout, KbnInfoCallout, KbnWarningCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../../data/maintenance/use_significant_events_maintenance';
+} from '../../../data/maintenance/use_significant_events_maintenance';
 import { DetectionPausedCallout } from './detection_paused_callout';
 import { SettingsSectionRow } from './settings_section';
 

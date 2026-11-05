@@ -11,7 +11,7 @@ import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
 import type { NightshiftSource } from '@kbn/nightshift-shared';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RecommendedSourcesCreationState } from '../components/entities/source/recommended_sources/recommended_sources_table';
+import type { RecommendedSourcesCreationState } from '../../components/entities/source/recommended_sources/recommended_sources_table';
 import { SourcesView } from './sources_view';
 
 const createSource = (id: string): NightshiftSource => ({
@@ -37,7 +37,7 @@ let mockIsSourcesFetching = false;
 let mockIsSourcesError = false;
 const mockToasts = { addWarning: jest.fn() };
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
@@ -70,14 +70,14 @@ jest.mock('./onboarding/ki_generation_context', () => ({
     bulkOnboardQueriesOnly: jest.fn(),
   }),
 }));
-jest.mock('../data/connectors/use_ai_features', () => ({ useAIFeatures: () => null }));
-jest.mock('../data/sources/use_sources_api', () => ({
+jest.mock('../../data/connectors/use_ai_features', () => ({ useAIFeatures: () => null }));
+jest.mock('../../data/sources/use_sources_api', () => ({
   useSourcesApi: () => ({
     setSourceEnabled: { isLoading: false, mutate: jest.fn() },
     deleteSource: { isLoading: false, mutate: jest.fn() },
   }),
 }));
-jest.mock('../data/discovery/significant_events_page_context', () => ({
+jest.mock('../../data/discovery/significant_events_page_context', () => ({
   useSignificantEventsPageContext: () => ({
     isRunning: false,
     isCanceling: false,
@@ -85,10 +85,10 @@ jest.mock('../data/discovery/significant_events_page_context', () => ({
     handleCancel: jest.fn(),
   }),
 }));
-jest.mock('../data/maintenance/use_significant_events_maintenance', () => ({
+jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ blocksActivity: false }),
 }));
-jest.mock('../components/search_bar', () => ({ SignificantEventsSearchBar: () => null }));
+jest.mock('../../components/search_bar', () => ({ SignificantEventsSearchBar: () => null }));
 jest.mock('./onboarding/generate_split_button', () => ({
   GenerateSplitButton: () => <button data-test-subj="generateSplitButtonStub">Generate</button>,
 }));
@@ -98,7 +98,7 @@ jest.mock('./find_significant_events_button', () => ({
   ),
 }));
 let mockRecommendedSourcesTableMountCount = 0;
-jest.mock('../components/entities/source/recommended_sources/recommended_sources_table', () => ({
+jest.mock('../../components/entities/source/recommended_sources/recommended_sources_table', () => ({
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE: {
     isCreating: false,
     hasCreatedSources: false,
@@ -173,7 +173,7 @@ jest.mock('./sources_table', () => ({
     </>
   ),
 }));
-jest.mock('../components/entities/source/source_flyout/source_flyout', () => ({
+jest.mock('../../components/entities/source/source_flyout/source_flyout', () => ({
   SourceFlyout: ({
     source,
     readOnly,

@@ -30,7 +30,7 @@ import {
   KNOWLEDGE_PURGE_CONFIRMATION,
   type KnowledgePurgePreview,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { SettingsSectionRow } from './settings_section';
 import { usePurgeKnowledge, usePurgePreview } from './use_knowledge_purge';
 

@@ -33,19 +33,19 @@ import { isComputedFeature, QUERY_TYPE_STATS } from '@kbn/significant-events-sch
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
-import { useKibana } from '../../../../hooks/use_kibana';
-import { useTimefilter } from '../../../../hooks/use_timefilter';
-import { buildFeatureDiscoverParams } from '../../../../common/discover_helpers';
+import { useKibana } from '../../../../../hooks/use_kibana';
+import { useTimefilter } from '../../../../../hooks/use_timefilter';
+import { buildFeatureDiscoverParams } from '../../../../../common/discover_helpers';
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
-import { getConfidenceColor } from '../../../../common/get_confidence_color';
-import { FlyoutMetadataCard } from '../../../../components/ui/flyout_metadata_card';
-import { FlyoutToolbarHeader } from '../../../../components/ui/flyout_toolbar_header';
-import { SeverityBadge } from '../../../../components/ui/severity_badge';
+import { getConfidenceColor } from '../../../../../common/get_confidence_color';
+import { FlyoutMetadataCard } from '../../../../../components/ui/flyout_metadata_card';
+import { FlyoutToolbarHeader } from '../../../../../components/ui/flyout_toolbar_header';
+import { SeverityBadge } from '../../../../../components/ui/severity_badge';
 import { DurabilityBadge } from '../durability_badge';
 import { getKnowledgeIndicatorExpiresAt } from '../../utils/get_knowledge_indicator_expires_at';
-import { useKnowledgeIndicatorsBulkDelete } from '../../../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete';
-import { useSourcesById } from '../../../../data/sources/use_sources_by_id';
-import { useRulesDemote } from '../../../../data/rules/use_rules_demote';
+import { useKnowledgeIndicatorsBulkDelete } from '../../../../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete';
+import { useSourcesById } from '../../../../../data/sources/use_sources_by_id';
+import { useRulesDemote } from '../../../../../data/rules/use_rules_demote';
 import {
   useKnowledgeIndicatorActions,
   DELETE_LABEL,
@@ -54,7 +54,7 @@ import {
   PROMOTE_LABEL,
 } from '../../hooks/use_knowledge_indicator_actions';
 import { durabilityMenuItem } from '../durability_menu_item';
-import { useBlocksNewActivity } from '../../../../data/maintenance/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../../../../data/maintenance/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
 import { DeleteTableItemsModal } from '../delete_table_items_modal';
 import { getKnowledgeIndicatorSourceId } from '../../utils/get_knowledge_indicator_source_id';

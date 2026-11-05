@@ -21,11 +21,11 @@ const defaultCatalog = {
   isError: false,
 };
 const mockUseRuleCatalog = jest.fn();
-jest.mock('../../../../data/rules/use_rule_catalog', () => ({
+jest.mock('../../../../../data/rules/use_rule_catalog', () => ({
   useRuleCatalog: () => mockUseRuleCatalog(),
 }));
-jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
+jest.mock('../../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../../data/relay_apps/use_relay_app_bindings'),
   useAllRelayAppBindings: () => ({
     bindings: [],
     isLoading: false,

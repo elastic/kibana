@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { RunQuotaReachedBanner } from '../../components/ui/run_quota_reached_callout';
+import { RunQuotaReachedBanner } from '../../../components/ui/run_quota_reached_callout';
 import { KnowledgeIndicatorsTable } from './knowledge_indicators_table';
 
 export const KnowledgeIndicatorsTab = (): React.ReactElement => (

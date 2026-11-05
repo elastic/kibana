@@ -11,7 +11,7 @@ import type { RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import {
   useRunQuotas,
   useUpdateRunQuotas,
-} from '../../data/run_quotas/use_significant_events_run_quotas';
+} from '../../../data/run_quotas/use_significant_events_run_quotas';
 import {
   buildRunQuotaSettingsUpdate,
   createRunQuotaDraftState,

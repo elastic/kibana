@@ -8,8 +8,8 @@
 import { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useFetchAutomations } from '../data/automations/use_automations';
-import { useKibana } from '../hooks/use_kibana';
+import { useFetchAutomations } from '../../../data/automations/use_automations';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useFetchLatestInvestigation } from './use_fetch_latest_investigation';
 
 /** Per space: the base path carries the space prefix (`/s/<space id>`). */

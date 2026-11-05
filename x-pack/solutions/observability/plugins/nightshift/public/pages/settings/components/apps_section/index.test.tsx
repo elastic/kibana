@@ -14,12 +14,12 @@ import {
   useRelayAppBindings,
   useBindChannel,
   useUnbindChannel,
-} from '../../../data/relay_apps/use_relay_app_bindings';
+} from '../../../../data/relay_apps/use_relay_app_bindings';
 
 // Mock the hooks that depend on Kibana context — keep the component under test
 // isolated so we can drive its UI purely through controlled bindings.
-jest.mock('../../../data/relay_apps/use_relay_app_bindings', () => ({
-  ...jest.requireActual('../../../data/relay_apps/use_relay_app_bindings'),
+jest.mock('../../../../data/relay_apps/use_relay_app_bindings', () => ({
+  ...jest.requireActual('../../../../data/relay_apps/use_relay_app_bindings'),
   useRelayAppBindings: jest.fn(),
   useBindChannel: jest.fn(),
   useUnbindChannel: jest.fn(),

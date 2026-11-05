@@ -6,13 +6,13 @@
  */
 
 import { act, renderHook } from '@testing-library/react';
-import { useFetchAutomations } from '../data/automations/use_automations';
+import { useFetchAutomations } from '../../../data/automations/use_automations';
 import { useFetchLatestInvestigation } from './use_fetch_latest_investigation';
 import { useOnboardingVisibility } from './use_onboarding_visibility';
 
-jest.mock('../data/automations/use_automations');
+jest.mock('../../../data/automations/use_automations');
 jest.mock('./use_fetch_latest_investigation');
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { http: { basePath: { get: () => '/s/team-a' } } } }),
 }));
 

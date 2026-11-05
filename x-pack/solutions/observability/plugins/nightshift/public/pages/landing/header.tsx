@@ -18,7 +18,7 @@ import {
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { NightshiftMarkIcon } from '@kbn/observability-shared-plugin/public';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 
 export interface NightshiftHeaderProps {
   isLoading?: boolean;

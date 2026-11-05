@@ -22,8 +22,8 @@ import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
-import { nightshiftStatusCardTransition } from '../common/transition';
+} from '../../common/ebt_constants';
+import { nightshiftStatusCardTransition } from '../../common/transition';
 
 type SignificantEventStatusGroup = 'needsAction' | 'resolved';
 

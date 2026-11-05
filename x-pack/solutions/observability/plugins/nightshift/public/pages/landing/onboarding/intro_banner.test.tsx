@@ -8,10 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { OnboardingIntroBanner } from './intro_banner';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const STORAGE_KEY = 'nightshift.onboarding.introBannerDismissed:/s/sre';
 

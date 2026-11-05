@@ -25,8 +25,8 @@ import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
-import { getLatestInvestigation } from '../components/entities/significant_event/significant_event_status';
+} from '../../common/ebt_constants';
+import { getLatestInvestigation } from '../../components/entities/significant_event/significant_event_status';
 import { SignificantEventItem } from './significant_event_item';
 
 const getEventInvestigationRunStatus = (

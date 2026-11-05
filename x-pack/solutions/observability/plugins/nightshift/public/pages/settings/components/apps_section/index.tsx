@@ -29,7 +29,7 @@ import {
   type RelayAppConnectionStatus,
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 import { SettingsSection } from '../settings_section';
 import { useRelayAppConnection } from './use_relay_app_connection';
 import { SlackConnectionBindings } from './slack_connection_bindings';

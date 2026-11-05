@@ -16,30 +16,30 @@ import { OBSERVABILITY_OVERVIEW_APP_ID } from '@kbn/deeplinks-observability';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
 import { NightshiftPage } from './nightshift_page';
 import { Router } from '@kbn/shared-ux-router';
-import { useKibana } from './hooks/use_kibana';
-import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
-import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
-import type { NightshiftAppHeaderProps } from './components/app_header';
+import { useKibana } from '../hooks/use_kibana';
+import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
+import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
+import type { NightshiftAppHeaderProps } from '../components/app_header';
 
 jest.mock('@kbn/observability-shared-plugin/public', () => ({ useBreadcrumbs: jest.fn() }));
 jest.mock('@elastic/eui', () => ({
   ...jest.requireActual('@elastic/eui'),
   useCurrentEuiBreakpoint: () => 'xl',
 }));
-jest.mock('./app/app', () => ({
+jest.mock('../pages/landing/app', () => ({
   NightshiftApp: ({ hideDetectionSetupBanner }: { hideDetectionSetupBanner: boolean }) => (
     <div data-test-subj="nightshiftAppStub">{String(hideDetectionSetupBanner)}</div>
   ),
 }));
-jest.mock('./automations/automations_page', () => ({
+jest.mock('../pages/automations/automations_page', () => ({
   AutomationsPage: () => <div data-test-subj="automationsPageStub" />,
 }));
-jest.mock('./onboarding/onboarding', () => ({
+jest.mock('../pages/landing/onboarding/onboarding', () => ({
   NightshiftOnboarding: () => <div data-test-subj="nightshiftOnboardingStub" />,
 }));
-jest.mock('./onboarding/use_onboarding_visibility');
-jest.mock('./knowledge/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
+jest.mock('../pages/landing/onboarding/use_onboarding_visibility');
+jest.mock('../pages/knowledge/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('../components/app_header');
   return {
     KnowledgePage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -49,8 +49,8 @@ jest.mock('./knowledge/page', () => {
     ),
   };
 });
-jest.mock('./sources/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
+jest.mock('../pages/sources/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('../components/app_header');
   return {
     SourcesPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -60,8 +60,8 @@ jest.mock('./sources/page', () => {
     ),
   };
 });
-jest.mock('./pages/detection/page', () => {
-  const { NightshiftAppHeader } = jest.requireActual('./components/app_header');
+jest.mock('../pages/detection/page', () => {
+  const { NightshiftAppHeader } = jest.requireActual('../components/app_header');
   return {
     DetectionPage: ({ headerProps }: { headerProps: NightshiftAppHeaderProps }) => (
       <>
@@ -71,7 +71,7 @@ jest.mock('./pages/detection/page', () => {
     ),
   };
 });
-jest.mock('./settings/page', () => ({
+jest.mock('../pages/settings/page', () => ({
   SettingsPage: ({ headerProps }: { headerProps: { onCustomContextClick?: () => void } }) => {
     const [draft, setDraft] = React.useState('');
 
@@ -92,7 +92,7 @@ jest.mock('./settings/page', () => ({
     );
   },
 }));
-jest.mock('./components/start_investigation_panel', () => ({
+jest.mock('../components/start_investigation_panel', () => ({
   StartInvestigationPanel: ({ onClose }: { onClose: () => void }) => (
     <div data-test-subj="startInvestigationPanelStub">
       <button onClick={onClose} type="button">
@@ -101,18 +101,18 @@ jest.mock('./components/start_investigation_panel', () => ({
     </div>
   ),
 }));
-jest.mock('./hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('./hooks/use_developer_mode', () => ({
+jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../hooks/use_developer_mode', () => ({
   useDeveloperMode: () => ({
     isDeveloperMode: false,
     isSaving: false,
     setDeveloperMode: jest.fn(),
   }),
 }));
-jest.mock('./data/availability/use_significant_events_availability');
+jest.mock('../data/availability/use_significant_events_availability');
 let mockServiceAccount: { isLoading: boolean; isSuccess: boolean; data?: Record<string, unknown> };
-jest.mock('./data/service_accounts/use_investigator_service_account', () => ({
-  ...jest.requireActual('./data/service_accounts/use_investigator_service_account'),
+jest.mock('../data/service_accounts/use_investigator_service_account', () => ({
+  ...jest.requireActual('../data/service_accounts/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockServiceAccount,
 }));
 

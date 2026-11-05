@@ -8,7 +8,7 @@
 import React from 'react';
 import { getEbtProps } from '@kbn/ebt-click';
 import { KbnWarningCallout } from '@kbn/ui-callout';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { globalLimitLabels } from './translations';
 
 export const GlobalLimitCallout = ({

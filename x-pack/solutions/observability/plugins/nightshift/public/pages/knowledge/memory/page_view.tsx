@@ -33,7 +33,7 @@ import { css } from '@emotion/css';
 import { FormattedMessage, FormattedNumber, FormattedRelative } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { getMemoryArchiveReasonLabel } from './labels';
 import { MemoryMergedFromRow } from './lineage';
 import { getSourceTaskPath } from './source_task';

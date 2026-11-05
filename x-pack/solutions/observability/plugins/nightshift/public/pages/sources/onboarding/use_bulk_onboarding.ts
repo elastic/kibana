@@ -12,11 +12,11 @@ import {
 } from '@kbn/significant-events-schema';
 import pMap from 'p-map';
 import { useCallback, useState } from 'react';
-import type { ScheduleOnboardingOptions } from '../../data/sources/use_onboarding_api';
-import { useOnboardingApi } from '../../data/sources/use_onboarding_api';
-import { useKibana } from '../../hooks/use_kibana';
-import { useSourcesById } from '../../data/sources/use_sources_by_id';
-import { getFormattedError } from '../../common/errors';
+import type { ScheduleOnboardingOptions } from '../../../data/sources/use_onboarding_api';
+import { useOnboardingApi } from '../../../data/sources/use_onboarding_api';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useSourcesById } from '../../../data/sources/use_sources_by_id';
+import { getFormattedError } from '../../../common/errors';
 import type { OnboardingConfig } from './types';
 import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_queue';
 

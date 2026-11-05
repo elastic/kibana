@@ -26,7 +26,7 @@ const mockKibanaServices = {
 jest.mock('@kbn/unsaved-changes-prompt', () => ({
   useUnsavedChangesPrompt: jest.fn(),
 }));
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: mockKibanaServices }),
 }));
 jest.mock('./components/investigation_identity_section', () => ({

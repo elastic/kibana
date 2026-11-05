@@ -11,8 +11,8 @@ import type {
   PutCustomContextRequest,
   PutCustomContextResponse,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { getHttpErrorStatus } from '../common/http_error';
-import { useKibana } from '../hooks/use_kibana';
+import { getHttpErrorStatus } from '../../../common/http_error';
+import { useKibana } from '../../../hooks/use_kibana';
 import { NIGHTSHIFT_CUSTOM_CONTEXT_QUERY_KEY } from './use_fetch_custom_context';
 
 const SAVE_ERROR_TOAST_TITLE = i18n.translate(

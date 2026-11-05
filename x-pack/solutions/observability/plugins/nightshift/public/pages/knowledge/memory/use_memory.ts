@@ -8,8 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { useInfiniteQuery, useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { useMemo } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../../common/errors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../common/errors';
 import type {
   MemoryDetailResult,
   MemoryFilter,

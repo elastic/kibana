@@ -9,13 +9,13 @@ import React from 'react';
 import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { MemoryPageView } from './page_view';
 import { useDeleteMemoryPage, useMemoryPage, useSetMemoryArchived } from './use_memory';
 import type { MemoryPage } from './types';
 
 jest.mock('./use_memory');
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 // The merged-from row issues its own fetch; stub it so these tests stay about
 // the page's own actions.
 jest.mock('./lineage', () => ({

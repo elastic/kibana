@@ -25,7 +25,7 @@ import {
 } from '@kbn/significant-events-schema';
 import React, { useState } from 'react';
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { KnowledgeIndicatorsColumn } from './knowledge_indicators_column';
 import { QueriesColumn } from './queries_column';
 import { SignificantEventsColumn } from './significant_events_column';

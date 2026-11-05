@@ -10,7 +10,7 @@ import type { EuiSelectableOption } from '@elastic/eui';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import React, { useCallback, useMemo } from 'react';
-import { ConnectorIcon } from '../../components/ui/connector_icon';
+import { ConnectorIcon } from '../../../components/ui/connector_icon';
 import {
   CONFIGURED_DEFAULT_MODEL_CALLOUT_DESCRIPTION,
   CONFIGURED_DEFAULT_MODEL_CALLOUT_TITLE,

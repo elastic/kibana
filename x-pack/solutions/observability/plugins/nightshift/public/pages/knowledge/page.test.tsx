@@ -9,15 +9,15 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { createMemoryHistory } from 'history';
 import { Route, Router } from '@kbn/shared-ux-router';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { useKnowledgeTabsAvailability } from './hooks/use_knowledge_tabs_availability';
 import { getDefaultKnowledgeTab, type KnowledgeTabsAvailability } from './knowledge_tabs';
 import { KnowledgePage, type KnowledgePageHeaderProps } from './page';
 
-jest.mock('../hooks/use_kibana');
+jest.mock('../../hooks/use_kibana');
 jest.mock('./hooks/use_knowledge_tabs_availability');
 const mockAppHeader = jest.fn();
-jest.mock('../components/app_header', () => ({
+jest.mock('../../components/app_header', () => ({
   NightshiftAppHeader: (props: unknown) => {
     mockAppHeader(props);
     return <div data-test-subj="knowledgeHeader" />;

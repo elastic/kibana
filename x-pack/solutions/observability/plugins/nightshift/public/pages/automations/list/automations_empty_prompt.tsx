@@ -8,7 +8,7 @@
 import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiButton, EuiEmptyPrompt, EuiToolTip } from '@elastic/eui';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
 import { listLabels } from './translations';
 
 export const AutomationsEmptyPrompt = ({

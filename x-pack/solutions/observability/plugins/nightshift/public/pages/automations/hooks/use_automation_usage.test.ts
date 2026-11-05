@@ -7,10 +7,10 @@
 
 import { renderHook } from '@testing-library/react';
 import { QueryClient, QueryObserver } from '@kbn/react-query';
-import { useAutomationsRunsInRange } from '../../data/automations/use_automations';
+import { useAutomationsRunsInRange } from '../../../data/automations/use_automations';
 import { useAutomationUsage } from './use_automation_usage';
 
-jest.mock('../../data/automations/use_automations', () => ({
+jest.mock('../../../data/automations/use_automations', () => ({
   useAutomationsRunsInRange: jest.fn(() => []),
 }));
 

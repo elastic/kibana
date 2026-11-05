@@ -9,7 +9,7 @@ import { EuiI18nNumber, EuiText } from '@elastic/eui';
 import { css } from '@emotion/css';
 import type { SignificantEventsWorkflowStatusResult } from '@kbn/significant-events-schema';
 import React from 'react';
-import { useFetchDiscoveryQueries } from '../data/rules/use_fetch_discovery_queries';
+import { useFetchDiscoveryQueries } from '../../data/rules/use_fetch_discovery_queries';
 
 const ACTIVE_DRAFT_STATUS = ['active', 'draft'] as const;
 

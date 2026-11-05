@@ -22,11 +22,14 @@ import { i18n } from '@kbn/i18n';
 import type { AggregatedFeature } from '@kbn/significant-events-schema';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
-import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
-import { DeveloperModeBadge } from '../../../../components/ui/developer_mode_badge';
-import { InfoPanel } from '../../../../components/ui/info_panel';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
-import { getConfidenceColor } from '../../../../common/get_confidence_color';
+import { useDeveloperMode } from '../../../../../hooks/use_developer_mode';
+import { DeveloperModeBadge } from '../../../../../components/ui/developer_mode_badge';
+import { InfoPanel } from '../../../../../components/ui/info_panel';
+import {
+  NIGHTSHIFT_EBT_ACTIONS,
+  NIGHTSHIFT_EBT_ELEMENTS,
+} from '../../../../../common/ebt_constants';
+import { getConfidenceColor } from '../../../../../common/get_confidence_color';
 import { DurabilityBadge } from '../durability_badge';
 
 interface Props {

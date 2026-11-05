@@ -8,10 +8,10 @@
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useTokenTrackingForm, type TokenTrackingSaveResult } from './use_token_tracking_form';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.Mock;
 const setUiSetting = jest.fn();

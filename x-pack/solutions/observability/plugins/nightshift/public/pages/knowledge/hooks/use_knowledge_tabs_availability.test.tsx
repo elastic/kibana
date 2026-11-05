@@ -8,12 +8,12 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../../hooks/use_developer_mode';
+import { useKibana } from '../../../hooks/use_kibana';
 import { useKnowledgeTabsAvailability, useMemoryEnabled } from './use_knowledge_tabs_availability';
 
-jest.mock('../../hooks/use_kibana');
-jest.mock('../../hooks/use_developer_mode');
+jest.mock('../../../hooks/use_kibana');
+jest.mock('../../../hooks/use_developer_mode');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;

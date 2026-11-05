@@ -7,14 +7,14 @@
 
 import { act, renderHook } from '@testing-library/react';
 import { NIGHTSHIFT_UI_PRIVILEGES, type NightshiftSource } from '@kbn/nightshift-shared';
-import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
-import { useFetchSources } from '../data/sources/use_fetch_sources';
-import { useKibana } from '../hooks/use_kibana';
+import { useSignificantEventsAvailability } from '../../data/availability/use_significant_events_availability';
+import { useFetchSources } from '../../data/sources/use_fetch_sources';
+import { useKibana } from '../../hooks/use_kibana';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';
 
-jest.mock('../data/availability/use_significant_events_availability');
-jest.mock('../data/sources/use_fetch_sources');
-jest.mock('../hooks/use_kibana');
+jest.mock('../../data/availability/use_significant_events_availability');
+jest.mock('../../data/sources/use_fetch_sources');
+jest.mock('../../hooks/use_kibana');
 
 const mockUseSignificantEventsAvailability = useSignificantEventsAvailability as jest.Mock;
 const mockUseFetchSources = useFetchSources as jest.Mock;

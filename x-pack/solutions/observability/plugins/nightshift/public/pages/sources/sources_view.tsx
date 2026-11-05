@@ -18,14 +18,14 @@ import type { NightshiftSource } from '@kbn/nightshift-shared';
 import React, { useCallback, useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { LoadingPanel } from '../components/ui/loading_panel';
-import { useAIFeatures } from '../data/connectors/use_ai_features';
-import { useKibana } from '../hooks/use_kibana';
-import { useSourcesApi } from '../data/sources/use_sources_api';
-import { useSignificantEventsPageContext } from '../data/discovery/significant_events_page_context';
-import type { SignificantEventsSearchBarProps } from '../components/search_bar';
-import { SignificantEventsSearchBar } from '../components/search_bar';
-import { useBlocksNewActivity } from '../data/maintenance/use_significant_events_maintenance';
+import { LoadingPanel } from '../../components/ui/loading_panel';
+import { useAIFeatures } from '../../data/connectors/use_ai_features';
+import { useKibana } from '../../hooks/use_kibana';
+import { useSourcesApi } from '../../data/sources/use_sources_api';
+import { useSignificantEventsPageContext } from '../../data/discovery/significant_events_page_context';
+import type { SignificantEventsSearchBarProps } from '../../components/search_bar';
+import { SignificantEventsSearchBar } from '../../components/search_bar';
+import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
 import { useKiGeneration } from './onboarding/ki_generation_context';
 import { FindSignificantEventsButton } from './find_significant_events_button';
 import { GenerateSplitButton } from './onboarding/generate_split_button';
@@ -33,7 +33,7 @@ import { getGenerateDisabledTooltip } from './onboarding/translations';
 import {
   ConfirmSourceActionModal,
   type SourceAction,
-} from '../components/entities/source/confirm_source_action_modal';
+} from '../../components/entities/source/confirm_source_action_modal';
 import { SourcesTable } from './sources_table';
 import { isOnboardingInProgress } from './utils';
 import {
@@ -52,11 +52,11 @@ import {
   INITIAL_RECOMMENDED_SOURCES_CREATION_STATE,
   RecommendedSourcesTable,
   type RecommendedSourcesCreationState,
-} from '../components/entities/source/recommended_sources/recommended_sources_table';
-import { ADD_RECOMMENDED_SOURCES_TITLE } from '../components/entities/source/recommended_sources/translations';
+} from '../../components/entities/source/recommended_sources/recommended_sources_table';
+import { ADD_RECOMMENDED_SOURCES_TITLE } from '../../components/entities/source/recommended_sources/translations';
 
 const SourceFlyout = React.lazy(() =>
-  import('../components/entities/source/source_flyout/source_flyout').then(
+  import('../../components/entities/source/source_flyout/source_flyout').then(
     ({ SourceFlyout: Flyout }) => ({ default: Flyout })
   )
 );

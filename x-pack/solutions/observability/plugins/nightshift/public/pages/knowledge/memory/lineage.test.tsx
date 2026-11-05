@@ -11,12 +11,12 @@ import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { MemoryMergedFromRow } from './lineage';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import type { MemoryPage } from './types';
 
 // Mock the module and drive it from the test body. Closing over a `const` inside
 // the factory would throw, because `jest.mock` is hoisted above the imports.
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const fetchMock = jest.fn();

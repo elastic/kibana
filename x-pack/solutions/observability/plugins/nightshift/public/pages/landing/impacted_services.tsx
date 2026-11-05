@@ -23,8 +23,8 @@ import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
-import { nightshiftInteractiveSurfaceTransition } from '../common/transition';
+} from '../../common/ebt_constants';
+import { nightshiftInteractiveSurfaceTransition } from '../../common/transition';
 import type { ImpactedServiceChip } from './impacted_services_chips';
 
 export const MAX_VISIBLE_IMPACTED_SERVICES = 10;

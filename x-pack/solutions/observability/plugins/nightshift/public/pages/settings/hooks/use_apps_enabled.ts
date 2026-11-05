@@ -8,7 +8,7 @@
 import { useMemo } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export const useAppsEnabled = (): boolean | undefined => {
   const { featureFlags } = useKibana().services;

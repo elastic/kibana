@@ -10,17 +10,17 @@ import { fireEvent, render, screen } from '@testing-library/react';
 import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 import { KIsOnboardingStep } from '@kbn/significant-events-schema';
-import { useKibana } from '../../hooks/use_kibana';
-import { ContextMenuSplitButton } from '../../components/ui/context_menu_split_button';
-import type { ContextMenuSplitButtonProps } from '../../components/ui/context_menu_split_button';
+import { useKibana } from '../../../hooks/use_kibana';
+import { ContextMenuSplitButton } from '../../../components/ui/context_menu_split_button';
+import type { ContextMenuSplitButtonProps } from '../../../components/ui/context_menu_split_button';
 import { GenerateSplitButton } from './generate_split_button';
 import type { OnboardingConfig } from './types';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 jest.mock('@kbn/cps-utils', () => ({
   useIsCpsMultiProject: () => false,
 }));
-jest.mock('../../components/ui/context_menu_split_button', () => ({
+jest.mock('../../../components/ui/context_menu_split_button', () => ({
   ContextMenuSplitButton: jest.fn(),
 }));
 

@@ -9,8 +9,8 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import { GEN_AI_SETTINGS_TOKEN_USAGE_TRACKING } from '@kbn/management-settings-ids';
-import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../../common/errors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../common/errors';
 
 const INSTALL_TOKEN_USAGE_DASHBOARD_URL = '/internal/gen_ai_settings/install_token_usage_dashboard';
 

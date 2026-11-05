@@ -15,14 +15,14 @@ import {
 } from '@kbn/significant-events-schema';
 import { OBSERVABILITY_STREAMS_SIGNIFICANT_EVENTS_TUNING_CONFIG } from '@kbn/management-settings-ids';
 import { useCallback, useMemo } from 'react';
-import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../../../data/query_keys';
-import { useKibana } from '../../../hooks/use_kibana';
-import { useQueriesApi, type PromoteResult } from '../../../data/rules/use_queries_api';
+import { DISCOVERY_QUERIES_QUERY_KEY, FEATURES_QUERY_KEY } from '../../../../data/query_keys';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { useQueriesApi, type PromoteResult } from '../../../../data/rules/use_queries_api';
 import {
   type BulkOperationResult,
   useDiscoveryFeaturesApi,
-} from '../../../data/knowledge_indicators/use_discovery_features_api';
-import { BULK_WRITE_CONFLICT_MESSAGE, getFormattedError } from '../../../common/errors';
+} from '../../../../data/knowledge_indicators/use_discovery_features_api';
+import { BULK_WRITE_CONFLICT_MESSAGE, getFormattedError } from '../../../../common/errors';
 import { PROMOTE_QUERY_ALREADY_PROMOTED } from '../translations';
 import { getPromoteSkipReason } from '../utils/promote_skip_reason';
 

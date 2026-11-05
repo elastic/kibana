@@ -34,7 +34,7 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
-import { useChartThemes } from '../../hooks/use_chart_themes';
+import { useChartThemes } from '../../../hooks/use_chart_themes';
 
 export type RunStatus = 'succeeded' | 'running' | 'failed' | 'skipped';
 export interface Run {

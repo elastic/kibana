@@ -11,7 +11,7 @@ import { GEN_AI_SETTINGS_DEFAULT_AI_CONNECTOR_DEFAULT_ONLY } from '@kbn/manageme
 import { useIsCpsMultiProject } from '@kbn/cps-utils';
 import React, { useCallback, useMemo } from 'react';
 import type { ReactNode } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   CONNECTOR_LOAD_ERROR,
   CROSS_PROJECT_GENERATION_DISCLOSURE,
@@ -24,11 +24,11 @@ import {
 } from './translations';
 import { buildConnectorMenuItem, buildConnectorSelectionPanel } from './context_menu_helpers';
 import type { OnboardingConfig } from './types';
-import { ContextMenuSplitButton } from '../../components/ui/context_menu_split_button';
+import { ContextMenuSplitButton } from '../../../components/ui/context_menu_split_button';
 import type {
   ContextMenuSplitButtonProps,
   MenuHelpers,
-} from '../../components/ui/context_menu_split_button';
+} from '../../../components/ui/context_menu_split_button';
 
 interface GenerateSplitButtonProps {
   config: OnboardingConfig;

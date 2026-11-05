@@ -8,8 +8,8 @@
 import { useMutation, useQuery, useQueryClient } from '@kbn/react-query';
 import { i18n } from '@kbn/i18n';
 import type { GetOnboardingResponse } from '@kbn/nightshift-investigations-plugin/common';
-import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../data/query_keys';
-import { useKibana } from '../hooks/use_kibana';
+import { NIGHTSHIFT_ONBOARDING_QUERY_KEY } from '../../../data/query_keys';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const POLL_INTERVAL_MS = 3_000;
 

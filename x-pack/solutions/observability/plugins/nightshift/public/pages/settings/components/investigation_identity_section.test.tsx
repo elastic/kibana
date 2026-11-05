@@ -9,9 +9,9 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { InvestigationIdentitySection } from './investigation_identity_section';
-import { useDeveloperMode } from '../../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../../hooks/use_developer_mode';
 
-jest.mock('../../hooks/use_developer_mode');
+jest.mock('../../../hooks/use_developer_mode');
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
 
 let mockStatus: {
@@ -21,8 +21,8 @@ let mockStatus: {
   refetch?: () => void;
 };
 
-jest.mock('../../data/service_accounts/use_investigator_service_account', () => ({
-  ...jest.requireActual('../../data/service_accounts/use_investigator_service_account'),
+jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
+  ...jest.requireActual('../../../data/service_accounts/use_investigator_service_account'),
   useInvestigatorServiceAccount: () => mockStatus,
 }));
 

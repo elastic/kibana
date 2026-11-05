@@ -9,11 +9,11 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { RunQuotasResponse } from '@kbn/significant-events-plugin/common';
-import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
+import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
 import { KnowledgeIndicatorsTab } from './tab';
 
-jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
-jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+jest.mock('../../../data/run_quotas/use_significant_events_run_quotas');
+jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useBlocksNewActivity: () => ({ isBlocked: false }),
 }));
 jest.mock('./knowledge_indicators_table', () => ({

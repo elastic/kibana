@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import type { TimeRange } from '../hooks/use_automation_usage';
 import { listLabels } from './translations';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 
 const PRESETS: NonNullable<DateRangePickerProps['presets']> = [
   {

@@ -8,10 +8,10 @@
 import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import type { AggregatedFeature, Feature } from '@kbn/significant-events-schema';
-import { useDeveloperMode } from '../../../../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../../../../hooks/use_developer_mode';
 import { KnowledgeIndicatorFeatureDetailsContent } from './knowledge_indicator_feature_details_content';
 
-jest.mock('../../../../hooks/use_developer_mode');
+jest.mock('../../../../../hooks/use_developer_mode');
 
 const mockUseDeveloperMode = useDeveloperMode as jest.MockedFunction<typeof useDeveloperMode>;
 

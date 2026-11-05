@@ -13,8 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { isRunQuotaReached, type RunQuotaGroup } from '@kbn/significant-events-plugin/common';
 import { KbnWarningCallout } from '@kbn/ui-callout';
 import { NIGHTSHIFT_ENABLED_FLAG } from '@kbn/nightshift-shared';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { useKibana } from '../../hooks/use_kibana';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export const RunQuotaExhaustionCallout = ({
   enabled,

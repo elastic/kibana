@@ -21,8 +21,8 @@ import type { SerializedStyles } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { NIGHTSHIFT_APP_ID } from '@kbn/deeplinks-observability';
-import { getNightshiftInvestigationPath } from '../../common/url_params';
-import { useKibana } from '../../hooks/use_kibana';
+import { getNightshiftInvestigationPath } from '../../../common/url_params';
+import { useKibana } from '../../../hooks/use_kibana';
 import { SectionHeader } from '../flyouts/form/section_header';
 import { RunStatusIndicator, type Run } from './run_history';
 

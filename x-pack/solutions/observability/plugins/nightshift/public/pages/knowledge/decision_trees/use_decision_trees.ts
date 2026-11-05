@@ -7,7 +7,7 @@
 
 import { buildPath } from '@kbn/core-http-browser';
 import { useQuery } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import type {
   GetDecisionTreeResponse,
   GetDecisionTreeVersionResponse,

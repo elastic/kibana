@@ -8,7 +8,7 @@
 import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   MEMORY_KEYWORD_MAX_REQUESTS,
   MEMORY_KEYWORD_SIZE,
@@ -21,7 +21,7 @@ import {
 } from './use_memory';
 import type { MemoryListResult } from './types';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 
 const fetchMock = jest.fn();

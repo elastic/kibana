@@ -11,13 +11,13 @@ import type { AppHeaderBack, AppHeaderTab } from '@kbn/app-header';
 import { createMemoryHistory } from 'history';
 import { I18nProvider } from '@kbn/i18n-react';
 import { Route, Router } from '@kbn/shared-ux-router';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { useAppsEnabled } from './hooks/use_apps_enabled';
 import { SettingsPage } from './page';
 
-jest.mock('../hooks/use_kibana');
+jest.mock('../../hooks/use_kibana');
 jest.mock('./hooks/use_apps_enabled');
-jest.mock('../components/app_header', () => ({
+jest.mock('../../components/app_header', () => ({
   NightshiftAppHeader: ({ back, tabs }: { back: AppHeaderBack; tabs: AppHeaderTab[] }) => (
     <div>
       <a href={back.href} data-test-subj="nightshiftSettingsBackLink">

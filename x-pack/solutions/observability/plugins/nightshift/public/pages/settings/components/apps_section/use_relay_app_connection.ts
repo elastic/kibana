@@ -17,9 +17,9 @@ import {
   type SlackAppStatusResponse,
   type SlackAppWorkspace,
 } from '@kbn/significant-events-plugin/common';
-import { useKibana } from '../../../hooks/use_kibana';
-import { getFormattedError } from '../../../common/errors';
-import { RELAY_APP_BINDINGS_QUERY_KEY } from '../../../data/relay_apps/use_relay_app_bindings';
+import { useKibana } from '../../../../hooks/use_kibana';
+import { getFormattedError } from '../../../../common/errors';
+import { RELAY_APP_BINDINGS_QUERY_KEY } from '../../../../data/relay_apps/use_relay_app_bindings';
 
 const STATUS_ROUTE = '/internal/significant_events/apps/slack/status';
 const CONNECT_ROUTE = '/internal/significant_events/apps/slack/connect';

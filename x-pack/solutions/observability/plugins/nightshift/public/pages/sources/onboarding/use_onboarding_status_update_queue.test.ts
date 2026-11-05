@@ -14,7 +14,7 @@ import { useOnboardingStatusUpdateQueue } from './use_onboarding_status_update_q
 
 const mockGetOnboardingStatuses = jest.fn();
 
-jest.mock('../../data/sources/use_onboarding_api', () => ({
+jest.mock('../../../data/sources/use_onboarding_api', () => ({
   useOnboardingApi: () => ({ getOnboardingStatuses: mockGetOnboardingStatuses }),
 }));
 

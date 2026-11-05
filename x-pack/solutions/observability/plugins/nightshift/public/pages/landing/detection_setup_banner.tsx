@@ -22,7 +22,7 @@ import { monitorGraphCogs } from '@elastic/eui-illustrations';
 import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
 
 const DISMISS_LABEL = i18n.translate('xpack.nightshift.detectionSetupBanner.dismissButtonLabel', {
   defaultMessage: 'Dismiss',

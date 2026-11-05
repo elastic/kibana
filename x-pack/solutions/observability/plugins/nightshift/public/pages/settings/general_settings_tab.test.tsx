@@ -9,9 +9,9 @@ import React from 'react';
 import { fireEvent, render, screen } from '@testing-library/react';
 import { coreMock } from '@kbn/core/public/mocks';
 import { NIGHTSHIFT_UI_PRIVILEGES } from '@kbn/nightshift-shared';
-import type { useKibana } from '../hooks/use_kibana';
+import type { useKibana } from '../../hooks/use_kibana';
 import { GeneralSettingsTab } from './general_settings_tab';
-import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useDeveloperMode } from '../../hooks/use_developer_mode';
 
 const baseCapabilities = coreMock.createStart().application.capabilities;
 let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'], 'capabilities'> =
@@ -19,10 +19,10 @@ let mockApplication: Pick<ReturnType<typeof useKibana>['services']['application'
     capabilities: baseCapabilities,
   };
 
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../hooks/use_kibana', () => ({
   useKibana: () => ({ services: { application: mockApplication } }),
 }));
-jest.mock('../hooks/use_developer_mode');
+jest.mock('../../hooks/use_developer_mode');
 jest.mock('./components/connectors_section', () => ({
   ConnectorsSection: () => <div data-test-subj="connectorsSectionStub" />,
 }));

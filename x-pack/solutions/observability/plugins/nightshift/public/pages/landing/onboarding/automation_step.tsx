@@ -23,12 +23,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
-import { NIGHTSHIFT_EBT_ELEMENTS } from '../common/ebt_constants';
-import { InvestigationCardActions } from '../components/entities/investigation/investigation_card_actions';
-import { useInvestigationAssignees } from '../components/entities/investigation/use_investigation_assignees';
-import { useAgentConnectors } from '../data/sandbox_connectors/use_agent_connectors';
-import { useFetchSandboxConnectors } from '../data/sandbox_connectors/use_fetch_sandbox_connectors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { InvestigationCardActions } from '../../../components/entities/investigation/investigation_card_actions';
+import { useInvestigationAssignees } from '../../../components/entities/investigation/use_investigation_assignees';
+import { useAgentConnectors } from '../../../data/sandbox_connectors/use_agent_connectors';
+import { useFetchSandboxConnectors } from '../../../data/sandbox_connectors/use_fetch_sandbox_connectors';
 
 interface SuggestedAutomation {
   id: string;

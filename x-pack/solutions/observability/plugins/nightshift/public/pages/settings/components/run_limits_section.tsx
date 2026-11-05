@@ -21,7 +21,7 @@ import { KbnDangerCallout, KbnInfoCallout } from '@kbn/ui-callout';
 import {
   isDetectionRunQuotaGroup,
   RunQuotaReachedCallout,
-} from '../../components/ui/run_quota_reached_callout';
+} from '../../../components/ui/run_quota_reached_callout';
 import { isFiniteRunLimit, RUN_QUOTA_GROUPS } from './run_limit_draft';
 import { RunLimitRow, RUN_QUOTA_GROUP_LABELS } from './run_limit_row';
 import { RunQuotaExhaustionCallout } from './run_quota_exhaustion_callout';

@@ -26,7 +26,7 @@ import { KbnWarningCallout } from '@kbn/ui-callout';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import { upperFirst } from 'lodash';
 import React, { useMemo } from 'react';
-import { SeverityBadge } from '../../../../components/ui/severity_badge';
+import { SeverityBadge } from '../../../../../components/ui/severity_badge';
 import { getKnowledgeIndicatorTitle } from '../../utils/get_knowledge_indicator_title';
 
 interface DeleteTableItemsModalProps {

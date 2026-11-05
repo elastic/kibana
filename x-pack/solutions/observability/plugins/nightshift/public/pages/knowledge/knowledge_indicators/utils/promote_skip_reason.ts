@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PromoteResult } from '../../../data/rules/use_queries_api';
+import type { PromoteResult } from '../../../../data/rules/use_queries_api';
 import { NOT_FILTER_ONLY_PROMOTE_DISABLED, STATS_PROMOTE_DISABLED_TOOLTIP } from '../translations';
 
 /**

@@ -10,13 +10,13 @@ import type {
   InvestigationSummary,
   ListInvestigationsResponse,
 } from '@kbn/agentic-investigations-plugin/common';
-import { isHttpClientError } from '../common/http_error';
+import { isHttpClientError } from '../../../common/http_error';
 import {
   SHARED_INVESTIGATIONS_API_VERSION,
   SHARED_INVESTIGATIONS_URL,
-} from '../data/investigations/shared_investigations_api';
-import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../data/investigations/use_fetch_investigations';
-import { useKibana } from '../hooks/use_kibana';
+} from '../../../data/investigations/shared_investigations_api';
+import { NIGHTSHIFT_INVESTIGATIONS_QUERY_KEY } from '../../../data/investigations/use_fetch_investigations';
+import { useKibana } from '../../../hooks/use_kibana';
 
 export interface FetchLatestInvestigationResult {
   latestInvestigation?: InvestigationSummary;

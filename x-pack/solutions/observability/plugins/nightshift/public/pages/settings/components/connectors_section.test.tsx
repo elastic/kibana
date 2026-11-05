@@ -13,9 +13,9 @@ import {
   mockKibanaServices,
   renderWithProviders,
   sandboxConnector,
-} from '../../data/sandbox_connectors/test_utils';
+} from '../../../data/sandbox_connectors/test_utils';
 
-jest.mock('../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
 
 const setup = (options: Parameters<typeof mockKibanaServices>[0] = {}) => {
   const services = mockKibanaServices({

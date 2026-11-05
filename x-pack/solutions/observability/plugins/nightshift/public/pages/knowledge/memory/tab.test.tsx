@@ -25,7 +25,7 @@ jest.mock('./use_memory');
 jest.mock('./lineage', () => ({
   MemoryMergedFromRow: () => null,
 }));
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: { capabilities: { nightshift: {} } },

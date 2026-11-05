@@ -8,14 +8,14 @@
 import React from 'react';
 import { renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   useDecisionTree,
   useDecisionTreeVersion,
   useDecisionTreeVersions,
 } from './use_decision_trees';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 
 const mockUseKibana = useKibana as jest.MockedFunction<typeof useKibana>;
 const httpGetMock = jest.fn();

@@ -36,9 +36,9 @@ import {
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { useHistory, useLocation } from 'react-router-dom';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { NIGHTSHIFT_APP_ROUTE } from '../../../common/constants';
-import { useKibana } from '../../hooks/use_kibana';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_APP_ROUTE } from '../../../../common/constants';
+import { useKibana } from '../../../hooks/use_kibana';
 import { AutomationFormBody } from '../flyouts/form/automation_form_body';
 import {
   toAutomationFormValues,
@@ -58,7 +58,7 @@ import {
   useToggleAutomation,
   useUpdateAutomation,
   type Automation,
-} from '../../data/automations/use_automations';
+} from '../../../data/automations/use_automations';
 import { getDailyUsageTone } from '../utils/daily_usage';
 import { statusLabels } from '../utils/filter_automations';
 import type { RunRange } from '../hooks/use_automation_usage';

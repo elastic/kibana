@@ -21,8 +21,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from '../../data/service_accounts/use_investigator_service_account';
-import { useDeveloperMode } from '../../hooks/use_developer_mode';
+} from '../../../data/service_accounts/use_investigator_service_account';
+import { useDeveloperMode } from '../../../hooks/use_developer_mode';
 import { SettingsSectionRow } from './settings_section';
 
 /** Shows whether this space is set up with the Nightshift service account, read-only. */

@@ -11,7 +11,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 import type {
   useMaintenanceStatus,
   useSignificantEventsMaintenanceActions,
-} from '../../data/maintenance/use_significant_events_maintenance';
+} from '../../../data/maintenance/use_significant_events_maintenance';
 import { MaintenanceSection } from './maintenance_section';
 
 const pause = jest.fn();
@@ -26,7 +26,7 @@ let mockMaintenanceActions: Pick<
   'pause' | 'resume' | 'isPausing' | 'isMutating'
 >;
 
-jest.mock('../../data/maintenance/use_significant_events_maintenance', () => ({
+jest.mock('../../../data/maintenance/use_significant_events_maintenance', () => ({
   useMaintenanceStatus: () => mockMaintenanceStatus,
   useSignificantEventsMaintenanceActions: () => mockMaintenanceActions,
 }));

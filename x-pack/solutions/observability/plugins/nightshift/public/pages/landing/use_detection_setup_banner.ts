@@ -8,9 +8,9 @@
 import { useCallback } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
-import { useFetchSources } from '../data/sources/use_fetch_sources';
-import { useKibana } from '../hooks/use_kibana';
+import { useSignificantEventsAvailability } from '../../data/availability/use_significant_events_availability';
+import { useFetchSources } from '../../data/sources/use_fetch_sources';
+import { useKibana } from '../../hooks/use_kibana';
 
 const getDismissedStorageKey = (basePath: string): string =>
   `nightshift.detectionSetupBanner.dismissed:${basePath || 'default'}`;

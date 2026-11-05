@@ -10,11 +10,11 @@ import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { GetCustomContextResponse } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { CustomContextFlyout } from './custom_context_flyout';
 
-jest.mock('../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
-jest.mock('../hooks/use_format_timestamp', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({ useKibana: jest.fn() }));
+jest.mock('../../../hooks/use_format_timestamp', () => ({
   useFormatTimestamp: () => (timestamp: string) => timestamp,
 }));
 

@@ -6,8 +6,8 @@
  */
 
 import { useQuery } from '@kbn/react-query';
-import { useDeveloperMode } from '../../hooks/use_developer_mode';
-import { useKibana } from '../../hooks/use_kibana';
+import { useDeveloperMode } from '../../../hooks/use_developer_mode';
+import { useKibana } from '../../../hooks/use_kibana';
 import { toFeatureAvailability, type FeatureAvailability } from '../feature_availability';
 import type { KnowledgeTabsAvailability } from '../knowledge_tabs';
 

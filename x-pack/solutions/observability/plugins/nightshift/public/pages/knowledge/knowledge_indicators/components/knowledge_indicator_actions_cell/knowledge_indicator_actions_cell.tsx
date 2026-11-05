@@ -25,7 +25,7 @@ import {
   PROMOTE_LABEL,
 } from '../../hooks/use_knowledge_indicator_actions';
 import { durabilityMenuItem } from '../durability_menu_item';
-import { useBlocksNewActivity } from '../../../../data/maintenance/use_significant_events_maintenance';
+import { useBlocksNewActivity } from '../../../../../data/maintenance/use_significant_events_maintenance';
 import { STATS_PROMOTE_DISABLED_TOOLTIP } from '../../translations';
 
 interface Props {

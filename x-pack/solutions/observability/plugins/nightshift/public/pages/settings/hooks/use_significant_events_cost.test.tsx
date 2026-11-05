@@ -9,15 +9,15 @@ import React from 'react';
 import { act, renderHook, waitFor } from '@testing-library/react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import type { CostResponse, RunQuotasResponse } from '@kbn/significant-events-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
-import { useRunQuotas } from '../../data/run_quotas/use_significant_events_run_quotas';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useRunQuotas } from '../../../data/run_quotas/use_significant_events_run_quotas';
 import { NIGHTSHIFT_COST_QUERY_KEY, useSignificantEventsCost } from './use_significant_events_cost';
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: jest.fn(),
 }));
 
-jest.mock('../../data/run_quotas/use_significant_events_run_quotas', () => ({
+jest.mock('../../../data/run_quotas/use_significant_events_run_quotas', () => ({
   useRunQuotas: jest.fn(),
 }));
 

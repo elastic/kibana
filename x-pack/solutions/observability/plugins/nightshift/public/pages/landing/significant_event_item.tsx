@@ -20,18 +20,18 @@ import { i18n } from '@kbn/i18n';
 import { FormattedRelative } from '@kbn/i18n-react';
 import { AiButtonIcon } from '@kbn/shared-ux-ai-components';
 import type { InvestigationRunStatus, SignificantEvent } from '@kbn/significant-events-schema';
-import { InvestigationStatusBadge } from '../components/entities/investigation/investigation_status_badge';
-import { toInvestigationStatus } from '../common/investigation_progress_status';
+import { InvestigationStatusBadge } from '../../components/entities/investigation/investigation_status_badge';
+import { toInvestigationStatus } from '../../common/investigation_progress_status';
 import {
   getStatusColor,
   isNeedsActionStatus,
-} from '../components/entities/significant_event/significant_event_status';
+} from '../../components/entities/significant_event/significant_event_status';
 import {
   NIGHTSHIFT_EBT_ACTIONS,
   NIGHTSHIFT_EBT_DETAILS,
   NIGHTSHIFT_EBT_ELEMENTS,
-} from '../common/ebt_constants';
-import { nightshiftBackgroundTransition } from '../common/transition';
+} from '../../common/ebt_constants';
+import { nightshiftBackgroundTransition } from '../../common/transition';
 
 export interface SignificantEventItemProps {
   event: SignificantEvent;

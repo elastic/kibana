@@ -9,13 +9,13 @@ import React, { useCallback } from 'react';
 import type { ReactNode } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../hooks/use_kibana';
 import { CANCEL_DISCOVERY_LABEL, FIND_SIGNIFICANT_EVENTS_LABEL } from './translations';
-import { ContextMenuSplitButton } from '../components/ui/context_menu_split_button';
+import { ContextMenuSplitButton } from '../../components/ui/context_menu_split_button';
 import type {
   MenuHelpers,
   ContextMenuSplitButtonProps,
-} from '../components/ui/context_menu_split_button';
+} from '../../components/ui/context_menu_split_button';
 
 const SECONDARY_ARIA_LABEL = i18n.translate(
   'xpack.nightshift.findSignificantEventsSecondaryAriaLabel',

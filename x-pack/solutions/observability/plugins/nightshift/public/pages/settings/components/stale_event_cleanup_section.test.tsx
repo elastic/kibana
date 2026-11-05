@@ -9,10 +9,10 @@ import React from 'react';
 import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import { QueryClient, QueryClientProvider } from '@kbn/react-query';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import { StaleEventCleanupSection } from './stale_event_cleanup_section';
 
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../hooks/use_kibana');
 
 const useKibanaMock = useKibana as jest.MockedFunction<typeof useKibana>;
 const fetch = jest.fn();

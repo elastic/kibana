@@ -13,16 +13,16 @@ import { getEbtProps } from '@kbn/ebt-click';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SlackChannelBinding } from '@kbn/significant-events-plugin/common';
-import { PrivateChannelIcon } from '../../../components/ui/channel_label';
-import { parseSlackChannelInput } from '../../../common/parse_slack_channel_input';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
-import { useKibana } from '../../../hooks/use_kibana';
+import { PrivateChannelIcon } from '../../../../components/ui/channel_label';
+import { parseSlackChannelInput } from '../../../../common/parse_slack_channel_input';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
+import { useKibana } from '../../../../hooks/use_kibana';
 import {
   formatChannelLabel,
   formatChannelValue,
   useAllRelayAppBindings,
   type UseAllRelayAppBindings,
-} from '../../../data/relay_apps/use_relay_app_bindings';
+} from '../../../../data/relay_apps/use_relay_app_bindings';
 
 /** Selected values that are not connected channels; none unless the full connected list loaded. */
 export const findUnconnectedChannels = (

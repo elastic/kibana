@@ -12,8 +12,8 @@ import {
   type KnowledgePurgePreview,
   type KnowledgePurgeResult,
 } from '@kbn/nightshift-investigations-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
-import { getFormattedError } from '../../common/errors';
+import { useKibana } from '../../../hooks/use_kibana';
+import { getFormattedError } from '../../../common/errors';
 
 const purgeKeys = {
   preview: (since: string) => ['nightshift', 'knowledge', 'purge', 'preview', since] as const,

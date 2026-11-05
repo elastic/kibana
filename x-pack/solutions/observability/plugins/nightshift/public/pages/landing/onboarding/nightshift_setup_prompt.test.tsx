@@ -12,12 +12,12 @@ import { NightshiftSetupPrompt } from './nightshift_setup_prompt';
 
 const mockMutate = jest.fn();
 
-jest.mock('../data/service_accounts/use_investigator_service_account', () => ({
+jest.mock('../../../data/service_accounts/use_investigator_service_account', () => ({
   useSetUpNightshiftServiceAccount: () => ({ mutate: mockMutate, isLoading: false }),
 }));
 
 let canManage = true;
-jest.mock('../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {

@@ -8,7 +8,7 @@
 import { getEbtProps } from '@kbn/ebt-click';
 import React from 'react';
 import { EuiLink, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../../common/ebt_constants';
 
 export const RunCountCell = ({
   count,

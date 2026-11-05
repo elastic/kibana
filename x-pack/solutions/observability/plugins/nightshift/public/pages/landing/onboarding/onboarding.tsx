@@ -19,16 +19,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
-import { NightshiftHeader } from '../app/header';
-import { useFlyoutShareUrlCustomAction } from '../components/ui/flyout_share_url_button';
+import { NightshiftHeader } from '../header';
+import { useFlyoutShareUrlCustomAction } from '../../../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
   getNightshiftInvestigationIdFromSearch,
   setNightshiftInvestigationIdParam,
-} from '../common/url_params';
-import { useKibana } from '../hooks/use_kibana';
-import { useCurrentUserName } from '../hooks/use_current_user_name';
+} from '../../../common/url_params';
+import { useKibana } from '../../../hooks/use_kibana';
+import { useCurrentUserName } from '../../../hooks/use_current_user_name';
 import { OnboardingIntroBanner } from './intro_banner';
 import {
   OnboardingStepsCard,
@@ -39,7 +39,7 @@ import { NightshiftSetupPrompt } from './nightshift_setup_prompt';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from '../data/service_accounts/use_investigator_service_account';
+} from '../../../data/service_accounts/use_investigator_service_account';
 import {
   CONNECT_SUB_STEP_TITLES,
   OnboardingConnectStep,

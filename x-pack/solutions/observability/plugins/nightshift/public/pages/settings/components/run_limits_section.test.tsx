@@ -13,17 +13,17 @@ import type {
   RunQuotaSettingsUpdate,
   RunQuotasResponse,
 } from '@kbn/significant-events-plugin/common';
-import { useKibana } from '../../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import {
   useRunQuotas,
   useUpdateRunQuotas,
-} from '../../data/run_quotas/use_significant_events_run_quotas';
+} from '../../../data/run_quotas/use_significant_events_run_quotas';
 import { RunLimitsSection } from './run_limits_section';
 import { SettingsSaveBar } from './settings_save_bar';
 import { useRunLimitsForm } from './use_run_limits_form';
 
-jest.mock('../../data/run_quotas/use_significant_events_run_quotas');
-jest.mock('../../hooks/use_kibana');
+jest.mock('../../../data/run_quotas/use_significant_events_run_quotas');
+jest.mock('../../../hooks/use_kibana');
 
 const navigateToUrl = jest.fn();
 let automationsAvailable = true;

@@ -23,24 +23,24 @@ import { useDebouncedValue } from '@kbn/react-hooks';
 import type { Severity } from '@kbn/nightshift-investigations-plugin/common';
 import type { InvestigationSummary } from '@kbn/agentic-investigations-plugin/common';
 import { SEVERITY_OPTIONS } from '@kbn/significant-events-schema';
-import { useKibana } from '../hooks/use_kibana';
-import { isHttpNotFoundError } from '../common/http_error';
+import { useKibana } from '../../hooks/use_kibana';
+import { isHttpNotFoundError } from '../../common/http_error';
 import {
   INVESTIGATION_VIEW_SOURCES,
   reportNightshiftHomepageViewed,
   reportNightshiftInvestigationsSearched,
   reportNightshiftInvestigationViewed,
   type InvestigationViewSource,
-} from '../common/ebt_events';
-import { RETRY_BUTTON_LABEL } from '../common/messages';
-import { useInvestigationSections } from '../data/investigations/use_investigation_sections';
+} from '../../common/ebt_events';
+import { RETRY_BUTTON_LABEL } from '../../common/messages';
+import { useInvestigationSections } from '../../data/investigations/use_investigation_sections';
 import {
   InvestigationList,
   type InvestigationListHandle,
-} from '../components/entities/investigation/investigation_list';
-import { isInvestigationSectionVisible } from '../components/entities/investigation/investigation_section';
-import { InvestigationSeverityTiles } from '../components/entities/investigation/investigation_severity_tiles';
-import { useFlyoutShareUrlCustomAction } from '../components/ui/flyout_share_url_button';
+} from '../../components/entities/investigation/investigation_list';
+import { isInvestigationSectionVisible } from '../../components/entities/investigation/investigation_section';
+import { InvestigationSeverityTiles } from '../../components/entities/investigation/investigation_severity_tiles';
+import { useFlyoutShareUrlCustomAction } from '../../components/ui/flyout_share_url_button';
 import {
   buildNightshiftInvestigationFlyoutShareUrl,
   clearNightshiftInvestigationIdParam,
@@ -50,7 +50,7 @@ import {
   setNightshiftInvestigationIdParam,
   setNightshiftSearchQueryParam,
   setNightshiftSeverityParam,
-} from '../common/url_params';
+} from '../../common/url_params';
 import { DetectionSetupBanner } from './detection_setup_banner';
 import { NightshiftHeader } from './header';
 import { useDetectionSetupBanner } from './use_detection_setup_banner';

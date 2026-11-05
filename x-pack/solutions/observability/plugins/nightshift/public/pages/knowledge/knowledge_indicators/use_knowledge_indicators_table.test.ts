@@ -9,8 +9,8 @@ import { renderHook, act, waitFor } from '@testing-library/react';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import type { AggregatedFeature, Feature } from '@kbn/significant-events-schema';
-import { BULK_WRITE_CONFLICT_MESSAGE } from '../../common/errors';
-import type { PromoteResult } from '../../data/rules/use_queries_api';
+import { BULK_WRITE_CONFLICT_MESSAGE } from '../../../common/errors';
+import type { PromoteResult } from '../../../data/rules/use_queries_api';
 import { BULK_EXCLUDE_PARTIAL_TOAST_TITLE } from './translations';
 import type { KnowledgeIndicatorsQuery } from './use_knowledge_indicators_query_params';
 import {
@@ -29,7 +29,7 @@ const mockToasts = {
 
 let mockQuery: KnowledgeIndicatorsQuery = {};
 
-jest.mock('../../hooks/use_kibana', () => ({
+jest.mock('../../../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: { notifications: { toasts: mockToasts } },
   }),
@@ -47,7 +47,7 @@ let mockKnowledgeIndicators: KnowledgeIndicator[] = [];
 let mockIsLoading = false;
 const mockRefetch = jest.fn();
 
-jest.mock('../../data/knowledge_indicators/use_fetch_knowledge_indicators', () => ({
+jest.mock('../../../data/knowledge_indicators/use_fetch_knowledge_indicators', () => ({
   useFetchKnowledgeIndicators: () => ({
     knowledgeIndicators: mockKnowledgeIndicators,
     occurrencesByQueryId: {},
@@ -60,7 +60,7 @@ jest.mock('../../data/knowledge_indicators/use_fetch_knowledge_indicators', () =
 const mockExcludeFeaturesInBulk = jest.fn();
 const mockRestoreFeaturesInBulk = jest.fn();
 
-jest.mock('../../data/knowledge_indicators/use_discovery_features_api', () => ({
+jest.mock('../../../data/knowledge_indicators/use_discovery_features_api', () => ({
   useDiscoveryFeaturesApi: () => ({
     excludeFeaturesInBulk: mockExcludeFeaturesInBulk,
     restoreFeaturesInBulk: mockRestoreFeaturesInBulk,
@@ -69,7 +69,7 @@ jest.mock('../../data/knowledge_indicators/use_discovery_features_api', () => ({
 
 const mockPromote = jest.fn();
 
-jest.mock('../../data/rules/use_queries_api', () => ({
+jest.mock('../../../data/rules/use_queries_api', () => ({
   useQueriesApi: () => ({
     promote: mockPromote,
   }),
@@ -77,14 +77,14 @@ jest.mock('../../data/rules/use_queries_api', () => ({
 
 const mockInvalidatePromoteRelatedQueries = jest.fn().mockResolvedValue(undefined);
 
-jest.mock('../../data/knowledge_indicators/use_invalidate_promote_queries', () => ({
+jest.mock('../../../data/knowledge_indicators/use_invalidate_promote_queries', () => ({
   useInvalidatePromoteRelatedQueries: () => mockInvalidatePromoteRelatedQueries,
 }));
 
 const mockDeleteKnowledgeIndicatorsInBulk = jest.fn();
 let mockIsDeleting = false;
 
-jest.mock('../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete', () => ({
+jest.mock('../../../data/knowledge_indicators/use_knowledge_indicators_bulk_delete', () => ({
   useKnowledgeIndicatorsBulkDelete: ({ onSuccess }: { onSuccess?: () => void }) => {
     mockBulkDeleteOnSuccess = onSuccess;
     return {

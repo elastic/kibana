@@ -10,7 +10,7 @@ import type { KnowledgeIndicator } from '@kbn/nightshift-ai';
 import React, { useMemo } from 'react';
 import { KnowledgeIndicatorSelectableFilter } from '../knowledge_indicator_selectable_filter';
 import { getKnowledgeIndicatorSourceIds } from '../../utils/get_knowledge_indicator_source_id';
-import { useSourcesById } from '../../../../data/sources/use_sources_by_id';
+import { useSourcesById } from '../../../../../data/sources/use_sources_by_id';
 
 interface StreamFilterProps {
   knowledgeIndicators: KnowledgeIndicator[];

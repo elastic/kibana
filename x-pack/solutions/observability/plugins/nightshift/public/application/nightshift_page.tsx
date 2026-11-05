@@ -19,30 +19,30 @@ import {
   NIGHTSHIFT_ENABLED_FLAG,
   SETTINGS_TAB_IDS,
 } from '@kbn/nightshift-shared';
-import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
-import { NightshiftApp } from './app/app';
+import { NIGHTSHIFT_APP_ROUTE } from '../../common/constants';
+import { NightshiftApp } from '../pages/landing/app';
 import {
   DETECTION_PAGE_TITLE,
   KNOWLEDGE_PAGE_TITLE,
   NightshiftAppHeader,
   SETTINGS_PAGE_TITLE,
   SOURCES_PAGE_TITLE,
-} from './components/app_header';
-import { AutomationsPage } from './automations/automations_page';
-import { useKibana } from './hooks/use_kibana';
-import { useDeveloperMode } from './hooks/use_developer_mode';
-import { useSignificantEventsAvailability } from './data/availability/use_significant_events_availability';
-import { CustomContextFlyout } from './custom_context/custom_context_flyout';
-import { StartInvestigationPanel } from './components/start_investigation_panel';
-import { NightshiftOnboarding } from './onboarding/onboarding';
-import { useOnboardingVisibility } from './onboarding/use_onboarding_visibility';
-import { SettingsPage } from './settings/page';
+} from '../components/app_header';
+import { AutomationsPage } from '../pages/automations/automations_page';
+import { useKibana } from '../hooks/use_kibana';
+import { useDeveloperMode } from '../hooks/use_developer_mode';
+import { useSignificantEventsAvailability } from '../data/availability/use_significant_events_availability';
+import { CustomContextFlyout } from '../components/global_flyouts/custom_context/custom_context_flyout';
+import { StartInvestigationPanel } from '../components/start_investigation_panel';
+import { NightshiftOnboarding } from '../pages/landing/onboarding/onboarding';
+import { useOnboardingVisibility } from '../pages/landing/onboarding/use_onboarding_visibility';
+import { SettingsPage } from '../pages/settings/page';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from './data/service_accounts/use_investigator_service_account';
-import { DETECTION_TAB_IDS, isDetectionTabId } from './pages/detection/detection_tabs';
-import { KNOWLEDGE_TAB_IDS } from './knowledge/knowledge_tabs';
+} from '../data/service_accounts/use_investigator_service_account';
+import { DETECTION_TAB_IDS, isDetectionTabId } from '../pages/detection/detection_tabs';
+import { KNOWLEDGE_TAB_IDS } from '../pages/knowledge/knowledge_tabs';
 
 /** Onboarding has a second column for the "Get started" card. */
 const ONBOARDING_MAX_WIDTH = '1040px';
@@ -73,15 +73,15 @@ const getExecutionContextPage = (pathname: string, canUseAutomationsPage: boolea
 };
 
 const KnowledgePage = React.lazy(() =>
-  import('./knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
+  import('../pages/knowledge/page').then(({ KnowledgePage: Page }) => ({ default: Page }))
 );
 
 const SourcesPage = React.lazy(() =>
-  import('./sources/page').then(({ SourcesPage: Page }) => ({ default: Page }))
+  import('../pages/sources/page').then(({ SourcesPage: Page }) => ({ default: Page }))
 );
 
 const DetectionPage = React.lazy(() =>
-  import('./pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
+  import('../pages/detection/page').then(({ DetectionPage: Page }) => ({ default: Page }))
 );
 
 export const DetectionRoute = ({

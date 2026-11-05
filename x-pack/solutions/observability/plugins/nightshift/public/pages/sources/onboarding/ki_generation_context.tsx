@@ -22,9 +22,9 @@ import React, {
   useRef,
   useState,
 } from 'react';
-import { useBlocksNewActivity } from '../../data/maintenance/use_significant_events_maintenance';
-import { useFetchSources } from '../../data/sources/use_fetch_sources';
-import type { ScheduleOnboardingOptions } from '../../data/sources/use_onboarding_api';
+import { useBlocksNewActivity } from '../../../data/maintenance/use_significant_events_maintenance';
+import { useFetchSources } from '../../../data/sources/use_fetch_sources';
+import type { ScheduleOnboardingOptions } from '../../../data/sources/use_onboarding_api';
 import { useBulkOnboarding } from './use_bulk_onboarding';
 import type { OnboardingConfig } from './types';
 

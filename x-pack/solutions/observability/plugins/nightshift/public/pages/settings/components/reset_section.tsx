@@ -17,8 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { getEbtProps } from '@kbn/ebt-click';
-import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../common/ebt_constants';
-import { useSignificantEventsMaintenanceActions } from '../../data/maintenance/use_significant_events_maintenance';
+import { NIGHTSHIFT_EBT_ACTIONS, NIGHTSHIFT_EBT_ELEMENTS } from '../../../common/ebt_constants';
+import { useSignificantEventsMaintenanceActions } from '../../../data/maintenance/use_significant_events_maintenance';
 import { SettingsSectionRow } from './settings_section';
 
 export function ResetSection({ canManage }: { canManage: boolean }) {

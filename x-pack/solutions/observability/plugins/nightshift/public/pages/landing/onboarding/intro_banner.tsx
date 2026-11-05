@@ -19,7 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useKibana } from '../hooks/use_kibana';
+import { useKibana } from '../../../hooks/use_kibana';
 import posterSrc from './assets/elky_story_poster.jpg';
 
 const EXPLORE_LIVE_EXAMPLE_HREF: string | undefined = undefined;
