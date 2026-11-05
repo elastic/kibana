@@ -12,6 +12,7 @@ import {
   EuiButton,
   EuiButtonEmpty,
   EuiButtonIcon,
+  EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -22,7 +23,7 @@ import {
   EuiLink,
   EuiLoadingSpinner,
   EuiResizeObserver,
-  EuiSelect,
+  EuiSuperSelect,
   EuiSpacer,
   EuiText,
   EuiTitle,
@@ -37,7 +38,7 @@ import { AiButton } from '@kbn/shared-ux-ai-components';
 import { KbnDangerCallout } from '@kbn/ui-callout';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
-import type { CustomCellDefinition } from '../../common/types';
+import type { CellDefinition, CustomCellDefinition } from '../../common/types';
 import { getCellDisplayName } from '../model/references';
 import type { CellRuntime } from '../model/types';
 import { useNotebookServices } from '../services';
@@ -48,8 +49,17 @@ import { ResultGrid, ResultPreview } from './result_preview';
 
 const EDITOR_DEFAULT_HEIGHT = 400;
 
-/** Select value for the panel's own query; cell ids are UUIDs, so it cannot collide. */
+/** Select values for the panel's own query and the cells' heading; cell ids are UUIDs, so they cannot collide. */
 const CUSTOM_QUERY = 'customQuery';
+const CELL_SOURCES_GROUP = 'cellSources';
+
+const CUSTOM_QUERY_LABEL = i18n.translate('xpack.notebook.customCell.flyout.customQuery', {
+  defaultMessage: 'Custom ES|QL query',
+});
+
+const CELL_SOURCES_LABEL = i18n.translate('xpack.notebook.customCell.flyout.cellSources', {
+  defaultMessage: 'Cell sources',
+});
 
 const COPY_TEMPLATE_LABEL = i18n.translate('xpack.notebook.customCell.flyout.copyTemplate', {
   defaultMessage: 'Copy template',
@@ -125,6 +135,22 @@ const SectionTitle = ({
       </EuiFlexGroup>
     </EuiFlexItem>
     {action && <EuiFlexItem grow={false}>{action}</EuiFlexItem>}
+  </EuiFlexGroup>
+);
+
+/** A cell's output name in code, with its label alongside when it has one. */
+const CellSourceName = ({ cell: { name, label } }: { cell: CellDefinition }) => (
+  <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+    <EuiFlexItem grow={false}>
+      <EuiCode>{name}</EuiCode>
+    </EuiFlexItem>
+    {label && (
+      <EuiFlexItem grow={false}>
+        <EuiText size="s" color="subdued">
+          {label}
+        </EuiText>
+      </EuiFlexItem>
+    )}
   </EuiFlexGroup>
 );
 
@@ -424,23 +450,39 @@ export const CustomCellFlyout = ({
               defaultMessage: 'Source',
             })}
           >
-            <EuiSelect
+            <EuiSuperSelect
               fullWidth
-              hasNoInitialSelection={!isQuery && !draft.sourceCell}
-              value={isQuery ? CUSTOM_QUERY : draft.sourceCell ?? ''}
+              placeholder={i18n.translate('xpack.notebook.customCell.flyout.sourcePlaceholder', {
+                defaultMessage: 'Select a source',
+              })}
+              valueOfSelected={isQuery ? CUSTOM_QUERY : draft.sourceCell ?? undefined}
               options={[
                 {
                   value: CUSTOM_QUERY,
-                  text: i18n.translate('xpack.notebook.customCell.flyout.customQuery', {
-                    defaultMessage: 'Custom ES|QL query',
-                  }),
+                  inputDisplay: CUSTOM_QUERY_LABEL,
+                  'data-test-subj': 'notebookCustomSourceCustom',
                 },
+                ...(esqlCells.length > 0
+                  ? [
+                      {
+                        value: CELL_SOURCES_GROUP,
+                        disabled: true,
+                        inputDisplay: CELL_SOURCES_LABEL,
+                        dropdownDisplay: (
+                          <EuiText size="xs" color="subdued">
+                            <strong>{CELL_SOURCES_LABEL}</strong>
+                          </EuiText>
+                        ),
+                      },
+                    ]
+                  : []),
                 ...esqlCells.map((esqlCell) => ({
                   value: esqlCell.id,
-                  text: getCellDisplayName(esqlCell),
+                  inputDisplay: <CellSourceName cell={esqlCell} />,
+                  'data-test-subj': `notebookCustomSource-${esqlCell.name}`,
                 })),
               ]}
-              onChange={({ target: { value } }) =>
+              onChange={(value) =>
                 update(
                   value === CUSTOM_QUERY
                     ? { dataSource: 'query', query: draft.query || sourceQuery || '' }
