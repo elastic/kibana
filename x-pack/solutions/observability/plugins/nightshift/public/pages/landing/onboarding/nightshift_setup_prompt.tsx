@@ -32,7 +32,8 @@ export const NIGHTSHIFT_SERVICE_ACCOUNT_PRIVILEGES_HREF =
  * The one "Enable Elastic Nightshift" step, shown until the space is set up: a single click binds
  * the space to its service accounts and installs the investigation agent. Nightshift runs as its
  * service account, so nothing else works before an admin does it. Enabling requires Nightshift
- * manage and `manage_security`; everyone else sees why the button is disabled.
+ * manage, the Manage engines sub-privilege and `manage_security`; everyone else sees why the
+ * button is disabled.
  */
 export const NightshiftSetupPrompt = ({
   status,
@@ -41,12 +42,15 @@ export const NightshiftSetupPrompt = ({
 }) => {
   const { euiTheme } = useEuiTheme();
   const { application } = useKibana().services;
-  const { canManage } = getNightshiftCapabilities(application.capabilities.nightshift);
+  const { canManage, canManageAndConfigure } = getNightshiftCapabilities(
+    application.capabilities.nightshift
+  );
   const setUp = useSetUpNightshiftServiceAccount();
   // The account is found or created by name; the backend assigns its id on setup.
   const account = getNightshiftServiceAccountName('agent');
   const serviceAccountsOff = status?.serviceAccountsEnabled === false;
-  const canEnable = canManage && !serviceAccountsOff && status?.canModifyBoundWorkflows === true;
+  const hasManageSecurity = status?.canModifyBoundWorkflows === true;
+  const canEnable = canManageAndConfigure && !serviceAccountsOff && hasManageSecurity;
 
   const body = serviceAccountsOff ? (
     <p data-test-subj="nightshiftSetupServiceAccountsOff">
@@ -81,11 +85,26 @@ export const NightshiftSetupPrompt = ({
         }}
       />
     </p>
-  ) : canManage ? (
+  ) : canManageAndConfigure ? (
     <p data-test-subj="nightshiftSetupAskAdmin">
       <FormattedMessage
         id="xpack.nightshift.setup.askAdminBody"
         defaultMessage="A space administrator with the {privilege} privilege has to enable Elastic Nightshift once for this space. Ask them to turn it on."
+        values={{ privilege: <EuiCode>manage_security</EuiCode> }}
+      />
+    </p>
+  ) : canManage && hasManageSecurity ? (
+    <p data-test-subj="nightshiftSetupAskAdmin">
+      {i18n.translate('xpack.nightshift.setup.askEnginesAdminBody', {
+        defaultMessage:
+          'A space administrator with the Nightshift Manage engines privilege has to enable Elastic Nightshift once for this space. Ask them to turn it on.',
+      })}
+    </p>
+  ) : canManage ? (
+    <p data-test-subj="nightshiftSetupAskAdmin">
+      <FormattedMessage
+        id="xpack.nightshift.setup.askEnginesAndSecurityAdminBody"
+        defaultMessage="A space administrator with the Nightshift Manage engines privilege and the {privilege} privilege has to enable Elastic Nightshift once for this space. Ask them to turn it on."
         values={{ privilege: <EuiCode>manage_security</EuiCode> }}
       />
     </p>
