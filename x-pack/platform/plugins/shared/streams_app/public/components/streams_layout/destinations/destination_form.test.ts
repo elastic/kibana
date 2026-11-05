@@ -348,12 +348,12 @@ describe('destination form', () => {
       expect(canSubmitDestinationForm({ formData, unitDefinition })).toBe(false);
     });
 
-    it('marks a docs write pattern longer than 1024 characters', () => {
-      const longPattern = `logs-${'a'.repeat(1020)}`;
+    it('marks a docs write pattern over 255 UTF-8 bytes', () => {
+      const longPattern = `logs-${'a'.repeat(251)}`;
       const formData = elasticsearchForm({
         useCustomWritePatterns: true,
         customSignals: ['docs'],
-        docsWritePatterns: [`logs-${'a'.repeat(1019)}`, longPattern],
+        docsWritePatterns: [`logs-${'a'.repeat(250)}`, longPattern],
       });
 
       expect(

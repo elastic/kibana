@@ -136,6 +136,9 @@ export function IngestRateChartContent({
   // A refetch cancels the running request, and its AbortError can land after the new call started.
   const histogramLoading = histogramResult.loading || isRequestAbortedError(histogramResult.error);
   const histogramUnavailable = Boolean(histogramResult.error) && !histogramLoading;
+  const missingTimestamp =
+    histogramResult.error instanceof Error &&
+    histogramResult.error.message.includes('Unknown column [@timestamp]');
 
   const allTimeseries = useMemo(
     () =>
@@ -229,10 +232,15 @@ export function IngestRateChartContent({
                       data-test-subj="streamsAppIngestRateChartError"
                     >
                       <p>
-                        {i18n.translate('xpack.streams.ingestRateChart.histogramErrorMessage', {
-                          defaultMessage:
-                            'No ingest rate to show. This index may not have a @timestamp field.',
-                        })}
+                        {missingTimestamp
+                          ? i18n.translate('xpack.streams.ingestRateChart.histogramErrorMessage', {
+                              defaultMessage:
+                                'No ingest rate to show. This index may not have a @timestamp field.',
+                            })
+                          : i18n.translate(
+                              'xpack.streams.ingestRateChart.histogramLoadErrorMessage',
+                              { defaultMessage: "Couldn't load the ingest rate." }
+                            )}
                       </p>
                     </EuiText>
                   ) : (

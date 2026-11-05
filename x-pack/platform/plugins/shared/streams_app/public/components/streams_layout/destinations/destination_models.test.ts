@@ -426,9 +426,11 @@ describe('destination models', () => {
     expect(validateAutoWritePattern('logs', 'logs-billing,prod-*')).toBe('invalidCharacter');
   });
 
-  it('rejects an auto write pattern longer than the key route accepts', () => {
-    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(1017)}-*`)).toBeUndefined();
-    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(1018)}-*`)).toBe('tooLong');
+  it('rejects an auto write pattern over 255 UTF-8 bytes', () => {
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(248)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'a'.repeat(249)}-*`)).toBe('tooLong');
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}-*`)).toBeUndefined();
+    expect(validateAutoWritePattern('logs', `logs-${'é'.repeat(124)}a-*`)).toBe('tooLong');
   });
 });
 
@@ -470,9 +472,11 @@ describe('docs targets', () => {
     expect(validateDocsWritePattern('logs-{{x}}')).toBe('template');
   });
 
-  it('rejects a docs write pattern longer than the key route accepts', () => {
-    expect(validateDocsWritePattern(`logs-${'a'.repeat(1019)}`)).toBeUndefined();
-    expect(validateDocsWritePattern(`logs-${'a'.repeat(1020)}`)).toBe('tooLong');
+  it('rejects a docs write pattern over 255 UTF-8 bytes', () => {
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(250)}`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'a'.repeat(251)}`)).toBe('tooLong');
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(124)}a*`)).toBeUndefined();
+    expect(validateDocsWritePattern(`logs-${'é'.repeat(125)}*`)).toBe('tooLong');
   });
 });
 

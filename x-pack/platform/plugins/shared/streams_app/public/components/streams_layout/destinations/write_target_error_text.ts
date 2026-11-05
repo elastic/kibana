@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  MAX_RESOLVE_INDEX_PATTERN_LENGTH,
-  MAX_RESOLVE_INDEX_PATTERNS,
-} from '@kbn/streams-plugin/common';
+import { MAX_RESOLVE_INDEX_PATTERNS } from '@kbn/streams-plugin/common';
+import { MAX_INDEX_NAME_BYTES } from './destination_models';
 import { DESTINATION_SIGNAL_LABELS } from './destination_type_config';
 import type {
   AutoWritePatternValidationError,
@@ -76,8 +74,8 @@ export const writeTargetErrorText = (
   }
   if (error === 'tooLong') {
     return i18n.translate('xpack.streams.destinations.writePatternTooLongErrorMessage', {
-      defaultMessage: 'Write patterns can be at most {max} characters.',
-      values: { max: MAX_RESOLVE_INDEX_PATTERN_LENGTH },
+      defaultMessage: 'Write patterns can be at most {max} bytes.',
+      values: { max: MAX_INDEX_NAME_BYTES },
     });
   }
   if (error === 'tooMany') {

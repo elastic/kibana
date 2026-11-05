@@ -102,6 +102,15 @@ describe('IngestRateChartContent', () => {
     expect(screen.queryByTestId('mockIngestRateChart')).not.toBeInTheDocument();
   });
 
+  it('leaves out the @timestamp hint when the histogram fails for another reason', async () => {
+    histogramReturns(Promise.reject(new Error('Request failed with status 500')));
+    renderChart();
+
+    const message = await screen.findByTestId('streamsAppIngestRateChartError');
+    expect(message).toHaveTextContent("Couldn't load the ingest rate.");
+    expect(message).not.toHaveTextContent('@timestamp');
+  });
+
   it('keeps loading instead of showing the message when the request was cancelled', async () => {
     const abortError = new Error('The user aborted a request.');
     abortError.name = 'AbortError';

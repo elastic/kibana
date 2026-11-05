@@ -15,7 +15,6 @@ import {
   readUnitDestinationSignals,
 } from '@kbn/streams-schema';
 import type { UnitDestination } from '@kbn/streams-schema';
-import { MAX_RESOLVE_INDEX_PATTERN_LENGTH } from '@kbn/streams-plugin/common';
 import type { Unit } from '../../../services/unit_repository';
 import {
   REMOTE_ELASTICSEARCH_TYPE,
@@ -34,7 +33,11 @@ import {
 
 /** An index containing `{{` or `${` is a template, which the transpiler rejects (E035). */
 const INDEX_TEMPLATE_PATTERN = /\{\{|\$\{/;
-const MAX_INDEX_NAME_BYTES = 255;
+/** Elasticsearch and the transpiler cap index names and write patterns at 255 UTF-8 bytes. */
+export const MAX_INDEX_NAME_BYTES = 255;
+
+const exceedsIndexNameBytes = (value: string): boolean =>
+  new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES;
 
 const LOCAL_ELASTICSEARCH_TYPE = 'elasticsearch' as const;
 
@@ -298,7 +301,7 @@ export const validateAutoWritePattern = (
   if (!value) {
     return undefined;
   }
-  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
+  if (exceedsIndexNameBytes(value)) {
     return 'tooLong';
   }
   if (value !== value.toLowerCase()) {
@@ -340,7 +343,7 @@ export const validateFreeFormIndexName = (
     RESERVED_STREAM_NAMES.includes(value) ||
     value.startsWith('.') ||
     INVALID_STREAM_NAME_PREFIXES.some((prefix) => value.startsWith(prefix)) ||
-    new TextEncoder().encode(value).length > MAX_INDEX_NAME_BYTES
+    exceedsIndexNameBytes(value)
   ) {
     return 'invalidName';
   }
@@ -368,7 +371,7 @@ export const validateDocsWritePattern = (
   if (!value) {
     return undefined;
   }
-  if (value.length > MAX_RESOLVE_INDEX_PATTERN_LENGTH) {
+  if (exceedsIndexNameBytes(value)) {
     return 'tooLong';
   }
   if (indexUsesTemplate(value)) {
