@@ -923,4 +923,47 @@ describe('seedScenario world indices', () => {
     expect(create).not.toHaveBeenCalled();
     expect(createDataStream).not.toHaveBeenCalled();
   });
+
+  it('accepts an entities index that mixes host entities with user entities that have no host.id', async () => {
+    const withUsers = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    if (!withUsers) throw new Error('no scenario');
+    const bodiesById = new Map<string, Record<string, unknown>>();
+    await seedScenario({
+      esClient: searchableEs({
+        exists: jest.fn(async () => true),
+        indices: {},
+        bodiesById,
+      }),
+      log: { info: jest.fn() } as unknown as ToolingLog,
+      scenario: withUsers,
+      spaceId: 's',
+    });
+    const entities = [...bodiesById.values()].filter((body) => 'entity.type' in body);
+    expect(entities.some((body) => body['entity.type'] === 'user' && !('host.id' in body))).toBe(
+      true
+    );
+    expect(entities.some((body) => 'host.id' in body)).toBe(true);
+  });
+
+  it('names user.name when a user entity is not searchable by it', async () => {
+    const withUsers = AUDIT_SCENARIOS.find(({ id }) => id === 'positive-chain-with-noise');
+    if (!withUsers) throw new Error('no scenario');
+    const bodiesById = new Map<string, Record<string, unknown>>();
+    const es = searchableEs({ exists: jest.fn(async () => true), indices: {}, bodiesById });
+    // Index the user entities under a different key, as an analysed `text` field would behave.
+    const countWithBrokenUsers = jest.fn(async (args: { index: string; query?: unknown }) => {
+      const terms = JSON.stringify(args.query ?? {});
+      if (terms.includes('"user.name"')) return { count: 0 };
+      return (es.count as unknown as (a: unknown) => Promise<{ count: number }>)(args);
+    });
+    await expect(
+      seedScenario({
+        esClient: { ...es, count: countWithBrokenUsers } as unknown as Client,
+        log: { info: jest.fn() } as unknown as ToolingLog,
+        scenario: withUsers,
+        spaceId: 's',
+        wait: async () => {},
+      })
+    ).rejects.toThrow(/entities-latest-s.*match by user\.name/);
+  });
 });

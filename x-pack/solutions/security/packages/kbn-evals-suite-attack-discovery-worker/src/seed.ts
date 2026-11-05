@@ -712,11 +712,40 @@ const ensureWorldIndices = async ({
   }
 };
 
+/** How many of `docs` a `terms` query on `key` finds, using the values the docs were written with. */
+const countMatchingKey = async ({
+  esClient,
+  index,
+  key,
+  docs,
+}: {
+  esClient: Client;
+  index: string;
+  key: string;
+  docs: WorldDoc[];
+}): Promise<number> => {
+  const withKey = docs.filter(({ body }) => body[key] !== undefined);
+  if (withKey.length === 0) return 0;
+  const { count } = await esClient.count({
+    index,
+    query: {
+      bool: {
+        filter: [
+          { ids: { values: withKey.map(({ id }) => id) } },
+          { terms: { [key]: [...new Set(withKey.map(({ body }) => String(body[key])))] } },
+        ],
+      },
+    },
+  });
+  return count;
+};
+
 /**
- * The review reads the world by `host.id` over `entities-latest-<space>` and `logs-endpoint.events.*`.
- * A world that was accepted by the bulk but is not searchable by those keys makes every verdict
- * `inconclusive`, so the seed proves it: each world document must be found by id, and each host id
- * must match through the same field the review filters on.
+ * The review reads the world by `host.id` (and `user.name` for user entities) over
+ * `entities-latest-<space>` and `logs-endpoint.events.*`. A world that was accepted by the bulk but is
+ * not searchable by those keys makes every verdict `inconclusive`, so the seed proves it: each world
+ * document must be found by id, and by the key the review filters it on (`host.id` when it has one,
+ * `user.name` otherwise).
  */
 const assertWorldSearchable = async ({
   esClient,
@@ -729,29 +758,30 @@ const assertWorldSearchable = async ({
   scenarioId: string;
   worldDocs: WorldDoc[];
 }): Promise<void> => {
-  if (worldDocs.length === 0) return;
-  const idsByIndex = new Map<string, string[]>();
-  for (const { index, id } of worldDocs) {
-    idsByIndex.set(index, [...(idsByIndex.get(index) ?? []), id]);
+  const docsByIndex = new Map<string, WorldDoc[]>();
+  for (const doc of worldDocs) {
+    docsByIndex.set(doc.index, [...(docsByIndex.get(doc.index) ?? []), doc]);
   }
-  const hostIds = [
-    ...new Set(
-      worldDocs.map(({ body }) => String(body['host.id'])).filter((id) => id !== 'undefined')
-    ),
-  ];
-  for (const [index, ids] of idsByIndex) {
+  for (const [index, docs] of docsByIndex) {
+    const ids = docs.map(({ id }) => id);
     const { count } = await esClient.count({ index, query: { ids: { values: ids } } });
-    const byHostId = await esClient.count({
-      index,
-      query: { bool: { filter: [{ ids: { values: ids } }, { terms: { 'host.id': hostIds } }] } },
-    });
-    log.info(
-      `[ad-worker] world ${index}: ${count}/${ids.length} documents found, ${byHostId.count} matched by host.id`
-    );
-    if (count !== ids.length || byHostId.count !== ids.length) {
+    const failures: string[] = [];
+    if (count !== ids.length) failures.push(`${count}/${ids.length} found by id`);
+    // A doc is filtered on `host.id` when it has one; only the rest are checked by `user.name`.
+    const byKey: Array<[string, WorldDoc[]]> = [
+      ['host.id', docs.filter(({ body }) => body['host.id'] !== undefined)],
+      ['user.name', docs.filter(({ body }) => body['host.id'] === undefined)],
+    ];
+    for (const [key, keyed] of byKey) {
+      const matched = await countMatchingKey({ esClient, index, key, docs: keyed });
+      log.info(`[ad-worker] world ${index}: ${matched}/${keyed.length} matched by ${key}`);
+      if (matched !== keyed.length) failures.push(`${matched}/${keyed.length} match by ${key}`);
+    }
+    if (failures.length > 0) {
       throw new Error(
-        `Seeding "${scenarioId}": ${index} holds ${count}/${ids.length} world documents and ` +
-          `${byHostId.count} match by host.id; the review would read an empty world`
+        `Seeding "${scenarioId}": world documents in ${index}: ${failures.join(
+          ', '
+        )}; the review would read an empty world`
       );
     }
   }
