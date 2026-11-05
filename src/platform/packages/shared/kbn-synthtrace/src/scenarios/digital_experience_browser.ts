@@ -34,7 +34,8 @@
  * - includeRawAttribution (boolean, default: false): write the web-vitals attribution as a JSON
  *   body on `browser.web_vital` events, like the instrumentation's experimental opt-in option
  * - scale (number, default: 1): multiplies the number of sessions per minute of every app
- * - seed (string or number, default: random): makes the data reproducible
+ * - seed (string or number, default: the run's `from` in milliseconds): makes the data
+ *   reproducible
  *
  * Run:
  *   node scripts/synthtrace digital_experience_browser --from=now-30m --to=now
@@ -48,13 +49,14 @@ import { withClient } from '../lib/utils/with_client';
 import {
   generateEdotBrowserSessions,
   parseDigitalExperienceScenarioOpts,
+  SEED_LOG_HINT,
 } from './helpers/digital_experience_apps';
 
 const ENVIRONMENT = getSynthtraceEnvironment(__filename);
 
 const scenario: Scenario<OtelDocument> = async ({ scenarioOpts, logger, from }) => {
-  const opts = parseDigitalExperienceScenarioOpts(scenarioOpts);
-  logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}`);
+  const opts = parseDigitalExperienceScenarioOpts(scenarioOpts, from);
+  logger.info(`Generating EDOT Browser data with ${JSON.stringify(opts)}; ${SEED_LOG_HINT}`);
 
   return {
     generate: ({ range, clients: { otelEsClient } }) =>

@@ -10,6 +10,7 @@
 import type { Client } from '@elastic/elasticsearch';
 import type {
   EdotBrowserSpanDocument,
+  EdotReactNativeSpanDocument,
   ESDocumentWithOperation,
   Fields,
   OtelLogDocument,
@@ -21,7 +22,7 @@ import { SynthtraceEsClientBase } from '../shared/base_client';
 import { getSerializeTransform } from '../shared/get_serialize_transform';
 import type { Logger } from '../utils/create_logger';
 
-export type OtelDocument = OtelLogDocument | EdotBrowserSpanDocument;
+export type OtelDocument = OtelLogDocument | EdotBrowserSpanDocument | EdotReactNativeSpanDocument;
 
 export type OtelSynthtraceEsClient = SynthtraceEsClient<OtelDocument>;
 

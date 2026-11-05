@@ -137,6 +137,16 @@ export const CloudOnboardingDeploymentSchemaV5 = CloudOnboardingDeploymentSchema
   instances: schema.maybe(schema.arrayOf(PersistedInstanceSchema, { maxSize: 1000 })),
 });
 
+// ── V6: packageNames + serviceNames + updatedBy ──────────────────────────────
+// packageNames (and provider) are mapped as keyword so deployments can be listed per package.
+export const CloudOnboardingDeploymentSchemaV6 = CloudOnboardingDeploymentSchemaV5.extends({
+  packageNames: schema.maybe(schema.arrayOf(schema.string({ maxLength: 255 }), { maxSize: 100 })),
+  serviceNames: schema.maybe(
+    schema.recordOf(schema.string({ maxLength: 256 }), schema.string({ maxLength: 256 }))
+  ),
+  updatedBy: schema.maybe(schema.string({ maxLength: 1024 })),
+});
+
 // ── V1 ───────────────────────────────────────────────────────────────────────
 export const CloudOnboardingDeploymentSchemaV1 = schema.object({
   provider: ProviderSchema,

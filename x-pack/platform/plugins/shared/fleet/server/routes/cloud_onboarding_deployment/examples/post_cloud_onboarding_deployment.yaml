@@ -3,7 +3,7 @@ requestBody:
     application/json:
       examples:
         postCloudOnboardingDeploymentRequestExample:
-          description: 'Create a new AWS cloud onboarding deployment using identity federation (managed integration)'
+          description: 'Create a new cloud onboarding instance for AWS using identity federation (managed integration)'
           value:
             provider: 'aws'
             connectorId: 'cloud-connector-id-1'
@@ -23,7 +23,7 @@ requestBody:
                   - 'us-east-1'
                 s3_bucket_arn: 'arn:aws:s3:::my-cloudtrail-bucket'
         postCloudOnboardingDeploymentAgentBasedRequestExample:
-          description: 'Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)'
+          description: 'Create a new cloud onboarding instance for AWS using an Elastic Agent (agent-based)'
           value:
             provider: 'aws'
             mechanisms:
@@ -37,7 +37,7 @@ requestBody:
                 namespace: 'AWS/EC2'
             authMethod: 'assume_role'
         postCloudOnboardingDeploymentEcfRequestExample:
-          description: 'Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)'
+          description: 'Create a new cloud onboarding instance for AWS using Elastic Cloud Forwarder (ECF)'
           value:
             provider: 'aws'
             connectorId: 'cloud-connector-id-1'

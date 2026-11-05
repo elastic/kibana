@@ -189,6 +189,7 @@ export interface PackagePolicySOAttributes {
   inputs_for_versions?: Record<string, PackagePolicyInput[]>;
   package_agent_version_condition?: string;
   condition?: string | null;
+  onboarding_deployment_id?: string | null;
 }
 
 export interface OutputSoBaseAttributes {
@@ -419,6 +420,12 @@ export interface CloudOnboardingDeploymentSOAttributes {
   namespace?: string;
   /** The service instances (originals and duplicates) of the last deploy. Hydrated into the Service settings step on resume so duplicates and their names come back. */
   instances?: CloudOnboardingInstance[];
+  /** Names of the integration packages this deployment covers. Mapped as keyword so deployments can be listed per package. */
+  packageNames?: string[];
+  /** Display name of each service as shown in the onboarding flow, by service id. */
+  serviceNames?: Record<string, string>;
+  /** Username of the user who last wrote the deployment. */
+  updatedBy?: string;
   /** Data format selected in the Services step: 'ecs' or 'otel'. Used to hydrate the services step on resume so service filtering is consistent. */
   dataFormat?: 'ecs' | 'otel';
   /**
