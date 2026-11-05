@@ -159,11 +159,13 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
   };
 
   /**
-   * Deletes all conversations in the index.
+   * Deletes conversations owned by the current user.
+   * @param options.authenticatedUser Current authenticated user.
    * @param options.excludedIds An array of ids to exclude from deletion.
    * @returns The number of conversations deleted
    */
-  public deleteAllConversations = async (options?: {
+  public deleteAllConversations = async (options: {
+    authenticatedUser: AuthenticatedUser;
     excludedIds?: string[];
   }): Promise<DeleteByQueryResponse | undefined> => {
     const esClient = await this.options.elasticsearchClientPromise;
@@ -171,7 +173,8 @@ export class AIAssistantConversationsDataClient extends AIAssistantDataClient {
       esClient,
       conversationIndex: this.indexTemplateAndPattern.alias,
       logger: this.options.logger,
-      excludedIds: options?.excludedIds,
+      authenticatedUser: options.authenticatedUser,
+      excludedIds: options.excludedIds,
     });
   };
 }
