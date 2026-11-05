@@ -57,6 +57,7 @@ import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
 import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
+import { CustomCanvas } from './custom_cell';
 import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
 import { NotebookFlyout } from './notebook_flyout';
@@ -99,6 +100,8 @@ const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition
   switch (cell.type) {
     case 'chart':
       return <ChartPanelContent panelId={panelId} cell={cell} />;
+    case 'custom':
+      return <CustomCanvas cell={cell} />;
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':

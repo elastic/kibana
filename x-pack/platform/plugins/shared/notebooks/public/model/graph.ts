@@ -138,7 +138,7 @@ export const buildGraph = (
 
   const parents = new Map<string, string[]>();
   executable.forEach((cell) => {
-    if (cell.type === 'chart') {
+    if (cell.type === 'chart' || cell.type === 'custom') {
       const { sourceCell } = cell;
       const source = sourceCell === null ? undefined : cells[sourceCell];
       if (sourceCell !== null && !source) addError(cell.id, 'The source cell no longer exists');

@@ -14,6 +14,7 @@ import type { CellStatus } from '../model/types';
 export const TYPE_ICONS: Record<CellType, string> = {
   esql: 'database',
   chart: 'visBarVertical',
+  custom: 'code',
   markdown: 'text',
   input: 'controls',
 };
@@ -21,6 +22,7 @@ export const TYPE_ICONS: Record<CellType, string> = {
 const TYPE_LABELS: Record<NewCellKind, string> = {
   esql: i18n.translate('xpack.notebook.cell.type.esql', { defaultMessage: 'ES|QL' }),
   chart: i18n.translate('xpack.notebook.cell.type.chart', { defaultMessage: 'Chart' }),
+  custom: i18n.translate('xpack.notebook.cell.type.custom', { defaultMessage: 'Custom' }),
   markdown: i18n.translate('xpack.notebook.cell.type.markdown', { defaultMessage: 'Markdown' }),
   'input:time': i18n.translate('xpack.notebook.cell.type.time', {
     defaultMessage: 'Time range input',

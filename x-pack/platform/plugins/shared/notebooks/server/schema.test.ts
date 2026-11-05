@@ -75,6 +75,14 @@ const everyVariant = toNotebook([
     sourceCell: null,
     lensAttributes: null,
   },
+  {
+    id: 'custom',
+    name: 'custom',
+    type: 'custom',
+    runMode: 'auto',
+    sourceCell: 'visits',
+    template: '{% for row in rows %}<p>{{ row["c"].value }}</p>{% endfor %}',
+  },
   { id: 'notes', name: 'notes', type: 'markdown', content: '# Instructions' },
 ]);
 

@@ -44,6 +44,17 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
       lensAttributes: null,
     }),
   },
+  custom: {
+    namePrefix: 'custom',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.custom', { defaultMessage: 'Custom' }),
+    build: (base, sourceCell) => ({
+      ...base,
+      type: 'custom',
+      runMode: 'auto',
+      sourceCell,
+      template: '',
+    }),
+  },
   markdown: {
     namePrefix: 'notes',
     labelPrefix: i18n.translate('xpack.notebook.cell.label.markdown', { defaultMessage: 'Notes' }),

@@ -16,6 +16,16 @@ describe('createCell', () => {
     expect(createCell('chart', {})).toMatchObject({ name: 'chart_1', label: 'Chart 1' });
   });
 
+  it('starts a custom cell on the given source with an empty template', () => {
+    expect(createCell('custom', {}, 'q')).toMatchObject({
+      name: 'custom_1',
+      label: 'Custom 1',
+      type: 'custom',
+      sourceCell: 'q',
+      template: '',
+    });
+  });
+
   it('numbers past names already in use', () => {
     const first = createCell('esql', {});
     expect(createCell('esql', toRecord([first]))).toMatchObject({

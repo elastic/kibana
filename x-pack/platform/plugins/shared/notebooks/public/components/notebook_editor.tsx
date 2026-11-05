@@ -18,6 +18,7 @@ import { NotebookScheduler } from '../model/scheduler';
 import { useNotebookServices } from '../services';
 import { AddCellBar } from './add_cell_bar';
 import { ChartCell } from './chart_cell';
+import { CustomCell } from './custom_cell';
 import { EsqlCell } from './esql_cell';
 import { InputCell } from './input_cell';
 import { MarkdownCell } from './markdown_cell';
@@ -38,6 +39,8 @@ const CellView = ({ cell }: { cell: CellDefinition }) => {
       return <EsqlCell cell={cell} />;
     case 'chart':
       return <ChartCell cell={cell} />;
+    case 'custom':
+      return <CustomCell cell={cell} />;
     case 'markdown':
       return <MarkdownCell cell={cell} />;
     case 'input':

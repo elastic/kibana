@@ -6,6 +6,7 @@
  */
 
 import { schema, type TypeOf } from '@kbn/config-schema';
+import { CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH } from '@kbn/custom-content-common';
 import {
   GRID_SUBDIVISIONS,
   MAX_DESCRIPTION_LENGTH,
@@ -103,6 +104,13 @@ const cellSchema = schema.discriminatedUnion('type', [
     runMode: runModeSchema,
     sourceCell: schema.nullable(idSchema),
     lensAttributes: schema.nullable(lensAttributesSchema),
+  }),
+  schema.object({
+    ...cellBaseProps,
+    type: schema.literal('custom'),
+    runMode: runModeSchema,
+    sourceCell: schema.nullable(idSchema),
+    template: schema.string({ maxLength: CUSTOM_CONTENT_MAX_TEMPLATE_SCHEMA_LENGTH }),
   }),
   schema.object({
     ...cellBaseProps,

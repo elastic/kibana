@@ -191,6 +191,19 @@ describe('NotebookScheduler', () => {
       expect(env.output('c')).toBe(env.output('q'));
     });
 
+    it('feeds a custom cell its source output', async () => {
+      const env = track(
+        setup([
+          esql('q', 'FROM logs'),
+          { id: 'p', name: 'p', type: 'custom', runMode: 'auto', sourceCell: 'q', template: '' },
+        ])
+      );
+      await env.open();
+
+      expect(env.runtime('p').status).toBe('done');
+      expect(env.output('p')).toBe(env.output('q'));
+    });
+
     it('runs independent branches concurrently', async () => {
       const env = track(setup([esql('a', 'FROM a'), esql('b', 'FROM b')]));
       env.fake.setDeferred(true);

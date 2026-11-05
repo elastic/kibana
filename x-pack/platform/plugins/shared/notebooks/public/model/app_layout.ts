@@ -49,6 +49,7 @@ const getBasePanelSize = (cell: CellDefinition): PanelSize => {
     case 'markdown':
       return { width: DEFAULT_GRID_COLUMNS, height: 3 };
     case 'chart':
+    case 'custom':
       return { width: 6, height: 7 };
     case 'esql':
       return { width: DEFAULT_GRID_COLUMNS, height: 8 };
@@ -225,11 +226,17 @@ export const getAppStatusGroups = (
   });
 };
 
-const SECTION_ORDER: ReadonlyArray<CellDefinition['type']> = ['markdown', 'input', 'chart', 'esql'];
+const SECTION_ORDER: ReadonlyArray<CellDefinition['type']> = [
+  'markdown',
+  'input',
+  'chart',
+  'custom',
+  'esql',
+];
 
 /**
- * A dashboard-style app over the notebook: notes, then controls, then charts, then the tables of
- * queries no chart already shows. Each section starts on a new row.
+ * A dashboard-style app over the notebook: notes, then controls, then charts and custom panels,
+ * then the tables of queries none of those already shows. Each section starts on a new row.
  */
 export const generateDefaultApp = (
   cells: Readonly<Record<string, CellDefinition>>,
@@ -242,7 +249,9 @@ export const generateDefaultApp = (
     return cell && !isPinnedTimeCell(cell) ? [cell] : [];
   });
   const charted = new Set(
-    ordered.flatMap((cell) => (cell.type === 'chart' && cell.sourceCell ? [cell.sourceCell] : []))
+    ordered.flatMap((cell) =>
+      (cell.type === 'chart' || cell.type === 'custom') && cell.sourceCell ? [cell.sourceCell] : []
+    )
   );
   const included = ordered.filter((cell) => cell.type !== 'esql' || !charted.has(cell.id));
 

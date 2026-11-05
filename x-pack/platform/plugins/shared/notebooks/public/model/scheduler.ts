@@ -13,6 +13,7 @@ import type {
   CellDefinition,
   CellType,
   ChartCellDefinition,
+  CustomCellDefinition,
   EsqlCellDefinition,
   InputCellDefinition,
 } from '../../common/types';
@@ -43,6 +44,7 @@ const EXECUTION_FIELDS: {
 } = {
   esql: ['runMode'],
   chart: ['sourceCell', 'runMode'],
+  custom: ['sourceCell', 'runMode'],
   input: ['input', 'name'],
   markdown: [],
 };
@@ -283,7 +285,8 @@ export class NotebookScheduler {
       case 'esql':
         return this.evaluateEsql(cell, forced, signal);
       case 'chart':
-        return this.evaluateChart(cell, forced);
+      case 'custom':
+        return this.evaluateSourced(cell, forced);
       case 'input':
         return this.evaluateInput(cell, forced, signal);
     }
@@ -330,7 +333,11 @@ export class NotebookScheduler {
     });
   }
 
-  private evaluateChart({ id, sourceCell, runMode }: ChartCellDefinition, forced: boolean): void {
+  /** Charts and custom cells take their source cell's table as their own output. */
+  private evaluateSourced(
+    { id, sourceCell, runMode }: ChartCellDefinition | CustomCellDefinition,
+    forced: boolean
+  ): void {
     const source = sourceCell === null ? undefined : this.runtime(sourceCell);
     const sourceOutput = source?.output;
     const runtime = this.runtime(id);

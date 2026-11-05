@@ -70,6 +70,15 @@ export interface ChartCellDefinition extends CellBase {
   lensAttributes: LensAttributes | null;
 }
 
+/** HTML built from a Liquid template filled with an ES|QL cell's results, like a Dashboard custom panel. */
+export interface CustomCellDefinition extends CellBase {
+  type: 'custom';
+  runMode: RunMode;
+  /** Id of the ES|QL cell whose rows fill the template; null until the user picks a source. */
+  sourceCell: string | null;
+  template: string;
+}
+
 export interface MarkdownCellDefinition extends CellBase {
   type: 'markdown';
   content: string;
@@ -83,6 +92,7 @@ export interface InputCellDefinition extends CellBase {
 export type CellDefinition =
   | EsqlCellDefinition
   | ChartCellDefinition
+  | CustomCellDefinition
   | MarkdownCellDefinition
   | InputCellDefinition;
 

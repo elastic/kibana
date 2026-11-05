@@ -114,6 +114,17 @@ describe('buildGraph', () => {
     expect(graph.order).toEqual(['b', 'a', 'cb']);
   });
 
+  it('links a custom cell to its source like a chart', () => {
+    const graph = graphOf([
+      esql('q', 'FROM logs'),
+      { id: 'p', name: 'p', type: 'custom', runMode: 'auto', sourceCell: 'q', template: '' },
+    ]);
+
+    expect(graph.parents.get('p')).toEqual(['q']);
+    expect(graph.children.get('q')).toEqual(['p']);
+    expect(graph.errors.size).toBe(0);
+  });
+
   it('gives a chart without a source no parent and no error', () => {
     const graph = graphOf([chart('c', null)]);
     expect(graph.parents.get('c')).toEqual([]);
