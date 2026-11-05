@@ -25,7 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
-import { getTelemetryTargets } from './telemetry_targets';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
   InvestigationLocatorDefinition,
@@ -90,10 +90,7 @@ import { setupNightshiftTelemetry } from './telemetry';
 import { createTriggerEmitter, type TriggerEmitter } from './workflows/triggers/emit';
 import { registerInvestigationsWorkflowTriggers } from './workflows/triggers/register_triggers';
 import type { NightshiftAgentTypeOptions } from './agents/investigation';
-import {
-  NIGHTSHIFT_INVESTIGATION_AGENT_ID,
-  registerInvestigationAgentType,
-} from './agents/investigation';
+import { registerInvestigationAgentType } from './agents/investigation';
 import { registerFindingsRecorder } from './findings_recorder';
 import { createRecorderProposals } from './findings_recorder/proposals_adapter';
 import { createRecorderWorkspace } from './findings_recorder/workspace_tools';
@@ -102,6 +99,7 @@ import { registerAssistantAgentType } from './agents/assistant';
 import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createTimeConverterTool } from './tools/time_converter/tool';
+import { createSlackReadTool } from './tools/slack_read/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -276,6 +274,7 @@ export class NightshiftInvestigationsPlugin
         spaces: this.spaces,
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
+        assistantEnabled: this.assistantEnabled,
         actions: this.actionsStart,
         elasticsearch: this.elasticsearch,
         cloud: this.cloudSetup,
@@ -317,17 +316,12 @@ export class NightshiftInvestigationsPlugin
         logger: this.logger,
       });
       const config = this.ctx.config.get();
-      const telemetryConnectorId = config.sandbox?.telemetry_connector_id;
       const nightshiftAgentOptions: NightshiftAgentTypeOptions = {
         sandboxEnabled: plugins.sandbox?.isAvailable ?? false,
         cortexEnabled: this.cortexEnabled,
         memoryEnabled: this.memoryEnabled,
         investigationToolsEnabled: Boolean(plugins.agenticInvestigations),
         proposalsEnabled: Boolean(plugins.proposals),
-        telemetryConnectorId,
-        // Both agent types allow every configured telemetry connector; the investigator narrows
-        // the list per conversation in the sandbox workspace manager.
-        telemetryConfig: config.sandbox,
         getCustomContextInstructions: ({ request, spaceId }) =>
           customContextClient.getInstructions(request, spaceId),
         logger: this.logger.get('agent_types'),
@@ -393,6 +387,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      plugins.agentBuilder.tools.register({
+        ...createSlackReadTool({ getActions: () => this.actionsStart }),
+        availability: createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        }),
+      });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
@@ -413,14 +413,6 @@ export class NightshiftInvestigationsPlugin
         const getSandboxStart = getGatedSandboxStart;
         const sandboxWorkspaceManager = createSandboxWorkspaceManager({
           getDeps: () => ({ actions: this.actionsStart }),
-          telemetryConnectorId,
-          telemetryReadableIndices: config.sandbox?.telemetry_readable_indices,
-          telemetryTargets: getTelemetryTargets(config.sandbox),
-          getTelemetryTarget: async ({ agentId, conversationId, request }) => {
-            if (agentId !== NIGHTSHIFT_INVESTIGATION_AGENT_ID) return undefined;
-            if (!conversationId) throw new Error('Investigation telemetry requires a conversation');
-            return this.getInvestigationsClient(request).getTelemetryTarget(conversationId);
-          },
           logger: sandboxLogger,
         });
         const resolveConnectorCredentials = createConnectorCredentialResolver({
@@ -429,7 +421,6 @@ export class NightshiftInvestigationsPlugin
         });
         const outputRedactionLogger = sandboxLogger.get('output_redaction');
         const redaction = {
-          prepareCallContext: sandboxWorkspaceManager.prepareCallContext,
           getOutputRedactor: createSandboxOutputRedactorProvider({
             getDeps: () => ({ actions: this.actionsStart }),
           }),
@@ -484,9 +475,7 @@ export class NightshiftInvestigationsPlugin
             this.spaces?.spacesService.getSpaceId(request) ?? DEFAULT_SPACE_ID;
           for (const tool of createDecisionTreeTools({
             getSandboxStart,
-            connectorNames: getTelemetryTargets(config.sandbox).flatMap(({ connectorId }) =>
-              connectorId ? [connectorId] : []
-            ),
+            connectorNames: [],
             getSpaceId,
             getUsername: (req: KibanaRequest) => this.security?.authc.getCurrentUser(req)?.username,
             logger: decisionTreeLogger,
@@ -525,6 +514,18 @@ export class NightshiftInvestigationsPlugin
           scoreOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getEvaluate: () => this.evals?.evaluate,
+            resolveJudgeConnectorId: (request) => {
+              if (!this.inference || !this.savedObjects || !this.uiSettings) {
+                throw new Error('Nightshift model resolution is unavailable');
+              }
+              return resolveNightshiftModelForRequest({
+                request,
+                inference: this.inference,
+                savedObjects: this.savedObjects,
+                uiSettings: this.uiSettings,
+                step: 'onlineEvalsJudge',
+              });
+            },
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
             telemetry,
@@ -651,11 +652,6 @@ export class NightshiftInvestigationsPlugin
         // reinforcement phase too. The handler no-ops on the flag.
         plugins.workflowsExtensions.registerStepDefinition(
           decisionTreePrepareStepDefinition({
-            getTelemetryConnectorId: async (request, conversationId) =>
-              conversationId
-                ? (await this.getInvestigationsClient(request).getTelemetryTarget(conversationId))
-                    .connectorId
-                : this.ctx.config.get().sandbox?.telemetry_connector_id,
             getAgentBuilder: () => this.agentBuilder,
             getSavedObjects: () => this.savedObjects,
             getUiSettings: () => this.uiSettings,
@@ -798,6 +794,8 @@ export class NightshiftInvestigationsPlugin
         agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
         availability: this.getInvestigationAvailability(),
+        // Users pick the assistant when it exists and reach the investigator through investigations.
+        hidden: this.assistantEnabled,
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
@@ -886,7 +884,6 @@ export class NightshiftInvestigationsPlugin
 
     return new NightshiftInvestigationsClient({
       request,
-      telemetryConfig: this.ctx.config.get().sandbox,
       workflowsManagement: this.workflowsManagement,
       spaces: this.spaces,
       logger: this.logger,

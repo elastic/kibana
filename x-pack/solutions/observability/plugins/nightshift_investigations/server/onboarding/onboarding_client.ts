@@ -23,6 +23,7 @@ import type {
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
 import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
 import {
@@ -38,6 +39,8 @@ export interface OnboardingClientDeps {
   spaces?: SpacesPluginStart;
   agentBuilder?: AgentBuilderPluginStart;
   agentAvailability?: AgentAvailabilityConfig;
+  /** The investigator is hidden from the picker while the assistant is enabled. */
+  assistantEnabled?: boolean;
   actions?: ActionsPluginStart;
   elasticsearch?: ElasticsearchServiceStart;
   cloud?: CloudSetup;
@@ -51,7 +54,7 @@ export interface OnboardingClientDeps {
  */
 export interface OnboardingClient {
   get: (request: KibanaRequest) => Promise<GetOnboardingResponse>;
-  /** Enables Nightshift in the space: installs the investigation agent there. */
+  /** Enables Nightshift in the space: installs the investigation agent, and the assistant when enabled, there. */
   enable: (request: KibanaRequest) => Promise<EnableOnboardingResponse>;
   /** Starts an exploration run of the investigation agent. */
   start: (request: KibanaRequest) => Promise<StartOnboardingSuggestionsResponse>;
@@ -148,7 +151,7 @@ export const createOnboardingClient = ({
     },
 
     enable: async (request) => {
-      const { agentBuilder, agentAvailability, actions, elasticsearch, cloud, esHosts } = getDeps();
+      const { agentBuilder, agentAvailability, assistantEnabled, actions, elasticsearch, cloud, esHosts } = getDeps();
       if (!agentBuilder || !agentAvailability) {
         throw new OnboardingUnavailableError('Agent Builder is not available');
       }
@@ -160,6 +163,9 @@ export const createOnboardingClient = ({
         spaceId,
         availability: agentAvailability,
       });
+      if (assistantEnabled) {
+        await installAssistantAgent({ agentBuilder, spaceId, availability: agentAvailability });
+      }
       await ensureFailureSweep?.(request, spaceId);
       logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);
 

@@ -31,6 +31,7 @@ const setup = ({
   agentConnectorIds = [],
   withAgentBuilder = true,
   withActions = true,
+  assistantEnabled = false,
 }: {
   executions?: Array<{ id: string }>;
   execution?: Record<string, unknown>;
@@ -40,6 +41,7 @@ const setup = ({
   agentConnectorIds?: string[];
   withAgentBuilder?: boolean;
   withActions?: boolean;
+  assistantEnabled?: boolean;
 } = {}) => {
   const management = {
     getWorkflowExecutions: jest.fn().mockResolvedValue({ results: executions }),
@@ -82,6 +84,7 @@ const setup = ({
       agentAvailability,
       actions: withActions ? actions : undefined,
       elasticsearch,
+      assistantEnabled,
     }),
     logger,
   });
@@ -137,6 +140,7 @@ describe('createOnboardingClient', () => {
         secrets: { authType: 'api_key_header', Authorization: 'ApiKey ZW5j' },
       }),
     });
+    expect(agents.ensure).toHaveBeenCalledTimes(1);
     expect(agents.ensure).toHaveBeenCalledWith(
       expect.objectContaining({
         spaceId: 'default',
@@ -201,6 +205,19 @@ describe('createOnboardingClient', () => {
     await expect(client.enable(request)).rejects.toThrow('agent type missing');
     expect(esClient.security.createApiKey).not.toHaveBeenCalled();
     expect(actionsClient.create).not.toHaveBeenCalled();
+  });
+
+  it('also installs the assistant in the space when it is enabled', async () => {
+    const { client, agents, request } = setup({ agentInstalled: false, assistantEnabled: true });
+
+    await client.enable(request);
+
+    expect(agents.ensure).toHaveBeenCalledWith(
+      expect.objectContaining({
+        spaceId: 'default',
+        agent: expect.objectContaining({ id: 'nightshift.assistant' }),
+      })
+    );
   });
 
   it('cannot enable Nightshift without Agent Builder', async () => {
