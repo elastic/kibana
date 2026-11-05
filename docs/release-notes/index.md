@@ -216,13 +216,7 @@ To check for security updates, go to [Security announcements for the Elastic sta
 * Show layouts tailored to your Observability and Security data in Discover when you use Classic navigation. Turn this off with the **Contextual profiles in Classic navigation** advanced setting [#296406]({{kib-pull}}296406).
 * Allow renaming a Discover session from the header title [#295364]({{kib-pull}}295364).
 
-#### {{product.observability}} solution [kibana-9.6.0-features-observability-solution]
-For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
-
-#### {{elastic-sec}} solution [kibana-9.6.0-features-security-solution]
-For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
-
-#### {{es}} solution [kibana-9.6.0-features-elasticsearch-solution]
+#### {{es}} content connectors [kibana-9.6.0-features-elasticsearch-content-connectors]
 * Add the Exchange Server native connector for Microsoft Exchange Server (on-premises) content [#298385]({{kib-pull}}298385).
 * Add the **Maximum concurrent access control requests** advanced setting to SharePoint Online connectors in {{fleet}} to tune access control sync concurrency [#294250]({{kib-pull}}294250).
 * Add the **Index full raw email (including headers)** setting to the Gmail and Outlook content connectors [#291419]({{kib-pull}}291419).
@@ -231,6 +225,14 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Update the Microsoft Teams content connector to application-only authentication with a client secret or a certificate, and remove username and password authentication [#287028]({{kib-pull}}287028).
 * Clarify that Salesforce document level security applies per object type, not per record [#297728]({{kib-pull}}297728).
 * Add an **Expand role members** toggle for compact document-level security to ServiceNow connectors, and an **Expand site group members** toggle to SharePoint Online connectors, in {{fleet}} [#288071]({{kib-pull}}288071), [#288070]({{kib-pull}}288070).
+
+#### {{product.observability}} solution [kibana-9.6.0-features-observability-solution]
+For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
+
+#### {{elastic-sec}} solution [kibana-9.6.0-features-security-solution]
+For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
+
+#### {{es}} solution [kibana-9.6.0-features-elasticsearch-solution]
 * Return a `400` error when a query rule, ruleset, or synonyms set ID in an API path contains characters other than letters, numbers, `_`, and `-`, or is longer than 512 characters [#276710]({{kib-pull}}276710).
 
 #### {{esql}} editor [kibana-9.6.0-features-esql-editor]
@@ -522,6 +524,12 @@ For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Sol
 * Fix search highlighting showing stray `@kibana-highlighted-field@` tag text when you search a multi-value field for a term such as `field` or `kibana` [#283345]({{kib-pull}}283345).
 * Keep focus on a field when you pin or unpin it in the document viewer **Table** tab, so focus follows the field to its new position [#220097]({{kib-pull}}220097).
 
+#### {{es}} content connectors [kibana-9.6.0-fixes-elasticsearch-content-connectors]
+* Map the document `id` field of content connector indices as `keyword` instead of `long` when {{kib}} creates the index, so large numeric IDs don't fail to index [#297711]({{kib-pull}}297711).
+* Raise the size limits for connector configuration values, descriptions, and advanced snippets on the **Connectors** page in the {{es}} solution, so you can save large values such as custom SSL certificate chains [#297832]({{kib-pull}}297832).
+* Fix deleted connectors remaining in the content connectors list after a successful delete [#290859]({{kib-pull}}290859).
+* Fix the **View logs** button on an agentless connector's page opening Discover with filters that show `(null)` instead of the connector ID and agent ID [#281155]({{kib-pull}}281155).
+
 #### {{product.observability}} solution [kibana-9.6.0-fixes-observability-solution]
 For the {{product.observability}} 9.6.0 release information, refer to [{{product.observability}} Solution Release Notes](docs-content://release-notes/elastic-observability/index.md).
 
@@ -529,12 +537,8 @@ For the {{product.observability}} 9.6.0 release information, refer to [{{product
 For the {{elastic-sec}} 9.6.0 release information, refer to [{{elastic-sec}} Solution Release Notes](docs-content://release-notes/elastic-security/index.md).
 
 #### {{es}} solution [kibana-9.6.0-fixes-elasticsearch-solution]
-* Map the document `id` field of content connector indices as `keyword` instead of `long` when {{kib}} creates the index, so large numeric IDs don't fail to index [#297711]({{kib-pull}}297711).
-* Raise the size limits for connector configuration values, descriptions, and advanced snippets on the **Connectors** page in the {{es}} solution, so you can save large values such as custom SSL certificate chains [#297832]({{kib-pull}}297832).
-* Fix deleted connectors remaining in the content connectors list after a successful delete [#290859]({{kib-pull}}290859).
 * Fix the document preview for a query rule failing with a 404 error when the document ID contains a slash [#287214]({{kib-pull}}287214).
 * Fix the query rule flyout tooltips not being announced by screen readers in Chrome with VoiceOver [#295021]({{kib-pull}}295021).
-* Fix the **View logs** button on an agentless connector's page opening Discover with filters that show `(null)` instead of the connector ID and agent ID [#281155]({{kib-pull}}281155).
 
 #### {{esql}} editor [kibana-9.6.0-fixes-esql-editor]
 * Fix autocomplete for the second argument of `MV_CONTAINS` when the first argument is a variable, and enable the Type dropdown in the controls flyout for multi-value variables [#288972]({{kib-pull}}288972).
