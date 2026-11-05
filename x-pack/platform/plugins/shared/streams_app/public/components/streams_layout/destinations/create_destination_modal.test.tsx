@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { I18nProvider } from '@kbn/i18n-react';
 import { createDefaultUnit } from '../../../services/unit_repository';
@@ -34,11 +34,8 @@ const renderModal = () => {
   return { createDestination };
 };
 
-// Typing long values key by key times out on CI.
-const pasteInto = async (testSubject: string, value: string) => {
-  await userEvent.click(screen.getByTestId(testSubject));
-  await userEvent.paste(value);
-};
+const setFieldValue = (testSubject: string, value: string) =>
+  fireEvent.change(screen.getByTestId(testSubject), { target: { value } });
 
 describe('CreateDestinationModal', () => {
   it('only shows the errors of fields the user has left', async () => {
@@ -97,14 +94,16 @@ describe('CreateDestinationModal', () => {
     it('submits the remote form values', async () => {
       const { createDestination } = renderModal();
       await userEvent.click(screen.getByTestId('streamsCreateDestinationRemoteElasticsearch'));
-      await userEvent.click(screen.getByRole('radio', { name: 'Fixed index per signal' }));
-      await pasteInto('streamsCreateDestinationIndex', 'shared-idx');
-      await pasteInto(
+      await userEvent.click(
+        within(screen.getByTestId('streamsCreateDestinationFixedIndex')).getByRole('radio')
+      );
+      setFieldValue('streamsCreateDestinationIndex', 'shared-idx');
+      setFieldValue(
         'streamsCreateDestinationRemoteElasticsearchEndpoint',
         'https://es.example.com:443'
       );
-      await pasteInto('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
-      await pasteInto('streamsCreateDestinationName', 'Central');
+      setFieldValue('streamsCreateDestinationRemoteElasticsearchApiKey', 'remote-key');
+      setFieldValue('streamsCreateDestinationName', 'Central');
       await userEvent.click(screen.getByTestId('streamsCreateDestinationSubmit'));
 
       await waitFor(() =>
