@@ -17,6 +17,7 @@ export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID =
 export const NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID =
   'system-nightshift-scheduled-review-bound';
 
+/** Template values of the scheduled detection workflow. */
 export interface NightshiftBoundScheduledDetectionTemplateValues
   extends ManagedWorkflowTemplateValues {
   /** The service account the detection engine runs as in the space. */
@@ -27,6 +28,7 @@ export interface NightshiftBoundScheduledDetectionTemplateValues
   targetCoverageMinutes: number;
 }
 
+/** Template values of the scheduled review workflow. */
 export interface NightshiftBoundScheduledReviewTemplateValues
   extends ManagedWorkflowTemplateValues {
   /** The service account the detection engine runs as in the space. */
@@ -57,6 +59,7 @@ const renderTemplate = (template: string, values: Record<string, string | number
     template
   );
 
+/** Scheduled detection, installed per space and bound to its detection engine account. */
 export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
   pluginId: 'significantEvents',
@@ -84,6 +87,7 @@ export const NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW = {
   management: NIGHTSHIFT_BOUND_SCHEDULED_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<NightshiftBoundScheduledDetectionTemplateValues>;
 
+/** Scheduled review and discovery, installed per space and bound to its detection engine account. */
 export const NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW = {
   id: NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
   pluginId: 'significantEvents',
