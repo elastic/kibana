@@ -51,8 +51,8 @@ export async function pickTestGroupRunOrder() {
 
   const selectiveTestingMergeBase = config.useSelectiveTesting ? config.prMergeBase : undefined;
 
-  // Fast path: a PR whose diff is exclusively Scout test files cannot affect
-  // any Jest unit/integration or FTR config — skip emitting them entirely.
+  // Fast path: skip Jest/FTR for Scout-only changes except fixtures, which
+  // may also be imported by Jest tests.
   // The Scout pipeline still runs its own selective testing in parallel.
   let selectiveChangedFiles: string[] | undefined;
   if (selectiveTestingMergeBase) {

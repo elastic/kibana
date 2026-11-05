@@ -46,7 +46,7 @@ describe('computeMoonShadow', () => {
     });
 
     expect(result?.diffFromGit).toEqual({ onlyInGit: [], onlyInMoon: [] });
-    expect(result?.scoutTasks.affectedConfigs).toEqual(['foo/test/scout/ui/playwright.config.ts']);
+    expect(result?.scoutTasks?.affectedConfigs).toEqual(['foo/test/scout/ui/playwright.config.ts']);
     expect(log.warning).not.toHaveBeenCalled();
   });
 
@@ -83,6 +83,27 @@ describe('computeMoonShadow', () => {
 
     expect(result).toBeNull();
     expect(log.warning).toHaveBeenCalled();
+  });
+
+  it('retains the module comparison when the Scout task query fails', () => {
+    mockGetAffectedProjectsMoon.mockReturnValue(new Set(['@kbn/foo']));
+    mockQueryMoonTestSelection.mockImplementation(() => {
+      throw new Error('Scout task unavailable');
+    });
+    const log = createMockLog();
+
+    const result = computeMoonShadow({
+      mergeBase: 'main',
+      gitChangedFiles: ['foo/index.ts'],
+      gitAffectedModules: new Set(['@kbn/foo']),
+      log,
+    });
+
+    expect(result?.diffFromGit).toEqual({ onlyInGit: [], onlyInMoon: [] });
+    expect(result?.scoutTasks).toBeUndefined();
+    expect(log.warning).toHaveBeenCalledWith(
+      'Selective testing shadow mode: Moon Scout task comparison failed (Scout task unavailable)'
+    );
   });
 
   it('overlays implicit consumers from the changed-files list', () => {

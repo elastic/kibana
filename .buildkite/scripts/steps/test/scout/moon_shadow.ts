@@ -24,7 +24,7 @@ export interface MoonShadowResult {
     onlyInGit: string[];
     onlyInMoon: string[];
   };
-  scoutTasks: {
+  scoutTasks?: {
     modeledConfigs: string[];
     affectedConfigs: string[];
   };
@@ -47,7 +47,20 @@ export function computeMoonShadow({
       gitChangedFiles,
       log
     );
-    const scoutTaskSelection = queryMoonTestSelection([...gitChangedFiles], 'scout-tests');
+    let scoutTasks: MoonShadowResult['scoutTasks'];
+    try {
+      const scoutTaskSelection = queryMoonTestSelection([...gitChangedFiles], 'scout-tests');
+      scoutTasks = {
+        modeledConfigs: [...scoutTaskSelection.modeledConfigs].sort(),
+        affectedConfigs: [...scoutTaskSelection.affectedConfigs].sort(),
+      };
+    } catch (error) {
+      log.warning(
+        `Selective testing shadow mode: Moon Scout task comparison failed (${
+          error instanceof Error ? error.message : String(error)
+        })`
+      );
+    }
 
     const onlyInGit = [...gitAffectedModules].filter((m) => !moonAffectedModules.has(m)).sort();
     const onlyInMoon = [...moonAffectedModules].filter((m) => !gitAffectedModules.has(m)).sort();
@@ -65,10 +78,7 @@ export function computeMoonShadow({
       mergeBase,
       affectedModules: [...moonAffectedModules].sort(),
       diffFromGit: { onlyInGit, onlyInMoon },
-      scoutTasks: {
-        modeledConfigs: [...scoutTaskSelection.modeledConfigs].sort(),
-        affectedConfigs: [...scoutTaskSelection.affectedConfigs].sort(),
-      },
+      scoutTasks,
     };
   } catch (error) {
     log.warning(
