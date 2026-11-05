@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod/v4';
 import { runLlmJudge } from '../llm_judge';
-import type { EvaluatorDefinition } from '../types';
+import type { EvaluatorDefinition, EvaluatorResult } from '../types';
 import { LlmCorrectnessEvaluationPrompt } from './prompt';
 import {
   calculateFactualScore,
@@ -59,29 +59,38 @@ export const correctnessEvaluator: EvaluatorDefinition<z.infer<typeof referenceD
       },
     });
 
+    const scoreEntry = (
+      name: string,
+      score: number | null,
+      summary: string
+    ): EvaluatorResult['scores'][number] =>
+      score === null
+        ? {
+            name,
+            score: null,
+            label: 'error',
+            explanation: 'Judge output has no claim analysis to score',
+            metadata: { ...analysis },
+          }
+        : { name, score, label: summary, explanation: summary, metadata: { ...analysis } };
+
     return {
       scores: [
-        {
-          name: 'factuality',
-          score: calculateFactualScore(analysis),
-          label: analysis.summary.factual_accuracy_summary,
-          explanation: analysis.summary.factual_accuracy_summary,
-          metadata: { ...analysis },
-        },
-        {
-          name: 'relevance',
-          score: calculateRelevanceScore(analysis),
-          label: analysis.summary.relevance_summary,
-          explanation: analysis.summary.relevance_summary,
-          metadata: { ...analysis },
-        },
-        {
-          name: 'sequence_accuracy',
-          score: calculateProceduralFidelityScore(analysis),
-          label: analysis.summary.sequence_accuracy_summary,
-          explanation: analysis.summary.sequence_accuracy_summary,
-          metadata: { ...analysis },
-        },
+        scoreEntry(
+          'factuality',
+          calculateFactualScore(analysis),
+          analysis.summary.factual_accuracy_summary
+        ),
+        scoreEntry(
+          'relevance',
+          calculateRelevanceScore(analysis),
+          analysis.summary.relevance_summary
+        ),
+        scoreEntry(
+          'sequence_accuracy',
+          calculateProceduralFidelityScore(analysis),
+          analysis.summary.sequence_accuracy_summary
+        ),
       ],
     };
   },

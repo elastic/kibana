@@ -976,5 +976,34 @@ describe('KibanaEvalsClient', () => {
       healthy.forEach((r) => expect(r.result?.score).toBe(1));
       expect(mockLog.error).toHaveBeenCalledWith(expect.stringContaining('Broken'));
     });
+
+    it.each([
+      ['a failed task', async () => Promise.reject(new Error('boom')), async () => ({ score: 1 })],
+      [
+        'an evaluator that throws',
+        async () => ({ value: 1 }),
+        async (): Promise<{ score: number }> => {
+          throw new Error('judge unavailable');
+        },
+      ],
+      ['a successful evaluator', async () => ({ value: 1 }), async () => ({ score: 1 })],
+    ])(
+      'completes the experiment when the model and version getters throw after %s',
+      async (_, task, evaluate) => {
+        const client = createClient();
+        const throwing = () => {
+          throw new Error('getter exploded');
+        };
+
+        const [exp] = await client.runExperiment(
+          { datasets: [{ ...dataset, examples: [dataset.examples[0]] }], task },
+          [{ ...countEvaluator(evaluate), getModel: throwing, getVersion: throwing }]
+        );
+
+        expect(exp.evaluationRuns).toHaveLength(1);
+        expect(exp.evaluationRuns[0].model).toBeUndefined();
+        expect(exp.evaluationRuns[0].version).toBeUndefined();
+      }
+    );
   });
 });

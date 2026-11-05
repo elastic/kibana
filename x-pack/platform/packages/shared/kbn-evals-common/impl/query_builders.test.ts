@@ -199,7 +199,25 @@ describe('query_builders', () => {
     it('counts null scores apart from the score stats', () => {
       const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
 
-      expect(aggs.score_missing).toEqual({ missing: { field: 'evaluator.score' } });
+      expect(aggs.score_error).toEqual({
+        filter: {
+          bool: {
+            must_not: [{ exists: { field: 'evaluator.score' } }],
+            filter: [{ terms: { 'evaluator.label': ['error', 'unavailable'] } }],
+          },
+        },
+      });
+    });
+
+    it('does not count an analysis-labelled null score as an error', () => {
+      const { aggs } = buildStatsAggregation().by_dataset.aggs.by_evaluator;
+      const { must_not: mustNot, filter } = aggs.score_error.filter.bool;
+      const labels = filter.flatMap((clause) => clause.terms['evaluator.label']);
+
+      expect(mustNot).toEqual([{ exists: { field: 'evaluator.score' } }]);
+      expect(labels).toEqual(['error', 'unavailable']);
+      expect(labels).not.toContain('correctness-analysis');
+      expect(labels).not.toContain('groundedness-analysis');
     });
 
     it('aggregates the evaluator kind so code evaluators are never attributed a model', () => {
@@ -801,7 +819,7 @@ describe('query_builders', () => {
                     key: 'correctness',
                     score_stats: { avg: 0.8, std_deviation: 0.1, min: 0.5, max: 1.0, count: 10 },
                     score_median: { values: { '50.0': 0.85 } },
-                    score_missing: { doc_count: 2 },
+                    score_error: { doc_count: 2 },
                   },
                 ],
               },
@@ -829,7 +847,7 @@ describe('query_builders', () => {
       });
     });
 
-    it('reports a zero error_count when the missing-score aggregation is absent', () => {
+    it('reports a zero error_count when the error-score aggregation is absent', () => {
       const result = parseStatsAggregationResponse({
         by_dataset: {
           buckets: [

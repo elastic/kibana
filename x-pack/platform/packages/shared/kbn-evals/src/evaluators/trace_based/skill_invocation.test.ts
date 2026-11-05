@@ -276,7 +276,7 @@ describe('createSkillInvocationEvaluator', () => {
     const result = await promise;
 
     expect(result.label).toBe('error');
-    expect(result.score).toBeUndefined();
+    expect(result.score).toBeNull();
   });
 
   it('should throw for invalid skill names', () => {

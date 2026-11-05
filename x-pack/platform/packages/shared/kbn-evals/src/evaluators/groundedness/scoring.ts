@@ -36,9 +36,16 @@ const CLAIM_FACTUAL_SCORE_MAP = {
  * ensuring that a single critically incorrect claim (such as a contradicted central claim
  * with a score of 0.0) will result in an overall groundedness score of 0.0.
  */
-export function calculateGroundednessScore(groundednessAnalysis: GroundednessAnalysis): number {
+export function calculateGroundednessScore(
+  groundednessAnalysis: GroundednessAnalysis
+): number | null {
   const analysis = groundednessAnalysis?.analysis;
-  if (!analysis || !Array.isArray(analysis) || analysis.length === 0) {
+  // A judge output without an analysis array could not be scored; an empty array is a judged
+  // answer with no claims, which scores 0.
+  if (!Array.isArray(analysis)) {
+    return null;
+  }
+  if (analysis.length === 0) {
     return 0.0;
   }
 

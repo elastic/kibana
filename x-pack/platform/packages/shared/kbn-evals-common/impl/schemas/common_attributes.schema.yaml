@@ -229,6 +229,16 @@ components:
           type: object
           additionalProperties: true
           nullable: true
+        error:
+          type: object
+          description: >-
+            Why the task produced no output. Present only when the task threw.
+          properties:
+            message:
+              type: string
+              maxLength: 1024
+          required:
+            - message
         model:
           $ref: '#/components/schemas/Model'
       required:
@@ -353,8 +363,9 @@ components:
               type: integer
               minimum: 0
               description: >-
-                Score documents with a null score (the evaluator or task could not
-                produce a score). These are excluded from the other stats.
+                Score documents with no score that are labelled `error` or
+                `unavailable` (the evaluator or task could not produce a score).
+                These are excluded from the other stats.
           required:
             - mean
             - median

@@ -136,6 +136,7 @@ describe('createTraceBasedEvaluator', () => {
 
     const result = await evaluateWith(evaluator, 'invalid-trace-id');
 
+    expect(result.score).toBeNull();
     expect(result.label).toBe('error');
     expect(result.explanation).toBe('Invalid traceId');
   });
@@ -245,6 +246,7 @@ describe('createTraceBasedEvaluator', () => {
     await exhaustRetries();
     const result = await promise;
 
+    expect(result.score).toBeNull();
     expect(result.label).toBe('error');
     expect(result.explanation).toContain('Failed to retrieve Test Evaluator');
   });

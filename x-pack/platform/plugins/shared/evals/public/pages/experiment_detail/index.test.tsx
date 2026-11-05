@@ -13,7 +13,8 @@ import { QueryClient, QueryClientProvider } from '@kbn/react-query';
 import { ExampleScoresTable } from '../../components/example_scores_table';
 import { useExperimentDatasetExamples } from '../../hooks/use_evals_api';
 import { queryKeys } from '../../query_keys';
-import { DatasetStatsAccordion } from '.';
+import type { EvaluatorStats } from '@kbn/evals-common';
+import { DatasetStatsAccordion, MeanWithErrors, sumScoresIngested } from '.';
 
 jest.mock('../../hooks/use_evals_api');
 jest.mock('../../components/example_scores_table', () => ({
@@ -193,5 +194,43 @@ describe('DatasetStatsAccordion', () => {
     );
     expect(pollingCalls).toHaveLength(1);
     expect(pollingCalls[0][3]?.includePreviews).not.toBe(true);
+  });
+});
+
+describe('sumScoresIngested', () => {
+  const buildStat = (count: number, errorCount?: number): EvaluatorStats => ({
+    dataset_id: 'dataset-1',
+    dataset_name: 'Dataset 1',
+    evaluator_name: 'evaluator',
+    example_count: 1,
+    stats: {
+      mean: 0,
+      median: 0,
+      std_dev: 0,
+      min: 0,
+      max: 0,
+      count,
+      ...(errorCount !== undefined && { error_count: errorCount }),
+    },
+  });
+
+  it('counts errored scores alongside scored ones', () => {
+    expect(sumScoresIngested([buildStat(3, 2), buildStat(4)])).toBe(9);
+  });
+});
+
+describe('MeanWithErrors', () => {
+  it('shows the error count next to the mean', () => {
+    const { getByTestId, container } = render(<MeanWithErrors mean={0.5} errorCount={2} />);
+
+    expect(container.textContent).toContain('0.50');
+    expect(getByTestId('evalsExperimentDetailMeanErrorCount').textContent).toContain('2 errors');
+  });
+
+  it('shows only the mean when there are no errors', () => {
+    const { queryByTestId, container } = render(<MeanWithErrors mean={0.5} errorCount={0} />);
+
+    expect(container.textContent).toBe('0.50');
+    expect(queryByTestId('evalsExperimentDetailMeanErrorCount')).toBeNull();
   });
 });

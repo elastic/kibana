@@ -39,7 +39,9 @@ const CLAIM_FACTUAL_SCORE_MAP: ClaimScoreMap = {
  * ensuring that a single critically incorrect claim (such as a contradicted central claim
  * with a score of 0.0) will result in an overall groundedness score of 0.0.
  */
-export function calculateGroundednessScore(groundednessAnalysis: GroundednessAnalysis): number {
+export function calculateGroundednessScore(
+  groundednessAnalysis: GroundednessAnalysis
+): number | null {
   return geometricMeanClaimScore(
     groundednessAnalysis?.analysis,
     CLAIM_FACTUAL_SCORE_MAP,

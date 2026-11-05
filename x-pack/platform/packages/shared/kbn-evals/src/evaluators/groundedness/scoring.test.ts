@@ -23,6 +23,12 @@ const buildAnalysis = (
 });
 
 describe('calculateGroundednessScore', () => {
+  it('returns null when the judge output has no analysis array', () => {
+    expect(
+      calculateGroundednessScore({ summary_verdict: 'GROUNDED' } as unknown as GroundednessAnalysis)
+    ).toBeNull();
+  });
+
   it('returns 0 when analysis is empty', () => {
     expect(calculateGroundednessScore({ summary_verdict: 'GROUNDED', analysis: [] })).toBe(0);
   });
@@ -78,7 +84,7 @@ describe('calculateGroundednessScore', () => {
     const notFound = calculateGroundednessScore(
       buildAnalysis([{ verdict: 'NOT_FOUND', centrality: 'central' }])
     );
-    expect(ungrounded).toBeGreaterThan(notFound);
+    expect(ungrounded ?? -1).toBeGreaterThan(notFound ?? -1);
   });
 
   it('computes geometric mean across mixed verdicts', () => {

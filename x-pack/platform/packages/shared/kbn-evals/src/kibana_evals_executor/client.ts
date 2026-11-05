@@ -40,6 +40,18 @@ const toErrorResult = (message: string): EvaluationResult => ({
   explanation: message,
 });
 
+/**
+ * Reads an evaluator's optional metadata getter. Attribution is best-effort: a getter that
+ * throws must not reject the experiment or turn a finished score into an error.
+ */
+const readEvaluatorAttribute = <T>(getter: (() => T) | undefined): T | undefined => {
+  try {
+    return getter?.();
+  } catch {
+    return undefined;
+  }
+};
+
 const EXPERIMENT_UUID_NAMESPACE = 'c7e6c018-66dc-4511-b97d-046e2194d017';
 
 function computeExperimentId(
@@ -298,8 +310,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       ...evaluatorSummary,
                       result: toErrorResult(taskErrorMessage),
                       evaluatorTraceId: undefined,
-                      model: evaluator.getModel?.(),
-                      version: evaluator.getVersion?.(),
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
                     };
                   }
 
@@ -330,8 +342,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       evaluatorTraceId,
                       // Read after `evaluate` so evaluators that learn their model from
                       // the `_evaluate` response have it by now.
-                      model: evaluator.getModel?.(),
-                      version: evaluator.getVersion?.(),
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
                     };
                   } catch (error) {
                     const message = toErrorMessage(error);
@@ -342,8 +354,8 @@ export class KibanaEvalsClient implements EvalsExecutorClient {
                       ...evaluatorSummary,
                       result: toErrorResult(message),
                       evaluatorTraceId,
-                      model: evaluator.getModel?.(),
-                      version: evaluator.getVersion?.(),
+                      model: readEvaluatorAttribute(() => evaluator.getModel?.()),
+                      version: readEvaluatorAttribute(() => evaluator.getVersion?.()),
                     };
                   }
                 })

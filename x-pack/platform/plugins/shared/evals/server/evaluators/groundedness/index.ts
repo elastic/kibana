@@ -46,17 +46,25 @@ export const groundednessEvaluator: EvaluatorDefinition = {
       },
     });
 
+    const score = calculateGroundednessScore(analysis);
+
     return {
       scores: [
-        {
-          name: 'groundedness',
-          score: calculateGroundednessScore(analysis),
-          label: analysis.summary_verdict,
-          explanation: analysis.summary_verdict,
-          metadata: {
-            ...analysis,
-          },
-        },
+        score === null
+          ? {
+              name: 'groundedness',
+              score: null,
+              label: 'error',
+              explanation: 'Judge output has no claim analysis to score',
+              metadata: { ...analysis },
+            }
+          : {
+              name: 'groundedness',
+              score,
+              label: analysis.summary_verdict,
+              explanation: analysis.summary_verdict,
+              metadata: { ...analysis },
+            },
       ],
     };
   },

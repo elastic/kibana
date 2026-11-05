@@ -133,7 +133,7 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
   // Helper function to create evaluator with common validation logic
   const quantitativeEvaluator = (
     name: string,
-    scoreCalculator: (analysis: CorrectnessAnalysis) => number,
+    scoreCalculator: (analysis: CorrectnessAnalysis) => number | null,
     summaryKey: keyof CorrectnessAnalysis['summary']
   ): Evaluator => ({
     evaluate: async ({ output, metadata }) => {
@@ -149,6 +149,14 @@ export function createQuantitativeCorrectnessEvaluators(): Evaluator[] {
       }
 
       const score = scoreCalculator(correctnessAnalysis);
+      if (score === null) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Correctness analysis has no claim analysis to score',
+          metadata: { ...(metadata ?? {}), correctnessAnalysis },
+        };
+      }
       const summaryText = correctnessAnalysis.summary[summaryKey];
 
       return {

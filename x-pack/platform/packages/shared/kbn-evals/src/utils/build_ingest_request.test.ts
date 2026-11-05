@@ -185,6 +185,41 @@ describe('buildIngestRequest', () => {
     expect(request.scores[0].evaluator.version).toBe('1.2.0');
   });
 
+  it('sends the task error message when the task threw', () => {
+    const requests = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: {
+        kind: 'event',
+        event: createEvent({
+          taskRun: {
+            ...createEvent().taskRun,
+            output: null,
+            taskError: { message: 'task blew up' },
+          },
+        }),
+      },
+    });
+
+    expect(requests[0].scores[0].task.error).toEqual({ message: 'task blew up' });
+  });
+
+  it('omits the task error when the task succeeded', () => {
+    const [request] = buildIngestRequest({
+      taskModel,
+      evaluatorModel,
+      repetitions: 1,
+      hostName: 'host-a',
+      gitMetadata: { branch: 'main', commitSha: 'abc123' },
+      source: { kind: 'event', event: createEvent() },
+    });
+
+    expect(request.scores[0].task).not.toHaveProperty('error');
+  });
+
   it('includes example metadata when taskRun.metadata is a plain object', () => {
     const requests = buildIngestRequest({
       taskModel,

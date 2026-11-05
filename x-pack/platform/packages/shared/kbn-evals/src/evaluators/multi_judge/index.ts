@@ -75,7 +75,7 @@ export function createMultiJudgeEvaluator(config: {
       if (scores.length === 0) {
         return {
           score: null,
-          label: 'no-scores',
+          label: 'error',
           explanation: 'No judges returned valid scores.',
           metadata: { judgeResults, failedJudges },
         };

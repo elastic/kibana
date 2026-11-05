@@ -193,6 +193,7 @@ export function createTraceBasedEvaluator({
 
         log.error(`Failed to evaluate ${name} for trace ${traceId}: ${errorMessage}`);
         return {
+          score: null,
           label: 'error',
           explanation: `Failed to retrieve ${name}: ${errorMessage}`,
         };

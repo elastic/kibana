@@ -117,6 +117,15 @@ export const TaskInfo = lazySchema(() =>
     trace_id: z.string().max(256).nullable().optional(),
     repetition_index: z.number().int(),
     output: z.object({}).catchall(z.unknown()).nullable().optional(),
+    /**
+     * Why the task produced no output. Present only when the task threw.
+     */
+    error: z
+      .object({
+        message: z.string().max(1024),
+      })
+      .describe('Why the task produced no output. Present only when the task threw.')
+      .optional(),
     model: Model,
   })
 );
@@ -238,7 +247,7 @@ export const EvaluatorStats = lazySchema(() =>
       max: z.number(),
       count: z.number().int(),
       /**
-       * Score documents with a null score (the evaluator or task could not produce a score). These are excluded from the other stats.
+       * Score documents with no score that are labelled `error` or `unavailable` (the evaluator or task could not produce a score). These are excluded from the other stats.
        */
       error_count: z.number().int().min(0).optional(),
     }),

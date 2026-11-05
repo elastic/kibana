@@ -130,6 +130,14 @@ export function createQuantitativeGroundednessEvaluator(): Evaluator {
       }
 
       const score = calculateGroundednessScore(groundednessAnalysis);
+      if (score === null) {
+        return {
+          score: null,
+          label: 'error',
+          explanation: 'Groundedness analysis has no claim analysis to score',
+          metadata: { ...(metadata ?? {}), groundednessAnalysis },
+        };
+      }
       const summaryText = groundednessAnalysis.summary_verdict;
 
       return {

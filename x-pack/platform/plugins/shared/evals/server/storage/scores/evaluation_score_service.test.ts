@@ -229,6 +229,28 @@ describe('EvaluationScoreService', () => {
       };
     };
 
+    const withTask = (
+      task: Partial<IngestScoresRequestBody['scores'][number]['task']>
+    ): IngestScoresRequestBody => {
+      const request = getBaseRequest();
+      return {
+        ...request,
+        scores: [{ ...request.scores[0], task: { ...request.scores[0].task, ...task } }],
+      };
+    };
+
+    it('persists the task error message when the task threw', async () => {
+      const documents = await captureDocuments(withTask({ error: { message: 'task blew up' } }));
+
+      expect(documents[0].task.error).toEqual({ message: 'task blew up' });
+    });
+
+    it('leaves the task error absent for a task that succeeded', async () => {
+      const documents = await captureDocuments(withTask({}));
+
+      expect(documents[0].task).not.toHaveProperty('error');
+    });
+
     it('prefers the model the evaluator reports over the request default', async () => {
       const perScoreModel = { id: 'gpt-4o', family: 'GPT', provider: 'OpenAI' };
       const documents = await captureDocuments(

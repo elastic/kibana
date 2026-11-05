@@ -316,7 +316,15 @@ export const buildStatsAggregation = () => ({
           score_stats: { extended_stats: { field: 'evaluator.score' } },
           score_median: { percentiles: { field: 'evaluator.score', percents: [50] } },
           // Null scores mean "could not score"; extended_stats skips them, so count them apart.
-          score_missing: { missing: { field: 'evaluator.score' } },
+          // Only error/unavailable labels count: analysis evaluators emit a null score on purpose.
+          score_error: {
+            filter: {
+              bool: {
+                must_not: [{ exists: { field: 'evaluator.score' } }],
+                filter: [{ terms: { 'evaluator.label': ['error', 'unavailable'] } }],
+              },
+            },
+          },
           evaluator_kind: { terms: { field: 'evaluator.kind', size: 1 } },
           // Family and provider are nested under the id so they stay correlated with their own
           // model. Sibling terms aggs would pair one judge's id with another's family when a
@@ -735,7 +743,7 @@ interface StatsAggregations {
             count?: number;
           };
           score_median?: { values?: Record<string, number | null> };
-          score_missing?: { doc_count?: number };
+          score_error?: { doc_count?: number };
           evaluator_kind?: TermsBucket;
           evaluator_model_id?: {
             buckets?: Array<{ key: string; family?: TermsBucket; provider?: TermsBucket }>;
@@ -814,7 +822,7 @@ export const parseStatsAggregationResponse = (
           min: scoreStats?.min ?? 0,
           max: scoreStats?.max ?? 0,
           count: scoreStats?.count ?? 0,
-          error_count: evaluatorBucket.score_missing?.doc_count ?? 0,
+          error_count: evaluatorBucket.score_error?.doc_count ?? 0,
         },
       };
     });

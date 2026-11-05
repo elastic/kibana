@@ -55,6 +55,25 @@ import { SaveAsWorkflowButton } from '../../components/save_as_workflow_button';
 import { resolvePrUrl } from '../../utils/pr_url';
 import * as i18n from './translations';
 
+/** Scores and errored scores both count as ingested; errors carry no score so `count` omits them. */
+export const sumScoresIngested = (stats: EvaluatorStats[]): number =>
+  stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0) + (stat.stats.error_count ?? 0), 0);
+
+export const MeanWithErrors: React.FC<{ mean: number; errorCount?: number }> = ({
+  mean,
+  errorCount,
+}) => (
+  <>
+    {mean.toFixed(2)}
+    {errorCount ? (
+      <EuiTextColor color="danger" data-test-subj="evalsExperimentDetailMeanErrorCount">
+        {' '}
+        ({i18n.getMeanErrorCountLabel(errorCount)})
+      </EuiTextColor>
+    ) : null}
+  </>
+);
+
 interface DatasetStatsGroup {
   datasetId: string;
   datasetName: string;
@@ -415,7 +434,7 @@ export const ExperimentDetailPage: React.FC = () => {
     if (!stats || stats.length === 0) {
       return undefined;
     }
-    const esScoresIngested = stats.reduce((sum, stat) => sum + (stat.stats.count ?? 0), 0);
+    const esScoresIngested = sumScoresIngested(stats);
     const exampleCountByDataset = new Map<string, number>();
     for (const stat of stats) {
       if (!exampleCountByDataset.has(stat.dataset_id)) {
@@ -459,7 +478,9 @@ export const ExperimentDetailPage: React.FC = () => {
         field: 'stats.mean',
         name: i18n.COLUMN_MEAN,
         sortable: true,
-        render: (value: number) => value.toFixed(2),
+        render: (value: number, item: EvaluatorStats) => (
+          <MeanWithErrors mean={value} errorCount={item.stats.error_count} />
+        ),
       },
       {
         field: 'stats.median',
