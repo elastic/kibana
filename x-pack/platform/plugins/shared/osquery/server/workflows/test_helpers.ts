@@ -8,8 +8,13 @@
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import type { KibanaApiCaller } from './lib/types';
 
-export const apiError = (status: number, message = 'failed') =>
-  new KibanaApiCallError({ status, headers: {}, body: { message }, message });
+export const apiError = (status: number, message = 'failed', code?: string) =>
+  new KibanaApiCallError({
+    status,
+    headers: {},
+    body: { message, ...(code ? { attributes: { code } } : {}) },
+    message,
+  });
 
 type Handler = (params: { query?: Record<string, unknown>; body?: unknown }) => unknown;
 

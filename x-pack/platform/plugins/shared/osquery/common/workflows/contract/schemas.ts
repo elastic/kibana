@@ -11,6 +11,7 @@ import {
   isWithinMaxWait,
   MAX_AGENT_IDS,
   MAX_AGENT_POLICY_ID_LENGTH,
+  MAX_AGENT_ID_LENGTH,
   MAX_AGENT_POLICY_IDS,
   MAX_ROWS,
   MAX_WAIT_LENGTH,
@@ -21,7 +22,11 @@ export type StepStatus = (typeof STEP_STATUSES)[number];
 
 /** Raw input fields shared by both steps, to be spread into `z.object`. */
 export const commonInputShape = () => ({
-  agent_ids: z.array(z.string().min(1)).min(1).max(MAX_AGENT_IDS).optional(),
+  agent_ids: z
+    .array(z.string().min(1).max(MAX_AGENT_ID_LENGTH))
+    .min(1)
+    .max(MAX_AGENT_IDS)
+    .optional(),
   agent_policy_ids: z
     .array(z.string().min(1).max(MAX_AGENT_POLICY_ID_LENGTH))
     .min(1)

@@ -10,10 +10,7 @@ import type { z } from '@kbn/zod/v4';
 import { KibanaApiCallError } from '@kbn/workflows-extensions/server';
 import { PreDispatchErrorCode } from '../../../common/workflows/contract/error_codes';
 import type { PreDispatchErrorCodeValue } from '../../../common/workflows/contract/error_codes';
-import {
-  AGENT_LIMIT_MESSAGE_PATTERN,
-  NO_AGENTS_FOUND_MESSAGE,
-} from '../../../common/workflows/contract/route_messages';
+import { RouteErrorCode } from '../../../common/workflows/contract/route_messages';
 
 /** Raised before dispatch: `details.code` is the contract's error code. */
 export const stepError = (
@@ -21,6 +18,9 @@ export const stepError = (
   message: string,
   type: 'ValidationError' | 'NotFoundError' | 'PermissionError' = 'ValidationError'
 ): ExecutionError => new ExecutionError({ type, message, details: { code } });
+
+const bodyCode = (error: KibanaApiCallError): unknown =>
+  (error.body as { attributes?: { code?: unknown } } | undefined)?.attributes?.code;
 
 const bodyMessage = (error: KibanaApiCallError): string => {
   const body = error.body as { message?: unknown } | undefined;
@@ -69,11 +69,11 @@ export const toDispatchRejection = (error: unknown): ExecutionError | undefined 
     );
   }
 
-  if (error.status === 400 && AGENT_LIMIT_MESSAGE_PATTERN.test(message)) {
+  if (error.status === 400 && bodyCode(error) === RouteErrorCode.AGENT_LIMIT_EXCEEDED) {
     return stepError(PreDispatchErrorCode.TARGET_LIMIT_EXCEEDED, message);
   }
 
-  if (error.status === 400 && message.includes(NO_AGENTS_FOUND_MESSAGE)) {
+  if (error.status === 400 && bodyCode(error) === RouteErrorCode.NO_AGENTS_FOUND) {
     return stepError(
       PreDispatchErrorCode.AGENTS_NOT_IN_SPACE,
       'No agents found for the selection: the agents are not in this space, or none of them is online.'

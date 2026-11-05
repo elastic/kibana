@@ -11,6 +11,7 @@ import { TARGET_AGENT_LIMIT } from '../../../../common/workflows/contract/budget
 import {
   agentLimitMessage,
   NO_AGENTS_FOUND_MESSAGE,
+  RouteErrorCode,
 } from '../../../../common/workflows/contract/route_messages';
 import { runQueryStepDefinition } from './run_query_step';
 import { apiError, createContextManager, createLogger, resultEdges } from '../../test_helpers';
@@ -243,20 +244,26 @@ describe('osquery.runQuery step', () => {
 
     it('maps the route agent ceiling to TARGET_LIMIT_EXCEEDED', async () => {
       const { result } = start({
-        [POST]: () => apiError(400, agentLimitMessage(1001, 1000)),
+        [POST]: () => apiError(400, agentLimitMessage(1001, 1000), RouteErrorCode.AGENT_LIMIT_EXCEEDED),
       });
 
       await expect(result).rejects.toMatchObject({ details: { code: 'TARGET_LIMIT_EXCEEDED' } });
     });
 
     it('maps the route 400 "No agents found" to AGENTS_NOT_IN_SPACE naming both causes', async () => {
-      const { result } = start({ [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE) });
+      const { result } = start({ [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE, RouteErrorCode.NO_AGENTS_FOUND) });
 
       const error = (await result.catch((e) => e)) as ExecutionError;
 
       expect(error.details).toEqual({ code: 'AGENTS_NOT_IN_SPACE' });
       expect(error.message).toMatch(/not in this space/);
       expect(error.message).toMatch(/online/);
+    });
+
+    it('does not map a 400 by its message alone', async () => {
+      const { result } = start({ [POST]: () => apiError(400, NO_AGENTS_FOUND_MESSAGE) });
+
+      await expect(result).rejects.toMatchObject({ details: { code: 'REQUEST_REJECTED' } });
     });
 
     it('maps a 403 on the POST to MISSING_PRIVILEGE', async () => {

@@ -29,9 +29,10 @@ const finishedStatus = (counters: QueryCounters): StepStatus => {
 };
 
 /**
- * First matching row of the status table; `undefined` means keep polling. `pending` is
- * `agents - responses`, so a duplicate response (Fleet delivers at least once) can make it
- * negative: anything at or below zero means every agent answered.
+ * First matching row of the status table; `undefined` means keep polling. `pending` is the
+ * targeted agents minus the distinct agents that responded, so a duplicate response (Fleet
+ * delivers at least once) does not change it. Anything at or below zero means every agent
+ * answered.
  */
 export const deriveStepStatus = (
   counters: QueryCounters,

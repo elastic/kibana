@@ -38,6 +38,9 @@ export const MAX_AGENT_POLICY_IDS = 10;
  * stay under the cap and an over-long id is an `INVALID_INPUT`, not a rejected request.
  */
 export const MAX_AGENT_POLICY_ID_LENGTH = 64;
+
+/** Longest accepted `agent_ids` entry (Fleet agent ids are UUIDs). */
+export const MAX_AGENT_ID_LENGTH = 64;
 /** Longest `wait_timeout` string (`1800s`, `30m`); the digits of the regex are unbounded. */
 export const MAX_WAIT_LENGTH = 8;
 /** Post-expansion ceiling: the live-query route has no bound of its own. */

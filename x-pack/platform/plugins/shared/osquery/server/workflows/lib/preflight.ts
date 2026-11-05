@@ -135,6 +135,8 @@ export const assertCanReadLiveQueries = async (contextManager: KibanaApiCaller):
       path: '/api/osquery/live_queries',
       // The route's default sort (`created_at`) is not mapped on the actions index and fails
       // the search; sort like the Live queries UI does.
+      // TODO: drop `sort` once GET /api/osquery/live_queries defaults to a mapped field (no
+      // issue filed yet; link it here when it is).
       query: { pageSize: 1, sort: '@timestamp' },
       headers: PUBLIC_API_HEADERS,
     });

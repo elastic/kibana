@@ -35,7 +35,7 @@ export const runQueryInputSchema = lazySchema(() =>
 export const runQueryOutputSchema = lazySchema(() =>
   z.object({
     ...queryResultShape(),
-    error_code: z.enum(Object.values(OutputErrorCode) as [string, ...string[]]).optional(),
+    error_code: z.enum(OutputErrorCode).optional(),
     action_id: z.string().optional(),
   })
 );

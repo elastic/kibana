@@ -29,6 +29,7 @@ import { getInternalSavedObjectsClientForSpaceId } from '../../utils/get_interna
 import {
   agentLimitMessage,
   NO_AGENTS_FOUND_MESSAGE,
+  RouteErrorCode,
 } from '../../../common/workflows/contract/route_messages';
 import type { DispatchEntryPoint } from './dispatch_source';
 import { resolveRuleRunDispatchSource } from './dispatch_source';
@@ -96,13 +97,18 @@ export const createActionHandler = async (
   );
 
   if (!selectedAgents.length) {
-    throw new CustomHttpRequestError(NO_AGENTS_FOUND_MESSAGE, 400);
+    throw new CustomHttpRequestError(
+      NO_AGENTS_FOUND_MESSAGE,
+      400,
+      RouteErrorCode.NO_AGENTS_FOUND
+    );
   }
 
   if (options.maxAgents !== undefined && selectedAgents.length > options.maxAgents) {
     throw new CustomHttpRequestError(
       agentLimitMessage(selectedAgents.length, options.maxAgents),
-      400
+      400,
+      RouteErrorCode.AGENT_LIMIT_EXCEEDED
     );
   }
 

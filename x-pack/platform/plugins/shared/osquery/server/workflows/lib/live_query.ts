@@ -213,7 +213,8 @@ export const readLiveQuery = async ({
     const detail = details.find((query) => query.action_id === spec.action_id);
     const counters = {
       responded: detail?.responded ?? 0,
-      // A duplicate agent response makes the route's `agents - responses` negative.
+      // Counted on distinct agents, so only a response from a non-targeted agent can make it
+      // negative.
       pending: Math.max(0, detail?.pending ?? state.agents_total),
       failed: detail?.failed ?? 0,
       successful: detail?.successful ?? 0,

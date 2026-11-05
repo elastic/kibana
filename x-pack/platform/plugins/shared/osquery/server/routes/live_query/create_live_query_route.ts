@@ -252,7 +252,11 @@ export const createLiveQueryRoute = (router: IRouter, osqueryContext: OsqueryApp
           });
         } catch (error) {
           if (error.statusCode === 400) {
-            return response.badRequest({ body: error });
+            return response.badRequest({
+              body: error.code
+                ? { message: error.message, attributes: { code: error.code } }
+                : error,
+            });
           }
 
           return response.customError({
