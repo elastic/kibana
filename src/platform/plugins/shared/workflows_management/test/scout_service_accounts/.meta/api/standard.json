@@ -1,5 +1,5 @@
 {
-  "sha1": "473b011978e18ebb29e74ae4cebfb9181b0f2dca",
+  "sha1": "ebeebe7348bf60f411743fa9e53eb55b82c85eab",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -70,8 +70,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 33,
-        "column": 32
+        "line": 39,
+        "column": 20
       }
     },
     {
@@ -84,8 +84,22 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 33,
-        "column": 32
+        "line": 39,
+        "column": 20
+      }
+    },
+    {
+      "id": "da471a0a48fcee6-bf7fd3cf2aa301c",
+      "title": "[NON-MKI] Workflow service accounts: deletion returns conflict when deleting a bound workflow with a paused execution",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-serverless-search",
+        "@local-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
+        "line": 39,
+        "column": 20
       }
     },
     {
@@ -98,8 +112,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 75,
-        "column": 24
+        "line": 77,
+        "column": 15
       }
     },
     {
@@ -112,8 +126,8 @@
       ],
       "location": {
         "file": "src/platform/plugins/shared/workflows_management/test/scout_service_accounts/api/tests/service_account_deletion.spec.ts",
-        "line": 102,
-        "column": 23
+        "line": 104,
+        "column": 26
       }
     },
     {
