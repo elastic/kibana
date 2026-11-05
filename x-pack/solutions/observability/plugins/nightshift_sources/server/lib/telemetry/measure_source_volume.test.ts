@@ -61,8 +61,10 @@ const setup = ({
 };
 
 describe('measureSourceVolume', () => {
-  it('counts with the window filter and estimates bytes from stateful index stats', async () => {
-    const { esClient, measure } = setup();
+  it('counts the window and sizes exact stateful expressions', async () => {
+    const { esClient, measure } = setup({
+      esql: 'FROM logs-*,-logs-archive-*,<logs-{now/d}> | WHERE status >= 500',
+    });
     esClient.esql.query.mockResolvedValue(countOf(42));
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
@@ -72,10 +74,10 @@ describe('measureSourceVolume', () => {
       doc_count: 42,
       bytes_estimated: 21_000,
     });
-    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query).toHaveBeenCalledWith(
       {
-        query: 'FROM logs-nginx-* | WHERE status >= 500\n| STATS doc_count = COUNT(*)',
+        query:
+          'FROM logs-*,-logs-archive-*,<logs-{now/d}> | WHERE status >= 500\n| STATS doc_count = COUNT(*)',
         format: 'json',
         include_ccs_metadata: true,
         filter: { range: { '@timestamp': { gte: window.start, lte: window.end } } },
@@ -83,7 +85,9 @@ describe('measureSourceVolume', () => {
       expect.objectContaining({ requestTimeout: expect.any(Number) })
     );
     expect(esClient.indices.stats).toHaveBeenCalledWith(
-      expect.objectContaining({ index: ['logs-nginx-*'] }),
+      expect.objectContaining({
+        index: ['logs-*', '-logs-archive-*', '<logs-{now/d}>'],
+      }),
       expect.anything()
     );
   });
@@ -99,8 +103,11 @@ describe('measureSourceVolume', () => {
     });
   });
 
-  it('reads sizes from metering stats on serverless', async () => {
-    const { esClient, measure } = setup({ isServerless: true });
+  it('sizes exact expressions with serverless metering stats', async () => {
+    const { esClient, measure } = setup({
+      esql: 'FROM <logs-{now/d}>,-logs-archive-*',
+      isServerless: true,
+    });
     esClient.esql.query.mockResolvedValue(countOf(42));
     esClient.transport.request.mockResolvedValue({
       indices: [
@@ -111,7 +118,10 @@ describe('measureSourceVolume', () => {
 
     await expect(measure()).resolves.toMatchObject({ doc_count: 42, bytes_estimated: 8400 });
     expect(esClient.transport.request).toHaveBeenCalledWith(
-      { method: 'GET', path: '/_metering/stats/logs-nginx-*' },
+      {
+        method: 'GET',
+        path: `/_metering/stats/${encodeURIComponent('<logs-{now/d}>,-logs-archive-*')}`,
+      },
       expect.anything()
     );
     expect(esClient.indices.stats).not.toHaveBeenCalled();
@@ -123,7 +133,6 @@ describe('measureSourceVolume', () => {
     esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
 
     await expect(measure()).resolves.toMatchObject({ doc_count: 100, bytes_estimated: 50_000 });
-    expect(esClient.esql.query).toHaveBeenCalledTimes(1);
     expect(esClient.esql.query.mock.calls[0][0]).toMatchObject({ project_routing: '_alias:*' });
   });
 

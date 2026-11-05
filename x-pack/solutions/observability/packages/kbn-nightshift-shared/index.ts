@@ -127,6 +127,7 @@ export {
   analyzeSourceQuery,
   getSourceCommandQuery,
   getSourceDocumentQuery,
+  getSourceLocalIndexExpressions,
   getSourceReadTargets,
   hasMultipleSourceIndices,
   validateSourceQuery,

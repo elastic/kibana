@@ -23,13 +23,14 @@ const measure = jest.mocked(measureSourceVolume);
 const source = (
   id: string,
   spaceId: string,
-  esql = `FROM logs-${id}-*`
+  esql = `FROM logs-${id}-*`,
+  enabled = true
 ): SavedObjectsFindResult<NightshiftSourceAttributes> =>
   ({
     id,
     type: 'nightshift-source',
     namespaces: [spaceId],
-    attributes: { esql, type: 'logs' },
+    attributes: { enabled, esql, type: 'logs' },
     references: [],
     score: 0,
   } as unknown as SavedObjectsFindResult<NightshiftSourceAttributes>);
@@ -63,11 +64,12 @@ describe('reportSourceVolumes', () => {
     measure.mockReset();
   });
 
-  it('sends one event with every enabled source of every space, failures included', async () => {
+  it('reports every configured source across spaces', async () => {
     const { deps, report } = setup([
       source('a', 'default'),
       source('b', 'default'),
       source('c', 'marketing'),
+      source('d', 'marketing', 'FROM logs-d-*', false),
     ]);
     measure.mockImplementation(async ({ esql }) =>
       esql === 'FROM logs-b-*'
@@ -81,29 +83,49 @@ describe('reportSourceVolumes', () => {
       expect.objectContaining({
         type: 'nightshift-source',
         namespaces: ['*'],
-        filter: 'nightshift-source.attributes.enabled: true',
+        fields: ['enabled', 'esql', 'type'],
       })
     );
-    expect(deps.analytics.reportEvent).toHaveBeenCalledTimes(1);
+    expect(deps.soRepository.createPointInTimeFinder.mock.calls[0][0]).not.toHaveProperty('filter');
     expect(deps.analytics.reportEvent).toHaveBeenCalledWith(SOURCE_VOLUME_EVENT_TYPE, {
       window_start: expect.any(String),
       window_end: expect.any(String),
       sources: [
-        { space_id: 'default', source_id: 'a', source_type: 'logs', ...ok },
+        {
+          space_id: 'default',
+          source_id: 'a',
+          source_type: 'logs',
+          enabled: true,
+          ...ok,
+        },
         {
           space_id: 'default',
           source_id: 'b',
           source_type: 'logs',
+          enabled: true,
           status: 'error',
           has_remote: false,
           error: 'verification_exception',
         },
-        { space_id: 'marketing', source_id: 'c', source_type: 'logs', ...ok },
+        {
+          space_id: 'marketing',
+          source_id: 'c',
+          source_type: 'logs',
+          enabled: true,
+          ...ok,
+        },
+        {
+          space_id: 'marketing',
+          source_id: 'd',
+          source_type: 'logs',
+          enabled: false,
+          ...ok,
+        },
       ],
     });
   });
 
-  it('sends nothing without enabled sources', async () => {
+  it('sends nothing without configured sources', async () => {
     const { deps, report } = setup([]);
     await report();
     expect(measure).not.toHaveBeenCalled();

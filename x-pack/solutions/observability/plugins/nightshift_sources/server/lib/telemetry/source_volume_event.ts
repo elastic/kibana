@@ -26,6 +26,7 @@ export interface SourceVolumeEntry extends SourceVolume {
   space_id: string;
   source_id: string;
   source_type: SourceType;
+  enabled: boolean;
 }
 
 export interface SourceVolumePayload {
@@ -62,6 +63,10 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
             _meta: {
               description: 'Kind of data the source reads: logs, metrics, traces or unknown',
             },
+          },
+          enabled: {
+            type: 'boolean',
+            _meta: { description: 'Whether the source is enabled' },
           },
           status: {
             type: 'keyword',
@@ -120,7 +125,7 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
       },
       _meta: {
         description:
-          'One entry per enabled source across every space. Each source is measured on its own query, so sources with overlapping index patterns count the same documents more than once; summing across sources can double count',
+          'One entry per configured source across every space. Each source is measured on its own query, so sources with overlapping index patterns count the same documents more than once; summing across sources can double count',
       },
     },
   },

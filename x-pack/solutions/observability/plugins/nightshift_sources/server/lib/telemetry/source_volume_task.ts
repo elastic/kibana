@@ -42,25 +42,24 @@ export interface SourceVolumeTaskDeps {
   logger: Logger;
 }
 
-interface EnabledSource {
+interface ConfiguredSource {
   id: string;
   spaceId: string;
-  attributes: Pick<NightshiftSourceAttributes, 'esql' | 'type'>;
+  attributes: Pick<NightshiftSourceAttributes, 'enabled' | 'esql' | 'type'>;
 }
 
 // Hidden type: the repository must be created with it included.
-const listEnabledSources = async (
+const listSources = async (
   soRepository: ISavedObjectsRepository,
   signal: AbortSignal
-): Promise<EnabledSource[]> => {
+): Promise<ConfiguredSource[]> => {
   const finder = soRepository.createPointInTimeFinder<NightshiftSourceAttributes>({
     type: NIGHTSHIFT_SOURCE_SO_TYPE,
     namespaces: ['*'],
     perPage: PAGE_SIZE,
-    filter: `${NIGHTSHIFT_SOURCE_SO_TYPE}.attributes.enabled: true`,
-    fields: ['esql', 'type'],
+    fields: ['enabled', 'esql', 'type'],
   });
-  const sources: EnabledSource[] = [];
+  const sources: ConfiguredSource[] = [];
   try {
     for await (const { saved_objects: savedObjects } of finder.find()) {
       signal.throwIfAborted();
@@ -75,7 +74,6 @@ const listEnabledSources = async (
   return sources;
 };
 
-/** One event per run with every enabled source of every space; an abort ends the run without one. */
 export const reportSourceVolumes = async (
   { analytics, esClient, soRepository, isServerless, cpsEnabled, logger }: SourceVolumeTaskDeps,
   signal: AbortSignal
@@ -86,21 +84,22 @@ export const reportSourceVolumes = async (
     end: new Date(end).toISOString(),
   };
 
-  const sources = await listEnabledSources(soRepository, signal);
+  const sources = await listSources(soRepository, signal);
   if (sources.length === 0) {
-    logger.debug('No enabled source to report');
+    logger.debug('No source to report');
     return;
   }
 
   const limit = pLimit(MAX_CONCURRENT_MEASUREMENTS);
   const entries: SourceVolumeEntry[] = await Promise.all(
-    sources.map(({ id, spaceId, attributes: { esql, type } }) =>
+    sources.map(({ id, spaceId, attributes: { enabled, esql, type } }) =>
       limit(async () => {
         signal.throwIfAborted();
         return {
           space_id: spaceId,
           source_id: id,
           source_type: type,
+          enabled,
           ...(await measureSourceVolume({
             esClient,
             esql,

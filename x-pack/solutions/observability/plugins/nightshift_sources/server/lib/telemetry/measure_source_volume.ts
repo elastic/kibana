@@ -9,7 +9,11 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { PROJECT_ROUTING_ALL } from '@kbn/cps-server-utils';
 import { isResponseError, type ElasticsearchErrorDetails } from '@kbn/es-errors';
-import { getSourceDocumentQuery, getSourceReadTargets } from '@kbn/nightshift-shared';
+import {
+  getSourceDocumentQuery,
+  getSourceLocalIndexExpressions,
+  getSourceReadTargets,
+} from '@kbn/nightshift-shared';
 import type { SourceVolume } from './source_volume_event';
 
 const COUNT_TIMEOUT_MS = 60_000;
@@ -102,7 +106,10 @@ const averageDocumentBytes = async ({
   try {
     if (isServerless) {
       const { indices = [] } = await esClient.transport.request<MeteringStatsResponse>(
-        { method: 'GET', path: `/_metering/stats/${indexPatterns.join(',')}` },
+        {
+          method: 'GET',
+          path: `/_metering/stats/${encodeURIComponent(indexPatterns.join(','))}`,
+        },
         { signal }
       );
       const docs = indices.reduce((sum, { num_docs: numDocs }) => sum + numDocs, 0);
@@ -153,7 +160,8 @@ export const measureSourceVolume = async ({
   let indexPatterns: string[];
   let hasRemote: boolean;
   try {
-    ({ indexPatterns, hasRemote } = getSourceReadTargets(esql));
+    indexPatterns = getSourceLocalIndexExpressions(esql);
+    ({ hasRemote } = getSourceReadTargets(esql));
   } catch {
     return { status: 'error', has_remote: false, error: 'invalid_query' };
   }
