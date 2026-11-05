@@ -15,6 +15,6 @@ export { selectDefaultTimeRange } from './time_range/select_default_time_range';
 export { buildVegaConfig } from './vega';
 export { generateVisualizationEsql } from './shared/generate_visualization_esql';
 export {
-  CUSTOM_CONTENT_ESQL_INSTRUCTIONS,
-  generateCustomContentEsql,
-} from './shared/custom_content_esql';
+  buildCustomContentConfig,
+  type ResolveCustomContentEsqlVariables,
+} from './custom_content/build_custom_content_config';

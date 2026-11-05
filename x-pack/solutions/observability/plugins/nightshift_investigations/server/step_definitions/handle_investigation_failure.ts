@@ -12,6 +12,7 @@ import { MAX_TEXT_LENGTH } from '@kbn/significant-events-schema';
 import { MAX_KEYWORD_LENGTH } from '../../common';
 import { INVESTIGATION_FAILED_TRIGGER_ID } from '../../common/workflows/triggers';
 import type { GetTriggerEmitter } from '../types';
+import { InvestigationFailureContextError } from '../client/errors';
 import { sendInvestigationNotifications } from '../lib/notifications/send_investigation_notifications';
 import type { InvestigationNotificationDeps } from '../lib/notifications/send_investigation_notifications';
 
@@ -44,7 +45,11 @@ export const handleInvestigationFailureStepDefinition = (
         workflow: { spaceId },
       } = context.contextManager.getContext();
       const client = deps.getInvestigationsClient(request, spaceId);
-      await client.ensureForFailure(investigationId, executionId, reason);
+      try {
+        await client.ensureForFailure(investigationId, executionId, reason);
+      } catch (error) {
+        if (!(error instanceof InvestigationFailureContextError)) throw error;
+      }
       const output = await sendInvestigationNotifications(deps, context, {
         investigationId,
         phase: 'failed',
@@ -59,6 +64,7 @@ export const handleInvestigationFailureStepDefinition = (
             if (lifecycleSubject) {
               emitter(INVESTIGATION_FAILED_TRIGGER_ID, {
                 investigation_id: investigationId,
+                execution_id: executionId,
                 subject: lifecycleSubject.subject,
                 trigger_type: lifecycleSubject.triggerType,
                 started_at: lifecycleSubject.startedAt,

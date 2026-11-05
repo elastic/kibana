@@ -227,6 +227,42 @@ describe('executeEsqlTool', () => {
     });
   });
 
+  describe('timeout_seconds', () => {
+    const schema = () => resolveToolSchema(executeEsqlTool(), false);
+
+    it('accepts 1 to 300 whole seconds, or none', async () => {
+      const { safeParse } = await schema();
+
+      expect(safeParse({ query: 'FROM logs' }).success).toBe(true);
+      expect(safeParse({ query: 'FROM logs', timeout_seconds: 1 }).success).toBe(true);
+      expect(safeParse({ query: 'FROM logs', timeout_seconds: 300 }).success).toBe(true);
+    });
+
+    it.each([0, 301, 1.5, -5])('rejects timeout_seconds %p', async (timeout_seconds) => {
+      const { safeParse } = await schema();
+
+      expect(safeParse({ query: 'FROM logs', timeout_seconds }).success).toBe(false);
+    });
+
+    it('converts seconds to milliseconds for the ES|QL helper', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100, include_frozen: false, timeout_seconds: 60 },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).toMatchObject({ timeoutMs: 60_000 });
+    });
+
+    it('passes no timeout to the ES|QL helper when the caller omits it', async () => {
+      await executeEsqlTool().handler(
+        { query: 'FROM logs', limit: 100, include_frozen: false },
+        createHandlerContext() as any
+      );
+
+      expect(executeEsqlMock.mock.calls[0][0]).not.toHaveProperty('timeoutMs');
+    });
+  });
+
   describe('filter', () => {
     it('forwards a supplied filter to the ES|QL helper', async () => {
       const tool = executeEsqlTool();

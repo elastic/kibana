@@ -727,7 +727,7 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     }
   }
   if (atomicRules?.length) {
-    lines.push('- Proposed atomic rules (already drafted from Tier 1 IOC hits):');
+    lines.push('- Proposed atomic rules (already drafted from IOC Hunt hits):');
     for (const rule of atomicRules.slice(0, 10)) {
       lines.push(`    • ${rule.rule_name}  [${rule.ioc_type}=${rule.ioc_value}]`);
     }
@@ -736,7 +736,9 @@ const renderArticleContext = (context: HuntBehaviorArticleContext | undefined): 
     }
   }
   if (lines.length === 0) return '';
-  return `\n\n--- ENVIRONMENT CONTEXT (Tier 1 hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join('\n')}`;
+  return `\n\n--- ENVIRONMENT CONTEXT (IOC Hunt hits) ---\n${CONTEXT_PREAMBLE}\n${lines.join(
+    '\n'
+  )}`;
 };
 
 export const huntBehavior = async (
