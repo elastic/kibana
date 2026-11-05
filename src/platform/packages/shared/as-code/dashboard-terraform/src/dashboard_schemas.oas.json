@@ -18805,7 +18805,8 @@
         "type": "object",
         "x-tf-variant": {
           "json_leaves": {
-            "data_source": "data_source_json"
+            "data_source": "data_source_json",
+            "thresholds[]": "value_json"
           },
           "key": "reference_line_layer"
         }
@@ -19106,7 +19107,8 @@
         "type": "object",
         "x-tf-variant": {
           "json_leaves": {
-            "data_source": "data_source_json"
+            "data_source": "data_source_json",
+            "thresholds[]": "value_json"
           },
           "key": "reference_line_layer"
         }
@@ -19425,7 +19427,8 @@
         "type": "object",
         "x-tf-variant": {
           "json_leaves": {
-            "data_source": "data_source_json"
+            "data_source": "data_source_json",
+            "thresholds[]": "value_json"
           },
           "key": "reference_line_layer"
         }

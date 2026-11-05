@@ -262,6 +262,50 @@ describe('createDashboardConverter', () => {
     );
   });
 
+  it('writes each reference-line threshold whole as the value_json of an object', () => {
+    const staticThreshold = {
+      operation: 'static_value',
+      value: 42,
+      axis: 'y2',
+      color: { type: 'static', color: '#E7664C' },
+      text: { visible: true },
+      fill: 'above',
+    };
+    const countThreshold = { operation: 'count', empty_as_null: false };
+    const { body, droppedFields, skippedPanels } = convert({
+      title: 'Reference lines',
+      panels: [
+        {
+          type: 'vis',
+          grid: { x: 0, y: 0, w: 24, h: 10 },
+          config: {
+            type: 'xy',
+            layers: [
+              {
+                type: 'line',
+                data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
+                y: [{ operation: 'count' }],
+              },
+              {
+                type: 'reference_lines',
+                data_source: { type: 'data_view_spec', index_pattern: 'logs-*' },
+                thresholds: [staticThreshold, countThreshold],
+              },
+            ],
+          },
+        },
+      ],
+    });
+
+    expect(skippedPanels).toEqual([]);
+    expect(droppedFields).toEqual([]);
+    const chart = at(body, 'panels', 0, 'vis_config', 'by_value', 'xy_chart_config');
+    expect(at(chart, 'layers', 1, 'reference_line_layer', 'thresholds')).toEqual([
+      { value_json: JSON.stringify(staticThreshold) },
+      { value_json: JSON.stringify(countThreshold) },
+    ]);
+  });
+
   it('names skipped panels by title, and keeps converting the rest', () => {
     const { body, skippedPanels } = convert({
       title: 'With a panel the provider does not support',

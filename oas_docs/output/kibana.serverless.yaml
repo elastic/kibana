@@ -190019,6 +190019,7 @@ components:
       x-tf-variant:
         json_leaves:
           data_source: data_source_json
+          thresholds[]: value_json
         key: reference_line_layer
     Kibana_HTTP_APIs_visXyReferenceLineLayerESQLStatic:
       additionalProperties: false
@@ -190194,6 +190195,7 @@ components:
       x-tf-variant:
         json_leaves:
           data_source: data_source_json
+          thresholds[]: value_json
         key: reference_line_layer
     Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL:
       additionalProperties: false
@@ -190366,6 +190368,7 @@ components:
       x-tf-variant:
         json_leaves:
           data_source: data_source_json
+          thresholds[]: value_json
         key: reference_line_layer
     Kibana_HTTP_APIs_visXyRefLineCountMetric:
       $ref: '#/components/schemas/Kibana_HTTP_APIs_visCountMetricOperation'

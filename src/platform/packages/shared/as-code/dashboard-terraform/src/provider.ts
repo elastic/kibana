@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-// 0.16.6 was the latest release when the mapping was compared with provider main at dde805511b27; a real
+// 0.16.6 was the latest release when the mapping was compared with provider main at 10a9ad705511; a real
 // `terraform plan` against it is still to run (tf-export 14). Bump with the provider's CI check, never on its own.
 /** The provider version this Kibana's mapping targets; exports require `>=` it. */
 export const TERRAFORM_PROVIDER = { source: 'elastic/elasticstack', version: '0.16.6' } as const;

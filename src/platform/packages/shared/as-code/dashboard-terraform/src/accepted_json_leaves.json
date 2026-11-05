@@ -40,6 +40,5 @@
   "Kibana_HTTP_APIs_visWaffleChart.data_source",
   "Kibana_HTTP_APIs_visWaffleChart.group_by[]",
   "Kibana_HTTP_APIs_visWaffleChart.metrics[]",
-  "Kibana_HTTP_APIs_visXyLegend",
-  "Kibana_HTTP_APIs_visXyReferenceLineLayerNoESQL.thresholds[]"
+  "Kibana_HTTP_APIs_visXyLegend"
 ]

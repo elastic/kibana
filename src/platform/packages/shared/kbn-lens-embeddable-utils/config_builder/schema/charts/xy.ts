@@ -765,7 +765,8 @@ const referenceLineLayerSchemaNoESQL = lazySchema(() =>
       id: 'visXyReferenceLineLayerNoESQL',
       ...tfVariant({
         key: 'reference_line_layer',
-        json_leaves: { data_source: 'data_source_json' },
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
       }),
       title: 'Reference Line Layer (DSL)',
       description: 'Reference line layer for standard queries',
@@ -792,7 +793,8 @@ const esqlReferenceLineLayerSchema = lazySchema(() =>
       id: 'visXyReferenceLineLayerESQL',
       ...tfVariant({
         key: 'reference_line_layer',
-        json_leaves: { data_source: 'data_source_json' },
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
       }),
       title: 'ES|QL Reference Line Layer',
       description: 'Reference lines defined by numeric columns from a layer-specific ES|QL query.',
@@ -1051,7 +1053,8 @@ const staticReferenceLineLayerSchemaForESQLCharts = lazySchema(() =>
       id: 'visXyReferenceLineLayerESQLStatic',
       ...tfVariant({
         key: 'reference_line_layer',
-        json_leaves: { data_source: 'data_source_json' },
+        // The provider holds a threshold whole in the value_json of an object.
+        json_leaves: { data_source: 'data_source_json', 'thresholds[]': 'value_json' },
       }),
       title: 'Static Reference Line Layer for ES|QL Charts',
       description: 'Reference lines defined by constant numeric values on ES|QL charts.',
