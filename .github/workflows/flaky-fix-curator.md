@@ -2,6 +2,9 @@
 name: Flaky Fix Curator
 description: Weekly pass over the Flaky Fix Retrospective findings. Turns repeated findings into one draft PR that sharpens the shared fix guidelines or the fixer, verifier and investigator prompts.
 on:
+  # TEST ONLY: registers the workflow on this branch so workflow_dispatch can target it.
+  push:
+    branches: [stelios/flaky-fix-curator-test]
   schedule: weekly on monday around 7:00
   workflow_dispatch:
     inputs:
@@ -78,7 +81,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: elastic/kibana
-          ref: main
+          ref: stelios/flaky-fix-curator-test
           sparse-checkout: .github/scripts
           persist-credentials: false
       - name: Collect the retrospective findings
