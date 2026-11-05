@@ -34,6 +34,7 @@ import {
 } from './services/agents/service_account_binding';
 import { createStorage as createAgentStorage } from './services/agents/persisted/client/storage';
 import { registerRoutes } from './routes';
+import { setSpaceDefaultAgent } from './services/space_settings';
 import { agentBuilderSpaceSettingsType } from './saved_objects';
 import { registerUISettings } from './ui_settings';
 import { getRunAgentStepDefinition, rerankStepDefinition } from './step_types';
@@ -437,6 +438,7 @@ export class AgentBuilderPlugin
       conversations,
       conversationTemplates,
       attachments,
+      spaceSettings,
     } = startServices;
     const runner = runnerFactory.getRunner();
 
@@ -508,6 +510,12 @@ export class AgentBuilderPlugin
           }),
       },
       conversationTemplates,
+      spaceSettings: {
+        getDefaultAgentId: async ({ request }) => (await spaceSettings.get(request)).defaultAgentId,
+        setDefaultAgentId: async ({ request, agentId }) => {
+          await setSpaceDefaultAgent({ spaceSettings, agents, request, defaultAgentId: agentId });
+        },
+      },
     };
   }
 

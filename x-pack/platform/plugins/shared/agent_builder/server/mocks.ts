@@ -106,6 +106,10 @@ const createStartContractMock = (): AgentBuilderPluginStartMock => {
       get: jest.fn(),
       list: jest.fn(),
     },
+    spaceSettings: {
+      getDefaultAgentId: jest.fn().mockResolvedValue(null),
+      setDefaultAgentId: jest.fn(),
+    },
   };
 };
 

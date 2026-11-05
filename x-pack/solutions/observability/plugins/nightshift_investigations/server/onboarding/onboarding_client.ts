@@ -20,7 +20,7 @@ import type {
   OnboardingSuggestionsStatus,
   StartOnboardingSuggestionsResponse,
 } from '../../common/onboarding';
-import { NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
+import { NIGHTSHIFT_ASSISTANT_AGENT_ID, NIGHTSHIFT_INVESTIGATION_AGENT_ID } from '../../common';
 import { installAssistantAgent } from '../lib/install_assistant_agent';
 import { installInvestigationAgent } from '../lib/install_investigation_agent';
 import { OnboardingUnavailableError } from './errors';
@@ -153,6 +153,17 @@ export const createOnboardingClient = ({
       });
       if (assistantEnabled) {
         await installAssistantAgent({ agentBuilder, spaceId, availability: agentAvailability });
+        // Enabling Nightshift makes its assistant the agent the space chats with by default, so
+        // users reach it from Agent Builder without picking it first. A failure here leaves the
+        // space's previous default and is not worth failing the setup for: the assistant is
+        // installed and selectable either way.
+        await agentBuilder.spaceSettings
+          .setDefaultAgentId({ request, agentId: NIGHTSHIFT_ASSISTANT_AGENT_ID })
+          .catch((error) => {
+            logger.warn(
+              `Could not make the Nightshift assistant the default agent of space "${spaceId}": ${error.message}`
+            );
+          });
       }
       await ensureFailureSweep?.(request, spaceId);
       logger.info(`Enabled Nightshift in space "${spaceId}": investigation agent installed`);

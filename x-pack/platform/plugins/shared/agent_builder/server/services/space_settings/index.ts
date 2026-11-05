@@ -10,3 +10,5 @@ export {
   type SpaceSettingsService,
   type AgentBuilderSpaceSettings,
 } from './space_settings_service';
+
+export { setSpaceDefaultAgent } from './set_default_agent';
