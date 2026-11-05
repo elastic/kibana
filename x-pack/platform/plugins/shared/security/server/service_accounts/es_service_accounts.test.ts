@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 
 import type { KibanaRequest } from '@kbn/core/server';
@@ -25,6 +26,7 @@ import { EsServiceAccounts } from './es_service_accounts';
 import { UIAM_SERVICE_ACCOUNT_MAX_ROLES } from './uiam_role_limits';
 import { licenseMock } from '../../common/licensing/index.mock';
 import { auditLoggerMock, auditServiceMock } from '../audit/mocks';
+import { securityMock } from '../mocks';
 import { securityTelemetry } from '../otel/instrumentation';
 
 jest.mock('../otel/instrumentation', () => ({
@@ -65,6 +67,12 @@ const staleCredential = () => ({
   createdBy: { type: 'user' as const, username: 'user' },
   token: 'AAEAAWtpYmFuYS9...',
 });
+
+/** An Elasticsearch error response with the given status. */
+const esError = (statusCode: number) =>
+  new errors.ResponseError(
+    securityMock.createApiResponse({ statusCode, body: { error: 'failed' } })
+  );
 
 /** The shape Elasticsearch returns for a scoped GET of a user-managed account. */
 const accountEntry = (overrides = {}) => ({
@@ -1225,6 +1233,36 @@ describe('EsServiceAccounts', () => {
         );
       });
 
+      it('lists again without profile uids when Elasticsearch cannot look up the profiles', async () => {
+        esClient.asCurrentUser.transport.request
+          .mockRejectedValueOnce(esError(500))
+          .mockResolvedValueOnce({ service_accounts: [queried('kibana/a', { created_by: user })] });
+
+        const [entry] = (await serviceAccounts.list(request)).serviceAccounts;
+
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+          1,
+          expect.objectContaining({ querystring: { with_profile_uid: true } })
+        );
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+          2,
+          expect.objectContaining({ querystring: { with_profile_uid: false } })
+        );
+        expect(entry.createdBy).toEqual({ type: 'user', username: 'ada' });
+        expect(logger.warn).toHaveBeenCalledWith(
+          expect.stringContaining(
+            'Failed to list service accounts with creator profiles, so retrying without them'
+          )
+        );
+      });
+
+      it.each([403, 400])('does not list again after a %d', async (statusCode) => {
+        esClient.asCurrentUser.transport.request.mockRejectedValueOnce(esError(statusCode));
+
+        await expect(serviceAccounts.list(request)).rejects.toMatchObject({ statusCode });
+        expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
+      });
+
       it('omits a creator Elasticsearch did not record, or reported in an unrecognized shape', async () => {
         esClient.asCurrentUser.transport.request.mockResolvedValueOnce({
           service_accounts: [
@@ -1457,6 +1495,41 @@ describe('EsServiceAccounts', () => {
         },
       });
       expect(getUserProfiles).toHaveBeenCalledWith(new Set(['u_ada']));
+    });
+
+    it('reads the account again without a profile uid when Elasticsearch cannot look up the profile', async () => {
+      esClient.asCurrentUser.transport.request
+        .mockRejectedValueOnce(esError(500))
+        .mockResolvedValueOnce(
+          accountEntry({ created_by: { username: 'ada', realm: 'saml1', realm_type: 'saml' } })
+        );
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).resolves.toMatchObject({
+        createdBy: { type: 'user', username: 'ada' },
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(
+        1,
+        READ_ACCOUNT_WITH_CREATOR,
+        { ignore: [404] }
+      );
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenNthCalledWith(2, READ_ACCOUNT, {
+        ignore: [404],
+      });
+      expect(getUserProfiles).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        expect.stringContaining(
+          'Failed to read service account [kibana/nightshift-relay] with creator profiles, so retrying without them'
+        )
+      );
+    });
+
+    it('does not read the account again after a 403', async () => {
+      esClient.asCurrentUser.transport.request.mockRejectedValueOnce(esError(403));
+
+      await expect(serviceAccounts.get(request, ACCOUNT_ID)).rejects.toMatchObject({
+        statusCode: 403,
+      });
+      expect(esClient.asCurrentUser.transport.request).toHaveBeenCalledTimes(1);
     });
 
     it('reads an account whose creator it cannot read, and warns about the creator', async () => {

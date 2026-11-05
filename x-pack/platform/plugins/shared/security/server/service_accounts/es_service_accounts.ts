@@ -513,18 +513,20 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
 
     // One more than the page, so that "is there another page" is answered by the same query
     // without trusting a total that a concurrent create could shift.
-    const { service_accounts: rawAccounts } = await esClient.transport.request<{
-      service_accounts: QueriedServiceAccount[];
-    }>({
-      method: 'POST',
-      path: '/_security/_query/service',
-      querystring: { with_profile_uid: true },
-      body: {
-        size: limit + 1,
-        sort: ['username'],
-        ...(after !== undefined ? { search_after: [after] } : {}),
-      },
-    });
+    const { service_accounts: rawAccounts } = await this.withCreatorProfileUids(
+      'list service accounts',
+      (withProfileUid) =>
+        esClient.transport.request<{ service_accounts: QueriedServiceAccount[] }>({
+          method: 'POST',
+          path: '/_security/_query/service',
+          querystring: { with_profile_uid: withProfileUid },
+          body: {
+            size: limit + 1,
+            sort: ['username'],
+            ...(after !== undefined ? { search_after: [after] } : {}),
+          },
+        })
+    );
 
     // An account whose principal Kibana cannot split is skipped rather than taken as a reason to
     // refuse the page: an oddity in one account must not make the whole directory unreadable.
@@ -616,6 +618,35 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       await this.isAssumable(esClient, principal, stored),
       fullNames
     );
+  }
+
+  /**
+   * Sends a read that asks Elasticsearch for creators' profile uids, and sends it again without
+   * them if Elasticsearch fails it. Elasticsearch fails the whole read when it cannot look up any
+   * one creator's profile, and its error asks the caller to retry without `with_profile_uid`.
+   * Without the uids, creators are named by username.
+   */
+  private async withCreatorProfileUids<T>(
+    action: string,
+    send: (withProfileUid: boolean) => Promise<T>
+  ): Promise<T> {
+    try {
+      return await send(true);
+    } catch (e) {
+      // Only a 5xx can be the profile lookup failing. A 4xx is about the read itself, and an error
+      // with no status got no answer from Elasticsearch, so a second try would fail the same way.
+      const statusCode = getErrorStatusCode(e);
+      if (typeof statusCode !== 'number' || statusCode < 500) {
+        throw e;
+      }
+
+      this.logger.warn(
+        `Failed to ${action} with creator profiles, so retrying without them: ${getDetailedErrorMessage(
+          e
+        )}`
+      );
+      return send(false);
+    }
   }
 
   /**
@@ -1101,18 +1132,22 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   ): Promise<ElasticsearchServiceAccount | undefined> {
     const principal = `${namespace}/${name}`;
 
-    const response = await esClient.transport.request<Record<string, unknown>>(
-      {
-        method: 'GET',
-        path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
-        // Asked for explicitly, because the API's default depends on the shape of the path.
-        // Kibana only ever manages user-managed accounts.
-        querystring: { type: 'user_managed', ...(withCreator && { with_profile_uid: true }) },
-      },
-      // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
-      // tightening upstream does not turn "no such account" into an error.
-      { ignore: [404] }
-    );
+    const send = (withProfileUid: boolean) =>
+      esClient.transport.request<Record<string, unknown>>(
+        {
+          method: 'GET',
+          path: `/_security/service/${encodeURIComponent(namespace)}/${encodeURIComponent(name)}`,
+          // Asked for explicitly, because the API's default depends on the shape of the path.
+          // Kibana only ever manages user-managed accounts.
+          querystring: { type: 'user_managed', ...(withProfileUid && { with_profile_uid: true }) },
+        },
+        // An unknown principal is an empty 200 rather than a 404. Ignore 404 as well, so a future
+        // tightening upstream does not turn "no such account" into an error.
+        { ignore: [404] }
+      );
+    const response = withCreator
+      ? await this.withCreatorProfileUids(`read service account [${principal}]`, send)
+      : await send(false);
 
     const entry = response?.[principal];
     if (entry === undefined) {
