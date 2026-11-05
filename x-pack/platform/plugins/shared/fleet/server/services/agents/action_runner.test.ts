@@ -14,6 +14,7 @@ import { appContextService } from '../app_context';
 
 import { ActionRunner, PIT_KEEP_ALIVE } from './action_runner';
 import { BulkActionTaskType } from './bulk_action_types';
+import { getAgentActions } from './actions';
 import { getAgentsByKuery, openPointInTime } from './crud';
 import { CHECK_TASK_INTERVAL_MINUTES, MAX_RETRY_COUNT } from './retry_helper';
 
@@ -26,6 +27,7 @@ jest.mock('../spaces/agent_namespaces', () => ({
 
 const mockedGetAgentsByKuery = getAgentsByKuery as jest.MockedFunction<typeof getAgentsByKuery>;
 const mockedOpenPointInTime = openPointInTime as jest.MockedFunction<typeof openPointInTime>;
+const mockedGetAgentActions = getAgentActions as jest.MockedFunction<typeof getAgentActions>;
 
 const logger = loggerMock.create();
 
@@ -96,6 +98,7 @@ describe('ActionRunner', () => {
     };
     jest.spyOn(appContextService, 'getBulkActionsResolver').mockReturnValue(resolver as any);
     mockedOpenPointInTime.mockResolvedValue('fresh-pit');
+    mockedGetAgentActions.mockResolvedValue([]);
   });
 
   const createRunner = (actionParams = {}, retryParams = {}) =>
@@ -131,8 +134,9 @@ describe('ActionRunner', () => {
 
       await runner.runActionAsyncWithRetry();
 
+      // the cursor matches the count: both describe "everything through batch 2 is done"
       expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(CHECK_TASK_ID, {
-        searchAfter: ['agent-1'],
+        searchAfter: ['agent-3'],
         nbAgentsProcessed: 4,
       });
       // the first batch is checkpointed too
@@ -358,6 +362,41 @@ describe('ActionRunner', () => {
       await createRunner({ total: 2 }).runActionAsyncWithRetry();
 
       expect(mockedOpenPointInTime).not.toHaveBeenCalled();
+    });
+
+    it('does not count a batch the dedupe guard skips', async () => {
+      mockAgentPages(2, 2);
+      // an action document already covers the first batch, as after an overlapping resume
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
+      ] as any);
+
+      await createRunner().runActionAsyncWithRetry();
+
+      // 4 agents paged, but only the second batch was actually actioned
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ nbAgentsProcessed: 2, searchAfter: ['agent-3'] })
+      );
+    });
+
+    it('does not inflate the count when a resume re-reads a batch', async () => {
+      // resuming from a cursor that already covers batch 1
+      mockAgentPages(2, 2);
+      mockedGetAgentActions.mockResolvedValue([
+        { agents: ['agent-0'], type: 'POLICY_REASSIGN' },
+      ] as any);
+
+      await createRunner(
+        {},
+        { nbAgentsProcessed: 2, searchAfter: ['agent-1'] }
+      ).runActionAsyncWithRetry();
+
+      // the skipped batch is not counted again, so the total stays truthful
+      expect(resolver.updateCheckTaskState).toHaveBeenLastCalledWith(
+        CHECK_TASK_ID,
+        expect.objectContaining({ nbAgentsProcessed: 4 })
+      );
     });
 
     it('carries the cumulative processed count onto a retry', async () => {

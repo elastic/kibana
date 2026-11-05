@@ -364,7 +364,9 @@ describe('createRetryTask', () => {
       expect(result).toEqual({ state: expect.objectContaining({ resumeCount: 1 }) });
     });
 
-    it('drops the expired point in time when resuming', async () => {
+    it('keeps the original point in time when resuming, so the cursor stays meaningful', async () => {
+      // the saved cursor's implicit _shard_doc tiebreaker only means anything inside the point in
+      // time that produced it; a stall shorter than the keep alive leaves it usable
       const doRetry = jest.fn().mockResolvedValue({ actionId: 'action1' });
 
       await createRetryTask(
@@ -377,7 +379,7 @@ describe('createRetryTask', () => {
         esClient,
         soClient,
         expect.anything(),
-        expect.objectContaining({ pitId: undefined, searchAfter: ['lastAgent'] })
+        expect.objectContaining({ pitId: 'stale-pit', searchAfter: ['lastAgent'] })
       );
     });
 
@@ -444,7 +446,6 @@ describe('createRetryTask', () => {
         expect.objectContaining({
           searchAfter: ['legacy'],
           nbAgentsProcessed: 30000,
-          pitId: undefined,
         })
       );
     });

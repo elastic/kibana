@@ -348,11 +348,10 @@ const runCheckTask = async (
     // A check task scheduled before this change kept its checkpoint in params rather than state.
     searchAfter: state.searchAfter ?? params.retryParams?.searchAfter,
     nbAgentsProcessed: state.nbAgentsProcessed ?? params.retryParams?.nbAgentsProcessed,
-    // The params still carry the point in time the API handler opened when the action started.
-    // We only get here after at least one interval without progress, and every search renews it
-    // for pitKeepAlive only, so it is long gone. Clearing it makes the runner open a fresh one,
-    // which keeps the sort shape compatible with the saved cursor.
-    pitId: undefined,
+    // The point in time the API handler opened is kept rather than cleared. A stall shorter than
+    // its keep alive leaves it valid, and the saved cursor's implicit `_shard_doc` tiebreaker is
+    // only meaningful inside the point in time that produced it. If it has expired the search
+    // 404s, and that handler clears it so the next run opens a fresh one.
   });
 
   // Intentionally not awaited: the runner outlives this task's 1m timeout. The catch is what

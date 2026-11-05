@@ -255,7 +255,7 @@ export abstract class ActionRunner {
     }
   }
 
-  private async processBatch(agents: Agent[]): Promise<{ actionId: string }> {
+  private async processBatch(agents: Agent[]): Promise<{ actionId: string; skipped?: boolean }> {
     if (this.retryParams.retryCount) {
       try {
         const actions = await getAgentActions(this.esClient, this.actionParams!.actionId!);
@@ -269,7 +269,7 @@ export abstract class ActionRunner {
                   `skipping batch as there is already an action document present with last agent ids, actionId: ${this
                     .actionParams!.actionId!}`
                 );
-              return { actionId: this.actionParams.actionId! };
+              return { actionId: this.actionParams.actionId!, skipped: true };
             }
           }
         }
@@ -331,14 +331,18 @@ export abstract class ActionRunner {
       return { actionId: this.actionParams.actionId! }; // stop executing if there are no more results
     }
 
-    await this.processBatch(currentAgents);
+    const firstBatch = await this.processBatch(currentAgents);
     let allAgentsProcessed = currentAgents.length;
-    this.nbAgentsProcessed += currentAgents.length;
+    if (!firstBatch.skipped) {
+      this.nbAgentsProcessed += currentAgents.length;
+    }
+    // The cursor is advanced only once the batch is processed, so a runner that dies mid-batch
+    // leaves a checkpoint pointing before it. Cursor and count always describe the same point:
+    // advancing the count without the cursor would re-fetch a batch on resume and count it twice.
+    this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
     await this.updateCheckpoint();
 
     while (allAgentsProcessed < res.total) {
-      const lastAgent = currentAgents[currentAgents.length - 1];
-      this.retryParams.searchAfter = lastAgent.sort!;
       const nextPage = await getAgents();
       if (nextPage.pit) {
         pitId = nextPage.pit;
@@ -351,10 +355,13 @@ export abstract class ActionRunner {
           .debug('currentAgents returned 0 hits, returning from bulk action query');
         break; // stop executing if there are no more results
       }
-      await this.processBatch(currentAgents);
+      const batch = await this.processBatch(currentAgents);
       allAgentsProcessed += currentAgents.length;
-      this.nbAgentsProcessed += currentAgents.length;
+      if (!batch.skipped) {
+        this.nbAgentsProcessed += currentAgents.length;
+      }
       // updating check task with latest checkpoint (this.retryParams.searchAfter)
+      this.retryParams.searchAfter = currentAgents[currentAgents.length - 1].sort!;
       await this.updateCheckpoint();
     }
 
