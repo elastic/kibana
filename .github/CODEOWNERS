@@ -872,7 +872,7 @@ src/platform/plugins/private/image_embeddable @elastic/kibana-dashboards
 src/platform/plugins/private/input_control_vis @elastic/kibana-dashboards
 src/platform/plugins/private/inspect_component @elastic/appex-sharedux
 src/platform/plugins/private/interactive_setup @elastic/kibana-security
-src/platform/plugins/private/interactive_setup/test/plugins/test_endpoints @elastic/kibana-security
+src/platform/plugins/private/interactive_setup_test_endpoints @elastic/kibana-security
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
 src/platform/plugins/private/kibana_usage_collection @elastic/kibana-core
 src/platform/plugins/private/links @elastic/kibana-dashboards
@@ -955,6 +955,7 @@ src/platform/plugins/shared/workflows_execution_engine @elastic/workflows-eng
 src/platform/plugins/shared/workflows_extensions @elastic/workflows-eng
 src/platform/plugins/shared/workflows_management @elastic/workflows-eng
 src/platform/test
+src/platform/test_plugins/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/analytics/plugins/analytics_ftr_helpers @elastic/kibana-core
 src/platform/test/analytics/plugins/analytics_plugin_a @elastic/kibana-core
 src/platform/test/common/plugins/newsfeed @elastic/kibana-core
@@ -980,7 +981,6 @@ src/platform/test/plugin_functional/plugins/core_plugin_route_timeouts @elastic/
 src/platform/test/plugin_functional/plugins/core_provider_plugin @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/data_search @elastic/kibana-discover
 src/platform/test/plugin_functional/plugins/elasticsearch_client_plugin @elastic/kibana-core
-src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
 src/platform/test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 src/platform/test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-dashboards
 src/platform/test/plugin_functional/plugins/rendering_plugin @elastic/kibana-core
@@ -1333,6 +1333,22 @@ x-pack/platform/plugins/shared/task_manager @elastic/response-ops
 x-pack/platform/plugins/shared/triggers_actions_ui @elastic/response-ops
 x-pack/platform/plugins/shared/usage_api @elastic/kibana-core
 x-pack/platform/test
+x-pack/platform/test_plugins/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
+x-pack/platform/test_plugins/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
+x-pack/platform/test_plugins/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
+x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
+x-pack/platform/test_plugins/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/packages/helpers @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/audit_log @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/features_provider @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/oidc_provider @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/saml_provider @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/service_accounts @elastic/kibana-security
+x-pack/platform/test_plugins/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
+x-pack/platform/test_plugins/security_functional/plugins/test_endpoints @elastic/kibana-security
+x-pack/platform/test_plugins/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
+x-pack/platform/test_plugins/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
+x-pack/platform/test_plugins/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/agent_builder_sml/plugins/sml_test_types @elastic/workchat-eng
 x-pack/platform/test/alerting_api_integration/common/plugins/aad @elastic/response-ops
 x-pack/platform/test/alerting_api_integration/common/plugins/actions_simulators @elastic/response-ops
@@ -1344,34 +1360,18 @@ x-pack/platform/test/cases_api_integration/common/plugins/cases @elastic/securit
 x-pack/platform/test/cases_api_integration/common/plugins/observability @elastic/security-investigations
 x-pack/platform/test/cases_api_integration/common/plugins/security_solution @elastic/security-investigations
 x-pack/platform/test/cloud_integration/plugins/saml_provider @elastic/kibana-core
-x-pack/platform/test/encrypted_saved_objects_api_integration/plugins/api_consumer_plugin @elastic/kibana-security
-x-pack/platform/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 x-pack/platform/test/functional_embedded/plugins/iframe_embedded @elastic/kibana-core
 x-pack/platform/test/functional_execution_context/plugins/alerts @elastic/kibana-core
 x-pack/platform/test/functional_with_es_ssl/plugins/alerts @elastic/response-ops
 x-pack/platform/test/functional_with_es_ssl/plugins/cases @elastic/security-investigations
-x-pack/platform/test/licensing_plugin/plugins/test_feature_usage @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/event_log @elastic/response-ops
-x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-security
 x-pack/platform/test/plugin_api_integration/plugins/sample_task_plugin @elastic/response-ops
 x-pack/platform/test/plugin_api_perf/plugins/task_manager_performance @elastic/response-ops
 x-pack/platform/test/reporting_api_integration/plugins/reporting_fixture @elastic/response-ops
 x-pack/platform/test/reporting_api_integration/plugins/reporting_test_routes @elastic/response-ops
-x-pack/platform/test/saved_object_api_integration/common/plugins/saved_object_test_plugin @elastic/kibana-security
 x-pack/platform/test/search_inference_endpoints/plugins/search_inference_endpoints_fixture @elastic/search-ml-ux
-x-pack/platform/test/security_api_integration/packages/helpers @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/audit_log @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/features_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/oidc_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/saml_provider @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/service_accounts @elastic/kibana-security
-x-pack/platform/test/security_api_integration/plugins/user_profiles_consumer @elastic/kibana-security
-x-pack/platform/test/security_functional/plugins/test_endpoints @elastic/kibana-security
-x-pack/platform/test/spaces_api_integration/common/plugins/access_control_test_plugin @elastic/kibana-security
-x-pack/platform/test/spaces_api_integration/common/plugins/spaces_test_plugin @elastic/kibana-security
 x-pack/platform/test/task_manager/plugins/service_accounts @elastic/response-ops
-x-pack/platform/test/ui_capabilities/common/plugins/foo_plugin @elastic/kibana-security
 x-pack/platform/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
 x-pack/platform/test/usage_collection/plugins/stack_management_usage_test @elastic/kibana-core
 x-pack/solutions/observability/packages/alert-details @elastic/nightshift-sre-agent-team
@@ -2343,7 +2343,7 @@ x-pack/platform/plugins/shared/ml/server/models/data_recognizer/modules/security
 /src/platform/test/interpreter_functional @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/blob/main/test/interpreter_functional/plugins/kbn_tp_run_pipeline/kibana.jsonc#L4
 /src/platform/test/api_integration/apis/general/*.js @elastic/kibana-core # Assigned per https://github.com/elastic/kibana/pull/199795/files/894a8ede3f9d0398c5af56bf5a82654a9bc0610b#r1846691639
 x-pack/platform/test/plugin_api_integration/*.ts @elastic/kibana-core @elastic/response-ops # Shared files across test suites owned by Core and Response Ops
-/x-pack/platform/test/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
+/x-pack/platform/test_plugins/plugin_api_integration/plugins/feature_usage_test @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/plugins/elasticsearch_client @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/licensed_feature_usage @elastic/kibana-core
 x-pack/platform/test/plugin_api_integration/test_suites/platform/ @elastic/kibana-core
@@ -2523,7 +2523,7 @@ packages/kbn-eslint-plugin-eslint/rules/no_unsafe_hash.js @elastic/kibana-securi
 /src/platform/packages/shared/kbn-std/src/is_internal_url.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.test.ts @elastic/kibana-core @elastic/kibana-security
 /src/platform/packages/shared/kbn-std/src/parse_next_url.ts @elastic/kibana-core @elastic/kibana-security
-/src/platform/test/plugin_functional/plugins/hardening @elastic/kibana-security
+/src/platform/test_plugins/plugin_functional/plugins/hardening @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/core_plugins/rendering.ts @elastic/kibana-security
 /src/platform/test/plugin_functional/test_suites/hardening @elastic/kibana-security
 /x-pack/platform/test/accessibility/apps/group1/login_page.ts @elastic/kibana-security

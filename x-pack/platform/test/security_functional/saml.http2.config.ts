@@ -28,7 +28,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   const kibanaPort = kibanaFunctionalConfig.get('servers.kibana.port');
   const idpPath = resolve(
     __dirname,
-    '../security_api_integration/plugins/saml_provider/metadata.xml'
+    '../../test_plugins/security_api_integration/plugins/saml_provider/metadata.xml'
   );
 
   return configureHTTP2({

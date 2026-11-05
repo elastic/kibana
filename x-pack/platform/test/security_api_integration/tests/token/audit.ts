@@ -18,7 +18,10 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Audit Log', function () {
-    const logFilePath = resolve(__dirname, '../../packages/helpers/audit/token.log');
+    const logFilePath = resolve(
+      __dirname,
+      '../../../../test_plugins/security_api_integration/packages/helpers/audit/token.log'
+    );
     const logFile = new FileWrapper(logFilePath, retry);
 
     beforeEach(async () => {
