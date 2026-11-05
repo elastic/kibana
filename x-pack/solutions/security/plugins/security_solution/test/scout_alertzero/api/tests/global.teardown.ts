@@ -8,6 +8,9 @@
 import { globalTeardownHook } from '@kbn/scout-security';
 import { restoreRuntimeSettings } from '../fixtures/runtime_settings';
 
-globalTeardownHook('Restore the AlertZero runtime advanced settings', async ({ kbnClient, log }) => {
-  await restoreRuntimeSettings({ kbnClient, log, suiteKey: 'security_solution_api' });
-});
+globalTeardownHook(
+  'Restore the AlertZero runtime advanced settings',
+  async ({ kbnClient, log }) => {
+    await restoreRuntimeSettings({ kbnClient, log, suiteKey: 'security_solution_api' });
+  }
+);

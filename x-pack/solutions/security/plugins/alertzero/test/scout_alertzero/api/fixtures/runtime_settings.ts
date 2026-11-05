@@ -51,7 +51,9 @@ export const applyAlertAnalysisSetting = async ({
     const { data } = await kbnClient.request<{
       settings?: Record<string, { userValue?: unknown }>;
     }>({ method: 'GET', path: KIBANA_SETTINGS_PATH, description: 'read advanced settings' });
-    const prior = { [ALERT_ANALYSIS_SETTING]: data.settings?.[ALERT_ANALYSIS_SETTING]?.userValue ?? null };
+    const prior = {
+      [ALERT_ANALYSIS_SETTING]: data.settings?.[ALERT_ANALYSIS_SETTING]?.userValue ?? null,
+    };
     mkdirSync(dirname(STATE_FILE), { recursive: true });
     writeFileSync(STATE_FILE, JSON.stringify(prior, null, 2));
   }

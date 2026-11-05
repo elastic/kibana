@@ -8,6 +8,9 @@
 import { globalSetupHook } from '@kbn/scout-security';
 import { applyAlertAnalysisSetting } from '../fixtures/runtime_settings';
 
-globalSetupHook('Turn on alert analysis for the Alert Triage worker', async ({ kbnClient, log }) => {
-  await applyAlertAnalysisSetting({ kbnClient, log });
-});
+globalSetupHook(
+  'Turn on alert analysis for the Alert Triage worker',
+  async ({ kbnClient, log }) => {
+    await applyAlertAnalysisSetting({ kbnClient, log });
+  }
+);
