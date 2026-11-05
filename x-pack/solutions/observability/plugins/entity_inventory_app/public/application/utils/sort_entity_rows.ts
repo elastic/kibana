@@ -5,19 +5,13 @@
  * 2.0.
  */
 
-import type {
-  InventoryCellScalar,
-  InventoryCellValue,
-  InventoryRow,
-} from '../../inventory_api/types';
+import type { InventoryCellValue, InventoryRow } from '../../inventory_api/types';
+import { getFirstScalar } from './get_first_scalar';
 
 export interface EntityRowSortingColumn {
   id: string;
   direction: 'asc' | 'desc';
 }
-
-const toSortScalar = (value: InventoryCellValue | undefined): InventoryCellScalar =>
-  Array.isArray(value) ? value[0] ?? null : value ?? null;
 
 const compareScalars = (a: string | number | boolean, b: string | number | boolean): number => {
   if (typeof a === 'number' && typeof b === 'number') {
@@ -44,8 +38,8 @@ export const sortEntityRows = (
 
   return rows.slice().sort((rowA, rowB) => {
     for (const { id, direction } of sortingColumns) {
-      const a = toSortScalar(getSortValue(rowA, id));
-      const b = toSortScalar(getSortValue(rowB, id));
+      const a = getFirstScalar(getSortValue(rowA, id));
+      const b = getFirstScalar(getSortValue(rowB, id));
       if (a === null || b === null) {
         if (a !== b) {
           return a === null ? 1 : -1;

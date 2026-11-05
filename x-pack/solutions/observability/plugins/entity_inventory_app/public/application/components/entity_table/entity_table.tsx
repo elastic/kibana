@@ -12,7 +12,8 @@ import type {
   EuiDataGridStyle,
   EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
-import { EuiDataGrid, EuiPanel } from '@elastic/eui';
+import { EuiButtonEmpty, EuiDataGrid, EuiPanel } from '@elastic/eui';
+import { getEbtProps } from '@kbn/ebt-click';
 import { UI_SETTINGS } from '@kbn/data-service';
 import type {
   InventoryCellValue,
@@ -20,19 +21,22 @@ import type {
   InventoryListResponse,
   InventoryRow,
 } from '../../../inventory_api/types';
+import {
+  ENTITY_INVENTORY_EBT_ACTIONS,
+  ENTITY_INVENTORY_EBT_ELEMENTS,
+} from '../../../ebt_constants';
 import { useKibana } from '../../../hooks/use_kibana';
 import { formatCellValue } from '../../utils/format_cell_value';
 import { sortEntityRows } from '../../utils/sort_entity_rows';
 import { getColumnLabel } from './column_labels';
 import { EntityCell, EntityNameCell } from './entity_table_cells';
-import { EntityTableResetButton } from './entity_table_reset_button';
 import {
   NAME_COLUMN_ID,
   getColumnValue,
   getDefaultVisibleColumns,
   getDisplayConfig,
 } from './entity_type_config';
-import { getTableAriaLabel } from './translations';
+import { RESET_TO_DEFAULT_LABEL, getTableAriaLabel } from './translations';
 import { PAGE_SIZE_OPTIONS, useEntityTableState } from './use_entity_table_state';
 
 /** Row rules only and a shaded header, as in the design's list tables. */
@@ -133,7 +137,24 @@ export const EntityTable = ({ entityType, list }: EntityTableProps) => {
       showSortSelector: true,
       showDisplaySelector: false,
       showFullScreenSelector: false,
-      additionalControls: { right: <EntityTableResetButton entityType={type} onReset={reset} /> },
+      additionalControls: {
+        right: (
+          <EuiButtonEmpty
+            size="xs"
+            color="text"
+            iconType="undo"
+            onClick={reset}
+            data-test-subj="entityInventoryTableReset"
+            {...getEbtProps({
+              action: ENTITY_INVENTORY_EBT_ACTIONS.RESET_TABLE,
+              element: ENTITY_INVENTORY_EBT_ELEMENTS.ENTITY_TABLE,
+              detail: type,
+            })}
+          >
+            {RESET_TO_DEFAULT_LABEL}
+          </EuiButtonEmpty>
+        ),
+      },
     }),
     [type, reset]
   );

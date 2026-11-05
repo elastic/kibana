@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useCallback, useState } from 'react';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import type { InventoryRow } from '../../../inventory_api/types';
 
@@ -31,7 +31,12 @@ export const useEntityTableState = ({
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
-  useEffect(() => setPageIndex(0), [rows]);
+  // Adjusting state while rendering, rather than in an effect, avoids a frame at a stale page.
+  const [pageRows, setPageRows] = useState(rows);
+  if (pageRows !== rows) {
+    setPageRows(rows);
+    setPageIndex(0);
+  }
 
   const onSort = useCallback((nextSortingColumns: SortingColumns) => {
     setSortingColumns(nextSortingColumns);

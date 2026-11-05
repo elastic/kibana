@@ -13,6 +13,7 @@ import type {
   InventoryRow,
 } from '../../../inventory_api/types';
 import type { EntityInventoryEntityCategory } from '../../../types';
+import { getFirstScalar } from '../../utils/get_first_scalar';
 
 /** The entity type each page lists. All resources lists groups instead (#6340). */
 export const ENTITY_TYPE_BY_CATEGORY: Readonly<
@@ -97,7 +98,7 @@ export const getDefaultVisibleColumns = (
   type: string,
   columns: readonly InventoryListColumn[]
 ): string[] => {
-  const { defaultVisibleColumns } = getDisplayConfig(type);
+  const { defaultVisibleColumns, mergedColumns } = getDisplayConfig(type);
   if (!defaultVisibleColumns) {
     return [
       NAME_COLUMN_ID,
@@ -106,7 +107,6 @@ export const getDefaultVisibleColumns = (
     ];
   }
   const available = new Set(columns.map(({ name }) => name));
-  const { mergedColumns } = getDisplayConfig(type);
   return defaultVisibleColumns.filter(
     (id) => id === NAME_COLUMN_ID || id in mergedColumns || available.has(id)
   );
@@ -118,9 +118,8 @@ export const getFirstValue = (
   fields: readonly string[]
 ): InventoryCellScalar => {
   for (const field of fields) {
-    const value = row[field];
-    const scalar = Array.isArray(value) ? value[0] : value;
-    if (scalar !== null && scalar !== undefined) {
+    const scalar = getFirstScalar(row[field]);
+    if (scalar !== null) {
       return scalar;
     }
   }

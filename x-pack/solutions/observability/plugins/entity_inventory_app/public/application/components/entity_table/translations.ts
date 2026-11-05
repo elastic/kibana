@@ -6,6 +6,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
+import type {
+  InventorySourceError,
+  InventoryUnavailableColumn,
+} from '../../../inventory_api/types';
 
 export const getTableAriaLabel = (typeName: string) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.ariaLabel', {
@@ -48,15 +52,7 @@ export const DIAGNOSTICS_TITLE = i18n.translate(
   { defaultMessage: 'Some data sources returned incomplete results' }
 );
 
-export const getSourceErrorText = ({
-  indexPattern,
-  status,
-  reason,
-}: {
-  indexPattern: string;
-  status: number | null;
-  reason: string;
-}) =>
+export const getSourceErrorText = ({ indexPattern, status, reason }: InventorySourceError) =>
   status === null
     ? i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.sourceError', {
         defaultMessage: '{indexPattern}: {reason}',
@@ -70,10 +66,7 @@ export const getSourceErrorText = ({
 export const getUnavailableColumnText = ({
   column,
   indexPattern,
-}: {
-  column: string;
-  indexPattern: string;
-}) =>
+}: Pick<InventoryUnavailableColumn, 'column' | 'indexPattern'>) =>
   i18n.translate('xpack.entityInventoryApp.entityTable.diagnostics.unavailableColumn', {
     defaultMessage: '{column} is not available in {indexPattern}',
     values: { column, indexPattern },
