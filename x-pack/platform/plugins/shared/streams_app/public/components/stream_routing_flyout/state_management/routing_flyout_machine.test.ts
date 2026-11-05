@@ -30,6 +30,8 @@ const startFlyout = (overrides: Partial<Omit<RoutingFlyoutInput, 'parentRef'>> =
     input: {
       target: { kind: 'line', line },
       rules: getNewRoutingNodeRules(line),
+      signals: ['logs'],
+      availableSignals: ['logs', 'traces'],
       editable: true,
       parentRef: parent,
       ...overrides,
@@ -43,7 +45,13 @@ describe('routingFlyoutMachine', () => {
     const { flyout, requests } = startFlyout();
     const { context } = flyout.getSnapshot();
     expect(context.rules).toEqual([
-      { key: 'rule-0', condition: undefined, action: 'move', base: { destinations: ['es-logs'] } },
+      {
+        key: 'rule-0',
+        condition: undefined,
+        action: 'move',
+        telemetry: ['logs'],
+        base: { destinations: ['es-logs'] },
+      },
     ]);
     expect(hasCatchAllRule(context.rules)).toBe(true);
     expect(context.hasChanges).toBe(false);
@@ -55,6 +63,7 @@ describe('routingFlyoutMachine', () => {
         type: 'routing.save',
         target: { kind: 'line', line },
         rules: [{ destinations: ['es-logs'] }],
+        supportedTelemetry: ['logs'],
       },
     ]);
   });
@@ -65,7 +74,10 @@ describe('routingFlyoutMachine', () => {
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'attributes["team"]', value: 'a' }, action: 'copy' },
+      changes: {
+        condition: { field: 'attributes["team"]', operator: 'equals', value: 'a' },
+        action: 'copy',
+      },
     });
     flyout.send({ type: 'flyout.save' });
 
@@ -75,13 +87,54 @@ describe('routingFlyoutMachine', () => {
     ]);
   });
 
+  it('widens the routing node to the signals its rules handle', () => {
+    const { flyout, requests } = startFlyout();
+    flyout.send({ type: 'rule.add' });
+    flyout.send({
+      type: 'rule.update',
+      key: 'rule-1',
+      changes: {
+        condition: { field: 'body', operator: 'equals', value: 'x' },
+        telemetry: ['traces', 'logs'],
+      },
+    });
+    flyout.send({ type: 'flyout.save' });
+
+    expect(requests[0].supportedTelemetry).toEqual(['logs', 'traces']);
+    // The catch-all keeps handling logs only, so it now names its signal.
+    expect(requests[0].rules).toEqual([
+      { when: 'body == "x"', destinations: [] },
+      { destinations: ['es-logs'], telemetry: ['logs'] },
+    ]);
+  });
+
+  it('keeps rule signals and cannot save a rule without any', () => {
+    const { flyout, requests } = startFlyout({
+      target: { kind: 'pipeline', pipelineId: 'routing' },
+      rules: [{ when: 'body == "x"', destinations: ['es-logs'], telemetry: ['logs'] }],
+      signals: ['logs', 'traces'],
+    });
+    expect(flyout.getSnapshot().context.rules[0].telemetry).toEqual(['logs']);
+
+    flyout.send({ type: 'rule.update', key: 'rule-0', changes: { telemetry: [] } });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests).toEqual([]);
+
+    flyout.send({ type: 'rule.update', key: 'rule-0', changes: { telemetry: ['logs', 'traces'] } });
+    flyout.send({ type: 'flyout.save' });
+    expect(requests[0]).toMatchObject({
+      supportedTelemetry: ['logs', 'traces'],
+      rules: [{ when: 'body == "x"', destinations: ['es-logs'], telemetry: ['logs', 'traces'] }],
+    });
+  });
+
   it('warns once no rule is left without a condition', () => {
     const { flyout } = startFlyout();
     flyout.send({ type: 'rule.add' });
     flyout.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'body', value: 'x' } },
+      changes: { condition: { field: 'body', operator: 'equals', value: 'x' } },
     });
     expect(hasCatchAllRule(flyout.getSnapshot().context.rules)).toBe(true);
 

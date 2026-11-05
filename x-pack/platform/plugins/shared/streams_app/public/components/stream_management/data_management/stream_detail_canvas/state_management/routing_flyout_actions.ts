@@ -17,6 +17,8 @@ import {
   canEditPipelineRoutes,
   canRouteLine,
   getPipelineRoutes,
+  getPipelineRoutingSignals,
+  getRoutableLineSignals,
   routeLine,
   writePipelineRoutes,
 } from '../../../../../services/unit_connections';
@@ -47,19 +49,39 @@ export const getRoutingFlyoutInput = (
 ): RoutingFlyoutInput | undefined => {
   if (target.kind === 'pipeline') {
     const rules = getPipelineRoutes(unit, target.pipelineId);
+    const { current, available } = getPipelineRoutingSignals(unit, target.pipelineId);
     return rules.length > 0
-      ? { target, rules, editable: canEditPipelineRoutes(unit, target.pipelineId), parentRef }
+      ? {
+          target,
+          rules,
+          signals: current,
+          availableSignals: available,
+          editable: canEditPipelineRoutes(unit, target.pipelineId),
+          parentRef,
+        }
       : undefined;
   }
-  return canRouteLine(unit, target.line)
-    ? { target, rules: getNewRoutingNodeRules(target.line), editable: true, parentRef }
-    : undefined;
+  if (!canRouteLine(unit, target.line)) {
+    return undefined;
+  }
+  const { current, available } = getRoutableLineSignals(unit, target.line);
+  return {
+    target,
+    rules: getNewRoutingNodeRules(target.line),
+    signals: current,
+    availableSignals: available,
+    editable: true,
+    parentRef,
+  };
 };
 
-const draftRoutingSave = (unit: Unit, { target, rules }: RoutingSaveRequest): Unit =>
+const draftRoutingSave = (
+  unit: Unit,
+  { target, rules, supportedTelemetry }: RoutingSaveRequest
+): Unit =>
   target.kind === 'line'
-    ? routeLine(unit, target.line, rules)
-    : writePipelineRoutes(unit, target.pipelineId, rules);
+    ? routeLine(unit, target.line, rules, supportedTelemetry)
+    : writePipelineRoutes(unit, target.pipelineId, rules, supportedTelemetry);
 
 /** The guard and the action of one `routing.save` transition receive the same event. */
 const draftsBySaveEvent = new WeakMap<RoutingSaveRequest, Unit>();

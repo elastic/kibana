@@ -286,7 +286,7 @@ describe('canvas routing flyout', () => {
     ref.send({
       type: 'rule.update',
       key: 'rule-1',
-      changes: { condition: { field: 'body', value: 'x' }, action: 'copy' },
+      changes: { condition: { field: 'body', operator: 'equals', value: 'x' }, action: 'copy' },
     });
     ref.send({ type: 'flyout.save' });
 

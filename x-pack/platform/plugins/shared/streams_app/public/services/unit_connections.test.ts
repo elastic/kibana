@@ -10,6 +10,8 @@ import {
   canEditPipelineRoutes,
   canRouteLine,
   getPipelineRoutes,
+  getPipelineRoutingSignals,
+  getRoutableLineSignals,
   routeLine,
   writePipelineRoutes,
   canConnectSourceToDestination,
@@ -1310,6 +1312,51 @@ describe('routeLine from a routing rule', () => {
     const line = ruleLine(1, 'es-logs');
     expect(canRouteLine(unit, line)).toBe(false);
     expect(routeLine(unit, line, [{ destinations: ['es-logs'] }])).toBe(unit);
+  });
+});
+
+describe('routing signals', () => {
+  const narrowedUnit = (): Unit => {
+    const unit = routeLine(
+      processedUnit(['es-logs']),
+      { origin: processing('main'), destinationId: 'es-logs' },
+      [{ destinations: ['es-logs'] }]
+    );
+    unit.unit.sources = [
+      ...(unit.unit.sources ?? []),
+      { id: 'otlp-input', name: 'OTLP', type: 'otlp', supported_telemetry: ['logs', 'traces'] },
+    ];
+    return unit;
+  };
+
+  it('offers the signals the incoming source sends beyond those of a narrowed routing node', () => {
+    expect(getPipelineRoutingSignals(narrowedUnit(), 'main')).toEqual({
+      current: ['logs'],
+      available: ['logs', 'traces'],
+    });
+  });
+
+  it('offers what the source sends for a new routing node on its line', () => {
+    const unit = narrowedUnit();
+    expect(
+      getRoutableLineSignals(unit, { origin: processing('main'), destinationId: 'x' })
+    ).toEqual({ current: ['logs'], available: ['logs', 'traces'] });
+  });
+
+  it('widens a routing node to the signals its rules handle', () => {
+    const next = writePipelineRoutes(
+      narrowedUnit(),
+      'main',
+      [
+        { destinations: ['es-logs'], telemetry: ['logs'] },
+        { when: 'true', destinations: [] },
+      ],
+      ['logs', 'traces']
+    );
+    expect(next.unit.pipelines.find(({ id }) => id === 'main')?.supported_telemetry).toEqual([
+      'logs',
+      'traces',
+    ]);
   });
 });
 

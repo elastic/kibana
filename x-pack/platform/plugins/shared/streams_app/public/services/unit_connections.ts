@@ -696,7 +696,8 @@ export const canEditPipelineRoutes = (unit: Unit, pipelineId: string): boolean =
 export const writePipelineRoutes = (
   unit: Unit,
   pipelineId: string,
-  routes: readonly RouteRule[]
+  routes: readonly RouteRule[],
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
 ): Unit => {
   const pipelineIndex = findPipelineIndex(unit, pipelineId);
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -706,7 +707,8 @@ export const writePipelineRoutes = (
   return writePipeline(
     unit,
     pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes)
+    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+    supportedTelemetry
   );
 };
 
@@ -1043,7 +1045,8 @@ const routePipelineLine = (
   unit: Unit,
   origin: UnitConnectionOrigin,
   destinationId: string,
-  routes: readonly RouteRule[]
+  routes: readonly RouteRule[],
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
 ): Unit => {
   let routable = unit;
   let pipelineIndex: number;
@@ -1068,7 +1071,8 @@ const routePipelineLine = (
   return writePipeline(
     routable,
     pipelineIndex,
-    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes)
+    withRoutes(withIdentifiers(pipeline.config, PIPELINE_ENTRY.destinations, []), routes),
+    supportedTelemetry
   );
 };
 
@@ -1081,7 +1085,8 @@ const routeRuleLine = (
   unit: Unit,
   rule: RouteRuleRef,
   destinationId: string,
-  routes: readonly RouteRule[]
+  routes: readonly RouteRule[],
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
 ): Unit => {
   const pipelineIndex = findPipelineIndex(unit, rule.pipelineId);
   const pipeline = unit.unit.pipelines[pipelineIndex];
@@ -1104,7 +1109,7 @@ const routeRuleLine = (
     ...unit.unit.pipelines,
     {
       id: childId,
-      supported_telemetry: [...ruleSignals(pipeline, rule.ruleIndex)],
+      supported_telemetry: [...(supportedTelemetry ?? ruleSignals(pipeline, rule.ruleIndex))],
       config: [{ name: PIPELINE_ENTRY.routes, value: [...routes] }],
     },
   ]);
@@ -1112,25 +1117,108 @@ const routeRuleLine = (
 };
 
 /**
- * Routes one drawn line through a new routing node with `routes`. Returns
- * `unit` unchanged when the line cannot be routed or `routes` is empty.
+ * Routes one drawn line through a new routing node with `routes`, handling
+ * `supportedTelemetry` when given. Returns `unit` unchanged when the line
+ * cannot be routed or `routes` is empty.
  */
 export const routeLine = (
   unit: Unit,
   { origin, destinationId }: UnitRoutableLine,
-  routes: readonly RouteRule[]
+  routes: readonly RouteRule[],
+  supportedTelemetry?: UnitPipeline['supported_telemetry']
 ): Unit => {
   if (routes.length === 0) {
     return unit;
   }
   return origin.kind === 'route'
-    ? routeRuleLine(unit, origin.rule, destinationId, routes)
-    : routePipelineLine(unit, origin, destinationId, routes);
+    ? routeRuleLine(unit, origin.rule, destinationId, routes, supportedTelemetry)
+    : routePipelineLine(unit, origin, destinationId, routes, supportedTelemetry);
 };
 
 /** Whether {@link routeLine} can put a routing node on the line. */
 export const canRouteLine = (unit: Unit, line: UnitRoutableLine): boolean =>
   routeLine(unit, line, [{ destinations: [line.destinationId] }]) !== unit;
+
+/** The signals a routing node handles, and those it could handle from what flows into it. */
+export interface RoutingSignals {
+  current: UnitSignal[];
+  available: UnitSignal[];
+}
+
+const sourceSignals = (unit: Unit, sourceIds: readonly string[]): UnitSignal[] =>
+  sourceIds.reduce<UnitSignal[]>(
+    (signals, id) =>
+      unionSignals(
+        signals,
+        unit.unit.sources?.find((source) => source.id === id)?.supported_telemetry ?? []
+      ),
+    []
+  );
+
+/**
+ * Signals that flow into a pipeline: those its sources send, and those the
+ * rules delegating to it carry. A routing node narrowed on publish can be
+ * widened again up to these.
+ */
+const incomingSignals = (
+  unit: Unit,
+  pipelineId: string,
+  visited: ReadonlySet<string> = new Set()
+): UnitSignal[] => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, pipelineId)];
+  if (!pipeline || visited.has(pipelineId)) {
+    return [];
+  }
+  const seen = new Set([...visited, pipelineId]);
+  const delegated = unit.unit.pipelines.flatMap((parent) =>
+    readRoutes(parent.config).flatMap((route, ruleIndex) =>
+      isDelegatingRoute(route) && route.pipelines.includes(pipelineId) && !seen.has(parent.id)
+        ? [...ruleSignals(parent, ruleIndex)]
+        : []
+    )
+  );
+  return unionSignals(
+    sourceSignals(unit, readEntryIds(pipeline.config, PIPELINE_ENTRY.sources)),
+    delegated
+  );
+};
+
+const withCurrent = (
+  current: readonly UnitSignal[],
+  incoming: readonly UnitSignal[]
+): RoutingSignals => ({
+  current: [...current],
+  available: unionSignals(incoming, current),
+});
+
+/** Signals of the routing node of `pipelineId`. */
+export const getPipelineRoutingSignals = (unit: Unit, pipelineId: string): RoutingSignals => {
+  const pipeline = unit.unit.pipelines[findPipelineIndex(unit, pipelineId)];
+  return pipeline
+    ? withCurrent(pipeline.supported_telemetry, incomingSignals(unit, pipelineId))
+    : withCurrent([], []);
+};
+
+/** Signals a new routing node on the line starts with, and those it can take on. */
+export const getRoutableLineSignals = (
+  unit: Unit,
+  { origin, destinationId }: UnitRoutableLine
+): RoutingSignals => {
+  if (origin.kind === 'route') {
+    const pipeline = unit.unit.pipelines[findPipelineIndex(unit, origin.rule.pipelineId)];
+    const current = pipeline ? ruleSignals(pipeline, origin.rule.ruleIndex) : [];
+    return withCurrent(current, incomingSignals(unit, origin.rule.pipelineId));
+  }
+  if (origin.kind === GRAPH_ENDPOINT_KIND.source) {
+    const pipeline =
+      unit.unit.pipelines[
+        findUnprocessedSourcePipelineIndex(unit.unit.pipelines, origin.id, destinationId)
+      ];
+    const incoming = sourceSignals(unit, [origin.id]);
+    return withCurrent(pipeline?.supported_telemetry ?? incoming, incoming);
+  }
+  return getPipelineRoutingSignals(unit, origin.ref.pipelineId);
+};
 
 export const canConnectRouteToTarget = (
   unit: Unit,

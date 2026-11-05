@@ -14,15 +14,29 @@ describe('routing rule conditions', () => {
   });
 
   it('round-trips a field matched against a value', () => {
-    const when = serializeCondition({ field: 'attributes["service.name"]', value: 'api' });
+    const when = serializeCondition({
+      field: 'attributes["service.name"]',
+      operator: 'equals',
+      value: 'api',
+    });
     expect(when).toBe('attributes["service.name"] == "api"');
-    expect(parseWhen(when)).toEqual({ field: 'attributes["service.name"]', value: 'api' });
+    expect(parseWhen(when)).toEqual({
+      field: 'attributes["service.name"]',
+      operator: 'equals',
+      value: 'api',
+    });
+  });
+
+  it('round-trips a field that does not equal a value', () => {
+    const when = serializeCondition({ field: 'body', operator: 'notEquals', value: 'x' });
+    expect(when).toBe('body != "x"');
+    expect(parseWhen(when)).toEqual({ field: 'body', operator: 'notEquals', value: 'x' });
   });
 
   it('escapes quotes and backslashes in the value', () => {
-    const when = serializeCondition({ field: 'body', value: 'say "hi" \\o/' });
+    const when = serializeCondition({ field: 'body', operator: 'equals', value: 'say "hi" \\o/' });
     expect(when).toBe('body == "say \\"hi\\" \\\\o/"');
-    expect(parseWhen(when)).toEqual({ field: 'body', value: 'say "hi" \\o/' });
+    expect(parseWhen(when)).toEqual({ field: 'body', operator: 'equals', value: 'say "hi" \\o/' });
   });
 
   it('keeps other OTTL conditions as written', () => {
@@ -32,6 +46,6 @@ describe('routing rule conditions', () => {
   });
 
   it('leaves a rule with an empty field without a condition', () => {
-    expect(serializeCondition({ field: '  ', value: 'x' })).toBeUndefined();
+    expect(serializeCondition({ field: '  ', operator: 'notEquals', value: 'x' })).toBeUndefined();
   });
 });

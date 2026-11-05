@@ -13,12 +13,15 @@ import {
   EuiDroppable,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiIconTip,
   EuiSpacer,
+  EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { OnDragEndResponder } from '@hello-pangea/dnd';
 import { i18n } from '@kbn/i18n';
 import { KbnWarningCallout } from '@kbn/ui-callout';
+import type { UnitSignal } from '../../services/unit_pipeline';
 import { RoutingRuleRow } from './rule_row';
 import {
   hasCatchAllRule,
@@ -28,6 +31,7 @@ import {
 
 interface RoutingRuleListProps {
   rules: RoutingRuleDraft[];
+  availableSignals: UnitSignal[];
   editable: boolean;
   onAdd: () => void;
   onChange: (key: string, changes: RoutingRuleChanges) => void;
@@ -37,6 +41,7 @@ interface RoutingRuleListProps {
 
 export function RoutingRuleList({
   rules,
+  availableSignals,
   editable,
   onAdd,
   onChange,
@@ -56,6 +61,47 @@ export function RoutingRuleList({
 
   return (
     <>
+      <EuiFlexGroup alignItems="center" gutterSize="s" responsive={false}>
+        <EuiFlexItem grow={false}>
+          <EuiTitle size="xs">
+            <h2>
+              {i18n.translate('xpack.streams.routingFlyout.rulesTitle', {
+                defaultMessage: 'Routing rules',
+              })}
+            </h2>
+          </EuiTitle>
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <EuiIconTip
+            type="info"
+            color="subdued"
+            title={i18n.translate('xpack.streams.routingFlyout.rulesHelpTitle', {
+              defaultMessage: 'How routing rules work',
+            })}
+            content={i18n.translate('xpack.streams.routingFlyout.rulesHelpText', {
+              defaultMessage:
+                'We check rules top to bottom and send data to the first match. Anything left over goes to a route with no condition.',
+            })}
+            iconProps={{ 'data-test-subj': 'streamsRoutingFlyoutRulesHelp' }}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem />
+        {editable ? (
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              iconType="plusCircle"
+              size="s"
+              onClick={onAdd}
+              data-test-subj="streamsRoutingFlyoutAddRule"
+            >
+              {i18n.translate('xpack.streams.routingFlyout.addRule', {
+                defaultMessage: 'Add rule',
+              })}
+            </EuiButton>
+          </EuiFlexItem>
+        ) : null}
+      </EuiFlexGroup>
+      <EuiSpacer size="m" />
       {!hasCatchAllRule(rules) ? (
         <>
           <KbnWarningCallout
@@ -87,6 +133,7 @@ export function RoutingRuleList({
                     <RoutingRuleRow
                       rule={rule}
                       position={index + 1}
+                      availableSignals={availableSignals}
                       editable={editable}
                       onChange={onChange}
                       onDelete={onDelete}
@@ -100,22 +147,6 @@ export function RoutingRuleList({
           </EuiFlexGroup>
         </EuiDroppable>
       </EuiDragDropContext>
-
-      {editable ? (
-        <>
-          <EuiSpacer size="m" />
-          <EuiButton
-            iconType="plusCircle"
-            size="s"
-            onClick={onAdd}
-            data-test-subj="streamsRoutingFlyoutAddRule"
-          >
-            {i18n.translate('xpack.streams.routingFlyout.addRule', {
-              defaultMessage: 'Add rule',
-            })}
-          </EuiButton>
-        </>
-      ) : null}
     </>
   );
 }

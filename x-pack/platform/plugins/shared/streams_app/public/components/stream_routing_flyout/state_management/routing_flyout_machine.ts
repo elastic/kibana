@@ -6,10 +6,11 @@
  */
 
 import { assign, sendTo, setup, type ActorRefFrom, type AnyActorRef } from 'xstate';
-import type { RouteRule } from '../../../services/unit_pipeline';
+import type { RouteRule, UnitSignal } from '../../../services/unit_pipeline';
 import type { UnitRoutableLine } from '../../../services/unit_connections';
 import type { RoutingAction } from '../../streams_layout/routing/types';
 import {
+  createEmptyCondition,
   parseWhen,
   serializeCondition,
   type RoutingRuleCondition,
@@ -28,6 +29,8 @@ export interface RoutingRuleDraft {
   /** `undefined` for a rule with no condition, which matches all remaining data. */
   condition?: RoutingRuleCondition;
   action: RoutingAction;
+  /** Signals the rule handles; never empty. */
+  telemetry: UnitSignal[];
   /** The rule as saved: its targets, processors and other fields are written back unchanged. */
   base: RouteRule;
 }
@@ -35,6 +38,10 @@ export interface RoutingRuleDraft {
 export interface RoutingFlyoutInput {
   target: RoutingFlyoutTarget;
   rules: RouteRule[];
+  /** Signals the routing node handles; rules without their own `telemetry` carry these. */
+  signals: UnitSignal[];
+  /** Signals that flow into the routing node, which its rules can choose from. */
+  availableSignals: UnitSignal[];
   editable: boolean;
   parentRef: AnyActorRef;
 }
@@ -42,6 +49,8 @@ export interface RoutingFlyoutInput {
 export interface RoutingFlyoutContext {
   target: RoutingFlyoutTarget;
   rules: RoutingRuleDraft[];
+  signals: UnitSignal[];
+  availableSignals: UnitSignal[];
   editable: boolean;
   hasChanges: boolean;
   saveError?: string;
@@ -49,7 +58,9 @@ export interface RoutingFlyoutContext {
   parentRef: AnyActorRef;
 }
 
-export type RoutingRuleChanges = Partial<Pick<RoutingRuleDraft, 'condition' | 'action'>>;
+export type RoutingRuleChanges = Partial<
+  Pick<RoutingRuleDraft, 'condition' | 'action' | 'telemetry'>
+>;
 
 export type RoutingFlyoutEvent =
   | { type: 'rule.add' }
@@ -65,31 +76,62 @@ export interface RoutingSaveRequest {
   type: 'routing.save';
   target: RoutingFlyoutTarget;
   rules: RouteRule[];
+  /** Every signal the rules handle, which the routing node is widened or narrowed to. */
+  supportedTelemetry: UnitSignal[];
 }
 
 /** Whether a rule with no condition keeps the data the other rules do not match. */
 export const hasCatchAllRule = (rules: readonly RoutingRuleDraft[]): boolean =>
   rules.some(({ condition }) => serializeCondition(condition) === undefined);
 
-const toDraft = (rule: RouteRule, index: number): RoutingRuleDraft => ({
-  key: `rule-${index}`,
-  condition: parseWhen(rule.when),
-  action: rule.action ?? DEFAULT_ROUTING_ACTION,
-  base: rule,
-});
+const toDraft =
+  (signals: readonly UnitSignal[]) =>
+  (rule: RouteRule, index: number): RoutingRuleDraft => ({
+    key: `rule-${index}`,
+    condition: parseWhen(rule.when),
+    action: rule.action ?? DEFAULT_ROUTING_ACTION,
+    telemetry: [...(rule.telemetry ?? signals)],
+    base: rule,
+  });
 
-export const toRouteRule = ({ condition, action, base }: RoutingRuleDraft): RouteRule => {
+/** Every signal the rules handle, in the order they are offered. */
+export const getRulesTelemetry = (
+  rules: readonly RoutingRuleDraft[],
+  availableSignals: readonly UnitSignal[]
+): UnitSignal[] => {
+  const used = new Set(rules.flatMap(({ telemetry }) => telemetry));
+  const ordered = availableSignals.filter((signal) => used.has(signal));
+  return [...ordered, ...[...used].filter((signal) => !availableSignals.includes(signal))];
+};
+
+const sameSignals = (left: readonly UnitSignal[], right: readonly UnitSignal[]): boolean =>
+  left.length === right.length && left.every((signal) => right.includes(signal));
+
+/**
+ * The rule as written to the unit. A rule handling every signal of its routing
+ * node leaves `telemetry` unset, unless it set one before.
+ */
+export const toRouteRule = (
+  { condition, action, telemetry, base }: RoutingRuleDraft,
+  supportedTelemetry: readonly UnitSignal[]
+): RouteRule => {
   const when = serializeCondition(condition);
   // Leave the default action implicit on rules that never set it.
   const writeAction = base.action !== undefined || action !== DEFAULT_ROUTING_ACTION;
+  const writeTelemetry =
+    base.telemetry !== undefined || !sameSignals(telemetry, supportedTelemetry);
   const rule: RouteRule = { ...base };
   delete rule.when;
   delete rule.action;
+  delete rule.telemetry;
   if (when !== undefined) {
     rule.when = when;
   }
   if (writeAction) {
     rule.action = action;
+  }
+  if (writeTelemetry) {
+    rule.telemetry = supportedTelemetry.filter((signal) => telemetry.includes(signal));
   }
   return rule;
 };
@@ -109,8 +151,9 @@ export const routingFlyoutMachine = setup({
     addRule: assign(({ context }) => {
       const added: RoutingRuleDraft = {
         key: `rule-${context.nextKey}`,
-        condition: { field: '', value: '' },
+        condition: createEmptyCondition(),
         action: DEFAULT_ROUTING_ACTION,
+        telemetry: [...context.signals],
         // Rules added here route nowhere until they are connected on the canvas.
         base: { destinations: [] },
       };
@@ -150,11 +193,15 @@ export const routingFlyoutMachine = setup({
     ),
     requestSave: sendTo(
       ({ context }) => context.parentRef,
-      ({ context }): RoutingSaveRequest => ({
-        type: 'routing.save',
-        target: context.target,
-        rules: context.rules.map(toRouteRule),
-      })
+      ({ context }): RoutingSaveRequest => {
+        const supportedTelemetry = getRulesTelemetry(context.rules, context.availableSignals);
+        return {
+          type: 'routing.save',
+          target: context.target,
+          rules: context.rules.map((rule) => toRouteRule(rule, supportedTelemetry)),
+          supportedTelemetry,
+        };
+      }
     ),
   },
   guards: {
@@ -177,13 +224,16 @@ export const routingFlyoutMachine = setup({
     canSave: ({ context }) =>
       context.editable &&
       context.rules.length > 0 &&
+      context.rules.every(({ telemetry }) => telemetry.length > 0) &&
       (context.hasChanges || context.target.kind === 'line'),
   },
 }).createMachine({
   id: 'routingFlyout',
   context: ({ input }) => ({
     target: input.target,
-    rules: input.rules.map(toDraft),
+    rules: input.rules.map(toDraft(input.signals)),
+    signals: input.signals,
+    availableSignals: input.availableSignals,
     editable: input.editable,
     hasChanges: false,
     saveError: undefined,

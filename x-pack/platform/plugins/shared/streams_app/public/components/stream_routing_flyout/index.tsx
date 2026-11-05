@@ -152,6 +152,7 @@ function RoutingFlyoutForm({
 }) {
   const { euiTheme } = useEuiTheme();
   const rules = useSelector(flyoutRef, (state) => state.context.rules);
+  const availableSignals = useSelector(flyoutRef, (state) => state.context.availableSignals);
   const isNew = useSelector(flyoutRef, (state) => state.context.target.kind === 'line');
   const editable = useSelector(flyoutRef, (state) => state.context.editable);
   const hasChanges = useSelector(flyoutRef, (state) => state.context.hasChanges);
@@ -228,6 +229,7 @@ function RoutingFlyoutForm({
           ) : null}
           <RoutingRuleList
             rules={rules}
+            availableSignals={availableSignals}
             editable={editable && !isSaving}
             onAdd={addRule}
             onChange={updateRule}

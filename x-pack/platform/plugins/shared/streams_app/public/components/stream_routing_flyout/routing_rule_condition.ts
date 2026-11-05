@@ -5,13 +5,26 @@
  * 2.0.
  */
 
+export type RoutingConditionOperator = 'equals' | 'notEquals';
+
+export interface RoutingFieldCondition {
+  field: string;
+  operator: RoutingConditionOperator;
+  value: string;
+}
+
 /**
- * The form edits a rule's `when` as a field matched against a value. Any other
+ * The form edits a rule's `when` as a field compared with a value. Any other
  * OTTL condition is kept as written and shown read-only.
  */
-export type RoutingRuleCondition = { field: string; value: string } | { raw: string };
+export type RoutingRuleCondition = RoutingFieldCondition | { raw: string };
 
-const EQUALITY_CONDITION = /^\s*(.+?)\s*==\s*"((?:[^"\\]|\\.)*)"\s*$/;
+const OTTL_OPERATORS: Readonly<Record<RoutingConditionOperator, string>> = {
+  equals: '==',
+  notEquals: '!=',
+};
+
+const COMPARISON_CONDITION = /^\s*(.+?)\s*(==|!=)\s*"((?:[^"\\]|\\.)*)"\s*$/;
 
 const escapeValue = (value: string): string => value.replace(/[\\"]/g, (char) => `\\${char}`);
 
@@ -22,12 +35,16 @@ export const parseWhen = (when: string | undefined): RoutingRuleCondition | unde
   if (when === undefined) {
     return undefined;
   }
-  const match = EQUALITY_CONDITION.exec(when);
+  const match = COMPARISON_CONDITION.exec(when);
   if (!match) {
     return { raw: when };
   }
-  const [, field, value] = match;
-  return { field, value: unescapeValue(value) };
+  const [, field, operator, value] = match;
+  return {
+    field,
+    operator: operator === OTTL_OPERATORS.notEquals ? 'notEquals' : 'equals',
+    value: unescapeValue(value),
+  };
 };
 
 /** Writes a condition as OTTL; an empty field leaves the rule without a condition. */
@@ -44,9 +61,16 @@ export const serializeCondition = (
   if (field === '') {
     return undefined;
   }
-  return `${field} == "${escapeValue(condition.value)}"`;
+  return `${field} ${OTTL_OPERATORS[condition.operator]} "${escapeValue(condition.value)}"`;
 };
 
 export const isRawCondition = (
   condition: RoutingRuleCondition | undefined
 ): condition is { raw: string } => condition !== undefined && 'raw' in condition;
+
+/** An empty condition, as a newly added rule starts with. */
+export const createEmptyCondition = (): RoutingFieldCondition => ({
+  field: '',
+  operator: 'equals',
+  value: '',
+});
