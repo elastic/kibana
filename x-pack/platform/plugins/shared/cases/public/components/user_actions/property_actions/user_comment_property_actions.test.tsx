@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
-import userEvent from '@testing-library/user-event';
+import userEvent, { type UserEvent } from '@testing-library/user-event';
 
 import {
   noCasesPermissions,
@@ -25,8 +25,20 @@ describe('UserCommentPropertyActions', () => {
     onDelete: jest.fn(),
   };
 
+  let user: UserEvent;
+
+  beforeAll(() => {
+    jest.useFakeTimers();
+  });
+
+  afterAll(() => {
+    jest.useRealTimers();
+  });
+
   beforeEach(() => {
     jest.clearAllMocks();
+    // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
+    user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime });
   });
 
   it('renders the correct number of actions', async () => {
@@ -34,7 +46,7 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.getByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
@@ -47,12 +59,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.getByTestId('property-actions-user-action-pencil')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-pencil'));
+    await user.click(await screen.findByTestId('property-actions-user-action-pencil'));
 
     expect(props.onEdit).toHaveBeenCalled();
   });
@@ -62,12 +74,12 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.getByTestId('property-actions-user-action-quote')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-quote'));
+    await user.click(await screen.findByTestId('property-actions-user-action-quote'));
 
     expect(props.onQuote).toHaveBeenCalled();
   });
@@ -77,16 +89,16 @@ describe('UserCommentPropertyActions', () => {
 
     expect(await screen.findByTestId('property-actions-user-action')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-ellipses'));
+    await user.click(await screen.findByTestId('property-actions-user-action-ellipses'));
     await waitForEuiPopoverOpen();
 
     expect(screen.getByTestId('property-actions-user-action-trash')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByTestId('property-actions-user-action-trash'));
+    await user.click(await screen.findByTestId('property-actions-user-action-trash'));
 
     expect(await screen.findByTestId('property-actions-confirm-modal')).toBeInTheDocument();
 
-    await userEvent.click(await screen.findByText('Delete'));
+    await user.click(await screen.findByText('Delete'));
     expect(props.onDelete).toHaveBeenCalled();
   });
 
