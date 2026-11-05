@@ -15,16 +15,18 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  * Scout server config for everything under `test/scout_alertzero`: the AlertZero API suites
  * and the AlertZero end-to-end flows (the attack-discovery and worker-control specs).
  *
+ * This file carries only what has to be fixed when the server starts. Advanced settings that
+ * Kibana accepts at runtime are not set here: the suites' global setup writes them through
+ * `internal/kibana/settings` and the global teardown restores the values it found, so a stack
+ * started from this config set is not left with settings the tests changed (see
+ * `setUpAlertZeroSettings` in `@kbn/scout-security`-based suites' `tests/global.setup.ts`).
+ *
  * Base flags — `alertzero` plus `agenticInvestigations` and `proposals`, which alertzero
  * requires and which default off; without them Kibana cascade-disables alertzero. On top of
  * that, what the managed workflows and the e2e flows need:
  *
  * - service accounts: alertzero installs no managed workflows without them, and a Worker
  *   cannot be enabled without a service account to run as.
- * - the `securitySolution:enableAlertZero` advanced setting. Every AlertZero route sits behind it
- *   and answers 404 while it is off, which is the default. The setting is `scope: 'namespace'`;
- *   `uiSettings.overrides` is applied by the UI settings client of every space, so the override
- *   turns it on for the test space.
  * - the `endpointForensicAnalysisSkill` securitySolution experimental feature. The managed
  *   `system-security-forensics-endpoint-analysis` Worker is hidden until the
  *   `endpoint-forensic-analysis` Agent Builder skill is registered, and the forensics workflow
@@ -34,8 +36,12 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *   `investigate-rule` Agent Builder skill, whose `get_alerts_by_ids` tool is how the agent reads the
  *   harvested false positives. With the skill unregistered the agent has no alert retrieval tool and
  *   the review ends in a no-action proposal instead of a tuning proposal.
- * - the Workflows UI, `ai.agent` workflow steps and Agent Builder experimental features the
- *   Attack Discovery review and forensics workflows rely on.
+ * - the Attack Discovery workflows feature flag the review and forensics workflows rely on.
+ *
+ * The per-space `securitySolution:enableAlertZero` setting is deliberately not overridden: an
+ * override makes it read-only, and `internal/kibana/settings` rejects writes to overridden
+ * settings, including the baseline writes the hunt suites make to restore a value they never
+ * changed. Suites enable it for their space and restore it themselves (`enableAlertZeroInSpace`).
  *
  * EIS inference is opportunistic (`buildEisServerConfig({ required: false })`): when a connector
  * source exists (`KIBANA_TESTING_AI_CONNECTORS`, `config/kibana.dev.yml` or
@@ -46,14 +52,13 @@ import { serviceAccountsServerArgs } from '../../service_accounts/shared';
  *
  * Model selection: the e2e specs use the stack's default AI connector. Set
  * `ALERTZERO_E2E_AI_CONNECTOR` to the id of a preconfigured connector (for EIS models,
- * `eis-<modelId>`, e.g. `eis-gpt-5-6-sol`) to pin `genAiSettings:defaultAIConnector` to it.
+ * `eis-<modelId>`, e.g. `eis-gpt-5-6-sol`) to pin `genAiSettings:defaultAIConnector` to it; the
+ * suites' global setup applies the pin at runtime.
  *
  * Usage:
  *   ALERTZERO_E2E_AI_CONNECTOR=eis-gpt-5-6-sol \
  *   node scripts/scout start-server --arch stateful --domain classic --serverConfigSet alertzero
  */
-const pinnedConnectorId = process.env.ALERTZERO_E2E_AI_CONNECTOR?.trim();
-
 const ENABLE_EXPERIMENTAL_ARG = '--xpack.securitySolution.enableExperimental=';
 const REQUIRED_EXPERIMENTAL_FEATURES = ['endpointForensicAnalysisSkill', 'investigateRuleSkill'];
 
@@ -88,30 +93,14 @@ export const servers: ScoutServerConfig = {
         ...eisConfig.kbnTestServer.serverArgs,
         ...serviceAccountsServerArgs,
       ]),
+      // Plugin enable flags: all three default off, and alertzero cascade-disables without the
+      // other two.
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
-      // The per-space `securitySolution:enableAlertZero` advanced setting is deliberately NOT
-      // overridden here: an override makes it read-only, and `internal/kibana/settings` rejects
-      // writes to overridden settings — including the baseline writes the hunt suites make to
-      // restore a value they never changed. Each suite that needs AlertZero in a space enables
-      // the setting itself and restores it in teardown (see `enableAlertZeroInSpace`), exactly
-      // as the hunt suites already do.
-      // Attack Discovery workflows + Context Engine (the review and forensics workflows are
-      // workflow runs; context engine is what the forensics skill reads), mirroring the
-      // evals_attack_discovery_agent_builder set.
+      // Process-wide feature flag read once at startup, so it cannot be set at runtime;
+      // mirrors the evals_attack_discovery_agent_builder set.
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
-      '--uiSettings.overrides.securitySolution:enableAttackDiscoveryWorkflows=true',
-      '--uiSettings.overrides.contextEngine:enabled=true',
-      // Enabling the Alert Triage worker is refused unless alert analysis is on for the space.
-      // The setting is readonly and defaults to false, so only a server override can set it.
-      '--uiSettings.overrides.securitySolution:alertAnalysisWorkflowEnabled=true',
-      '--uiSettings.overrides.workflows:ui:enabled=true',
-      '--uiSettings.overrides.workflows:aiAgent:enabled=true',
-      '--uiSettings.overrides.agentBuilder:experimentalFeatures=true',
-      ...(pinnedConnectorId
-        ? [`--uiSettings.overrides.genAiSettings:defaultAIConnector=${pinnedConnectorId}`]
-        : []),
       // Already the traditional default; pinned so a local override cannot refuse the service
       // account the Hunt Watch specs create.
       '--xpack.security.serviceAccounts.enabled=true',

@@ -9,4 +9,7 @@ import { createPlaywrightConfig } from '@kbn/scout-security';
 
 export default createPlaywrightConfig({
   testDir: './tests',
+  // Wires `tests/global.setup.ts` / `tests/global.teardown.ts`, which turn alert analysis on
+  // and restore it once per run
+  runGlobalSetup: true,
 });

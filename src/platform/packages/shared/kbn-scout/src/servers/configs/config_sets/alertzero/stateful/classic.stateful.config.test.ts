@@ -34,12 +34,31 @@ describe('alertzero stateful classic server config', () => {
     expect(args).not.toContain('--uiSettings.overrides.securitySolution:enableAlertZero=true');
   });
 
-  it('turns on alert analysis so the Alert Triage worker can be enabled', () => {
+  it('keeps runtime-applicable advanced settings out of the server args', () => {
+    delete process.env.KIBANA_TESTING_AI_CONNECTORS;
+    process.env.ALERTZERO_E2E_AI_CONNECTOR = 'eis-some-model';
+    const { servers } = jest.requireActual('./classic.stateful.config');
+    const args: string[] = servers.kbnTestServer.serverArgs;
+
+    // These are written through `internal/kibana/settings` by the suites' global setup and
+    // restored by their global teardown, so they must not be pinned (and made read-only) here.
+    expect(args.filter((arg) => arg.startsWith('--uiSettings.overrides'))).toEqual([]);
+  });
+
+  it('keeps the server-driver args', () => {
     delete process.env.KIBANA_TESTING_AI_CONNECTORS;
     const { servers } = jest.requireActual('./classic.stateful.config');
+    const args: string[] = servers.kbnTestServer.serverArgs;
 
-    expect(servers.kbnTestServer.serverArgs).toContain(
-      '--uiSettings.overrides.securitySolution:alertAnalysisWorkflowEnabled=true'
+    expect(args).toEqual(
+      expect.arrayContaining([
+        '--xpack.alertzero.enabled=true',
+        '--xpack.agenticInvestigations.enabled=true',
+        '--xpack.proposals.enabled=true',
+        '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
+        '--xpack.security.serviceAccounts.enabled=true',
+        '--server.restrictInternalApis=true',
+      ])
     );
   });
 });
