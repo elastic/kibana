@@ -395,9 +395,43 @@ const rescaleTimestamps = ({
   );
 };
 
+const isFlatAlertField = (key: string): boolean => key.startsWith('kibana.');
+
 /**
- * One alert document as a flat dotted-field map, so the base fields and the scenario's own
- * dotted fields cannot collide as object-versus-leaf. The scenario's values win.
+ * A dotted-field map as nested objects, except the keys `keepFlat` names. Alerts keep `kibana.*`
+ * flat, as the detection engine writes them. The review workflow reads `_source` with liquid
+ * `map: '_source.host.id'` (and `_source.entity.id` for grounding), which only walks nested
+ * objects, so a flat `host.id` key reads as no host and the review sees an empty world.
+ */
+export const toNestedSource = (
+  fields: Record<string, unknown>,
+  keepFlat: (key: string) => boolean = () => false
+): Record<string, unknown> => {
+  const source: Record<string, unknown> = {};
+  for (const [key, value] of Object.entries(fields)) {
+    const segments = keepFlat(key) ? [key] : key.split('.');
+    const leaf = segments[segments.length - 1];
+    let node = source;
+    for (const segment of segments.slice(0, -1)) {
+      const child = node[segment] ?? {};
+      if (typeof child !== 'object' || child === null || Array.isArray(child)) {
+        throw new Error(`Field "${key}" nests under "${segment}", which holds a value`);
+      }
+      node[segment] = child;
+      node = child as Record<string, unknown>;
+    }
+    if (typeof node[leaf] === 'object' && node[leaf] !== null && !Array.isArray(node[leaf])) {
+      throw new Error(`Field "${key}" holds a value and also has nested fields`);
+    }
+    node[leaf] = value;
+  }
+  return source;
+};
+
+/**
+ * One alert document. It is merged as a flat dotted-field map, so the base fields and the
+ * scenario's own dotted fields cannot collide as object-versus-leaf and the scenario's values
+ * win, then written in the detection engine's shape (`toNestedSource`).
  */
 export const buildSeededAlert = ({
   alert,
@@ -455,19 +489,22 @@ export const buildSeededAlert = ({
     'kibana.space_ids': [spaceId],
   };
   const hostName = alert.fields['host.name'];
-  return {
-    ...base,
-    // Endpoint alerts carry only `host.name`; the review joins raw events on `host.id`.
-    ...(withHostId && hostName !== undefined && alert.fields['host.id'] === undefined
-      ? { 'host.id': hostIdFor(String(hostName)) }
-      : {}),
-    ...alert.fields,
-    '@timestamp': timestamp,
-    'kibana.alert.original_time': timestamp,
-    tags: [runMarker],
-    'kibana.alert.uuid': seededId,
-    'kibana.space_ids': [spaceId],
-  };
+  return toNestedSource(
+    {
+      ...base,
+      // Endpoint alerts carry only `host.name`; the review joins raw events on `host.id`.
+      ...(withHostId && hostName !== undefined && alert.fields['host.id'] === undefined
+        ? { 'host.id': hostIdFor(String(hostName)) }
+        : {}),
+      ...alert.fields,
+      '@timestamp': timestamp,
+      'kibana.alert.original_time': timestamp,
+      tags: [runMarker],
+      'kibana.alert.uuid': seededId,
+      'kibana.space_ids': [spaceId],
+    },
+    isFlatAlertField
+  );
 };
 
 /**
@@ -835,10 +872,11 @@ export const seedScenario = async ({
   }
   const world = buildWorld({ scenarioId: scenario.id, runMarker, spaceId, anchorMsByHost });
   // Events are written with `create` so a data stream (when the endpoint package is installed)
-  // accepts them; the entity store index takes `index`.
+  // accepts them; the entity store index takes `index`. Nested like the real entity store and
+  // endpoint events, because the review grounds entity claims on `_source.entity.id`.
   const worldOperations = world.flatMap(({ kind, id, index, body }) => [
     { [kind === 'event' ? 'create' : 'index']: { _index: index, _id: id } },
-    body,
+    toNestedSource(body),
   ]);
   const seeded: SeededScenario = {
     runMarker,

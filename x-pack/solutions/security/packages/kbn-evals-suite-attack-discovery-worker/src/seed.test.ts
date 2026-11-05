@@ -7,17 +7,30 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
+import { createWorkflowLiquidEngine } from '@kbn/workflows';
 import { alertsIndexForSpace, attackDiscoveryIndexForSpace } from './constants';
 import type { KbnRequest } from './kbn_request';
 import {
   assertCleanSpace,
+  buildSeededAlert,
   cleanupSeed,
   pauseEntityExtraction,
   prepareWorkerSpace,
   seedScenario,
+  toNestedSource,
   type SeededScenario,
 } from './seed';
 import { AUDIT_SCENARIOS } from './audit_failure_classes/registry';
+
+/** Reads a dotted path through a nested `_source`, as ES resolves a field name. */
+const getPath = (doc: Record<string, unknown> | undefined, path: string): unknown =>
+  path
+    .split('.')
+    .reduce<unknown>(
+      (node, segment) =>
+        node && typeof node === 'object' ? (node as Record<string, unknown>)[segment] : undefined,
+      doc
+    );
 
 const seeded: SeededScenario = {
   runMarker: 'adw-1',
@@ -190,14 +203,21 @@ describe('seedScenario world documents', () => {
     async (id) => {
       const { seededScenario, operations } = await seedWith(id);
       const docs = bodies(operations) as Array<Record<string, unknown>>;
-      const entities = docs.filter((doc) => 'entity.id' in doc);
-      const events = docs.filter((doc) => 'event.action' in doc && !('kibana.alert.uuid' in doc));
+      const entities = docs.filter((doc) => getPath(doc, 'entity.id') !== undefined);
+      const events = docs.filter(
+        (doc) => getPath(doc, 'event.action') !== undefined && !('kibana.alert.uuid' in doc)
+      );
       const alerts = docs.filter((doc) => 'kibana.alert.uuid' in doc);
       expect(entities.length).toBeGreaterThan(0);
       expect(events.length).toBeGreaterThan(0);
       expect(seededScenario.worldDocs).toHaveLength(entities.length + events.length);
-      const alertHostIds = new Set(alerts.flatMap((a) => (a['host.id'] ? [a['host.id']] : [])));
-      const eventHostIds = new Set(events.map((e) => String(e['host.id'])));
+      const alertHostIds = new Set(
+        alerts.flatMap((a) => {
+          const hostId = getPath(a, 'host.id');
+          return hostId ? [String(hostId)] : [];
+        })
+      );
+      const eventHostIds = new Set(events.map((e) => String(getPath(e, 'host.id'))));
       expect(alertHostIds.size).toBeGreaterThan(0);
       for (const hostId of eventHostIds) expect(alertHostIds.has(hostId)).toBe(true);
     }
@@ -229,7 +249,7 @@ describe('seedScenario world documents', () => {
       .filter((doc) => 'kibana.alert.uuid' in doc)
       .map((doc) => Date.parse(String(doc['@timestamp'])));
     const eventTimes = docs
-      .filter((doc) => 'event.action' in doc && !('kibana.alert.uuid' in doc))
+      .filter((doc) => getPath(doc, 'event.action') !== undefined && !('kibana.alert.uuid' in doc))
       .map((doc) => Date.parse(String(doc['@timestamp'])));
     const twoHours = 2 * 60 * 60 * 1000;
     for (const time of eventTimes) {
@@ -841,7 +861,7 @@ describe('seedScenario world indices', () => {
         const [[key, allowed]] = Object.entries(terms ?? {});
         return {
           count: (ids?.values ?? []).filter((id) =>
-            allowed.includes(String(bodiesById.get(id)?.[key]))
+            allowed.includes(String(getPath(bodiesById.get(id), key)))
           ).length,
         };
       }
@@ -1027,11 +1047,15 @@ describe('seedScenario world indices', () => {
       scenario: withUsers,
       spaceId: 's',
     });
-    const entities = [...bodiesById.values()].filter((body) => 'entity.type' in body);
-    expect(entities.some((body) => body['entity.type'] === 'user' && !('host.id' in body))).toBe(
-      true
+    const entities = [...bodiesById.values()].filter(
+      (body) => getPath(body, 'entity.type') !== undefined
     );
-    expect(entities.some((body) => 'host.id' in body)).toBe(true);
+    expect(
+      entities.some(
+        (body) => getPath(body, 'entity.type') === 'user' && getPath(body, 'host.id') === undefined
+      )
+    ).toBe(true);
+    expect(entities.some((body) => getPath(body, 'host.id') !== undefined)).toBe(true);
   });
 
   it('names user.name when a user entity is not searchable by it', async () => {
@@ -1054,5 +1078,71 @@ describe('seedScenario world indices', () => {
         wait: async () => {},
       })
     ).rejects.toThrow(/entities-latest-s.*match by user\.name/);
+  });
+});
+
+describe('seeded document shape', () => {
+  const alert = buildSeededAlert({
+    alert: {
+      id: 'a1',
+      fields: {
+        'kibana.alert.rule.name': 'Suspicious child',
+        'host.name': 'ws-01',
+        'user.name': 'm.novak',
+        'process.parent.name': 'explorer.exe',
+      },
+    },
+    seededId: 'adw-1-a1',
+    runMarker: 'adw-1',
+    spaceId: 's',
+    timestampMs: Date.parse('2026-11-01T00:00:00.000Z'),
+    withHostId: true,
+  });
+
+  // The review workflow's `count_alerts` step reads the hosts and users this way.
+  it.each(['_source.host.id', '_source.host.name', '_source.user.name'])(
+    'resolves liquid map %s over the alert, as the review workflow reads it',
+    (path) => {
+      const values = createWorkflowLiquidEngine().evalValueSync(`hits | map: '${path}' | compact`, {
+        hits: [{ _source: alert }],
+      });
+      expect(values).toEqual([expect.any(String)]);
+    }
+  );
+
+  it('keeps kibana.* fields flat and nests the ECS fields', () => {
+    expect(alert['kibana.alert.uuid']).toBe('adw-1-a1');
+    expect(alert['kibana.alert.rule.name']).toBe('Suspicious child');
+    expect(alert['kibana.alert.original_time']).toBe('2026-11-01T00:00:00.000Z');
+    expect(alert['@timestamp']).toBe('2026-11-01T00:00:00.000Z');
+    expect(alert).not.toHaveProperty(['host.name']);
+    expect(alert.process).toEqual({ parent: { name: 'explorer.exe' } });
+  });
+
+  it.each(AUDIT_SCENARIOS.map(({ id, alerts }) => [id, alerts] as const))(
+    'nests every alert of %s without a value-versus-object collision',
+    (_id, alerts) => {
+      for (const scenarioAlert of alerts) {
+        expect(() =>
+          buildSeededAlert({
+            alert: scenarioAlert,
+            seededId: `adw-1-${scenarioAlert.id}`,
+            runMarker: 'adw-1',
+            spaceId: 's',
+            timestampMs: 0,
+            withHostId: true,
+          })
+        ).not.toThrow();
+      }
+    }
+  );
+
+  it('refuses a field that is both a value and an object', () => {
+    expect(() => toNestedSource({ 'host.os': 'linux', 'host.os.name': 'Ubuntu' })).toThrow(
+      /host\.os\.name.*nests under "os"/
+    );
+    expect(() => toNestedSource({ 'host.os.name': 'Ubuntu', 'host.os': 'linux' })).toThrow(
+      /host\.os.*also has nested fields/
+    );
   });
 });
