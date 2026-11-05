@@ -14,7 +14,6 @@ import {
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
   STACK_ALERTS_FEATURE_ID,
   STACK_ALERTS_ONLY_FEATURE_ID,
-  STACK_ALERTS_UI_SHOW,
 } from '@kbn/rule-data-utils';
 import { ES_QUERY_ID as ElasticsearchQuery } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
@@ -105,7 +104,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       api: ['rac', 'bulkGetUserProfiles'],
-      ui: [STACK_ALERTS_UI_SHOW],
+      ui: ['show'],
     },
     read: {
       app: [],
@@ -126,7 +125,7 @@ export const BUILT_IN_ALERTS_FEATURE: KibanaFeatureConfig = {
         read: [],
       },
       api: ['rac', 'bulkGetUserProfiles'],
-      ui: [STACK_ALERTS_UI_SHOW],
+      ui: ['show'],
     },
   },
 };

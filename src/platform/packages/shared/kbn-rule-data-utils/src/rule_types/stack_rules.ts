@@ -9,8 +9,6 @@
 
 export const STACK_ALERTS_FEATURE_ID = 'stackAlerts';
 export const STACK_ALERTS_ONLY_FEATURE_ID = 'stackAlertsOnly';
-/** UI capability on the Stack Rules read and all privileges. */
-export const STACK_ALERTS_UI_SHOW = 'show';
 export const ES_QUERY_ID = '.es-query';
 export const INDEX_THRESHOLD_ID = '.index-threshold';
 export const GEO_CONTAINMENT_ID = '.geo-containment';

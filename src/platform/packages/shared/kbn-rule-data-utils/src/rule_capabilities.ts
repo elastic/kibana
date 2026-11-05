@@ -8,7 +8,7 @@
  */
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import { STACK_ALERTS_FEATURE_ID, STACK_ALERTS_UI_SHOW } from './rule_types/stack_rules';
+import { STACK_ALERTS_FEATURE_ID } from './rule_types/stack_rules';
 
 /**
  * UI capability key under `capabilities.management.insightsAndAlerting` granting access to the
@@ -39,7 +39,7 @@ const SECURITY_RULES_FEATURE_IDS = [
  */
 const CLASSIC_RULES_FEATURE_CAPABILITIES: ReadonlyArray<readonly [string, string]> = [
   ['logs', 'show'],
-  [STACK_ALERTS_FEATURE_ID, STACK_ALERTS_UI_SHOW],
+  [STACK_ALERTS_FEATURE_ID, 'show'],
   ['ml', 'canUseMlAlerts'],
   ['dataQuality', 'show'],
   ...SECURITY_RULES_FEATURE_IDS.map((featureId) => [featureId, 'read_rules'] as const),
