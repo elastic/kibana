@@ -242,7 +242,10 @@ import {
   _packagePoliciesUpgrade,
 } from './package_policies/upgrade';
 
-import { getInputsWithIds } from './package_policies/get_input_with_ids';
+import {
+  getInputsWithIds,
+  validateNoTraversalInCompiledIds,
+} from './package_policies/get_input_with_ids';
 import { runWithCache } from './epm/packages/cache';
 import {
   getAgentVersionsForVersionSpecificPolicies,
@@ -4158,7 +4161,7 @@ export function _compilePackagePolicyInputs(
   assetsMap: PackagePolicyAssetsMap,
   agentVersion?: string
 ): PackagePolicyInput[] {
-  return inputs
+  const compiledInputs = inputs
     .filter((input) => !agentVersion || input.enabled)
     .map((input) => {
       if (agentVersion) {
@@ -4188,6 +4191,15 @@ export function _compilePackagePolicyInputs(
         streams: compiledStreams,
       };
     });
+
+  // Template output (e.g. from user-supplied yaml vars) is spread over the validated
+  // input/stream ids when the full agent policy is built. `agentVersion` is only set by that
+  // generation-time recompile of stored policies, which must not throw.
+  if (!agentVersion) {
+    validateNoTraversalInCompiledIds(compiledInputs);
+  }
+
+  return compiledInputs;
 }
 
 function _compileAndMergeTemplatePaths(
