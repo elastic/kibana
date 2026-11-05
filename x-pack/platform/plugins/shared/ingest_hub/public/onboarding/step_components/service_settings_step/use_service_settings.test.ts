@@ -720,7 +720,7 @@ describe('getIncompleteInstances — required set follows the matrix view', () =
     const bedrock = {
       ...base,
       dataStreams: ['guardrails', 'invocation'],
-      inputs: ['aws-cloudwatch', 'aws-cloudwatch'],
+      inputs: ['aws-cloudwatch'],
       varDefsByInput: logVars,
       varDefsByDataStream: {
         guardrails: { inputs: ['aws-cloudwatch'], defaultEnabledInputs: ['aws-cloudwatch'] },
