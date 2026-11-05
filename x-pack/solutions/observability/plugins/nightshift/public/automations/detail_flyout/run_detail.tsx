@@ -178,6 +178,7 @@ export const RunDetail = ({
               listItems={[
                 { title: labels.source, description: run.triggeredBy ?? '—' },
                 { title: labels.message, description: run.message ?? '—' },
+                ...(run.error ? [{ title: labels.reason, description: run.error }] : []),
                 {
                   title: labels.started,
                   description: formatStarted(run.startedAt),
