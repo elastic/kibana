@@ -13,6 +13,7 @@ import {
   mintOrcaCutoffKeys,
   orcaCutoffQuery,
   resolveOrcaEsCredentials,
+  withOrcaKeysInvalidated,
 } from './orca_cutoff';
 import type { OrcaTelemetryVariant } from './orca_dataset';
 
@@ -118,6 +119,7 @@ const fakeOrca = ({
   variant = 'full',
   slowKeys = [],
   stuckKeys = [],
+  failInvalidations = 0,
 }: {
   seenAfter?: number;
   leakingCutoff?: string;
@@ -125,8 +127,10 @@ const fakeOrca = ({
   variant?: OrcaTelemetryVariant;
   slowKeys?: string[];
   stuckKeys?: string[];
+  failInvalidations?: number;
 } = {}) => {
   const stuck = new Set(stuckKeys);
+  let invalidationFailures = failInvalidations;
   const minted: Array<{ id: string; body: { name: string; role_descriptors: unknown } }> = [];
   const invalidated: unknown[] = [];
   const pinned =
@@ -146,6 +150,10 @@ const fakeOrca = ({
     }
     if (pathname === '/_security/api_key' && init?.method === 'DELETE') {
       invalidated.push(body);
+      if (invalidationFailures > 0) {
+        invalidationFailures--;
+        return new Response('', { status: 503 });
+      }
       const ids: string[] = body.ids;
       const kept = ids.filter((id) => stuck.has(id));
       kept.forEach((id) => stuck.delete(id));
@@ -233,6 +241,23 @@ describe('mintOrcaCutoffKeys', () => {
     ]);
   });
 
+  it('keeps every key when the invalidation request itself fails, and revokes them on retry', async () => {
+    const orca = fakeOrca({ failInvalidations: 1 });
+    const { invalidate } = await mintOrcaCutoffKeys({
+      credentials,
+      cutoffs,
+      variant: 'full',
+      request: orca.request,
+    });
+
+    await expect(invalidate()).rejects.toThrow('ORCA DELETE /_security/api_key returned HTTP 503');
+    await expect(invalidate()).resolves.toBeUndefined();
+    expect(orca.invalidated).toEqual([
+      { ids: ['key-1', 'key-2', 'key-3'], owner: true },
+      { ids: ['key-1', 'key-2', 'key-3'], owner: true },
+    ]);
+  });
+
   it('keeps keys Elasticsearch did not invalidate, names them, and revokes them on the next call', async () => {
     const orca = fakeOrca({ stuckKeys: ['key-2'] });
     const { invalidate } = await mintOrcaCutoffKeys({
@@ -265,5 +290,44 @@ describe('mintOrcaCutoffKeys', () => {
     ).rejects.toThrow('pinned no-flags snapshot');
     expect(orca.minted).toHaveLength(1);
     expect(orca.invalidated).toEqual([{ ids: ['key-1'], owner: true }]);
+  });
+});
+
+describe('withOrcaKeysInvalidated', () => {
+  it('invalidates after the work and returns its result', async () => {
+    const invalidate = jest.fn().mockResolvedValue(undefined);
+    await expect(withOrcaKeysInvalidated(invalidate, async () => 'done')).resolves.toBe('done');
+    expect(invalidate).toHaveBeenCalledTimes(1);
+  });
+
+  it("rethrows the work's own error after invalidating", async () => {
+    const failure = new Error('setup broke');
+    const invalidate = jest.fn().mockResolvedValue(undefined);
+    await expect(
+      withOrcaKeysInvalidated(invalidate, async () => {
+        throw failure;
+      })
+    ).rejects.toBe(failure);
+    expect(invalidate).toHaveBeenCalledTimes(1);
+  });
+
+  it('keeps the reason the run broke when invalidation also fails', async () => {
+    const invalidate = jest
+      .fn()
+      .mockRejectedValue(new Error('ORCA left 1 of 3 keys active: key-2'));
+    await expect(
+      withOrcaKeysInvalidated(invalidate, async () => {
+        throw new Error('setup broke');
+      })
+    ).rejects.toThrow('setup broke; ORCA left 1 of 3 keys active: key-2');
+  });
+
+  it('reports an invalidation failure after successful work', async () => {
+    const invalidate = jest
+      .fn()
+      .mockRejectedValue(new Error('ORCA left 1 of 3 keys active: key-2'));
+    await expect(withOrcaKeysInvalidated(invalidate, async () => 'done')).rejects.toThrow(
+      'ORCA left 1 of 3 keys active: key-2'
+    );
   });
 });

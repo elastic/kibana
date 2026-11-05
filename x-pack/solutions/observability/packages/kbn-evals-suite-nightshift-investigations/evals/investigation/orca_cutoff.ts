@@ -231,9 +231,13 @@ export const mintOrcaCutoffKeys = async ({
   const invalidate = async () => {
     if (minted.length === 0) return;
     const ids = minted.splice(0);
-    const result = invalidationSchema.parse(
-      await asEvalUser('DELETE', '/_security/api_key', { ids, owner: true })
-    );
+    const result = await asEvalUser('DELETE', '/_security/api_key', { ids, owner: true })
+      .then((body) => invalidationSchema.parse(body))
+      .catch((error: unknown) => {
+        // A failed request revoked nothing we know of, so every key stays tracked for a retry.
+        minted.push(...ids);
+        throw error;
+      });
     const revoked = new Set([
       ...result.invalidated_api_keys,
       ...result.previously_invalidated_api_keys,
@@ -294,9 +298,33 @@ export const mintOrcaCutoffKeys = async ({
     }
     return { apiKeys, invalidate };
   } catch (error) {
-    await invalidate().catch((invalidateError: unknown) => {
-      throw new Error(`${messageOf(error)}; ${messageOf(invalidateError)}`);
-    });
+    await invalidateAfterFailure(invalidate, error);
     throw error;
   }
+};
+
+/** Invalidates after a failure; a cleanup failure is added to the original error, never replaces it. */
+const invalidateAfterFailure = async (
+  invalidate: () => Promise<void>,
+  failure: unknown
+): Promise<void> => {
+  await invalidate().catch((invalidateError: unknown) => {
+    throw new Error(`${messageOf(failure)}; ${messageOf(invalidateError)}`);
+  });
+};
+
+/** Runs `work`, then invalidates the keys. A cleanup failure never hides the work's own error. */
+export const withOrcaKeysInvalidated = async <T>(
+  invalidate: () => Promise<void>,
+  work: () => Promise<T>
+): Promise<T> => {
+  let result: T;
+  try {
+    result = await work();
+  } catch (error) {
+    await invalidateAfterFailure(invalidate, error);
+    throw error;
+  }
+  await invalidate();
+  return result;
 };

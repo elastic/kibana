@@ -34,6 +34,7 @@ import {
   groupOrcaCasesByCutoff,
   mintOrcaCutoffKeys,
   resolveOrcaEsCredentials,
+  withOrcaKeysInvalidated,
 } from './orca_cutoff';
 import { countSpacesWith, ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
 import {
@@ -259,7 +260,7 @@ export const registerInvestigationEvaluation = ({
             `ORCA: ${dataset.examples.length} tasks read through ${cutoffGroups.length} cutoff keys`
           );
           // The keys only serve the investigations, so they are revoked as soon as those finish.
-          try {
+          experimentResults = await withOrcaKeysInvalidated(invalidate, async () => {
             await pMap(
               cutoffGroups,
               async ({ cutoff, spaceId, connectorId }) => {
@@ -273,10 +274,8 @@ export const registerInvestigationEvaluation = ({
               },
               { concurrency: 4 }
             );
-            experimentResults = await runExperiment();
-          } finally {
-            await invalidate();
-          }
+            return runExperiment();
+          });
         } else {
           await setUpNightshiftSpace('');
           await saveConnectorSetOnInvestigator(fetch, { withoutConnectors: bundledSynthetic });
