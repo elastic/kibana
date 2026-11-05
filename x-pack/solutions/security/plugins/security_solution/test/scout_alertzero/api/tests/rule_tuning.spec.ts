@@ -366,6 +366,54 @@ const waitForTuningProposal = async (
     { timeoutMs: testData.GENERATION_TIMEOUT_MS }
   ).catch((error: unknown) => explainMissingTuningProposal(adminApi, error, sweepExecutionId));
 
+interface RuleExceptionListRef {
+  list_id: string;
+  type: string;
+  namespace_type: string;
+}
+
+/** The rule's own `rule_default` exception lists; empty when the rule is already gone. */
+const readRuleDefaultLists = async (
+  adminApi: AlertZeroApi,
+  rule: SeededRule
+): Promise<RuleExceptionListRef[]> => {
+  const response = await adminApi.public<{ exceptions_list?: RuleExceptionListRef[] }>(
+    'GET',
+    `/api/detection_engine/rules?id=${encodeURIComponent(rule.ruleId)}`
+  );
+  if (response.statusCode === 404) {
+    return [];
+  }
+  if (response.statusCode !== 200) {
+    throw new Error(
+      `read rule ${rule.ruleId} before teardown failed: ${response.statusCode} ${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+  return (response.body.exceptions_list ?? []).filter((list) => list.type === 'rule_default');
+};
+
+/** Deleting the list deletes its items; a 404 means the rule delete already removed it. */
+const deleteExceptionList = async (
+  adminApi: AlertZeroApi,
+  list: RuleExceptionListRef
+): Promise<void> => {
+  const response = await adminApi.public(
+    'DELETE',
+    `/api/exception_lists?list_id=${encodeURIComponent(
+      list.list_id
+    )}&namespace_type=${encodeURIComponent(list.namespace_type)}`
+  );
+  if (response.statusCode !== 200 && response.statusCode !== 404) {
+    throw new Error(
+      `delete exception list ${list.list_id} failed: ${response.statusCode} ${JSON.stringify(
+        response.body
+      )}`
+    );
+  }
+};
+
 /** The rule's own exception items, read back from the exceptions API rather than the proposal. */
 const readRuleExceptionItems = async (
   adminApi: AlertZeroApi,
@@ -726,6 +774,10 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
     for (const rule of seededRules) {
       await attempt(async () => {
         if (api) {
+          // Capture the rule's own default exception list before the rule goes: once the rule is
+          // gone its list identity is unreachable, and an approved exception would leave the list
+          // and its items behind.
+          const defaultLists = await readRuleDefaultLists(api, rule);
           // A 404 means an earlier teardown already removed it; anything else fails loudly —
           // `api.public` resolves HTTP failures as values, so discarding the response would
           // make a failed delete look successful and leak the rule, which the control
@@ -740,6 +792,9 @@ apiTest.describe('AlertZero e2e - rule tuning', { tag: [...tags.stateful.classic
                 response.body
               )}`
             );
+          }
+          for (const list of defaultLists) {
+            await deleteExceptionList(api, list);
           }
         }
       });

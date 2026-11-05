@@ -46,6 +46,7 @@ import {
   withAlertZeroEnabledInSpace,
   waitForWorkflowExecution,
   waitForNewExecution,
+  waitForEndpointAnalysisRun,
 } from '../fixtures';
 import type { AlertZeroApi, InvestigationProposal, SeededScenario } from '../fixtures';
 
@@ -285,14 +286,14 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
     await attempt(async () => {
       if (api) await resetWorker(api, WORKER_ID);
     });
-    await attempt(async () => {
-      if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
-    });
     for (const investigationId of investigationIds) {
       await attempt(async () => {
         if (api) await deleteInvestigation(api, investigationId);
       });
     }
+    await attempt(async () => {
+      if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
+    });
     await attempt(async () => {
       if (esClientRef && attackDiscoveryAlertIds.length > 0) {
         await esClientRef.deleteByQuery({
@@ -400,16 +401,14 @@ apiTest.describe('AlertZero e2e - endpoint analysis', { tag: [...tags.stateful.c
       );
       await assertExecutionCompleted(adminApi, 'The forensics sweep execution', sweep);
 
-      // The sweep dispatches one run per pending indicator, so poll for a run of THIS workflow
-      // the sweep started — correlated against the run workflow's own pre-enable snapshot, not
-      // the sweep workflow's (that one says nothing about which run executions predate this
-      // test, so an old or unrelated run could be selected instead).
-      const runExecutionId = await pollUntil(
-        `an execution of ${RUN_WORKFLOW_ID} started after the sweep`,
-        async () =>
-          (
-            await listExecutionIds(adminApi, RUN_WORKFLOW_ID)
-          ).find((id) => !knownRunExecutionIds.includes(id)),
+      // The sweep dispatches one run per pending indicator, so wait for the run of THIS
+      // workflow that was handed this run's indicator. "Newer than the snapshot" alone would
+      // also match a run another suite's indicator started on the shared workflow.
+      const runExecutionId = await waitForEndpointAnalysisRun(
+        adminApi,
+        RUN_WORKFLOW_ID,
+        knownRunExecutionIds,
+        context.kiId,
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
       const run = await waitForWorkflowExecution(

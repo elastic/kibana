@@ -6,46 +6,18 @@
  */
 
 import type { EsClient } from '@kbn/scout-security';
-import type { ListProposalsResponse } from '@kbn/proposals-common';
 import {
   AI_INDEX_KI_BACKING_INDEX,
   AI_INDEX_URL,
   CONVERSATIONS_URL,
-  PROPOSALS_URL,
   SECURITY_INVESTIGATIONS_AI_INDEX_ID,
 } from './constants';
+import { listInvestigationProposals } from './investigations';
+import type { InvestigationProposal } from './investigations';
+import { listExecutionIds } from './alertzero';
+import type { WorkflowExecution } from './alertzero';
 import { ok, pollUntil } from './kbn';
 import type { AlertZeroApi } from './kbn';
-
-export interface InvestigationProposal {
-  readonly id: string;
-  readonly conversationId: string;
-  readonly title: string;
-  readonly actionWorkflowId?: string;
-  readonly actionInput?: Record<string, unknown>;
-  readonly createdAt: string;
-}
-
-/**
- * Pending containment cards, optionally scoped to one investigation. `conversationId` is what
- * keeps a run's assertions on its own cards: the queue is shared across the space.
- */
-export const listInvestigationProposals = async (
-  api: AlertZeroApi,
-  conversationId?: string
-): Promise<InvestigationProposal[]> =>
-  ok(
-    await api.internal<ListProposalsResponse>('GET', PROPOSALS_URL, {
-      query: {
-        origin: 'alertzero',
-        status: 'pending',
-        excludeSuperseded: true,
-        size: 100,
-        ...(conversationId ? { conversationId } : {}),
-      },
-    }),
-    'list pending proposals'
-  ).proposals as InvestigationProposal[];
 
 /**
  * Waits for a pending proposal whose action workflow matches and that was created after `since`.
@@ -87,51 +59,6 @@ export const createInvestigation = async (
     }),
     `create investigation ${title}`
   ).id;
-
-/**
- * Deletes an Investigation conversation; its attachments are deleted with it. A 404 means an
- * earlier teardown already removed it, anything else non-2xx fails loudly — `api.public`
- * resolves non-2xx responses as values, so discarding the result would make teardown look
- * successful while the conversation (and its pending containment cards) survived.
- */
-export const deleteInvestigation = async (api: AlertZeroApi, id: string): Promise<void> => {
-  const response = await api.public('DELETE', `${CONVERSATIONS_URL}/${encodeURIComponent(id)}`);
-  if (response.statusCode >= 300 && response.statusCode !== 404) {
-    throw new Error(
-      `Delete investigation ${id} failed: ${response.statusCode} ${JSON.stringify(response.body)}`
-    );
-  }
-};
-
-/**
- * Dismisses every pending proposal attached to one Investigation. The endpoint-analysis run
- * raises containment cards (isolate/collect) whose action input can carry only `endpoint_ids`
- * and a comment, so the alert- and agent-keyed run correlation cannot match them; the
- * conversation id is the one identifier every card on this Investigation shares. Dismissal —
- * not approval — releases the parked run behind each card, which then ends on its declined
- * branch while the service account still exists, so this belongs before the account teardown.
- */
-export const dismissInvestigationProposals = async (
-  api: AlertZeroApi,
-  conversationId: string
-): Promise<void> => {
-  for (const proposal of await listInvestigationProposals(api, conversationId)) {
-    const response = await api.internal(
-      'POST',
-      `${PROPOSALS_URL}/${encodeURIComponent(proposal.id)}/dismiss`,
-      { body: { dismissReason: 'handled_elsewhere', rationale: 'AlertZero e2e teardown' } }
-    );
-    // A 409 means the card was decided concurrently (its spec approved it, or a teardown cancel
-    // already ended the run behind it), which teardown accepts.
-    if (response.statusCode >= 300 && response.statusCode !== 409) {
-      throw new Error(
-        `dismiss proposal ${proposal.id} of investigation ${conversationId} failed: ${
-          response.statusCode
-        } ${JSON.stringify(response.body)}`
-      );
-    }
-  }
-};
 
 export interface AttachmentVersion<DataType = unknown> {
   readonly version: number;
@@ -331,28 +258,6 @@ export const seedKnowledgeIndicator = async (
   return seed.kiId;
 };
 
-/** Removes exactly the indicators this run wrote, identified by their stable id prefix. */
-export const cleanupKnowledgeIndicators = async (
-  esClient: EsClient,
-  kiIds: readonly string[]
-): Promise<void> => {
-  if (kiIds.length === 0) {
-    return;
-  }
-  await esClient
-    .deleteByQuery({
-      index: AI_INDEX_KI_BACKING_INDEX,
-      conflicts: 'proceed',
-      refresh: true,
-      query: { ids: { values: [...kiIds] } },
-    })
-    .catch((error: { statusCode?: number }) => {
-      if (error.statusCode !== 404) {
-        throw error;
-      }
-    });
-};
-
 export const readKnowledgeIndicator = async (
   esClient: EsClient,
   kiId: string
@@ -389,3 +294,39 @@ export const ensureInvestigationsAiIndex = async (api: AlertZeroApi): Promise<vo
     ok(result, 'register the security-investigations AI index');
   }
 };
+
+/**
+ * Waits for the run-workflow execution the sweep dispatched for ONE indicator. A run execution
+ * newer than a snapshot may belong to anyone sharing the workflow, so each new execution is read
+ * back and matched on the `ki_id` input it was started with (or its `endpoint-analysis-<ki_id>`
+ * concurrency key) — only the execution handed this run's indicator is returned.
+ */
+export const waitForEndpointAnalysisRun = async (
+  api: AlertZeroApi,
+  workflowId: string,
+  knownExecutionIds: readonly string[],
+  kiId: string,
+  { timeoutMs }: { timeoutMs: number }
+): Promise<string> =>
+  pollUntil(
+    `an execution of ${workflowId} started for indicator ${kiId}`,
+    async () => {
+      const newIds = (await listExecutionIds(api, workflowId)).filter(
+        (id) => !knownExecutionIds.includes(id)
+      );
+      for (const id of newIds) {
+        const execution = ok(
+          await api.public<WorkflowExecution>('GET', `/api/workflows/executions/${id}`),
+          `read execution ${id}`
+        );
+        if (
+          execution.context?.inputs?.ki_id === kiId ||
+          execution.concurrencyGroupKey === `endpoint-analysis-${kiId}`
+        ) {
+          return id;
+        }
+      }
+      return undefined;
+    },
+    { timeoutMs }
+  );

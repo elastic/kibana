@@ -269,11 +269,22 @@ export const withAlertZeroEnabledInSpace = async (args: {
   spaceId: string;
 }): Promise<() => Promise<void>> => {
   const baselineSolution = await readSpaceSolution(args);
-  if (baselineSolution !== 'security') {
+  const switchedSolution = baselineSolution !== 'security';
+  if (switchedSolution) {
     await setSpaceSolution({ ...args, solution: 'security' });
   }
-  const baselineEnabled = await readAlertZeroEnabledInSpace(args);
-  await setAlertZeroEnabledInSpace({ ...args, enabled: true });
+  let baselineEnabled: boolean;
+  try {
+    baselineEnabled = await readAlertZeroEnabledInSpace(args);
+    await setAlertZeroEnabledInSpace({ ...args, enabled: true });
+  } catch (error) {
+    // The caller never receives a restore callback when setup throws, so the solution switch
+    // would outlive the suite. Roll it back here before surfacing the original failure.
+    if (switchedSolution) {
+      await setSpaceSolution({ ...args, solution: baselineSolution }).catch(() => undefined);
+    }
+    throw error;
+  }
   return async () => {
     await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
     if (baselineSolution !== 'security') {

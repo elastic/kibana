@@ -77,17 +77,23 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
     }
   );
 
-  // Known gap, expected to fail until security-team#19988 (fix: elastic/kibana#296929) lands:
-  // a sweep over an AI index that does not exist yet must complete with `search_failed: false`,
-  // since a space that has produced no indicator has nothing to review. Today the search throws
-  // index_not_found and the sweep reports `search_failed: true`. The index id is minted per run
-  // and never created, so it cannot collide with a real one.
-  apiTest.fail(
+  // Known gap until security-team#19988 (fix: elastic/kibana#296929) lands: a sweep over an AI
+  // index that does not exist yet should complete with `search_failed: false`, since a space that
+  // has produced no indicator has nothing to review. Today the search throws index_not_found and
+  // the sweep reports `search_failed: true`. The index id is minted per run and never created, so
+  // it cannot collide with a real one.
+  //
+  // Not `apiTest.fail`: that marks the whole test as an expected failure, so a run route that
+  // answers 500 or a sweep that never completes would pass as "the known gap". Everything up to
+  // the `search_failed` read is an ordinary assertion; only that one expectation is inverted, and
+  // the inversion flips red the moment the product is fixed so the guard gets removed.
+  apiTest(
     'treats an absent AI index as empty, not as an error (security-team#19988, elastic/kibana#296929)',
     async ({ apiClient, samlAuth }) => {
       apiTest.setTimeout(TEST_TIMEOUT_MS);
       const api = await getAdminApi(apiClient, samlAuth);
 
+      // `runWorkflow` fails unless the run route answers 2xx, then waits for a terminal status.
       const sweep = await runWorkflow(
         api,
         COVERAGE_SWEEP_WORKFLOW_ID,
@@ -100,10 +106,22 @@ apiTest.describe('AlertZero e2e - rule coverage', { tag: [...tags.stateful.class
         },
         { timeoutMs: testData.ACTION_TIMEOUT_MS }
       );
-      const output = await readExecutionOutput(api, sweep.id);
-
       expect(sweep.status).toBe('completed');
-      expect(output.search_failed).toBe(false);
+      const output = await readExecutionOutput(api, sweep.id);
+      expect(typeof output.search_failed).toBe('boolean');
+
+      // The expected behaviour is `search_failed === false`. It holds only after the fix, so
+      // today this expectation is the one known failure.
+      let expectationHolds = true;
+      try {
+        expect(output.search_failed).toBe(false);
+      } catch {
+        expectationHolds = false;
+      }
+      expect(
+        expectationHolds,
+        'the absent-index sweep now reports search_failed: false, so security-team#19988 is fixed: assert it directly and drop this inversion'
+      ).toBe(false);
     }
   );
 });

@@ -70,17 +70,20 @@ export const PROPOSAL_TIMEOUT_MS = 10 * 60_000;
 export const ACTION_TIMEOUT_MS = 3 * 60_000;
 export const POLL_INTERVAL_MS = 5_000;
 
-// --- Flow 3: endpoint analysis ---
-export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
-  'system-security-forensics-run-endpoint-analysis';
-
 /** Managed AI index the AlertZero producers write knowledge indicators into. */
 export const SECURITY_INVESTIGATIONS_AI_INDEX_ID = 'security-investigations';
 export const AI_INDEX_KI_BACKING_INDEX = `ai-index-idx-${SECURITY_INVESTIGATIONS_AI_INDEX_ID}`;
 
+/** Backing index of the managed AI index the Attack Discovery review writes fingerprints into. */
+export const ATTACK_FINGERPRINT_INDEX = 'ai-index-idx-security-attack-fingerprints';
+
 export const AI_INDEX_URL = '/api/context_engine/ai_index';
 export const PROPOSALS_URL = '/internal/proposals';
 export const CONVERSATIONS_URL = '/api/agent_builder/conversations';
+
+// --- Flow 3: endpoint analysis ---
+export const FORENSICS_RUN_ENDPOINT_ANALYSIS_WORKFLOW_ID =
+  'system-security-forensics-run-endpoint-analysis';
 // --- end Flow 3 ---
 
 /** Hunt for_threat and hunt_behavior live beside the other hunt URLs; not yet in the common package. */

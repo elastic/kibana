@@ -19,6 +19,7 @@ import {
   listExecutionIds,
   listWorkers,
   patchWorker,
+  pollUntil,
   resetWorker,
   updateWorker,
   withAlertZeroEnabledInSpace,
@@ -60,6 +61,27 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       workflowId,
       knownExecutionIds: await listExecutionIds(api, workflowId),
     });
+  };
+
+  // The settings write installs the managed workflow, but the catalog surfaces it through the
+  // SML indexer asynchronously, so the read can lag the install. Without the baseline the
+  // teardown cannot tell this suite's runs from anyone else's, so a workflow that never shows
+  // up is a hard failure rather than a skipped snapshot.
+  const waitForInstalledWorkflowId = async (
+    api: Awaited<ReturnType<typeof getAdminApi>>
+  ): Promise<string> => {
+    const installed = await pollUntil(
+      `worker ${WORKER_ID} to have a workflow installed`,
+      async () => {
+        const candidate = await getWorker(api, WORKER_ID);
+        return candidate.workflowId ? candidate : undefined;
+      },
+      { timeoutMs: testData.PROPOSAL_TIMEOUT_MS }
+    );
+    if (!installed.workflowId) {
+      throw new Error(`Worker ${WORKER_ID} has no workflow installed`);
+    }
+    return installed.workflowId;
   };
 
   // Worker routes are gated on the per-space AlertZero setting; the server config deliberately
@@ -152,10 +174,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // BEFORE enabling: the enable below makes Task Manager run the worker at once as its
       // service account, and teardown must be able to cancel exactly that run (see afterAll),
       // not whatever else shares the workflow.
-      const installed = await getWorker(api, WORKER_ID);
-      if (installed.workflowId) {
-        await snapshotBeforeEnable(api, installed.workflowId);
-      }
+      await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
       await updateWorker(api, WORKER_ID, { enabled: true });
 
       await resetWorker(api, WORKER_ID);
@@ -188,10 +207,7 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
       // workflow, before the enable starts a real run that teardown must be able to end
       // (see afterAll). The helper keeps the reset spec's earlier baseline if the workflow is
       // the same, so that spec's run is still cancelled as one of ours.
-      const installed = await getWorker(api, WORKER_ID);
-      if (installed.workflowId) {
-        await snapshotBeforeEnable(api, installed.workflowId);
-      }
+      await snapshotBeforeEnable(api, await waitForInstalledWorkflowId(api));
 
       expect((await updateWorker(api, WORKER_ID, { enabled: true })).enabled).toBe(true);
       expect((await updateWorker(api, WORKER_ID, { enabled: false })).enabled).toBe(false);

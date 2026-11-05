@@ -17,6 +17,7 @@ import {
   assertExecutionCompleted,
   apiTest,
   cancelNewExecutions,
+  cleanupKnowledgeIndicators,
   tags,
   testData,
   createServiceAccount,
@@ -54,36 +55,101 @@ interface EndpointAction {
 const ATTACK_DISCOVERY_ALERTS_INDEX = '.alerts-security.attack.discovery.alerts-default';
 
 /**
- * Deletes the Attack Discovery alerts this run minted from the flow's own index. The id is
- * chosen by the product at generation time, so teardown discovers it by correlation — an AD
+ * Deletes the records this run's Attack Discovery flow minted outside the seeded data: the
+ * Attack Discovery alert, the attack fingerprint the review stores for it, and the
+ * `analyze-endpoint-<attack id>` knowledge indicator the forensics handoff writes. The attack id
+ * is chosen by the product at generation time, so teardown discovers it by correlation — an AD
  * alert whose `kibana.alert.attack_discovery.alert_ids` references one of this run's seeded
- * scenario alerts — instead of predicting it. Runs after the proposal dismissal and account
- * deletion: a still-live generation run could otherwise re-write the alert after the delete.
+ * scenario alerts — instead of predicting it. The fingerprint is matched on the same alert ids
+ * (and the Investigation id when known), and the indicator on the discovered attack ids, so only
+ * this run's documents go. The control indexes are cleared first and the alert last, because
+ * the alert is what the other two are discovered through. Runs after the proposal dismissal and
+ * account deletion: a still-live generation run could otherwise re-write them after the delete.
  */
-const deleteRunAttackDiscoveryAlerts = async ({
+const deleteRunAttackRecords = async ({
   esClient,
   runReferences,
+  investigationId,
 }: {
   esClient: EsClient;
   runReferences: RunReferences | undefined;
+  investigationId: string | undefined;
 }): Promise<void> => {
   const alertIds = runReferences?.alertIds ?? [];
   if (alertIds.length === 0) {
     return;
   }
-  await esClient.deleteByQuery({
-    index: ATTACK_DISCOVERY_ALERTS_INDEX,
-    conflicts: 'proceed',
-    refresh: true,
-    query: {
-      bool: {
-        should: alertIds.map((alertId) => ({
-          term: { 'kibana.alert.attack_discovery.alert_ids': alertId },
-        })),
-        minimum_should_match: 1,
-      },
+  const runAlertsQuery = {
+    bool: {
+      should: alertIds.map((alertId) => ({
+        term: { 'kibana.alert.attack_discovery.alert_ids': alertId },
+      })),
+      minimum_should_match: 1,
     },
+  };
+
+  const found = await esClient.search({
+    index: ATTACK_DISCOVERY_ALERTS_INDEX,
+    ignore_unavailable: true,
+    size: 100,
+    _source: ['kibana.alert.uuid'],
+    query: runAlertsQuery,
   });
+  const attackIds = found.hits.hits.flatMap((hit) => {
+    const source = hit._source as Record<string, unknown> | undefined;
+    const uuid = source?.['kibana.alert.uuid'] ?? hit._id;
+    return typeof uuid === 'string' && uuid.length > 0 ? [uuid] : [];
+  });
+
+  const errors: unknown[] = [];
+  const attempt = async (step: () => Promise<unknown>) => {
+    try {
+      await step();
+    } catch (error) {
+      errors.push(error);
+    }
+  };
+  await attempt(async () =>
+    esClient.deleteByQuery({
+      index: testData.ATTACK_FINGERPRINT_INDEX,
+      ignore_unavailable: true,
+      conflicts: 'proceed',
+      refresh: true,
+      query: {
+        bool: {
+          should: [
+            { terms: { 'attributes.alert_ids': alertIds } },
+            ...(investigationId
+              ? [{ term: { 'attributes.investigation_id': investigationId } }]
+              : []),
+          ],
+          minimum_should_match: 1,
+        },
+      },
+    })
+  );
+  await attempt(async () =>
+    cleanupKnowledgeIndicators(
+      esClient,
+      attackIds.map((attackId) => `analyze-endpoint-${attackId}`)
+    )
+  );
+  await attempt(async () =>
+    esClient.deleteByQuery({
+      index: ATTACK_DISCOVERY_ALERTS_INDEX,
+      ignore_unavailable: true,
+      conflicts: 'proceed',
+      refresh: true,
+      query: runAlertsQuery,
+    })
+  );
+  if (errors.length > 0) {
+    throw new Error(
+      `delete attack records failed: ${errors
+        .map((error) => (error instanceof Error ? error.message : String(error)))
+        .join('; ')}`
+    );
+  }
 };
 
 /**
@@ -179,17 +245,20 @@ apiTest.describe(
       await attempt(async () => {
         if (api && runReferences) await dismissRunProposals(api, runReferences);
       });
-      await attempt(async () => {
-        if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
-      });
-      // The flow's own business records, deleted after the runs that maintain them settled: the
-      // Investigation the Investigate approval created, and the Attack Discovery alert the
-      // generation step wrote. Both point at telemetry and a host this teardown removes.
+      // The Investigation the Investigate approval created, deleted while the account that owned
+      // the runs maintaining it still exists, then the service account itself.
       await attempt(async () => {
         if (api && investigationId) await deleteInvestigation(api, investigationId);
       });
       await attempt(async () => {
-        await deleteRunAttackDiscoveryAlerts({ esClient, runReferences });
+        if (api && serviceAccountId) await deleteServiceAccount(api, serviceAccountId);
+      });
+      // The flow's own business records, deleted after the runs that maintain them settled: the
+      // attack fingerprint and forensics handoff indicator in the control indexes, then the
+      // Attack Discovery alert they were discovered through. All point at telemetry and a host
+      // this teardown removes.
+      await attempt(async () => {
+        await deleteRunAttackRecords({ esClient, runReferences, investigationId });
       });
       await attempt(async () => scenario?.cleanup());
       // Restore the per-space AlertZero gate this suite enabled (see beforeAll).
