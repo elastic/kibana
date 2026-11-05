@@ -21,17 +21,9 @@
  * and `process` are indexed as nested objects, as Elastic Defend writes them. A flat `host.id` key
  * would be invisible to the graph even though ES queries resolve it.
  *
- * The benign case mirrors a reported macOS triage: "Suspicious Binary Execution via SSH" on an
- * Apple-signed `curl` run by a user's script, with related alerts for sshd's own re-exec (named
- * "SSH Remote Port Tunneling"), the per-connection `sshd-keygen-wrapper` starts ("Potential SSH
- * Brute Force") and a developer grepping source ("Credential Discovery via Recursive Grep").
- *
  * Each run is isolated by a per-run suffix on `host.id`. Concurrent runs share only `user.id` and
  * `host.name` (user 4 + host 1 = 5), which stays below the threshold. No fixture sets an IP:
  * `source.ip`/`destination.ip` are separate labels and a shared one would link concurrent runs.
- *
- * Not modelled: the rule recurring on previous days (outside the graph's one-hour window, and every
- * alert carries its own rule uuid so prevalence and close history stay empty).
  *
  * CCS / remote-cluster coverage: NOT covered. `get_related_alerts` is hard-scoped to
  * `.alerts-security.alerts-{spaceId}` (see `alert_analysis_workflow.yaml`, the `get_related_alerts`
