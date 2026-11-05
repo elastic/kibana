@@ -19,7 +19,7 @@ export const createMockConfig = (): ConfigType => {
   return {
     [SIGNALS_INDEX_KEY]: DEFAULT_SIGNALS_INDEX,
     maxRuleImportExportSize: 10000,
-    maxRuleImportPayloadBytes: 10485760,
+    maxRuleImportPayloadBytes: 26214400,
     maxTimelineImportExportSize: 10000,
     maxTimelineImportPayloadBytes: 10485760,
     enableExperimental,

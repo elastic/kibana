@@ -78,7 +78,7 @@ groups:
         description: |
           The maximum size, in bytes, of a detection rules [import](docs-content://solutions/security/detect-and-alert/manage-detection-rules.md#import-rules-ui) file.
         datatype: int
-        default: 10485760
+        default: 26214400
         applies_to:
           stack: ga
           ech: ga

@@ -25,7 +25,7 @@ const isValidTaskManagerDuration = (value: string): string | undefined => {
 
 export const configSchema = schema.object({
   maxRuleImportExportSize: schema.number({ defaultValue: 10000 }),
-  maxRuleImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
+  maxRuleImportPayloadBytes: schema.number({ defaultValue: 26214400 }),
   maxTimelineImportExportSize: schema.number({ defaultValue: 10000 }),
   maxTimelineImportPayloadBytes: schema.number({ defaultValue: 10485760 }),
 
