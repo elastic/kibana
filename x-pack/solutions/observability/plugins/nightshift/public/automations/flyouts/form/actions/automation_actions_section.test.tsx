@@ -60,17 +60,8 @@ describe('AutomationActionsSection', () => {
     fireEvent.click(await screen.findByRole('option', { name: '#oncall' }));
     expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'channel', destination: 'C2' });
 
-    fireEvent.change(screen.getByLabelText('Where to respond'), { target: { value: 'self' } });
-    expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '' });
-    expect(screen.getByTestId('automationSlackDestination')).toHaveAttribute(
-      'placeholder',
-      'Search people…'
-    );
-
-    fireEvent.change(screen.getByTestId('automationSlackDestination'), {
-      target: { value: '@me' },
-    });
-    expect(onSlackActionChange).toHaveBeenLastCalledWith({ target: 'self', destination: '@me' });
+    expect(screen.queryByLabelText('Where to respond')).not.toBeInTheDocument();
+    expect(screen.queryByText('Direct message')).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByTestId('automationRemoveSlackAction'));
     expect(onSlackActionChange).toHaveBeenLastCalledWith(undefined);
