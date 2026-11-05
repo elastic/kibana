@@ -31,16 +31,31 @@ const PLACEHOLDER = i18n.translate('xpack.notebook.codeCell.placeholder', {
 const CONSOLE_TITLE = i18n.translate('xpack.notebook.codeCell.console', {
   defaultMessage: 'Console',
 });
-const getLevelCountLabel = (level: 'error' | 'warn', count: number) =>
-  level === 'error'
-    ? i18n.translate('xpack.notebook.codeCell.errorCount', {
-        defaultMessage: '{count, plural, one {# error} other {# errors}}',
+type CountLevel = 'log' | 'warn' | 'error';
+const COUNT_ORDER: readonly CountLevel[] = ['log', 'warn', 'error'];
+
+const getCountLevel = (level: CodeLogLevel): CountLevel =>
+  level === 'warn' || level === 'error' ? level : 'log';
+
+const getLevelCountLabel = (level: CountLevel, count: number) => {
+  switch (level) {
+    case 'log':
+      return i18n.translate('xpack.notebook.codeCell.logCount', {
+        defaultMessage: '{count, plural, one {# log} other {# logs}}',
         values: { count },
-      })
-    : i18n.translate('xpack.notebook.codeCell.warningCount', {
+      });
+    case 'warn':
+      return i18n.translate('xpack.notebook.codeCell.warningCount', {
         defaultMessage: '{count, plural, one {# warning} other {# warnings}}',
         values: { count },
       });
+    case 'error':
+      return i18n.translate('xpack.notebook.codeCell.errorCount', {
+        defaultMessage: '{count, plural, one {# error} other {# errors}}',
+        values: { count },
+      });
+  }
+};
 
 const LOG_ICONS: Partial<Record<CodeLogLevel, string>> = {
   info: 'info',
@@ -112,16 +127,19 @@ const ConsoleLine = ({ entry: { level, message } }: { entry: CodeLogEntry }) => 
   );
 };
 
-const LevelCount = ({ level, count }: { level: 'error' | 'warn'; count: number }) => {
+const LevelCount = ({ level, count }: { level: CountLevel; count: number }) => {
   const { text } = useLevelColors(level);
-  if (count === 0) return null;
   return (
-    <EuiFlexItem grow={false}>
-      <EuiText size="xs" color={text}>
-        <EuiIcon type={LOG_ICONS[level] ?? level} size="s" color={text} aria-hidden={true} />{' '}
+    <>
+      {' · '}
+      <span
+        css={css`
+          color: ${text};
+        `}
+      >
         {getLevelCountLabel(level, count)}
-      </EuiText>
-    </EuiFlexItem>
+      </span>
+    </>
   );
 };
 
@@ -129,22 +147,21 @@ const LevelCount = ({ level, count }: { level: 'error' | 'warn'; count: number }
 const CodeConsole = ({ cellId, logs }: { cellId: string; logs: readonly CodeLogEntry[] }) => {
   const { euiTheme } = useEuiTheme();
   if (logs.length === 0) return null;
-  const countOf = (level: CodeLogLevel) => logs.filter((entry) => entry.level === level).length;
+  const countOf = (level: CountLevel) =>
+    logs.filter((entry) => getCountLevel(entry.level) === level).length;
   return (
     <EuiAccordion
       id={`notebookCodeConsole-${cellId}`}
       initialIsOpen
       paddingSize="none"
       buttonContent={
-        <EuiFlexGroup gutterSize="m" alignItems="center" responsive={false}>
-          <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <strong>{CONSOLE_TITLE}</strong> ({logs.length})
-            </EuiText>
-          </EuiFlexItem>
-          <LevelCount level="error" count={countOf('error')} />
-          <LevelCount level="warn" count={countOf('warn')} />
-        </EuiFlexGroup>
+        <EuiText size="xs">
+          <strong>{CONSOLE_TITLE}</strong>
+          {COUNT_ORDER.map((level) => {
+            const count = countOf(level);
+            return count > 0 && <LevelCount key={level} level={level} count={count} />;
+          })}
+        </EuiText>
       }
       data-test-subj="notebookCodeLogs"
     >
