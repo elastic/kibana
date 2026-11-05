@@ -12,7 +12,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import type { QueryArgs, Row } from '../../../common';
 import type { EsqlRunner } from '../../types';
 import { alertsIndex } from './alerts';
-import { anomaliesIndex, ANOMALY_JOB_ID } from './anomalies';
+import { anomaliesIndex, ANOMALY_JOB_ID, customAnomaliesIndex } from './anomalies';
 import { entitiesIndex, ENTITY_INDEX } from './entities';
 import { riskScoresIndex } from './risk_scores';
 import { HOUR_MS, NAMESPACE, toIsoAgo } from './fixture_index';
@@ -50,6 +50,7 @@ const FIXTURE_INDICES: readonly FixtureIndex[] = [
   entitiesIndex,
   alertsIndex,
   anomaliesIndex,
+  customAnomaliesIndex,
   riskScoresIndex,
 ];
 

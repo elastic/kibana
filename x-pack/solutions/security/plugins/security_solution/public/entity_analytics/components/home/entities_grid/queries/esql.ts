@@ -41,8 +41,6 @@ export const RISK_SCORE_TYPE = `COALESCE(host.risk.score_type, user.risk.score_t
 /** The entity's own score docs: resolution docs hold its group score; untyped older docs are its own. */
 export const OWN_RISK_SCORE_CONDITION = `(${RISK_SCORE_TYPE} IS NULL OR ${RISK_SCORE_TYPE} != "resolution")`;
 
-export const ML_ANOMALY_INDICES = '.ml-anomalies-shared*';
-
 export const ANOMALY_RECORD_FILTER =
   'result_type == "record" AND is_interim == false AND record_score >= 1';
 
