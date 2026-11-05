@@ -9,12 +9,13 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { AnalyticsServiceSetup, CoreStart, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { hydrateCortexWorkspace } from '../cortex/register_cortex';
 import { CORTEX_WORKSPACE_ROOT } from '../cortex/materialize';
 import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { scopeConversationId, unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { getSandboxStepWorkload } from './sandbox_workload';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -28,7 +29,7 @@ export const cortexHydrateStepDefinition = ({
   logger,
   isEnabled,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   analytics: AnalyticsServiceSetup;
@@ -115,7 +116,8 @@ export const cortexHydrateStepDefinition = ({
 
       const session = sandboxStart.getSessionForSpace(
         spaceId,
-        unscopeConversationId(spaceId, sandboxId)
+        unscopeConversationId(spaceId, sandboxId),
+        getSandboxStepWorkload(context)
       );
 
       context.logger.info(`Hydrating Cortex into sandbox ${sandboxId} (space ${spaceId})`);

@@ -244,6 +244,7 @@ describe('PR 3b write provenance, reinforcementSessionRegistry, and applied_writ
       const toolContext = {
         request: {} as never,
         runContext: { stack: [{ type: 'agent', conversationId: reinfConvId }] },
+        callContext: { toolId: 'tool', toolCallId: 'call-1', callSource: 'agent' },
         esClient: { asCurrentUser: esClient },
         agentConfiguration: { connector_ids: [] },
       } as never;

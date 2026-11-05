@@ -8,6 +8,7 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type { AgentConfiguration } from '@kbn/agent-builder-common';
 import type { RunContextStackEntry, ToolHandlerContext } from '@kbn/agent-builder-server';
+import type { SandboxWorkload } from '../../sandbox_audit';
 import type { ResolvedSandboxCredentials } from './connector_credentials';
 
 export const getConversationId = (context: {
@@ -17,6 +18,18 @@ export const getConversationId = (context: {
     .filter((e) => e.type === 'agent')
     .map((e) => (e as Extract<RunContextStackEntry, { type: 'agent' }>).conversationId)
     .find(Boolean);
+
+/**
+ * What the sandbox audit events of a tool call say issued them: the tool and this call of it.
+ * Every tool that obtains a session passes this, since a session cannot be had without it.
+ */
+export const getSandboxWorkload = (
+  context: Pick<ToolHandlerContext, 'callContext'>
+): SandboxWorkload => ({
+  type: 'tool',
+  toolId: context.callContext.toolId,
+  toolCallId: context.callContext.toolCallId,
+});
 
 /**
  * Sandbox workspaces are namespaced per space, so the same conversation id in two spaces

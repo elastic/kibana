@@ -8,8 +8,8 @@
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import type { ContextEnginePluginSetup } from '@kbn/context-engine-plugin/server';
-import type { SandboxSession } from '@kbn/sandbox-plugin/server';
 import type { DecisionTreeTurnKind } from '@kbn/nightshift-decision-trees';
+import type { AuditedSandboxSession } from '../sandbox_audit';
 import {
   DECISION_TREE_AI_INDEX_DEST,
   DECISION_TREE_AI_INDEX_ID,
@@ -61,7 +61,7 @@ export const hydrateDecisionTreeWorkspace = async ({
   prompt,
   signal,
 }: {
-  session: SandboxSession;
+  session: AuditedSandboxSession;
   esClient: ElasticsearchClient;
   logger: Logger;
   spaceId: string;

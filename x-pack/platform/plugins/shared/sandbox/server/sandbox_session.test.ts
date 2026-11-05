@@ -9,6 +9,8 @@ import { loggerMock } from '@kbn/logging-mocks';
 import type { Logger } from '@kbn/core/server';
 import { SandboxApiClient } from './grpc_client';
 import { SandboxSessionImpl } from './sandbox_session';
+import type { SandboxRpcInfo } from './rpc';
+import { SandboxRpcError } from './rpc';
 
 const mockClose = jest.fn();
 
@@ -41,7 +43,19 @@ const sandboxConfig = {
   clientKeyPem: Buffer.from('mock-key'),
 };
 
-const unavailable = (): Error => Object.assign(new Error('UNAVAILABLE'), { code: 14 });
+const rpc: SandboxRpcInfo = {
+  requestId: 'req-1',
+  conversationId: 'space__conv-1',
+  method: 'sandbox.SandboxService/RunCommand',
+  statusCode: 'OK',
+  durationNs: 1_000,
+};
+
+const unavailable = (): Error =>
+  new SandboxRpcError(
+    { ...rpc, statusCode: 'UNAVAILABLE' },
+    Object.assign(new Error('UNAVAILABLE'), { code: 14 })
+  );
 
 interface Deferred<T> {
   promise: Promise<T>;
@@ -59,6 +73,7 @@ const defer = <T>(): Deferred<T> => {
 };
 
 const okResult = { stdout: '', stderr: '', exit_code: 0, timed_out: false };
+const okResponse = { value: okResult, rpc };
 
 describe('SandboxSessionImpl', () => {
   let logger: jest.Mocked<Logger>;
@@ -69,7 +84,7 @@ describe('SandboxSessionImpl', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     logger = loggerMock.create();
-    apiClient = new SandboxApiClient(sandboxConfig);
+    apiClient = new SandboxApiClient({ ...sandboxConfig, logger });
     session = new SandboxSessionImpl('space:conv-1', apiClient, logger);
     runCommand = jest.spyOn(apiClient, 'runCommand');
   });
@@ -81,13 +96,30 @@ describe('SandboxSessionImpl', () => {
   });
 
   it('sets isReset=false after a successful call', async () => {
-    runCommand.mockResolvedValueOnce(okResult);
+    runCommand.mockResolvedValueOnce(okResponse);
     await run();
     expect(session.isReset).toBe(false);
   });
 
+  it('resolves with the value and what the call reports about itself', async () => {
+    runCommand.mockResolvedValueOnce(okResponse);
+    await expect(run()).resolves.toEqual({ value: okResult, rpc });
+  });
+
+  it('logs what the evicted call reports about itself', async () => {
+    runCommand.mockRejectedValueOnce(unavailable());
+    await expect(run()).rejects.toMatchObject({ code: 14 });
+    expect(logger.warn).toHaveBeenCalledWith(
+      expect.stringContaining('Sandbox pod evicted'),
+      expect.objectContaining({
+        http: { request: { id: 'req-1' } },
+        rpc: expect.objectContaining({ response: { status_code: 'UNAVAILABLE' } }),
+      })
+    );
+  });
+
   it('sets isReset=true after an UNAVAILABLE failure', async () => {
-    runCommand.mockResolvedValueOnce(okResult);
+    runCommand.mockResolvedValueOnce(okResponse);
     await run();
     expect(session.isReset).toBe(false);
 
@@ -98,7 +130,7 @@ describe('SandboxSessionImpl', () => {
   });
 
   it('does not set isReset=true for non-UNAVAILABLE errors', async () => {
-    runCommand.mockResolvedValueOnce(okResult);
+    runCommand.mockResolvedValueOnce(okResponse);
     await run();
     expect(session.isReset).toBe(false);
 
@@ -112,7 +144,7 @@ describe('SandboxSessionImpl', () => {
     // Call A starts under generation 0. Before it resolves, call B fails with UNAVAILABLE,
     // bumping the generation to 1 and setting isReset=true.
     // A's late success must not clear the isReset that generation 1 installed.
-    const callA = defer<typeof okResult>();
+    const callA = defer<typeof okResponse>();
     runCommand.mockReturnValueOnce(callA.promise);
 
     const resultA = run();
@@ -123,7 +155,7 @@ describe('SandboxSessionImpl', () => {
     expect(session.isReset).toBe(true);
 
     // A's stale success (started in generation 0) arrives now.
-    callA.resolve(okResult);
+    callA.resolve(okResponse);
     await resultA;
 
     // isReset must still be true — a stale success from the old pod must not win.
@@ -141,7 +173,7 @@ describe('SandboxSessionImpl', () => {
     // isReset is now true, generation bumped to 1.
 
     // Call G succeeds under generation 1.
-    runCommand.mockResolvedValueOnce(okResult);
+    runCommand.mockResolvedValueOnce(okResponse);
     await run();
     expect(session.isReset).toBe(false);
 
@@ -164,6 +196,7 @@ describe('SandboxApiClient', () => {
       host: 'sandbox-api',
       port: 50051,
       apiKey: 'secret-key',
+      logger: loggerMock.create(),
       rootCertPem: Buffer.from('mock-ca'),
       clientCertPem: Buffer.from('mock-cert'),
       clientKeyPem: Buffer.from('mock-key'),

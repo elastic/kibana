@@ -11,10 +11,11 @@ import { ToolType } from '@kbn/agent-builder-common';
 import { ToolResultType } from '@kbn/agent-builder-common/tools/tool_result';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server';
 import type { Logger } from '@kbn/core/server';
-import type { SandboxPluginStart, SandboxSession, SecretEnvKey } from '@kbn/sandbox-plugin/server';
+import type { SecretEnvKey } from '@kbn/sandbox-plugin/server';
+import type { AuditedSandboxSession, NightshiftSandboxStart } from '../../sandbox_audit';
 import type { ResolveConnectorCredentials } from './connector_credentials';
 import { redactSecrets } from './connector_credentials';
-import { getConversationId, getSandboxCallContext } from './tool_utils';
+import { getConversationId, getSandboxCallContext, getSandboxWorkload } from './tool_utils';
 import { SANDBOX_VIEW_FILE_TOOL_ID } from './view_file_tool';
 import type { SandboxWorkspaceManager } from './sandbox_workspace_manager';
 import type { SandboxAllowlistClient } from '../../sandbox_allowlist';
@@ -38,7 +39,7 @@ const INLINE_TAIL_CHARS = 4_000;
 const TOOL_OUTPUT_DIR = '/workspace/.tool-output';
 
 const capOutput = async (
-  session: SandboxSession,
+  session: AuditedSandboxSession,
   stream: 'stdout' | 'stderr',
   text: string
 ): Promise<string> => {
@@ -97,7 +98,7 @@ export const createSandboxBashTool = ({
   sandboxAllowlistClient,
   logger,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   sandboxWorkspaceManager: SandboxWorkspaceManager;
   resolveConnectorCredentials?: ResolveConnectorCredentials;
   sandboxAllowlistClient?: Pick<SandboxAllowlistClient, 'getHostsForCommand'>;
@@ -139,9 +140,13 @@ export const createSandboxBashTool = ({
       };
     }
 
-    let session: SandboxSession;
+    let session: AuditedSandboxSession;
     try {
-      session = sandboxStart.getSession(context.request, rawConversationId);
+      session = sandboxStart.getSession(
+        context.request,
+        rawConversationId,
+        getSandboxWorkload(context)
+      );
     } catch (err) {
       return {
         results: [

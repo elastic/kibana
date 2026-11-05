@@ -9,7 +9,7 @@ import { z } from '@kbn/zod/v4';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
-import type { SandboxPluginStart } from '@kbn/sandbox-plugin/server';
+import type { NightshiftSandboxStart } from '../sandbox_audit';
 import { usesKnowledge } from '../agents/agent_policy';
 import { hydrateMemoryWorkspace } from '../memory/register_memory';
 import { MEMORY_WORKSPACE_ROOT } from '../memory/materialize';
@@ -17,6 +17,7 @@ import { degradeOnWriterFailure } from '../lib/hydrate_notification';
 import type { NightshiftTelemetryClient } from '../telemetry';
 import { withNightshiftBackgroundSpan } from '../tracing';
 import { unscopeConversationId } from '../tools/sandbox_bash/tool_utils';
+import { getSandboxStepWorkload } from './sandbox_workload';
 import { withTimeout } from './with_timeout';
 
 /** Caps a stuck write so it cannot stall the rest of the parallel hydrate. */
@@ -30,7 +31,7 @@ export const memoryMaterializeToSandboxStepDefinition = ({
   isEnabled,
   telemetry,
 }: {
-  getSandboxStart: () => SandboxPluginStart | undefined;
+  getSandboxStart: () => NightshiftSandboxStart | undefined;
   getSavedObjects?: () => CoreStart['savedObjects'] | undefined;
   getUiSettings?: () => CoreStart['uiSettings'] | undefined;
   logger: Logger;
@@ -126,7 +127,8 @@ export const memoryMaterializeToSandboxStepDefinition = ({
 
       const session = sandboxStart.getSessionForSpace(
         spaceId,
-        unscopeConversationId(spaceId, sandboxId)
+        unscopeConversationId(spaceId, sandboxId),
+        getSandboxStepWorkload(context)
       );
 
       context.logger.info(
