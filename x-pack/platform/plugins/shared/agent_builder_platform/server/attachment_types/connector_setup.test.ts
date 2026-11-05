@@ -269,7 +269,7 @@ describe('connector_setup toSurfaceComposition', () => {
     buttons: [
       {
         label: 'Configure in Kibana',
-        url: `${SURFACE_BASE_URL}/app/agent_builder/manage/connectors`,
+        url: `${SURFACE_BASE_URL}/app/agent_builder/agents/ops-agent/connectors`,
         ...(primary ? { primary } : {}),
       },
     ],
@@ -279,7 +279,7 @@ describe('connector_setup toSurfaceComposition', () => {
     getConnectorSpecMock.mockReturnValue(undefined);
   });
 
-  it('shows the reason and links to the connectors page in Kibana', async () => {
+  it("shows the reason and links to the agent's connectors page in Kibana", async () => {
     const composition = await definition.toSurfaceComposition?.(
       createAttachment(validData),
       surfaceContext
@@ -297,7 +297,9 @@ describe('connector_setup toSurfaceComposition', () => {
 
     const { valid, slack } = await renderSurface(composition);
     expect(valid).toBe(true);
-    expect(slack).toContain(`"url":"${SURFACE_BASE_URL}/app/agent_builder/manage/connectors"`);
+    expect(slack).toContain(
+      `"url":"${SURFACE_BASE_URL}/app/agent_builder/agents/ops-agent/connectors"`
+    );
     expect(slack).toContain('"style":"primary"');
   });
 

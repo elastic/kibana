@@ -16,6 +16,7 @@ export const SURFACE_BASE_URL = 'https://kibana.example.com/base/s/ops';
 export const surfaceContext = {
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'ops',
+  agentId: 'ops-agent',
   kibanaUrl: SURFACE_BASE_URL,
 };
 

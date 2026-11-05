@@ -25,7 +25,7 @@ export interface SurfacesService {
   /** Renders the round's surface payload, or resolves to nothing when unavailable or rendering fails. */
   renderPayload(
     event: RoundCompleteEvent,
-    options: { originType?: ConversationOriginType } & AttachmentFormatContext
+    options: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined>;
 }
 
@@ -61,9 +61,10 @@ export class SurfacesServiceImpl implements SurfacesService {
     { data: { round, attachments = [] } }: RoundCompleteEvent,
     {
       originType,
+      agentId,
       request,
       spaceId,
-    }: { originType?: ConversationOriginType } & AttachmentFormatContext
+    }: { originType?: ConversationOriginType; agentId: string } & AttachmentFormatContext
   ): Promise<SurfacePayload | undefined> {
     const renderer = this.surfaceRenderers.find(({ id }) => id === originType);
 
@@ -79,7 +80,7 @@ export class SurfacesServiceImpl implements SurfacesService {
         round,
         attachments,
         attachmentsService: this.attachmentsService,
-        context: { request, spaceId, kibanaUrl },
+        context: { request, spaceId, agentId, kibanaUrl },
         logger: this.logger,
         runtime,
       });

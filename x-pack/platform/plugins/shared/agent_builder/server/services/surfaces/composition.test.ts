@@ -29,6 +29,7 @@ type ToSurfaceComposition = NonNullable<AttachmentTypeDefinition['toSurfaceCompo
 const context = {
   request: httpServerMock.createKibanaRequest(),
   spaceId: 'space-1',
+  agentId: 'agent-1',
   kibanaUrl: undefined,
 };
 

@@ -403,7 +403,7 @@ describe('deliverCallbackEvents', () => {
     expect(slack).not.toContain('render_attachment');
   });
 
-  it("renders the surface payload with the execution's request and space", async () => {
+  it("renders the surface payload with the execution's agent, request and space", async () => {
     const { service } = createCallbackDeliveryServiceMock();
     const renderPayload = jest.spyOn(surfacesDeps.surfacesService, 'renderPayload');
 
@@ -417,6 +417,7 @@ describe('deliverCallbackEvents', () => {
 
     expect(renderPayload).toHaveBeenCalledWith(expect.anything(), {
       originType: ConversationOriginType.Slack,
+      agentId: createSlackExecution().agentId,
       request,
       spaceId: 'space-1',
     });

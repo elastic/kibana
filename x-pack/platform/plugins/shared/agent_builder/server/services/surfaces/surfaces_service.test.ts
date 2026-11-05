@@ -65,7 +65,11 @@ const unmappedAttachmentsService = {
   getTypeDefinition: () => undefined,
 } as unknown as AttachmentServiceStart;
 
-const context = { request: httpServerMock.createKibanaRequest(), spaceId: 'space-1' };
+const context = {
+  request: httpServerMock.createKibanaRequest(),
+  spaceId: 'space-1',
+  agentId: 'agent-1',
+};
 
 const basePath = { publicBaseUrl: 'https://kibana.example.com' } as IBasePath;
 
