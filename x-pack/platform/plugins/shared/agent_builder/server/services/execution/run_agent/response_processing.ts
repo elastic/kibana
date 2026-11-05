@@ -13,6 +13,7 @@ import {
   ConversationRoundStepType,
   createAskUserQuestionStep,
   internalTools,
+  createModelReasoningStep,
 } from '@kbn/agent-builder-common';
 import { AgentExecutionErrorCode } from '@kbn/agent-builder-common/agents';
 import {
@@ -21,6 +22,7 @@ import {
 } from '@kbn/agent-builder-common/agents/prompts';
 import { createAgentExecutionError } from '@kbn/agent-builder-common/base/errors';
 import {
+  extractReasoningContent,
   extractTextContent,
   extractToolCallsWithReasoning,
   toolIdentifierFromToolCall,
@@ -76,6 +78,7 @@ export const processResearchResponse = (
   { cycle, toolManager }: { cycle: number; toolManager: ToolManager }
 ): ResearchTurn => {
   const text = extractTextContent(message);
+  const modelReasoning = extractReasoningContent(message);
 
   if (!message.tool_calls?.length) {
     // same branch order as before: any text is a handover; no text is an empty response
@@ -91,7 +94,9 @@ export const processResearchResponse = (
       };
     }
     return {
-      stepUpdates: [],
+      stepUpdates: modelReasoning
+        ? [stepUpdates.append(createModelReasoningStep({ reasoning: modelReasoning }))]
+        : [],
       outcome: { type: 'handover', message: text, forceful: false },
       renderState: {},
       pendingToolCallIds: [],
@@ -105,6 +110,14 @@ export const processResearchResponse = (
   const renderState: ToolRenderStateUpdate = {};
   const seen = new Set<string>();
   const mapping = toolManager.getToolIdMapping();
+
+  if (modelReasoning) {
+    updates.push(
+      stepUpdates.append(
+        createModelReasoningStep({ reasoning: modelReasoning, tool_call_group_id: toolCallGroupId })
+      )
+    );
+  }
 
   if (text.trim().length > 0) {
     updates.push(
