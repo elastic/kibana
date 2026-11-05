@@ -29,7 +29,7 @@ export const BuildSidecar: Task = {
 
       log.info(`Building sidecar for ${goos}/${goarch}`);
 
-      await exec(log, 'go', ['build', '-o', outputPath, './cmd/kbn_sidecar/'], {
+      await exec(log, 'go', ['build', '-tags', 'release', '-o', outputPath, './cmd/kbn_sidecar/'], {
         cwd: sidecarSourceDir,
         env: { ...process.env, GOOS: goos, GOARCH: goarch, CGO_ENABLED: '0' },
       });

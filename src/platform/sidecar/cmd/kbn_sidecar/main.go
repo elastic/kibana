@@ -7,7 +7,7 @@ import (
 	"encoding/json"
 	"errors"
 	"fmt"
-	"log"
+	"log/slog"
 	"net"
 	"net/http"
 	"net/http/httputil"
@@ -52,12 +52,10 @@ type BootstrapConfig struct {
 }
 
 func main() {
-	log.SetOutput(os.Stdout)
-	log.SetFlags(log.Ldate | log.Ltime | log.Lmicroseconds)
-
 	config, err := readBootstrapConfig()
 	if err != nil {
-		log.Fatalf("failed to read bootstrap config: %v", err)
+		slog.Error("failed to read bootstrap config", "error", err)
+		os.Exit(1)
 	}
 
 	proxy := platform.NewNodeProxy(config.SocketPath)
@@ -67,7 +65,8 @@ func main() {
 	addr := fmt.Sprintf("%s:%d", config.Host, config.Port)
 	listener, err := createListener(addr, config.TLS)
 	if err != nil {
-		log.Fatalf("failed to create listener: %v", err)
+		slog.Error("failed to create listener", "error", err)
+		os.Exit(1)
 	}
 
 	server := &http.Server{
@@ -85,7 +84,7 @@ func main() {
 	go func() {
 		select {
 		case sig := <-sigCh:
-			log.Printf("received signal %v, shutting down", sig)
+			slog.Info("received signal, shutting down", "signal", sig)
 			cancel()
 		case <-ctx.Done():
 		}
@@ -96,25 +95,26 @@ func main() {
 		shutdownCtx, shutdownCancel := context.WithTimeout(context.Background(), 30*time.Second)
 		defer shutdownCancel()
 		if err := server.Shutdown(shutdownCtx); err != nil {
-			log.Printf("shutdown error: %v", err)
+			slog.Error("shutdown error", "error", err)
 		}
 	}()
 
 	go func() {
-		log.Printf("pprof listening on :6060")
+		slog.Debug("pprof listening", "addr", ":6060")
 		if err := http.ListenAndServe(":6060", nil); err != nil {
-			log.Printf("pprof server error: %v", err)
+			slog.Error("pprof server error", "error", err)
 		}
 	}()
 
 	signalReady()
-	log.Printf("kbn-sidecar listening on %s (tls=%v)", addr, config.TLS != nil)
+	slog.Info("kbn-sidecar listening", "addr", addr, "tls", config.TLS != nil)
 
 	if err := server.Serve(listener); err != nil && !errors.Is(err, http.ErrServerClosed) {
-		log.Fatalf("server error: %v", err)
+		slog.Error("server error", "error", err)
+		os.Exit(1)
 	}
 
-	log.Println("kbn-sidecar stopped")
+	slog.Info("kbn-sidecar stopped")
 }
 
 func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient, config *BootstrapConfig) http.Handler {
@@ -127,7 +127,7 @@ func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient,
 		whitelistHeaders := config.Elasticsearch.RequestHeadersWhitelist
 		esqlHandler = routes.NewESQLAsyncHandler(esClient, whitelistHeaders, proxy)
 		eseHandler = routes.NewESEHandler(esClient, whitelistHeaders, proxy)
-		log.Printf("Search handlers enabled (ES hosts: %v)", config.Elasticsearch.Hosts)
+		slog.Info("search handlers enabled", "hosts", config.Elasticsearch.Hosts)
 	}
 
 	requireAuth := func(next http.HandlerFunc) http.HandlerFunc {
@@ -139,17 +139,20 @@ func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient,
 
 		switch {
 		case r.Method == http.MethodGet && r.URL.Path == "/api/status":
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "status")
 			statusHandler.ServeHTTP(w, r)
 
 		case esqlHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async")
 			id = strings.TrimPrefix(id, "/")
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "esql_async")
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				esqlHandler.HandleAsync(w, r, id)
 			})(w, r)
 
 		case esqlHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/esql_async/"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/esql_async/")
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "esql_async_delete")
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				esqlHandler.HandleDelete(w, r, id)
 			})(w, r)
@@ -157,17 +160,20 @@ func buildHandler(proxy *httputil.ReverseProxy, nodeClient *platform.NodeClient,
 		case eseHandler != nil && r.Method == http.MethodPost && strings.HasPrefix(r.URL.Path, "/internal/search/ese"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese")
 			id = strings.TrimPrefix(id, "/")
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "ese")
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				eseHandler.HandleSearch(w, r, id)
 			})(w, r)
 
 		case eseHandler != nil && r.Method == http.MethodDelete && strings.HasPrefix(r.URL.Path, "/internal/search/ese/"):
 			id := strings.TrimPrefix(r.URL.Path, "/internal/search/ese/")
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "ese_delete")
 			requireAuth(func(w http.ResponseWriter, r *http.Request) {
 				eseHandler.HandleDelete(w, r, id)
 			})(w, r)
 
 		default:
+			slog.Debug("route", "method", r.Method, "path", r.URL.Path, "handler", "proxy")
 			proxy.ServeHTTP(w, r)
 		}
 	})
@@ -206,7 +212,8 @@ func buildESClient(esCfg *ESConfig) *elasticsearch.TypedClient {
 		},
 	})
 	if err != nil {
-		log.Fatalf("failed to create ES client: %v", err)
+		slog.Error("failed to create ES client", "error", err)
+		os.Exit(1)
 	}
 	return esClient
 }
@@ -233,7 +240,7 @@ func createListener(addr string, tlsCfg *TLSConfig) (net.Listener, error) {
 func signalReady() {
 	fd3 := os.NewFile(3, "ready-signal")
 	if fd3 == nil {
-		log.Println("fd 3 not available, skipping ready signal")
+		slog.Warn("fd 3 not available, skipping ready signal")
 		return
 	}
 	_, _ = fd3.Write([]byte("READY\n"))
@@ -245,7 +252,7 @@ func watchStdin(cancel context.CancelFunc) {
 	for {
 		_, err := os.Stdin.Read(buf)
 		if err != nil {
-			log.Println("stdin closed, initiating shutdown (orphan protection)")
+			slog.Info("stdin closed, initiating shutdown (orphan protection)")
 			cancel()
 			return
 		}
