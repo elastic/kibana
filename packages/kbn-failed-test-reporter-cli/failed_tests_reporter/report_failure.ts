@@ -339,8 +339,8 @@ interface CommentOptions {
   nameTest?: boolean;
 }
 
-/** How a suite issue comment names the failed test: a Scout failure only knows its describe and title */
-const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
+/** How a suite issue names the failed test: a Scout failure only knows its describe and title */
+export const testLabel = (failure: TestFailure | ScoutTestFailureExtended): string =>
   isScoutFailure(failure) ? `${failure.classname} ${failure.name}` : failure.name;
 
 function createJUnitComment(

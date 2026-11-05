@@ -347,7 +347,7 @@ const fetchFailedTestIssues = async (
 };
 
 /** `failed-test` plus the label of each owning team, the latter only in the Kibana repository. */
-export const issueLabels = (suite: FlakySuite, githubRepo: string): string[] => {
+export const issueLabels = (suite: Pick<FlakySuite, 'owners'>, githubRepo: string): string[] => {
   if (githubRepo !== DEFAULT_GITHUB_REPO) {
     return [FAILED_TEST_LABEL];
   }
