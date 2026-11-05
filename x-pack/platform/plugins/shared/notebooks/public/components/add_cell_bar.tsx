@@ -20,41 +20,65 @@ import { i18n } from '@kbn/i18n';
 import { createCell, type NewCellKind } from '../model/cell_factory';
 import { useNotebook } from './notebook_context';
 
-const CELL_KINDS: ReadonlyArray<{ kind: NewCellKind; icon: string; label: string }> = [
+interface CellKindOption {
+  kind: NewCellKind;
+  icon: string;
+  label: string;
+}
+
+const CELL_KIND_GROUPS: ReadonlyArray<{ id: string; title: string; kinds: CellKindOption[] }> = [
   {
-    kind: 'esql',
-    icon: 'database',
-    label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL' }),
+    id: 'inputs',
+    title: i18n.translate('xpack.notebook.addCell.group.inputs', { defaultMessage: 'Inputs' }),
+    kinds: [
+      {
+        kind: 'input:time',
+        icon: 'calendar',
+        label: i18n.translate('xpack.notebook.addCell.time', { defaultMessage: 'Time range' }),
+      },
+      {
+        kind: 'input:dropdown',
+        icon: 'list',
+        label: i18n.translate('xpack.notebook.addCell.dropdown', { defaultMessage: 'Dropdown' }),
+      },
+      {
+        kind: 'input:range',
+        icon: 'controls',
+        label: i18n.translate('xpack.notebook.addCell.range', { defaultMessage: 'Range' }),
+      },
+    ],
   },
   {
-    kind: 'chart',
-    icon: 'visBarVertical',
-    label: i18n.translate('xpack.notebook.addCell.chart', { defaultMessage: 'Chart' }),
+    id: 'data',
+    title: i18n.translate('xpack.notebook.addCell.group.data', { defaultMessage: 'Data' }),
+    kinds: [
+      {
+        kind: 'esql',
+        icon: 'database',
+        label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL' }),
+      },
+    ],
   },
   {
-    kind: 'custom',
-    icon: 'sparkles',
-    label: i18n.translate('xpack.notebook.addCell.custom', { defaultMessage: 'Custom' }),
-  },
-  {
-    kind: 'markdown',
-    icon: 'text',
-    label: i18n.translate('xpack.notebook.addCell.markdown', { defaultMessage: 'Markdown' }),
-  },
-  {
-    kind: 'input:time',
-    icon: 'calendar',
-    label: i18n.translate('xpack.notebook.addCell.time', { defaultMessage: 'Time range input' }),
-  },
-  {
-    kind: 'input:dropdown',
-    icon: 'list',
-    label: i18n.translate('xpack.notebook.addCell.dropdown', { defaultMessage: 'Dropdown input' }),
-  },
-  {
-    kind: 'input:range',
-    icon: 'controls',
-    label: i18n.translate('xpack.notebook.addCell.range', { defaultMessage: 'Range input' }),
+    id: 'display',
+    title: i18n.translate('xpack.notebook.addCell.group.display', { defaultMessage: 'Display' }),
+    kinds: [
+      {
+        kind: 'chart',
+        icon: 'visBarVertical',
+        label: i18n.translate('xpack.notebook.addCell.chart', { defaultMessage: 'Chart' }),
+      },
+      {
+        kind: 'custom',
+        icon: 'sparkles',
+        label: i18n.translate('xpack.notebook.addCell.custom', { defaultMessage: 'Custom' }),
+      },
+      {
+        kind: 'markdown',
+        icon: 'text',
+        label: i18n.translate('xpack.notebook.addCell.markdown', { defaultMessage: 'Markdown' }),
+      },
+    ],
   },
 ];
 
@@ -115,18 +139,23 @@ export const AddCellBar = ({
             </EuiButtonEmpty>
           }
         >
-          <EuiContextMenuPanel
-            items={CELL_KINDS.map(({ kind, icon, label }) => (
-              <EuiContextMenuItem
-                key={kind}
-                icon={icon}
-                onClick={() => add(kind)}
-                data-test-subj={`notebookAddCell-${kind}`}
-              >
-                {label}
-              </EuiContextMenuItem>
-            ))}
-          />
+          {CELL_KIND_GROUPS.map(({ id, title, kinds }) => (
+            <EuiContextMenuPanel
+              key={id}
+              title={title}
+              data-test-subj={`notebookAddCellGroup-${id}`}
+              items={kinds.map(({ kind, icon, label }) => (
+                <EuiContextMenuItem
+                  key={kind}
+                  icon={icon}
+                  onClick={() => add(kind)}
+                  data-test-subj={`notebookAddCell-${kind}`}
+                >
+                  {label}
+                </EuiContextMenuItem>
+              ))}
+            />
+          ))}
         </EuiPopover>
       </EuiFlexItem>
     </EuiFlexGroup>
