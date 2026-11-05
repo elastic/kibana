@@ -8,7 +8,6 @@
 import React, { Suspense, useCallback, useEffect, useRef, useState } from 'react';
 import { isEqual } from 'lodash';
 import {
-  EuiAccordion,
   EuiBetaBadge,
   EuiButton,
   EuiButtonEmpty,
@@ -404,26 +403,20 @@ export const CustomCellFlyout = ({
           </EuiResizeObserver>
         </EuiFormRow>
         <EuiSpacer size="m" />
-        <EuiAccordion
-          id={`${titleId}-data`}
-          buttonContent={
-            <SectionTitle
-              icon={<EuiIcon type="database" size="s" aria-hidden={true} />}
-              title={i18n.translate('xpack.notebook.customCell.flyout.dataSection', {
-                defaultMessage: 'Data source (ES|QL)',
-              })}
-            />
-          }
-          extraAction={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate('xpack.notebook.customCell.flyout.dataSectionOptional', {
-                defaultMessage: 'Optional',
-              })}
-            </EuiText>
-          }
-          paddingSize="none"
-          data-test-subj="notebookCustomDataSection"
-        >
+        <div data-test-subj="notebookCustomDataSection">
+          <SectionTitle
+            icon={<EuiIcon type="database" size="s" aria-hidden={true} />}
+            title={i18n.translate('xpack.notebook.customCell.flyout.dataSection', {
+              defaultMessage: 'Data source (ES|QL)',
+            })}
+            action={
+              <EuiText size="xs" color="subdued">
+                {i18n.translate('xpack.notebook.customCell.flyout.dataSectionOptional', {
+                  defaultMessage: 'Optional',
+                })}
+              </EuiText>
+            }
+          />
           <EuiSpacer size="s" />
           <EuiFormRow
             fullWidth
@@ -535,7 +528,7 @@ export const CustomCellFlyout = ({
               )}
             </>
           )}
-        </EuiAccordion>
+        </div>
       </EuiFlyoutBody>
 
       <EuiFlyoutFooter>
