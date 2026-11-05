@@ -174,7 +174,9 @@ export const PACK_HOST_CORRELATION_CONFIGS: Record<string, PackHostCorrelationCo
     host: {
       architecture: 'x86_64',
       hostId: 'b2c3d4e5-6f7a-4b1c-8d2e-3f4a5b6c7d8e',
-      ip: ['203.0.113.15'],
+      // The source IP the pack's CloudTrail events record for dev-user on this host, so the
+      // host's endpoint telemetry joins the same IP IOCs the CloudTrail side does.
+      ip: ['192.0.2.30'],
       mac: ['02:42:ac:11:00:15'],
       osFamily: 'windows',
       osFull: 'Windows Server 2019 Datacenter',
@@ -397,6 +399,7 @@ export const buildProcessDoc = (
     name: config.hostName,
     hostname: config.hostName,
     id: config.host.hostId,
+    ip: config.host.ip,
     os: {
       family: config.host.osFamily,
       name: config.host.osName,

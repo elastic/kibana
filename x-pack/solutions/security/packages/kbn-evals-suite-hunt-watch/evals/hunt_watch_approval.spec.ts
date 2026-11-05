@@ -61,7 +61,16 @@ const conversationId = buildHuntInvestigationConversationId({ spaceId, reportId 
 
 const isPending = (p: ProposalWithMetadata) => p.status === 'pending';
 
-const mintPendingProposals = async ({
+// The hunt step generates its behavior queries per run, so the same report does not always
+// ground on the seeded Defend process events: a run whose query lands only on CloudTrail has
+// no process to act on and mints the recommendation alone (and Tier 2 on this scenario can
+// stop `incomplete_retryable` with no Proposal at all, see README). Neither is what this spec
+// tests, so setup reruns the report until it has an actioned pending Proposal to decide.
+const MINT_ATTEMPTS = 3;
+
+class MissingActionedProposalError extends Error {}
+
+const mintOnce = async ({
   huntWatchClient,
   esClient,
   fetch,
@@ -83,13 +92,13 @@ const mintPendingProposals = async ({
   const report = artifacts.reports[reportId];
   const pending = report?.proposals.filter(isPending) ?? [];
   if (pending.length === 0) {
-    throw new Error(
+    throw new MissingActionedProposalError(
       `${reportId} raised no pending Proposal (outcome: ${report?.outcome ?? 'none'}, ` +
         `Proposals: ${report?.proposals.map((p) => `${p.id}:${p.status}`).join(', ') || 'none'})`
     );
   }
   if (!pending.some((p) => p.actionWorkflowId)) {
-    throw new Error(
+    throw new MissingActionedProposalError(
       `${reportId} raised no pending Proposal with an action, so approve and dismiss would both ` +
         `settle through no_action only (pending: ${pending
           .map((p) => `${p.id}:${p.actionWorkflowId ?? 'no action'}`)
@@ -100,6 +109,30 @@ const mintPendingProposals = async ({
     throw new Error(`Investigation ${conversationId} closed before any Proposal was decided`);
   }
   return pending;
+};
+
+const mintPendingProposals = async (deps: {
+  huntWatchClient: HuntWatchClient;
+  esClient: Client;
+  fetch: HttpHandler;
+  log: ToolingLog;
+}): Promise<ProposalWithMetadata[]> => {
+  const { huntWatchClient, esClient, fetch, log } = deps;
+  const misses: string[] = [];
+  for (let attempt = 1; attempt <= MINT_ATTEMPTS; attempt++) {
+    try {
+      return await mintOnce(deps);
+    } catch (error) {
+      if (!(error instanceof MissingActionedProposalError)) throw error;
+      misses.push(`attempt ${attempt}: ${error.message}`);
+      log.warning(`mint ${attempt}/${MINT_ATTEMPTS} missed: ${error.message}`);
+      if (attempt < MINT_ATTEMPTS) {
+        await huntWatchClient.cancelPending();
+        await resetHuntReport({ esClient, fetch, log, reportId, spaceId });
+      }
+    }
+  }
+  throw new Error(misses.join('; '));
 };
 
 const dismissLeftovers = async ({ fetch, log }: { fetch: HttpHandler; log: ToolingLog }) => {

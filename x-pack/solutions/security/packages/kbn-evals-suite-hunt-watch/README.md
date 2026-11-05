@@ -281,6 +281,14 @@ d=$(mktemp -d) && cp gate_checklist.yaml "$d/gate-checklist.yaml"
   that is the first place to look.
 - A confirmed hit raises more than one Proposal, so the hit rows use a minimum rather than an
   exact count.
+- Tier 2 writes its own ES|QL each run, and the model picks each behavior's `FROM` from the
+  indices Tier 1 matched. When Tier 1 matched only CloudTrail, the T1059.001 query often read
+  CloudTrail too. That query has no process to point at, so packaging minted only a
+  recommendation and the approval spec had no suspend-process Proposal to act on. The seeded
+  WIN-ANALYST01 process events therefore carry `host.ip` 192.0.2.30, the same source IP the
+  CloudTrail events record, so Tier 1 also matches them and Tier 2 is grounded on endpoint
+  data. The approval spec still re-mints, up to three times, when no actioned Proposal
+  appears.
 - On the `aws-iam-assume-role` scenario, Tier 2 often ends `incomplete_retryable`, which makes
   the run `partial` with no evidence written. Before Tier 2 ES|QL generation moved to the
   Frontier tier (#298211) the cause was `generation_failed` on at least one derived technique in
