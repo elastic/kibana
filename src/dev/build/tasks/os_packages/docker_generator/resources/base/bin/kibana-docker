@@ -141,6 +141,10 @@ kibana_vars=(
     notifications.connectors.default.email
     ops.cGroupOverrides.cpuAcctPath
     ops.cGroupOverrides.cpuPath
+    ops.eventLoopWatchdog.blockThreshold
+    ops.eventLoopWatchdog.enabled
+    ops.eventLoopWatchdog.startup.blockThreshold
+    ops.eventLoopWatchdog.statsInterval
     ops.interval
     path.data
     pid.file

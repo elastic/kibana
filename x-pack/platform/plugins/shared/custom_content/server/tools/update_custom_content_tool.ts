@@ -11,6 +11,8 @@ import { getToolResultId } from '@kbn/agent-builder-server';
 import { ATTACHMENT_REF_ACTOR } from '@kbn/agent-builder-common/attachments';
 import type { BuiltinToolDefinition } from '@kbn/agent-builder-server/tools/builtin';
 import {
+  CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID,
+  CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   customContentPanelUpdateSchema,
   resolveCustomContentQuery,
 } from '@kbn/custom-content-common';
@@ -29,27 +31,19 @@ import {
 const updateCustomContentSchema = customContentPanelUpdateSchema;
 
 /**
- * Id of the dashboard generation tool, named in agent-facing copy so the agent can fall back to it
- * for panels that have no context attachment. Inlined rather than imported from
- * `@kbn/agent-builder-dashboards-common` to avoid a plugin dependency for a prompt string; keep in
- * sync with `dashboardTools.generateDashboard` there.
- */
-const GENERATE_DASHBOARD_TOOL_ID = 'platform.dashboard.generate_dashboard';
-
-/**
  * Only panels the user explicitly sent to chat have a context attachment, but any panel on the
  * attached dashboard can still be edited through the dashboard tool, which targets the panel by id and
  * needs no attachment. Spelling that route out is what stops the agent from dead-ending — left to
  * itself it invents remediations like asking the user to click the panel, which attaches nothing.
  */
 const NOT_ATTACHED_REMEDIATION =
-  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${GENERATE_DASHBOARD_TOOL_ID}\` by listing the panel's id in \`panels\` with \`content: { source: "request", renderer: "custom_content" }\` plus the requested \`query\` and/or \`esql\` (read the dashboard attachment to find the id; for a dashboard panel it is the same value as embeddable_id). ` +
+  `If this panel is on the dashboard attached to this conversation, do not ask the user for anything — edit it with \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` by listing the panel's id in \`panels\` with \`content: { source: "request", renderer: "custom_content" }\` plus the requested \`query\` and/or \`esql\` (read the dashboard attachment to find the id; for a dashboard panel it is the same value as embeddable_id). ` +
   'Only if no dashboard is attached, ask the user to open that panel\'s context menu, choose Edit, then "Refine with chat". Never suggest clicking the panel — that attaches nothing.';
 
 export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
   typeof updateCustomContentSchema
 > => ({
-  id: 'custom_content_update_panel',
+  id: CUSTOM_CONTENT_UPDATE_PANEL_TOOL_ID,
   type: ToolType.builtin,
   annotations: {
     title: 'Update Custom Content Panel',
@@ -67,7 +61,7 @@ export const createUpdateCustomContentTool = (): BuiltinToolDefinition<
 - When only \`prompt\` is provided (style or layout change, no query change), the server refines the existing template directly — no query generation or sampling, preserving layout and design.
 - Pass \`esqlQuery\` only when the user supplied a query verbatim; pass \`esqlQuery: null\` to remove the query entirely.
 
-This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
+This tool only reaches panels whose context is attached to the conversation — that happens when the user picks "Refine with chat" on a panel. For any other custom content panel on the attached dashboard, use \`${CUSTOM_CONTENT_GENERATE_DASHBOARD_TOOL_ID}\` instead, listing the panel's id in \`panels\` with \`source: "request"\`, \`renderer: "custom_content"\` content; it targets the panel by id and needs no attachment.
 
 On success this returns \`attachment_id\` and \`version\`. You MUST render the updated panel inline as the last part of your response by emitting \`<render_attachment id="{attachment_id}" version="{version}" />\` — without it the user cannot preview or step back through earlier versions of the panel.`,
   schema: updateCustomContentSchema,

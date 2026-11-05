@@ -88,6 +88,7 @@ dependsOn:
   - '@kbn/ebt-click'
   - '@kbn/usage-collection-plugin'
   - '@kbn/unsaved-changes-prompt'
+  - '@kbn/cloud-plugin'
 tags:
   - plugin
   - prod

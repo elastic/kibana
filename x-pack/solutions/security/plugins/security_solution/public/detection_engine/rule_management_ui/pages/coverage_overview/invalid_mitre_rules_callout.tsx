@@ -8,7 +8,7 @@
 import React, { memo, useCallback, useMemo, useState } from 'react';
 import { EuiButton, EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { THREAT_FRAMEWORK_NAME } from '@kbn/security-mitre-attack-common';
+import { THREAT_FRAMEWORK_DISPLAY_NAME } from '@kbn/security-mitre-attack-common';
 import { useKibana } from '../../../../common/lib/kibana';
 import { useCoverageOverviewDashboardContext } from './coverage_overview_dashboard_context';
 import { InvalidMitreRulesModal } from './invalid_mitre_rules_modal';
@@ -21,7 +21,7 @@ const CoverageOverviewInvalidMitreRulesCalloutComponent = () => {
   const {
     state: { data, framework, frameworkVersion },
   } = useCoverageOverviewDashboardContext();
-  const frameworkLabel = THREAT_FRAMEWORK_NAME[framework];
+  const frameworkLabel = THREAT_FRAMEWORK_DISPLAY_NAME[framework];
   // The hook returns the version without the leading 'v', so re-add it at the display site.
   const displayVersion = frameworkVersion ? `v${frameworkVersion}` : undefined;
 

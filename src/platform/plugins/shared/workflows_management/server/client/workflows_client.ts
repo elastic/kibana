@@ -118,6 +118,13 @@ export const createManagedWorkflowsSystemApiProvider = (
         }
         await workflowsService.uninstallManagedWorkflow(id, options, pluginId);
       },
+      disable: async (id, options) => {
+        if (!isWorkflowsAvailable) {
+          logger.debug('Workflows is not available in this environment. Managed disable ignored.');
+          return false;
+        }
+        return workflowsService.disableManagedWorkflow(id, options, pluginId);
+      },
       getWorkflowStatus: async (id, options) => {
         if (!isWorkflowsAvailable) {
           logger.debug('Workflows is not available in this environment. Managed status rejected.');
