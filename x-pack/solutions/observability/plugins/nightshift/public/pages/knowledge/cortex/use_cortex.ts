@@ -86,30 +86,6 @@ const useCortexMutation = <TVariables>(
   });
 };
 
-export const useCreateCortexPage = () =>
-  useCortexMutation(
-    (client, page: CortexPageInput) =>
-      client.fetch('POST /internal/nightshift/cortex/pages', {
-        signal: null,
-        params: { body: page },
-      }),
-    i18n.translate('xpack.nightshift.knowledge.cortex.createErrorTitle', {
-      defaultMessage: 'Could not create Cortex page',
-    })
-  );
-
-export const useUpdateCortexPage = () =>
-  useCortexMutation(
-    (client, page: CortexPageInput & CortexPageVersion) =>
-      client.fetch('PUT /internal/nightshift/cortex/pages', {
-        signal: null,
-        params: { body: page },
-      }),
-    i18n.translate('xpack.nightshift.knowledge.cortex.updateErrorTitle', {
-      defaultMessage: 'Could not save Cortex page',
-    })
-  );
-
 export const useArchiveCortexPage = () =>
   useCortexMutation(
     (client, { id, version }: CortexPageVersion & { id: string }) =>
@@ -119,5 +95,23 @@ export const useArchiveCortexPage = () =>
       }),
     i18n.translate('xpack.nightshift.knowledge.cortex.archiveErrorTitle', {
       defaultMessage: 'Could not archive Cortex page',
+    })
+  );
+
+/** Restores an archived page as tentative; agents can corroborate it again from there. */
+export const useRestoreCortexPage = () =>
+  useCortexMutation(
+    (client, page: CortexPageInput & CortexPageVersion) =>
+      client.fetch('PUT /internal/nightshift/cortex/pages', {
+        signal: null,
+        params: {
+          body: {
+            ...page,
+            status: 'tentative',
+          },
+        },
+      }),
+    i18n.translate('xpack.nightshift.knowledge.cortex.restoreErrorTitle', {
+      defaultMessage: 'Could not restore Cortex page',
     })
   );
