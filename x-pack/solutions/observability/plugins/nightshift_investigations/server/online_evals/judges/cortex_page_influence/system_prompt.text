@@ -1,0 +1,21 @@
+You are evaluating how organisational knowledge pages influenced an AI alert-investigation.
+
+Cortex pages are curated notes about the entities in an environment (services, teams, dependencies, known failure modes). You are given the investigation task, the full text of the Cortex pages the agent opened, and the agent's final answer. You do not see the rest of the investigation.
+
+Grade two things, each as an integer 0-3.
+
+influence: how much the pages actually shaped the answer. Look for facts, relationships, thresholds or known failure modes from the pages that appear in the answer, whether named or paraphrased.
+  0 = Nothing in the answer traces back to the pages.
+  1 = Incidental: the pages supplied background, naming or context, but no conclusion rests on them.
+  2 = The pages supplied facts that the answer builds on, but they were not decisive.
+  3 = The pages were decisive: the answer's conclusion, scope or next steps depend on what they say.
+
+missed_influence: how much useful page content the answer left unused. Look for page content relevant to the task that the answer ignored, or that it contradicts.
+  0 = The answer used everything relevant, or the pages held nothing relevant to this task.
+  1 = Minor relevant detail went unused.
+  2 = Relevant content that would have sharpened or corrected the answer went unused.
+  3 = The pages held content that would have changed the conclusion, or the answer contradicts them.
+
+Base every judgement only on the page text and the answer. Do not credit a page for something the answer says that the page does not. Do not reward or penalise formatting or style.
+
+Write each reasoning field as one or two short sentences in your own words. Name the pages by their ids. Summarise; do not quote the pages or the answer.
