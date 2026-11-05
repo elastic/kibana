@@ -19,6 +19,14 @@ import type {
 } from './providers/types';
 import { DecisionProviderUnavailableError } from './providers/types';
 
+const span = { setAttributes: jest.fn() };
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ...jest.requireActual('@kbn/inference-tracing'),
+  withActiveInferenceSpan: (_name: string, _opts: unknown, cb: (s: typeof span) => unknown) =>
+    cb(span),
+}));
+
 const questions: Record<string, DecisionQuestion> = {
   should_respond: { type: 'predicate', instructions: 'Should the agent respond?' },
 };
@@ -67,6 +75,36 @@ const setup = (providers: FakeProvider[]) => {
 describe('DecisionService', () => {
   afterEach(() => {
     jest.useRealTimers();
+    span.setAttributes.mockClear();
+  });
+
+  it('records the provider and inference endpoint that answered on the decide span', async () => {
+    const { decide } = setup([
+      fakeProvider('eis', async () => {
+        throw new Error('boom');
+      }),
+      fakeProvider('fast_model'),
+    ]);
+
+    await decide();
+
+    expect(span.setAttributes).toHaveBeenCalledWith({
+      'elastic.decision.status': 'decided',
+      'elastic.decision.provider': 'fast_model',
+      'elastic.decision.inference_id': 'model-1',
+    });
+  });
+
+  it('records the status on the decide span when no provider answers', async () => {
+    const { decide } = setup([
+      fakeProvider('eis', async () => {
+        throw new DecisionProviderUnavailableError('no endpoint');
+      }),
+    ]);
+
+    await decide();
+
+    expect(span.setAttributes).toHaveBeenCalledWith({ 'elastic.decision.status': 'unavailable' });
   });
 
   it('uses the first provider that answers, in order', async () => {

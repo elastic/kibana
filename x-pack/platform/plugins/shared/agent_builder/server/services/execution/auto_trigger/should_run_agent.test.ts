@@ -26,6 +26,22 @@ import {
 import { shouldRespondQuestions } from './build_trigger_decision_input';
 import { shouldRunAgent } from './should_run_agent';
 
+const span = { setAttributes: jest.fn() };
+const spanNames: string[] = [];
+
+jest.mock('@kbn/inference-tracing', () => ({
+  ...jest.requireActual('@kbn/inference-tracing'),
+  withActiveInferenceSpan: (
+    name: string,
+    opts: { attributes?: Record<string, unknown> },
+    cb: (s: typeof span) => unknown
+  ) => {
+    spanNames.push(name);
+    span.setAttributes(opts.attributes);
+    return cb(span);
+  },
+}));
+
 const sharedAccessControl = {
   access_mode: ConversationAccessControlMode.Public,
   entries: [],
@@ -106,6 +122,48 @@ const predicate = (probability: number): DecideResult => ({
 });
 
 describe('shouldRunAgent', () => {
+  beforeEach(() => {
+    span.setAttributes.mockClear();
+    spanNames.length = 0;
+  });
+
+  it('records the decision on an auto_trigger span for the conversation', async () => {
+    const { run } = setup({ decideResult: predicate(0.2) });
+
+    await run();
+
+    expect(spanNames).toEqual(['auto_trigger']);
+    expect(span.setAttributes).toHaveBeenCalledWith(
+      expect.objectContaining({ 'gen_ai.conversation.id': 'conversation-1' })
+    );
+    expect(span.setAttributes).toHaveBeenCalledWith({
+      'elastic.auto_trigger.status': 'decided',
+      'elastic.auto_trigger.inference_id': 'decision-1',
+      'elastic.auto_trigger.probability': 0.2,
+      'elastic.auto_trigger.threshold': 0.5,
+      'elastic.auto_trigger.run': false,
+    });
+  });
+
+  it('records the fallback on the auto_trigger span when no decision is available', async () => {
+    const { run } = setup({ decideResult: { status: 'unavailable' } });
+
+    await run();
+
+    expect(span.setAttributes).toHaveBeenCalledWith({
+      'elastic.auto_trigger.status': 'unavailable',
+      'elastic.auto_trigger.run': true,
+    });
+  });
+
+  it('does not open a span when it skips the decision', async () => {
+    const { run } = setup({ experimental: false });
+
+    await run();
+
+    expect(spanNames).toEqual([]);
+  });
+
   it('runs without deciding when there is no conversation id', async () => {
     const { run, decide } = setup();
 

@@ -12,7 +12,7 @@ import type { AgentBuilderConfig } from '../../config';
 import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
 import { EisDecisionProvider } from './providers/eis';
 import { FastModelDecisionProvider } from './providers/fast_model';
-import type { DecisionProvider } from './providers/types';
+import type { DecisionProvider, DecisionProviderId } from './providers/types';
 import {
   isDecisionProviderAbortedError,
   isDecisionProviderUnavailableError,
@@ -63,11 +63,26 @@ export class DecisionService implements DecisionsStart {
     this.timeoutMs = timeoutMs;
   }
 
+  /** Runs the provider chain in a `decide` span that records which provider answered. */
   decide = (params: DecideParams): Promise<DecideResult> =>
     withActiveInferenceSpan(
       'decide',
       { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-      () => this.run(params)
+      async (span) => {
+        const { result, providerId } = await this.run(params);
+
+        span?.setAttributes({
+          'elastic.decision.status': result.status,
+          ...(result.status === 'decided'
+            ? {
+                'elastic.decision.provider': providerId,
+                'elastic.decision.inference_id': result.inferenceId,
+              }
+            : {}),
+        });
+
+        return result;
+      }
     );
 
   private async run({
@@ -76,13 +91,13 @@ export class DecisionService implements DecisionsStart {
     questions,
     abortSignal,
     timeoutMs = this.timeoutMs,
-  }: DecideParams): Promise<DecideResult> {
+  }: DecideParams): Promise<{ result: DecideResult; providerId?: DecisionProviderId }> {
     const questionNames = Object.keys(questions).join(', ');
     let lastError: Error | undefined;
 
     for (const provider of this.providers) {
       if (abortSignal?.aborted) {
-        return { status: 'failed', error: new Error('Decision aborted') };
+        return { result: { status: 'failed', error: new Error('Decision aborted') } };
       }
 
       if (!provider.isAvailable()) {
@@ -107,7 +122,7 @@ export class DecisionService implements DecisionsStart {
             }ms: ${JSON.stringify(answers)}`
         );
 
-        return { status: 'decided', inferenceId, answers };
+        return { result: { status: 'decided', inferenceId, answers }, providerId: provider.id };
       } catch (error) {
         if (isDecisionProviderUnavailableError(error)) {
           this.logger.debug(
@@ -134,9 +149,11 @@ export class DecisionService implements DecisionsStart {
     }
 
     if (abortSignal?.aborted) {
-      return { status: 'failed', error: new Error('Decision aborted') };
+      return { result: { status: 'failed', error: new Error('Decision aborted') } };
     }
 
-    return lastError ? { status: 'failed', error: lastError } : { status: 'unavailable' };
+    return {
+      result: lastError ? { status: 'failed', error: lastError } : { status: 'unavailable' },
+    };
   }
 }

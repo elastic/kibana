@@ -14,6 +14,11 @@ import type {
 } from '@kbn/core/server';
 import { AGENT_BUILDER_EXPERIMENTAL_FEATURES_SETTING_ID } from '@kbn/management-settings-ids';
 import { isSharedConversation } from '@kbn/agent-builder-common';
+import {
+  ElasticGenAIAttributes,
+  GenAISemanticConventions,
+  withActiveInferenceSpan,
+} from '@kbn/inference-tracing';
 import type { DecisionsStart } from '@kbn/agent-builder-server';
 import type { ConversationExecutionParams } from '@kbn/agent-builder-server/execution';
 import type { AgentBuilderConfig } from '../../../config';
@@ -124,36 +129,65 @@ export const shouldRunAgent = async ({
   }
 
   const { decisions, decisionConfig, logger } = deps;
+  const { triggerThreshold } = decisionConfig;
 
-  const result = await decisions.decide({
-    request,
-    input,
-    questions: shouldRespondQuestions,
-    timeoutMs: decisionConfig.timeoutMs,
-    abortSignal,
-  });
+  return withActiveInferenceSpan(
+    'auto_trigger',
+    {
+      attributes: {
+        [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN',
+        [GenAISemanticConventions.GenAIConversationId]: params.conversationId,
+      },
+    },
+    async (span) => {
+      const result = await decisions.decide({
+        request,
+        input,
+        questions: shouldRespondQuestions,
+        timeoutMs: decisionConfig.timeoutMs,
+        abortSignal,
+      });
 
-  if (result.status !== 'decided') {
-    logger.debug(`auto trigger: decision ${result.status}, running the agent`);
-    return true;
-  }
+      if (result.status !== 'decided') {
+        logger.debug(`auto trigger: decision ${result.status}, running the agent`);
+        span?.setAttributes({
+          'elastic.auto_trigger.status': result.status,
+          'elastic.auto_trigger.run': true,
+        });
+        return true;
+      }
 
-  const answer = result.answers[SHOULD_RESPOND_QUESTION];
+      const answer = result.answers[SHOULD_RESPOND_QUESTION];
 
-  if (answer?.type !== 'predicate') {
-    logger.debug(
-      `auto trigger: no predicate answer from [${result.inferenceId}], running the agent`
-    );
-    return true;
-  }
+      if (answer?.type !== 'predicate') {
+        logger.debug(
+          `auto trigger: no predicate answer from [${result.inferenceId}], running the agent`
+        );
+        span?.setAttributes({
+          'elastic.auto_trigger.status': 'invalid_answer',
+          'elastic.auto_trigger.inference_id': result.inferenceId,
+          'elastic.auto_trigger.run': true,
+        });
+        return true;
+      }
 
-  const run = answer.probability >= decisionConfig.triggerThreshold;
+      const run = answer.probability >= triggerThreshold;
 
-  logger.debug(
-    `auto trigger: [${result.inferenceId}] should_respond=${answer.probability} (threshold ${
-      decisionConfig.triggerThreshold
-    }), ${run ? 'running the agent' : 'not running the agent'}`
+      logger.debug(
+        `auto trigger: [${result.inferenceId}] should_respond=${
+          answer.probability
+        } (threshold ${triggerThreshold}), ${run ? 'running the agent' : 'not running the agent'}`
+      );
+
+      span?.setAttributes({
+        'elastic.auto_trigger.status': 'decided',
+        'elastic.auto_trigger.inference_id': result.inferenceId,
+        'elastic.auto_trigger.probability': answer.probability,
+        'elastic.auto_trigger.threshold': triggerThreshold,
+        'elastic.auto_trigger.run': run,
+      });
+
+      return run;
+    }
   );
-
-  return run;
 };
