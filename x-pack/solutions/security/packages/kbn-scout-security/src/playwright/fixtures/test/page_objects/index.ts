@@ -37,6 +37,7 @@ import { EntityFlyoutAnomaliesPage } from './entity_flyout_anomalies_page';
 import { CoverageOverviewPage } from './coverage_overview';
 import { SecurityOverviewPage } from './security_overview_page';
 import { RuleEditPage } from './rule_edit_page';
+import { WatchlistEditFlyout } from './watchlist_edit_flyout';
 
 export type { RuleCreateWizardPage } from './rule_create_wizard';
 export type { RuleDetailsPage } from './rule_details_page';
@@ -94,6 +95,8 @@ export interface SecurityPageObjects extends PageObjects {
   securityOverviewPage: SecurityOverviewPage;
   /** Detection rule edit page — save flow and the save-with-warnings confirmation modal. */
   ruleEditPage: RuleEditPage;
+  /** Watchlist create / edit flyout — opened from the Watchlists tab of the Entity analytics management page. */
+  watchlistEditFlyout: WatchlistEditFlyout;
 }
 
 export function extendPageObjects(
@@ -137,5 +140,6 @@ export function extendPageObjects(
     coverageOverviewPage: createLazyPageObject(CoverageOverviewPage, page),
     securityOverviewPage: createLazyPageObject(SecurityOverviewPage, page),
     ruleEditPage: createLazyPageObject(RuleEditPage, page),
+    watchlistEditFlyout: createLazyPageObject(WatchlistEditFlyout, page),
   };
 }

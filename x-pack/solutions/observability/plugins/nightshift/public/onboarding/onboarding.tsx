@@ -35,11 +35,11 @@ import {
   type OnboardingStepId,
   type OnboardingStepState,
 } from './onboarding_steps';
-import { NightshiftSetupPrompt } from '../service_account/nightshift_setup_prompt';
+import { NightshiftSetupPrompt } from './nightshift_setup_prompt';
 import {
   isNightshiftSetUp,
   useInvestigatorServiceAccount,
-} from '../service_account/use_investigator_service_account';
+} from '../data/service_accounts/use_investigator_service_account';
 import {
   CONNECT_SUB_STEP_TITLES,
   OnboardingConnectStep,

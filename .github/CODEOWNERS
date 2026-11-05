@@ -689,6 +689,7 @@ src/platform/packages/shared/kbn-otel-semantic-conventions @elastic/streams-ui
 src/platform/packages/shared/kbn-palettes @elastic/kibana-dashboards
 src/platform/packages/shared/kbn-profiler @elastic/observability-ui
 src/platform/packages/shared/kbn-profiling-utils @elastic/obs-signals-logs-team
+src/platform/packages/shared/kbn-react-fiber @elastic/appex-sharedux
 src/platform/packages/shared/kbn-react-field @elastic/kibana-discover
 src/platform/packages/shared/kbn-react-hooks @elastic/streams-ui
 src/platform/packages/shared/kbn-react-query @elastic/appex-sharedux
@@ -1501,6 +1502,7 @@ x-pack/solutions/security/packages/siem-readiness @elastic/contextual-security-a
 x-pack/solutions/security/packages/storybook/config @elastic/security-investigations
 x-pack/solutions/security/packages/test-api-clients @elastic/security-detection-engineering
 x-pack/solutions/security/packages/timeline-common @elastic/security-threat-hunting
+x-pack/solutions/security/packages/timeline-components @elastic/security-threat-hunting
 x-pack/solutions/security/packages/upselling @elastic/security-investigations
 x-pack/solutions/security/plugins/alertzero @elastic/security-solution
 x-pack/solutions/security/plugins/cloud_defend @elastic/contextual-security-apps
@@ -2945,8 +2947,20 @@ x-pack/platform/plugins/shared/agent_builder_platform/server/skills/ai_index_aut
 /x-pack/solutions/security/test/security_solution_cypress/cypress/urls @elastic/security-investigations @elastic/security-detection-engineering
 
 /x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule @elastic/security-investigations @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/exception @elastic/security-detection-engineering
 /x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/entity_graph @elastic/security-entity-analytics
 /x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/entity_risk_score_history @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/entity_attachment @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/components/entity_card_flyout_overview_canvas.tsx @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/components/entity_card_flyout_overview_canvas.test.tsx @elastic/security-entity-analytics
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/rule_preview @elastic/security-detection-engineering
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/investigation_iocs @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/investigation_timeline @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/alerts @elastic/security-investigations
+/x-pack/solutions/security/plugins/security_solution/public/agent_builder/attachment_types/grouped_attachments @elastic/alertzero-common-layer
+
+/x-pack/solutions/security/packages/features/src/rules @elastic/security-detection-engineering
+/x-pack/solutions/security/packages/features/src/alerts @elastic/security-detection-engineering @elastic/security-investigations
 
 /x-pack/solutions/security/plugins/security_solution/common/test @elastic/security-detection-engineering @elastic/security-investigations
 
@@ -3806,13 +3820,11 @@ x-pack/solutions/observability/plugins/observability_shared/public/components/pr
 /src/platform/test/functional/services/monaco_editor.ts @elastic/appex-sharedux
 /src/platform/test/functional/page_objects/settings_page.ts @elastic/appex-sharedux
 /src/platform/test/examples/ui_actions/*.ts @elastic/appex-sharedux
-/src/platform/test/examples/state_sync/*.ts @elastic/appex-sharedux
 /src/platform/test/examples/content_management/*.ts @elastic/appex-sharedux
 /x-pack/platform/test/api_integration/apis/anonymization @elastic/workchat-eng @elastic/security-threat-hunting
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/fixtures/ @elastic/appex-sharedux
 /x-pack/platform/plugins/shared/spaces/test/scout/ui/tests/spaces_selection_serverless.spec.ts @elastic/appex-sharedux
 /x-pack/platform/test/serverless/functional/page_objects/svl_common_navigation.ts @elastic/appex-sharedux
-/x-pack/solutions/security/test/serverless/functional/page_objects/svl_sec_landing_page.ts @elastic/appex-sharedux
 
 # OpenAPI spec files
 oas_docs/linters                              @elastic/ski-docs

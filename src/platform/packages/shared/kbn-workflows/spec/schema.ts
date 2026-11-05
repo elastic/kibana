@@ -29,6 +29,7 @@ import {
   HITL_EXTERNAL_FORM_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_QUERY_LINK_CONTEXT_KEY,
   HITL_EXTERNAL_REJECT_LINK_CONTEXT_KEY,
+  HITL_SLACK2_INTERACTIVE_DESCRIPTION,
   MAX_HITL_ACTION_LABEL_LENGTH,
   MAX_HITL_EMAIL_ADDRESS_LENGTH,
   MAX_HITL_EMAIL_RECIPIENTS,
@@ -57,19 +58,26 @@ export const RetryPolicySchema = z.object({
 export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
 export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
-  /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
-  strategy: RetryDelayStrategySchema.optional(),
-  /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
-  multiplier: z.number().min(1).optional(),
-  /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
-  'max-delay': DurationSchema.optional(),
-  /** Add jitter to delay to avoid thundering herd. Default: false. */
-  jitter: z.boolean().optional(),
-});
+export const WorkflowRetrySchema = lazySchema(() =>
+  z.object({
+    'max-attempts': z.number().min(1),
+    condition: z
+      .string()
+      .optional()
+      .describe(
+        'Retry only when this expression is true, e.g. "${{ error.type == \'TimeoutError\' }}". Without it, every error is retried except errors with `error.retryable: false`.'
+      ),
+    delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
+    /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
+    strategy: RetryDelayStrategySchema.optional(),
+    /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
+    multiplier: z.number().min(1).optional(),
+    /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
+    'max-delay': DurationSchema.optional(),
+    /** Add jitter to delay to avoid thundering herd. Default: false. */
+    jitter: z.boolean().optional(),
+  })
+);
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 const IfConditionSchema = z
@@ -383,27 +391,30 @@ export const HitlEmailChannelSchema = z.object({
     .describe('Email subject. Defaults to a built-in subject when omitted.'),
 });
 
-export const HitlSlack2ChannelSchema = z.object({
-  'connector-id': z
-    .string()
-    .min(1)
-    .max(CONNECTOR_ID_MAX_LENGTH)
-    .describe('Slack (v2) connector saved object id or name'),
-  channels: z
-    .array(
-      z
-        .string()
-        .min(1)
-        .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
-        .describe(
-          'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
-        )
-    )
-    .min(1)
-    .describe(
-      'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
-    ),
-});
+export const HitlSlack2ChannelSchema = lazySchema(() =>
+  z.object({
+    'connector-id': z
+      .string()
+      .min(1)
+      .max(CONNECTOR_ID_MAX_LENGTH)
+      .describe('Slack (v2) connector saved object id or name'),
+    channels: z
+      .array(
+        z
+          .string()
+          .min(1)
+          .max(MAX_HITL_SLACK_CHANNEL_LENGTH)
+          .describe(
+            'Conversation ID to send the message to (e.g. C... for channels, G... for private channels, D... for DMs)'
+          )
+      )
+      .min(1)
+      .describe(
+        'Conversation IDs to send the message to (e.g. C... for channels, G... for private channels, D... for DMs).'
+      ),
+    interactive: z.boolean().optional().describe(HITL_SLACK2_INTERACTIVE_DESCRIPTION),
+  })
+);
 
 export const HitlTeamsChannelSchema = z.object({
   'connector-id': z
@@ -518,7 +529,7 @@ const hitlChannelDescriptions = {
     'Notify via a Slack API connector. Set connector-id and one or more channel IDs and/or #channel names.',
   email: 'Notify via an Email connector. Requires connector-id and at least one `to` recipient.',
   slack2:
-    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs.',
+    'Notify via a Slack (v2) connector using sendMessage. Set connector-id and one or more conversation IDs. Set interactive: true to collect the response in Slack (requires connector Receive events and Slack Interactivity Request URL).',
   teams: 'Post a message to a Microsoft Teams channel. Set connector-id, team-id, and channel-id.',
   servicenow:
     'Add a customer-visible comment to an existing ServiceNow record. Set connector-id, table, and sys-id.',
@@ -1635,11 +1646,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
+export const BaseSerializedErrorSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    details: z.record(z.string(), z.unknown()).optional(),
+    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
+    retryable: z.boolean().optional(),
+  })
+);
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
 export const WhileContextSchema = z.object({
