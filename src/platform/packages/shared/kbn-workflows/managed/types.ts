@@ -15,14 +15,18 @@ export interface ManagedWorkflowManagement {
 
 export const MANAGED_WORKFLOW_SELECTORS = ['rule_action', 'watch'] as const;
 export const MANAGED_WORKFLOW_SOLUTIONS = ['security'] as const;
+export const MANAGED_WORKFLOW_LISTS = ['workflows'] as const;
 
 export type ManagedWorkflowSelector = (typeof MANAGED_WORKFLOW_SELECTORS)[number];
 export type ManagedWorkflowSolution = (typeof MANAGED_WORKFLOW_SOLUTIONS)[number];
+export type ManagedWorkflowList = (typeof MANAGED_WORKFLOW_LISTS)[number];
 export type ManagedWorkflowSelectorVisibilityContext = `selector:${ManagedWorkflowSelector}`;
 export type ManagedWorkflowSolutionVisibilityContext = `solution:${ManagedWorkflowSolution}`;
+export type ManagedWorkflowListVisibilityContext = `list:${ManagedWorkflowList}`;
 export type ManagedWorkflowVisibilityContext =
   | ManagedWorkflowSelectorVisibilityContext
-  | ManagedWorkflowSolutionVisibilityContext;
+  | ManagedWorkflowSolutionVisibilityContext
+  | ManagedWorkflowListVisibilityContext;
 
 export const getManagedWorkflowSelectorVisibilityContext = <
   TSelector extends ManagedWorkflowSelector
@@ -36,15 +40,21 @@ export const getManagedWorkflowSolutionVisibilityContext = <
   solution: TSolution
 ): `solution:${TSolution}` => `solution:${solution}`;
 
+export const getManagedWorkflowListVisibilityContext = <TList extends ManagedWorkflowList>(
+  list: TList
+): `list:${TList}` => `list:${list}`;
+
 export interface ManagedWorkflowVisibility {
   selectors?: readonly ManagedWorkflowSelector[];
   solutions?: readonly ManagedWorkflowSolution[];
+  lists?: readonly ManagedWorkflowList[];
 }
 
 export const getManagedWorkflowVisibilityContexts = (
   visibility: ManagedWorkflowVisibility | undefined
 ): ManagedWorkflowVisibilityContext[] => [
   ...(visibility?.selectors ?? []).map(getManagedWorkflowSelectorVisibilityContext),
+  ...(visibility?.lists ?? []).map(getManagedWorkflowListVisibilityContext),
   ...(visibility?.solutions ?? []).map(getManagedWorkflowSolutionVisibilityContext),
 ];
 
