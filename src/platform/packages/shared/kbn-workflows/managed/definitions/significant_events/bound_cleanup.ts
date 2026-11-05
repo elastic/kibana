@@ -20,4 +20,5 @@ export const NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW_ID,
   pluginId: 'significantEvents',
   yaml: CLEANUP_YAML,
+  version: 1,
 });

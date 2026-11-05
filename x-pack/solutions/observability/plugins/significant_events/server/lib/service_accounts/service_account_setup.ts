@@ -41,6 +41,11 @@ export const SETUP_WORKFLOW_IDS = [
   NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
 ] as const;
 
+const getStatusCode = (error: unknown): number | undefined =>
+  typeof error === 'object' && error !== null && 'statusCode' in error
+    ? (error as { statusCode?: number }).statusCode
+    : undefined;
+
 /** Sets a space up to run the detection engine as the deployment's `nightshift_detection` account. */
 export interface DetectionEngineSetupService {
   /**
@@ -153,12 +158,14 @@ export function createDetectionEngineSetupService({
           { spaceId, workflowIdSuffix: spaceId, values: { serviceAccountId } }
         );
       } catch (error) {
-        // The space is bound already, and installing is repeatable: calling _enable again retries.
+        // Keep the status of the workflows plugin: a 403 or 400 is not fixed by calling again.
+        const statusCode = getStatusCode(error) ?? 500;
+        const retry = statusCode >= 500 ? ' The space is bound; call _enable again to retry.' : '';
         throw new StatusError(
           `Installing workflow [${workflowId}] failed: ${
             error instanceof Error ? error.message : String(error)
-          }. The space is bound; call _enable again to retry.`,
-          500
+          }.${retry}`,
+          statusCode
         );
       }
     }
@@ -174,6 +181,14 @@ export function createDetectionEngineSetupService({
       if (document?.definition?.settings?.run_as !== serviceAccountId) {
         unbound.push(workflowId);
       }
+    }
+    // A concurrent call for another account may have rebound the space after this one bound it.
+    const currentAccountId = await getDetectionEngineAccountId({ core, spaceId });
+    if (currentAccountId !== serviceAccountId) {
+      throw new StatusError(
+        `The detection engine of space [${spaceId}] is now bound to [${currentAccountId}] instead of [${serviceAccountId}], so a concurrent _enable replaced this one. Call _enable again with the account you want.`,
+        409
+      );
     }
     if (unbound.length > 0) {
       throw new StatusError(

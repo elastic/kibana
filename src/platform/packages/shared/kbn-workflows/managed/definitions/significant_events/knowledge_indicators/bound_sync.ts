@@ -20,4 +20,5 @@ export const NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW_ID,
   pluginId: 'significantEvents',
   yaml: SYNC_YAML,
+  version: 1,
 });

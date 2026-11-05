@@ -21,4 +21,5 @@ export const NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW = defineBoundWorkfl
   id: NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW_ID,
   pluginId: 'significantEvents',
   yaml: SOURCE_RECONCILIATION_YAML,
+  version: 1,
 });

@@ -20,4 +20,5 @@ export const NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW = defineBoundWorkflow({
   id: NIGHTSHIFT_BOUND_ORCHESTRATOR_WORKFLOW_ID,
   pluginId: 'significantEvents',
   yaml: ORCHESTRATOR_YAML,
+  version: 1,
 });
