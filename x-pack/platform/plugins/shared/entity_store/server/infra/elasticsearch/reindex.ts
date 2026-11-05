@@ -32,7 +32,7 @@ export interface ReindexResult {
   failures: NonNullable<ReindexResponse['failures']>;
 }
 
-const toReindexResult = (response: ReindexResponse): ReindexResult => ({
+export const toReindexResult = (response: ReindexResponse): ReindexResult => ({
   created: response.created ?? 0,
   updated: response.updated ?? 0,
   versionConflicts: response.version_conflicts ?? 0,
@@ -64,18 +64,39 @@ export const assertReindexSucceeded = (result: ReindexResult, context: string): 
   }
 };
 
+const buildReindexRequest = (
+  { source, dest }: Pick<ReindexOptions, 'source' | 'dest'>,
+  waitForCompletion: boolean
+): ReindexRequest => ({
+  source: { index: source.index, query: source.query },
+  dest: { index: dest.index, op_type: dest.op_type },
+  wait_for_completion: waitForCompletion,
+  refresh: true,
+  conflicts: 'proceed',
+});
+
+/**
+ * Starts a reindex as a background Elasticsearch task and returns its task id without waiting.
+ */
+export const startReindex = async (
+  esClient: EsClient,
+  options: Omit<ReindexOptions, 'waitForTask'>
+): Promise<string> => {
+  const { task } = await esClient.reindex(buildReindexRequest(options, false), {
+    signal: options.signal,
+  });
+  if (task == null) {
+    throw new Error('Reindex did not return a task id');
+  }
+  return String(task);
+};
+
 export const reindex = async (
   esClient: EsClient,
   options: ReindexOptions
 ): Promise<ReindexResult> => {
-  const { source, dest, signal, waitForTask } = options;
-  const body: ReindexRequest = {
-    source: { index: source.index, query: source.query },
-    dest: { index: dest.index, op_type: dest.op_type },
-    wait_for_completion: waitForTask === undefined,
-    refresh: true,
-    conflicts: 'proceed',
-  };
+  const { signal, waitForTask } = options;
+  const body = buildReindexRequest(options, waitForTask === undefined);
 
   if (waitForTask !== undefined) {
     const { task } = await esClient.reindex(body, { signal });
