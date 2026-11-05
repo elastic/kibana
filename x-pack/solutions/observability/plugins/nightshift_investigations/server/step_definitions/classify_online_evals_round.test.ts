@@ -155,8 +155,11 @@ describe('classifyOnlineEvalsRoundStepDefinition', () => {
     });
   });
 
-  it("scores an alert recovery whose hypotheses can't be compared, for the judges to decide", async () => {
-    const { run } = setup({ rounds: recoveryRounds });
+  it('scores an alert recovery the recorder wrote no hypotheses for, for the judges to decide', async () => {
+    const { run } = setup({
+      rounds: recoveryRounds,
+      attachments: hypotheses([END_OF_ROUND_1, 'investigating']),
+    });
 
     await expect(run({ follow_up: 'alert_recovered' })).resolves.toEqual({
       output: {
