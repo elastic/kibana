@@ -15,6 +15,7 @@ function getDrilldownReferences(
   containerReferences: SavedObjectReference[],
   panel: SavedDashboardPanel
 ) {
+  if (!panel.embeddableConfig) return [];
   const config = panel.embeddableConfig as {
     enhancements?: {
       dynamicActions?: {

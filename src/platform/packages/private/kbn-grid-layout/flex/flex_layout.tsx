@@ -157,14 +157,6 @@ const styles = {
     gap: 'calc(var(--kbnGridGutterSize) * 1px)',
     padding: 'calc(var(--kbnGridGutterSize) * 1px)',
     minHeight: 'calc(var(--kbnGridRowHeight) * 1px)',
-    // gridAutoRows: 'calc(var(--kbnGridRowHeight) * 1px)',
-    // gridTemplateColumns: `repeat(
-    //       var(--kbnGridColumnCount),
-    //       calc(
-    //         (100% - (var(--kbnGridGutterSize) * (var(--kbnGridColumnCount) - 1) * 1px)) /
-    //           var(--kbnGridColumnCount)
-    //       )
-    //     )`,
   }),
   hasActivePanel: css({
     '&:has(.kbnGridPanel--active)': {

@@ -24,6 +24,7 @@ import type {
 import type { DashboardSavedObjectAttributes } from '../../../dashboard_saved_object';
 import { embeddableService } from '../../../kibana_services';
 import type { Warnings } from '../../types';
+import { getPanelReferences } from './get_panel_references';
 
 export type StoredPinnedPanels =
   Required<DashboardSavedObjectAttributes>['pinned_panels']['panels'];
@@ -136,8 +137,10 @@ function transformPanels(
 ): { panels: DashboardPinnedPanelsState; warnings: Warnings } {
   const transformedPanels: DashboardPinnedPanelsState = [];
   const warnings: Warnings = [];
-
+  console.log({ containerReferences });
   panels.forEach((panel) => {
+    const storedPanelReferences = getPanelReferences(containerReferences ?? [], panel);
+
     const { transformOut, schema } = embeddableService.getTransforms(panel.type) ?? {};
     // eslint-disable-next-line prefer-const
     let { config, type, ...rest } = panel;
@@ -145,15 +148,17 @@ function transformPanels(
       if (transformOut) {
         config = transformOut(
           config,
-          [],
+          storedPanelReferences,
           containerReferences,
           panel.id
         ) as DashboardPinnedPanel['config'];
       }
+      console.log('MADE IT HERE 1', { config, rest });
+
       if (schema) {
         config = schema.parse(config) as DashboardPinnedPanel['config'];
       }
-      console.log('MADE IT HERE', { config, rest });
+      console.log('MADE IT HERE 2', { config, rest });
       transformedPanels.push({
         ...pinnedControlSchema.parse(rest),
         config,

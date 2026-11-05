@@ -7,19 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import { isEqual } from 'lodash';
+import React, { useCallback } from 'react';
+
 import { transparentize, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-
 import { FlexLayout } from '@kbn/grid-layout';
+import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useCallback } from 'react';
+
+import { DashboardLayout } from '../dashboard_api/layout_manager';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
 import { DASHBOARD_MARGIN_SIZE } from '../dashboard_renderer/grid/constants';
 import { PinnedPanel } from './pinned_panel';
-import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
-import { DashboardLayout } from '../dashboard_api/layout_manager';
-import { isEqual } from 'lodash';
 
 export const DashboardPinnedPanelsRenderer = () => {
   const dashboardApi = useDashboardApi();
