@@ -87,7 +87,8 @@ export interface StartInvestigationRequest {
   slack_thread?: SlackThreadReference;
   /**
    * Latest inclusive `@timestamp` sandbox telemetry queries for this investigation may return.
-   * Not part of the agent prompt. The ORCA eval sets it to `metadata.current_time` plus five minutes.
+   * Not part of the agent prompt. The ORCA eval sets it to `metadata.telemetry_snapshot_time` when
+   * the task records one, otherwise to `metadata.current_time` plus five minutes.
    */
   telemetry_not_after?: string;
 }

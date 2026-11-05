@@ -240,12 +240,7 @@ export const createSandboxBashTool = ({
       };
 
       let commandToRun = command;
-      if (
-        readTelemetryNotAfter &&
-        connector_id &&
-        telemetryConnectorIds?.has(connector_id) &&
-        mergedEnv.CONNECTOR_CONFIG_URL
-      ) {
+      if (readTelemetryNotAfter && connector_id && telemetryConnectorIds?.has(connector_id)) {
         let notAfter: string | undefined;
         try {
           notAfter = await readTelemetryNotAfter(context.request, rawConversationId);
@@ -267,6 +262,20 @@ export const createSandboxBashTool = ({
           };
         }
         if (notAfter) {
+          // Without a URL there is nothing to point at the proxy, so the command would read unbounded.
+          if (!mergedEnv.CONNECTOR_CONFIG_URL) {
+            return {
+              results: [
+                {
+                  type: ToolResultType.error,
+                  data: {
+                    message:
+                      'The telemetry connector has no URL to apply the cutoff to, so the command was not run.',
+                  },
+                },
+              ],
+            };
+          }
           if (!isTelemetryNotAfter(notAfter)) {
             return {
               results: [

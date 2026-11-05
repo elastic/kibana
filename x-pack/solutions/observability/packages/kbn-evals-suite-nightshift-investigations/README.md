@@ -656,11 +656,20 @@ are unchanged. Eight
 investigations run at once and each has its own cutoff, so the bound is not a cluster setting.
 
 ORCA's judges bind to `eis-openai-gpt-5-4`, not the agent connector. Customer-0 keeps the suite's
-evaluation connector. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
+evaluation connector. The model is the paper's judge model, but not its settings: the paper runs
+GPT-5.4 at reasoning effort "high", temperature 1, and 128,000 max tokens. Our judges answer
+through a forced `score` tool call, so the inference adapter sends reasoning effort "none" to
+gpt-5 models, and temperature falls back to the provider default of 1. Until the judges can set
+an effort ([#297542](https://github.com/elastic/kibana/pull/297542)), ORCA scores here come from a
+judge that does not reason and are not directly comparable to the paper's. `goal_pass` is unchanged: it scores the single best hypothesis and passes at
 4/5. ORCA also records three scores. RCA accuracy is 1 when the report names every flag in
 `metadata.plausible_flags`. A flag named without its variant still counts, and an extra cause
 does not fail accuracy. Hallucination is 1 when the report names at least one cause and none of
 them is in that set, and its direction is minimize. An empty incident report scores 0 on both.
+Only the control judge uses ORCA's prompt. Accuracy and hallucination use our own extraction
+prompt, `OrcaFlagsJudgePrompt`, which lists the flags a report names, and the set logic above is
+applied in code. They do not use the paper's incident judge prompt (`JUDGE_PROMPT_MULTI_HEADER`
+plus its scoring footer).
 Control passes an empty report and fails when a report places an incident inside
 `metadata.quiet_window`. Its judge prompt is ORCA's `JUDGE_PROMPT_CONTROL` from the Harbor tasks'
 `check_prediction.py`, word for word except that it answers through the `score` tool. It gets

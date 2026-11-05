@@ -784,6 +784,9 @@ export const createOrcaEvaluators = (deps: JudgeDeps): InvestigationEvaluator[] 
             explanation: 'Control needs the task quiet window and current time.',
           };
         }
+        // TODO: run the ORCA judges at the paper's reasoning effort ("high") once
+        // https://github.com/elastic/kibana/pull/297542 lands. The forced score tool call makes the
+        // inference adapter send effort "none" to gpt-5 models, so these judges do not reason.
         const result = await invokeJudge<{
           claims_incident_in_quiet_window: unknown;
           reasoning: string;

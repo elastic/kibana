@@ -394,6 +394,34 @@ describe('sandbox bash tool — telemetry cutoff', () => {
     expect(runCommand.mock.calls[0][0].command).toBe('curl "$CONNECTOR_CONFIG_APIURL"');
   });
 
+  it('does not run the command when the telemetry connector has no URL to bound', async () => {
+    const resolveConnectorCredentials: ResolveConnectorCredentials = jest.fn().mockResolvedValue({
+      env: { CONNECTOR_HEADER_AUTHORIZATION: 'ApiKey abc' },
+      secretValues: ['ApiKey abc'],
+      secretEnvKeys: [],
+    });
+    const { run, runCommand } = setup({
+      resolveConnectorCredentials,
+      readTelemetryNotAfter: jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z'),
+    });
+
+    const { results } = await run({
+      connector_id: 'nightshift-evals-telemetry',
+      command: 'curl https://telemetry.example/_search',
+    });
+
+    expect(runCommand).not.toHaveBeenCalled();
+    expect(results).toEqual([
+      {
+        type: ToolResultType.error,
+        data: {
+          message:
+            'The telemetry connector has no URL to apply the cutoff to, so the command was not run.',
+        },
+      },
+    ]);
+  });
+
   it('does not proxy another connector that has a URL', async () => {
     const readTelemetryNotAfter = jest.fn().mockResolvedValue('2026-04-19T16:27:00.000Z');
     const { run, runCommand } = setup({
