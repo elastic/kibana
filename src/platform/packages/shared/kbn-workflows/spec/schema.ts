@@ -57,19 +57,26 @@ export const RetryPolicySchema = z.object({
 export const RetryDelayStrategySchema = z.enum(['fixed', 'exponential']);
 export type RetryDelayStrategy = z.infer<typeof RetryDelayStrategySchema>;
 
-export const WorkflowRetrySchema = z.object({
-  'max-attempts': z.number().min(1),
-  condition: z.string().optional(), // e.g., "${{error.type == 'NetworkError'}}" (default: always retry)
-  delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
-  /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
-  strategy: RetryDelayStrategySchema.optional(),
-  /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
-  multiplier: z.number().min(1).optional(),
-  /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
-  'max-delay': DurationSchema.optional(),
-  /** Add jitter to delay to avoid thundering herd. Default: false. */
-  jitter: z.boolean().optional(),
-});
+export const WorkflowRetrySchema = lazySchema(() =>
+  z.object({
+    'max-attempts': z.number().min(1),
+    condition: z
+      .string()
+      .optional()
+      .describe(
+        'Retry only when this expression is true, e.g. "${{ error.type == \'TimeoutError\' }}". Without it, every error is retried except errors with `error.retryable: false`.'
+      ),
+    delay: DurationSchema.optional(), // e.g., '5s', '1h30m' (default: no delay)
+    /** Delay strategy: fixed (same delay each retry) or exponential backoff. Default: fixed. */
+    strategy: RetryDelayStrategySchema.optional(),
+    /** Multiplier for exponential backoff (e.g. 2 => 1s, 2s, 4s). Default: 2. Ignored when strategy is fixed. */
+    multiplier: z.number().min(1).optional(),
+    /** Cap for exponential backoff (e.g. "5m"). Ignored when strategy is fixed. */
+    'max-delay': DurationSchema.optional(),
+    /** Add jitter to delay to avoid thundering herd. Default: false. */
+    jitter: z.boolean().optional(),
+  })
+);
 export type WorkflowRetry = z.infer<typeof WorkflowRetrySchema>;
 
 const IfConditionSchema = z
@@ -1635,11 +1642,15 @@ export const ForEachContextSchema = z.object({
 });
 export type ForEachContext = z.infer<typeof ForEachContextSchema>;
 
-export const BaseSerializedErrorSchema = z.object({
-  type: z.string(),
-  message: z.string(),
-  details: z.record(z.string(), z.unknown()).optional(),
-});
+export const BaseSerializedErrorSchema = lazySchema(() =>
+  z.object({
+    type: z.string(),
+    message: z.string(),
+    details: z.record(z.string(), z.unknown()).optional(),
+    /** `false` when retrying cannot succeed, so `on-failure.retry` without a `condition` skips it. */
+    retryable: z.boolean().optional(),
+  })
+);
 export type SerializedError = z.infer<typeof BaseSerializedErrorSchema>;
 
 export const WhileContextSchema = z.object({

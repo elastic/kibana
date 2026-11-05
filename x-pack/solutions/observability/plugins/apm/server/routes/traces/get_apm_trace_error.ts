@@ -55,6 +55,13 @@ export async function getApmTraceError(params: {
 
     const { _id: id, parent, error, ...unflattened } = event.unflatten();
 
+    // `error.id` is not guaranteed to be present on every error document in the error index
+    // (e.g. OTel-native exception/error events). Skip such documents instead of throwing so a
+    // single error doc without `error.id` cannot fail the entire trace request with a 500.
+    if (!error?.id) {
+      return undefined;
+    }
+
     return {
       id,
       source: 'apm' as const,
@@ -85,17 +92,19 @@ const requiredFields = asMutableArray([
   TIMESTAMP_US,
   TRACE_ID,
   SERVICE_NAME,
-  ERROR_ID,
   ERROR_GROUP_ID,
   PROCESSOR_EVENT,
   ID,
 ] as const);
 
+// `ERROR_ID` is optional: OTel-native exception/error events are not guaranteed to carry
+// `error.id`. Documents without it are skipped in the mapping above rather than throwing.
 const optionalFields = asMutableArray([
   PARENT_ID,
   TRANSACTION_ID,
   SPAN_ID,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  ERROR_ID,
   ERROR_CULPRIT,
   ERROR_LOG_MESSAGE,
   ERROR_EXC_MESSAGE,

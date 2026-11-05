@@ -14,9 +14,12 @@ import type { AuthTypeDef, ConnectorSpec, NormalizedAuthType } from './connector
 import { ConnectorIconsMap } from './connector_icons_map';
 import { getSchemaForAuthType } from './lib';
 import { buildEventId, MAX_CONNECTOR_TYPE_ID_LENGTH } from './event_type_id';
+import { getSandboxSupportedAuthTypeIds } from './get_sandbox_supported_auth_type_ids';
 import { SPECS_ALLOWED_EVENTS } from './specs_allowed_events';
 
 const CONNECTOR_ID_PATTERN = /^\.[A-Za-z0-9]+(?:[._-][A-Za-z0-9]+)*$/;
+const SANDBOX_HOST_PATTERN =
+  /^[a-z0-9](?:[a-z0-9-]*[a-z0-9])?(?:\.[a-z0-9](?:[a-z0-9-]*[a-z0-9])?)*$/;
 const allSpecs = Object.entries(connectorsSpecs) as Array<[string, ConnectorSpec]>;
 const registeredAuthTypes = Object.values(authTypeSpecs) as NormalizedAuthType[];
 
@@ -71,6 +74,27 @@ describe('connector spec contracts', () => {
         if (!inSchema) {
           violations.push(`${authType.type}.${defaultField} is not defined by the auth type`);
         }
+      }
+    }
+
+    expect(violations).toEqual([]);
+  });
+
+  it.each(allSpecs)('%s declares valid sandbox hosts', (_exportName, spec) => {
+    const { hosts = [], hostsFromConfig = [] } = spec.sandbox ?? {};
+    const violations: string[] = [];
+
+    const isSandboxCapable = getSandboxSupportedAuthTypeIds(spec.auth).length > 0;
+    if (isSandboxCapable && hosts.length + hostsFromConfig.length === 0) {
+      violations.push('sandbox capable specs must declare sandbox hosts');
+    }
+    // The credential proxy accepts at most 32 exact, lowercase hostnames per secret.
+    if (hosts.length + hostsFromConfig.length > 32) {
+      violations.push('at most 32 sandbox hosts are allowed');
+    }
+    for (const host of hosts) {
+      if (!SANDBOX_HOST_PATTERN.test(host)) {
+        violations.push(`sandbox host "${host}" must be a lowercase hostname`);
       }
     }
 

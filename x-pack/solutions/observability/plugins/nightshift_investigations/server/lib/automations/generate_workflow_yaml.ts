@@ -39,7 +39,7 @@ const SLACK_THREAD = {
   external_conversation_id: '{{ event.externalConversationId }}',
 };
 
-// See MAX_PROMPT_TEMPLATE_LENGTH: the template and this text share the step's message limit.
+// Bound trigger evidence independently from the operator's additional instructions.
 export const SLACK_MESSAGE_TEXT_LIMIT = 4000;
 
 const SLACK_MESSAGE_PROMPT = `Slack message from {{ event.botName | default: event.sender | default: event.botId }} in channel {{ event.channel }}:\n\n{{ event.text | truncate: ${SLACK_MESSAGE_TEXT_LIMIT} }}`;
@@ -59,9 +59,11 @@ export function generateWorkflowYaml({
   automationId,
   automation,
   serviceAccountId,
+  universalAlerts = true,
 }: {
   automationId: string;
   automation: NightshiftAutomationAttributes;
+  universalAlerts?: boolean;
   /** The account the automation runs as (`settings.run_as`); unbound when omitted. */
   serviceAccountId?: string;
 }): string {
@@ -69,13 +71,18 @@ export function generateWorkflowYaml({
   const slackRows = automation.trigger.rows.filter(isSlackRow);
   const schedule = automation.trigger.rows.find((row) => row.kind === 'schedule');
   const hasMultipleTriggers =
-    Number(alertRows.length > 0) * 2 + Number(slackRows.length > 0) + Number(Boolean(schedule)) > 1;
+    Number(alertRows.length > 0) * (universalAlerts ? 2 : 1) +
+      Number(slackRows.length > 0) +
+      Number(Boolean(schedule)) >
+    1;
   const alertWorkflow =
     alertRows.length > 0 || (slackRows.length === 0 && !schedule)
       ? generateAlertWorkflow(automationId, automation, alertRows, hasMultipleTriggers)
       : undefined;
   const alertV2Workflow =
-    alertRows.length > 0 ? generateAlertV2Workflow(automationId, automation, alertRows) : undefined;
+    universalAlerts && alertRows.length > 0
+      ? generateAlertV2Workflow(automationId, automation, alertRows)
+      : undefined;
   const slackWorkflow =
     slackRows.length > 0
       ? generateSlackWorkflow(automationId, automation, slackRows, hasMultipleTriggers)
@@ -154,7 +161,9 @@ function generateAlertWorkflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? alertRows.length > 0
+              ? { instructions: automation.execution.promptTemplate }
+              : { message: automation.execution.promptTemplate }
             : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
@@ -192,7 +201,7 @@ function generateAlertV2Workflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? { instructions: automation.execution.promptTemplate }
             : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
@@ -214,7 +223,7 @@ const RECOVERED_ALERT_V2_STEP = {
   with: {
     alert_uuid: '{{ event.alert.id }}',
     alert_id: '{{ event.alert.groupHash }}',
-    recovered_at: '{{ event.execution.scheduledAt }}',
+    recovered_at: '{{ event.timestamp }}',
     rule_id: '${{ event.rule.id }}',
     rule_name: '${{ event.rule.name }}',
     rule_tags: '${{ event.rule.tags }}',
@@ -290,7 +299,7 @@ function generateScheduledWorkflow(
           summary: automation.name,
           trigger_type: 'automatic',
           ...(automation.execution.promptTemplate
-            ? { message: automation.execution.promptTemplate }
+            ? { message: `Instructions:\n${automation.execution.promptTemplate}` }
             : {}),
           ...(schedule.scopeQuery ? { scope_query: schedule.scopeQuery } : {}),
           ...(automation.runtime.timeoutSeconds !== undefined
@@ -379,7 +388,8 @@ function generateSlackWorkflow(
           title: automation.name,
           summary: automation.name,
           trigger_type: 'automatic',
-          ...buildMessage(automation.execution.promptTemplate, true),
+          instructions: automation.execution.promptTemplate ?? '',
+          message: SLACK_MESSAGE_PROMPT,
           ...(automation.runtime.timeoutSeconds !== undefined
             ? { timeout_seconds: automation.runtime.timeoutSeconds }
             : {}),
@@ -429,23 +439,6 @@ function buildNotificationDestinations(
 
 function isSlackRow(row: NightshiftTriggerRow): row is SlackRow {
   return row.kind === 'slack';
-}
-
-/**
- * The prompt for the investigation. A Slack-triggered run has no alert data to compose a brief
- * from, so the message itself is appended to the prompt. The text is truncated to stay under the
- * investigation step's message limit.
- */
-function buildMessage(
-  promptTemplate: string | undefined,
-  includeSlackMessage: boolean
-): { message?: string } {
-  if (!includeSlackMessage) {
-    return promptTemplate ? { message: promptTemplate } : {};
-  }
-  return {
-    message: [promptTemplate, SLACK_MESSAGE_PROMPT].filter(Boolean).join('\n\n'),
-  };
 }
 
 /**
