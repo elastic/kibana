@@ -83,12 +83,12 @@ const isWrapperFrame = ({ name, source }: ComponentStackFrame): boolean =>
  * Keeps the frames an agent can act on. Wrapper frames are dropped, consecutive frames of the
  * same file or component are collapsed and beyond the closest frames only the ones where the
  * stack crosses into another plugin or package are kept. The closest frame is always kept.
+ * Without `getModule` modules can't be told apart, so only the wrapper and file rules apply.
  */
 const pruneStack = (
   stack: ComponentStackFrame[],
-  toRepoPath: (fileName: string) => string
+  getModule: ((frame: ComponentStackFrame) => string) | null
 ): ComponentStackFrame[] => {
-  const getModule = ({ source }: ComponentStackFrame) => getModuleKey(toRepoPath(source.fileName));
   const kept: ComponentStackFrame[] = [];
 
   for (const [index, frame] of stack.entries()) {
@@ -98,7 +98,7 @@ const pruneStack = (
     const previous = kept[kept.length - 1];
 
     if (previous) {
-      const isSameModule = getModule(previous) === getModule(frame);
+      const isSameModule = getModule !== null && getModule(previous) === getModule(frame);
       const isSameFile = previous.source.fileName === frame.source.fileName;
       const isSameComponent = isSameModule && previous.name === frame.name;
 
@@ -119,8 +119,12 @@ const pruneStack = (
 export const buildGrabContext = ({ element, fiber, repoRoot }: BuildGrabContextOptions): string => {
   const toRepoPath = (fileName: string) =>
     repoRoot && fileName.startsWith(repoRoot) ? fileName.slice(repoRoot.length) : fileName;
+  /** Modules are told apart by repository relative path, so not until the root is known. */
+  const getModule = repoRoot
+    ? ({ source }: ComponentStackFrame) => getModuleKey(toRepoPath(source.fileName))
+    : null;
 
-  const stack = fiber ? pruneStack(getComponentStack(fiber), toRepoPath) : [];
+  const stack = fiber ? pruneStack(getComponentStack(fiber), getModule) : [];
   const stackLines = stack.map(
     ({ name, source: { fileName, lineNumber, columnNumber } }) =>
       `  in ${name} (${toRepoPath(fileName)}:${lineNumber}:${columnNumber})`
