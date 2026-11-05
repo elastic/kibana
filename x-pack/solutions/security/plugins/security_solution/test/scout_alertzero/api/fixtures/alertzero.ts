@@ -480,16 +480,20 @@ export const proposalReferencesRun = async (
   const reviewExecutionId = (
     proposal.actionInput as { workflow_execution_id?: unknown } | undefined
   )?.workflow_execution_id;
-  const reviewInputs =
-    typeof reviewExecutionId === 'string'
-      ? ok(
-          await api.public<WorkflowExecution>(
-            'GET',
-            `${EXECUTIONS_URL}/${encodeURIComponent(reviewExecutionId)}`
-          ),
-          `read the review execution behind proposal ${proposal.id}`
-        ).context?.inputs
-      : undefined;
+  let reviewInputs: unknown;
+  if (typeof reviewExecutionId === 'string') {
+    const review = await api.public<WorkflowExecution>(
+      'GET',
+      `${EXECUTIONS_URL}/${encodeURIComponent(reviewExecutionId)}`
+    );
+    // A stale proposal from another run can point at an execution that no longer exists. That
+    // proposal is not this run's, so it falls back to its own fields instead of failing the
+    // poll; any other error still fails loudly.
+    if (review.statusCode !== 404) {
+      reviewInputs = ok(review, `read the review execution behind proposal ${proposal.id}`).context
+        ?.inputs;
+    }
+  }
   const encoded = JSON.stringify({
     actionInput: proposal.actionInput ?? {},
     reviewInputs,

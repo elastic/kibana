@@ -286,9 +286,14 @@ export const withAlertZeroEnabledInSpace = async (args: {
     throw error;
   }
   return async () => {
-    await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
-    if (baselineSolution !== 'security') {
-      await setSpaceSolution({ ...args, solution: baselineSolution });
+    // The solution view is restored even when the gate write fails, so the shared space never
+    // stays on Security for later suites; the gate failure is still surfaced.
+    try {
+      await setAlertZeroEnabledInSpace({ ...args, enabled: baselineEnabled });
+    } finally {
+      if (switchedSolution) {
+        await setSpaceSolution({ ...args, solution: baselineSolution });
+      }
     }
   };
 };

@@ -36,13 +36,41 @@ describe('alertzero stateful classic server config', () => {
 
   it('keeps runtime-applicable advanced settings out of the server args', () => {
     delete process.env.KIBANA_TESTING_AI_CONNECTORS;
-    process.env.ALERTZERO_E2E_AI_CONNECTOR = 'eis-some-model';
     const { servers } = jest.requireActual('./classic.stateful.config');
     const args: string[] = servers.kbnTestServer.serverArgs;
 
     // These are written through `internal/kibana/settings` by the suites' global setup and
     // restored by their global teardown, so they must not be pinned (and made read-only) here.
     expect(args.filter((arg) => arg.startsWith('--uiSettings.overrides'))).toEqual([]);
+  });
+
+  it('wires EIS and the preconfigured connectors when a connector source is set', () => {
+    const connectors = {
+      'eis-some-model': {
+        name: 'EIS some model',
+        actionTypeId: '.inference',
+        exposeConfig: true,
+        config: { provider: 'elastic', taskType: 'chat_completion', inferenceId: 'some-model' },
+        secrets: {},
+      },
+    };
+    process.env.KIBANA_TESTING_AI_CONNECTORS = Buffer.from(JSON.stringify(connectors)).toString(
+      'base64'
+    );
+    const { servers } = jest.requireActual('./classic.stateful.config');
+    const kbnArgs: string[] = servers.kbnTestServer.serverArgs;
+    const esArgs: string[] = servers.esTestCluster.serverArgs;
+
+    expect(esArgs).toContain(
+      'xpack.inference.elastic.url=https://inference.eu-west-1.aws.svc.qa.elastic.cloud'
+    );
+    const preconfigured = kbnArgs.find((arg) => arg.startsWith('--xpack.actions.preconfigured='));
+    expect(preconfigured).toBeDefined();
+    expect(
+      JSON.parse((preconfigured ?? '').slice('--xpack.actions.preconfigured='.length))
+    ).toMatchObject(connectors);
+    // The AlertZero args are layered on top of the EIS base, not replaced by it.
+    expect(kbnArgs).toContain('--xpack.alertzero.enabled=true');
   });
 
   it('keeps the server-driver args', () => {

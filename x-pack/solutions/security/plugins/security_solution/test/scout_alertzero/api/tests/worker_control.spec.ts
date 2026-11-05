@@ -99,20 +99,48 @@ apiTest.describe('AlertZero e2e - worker control', { tag: [...tags.stateful.clas
   });
 
   apiTest.afterAll(async ({ apiClient, samlAuth }) => {
-    const api = await getAdminApi(apiClient, samlAuth);
+    // Every step runs even when an earlier one throws (a drain timeout, say), so one failure
+    // cannot leak the superuser service accounts or the per-space gate. Failures are reported
+    // together.
+    const errors: unknown[] = [];
+    const attempt = async (step: () => Promise<unknown>) => {
+      try {
+        await step();
+      } catch (error) {
+        errors.push(error);
+      }
+    };
+    let api: Awaited<ReturnType<typeof getAdminApi>> | undefined;
+    await attempt(async () => {
+      api = await getAdminApi(apiClient, samlAuth);
+    });
     // Unbind before deleting the accounts: a worker left pointing at a deleted account leaks into
     // whatever spec runs next.
-    await resetWorker(api, WORKER_ID);
+    await attempt(async () => {
+      if (api) await resetWorker(api, WORKER_ID);
+    });
     // End the runs this suite's enables started; run before the accounts go away below so a
     // drained run cannot fail after the fact on its deleted service account.
     for (const { workflowId, knownExecutionIds } of enabledWorkflows) {
-      await cancelNewExecutions(api, workflowId, knownExecutionIds);
+      await attempt(async () => {
+        if (api) await cancelNewExecutions(api, workflowId, knownExecutionIds);
+      });
     }
     for (const id of serviceAccountIds) {
-      await deleteServiceAccount(api, id);
+      await attempt(async () => {
+        if (api) await deleteServiceAccount(api, id);
+      });
     }
-    // Last, and best-effort: the worker resets above already stopped the gated routes' users.
-    await restoreAlertZero?.().catch(() => undefined);
+    await attempt(async () => {
+      await restoreAlertZero?.();
+    });
+    if (errors.length > 0) {
+      throw new Error(
+        `AlertZero worker control cleanup failed: ${errors
+          .map((error) => (error instanceof Error ? error.message : String(error)))
+          .join('; ')}`
+      );
+    }
   });
 
   apiTest('lists the managed security workers', async ({ apiClient, samlAuth }) => {

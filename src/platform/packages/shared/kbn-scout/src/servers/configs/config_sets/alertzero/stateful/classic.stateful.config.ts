@@ -94,8 +94,9 @@ export const servers: ScoutServerConfig = {
       '--xpack.alertzero.enabled=true',
       '--xpack.agenticInvestigations.enabled=true',
       '--xpack.proposals.enabled=true',
-      // Process-wide feature flag read once at startup, so it cannot be set at runtime;
-      // mirrors the evals_attack_discovery_agent_builder set.
+      // Falls back to true already; pinned so a feature-flag provider cannot turn it off, since
+      // Discoveries installs its managed workflows only when the flag is on at plugin start.
+      // Mirrors the evals_attack_discovery_agent_builder set.
       '--feature_flags.overrides.securitySolution.attackDiscoveryWorkflowsEnabled=true',
       // Already the traditional default; pinned so a local override cannot refuse the service
       // account the Hunt Watch specs create.
