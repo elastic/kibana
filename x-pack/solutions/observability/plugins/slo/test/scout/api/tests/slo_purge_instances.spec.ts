@@ -67,7 +67,7 @@ apiTest.describe(
             status.statusCode === 200 && (status.body as { completed?: boolean }).completed === true
           );
         },
-        { timeoutMs: 120_000, intervalMs: 2000 }
+        { timeoutMs: 120_000 }
       );
 
       const status = await apiClient.get(
@@ -125,7 +125,7 @@ apiTest.describe(
               (status.body as { completed?: boolean }).completed === true
             );
           },
-          { timeoutMs: 120_000, intervalMs: 2000 }
+          { timeoutMs: 120_000 }
         );
 
         await refreshSloSummaryIndex(esClient);
@@ -179,7 +179,7 @@ apiTest.describe(
               (status.body as { completed?: boolean }).completed === true
             );
           },
-          { timeoutMs: 120_000, intervalMs: 2000 }
+          { timeoutMs: 120_000 }
         );
 
         await refreshSloSummaryIndex(esClient);
@@ -232,7 +232,7 @@ apiTest.describe(
               (status.body as { completed?: boolean }).completed === true
             );
           },
-          { timeoutMs: 120_000, intervalMs: 2000 }
+          { timeoutMs: 120_000 }
         );
 
         await refreshSloSummaryIndex(esClient);

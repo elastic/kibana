@@ -27,7 +27,7 @@ import type { SubjectServices } from '../../subjects/attachments/subject_service
 
 jest.mock('@kbn/proposals-plugin/public');
 
-const flags = { isSelected: false, isDimmed: false, selectedActionIndex: null };
+const flags = { isSelected: false, isDimmed: false, isRunning: false, selectedActionIndex: null };
 
 const renderNode = (
   data: HypothesisTreeFlowNode['data'],
@@ -224,6 +224,28 @@ describe('HypothesisTreeNode', () => {
     expect(node).toHaveTextContent('90% confidence');
     expect(node.querySelector('code')).toHaveTextContent('user_id');
   });
+
+  it.each([
+    [true, 'Investigating', 'Unresolved'],
+    [false, 'Unresolved', 'Investigating'],
+  ])(
+    'shows an open hypothesis as in progress only while the agent runs (running: %s)',
+    (isRunning, shown, hidden) => {
+      renderNode({
+        kind: 'hypothesis',
+        index: 0,
+        isWinner: false,
+        hypothesis: { candidate: 'Pool leak', confidence: 0.4, status: 'investigating' },
+        ...flags,
+        isRunning,
+      });
+
+      const node = screen.getByTestId('investigationHypothesisTreeNode-hypothesis');
+      expect(node).toHaveTextContent(shown);
+      expect(node).not.toHaveTextContent(hidden);
+      expect(node.querySelector('[role="progressbar"]') !== null).toBe(isRunning);
+    }
+  );
 
   it('counts the hypotheses by status', () => {
     renderNode({
