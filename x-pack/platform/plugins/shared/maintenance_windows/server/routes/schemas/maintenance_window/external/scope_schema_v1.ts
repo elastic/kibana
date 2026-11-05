@@ -25,7 +25,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
             schema.boolean({
               meta: {
                 description:
-                  'Whether this maintenance window applies to Alerting V1 alerts. If omitted, is treated as `true`.',
+                  'Whether this maintenance window applies to Kibana Classic Alerting alerts. If omitted, is treated as `true`.',
               },
             })
           ),
@@ -35,7 +35,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
                 maxLength: 10000,
                 meta: {
                   description:
-                    "A KQL filter that limits which Alerting V1 alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.",
+                    "A KQL filter that limits which Kibana Classic Alerting alerts this maintenance window affects. Matching alerts don't run rule actions while the window is active. If you omit query, the window affects all alerts.",
                 },
               }),
             })
@@ -44,7 +44,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
         {
           meta: {
             description:
-              "Settings that control how this maintenance window affects Alerting V1 alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.",
+              "Settings that control how this maintenance window affects Kibana Classic Alerting alerts, including an optional KQL filter. If you include `scope` but omit `alerting`, the maintenance window doesn't affect these alerts.",
           },
         }
       )
@@ -58,7 +58,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
             schema.boolean({
               meta: {
                 description:
-                  'Whether this maintenance window affects Alerting V2 alerts. Defaults to `true`.',
+                  'Whether this maintenance window affects Kibana Universal Alerting alerts. Defaults to `true`.',
               },
             })
           ),
@@ -68,7 +68,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
                 maxLength: MAX_KQL_LENGTH,
                 meta: {
                   description:
-                    "A KQL filter that limits which Alerting V2 alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Alerting V2 alerts.",
+                    "A KQL filter that limits which Kibana Universal Alerting alerts this maintenance window affects. You can filter on `alert_id`, `alert_status`, `group_hash`, `last_event_timestamp`, `severity`, and `data.*`. Matching alerts don't send notifications while the window is active. If you omit query, the window affects all Kibana Universal Alerting alerts.",
                 },
               }),
             })
@@ -77,7 +77,7 @@ export const maintenanceWindowScopeSchemaV1 = schema.object(
         {
           meta: {
             description:
-              "Settings that control how this maintenance window affects Alerting V2 alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Alerting V2 alerts.",
+              "Settings that control how this maintenance window affects Kibana Universal Alerting alerts, including an optional KQL filter. If you omit `alerting_v2`, the maintenance window doesn't affect Kibana Universal Alerting alerts.",
           },
         }
       )

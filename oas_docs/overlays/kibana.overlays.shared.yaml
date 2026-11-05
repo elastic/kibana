@@ -19,21 +19,24 @@ actions:
     description: Change tag description and displayName
     update:
       description: >
-        Alerting enables you to define rules, which detect complex conditions within your data.
+        Kibana Classic Alerting enables you to define rules, which detect complex conditions within your data.
         When a condition is met, the rule tracks it as an alert and runs the actions that are defined in the rule.
         Actions typically involve the use of connectors to interact with Kibana services or third party integrations.
       externalDocs:
-        description: Alerting documentation
-        url: https://www.elastic.co/docs/explore-analyze/alerts-cases/alerts
-      x-displayName: 'Alerting'
+        description: Kibana Classic Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerting/alerts
+      x-displayName: 'Kibana Classic Alerting'
   - target: '$.tags[?(@.name=="alerting-v2")]'
     description: Change tag description and displayName
     update:
       description: >
-        Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
+        Kibana Universal Alerting is an ES|QL-first alerting API for managing rules, alert actions, and action policies.
         Use these endpoints to create and manage detection rules, act on alerts, and control when and how
         notifications are delivered.
-      x-displayName: 'Universal Alerting'
+      externalDocs:
+        description: Kibana Universal Alerting documentation
+        url: https://www.elastic.co/docs/explore-analyze/alerting/esql/system-overview
+      x-displayName: 'Kibana Universal Alerting'
   - target: '$.tags[?(@.name=="connectors")]'
     description: Change tag description and displayName
     update:
