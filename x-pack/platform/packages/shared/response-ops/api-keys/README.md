@@ -61,3 +61,14 @@ describeApiKeyStorage('my plugin', myStorage, {
 | Immediate invalidation on delete | `src/invalidate/invalidate_now.ts` |
 | The invalidation task's run logic or state | `src/invalidate/task/` |
 | UIAM log tags | `src/log_tags.ts` |
+
+## Where each plugin keeps its API key code
+
+Paths are relative to the plugin's `server/` folder.
+
+| Plugin | Profile and client | Storage mapper | Invalidation | Extras |
+| --- | --- | --- | --- | --- |
+| Task Manager | `api_keys/client.ts` (UIAM `optional`, or ES only) | `api_keys/storage.ts` (task `apiKey`, `uiamApiKey`, `userScope`) | `invalidate_api_keys/invalidate_api_keys_task.ts` | `api_keys/api_key_utils.ts` (keys per task type) |
+| Alerting | `api_keys/client.ts` (UIAM `optional` or `required`, reuse) | `api_keys/storage.ts` (rule attributes) | `invalidate_pending_api_keys/task.ts` | `api_keys/create_api_key_result.ts` (rules client result shape) |
+| Alerting v2 | `api_keys/client.ts` (UIAM `only`, reuse) | `api_keys/storage.ts` (action policy `apiKey`) | `lib/tasks/invalidate_pending_api_keys/task_runner.ts` | `lib/services/api_key_service/` (rejects raw Cloud API keys) |
+| Actions | `api_keys/client.ts` (UIAM `optional`, clone instead of reuse) | `api_keys/storage.ts` (connector event identity) | none: deleted keys are invalidated right away | `inbound/event_identity/` (mint, invalidate, fake request) |

@@ -13,8 +13,9 @@ import type { Logger, PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { RunContext, RunResult } from '@kbn/task-manager-plugin/server/task';
-import { runInvalidate } from '@kbn/response-ops-api-keys';
+import { createInvalidationRunner } from '@kbn/response-ops-api-keys';
 import { inject, injectable } from 'inversify';
+import { ALERTING_V2_PLUGIN_TAG } from '../../../api_keys/client';
 import { ALERTING_LOG_CODES } from '../../errors/error_codes';
 import {
   LoggerServiceToken,
@@ -49,52 +50,28 @@ export class ApiKeyInvalidationTaskRunner {
   }
 
   public async run({ taskInstance }: TaskRunParams): Promise<RunResult> {
-    const state = taskInstance.state as LatestTaskStateSchema;
-    const interval = this.config.invalidateApiKeysTask.interval;
-    const removalDelay = this.config.invalidateApiKeysTask.removalDelay;
-    let totalInvalidated = 0;
-    let missingApiKeyRetries = { ...state.missing_api_key_retries };
-
-    try {
-      const result = await runInvalidate({
+    const runner = createInvalidationRunner({
+      logger: this.coreLogger,
+      pluginTag: ALERTING_V2_PLUGIN_TAG,
+      removalDelay: this.config.invalidateApiKeysTask.removalDelay,
+      getRunDependencies: () => ({
         invalidateApiKeyFn: this.security?.authc.apiKeys.invalidateAsInternalUser,
         invalidateUiamApiKeyFn: this.securityCore.authc.apiKeys.uiam?.invalidate,
-        logger: this.coreLogger,
-        missingApiKeyRetries,
-        pluginTag: 'alerting-v2',
-        removalDelay,
         savedObjectsClient: this.savedObjectsClient,
         savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
         savedObjectTypesToQuery: [],
-      });
-      totalInvalidated = result.totalInvalidated;
-      missingApiKeyRetries = result.missingApiKeyRetries;
+      }),
+      onError: (error) =>
+        this.logger.warn({
+          message: 'API key invalidation task run failed',
+          error,
+          code: ALERTING_LOG_CODES.TASKS_API_KEY_INVALIDATION_RUN_FAILED,
+        }),
+    });
 
-      const updatedState: LatestTaskStateSchema = {
-        runs: (state.runs || 0) + 1,
-        total_invalidated: totalInvalidated,
-        missing_api_key_retries: missingApiKeyRetries,
-      };
-      return {
-        state: updatedState,
-        schedule: { interval },
-      };
-    } catch (error) {
-      this.logger.warn({
-        message: 'API key invalidation task run failed',
-        error,
-        code: ALERTING_LOG_CODES.TASKS_API_KEY_INVALIDATION_RUN_FAILED,
-      });
-
-      const updatedState: LatestTaskStateSchema = {
-        runs: (state.runs || 0) + 1,
-        total_invalidated: totalInvalidated,
-        missing_api_key_retries: missingApiKeyRetries,
-      };
-      return {
-        state: updatedState,
-        schedule: { interval },
-      };
-    }
+    const state: LatestTaskStateSchema = await runner.run(
+      taskInstance.state as LatestTaskStateSchema
+    );
+    return { state, schedule: { interval: this.config.invalidateApiKeysTask.interval } };
   }
 }

@@ -10,16 +10,17 @@ import type { PluginInitializerContext } from '@kbn/core/server';
 import type { SecurityServiceStart } from '@kbn/core-security-server';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { securityMock } from '@kbn/security-plugin/server/mocks';
+import type { InvalidationRunnerOptions } from '@kbn/response-ops-api-keys';
 import { API_KEY_PENDING_INVALIDATION_TYPE } from '../../../saved_objects';
 import type { PluginConfig } from '../../../config';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
 import { ApiKeyInvalidationTaskRunner } from './task_runner';
 
 jest.mock('@kbn/response-ops-api-keys', () => ({
-  runInvalidate: jest.fn().mockResolvedValue({ totalInvalidated: 0, missingApiKeyRetries: {} }),
+  createInvalidationRunner: jest.fn(),
 }));
 
-const { runInvalidate } = jest.requireMock('@kbn/response-ops-api-keys');
+const { createInvalidationRunner } = jest.requireMock('@kbn/response-ops-api-keys');
 
 const config = {
   get: jest.fn().mockReturnValue({ invalidateApiKeysTask: { interval: '5m', removalDelay: '1h' } }),
@@ -30,9 +31,14 @@ describe('ApiKeyInvalidationTaskRunner characterization', () => {
   const { loggerService } = createLoggerService();
   const savedObjectsClient = savedObjectsClientMock.create();
   const securityStart = securityMock.createStart();
+  const runPass = jest.fn();
+
+  const runnerOptions = (): InvalidationRunnerOptions => createInvalidationRunner.mock.calls[0][0];
 
   beforeEach(() => {
     jest.clearAllMocks();
+    runPass.mockImplementation(async (state) => state);
+    createInvalidationRunner.mockReturnValue({ run: runPass });
   });
 
   const run = (securityCore: SecurityServiceStart, state: Record<string, unknown>) =>
@@ -45,41 +51,48 @@ describe('ApiKeyInvalidationTaskRunner characterization', () => {
       config
     ).run({ taskInstance: { state } as never, signal: new AbortController().signal });
 
-  it('passes exactly these arguments to runInvalidate, copying the retry map', async () => {
+  it('runs the shared invalidation runner with exactly these options and dependencies', async () => {
     const securityCore = securityServiceMock.createStart();
-    const retries = { 'key-1': 2 };
+    const state = { runs: 0, total_invalidated: 0, missing_api_key_retries: { 'key-1': 2 } };
 
-    await run(securityCore, { runs: 0, total_invalidated: 0, missing_api_key_retries: retries });
+    await run(securityCore, state);
 
-    expect(runInvalidate).toHaveBeenCalledTimes(1);
-    expect(runInvalidate).toHaveBeenCalledWith({
-      invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
-      invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
+    expect(createInvalidationRunner).toHaveBeenCalledTimes(1);
+    expect(runnerOptions()).toEqual({
       logger: coreLogger,
-      missingApiKeyRetries: { 'key-1': 2 },
       pluginTag: 'alerting-v2',
       removalDelay: '1h',
+      getRunDependencies: expect.any(Function),
+      onError: expect.any(Function),
+    });
+    expect(await runnerOptions().getRunDependencies()).toEqual({
+      invalidateApiKeyFn: securityStart.authc.apiKeys.invalidateAsInternalUser,
+      invalidateUiamApiKeyFn: securityCore.authc.apiKeys.uiam?.invalidate,
       savedObjectsClient,
       savedObjectType: API_KEY_PENDING_INVALIDATION_TYPE,
       savedObjectTypesToQuery: [],
     });
-    expect(runInvalidate.mock.calls[0][0].missingApiKeyRetries).not.toBe(retries);
+    expect(runPass).toHaveBeenCalledWith(state);
   });
 
-  it('passes an undefined UIAM invalidator and an empty retry map when UIAM and prior retries are absent', async () => {
+  it('passes an undefined UIAM invalidator when UIAM is absent', async () => {
     const securityCore = {
       authc: { apiKeys: { uiam: null } },
     } as unknown as SecurityServiceStart;
 
     await run(securityCore, { runs: 0, total_invalidated: 0 });
 
-    expect(runInvalidate).toHaveBeenCalledWith(
-      expect.objectContaining({ invalidateUiamApiKeyFn: undefined, missingApiKeyRetries: {} })
+    expect(await runnerOptions().getRunDependencies()).toEqual(
+      expect.objectContaining({ invalidateUiamApiKeyFn: undefined })
     );
   });
 
-  it('keeps the previous retry map but resets total_invalidated to 0 when runInvalidate rejects (current behavior)', async () => {
-    runInvalidate.mockRejectedValueOnce(new Error('invalidation failed'));
+  it('returns the state from the runner with the configured schedule', async () => {
+    runPass.mockResolvedValueOnce({
+      runs: 5,
+      total_invalidated: 0,
+      missing_api_key_retries: { 'key-1': 1 },
+    });
 
     const result = await run(securityServiceMock.createStart(), {
       runs: 4,

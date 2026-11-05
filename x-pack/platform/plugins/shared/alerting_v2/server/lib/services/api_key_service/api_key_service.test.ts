@@ -51,6 +51,7 @@ const createMockSecurityService = (
             }
           : null
       ),
+      getPrincipal: jest.fn(),
       apiKeys: {
         grantAsInternalUser,
         ...(uiam
@@ -72,6 +73,9 @@ const createRequestWithApiKey = (id: string, key: string): KibanaRequest => {
   });
 };
 
+const createUiamSessionRequest = (): KibanaRequest =>
+  httpServerMock.createKibanaRequest({ headers: { authorization: 'Bearer essu_session' } });
+
 describe('ApiKeyService', () => {
   describe('create (grant path - password/token auth)', () => {
     it('grants an ES API key when UIAM is not available', async () => {
@@ -82,11 +86,15 @@ describe('ApiKeyService', () => {
 
       const result = await service.create('My Policy');
 
-      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(request, {
-        name: 'My Policy',
-        role_descriptors: {},
-        metadata: { managed: true, kibana: { type: 'action_policy' } },
-      });
+      expect(security.authc.apiKeys.grantAsInternalUser).toHaveBeenCalledWith(
+        request,
+        {
+          name: 'My Policy',
+          role_descriptors: {},
+          metadata: { managed: true, kibana: { type: 'action_policy' } },
+        },
+        {}
+      );
 
       expect(result.apiKey).toBe(Buffer.from('es-key-id:es-key-secret').toString('base64'));
       expect(result.owner).toBe('test-user');
@@ -94,7 +102,7 @@ describe('ApiKeyService', () => {
     });
 
     it('grants only a UIAM API key when UIAM is available', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = createUiamSessionRequest();
       const security = createMockSecurityService({ uiam: true });
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
@@ -136,14 +144,14 @@ describe('ApiKeyService', () => {
     });
 
     it('throws when UIAM grant returns null', async () => {
-      const request = httpServerMock.createKibanaRequest();
+      const request = createUiamSessionRequest();
       const security = createMockSecurityService({ uiam: true });
       (security.authc.apiKeys.uiam!.grant as jest.Mock).mockResolvedValue(null);
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
       await expect(service.create('My Policy')).rejects.toThrow(
-        'Failed to create UIAM API key for action policy: My Policy'
+        'Failed to create a Cloud API key for action policy: My Policy'
       );
     });
   });
@@ -180,7 +188,7 @@ describe('ApiKeyService', () => {
       expect(result.createdByUser).toBe(true);
     });
 
-    it('throws when UIAM credential is used in non-serverless environment', async () => {
+    it('rejects a UIAM credential with a bad request in a non-serverless environment', async () => {
       const uiamKey = 'essu_uiam-secret-value';
       const request = createRequestWithApiKey('uiam-id', uiamKey);
       const security = createMockSecurityService({
@@ -190,9 +198,10 @@ describe('ApiKeyService', () => {
       const { invalidationSavedObjectsClient, logger } = createMockInvalidationDeps();
       const service = new ApiKeyService(request, security, invalidationSavedObjectsClient, logger);
 
-      await expect(service.create('My Policy')).rejects.toThrow(
-        'UIAM API keys should only be used in serverless environments'
-      );
+      await expect(service.create('My Policy')).rejects.toMatchObject({
+        output: { statusCode: 400 },
+        data: { code: ALERTING_ERROR_CODES.ACTION_POLICY_CLOUD_API_KEY_NOT_SUPPORTED },
+      });
     });
 
     it('rejects a raw Cloud API key with a bad request', async () => {

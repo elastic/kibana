@@ -7,6 +7,7 @@
 
 import { httpServerMock, loggingSystemMock, securityServiceMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/logging';
+import { getUiamLogTags } from '@kbn/response-ops-api-keys';
 
 import { encodeApiKey } from './encode_api_key';
 import { invalidateConnectorEventIdentity } from './invalidate_connector_event_identity';
@@ -17,6 +18,7 @@ const connectorId = 'connector-1';
 const name = connectorEventIdentityApiKeyName(connectorId);
 const ES_GRANT = { id: 'es-id', name, api_key: 'es-secret' };
 const UIAM_GRANT = { id: 'uiam-id', name: `uiam-${name}`, api_key: 'essu_granted' };
+const TAGS = getUiamLogTags('actions');
 const UNSUPPORTED =
   'Cannot use a Cloud API key to save this inbound connector. Cloud API keys are only supported in serverless environments; use a project-scoped Elasticsearch API key instead.';
 
@@ -55,8 +57,16 @@ describe('connector event identity API keys characterization', () => {
       expect(securityService.authc.apiKeys.uiam!.grant).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to create UIAM API key for connector event identity "${name}": Invalid or missing UIAM credentials`,
-        { tags: ['uiam', 'credentials'] }
+        { tags: TAGS.credentials }
       );
+    });
+
+    it('grants only an ES key without logging when UIAM is null (stateful)', async () => {
+      const { mint, logger, securityService } = setup({ authorization: 'Basic abc' });
+      (securityService.authc.apiKeys as { uiam?: unknown }).uiam = null;
+
+      await expect(mint()).resolves.toEqual({ apiKey: encodeApiKey('es-id', 'es-secret') });
+      expect(logger.error).not.toHaveBeenCalled();
     });
 
     it('logs a failed UIAM grant and still grants the ES key', async () => {
@@ -66,7 +76,7 @@ describe('connector event identity API keys characterization', () => {
       await expect(mint()).resolves.toEqual({ apiKey: encodeApiKey('es-id', 'es-secret') });
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to create UIAM API key for connector event identity "${name}": uiam down`,
-        expect.objectContaining({ tags: ['uiam', 'uiam-api-key-grant'] })
+        expect.objectContaining({ tags: TAGS.grant })
       );
     });
 
@@ -76,8 +86,8 @@ describe('connector event identity API keys characterization', () => {
 
       await expect(mint()).resolves.toEqual({ apiKey: encodeApiKey('es-id', 'es-secret') });
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to create UIAM API key for connector event identity "${name}": Failed to create UIAM API key for connector event identity "${name}"`,
-        expect.objectContaining({ tags: ['uiam', 'uiam-api-key-grant'] })
+        `Failed to create UIAM API key for connector event identity "${name}": Failed to create a Cloud API key for connector event identity "${name}"`,
+        expect.objectContaining({ tags: TAGS.grant })
       );
     });
 
@@ -106,16 +116,20 @@ describe('connector event identity API keys characterization', () => {
       await expect(mint()).rejects.toThrow('es down');
       expect(logger.error).toHaveBeenCalledWith(
         `Failed to invalidate UIAM API key for connector event identity "${name}": nope`,
-        { tags: ['uiam', 'uiam-api-key-invalidate'] }
+        { tags: TAGS.invalidate }
       );
     });
 
-    it('replaces the ES error with the rollback error when the rollback throws (current behavior)', async () => {
-      const { mint, securityService } = setup({ authorization: 'ApiKey essu_session' });
+    it('logs a rollback that throws and rethrows the ES error', async () => {
+      const { mint, logger, securityService } = setup({ authorization: 'ApiKey essu_session' });
       securityService.authc.apiKeys.grantAsInternalUser.mockRejectedValue(new Error('es down'));
       securityService.authc.apiKeys.uiam!.invalidate.mockRejectedValue(new Error('rollback down'));
 
-      await expect(mint()).rejects.toThrow('rollback down');
+      await expect(mint()).rejects.toThrow('es down');
+      expect(logger.error).toHaveBeenCalledWith(
+        `Failed to invalidate UIAM API key for connector event identity "${name}": rollback down`,
+        expect.objectContaining({ tags: TAGS.invalidate })
+      );
     });
   });
 
@@ -213,12 +227,12 @@ describe('connector event identity API keys characterization', () => {
 
       expect(securityService.authc.apiKeys.uiam!.invalidate).not.toHaveBeenCalled();
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to invalidate UIAM API key for connector event identity "${name}": stored credential is not a UIAM API key`,
-        { tags: ['uiam', 'uiam-api-key-invalidate'] }
+        `Failed to synchronously invalidate UIAM API key for connector event identity "${name}": stored credential is not a UIAM API key`,
+        { tags: TAGS.invalidate }
       );
     });
 
-    it('logs a UIAM invalidation that throws', async () => {
+    it('logs a UIAM invalidation that throws, and warns that it will not be retried', async () => {
       const { securityService, logger } = setup();
       securityService.authc.apiKeys.uiam!.invalidate.mockRejectedValue(new Error('uiam down'));
 
@@ -227,8 +241,11 @@ describe('connector event identity API keys characterization', () => {
       });
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to invalidate UIAM API key for connector event identity "${name}": uiam down`,
-        expect.objectContaining({ tags: ['uiam', 'uiam-api-key-invalidate'] })
+        `Failed to synchronously invalidate UIAM API key for connector event identity "${name}": uiam down`,
+        expect.objectContaining({ tags: TAGS.invalidate })
+      );
+      expect(logger.warn).toHaveBeenCalledWith(
+        `API keys ["uiam-id"] for connector event identity "${name}" could not be invalidated and will not be retried.`
       );
     });
 
@@ -244,11 +261,11 @@ describe('connector event identity API keys characterization', () => {
       await invalidate(securityService, logger, { apiKey: encodeApiKey('es-id', 'es-secret') });
 
       expect(logger.error).toHaveBeenCalledWith(
-        `Failed to invalidate ES API key for connector event identity "${name}": nope`
+        `Failed to synchronously invalidate ES API key for connector event identity "${name}": nope`
       );
     });
 
-    it('does nothing more when Elasticsearch does not find the key', async () => {
+    it('warns when Elasticsearch does not find the key', async () => {
       const { securityService, logger } = setup();
       securityService.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
         invalidated_api_keys: [],
@@ -259,7 +276,9 @@ describe('connector event identity API keys characterization', () => {
       await invalidate(securityService, logger, { apiKey: encodeApiKey('es-id', 'es-secret') });
 
       expect(logger.error).not.toHaveBeenCalled();
-      expect(logger.warn).not.toHaveBeenCalled();
+      expect(logger.warn).toHaveBeenCalledWith(
+        `API keys ["es-id"] for connector event identity "${name}" could not be invalidated and will not be retried.`
+      );
     });
   });
 });

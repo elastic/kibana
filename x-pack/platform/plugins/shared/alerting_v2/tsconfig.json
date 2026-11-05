@@ -65,6 +65,7 @@
     "@kbn/react-query",
     "@kbn/core-security-server",
     "@kbn/response-ops-api-keys",
+    "@kbn/response-ops-api-keys-test-helpers",
     "@kbn/encrypted-saved-objects-plugin",
     "@kbn/event-log-plugin",
     "@kbn/workflows-management-plugin",

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type { FakeRawRequest, Headers } from '@kbn/core-http-server';
-import { kibanaRequestFactory } from '@kbn/core-http-server-utils';
 import type { KibanaRequest } from '@kbn/core/server';
-import { brandSpaceId } from '@kbn/core-spaces-common';
 import type {
   BulkScheduleWorkflowResult,
   WorkflowDetailDto,
@@ -19,11 +16,12 @@ import type {
   WorkflowsServerPluginSetup,
   WorkflowsManagementClient,
 } from '@kbn/workflows-management-plugin/server';
-import { getUiamApiKeySecret } from '@kbn/response-ops-api-keys';
+import { toFakeRequest } from '@kbn/response-ops-api-keys';
 import { ALERT_ACTIONS_DATA_STREAM } from '@kbn/alerting-v2-constants';
 import { inject, injectable } from 'inversify';
 import { isError, uniqBy } from 'lodash';
 import { ACTION_POLICIES_REQUIRED_LICENSE } from '../../../../common/action_policies_license';
+import { actionPolicyApiKeyStorage } from '../../../api_keys/storage';
 import type { AlertActionDocument } from '../../../resources/datastreams/alert_actions';
 import { getActionPolicyLicenseNotSupportedMessage } from '../../errors/action_policy_error_messages';
 import { ALERTING_LOG_CODES, type AlertingV2LogCode } from '../../errors/error_codes';
@@ -626,15 +624,7 @@ export class DispatchStep implements DispatcherStep {
    * scheduled workflow runs, and resolves its connectors, in that space.
    */
   private craftFakeRequest(apiKey: string, spaceId: string): KibanaRequest {
-    const requestHeaders: Headers = {
-      authorization: `ApiKey ${getUiamApiKeySecret(apiKey)}`,
-    };
-
-    const fakeRawRequest: FakeRawRequest = {
-      headers: requestHeaders,
-      spaceId: brandSpaceId(spaceId),
-    };
-
-    return kibanaRequestFactory(fakeRawRequest);
+    return toFakeRequest(actionPolicyApiKeyStorage.read({ apiKey }), { spaceId, prefer: 'uiam' })
+      .request;
   }
 }
