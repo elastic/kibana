@@ -52,7 +52,6 @@ export const FlyoutTabs = ({
   isBusy,
   integrationId,
   dataStreamId,
-  pendingTypeChangeCount,
   onSelectTable,
   onSelectPipeline,
 }: {
@@ -60,7 +59,6 @@ export const FlyoutTabs = ({
   isBusy: boolean;
   integrationId: string;
   dataStreamId: string;
-  pendingTypeChangeCount: number;
   onSelectTable: () => void;
   onSelectPipeline: () => void;
 }) => {
@@ -85,7 +83,7 @@ export const FlyoutTabs = ({
         disabled={isBusy}
         onClick={() => {
           if (!isTableTab) return;
-          reportEditPipelineTabOpened({ integrationId, dataStreamId, pendingTypeChangeCount });
+          reportEditPipelineTabOpened({ integrationId, dataStreamId });
           onSelectPipeline();
         }}
       >

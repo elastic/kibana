@@ -191,50 +191,6 @@ describe('useTelemetry', () => {
       })
     );
   });
-
-  it.each([
-    [
-      'reportFieldTypeStaged',
-      AutomaticImportTelemetryEventType.FieldTypeStaged,
-      { fromType: 'long', toType: 'keyword', isRevert: false },
-    ],
-    [
-      'reportSyncToTableBlocked',
-      AutomaticImportTelemetryEventType.SyncToTableBlocked,
-      { reason: 'pipeline_errors' },
-    ],
-    [
-      'reportPipelineCheckFailed',
-      AutomaticImportTelemetryEventType.PipelineCheckFailed,
-      { kind: 'field_errors', failingSampleGroups: 0 },
-    ],
-    [
-      'reportBreakingChangesModalClosed',
-      AutomaticImportTelemetryEventType.BreakingChangesModalClosed,
-      { action: 'cancel', removedApprovedFieldCount: 2 },
-    ],
-    [
-      'reportEditsDiscarded',
-      AutomaticImportTelemetryEventType.EditsDiscarded,
-      { trigger: 'reset', pendingTypeChangeCount: 1, pipelineDirty: false },
-    ],
-  ] as const)('%s reports %s with the session ID', (reporterName, eventType, params) => {
-    const { result } = renderHook(() => useTelemetry(), { wrapper });
-    const reporter = result.current[reporterName] as (
-      args: typeof params & { integrationId: string; dataStreamId: string }
-    ) => void;
-
-    act(() => {
-      reporter({ integrationId: 'int-1', dataStreamId: 'ds-1', ...params });
-    });
-
-    expect(mockReportEvent).toHaveBeenCalledWith(eventType, {
-      sessionId: expect.any(String),
-      integrationId: 'int-1',
-      dataStreamId: 'ds-1',
-      ...params,
-    });
-  });
 });
 
 describe('TelemetryContextProvider without telemetry service', () => {

@@ -7,13 +7,6 @@
 import React, { useCallback, useMemo, useRef, type PropsWithChildren } from 'react';
 import { v4 as uuidV4 } from 'uuid';
 import { useKibana } from '../common/hooks/use_kibana';
-import type {
-  BreakingChangesModalClosedPayload,
-  EditsDiscardedPayload,
-  FieldTypeStagedPayload,
-  PipelineCheckFailedPayload,
-  SyncToTableBlockedPayload,
-} from '../../common/telemetry/types';
 import { AutomaticImportTelemetryEventType } from '../../common/telemetry/types';
 
 export type LogsSource = 'file' | 'index';
@@ -34,7 +27,6 @@ type ReportAnalyzeLogsTriggered = (params: {
 type ReportEditPipelineTabOpened = (params?: {
   integrationId?: string;
   dataStreamId?: string;
-  pendingTypeChangeCount?: number;
 }) => void;
 
 type ReportCodeEditorCopyClicked = (params?: {
@@ -64,14 +56,6 @@ type ReportPipelineEdited = (params: {
   netLineChange: number;
 }) => void;
 
-type ReportFieldTypeStaged = (params: Omit<FieldTypeStagedPayload, 'sessionId'>) => void;
-type ReportSyncToTableBlocked = (params: Omit<SyncToTableBlockedPayload, 'sessionId'>) => void;
-type ReportPipelineCheckFailed = (params: Omit<PipelineCheckFailedPayload, 'sessionId'>) => void;
-type ReportBreakingChangesModalClosed = (
-  params: Omit<BreakingChangesModalClosedPayload, 'sessionId'>
-) => void;
-type ReportEditsDiscarded = (params: Omit<EditsDiscardedPayload, 'sessionId'>) => void;
-
 interface TelemetryContextProps {
   sessionId: string;
   reportDataStreamFlyoutOpened: ReportDataStreamFlyoutOpened;
@@ -84,11 +68,6 @@ interface TelemetryContextProps {
   reportDataStreamDeleteConfirmed: ReportDataStreamDeleteConfirmed;
   reportDataStreamRefreshConfirmed: ReportDataStreamRefreshConfirmed;
   reportPipelineEdited: ReportPipelineEdited;
-  reportFieldTypeStaged: ReportFieldTypeStaged;
-  reportSyncToTableBlocked: ReportSyncToTableBlocked;
-  reportPipelineCheckFailed: ReportPipelineCheckFailed;
-  reportBreakingChangesModalClosed: ReportBreakingChangesModalClosed;
-  reportEditsDiscarded: ReportEditsDiscarded;
 }
 
 const defaultTelemetryContext: TelemetryContextProps = {
@@ -103,11 +82,6 @@ const defaultTelemetryContext: TelemetryContextProps = {
   reportDataStreamDeleteConfirmed: () => {},
   reportDataStreamRefreshConfirmed: () => {},
   reportPipelineEdited: () => {},
-  reportFieldTypeStaged: () => {},
-  reportSyncToTableBlocked: () => {},
-  reportPipelineCheckFailed: () => {},
-  reportBreakingChangesModalClosed: () => {},
-  reportEditsDiscarded: () => {},
 };
 
 const TelemetryContext = React.createContext<TelemetryContextProps>(defaultTelemetryContext);
@@ -160,7 +134,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren>(({ childre
         sessionId: sessionData.current.sessionId,
         integrationId: params?.integrationId,
         dataStreamId: params?.dataStreamId,
-        pendingTypeChangeCount: params?.pendingTypeChangeCount,
       });
     },
     [telemetry]
@@ -233,56 +206,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren>(({ childre
     [telemetry]
   );
 
-  const reportFieldTypeStaged = useCallback<ReportFieldTypeStaged>(
-    (params) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.FieldTypeStaged, {
-        sessionId: sessionData.current.sessionId,
-        ...params,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportSyncToTableBlocked = useCallback<ReportSyncToTableBlocked>(
-    (params) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.SyncToTableBlocked, {
-        sessionId: sessionData.current.sessionId,
-        ...params,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportPipelineCheckFailed = useCallback<ReportPipelineCheckFailed>(
-    (params) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.PipelineCheckFailed, {
-        sessionId: sessionData.current.sessionId,
-        ...params,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportBreakingChangesModalClosed = useCallback<ReportBreakingChangesModalClosed>(
-    (params) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.BreakingChangesModalClosed, {
-        sessionId: sessionData.current.sessionId,
-        ...params,
-      });
-    },
-    [telemetry]
-  );
-
-  const reportEditsDiscarded = useCallback<ReportEditsDiscarded>(
-    (params) => {
-      telemetry?.reportEvent(AutomaticImportTelemetryEventType.EditsDiscarded, {
-        sessionId: sessionData.current.sessionId,
-        ...params,
-      });
-    },
-    [telemetry]
-  );
-
   const value = useMemo<TelemetryContextProps>(
     () => ({
       sessionId: sessionData.current.sessionId,
@@ -296,11 +219,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren>(({ childre
       reportDataStreamDeleteConfirmed,
       reportDataStreamRefreshConfirmed,
       reportPipelineEdited,
-      reportFieldTypeStaged,
-      reportSyncToTableBlocked,
-      reportPipelineCheckFailed,
-      reportBreakingChangesModalClosed,
-      reportEditsDiscarded,
     }),
     [
       reportDataStreamFlyoutOpened,
@@ -313,11 +231,6 @@ export const TelemetryContextProvider = React.memo<PropsWithChildren>(({ childre
       reportDataStreamDeleteConfirmed,
       reportDataStreamRefreshConfirmed,
       reportPipelineEdited,
-      reportFieldTypeStaged,
-      reportSyncToTableBlocked,
-      reportPipelineCheckFailed,
-      reportBreakingChangesModalClosed,
-      reportEditsDiscarded,
     ]
   );
 

@@ -16,7 +16,6 @@ import type {
   FieldTypeOverride,
   PipelineDefinition,
   PipelineErrors,
-  PipelineCheckFailureKind,
 } from '../../../../../common';
 import {
   readBackFieldTypeProcessors,
@@ -69,9 +68,6 @@ const toHandEditedText = (text: string): string => {
   }
 };
 
-const getCheckFailureKind = (response: DataStreamEditsFailure): PipelineCheckFailureKind =>
-  response.pipeline_errors ? 'pipeline_errors' : 'field_errors';
-
 const unwrapDocuments = (
   documents: Array<Record<string, unknown>>
 ): Array<Record<string, unknown>> =>
@@ -120,15 +116,7 @@ export const useDataStreamDraft = ({
   isEditable,
 }: UseDataStreamDraftParams) => {
   const { applyDataStreamEditsMutation } = useApplyDataStreamEdits();
-  const {
-    sessionId,
-    reportPipelineEdited,
-    reportFieldTypeStaged,
-    reportSyncToTableBlocked,
-    reportPipelineCheckFailed,
-    reportBreakingChangesModalClosed,
-    reportEditsDiscarded,
-  } = useTelemetry();
+  const { sessionId, reportPipelineEdited } = useTelemetry();
   const [preview, setPreview] = useState<DataStreamEditsResult>();
   const [pendingTypes, setPendingTypes] = useState<PendingTypes>(EMPTY_PENDING);
   const [fieldErrors, setFieldErrors] = useState<Record<string, FieldTypeError>>({});
@@ -146,7 +134,6 @@ export const useDataStreamDraft = ({
   const checkTimerRef = useRef<ReturnType<typeof setTimeout>>();
   const checkIdRef = useRef(0);
   const hasCheckResultsRef = useRef(false);
-  const lastCheckFailureRef = useRef<PipelineCheckFailureKind>();
 
   const isDataStreamApproved = data?.data_stream_approved ?? false;
   const savedOverrides = data?.field_type_overrides ?? EMPTY_OVERRIDES;
@@ -191,22 +178,10 @@ export const useDataStreamDraft = ({
 
   useEffect(() => () => clearTimeout(checkTimerRef.current), []);
 
-  /** Reports a live check failure only when it starts or changes kind, not on every check. */
-  const trackCheckResult = useCallback(
-    (kind: PipelineCheckFailureKind | undefined, failingSampleGroups = 0) => {
-      const previousKind = lastCheckFailureRef.current;
-      lastCheckFailureRef.current = kind;
-      if (!kind || kind === previousKind) return;
-      reportPipelineCheckFailed({ integrationId, dataStreamId, kind, failingSampleGroups });
-    },
-    [dataStreamId, integrationId, reportPipelineCheckFailed]
-  );
-
   const clearDraft = useCallback(
     (text: string) => {
       cancelCheck();
       hasCheckResultsRef.current = false;
-      lastCheckFailureRef.current = undefined;
       syncedTextRef.current = text;
       setPipelineText(text);
       setPreview(undefined);
@@ -284,16 +259,6 @@ export const useDataStreamDraft = ({
       const savedType = data?.field_mapping.find(({ name }) => name === fieldName)?.type;
       const baseType =
         preview?.field_mapping.find(({ name }) => name === fieldName)?.type ?? savedType;
-      const fromType = pendingTypes[fieldName] ?? baseType;
-      if (fromType && fromType !== nextType) {
-        reportFieldTypeStaged({
-          integrationId,
-          dataStreamId,
-          fromType,
-          toType: nextType,
-          isRevert: nextType === savedType,
-        });
-      }
       setPendingTypes((current) => {
         if (nextType === savedType && baseType === savedType) {
           const { [fieldName]: _removed, ...remaining } = current;
@@ -302,7 +267,7 @@ export const useDataStreamDraft = ({
         return { ...current, [fieldName]: nextType };
       });
     },
-    [data, dataStreamId, integrationId, pendingTypes, preview, reportFieldTypeStaged]
+    [data, preview]
   );
 
   const applyFailure = useCallback((response: DataStreamEditsFailure) => {
@@ -336,7 +301,6 @@ export const useDataStreamDraft = ({
     async (text: string) => {
       if (!data || !baseVersion) return;
       if (text === syncedTextRef.current) {
-        trackCheckResult(undefined);
         if (!hasCheckResultsRef.current) return;
         hasCheckResultsRef.current = false;
         setFieldErrors({});
@@ -348,7 +312,6 @@ export const useDataStreamDraft = ({
       try {
         parsed = parsePipeline(text);
       } catch (error) {
-        trackCheckResult('invalid_json');
         setPipelineError(i18n.EDIT_PIPELINE_FLYOUT.invalidJsonError((error as Error).message));
         return;
       }
@@ -364,19 +327,13 @@ export const useDataStreamDraft = ({
           changes: toChanges(foldPipelineEdits(parsed)),
           version: baseVersion,
           dryRun: true,
-          sessionId,
         });
         if (checkId !== checkIdRef.current) return;
         hasCheckResultsRef.current = true;
         if (response.status === 'failure') {
-          trackCheckResult(
-            getCheckFailureKind(response),
-            response.pipeline_errors?.error_groups.length
-          );
           applyFailure(response);
           setCheckedRemovedFields(EMPTY_NAMES);
         } else {
-          trackCheckResult(undefined);
           setFieldErrors({});
           setPipelineErrors(undefined);
           setCheckedRemovedFields(response.removed_approved_fields);
@@ -395,8 +352,6 @@ export const useDataStreamDraft = ({
       dataStreamId,
       foldPipelineEdits,
       integrationId,
-      sessionId,
-      trackCheckResult,
     ]
   );
 
@@ -426,7 +381,6 @@ export const useDataStreamDraft = ({
     try {
       parsed = parsePipeline(pipelineText);
     } catch (error) {
-      reportSyncToTableBlocked({ integrationId, dataStreamId, reason: 'invalid_json' });
       setPipelineError(i18n.EDIT_PIPELINE_FLYOUT.invalidJsonError((error as Error).message));
       return false;
     }
@@ -444,14 +398,8 @@ export const useDataStreamDraft = ({
         changes: toChanges(pending),
         version: baseVersion,
         dryRun: true,
-        sessionId,
       });
       if (response.status === 'failure') {
-        reportSyncToTableBlocked({
-          integrationId,
-          dataStreamId,
-          reason: getCheckFailureKind(response),
-        });
         setPendingTypes(pending);
         applyFailure(response);
         return false;
@@ -459,7 +407,6 @@ export const useDataStreamDraft = ({
       applyPreview(response, pipelineText, parsed);
       return true;
     } catch (error) {
-      reportSyncToTableBlocked({ integrationId, dataStreamId, reason: 'request_error' });
       setPipelineError((error as Error).message);
       return false;
     } finally {
@@ -477,8 +424,6 @@ export const useDataStreamDraft = ({
     integrationId,
     isEditable,
     pipelineText,
-    reportSyncToTableBlocked,
-    sessionId,
   ]);
 
   /**
@@ -501,14 +446,6 @@ export const useDataStreamDraft = ({
         if (pipelineText !== syncedTextRef.current) pending = foldPipelineEdits(parsed);
       }
 
-      if (acknowledgeBreakingChanges) {
-        reportBreakingChangesModalClosed({
-          integrationId,
-          dataStreamId,
-          action: 'save_anyway',
-          removedApprovedFieldCount: pendingBreakingChanges.length,
-        });
-      }
       setIsSaving(true);
       setPipelineError(null);
       setPipelineErrors(undefined);
@@ -559,59 +496,16 @@ export const useDataStreamDraft = ({
       dataStreamId,
       foldPipelineEdits,
       integrationId,
-      pendingBreakingChanges.length,
       pendingTypes,
       pipelineText,
-      reportBreakingChangesModalClosed,
       reportPipelineEdited,
       sessionId,
     ]
   );
 
-  /** Reports that unsaved edits were thrown away. */
-  const reportDiscarded = useCallback(
-    (trigger: 'reset' | 'close') => {
-      if (!isDirty) return;
-      reportEditsDiscarded({
-        integrationId,
-        dataStreamId,
-        trigger,
-        pendingTypeChangeCount: Object.keys(pendingTypes).length,
-        pipelineDirty: toHandEditedText(pipelineText) !== toHandEditedText(baselineText),
-      });
-    },
-    [
-      baselineText,
-      dataStreamId,
-      integrationId,
-      isDirty,
-      pendingTypes,
-      pipelineText,
-      reportEditsDiscarded,
-    ]
-  );
+  const reset = useCallback(() => clearDraft(baselineText), [baselineText, clearDraft]);
 
-  const reset = useCallback(() => {
-    reportDiscarded('reset');
-    clearDraft(baselineText);
-  }, [baselineText, clearDraft, reportDiscarded]);
-
-  const discardOnClose = useCallback(() => reportDiscarded('close'), [reportDiscarded]);
-
-  const cancelBreakingChanges = useCallback(() => {
-    reportBreakingChangesModalClosed({
-      integrationId,
-      dataStreamId,
-      action: 'cancel',
-      removedApprovedFieldCount: pendingBreakingChanges.length,
-    });
-    setPendingBreakingChanges([]);
-  }, [
-    dataStreamId,
-    integrationId,
-    pendingBreakingChanges.length,
-    reportBreakingChangesModalClosed,
-  ]);
+  const cancelBreakingChanges = useCallback(() => setPendingBreakingChanges([]), []);
 
   const updatePipelineText = useCallback(
     (value: string) => {
@@ -650,6 +544,5 @@ export const useDataStreamDraft = ({
     syncToTable,
     save,
     reset,
-    discardOnClose,
   };
 };
