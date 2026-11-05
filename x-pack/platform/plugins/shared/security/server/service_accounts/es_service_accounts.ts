@@ -29,6 +29,7 @@ import { z } from '@kbn/zod';
 import { bestEffortUserProfileIdResolver, resolveWorkloadBinder } from './bindings';
 import { ensureClusterPrivilege } from './cluster_privilege';
 import { auditableName, parseCreateServiceAccountParams } from './create_params';
+import { ServiceAccountCredentialRefusedError } from './credential_refused_error';
 import { BINDING_CLOCK_SKEW_TOLERANCE_MS } from './credentials';
 import type { ServiceAccountCredentialStore } from './credentials';
 import { toDescriptionField } from './description_field';
@@ -39,7 +40,10 @@ import {
 } from './es_role_limits';
 import type { EsServiceAccountPrincipal } from './es_service_account_id';
 import { parseEsServiceAccountId } from './es_service_account_id';
-import type { CreateServiceAccountFakeRequestParams } from './fake_requests';
+import type {
+  CreateServiceAccountFakeRequestParams,
+  ServiceAccountMintedToken,
+} from './fake_requests';
 import { SERVICE_ACCOUNT_TOKEN_RETRY_REUSE_MS, ServiceAccountFakeRequests } from './fake_requests';
 import { ServiceAccountTokenExchangeError } from './token_exchange_error';
 import type { ListServiceAccountsParams, ServiceAccountsBackend } from './types';
@@ -334,9 +338,30 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       throw e;
     }
 
+    let token: string;
     try {
-      const token = await this.createToken(esClient, namespace, name);
+      token = await this.createToken(esClient, namespace, name);
+    } catch (e) {
+      // A token that already exists means a concurrent create of this name got there first and
+      // owns the account. Rolling back would delete the account, token and credential it just
+      // made, so the loser steps aside and leaves everything in place.
+      if (getErrorStatusCode(e) === 409) {
+        this.logger.warn(
+          `Service account [${serviceAccountId}] was created concurrently, so this create stepped ` +
+            `aside without a rollback: ${getDetailedErrorMessage(e)}`
+        );
+        throw Boom.conflict(`A service account named [${name}] already exists`);
+      }
+      if (!(await this.rollback(esClient, namespace, name))) {
+        cleanup.accountMayRemain = { id: serviceAccountId, name };
+      }
+      this.logger.error(
+        `Failed to create service account [${serviceAccountId}]: ${getDetailedErrorMessage(e)}`
+      );
+      throw e;
+    }
 
+    try {
       await this.credentialStore.set({
         serviceAccountId,
         namespace,
@@ -725,7 +750,7 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
   async reauthenticateFakeRequest(
     request: KibanaRequest
   ): Promise<{ authorization: string } | null> {
-    if (!this.fakeRequests.isServiceAccountRequest(request)) {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
       return null;
     }
 
@@ -736,6 +761,25 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       );
       return { authorization: `Bearer ${token}` };
     } catch {
+      return null;
+    }
+  }
+
+  async refreshFakeRequestBeforeUse(
+    request: KibanaRequest,
+    validForMs: number
+  ): Promise<{ authorization: string } | null> {
+    if (!this.fakeRequests.carriesIssuedToken(request)) {
+      return null;
+    }
+
+    try {
+      const token = await this.fakeRequests.refreshTokenBeforeUse(request, validForMs);
+      return { authorization: `Bearer ${token}` };
+    } catch (err) {
+      if (err instanceof ServiceAccountCredentialRefusedError) {
+        throw err;
+      }
       return null;
     }
   }
@@ -751,7 +795,10 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
       : null;
   }
 
-  private async exchangeToken(serviceAccountId: string, boundAt?: string): Promise<string> {
+  private async exchangeToken(
+    serviceAccountId: string,
+    boundAt?: string
+  ): Promise<ServiceAccountMintedToken> {
     if (!this.license.isEnabled()) {
       throw Boom.forbidden(
         'Cannot exchange a service account token: security features are disabled in Elasticsearch'
@@ -826,7 +873,11 @@ export class EsServiceAccounts implements ServiceAccountsBackend {
         grant_type: '_user_managed_service_account',
         service_account_token: credential.token,
       });
-      return response.access_token;
+      return {
+        token: response.access_token,
+        // Elasticsearch reports the lifetime in seconds.
+        expiresInMs: response.expires_in * 1000,
+      };
     });
   }
 

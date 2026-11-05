@@ -19,6 +19,7 @@ const moon = path.join(REPO_ROOT, 'node_modules/.bin/moon');
 
 describe('Moon Jest task inputs', () => {
   let fixtureRoot: string;
+  const originalMoonWorkspaceRoot = process.env.MOON_WORKSPACE_ROOT;
 
   const write = (relativePath: string, contents: string): void => {
     const filePath = path.join(fixtureRoot, relativePath);
@@ -40,6 +41,7 @@ describe('Moon Jest task inputs', () => {
 
   beforeAll(() => {
     fixtureRoot = mkdtempSync(path.join(tmpdir(), 'kbn-moon-jest-inputs-'));
+    process.env.MOON_WORKSPACE_ROOT = fixtureRoot;
     write(
       '.moon/workspace.yml',
       `projects:
@@ -146,6 +148,11 @@ if (process.env.MOON_FIXTURE_ARGS_OUTPUT) fs.appendFileSync(process.env.MOON_FIX
   });
 
   afterAll(() => {
+    if (originalMoonWorkspaceRoot === undefined) {
+      delete process.env.MOON_WORKSPACE_ROOT;
+    } else {
+      process.env.MOON_WORKSPACE_ROOT = originalMoonWorkspaceRoot;
+    }
     if (fixtureRoot) rmSync(fixtureRoot, { recursive: true, force: true });
   });
 

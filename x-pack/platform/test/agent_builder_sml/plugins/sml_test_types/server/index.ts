@@ -7,8 +7,14 @@
 
 import type { PluginInitializer } from '@kbn/core/server';
 import type { SetupDependencies } from './plugin';
+import type { StartDependencies } from './service_account_binding_route';
 
-export const plugin: PluginInitializer<void, void, SetupDependencies> = async () => {
+export const plugin: PluginInitializer<
+  void,
+  void,
+  SetupDependencies,
+  StartDependencies
+> = async () => {
   const { SmlTestTypesPlugin } = await import('./plugin');
   return new SmlTestTypesPlugin();
 };

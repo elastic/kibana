@@ -9,13 +9,11 @@ import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { ContextLandingPage } from './context_landing_page';
 import { AiIndexDetailPage } from './pages/ai_index_detail_page';
-import { CreateAiIndexPage } from './pages/create_ai_index_page';
 import { KiPage } from './pages/ki_page';
 import { CONTEXT_ENGINE_PATHS } from './paths';
 
 export const ContextEngineRoutes = () => (
   <Routes>
-    <Route path={CONTEXT_ENGINE_PATHS.create} exact component={CreateAiIndexPage} />
     <Route
       path={[CONTEXT_ENGINE_PATHS.viewKi, CONTEXT_ENGINE_PATHS.viewKiDocument]}
       exact

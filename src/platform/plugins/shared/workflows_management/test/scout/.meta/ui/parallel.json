@@ -1,5 +1,5 @@
 {
-  "sha1": "330aab19708c778cdc5fa7902a2992ad1d26dad9",
+  "sha1": "6f744cd0a6ffb85f5c9855c1de0c4c43dd9cdbf6",
   "testChannels": [
     "ci-on-commit"
   ],
@@ -1194,6 +1194,20 @@
         "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
         "line": 64,
         "column": 23
+      }
+    },
+    {
+      "id": "41c034019daea35-426ba8b5bfd4825",
+      "title": "WorkflowsList/FilterSortSearch should rank the exact hyphenated name first",
+      "expectedStatus": "passed",
+      "tags": [
+        "@local-stateful-classic",
+        "@cloud-stateful-classic"
+      ],
+      "location": {
+        "file": "src/platform/plugins/shared/workflows_management/test/scout/ui/parallel_tests/workflows_list/filter_sort_search.spec.ts",
+        "line": 116,
+        "column": 18
       }
     },
     {

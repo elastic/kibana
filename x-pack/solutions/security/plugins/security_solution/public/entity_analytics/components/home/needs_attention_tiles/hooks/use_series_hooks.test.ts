@@ -58,6 +58,8 @@ const DOTS = Array.from({ length: DOT_COUNT }, (_, i) => 10 + i);
 
 interface TileGate {
   count: number;
+  /** False for a count that failed or timed out; true when left out. */
+  hasCount?: boolean;
   reachesBack: boolean | undefined;
   /** The count the tile's delta compares with; undefined when it has no delta. */
   deltaBaseline?: number;
@@ -108,6 +110,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: severe.reachesBack,
+          hasCount: severe.hasCount ?? true,
           severeAlertsCount: severe.count,
           watchlistedCount: watchlisted.count,
           severeAlertsBaseline: severe.deltaBaseline,
@@ -134,6 +137,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: tile.reachesBack,
+          hasCount: tile.hasCount ?? true,
           count: tile.count,
           deltaBaseline: tile.deltaBaseline,
         })
@@ -158,6 +162,7 @@ const HOOKS: readonly HookCase[] = [
           skip,
           entityFilters,
           reachesBack: tile.reachesBack,
+          hasCount: tile.hasCount ?? true,
           count: tile.count,
           deltaBaseline: tile.deltaBaseline,
         })
@@ -189,6 +194,8 @@ const HOOKS: readonly HookCase[] = [
           entityFilters,
           riskMoversReachesBack: riskMovers.reachesBack,
           newlyHighCriticalReachesBack: newlyHighCritical.reachesBack,
+          riskMoversHasCount: riskMovers.hasCount ?? true,
+          newlyHighCriticalHasCount: newlyHighCritical.hasCount ?? true,
           riskMoversCount: riskMovers.count,
           newlyHighCriticalCount: newlyHighCritical.count,
           riskMoversBaseline: riskMovers.deltaBaseline,
@@ -270,11 +277,22 @@ describe('series hooks', () => {
       expect(isEnabled()).toBe(false);
     });
 
-    it.each([
-      ['the history is too short', { count: 4, reachesBack: false }],
-      ['the count is 0', { count: 0, reachesBack: true }],
-    ])('leaves the lines out, with no spinner and no query, when %s', (_reason, tile) => {
-      expect(runAll(hook, tile)).toEqual(NO_LINES(hook));
+    it('leaves the lines out, with no spinner and no query, when the history is too short', () => {
+      expect(runAll(hook, { count: 4, reachesBack: false })).toEqual(NO_LINES(hook));
+      expect(isEnabled()).toBe(false);
+    });
+
+    it('runs for a count of 0 too, so a drop to 0 keeps its line', () => {
+      runAll(hook, { count: 0, reachesBack: true });
+      expect(isEnabled()).toBe(true);
+    });
+
+    it('leaves the lines out when the count did not come back, although a cached history reaches back', () => {
+      // The history check is cached across filter changes, so `reachesBack` can be true for a count
+      // that has since timed out; its series must not run.
+      expect(runAll(hook, { count: 0, hasCount: false, reachesBack: true })).toEqual(
+        NO_LINES(hook)
+      );
       expect(isEnabled()).toBe(false);
     });
 
@@ -298,7 +316,7 @@ describe('series hooks', () => {
       expect(run(hook)).toEqual(NO_LINES(hook));
     });
 
-    it('sends one query and reads the dots of each tile from its own columns', async () => {
+    it('sends one query, in the local project only, and reads the dots of each tile from its own columns', async () => {
       const columns = hook.columns.flatMap((column, t) =>
         Array.from({ length: DOT_COUNT }, (_, k) => ({ name: column(k), value: 1000 * t + k }))
       );
@@ -314,8 +332,13 @@ describe('series hooks', () => {
       expect(mockUseQuery).toHaveBeenCalledTimes(1);
       const [key, queryFn] = lastCall();
       expect(key[0]).toBe(hook.tileKey);
+      const parsed = await queryFn({ signal: undefined });
+      expect(mockSearch).toHaveBeenCalledWith(
+        { params: { query: key[1] } },
+        expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
+      );
       // Oldest first: the first dot is column 5 of the tile, the last is column 0.
-      hook.fromParsed(await queryFn({ signal: undefined })).forEach((dots, t) => {
+      hook.fromParsed(parsed).forEach((dots, t) => {
         expect(dots[0]).toBe(1000 * t + DOT_COUNT - 1);
         expect(dots[DOT_COUNT - 1]).toBe(1000 * t);
       });
@@ -333,28 +356,46 @@ describe('series hooks', () => {
   });
 
   describe.each(TWO_TILE_HOOKS)('$name: two tiles in one query', (hook) => {
-    it('hides only the tile whose count is 0, and runs while the other has a count', () => {
+    it('draws a line for a tile whose count is 0 too, ending on 0', () => {
       mockUseQuery.mockReturnValue(queryResult({ data: hook.toQueryData(dotsOfTiles(hook)) }));
       const [first, second] = settledTiles(hook);
 
       const firstZero = run(hook, { tiles: [{ ...first, count: 0 }, second] });
       expect(isEnabled()).toBe(true);
-      expect(firstZero.trends[0]).toBeUndefined();
+      expect(firstZero.trends[0]?.[DOT_COUNT - 1]).toBe(0);
       expect(firstZero.trends[1]?.[DOT_COUNT - 1]).toBe(second.count);
 
       const secondZero = run(hook, { tiles: [first, { ...second, count: 0 }] });
       expect(isEnabled()).toBe(true);
       expect(secondZero.trends[0]?.[DOT_COUNT - 1]).toBe(first.count);
-      expect(secondZero.trends[1]).toBeUndefined();
+      expect(secondZero.trends[1]?.[DOT_COUNT - 1]).toBe(0);
     });
 
-    it('does not run when both counts are 0', () => {
-      expect(runAll(hook, { count: 0, reachesBack: true })).toEqual(NO_LINES(hook));
-      expect(isEnabled()).toBe(false);
+    it('runs when both counts are 0', () => {
+      runAll(hook, { count: 0, reachesBack: true });
+      expect(isEnabled()).toBe(true);
     });
   });
 
   describe('risk', () => {
+    it('hides only the tile whose count did not come back, and runs for the other', () => {
+      mockUseQuery.mockReturnValue(queryResult({ data: RISK.toQueryData(dotsOfTiles(RISK)) }));
+      const [movers, newlyHigh] = settledTiles(RISK);
+
+      const moversNoCount = run(RISK, { tiles: [{ ...movers, hasCount: false }, newlyHigh] });
+      expect(isEnabled()).toBe(true);
+      expect(moversNoCount.trends[0]).toBeUndefined();
+      expect(moversNoCount.trends[1]?.[DOT_COUNT - 1]).toBe(newlyHigh.count);
+
+      run(RISK, {
+        tiles: [
+          { ...movers, hasCount: false },
+          { ...newlyHigh, hasCount: false },
+        ],
+      });
+      expect(isEnabled()).toBe(false);
+    });
+
     it('hides only the tile whose own history is too short, and runs while the other reaches back', () => {
       mockUseQuery.mockReturnValue(queryResult({ data: RISK.toQueryData(dotsOfTiles(RISK)) }));
       const [movers, newlyHigh] = settledTiles(RISK);
@@ -389,28 +430,6 @@ describe('series hooks', () => {
       mockJobs.mockReturnValue({ jobIds: ['job_a'], loading: true });
       run(ANOMALIES);
       expect(isEnabled()).toBe(false);
-    });
-  });
-
-  describe('new entity', () => {
-    it('runs on the local cluster only, like the count', async () => {
-      mockSearch.mockReturnValue(
-        of({
-          rawResponse: {
-            columns: Array.from({ length: DOT_COUNT }, (_, k) => ({
-              name: NEW_ENTITY.columns[0](k),
-            })),
-            values: [Array.from({ length: DOT_COUNT }, () => 0)],
-          },
-        })
-      );
-      run(NEW_ENTITY);
-      const [key, queryFn] = lastCall();
-      await queryFn({ signal: undefined });
-      expect(mockSearch).toHaveBeenCalledWith(
-        { params: { query: key[1] } },
-        expect.objectContaining({ strategy: 'esql_async', projectRouting: '_alias:_origin' })
-      );
     });
   });
 });

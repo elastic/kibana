@@ -132,12 +132,16 @@ const loadAlertsInputSchema = z.object({
   alert_ids: z.array(idSchema).min(1).max(100).describe('Alerts of one triage batch.'),
 });
 
-const loadAlertsOutputSchema = z.object({
-  alerts: z
-    .array(z.record(z.string(), z.unknown()))
-    .describe('Alert documents with `_id` and `_index`, in the shape Alert Analysis takes.'),
-  missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
-});
+const loadAlertsOutputSchema = lazySchema(() =>
+  z.object({
+    alerts: z
+      .array(z.record(z.string(), z.unknown()))
+      .describe(
+        'Alerts with `_id`, `_index` and the fields Alert Analysis and the pattern keys read, in the shape Alert Analysis takes.'
+      ),
+    missing_alert_ids: z.array(z.string()).describe('Ids that no longer match an alert.'),
+  })
+);
 
 export const triageLoadAlertsStepCommonDefinition: CommonStepDefinition<
   typeof loadAlertsInputSchema,
