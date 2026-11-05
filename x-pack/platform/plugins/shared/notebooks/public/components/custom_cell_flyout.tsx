@@ -418,14 +418,12 @@ export const CustomCellFlyout = ({
             }
           />
           <EuiSpacer size="s" />
-          <EuiFormRow
-            fullWidth
-            label={i18n.translate('xpack.notebook.customCell.flyout.source', {
-              defaultMessage: 'Source',
-            })}
-          >
+          <EuiFormRow fullWidth>
             <EuiSelect
               fullWidth
+              aria-label={i18n.translate('xpack.notebook.customCell.flyout.source', {
+                defaultMessage: 'Source',
+              })}
               hasNoInitialSelection={!isQuery && !draft.sourceCell}
               value={isQuery ? CUSTOM_QUERY : draft.sourceCell ?? ''}
               options={[
