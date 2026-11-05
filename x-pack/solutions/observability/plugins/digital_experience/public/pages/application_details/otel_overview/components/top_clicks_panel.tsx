@@ -45,7 +45,7 @@ export function TopClicksPanel({
               <EuiBadge color="hollow">{tagName}</EuiBadge>
             </EuiFlexItem>
           )}
-          <EuiFlexItem css={{ minWidth: 0 }} className="eui-textTruncate">
+          <EuiFlexItem className="eui-textTruncate">
             <EuiCode transparentBackground>{cssSelector}</EuiCode>
           </EuiFlexItem>
         </EuiFlexGroup>

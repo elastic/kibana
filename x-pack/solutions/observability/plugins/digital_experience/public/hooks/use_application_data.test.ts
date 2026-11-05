@@ -6,17 +6,18 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
-import { useApiClient } from '../../../hooks/use_api_client';
-import { useEnvironment } from '../../../hooks/use_environment';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { useApplicationErrors } from './use_application_errors';
+import type { ApplicationErrorsResponse } from '../../common/types/errors';
+import { useApiClient } from './use_api_client';
+import type { ApplicationRequest } from './use_application_data';
+import { useApplicationData } from './use_application_data';
+import { useEnvironment } from './use_environment';
+import { useTimeRange } from './use_time_range';
 
-jest.mock('../../../hooks/use_api_client');
-jest.mock('../../../hooks/use_environment');
-jest.mock('../../../hooks/use_time_range', () => {
+jest.mock('./use_api_client');
+jest.mock('./use_environment');
+jest.mock('./use_time_range', () => {
   return {
-    ...jest.requireActual('../../../hooks/use_time_range'),
+    ...jest.requireActual('./use_time_range'),
     useTimeRange: jest.fn(),
   };
 });
@@ -30,6 +31,17 @@ const RESPONSE: ApplicationErrorsResponse = {
 
 const timeRange = { rangeFrom: '2021-01-18T12:00:00.000Z', rangeTo: '2021-01-18T13:00:00.000Z' };
 const fetch = jest.fn();
+
+const errorsRequest: ApplicationRequest<ApplicationErrorsResponse> = (apiClient, options) => {
+  return apiClient.fetch(
+    'GET /internal/digital_experience/applications/{serviceName}/errors',
+    options
+  );
+};
+
+const useErrors = (serviceName: string) => {
+  return useApplicationData(serviceName, errorsRequest);
+};
 
 beforeEach(() => {
   jest.clearAllMocks();
@@ -45,10 +57,10 @@ beforeEach(() => {
     .mockReturnValue({ timeRange, isTimeRangeInUrl: true, setTimeRange: jest.fn() });
 });
 
-describe('useApplicationErrors', () => {
-  it('fetches the errors of the application in the time range and environment', async () => {
+describe('useApplicationData', () => {
+  it('requests the data of the application in the time range and environment', async () => {
     const { result } = renderHook(() => {
-      return useApplicationErrors('shop');
+      return useErrors('shop');
     });
 
     expect(result.current.isLoading).toBe(true);
@@ -72,7 +84,7 @@ describe('useApplicationErrors', () => {
     fetch.mockRejectedValue(new Error('Internal Server Error'));
 
     const { result } = renderHook(() => {
-      return useApplicationErrors('shop');
+      return useErrors('shop');
     });
 
     await waitFor(() => {
@@ -85,7 +97,7 @@ describe('useApplicationErrors', () => {
   it('clears the response of another application while the next one loads', async () => {
     const { result, rerender } = renderHook(
       ({ serviceName }: { serviceName: string }) => {
-        return useApplicationErrors(serviceName);
+        return useErrors(serviceName);
       },
       { initialProps: { serviceName: 'shop' } }
     );

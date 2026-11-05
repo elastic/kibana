@@ -101,7 +101,7 @@ export function SlowestResourcesPanel({
       render: (url: string, { renderBlocking }) => {
         return (
           <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-            <EuiFlexItem css={{ minWidth: 0 }}>
+            <EuiFlexItem className="eui-textTruncate">
               <TruncatedCode value={toUrlFileName(url, pageOrigin)} title={url} />
             </EuiFlexItem>
             {renderBlocking && (

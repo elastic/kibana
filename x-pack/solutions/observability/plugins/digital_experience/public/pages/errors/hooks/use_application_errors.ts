@@ -5,47 +5,23 @@
  * 2.0.
  */
 
-import { useAbortableAsync } from '@kbn/react-hooks';
 import type { ApplicationErrorsResponse } from '../../../../common/types/errors';
-import { useApiClient } from '../../../hooks/use_api_client';
-import { useEnvironment } from '../../../hooks/use_environment';
-import { useTimeRange } from '../../../hooks/use_time_range';
-import { toTimeRangeQuery } from '../../../utils/time_range_query';
+import type { ApplicationData, ApplicationRequest } from '../../../hooks/use_application_data';
+import { useApplicationData } from '../../../hooks/use_application_data';
 
-export interface ApplicationErrors {
-  response: ApplicationErrorsResponse | undefined;
-  /** True until the first response or error, and while the next one loads. */
-  isLoading: boolean;
-  error: Error | undefined;
-  refresh: () => void;
-}
+export type ApplicationErrors = ApplicationData<ApplicationErrorsResponse>;
+
+const errorsRequest: ApplicationRequest<ApplicationErrorsResponse> = (apiClient, options) => {
+  return apiClient.fetch(
+    'GET /internal/digital_experience/applications/{serviceName}/errors',
+    options
+  );
+};
 
 /**
  * The JS error groups of one application in the selected time range and environment, for the Errors
  * tab and the Overview's top errors.
  */
 export const useApplicationErrors = (serviceName: string): ApplicationErrors => {
-  const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment } = useEnvironment();
-
-  const { value, loading, error, refresh } = useAbortableAsync(
-    async ({ signal }) => {
-      return apiClient.fetch('GET /internal/digital_experience/applications/{serviceName}/errors', {
-        signal,
-        params: { path: { serviceName }, query: toTimeRangeQuery(timeRange, environment) },
-      });
-    },
-    [apiClient, serviceName, timeRange, environment],
-    // The results of another application, environment or time range are never shown as current.
-    { clearValueOnNext: true, unsetValueOnError: true }
-  );
-
-  return {
-    response: value,
-    // Nothing has been fetched before the first request starts.
-    isLoading: loading || (!value && !error),
-    error,
-    refresh,
-  };
+  return useApplicationData(serviceName, errorsRequest);
 };

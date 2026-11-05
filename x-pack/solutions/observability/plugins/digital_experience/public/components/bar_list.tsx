@@ -73,7 +73,7 @@ export function BarList({
               justifyContent="spaceBetween"
               responsive={false}
             >
-              <EuiFlexItem css={{ minWidth: 0 }}>
+              <EuiFlexItem className="eui-textTruncate">
                 <EuiText size="s" className="eui-textTruncate" title={key}>
                   {label ?? key}
                 </EuiText>

@@ -8,15 +8,13 @@
 import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useAbortableAsync } from '@kbn/react-hooks';
+import type { ApplicationNetworkResponse } from '../../../common/types/network';
 import { ApplicationTabToolbar } from '../../components/application_tab_toolbar';
 import { LoadErrorPrompt } from '../../components/load_error_prompt';
 import { NETWORK_EBT_ELEMENTS } from '../../ebt_constants';
-import { useApiClient } from '../../hooks/use_api_client';
-import { useEnvironment } from '../../hooks/use_environment';
+import type { ApplicationRequest } from '../../hooks/use_application_data';
+import { useApplicationData } from '../../hooks/use_application_data';
 import { useLastEnvironments } from '../../hooks/use_last_environments';
-import { useTimeRange } from '../../hooks/use_time_range';
-import { toTimeRangeQuery } from '../../utils/time_range_query';
 import { HttpRequestsPanel } from './components/http_requests_panel';
 import { SlowestResourcesPanel } from './components/slowest_resources_panel';
 
@@ -24,33 +22,16 @@ const FETCH_ERROR_TITLE = i18n.translate('xpack.digitalExperience.network.fetchE
   defaultMessage: 'Could not load the requests and resources',
 });
 
+const networkRequest: ApplicationRequest<ApplicationNetworkResponse> = (apiClient, options) => {
+  return apiClient.fetch(
+    'GET /internal/digital_experience/applications/{serviceName}/network',
+    options
+  );
+};
+
 /** The HTTP requests and slowest resources of one EDOT Browser application. */
 export function NetworkTab({ serviceName }: { serviceName: string }) {
-  const apiClient = useApiClient();
-  const { timeRange } = useTimeRange();
-  const { environment } = useEnvironment();
-
-  const {
-    value: response,
-    loading,
-    error,
-    refresh,
-  } = useAbortableAsync(
-    async ({ signal }) => {
-      return apiClient.fetch(
-        'GET /internal/digital_experience/applications/{serviceName}/network',
-        {
-          signal,
-          params: { path: { serviceName }, query: toTimeRangeQuery(timeRange, environment) },
-        }
-      );
-    },
-    [apiClient, serviceName, timeRange, environment],
-    // The results of another application, environment or time range are never shown as current.
-    { clearValueOnNext: true, unsetValueOnError: true }
-  );
-  // Nothing has been fetched before the first request starts.
-  const isLoading = loading || (!response && !error);
+  const { response, isLoading, error, refresh } = useApplicationData(serviceName, networkRequest);
   const environments = useLastEnvironments(serviceName, response);
   const resources = response?.slowestResources ?? [];
 

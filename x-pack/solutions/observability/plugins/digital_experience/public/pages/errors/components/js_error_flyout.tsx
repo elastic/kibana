@@ -36,6 +36,23 @@ const SESSIONS_WITH_ERRORS_LABEL = i18n.translate(
   { defaultMessage: 'View sessions with errors' }
 );
 
+/** The stack trace of an error group, or its message under a note when it has none. */
+function ErrorStacktrace({ type, message, stacktrace }: JsErrorGroup) {
+  if (stacktrace === null) {
+    return (
+      <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE}>
+        {message}
+      </KbnInfoCallout>
+    );
+  }
+  // `PlaintextStacktrace` takes no `data-test-subj`.
+  return (
+    <div data-test-subj="digitalExperienceErrorStacktrace">
+      <PlaintextStacktrace type={type} message={message ?? undefined} stacktrace={stacktrace} />
+    </div>
+  );
+}
+
 /** One error group: its counts and its stack trace, with a way to the sessions with errors. */
 export function JsErrorFlyout({
   error,
@@ -48,7 +65,11 @@ export function JsErrorFlyout({
 }) {
   const { formatNumber, formatDate } = useFormatters();
   const titleId = useGeneratedHtmlId({ prefix: 'digitalExperienceJsErrorFlyoutTitle' });
-  const { type, message, stacktrace, count, lastSeen } = error;
+  const { type, count, lastSeen } = error;
+  const details = [
+    { title: OCCURRENCES_LABEL, description: formatNumber(count) },
+    ...(lastSeen ? [{ title: LAST_SEEN_LABEL, description: formatDate(lastSeen) }] : []),
+  ];
 
   return (
     <EuiFlyout
@@ -63,28 +84,9 @@ export function JsErrorFlyout({
         </EuiTitle>
       </EuiFlyoutHeader>
       <EuiFlyoutBody>
-        <EuiDescriptionList
-          type="column"
-          compressed
-          listItems={[
-            { title: OCCURRENCES_LABEL, description: formatNumber(count) },
-            ...(lastSeen ? [{ title: LAST_SEEN_LABEL, description: formatDate(lastSeen) }] : []),
-          ]}
-        />
+        <EuiDescriptionList type="column" compressed listItems={details} />
         <EuiSpacer size="l" />
-        {stacktrace === null ? (
-          <KbnInfoCallout size="s" title={NO_STACKTRACE_TITLE}>
-            {message}
-          </KbnInfoCallout>
-        ) : (
-          <div data-test-subj="digitalExperienceErrorStacktrace">
-            <PlaintextStacktrace
-              type={type}
-              message={message ?? undefined}
-              stacktrace={stacktrace}
-            />
-          </div>
-        )}
+        <ErrorStacktrace {...error} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="flexEnd">

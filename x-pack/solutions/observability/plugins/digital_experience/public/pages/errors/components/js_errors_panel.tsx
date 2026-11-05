@@ -105,7 +105,7 @@ export function JsErrorsPanel({
       name: ERROR_LABEL,
       render: (type: string, error) => {
         return (
-          <div css={{ minWidth: 0 }}>
+          <div className="eui-textTruncate">
             <EuiLink
               onClick={() => {
                 return setSelectedKey({ type: error.type, stacktrace: error.stacktrace });
