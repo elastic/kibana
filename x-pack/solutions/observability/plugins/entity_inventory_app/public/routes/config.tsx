@@ -11,6 +11,7 @@ import { EuiText } from '@elastic/eui';
 import { createRouter, Outlet } from '@kbn/typed-react-router-config';
 import type { PathsOf, RouteMap } from '@kbn/typed-react-router-config';
 import { EntityInventoryPageShell } from '../application/components/page_shell';
+import { EntityInventoryPageFilterControls } from '../application/filters/page_filter_controls';
 import { ENTITY_LIST_PLACEHOLDER } from '../application/translations';
 import type { EntityInventoryEntityCategory } from '../types';
 
@@ -19,7 +20,10 @@ const EntityInventoryPage = ({
 }: {
   entityCategory: EntityInventoryEntityCategory;
 }) => (
-  <EntityInventoryPageShell entityCategory={entityCategory}>
+  <EntityInventoryPageShell
+    entityCategory={entityCategory}
+    secondaryControls={<EntityInventoryPageFilterControls />}
+  >
     <EuiText color="subdued" data-test-subj="entityInventoryPlaceholder">
       <p>{ENTITY_LIST_PLACEHOLDER}</p>
     </EuiText>
