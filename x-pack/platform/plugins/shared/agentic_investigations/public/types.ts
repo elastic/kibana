@@ -52,6 +52,12 @@ export interface AgenticInvestigationsPublicConfig {
 
 export interface AgenticInvestigationsPublicPluginSetup {
   registerFlyoutGroupedAttachment: RegisterFlyoutGroupedAttachment;
+  /**
+   * Registers the flyout that shows the alerts of one `source` (an alerting v2 alert's producer),
+   * so an investigation opens them where the user already is instead of the default alert flyout.
+   * Read when a subject is clicked, so the registration can be made, or finish, at any point.
+   */
+  registerAlertFlyout: (source: string, registration: AlertFlyoutRegistration) => void;
 }
 
 /** Opens the entity flyout for one impacted entity. Supplied by the solution that owns the flyout. */
@@ -77,12 +83,6 @@ export interface AlertFlyoutProps {
 }
 
 export interface AgenticInvestigationsPublicPluginStart {
-  /**
-   * Registers the flyout that shows the alerts of one `source` (an alerting v2 alert's producer),
-   * so an investigation opens them where the user already is instead of the default alert flyout.
-   * Read when a subject row renders, so the solution can register after this plugin starts.
-   */
-  registerAlertFlyout: (source: string, registration: AlertFlyoutRegistration) => void;
   /**
    * Registers the entity-flyout opener. Called from the solution's start, which runs after this
    * plugin's start, so the overview reads it when a row is clicked rather than at registration.

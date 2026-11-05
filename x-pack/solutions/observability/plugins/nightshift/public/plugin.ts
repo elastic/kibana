@@ -16,6 +16,7 @@ import {
 import { NIGHTSHIFT_APP_ID, type NightshiftLinkId } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, type Subscription } from 'rxjs';
+import type { AgenticInvestigationsPublicPluginSetup } from '@kbn/agentic-investigations-plugin/public';
 import { NIGHTSHIFT_APP_ROUTE } from '../common/constants';
 import { NightshiftSettingsLocatorDefinition } from '../common/locators';
 import { FocusedSignificantEventService } from './chat/focused_significant_event_service';
@@ -39,8 +40,8 @@ export class NightshiftPlugin
   private readonly focusedSignificantEventService = new FocusedSignificantEventService();
   private servicesSubscription?: Subscription;
   private stopped = false;
-  private ensureEbtEvents: () => Promise<void> = () => Promise.resolve();
   private ebtEventsRegistration?: Promise<void>;
+  private ensureEbtEvents: () => Promise<void> = () => Promise.resolve();
 
   constructor(private readonly context: PluginInitializerContext) {}
 
@@ -50,17 +51,25 @@ export class NightshiftPlugin
   ): NightshiftPublicSetup {
     const startServicesPromise = coreSetup.getStartServices();
     // Registered when first needed rather than in setup, so the event schemas stay out of the page
-    // load bundle. One promise, because the app and the event flyout in an investigation both
-    // report events and must not do so before registration.
+    // load bundle. One shared promise, because the app and the event flyout in an investigation both
+    // report events and must not do so before registration; a failed chunk load is not kept, so the
+    // next call retries.
     const ensureEbtEvents = (): Promise<void> => {
-      this.ebtEventsRegistration ??= import('./common/ebt_events').then(
-        ({ registerNightshiftEbtEvents }) => registerNightshiftEbtEvents(coreSetup.analytics)
-      );
+      this.ebtEventsRegistration ??= import('./common/ebt_events')
+        .then(({ registerNightshiftEbtEvents }) => registerNightshiftEbtEvents(coreSetup.analytics))
+        .catch((error) => {
+          this.ebtEventsRegistration = undefined;
+          throw error;
+        });
       return this.ebtEventsRegistration;
     };
     this.ensureEbtEvents = ensureEbtEvents;
 
     pluginsSetup.share.url.locators.create(new NightshiftSettingsLocatorDefinition());
+
+    if (pluginsSetup.agenticInvestigations) {
+      this.registerSignificantEventFlyout(pluginsSetup.agenticInvestigations, startServicesPromise);
+    }
 
     coreSetup.application.register({
       id: NIGHTSHIFT_APP_ID,
@@ -139,7 +148,6 @@ export class NightshiftPlugin
 
   start(coreStart: CoreStart, pluginsStart: NightshiftStartDependencies): NightshiftPublicStart {
     this.stopped = false;
-    this.registerSignificantEventFlyout(coreStart, pluginsStart);
     void import('./start_services')
       .then(({ startNightshiftServices }) => {
         if (this.stopped) {
@@ -162,19 +170,18 @@ export class NightshiftPlugin
 
   /**
    * Loaded with `import()` because the plugin entry is on every page's load path and the flyout is
-   * rarely opened; an investigation reads the registration when it renders, so a short delay is
-   * harmless.
+   * rarely opened. An investigation reads the registration when a subject is clicked, so it can
+   * finish after the page has loaded.
    */
   private registerSignificantEventFlyout(
-    coreStart: CoreStart,
-    pluginsStart: NightshiftStartDependencies
+    agenticInvestigations: AgenticInvestigationsPublicPluginSetup,
+    startServicesPromise: ReturnType<CoreSetup<NightshiftStartDependencies>['getStartServices']>
   ) {
-    const { agenticInvestigations } = pluginsStart;
-    if (!agenticInvestigations) {
-      return;
-    }
-    import('./components/entities/significant_event/lazy_event_flyout')
-      .then(({ registerEventFlyout }) => {
+    Promise.all([
+      import('./components/entities/significant_event/lazy_event_flyout'),
+      startServicesPromise,
+    ])
+      .then(([{ registerEventFlyout }, [coreStart, pluginsStart]]) => {
         if (!this.stopped) {
           registerEventFlyout({
             agenticInvestigations,

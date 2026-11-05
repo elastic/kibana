@@ -9,7 +9,7 @@ import React from 'react';
 import { get } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import type {
-  AgenticInvestigationsPublicPluginStart,
+  AgenticInvestigationsPublicPluginSetup,
   AlertFlyoutProps,
   AlertFlyoutRegistration,
 } from '@kbn/agentic-investigations-plugin/public';
@@ -67,7 +67,7 @@ export const registerEventFlyout = ({
   agenticInvestigations,
   ...flyoutDeps
 }: Parameters<typeof createLazyEventFlyout>[0] & {
-  agenticInvestigations: AgenticInvestigationsPublicPluginStart;
+  agenticInvestigations: AgenticInvestigationsPublicPluginSetup;
 }): void => {
   agenticInvestigations.registerAlertFlyout(
     SIGNIFICANT_EVENTS_ALERT_SOURCE,

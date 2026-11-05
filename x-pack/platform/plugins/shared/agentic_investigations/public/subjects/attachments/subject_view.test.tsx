@@ -325,6 +325,24 @@ describe('SubjectView alert with a registered flyout', () => {
     expect(navigate).not.toHaveBeenCalled();
   });
 
+  it('opens a flyout registered after the row rendered, since it decides when clicked', async () => {
+    const { services, navigate } = createShare();
+    const registry: { flyout?: () => null } = {};
+    renderView(sourceAlert, { ...services, getAlertFlyout: () => registry.flyout });
+    await waitFor(() =>
+      expect(screen.getByTestId('investigationSubject-alert')).toHaveAttribute('href')
+    );
+
+    registry.flyout = () => null;
+    const row = screen.getByTestId('investigationSubject-alert');
+    const click = createEvent.click(row, { bubbles: true, cancelable: true });
+    fireEvent(row, click);
+
+    expect(click.defaultPrevented).toBe(true);
+    expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    expect(navigate).not.toHaveBeenCalled();
+  });
+
   it('lets the browser handle a new-tab click', async () => {
     const { services, navigate } = createShare();
     renderView(sourceAlert, { ...services, getAlertFlyout: () => () => null });

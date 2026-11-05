@@ -270,11 +270,8 @@ export const SubjectRow: React.FC<{ subject: SubjectRowData; isNested?: boolean 
   isNested = false,
 }) => {
   const { href, onClick: onLinkClick, isExternal } = useSubjectLink(subject);
-  const { opensFlyout, onClick: onFlyoutClick, flyout } = useSubjectFlyout(subject, href);
+  const { onClick: onRowClick, flyout } = useSubjectFlyout(subject, href, { onLinkClick });
   const displayType = getSubjectDisplayType(subject);
-
-  // An alert opens next to the investigation; everything else keeps its link.
-  const onRowClick = opensFlyout ? onFlyoutClick : onLinkClick;
 
   return (
     <>

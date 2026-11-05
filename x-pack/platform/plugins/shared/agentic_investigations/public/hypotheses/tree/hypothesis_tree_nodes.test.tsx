@@ -167,6 +167,19 @@ describe('HypothesisTreeNode', () => {
       expect(onParentClick).not.toHaveBeenCalled();
     });
 
+    it('opens a flyout registered after the link rendered, since it decides when clicked', async () => {
+      const registry: { flyout?: () => null } = {};
+      renderNode(trigger, undefined, { getAlertFlyout: () => registry.flyout });
+
+      registry.flyout = () => null;
+      const link = screen.getByTestId('investigationHypothesisTreeTriggerLink');
+      const click = createEvent.click(link, { bubbles: true, cancelable: true });
+      fireEvent(link, click);
+
+      expect(click.defaultPrevented).toBe(true);
+      expect(await screen.findByTestId('subjectFlyoutStub')).toHaveTextContent('episode-1');
+    });
+
     it('keeps following the link for a new-tab click', () => {
       renderNode(trigger, undefined, { getAlertFlyout: () => () => null });
 

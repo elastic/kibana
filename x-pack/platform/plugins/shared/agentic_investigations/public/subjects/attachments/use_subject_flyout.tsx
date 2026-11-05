@@ -18,9 +18,10 @@ const LazySubjectDetailsFlyout = React.lazy(async () => {
 });
 
 export interface SubjectFlyout {
-  /** Whether a plain click opens the flyout, here, instead of following the subject's link. */
-  opensFlyout: boolean;
-  /** Opens the flyout on a plain click; a new-tab or new-window click keeps the browser's own. */
+  /**
+   * The click handler: opens the flyout when one can open now, else hands the click to the caller's
+   * own link. A new-tab or new-window click keeps the browser's own behavior.
+   */
   onClick: (event: React.MouseEvent) => void;
   /** The open flyout, to render next to the element that was clicked; `null` while closed. */
   flyout: React.ReactNode;
@@ -30,31 +31,40 @@ export interface SubjectFlyout {
  * The flyout an alert subject opens next to the investigation, so the user does not leave it: the
  * alert's details, or the flyout a solution registered for the alert's source. With
  * `onlyRegistered`, only that registered flyout: the caller keeps its own link for other alerts.
+ * Whether a flyout can open is decided when the link is clicked, not when it renders: a solution
+ * registers its flyout after this plugin starts, which can be after the link is on screen.
  */
 export const useSubjectFlyout = (
   subject: SubjectRowData | undefined,
   detailsHref?: string,
-  { onlyRegistered = false }: { onlyRegistered?: boolean } = {}
+  {
+    onlyRegistered = false,
+    onLinkClick,
+  }: { onlyRegistered?: boolean; onLinkClick?: (event: React.MouseEvent) => void } = {}
 ): SubjectFlyout => {
   const { services } = useKibana<SubjectServices>();
   const [isOpen, setIsOpen] = useState(false);
   const source = subject?.snapshot?.source;
-  const opensFlyout =
-    subject?.type === 'alert' &&
-    (onlyRegistered
-      ? services.getAlertFlyout?.(source, subject.snapshot) !== undefined
-      : canOpenSubjectFlyout(services, source, subject.snapshot));
   const close = useCallback(() => setIsOpen(false), []);
 
   const onClick = useCallback(
     (event: React.MouseEvent) => {
-      if (!opensFlyout || isModifiedClick(event)) {
+      const opensFlyout =
+        subject?.type === 'alert' &&
+        (onlyRegistered
+          ? services.getAlertFlyout?.(source, subject.snapshot) !== undefined
+          : canOpenSubjectFlyout(services, source, subject.snapshot));
+      if (!opensFlyout) {
+        onLinkClick?.(event);
+        return;
+      }
+      if (isModifiedClick(event)) {
         return;
       }
       event.preventDefault();
       setIsOpen(true);
     },
-    [opensFlyout]
+    [subject, source, services, onlyRegistered, onLinkClick]
   );
 
   const flyout =
@@ -71,5 +81,5 @@ export const useSubjectFlyout = (
       </React.Suspense>
     ) : null;
 
-  return { opensFlyout, onClick, flyout };
+  return { onClick, flyout };
 };

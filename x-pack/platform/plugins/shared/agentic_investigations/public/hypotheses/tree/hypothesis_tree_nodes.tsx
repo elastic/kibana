@@ -514,17 +514,13 @@ const TriggerLink = ({
   alertCount: number;
 }) => {
   const { href, onClick: onLinkClick, isExternal: isSlack } = link;
-  const {
-    opensFlyout,
-    onClick: onFlyoutClick,
-    flyout,
-  } = useSubjectFlyout(subject, href, {
+  const { onClick: onTriggerLinkClick, flyout } = useSubjectFlyout(subject, href, {
     onlyRegistered: true,
+    onLinkClick,
   });
   if (!href) {
     return null;
   }
-  const onTriggerLinkClick = opensFlyout ? onFlyoutClick : onLinkClick;
   return (
     <>
       <EuiText size="xs">

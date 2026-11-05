@@ -77,7 +77,12 @@ export class AgenticInvestigationsPublicPlugin
     registerImpactPublicStepDefinitions(workflowsExtensions);
     registerInvestigationPublicStepDefinitions(workflowsExtensions);
     registerWorkflowExecutionPublicStepDefinitions(workflowsExtensions);
-    return { registerFlyoutGroupedAttachment: this.groupedAttachments.register };
+    return {
+      registerFlyoutGroupedAttachment: this.groupedAttachments.register,
+      registerAlertFlyout: (source, registration) => {
+        this.alertFlyouts.set(source, registration);
+      },
+    };
   }
 
   start(
@@ -131,9 +136,6 @@ export class AgenticInvestigationsPublicPlugin
     return {
       registerImpactEntityOpener: (opener) => {
         this.impactEntityOpener = opener;
-      },
-      registerAlertFlyout: (source, registration) => {
-        this.alertFlyouts.set(source, registration);
       },
       InvestigationCard: LazyInvestigationCard,
     };
