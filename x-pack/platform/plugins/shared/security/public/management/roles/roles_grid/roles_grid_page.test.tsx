@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
 import React from 'react';
 
 import { MockAppHeaderProvider } from '@kbn/app-header/mocks';
@@ -27,7 +27,9 @@ const renderWithIntl = (ui: React.ReactElement) =>
 describe('<RolesGridPage />', () => {
   let apiClientMock: jest.Mocked<PublicMethodsOf<RolesAPIClient>>;
   let history: ReturnType<typeof scopedHistoryMock.create>;
-  const { userProfile, theme, i18n, analytics, notifications, rendering } = coreMock.createStart();
+  const { userProfile, theme, i18n, analytics, notifications, rendering, security } =
+    coreMock.createStart();
+  const { serviceAccounts } = security;
 
   beforeEach(() => {
     history = scopedHistoryMock.create();
@@ -82,6 +84,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -105,6 +108,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -128,6 +132,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -149,6 +154,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -189,6 +195,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
         readOnly
       />
     );
@@ -218,6 +225,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -250,6 +258,7 @@ describe('<RolesGridPage />', () => {
         theme={theme}
         userProfile={userProfile}
         rendering={rendering}
+        serviceAccounts={serviceAccounts}
       />
     );
 
@@ -257,5 +266,40 @@ describe('<RolesGridPage />', () => {
       expect(screen.getByTestId('createRoleButton')).toBeInTheDocument();
     });
     expect(screen.queryByTestId('permissionDeniedMessage')).not.toBeInTheDocument();
+  });
+
+  it('warns in the delete confirmation about the service accounts holding the role', async () => {
+    serviceAccounts.isEnabled.mockReturnValue(true);
+    serviceAccounts.findByRoles.mockResolvedValue({
+      serviceAccounts: [
+        { id: 'kibana/relay', name: 'relay', roles: ['test-role-1'], enabled: true },
+      ],
+      complete: true,
+    });
+
+    renderWithIntl(
+      <RolesGridPage
+        rolesAPIClient={apiClientMock}
+        history={history}
+        notifications={notifications}
+        i18n={i18n}
+        buildFlavor={'traditional'}
+        analytics={analytics}
+        theme={theme}
+        userProfile={userProfile}
+        rendering={rendering}
+        serviceAccounts={serviceAccounts}
+      />
+    );
+
+    // Delete isn't a primary action, so it sits in the row's collapsed actions menu.
+    const [firstRowActions] = await screen.findAllByTestId('euiCollapsedItemActionsButton');
+    fireEvent.click(firstRowActions);
+    fireEvent.click(await screen.findByTestId('delete-role-action-test-role-1'));
+
+    const callout = await screen.findByTestId('serviceAccountRoleUsageCallout');
+    expect(callout).toHaveTextContent('1 service account uses this role');
+    expect(within(callout).getByText('relay')).toBeInTheDocument();
+    expect(serviceAccounts.findByRoles).toHaveBeenCalledWith(['test-role-1']);
   });
 });

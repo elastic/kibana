@@ -109,6 +109,7 @@ export const rolesManagementApp = Object.freeze({
                 spacesApiUi={spacesApiUi}
                 buildFlavor={buildFlavor}
                 cloudOrgUrl={cloud?.organizationUrl}
+                serviceAccounts={startServices.security.serviceAccounts}
                 {...startServices}
               />
             </Breadcrumb>
@@ -136,6 +137,7 @@ export const rolesManagementApp = Object.freeze({
                         readOnly={!startServices.application.capabilities.roles.save}
                         buildFlavor={buildFlavor}
                         cloudOrgUrl={cloud?.organizationUrl}
+                        serviceAccounts={startServices.security.serviceAccounts}
                         {...startServices}
                       />
                     </Route>

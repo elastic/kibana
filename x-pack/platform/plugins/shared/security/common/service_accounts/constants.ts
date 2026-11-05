@@ -69,6 +69,15 @@ export interface ServiceAccountRoleLimits {
  */
 export const SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE = 100;
 
+/**
+ * Cap on the accounts one lookup by role examines. Past it, the lookup reports itself incomplete
+ * rather than paging on.
+ */
+export const SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED = 1000;
+
+/** Cap on the roles one lookup by role accepts. */
+export const SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_ROLES = 1000;
+
 /** Maximum roles per Elasticsearch service account. */
 export const ES_SERVICE_ACCOUNT_MAX_ROLES = 1000;
 

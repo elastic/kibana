@@ -38,6 +38,9 @@ export const buildSecurityApi = ({
       // started. Reading it earlier fails closed.
       canCreate: () => getCapabilities()?.service_accounts?.save === true,
       create: (params) => serviceAccounts.create(params),
+      findByRoles: (roles) => serviceAccounts.findByRoles(roles),
+      listWorkloads: async (serviceAccountId) =>
+        (await serviceAccounts.listWorkloads(serviceAccountId)).workloads,
     },
   };
 };

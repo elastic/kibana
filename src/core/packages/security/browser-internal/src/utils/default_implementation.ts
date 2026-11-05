@@ -20,6 +20,8 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
       isEnabled: () => false,
       canCreate: () => false,
       create: () => Promise.reject(new Error('Service accounts are disabled')),
+      findByRoles: () => Promise.reject(new Error('Service accounts are disabled')),
+      listWorkloads: () => Promise.reject(new Error('Service accounts are disabled')),
     },
   };
 };

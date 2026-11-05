@@ -39,5 +39,17 @@ describe('getDefaultSecurityImplementation', () => {
         implementation.serviceAccounts.create({ name: 'my-service-account', roles: ['viewer'] })
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
     });
+
+    it('findByRoles rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.findByRoles(['viewer'])
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
+
+    it('listWorkloads rejects', async () => {
+      await expect(
+        implementation.serviceAccounts.listWorkloads('my-service-account')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"Service accounts are disabled"`);
+    });
   });
 });
