@@ -688,6 +688,37 @@ describe('customContentEmbeddableFactory', () => {
       expect(capturedFlyoutProps?.additionalEsqlQueries).toEqual(['FROM b', 'FROM c']);
     });
 
+    it('publishes every query of the panel, so a control finds the panel by any of them', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a | WHERE x == ?host', 'FROM b | WHERE y == ?region'],
+      });
+
+      expect(embeddable.api.esql$.getValue()).toEqual([
+        { esql: 'FROM a | WHERE x == ?host' },
+        { esql: 'FROM b | WHERE y == ?region' },
+      ]);
+    });
+
+    it('removes the additional queries with the main one, so a query added later does not bring them back', async () => {
+      const { embeddable } = await buildEmbeddable({
+        ...baseState,
+        esql_query: ['FROM a', 'FROM b'],
+      });
+      await act(async () => render(<embeddable.Component />));
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave(undefined, '<div>static</div>'));
+      expect(embeddable.api.serializeState().esql_query).toBeUndefined();
+
+      await act(async () => embeddable.api.onEdit());
+      await renderFlyoutContent();
+      await act(async () => capturedFlyoutProps!.onSave('FROM c', '<div>dynamic</div>'));
+
+      expect(embeddable.api.serializeState().esql_query).toEqual(['FROM c']);
+    });
+
     it('sends the additional queries of the panel to the chat', async () => {
       const openChat = jest.fn();
       mockAgentBuilder = {

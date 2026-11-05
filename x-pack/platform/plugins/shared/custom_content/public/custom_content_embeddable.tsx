@@ -202,7 +202,11 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
     });
 
     const applyConfigUpdate = (update: { esqlQuery?: string; template?: string }) => {
-      if ('esqlQuery' in update) esqlQuery$.next(update.esqlQuery);
+      if ('esqlQuery' in update) {
+        esqlQuery$.next(update.esqlQuery);
+        // The additional queries extend the main one, so there is nothing for them to extend once it is removed.
+        if (!update.esqlQuery) additionalEsqlQueries$.next([]);
+      }
       if ('template' in update) template$.next(update.template);
     };
 
@@ -381,31 +385,29 @@ export const customContentEmbeddableFactory: EmbeddablePublicDefinition<
       isEditingEnabled: () => true,
     });
 
-    const esqlUsageSubscription = esqlQuery$
-      .pipe(
-        map((q) => (q ? [{ esql: q }] : [])),
-        distinctUntilChanged((a, b) => a.length === b.length && a[0]?.esql === b[0]?.esql)
+    // Every query of the panel, the main one first. A panel with no main query has none.
+    const queries$ = combineLatest([esqlQuery$, additionalEsqlQueries$]).pipe(
+      map(([esqlQueryValue, additionalQueries]) =>
+        esqlQueryValue ? [esqlQueryValue, ...additionalQueries] : []
+      ),
+      distinctUntilChanged(
+        (a, b) => a.length === b.length && a.every((query, index) => query === b[index])
       )
+    );
+
+    // Lets an ES|QL control find the panels whose queries use its variable, whichever query that is.
+    const esqlUsageSubscription = queries$
+      .pipe(map((queries) => queries.map((query) => ({ esql: query }))))
       .subscribe(esql$);
 
     // Important for unified search support: KQL bar and filter builder suggestions, and whether the
     // dashboard offers its time picker. Every query counts, since every query is fetched with the
     // dashboard's time range, so a data view is published for each one.
-    const dataViewsSubscription = combineLatest([
-      esqlQuery$,
-      additionalEsqlQueries$,
-      projectRouting$,
-    ])
+    const dataViewsSubscription = combineLatest([queries$, projectRouting$])
       .pipe(
-        map(([esqlQueryValue, additionalQueries, routingValue]) => ({
-          queries: esqlQueryValue ? [esqlQueryValue, ...additionalQueries] : [],
-          routingValue,
-        })),
+        map(([queries, routingValue]) => ({ queries, routingValue })),
         distinctUntilChanged(
-          (a, b) =>
-            a.routingValue === b.routingValue &&
-            a.queries.length === b.queries.length &&
-            a.queries.every((query, index) => query === b.queries[index])
+          (a, b) => a.routingValue === b.routingValue && a.queries === b.queries
         ),
         switchMap(({ queries, routingValue }) => {
           if (queries.length === 0) return of(undefined);
