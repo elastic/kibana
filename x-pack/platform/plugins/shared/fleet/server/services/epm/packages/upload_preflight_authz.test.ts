@@ -6,6 +6,7 @@
  */
 
 import type { KibanaRequest } from '@kbn/core/server';
+import { WorkflowsManagementOperationPrivileges } from '@kbn/workflows';
 
 import { KibanaAssetType } from '../../../types';
 import { FleetUnauthorizedError } from '../../../errors';
@@ -15,6 +16,7 @@ import { getWorkflowAssetsClient } from '../kibana/workflows/availability';
 
 import {
   checkUploadPackageAssetPrivileges,
+  checkWorkflowAssetPrivilegesForSpaces,
   collectArchiveSignals,
   parsePackageAndCollectSignals,
   buildRequiredActions,
@@ -1386,5 +1388,44 @@ describe('checkUploadPackageAssetPrivileges', () => {
         kibana: expect.arrayContaining(['api:rules-all', 'api:ml:canCreateJob']),
       })
     );
+  });
+});
+
+describe('checkWorkflowAssetPrivilegesForSpaces', () => {
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
+  it('checks the workflow create and managed-update privileges in every space', async () => {
+    const security = makeSecurity(true);
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(security);
+
+    await checkWorkflowAssetPrivilegesForSpaces(mockRequest, ['space-a', 'space-b']);
+
+    const atSpaces = security.authz.checkPrivilegesWithRequest.mock.results[0].value.atSpaces;
+    expect(atSpaces).toHaveBeenCalledWith(['space-a', 'space-b'], {
+      kibana: expect.arrayContaining(
+        [
+          ...WorkflowsManagementOperationPrivileges.create,
+          ...WorkflowsManagementOperationPrivileges.updateManaged,
+        ].map((name) => `api:${name}`)
+      ),
+    });
+  });
+
+  it('throws when the caller lacks the workflow privileges', async () => {
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(makeSecurity(false));
+
+    await expect(
+      checkWorkflowAssetPrivilegesForSpaces(mockRequest, ['space-a'])
+    ).rejects.toBeInstanceOf(FleetUnauthorizedError);
+  });
+
+  it('throws when the security plugin is unavailable', async () => {
+    (appContextService.getSecurity as jest.Mock).mockReturnValue(undefined);
+
+    await expect(
+      checkWorkflowAssetPrivilegesForSpaces(mockRequest, ['space-a'])
+    ).rejects.toBeInstanceOf(FleetUnauthorizedError);
   });
 });

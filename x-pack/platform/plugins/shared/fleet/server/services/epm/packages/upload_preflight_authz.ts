@@ -159,6 +159,32 @@ export function buildRequiredActions(
   return [...privilegeNames].map((name) => security.authz.actions.api.get(name));
 }
 
+/**
+ * Requires the caller to hold the workflow asset privileges an upload would require, in every space.
+ */
+export async function checkWorkflowAssetPrivilegesForSpaces(
+  request: KibanaRequest,
+  spaceIds: string[]
+): Promise<void> {
+  const security = appContextService.getSecurity();
+  if (!security) {
+    throw new FleetUnauthorizedError(
+      'Installing workflow assets from uploaded packages requires the security plugin to be enabled'
+    );
+  }
+
+  const actions = buildRequiredActions(
+    { gatedTypesFound: new Set([KibanaAssetType.workflow]), hasMlSecurityRules: false },
+    security
+  );
+  const checkResult = await security.authz
+    .checkPrivilegesWithRequest(request)
+    .atSpaces(spaceIds, { kibana: actions });
+  if (!checkResult.hasAllRequested) {
+    throw new FleetUnauthorizedError('Insufficient privileges to install workflow assets');
+  }
+}
+
 export interface CheckUploadPackageAssetPrivilegesOptions {
   request: KibanaRequest;
   archiveSignals: ArchiveSignals;
