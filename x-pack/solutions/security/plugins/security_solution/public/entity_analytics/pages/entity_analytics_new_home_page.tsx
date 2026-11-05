@@ -94,6 +94,7 @@ import { GenerateAiBriefButton } from '../components/home/ai_brief/generate_ai_b
 import { useKibana } from '../../common/lib/kibana';
 import { getRiskLevel } from '../../../common/entity_analytics/risk_engine/risk_levels';
 import { useInvalidateEntityGrid } from '../components/home/entities_grid/hooks/use_invalidate_entity_grid';
+import { useAddToWatchlistAction } from '../components/home/entities_grid/hooks/use_add_to_watchlist_action';
 import { useCanAttachToCase } from '../../cases/attachments/hooks/use_can_attach_to_case';
 import { generateEntityAttachmentsWithoutOwner } from '../../cases/attachments/entity';
 import { useIsExperimentalFeatureEnabled } from '../../common/hooks/use_experimental_features';
@@ -394,6 +395,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
   const canAttachToCase = useCanAttachToCase();
   const canAddToCase =
     entityAttachmentsEnabled && cases.config.attachmentsEnabled && canAttachToCase;
+  const { onAddToWatchlist, addToWatchlistModal } = useAddToWatchlistAction();
   const { isAgentChatExperienceEnabled } = useAgentBuilderAvailability();
   const reportAddToChat = useReportAddToChat();
   const {
@@ -565,10 +567,12 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
             });
           }
         : undefined,
+      onAddToWatchlist,
     }),
     [
       agentBuilder,
       canAddToCase,
+      onAddToWatchlist,
       selectCaseModal,
       canReadTimeline,
       euidApi,
@@ -1725,6 +1729,7 @@ const EntityAnalyticsNewHomePageContent: React.FC<{
           onEnd={productTour.endTour}
         />
       )}
+      {addToWatchlistModal}
       <SpyRoute pageName={SecurityPageName.entityAnalyticsHomePage} />
     </>
   );

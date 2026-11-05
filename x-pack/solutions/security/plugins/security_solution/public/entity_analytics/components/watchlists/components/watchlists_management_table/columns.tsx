@@ -215,19 +215,24 @@ const getActionsColumn = (
   width: COLUMN_WIDTHS.actions,
 });
 
+/** The columns that describe a watchlist, without any action, for tables that add their own. */
+export const buildWatchlistsDataColumns = (): Array<
+  EuiBasicTableColumn<WatchlistTableItemType>
+> => [
+  getWatchlistColumn(),
+  getNumberOfEntitiesColumn(),
+  getRiskScoreWeightingColumn(),
+  getSourceColumn(),
+  getLastUpdatedColumn(),
+];
+
 export const buildWatchlistsManagementTableColumns = (
   euiTheme: EuiThemeComputed,
   onEdit: (record: WatchlistTableItemType) => void,
   onDelete: (record: WatchlistTableItemType) => void,
   canWrite: boolean = true
 ): Array<EuiBasicTableColumn<WatchlistTableItemType>> => {
-  const columns: Array<EuiBasicTableColumn<WatchlistTableItemType>> = [
-    getWatchlistColumn(),
-    getNumberOfEntitiesColumn(),
-    getRiskScoreWeightingColumn(),
-    getSourceColumn(),
-    getLastUpdatedColumn(),
-  ];
+  const columns = buildWatchlistsDataColumns();
 
   if (canWrite) {
     columns.push(getActionsColumn(onEdit, onDelete));
