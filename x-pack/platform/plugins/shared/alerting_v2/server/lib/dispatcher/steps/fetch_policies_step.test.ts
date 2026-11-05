@@ -12,6 +12,7 @@ import type {
 } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service';
 import { createActionPolicySavedObjectService } from '../../services/action_policy_saved_object_service/action_policy_saved_object_service.mock';
 import { createLoggerService } from '../../services/logger_service/logger_service.mock';
+import { savedObjectNamespacesToSpaceId } from '../../space_id_to_namespace';
 import {
   createAlert,
   createDispatcherPipelineState,
@@ -27,7 +28,7 @@ const policyAttributes = (
   name: 'Policy 1',
   description: 'Test',
   enabled: true,
-  destinations: [{ type: 'workflow' as const, id: 'w1' }],
+  destinations: [{ type: 'workflow', id: 'w1' }],
   apiKey: 'decrypted-key',
   apiKeyOwner: 'elastic',
   apiKeyCreatedByUser: false,
@@ -80,7 +81,7 @@ describe('FetchPoliciesStep', () => {
    */
   const givenStoredPolicies = (docs: ActionPolicySavedObjectBulkGetItem[]) => {
     const spaceOf = (doc: ActionPolicySavedObjectBulkGetItem) =>
-      'namespaces' in doc ? doc.namespaces?.[0] ?? 'default' : 'default';
+      savedObjectNamespacesToSpaceId('namespaces' in doc ? doc.namespaces : undefined);
 
     mockFindAllVersions.mockResolvedValue(
       docs.map((doc) => ({
