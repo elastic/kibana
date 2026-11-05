@@ -39,17 +39,14 @@ export const getCombinedAttackDiscoveryPrompt = ({
   combinedMaybePartialResults: string;
   continuePrompt: string;
 }): string => {
-  // On a continuation call the alert context is intentionally omitted: re-sending
-  // the anonymized alerts together with a partial attack narrative trips the
-  // input-side content filter on some models (claude-5.5-opus). The alerts were
-  // already analyzed in the initial call; the continuation only finishes the
-  // truncated JSON.
+  const alertsContextPrompt = getAlertsContextPrompt({
+    anonymizedAlerts: anonymizedDocs,
+    attackDiscoveryPrompt: prompt,
+  });
+
   return isEmpty(combinedMaybePartialResults)
-    ? getAlertsContextPrompt({
-        anonymizedAlerts: anonymizedDocs,
-        attackDiscoveryPrompt: prompt,
-      }) // no partial results yet
-    : `${prompt}
+    ? alertsContextPrompt // no partial results yet
+    : `${alertsContextPrompt}
 
 ${continuePrompt}
 
