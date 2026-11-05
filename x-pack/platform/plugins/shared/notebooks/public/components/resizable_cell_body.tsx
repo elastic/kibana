@@ -6,12 +6,16 @@
  */
 
 import React, { useRef, useState, type KeyboardEvent, type PointerEvent } from 'react';
-import { useEuiTheme } from '@elastic/eui';
+import { EuiResizableButton } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 
 const KEYBOARD_STEP = 20;
 const KEYBOARD_LARGE_STEP = 100;
+
+const handleCss = css`
+  position: relative;
+`;
 
 const RESIZE_LABEL = i18n.translate('xpack.notebook.resizableCellBody.handleLabel', {
   defaultMessage: 'Resize cell',
@@ -30,31 +34,30 @@ export const ResizableCellBody = ({
   children,
   'data-test-subj': dataTestSubj,
 }: ResizableCellBodyProps) => {
-  const { euiTheme } = useEuiTheme();
   const [chosenHeight, setChosenHeight] = useState<number>();
   const drag = useRef<{ startY: number; startHeight: number }>();
   const height = Math.max(chosenHeight ?? defaultHeight, defaultHeight);
 
   const resizeTo = (next: number) => setChosenHeight(Math.max(Math.round(next), defaultHeight));
 
-  const onPointerDown = (event: PointerEvent<HTMLDivElement>) => {
+  const onPointerDown = (event: PointerEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.currentTarget.setPointerCapture(event.pointerId);
     drag.current = { startY: event.clientY, startHeight: height };
   };
 
-  const onPointerMove = (event: PointerEvent<HTMLDivElement>) => {
+  const onPointerMove = (event: PointerEvent<HTMLButtonElement>) => {
     if (!drag.current) return;
     const { startY, startHeight } = drag.current;
     resizeTo(startHeight + event.clientY - startY);
   };
 
-  const onPointerUp = (event: PointerEvent<HTMLDivElement>) => {
+  const onPointerUp = (event: PointerEvent<HTMLButtonElement>) => {
     event.currentTarget.releasePointerCapture(event.pointerId);
     drag.current = undefined;
   };
 
-  const onKeyDown = (event: KeyboardEvent<HTMLDivElement>) => {
+  const onKeyDown = (event: KeyboardEvent<HTMLButtonElement>) => {
     const step = event.shiftKey ? KEYBOARD_LARGE_STEP : KEYBOARD_STEP;
     if (event.key === 'ArrowDown') {
       event.preventDefault();
@@ -68,30 +71,6 @@ export const ResizableCellBody = ({
     }
   };
 
-  const handleCss = css`
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: ${euiTheme.size.m};
-    cursor: row-resize;
-    touch-action: none;
-    border-radius: ${euiTheme.border.radius.small};
-
-    &::after {
-      content: '';
-      width: ${euiTheme.size.xl};
-      height: ${euiTheme.size.xxs};
-      border-radius: ${euiTheme.border.radius.small};
-      background-color: ${euiTheme.colors.borderBaseProminent};
-    }
-
-    &:hover::after,
-    &:focus-visible::after,
-    &:active::after {
-      background-color: ${euiTheme.colors.vis.euiColorVis0};
-    }
-  `;
-
   return (
     <div>
       <div
@@ -103,13 +82,9 @@ export const ResizableCellBody = ({
       >
         {children}
       </div>
-      <div
-        role="separator"
-        aria-orientation="horizontal"
+      <EuiResizableButton
+        indicator="border"
         aria-label={RESIZE_LABEL}
-        aria-valuemin={defaultHeight}
-        aria-valuenow={height}
-        tabIndex={0}
         css={handleCss}
         onPointerDown={onPointerDown}
         onPointerMove={onPointerMove}
