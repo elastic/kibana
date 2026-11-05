@@ -83,13 +83,13 @@ jest.mock('./concurrency/concurrency_manager', () => ({
   })),
 }));
 
-const mockDiscardUnstartedExecution = jest.fn().mockResolvedValue(undefined);
+const mockUpdateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockCreateWorkflowExecution = jest.fn().mockResolvedValue(undefined);
 const mockGetWorkflowExecutionById = jest.fn().mockResolvedValue(null);
 jest.mock('./repositories/workflow_execution_repository', () => ({
   WorkflowExecutionRepository: jest.fn().mockImplementation(() => ({
     createWorkflowExecution: mockCreateWorkflowExecution,
-    discardUnstartedExecution: mockDiscardUnstartedExecution,
+    updateWorkflowExecution: mockUpdateWorkflowExecution,
     getWorkflowExecutionById: mockGetWorkflowExecutionById,
   })),
 }));
@@ -284,7 +284,10 @@ describe('workflow:scheduled task runner', () => {
       })
     );
     await expect(runner.run()).rejects.toThrow('Workflow is disabled');
-    expect(mockDiscardUnstartedExecution).toHaveBeenCalledWith(expect.any(String), spaceId);
+    expect(mockUpdateWorkflowExecution).toHaveBeenCalledWith(
+      expect.objectContaining({ status: ExecutionStatus.SKIPPED, cancelledBy: 'system' }),
+      { refresh: 'wait_for' }
+    );
     expect(mockRunWorkflow).not.toHaveBeenCalled();
   });
 
