@@ -8,9 +8,11 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { HttpHandler } from '@kbn/core/public';
 import { agentBuilderDefaultAgentId } from '@kbn/agent-builder-common';
+import type { PromptRequest } from '@kbn/agent-builder-common/agents';
+import type { AttachmentInput } from '@kbn/agent-builder-common/attachments';
 import pRetry from 'p-retry';
 
-type Messages = { message: string }[];
+type Messages = Array<{ message: string; prompts?: PromptRequest[] }>;
 
 /** Maximum number of auto-confirm continuation calls per turn. */
 const MAX_AUTO_CONFIRM_ROUNDS = 3;
@@ -30,6 +32,7 @@ interface ConverseFunctionParams {
   messages: Messages;
   conversationId?: string;
   options?: Options;
+  attachments?: AttachmentInput[];
 }
 
 interface AgentBuilderConverseApiResponse {
@@ -106,14 +109,14 @@ export class AgentBuilderEvaluationChatClient {
     return autoPrompts;
   };
 
-  converse: ConverseFunction = async ({ messages, conversationId, options = {} }) => {
+  converse: ConverseFunction = async ({ messages, conversationId, attachments, options = {} }) => {
     this.log.info('Calling converse');
 
     const { agentId = agentBuilderDefaultAgentId, autoConfirm = false } = options;
 
     const callConverseApi = async (): Promise<{
       conversationId?: string;
-      messages: { message: string }[];
+      messages: Messages;
       errors: any[];
       steps?: any[];
       traceId?: string;
@@ -126,6 +129,7 @@ export class AgentBuilderEvaluationChatClient {
           connector_id: this.connectorId,
           conversation_id: conversationId,
           input: messages[messages.length - 1].message,
+          attachments,
         }),
       });
       const chatResponse = chatResponseRaw as AgentBuilderConverseApiResponse;
