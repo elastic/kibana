@@ -25,6 +25,7 @@ import { useNotebookServices } from '../services';
 import { AddCellBar } from './add_cell_bar';
 import { CellFilterControls, CellFilterSummary } from './cell_filter_controls';
 import { ChartCell } from './chart_cell';
+import { CodeCell } from './code_cell';
 import { CustomCell } from './custom_cell';
 import { EsqlCell } from './esql_cell';
 import { InputCell } from './input_cell';
@@ -48,6 +49,8 @@ const CellView = ({ cell }: { cell: CellDefinition }) => {
       return <ChartCell cell={cell} />;
     case 'custom':
       return <CustomCell cell={cell} />;
+    case 'code':
+      return <CodeCell cell={cell} />;
     case 'markdown':
       return <MarkdownCell cell={cell} />;
     case 'input':

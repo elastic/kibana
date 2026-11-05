@@ -48,6 +48,12 @@ const FILTER_TYPES: ReadonlyArray<{ type: CellType; label: string }> = [
     label: i18n.translate('xpack.notebook.cellFilter.type.custom', { defaultMessage: 'Custom' }),
   },
   {
+    type: 'code',
+    label: i18n.translate('xpack.notebook.cellFilter.type.code', {
+      defaultMessage: 'JavaScript',
+    }),
+  },
+  {
     type: 'markdown',
     label: i18n.translate('xpack.notebook.cellFilter.type.markdown', {
       defaultMessage: 'Markdown',

@@ -64,6 +64,7 @@ type CellDefinition =
   | { id: string; name: string; type: 'esql'; runMode: RunMode; query: string }
   | { id: string; name: string; type: 'chart'; runMode: RunMode; sourceCell: string /* cell id */; lensAttributes: LensAttributes; height?: number }
   | { id: string; name: string; type: 'markdown'; content: string }
+  | { id: string; name: string; type: 'code'; runMode: RunMode; code: string /* JavaScript, max 100,000 chars */ }
   | { id: string; name: string; type: 'input'; input: InputDefinition };
 
 type InputDefinition =
@@ -100,6 +101,7 @@ Cells reference each other by name in text, Hex-style. Edges are derived from:
 - **Dropdown input** → named `?param`s in its `optionsQuery` (typically `?_tstart`/`?_tend`).
 - **Chart cell** → `sourceCell` (by **id**, chosen from a Source dropdown listing ES|QL cells by name).
 - **Markdown** → none (static). Stretch: `{{name}}` / `{{name.column}}` references parsed from `content`.
+- **Code cell** → every free identifier in `code` that matches an exposed name (input params, ES|QL cell names, other code cells' exports). A lightweight tokenizer skips comments, strings, template text, property access (`a.b`) and object keys; it is not a full parser.
 
 Param names exposed by inputs:
 
@@ -109,6 +111,7 @@ Param names exposed by inputs:
 | Unpinned time (stretch) | `?<name>_start`, `?<name>_end` |
 | Dropdown | `?<name>` |
 | Range | `?<name>_min`, `?<name>_max` |
+| Code cell | one name per `export` (fixed: renamed only by editing the code) |
 
 Name rules: unique per notebook, match `[a-z][a-z0-9_]*` (leading `_` reserved), and the set of exposed param names must be collision-free (e.g. range `bytes` conflicts with a dropdown named `bytes_min`). `?` appears only inside ES|QL; everywhere else (markdown, future JS) references are bare names.
 
@@ -146,6 +149,15 @@ A plain class over the store, injected with `runQuery` so it is unit-testable wi
 
 - All present → keep user config (including flyout edits) and inject the new table. Every source re-run re-renders all of its charts (input hashing only; see the output-hashing stretch goal).
 - Any missing → re-run suggestions with the same chart type and show a "Chart regenerated: columns changed" notice. Added columns never trigger a re-suggest.
+
+## JavaScript code cells
+
+Observable-style cells that run plain JavaScript in the page (POC: no sandbox, no TypeScript).
+
+- **Inputs** are injected as top-level `const`s, only for the names the code references: input params by value, ES|QL cells as arrays of row objects keyed by column name, and other code cells' exports by value. Reassigning one throws; declaring the same name in the cell shadows it.
+- **Exports** (`export const|let|var|function|class`, `export { a, b as c }`) become the cell's outputs under exactly those names. `export default` is an error. String, number and `null` exports also bind as ES|QL `?params`, and every export is available to markdown interpolation.
+- The body runs as an async function, so top-level `await` works. `console.log|info|warn|error|debug` calls are captured (and still forwarded to the browser console) and shown with the exports in the cell preview; an error keeps the logs written before it.
+- Edits run on Run/Cmd+Enter, like ES|QL. `memoKey = objectHash({ code, parents })`, where an input parent contributes its value and other parents their own `memoKey`.
 
 ## Running ES|QL
 

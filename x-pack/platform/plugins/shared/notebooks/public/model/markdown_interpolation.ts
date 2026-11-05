@@ -18,7 +18,7 @@ export interface MarkdownValue {
 
 /** What `{{…}}` references resolve against. */
 export interface MarkdownScope {
-  /** Input outputs by name. */
+  /** Input values and code exports by name. */
   params: Readonly<Record<string, MarkdownValue>>;
   /** ES|QL results by output name; undefined while the cell has none. */
   tables: Readonly<Record<string, Datatable | undefined>>;
@@ -86,7 +86,7 @@ export const interpolateMarkdown = (
 const getReferencedNames = (content: string): Set<string> =>
   new Set([...content.matchAll(REFERENCE)].map(([, name]) => name));
 
-/** Ids of the input and ES|QL cells whose outputs a note references. */
+/** Ids of the input, ES|QL and code cells whose outputs a note references. */
 export const getReferencedCellIds = (
   content: string,
   cells: Readonly<Record<string, CellDefinition>>
@@ -96,7 +96,7 @@ export const getReferencedCellIds = (
   return Object.values(cells)
     .filter(
       (cell) =>
-        (cell.type === 'input' || cell.type === 'esql') &&
+        (cell.type === 'input' || cell.type === 'esql' || cell.type === 'code') &&
         getCellOutputs(cell).some(({ name }) => names.has(name))
     )
     .map(({ id }) => id);
@@ -114,6 +114,13 @@ export const toMarkdownScope = (
     if (cell.type === 'esql') {
       const [{ name }] = getCellOutputs(cell);
       tables[name] = output?.kind === 'table' ? output.table : undefined;
+      return;
+    }
+    if (cell.type === 'code') {
+      if (output?.kind !== 'code') return;
+      Object.entries(output.values).forEach(([name, value]) => {
+        params[name] = { value };
+      });
       return;
     }
     if (cell.type !== 'input' || output?.kind !== 'input') return;

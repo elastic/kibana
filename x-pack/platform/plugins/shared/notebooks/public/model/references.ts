@@ -13,6 +13,7 @@ import type {
   CustomCellDefinition,
   InputCellDefinition,
 } from '../../common/types';
+import { getCodeExports, getCodeReferences, renameCodeReference } from './code_cell';
 
 /** Cell names must match this; a leading `_` is reserved for built-in params such as `_tstart`. */
 export const CELL_NAME_PATTERN = /^[a-z][a-z0-9_]*$/;
@@ -31,7 +32,7 @@ export const getQueryParamNames = (query: string): string[] => {
 export interface CellOutput {
   key: CellOutputKey;
   name: string;
-  /** The global time picker's `_tstart` and `_tend` cannot be renamed. */
+  /** The global time picker's `_tstart` and `_tend`, and code exports, cannot be renamed. */
   isFixed: boolean;
 }
 
@@ -43,6 +44,13 @@ const getDefaultOutputs = (cell: CellDefinition): CellOutput[] => {
     isFixed: false,
   });
   if (cell.type === 'esql') return [{ key: 'table', name, isFixed: false }];
+  if (cell.type === 'code') {
+    return getCodeExports(cell.code).map((exported) => ({
+      key: `export:${exported}`,
+      name: exported,
+      isFixed: true,
+    }));
+  }
   if (cell.type !== 'input') return [];
   const { input } = cell;
   switch (input.kind) {
@@ -122,6 +130,10 @@ export const getOwnQuery = ({ dataSource, query = '' }: CustomCellDefinition): s
   dataSource === 'query' ? query : undefined;
 
 const renameCellParam = (cell: CellDefinition, from: string, to: string): CellDefinition => {
+  if (cell.type === 'code') {
+    const code = renameCodeReference(cell.code, from, to);
+    return code === cell.code ? cell : { ...cell, code };
+  }
   if (cell.type === 'esql' || (cell.type === 'custom' && cell.query !== undefined)) {
     const current = cell.query ?? '';
     const query = renameQueryParam(current, from, to);
@@ -170,7 +182,9 @@ export const renameOutput = (
   const rewritten = Object.fromEntries(
     Object.entries({ ...cells, [cell.id]: renamed }).map(([id, other]) => [
       id,
-      current.key === 'table' ? other : renameCellParam(other, current.name, name),
+      current.key === 'table' && other.type !== 'code'
+        ? other
+        : renameCellParam(other, current.name, name),
     ])
   );
   return { cells: rewritten };
@@ -182,6 +196,7 @@ export const getCellDisplayName = ({ label, name }: CellDefinition): string => l
 /** Param names a cell consumes. */
 export const getCellParamNames = (cell: CellDefinition): string[] => {
   if (cell.type === 'esql') return getQueryParamNames(cell.query);
+  if (cell.type === 'code') return getCodeReferences(cell.code);
   if (cell.type === 'custom') {
     const query = getOwnQuery(cell);
     return query === undefined ? [] : getQueryParamNames(query);

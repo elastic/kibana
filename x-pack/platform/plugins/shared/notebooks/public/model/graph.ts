@@ -111,8 +111,12 @@ export const buildGraph = (
 
   const exposers = new Map<string, string[]>();
   executable.forEach((cell) => {
-    if (cell.type !== 'input') return;
-    getExposedParamNames(cell).forEach((param) => {
+    if (cell.type !== 'input' && cell.type !== 'code') return;
+    const exposed =
+      cell.type === 'input'
+        ? getExposedParamNames(cell)
+        : getCellOutputs(cell).map(({ name }) => name);
+    exposed.forEach((param) => {
       exposers.set(param, [...(exposers.get(param) ?? []), cell.id]);
     });
   });
@@ -129,8 +133,7 @@ export const buildGraph = (
   );
   const outputsByName = groupBy(outputs, ({ name }) => name);
   outputs.forEach(({ cellId, name, isFixed }) => {
-    if (isFixed) return;
-    const invalid = getOutputNameError(name);
+    const invalid = isFixed ? undefined : getOutputNameError(name);
     if (invalid) addError(cellId, invalid);
     if ((outputsByName.get(name) ?? []).length > 1) {
       addError(cellId, `More than one output is named "${name}"`);
@@ -139,6 +142,16 @@ export const buildGraph = (
 
   const parents = new Map<string, string[]>();
   executable.forEach((cell) => {
+    if (cell.type === 'code') {
+      const providers = getCellParamNames(cell).flatMap((name) =>
+        (outputsByName.get(name) ?? []).map(({ cellId }) => cellId)
+      );
+      parents.set(
+        cell.id,
+        [...new Set(providers)].filter((id) => id !== cell.id)
+      );
+      return;
+    }
     if (cell.type === 'chart' || (cell.type === 'custom' && getOwnQuery(cell) === undefined)) {
       const { sourceCell } = cell;
       const source = sourceCell === null ? undefined : cells[sourceCell];

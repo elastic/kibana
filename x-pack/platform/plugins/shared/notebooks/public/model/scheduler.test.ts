@@ -10,6 +10,7 @@ import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type {
   CellDefinition,
   ChartCellDefinition,
+  CodeCellDefinition,
   EsqlCellDefinition,
   InputCellDefinition,
   InputDefinition,
@@ -96,6 +97,14 @@ const input = (id: string, definition: InputDefinition): InputCellDefinition => 
   name: id,
   type: 'input',
   input: definition,
+});
+
+const code = (id: string, source: string): CodeCellDefinition => ({
+  id,
+  name: id,
+  type: 'code',
+  runMode: 'auto',
+  code: source,
 });
 
 const pinnedTime = (id: string, from = 'now-15m', to = 'now') =>
@@ -1000,6 +1009,59 @@ describe('NotebookScheduler', () => {
       expect(env.runtime('bytes').lastRunAt).toBeUndefined();
       expect(env.runtime('static_choice').lastRunAt).toBeUndefined();
       expect(env.runtime('os').lastRunAt).toEqual(expect.any(Number));
+    });
+  });
+
+  describe('code cells', () => {
+    it('reads inputs and ES|QL rows as constants and feeds its exports to ES|QL params', async () => {
+      const env = track(
+        setup([
+          dropdown('country', '', 'CA'),
+          esql('visits', 'FROM logs'),
+          code(
+            'summary',
+            'export const total = visits.length;\nexport const label = `${country}: ${total}`;'
+          ),
+          esql('top', 'FROM logs | LIMIT ?total'),
+        ])
+      );
+      env.fake.setRows('FROM logs', [{ host: 'a' }, { host: 'b' }]);
+      await env.open();
+
+      expect(env.runtime('summary')).toMatchObject({
+        status: 'done',
+        output: { kind: 'code', values: { total: 2, label: 'CA: 2' }, logs: [] },
+      });
+      expect(env.fake.callsFor('FROM logs | LIMIT ?total').map(({ params }) => params)).toEqual([
+        { total: 2 },
+      ]);
+    });
+
+    it('re-runs when an input it reads changes, and keeps logs written before an error', async () => {
+      jest.spyOn(console, 'log').mockImplementation(() => {});
+      const env = track(
+        setup([
+          dropdown('country', '', 'CA'),
+          code(
+            'check',
+            "console.log('country', country);\nif (country === 'US') throw new Error('no US');"
+          ),
+        ])
+      );
+      await env.open();
+      expect(env.runtime('check')).toMatchObject({
+        status: 'done',
+        output: { logs: [{ level: 'log', message: 'country CA' }] },
+      });
+
+      env.store.setInputValue('country', { kind: 'dropdown', value: 'US' });
+      await env.scheduler.whenIdle();
+      expect(env.runtime('check')).toMatchObject({
+        status: 'error',
+        error: 'no US',
+        output: { logs: [{ level: 'log', message: 'country US' }] },
+      });
+      jest.restoreAllMocks();
     });
   });
 });

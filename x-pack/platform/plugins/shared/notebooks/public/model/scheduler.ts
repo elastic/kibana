@@ -13,6 +13,7 @@ import type {
   CellDefinition,
   CellType,
   ChartCellDefinition,
+  CodeCellDefinition,
   CustomCellDefinition,
   EsqlCellDefinition,
   InputCellDefinition,
@@ -20,7 +21,8 @@ import type {
 import { buildGraph, getDescendants, type NotebookGraph } from './graph';
 import { getDefaultInputValue, type NotebookStore } from './notebook_store';
 import { buildQueryParams, resolveInputParams } from './params';
-import { getCellDisplayName, getOwnQuery } from './references';
+import { getCodeReferences, runCode } from './code_cell';
+import { getCellDisplayName, getCellOutputs, getOwnQuery } from './references';
 import type {
   CellOutput,
   CellRuntime,
@@ -45,6 +47,7 @@ const EXECUTION_FIELDS: {
   esql: ['runMode'],
   chart: ['sourceCell', 'runMode'],
   custom: ['dataSource', 'sourceCell', 'runMode'],
+  code: ['runMode'],
   input: ['input', 'name'],
   markdown: [],
 };
@@ -292,6 +295,8 @@ export class NotebookScheduler {
       }
       case 'chart':
         return this.evaluateSourced(cell, forced);
+      case 'code':
+        return this.evaluateCode(cell, forced, signal);
       case 'input':
         return this.evaluateInput(cell, forced, signal);
     }
@@ -336,6 +341,81 @@ export class NotebookScheduler {
       lastRunAt: this.now().getTime(),
       durationMs,
     });
+  }
+
+  private async evaluateCode(
+    { id, code, runMode }: CodeCellDefinition,
+    forced: boolean,
+    signal: AbortSignal
+  ): Promise<void> {
+    if (!code.trim()) {
+      this.publish(id, { status: 'idle' });
+      return;
+    }
+    if (this.editedCells.has(id)) {
+      this.markStale(id, 'edited');
+      return;
+    }
+    const parents = this.parents(id);
+    const memoKey = objectHash({
+      code,
+      parents: parents.map((parent) =>
+        this.cells[parent]?.type === 'input'
+          ? this.inputValues[parent] ?? null
+          : this.runtime(parent).memoKey ?? null
+      ),
+    });
+    if (isMemoHit(this.runtime(id), memoKey, forced)) {
+      this.setStatus(id, 'done');
+      return;
+    }
+    if (runMode === 'manual' && !forced) {
+      this.markStale(id, 'manual');
+      return;
+    }
+    this.setStatus(id, 'running');
+    const { values, logs, error, durationMs } = await runCode({
+      code,
+      inputs: this.getCodeInputs(code, parents),
+      signal,
+    });
+    if (signal.aborted) return;
+    this.publish(id, {
+      status: error ? 'error' : 'done',
+      error,
+      output: { kind: 'code', values, logs },
+      memoKey: error ? undefined : memoKey,
+      lastRunAt: this.now().getTime(),
+      durationMs,
+    });
+  }
+
+  /**
+   * The parent outputs a code cell reads, by name: input values, code exports, and ES|QL results
+   * as arrays of row objects keyed by column name.
+   */
+  private getCodeInputs(code: string, parents: readonly string[]): Record<string, unknown> {
+    const referenced = new Set(getCodeReferences(code));
+    const available = parents.flatMap((parentId): Array<[string, unknown]> => {
+      const { output } = this.runtime(parentId);
+      const parent = this.cells[parentId];
+      if (!output || !parent) return [];
+      switch (output.kind) {
+        case 'input':
+          return Object.entries(output.params);
+        case 'code':
+          return Object.entries(output.values);
+        case 'table': {
+          const name = getCellOutputs(parent).find(({ key }) => key === 'table')?.name;
+          const { columns, rows } = output.table;
+          const records = rows.map((row) =>
+            Object.fromEntries(columns.map((column) => [column.name, row[column.id]]))
+          );
+          return name ? [[name, records]] : [];
+        }
+      }
+    });
+    return Object.fromEntries(available.filter(([name]) => referenced.has(name)));
   }
 
   /** Charts and custom cells take their source cell's table as their own output. */

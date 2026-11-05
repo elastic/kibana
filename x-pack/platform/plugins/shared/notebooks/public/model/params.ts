@@ -40,15 +40,26 @@ export const resolveInputParams = (
   throw new Error(`Input "${cell.name}" is a ${input.kind} input but holds a ${value.kind} value`);
 };
 
-/** Binds every param a query references from its parents' input outputs; unbound params are `null`. */
+/**
+ * Binds every param a query references from its parents' inputs and the string or number exports
+ * of its code parents; unbound params are `null`.
+ */
 export const buildQueryParams = (
   query: string,
   parentOutputs: ReadonlyArray<CellOutput | undefined>
 ): ParamMap => {
-  const available = new Map(
-    parentOutputs.flatMap((output) =>
-      output?.kind === 'input' ? Object.entries(output.params) : []
-    )
+  const available = new Map<string, ParamValue>(
+    parentOutputs.flatMap((output) => {
+      if (output?.kind === 'input') return Object.entries(output.params);
+      if (output?.kind === 'code') {
+        return Object.entries(output.values).flatMap(([name, value]) =>
+          typeof value === 'string' || typeof value === 'number' || value === null
+            ? [[name, value] as const]
+            : []
+        );
+      }
+      return [];
+    })
   );
   return Object.fromEntries(
     getQueryParamNames(query).map((name) => [name, available.get(name) ?? null])

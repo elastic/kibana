@@ -57,6 +57,7 @@ import { findPinnedTimeCell } from '../model/cell_factory';
 import { AppSettingsFlyout } from './app_settings_flyout';
 import { AppStatusDot } from './app_status_dot';
 import { ChartCanvas, useChartAttributes } from './chart_cell';
+import { CodePreview } from './code_cell';
 import { CustomCanvas } from './custom_cell';
 import { InputControl } from './input_cell';
 import { useNotebook } from './notebook_context';
@@ -96,12 +97,29 @@ const EsqlPanelContent = ({ cell }: { cell: CellDefinition }) => {
   return <ResultGrid table={output.table} height="100%" />;
 };
 
+const CodePanelContent = ({ cell }: { cell: CellDefinition }) => {
+  const { store } = useNotebook();
+  const { output } = useStateFromPublishingSubject(store.getRuntime$(cell.id));
+  if (output?.kind !== 'code') {
+    return (
+      <EuiText size="s" color="subdued">
+        {i18n.translate('xpack.notebook.app.noCodeOutput', {
+          defaultMessage: 'Run the code to see its exports and logs.',
+        })}
+      </EuiText>
+    );
+  }
+  return <CodePreview output={output} />;
+};
+
 const PanelContent = ({ panelId, cell }: { panelId: string; cell: CellDefinition }) => {
   switch (cell.type) {
     case 'chart':
       return <ChartPanelContent panelId={panelId} cell={cell} />;
     case 'custom':
       return <CustomCanvas cell={cell} />;
+    case 'code':
+      return <CodePanelContent cell={cell} />;
     case 'esql':
       return <EsqlPanelContent cell={cell} />;
     case 'input':

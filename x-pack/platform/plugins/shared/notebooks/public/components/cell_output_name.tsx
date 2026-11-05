@@ -47,6 +47,12 @@ const getDescription = ({ key, isFixed }: CellOutput): string => {
       return i18n.translate('xpack.notebook.output.maxDescription', {
         defaultMessage: 'The upper bound of the selected range.',
       });
+    default:
+      return i18n.translate('xpack.notebook.output.exportDescription', {
+        defaultMessage:
+          'A value this code exports. Other code cells read it by name; ES|QL can use it as ?{name} when it is a string or number.',
+        values: { name: key.replace(/^export:/, '') },
+      });
   }
 };
 

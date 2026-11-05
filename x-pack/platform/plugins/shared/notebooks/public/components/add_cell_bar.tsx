@@ -66,6 +66,11 @@ const CELL_KIND_GROUPS: ReadonlyArray<{
         icon: 'database',
         label: i18n.translate('xpack.notebook.addCell.esql', { defaultMessage: 'ES|QL' }),
       },
+      {
+        kind: 'code',
+        icon: 'code',
+        label: i18n.translate('xpack.notebook.addCell.code', { defaultMessage: 'JavaScript' }),
+      },
     ],
   },
   {

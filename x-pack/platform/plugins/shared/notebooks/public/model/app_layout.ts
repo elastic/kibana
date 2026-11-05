@@ -49,6 +49,8 @@ const getBasePanelSize = (cell: CellDefinition): PanelSize => {
       return { width: 4, height: 2 };
     case 'markdown':
       return { width: DEFAULT_GRID_COLUMNS, height: 3 };
+    case 'code':
+      return { width: 6, height: 4 };
     case 'chart':
     case 'custom':
       return { width: 6, height: 7 };

@@ -7,6 +7,7 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { TimeRangeValue } from '../../common/types';
+import type { CodeLogEntry } from './code_cell';
 
 export type CellStatus = 'idle' | 'stale' | 'running' | 'done' | 'error' | 'blocked';
 
@@ -26,6 +27,7 @@ export type InputValue =
 
 export type CellOutput =
   | { kind: 'table'; table: Datatable; truncated: boolean }
+  | { kind: 'code'; values: Readonly<Record<string, unknown>>; logs: readonly CodeLogEntry[] }
   | {
       kind: 'input';
       params: ParamMap;

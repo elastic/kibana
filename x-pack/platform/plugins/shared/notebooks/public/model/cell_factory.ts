@@ -55,6 +55,13 @@ const BLUEPRINTS: Record<NewCellKind, CellBlueprint> = {
       template: '',
     }),
   },
+  code: {
+    namePrefix: 'code',
+    labelPrefix: i18n.translate('xpack.notebook.cell.label.code', {
+      defaultMessage: 'JavaScript',
+    }),
+    build: (base) => ({ ...base, type: 'code', runMode: 'auto', code: '' }),
+  },
   markdown: {
     namePrefix: 'notes',
     labelPrefix: i18n.translate('xpack.notebook.cell.label.markdown', {

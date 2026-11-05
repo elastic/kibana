@@ -94,6 +94,13 @@ const everyVariant = toNotebook([
     query: 'FROM logs | STATS c = COUNT()',
     template: '<p>{{ rows[0]["c"].value }}</p>',
   },
+  {
+    id: 'code',
+    name: 'code',
+    type: 'code',
+    runMode: 'auto',
+    code: 'export const total = visits.length;',
+  },
   { id: 'notes', name: 'notes', type: 'markdown', content: '# Instructions' },
 ]);
 

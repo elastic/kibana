@@ -42,8 +42,18 @@ export type InputDefinition =
 
 export type InputKind = InputDefinition['kind'];
 
-/** The outputs a cell can expose: an ES|QL table, a dropdown value, or the bounds of a range. */
-export type CellOutputKey = 'table' | 'value' | 'start' | 'end' | 'min' | 'max';
+/**
+ * The outputs a cell can expose: an ES|QL table, a dropdown value, the bounds of a range, or a
+ * code cell's export, keyed by its exported name.
+ */
+export type CellOutputKey =
+  | 'table'
+  | 'value'
+  | 'start'
+  | 'end'
+  | 'min'
+  | 'max'
+  | `export:${string}`;
 
 interface CellBase {
   id: string;
@@ -86,6 +96,16 @@ export interface CustomCellDefinition extends CellBase {
   height?: number;
 }
 
+/**
+ * JavaScript run in the page. Other cells' outputs it reads are injected as constants, and its
+ * `export`s become outputs named as exported.
+ */
+export interface CodeCellDefinition extends CellBase {
+  type: 'code';
+  runMode: RunMode;
+  code: string;
+}
+
 export interface MarkdownCellDefinition extends CellBase {
   type: 'markdown';
   content: string;
@@ -100,6 +120,7 @@ export type CellDefinition =
   | EsqlCellDefinition
   | ChartCellDefinition
   | CustomCellDefinition
+  | CodeCellDefinition
   | MarkdownCellDefinition
   | InputCellDefinition;
 
