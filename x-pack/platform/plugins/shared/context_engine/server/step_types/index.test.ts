@@ -39,6 +39,7 @@ describe('registerStepDefinitions', () => {
         getAiIndexService: () => ({} as AiIndexService),
         isContextEngineEnabled: async () => true,
         isMemoryEnabled: async () => true,
+        checkReadPrivilege: async () => true,
       },
     });
 

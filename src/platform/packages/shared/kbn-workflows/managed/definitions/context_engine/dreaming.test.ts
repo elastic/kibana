@@ -10,6 +10,28 @@
 import { parse } from 'yaml';
 import type { ContextEngineDreamingWorkflowTemplateValues } from '.';
 import { CONTEXT_ENGINE_DREAMING_WORKFLOW } from '.';
+import { createWorkflowLiquidEngine } from '../../../common/utils/create_workflow_liquid_engine/create_workflow_liquid_engine';
+
+interface Step {
+  name: string;
+  type: string;
+  condition?: string;
+  steps?: Step[];
+  with?: {
+    memories?: string;
+    collapse?: unknown;
+    query?: { bool?: Record<string, unknown> };
+    _source?: string[];
+  };
+}
+
+const findStep = (steps: Step[], name: string): Step => {
+  const step = steps.find((candidate) => candidate.name === name);
+  if (!step) {
+    throw new Error(`No step named '${name}'`);
+  }
+  return step;
+};
 
 const values: ContextEngineDreamingWorkflowTemplateValues = {
   aiIndexId: 'support-cases',
@@ -70,29 +92,54 @@ describe('CONTEXT_ENGINE_DREAMING_WORKFLOW', () => {
   });
 
   it('checks whether to dream before reading memories or calling a model', () => {
-    const [status, run] = render().steps;
+    const { steps } = render();
 
-    expect(status).toEqual(
-      expect.objectContaining({ name: 'status', type: 'context-engine.getDreamingStatus' })
-    );
-    expect(run).toEqual(
-      expect.objectContaining({
-        type: 'if',
-        condition: '${{ steps.status.output.dream == true }}',
-      })
-    );
-    expect(run.steps.map(({ name }: { name: string }) => name)).toEqual([
+    expect(steps.map(({ name }: { name: string }) => name)).toEqual([
+      'status',
+      'paused',
       'last_run',
       'read_memories',
+      'active',
       'dream',
+      'output_result',
+    ]);
+    expect(steps[0].type).toBe('context-engine.getDreamingStatus');
+  });
+
+  it('cancels a paused run, so it does not move the window the next run reads', () => {
+    const paused = findStep(render().steps, 'paused');
+
+    expect(paused.condition).toBe('${{ steps.status.output.dream != true }}');
+    expect(paused.steps).toEqual([
+      expect.objectContaining({ type: 'workflow.output', status: 'cancelled' }),
     ]);
   });
 
   it('keeps tombstones in the memory query, so collapse returns each memory latest revision', () => {
-    const readMemories = render().steps[1].steps[1];
+    const readMemories = findStep(render().steps, 'read_memories').with;
 
-    expect(readMemories.with.collapse).toEqual({ field: 'id' });
-    expect(readMemories.with.query.bool).not.toHaveProperty('must_not');
-    expect(readMemories.with._source).toContain('governance.lifecycle.status');
+    expect(readMemories?.collapse).toEqual({ field: 'id' });
+    expect(readMemories?.query?.bool).not.toHaveProperty('must_not');
+    expect(readMemories?._source).toContain('governance.lifecycle.status');
+  });
+
+  it('dreams only on memories that are not deleted', () => {
+    const memories = findStep(render().steps, 'active').with?.memories ?? '';
+    const hit = (id: string, status?: string) => ({
+      _source: { id, ...(status && { governance: { lifecycle: { status } } }) },
+    });
+    const hits = [
+      hit('m-1'),
+      hit('m-2', 'deleted'),
+      hit('m-3', 'active'),
+      hit('m-4', 'verification_failed'),
+    ];
+
+    expect(memories.startsWith('${{') && memories.endsWith('}}')).toBe(true);
+    expect(
+      createWorkflowLiquidEngine().evalValueSync(memories.slice(3, -2).trim(), {
+        steps: { read_memories: { output: { hits: { hits } } } },
+      })
+    ).toEqual([hits[0]._source, hits[2]._source]);
   });
 });

@@ -19,9 +19,9 @@ export const createDreamingChangeHandler = (
 ): AiIndexChangeHandler => ({
   id: DREAMING_CHANGE_HANDLER_ID,
   fields: ['dreaming', 'dest'],
-  // Saving the config unchanged still reconciles: it retries an install that failed, and
-  // enabling re-mints the API key the scheduled runs use, so they follow whoever last saved it.
-  // Reinstalling unchanged values leaves the workflow as it is.
+  // Saving the dreaming config unchanged through its own route still reconciles: it retries an
+  // install that failed, and enabling re-mints the API key the scheduled runs use, so they
+  // follow whoever last saved it. Reinstalling unchanged values leaves the workflow as it is.
   when: 'saved',
   onChange: async ({ aiIndexId, spaceId, request, current }) => {
     if (!current) {

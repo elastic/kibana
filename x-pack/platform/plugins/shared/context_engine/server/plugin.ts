@@ -292,19 +292,21 @@ export class ContextEnginePlugin
       });
     };
 
-    const checkWritePrivilege = async (request: KibanaRequest, spaceId: string) => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      const { security } = startDeps;
-      if (!security) {
-        return true;
-      }
-      const { hasAllRequested } = await security.authz
-        .checkPrivilegesWithRequest(request)
-        .atSpace(spaceId, {
-          kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
-        });
-      return hasAllRequested;
-    };
+    const checkContextEnginePrivilege =
+      (privilege: string) => async (request: KibanaRequest, spaceId: string) => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        const { security } = startDeps;
+        if (!security) {
+          return true;
+        }
+        const { hasAllRequested } = await security.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            kibana: [security.authz.actions.api.get(privilege)],
+          });
+        return hasAllRequested;
+      };
+    const checkWritePrivilege = checkContextEnginePrivilege(apiPrivileges.writeContextEngine);
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
@@ -330,6 +332,7 @@ export class ContextEnginePlugin
         getAiIndexService,
         isContextEngineEnabled,
         isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
+        checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
     });
 

@@ -16,20 +16,32 @@ describe('getDreamingStatusStepDefinition', () => {
   const run = ({
     contextEngineEnabled = true,
     memoryEnabled = true,
+    canRead = true,
     get = jest.fn().mockResolvedValue({ id: 'support', dreaming }),
   }: {
     contextEngineEnabled?: boolean;
     memoryEnabled?: boolean;
+    canRead?: boolean;
     get?: jest.Mock;
   } = {}) =>
     getDreamingStatusStepDefinition({
       getAiIndexService: () => ({ get } as unknown as AiIndexService),
       isContextEngineEnabled: async () => contextEngineEnabled,
       isMemoryEnabled: async () => memoryEnabled,
+      checkReadPrivilege: async () => canRead,
     }).handler(createMockStepContext({ input: { ai_index_id: 'support' }, esClient: {} }));
 
   it('dreams when Context Engine and memory are on and the AI index dreams', async () => {
     await expect(run()).resolves.toEqual({ output: { dream: true } });
+  });
+
+  it('fails without reading the AI index when the workflow user cannot read AI indices', async () => {
+    const get = jest.fn();
+
+    await expect(run({ canRead: false, get })).rejects.toThrow(
+      'Insufficient privileges to read AI indices'
+    );
+    expect(get).not.toHaveBeenCalled();
   });
 
   it('skips the run when the global memory setting is off', async () => {

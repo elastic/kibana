@@ -28,6 +28,11 @@ describe('dreaming ids', () => {
     expect(slugify('CUSTOMER  张三!')).toBe(zhang);
   });
 
+  it('keeps names apart that differ only in marks outside Latin script', () => {
+    expect(slugify('राम')).not.toBe(slugify('रमा'));
+    expect(slugify('Customer राम')).not.toBe(slugify('Customer रमा'));
+  });
+
   it('keeps names apart that share their first characters when cut short', () => {
     const long = 'x'.repeat(120);
 

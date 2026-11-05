@@ -81,6 +81,18 @@ describe('createDreamingChangeHandler', () => {
     expect(scheduleService.reconcile).not.toHaveBeenCalled();
   });
 
+  it('leaves the workflow alone when a save of the whole AI index changes only other fields', async () => {
+    const previous = { ...aiIndex, dreaming };
+
+    await notifier.notify({
+      ...change,
+      previous,
+      current: { ...previous, description: 'Support cases' },
+    });
+
+    expect(scheduleService.reconcile).not.toHaveBeenCalled();
+  });
+
   it('removes the workflow when the AI index is deleted', async () => {
     await notifier.notify({ ...change, previous: { ...aiIndex, dreaming } });
 

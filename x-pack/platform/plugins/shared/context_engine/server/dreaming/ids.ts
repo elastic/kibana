@@ -13,13 +13,17 @@ const HASH_LENGTH = 16;
 export const shortHash = (...parts: string[]): string =>
   createHash('sha256').update(parts.join('\u0000')).digest('hex').slice(0, HASH_LENGTH);
 
-/** The letters and digits of a name, case- and accent-folded, which decide an entity's identity. */
+/**
+ * The letters and digits of a name, case-folded, which decide an entity's identity. Marks on
+ * Latin letters are accents and fold away; in other scripts, such as Devanagari vowel signs,
+ * they tell names apart and stay.
+ */
 const identityOf = (name: string): string =>
   name
     .normalize('NFKD')
-    .replace(/\p{M}/gu, '')
+    .replace(/(\p{Script=Latin})\p{M}+/gu, '$1')
     .toLowerCase()
-    .split(/[^\p{L}\p{N}]+/u)
+    .split(/[^\p{L}\p{M}\p{N}]+/u)
     .filter(Boolean)
     .join(' ');
 

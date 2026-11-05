@@ -43,6 +43,8 @@ export interface DreamingStepDependencies {
   isContextEngineEnabled: (spaceId: string) => Promise<boolean>;
   /** Whether the global Context Engine memory setting is on. */
   isMemoryEnabled: () => Promise<boolean>;
+  /** Whether the request has the Context Engine read API privilege in this space. */
+  checkReadPrivilege: (request: KibanaRequest, spaceId: string) => Promise<boolean>;
 }
 
 /** Dependencies injected into the feedback analysis step definition factories. */

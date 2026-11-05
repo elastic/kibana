@@ -6,6 +6,7 @@
  */
 
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
+import { ExecutionError } from '@kbn/workflows/server';
 import {
   getDreamingStatusStepCommonDefinition,
   type GetDreamingStatusOutput,
@@ -18,12 +19,19 @@ export const getDreamingStatusStepDefinition = ({
   getAiIndexService,
   isContextEngineEnabled,
   isMemoryEnabled,
+  checkReadPrivilege,
 }: DreamingStepDependencies) =>
   createServerStepDefinition({
     ...getDreamingStatusStepCommonDefinition,
     handler: async (context) => {
       const { spaceId } = context.contextManager.getContext().workflow;
       const { ai_index_id: aiIndexId } = context.input;
+      if (!(await checkReadPrivilege(context.contextManager.getFakeRequest(), spaceId))) {
+        throw new ExecutionError({
+          type: 'PermissionError',
+          message: 'Insufficient privileges to read AI indices',
+        });
+      }
       const skip = (reason: string): { output: GetDreamingStatusOutput } => ({
         output: { dream: false, reason },
       });
