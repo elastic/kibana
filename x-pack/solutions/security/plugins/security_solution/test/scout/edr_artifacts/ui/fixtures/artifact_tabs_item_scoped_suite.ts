@@ -22,30 +22,28 @@ const STATEFUL_ONLY_REASON =
  *
  * The "unexisting" tab state (no item on the whole list) cannot be
  * guaranteed while another spec file creates items, so those steps start
- * from the "unassigned" state instead. Each worker owns its policy and no
- * blocklist suite creates global items, so what is assigned to this policy
- * is exactly what this test assigned.
+ * from the "unassigned" state instead.
+ *
+ * Precondition: the list holds no global (`policy:all`) item while this suite
+ * runs. The policy tab lists global items as assigned to every policy
+ * (`policy_artifacts_layout.tsx` queries `[policyId, 'all']`), so one
+ * leftover global item breaks every "unassigned" and `toHaveCount(1)`
+ * assertion here. The shared-list suite wiped the list first; this one
+ * cannot. Spec files that run on another worker at the same time create
+ * per-policy items only, and the global item the list-page suite creates in
+ * the same file is deleted before the next test starts.
  *
  * The list must already exist: items cannot be created through the API
  * before that, and `global.setup.ts` creates it once so workers do not race
  * the create POST.
  */
-export const describeArtifactTabPolicyDetailsItemScoped = (
-  artifact: ArtifactTabCase,
-  options?: { tag?: string[] }
-): void => {
+export const describeArtifactTabPolicyDetailsItemScoped = (artifact: ArtifactTabCase): void => {
   const { listId, entries, osTypes } = artifact;
 
   spaceTest.describe(
     `Artifact tabs in Policy Details page — ${artifact.title}`,
-    { tag: options?.tag ?? ARTIFACT_TAB_POLICY_DETAILS_TAGS },
+    { tag: ARTIFACT_TAB_POLICY_DETAILS_TAGS },
     () => {
-      spaceTest.beforeAll(async ({ apiServices }) => {
-        if (artifact.kind === 'endpointExceptions') {
-          await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
-        }
-      });
-
       spaceTest(
         `Tab is hidden when the user has no artifact privilege`,
         async ({ browserAuth, pageObjects, endpointPolicy, config }) => {

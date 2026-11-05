@@ -21,6 +21,8 @@ globalSetupHook(
     log.debug('[setup] ensuring the endpoint_blocklists exception list exists');
     await getEndpointArtifactsApiService({ kbnClient, esClient, log }).ensureList({
       listId: ENDPOINT_ARTIFACT_LISTS.blocklists.id,
+      name: ENDPOINT_ARTIFACT_LISTS.blocklists.name,
+      description: ENDPOINT_ARTIFACT_LISTS.blocklists.description,
       type: ExceptionListTypeEnum.ENDPOINT_BLOCKLISTS,
     });
     log.debug(

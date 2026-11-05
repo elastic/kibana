@@ -7,7 +7,7 @@
 
 import { expect } from '@kbn/scout-security/ui';
 import { spaceTest } from '.';
-import { ARTIFACT_LIST_PAGE_LOCAL_TAGS, ARTIFACT_LIST_PAGE_TAGS } from './artifact_list_suite';
+import { ARTIFACT_LIST_PAGE_TAGS } from './artifact_list_suite';
 import type { ArtifactTabCase } from './artifact_tabs_test_data';
 import { getArtifactRole } from './roles';
 
@@ -22,9 +22,11 @@ const STATEFUL_ONLY_REASON =
  *
  * What changes versus the shared-list suite:
  * - every item gets a unique name and assertions target that card;
- * - create starts from the header add button on a populated list, and the
- *   item is created per-policy (never global, so it cannot show up on
- *   another worker's policy tab);
+ * - create starts from the header add button on a populated list. It keeps
+ *   the form's default global assignment: the spec file that calls this
+ *   suite is the only one with blocklist policy-tab assertions, its tests
+ *   run serially on one worker, and the item is deleted before the next
+ *   test starts;
  * - the READ empty-state assertion becomes "no add button in either state",
  *   because the list may hold items from another spec file;
  * - `endpointArtifactItems` deletes only what the test created.
@@ -33,29 +35,14 @@ const STATEFUL_ONLY_REASON =
  * before that, and `global.setup.ts` creates it once so workers do not race
  * the create POST.
  */
-export const describeArtifactListPageItemScoped = (
-  artifact: ArtifactTabCase,
-  options?: { tag?: string[] }
-): void => {
+export const describeArtifactListPageItemScoped = (artifact: ArtifactTabCase): void => {
   const { pagePrefix, listId, entries, osTypes } = artifact;
   const editedDescription = 'Edited description';
 
   spaceTest.describe(
     `Artifact list page — ${artifact.title}`,
-    {
-      tag:
-        options?.tag ??
-        (artifact.kind === 'endpointExceptions'
-          ? ARTIFACT_LIST_PAGE_LOCAL_TAGS
-          : ARTIFACT_LIST_PAGE_TAGS),
-    },
+    { tag: ARTIFACT_LIST_PAGE_TAGS },
     () => {
-      spaceTest.beforeAll(async ({ apiServices }) => {
-        if (artifact.kind === 'endpointExceptions') {
-          await apiServices.endpointArtifacts.optInEndpointExceptionsPerPolicy();
-        }
-      });
-
       spaceTest(
         `T1 analyst sees no privileges on the list page`,
         async ({ browserAuth, pageObjects }) => {
@@ -142,7 +129,6 @@ export const describeArtifactListPageItemScoped = (
           await spaceTest.step('create from the page add button', async () => {
             await pageObjects.artifactListPage.openCreateFromPage(pagePrefix);
             await pageObjects.policyArtifactsPage.fillCreateForm(artifact.kind, name);
-            await pageObjects.policyArtifactsPage.selectPerPolicyAssignment();
             await pageObjects.artifactListPage.submitFlyout(pagePrefix);
 
             const card = pageObjects.artifactListPage.cardByName(pagePrefix, name);

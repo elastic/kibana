@@ -6,7 +6,6 @@
  */
 
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import type { EsClient, KbnClient, ScoutLogger, ScoutParallelWorkerFixtures } from '@kbn/scout';
 import { measurePerformanceAsync } from '@kbn/scout';
 import { INTERNAL_API_HEADERS, PUBLIC_API_HEADERS } from '../../../constants/api_headers';
@@ -20,7 +19,10 @@ const ENDPOINT_EXCEPTIONS_PER_POLICY_OPT_IN_ROUTE =
 export interface CreateEndpointArtifactListInput {
   listId: string;
   type: string;
-  /** Defaults to the product name for a known endpoint artifact list, else `listId`. */
+  /**
+   * Defaults to `listId`. Pass the product metadata (`ENDPOINT_ARTIFACT_LISTS`)
+   * for a list the UI will show.
+   */
   name?: string;
   description?: string;
 }
@@ -114,15 +116,15 @@ export const getEndpointArtifactsApiService = ({
   };
 
   // Opening an artifact tab/list page also ensure-creates the list, so the
-  // POST may 409 — same as FTR ensureListExists. The list outlives the test
-  // run, so a known endpoint artifact list gets the product's own metadata.
+  // POST may 409 — same as FTR ensureListExists. The list is not wiped here;
+  // `global.teardown.ts` deletes every endpoint artifact list at the end of
+  // the run.
   const ensureList = async ({
     listId,
     type,
     name,
     description,
   }: CreateEndpointArtifactListInput) => {
-    const known = Object.values(ENDPOINT_ARTIFACT_LISTS).find((list) => list.id === listId);
     await kbnClient.request({
       method: 'POST',
       path: `${basePath}${EXCEPTION_LIST_URL}`,
@@ -130,8 +132,8 @@ export const getEndpointArtifactsApiService = ({
       ignoreErrors: [409],
       retries: 0,
       body: {
-        name: name ?? known?.name ?? listId,
-        description: description ?? known?.description ?? 'Scout endpoint artifact list',
+        name: name ?? listId,
+        description: description ?? 'Scout endpoint artifact list',
         list_id: listId,
         type,
         namespace_type: 'agnostic',
