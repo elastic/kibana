@@ -63,6 +63,7 @@ export function transformPinnedPanelsIn(pinnedPanels: PinnedPanelsState): {
           };
         }
       } catch (e) {
+        console.log('IN !!!!!!!', { e });
         panelErrors.push(
           new TransformPanelInError(
             `Transform error: ${e.message}`,

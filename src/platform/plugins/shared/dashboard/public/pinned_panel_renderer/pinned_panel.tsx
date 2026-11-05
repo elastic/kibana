@@ -139,7 +139,7 @@ export const PinnedPanel = ({
                 {api?.CustomPrependComponent ? (
                   <>
                     <DragHandle
-                      isEditable={true}
+                      isEditable={viewMode === 'edit'}
                       controlTitle={'Test'}
                       setDragHandles={setDragHandles}
                     />
@@ -148,7 +148,7 @@ export const PinnedPanel = ({
                 ) : (
                   <>
                     <DragHandle
-                      isEditable={true}
+                      isEditable={viewMode === 'edit'}
                       controlTitle={panelLabel}
                       setDragHandles={setDragHandles}
                     >

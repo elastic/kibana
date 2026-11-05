@@ -30,7 +30,7 @@ export const isDashboardLayoutPanel = (panel: unknown): panel is DashboardLayout
 export interface DashboardPinnablePanel {
   type: DashboardPanel['type'];
   grow?: boolean;
-  width?: PinnedPanelWidth;
+  width: number;
   order?: number;
 }
 
@@ -40,7 +40,7 @@ export interface DashboardLayout {
   };
   sections: { [id: string]: Pick<DashboardSection, 'collapsed' | 'grid' | 'title'> };
   pinnedPanels: {
-    [id: string]: PinnedPanelLayoutState;
+    [id: string]: DashboardPinnablePanel;
   };
 }
 

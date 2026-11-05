@@ -76,6 +76,7 @@ export const FlexLayout = ({
      */
     const onLayoutChangeSubscription = gridLayoutStateManager.layoutUpdated$.subscribe(
       (newLayout) => {
+        console.log({ newLayout });
         onLayoutChange(newLayout);
       }
     );

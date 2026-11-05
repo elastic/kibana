@@ -113,7 +113,15 @@ export function transformPinnedPanelProperties(
         id,
         type: transformType(type),
         ...(grow !== undefined && { grow }),
-        ...(width !== undefined && { width }),
+        // ...(width !== undefined && { width }),
+        width:
+          typeof width === 'string'
+            ? width === 'large'
+              ? 800
+              : width === 'medium'
+              ? 400
+              : 224
+            : width,
         config: 'explicitInput' in rest ? rest.explicitInput : rest.config,
       } as DashboardPinnedPanel;
     });
@@ -145,12 +153,15 @@ function transformPanels(
       if (schema) {
         config = schema.parse(config) as DashboardPinnedPanel['config'];
       }
+      console.log('MADE IT HERE', { config, rest });
       transformedPanels.push({
         ...pinnedControlSchema.parse(rest),
         config,
         type,
       } as DashboardPinnedPanel);
     } catch (e) {
+      console.log('OUT !!!!!!!', { e });
+
       warnings.push({
         type: 'dropped_panel',
         panel_type: panel.type,

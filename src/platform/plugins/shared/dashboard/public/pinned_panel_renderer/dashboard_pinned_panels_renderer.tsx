@@ -10,25 +10,25 @@
 import { transparentize, UseEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import { FlexLayout } from '@kbn/grid-layout';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import React, { useCallback, useRef, useState } from 'react';
+import React, { useCallback } from 'react';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
 import { useDashboardInternalApi } from '../dashboard_api/use_dashboard_internal_api';
-import {
-  DASHBOARD_MARGIN_SIZE,
-  DEFAULT_DASHBOARD_DRAG_TOP_OFFSET,
-} from '../dashboard_renderer/grid/constants';
+import { DASHBOARD_MARGIN_SIZE } from '../dashboard_renderer/grid/constants';
 import { PinnedPanel } from './pinned_panel';
+import { FlexLayoutData } from '@kbn/grid-layout/flex/types';
+import { DashboardLayout } from '../dashboard_api/layout_manager';
+import { isEqual } from 'lodash';
 
 export const DashboardPinnedPanelsRenderer = () => {
   const dashboardApi = useDashboardApi();
   const dashboardInternalApi = useDashboardInternalApi();
-  const [topOffset, setTopOffset] = useState(DEFAULT_DASHBOARD_DRAG_TOP_OFFSET);
-  const embeddableApiRef = useRef<DefaultEmbeddableApi | null>(null);
 
-  const [flexLayout] = useBatchedPublishingSubjects(dashboardInternalApi.pinnedLayout$);
+  const [flexLayout, viewMode] = useBatchedPublishingSubjects(
+    dashboardInternalApi.pinnedLayout$,
+    dashboardApi.viewMode$
+  );
 
   const renderPanelContents = useCallback(
     (id: string, setDragHandles: (refs: Array<HTMLElement | null>) => void) => {
@@ -38,6 +38,30 @@ export const DashboardPinnedPanelsRenderer = () => {
       return <PinnedPanel id={id} type={type} setDragHandles={setDragHandles} />;
     },
     [dashboardApi.layout$]
+  );
+
+  const onLayoutChange = useCallback(
+    (newLayout: FlexLayoutData) => {
+      if (viewMode !== 'edit') return;
+
+      const currLayout = dashboardApi.layout$.getValue();
+      const updatedLayout: DashboardLayout = {
+        ...currLayout,
+        pinnedPanels: {},
+      };
+      Object.values(newLayout).forEach((panel) => {
+        updatedLayout.pinnedPanels[panel.id] = {
+          ...currLayout.pinnedPanels[panel.id],
+          order: panel.order,
+          width: panel.width,
+        };
+      });
+      console.log({ newLayout, updatedLayout });
+      if (!isEqual(currLayout, updatedLayout)) {
+        dashboardApi.layout$.next(updatedLayout);
+      }
+    },
+    [dashboardApi.layout$, viewMode]
   );
 
   return (
@@ -52,10 +76,8 @@ export const DashboardPinnedPanelsRenderer = () => {
         }}
         useCustomDragHandle={true}
         renderPanelContents={renderPanelContents}
-        onLayoutChange={(newLayout) => {
-          console.log({ newLayout });
-        }}
-        accessMode={'EDIT'}
+        onLayoutChange={onLayoutChange}
+        accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />
     </span>
   );

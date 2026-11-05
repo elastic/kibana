@@ -13,6 +13,7 @@ import {
   DEFAULT_PANEL_HEIGHT,
   DEFAULT_PANEL_WIDTH,
 } from '../constants';
+import { DEFAULT_PINNED_CONTROL_STATE } from '@kbn/controls-constants';
 
 export const panelGridSchema = z
   .object({
@@ -31,4 +32,21 @@ export const panelGridSchema = z
     id: 'kbn-dashboard-panel-grid',
     title: 'Panel grid',
     description: 'The position and size of the panel on the dashboard grid.',
+  });
+
+export const pinnedPanelLayoutSchema = z
+  .object({
+    width: z.number().meta({
+      description: 'The width of the panel in pixels.',
+    }),
+    grow: z.boolean().default(DEFAULT_PINNED_CONTROL_STATE.grow).meta({
+      description:
+        'When `true`, the control expands to fill any available horizontal space. Defaults to `false`.',
+    }),
+  })
+  .strict()
+  .meta({
+    id: 'kbn-dashboard-panel-grid',
+    title: 'Panel grid',
+    description: 'The order and width of the pinned panel.',
   });
