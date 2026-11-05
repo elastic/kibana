@@ -139,6 +139,7 @@ export const upsertHuntSessionAttachment = async ({
           data: next,
           description: next.definition.name,
           readonly: true,
+          render_inline: true,
           access: 'converse',
         });
         return next;
@@ -148,6 +149,7 @@ export const upsertHuntSessionAttachment = async ({
         conversationId,
         attachmentId: HUNT_SESSION_ATTACHMENT_ID,
         data: next,
+        render_inline: true,
         access: 'converse',
       });
       if (updated.current_version === existing.current_version + 1) return next;

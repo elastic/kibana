@@ -47,11 +47,11 @@ export const createHuntSessionAttachmentDefinition = ({
     const parsed = huntSessionAttachmentSchema.safeParse(attachment?.data);
     return parsed.success ? parsed.data.definition.name : i18n.DEFAULT_LABEL;
   },
-  getIcon: () => 'crosshairs',
+  getIcon: () => 'crosshair',
   getHeader: ({ attachment }) => {
     const parsed = huntSessionAttachmentSchema.safeParse(attachment?.data);
     return {
-      icon: 'crosshairs',
+      icon: 'crosshair',
       ...(parsed.success
         ? {
             subtitle:

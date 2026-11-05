@@ -63,7 +63,7 @@ export const createSecurityHuntDataSourceProfileProvider = (
                 id: 'hunt-guidance',
                 order: 1,
                 label: i18n.GUIDANCE_MENU_LABEL,
-                iconType: 'training',
+                iconType: 'crosshair',
                 testId: 'discoverAppMenuHuntGuidance',
                 render: ({ context: { onFinishAction } }) => (
                   <HuntGuidanceFlyout definition={definition} onClose={onFinishAction} />

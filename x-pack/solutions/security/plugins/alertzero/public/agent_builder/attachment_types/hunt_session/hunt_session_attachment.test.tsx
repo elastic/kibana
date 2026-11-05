@@ -49,11 +49,11 @@ describe('createHuntSessionAttachmentDefinition', () => {
 
     expect(definition.getLabel(attachment(manualSession))).toBe('Failed OAuth public client scope');
     expect(definition.getHeader?.({ attachment: attachment(manualSession) } as never)).toEqual({
-      icon: 'crosshairs',
+      icon: 'crosshair',
       subtitle: 'Analyst hunt',
     });
     expect(definition.getHeader?.({ attachment: attachment(automatedSession) } as never)).toEqual({
-      icon: 'crosshairs',
+      icon: 'crosshair',
       subtitle: 'Automated hunt',
     });
   });
@@ -63,7 +63,7 @@ describe('createHuntSessionAttachmentDefinition', () => {
 
     expect(definition.getLabel(attachment({ nope: true }))).toBe('Hunt session');
     expect(definition.getHeader?.({ attachment: attachment({ nope: true }) } as never)).toEqual({
-      icon: 'crosshairs',
+      icon: 'crosshair',
     });
   });
 

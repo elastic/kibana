@@ -129,6 +129,7 @@ describe('upsertHuntSessionAttachment', () => {
         id: 'hunt-session',
         type: 'security.hunt_session',
         readonly: true,
+        render_inline: true,
         access: 'converse',
       })
     );
@@ -142,7 +143,9 @@ describe('upsertHuntSessionAttachment', () => {
 
     expect(result.revision).toBe(2);
     expect(result.preservations?.map(({ preservation_id: id }) => id)).toEqual(['p1', 'p2']);
-    expect(fake.mocks.update).toHaveBeenCalledWith(expect.objectContaining({ access: 'converse' }));
+    expect(fake.mocks.update).toHaveBeenCalledWith(
+      expect.objectContaining({ access: 'converse', render_inline: true })
+    );
   });
 
   it('does not duplicate a repeated preservation', async () => {
