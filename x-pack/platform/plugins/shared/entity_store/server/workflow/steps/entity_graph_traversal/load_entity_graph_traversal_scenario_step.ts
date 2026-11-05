@@ -11,6 +11,8 @@ import {
   loadEntityGraphTraversalPlan,
 } from '@kbn/workflows/managed';
 import { loadEntityGraphTraversalScenarioStepCommonDefinition } from '../../../../common/workflow/steps/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
+import { resolveLatestEntityIndex } from '../../../domain/graph_traversal/resolve_latest_entity_index';
+import { resolveSpaceId } from './resolve_space_id';
 
 export const loadEntityGraphTraversalScenarioStepDefinition = createServerStepDefinition({
   ...loadEntityGraphTraversalScenarioStepCommonDefinition,
@@ -32,7 +34,30 @@ export const loadEntityGraphTraversalScenarioStepDefinition = createServerStepDe
           plan.hops.length
         } hops, limits ${JSON.stringify(plan.limits)}`
       );
-      return { output: { ...plan, until: [...plan.until, ...until] } };
+      // The execution space and the concrete lookup-join index are resolved once here and
+      // handed to every hop, which otherwise repeats both lookups per hop.
+      const spaceId = await resolveSpaceId(context.contextManager);
+      let lookupIndex: string | undefined;
+      try {
+        lookupIndex = await resolveLatestEntityIndex(
+          context.contextManager.getScopedEsClient(),
+          spaceId
+        );
+      } catch (error) {
+        context.logger.debug(
+          `entity graph traversal: no latest entity index to join in space "${spaceId}": ${
+            error instanceof Error ? error.message : String(error)
+          }`
+        );
+      }
+      return {
+        output: {
+          ...plan,
+          until: [...plan.until, ...until],
+          space_id: spaceId,
+          ...(lookupIndex !== undefined && { lookup_index: lookupIndex }),
+        },
+      };
     } catch (error) {
       return { error: error instanceof Error ? error : new Error(String(error)) };
     }

@@ -9,14 +9,27 @@ import type { StepHandlerContext } from '@kbn/workflows-extensions/server';
 import { loadEntityGraphTraversalScenarioStepDefinition } from './load_entity_graph_traversal_scenario_step';
 import { loadEntityGraphTraversalScenarioInputSchema } from '../../../../common/workflow/steps/entity_graph_traversal/load_entity_graph_traversal_scenario_step_common';
 
-const createContext = (rawInput: unknown): StepHandlerContext =>
+const LATEST_INDEX = '.entities.v2.latest.default-00001';
+
+const createContext = (
+  rawInput: unknown,
+  alias: Record<string, unknown> | Error = { [LATEST_INDEX]: {} }
+): StepHandlerContext =>
   ({
     input: loadEntityGraphTraversalScenarioInputSchema.parse(rawInput),
     config: {},
     rawInput,
     contextManager: {
-      getContext: jest.fn().mockReturnValue({}),
-      getScopedEsClient: jest.fn(),
+      getContext: jest.fn().mockReturnValue({ workflow: { spaceId: 'default' } }),
+      getScopedEsClient: jest.fn().mockReturnValue({
+        indices: {
+          getAlias:
+            alias instanceof Error
+              ? jest.fn().mockRejectedValue(alias)
+              : jest.fn().mockResolvedValue(alias),
+        },
+      }),
+      callKibanaApi: jest.fn().mockResolvedValue({ body: { id: 'default' } }),
       renderInputTemplate: jest.fn(),
       getFakeRequest: jest.fn(),
     },
@@ -27,6 +40,23 @@ const createContext = (rawInput: unknown): StepHandlerContext =>
   } as unknown as StepHandlerContext);
 
 describe('entityStore.loadEntityGraphTraversalScenario', () => {
+  it('resolves the execution space and the lookup index once for the hops', async () => {
+    const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
+      createContext({ scenario_id: 'okta-user-to-aws-resources' })
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.output).toMatchObject({ space_id: 'default', lookup_index: LATEST_INDEX });
+  });
+
+  it('leaves the lookup index out when the space has no latest entity index', async () => {
+    const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
+      createContext({ scenario_id: 'okta-user-to-aws-resources' }, new Error('no alias'))
+    );
+    expect(result.error).toBeUndefined();
+    expect(result.output).toMatchObject({ space_id: 'default' });
+    expect(result.output).not.toHaveProperty('lookup_index');
+  });
+
   it('loads a shipped scenario and expands its hops', async () => {
     const result = await loadEntityGraphTraversalScenarioStepDefinition.handler(
       createContext({ scenario_id: 'okta-user-to-aws-resources' })

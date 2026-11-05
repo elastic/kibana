@@ -47,6 +47,13 @@ export const loadEntityGraphTraversalScenarioOutputSchema = lazySchema(() =>
     hops: z.array(traversalHopSchema),
     /** The scenario's stop conditions followed by the run's. */
     until: z.array(traversalStopConditionSchema),
+    /** The execution space, resolved once for every hop to reuse. */
+    space_id: z.string(),
+    /**
+     * The concrete latest entity index of the space, which hop queries join to describe the
+     * reached node; absent when the entity store is not installed in the space.
+     */
+    lookup_index: z.string().optional(),
   })
 );
 

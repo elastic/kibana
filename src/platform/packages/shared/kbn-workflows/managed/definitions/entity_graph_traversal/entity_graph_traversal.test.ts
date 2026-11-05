@@ -164,6 +164,8 @@ describe('ENTITY_GRAPH_TRAVERSAL_WORKFLOW', () => {
     expect(runHop?.type).toBe('entityStore.runEntityGraphTraversalHop');
     expect(runHop?.with).toMatchObject({
       hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}',
+      space_id: '${{ steps.load_scenario.output.space_id }}',
+      lookup_index: '${{ steps.load_scenario.output.lookup_index }}',
       hops_executed: '${{ variables.hops_executed }}',
       seed_id: '{{ inputs.seed_id }}',
       edges: '${{ variables.edges }}',

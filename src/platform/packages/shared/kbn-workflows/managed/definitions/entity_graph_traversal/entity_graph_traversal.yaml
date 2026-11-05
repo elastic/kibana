@@ -183,6 +183,8 @@ steps:
           hop: '${{ steps.load_scenario.output.hops[variables.hops_executed] }}'
           hops_executed: '${{ variables.hops_executed }}'
           seed_id: '{{ inputs.seed_id }}'
+          space_id: '${{ steps.load_scenario.output.space_id }}'
+          lookup_index: '${{ steps.load_scenario.output.lookup_index }}'
           edges: '${{ variables.edges }}'
           nodes: '${{ variables.nodes }}'
           until_matches: '${{ variables.until_matches }}'

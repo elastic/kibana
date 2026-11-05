@@ -20,6 +20,8 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
       hop,
       hops_executed: hopsExecuted = 0,
       seed_id: seedId,
+      space_id: givenSpaceId,
+      lookup_index: givenLookupIndex,
       truncated_so_far,
       direction,
       limits,
@@ -46,14 +48,22 @@ export const runEntityGraphTraversalHopStepDefinition = createServerStepDefiniti
     const setupStartedAt = performance.now();
     // The graph is the entity store of the execution space: nodes are its entities and edges
     // their relationship ids, so every hop reads the space's latest entity index.
-    const spaceId = await resolveSpaceId(context.contextManager);
+    // The load step resolves the space once per run; a hop only repeats the lookup when it
+    // is not given the space, or the given one is not the execution space.
+    const contextSpaceId = context.contextManager.getContext().workflow.spaceId;
+    const spaceId: string =
+      givenSpaceId !== undefined && givenSpaceId === contextSpaceId
+        ? givenSpaceId
+        : await resolveSpaceId(context.contextManager);
     const index = getLatestEntityIndexPattern(spaceId);
 
     // Reached ids are joined to the concrete lookup-mode index so the payload fields describe
     // the reached node.
-    let lookupIndex: string | undefined;
+    let lookupIndex = givenLookupIndex;
     try {
-      lookupIndex = await resolveLatestEntityIndex(esClient, spaceId);
+      if (lookupIndex === undefined) {
+        lookupIndex = await resolveLatestEntityIndex(esClient, spaceId);
+      }
     } catch (error) {
       logger.debug(
         `entity graph traversal hop ${

@@ -73,7 +73,7 @@ const createContext = (rawInput: Record<string, unknown>, rows: Array<[string, s
     stepId: 'run_hop',
     stepType: runEntityGraphTraversalHopStepDefinition.id,
   } as unknown as StepHandlerContext;
-  return { context, esql };
+  return { context, esql, indices };
 };
 
 describe('entityStore.runEntityGraphTraversalHop', () => {
@@ -152,6 +152,39 @@ describe('entityStore.runEntityGraphTraversalHop', () => {
     // visited was not carried: it is the seed plus the carried nodes, plus this hop's.
     expect(output?.visited).toEqual([SEED, 'group-1', 'role-1']);
     expect(output?.edges.every((e) => !('payload' in e))).toBe(true);
+  });
+
+  it('skips the space and index lookups when the load step resolved them', async () => {
+    const { context, esql, indices } = createContext(
+      {
+        hop: hops[0],
+        seed_id: SEED,
+        space_id: 'default',
+        lookup_index: '.entities.v2.latest.default-00001',
+        direction: 'out',
+        limits,
+      },
+      [[SEED, 'group-1']]
+    );
+    const { output, error } = await runEntityGraphTraversalHopStepDefinition.handler(context);
+    expect(error).toBeUndefined();
+    expect(context.contextManager.callKibanaApi).not.toHaveBeenCalled();
+    expect(indices.getAlias).not.toHaveBeenCalled();
+    expect(esql.query.mock.calls[0][0].query).toContain(
+      'LOOKUP JOIN .entities.v2.latest.default-00001 ON `entity.id`'
+    );
+    expect(output?.nodes.map((n) => n.id)).toEqual(['group-1']);
+  });
+
+  it('resolves the space itself when the given one is not the execution space', async () => {
+    const { context } = createContext(
+      { hop: hops[0], seed_id: SEED, space_id: 'other', direction: 'out', limits },
+      [[SEED, 'group-1']]
+    );
+    // The API reports "default", which is the execution space, so the hop proceeds there.
+    const { error } = await runEntityGraphTraversalHopStepDefinition.handler(context);
+    expect(error).toBeUndefined();
+    expect(context.contextManager.callKibanaApi).toHaveBeenCalledTimes(1);
   });
 
   it('expands an explicit frontier when one is given', async () => {

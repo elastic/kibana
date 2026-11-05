@@ -42,6 +42,12 @@ export const runEntityGraphTraversalHopInputSchema = lazySchema(() =>
       .min(1)
       .max(2048)
       .describe('The entity the traversal starts from; the first hop expands it'),
+    space_id: carried(z.string().min(1).max(256)).describe(
+      'The execution space as the load step resolved it; when it matches the workflow context the hop skips the space lookup'
+    ),
+    lookup_index: carried(z.string().min(1).max(512)).describe(
+      'The concrete latest entity index to join, as the load step resolved it; resolved again when omitted'
+    ),
     frontier: carried(traversalIdListSchema).describe(
       'Ids to expand on this hop; derived when omitted: the seed on the first hop, then the nodes the previous hop admitted'
     ),
@@ -156,6 +162,8 @@ export const runEntityGraphTraversalHopStepCommonDefinition: BaseStepDefinition<
     hop: "\${{ steps.load_scenario.output.hops[variables.hops_executed] }}"
     hops_executed: "\${{ variables.hops_executed }}"
     seed_id: "{{ inputs.seed_id }}"
+    space_id: "\${{ steps.load_scenario.output.space_id }}"
+    lookup_index: "\${{ steps.load_scenario.output.lookup_index }}"
     edges: "\${{ variables.edges }}"
     nodes: "\${{ variables.nodes }}"
     until_matches: "\${{ variables.until_matches }}"
