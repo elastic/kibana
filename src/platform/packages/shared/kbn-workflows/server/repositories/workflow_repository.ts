@@ -97,6 +97,7 @@ export class WorkflowRepository {
           : undefined;
       const managedVersion =
         typeof source.managedVersion === 'number' ? source.managedVersion : undefined;
+      const workflowUid = typeof source.workflowUid === 'string' ? source.workflowUid : undefined;
       return {
         id: workflowId,
         ...(source.owner_id ? { owner_id: source.owner_id as string } : {}),
@@ -118,6 +119,7 @@ export class WorkflowRepository {
         ...(billable !== undefined ? { billable } : {}),
         ...(originManagedWorkflowId !== undefined ? { originManagedWorkflowId } : {}),
         ...(managedVersion !== undefined ? { managedVersion } : {}),
+        ...(workflowUid !== undefined ? { workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       };
     } catch (error) {
@@ -406,6 +408,7 @@ export class WorkflowRepository {
       'managedBy',
       'originManagedWorkflowId',
       'managedVersion',
+      'workflowUid',
       'version',
     ];
 
@@ -482,6 +485,7 @@ export class WorkflowRepository {
         ...(typeof source.managedVersion === 'number'
           ? { managedVersion: source.managedVersion }
           : {}),
+        ...(typeof source.workflowUid === 'string' ? { workflowUid: source.workflowUid } : {}),
         ...pickWorkflowDocumentVersion(source),
       }));
     } finally {

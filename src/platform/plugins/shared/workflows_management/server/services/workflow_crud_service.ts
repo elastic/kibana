@@ -1331,6 +1331,7 @@ export class WorkflowCrudService {
     options?: {
       force?: boolean;
       acknowledgeAclLoss?: boolean;
+      purgeExecutions?: boolean;
       profileId?: string;
       request?: KibanaRequest;
       isAdmin?: boolean;
@@ -1364,6 +1365,7 @@ export class WorkflowCrudService {
           }
         : {}),
       force: options?.force ?? false,
+      purgeExecutions: options?.purgeExecutions,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
       assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
@@ -1450,7 +1452,12 @@ export class WorkflowCrudService {
     });
     if (!versioned) return false;
     ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
-    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
+    const result = await this.deleteWorkflowDocuments(
+      [id],
+      spaceId,
+      { force: true, purgeExecutions: false },
+      versioned
+    );
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
     }
@@ -1592,16 +1599,21 @@ export class WorkflowCrudService {
     prepared: WorkflowProperties,
     existing: WorkflowProperties
   ): WorkflowProperties {
-    return applyWorkflowVersion(
-      {
-        ...prepared,
-        created_at: existing.created_at,
-        createdBy: existing.createdBy,
-        owner_id: existing.owner_id,
-        access_control: existing.access_control,
-      },
-      existing
-    );
+    const document: WorkflowProperties = {
+      ...prepared,
+      created_at: existing.created_at,
+      createdBy: existing.createdBy,
+      owner_id: existing.owner_id,
+      access_control: existing.access_control,
+    };
+    // A rewrite generates a uid. Keep the stored one, and leave a document that
+    // never had one linked by workflow id.
+    if (existing.workflowUid) {
+      document.workflowUid = existing.workflowUid;
+    } else {
+      delete document.workflowUid;
+    }
+    return applyWorkflowVersion(document, existing);
   }
 
   private async executeBulkOverwrite(

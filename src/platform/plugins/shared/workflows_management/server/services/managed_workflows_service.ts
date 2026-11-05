@@ -314,6 +314,7 @@ export class ManagedWorkflowsService {
       now,
       enabled,
       createdAt: existing.created_at,
+      workflowUid: existing.workflowUid,
     });
     const documentWithVersion = applyWorkflowVersion(document, existing);
     if (this.shouldAbortManagedWrite(`install update '${id}'`)) {
@@ -839,6 +840,7 @@ export class ManagedWorkflowsService {
     now: Date;
     enabled?: boolean;
     createdAt?: string;
+    workflowUid?: string;
   }): Promise<WorkflowProperties> {
     const {
       definition,
@@ -850,6 +852,7 @@ export class ManagedWorkflowsService {
       now,
       enabled,
       createdAt,
+      workflowUid,
     } = params;
     const { workflowData } = await this.deps.crudService.prepareWorkflowDocumentForStorage({
       id: workflowDocumentId,
@@ -873,10 +876,17 @@ export class ManagedWorkflowsService {
       managedVersion: definition.version,
     };
 
-    return {
+    const document = {
       ...this.applyManagedEnabledState(managedWorkflowData, enabled ?? workflowData.enabled),
       ...(createdAt ? { created_at: createdAt } : {}),
+      ...(workflowUid ? { workflowUid } : {}),
     };
+    // `createdAt` marks an update of an existing document. Prepare always generates a
+    // uid; drop it unless this document already has one so its history stays on workflow id.
+    if (createdAt && !workflowUid) {
+      delete document.workflowUid;
+    }
+    return document;
   }
 
   private resolveOwnedManagedWorkflow(

@@ -47,7 +47,8 @@ const DATASTREAM_WORKFLOWS_STEP_EXECUTIONS_INDEX_MAPPINGS = {
 
 export const STEP_EXECUTIONS_DATA_STREAM_DEFINITION = {
   name: WORKFLOWS_STEP_EXECUTIONS_DATA_STREAM,
-  version: 1,
+  // Bumped to 2 to roll out the `workflowUid` mapping to existing write indices.
+  version: 2,
   hidden: true,
   settings: {
     auto_expand_replicas: '0-1',

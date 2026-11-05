@@ -197,6 +197,8 @@ export interface GetExecutionStepExecutionsParams {
 export interface SearchStepExecutionsParams {
   request?: KibanaRequest;
   workflowId: string;
+  /** History identity of the current workflow document. When set, step search filters on this instead of `workflowId`. */
+  workflowUid?: string;
   stepId?: string;
   /**
    * When set, only step executions of this type, e.g. `ai.agent`. A step id can be shared by more
@@ -1226,17 +1228,26 @@ export class WorkflowsManagementApi {
   ): Promise<WorkflowExecutionListDto> {
     const access = await this.workflowsService.getAccessControl();
     let accessControlFilter: estypes.QueryDslQueryContainer | undefined;
+    let workflowUid: string | undefined;
     if (params.workflowId) {
       const workflow = await this.workflowsService.getWorkflow(params.workflowId, spaceId, {
         includeDeleted: true,
       });
+      workflowUid = workflow?.workflowUid;
       if (workflow && !(await access.checkAccess(workflow, 'read', params.request))) {
         accessControlFilter = { match_none: {} };
       }
     } else {
       accessControlFilter = await access.executionFilter(spaceId, params.request);
     }
-    return this.workflowsService.getWorkflowExecutions({ ...params, accessControlFilter }, spaceId);
+    return this.workflowsService.getWorkflowExecutions(
+      {
+        ...params,
+        accessControlFilter,
+        ...(workflowUid ? { workflowUid } : {}),
+      },
+      spaceId
+    );
   }
 
   public async searchExecutionsView(
@@ -1422,7 +1433,13 @@ export class WorkflowsManagementApi {
       const access = await this.workflowsService.getAccessControl();
       await access.assertAccess(workflow, 'read', params.request);
     }
-    return this.workflowsService.searchStepExecutions(params, spaceId);
+    return this.workflowsService.searchStepExecutions(
+      {
+        ...params,
+        ...(workflow?.workflowUid ? { workflowUid: workflow.workflowUid } : {}),
+      },
+      spaceId
+    );
   }
 
   private async assertExecutionAccess(

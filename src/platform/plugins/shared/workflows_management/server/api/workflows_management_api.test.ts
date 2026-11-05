@@ -303,6 +303,26 @@ describe('WorkflowsManagementApi', () => {
       expect(access.assertAccess).not.toHaveBeenCalled();
     });
 
+    it('filters editor history by the current document uid', async () => {
+      mockWorkflowsService.getWorkflow.mockResolvedValue({
+        ...workflow,
+        workflowUid: 'uid-current',
+      });
+      const params = { workflowId: workflow.id, request: mockRequest };
+
+      await api.getWorkflowExecutions(params, 'default');
+      expect(mockWorkflowsService.getWorkflowExecutions).toHaveBeenCalledWith(
+        { ...params, accessControlFilter: undefined, workflowUid: 'uid-current' },
+        'default'
+      );
+
+      await api.searchStepExecutions(params, 'default');
+      expect(mockWorkflowsService.searchStepExecutions).toHaveBeenCalledWith(
+        { ...params, workflowUid: 'uid-current' },
+        'default'
+      );
+    });
+
     it('keeps the space filter for cross-workflow history', async () => {
       const access = await mockWorkflowsService.getAccessControl();
       const filter = { bool: { must_not: [{ terms: { workflowId: ['hidden'] } }] } };

@@ -29,6 +29,8 @@ export interface SearchStepExecutionsParams {
   workflowExecutionId?: string;
   /** When set, search steps across all runs of a workflow. Use with optional stepId. */
   workflowId?: string;
+  /** When set, search steps for this document lifetime instead of `workflowId`. */
+  workflowUid?: string;
   stepId?: string;
   /** When set, only step executions of this type, e.g. `ai.agent`. */
   stepType?: string;
@@ -56,6 +58,7 @@ export interface SearchStepExecutionsParams {
 function buildMustQueries(params: {
   workflowExecutionId?: string;
   workflowId?: string;
+  workflowUid?: string;
   stepId?: string;
   stepType?: string;
   spaceId: string;
@@ -67,7 +70,9 @@ function buildMustQueries(params: {
   if (params.workflowExecutionId !== undefined) {
     mustQueries.push({ term: { workflowRunId: params.workflowExecutionId } });
   }
-  if (params.workflowId !== undefined) {
+  if (params.workflowUid !== undefined) {
+    mustQueries.push({ term: { workflowUid: params.workflowUid } });
+  } else if (params.workflowId !== undefined) {
     mustQueries.push({ term: { workflowId: params.workflowId } });
   }
   if (params.stepId !== undefined) {
@@ -105,6 +110,7 @@ export const searchStepExecutions = async ({
   logger,
   workflowExecutionId,
   workflowId,
+  workflowUid,
   stepId,
   stepType,
   additionalQuery,
@@ -117,8 +123,8 @@ export const searchStepExecutions = async ({
   startedAfter,
   startedBefore,
 }: SearchStepExecutionsParams): Promise<StepExecutionListResult> => {
-  if (workflowExecutionId === undefined && workflowId === undefined) {
-    throw new Error('Either workflowExecutionId or workflowId must be provided');
+  if (workflowExecutionId === undefined && workflowId === undefined && workflowUid === undefined) {
+    throw new Error('Either workflowExecutionId, workflowId, or workflowUid must be provided');
   }
 
   try {
@@ -127,6 +133,7 @@ export const searchStepExecutions = async ({
     const mustQueries = buildMustQueries({
       workflowExecutionId,
       workflowId,
+      workflowUid,
       stepId,
       stepType,
       spaceId,
