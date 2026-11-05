@@ -836,6 +836,8 @@ const handleSlackEvents = async (ctx: ConnectorIngressContext): Promise<HandleEv
             payload: hitl.payload,
           },
         ],
+        // Slack interactivity expects HTTP 200. The ingest route otherwise answers 202.
+        httpResponse: { status: 200 },
       };
     }
     // Non-HITL interactivity is ignored (no workflow start).

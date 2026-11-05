@@ -684,6 +684,7 @@ describe('Slack inbound events', () => {
       )
     );
 
+    expect(result.httpResponse).toEqual({ status: 200 });
     expect(result.events).toHaveLength(1);
     expect(result.events[0]?.eventId).toBe(SLACK_HITL_ACTION_EVENT_ID);
     expect(result.events[0]?.payload).toEqual({
@@ -721,6 +722,7 @@ describe('Slack inbound events', () => {
       )
     );
 
+    expect(result.httpResponse).toEqual({ status: 200 });
     expect(result.events[0]?.payload).toMatchObject({
       kind: 'approval',
       approved: false,
@@ -769,6 +771,7 @@ describe('Slack inbound events', () => {
       )
     );
 
+    expect(result.httpResponse).toEqual({ status: 200 });
     expect(JSON.parse(String(result.events[0]?.payload.inputJson))).toEqual({
       reason: 'looks good',
       approved: true,
