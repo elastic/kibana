@@ -70,7 +70,7 @@ export const deleteExceptionListItemByList = async ({
 }: DeleteExceptionListItemByListOptions): Promise<void> =>
   withSpan(
     {
-      labels: { listId, namespaceType },
+      labels: { namespaceType },
       name: 'exceptionLists.deleteExceptionListItemByList',
       type: 'lists',
     },

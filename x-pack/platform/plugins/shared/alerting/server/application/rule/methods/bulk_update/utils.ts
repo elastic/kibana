@@ -47,9 +47,13 @@ export const loadRulesByIds = async (
     return [];
   }
 
-  // search ≈ finder setup; hydrate ≈ find pages (ES children + decrypt self).
+  // createPointInTimeFinder ≈ finder setup; find ≈ ES pages + decrypt.
   const finder = await withSpan(
-    { name: 'loadRulesByIds.search', type: 'rules', labels: { count: String(ids.length) } },
+    {
+      name: 'loadRulesByIds.createPointInTimeFinder',
+      type: 'rules',
+      labels: { count: String(ids.length) },
+    },
     () =>
       context.encryptedSavedObjectsClient.createPointInTimeFinderDecryptedAsInternalUser<RawRule>({
         filter: convertRuleIdsToKueryNode(ids),
@@ -62,7 +66,7 @@ export const loadRulesByIds = async (
   const loaded: Array<SavedObject<RawRule>> = [];
   try {
     await withSpan(
-      { name: 'loadRulesByIds.hydrate', type: 'rules', labels: { count: String(ids.length) } },
+      { name: 'loadRulesByIds.find', type: 'rules', labels: { count: String(ids.length) } },
       async () => {
         for await (const response of finder.find()) {
           loaded.push(...response.saved_objects);
