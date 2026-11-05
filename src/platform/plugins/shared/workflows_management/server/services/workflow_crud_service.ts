@@ -1281,12 +1281,7 @@ export class WorkflowCrudService {
     }
     if (batch)
       await cleanupDeletedWorkflows(result.successfulIds ?? [], {
-        force: options?.force ?? false,
-        spaceId,
         taskScheduler: this.deps.getTaskScheduler(),
-        workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-        stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
-        logger: this.deps.logger,
       });
     return result;
   }
@@ -1331,7 +1326,6 @@ export class WorkflowCrudService {
     options?: {
       force?: boolean;
       acknowledgeAclLoss?: boolean;
-      purgeExecutions?: boolean;
       profileId?: string;
       request?: KibanaRequest;
       isAdmin?: boolean;
@@ -1365,7 +1359,6 @@ export class WorkflowCrudService {
           }
         : {}),
       force: options?.force ?? false,
-      purgeExecutions: options?.purgeExecutions,
       acknowledgeAclLoss: options?.acknowledgeAclLoss ?? false,
       assertCanDelete: (workflow, id) =>
         assertWorkflowOperation(
@@ -1377,7 +1370,6 @@ export class WorkflowCrudService {
         ),
       storage: this.deps.workflowStorage,
       workflowExecutionsDataClient: this.deps.workflowExecutionsDataClient,
-      stepExecutionsDataClient: this.deps.stepExecutionsDataClient,
       taskScheduler: this.deps.getTaskScheduler(),
       logger: this.deps.logger,
       getWorkflowExecutions: (params, sp) =>
@@ -1452,12 +1444,7 @@ export class WorkflowCrudService {
     });
     if (!versioned) return false;
     ensureManagedOrphanUnchanged({ document: versioned.source, orphan, spaceId });
-    const result = await this.deleteWorkflowDocuments(
-      [id],
-      spaceId,
-      { force: true, purgeExecutions: false },
-      versioned
-    );
+    const result = await this.deleteWorkflowDocuments([id], spaceId, { force: true }, versioned);
     if (result.deleted !== 1) {
       throw new Error(result.failures[0]?.error ?? 'Workflow deletion failed.');
     }

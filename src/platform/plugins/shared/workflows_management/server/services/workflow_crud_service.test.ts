@@ -3687,7 +3687,7 @@ describe('batched ordinary workflow deletion', () => {
     );
   });
 
-  it('bounds hard-delete concurrency and shares execution-data cleanup across the batch', async () => {
+  it('bounds hard-delete concurrency across the batch and leaves executions', async () => {
     const core = {
       ...coreMock.createStart(),
       elasticsearch: elasticsearchServiceMock.createStart(),
@@ -3713,8 +3713,8 @@ describe('batched ordinary workflow deletion', () => {
     expect(maximum).toBeGreaterThan(1);
     expect(maximum).toBeLessThanOrEqual(10);
     expect(client.search).toHaveBeenCalledTimes(1);
-    expect(deps.workflowExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
-    expect(deps.stepExecutionsDataClient.deleteByQuery).toHaveBeenCalledTimes(1);
+    expect(deps.workflowExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
+    expect(deps.stepExecutionsDataClient.deleteByQuery).not.toHaveBeenCalled();
   });
 
   it('does not retry a bulk deletion against a concurrently changed definition', async () => {
