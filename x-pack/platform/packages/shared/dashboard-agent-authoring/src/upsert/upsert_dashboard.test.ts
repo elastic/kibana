@@ -2059,6 +2059,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
         renderer: 'custom_content',
+        resolveEsqlVariables: expect.any(Function),
         nlQuery: 'updated prompt',
         esql: 'FROM logs | STATS count = COUNT(*)',
         existingPanel,
@@ -2106,6 +2107,7 @@ describe('executeDashboardUpsert', () => {
 
       expect(resolvePanelContent).toHaveBeenCalledWith({
         renderer: 'custom_content',
+        resolveEsqlVariables: expect.any(Function),
         nlQuery: 'Show error rate KPI',
         esql: 'FROM logs-* | STATS error_rate = AVG(error) BY host',
         hasData: true,

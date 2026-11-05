@@ -208,6 +208,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     http: services.http,
     dataViews: services.dataViews,
     search: services.data.search.search,
+    projectRouting: services.cps?.cpsManager?.getDefaultProjectRouting(),
   });
 
   const timeFieldOptions = timeFieldOptionsProp ?? resolvedTimeFieldOptions;
@@ -240,6 +241,7 @@ export const QuerySandbox: React.FC<QuerySandboxProps> = ({
     timeField,
     timeRange,
     data: services.data,
+    cps: services.cps,
     tab: tabProps?.activeTab,
   });
 

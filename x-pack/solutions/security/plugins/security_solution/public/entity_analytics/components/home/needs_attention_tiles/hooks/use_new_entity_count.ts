@@ -10,9 +10,7 @@ import { lastValueFrom } from 'rxjs';
 import { useQuery } from '@kbn/react-query';
 import type { ESQLSearchResponse } from '@kbn/es-types';
 import type { SecurityAppError } from '@kbn/securitysolution-t-grid';
-import { i18n } from '@kbn/i18n';
 import { useKibana } from '../../../../../common/lib/kibana';
-import { useErrorToast } from '../../../../../common/hooks/use_error_toast';
 import { useTileQueryInputs } from './use_tile_query_inputs';
 import { EMPTY_ENTITY_IDS } from '../data';
 import { buildNewEntityCountQuery } from '../queries/new_entity_query';
@@ -20,6 +18,7 @@ import { EMPTY_ENTITY_FILTERS } from '../../entities_grid/common';
 import type { EntityFilters, TimeRange } from '../../entities_grid/common';
 import { TILE_QUERY_CACHE_OPTIONS } from './tile_query_cache';
 import { isTileQueryTimeout, retryUnlessTimedOut, runWithTileTimeout } from './tile_query_timeout';
+import { TILE_PROJECT_ROUTING } from './tile_project_routing';
 
 export const useNewEntityCount = ({
   spaceId,
@@ -67,7 +66,7 @@ export const useNewEntityCount = ({
             {
               abortSignal: tileSignal,
               strategy: 'esql_async',
-              projectRouting: '_alias:_origin',
+              projectRouting: TILE_PROJECT_ROUTING,
             }
           )
         )
@@ -100,14 +99,6 @@ export const useNewEntityCount = ({
   // timed-out refetch does not leave the last count on show as if it were current.
   const isTimedOut = isTileQueryTimeout(error) || isTileQueryTimeout(indexError);
   const shownResult = isTimedOut ? undefined : result;
-
-  useErrorToast(
-    i18n.translate('xpack.securitySolution.entityAnalytics.home.newEntity.queryError', {
-      defaultMessage: 'There was an error loading new entity data',
-    }),
-    // A timeout gets one notice for the whole page, and a message on the tile, not a toast per tile.
-    isTimedOut ? undefined : (error as SecurityAppError | undefined) ?? indexError
-  );
 
   return {
     count: shownResult?.count ?? 0,
