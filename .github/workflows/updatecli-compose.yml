@@ -30,7 +30,7 @@ jobs:
 
       - name: Free Disk Space
         continue-on-error: true
-        uses: elastic/oblt-actions/github/free-disk-space@317c1a96c854d1503da8b6233bab9f35c27fe61a # elastic/oblt-actions#1186, switch to @v1 once released
+        uses: elastic/oblt-actions/github/free-disk-space
         with:
           android: true
           dotnet: true
