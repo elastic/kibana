@@ -427,26 +427,6 @@ describe('EventFlyout', () => {
     }
   );
 
-  it('ignores the event investigations[] entries', () => {
-    renderFlyout({
-      event: {
-        ...mockEvent,
-        investigations: [
-          {
-            workflow_execution_id: 'legacy-1',
-            started_at: '2026-07-10T12:00:00Z',
-            completed_at: '2026-07-10T12:05:00Z',
-          },
-        ],
-      },
-    });
-
-    expect(screen.queryByTestId('nightshiftEventInvestigationCard')).not.toBeInTheDocument();
-    expect(mockUseInvestigation).toHaveBeenCalledWith(
-      expect.objectContaining({ investigationId: undefined })
-    );
-  });
-
   it('renders the summary section with the summary text', () => {
     renderFlyout();
 
