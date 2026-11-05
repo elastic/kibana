@@ -5,17 +5,31 @@
  * 2.0.
  */
 
-import { EuiButtonEmpty, EuiConfirmModal, htmlIdGenerator } from '@elastic/eui';
+import { EuiButtonEmpty, EuiConfirmModal, EuiSpacer, htmlIdGenerator } from '@elastic/eui';
 import React, { Component, Fragment } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
+import type { CoreServiceAccountsService } from '@kbn/core-security-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { ServiceAccountRoleUsage } from '@kbn/security-ui-components';
+import {
+  hasServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageCallout,
+} from '@kbn/security-ui-components';
 
 interface Props {
   roleName: string;
   canDelete: boolean;
   onDelete: () => void;
   buildFlavor?: BuildFlavor;
+  /**
+   * The service accounts that hold the role, as the page already looked them up, and where to
+   * load their workloads from. The modal warns about them when both are given.
+   */
+  serviceAccountRoleUsage?: {
+    usage: ServiceAccountRoleUsage;
+    serviceAccounts: Pick<CoreServiceAccountsService, 'listWorkloads'>;
+  };
 }
 
 interface State {
@@ -46,7 +60,7 @@ export class DeleteRoleButton extends Component<Props, State> {
   }
 
   public maybeShowModal = () => {
-    const { buildFlavor, roleName } = this.props;
+    const { buildFlavor, roleName, serviceAccountRoleUsage } = this.props;
     if (!this.state.showModal) {
       return null;
     }
@@ -105,6 +119,18 @@ export class DeleteRoleButton extends Component<Props, State> {
             defaultMessage="This action cannot be undone!"
           />
         </p>
+        {serviceAccountRoleUsage &&
+          hasServiceAccountRoleUsageCallout(serviceAccountRoleUsage.usage) && (
+            <>
+              <EuiSpacer size="m" />
+              <ServiceAccountRoleUsageCallout
+                usage={serviceAccountRoleUsage.usage}
+                serviceAccounts={serviceAccountRoleUsage.serviceAccounts}
+                roleCount={1}
+                action="delete"
+              />
+            </>
+          )}
       </EuiConfirmModal>
     );
   };

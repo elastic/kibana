@@ -37,7 +37,13 @@ import type {
 } from '@kbn/security-plugin-types-common';
 import type { BulkUpdateRoleResponse } from '@kbn/security-plugin-types-public/src/roles/roles_api_client';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
-import { KibanaPrivilegeTable, PrivilegeFormCalculator } from '@kbn/security-ui-components';
+import {
+  hasServiceAccountRoleUsageCallout,
+  KibanaPrivilegeTable,
+  PrivilegeFormCalculator,
+  ServiceAccountRoleUsageCallout,
+  useServiceAccountRoleUsage,
+} from '@kbn/security-ui-components';
 
 import type { Space } from '../../../../../common';
 import {
@@ -71,7 +77,8 @@ const createRolesComboBoxOptions = (roles: Role[]): Array<EuiComboBoxOptionOptio
 
 export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const { space, onSaveCompleted, closeFlyout, features, defaultSelected = [] } = props;
-  const { logger, notifications, license, invokeClient, getUrlForApp } = useEditSpaceServices();
+  const { logger, notifications, license, invokeClient, getUrlForApp, security } =
+    useEditSpaceServices();
   const { dispatch: storeDispatch } = useEditSpaceStore();
   const [assigningToRole, setAssigningToRole] = useState(false);
   const [fetchingDataDeps, setFetchingDataDeps] = useState(false);
@@ -79,6 +86,12 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
   const [spaceUnallocatedRoles, setSpaceUnallocatedRole] = useState<Role[]>([]);
   const [selectedRoles, setSelectedRoles] = useState<ReturnType<typeof createRolesComboBoxOptions>>(
     createRolesComboBoxOptions(defaultSelected)
+  );
+  // Debounced, since the selection changes one pick at a time.
+  const serviceAccountRoleUsage = useServiceAccountRoleUsage(
+    security.serviceAccounts,
+    selectedRoles.map(({ label }) => label),
+    { debounceMs: 300 }
   );
   const manageRoleLinkId = useGeneratedHtmlId();
   const isEditOperation = useRef(Boolean(defaultSelected.length));
@@ -462,6 +475,16 @@ export const PrivilegesRolesForm: FC<PrivilegesRolesFormProps> = (props) => {
                   />
                 )}
               </EuiFormRow>
+              {hasServiceAccountRoleUsageCallout(serviceAccountRoleUsage) && (
+                <EuiFormRow fullWidth>
+                  <ServiceAccountRoleUsageCallout
+                    usage={serviceAccountRoleUsage}
+                    serviceAccounts={security.serviceAccounts}
+                    roleCount={selectedRoles.length}
+                    action="update"
+                  />
+                </EuiFormRow>
+              )}
               <EuiFormRow
                 label={i18n.translate(
                   'xpack.spaces.management.spaceDetails.roles.assign.privilegesLabelText',

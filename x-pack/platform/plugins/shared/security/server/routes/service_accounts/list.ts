@@ -5,44 +5,13 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
-
 import { listServiceAccountsQuerySchema } from './schemas';
 import { serviceAccountsUnavailable } from './unavailable';
+import { withWorkloadCounts } from './workload_counts';
 import type { RouteDefinitionParams } from '..';
 import type { ListServiceAccountsResponse } from '../../../common/service_accounts';
-import { getDetailedErrorMessage, wrapIntoCustomErrorResponse } from '../../errors';
-import type { ServiceAccountsManagementApi } from '../../service_accounts';
+import { wrapIntoCustomErrorResponse } from '../../errors';
 import { createLicensedRouteHandler } from '../licensed_route_handler';
-
-/**
- * Adds the number of bound workloads to each account. A failed count doesn't fail the list: the
- * accounts come back without counts instead.
- */
-const withWorkloadCounts = async (
-  page: ListServiceAccountsResponse,
-  management: ServiceAccountsManagementApi,
-  logger: Logger
-): Promise<ListServiceAccountsResponse> => {
-  const ids = page.serviceAccounts.map(({ id }) => id);
-  try {
-    const counts = await management.countBoundWorkloads(ids);
-    return {
-      ...page,
-      serviceAccounts: page.serviceAccounts.map((account) => ({
-        ...account,
-        workloadCount: counts.get(account.id) ?? 0,
-      })),
-    };
-  } catch (error) {
-    logger.warn(
-      `Unable to count the workloads bound to ${
-        ids.length
-      } service account(s): ${getDetailedErrorMessage(error)}`
-    );
-    return page;
-  }
-};
 
 export function defineListServiceAccountsRoute({
   router,
@@ -72,9 +41,15 @@ export function defineListServiceAccountsRoute({
         }
 
         const page = await serviceAccounts.backend.list(request, request.query);
-        return response.ok({
-          body: await withWorkloadCounts(page, serviceAccounts.management, logger),
-        });
+        const body: ListServiceAccountsResponse = {
+          ...page,
+          serviceAccounts: await withWorkloadCounts(
+            page.serviceAccounts,
+            serviceAccounts.management,
+            logger
+          ),
+        };
+        return response.ok({ body });
       } catch (error) {
         return response.customError(wrapIntoCustomErrorResponse(error));
       }

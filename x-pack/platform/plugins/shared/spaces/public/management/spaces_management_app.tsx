@@ -167,6 +167,7 @@ export const spacesManagementApp = Object.freeze({
               userProfile={coreStart.userProfile}
               theme={coreStart.theme}
               i18n={coreStart.i18n}
+              security={coreStart.security}
               logger={logger}
               spacesManager={spacesManager}
               spaceId={spaceId}

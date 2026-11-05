@@ -38,6 +38,7 @@ import type {
   ScopedHistory,
 } from '@kbn/core/public';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
+import type { CoreServiceAccountsService } from '@kbn/core-security-browser';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 import type { KibanaFeature } from '@kbn/features-plugin/common';
@@ -49,6 +50,12 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
 import { REMOTE_CLUSTERS_PATH } from '@kbn/remote-clusters-plugin/public';
 import { KibanaPrivileges } from '@kbn/security-role-management-model';
+import {
+  hasServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageSaveHint,
+  useServiceAccountRoleUsage,
+} from '@kbn/security-ui-components';
 import { API_VERSIONS as SPACES_API_VERSIONS } from '@kbn/spaces-plugin/common';
 import type { Space, SpacesApiUi } from '@kbn/spaces-plugin/public';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
@@ -138,6 +145,7 @@ export interface Props extends StartServices {
   docLinks: DocLinksStart;
   http: HttpStart;
   license: SecurityLicense;
+  serviceAccounts: CoreServiceAccountsService;
   uiCapabilities: Capabilities;
   notifications: NotificationsStart;
   fatalErrors: FatalErrorsSetup;
@@ -395,6 +403,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
   spacesApiUi,
   buildFlavor,
   cloudOrgUrl,
+  serviceAccounts,
   ...startServices
 }) => {
   const isDarkMode = useKibanaIsDarkMode();
@@ -437,6 +446,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
   );
 
   const isEditingExistingRole = !!roleName && action === 'edit';
+  // Only a role that can still be changed here is worth warning about.
+  const canChangeRole =
+    isEditingExistingRole &&
+    !!role &&
+    !hasReadOnlyPrivileges &&
+    !checkIfRoleReadOnly(role) &&
+    !checkIfRoleReserved(role);
+  const serviceAccountRoleUsage = useServiceAccountRoleUsage(
+    serviceAccounts,
+    canChangeRole && roleName ? [roleName] : []
+  );
 
   useEffect(() => {
     if (hasReadOnlyPrivileges && !isEditingExistingRole) {
@@ -557,6 +577,7 @@ export const EditRolePage: FunctionComponent<Props> = ({
             canDelete={true}
             onDelete={handleDeleteRole}
             buildFlavor={buildFlavor}
+            serviceAccountRoleUsage={{ usage: serviceAccountRoleUsage, serviceAccounts }}
           />
         </EuiFlexItem>
       );
@@ -912,6 +933,17 @@ export const EditRolePage: FunctionComponent<Props> = ({
                 />
               </Fragment>
             )}
+            {hasServiceAccountRoleUsageCallout(serviceAccountRoleUsage) && (
+              <Fragment>
+                <EuiSpacer size="s" />
+                <ServiceAccountRoleUsageCallout
+                  usage={serviceAccountRoleUsage}
+                  serviceAccounts={serviceAccounts}
+                  roleCount={1}
+                  action="update"
+                />
+              </Fragment>
+            )}
           </EuiFlexItem>
           <EuiFlexItem>{getRoleNameAndDescription()}</EuiFlexItem>
           <EuiFlexItem>
@@ -956,7 +988,14 @@ export const EditRolePage: FunctionComponent<Props> = ({
           </EuiFlexItem>
           {!isRoleReadOnly && (
             <EuiFlexItem>
-              <EuiFormRow fullWidth={false}>{getFormButtons()}</EuiFormRow>
+              <EuiFormRow fullWidth={false}>
+                <div>
+                  {getFormButtons()}
+                  {hasUnsavedChanges && (
+                    <ServiceAccountRoleUsageSaveHint usage={serviceAccountRoleUsage} />
+                  )}
+                </div>
+              </EuiFormRow>
             </EuiFlexItem>
           )}
         </EuiFlexGroup>

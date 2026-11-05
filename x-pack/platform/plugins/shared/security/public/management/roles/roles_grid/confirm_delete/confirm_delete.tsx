@@ -13,6 +13,7 @@ import {
   EuiModalFooter,
   EuiModalHeader,
   EuiModalHeaderTitle,
+  EuiSpacer,
   EuiText,
   htmlIdGenerator,
 } from '@elastic/eui';
@@ -20,8 +21,14 @@ import React, { Component, Fragment } from 'react';
 
 import type { BuildFlavor } from '@kbn/config';
 import type { NotificationsStart } from '@kbn/core/public';
+import type { CoreServiceAccountsService } from '@kbn/core-security-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  hasServiceAccountRoleUsageCallout,
+  ServiceAccountRoleUsageCallout,
+  useServiceAccountRoleUsage,
+} from '@kbn/security-ui-components';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
 import type { StartServices } from '../../../..';
@@ -35,11 +42,38 @@ interface Props extends StartServices {
   rolesAPIClient: PublicMethodsOf<RolesAPIClient>;
   buildFlavor: BuildFlavor;
   cloudOrgUrl?: string;
+  serviceAccounts: CoreServiceAccountsService;
 }
 
 interface State {
   deleteInProgress: boolean;
 }
+
+/** Warns about the service accounts that hold the roles about to be deleted. */
+const RolesServiceAccountUsage = ({
+  serviceAccounts,
+  roles,
+}: {
+  serviceAccounts: CoreServiceAccountsService;
+  roles: string[];
+}) => {
+  const usage = useServiceAccountRoleUsage(serviceAccounts, roles);
+  if (!hasServiceAccountRoleUsageCallout(usage)) {
+    return null;
+  }
+
+  return (
+    <>
+      <EuiSpacer size="m" />
+      <ServiceAccountRoleUsageCallout
+        usage={usage}
+        serviceAccounts={serviceAccounts}
+        roleCount={roles.length}
+        action="delete"
+      />
+    </>
+  );
+};
 
 export class ConfirmDelete extends Component<Props, State> {
   constructor(props: Props) {
@@ -116,6 +150,10 @@ export class ConfirmDelete extends Component<Props, State> {
               </p>
             )}
           </EuiText>
+          <RolesServiceAccountUsage
+            serviceAccounts={this.props.serviceAccounts}
+            roles={rolesToDelete}
+          />
         </EuiModalBody>
         <EuiModalFooter>
           <EuiButtonEmpty

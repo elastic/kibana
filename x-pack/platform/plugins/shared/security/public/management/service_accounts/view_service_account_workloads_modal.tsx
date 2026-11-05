@@ -22,9 +22,9 @@ import useLatest from 'react-use/lib/useLatest';
 
 import type { ServiceAccountBoundWorkload } from '@kbn/core-security-common';
 import { i18n } from '@kbn/i18n';
+import { BoundWorkloadsTable } from '@kbn/security-ui-components';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 
-import { BoundWorkloadsTable } from './bound_workloads_table';
 import type {
   ServiceAccountDirectoryEntry,
   ServiceAccountsAPIClient,

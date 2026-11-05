@@ -5,6 +5,7 @@
     "types": [
       "jest",
       "node",
+      "@testing-library/jest-dom",
       "react",
       "@kbn/ambient-ui-types"
     ]
@@ -24,6 +25,9 @@
     "@kbn/security-plugin-types-common",
     "@kbn/test-jest-helpers",
     "@kbn/security-role-management-model",
-    "@kbn/features-plugin"
+    "@kbn/features-plugin",
+    "@kbn/core-security-browser",
+    "@kbn/core-security-common",
+    "@kbn/ui-callout"
   ]
 }

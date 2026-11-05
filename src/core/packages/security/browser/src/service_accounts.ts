@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CreateServiceAccountParams, ServiceAccount } from '@kbn/core-security-common';
+import type {
+  CreateServiceAccountParams,
+  FindServiceAccountsByRolesResponse,
+  ServiceAccount,
+  ServiceAccountBoundWorkload,
+} from '@kbn/core-security-common';
 
 /**
  * Core's service accounts service
@@ -32,4 +37,20 @@ export interface CoreServiceAccountsService {
    * @param params The name and roles for the new service account.
    */
   create(params: CreateServiceAccountParams): Promise<ServiceAccount>;
+
+  /**
+   * Find the service accounts that hold any of the given roles, with the number of workloads bound
+   * to each. Requires the `manage_security` cluster privilege.
+   *
+   * @param roles The role names to look for. Must not be empty.
+   */
+  findByRoles(roles: string[]): Promise<FindServiceAccountsByRolesResponse>;
+
+  /**
+   * List every workload bound to a service account, across spaces. Requires the `manage_security`
+   * cluster privilege.
+   *
+   * @param serviceAccountId The id of the account.
+   */
+  listWorkloads(serviceAccountId: string): Promise<ServiceAccountBoundWorkload[]>;
 }

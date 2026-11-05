@@ -16,6 +16,7 @@ import {
   overlayServiceMock,
   themeServiceMock,
 } from '@kbn/core/public/mocks';
+import { securityServiceMock } from '@kbn/core-security-browser-mocks';
 import { asSpaceId } from '@kbn/core-spaces-common';
 import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
@@ -40,6 +41,7 @@ const notifications = notificationServiceMock.createStartContract();
 const overlays = overlayServiceMock.createStartContract();
 const theme = themeServiceMock.createStartContract();
 const userProfile = userProfileServiceMock.createStart();
+const security = securityServiceMock.createStart();
 const i18n = i18nServiceMock.createStartContract();
 const logger = loggingSystemMock.createLogger();
 
@@ -66,6 +68,7 @@ const TestComponent: React.FC<React.PropsWithChildren> = ({ children }) => {
         getSecurityLicense={getSecurityLicenseMock}
         theme={theme}
         userProfile={userProfile}
+        security={security}
         i18n={i18n}
         logger={logger}
         enableSecurityLink=""

@@ -33,6 +33,8 @@ const createStartMock = () => {
       isEnabled: jest.fn().mockReturnValue(false),
       canCreate: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      findByRoles: jest.fn(),
+      listWorkloads: jest.fn(),
     }),
   });
 
@@ -56,6 +58,8 @@ const createInternalStartMock = () => {
       isEnabled: jest.fn().mockReturnValue(false),
       canCreate: jest.fn().mockReturnValue(false),
       create: jest.fn(),
+      findByRoles: jest.fn(),
+      listWorkloads: jest.fn(),
     }),
   });
 
