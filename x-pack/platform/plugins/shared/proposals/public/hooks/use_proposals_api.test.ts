@@ -30,6 +30,7 @@ import {
   PROPOSAL_SETTLING_POLL_INTERVAL_MS,
 } from '@kbn/proposals-common';
 import { queryKeys } from '../query_keys';
+import { inFlightDecisions } from './in_flight_decisions';
 import { proposalDecisionSignal } from './proposal_decision_signal';
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
@@ -66,6 +67,8 @@ const makeHttpFetchError = (status: number): IHttpFetchError => {
   });
   return err as unknown as IHttpFetchError;
 };
+
+afterEach(() => inFlightDecisions.reset());
 
 describe('retryOnTransientError', () => {
   it('retries non-HTTP errors (e.g. network failure)', () => {
@@ -556,6 +559,95 @@ describe('useApproveProposal', () => {
     expect(http.get).toHaveBeenCalledTimes(2);
   });
 
+  it('keeps the proposal in flux and approving until a list read shows its decision', async () => {
+    jest.useFakeTimers();
+    try {
+      const http = makeHttp();
+      http.post.mockResolvedValue({ id: 'slow-1', status: 'approved' });
+      // The by-id read shows no decision for the whole wait.
+      http.get.mockResolvedValue({ decision: undefined });
+      useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+        typeof useKibana
+      >);
+
+      const { Wrapper } = createWrapper();
+      const { result } = renderHook(
+        () => ({
+          approve: useApproveProposal(),
+          approving: useIsApprovingProposal('slow-1'),
+          declining: useIsDecliningProposal('slow-1'),
+        }),
+        { wrapper: Wrapper }
+      );
+
+      const approval = result.current.approve.mutateAsync({ id: 'slow-1', body: {} });
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(10_000);
+      });
+      await act(async () => {
+        await approval;
+      });
+
+      expect(result.current.approve.isLoading).toBe(false);
+      expect(result.current.approving).toBe(true);
+      expect(result.current.declining).toBe(false);
+      expect(isInFlux({ id: 'slow-1', decision: undefined, status: 'pending' })).toBe(true);
+      expect(isInFlux({ id: 'other', decision: undefined, status: 'pending' })).toBe(false);
+
+      await act(async () => {
+        await jest.advanceTimersByTimeAsync(24 * 60 * 60 * 1000);
+      });
+      expect(isInFlux({ id: 'slow-1', decision: undefined, status: 'pending' })).toBe(true);
+
+      await act(async () => {
+        isInFlux({ id: 'slow-1', decision: 'approved', status: 'succeeded' });
+        // The fake clock also holds back the microtask that notifies the hooks.
+        await jest.advanceTimersByTimeAsync(0);
+      });
+      expect(result.current.approving).toBe(false);
+      expect(isInFlux({ id: 'slow-1', decision: undefined, status: 'pending' })).toBe(false);
+    } finally {
+      jest.useRealTimers();
+    }
+  });
+
+  it('stops waiting for a decision when the proposal expires or has a newer revision', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'end-1', status: 'approved' });
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'end-1', body: {} });
+    expect(isInFlux({ id: 'end-1', decision: undefined, status: 'expired' })).toBe(false);
+
+    await result.current.mutateAsync({ id: 'end-1', body: {} });
+    expect(
+      isInFlux({ id: 'end-1', decision: undefined, status: 'pending', supersededBy: 'end-2' })
+    ).toBe(false);
+  });
+
+  it('keeps the proposal in flux when the list still shows no decision after the decision landed', async () => {
+    const http = makeHttp();
+    http.post.mockResolvedValue({ id: 'lag-1', status: 'approved' });
+    // The by-id read shows the decision. The list read can still show old data.
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    const { Wrapper } = createWrapper();
+    const { result } = renderHook(() => useApproveProposal(), { wrapper: Wrapper });
+
+    await result.current.mutateAsync({ id: 'lag-1', body: {} });
+
+    expect(isInFlux({ id: 'lag-1', decision: undefined, status: 'pending' })).toBe(true);
+    expect(isInFlux({ id: 'lag-1', decision: 'approved', status: 'succeeded' })).toBe(false);
+  });
+
   it('surfaces the error when the API call rejects', async () => {
     const http = makeHttp();
     http.post.mockRejectedValue(new Error('Server error'));
@@ -621,11 +713,11 @@ describe('after an approval ends, before the new data arrives', () => {
     await result.current.mutateAsync({ id: 'p-1', body: { actionInput: {} } as never });
     await waitFor(() => expect(seen[seen.length - 1]).toBe('approving=false status=executing'));
 
-    expect(seen).not.toContain('approving=false status=pending approved');
-    expect(seen.slice(seen.indexOf('approving=true status=pending'))).toEqual([
-      'approving=true status=pending',
-      'approving=false status=executing',
-    ]);
+    // After approving starts, the list never shows old data with "not approving".
+    const afterStart = seen.slice(seen.indexOf('approving=true status=pending'));
+    expect(afterStart[0]).toBe('approving=true status=pending');
+    expect(afterStart).not.toContain('approving=false status=pending');
+    expect(afterStart[afterStart.length - 1]).toBe('approving=false status=executing');
   });
 });
 
@@ -703,7 +795,7 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
     expect(result.current.declining).toBe(false);
   });
 
-  it('is true only for the proposal actually being approved, and settles back to false', async () => {
+  it('is true only for the proposal actually being approved, and settles back to false once a read shows the decision', async () => {
     const http = makeHttp();
     let resolvePost: (value: unknown) => void = () => {};
     http.post.mockImplementation(
@@ -743,10 +835,16 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
       await mutatePromise;
     });
 
+    // The request has ended, but no read shows the decision yet.
+    expect(result.current.isApprovingP1).toBe(true);
+
+    await act(async () => {
+      isInFlux({ id: 'p-1', decision: 'approved', status: 'executing' });
+    });
     await waitFor(() => expect(result.current.isApprovingP1).toBe(false));
   });
 
-  it('is true only for the proposal actually being declined, and settles back to false', async () => {
+  it('is true only for the proposal actually being declined, and settles back to false once a read shows the decision', async () => {
     const http = makeHttp();
     let resolvePost: (value: unknown) => void = () => {};
     http.post.mockImplementation(
@@ -788,6 +886,11 @@ describe('useIsApprovingProposal / useIsDecliningProposal', () => {
       await mutatePromise;
     });
 
+    expect(result.current.isDecliningP1).toBe(true);
+
+    await act(async () => {
+      isInFlux({ id: 'p-1', decision: 'dismissed', status: 'no_action' });
+    });
     await waitFor(() => expect(result.current.isDecliningP1).toBe(false));
   });
 });
@@ -924,5 +1027,56 @@ describe('useSettleDeclinedProposal', () => {
     });
 
     expect(queryClient.getMutationCache().getAll()).toHaveLength(0);
+  });
+});
+
+describe('a decision made in another QueryClient', () => {
+  it('reads as approving and declining here until it ends', async () => {
+    const releaseApprove: Array<() => void> = [];
+    const http = makeHttp();
+    http.post.mockImplementation(
+      () => new Promise((resolve) => releaseApprove.push(() => resolve({ id: 'x-1' })))
+    );
+    http.get.mockResolvedValue({ decision: 'approved' });
+    useKibanaMock.mockReturnValue({ services: { http } } as unknown as ReturnType<
+      typeof useKibana
+    >);
+
+    // Two hosts: the chat page and the investigation flyout.
+    const chat = createWrapper();
+    const flyout = createWrapper();
+    const { result: chatApprove } = renderHook(() => useApproveProposal(), {
+      wrapper: chat.Wrapper,
+    });
+    const { result: flyoutState } = renderHook(
+      () => ({
+        approving: useIsApprovingProposal('x-1'),
+        declining: useIsDecliningProposal('x-1'),
+        otherApproving: useIsApprovingProposal('x-2'),
+      }),
+      { wrapper: flyout.Wrapper }
+    );
+    expect(flyoutState.current).toEqual({
+      approving: false,
+      declining: false,
+      otherApproving: false,
+    });
+
+    let approval: Promise<unknown> = Promise.resolve();
+    act(() => {
+      approval = chatApprove.current.mutateAsync({ id: 'x-1', body: {} });
+    });
+    await waitFor(() => expect(flyoutState.current.approving).toBe(true));
+    expect(flyoutState.current.declining).toBe(false);
+    expect(flyoutState.current.otherApproving).toBe(false);
+
+    releaseApprove.forEach((release) => release());
+    await act(async () => {
+      await approval;
+    });
+    await act(async () => {
+      isInFlux({ id: 'x-1', decision: 'approved', status: 'executing' });
+    });
+    await waitFor(() => expect(flyoutState.current.approving).toBe(false));
   });
 });
