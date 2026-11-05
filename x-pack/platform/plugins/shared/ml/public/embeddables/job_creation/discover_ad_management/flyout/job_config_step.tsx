@@ -518,7 +518,7 @@ export const JobConfigStep: FC<Props> = ({ suggestion, indexPattern, creator, on
           >
             <FormattedMessage
               id="xpack.ml.discoverADManagement.createButton"
-              defaultMessage="Create and start job"
+              defaultMessage="Create job"
             />
           </EuiButton>
         </>
