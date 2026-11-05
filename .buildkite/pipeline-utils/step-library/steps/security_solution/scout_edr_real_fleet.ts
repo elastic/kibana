@@ -8,11 +8,12 @@
  */
 
 import { commandStep } from '../../helpers.ts';
-import { retry, spotAgent, spotZones } from '../../presets.ts';
+import { pdBalanced, retry, spotAgent, spotZones } from '../../presets.ts';
 import type { Step } from '../../types.ts';
 
 const edrRealFleetAgents = {
   ...spotAgent('n2-highmem-4', spotZones.centralFCA),
+  ...pdBalanced,
   enableNestedVirtualization: true,
 };
 
