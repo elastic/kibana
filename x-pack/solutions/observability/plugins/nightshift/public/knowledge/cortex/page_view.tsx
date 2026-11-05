@@ -23,23 +23,23 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 import { getCortexEntityTypeLabel, getCortexStatusLabel } from './entity_type_labels';
-import { CortexPageEditor } from './page_editor';
-import { useArchiveCortexPage, useCortexPage } from './use_cortex';
+import { useArchiveCortexPage, useCortexPage, useRestoreCortexPage } from './use_cortex';
 import { contentWithoutDuplicateTitle, pageMarkdownCss } from '../page_markdown';
 
 interface CortexPageViewProps {
   pageId: string;
-  canEdit: boolean;
+  /** Manage privilege: archive and restore only (create/edit UI is disabled for now). */
+  canManage: boolean;
   onArchived: () => void;
 }
 
-export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewProps) {
+export function CortexPageView({ pageId, canManage, onArchived }: CortexPageViewProps) {
   const { data, isLoading, isError } = useCortexPage(pageId);
   const page = data?.page;
-  const [isEditing, setIsEditing] = useState(false);
   const [isConfirmingArchive, setIsConfirmingArchive] = useState(false);
   const archiveTitleId = useGeneratedHtmlId();
   const { mutate: archivePage, isLoading: isArchiving } = useArchiveCortexPage();
+  const { mutate: restorePage, isLoading: isRestoring } = useRestoreCortexPage();
 
   if (isLoading) {
     return <EuiLoadingSpinner size="l" data-test-subj="nightshiftCortexPageLoading" />;
@@ -70,11 +70,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
   }
 
   const { version } = page;
-  const canWrite = canEdit && version !== undefined;
-
-  if (isEditing && version !== undefined) {
-    return <CortexPageEditor page={page} version={version} onDone={() => setIsEditing(false)} />;
-  }
+  const canWrite = canManage && version !== undefined;
 
   return (
     <div data-test-subj="nightshiftCortexPageView">
@@ -84,17 +80,29 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
             <h2>{page.title}</h2>
           </EuiTitle>
         </EuiFlexItem>
-        {canWrite && (
+        {canWrite && page.status === 'archived' && (
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty
               size="s"
-              iconType="pencil"
-              onClick={() => setIsEditing(true)}
-              data-test-subj="nightshiftCortexPageEdit"
+              iconType="refresh"
+              isLoading={isRestoring}
+              onClick={() =>
+                restorePage({
+                  entity_type: page.entity_type,
+                  slug: page.slug,
+                  title: page.title,
+                  // Keep an absent description absent: sending '' would write an empty one.
+                  ...(page.description !== undefined ? { description: page.description } : {}),
+                  content: page.content,
+                  status: 'tentative',
+                  version,
+                })
+              }
+              data-test-subj="nightshiftCortexPageRestore"
             >
               <FormattedMessage
-                id="xpack.nightshift.knowledge.cortex.pageEditButton"
-                defaultMessage="Edit"
+                id="xpack.nightshift.knowledge.cortex.pageRestoreButton"
+                defaultMessage="Restore"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
@@ -196,7 +204,7 @@ export function CortexPageView({ pageId, canEdit, onArchived }: CortexPageViewPr
           <p>
             <FormattedMessage
               id="xpack.nightshift.knowledge.cortex.archiveConfirmDescription"
-              defaultMessage="Investigations will stop loading this page. You can restore it later by editing its status."
+              defaultMessage="Investigations will stop loading this page. You can restore it later from the Archived filter."
             />
           </p>
         </EuiConfirmModal>

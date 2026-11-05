@@ -19,7 +19,6 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { getNightshiftCapabilities } from '@kbn/nightshift-shared';
 import { useKibana } from '../../hooks/use_kibana';
 import { CortexActivity } from './activity';
-import { CortexCreatePageModal } from './create_page_modal';
 import { CortexHome } from './home';
 import { CortexPageView } from './page_view';
 import { CortexSidebar, type CortexSidebarSelection } from './sidebar';
@@ -33,7 +32,6 @@ export function CortexTab() {
   const [searchQuery, setSearchQuery] = useState('');
   const [statusFilter, setStatusFilter] = useState<CortexStatusFilter>('all');
   const [selection, setSelection] = useState<CortexSidebarSelection>({ kind: 'home' });
-  const [isCreatingPage, setIsCreatingPage] = useState(false);
   const [archiveCount, setArchiveCount] = useState(0);
   const homeTitleRef = useRef<HTMLHeadingElement>(null);
   const { data, isLoading, isError } = useCortexPages();
@@ -110,7 +108,6 @@ export function CortexTab() {
             onStatusFilterChange={setStatusFilter}
             selection={selection}
             onSelect={setSelection}
-            onCreatePage={canManage ? () => setIsCreatingPage(true) : undefined}
           />
         </EuiPanel>
       </EuiFlexItem>
@@ -151,7 +148,7 @@ export function CortexTab() {
               <CortexPageView
                 key={selection.id}
                 pageId={selection.id}
-                canEdit={canManage}
+                canManage={canManage}
                 onArchived={() => {
                   setSelection({ kind: 'home' });
                   setArchiveCount((count) => count + 1);
@@ -161,17 +158,6 @@ export function CortexTab() {
           </div>
         </EuiPanel>
       </EuiFlexItem>
-      {isCreatingPage && (
-        <CortexCreatePageModal
-          onClose={() => setIsCreatingPage(false)}
-          onCreated={(id) => {
-            setIsCreatingPage(false);
-            setStatusFilter('all');
-            setSearchQuery('');
-            setSelection({ kind: 'page', id });
-          }}
-        />
-      )}
     </EuiFlexGroup>
   );
 }
