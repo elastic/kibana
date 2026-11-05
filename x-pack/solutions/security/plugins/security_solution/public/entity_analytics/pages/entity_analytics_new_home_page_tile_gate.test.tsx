@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { fireEvent, render, screen, within } from '@testing-library/react';
 import { TestProviders } from '../../common/mock';
 import { EntityAnalyticsNewHomePage } from './entity_analytics_new_home_page';
 import * as tileHooks from '../components/home/needs_attention_tiles/hooks';
@@ -87,7 +87,11 @@ jest.mock('../components/home/entities_grid/hooks/use_entity_analytics_url_state
   }),
 }));
 jest.mock('../components/home/entities_grid/hooks/use_search_bar_expression', () => ({
-  useSearchBarExpression: jest.fn(() => ({ isSearchOverridesPending: false })),
+  useSearchBarExpression: jest.fn(() => ({
+    isSearchOverridesPending: false,
+    applicableFilters: [],
+    ignoredFields: [],
+  })),
 }));
 jest.mock('../components/home/entities_grid/components/entities_grid', () => ({
   EntitiesGrid: jest.fn(() => null),
@@ -448,7 +452,11 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
 
   afterEach(() => {
     mockUrlStateOverrides = {};
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 
   it('skips the alert tiles and says why when Alerts is None but the alerts index is readable', () => {
@@ -511,6 +519,8 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       searchExpression: 'entity.name == "a"',
       rawSearchExpression: 'entity.name == "a"',
       isSearchOverridesPending: true,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
     const { runKey, isFilterPending } = loadTelemetry();
@@ -521,11 +531,17 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
       searchExpression: '(entity.name == "a" AND NOT entity.id IN ("x")) OR entity.id IN ("y")',
       rawSearchExpression: 'entity.name == "a"',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     rerender(<EntityAnalyticsNewHomePage />);
     expect(loadTelemetry()).toMatchObject({ runKey, isFilterPending: false });
 
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
   });
 
   describe('the key of a grid load', () => {
@@ -563,6 +579,8 @@ describe('EntityAnalyticsNewHomePage: alerts feature privilege', () => {
         (useSearchBarExpression as jest.Mock).mockReturnValue({
           rawSearchExpression,
           isSearchOverridesPending: false,
+          applicableFilters: [],
+          ignoredFields: [],
         });
         return runKeyWith({});
       };
@@ -927,6 +945,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -960,6 +980,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -990,6 +1012,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
       searchExpression: 'KQL("bob")',
       isSearchOverridesPending: false,
       mainEntityOnlySearch: 'KQL("bob")',
+      applicableFilters: [],
+      ignoredFields: [],
     });
     const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
     rerender(<EntityAnalyticsNewHomePage />);
@@ -1001,6 +1025,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: {
@@ -1027,6 +1053,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
@@ -1035,7 +1063,11 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
   });
 
   it('keeps the counts, deltas and sparklines without a search', () => {
-    (useSearchBarExpression as jest.Mock).mockReturnValue({ isSearchOverridesPending: false });
+    (useSearchBarExpression as jest.Mock).mockReturnValue({
+      isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
+    });
     render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
 
     expect(getCard('entitiesWithAlerts')).toMatchObject({ value: 5, delta: 1 });
@@ -1045,6 +1077,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("host.name: a")',
       isSearchOverridesPending: false,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,
@@ -1059,6 +1093,8 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
     (useSearchBarExpression as jest.Mock).mockReturnValue({
       searchExpression: 'KQL("asset.criticality: low_impact")',
       isSearchOverridesPending: true,
+      applicableFilters: [],
+      ignoredFields: [],
     });
     hooks.useSearchedTileEntityIds.mockReturnValue({
       searchedTileEntityIds: undefined,
@@ -1068,5 +1104,75 @@ describe('EntityAnalyticsNewHomePage: the search narrows the tiles', () => {
 
     expect(lastOptions('useSearchedTileEntityIds').isReady).toBe(false);
     expect(getCard('entitiesWithAlerts')?.isLoading).toBe(true);
+  });
+
+  describe('the callout on the ignored filters', () => {
+    const CALLOUT = 'entity-analytics-ignored-filters-callout';
+    const mockIgnoredFields = (ignoredFields: string[]) =>
+      (useSearchBarExpression as jest.Mock).mockReturnValue({
+        isSearchOverridesPending: false,
+        applicableFilters: [],
+        ignoredFields,
+      });
+
+    it('is not shown when no filter was ignored', () => {
+      mockIgnoredFields([]);
+      render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown with the ignored fields, and hidden once dismissed', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.workflow_status');
+
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('stays hidden when an ignored field is removed after the dismiss', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status', 'kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.queryByTestId(CALLOUT)).not.toBeInTheDocument();
+    });
+
+    it('is shown again when a dismissed field is removed and added back', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields([]);
+      rerender(<EntityAnalyticsNewHomePage />);
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toBeInTheDocument();
+    });
+
+    it('is shown again for other ignored fields', () => {
+      mockIgnoredFields(['kibana.alert.workflow_status']);
+      const { rerender } = render(<EntityAnalyticsNewHomePage />, { wrapper: TestProviders });
+      fireEvent.click(within(screen.getByTestId(CALLOUT)).getByRole('button'));
+
+      mockIgnoredFields(['kibana.alert.severity']);
+      rerender(<EntityAnalyticsNewHomePage />);
+
+      expect(screen.getByTestId(CALLOUT)).toHaveTextContent('kibana.alert.severity');
+    });
   });
 });
