@@ -47,6 +47,7 @@ import {
   ECF_UNIFIED_TEMPLATE_FILE,
   ECF_OTEL_TEMPLATE_FILE,
   ECF_CROWDSTRIKE_TEMPLATE_FILE,
+  getEcfTemplateFamily,
 } from '../ecf_cloudformation';
 import type { EcfServiceConfig, EcfTemplateFamily } from '../ecf_cloudformation';
 import { getOnboardingSessionKey } from '../core/onboarding_session_storage';
@@ -65,6 +66,11 @@ export const ECF_LAUNCH_STEP_SESSION_KEY = 'ecfLaunchStep' as const;
  * Max length is `ECF_STACK_NAME_MAX_LENGTH` chars total (first letter + up to max−1 more).
  */
 const STACK_NAME_REGEX = new RegExp(`^[a-zA-Z][-a-zA-Z0-9]{0,${ECF_STACK_NAME_MAX_LENGTH - 1}}$`);
+
+const getServiceEcfTemplateFamily = (serviceId: string): EcfTemplateFamily | undefined => {
+  const entry = AWS_SERVICES_MAP.get(serviceId);
+  return entry ? getEcfTemplateFamily(entry) : undefined;
+};
 
 // ── Types ──────────────────────────────────────────────────────────────────────
 
@@ -217,24 +223,17 @@ export const useEcfDeployment = ({
   );
 
   const ecfUnifiedConfigs = useMemo(
-    () =>
-      allEcfConfigs.filter((c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate == null),
+    () => allEcfConfigs.filter((c) => getServiceEcfTemplateFamily(c.serviceId) === 'unified'),
     [allEcfConfigs]
   );
 
   const ecfOtelConfigs = useMemo(
-    () =>
-      allEcfConfigs.filter(
-        (c) => AWS_SERVICES_MAP.get(c.serviceId)?.ecfDedicatedTemplate === 'otel'
-      ),
+    () => allEcfConfigs.filter((c) => getServiceEcfTemplateFamily(c.serviceId) === 'otel'),
     [allEcfConfigs]
   );
 
   const ecfCrowdstrikeServices = useMemo(
-    () =>
-      selectedServiceIds.filter(
-        (id) => AWS_SERVICES_MAP.get(id)?.ecfDedicatedTemplate === 'crowdstrike_fdr'
-      ),
+    () => selectedServiceIds.filter((id) => getServiceEcfTemplateFamily(id) === 'crowdstrike'),
     [selectedServiceIds]
   );
 
@@ -280,14 +279,13 @@ export const useEcfDeployment = ({
   );
 
   // The namespace a launched stack has to be updated to, per family, when it differs from the one
-  // the stack was launched with. Old sessions without a snapshot are never considered stale.
+  // the stack was launched with. A stack launched without a snapshot took the template default.
   const staleNamespaceByFamily = useMemo(() => {
     const result: Partial<Record<EcfTemplateFamily, string>> = {};
     for (const family of launchedFamilies) {
-      const launched = launchedNamespaces[family];
+      const launched = launchedNamespaces[family] ?? ECF_DEFAULT_NAMESPACE;
       const current = currentNamespaceByFamily[family];
       if (
-        launched !== undefined &&
         current !== undefined &&
         launched !== current &&
         currentServiceIdsByFamily[family].length > 0

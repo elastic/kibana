@@ -37,6 +37,8 @@ jest.mock('../ecf_cloudformation', () => ({
   ECF_UNIFIED_TEMPLATE_FILE: 'unified.yaml',
   ECF_OTEL_TEMPLATE_FILE: 'otel.yaml',
   ECF_CROWDSTRIKE_TEMPLATE_FILE: 'crowdstrike.yaml',
+  ECF_DEFAULT_NAMESPACE: 'default',
+  getEcfTemplateFamily: jest.requireActual('../ecf_cloudformation').getEcfTemplateFamily,
 }));
 
 jest.mock('../core/onboarding_session_storage', () => ({
@@ -1247,10 +1249,13 @@ describe('useEcfDeployment staleness', () => {
         expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
       });
 
-      it('is not stale when no namespace snapshot exists (old session)', () => {
+      it('treats a stack without a namespace snapshot as launched with the template default', () => {
         launched(undefined);
+        expect(renderNamespaceHook('').result.current.sectionProps.isStaleByFamily.unified).toBe(
+          false
+        );
         const { result } = renderNamespaceHook('prod');
-        expect(result.current.sectionProps.isStaleByFamily.unified).toBe(false);
+        expect(result.current.sectionProps.staleNamespaceByFamily?.unified).toBe('prod');
       });
 
       it('onLaunch stores the namespace the stack is launched with', () => {

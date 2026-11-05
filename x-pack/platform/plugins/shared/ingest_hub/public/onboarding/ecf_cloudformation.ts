@@ -92,7 +92,7 @@ export const getEcfTemplateFamily = (
 };
 
 /** Only the unified (ECS) template takes a `DataStreamNamespace` parameter. */
-export const ecfFamilySupportsNamespace = (family: EcfTemplateFamily | undefined): boolean =>
+export const ecfFamilySupportsNamespace = (family: string | undefined): boolean =>
   family === 'unified';
 
 /** The namespace a unified stack uses when the `DataStreamNamespace` parameter is left out. */
