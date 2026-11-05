@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent } from '@testing-library/react';
+import { act, fireEvent } from '@testing-library/react';
 import { FormProvider, useForm, useFormContext } from 'react-hook-form';
 import { render } from '../../../utils/testing/rtl_helpers';
 import {
@@ -144,6 +144,50 @@ describe('ParameterValuesEditor', () => {
     fireEvent.blur(getByTestId('keyValuePairsValue0'));
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('readonly');
     expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+  });
+
+  describe('re-masking a value on blur', () => {
+    beforeEach(() => {
+      jest.useFakeTimers();
+    });
+
+    afterEach(() => {
+      jest.useRealTimers();
+    });
+
+    const startEditingFirstValue = () => {
+      const utils = render(
+        <ParameterValuesEditorForm
+          defaultParams={'{"certificate":"first\\nsecond","token":"abc"}'}
+        />
+      );
+      fireEvent.click(utils.getByTestId('syntheticsParamValueEdit0'));
+      return utils;
+    };
+
+    it('waits for the pointer to be released so a click on another row is not lost', () => {
+      const { getAllByTestId, getByTestId } = startEditingFirstValue();
+      const [, deleteSecondRow] = getAllByTestId('syntheticsKeyValuePairsFieldButton');
+
+      // Browsers blur the field on mousedown, before the click lands.
+      fireEvent.pointerDown(deleteSecondRow);
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+      expect(getByTestId('keyValuePairsValue0')).not.toHaveAttribute('type', 'password');
+
+      fireEvent.pointerUp(deleteSecondRow);
+      act(() => {
+        jest.runAllTimers();
+      });
+      expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    });
+
+    it('re-masks right away when no pointer is down', () => {
+      const { getByTestId } = startEditingFirstValue();
+
+      fireEvent.blur(getByTestId('keyValuePairsValue0'));
+
+      expect(getByTestId('keyValuePairsValue0')).toHaveAttribute('type', 'password');
+    });
   });
 
   it('renames a parameter and keeps its value', () => {
