@@ -403,6 +403,7 @@ export function useMiDeploy({
               policySettings: serviceSettings?.policySettings,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ([policyId]) => policyId,
@@ -545,6 +546,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -651,6 +653,7 @@ export function useMiDeploy({
             servicesMap: servicesMap ?? new Map(),
             addedInstanceIdsByPolicy: addedByPolicy,
             alreadyUpdatedPolicyIds: updatedPolicyIdsThisRun,
+            onboardingDeploymentId,
             ...connectorOverride,
           });
           storedSharedRefs = cleanupOps.sharedRefs ?? storedSharedRefs;
@@ -764,6 +767,7 @@ export function useMiDeploy({
               namespace,
               authenticateAndDeployStep: withSharedRefs(sharedRefs),
               servicesMap: servicesMap ?? new Map(),
+              onboardingDeploymentId: currentOnboardingDeploymentId,
               ...connectorOverride,
             }),
           getPolicyId: ({ policyId }) => policyId,

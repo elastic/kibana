@@ -299,6 +299,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
         // Clean up package policies for removed services before creating new ones.
         if (hasPendingCleanup) {
           const cleanupOps = await cleanupAgentBasedPolicies({
+            onboardingDeploymentId,
             pendingCleanupPolicyIds: effectivePendingCleanup,
             currentPolicyIdsByInstance: detectAndReviewStep.policyIdsByInstance ?? {},
             instances: serviceSettings?.instances ?? [],
@@ -346,6 +347,7 @@ export function useAgentBasedDeploy(): UseAgentBasedDeployResult {
           shared: ExistingSecretRefs | undefined
         ) =>
           updateAgentBasedPolicy(policyId, ids, {
+            onboardingDeploymentId,
             instances: serviceSettings?.instances ?? [],
             storedServiceVars,
             globalRegion,

@@ -15,7 +15,7 @@ import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { paths } from '@kbn/slo-shared-plugin/common/locators/paths';
 import { cleanup, fireEvent, waitFor } from '@testing-library/react';
 import { createBrowserHistory } from 'history';
-import React from 'react';
+import React, { useState } from 'react';
 import Router from 'react-router-dom';
 import { BehaviorSubject } from 'rxjs';
 import { buildSlo } from '../../data/slo/slo';
@@ -485,6 +485,55 @@ describe('SLO Edit Page', () => {
 
       fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: 'My SLO' } });
       await waitFor(() => expect(queryByText('SLO name cannot be empty.')).not.toBeInTheDocument());
+    });
+
+    function RerenderHarness() {
+      const [, setTick] = useState(0);
+      return (
+        <>
+          <button data-test-subj="forceRerender" onClick={() => setTick((n) => n + 1)} />
+          <SloEditPage />
+        </>
+      );
+    }
+
+    it('keeps user edits when the page re-renders with a refetched SLO', async () => {
+      const { getByTestId } = render(<RerenderHarness />);
+
+      fireEvent.change(getByTestId('sloFormNameInput'), { target: { value: 'Edited name' } });
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Edited name'));
+
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        data: buildSlo({ id: SLO_ID, name: 'Refetched name' }),
+      });
+      fireEvent.click(getByTestId('forceRerender'));
+
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Edited name'));
+    });
+
+    it('waits for a fresh fetch before seeding the form from cached SLO data', async () => {
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        isFetching: true,
+        isFetchedAfterMount: false,
+        data: buildSlo({ id: SLO_ID, name: 'Cached name' }),
+      });
+
+      const { getByTestId, queryByTestId } = render(<RerenderHarness />);
+
+      expect(queryByTestId('sloEditLoadingSpinner')).toBeTruthy();
+      expect(queryByTestId('sloForm')).toBeFalsy();
+
+      useFetchSloDetailsMock.mockReturnValue({
+        isInitialLoading: false,
+        isFetching: false,
+        isFetchedAfterMount: true,
+        data: buildSlo({ id: SLO_ID, name: 'Fresh name' }),
+      });
+      fireEvent.click(getByTestId('forceRerender'));
+
+      await waitFor(() => expect(getByTestId('sloFormNameInput')).toHaveValue('Fresh name'));
     });
 
     it('passes the data view id resolved from the index pattern on mount to the indicator form', async () => {
