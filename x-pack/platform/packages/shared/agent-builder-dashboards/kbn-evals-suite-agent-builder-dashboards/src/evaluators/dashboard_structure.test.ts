@@ -49,6 +49,21 @@ describe('dashboard structure evaluator', () => {
     expect(result.explanation).toContain('sections[1]');
   });
 
+  it('requires a gold section to hold panels running the given queries', async () => {
+    const query = 'FROM logs | STATS `Value` = COUNT(*)';
+    const structure: DashboardStructureGold = {
+      sections: [{ titleIncludesAny: ['key'], queries: [query] }],
+    };
+    const holding = await evaluateStructure(structure, [
+      section('s1', 'Key charts', 0, [metric('a', grid, 'FROM logs\n| STATS `Value` = COUNT(*)')]),
+    ]);
+    const missing = await evaluateStructure(structure, [
+      section('s1', 'Key charts', 0, [metric('a', grid, 'FROM other | STATS c = COUNT(*)')]),
+    ]);
+    expect(holding.score).toBe(1);
+    expect(missing.score).toBe(0);
+  });
+
   it('checks that each gold row sits directly below the previous one', async () => {
     const rows: DashboardStructureGold['rows'] = [
       { kind: 'metric' },

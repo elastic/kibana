@@ -15,7 +15,7 @@ import {
   GENERATE_DASHBOARD_TOOL_ID,
   findAskUserQuestionPrompt,
   findModeOptionIndex,
-  getLastWrittenDashboardId,
+  hasWrittenDashboard,
 } from '../extract_dashboard';
 import {
   SCORED_RULES,
@@ -107,7 +107,7 @@ const missingDashboardResult = (before?: DashboardAttachmentData): EvaluationRes
  * reward a run that did no enhancing; Defect Resolution scores that run 0.
  */
 const noWriteResult = (output: DashboardAgentTaskOutput): EvaluationResult | undefined =>
-  getLastWrittenDashboardId(output.steps ?? []) === undefined
+  !hasWrittenDashboard(output)
     ? {
         score: null,
         label: 'no-write',

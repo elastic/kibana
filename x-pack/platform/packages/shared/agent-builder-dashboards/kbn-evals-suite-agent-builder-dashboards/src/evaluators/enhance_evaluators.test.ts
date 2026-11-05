@@ -230,7 +230,10 @@ describe('enhance evaluators', () => {
 
   describe('no regression', () => {
     it('passes when nothing the seed met is broken, and abstains without a write', async () => {
-      expect((await run(enhanceNoRegressionEvaluator, gold(), output({}))).score).toBe(1);
+      const retitled = { ...clone(), title: 'Web logs' };
+      expect(
+        (await run(enhanceNoRegressionEvaluator, gold(), output({ dashboard: retitled }))).score
+      ).toBe(1);
       expect(
         (await run(enhanceNoRegressionEvaluator, gold(), output({ steps: [] }))).score
       ).toBeNull();

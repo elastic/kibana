@@ -75,6 +75,7 @@ export const getPanelQueryKey = (queries: readonly string[]): string =>
   queries.map(normalizeQuery).sort().join('\n');
 
 export const TIME_SLIDER_CONTROL = 'time_slider_control';
+export const RANGE_SLIDER_CONTROL = 'range_slider_control';
 
 const KEYWORD_SUFFIX = '.keyword';
 
