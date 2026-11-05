@@ -39,6 +39,7 @@ import {
 } from './use_reference_decorations';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { findReferenceTokens, insertTokenAsJsonText } from '../lib/reference_tokens';
+import { tokenForInsert } from '../lib/reference_value';
 
 type Editor = monaco.editor.IStandaloneCodeEditor;
 
@@ -51,6 +52,8 @@ export interface FieldEditorSubFlyoutProps {
   readonly runControls?: DataReferenceRunControls;
   /** Monaco language when using the code editor; omit for plain text. */
   readonly language?: 'json' | 'esql' | 'kuery' | 'plaintext' | 'yaml';
+  /** A pick that fills the whole editor is inserted as a value (`${{ }}`); see `ReferenceCapableField`. */
+  readonly valueFormWhenWhole?: boolean;
   /** Close this panel only (Back / Escape / history pop). */
   readonly onBack: () => void;
   /** Close the whole step-config stack (header ✕). */
@@ -100,6 +103,7 @@ export function FieldEditorSubFlyout({
   catalog,
   runControls,
   language,
+  valueFormWhenWhole = false,
   onBack,
   onCloseStack,
 }: FieldEditorSubFlyoutProps) {
@@ -167,16 +171,29 @@ export function FieldEditorSubFlyout({
 
   // Reference tree click-to-insert: at the editor's caret, as an undoable edit.
   const insertAtCaret = useCallback(
-    (token: string) => {
+    (picked: string) => {
       const bridge = bridgeRef.current;
       if (!bridge) {
-        applyDraft(`${draftRef.current}${token}`);
+        const end = draftRef.current.length;
+        applyDraft(
+          `${draftRef.current}${tokenForInsert(
+            picked,
+            draftRef.current,
+            end,
+            end,
+            valueFormWhenWhole
+          )}`
+        );
         return;
       }
       const caret = bridge.getCaret();
-      bridge.replaceText?.(caret, caret, token);
+      bridge.replaceText?.(
+        caret,
+        caret,
+        tokenForInsert(picked, draftRef.current, caret, caret, valueFormWhenWhole)
+      );
     },
-    [applyDraft]
+    [applyDraft, valueFormWhenWhole]
   );
 
   const handleEditorMount = useCallback(
@@ -376,7 +393,11 @@ export function FieldEditorSubFlyout({
                 insertAtCaret(token);
                 return;
               }
-              bridgeRef.current?.replaceText?.(offset, offset, token);
+              bridgeRef.current?.replaceText?.(
+                offset,
+                offset,
+                tokenForInsert(token, draftRef.current, offset, offset, valueFormWhenWhole)
+              );
             }}
             css={{
               flex: '1 1 auto',
@@ -445,6 +466,7 @@ export function FieldEditorSubFlyout({
                 onChange={applyDraft}
                 fillHeight
                 openOnBrace={isFreeText}
+                valueFormWhenWhole={valueFormWhenWhole}
               >
                 {({ appendControls, reportChange, registerSelection, teachingPlaceholder }) => (
                   <div

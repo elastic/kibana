@@ -16,6 +16,7 @@ import {
   setActiveDataReferenceInsertTarget,
 } from '../../../shared/lib/active_data_reference_insert_target';
 import type { DataReferenceCatalog } from '../lib/build_data_reference_catalog';
+import { tokenForInsert } from '../lib/reference_value';
 
 export interface ReferenceSelectionBridge {
   readonly focus: () => void;
@@ -60,6 +61,7 @@ export function ReferenceCapableField({
   onExpand,
   fillHeight = false,
   openOnBrace = false,
+  valueFormWhenWhole = false,
   children,
   'data-test-subj': dataTestSubj = 'workflowStepConfigDataReference',
 }: {
@@ -75,6 +77,12 @@ export function ReferenceCapableField({
    * `{` is syntax.
    */
   readonly openOnBrace?: boolean;
+  /**
+   * A reference that fills the whole field is inserted in the value form (`${{ }}`) instead of
+   * the text form; a field that already holds text keeps the text form. For `if` / `while`
+   * conditions.
+   */
+  readonly valueFormWhenWhole?: boolean;
   readonly children: (bind: ReferenceCapableBind) => React.ReactElement;
   readonly 'data-test-subj'?: string;
 }) {
@@ -129,11 +137,12 @@ export function ReferenceCapableField({
   );
 
   const handleInsert = useCallback(
-    (token: string) => {
+    (picked: string) => {
       const bridge = selectionBridgeRef.current;
       const input = inputRef.current;
       const caret = bridge?.getCaret() ?? input?.selectionStart ?? value.length;
       const range = replaceRangeRef.current ?? { start: caret, end: caret };
+      const token = tokenForInsert(picked, value, range.start, range.end, valueFormWhenWhole);
 
       setIsOpen(false);
       replaceRangeRef.current = null;
@@ -158,7 +167,7 @@ export function ReferenceCapableField({
         focusAndSetCaret(range.start + token.length);
       });
     },
-    [focusAndSetCaret, onChange, value]
+    [focusAndSetCaret, onChange, value, valueFormWhenWhole]
   );
 
   // Stay registered across blur so click-to-insert from the execution flyout

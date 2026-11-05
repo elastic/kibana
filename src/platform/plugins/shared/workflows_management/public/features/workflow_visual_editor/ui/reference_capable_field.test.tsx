@@ -36,11 +36,22 @@ jest.mock('./data_reference_picker', () => ({
 
 const catalog: DataReferenceCatalog = { groups: [] };
 
-function Harness() {
-  const [value, setValue] = useState('hello');
+function Harness({
+  initialValue = 'hello',
+  valueFormWhenWhole,
+}: {
+  initialValue?: string;
+  valueFormWhenWhole?: boolean;
+}) {
+  const [value, setValue] = useState(initialValue);
   return (
     <I18nProvider>
-      <ReferenceCapableField catalog={catalog} value={value} onChange={setValue}>
+      <ReferenceCapableField
+        catalog={catalog}
+        value={value}
+        onChange={setValue}
+        valueFormWhenWhole={valueFormWhenWhole}
+      >
         {({ value: textValue, reportChange, attachInputRef, togglePicker }) => (
           <>
             <input
@@ -78,5 +89,35 @@ describe('ReferenceCapableField insert undo', () => {
     fireEvent.click(screen.getByTestId('mockInsert'));
 
     expect(execCommand).toHaveBeenCalledWith('insertText', false, '{{ event.a }}');
+  });
+});
+
+describe('ReferenceCapableField value form when the pick fills the field', () => {
+  const insertedText = (initialValue: string, caret: number, valueFormWhenWhole?: boolean) => {
+    const execCommand = jest.fn().mockReturnValue(true);
+    Object.defineProperty(document, 'execCommand', { configurable: true, value: execCommand });
+    render(<Harness initialValue={initialValue} valueFormWhenWhole={valueFormWhenWhole} />);
+    const field = screen.getByTestId('field') as HTMLInputElement;
+    field.focus();
+    field.setSelectionRange(caret, caret);
+    fireEvent.click(screen.getByTestId('open'));
+    fireEvent.click(screen.getByTestId('mockInsert'));
+    return execCommand.mock.calls[0]?.[2];
+  };
+
+  it('writes a whole reference as a value into an empty field', () => {
+    expect(insertedText('', 0, true)).toBe('${{ event.a }}');
+  });
+
+  it('treats a field with only spaces as empty', () => {
+    expect(insertedText('  ', 1, true)).toBe('${{ event.a }}');
+  });
+
+  it('keeps the text form when the field already holds text', () => {
+    expect(insertedText('status : ', 9, true)).toBe('{{ event.a }}');
+  });
+
+  it('keeps the text form when the option is off', () => {
+    expect(insertedText('', 0)).toBe('{{ event.a }}');
   });
 });

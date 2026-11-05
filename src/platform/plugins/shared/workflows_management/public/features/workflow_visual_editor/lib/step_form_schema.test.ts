@@ -130,6 +130,26 @@ describe('step_form_schema', () => {
       expect(kindOf('plain')).toBe('code');
     });
 
+    it('asks for the value form on the condition of `if` and `while`, and nowhere else', () => {
+      const filterLike = {
+        type: 'data.filter',
+        hasConnectorId: false,
+        configSchema: z.object({ items: z.unknown() }),
+        paramsSchema: z.object({ condition: z.string() }),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const condition = (type: string, available: ConnectorContractUnion[] = []) =>
+        getStepFormSchema(type, available)?.fields.find((f) => f.key === 'condition');
+
+      expect(condition('if')).toMatchObject({ kind: 'code', language: 'kuery' });
+      expect(condition('if')?.valueFormWhenWhole).toBe(true);
+      expect(condition('while')?.valueFormWhenWhole).toBe(true);
+      // `data.filter` evaluates its condition once per item: a whole `${{ }}` would run once.
+      expect(condition('data.filter', [filterLike])?.valueFormWhenWhole).toBeUndefined();
+    });
+
     it('starts a field on earlier data when its schema says it usually holds a reference', () => {
       const connector = {
         type: 'mapper',

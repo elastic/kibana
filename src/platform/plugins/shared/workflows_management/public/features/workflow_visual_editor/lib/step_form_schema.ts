@@ -87,6 +87,12 @@ export interface StepFormField {
    * must not offer references for it. Declared with `.meta({ templatable: false })`.
    */
   readonly templatable?: false;
+  /**
+   * A reference picked into an empty field is written as a value (`${{ }}`): the engine
+   * evaluates a whole `${{ }}` condition to a boolean. Set for the condition of `if` and
+   * `while`; once the field holds KQL a pick stays the safe text form (`{{ }}`).
+   */
+  readonly valueFormWhenWhole?: true;
 }
 
 export interface StepFormSchema {
@@ -531,6 +537,13 @@ const buildVariants = (
   });
 };
 
+/**
+ * Steps whose root `condition` is evaluated once, as a whole: `${{ }}` gives a boolean. Not
+ * `data.filter` / `data.find`, whose condition is KQL run per item, where a whole `${{ }}` would
+ * be evaluated once without `item`.
+ */
+const VALUE_FORM_CONDITION_STEP_TYPES: ReadonlySet<string> = new Set(['if', 'while']);
+
 const fieldsFromObject = (
   stepType: string,
   schema: z.ZodType | undefined,
@@ -638,6 +651,9 @@ const fieldsFromObject = (
         ...(startsOnData ? { preferData: true } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(fixedOnly ? { templatable: false as const } : {}),
+        ...(isRootLevel && key === 'condition' && VALUE_FORM_CONDITION_STEP_TYPES.has(stepType)
+          ? { valueFormWhenWhole: true as const }
+          : {}),
       };
     });
 };

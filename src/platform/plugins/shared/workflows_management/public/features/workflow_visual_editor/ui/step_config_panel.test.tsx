@@ -34,7 +34,10 @@ jest.mock('@kbn/code-editor', () => {
         onKeyDown: (cb: (event: unknown) => void) => void;
         onDidBlurEditorText: (cb: () => void) => void;
         setSelection: (range: unknown) => void;
-        executeEdits: (source: string, edits: unknown[]) => void;
+        executeEdits: (
+          source: string,
+          edits: Array<{ range: { startColumn: number; endColumn: number }; text: string }>
+        ) => void;
         getModel: () => {
           getOffsetAt: (pos: { lineNumber: number; column: number }) => number;
           getPositionAt: (offset: number) => { lineNumber: number; column: number };
@@ -60,7 +63,20 @@ jest.mock('@kbn/code-editor', () => {
             blurRef.current = cb;
           },
           setSelection: () => undefined,
-          executeEdits: () => undefined,
+          // Like Monaco: apply the edit to the (single-line) text and report it as a change.
+          executeEdits: (
+            _source: string,
+            edits: Array<{
+              range: { startColumn: number; endColumn: number };
+              text: string;
+            }>
+          ) => {
+            const [{ range, text }] = edits;
+            const start = range.startColumn - 1;
+            const end = range.endColumn - 1;
+            const next = `${props.value.slice(0, start)}${text}${props.value.slice(end)}`;
+            props.onChange?.(next, { changes: [{ rangeOffset: start, text }] });
+          },
           getValue: () => props.value,
           getModel: () => ({
             getOffsetAt: () => textareaRef.current?.selectionStart ?? props.value.length,
@@ -1576,6 +1592,62 @@ with:
       expect(
         screen.queryByTestId('workflowStepConfigField-foreach-source-data')
       ).not.toBeInTheDocument();
+    });
+  });
+
+  describe('condition of if and while', () => {
+    const body = 'steps:\n  - name: a\n    type: console\n    with:\n      message: hi\n';
+    const renderCondition = (stepType: string, condition: string) =>
+      renderPanel({
+        stepType,
+        initialFragment: `name: gate\ntype: ${stepType}\ncondition: ${condition}\n${body}`,
+      });
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+    const pick = (token: string) => {
+      // The read view gives way to the editor on focus; claim the insert target on the live one.
+      fireEvent.focusIn(activateField('workflowStepConfigField-condition'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget(token);
+      });
+    };
+
+    it('writes a pick into an empty if condition as a whole value', () => {
+      const { onFragmentChange } = renderCondition('if', '""');
+      pick('{{ steps.a.output.ok }}');
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /condition: ["']?\$\{\{ steps\.a\.output\.ok \}\}["']?/
+      );
+    });
+
+    it('does the same for a while condition', () => {
+      const { onFragmentChange } = renderCondition('while', '""');
+      pick('{{ steps.a.output.ok }}');
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /condition: ["']?\$\{\{ steps\.a\.output\.ok \}\}["']?/
+      );
+    });
+
+    it('keeps the safe literal form once the condition already holds KQL', () => {
+      const { onFragmentChange } = renderCondition('if', '"status : "');
+      pick('{{ steps.a.output.status }}');
+      const saved = lastFragment(onFragmentChange);
+      expect(saved).toContain('{{ steps.a.output.status }}');
+      expect(saved).not.toContain('${{');
+    });
+
+    it('keeps the value form when a pick replaces the only reference', () => {
+      const { onFragmentChange } = renderCondition('if', '"${{ steps.a.output.ok }}"');
+      fireEvent.click(
+        within(screen.getByTestId('workflowStepConfigField-condition')).getByTestId(
+          'workflowReferenceChip'
+        )
+      );
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ steps.b.output.ok }}');
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /condition: ["']?\$\{\{ steps\.b\.output\.ok \}\}["']?/
+      );
     });
   });
 

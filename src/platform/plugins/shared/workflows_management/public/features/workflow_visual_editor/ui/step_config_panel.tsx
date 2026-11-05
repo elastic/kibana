@@ -1044,6 +1044,7 @@ export function StepConfigPanel({
             catalog={referenceCatalog}
             runControls={runControls}
             language={expandedField.kind === 'code' ? expandedField.language : undefined}
+            valueFormWhenWhole={expandedField.valueFormWhenWhole}
             onBack={handleFieldEditorBack}
             onCloseStack={attemptClose}
           />
@@ -2281,6 +2282,7 @@ function CodeField({
       onChange={applyDraft}
       onExpand={onExpand}
       openOnBrace={field.language === 'plaintext'}
+      valueFormWhenWhole={field.valueFormWhenWhole}
     >
       {(bind) => (
         <ReferenceTextInput

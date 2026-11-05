@@ -13,6 +13,7 @@ import {
   lookupReferenceTypeLabel,
   normalizeReferenceForm,
   parseWholeReference,
+  tokenForInsert,
   toValueFormToken,
 } from './reference_value';
 
@@ -41,6 +42,33 @@ describe('toValueFormToken', () => {
   it('rewrites a whole text-form token and leaves anything else alone', () => {
     expect(toValueFormToken('{{ steps.a.output }}')).toBe('${{ steps.a.output }}');
     expect(toValueFormToken('already ${{ x }} here')).toBe('already ${{ x }} here');
+  });
+});
+
+describe('tokenForInsert', () => {
+  const picked = '{{ steps.a.output.ok }}';
+
+  it('writes the value form when the pick fills the whole field', () => {
+    expect(tokenForInsert(picked, '', 0, 0, true)).toBe('${{ steps.a.output.ok }}');
+    expect(tokenForInsert(picked, '   ', 1, 1, true)).toBe('${{ steps.a.output.ok }}');
+  });
+
+  it('counts the text a pick replaces as not there', () => {
+    expect(tokenForInsert(picked, '${{ x }}', 0, 8, true)).toBe('${{ steps.a.output.ok }}');
+    expect(tokenForInsert(picked, '{{', 0, 2, true)).toBe('${{ steps.a.output.ok }}');
+  });
+
+  it('keeps the text form next to other text', () => {
+    expect(tokenForInsert(picked, 'status : ', 9, 9, true)).toBe(picked);
+    expect(tokenForInsert(picked, 'a and b', 2, 5, true)).toBe(picked);
+  });
+
+  it('keeps the text form when the field does not ask for the value form', () => {
+    expect(tokenForInsert(picked, '', 0, 0, false)).toBe(picked);
+  });
+
+  it('leaves anything that is not a whole reference alone', () => {
+    expect(tokenForInsert('plain text', '', 0, 0, true)).toBe('plain text');
   });
 });
 

@@ -44,6 +44,22 @@ export const toValueFormToken = (token: string): string => {
 };
 
 /**
+ * What to write for a picked reference. A field that asks for it (`valueFormWhenWhole`) gets the
+ * value form when the pick fills the whole field, i.e. nothing but whitespace is left outside
+ * `[start, end)`, so a lone reference keeps its type; any other pick stays as picked.
+ */
+export const tokenForInsert = (
+  picked: string,
+  text: string,
+  start: number,
+  end: number,
+  valueFormWhenWhole: boolean
+): string =>
+  valueFormWhenWhole && `${text.slice(0, start)}${text.slice(end)}`.trim() === ''
+    ? toValueFormToken(picked)
+    : picked;
+
+/**
  * True when a reference is known to hold a list or record. A filter (`| json`, `| join`) already
  * shapes the data into something else, so those don't count.
  */
