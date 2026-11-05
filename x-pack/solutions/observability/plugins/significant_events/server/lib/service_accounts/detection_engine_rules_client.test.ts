@@ -16,6 +16,7 @@ const createRulesManagementClient = (): jest.Mocked<IRulesManagementClient> => (
   bulkCreateRules: jest.fn().mockResolvedValue({ createdIds: ['rule-1'] }),
   updateRule: jest.fn().mockResolvedValue(undefined),
   setRulesEnabled: jest.fn().mockResolvedValue(undefined),
+  rotateRulesApiKey: jest.fn().mockResolvedValue(undefined),
   bulkDeleteRules: jest.fn().mockResolvedValue(undefined),
   findRuleEnabledStates: jest.fn().mockResolvedValue(new Map()),
   findExistingRuleIds: jest.fn().mockResolvedValue([]),
@@ -57,6 +58,23 @@ describe('DetectionEngineRulesClient', () => {
     expect(caller.bulkCreateRules).not.toHaveBeenCalled();
     expect(caller.updateRule).not.toHaveBeenCalled();
     expect(caller.setRulesEnabled).not.toHaveBeenCalled();
+  });
+
+  it('re-keys updated and already-enabled rules, and skips freshly created ones', async () => {
+    const { client, account } = setup();
+    account.bulkCreateRules.mockResolvedValueOnce({ createdIds: ['new'] });
+
+    await client.bulkCreateRules([
+      { id: 'new', definition },
+      { id: 'existing', definition },
+    ]);
+    expect(account.rotateRulesApiKey).toHaveBeenLastCalledWith(['existing']);
+
+    await client.updateRule('rule-1', definition);
+    expect(account.rotateRulesApiKey).toHaveBeenLastCalledWith(['rule-1']);
+
+    await client.setRulesEnabled(['rule-2'], true);
+    expect(account.rotateRulesApiKey).toHaveBeenLastCalledWith(['rule-2']);
   });
 
   it('disables and deletes rules as the caller, so turning rules off works without the account', async () => {

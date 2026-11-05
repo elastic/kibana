@@ -144,6 +144,7 @@ function makeClient(depsOverrides: Partial<KnowledgeIndicatorClientDeps> = {}): 
     findOwnedRuleIds: jest.fn().mockResolvedValue([]),
     findSourceIdsWithOwnedRules,
     findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
+    rotateRulesApiKey: jest.fn().mockResolvedValue(undefined),
   };
   const client = new KnowledgeIndicatorClient(
     deps,
@@ -799,6 +800,7 @@ describe('KnowledgeIndicatorClient.findIndicators search', () => {
       findOwnedRuleIds: jest.fn().mockResolvedValue([]),
       findSourceIdsWithOwnedRules: jest.fn().mockResolvedValue([]),
       findRuleIdsByTagPrefix: jest.fn().mockResolvedValue([]),
+      rotateRulesApiKey: jest.fn().mockResolvedValue(undefined),
     };
     const client = new KnowledgeIndicatorClient(
       deps,

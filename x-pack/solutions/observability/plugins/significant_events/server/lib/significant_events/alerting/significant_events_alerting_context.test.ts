@@ -80,7 +80,8 @@ describe('createSignificantEventsAlertingContextResolver', () => {
 
   it.each([true, false])('forwards cpsEnabled=%s to the rules adapter', async (cpsEnabled) => {
     const createRule = jest.fn().mockResolvedValue({});
-    const accountClient = { createRule } as unknown as RulesClientApi;
+    const bulkUpdateApiKey = jest.fn().mockResolvedValue({ affected_count: 1, errors: [] });
+    const accountClient = { createRule, bulkUpdateApiKey } as unknown as RulesClientApi;
     const context = await createSignificantEventsAlertingContextResolver({
       getAlertingV2RulesClient: async () => v2Client,
       withAccountRulesClient: async (fn) => fn(accountClient),

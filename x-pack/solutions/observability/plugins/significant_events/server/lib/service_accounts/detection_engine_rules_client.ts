@@ -16,7 +16,8 @@ type RunAsAccount = <T>(fn: (accountRules: IRulesManagementClient) => Promise<T>
 /**
  * Manages the detection engine's rules so that they belong to the space's account. A rule runs on
  * the key of whoever created or last enabled it, so creates, updates and enables run as the
- * account. Reads, disables and deletes assign no key and stay with the caller, so turning rules off
+ * account, and each is followed by a re-key, because an update or a repeated enable leaves the old
+ * key in place. Reads, disables and deletes assign no key and stay with the caller, so turning rules off
  * keeps working without the account.
  */
 export class DetectionEngineRulesClient implements IRulesManagementClient {
@@ -35,24 +36,47 @@ export class DetectionEngineRulesClient implements IRulesManagementClient {
   }
 
   createRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    return this.runAsAccount((rules) => rules.createRule(id, definition));
+    return this.runAsAccount(async (rules) => {
+      await rules.createRule(id, definition);
+      // A create that finds the rule already there updates it, which keeps the old key.
+      await rules.rotateRulesApiKey([id]);
+    });
   }
 
   bulkCreateRules(
     rules: Array<{ id: string; definition: SignificantEventsRuleDefinition }>
   ): Promise<{ createdIds: string[] }> {
-    return this.runAsAccount((accountRules) => accountRules.bulkCreateRules(rules));
+    return this.runAsAccount(async (accountRules) => {
+      const result = await accountRules.bulkCreateRules(rules);
+      // Only the rules that were updated in place keep their old key; created ones have the account's.
+      const created = new Set(result.createdIds);
+      await accountRules.rotateRulesApiKey(
+        rules.map(({ id }) => id).filter((id) => !created.has(id))
+      );
+      return result;
+    });
   }
 
   // An update creates the rule when it is missing.
   updateRule(id: string, definition: SignificantEventsRuleDefinition): Promise<void> {
-    return this.runAsAccount((rules) => rules.updateRule(id, definition));
+    return this.runAsAccount(async (rules) => {
+      await rules.updateRule(id, definition);
+      await rules.rotateRulesApiKey([id]);
+    });
   }
 
   setRulesEnabled(ids: string[], enabled: boolean): Promise<void> {
     return enabled
-      ? this.runAsAccount((rules) => rules.setRulesEnabled(ids, true))
+      ? this.runAsAccount(async (rules) => {
+          await rules.setRulesEnabled(ids, true);
+          // Bulk enable skips rules that are already on, so they keep the previous owner's key.
+          await rules.rotateRulesApiKey(ids);
+        })
       : this.caller.setRulesEnabled(ids, false);
+  }
+
+  rotateRulesApiKey(ids: string[]): Promise<void> {
+    return this.runAsAccount((rules) => rules.rotateRulesApiKey(ids));
   }
 
   bulkDeleteRules(ids: string[]): Promise<void> {
