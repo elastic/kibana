@@ -10,7 +10,7 @@ import { EuiFlexGrid, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import { InstanceNamespaceField } from './instance_namespace_field';
-import { OutputField, type OutputFieldProps } from './instance_output_field';
+import { OutputField, type OutputFieldProps } from './output_field';
 
 interface SharedAdvancedSettingsProps {
   namespace: string;

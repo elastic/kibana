@@ -23,12 +23,17 @@ type PolicySettingKey = keyof PolicySettings;
 type PolicySettingsSource = PolicySettings | Record<string, unknown> | undefined;
 
 /**
- * The deployment methods each setting applies to. Managed integrations go through Fleet's
- * agentless policy API, which accepts fewer fields than a package policy (no `output_id` or
- * `condition`), so a setting may list it only when that API takes the field.
+ * The deployment methods each setting applies to, and what a value must look like. Managed
+ * integrations go through Fleet's agentless policy API, which accepts fewer fields than a package
+ * policy (no `output_id` or `condition`), so a setting may list it only when that API takes the
+ * field. The saved object is an open record, so a value read back from it is checked here before it
+ * reaches a Fleet request body, where a wrong type would fail with a generic validation error.
  */
-const POLICY_SETTINGS: Record<PolicySettingKey, { methods: DeploymentMethod[] }> = {
-  output_id: { methods: ['agent_based'] },
+const POLICY_SETTINGS: Record<
+  PolicySettingKey,
+  { methods: DeploymentMethod[]; isValid: (value: unknown) => boolean }
+> = {
+  output_id: { methods: ['agent_based'], isValid: (value) => typeof value === 'string' },
 };
 
 const isEmptySetting = (value: unknown): boolean =>
@@ -57,13 +62,16 @@ export const getPolicySettings = (
 ): PolicySettings => {
   const compact = compactPolicySettings(settings);
   return Object.fromEntries(
-    getKeys(method).flatMap((key) => (key in compact ? [[key, compact[key]]] : []))
+    getKeys(method).flatMap((key) =>
+      key in compact && POLICY_SETTINGS[key].isValid(compact[key]) ? [[key, compact[key]]] : []
+    )
   ) as PolicySettings;
 };
 
 /**
  * The settings an update of a deployed policy sends. A setting set back to empty is sent as `null`,
- * which clears the value the policy has; one never set is left out, so the policy keeps its own.
+ * which clears the value the policy has; one never set, or with an invalid value, is left out, so
+ * the policy keeps its own.
  */
 export const getPolicySettingsUpdate = (
   settings: PolicySettingsSource,
@@ -73,7 +81,8 @@ export const getPolicySettingsUpdate = (
     getKeys(method).flatMap((key) => {
       const value = (settings as Record<string, unknown> | undefined)?.[key];
       if (value === undefined) return [];
-      return [[key, isEmptySetting(value) ? null : value]];
+      if (isEmptySetting(value)) return [[key, null]];
+      return POLICY_SETTINGS[key].isValid(value) ? [[key, value]] : [];
     })
   );
 

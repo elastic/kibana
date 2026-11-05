@@ -29,7 +29,7 @@ import { i18n } from '@kbn/i18n';
 
 import { GlobalRegionField } from './global_region_field';
 import { SharedAdvancedSettings } from './shared_advanced_settings';
-import type { OutputFieldProps } from './instance_output_field';
+import type { OutputFieldProps } from './output_field';
 import { MAX_DESCRIPTION_LENGTH, MAX_INTEGRATION_NAME_LENGTH } from './integration_settings';
 
 const ADVANCED_ANIMATION_MS = 300;

@@ -8,6 +8,7 @@
 import { schema } from '@kbn/config-schema';
 
 import { CLOUD_ONBOARDING_INTEGRATION_NAME_MAX_LENGTH } from '../../../common/constants';
+import { PolicySettingsRecordSchema } from '../models/cloud_onboarding_deployment';
 
 // --- Shared primitives ---
 
@@ -100,9 +101,7 @@ const RequestServiceVarsSchema = schema.recordOf(
 const POLICY_SETTINGS_AVAILABILITY = { stability: 'experimental' as const, since: '9.7.0' };
 
 const PolicySettingsSchema = (description: string) =>
-  schema.recordOf(schema.string({ maxLength: 256 }), schema.any(), {
-    meta: { description, availability: POLICY_SETTINGS_AVAILABILITY },
-  });
+  PolicySettingsRecordSchema({ description, availability: POLICY_SETTINGS_AVAILABILITY });
 
 const InstanceSchema = schema.object({
   instanceId: schema.string({

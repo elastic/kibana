@@ -38,6 +38,15 @@ describe('policy settings', () => {
       expect(getPolicySettings({ output_id: '' }, 'agent_based')).toEqual({});
       expect(getPolicySettings({ output_id: 'logstash-1' }, 'managed_integration')).toEqual({});
     });
+
+    it('leaves out a value of the wrong type read back from the saved object', () => {
+      expect(getPolicySettings({ output_id: 1 }, 'agent_based')).toEqual({});
+      expect(getPolicySettings({ output_id: { id: 'logstash-1' } }, 'agent_based')).toEqual({});
+    });
+
+    it('leaves out settings it does not know', () => {
+      expect(getPolicySettings({ unknown_setting: 'value' }, 'agent_based')).toEqual({});
+    });
   });
 
   describe('getPolicySettingsUpdate', () => {
@@ -51,6 +60,11 @@ describe('policy settings', () => {
       expect(getPolicySettingsUpdate({ output_id: '' }, 'agent_based')).toEqual({
         output_id: null,
       });
+    });
+
+    it('leaves out a value of the wrong type, so the policy keeps its own', () => {
+      expect(getPolicySettingsUpdate({ output_id: 1 }, 'agent_based')).toEqual({});
+      expect(getPolicySettingsUpdate({ output_id: ['logstash-1'] }, 'agent_based')).toEqual({});
     });
 
     it('leaves out a setting never chosen, and those of other deployment methods', () => {
@@ -77,6 +91,10 @@ describe('policy settings', () => {
 
     it('treats an empty setting and an absent one alike', () => {
       expect(detectPolicySettingsDrift({ output_id: '' }, undefined, 'agent_based')).toBe(false);
+    });
+
+    it('ignores a value of the wrong type, as the deploy does', () => {
+      expect(detectPolicySettingsDrift({ output_id: 1 }, {}, 'agent_based')).toBe(false);
     });
 
     it('ignores settings of other deployment methods', () => {

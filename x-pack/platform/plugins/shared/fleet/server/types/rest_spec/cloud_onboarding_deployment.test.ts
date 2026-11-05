@@ -162,6 +162,26 @@ describe('saved object model versions', () => {
     ).toEqual(expect.objectContaining({ policySettings: { output_id: 'logstash-1' } }));
   });
 
+  it('V7 rejects package policy settings that are not short strings', () => {
+    for (const policySettings of [
+      { output_id: { nested: 'object' } },
+      { output_id: 1 },
+      { output_id: 'x'.repeat(1025) },
+      { ['k'.repeat(257)]: 'value' },
+      Object.fromEntries(Array.from({ length: 21 }, (_, i) => [`setting_${i}`, 'value'])),
+    ]) {
+      expect(() =>
+        CloudOnboardingDeploymentSchemaV7.validate({ ...record, policySettings })
+      ).toThrow();
+    }
+  });
+
+  it('V7 accepts a package policy setting cleared back to its default', () => {
+    expect(() =>
+      CloudOnboardingDeploymentSchemaV7.validate({ ...record, policySettings: { output_id: null } })
+    ).not.toThrow();
+  });
+
   it('V6 does not know the package policy settings, which is why they need their own model version', () => {
     expect(() =>
       CloudOnboardingDeploymentSchemaV6.validate({
@@ -173,6 +193,20 @@ describe('saved object model versions', () => {
 });
 
 describe('policySettings in requests', () => {
+  it('rejects settings that are not short strings, or too many of them', () => {
+    const tooMany = Object.fromEntries(
+      Array.from({ length: 21 }, (_, i) => [`setting_${i}`, 'value'])
+    );
+    for (const policySettings of [{ output_id: { nested: 'object' } }, { output_id: 1 }, tooMany]) {
+      expect(() =>
+        CreateCloudOnboardingDeploymentRequestSchema.body.validate(createBody({ policySettings }))
+      ).toThrow();
+      expect(() =>
+        UpdateCloudOnboardingDeploymentRequestSchema.body.validate({ policySettings })
+      ).toThrow();
+    }
+  });
+
   it('accepts package policy settings on create and update', () => {
     const policySettings = { output_id: 'logstash-1' };
     expect(
