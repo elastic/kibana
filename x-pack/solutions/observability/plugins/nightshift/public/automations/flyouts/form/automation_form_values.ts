@@ -9,7 +9,7 @@ import {
   parsePresetSchedule,
   type PresetSchedule,
 } from '@kbn/nightshift-investigations-plugin/common';
-import type { Automation } from '../../hooks/use_automations';
+import type { Automation } from '../../../data/automations/use_automations';
 import { UNLIMITED_DAILY_LIMIT } from '../../utils/daily_usage';
 
 export type ScheduleUnit = 'hour' | 'day' | 'week';

@@ -25,6 +25,7 @@ import type { WorkflowsExtensionsServerPluginStart } from '@kbn/workflows-extens
 import { NIGHTSHIFT_ONBOARDING_SUGGESTIONS_WORKFLOW_ID } from '@kbn/workflows/managed';
 import { GLOBAL_WORKFLOW_SPACE_ID } from '@kbn/workflows/server';
 import type { InvestigationAttachmentDocService } from '@kbn/agentic-investigations-plugin/server';
+import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
 import { getTelemetryTargets } from './telemetry_targets';
 import type { NightshiftInvestigationsConfig } from './config';
 import {
@@ -102,6 +103,7 @@ import { registerAssistantAgentType } from './agents/assistant';
 import { getInvestigatorConnectorIds } from './agents/assistant/inherited_connectors';
 import { createDecisionTreeTools } from './tools/decision_tree';
 import { createTimeConverterTool } from './tools/time_converter/tool';
+import { createSlackReadTool } from './tools/slack_read/tool';
 import { createSandboxBashTool } from './tools/sandbox_bash/tool';
 import { createSandboxViewFileTool } from './tools/sandbox_bash/view_file_tool';
 import { createSandboxStrReplaceTool } from './tools/sandbox_bash/str_replace_tool';
@@ -260,6 +262,7 @@ export class NightshiftInvestigationsPlugin
         spaces: this.spaces,
         agentBuilder: this.agentBuilder,
         agentAvailability: this.getInvestigationAvailability(),
+        assistantEnabled: this.assistantEnabled,
       }),
       logger: this.logger.get('onboarding'),
       ensureFailureSweep: this.ensureFailureSweep,
@@ -373,6 +376,12 @@ export class NightshiftInvestigationsPlugin
         });
       }
       plugins.agentBuilder.tools.register(createTimeConverterTool());
+      plugins.agentBuilder.tools.register({
+        ...createSlackReadTool({ getActions: () => this.actionsStart }),
+        availability: createSandboxToolAvailability({
+          getDeps: () => ({ featureFlags: this.featureFlags, security: this.securityStart }),
+        }),
+      });
       if (this.decisionTreesEnabled) {
         registerDecisionTreeReinforcementAgentType(plugins.agentBuilder);
       }
@@ -505,6 +514,18 @@ export class NightshiftInvestigationsPlugin
           scoreOnlineEvalsRoundStepDefinition({
             getAgentBuilder: () => this.agentBuilder,
             getEvaluate: () => this.evals?.evaluate,
+            resolveJudgeConnectorId: (request) => {
+              if (!this.inference || !this.savedObjects || !this.uiSettings) {
+                throw new Error('Nightshift model resolution is unavailable');
+              }
+              return resolveNightshiftModelForRequest({
+                request,
+                inference: this.inference,
+                savedObjects: this.savedObjects,
+                uiSettings: this.uiSettings,
+                step: 'onlineEvalsJudge',
+              });
+            },
             isPaused: isOnlineEvalsPaused,
             shouldIncludeExplanations: createShouldIncludeExplanations(core.getStartServices),
             telemetry,
@@ -778,6 +799,8 @@ export class NightshiftInvestigationsPlugin
         agentBuilder,
         spaceId: DEFAULT_SPACE_ID,
         availability: this.getInvestigationAvailability(),
+        // Users pick the assistant when it exists and reach the investigator through investigations.
+        hidden: this.assistantEnabled,
       }).catch((err) => {
         this.logger.error(`Failed to install investigation agent in default space: ${err.message}`);
       });
