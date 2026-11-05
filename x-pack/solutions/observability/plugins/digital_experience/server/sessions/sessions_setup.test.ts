@@ -215,6 +215,70 @@ describe('sessions setup', () => {
       expect(esClient.asInternalUser.transform.putTransform).not.toHaveBeenCalled();
     });
 
+    it('waits until the new dest index accepts searches, so the list can read it right away', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      // The index calls run as the current user: Elasticsearch ignores secondary authorization there.
+      const client = esClient.asCurrentUser;
+      client.count.mockRejectedValueOnce(esError(503)).mockResolvedValueOnce({ count: 0 } as never);
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      // Created before the transforms start, so it exists when enabling returns.
+      expect(client.indices.create).toHaveBeenCalledWith({
+        index: 'digital-experience-sessions-1',
+      });
+      const [create] = client.indices.create.mock.invocationCallOrder;
+      const [start] =
+        esClient.asSecondaryAuthUser.transform.startTransform.mock.invocationCallOrder;
+      expect(create).toBeLessThan(start);
+      expect(client.count).toHaveBeenCalledTimes(2);
+      expect(client.count).toHaveBeenCalledWith({
+        index: 'digital-experience-sessions-1',
+        ignore_unavailable: true,
+      });
+      const [firstCount] = client.count.mock.invocationCallOrder;
+      expect(firstCount).toBeGreaterThan(start);
+    });
+
+    it('keeps an existing dest index, without needing view_index_metadata to check for it', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.indices.create.mockRejectedValue(
+        new errors.ResponseError({
+          statusCode: 400,
+          body: { error: { type: 'resource_already_exists_exception' } },
+          headers: {},
+          warnings: null,
+          meta: {} as never,
+        })
+      );
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      expect(esClient.asCurrentUser.indices.exists).not.toHaveBeenCalled();
+      expect(esClient.asSecondaryAuthUser.transform.startTransform).toHaveBeenCalled();
+    });
+
+    it('fails when the dest index cannot be created for another reason', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.indices.create.mockRejectedValue(esError(403));
+
+      await expect(enableSessions({ ...enableArgs(), settings: oneTransform })).rejects.toThrow();
+      expect(esClient.asSecondaryAuthUser.transform.startTransform).not.toHaveBeenCalled();
+    });
+
+    it('does not wait on errors other than an unavailable index', async () => {
+      grantAll(esClient.asCurrentUser);
+      mockTransforms(esClient.asSecondaryAuthUser, []);
+      esClient.asCurrentUser.count.mockRejectedValue(esError(403));
+
+      await enableSessions({ ...enableArgs(), settings: oneTransform });
+
+      expect(esClient.asCurrentUser.count).toHaveBeenCalledTimes(1);
+    });
+
     it('installs one transform per partition', async () => {
       grantAll(esClient.asCurrentUser);
       mockTransforms(esClient.asSecondaryAuthUser, []);

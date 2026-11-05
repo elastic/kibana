@@ -107,3 +107,28 @@ export interface GetEntityStoreStatusResponse {
     }
   >;
 }
+
+/** Subset of `CreateWatchlistRequestBody['entitySources'][number]` used by Scout setup. */
+export interface WatchlistEntitySourceInput {
+  type: 'index' | 'store' | 'entity_analytics_integration';
+  name: string;
+  indexPattern?: string;
+  identifierField?: string;
+  queryRule?: string;
+  enabled?: boolean;
+}
+
+/** Subset of `CreateWatchlistRequestBody` (`POST /api/entity_analytics/watchlists`). */
+export interface CreateWatchlistRequest {
+  name: string;
+  riskModifier: number;
+  description?: string;
+  entitySources?: WatchlistEntitySourceInput[];
+}
+
+/** Subset of `CreateWatchlistResponse`; `entitySources` is set when sources were sent. */
+export interface CreateWatchlistResponse {
+  id: string;
+  name: string;
+  entitySources?: Array<WatchlistEntitySourceInput & { id: string; apiKeyId?: string | null }>;
+}

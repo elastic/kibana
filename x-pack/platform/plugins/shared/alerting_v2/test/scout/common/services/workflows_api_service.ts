@@ -20,6 +20,12 @@ export interface WorkflowSummary {
   name: string;
 }
 
+export interface WorkflowExecution {
+  status: string;
+  workflowId: string;
+  isTestRun?: boolean;
+}
+
 interface WorkflowExecutionListResponse {
   results: Array<{ id: string; triggeredBy?: string }>;
 }
@@ -72,6 +78,11 @@ export interface WorkflowsApiService {
     executionId: string,
     options?: WorkflowsApiSpaceOptions
   ) => Promise<WorkflowExecutionDetail>;
+  /** Polls until the execution has completed, then returns it. */
+  waitForCompletedExecution: (
+    executionId: string,
+    options?: WorkflowsApiSpaceOptions
+  ) => Promise<WorkflowExecution>;
 }
 
 export const getWorkflowsApiService = ({
@@ -151,5 +162,29 @@ export const getWorkflowsApiService = ({
         query: { includeInput: true, includeOutput: true },
       });
       return response.data;
+    }),
+
+  waitForCompletedExecution: (executionId, options) =>
+    measurePerformanceAsync(log, 'workflows.waitForCompletedExecution', async () => {
+      const getExecution = async (): Promise<WorkflowExecution> => {
+        const response = await kbnClient.request<WorkflowExecution>({
+          method: 'GET',
+          path: withSpace(
+            `${WORKFLOWS_API_PATH}/executions/${encodeURIComponent(executionId)}`,
+            options?.spaceId
+          ),
+          headers: COMMON_HEADERS,
+          retries: 0,
+        });
+        return response.data;
+      };
+
+      await expect
+        .poll(async () => (await getExecution()).status, {
+          timeout: POLL_TIMEOUT_MS,
+          intervals: [POLL_INTERVAL_MS],
+        })
+        .toBe('completed');
+      return getExecution();
     }),
 });
