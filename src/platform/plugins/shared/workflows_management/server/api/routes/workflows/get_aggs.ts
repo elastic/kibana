@@ -11,7 +11,13 @@ import path from 'path';
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import type { RouteDependencies } from '../types';
-import { API_VERSION, AVAILABILITY, OAS_TAG } from '../utils/route_constants';
+import {
+  API_VERSION,
+  AVAILABILITY,
+  MAX_ARRAY_PARAM_SIZE,
+  MAX_VISIBILITY_CONTEXT_LENGTH,
+  OAS_TAG,
+} from '../utils/route_constants';
 import { handleRouteError } from '../utils/route_error_handlers';
 import {
   hasWorkflowReadPrivilege,
@@ -86,6 +92,22 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
                   }
                 )
               ),
+              visibilityContext: schema.maybe(
+                schema.oneOf(
+                  [
+                    schema.string({ maxLength: MAX_VISIBILITY_CONTEXT_LENGTH }),
+                    schema.arrayOf(schema.string({ maxLength: MAX_VISIBILITY_CONTEXT_LENGTH }), {
+                      maxSize: MAX_ARRAY_PARAM_SIZE,
+                    }),
+                  ],
+                  {
+                    meta: {
+                      description:
+                        'When managed workflows are included, only aggregate managed workflows visible in these contexts.',
+                    },
+                  }
+                )
+              ),
             }),
           },
         },
@@ -95,11 +117,18 @@ export function registerGetAggsRoute({ router, api, spaces }: RouteDependencies)
           if (!hasWorkflowReadPrivilege(request)) {
             return response.forbidden();
           }
-          const { fields: rawFields, managed } = request.query;
+          const { fields: rawFields, managed, visibilityContext } = request.query;
           const fields = Array.isArray(rawFields) ? rawFields : [rawFields];
           const spaceId = spaces.getSpaceId(request);
           const managedFilter = resolveAuthorizedManagedFilter(request, managed);
-          const aggs = await api.getWorkflowAggs(fields, spaceId, { managedFilter, request });
+          const aggs = await api.getWorkflowAggs(fields, spaceId, {
+            managedFilter,
+            visibilityContext:
+              visibilityContext != null && !Array.isArray(visibilityContext)
+                ? [visibilityContext]
+                : visibilityContext,
+            request,
+          });
           return response.ok({ body: aggs || {} });
         } catch (error) {
           return handleRouteError(response, error);
