@@ -17,11 +17,12 @@ jest.mock('../data/service_accounts/use_investigator_service_account', () => ({
 }));
 
 let canManage = true;
+let canConfigure = true;
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
       application: {
-        capabilities: { nightshift: { show: true, manage: canManage, configure: canManage } },
+        capabilities: { nightshift: { show: true, manage: canManage, configure: canConfigure } },
       },
     },
   }),
@@ -52,6 +53,7 @@ describe('NightshiftSetupPrompt', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     canManage = true;
+    canConfigure = true;
   });
 
   it('enables Nightshift in one click for a user with manage_security', () => {
@@ -67,12 +69,25 @@ describe('NightshiftSetupPrompt', () => {
   it('tells users without manage_security to ask an administrator', () => {
     renderPrompt({ canModifyBoundWorkflows: false });
 
-    expect(screen.getByTestId('nightshiftSetupAskAdmin')).toHaveTextContent('manage_security');
+    const message = screen.getByTestId('nightshiftSetupAskAdmin');
+    expect(message).toHaveTextContent('manage_security');
+    expect(message).not.toHaveTextContent('Manage engines');
+    expect(screen.getByTestId('nightshiftSetUpServiceAccount')).toBeDisabled();
+  });
+
+  it('tells Nightshift managers without Manage engines to ask an administrator', () => {
+    canConfigure = false;
+    renderPrompt();
+
+    const message = screen.getByTestId('nightshiftSetupAskAdmin');
+    expect(message).toHaveTextContent('Manage engines');
+    expect(message).not.toHaveTextContent('manage_security');
     expect(screen.getByTestId('nightshiftSetUpServiceAccount')).toBeDisabled();
   });
 
   it('asks for a Nightshift administrator when the user cannot manage Nightshift', () => {
     canManage = false;
+    canConfigure = false;
     renderPrompt();
 
     expect(screen.getByTestId('nightshiftSetupAskAdmin')).toHaveTextContent(
