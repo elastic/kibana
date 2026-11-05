@@ -146,6 +146,21 @@ describe('GraphQL specs', () => {
     expect(calls.map(({ namedTypes }) => namedTypes)).toEqual([['Board'], undefined]);
   });
 
+  it('reports the root fields a document mentions, called or not', async () => {
+    const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
+
+    await post(mockFetch, {
+      query: `query Other { node(id: "1") { id } } query Selected { boards { id } }`,
+      operationName: 'Selected',
+    });
+    await post(mockFetch, { query: 'query { boards { id } }' });
+
+    expect(calls.map(({ operation, namedRootFields }) => [operation, namedRootFields])).toEqual([
+      ['query boards', ['query boards', 'query node']],
+      ['query boards', ['query boards']],
+    ]);
+  });
+
   it('leaves out root fields that @skip or @include drop', async () => {
     const { fetch: mockFetch, calls } = createEmulatorFetch({ specs: [spec] });
 

@@ -79,6 +79,8 @@ export interface ActionsRecording {
   readonly unmatched: Record<string, RequestedPath[]>;
   /** Per source, the types GraphQL requests name, sorted, which its snapshot has to keep. */
   readonly namedTypes: Record<string, string[]>;
+  /** Per source, the root fields GraphQL requests' documents mention, likewise. */
+  readonly namedRootFields: Record<string, string[]>;
   readonly findings: RecordingFinding[];
 }
 
@@ -209,6 +211,14 @@ export const recordActions = async ({
   const operations: ActionsRecording['operations'] = {};
   const unmatched: ActionsRecording['unmatched'] = {};
   const namedTypes = new Map<string, Set<string>>();
+  const namedRootFields = new Map<string, Set<string>>();
+  const addNamed = (names: Map<string, Set<string>>, source: string, items: readonly string[]) => {
+    if (items.length > 0) {
+      names.set(source, new Set([...(names.get(source) ?? []), ...items]));
+    }
+  };
+  const toSortedRecord = (names: Map<string, Set<string>>): Record<string, string[]> =>
+    Object.fromEntries([...names].map(([source, items]) => [source, [...items].sort()]));
   const findings: RecordingFinding[] = [];
   const brokenAuthTypes = new Map<string, string>();
 
@@ -334,11 +344,11 @@ export const recordActions = async ({
           ? `${call.source} ${call.path} ${call.method}`
           : `${call.source} ${call.name}`
     );
-    for (const { matched, namedTypes: named = [] } of calls) {
-      if (matched?.source !== undefined && named.length > 0) {
-        const types = namedTypes.get(matched.source) ?? new Set();
-        named.forEach((type) => types.add(type));
-        namedTypes.set(matched.source, types);
+    for (const call of calls) {
+      const source = call.matched?.source;
+      if (source !== undefined) {
+        addNamed(namedTypes, source, call.namedTypes ?? []);
+        addNamed(namedRootFields, source, call.namedRootFields ?? []);
       }
     }
     const notFound = calls.filter(isUnmatched).map(toRequestedPath);
@@ -357,9 +367,8 @@ export const recordActions = async ({
   return {
     operations,
     unmatched,
-    namedTypes: Object.fromEntries(
-      [...namedTypes].map(([source, types]) => [source, [...types].sort()])
-    ),
+    namedTypes: toSortedRecord(namedTypes),
+    namedRootFields: toSortedRecord(namedRootFields),
     findings: [...new Map(findings.map((finding) => [JSON.stringify(finding), finding])).values()],
   };
 };

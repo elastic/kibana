@@ -59,6 +59,8 @@ export interface ContractCall {
   readonly readOnly?: boolean;
   /** Set for GraphQL: the types the request names, in fragments and variables. */
   readonly namedTypes?: readonly string[];
+  /** Set for GraphQL: the root fields the request's document mentions, called or not. */
+  readonly namedRootFields?: readonly string[];
   /**
    * Set for protocol messages that call no vendor operation, such as MCP's `initialize`;
    * `operation` names the message.
@@ -443,7 +445,7 @@ export const createEmulatorFetch = ({
       for (const message of messages) {
         calls.push({ ...base, operation: message, protocolMessage: true });
       }
-      for (const { name, source, readOnly, namedTypes } of called) {
+      for (const { name, source, readOnly, namedTypes, namedRootFields } of called) {
         const matched = { name, ...(source === undefined ? {} : { source }) };
         calls.push({
           ...base,
@@ -451,6 +453,7 @@ export const createEmulatorFetch = ({
           matched,
           readOnly,
           ...(namedTypes === undefined ? {} : { namedTypes }),
+          ...(namedRootFields === undefined ? {} : { namedRootFields }),
         });
       }
       return response;

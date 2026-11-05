@@ -915,6 +915,53 @@ describe('protocol sources', () => {
       expect(snapshot).not.toContain('nused');
     });
 
+    it.each([
+      [
+        'another operation of the document',
+        'query { ...Roots } fragment Roots on Query { unused }\nquery Selected { used }',
+      ],
+      ['a root field @skip drops', 'query { used unused @skip(if: true) }'],
+      ['an operation of another type', 'mutation Other { create } query Selected { used }'],
+    ])('keeps the root fields the document needs to validate: %s', async (_, query) => {
+      const schema =
+        'type Query { used: String, unused: String, neverNamed: Other } type Other { id: ID } type Mutation { create: String, neverNamed: Other }';
+      documents[GRAPHQL_SPEC_URL] = schema;
+      const named = query.includes('Selected')
+        ? {
+            query: query.replace('query { ...Roots }', 'query Other { ...Roots }'),
+            operationName: 'Selected',
+          }
+        : { query };
+      const connector: ConnectorSpec = {
+        ...graphQLConnector,
+        actions: {
+          run: {
+            scope: 'write',
+            input: z.object({}),
+            handler: async ({ client }) => (await client.post(GRAPHQL_ENDPOINT, named)).data,
+          },
+        },
+      };
+
+      const recorded = await updateVendorApi({
+        connector,
+        directory,
+        sources: { main: GRAPHQL_SPEC_URL },
+        formats: { main: 'graphql' },
+        endpoints: { main: [GRAPHQL_ENDPOINT] },
+        fetchText,
+        now,
+        log,
+      });
+
+      expect(recorded.problems).toEqual([]);
+      expect(await offlineCheck(connector)).toEqual({ changed: [], problems: [] });
+      expect((await manifestOf()).operations.run).toEqual([{ source: 'main', name: 'query used' }]);
+      expect(
+        await fs.readFile(path.join(directory, 'snapshots', 'main.graphql'), 'utf8')
+      ).not.toContain('neverNamed');
+    });
+
     it('reports a source that serves something else as unreachable', async () => {
       await recordGraphQL();
       documents[GRAPHQL_SPEC_URL] = '{ "error": "unauthorized" }';
