@@ -88,7 +88,19 @@ import {
   SIGNIFICANT_EVENTS_SCHEDULED_DETECTION_WORKFLOW,
   SIGNIFICANT_EVENTS_SCHEDULED_REVIEW_WORKFLOW,
 } from './significant_events';
+export { NIGHTSHIFT_DETECTION_ENGINE_TRIGGER_SOURCE } from './significant_events/trigger_source';
+export { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW_ID } from './significant_events/bound_investigation_completed';
+export {
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW_ID,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW_ID,
+} from './significant_events/bound_scheduled';
+export { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW_ID } from './significant_events/knowledge_indicators/bound_continuous_onboarding';
 import { NIGHTSHIFT_BOUND_CLEANUP_WORKFLOW } from './significant_events/bound_cleanup';
+import { NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW } from './significant_events/bound_investigation_completed';
+import {
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
+} from './significant_events/bound_scheduled';
 import {
   SIGNIFICANT_EVENTS_KI_CONTINUOUS_ONBOARDING_WORKFLOW,
   SIGNIFICANT_EVENTS_KI_FEATURES_IDENTIFICATION_WORKFLOW,
@@ -97,6 +109,7 @@ import {
   SIGNIFICANT_EVENTS_KI_SYNC_WORKFLOW,
   SIGNIFICANT_EVENTS_SOURCE_RECONCILIATION_WORKFLOW,
 } from './significant_events/knowledge_indicators';
+import { NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW } from './significant_events/knowledge_indicators/bound_continuous_onboarding';
 import { NIGHTSHIFT_BOUND_KI_ONBOARDING_WORKFLOW } from './significant_events/knowledge_indicators/bound_onboarding';
 import { NIGHTSHIFT_BOUND_SOURCE_RECONCILIATION_WORKFLOW } from './significant_events/knowledge_indicators/bound_source_reconciliation';
 import { NIGHTSHIFT_BOUND_KI_SYNC_WORKFLOW } from './significant_events/knowledge_indicators/bound_sync';
@@ -286,6 +299,10 @@ export const managedWorkflowDefinitions = [
   NIGHTSHIFT_INVESTIGATION_FAILURE_SWEEP_WORKFLOW,
   NIGHTSHIFT_BOUND_INVESTIGATION_WORKFLOW,
   NIGHTSHIFT_BOUND_SANDBOX_MATERIALIZE_WORKSPACE_WORKFLOW,
+  NIGHTSHIFT_BOUND_KI_CONTINUOUS_ONBOARDING_WORKFLOW,
+  NIGHTSHIFT_BOUND_INVESTIGATION_COMPLETED_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_DETECTION_WORKFLOW,
+  NIGHTSHIFT_BOUND_SCHEDULED_REVIEW_WORKFLOW,
   NIGHTSHIFT_BOUND_AGENT_OPTIMIZE_WORKFLOW,
   NIGHTSHIFT_BOUND_DECISION_TREE_HYDRATE_WORKFLOW,
   NIGHTSHIFT_SLACK_THREAD_WORKFLOW,
