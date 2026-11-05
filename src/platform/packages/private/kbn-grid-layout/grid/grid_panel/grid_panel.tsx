@@ -20,6 +20,10 @@ import { ResizeHandle } from './grid_panel_resize_handle';
 import { useGridPanelState } from './use_panel_grid_data';
 import { ResizeGauge } from './grid_panel_resize_gauge';
 
+const canAnimate = (element: HTMLElement): boolean =>
+  typeof element.animate === 'function' &&
+  !window.matchMedia?.('(prefers-reduced-motion: reduce)').matches;
+
 export interface GridPanelProps {
   panelId: string;
 }
@@ -64,6 +68,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   }, [panelId, gridLayoutStateManager]);
 
   useEffect(() => {
+    let lastPlacement: string | undefined;
     /** Update the styles of the panel as it is dragged via a subscription to prevent re-renders */
     const activePanelStyleSubscription = combineLatest([
       gridLayoutStateManager.activePanelEvent$.pipe(
@@ -83,7 +88,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         if (!ref) return;
 
         const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
-        const lockToGrid = () => {
+        const placeOnGrid = () => {
           ref.style.position = '';
           ref.style.left = ``;
           ref.style.top = ``;
@@ -95,6 +100,35 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
           ref.style.gridColumnEnd = `${currentPanel.column + 1 + currentPanel.width}`;
           ref.style.gridRowStart = `${`gridRow-${currentPanel.sectionId}`} ${currentPanel.row + 1}`;
           ref.style.gridRowEnd = `span ${currentPanel.height}`;
+        };
+        const lockToGrid = () => {
+          const placement = `${currentPanel.sectionId}:${currentPanel.column},${currentPanel.row},${currentPanel.width},${currentPanel.height}`;
+          const hasMoved = lastPlacement !== undefined && placement !== lastPlacement;
+          lastPlacement = placement;
+          if (!runtimeSettings.lockActivePanelToGrid || !hasMoved || !canAnimate(ref)) {
+            placeOnGrid();
+            return;
+          }
+          // animate from where the panel is drawn now (possibly mid-animation) to its new cells
+          const from = ref.getBoundingClientRect();
+          ref.getAnimations().forEach((animation) => animation.cancel());
+          placeOnGrid();
+          const to = ref.getBoundingClientRect();
+          ref.animate(
+            [
+              {
+                transform: `translate(${from.left - to.left}px, ${from.top - to.top}px)`,
+                width: `${from.width}px`,
+                height: `${from.height}px`,
+              },
+              { transform: 'none', width: `${to.width}px`, height: `${to.height}px` },
+            ],
+            {
+              // the theme gives durations as CSS times such as `150ms`
+              duration: parseFloat(String(euiTheme.animation.fast)),
+              easing: euiTheme.animation.resistance,
+            }
+          );
         };
 
         if (isPanelActive) {
@@ -177,7 +211,13 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       expandedPanelSubscription.unsubscribe();
       sectionIdSubscription.unsubscribe();
     };
-  }, [panel$, gridLayoutStateManager, euiTheme.levels.modal]);
+  }, [
+    panel$,
+    gridLayoutStateManager,
+    euiTheme.levels.modal,
+    euiTheme.animation.fast,
+    euiTheme.animation.resistance,
+  ]);
 
   /**
    * Memoize panel contents to prevent unnecessary re-renders
