@@ -11,8 +11,11 @@ import { inject } from 'inversify';
 import { isMainThread, threadId } from 'node:worker_threads';
 import { recordRemoteHeap, remotable } from '@kbn/core-remote-common';
 import { ExecutionStatus, isTerminalStatus } from '@kbn/workflows';
+import { getLocalStepDefinition } from '@kbn/workflows-extensions/server';
 import { runWorkflowEngineInWorker } from './assemble_engine_loop';
 import {
+  type ScopedEsApi,
+  ScopedEsToken,
   type WorkflowExecutorApi,
   type WorkflowLogApi,
   WorkflowLogToken,
@@ -33,7 +36,18 @@ interface ExecutableStep {
  * Steps that finish inside the current task. `if` and `foreach` are in this set.
  * A `wait` of at least five seconds parks and comes back through the resume task.
  */
-const IN_PROCESS_TYPES = new Set(['wait', 'if', 'foreach', 'while', 'switch', 'data.set']);
+const IN_PROCESS_TYPES = new Set([
+  'wait',
+  'if',
+  'foreach',
+  'while',
+  'switch',
+  'data.set',
+  'elasticsearch.request',
+  // http steps run their logic in-worker; the network call executes on the coordinator via the
+  // executeConnector capability (.http-system), so admitting them does not grant worker egress.
+  'http',
+]);
 
 /**
  * Pauses this proof does not run. They use the same resume entry as a long wait.
@@ -62,7 +76,13 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
     @inject(WorkflowStorageToken)
     private readonly storage: WorkflowStorageApi,
     @inject(WorkflowLogToken)
-    private readonly log: WorkflowLogApi
+    private readonly log: WorkflowLogApi,
+    @inject(ScopedEsToken)
+    private readonly scopedEs: ScopedEsApi = {
+      request: async () => {
+        throw new Error('scopedEs capability is not configured');
+      },
+    }
   ) {}
 
   async placement(): Promise<{
@@ -85,16 +105,25 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
 
   async run(request: { scopeId: string; workflowRunId: string; spaceId: string }): Promise<{
     status: string;
-    metrics: { executionStartEpochMs: number; executionMs: number; cpu: NodeJS.CpuUsage; memory: NodeJS.MemoryUsage };
+    metrics: {
+      executionStartEpochMs: number;
+      executionMs: number;
+      cpu: NodeJS.CpuUsage;
+      memory: NodeJS.MemoryUsage;
+    };
   }> {
     const start = performance.now();
     const cpu = process.cpuUsage();
     const result = await this.executeRun(request);
-    return { ...result, metrics: {
-      executionStartEpochMs: performance.timeOrigin + start,
-      executionMs: performance.now() - start,
-      cpu: process.cpuUsage(cpu), memory: process.memoryUsage(),
-    } };
+    return {
+      ...result,
+      metrics: {
+        executionStartEpochMs: performance.timeOrigin + start,
+        executionMs: performance.now() - start,
+        cpu: process.cpuUsage(cpu),
+        memory: process.memoryUsage(),
+      },
+    };
   }
 
   private async executeRun(request: {
@@ -121,6 +150,7 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
         execution,
         scopeId: request.scopeId,
         steps: this.steps,
+        scopedEs: this.scopedEs,
         storage: this.storage,
         log: this.log,
         resume,
@@ -151,7 +181,11 @@ export class WorkflowExecutor implements WorkflowExecutorApi {
           `Unsupported remote step type "${step.type}". Parallel, human input, polling, and child workflows are not run in this remote proof.`
         );
       }
-      if (!IN_PROCESS_TYPES.has(step.type) && !this.steps.supports(step.type)) {
+      if (
+        !IN_PROCESS_TYPES.has(step.type) &&
+        !this.steps.supports(step.type) &&
+        !getLocalStepDefinition(step.type)
+      ) {
         throw new Error(
           `Unsupported remote step type "${step.type}". Experimental remote execution only runs steps registered for this anchor.`
         );

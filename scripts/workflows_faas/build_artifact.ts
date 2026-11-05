@@ -11,6 +11,7 @@ import { globSync, readFileSync, mkdirSync, writeFileSync } from 'node:fs';
 import { resolve, relative, join } from 'node:path';
 import { performance } from 'node:perf_hooks';
 import { createRequire } from 'node:module';
+import { Script } from 'node:vm';
 import { build } from 'esbuild';
 import { transformSync } from '@swc/core';
 import { generate } from 'peggy';
@@ -40,6 +41,7 @@ async function main(): Promise<void> {
     },
     outfile: join(output, 'handler.cjs'), bundle: true, platform: 'node', target: 'node24',
     format: 'cjs', metafile: true, tsconfig: join(root, 'tsconfig.json'),
+    minifyWhitespace: true, minifySyntax: true, charset: 'ascii', legalComments: 'none', sourcemap: 'external',
     plugins: [{
       name: 'kibana-decorators',
       setup(builder) {
@@ -60,6 +62,14 @@ async function main(): Promise<void> {
       },
     }],
   });
+  // charset ascii leaves regex literals untouched; one wide char would force V8 to keep the whole
+  // Script source two-byte. Escape residual non-ASCII UTF-16 units (identical semantics in regex
+  // literals) and require a pure-ASCII, parseable artifact.
+  const bundledSource = readFileSync(join(output, 'handler.cjs'), 'utf8');
+  const asciiSource = bundledSource.replace(/[^\x00-\x7F]/g, (ch) => `\\u${ch.charCodeAt(0).toString(16).toUpperCase().padStart(4, '0')}`);
+  if (/[^\x00-\x7F]/.test(asciiSource)) throw new Error('Executor artifact is not pure ASCII after escaping');
+  new Script(asciiSource, { filename: 'handler.cjs' }); // compile-only parse check; never executed at build time
+  writeFileSync(join(output, 'handler.cjs'), asciiSource);
   const inputs = Object.keys(result.metafile.inputs).sort();
   const emitted = new Set(Object.values(result.metafile.outputs).flatMap((value) => Object.entries(value.inputs).filter(([, data]) => data.bytesInOutput > 0).map(([path]) => path)));
   const forbidden = inputs.filter((path) => emitted.has(path) && /\/server\/(plugin|workflow_storage|workflow_log|cases_operations|alert_graph_es)\.[tj]s$/.test(path));
@@ -78,7 +88,8 @@ async function main(): Promise<void> {
     artifactBytes: readFileSync(join(output, 'handler.cjs')).byteLength,
     buildNode: process.version,
   }, null, 2));
-  writeFileSync(join(output, 'Dockerfile'), `ARG RUNTIME_IMAGE=public.ecr.aws/lambda/nodejs:24\nFROM \${RUNTIME_IMAGE}\nCOPY handler.cjs manifest.json \${LAMBDA_TASK_ROOT}/\nRUN node -e "require(\'./handler.cjs\')"\nCMD ["handler.handler"]\n`);
+  // Small semispaces and a bounded old space make V8 collect well before a tight cgroup limit kills the runtime.
+  writeFileSync(join(output, 'Dockerfile'), `ARG RUNTIME_IMAGE=public.ecr.aws/lambda/nodejs:24\nFROM \${RUNTIME_IMAGE}\nENV NODE_OPTIONS="--max-semi-space-size=4 --max-old-space-size=80"\nCOPY handler.cjs manifest.json \${LAMBDA_TASK_ROOT}/\nRUN node -e "require(\'./handler.cjs\')"\nCMD ["handler.handler"]\n`);
   console.log(JSON.stringify({ output: relative(root, output), artifactHash: manifest.artifactHash, buildMs: performance.now() - started }));
 
 }

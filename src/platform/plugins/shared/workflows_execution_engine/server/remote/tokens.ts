@@ -34,6 +34,18 @@ export interface WorkflowStepCatalogApi {
   ): Promise<unknown>;
 }
 
+export interface ScopedEsApi {
+  request(params: {
+    scopeId?: string;
+    method: string;
+    path: string;
+    querystring?: Record<string, unknown> | string;
+    body?: unknown;
+  }): Promise<unknown>;
+}
+
+export const ScopedEsToken = createToken<ScopedEsApi>('workflows.scopedEs');
+
 export interface WorkflowThreadIdentity {
   readonly threadId: number;
   readonly isMainThread: boolean;

@@ -14,7 +14,13 @@ import {
   type WorkflowYaml,
 } from '@kbn/workflows';
 import { WorkflowGraph } from '@kbn/workflows/graph';
-import type { WorkflowLogApi, WorkflowStepCatalogApi, WorkflowStorageApi } from './tokens';
+import { getLocalStepDefinition } from '@kbn/workflows-extensions/server';
+import type {
+  ScopedEsApi,
+  WorkflowLogApi,
+  WorkflowStepCatalogApi,
+  WorkflowStorageApi,
+} from './tokens';
 import type { ConnectorExecutor } from '../connector_executor';
 import { defaultWorkflowSettings } from '../default_workflow_settings';
 import type { LogsRepository } from '../repositories/logs_repository';
@@ -37,6 +43,7 @@ interface EngineLoopRequest {
   execution: EsWorkflowExecution;
   scopeId: string;
   steps: WorkflowStepCatalogApi;
+  scopedEs: ScopedEsApi;
   storage: WorkflowStorageApi;
   log: WorkflowLogApi;
   resume: boolean;
@@ -48,7 +55,7 @@ interface EngineLoopRequest {
  * storage and log capabilities. It does not call `setupDependencies`.
  */
 export async function runWorkflowEngineInWorker(request: EngineLoopRequest): Promise<string> {
-  const { execution, scopeId, steps, storage, log } = request;
+  const { execution, scopeId, steps, scopedEs, storage, log } = request;
   const compiled = WorkflowGraph.fromWorkflowDefinition(
     execution.workflowDefinition as WorkflowYaml,
     defaultWorkflowSettings
@@ -81,7 +88,7 @@ export async function runWorkflowEngineInWorker(request: EngineLoopRequest): Pro
   const coreStart = {
     http: { basePath: { publicBaseUrl: 'http://127.0.0.1:5601', serverBasePath: '' } },
   } as unknown as CoreStart;
-  const esClient = blockedEsClient();
+  const esClient = scopedEsClient(scopedEs, scopeId);
   const dependencies = contextDependencies({
     coreStart,
     fakeRequest,
@@ -213,6 +220,12 @@ function connectorStandIn(scopeId: string, storage: WorkflowStorageApi): Connect
       connectorNameOrId: string;
       input: Record<string, unknown>;
     }) => storage.executeConnector(scopeId, params),
+    executeSystemConnector: (params: { connectorType: string; input: Record<string, unknown> }) =>
+      storage.executeConnector(scopeId, {
+        connectorType: params.connectorType,
+        connectorNameOrId: params.connectorType,
+        input: params.input,
+      }),
   } as unknown as ConnectorExecutor;
 }
 
@@ -241,19 +254,23 @@ function contextDependencies({
     actions: {} as ContextDependencies['actions'],
     taskManager: {} as ContextDependencies['taskManager'],
     workflowsExtensions: {
-      hasStepDefinition: (stepType: string) => steps.supports(stepType),
-      getStepDefinition: (stepType: string) => ({
-        id: stepType,
-        handler: async (context: { input: unknown; config: unknown }) => {
-          const result = await steps.run(
-            stepType,
-            scopeId,
-            { with: context.input, config: context.config },
-            { attribution }
-          );
-          return { output: unwrapOutput(result) };
+      // Pure built-in definitions run entirely inside this worker with the real engine context;
+      // contributed steps that need coordinator services go through the catalog capability.
+      hasStepDefinition: (stepType: string) =>
+        Boolean(getLocalStepDefinition(stepType)) || steps.supports(stepType),
+      getStepDefinition: (stepType: string) =>
+        getLocalStepDefinition(stepType) ?? {
+          id: stepType,
+          handler: async (context: { input: unknown; config: unknown }) => {
+            const result = await steps.run(
+              stepType,
+              scopeId,
+              { with: context.input, config: context.config },
+              { attribution }
+            );
+            return { output: unwrapOutput(result) };
+          },
         },
-      }),
     } as unknown as ContextDependencies['workflowsExtensions'],
     config: { logging: { console: false } } as ContextDependencies['config'],
     spaceId: execution.spaceId,
@@ -268,15 +285,20 @@ function unwrapOutput(result: unknown): unknown {
   return result;
 }
 
-function blockedEsClient(): ElasticsearchClient {
-  const fail = () => {
+export function scopedEsClient(scopedEs: ScopedEsApi, scopeId: string): ElasticsearchClient {
+  const blocked = (): never => {
     throw new Error('Elasticsearch calls from the worker must go through a coordinator capability');
   };
-  return new Proxy(
-    {},
+  const transport = new Proxy(
     {
-      get: () => fail,
-    }
+      request: (params: Parameters<ElasticsearchClient['transport']['request']>[0]) =>
+        scopedEs.request({ ...params, scopeId }),
+    },
+    { get: (target, property) => (property === 'request' ? target.request : blocked()) }
+  );
+  return new Proxy(
+    { transport },
+    { get: (target, property) => (property === 'transport' ? target.transport : blocked()) }
   ) as ElasticsearchClient;
 }
 

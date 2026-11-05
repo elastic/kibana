@@ -81,12 +81,14 @@ import {
   stampWorkflowTaskRunEventFields,
 } from './lib/workflow_task_run_event_fields';
 import { WorkflowsMeteringService } from './metering/metering_service';
+import { workflowRemoteRegistration } from './remote/registration';
+import { ScopedEs } from './remote/scoped_es';
 import {
+  ScopedEsToken,
   type WorkflowExecutorApi,
   WorkflowLogToken,
   WorkflowStorageToken,
 } from './remote/tokens';
-import { workflowRemoteRegistration } from './remote/registration';
 import { WorkflowLog } from './remote/workflow_log';
 import { WorkflowStorage } from './remote/workflow_storage';
 import { createDataClientBundle, type DataClientBundle } from './repositories/data_access_layer';
@@ -1276,6 +1278,15 @@ export class WorkflowsExecutionEnginePlugin
 
     if (this.config.remoteExecution.enabled && this.coreSetup) {
       const logsRepository = new LogsRepository(coreStart.dataStreams, this.logger);
+      this.coreSetup.remote.bind(
+        ScopedEsToken,
+        (scopes) =>
+          new ScopedEs(
+            (scopeId) =>
+              coreStart.elasticsearch.client.asScoped(scopes.get<KibanaRequest>(scopeId))
+                .asCurrentUser
+          )
+      );
       this.coreSetup.remote.bind(WorkflowStorageToken, (scopes) => {
         return new WorkflowStorage(
           workflowExecutionRepository,
@@ -1300,7 +1311,15 @@ export class WorkflowsExecutionEnginePlugin
               const actionsClient = await plugins.actions.getActionsClientWithRequest(
                 scopes.get<KibanaRequest>(scopeId)
               );
-              return new ConnectorExecutor(actionsClient).execute({
+              const executor = new ConnectorExecutor(actionsClient);
+              if (params.connectorType === '.http-system') {
+                return executor.executeSystemConnector({
+                  connectorType: params.connectorType,
+                  input: params.input,
+                  abortController: new AbortController(),
+                });
+              }
+              return executor.execute({
                 ...params,
                 abortController: new AbortController(),
               });

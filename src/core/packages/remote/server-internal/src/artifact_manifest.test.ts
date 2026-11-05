@@ -41,6 +41,12 @@ describe('artifact_manifest', () => {
     expect(readArtifact(directory, artifactHash).spec).toEqual(spec);
   });
 
+  it('memoizes a verified manifest per directory and expected hash', () => {
+    const first = readArtifact(directory, artifactHash);
+    writeFileSync(join(directory, 'handler.cjs'), 'mutated after successful verification');
+    expect(readArtifact(directory, artifactHash)).toBe(first);
+  });
+
   it('rejects a different expected artifact identity', () => {
     expect(() => readArtifact(directory, 'wrong-artifact')).toThrow('identity mismatch');
   });

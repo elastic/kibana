@@ -8,11 +8,16 @@
  */
 
 import type { RemoteRegistration } from '@kbn/core-remote-server';
-import { WorkflowExecutorToken, WorkflowStepKind, WorkflowStepCatalogToken } from './tokens';
+import {
+  ScopedEsToken,
+  WorkflowExecutorToken,
+  WorkflowStepCatalogToken,
+  WorkflowStepKind,
+} from './tokens';
 
 export const workflowRemoteRegistration: RemoteRegistration = {
   id: 'workflows',
   root: WorkflowExecutorToken,
   contributions: [WorkflowStepKind],
-  dependencies: [WorkflowStepCatalogToken],
+  dependencies: [WorkflowStepCatalogToken, ScopedEsToken],
 };

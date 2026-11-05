@@ -65,6 +65,8 @@ export type {
 
 export { isOneShotStepDefinition, isPollStepDefinition } from './step_registry/types';
 
+export { getLocalStepDefinition } from './remote/local_step_definitions';
+
 export { KibanaApiCallError } from './step_registry/call_kibana_api_error';
 
 export {

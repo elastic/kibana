@@ -8,9 +8,20 @@
  */
 
 import type { RemoteModule } from '@kbn/core-remote-common';
-import { WorkflowExecutorToken, WorkflowLogToken, WorkflowStorageToken } from './tokens';
+import {
+  ScopedEsToken,
+  WorkflowExecutorToken,
+  WorkflowLogToken,
+  WorkflowStorageToken,
+} from './tokens';
 
-export { WorkflowExecutorToken, WorkflowLogToken, WorkflowStorageToken } from './tokens';
+export {
+  ScopedEsToken,
+  WorkflowExecutorToken,
+  WorkflowLogToken,
+  WorkflowStorageToken,
+} from './tokens';
+export type { ScopedEsApi } from './tokens';
 export type { WorkflowExecutorApi, WorkflowLogApi, WorkflowStorageApi } from './tokens';
 
 export const remoteModule: RemoteModule = {
@@ -21,6 +32,12 @@ export const remoteModule: RemoteModule = {
       role: 'root',
       modulePath: require.resolve('./workflow_executor'),
       exportName: 'WorkflowExecutor',
+    },
+    {
+      token: ScopedEsToken,
+      placement: 'coordinator',
+      modulePath: require.resolve('./scoped_es'),
+      exportName: 'ScopedEs',
     },
     {
       token: WorkflowStorageToken,
