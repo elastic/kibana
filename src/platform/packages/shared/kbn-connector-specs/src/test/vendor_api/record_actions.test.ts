@@ -151,6 +151,34 @@ describe('recordActions', () => {
     );
   });
 
+  it('generates the inputs once per fixture input of a list', async () => {
+    const exclusive: ConnectorSpec = {
+      ...connector,
+      actions: {
+        repair: action(
+          z
+            .object({ ids: z.array(z.string()).optional(), all: z.boolean().optional() })
+            .refine(
+              ({ ids, all }) =>
+                (ids !== undefined && all !== true) || (ids === undefined && all === true)
+            ),
+          async ({ client }, { ids }) =>
+            (await client.get(ids ? `${V1}/items/${ids[0]}` : `${V1}/items`)).data
+        ),
+      },
+    };
+    const record = (input: Record<string, unknown> | Array<Record<string, unknown>>) =>
+      recordActions({ connector: exclusive, specs, fixtures: { repair: { input } } });
+
+    expect((await record({ all: true })).operations.repair).toEqual([
+      { source: 'v1', method: 'get', path: '/items' },
+    ]);
+    expect((await record([{ all: true }, { all: false }])).operations.repair).toEqual([
+      { source: 'v1', method: 'get', path: '/items' },
+      { source: 'v1', method: 'get', path: '/items/{id}' },
+    ]);
+  });
+
   it("allows 'read' scoped actions only safe methods and the queries their fixtures list", async () => {
     const searching: ConnectorSpec = {
       ...connector,

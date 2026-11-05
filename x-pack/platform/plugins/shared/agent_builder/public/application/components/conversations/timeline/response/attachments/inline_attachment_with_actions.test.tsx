@@ -118,6 +118,47 @@ describe('InlineAttachmentWithActions', () => {
     expect(screen.getByText("Couldn't render this attachment")).not.toBeNull();
   });
 
+  describe('header icon', () => {
+    const renderWithDefinition = (definition: Record<string, unknown>) => {
+      const attachmentsService = {
+        getAttachmentUiDefinition: jest.fn().mockReturnValue({
+          getLabel: () => 'Test attachment',
+          renderInlineContent: mockRenderInlineContent,
+          getActionButtons: () => [
+            { label: 'Open', type: ActionButtonType.PRIMARY, handler: jest.fn() },
+          ],
+          ...definition,
+        }),
+        updateOrigin: jest.fn(),
+      };
+
+      return render(
+        <InlineAttachmentWithActions
+          attachment={{ id: 'attachment-1', type: 'test', data: {} }}
+          attachmentsService={attachmentsService as unknown as AttachmentsService}
+          conversationId="conversation-1"
+          isSidebar={false}
+        />
+      );
+    };
+
+    it('falls back to the attachment type icon when getHeader sets none', () => {
+      const { container } = renderWithDefinition({ getIcon: () => 'document' });
+
+      expect(container.querySelector('[data-euiicon-type="document"]')).not.toBeNull();
+    });
+
+    it('prefers the icon from getHeader', () => {
+      const { container } = renderWithDefinition({
+        getIcon: () => 'document',
+        getHeader: () => ({ icon: 'code' }),
+      });
+
+      expect(container.querySelector('[data-euiicon-type="code"]')).not.toBeNull();
+      expect(container.querySelector('[data-euiicon-type="document"]')).toBeNull();
+    });
+  });
+
   it('renders action buttons registered by inline content', async () => {
     const attachment: UnknownAttachment = { id: 'attachment-1', type: 'test', data: {} };
     const attachmentsService = {
@@ -148,8 +189,10 @@ describe('InlineAttachmentWithActions', () => {
     );
 
     expect(screen.getByText('Inline content')).not.toBeNull();
-    expect(screen.getByRole('button', { name: 'Static action' })).not.toBeNull();
     expect(await screen.findByRole('button', { name: 'Dynamic action' })).not.toBeNull();
+
+    fireEvent.click(screen.getByTestId('agentBuilderAttachmentMoreActions'));
+    expect(await screen.findByText('Static action')).not.toBeNull();
   });
 
   describe('openSidebarConversation prop forwarded to inline content and action buttons', () => {

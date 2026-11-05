@@ -72,6 +72,7 @@ dependsOn:
   - '@kbn/core-http-browser-mocks'
   - '@kbn/core-application-browser'
   - '@kbn/security-solution-distribution-bar'
+  - '@kbn/security-solution-navigation'
   - '@kbn/test-jest-helpers'
   - '@kbn/proposals-common'
   - '@kbn/proposals-plugin'

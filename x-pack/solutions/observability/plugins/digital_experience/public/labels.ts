@@ -36,3 +36,8 @@ export const SOURCE_LABELS: Record<ApplicationSource, string> = {
     defaultMessage: 'Classic RUM',
   }),
 };
+
+export const ANONYMOUS_USER = i18n.translate(
+  'xpack.digitalExperience.sessions.table.anonymousUserLabel',
+  { defaultMessage: 'Anonymous' }
+);
