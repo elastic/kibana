@@ -18,8 +18,7 @@ export interface EvidenceViewProps {
 
 /**
  * One piece of investigation evidence: its static chart, when it has one, followed by its
- * Markdown description. Link/query references are intentionally not shown in the technical
- * preview (out of scope); see elastic/nightshift-program#2166.
+ * Markdown description. Renders the same whether the data was local or fetched remotely.
  */
 export const EvidenceView: React.FC<EvidenceViewProps> = ({
   evidence: { description, chart },

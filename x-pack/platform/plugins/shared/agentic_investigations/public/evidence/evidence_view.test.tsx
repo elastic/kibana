@@ -39,38 +39,16 @@ describe('EvidenceView', () => {
       'href',
       'https://example.com'
     );
-    expect(screen.queryByTestId('investigationEvidenceReferences')).not.toBeInTheDocument();
   });
 
-  it('does not render the references control in technical preview', () => {
+  it('renders a description on its own', () => {
     render(
       <EuiProvider>
-        <EvidenceView
-          evidence={{
-            description: 'Errors spiked.',
-            references: [{ url: 'https://example.com' }, { query: 'FROM logs-*' }],
-          }}
-        />
+        <EvidenceView evidence={{ description: 'Errors spiked.' }} />
       </EuiProvider>
     );
 
     expect(screen.getByText('Errors spiked.')).toBeVisible();
-    expect(screen.queryByTestId('investigationEvidenceReferences')).not.toBeInTheDocument();
-    expect(screen.queryByTestId('evidenceReferenceQuery')).not.toBeInTheDocument();
-  });
-
-  it('renders nothing when evidence is only references', () => {
-    const { container } = render(
-      <EuiProvider>
-        <EvidenceView
-          evidence={{
-            references: [{ url: 'https://example.com' }],
-          }}
-        />
-      </EuiProvider>
-    );
-
-    expect(container).toBeEmptyDOMElement();
   });
 
   it('renders nothing for empty evidence', () => {
