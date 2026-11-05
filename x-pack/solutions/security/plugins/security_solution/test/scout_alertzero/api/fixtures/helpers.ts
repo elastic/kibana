@@ -273,7 +273,7 @@ export const withAlertZeroEnabledInSpace = async (args: {
   if (switchedSolution) {
     await setSpaceSolution({ ...args, solution: 'security' });
   }
-  let baselineEnabled: boolean;
+  let baselineEnabled: boolean | undefined;
   try {
     baselineEnabled = await readAlertZeroEnabledInSpace(args);
     await setAlertZeroEnabledInSpace({ ...args, enabled: true });

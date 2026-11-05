@@ -118,7 +118,7 @@ const deleteRunAttackRecords = async ({
       query: {
         bool: {
           should: [
-            { terms: { 'attributes.alert_ids': alertIds } },
+            { terms: { 'attributes.alert_ids': [...alertIds] } },
             ...(investigationId
               ? [{ term: { 'attributes.investigation_id': investigationId } }]
               : []),
