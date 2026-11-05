@@ -62,13 +62,23 @@ export const isTriggerValid = (trigger?: TriggerFormValues): trigger is TriggerF
   return true;
 };
 
+export const getInstructionsError = (
+  instructions: string,
+  trigger: TriggerFormValues
+): string | undefined => {
+  if (instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+    return validationLabels.instructionsTooLong;
+  }
+  if (trigger.kind === 'every' && !instructions.trim()) {
+    return validationLabels.instructionsRequired;
+  }
+  return undefined;
+};
+
 export const getSaveBlocker = (values: AutomationFormValues): string | undefined => {
   if (!values.trigger) return validationLabels.triggerRequired;
-  if (values.trigger.kind === 'every') {
-    if (!values.instructions.trim()) return validationLabels.instructionsRequired;
-    if (values.instructions.trim().length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
-      return validationLabels.instructionsTooLong;
-    }
+  if (values.instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+    return validationLabels.instructionsTooLong;
   }
   if (values.trigger && isSlackTrigger(values.trigger) && !values.trigger.channels.length) {
     return validationLabels.slackChannelsRequired;

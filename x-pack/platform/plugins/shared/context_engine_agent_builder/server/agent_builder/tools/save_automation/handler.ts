@@ -54,6 +54,13 @@ export interface SaveAutomationResult {
   aiIndexId: string;
   workflowId: string;
   status: 'saved_and_attached' | 'attached' | 'already_attached';
+  /**
+   * Whether the saved definition passed schema validation. `false` means it was stored but cannot
+   * be enabled or run.
+   */
+  valid?: boolean;
+  /** Validation diagnostics explaining why the saved definition is invalid, when `valid` is false. */
+  validationErrors?: string[];
 }
 
 type WorkflowsManagementApi = WorkflowsServerPluginSetup['management'];
@@ -474,6 +481,42 @@ const syncAttachmentsToSavedWorkflow = async ({
   }
 };
 
+/** Error-severity validation diagnostics for a YAML definition; never throws. */
+export const collectWorkflowValidationErrors = async ({
+  yaml,
+  workflowsManagement,
+  spaceId,
+  request,
+  logger,
+}: {
+  yaml: string;
+  workflowsManagement: WorkflowsManagementApi;
+  spaceId: string;
+  request: KibanaRequest;
+  logger: Logger;
+}): Promise<string[]> => {
+  try {
+    const validation = await workflowsManagement.validateWorkflow(yaml, spaceId, request);
+    return validation.diagnostics
+      .filter((diagnostic) => diagnostic.severity === 'error')
+      .map((diagnostic) => diagnostic.message);
+  } catch (error) {
+    logger.warn(
+      `Could not collect workflow validation diagnostics: ${
+        error instanceof Error ? error.message : String(error)
+      }`
+    );
+    return [];
+  }
+};
+
+interface PersistedWorkflow {
+  workflowId: string;
+  newlyCreated: boolean;
+  valid: boolean;
+  validationErrors: string[];
+}
+
 const persistWorkflow = async ({
   yaml,
   existingWorkflowId,
@@ -481,6 +524,7 @@ const persistWorkflow = async ({
   spaceId,
   request,
   getSecurityStart,
+  logger,
 }: {
   yaml: string;
   existingWorkflowId?: string;
@@ -488,7 +532,8 @@ const persistWorkflow = async ({
   spaceId: string;
   request: KibanaRequest;
   getSecurityStart: () => Promise<SecurityPluginStart | undefined>;
-}): Promise<{ workflowId: string; newlyCreated: boolean }> => {
+  logger: Logger;
+}): Promise<PersistedWorkflow> => {
   if (existingWorkflowId !== undefined) {
     await assertWorkflowUpdateAccess({
       workflowId: existingWorkflowId,
@@ -509,14 +554,39 @@ const persistWorkflow = async ({
       );
     }
 
-    await workflowsManagement.updateWorkflow(existingWorkflowId, { yaml }, spaceId, request);
-    return { workflowId: existingWorkflowId, newlyCreated: false };
+    const updated = await workflowsManagement.updateWorkflow(
+      existingWorkflowId,
+      { yaml },
+      spaceId,
+      request
+    );
+    return {
+      workflowId: existingWorkflowId,
+      newlyCreated: false,
+      valid: updated.valid,
+      validationErrors: updated.validationErrors ?? [],
+    };
   }
 
   await assertWorkflowCreateAccess({ spaceId, request, getSecurityStart });
   const created = await workflowsManagement.createWorkflow({ yaml }, spaceId, request);
 
-  return { workflowId: created.id, newlyCreated: true };
+  const validationErrors = created.valid
+    ? []
+    : await collectWorkflowValidationErrors({
+        yaml,
+        workflowsManagement,
+        spaceId,
+        request,
+        logger,
+      });
+
+  return {
+    workflowId: created.id,
+    newlyCreated: true,
+    valid: created.valid,
+    validationErrors,
+  };
 };
 
 /**
@@ -714,13 +784,14 @@ export const saveAutomationHandler = async ({
     existingWorkflowId ? { type: 'workflow', value: existingWorkflowId } : undefined
   );
 
-  const { workflowId, newlyCreated } = await persistWorkflow({
+  const { workflowId, newlyCreated, valid, validationErrors } = await persistWorkflow({
     yaml: source.yaml,
     existingWorkflowId,
     workflowsManagement,
     spaceId,
     request,
     getSecurityStart,
+    logger,
   });
 
   let result: SaveAutomationResult;
@@ -736,6 +807,8 @@ export const saveAutomationHandler = async ({
       aiIndexId,
       workflowId,
       status: isUpdate || attachStatus === 'attached' ? 'saved_and_attached' : 'already_attached',
+      ...(valid === false && { valid: false }),
+      ...(validationErrors.length > 0 && { validationErrors }),
     };
   } catch (error) {
     if (newlyCreated) {
