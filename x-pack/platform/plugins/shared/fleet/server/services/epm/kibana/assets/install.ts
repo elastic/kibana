@@ -33,7 +33,8 @@ import {
   makeManagedIndexPatternsGlobal,
 } from '../index_pattern/install';
 import { saveKibanaAssetsRefs } from '../../packages/install';
-import { deleteKibanaSavedObjectsAssets } from '../../packages/remove';
+import { getInstalledWorkflowRefs } from '../workflows/install';
+import { deleteKibanaSavedObjectsAssets, deleteWorkflowAssets } from '../../packages/remove';
 import { FleetError, KibanaSOReferenceError } from '../../../../errors';
 import { withPackageSpan } from '../../packages/utils';
 
@@ -68,7 +69,11 @@ const formatImportErrorsForLog = (errors: SavedObjectsImportFailure[]) =>
   JSON.stringify(
     errors.map(({ type, id, error }) => ({ type, id, error })) // discard other fields
   );
-const validKibanaAssetTypes = new Set(Object.values(KibanaAssetType));
+// Workflow is on KibanaAssetType for package paths / refs, but workflows are YAML installed via
+// the managed workflows client (not saved objects), so exclude them from SO asset install.
+const validKibanaAssetTypes = new Set<KibanaAssetType>(
+  Object.values(KibanaAssetType).filter((type) => type !== KibanaAssetType.workflow)
+);
 type SavedObjectToBe = Required<
   Pick<SavedObjectsBulkCreateObject, keyof ArchiveAsset | 'originId'>
 > & {
@@ -105,6 +110,7 @@ export const KibanaSavedObjectTypeMapping: Record<KibanaAssetType, KibanaSavedOb
   [KibanaAssetType.tag]: KibanaSavedObjectType.tag,
   [KibanaAssetType.osqueryPackAsset]: KibanaSavedObjectType.osqueryPackAsset,
   [KibanaAssetType.osquerySavedQuery]: KibanaSavedObjectType.osquerySavedQuery,
+  [KibanaAssetType.workflow]: KibanaSavedObjectType.workflow,
 };
 
 const AssetFilters: Record<string, (kibanaAssets: ArchiveAsset[]) => ArchiveAsset[]> = {
@@ -490,14 +496,18 @@ export async function installKibanaAssetsAndReferences({
     options: { installAsAdditionalSpace, spaceId },
   });
 
+  const saveAsAdditionalSpace =
+    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
+      ? false
+      : installAsAdditionalSpace;
+
+  // Workflows are installed by a later step; keep their refs so a failure in between does not orphan them
   installedKibanaAssetsRefs = await saveKibanaAssetsRefs(
     savedObjectsClient,
     pkgName,
-    assets,
+    [...assets, ...getInstalledWorkflowRefs(installedPkg, spaceId, !!saveAsAdditionalSpace)],
     spaceId,
-    installedPkg && installedPkg.attributes.installed_kibana_space_id === spaceId
-      ? false
-      : installAsAdditionalSpace
+    saveAsAdditionalSpace
   );
 
   await withPackageSpan('Create and assign package tags', () =>
@@ -537,11 +547,18 @@ export async function deleteKibanaAssetsAndReferencesForSpace({
       'Impossible to delete kibana assets from the space where the package was installed, you must uninstall the package.'
     );
   }
+  // Strict so the refs are not cleared below while workflows still exist in the space.
+  await deleteWorkflowAssets({
+    refs: installedPkg.attributes.additional_spaces_installed_kibana?.[spaceId] ?? [],
+    spaceId,
+    logger,
+    strict: true,
+  });
   await deleteKibanaSavedObjectsAssets({ savedObjectsClient, installedPkg, spaceId });
   await saveKibanaAssetsRefs(savedObjectsClient, pkgName, null, spaceId, true);
 }
 
-const kibanaAssetTypes = Object.values(KibanaAssetType);
+const kibanaAssetTypes = Array.from(validKibanaAssetTypes);
 export const isKibanaAssetType = (path: string) => {
   const parts = getPathParts(path);
 

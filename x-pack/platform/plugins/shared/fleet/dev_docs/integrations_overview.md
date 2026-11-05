@@ -145,6 +145,15 @@ Contains screenshots rendered on the integrations detail page for the integratio
 
 Contains top level Kibana assets (dashboards, visualizations, Discover sessions etc) for the integration.
 
+### Workflows
+
+`kibana/workflow/*.yml` files are installed as managed workflows owned by Fleet (through the managed workflows client of `workflows_extensions`). The installation is gated by the `fleet.enableWorkflowAssets` Kibana feature flag (fallback `false`, see [Feature flags in Fleet](./feature_flags.md)); when it is off, workflow files are skipped.
+
+- Workflows are always installed disabled. Enable them from the Workflows app.
+- Package upgrades update the installed workflows in place, and workflows no longer shipped by the new version are removed. Uninstalling the package removes them.
+- Workflow ids are `system-fleet-package-workflow-{space hash}-{package name hash}-{file name}`, where each hash is the first 16 hex characters of the SHA-256 of the space id or package name, and the file name drops the `.yml` extension, is lowercased and has `_` replaced by `-`. The install fails if a file name doesn't produce a valid id, or if two files map to the same id.
+- Fleet only checks that the file is a YAML mapping within the size limit. The Workflows plugin validates `name`, `triggers` and `steps`, and stores an invalid workflow with `valid: false` instead of rejecting it.
+
 ## Relationship diagram
 
 Reference the following diagram to understand the relationship between the various components of an integration:

@@ -83,6 +83,9 @@ export const AssetTitleMap: Record<
   ml_module: i18n.translate('xpack.fleet.epm.assetTitles.mlModules', {
     defaultMessage: 'Anomaly detection configurations',
   }),
+  workflow: i18n.translate('xpack.fleet.epm.assetTitles.workflows', {
+    defaultMessage: 'Workflows',
+  }),
   tag: i18n.translate('xpack.fleet.epm.assetTitles.tag', {
     defaultMessage: 'Tags',
   }),
