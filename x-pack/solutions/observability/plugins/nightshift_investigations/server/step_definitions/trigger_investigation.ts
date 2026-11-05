@@ -14,7 +14,8 @@ import {
 } from '@kbn/significant-events-schema';
 import { StepCategory } from '@kbn/workflows';
 import { createServerStepDefinition } from '@kbn/workflows-extensions/server';
-import { serverUnavailable } from '@hapi/boom';
+import { isBoom, serverUnavailable } from '@hapi/boom';
+import pRetry, { AbortError } from 'p-retry';
 import type { KibanaRequest } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStart } from '@kbn/actions-plugin/server';
 import type { NightshiftSettingsLocator } from '../../common/locators';
@@ -142,6 +143,8 @@ const inputSchema = lazySchema(() =>
   })
 );
 
+const ALERT_VISIBILITY_RETRY_OPTIONS = { retries: 4, factor: 1, minTimeout: 500 } as const;
+
 const resolveAlerts = async ({
   subjectId,
   request,
@@ -159,11 +162,19 @@ const resolveAlerts = async ({
   if (!alertsClient) {
     throw serverUnavailable('Alert lookup is unavailable');
   }
-  return fetchInvestigationAlertSnapshots({
-    alertsClient,
-    alertIds: [subjectId],
-    ...getEpisodeLookup(request, spaceId),
-  });
+  const episodeLookup = getEpisodeLookup(request, spaceId);
+  return pRetry(async () => {
+    try {
+      return await fetchInvestigationAlertSnapshots({
+        alertsClient,
+        alertIds: [subjectId],
+        ...episodeLookup,
+      });
+    } catch (error) {
+      if (isBoom(error, 404)) throw error;
+      throw new AbortError(error instanceof Error ? error : String(error));
+    }
+  }, ALERT_VISIBILITY_RETRY_OPTIONS);
 };
 
 const toSubjectId = ({

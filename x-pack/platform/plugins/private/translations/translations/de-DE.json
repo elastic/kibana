@@ -26836,7 +26836,6 @@
     "xpack.infra.logSourceErrorPage.savedObjectNotFoundErrorMessage": "Das {savedObjectType} konnte nicht gefunden werden: {savedObjectId}",
     "xpack.infra.logSourceErrorPage.tryAgainButtonLabel": "Wiederholen",
     "xpack.infra.manageViewsFlyout.cancelButton.ariaLabel": "Abbrechen",
-    "xpack.infra.metadata.pinnedAriaLabel": "Angeheftet {fieldName}",
     "xpack.infra.metadataEmbeddable.AddFilterAriaLabel": "Filter hinzufügen und Seite neu laden",
     "xpack.infra.metadataEmbeddable.errorAction": "die Metadaten erneut abrufen",
     "xpack.infra.metadataEmbeddable.errorMessage": "Beim Laden Ihrer Daten ist ein Fehler aufgetreten. Versuchen Sie, {refetch} zu verwenden, und öffnen Sie die Hostdetails erneut.",

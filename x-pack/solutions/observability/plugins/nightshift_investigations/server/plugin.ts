@@ -68,7 +68,7 @@ import { classifyOnlineEvalsRoundStepDefinition } from './step_definitions/class
 import { scoreOnlineEvalsRoundStepDefinition } from './step_definitions/score_online_evals_round';
 import { createIsOnlineEvalsPaused } from './online_evals/is_online_evals_paused';
 import { createShouldIncludeExplanations } from './online_evals/should_include_explanations';
-import { referenceFreeJudges } from './online_evals/judges';
+import { alertOutcomeJudges, referenceFreeJudges } from './online_evals/judges';
 import { obtainSandboxStepDefinition } from './step_definitions/obtain_sandbox';
 import { composeHydrateNotificationsStepDefinition } from './step_definitions/compose_hydrate_notifications';
 import { resolveModelStepDefinition } from './step_definitions/resolve_model';
@@ -213,6 +213,9 @@ export class NightshiftInvestigationsPlugin
     plugins.alerting?.enableAlertStatusChanged({
       isEnabled: async () => isNightshiftEnabledSync(),
     });
+    plugins.alertingVTwo?.enableAlertStatusChanged({
+      isEnabled: async () => isNightshiftEnabledSync(),
+    });
     // Single choke point for sandbox access: tools and workflow steps resolve the sandbox through
     // this, so nothing can reach the sandbox service while `nightshift.enabled` is off.
     const getGatedSandboxStart = createGatedSandboxStart({
@@ -223,7 +226,7 @@ export class NightshiftInvestigationsPlugin
       analytics: core.analytics,
       logger: this.logger.get('telemetry'),
     });
-    for (const judge of referenceFreeJudges) {
+    for (const judge of [...referenceFreeJudges, ...alertOutcomeJudges]) {
       plugins.evals?.registerEvaluator(judge);
     }
 
@@ -678,6 +681,7 @@ export class NightshiftInvestigationsPlugin
           getEpisodeLookup: this.getEpisodeLookup,
           getAutomationsSoClient: this.getAutomationsSoClient,
           getWorkflowsManagement: () => this.workflowsManagement,
+          isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
           isCortexEnabled: () => this.cortexEnabled,
           listSandboxConnectors,
           listSandboxConnectorTypes,
@@ -955,6 +959,7 @@ export class NightshiftInvestigationsPlugin
       getAgentBuilder: () => this.agentBuilder,
       getAgentAvailability: () => this.getInvestigationAvailability(),
       getAutomationsSoClient: this.getAutomationsSoClient,
+      isUniversalAlertingAvailable: () => this.alertingVTwo !== undefined,
       isServerless: this.ctx.env.packageInfo.buildFlavor === 'serverless',
       logger: this.logger.get('service_account'),
     });
