@@ -356,6 +356,7 @@ describe('useVarGroupSelections', () => {
         {
           name: 'credential_type',
           title: 'Setup Access',
+          selector_title: 'Preferred method',
           required: true,
           options: [
             {
