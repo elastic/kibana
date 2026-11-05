@@ -23,10 +23,6 @@ export const ONBOARDING_TITLE = i18n.translate('xpack.alertzero.onboarding.title
   defaultMessage: "Let's get AlertZero working for you!",
 });
 
-export const ONBOARDING_DOC_TITLE = i18n.translate('xpack.alertzero.onboarding.docTitle', {
-  defaultMessage: 'Set up Watches',
-});
-
 export const ONBOARDING_INTRO_GREETING = i18n.translate(
   'xpack.alertzero.onboarding.intro.greeting',
   { defaultMessage: "Hello, I'm AlertZero." }
