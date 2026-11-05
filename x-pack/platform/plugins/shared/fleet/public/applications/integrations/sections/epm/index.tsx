@@ -30,13 +30,13 @@ import { CustomLanguagesOverview } from './screens/detail/custom_languages_overv
 
 export const EPMApp: React.FunctionComponent = () => {
   const { automaticImport } = useStartServices();
-  const { canCreate } = useAutomaticImportAuthz();
+  const { canView, canCreate } = useAutomaticImportAuthz();
   const canUploadPackages = useAuthz().integrations.uploadPackages;
   useBreadcrumbs('integrations');
 
   const hasCreateIntegration = Boolean(automaticImport) && canCreate;
-  // Uploading a package installs it through Fleet, so it needs no Automatic Import privilege.
-  const hasUploadIntegration = Boolean(automaticImport) && canUploadPackages;
+  // Upload checks the package name against Automatic Import integrations, which needs read access.
+  const hasUploadIntegration = Boolean(automaticImport) && canView && canUploadPackages;
 
   return (
     <Routes>

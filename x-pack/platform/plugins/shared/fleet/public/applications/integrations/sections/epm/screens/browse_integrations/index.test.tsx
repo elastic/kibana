@@ -72,6 +72,7 @@ jest.mock('./components/manage_integrations_table', () => ({
 jest.mock('../../components/no_epr_callout', () => ({ NoEprCallout: () => null }));
 
 import { OBLT_DEFAULT_CATEGORIES } from '../../../../../../../common/constants';
+
 import { BrowseIntegrationsPage } from '.';
 
 const ALL_CATEGORY = { id: '', title: 'All categories', count: 10 };
