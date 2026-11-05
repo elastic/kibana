@@ -6,13 +6,14 @@
  */
 
 import type { BuildFlavor } from '@kbn/config/src/types';
-import { z } from '@kbn/zod';
+import { lazySchema, z } from '@kbn/zod';
 import { BooleanFromString } from '@kbn/zod-helpers/v4';
 
 import type { ServiceAccountRoleLimits } from '../../../common/service_accounts';
 import {
   getCreateServiceAccountParamsSchema,
   SERVICE_ACCOUNT_DESCRIPTION_MAX_LENGTH,
+  SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_ROLES,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_NAME_MAX_LENGTH,
@@ -78,6 +79,17 @@ export const listServiceAccountsQuerySchema = z.object({
     .default(SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE),
   after: z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH).optional(),
 });
+
+export const findServiceAccountsByRolesBodySchema = lazySchema(() =>
+  z
+    .object({
+      roles: z
+        .array(z.string().min(1).max(SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH))
+        .min(1)
+        .max(SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_ROLES),
+    })
+    .strict()
+);
 
 export const serviceAccountIdParamsSchema = z.object({
   id: serviceAccountIdSchema.min(1),

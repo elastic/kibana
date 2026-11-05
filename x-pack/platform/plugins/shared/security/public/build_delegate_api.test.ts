@@ -9,6 +9,10 @@ import { of } from 'rxjs';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { CoreSecurityDelegateContract, ServiceAccount } from '@kbn/core-security-browser';
+import type {
+  FindServiceAccountsByRolesResponse,
+  ServiceAccountBoundWorkload,
+} from '@kbn/core-security-common';
 import type { CoreUserProfileDelegateContract } from '@kbn/core-user-profile-browser';
 import type { UserProfileAPIClient } from '@kbn/security-plugin-types-public';
 
@@ -33,7 +37,11 @@ describe('buildSecurityApi', () => {
 
   beforeEach(() => {
     authc = authenticationMock.createSetup();
-    serviceAccounts = { create: jest.fn() } as unknown as jest.Mocked<ServiceAccountsAPIClient>;
+    serviceAccounts = {
+      create: jest.fn(),
+      findByRoles: jest.fn(),
+      listWorkloads: jest.fn(),
+    } as unknown as jest.Mocked<ServiceAccountsAPIClient>;
     capabilities = undefined;
     api = build();
   });
@@ -118,6 +126,40 @@ describe('buildSecurityApi', () => {
       serviceAccounts.create.mockResolvedValue(created);
 
       await expect(api.serviceAccounts.create(params)).resolves.toBe(created);
+    });
+  });
+
+  describe('serviceAccounts.findByRoles', () => {
+    it('returns the result from the API client', async () => {
+      const found: FindServiceAccountsByRolesResponse = {
+        serviceAccounts: [
+          { id: 'service-account-id', name: 'nightshift-relay', roles: ['viewer'], enabled: true },
+        ],
+        complete: true,
+      };
+      serviceAccounts.findByRoles.mockResolvedValue(found);
+
+      await expect(api.serviceAccounts.findByRoles(['viewer'])).resolves.toBe(found);
+      expect(serviceAccounts.findByRoles).toHaveBeenCalledWith(['viewer']);
+    });
+  });
+
+  describe('serviceAccounts.listWorkloads', () => {
+    it('unwraps the workloads from the API client response', async () => {
+      const workloads: ServiceAccountBoundWorkload[] = [
+        {
+          pluginId: 'workflowsManagement',
+          workloadType: 'workflow',
+          workloadId: 'workflow-id',
+          displayName: 'Nightly report',
+        },
+      ];
+      serviceAccounts.listWorkloads.mockResolvedValue({ workloads });
+
+      await expect(api.serviceAccounts.listWorkloads('service-account-id')).resolves.toBe(
+        workloads
+      );
+      expect(serviceAccounts.listWorkloads).toHaveBeenCalledWith('service-account-id');
     });
   });
 });

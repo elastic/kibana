@@ -9,7 +9,10 @@ import Boom from '@hapi/boom';
 import moment from 'moment';
 
 import type { AuthenticatedUser, KibanaRequest, Logger } from '@kbn/core/server';
-import type { AuthenticatedPrincipal } from '@kbn/core-security-common';
+import type {
+  AuthenticatedPrincipal,
+  FindServiceAccountsByRolesResponse,
+} from '@kbn/core-security-common';
 import { getAuthenticatedPrincipal } from '@kbn/core-security-common';
 import type { CreateServiceAccountServerParams, ServiceAccount } from '@kbn/core-security-server';
 import { HTTPAuthorizationHeader, UIAM_ERROR_CODES } from '@kbn/core-security-server';
@@ -47,6 +50,7 @@ import type {
   ServiceAccountDirectoryEntry,
 } from '../../common/service_accounts';
 import {
+  SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED,
   SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
   SERVICE_ACCOUNT_MAX_STRING_FIELD_LENGTH,
   SERVICE_ACCOUNT_TOKEN_MAX_LENGTH,
@@ -357,6 +361,70 @@ export class UiamServiceAccounts implements ServiceAccountsBackend {
       this.logger.error(`Failed to list service accounts: ${getDetailedErrorMessage(e)}`);
       throw e;
     }
+  }
+
+  /**
+   * Finds the accounts holding any of `roles` by paging through the directory, since UIAM can't
+   * filter by role. Only accounts assumable by this project are visible, so an account created for
+   * another project in the organization that holds a role of the same name is not found.
+   */
+  async findByRoles(
+    request: KibanaRequest,
+    roles: string[]
+  ): Promise<FindServiceAccountsByRolesResponse> {
+    if (!this.license.isEnabled()) {
+      throw Boom.forbidden(
+        'Cannot find service accounts: security features are disabled in Elasticsearch'
+      );
+    }
+
+    await ensureClusterPrivilege({
+      request,
+      checkPrivilegesWithRequest: this.checkPrivilegesWithRequest,
+      logger: this.logger,
+      privilege: 'manage_security',
+      action: 'find service accounts by role',
+    });
+
+    const wanted = new Set(roles);
+    const serviceAccounts: FindServiceAccountsByRolesResponse['serviceAccounts'] = [];
+    // Counted in pages rather than accounts, so that a short page can't keep the walk going.
+    const maxPages = Math.ceil(
+      SERVICE_ACCOUNT_FIND_BY_ROLES_MAX_SCANNED / SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE
+    );
+    let pages = 0;
+    let after: string | undefined;
+
+    try {
+      do {
+        const { service_accounts: accounts, next_page: nextPage } =
+          await this.uiam.listServiceAccounts({
+            limit: SERVICE_ACCOUNT_LIST_MAX_PAGE_SIZE,
+            ...(after !== undefined ? { after } : {}),
+          });
+
+        for (const account of accounts) {
+          const {
+            id,
+            name,
+            roles: held,
+            enabled,
+          } = toDirectoryEntry(this.cloudProjectContext, account);
+          const matching = held.filter((role) => wanted.has(role));
+          if (matching.length > 0) {
+            serviceAccounts.push({ id, name, roles: matching, enabled });
+          }
+        }
+
+        pages++;
+        after = nextPage;
+      } while (after !== undefined && pages < maxPages);
+    } catch (e) {
+      this.logger.error(`Failed to find service accounts by role: ${getDetailedErrorMessage(e)}`);
+      throw e;
+    }
+
+    return { serviceAccounts, complete: after === undefined };
   }
 
   async get(request: KibanaRequest, id: string): Promise<ServiceAccountDirectoryEntry> {
