@@ -584,8 +584,11 @@ read. The agent investigates unchanged and no query it writes can see past its t
   Kibana space, `orca-<hash>`, with its own investigator, service-account binding and connector
   `orcabench-es-<hash>`. The hash of the cutoff keeps ids stable across runs without showing the
   agent its snapshot time. A task starts and is read in its cutoff's space, so eight investigations
-  still run at a time. Serverless allows 100 spaces, so a run there holds at most 99 cutoffs; run
-  the 755 in slices.
+  still run at a time. Spaces stay after a run, so slices that reuse one stack add up. Serverless
+  allows 100 spaces, and the eval fails before minting keys when this run's cutoffs and the stack's
+  existing spaces would exceed that; start a fresh stack (`node scripts/evals stop`) between slices
+  there. A model connector must be visible in every space: a preconfigured connector or an
+  inference endpoint, not a stack connector the eval created in the default space.
 - **Preflight.** Before any investigation, a reference key bounded at ORCA's last snapshot must
   return the document counts pinned in [`orca_dataset.ts`](evals/investigation/orca_dataset.ts) for
   the run's variant. Then every cutoff key must count no document after its cutoff and some document

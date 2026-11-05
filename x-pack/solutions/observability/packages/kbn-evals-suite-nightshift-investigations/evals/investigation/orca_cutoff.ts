@@ -154,6 +154,15 @@ const countSchema = lazySchema(() => z.object({ count: z.number() }));
 const apiKeySchema = lazySchema(() =>
   z.object({ id: z.string().min(1), encoded: z.string().min(1) })
 );
+const invalidationSchema = lazySchema(() =>
+  z.object({
+    invalidated_api_keys: z.array(z.string()),
+    previously_invalidated_api_keys: z.array(z.string()),
+  })
+);
+
+const messageOf = (error: unknown): string =>
+  error instanceof Error ? error.message : String(error);
 
 /**
  * Checks a cutoff key on every signal: nothing after the cutoff, something up to it, and for
@@ -180,6 +189,10 @@ export const assertOrcaCutoffKey = async (
     })
   );
 };
+
+type MintedKey =
+  | { ok: true; cutoff: string; apiKey: string }
+  | { ok: false; cutoff: string; error: unknown };
 
 /** One read key per cutoff, and how to revoke them all. */
 export interface OrcaCutoffKeys {
@@ -213,9 +226,24 @@ export const mintOrcaCutoffKeys = async ({
   );
   const run = randomBytes(4).toString('hex');
   const minted: string[] = [];
+  // Elasticsearch answers 200 even when it could not invalidate some keys, so the response is
+  // checked, and any key still active is kept for the next call and named by id (not a secret).
   const invalidate = async () => {
     if (minted.length === 0) return;
-    await asEvalUser('DELETE', '/_security/api_key', { ids: minted.splice(0), owner: true });
+    const ids = minted.splice(0);
+    const result = invalidationSchema.parse(
+      await asEvalUser('DELETE', '/_security/api_key', { ids, owner: true })
+    );
+    const revoked = new Set([
+      ...result.invalidated_api_keys,
+      ...result.previously_invalidated_api_keys,
+    ]);
+    const active = ids.filter((id) => !revoked.has(id));
+    if (active.length === 0) return;
+    minted.push(...active);
+    throw new Error(
+      `ORCA left ${active.length} of ${ids.length} keys active: ${active.join(', ')}`
+    );
   };
   const mint = async (cutoff: string) => {
     const { id, encoded } = apiKeySchema.parse(
@@ -241,22 +269,34 @@ export const mintOrcaCutoffKeys = async ({
   };
   try {
     await assertOrcaSource({ url, apiKey: await mint(ORCA_REFERENCE_CUTOFF), variant }, request);
-    const apiKeys = await pMap(
+    // Every job settles before a failure is raised, so no key is minted after the cleanup below.
+    const settled = await pMap(
       cutoffs,
-      async (cutoff) => {
-        const apiKey = await mint(cutoff);
-        await assertOrcaCutoffKey(
-          createOrcaEsRequest(url, `ApiKey ${apiKey}`, request),
-          cutoff,
-          variant
-        );
-        return [cutoff, apiKey] as const;
+      async (cutoff): Promise<MintedKey> => {
+        try {
+          const apiKey = await mint(cutoff);
+          await assertOrcaCutoffKey(
+            createOrcaEsRequest(url, `ApiKey ${apiKey}`, request),
+            cutoff,
+            variant
+          );
+          return { ok: true, cutoff, apiKey };
+        } catch (error) {
+          return { ok: false, cutoff, error };
+        }
       },
       { concurrency }
     );
-    return { apiKeys: new Map(apiKeys), invalidate };
+    const apiKeys = new Map<string, string>();
+    for (const each of settled) {
+      if (!each.ok) throw each.error;
+      apiKeys.set(each.cutoff, each.apiKey);
+    }
+    return { apiKeys, invalidate };
   } catch (error) {
-    await invalidate();
+    await invalidate().catch((invalidateError: unknown) => {
+      throw new Error(`${messageOf(error)}; ${messageOf(invalidateError)}`);
+    });
     throw error;
   }
 };

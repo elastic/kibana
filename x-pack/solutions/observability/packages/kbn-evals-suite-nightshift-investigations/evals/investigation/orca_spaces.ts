@@ -23,6 +23,18 @@ const exists = (fetch: HttpHandler, path: string): Promise<boolean> =>
     }
   );
 
+/**
+ * How many spaces the stack holds once these exist. Cutoff spaces stay after a run, so slices
+ * that reuse one stack add up.
+ */
+export const countSpacesWith = async (
+  fetch: HttpHandler,
+  spaceIds: readonly string[]
+): Promise<number> => {
+  const existing = await fetch<Array<{ id: string }>>('/api/spaces/space');
+  return new Set([...existing.map(({ id }) => id), ...spaceIds]).size;
+};
+
 /** Creates a cutoff's space unless an earlier run on this stack already did. */
 export const ensureOrcaSpace = async (fetch: HttpHandler, spaceId: string): Promise<void> => {
   if (await exists(fetch, `/api/spaces/space/${encodeURIComponent(spaceId)}`)) return;

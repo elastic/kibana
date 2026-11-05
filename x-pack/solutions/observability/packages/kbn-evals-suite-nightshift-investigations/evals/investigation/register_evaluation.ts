@@ -35,7 +35,7 @@ import {
   mintOrcaCutoffKeys,
   resolveOrcaEsCredentials,
 } from './orca_cutoff';
-import { ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
+import { countSpacesWith, ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
 import {
   assertExecutionSuccessRate,
   executionSuccessEvaluator,
@@ -93,10 +93,14 @@ export const registerInvestigationEvaluation = ({
         // investigator holds one connector, whose key's document-level security stops there.
         const cutoffGroups = orca ? groupOrcaCasesByCutoff(dataset.examples) : [];
         if (orca && config.serverless) {
+          // Counts the spaces earlier slices left on a reused stack, not only this slice's.
           expect(
-            cutoffGroups.length,
-            'Every ORCA cutoff needs a space; run fewer cutoffs per Serverless stack with NIGHTSHIFT_ORCA_SLICE'
-          ).toBeLessThan(SERVERLESS_MAX_SPACES);
+            await countSpacesWith(
+              fetch,
+              cutoffGroups.map(({ spaceId }) => spaceId)
+            ),
+            'Every ORCA cutoff needs a space; start a fresh Serverless stack (node scripts/evals stop) or run fewer cutoffs with NIGHTSHIFT_ORCA_SLICE'
+          ).toBeLessThanOrEqual(SERVERLESS_MAX_SPACES);
         }
         const basePathByCase = new Map(
           cutoffGroups.flatMap(({ spaceId, caseIds }) =>
@@ -192,7 +196,14 @@ export const registerInvestigationEvaluation = ({
                     )}`
                   )
                 ).available,
-              { timeout: 60_000 }
+              {
+                timeout: 60_000,
+                // A stack connector the eval created lives only in the default space; ORCA's
+                // cutoff spaces need a preconfigured connector or an inference endpoint.
+                message: `Model connector ${connector.id} is not available in ${
+                  basePath || 'the default space'
+                }; ORCA cutoff spaces need a preconfigured connector or an inference endpoint`,
+              }
             )
             .toBe(true);
           // Availability can turn true while Kibana is still installing the managed workflow after a

@@ -107,13 +107,26 @@ describe('resolveOrcaEsCredentials', () => {
 
 /**
  * An ORCA cluster that mints keys for the eval user and answers each key's reads. `seenAfter` and
- * `flagDocuments` are what a key's counts return for reads past its cutoff and for flag documents.
+ * `flagDocuments` are what a key's counts return for reads past its cutoff (only `leakingCutoff`'s,
+ * when set) and for flag documents. `slowKeys` answer their creation late, and `stuckKeys` survive
+ * their first invalidation.
  */
 const fakeOrca = ({
   seenAfter = 0,
+  leakingCutoff,
   flagDocuments = 0,
   variant = 'full',
-}: { seenAfter?: number; flagDocuments?: number; variant?: OrcaTelemetryVariant } = {}) => {
+  slowKeys = [],
+  stuckKeys = [],
+}: {
+  seenAfter?: number;
+  leakingCutoff?: string;
+  flagDocuments?: number;
+  variant?: OrcaTelemetryVariant;
+  slowKeys?: string[];
+  stuckKeys?: string[];
+} = {}) => {
+  const stuck = new Set(stuckKeys);
   const minted: Array<{ id: string; body: { name: string; role_descriptors: unknown } }> = [];
   const invalidated: unknown[] = [];
   const pinned =
@@ -128,18 +141,29 @@ const fakeOrca = ({
       expect(authorization).toBe(`Basic ${Buffer.from('eval:password').toString('base64')}`);
       const id = `key-${minted.length + 1}`;
       minted.push({ id, body });
+      if (slowKeys.includes(id)) await new Promise((resolve) => setTimeout(resolve, 20));
       return new Response(JSON.stringify({ id, encoded: `encoded-${id}` }));
     }
     if (pathname === '/_security/api_key' && init?.method === 'DELETE') {
       invalidated.push(body);
-      return new Response(JSON.stringify({ invalidated_api_keys: body.ids }));
+      const ids: string[] = body.ids;
+      const kept = ids.filter((id) => stuck.has(id));
+      kept.forEach((id) => stuck.delete(id));
+      return new Response(
+        JSON.stringify({
+          invalidated_api_keys: ids.filter((id) => !kept.includes(id)),
+          previously_invalidated_api_keys: [],
+          error_count: kept.length,
+        })
+      );
     }
     expect(authorization).toMatch(/^ApiKey encoded-key-\d+$/);
     if (pathname === '/_query') {
       const signal = body.query.split(/[ -]/)[1] as keyof typeof pinned;
       return new Response(JSON.stringify({ values: [[pinned[signal]]] }));
     }
-    const count = !body ? 10 : body.query.range ? seenAfter : flagDocuments;
+    const leaks = !leakingCutoff || body?.query.range?.['@timestamp'].gt === leakingCutoff;
+    const count = !body ? 10 : body.query.range ? (leaks ? seenAfter : 0) : flagDocuments;
     return new Response(JSON.stringify({ count }));
   });
   return { request, minted, invalidated };
@@ -189,8 +213,9 @@ describe('mintOrcaCutoffKeys', () => {
     expect(orca.invalidated).toEqual([{ ids: ['key-1', 'key-2', 'key-3'], owner: true }]);
   });
 
-  it('refuses a key that reads past its cutoff and revokes every key minted so far', async () => {
-    const orca = fakeOrca({ seenAfter: 3 });
+  it('refuses a key that reads past its cutoff and revokes every key, including one still being minted', async () => {
+    // The first cutoff's key fails its check while the second cutoff's key is still being created.
+    const orca = fakeOrca({ seenAfter: 3, leakingCutoff: cutoffs[0], slowKeys: ['key-3'] });
 
     const minting = mintOrcaCutoffKeys({
       credentials,
@@ -199,11 +224,29 @@ describe('mintOrcaCutoffKeys', () => {
       request: orca.request,
     });
 
-    await expect(minting).rejects.toThrow(/ORCA key for 2026-04-.* reads 3 .* documents after it/);
+    await expect(minting).rejects.toThrow(
+      `ORCA key for ${cutoffs[0]} reads 3 logs-orcabench.otel-* documents after it`
+    );
     await expect(minting).rejects.not.toThrow(/encoded-key/);
     expect(orca.invalidated).toEqual([
-      { ids: expect.arrayContaining(['key-1', 'key-2']), owner: true },
+      { ids: expect.arrayContaining(['key-1', 'key-2', 'key-3']), owner: true },
     ]);
+  });
+
+  it('keeps keys Elasticsearch did not invalidate, names them, and revokes them on the next call', async () => {
+    const orca = fakeOrca({ stuckKeys: ['key-2'] });
+    const { invalidate } = await mintOrcaCutoffKeys({
+      credentials,
+      cutoffs,
+      variant: 'full',
+      request: orca.request,
+    });
+
+    await expect(invalidate()).rejects.toThrow('ORCA left 1 of 3 keys active: key-2');
+    await expect(invalidate()).resolves.toBeUndefined();
+    expect(orca.invalidated.at(-1)).toEqual({ ids: ['key-2'], owner: true });
+    await expect(invalidate()).resolves.toBeUndefined();
+    expect(orca.invalidated).toHaveLength(2);
   });
 
   it('refuses a no-flags key that still reads flag documents', async () => {

@@ -6,7 +6,7 @@
  */
 
 import type { HttpHandler } from '@kbn/core/public';
-import { ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
+import { countSpacesWith, ensureOrcaSpace, saveOrcaConnector, spaceBasePath } from './orca_spaces';
 
 const notFound = () => Object.assign(new Error('Not Found'), { status: 404 });
 
@@ -81,4 +81,15 @@ describe('saveOrcaConnector', () => {
 
 it('addresses a space by its base path', () => {
   expect(spaceBasePath('orca-abc')).toBe('/s/orca-abc');
+});
+
+it('counts the spaces earlier slices left on the stack together with this run’s', async () => {
+  const fetch = jest
+    .fn()
+    .mockResolvedValue([{ id: 'default' }, { id: 'orca-old' }, { id: 'orca-abc' }]);
+
+  await expect(
+    countSpacesWith(fetch as unknown as HttpHandler, ['orca-abc', 'orca-new'])
+  ).resolves.toBe(4);
+  expect(fetch).toHaveBeenCalledWith('/api/spaces/space');
 });
