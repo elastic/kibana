@@ -7,11 +7,12 @@
 
 import React, { useState } from 'react';
 import {
-  EuiButtonEmpty,
+  EuiButtonIcon,
   EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopover,
+  EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
@@ -120,9 +121,20 @@ export const AddCellBar = ({
     store.addCell(cell, index);
   };
 
+  const getLineCss = (direction: 'left' | 'right') => css`
+    height: ${euiTheme.border.width.thin};
+    background: linear-gradient(
+      to ${direction},
+      transparent,
+      ${euiTheme.colors.borderBaseProminent}
+    );
+  `;
+
   return (
     <EuiFlexGroup
-      justifyContent="center"
+      alignItems="center"
+      gutterSize="s"
+      responsive={false}
       css={css`
         flex-grow: 0;
         opacity: ${alwaysVisible || isOpen ? 1 : 0};
@@ -133,6 +145,7 @@ export const AddCellBar = ({
         }
       `}
     >
+      <EuiFlexItem css={getLineCss('right')} />
       <EuiFlexItem grow={false}>
         <EuiPopover
           isOpen={isOpen}
@@ -140,14 +153,15 @@ export const AddCellBar = ({
           panelPaddingSize="none"
           aria-label={ADD_CELL_LABEL}
           button={
-            <EuiButtonEmpty
-              size="xs"
-              iconType="plusCircle"
-              onClick={() => setIsOpen((open) => !open)}
-              data-test-subj="notebookAddCell"
-            >
-              {ADD_CELL_LABEL}
-            </EuiButtonEmpty>
+            <EuiToolTip content={ADD_CELL_LABEL} disableScreenReaderOutput>
+              <EuiButtonIcon
+                size="xs"
+                iconType="plus"
+                aria-label={ADD_CELL_LABEL}
+                onClick={() => setIsOpen((open) => !open)}
+                data-test-subj="notebookAddCell"
+              />
+            </EuiToolTip>
           }
         >
           <EuiContextMenu
@@ -176,6 +190,7 @@ export const AddCellBar = ({
           />
         </EuiPopover>
       </EuiFlexItem>
+      <EuiFlexItem css={getLineCss('left')} />
     </EuiFlexGroup>
   );
 };
