@@ -1036,6 +1036,7 @@ const buildConfiguredSourceNode = (source: SourceViewModel, hasConnection: boole
           }),
     data: {
       sourceId: source.id,
+      sourceType: source.type,
       hasConnection,
       title: name,
       subtitle: SOURCE_TYPE_CONFIG_BY_TYPE[source.type].shortLabel,
