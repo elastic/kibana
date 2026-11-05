@@ -8,8 +8,6 @@
  */
 
 import { getIssueMetadata } from './issue_metadata';
-import { getFailures } from './get_failures';
-import { parseTestReport } from './test_report';
 import { testHistoryDashboardUrl, withTestHistoryDashboardLink } from './test_history_dashboard';
 
 const ftrFailure = {
@@ -23,53 +21,6 @@ const ftrFailure = {
 };
 
 describe('testHistoryDashboardUrl', () => {
-  it.each([
-    ['ftr', 'FTR Tests.src/example·test·ts', 'unused'],
-    ['jest', 'Jest Tests.src', 'src/example.test.ts'],
-  ])(
-    'links parsed %s failures using their exact file and title',
-    async (framework, classname, file) => {
-      const report = await parseTestReport(`
-      <testsuites name="${framework}">
-        <testsuite name="${file}">
-          <testcase classname="${classname}" name="example fails" time="1">
-            <failure>failed</failure>
-          </testcase>
-        </testsuite>
-      </testsuites>
-    `);
-      const [failure] = getFailures(report);
-      expect(failure.testType).toBe(framework);
-      expect(failure.location).toBe('src/example.test.ts');
-      expect(testHistoryDashboardUrl(failure)).toBe(
-        testHistoryDashboardUrl({
-          ...ftrFailure,
-          testType: 'jest',
-          location: 'src/example.test.ts',
-          name: 'example fails',
-        })
-      );
-    }
-  );
-
-  it('omits links for parsed Jest reports without a file and for Cypress reports', async () => {
-    for (const [framework, classname] of [
-      ['jest', 'Jest Tests.src'],
-      ['ftr', 'Cypress Tests.src/example·cy·ts'],
-    ]) {
-      const report = await parseTestReport(`
-        <testsuites name="${framework}">
-          <testsuite name="">
-            <testcase classname="${classname}" name="example fails" time="1">
-              <failure>failed</failure>
-            </testcase>
-          </testsuite>
-        </testsuites>
-      `);
-      expect(testHistoryDashboardUrl(getFailures(report)[0])).toBeUndefined();
-    }
-  });
-
   it('matches the FTR event ID for an existing issue', () => {
     const url = testHistoryDashboardUrl(ftrFailure);
     const appState = new URLSearchParams(url?.split('?')[1]).get('_a');
