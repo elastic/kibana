@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchDestinationViewModel,
-  S3DestinationViewModel,
+import {
+  REMOTE_ELASTICSEARCH_TYPE,
+  type ElasticsearchDestinationViewModel,
+  type RemoteElasticsearchDestinationViewModel,
+  type S3DestinationViewModel,
 } from '../../../streams_layout/destinations/types';
 import { buildConfiguredDestinationNode } from '.';
 
@@ -83,6 +85,65 @@ describe('buildConfiguredDestinationNode', () => {
     );
 
     expect(node.data.subtitle).toBe('No source');
+  });
+
+  describe('remote Elasticsearch', () => {
+    const remoteDestination = (
+      partial: Partial<RemoteElasticsearchDestinationViewModel> = {}
+    ): RemoteElasticsearchDestinationViewModel => ({
+      id: 'backup',
+      name: 'Backup',
+      type: REMOTE_ELASTICSEARCH_TYPE,
+      signals: ['logs', 'traces'],
+      endpoint: 'https://my-cluster.es.example.com:9243/proxy/',
+      mode: 'static',
+      indexBySignal: { logs: 'remote-logs', traces: 'remote-traces' },
+      ...partial,
+    });
+
+    it('announces a disconnected remote destination as having no source', () => {
+      const node = buildConfiguredDestinationNode(remoteDestination(), false, []);
+
+      expect(node.ariaLabel).toBe('Destination: Backup, Logs, Traces, no source');
+      expect(node.data.subtitle).toBe('No source');
+    });
+
+    it('shows the endpoint host for a connected remote destination', () => {
+      const node = buildConfiguredDestinationNode(remoteDestination(), true, []);
+
+      expect(node.ariaLabel).toBe('Destination: Backup, Logs, Traces');
+      expect(node.data.subtitle).toBe('my-cluster.es.example.com:9243');
+    });
+
+    it('prefers the description over the endpoint host', () => {
+      const node = buildConfiguredDestinationNode(
+        remoteDestination({ description: 'Long-term copy' }),
+        true,
+        []
+      );
+
+      expect(node.data.subtitle).toBe('Long-term copy');
+    });
+
+    it.each(['not a url', 'my-cluster:9200'])(
+      'falls back to the full endpoint for %s',
+      (endpoint) => {
+        const node = buildConfiguredDestinationNode(remoteDestination({ endpoint }), true, []);
+
+        expect(node.data.subtitle).toBe(endpoint);
+      }
+    );
+
+    it('carries the endpoint and remote index names for search, but no local index count', () => {
+      const node = buildConfiguredDestinationNode(remoteDestination(), true, ['local-index']);
+
+      expect(node.ariaLabel).not.toMatch(/ind(ex|ices)/);
+      expect(node.data.indexCount).toBeUndefined();
+      expect(node.data.streamName).toBeUndefined();
+      expect(node.data.endpoint).toBe('https://my-cluster.es.example.com:9243/proxy/');
+      expect(node.data.remoteIndexNames).toEqual(['remote-logs', 'remote-traces']);
+      expect(node.data.targetedIndexNames).toBeUndefined();
+    });
   });
 
   describe('destinationType', () => {
