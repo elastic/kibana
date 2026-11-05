@@ -35,6 +35,15 @@ export const DESTINATION_ID_FIELD = 'scope.attributes.streams.destination.id';
 export const DESTINATION_ITEMS_FIELD = 'metrics.streams.destination.items';
 export const DESTINATION_DURATION_FIELD = 'metrics.streams.destination.duration';
 
+/**
+ * Source metrics come from the ingest collector, not from a unit collector. They have no scope
+ * attributes, so the `scope.attributes.streams.*` paths above match nothing for a source, and no
+ * config hash. The source id and the outcome are datapoint attributes. Verified against the
+ * local dev stack (hosted-otel-collector git-4f5ab031f11d) on 2026-11-05.
+ */
+export const SOURCE_ID_FIELD = 'attributes.source.id';
+export const SOURCE_ITEMS_FIELD = 'metrics.streams.source.items';
+
 /** The telemetry calls a processor a step. */
 export const STEP_ID_FIELD = 'scope.attributes.streams.step.id';
 export const STEP_PIPELINE_ID_FIELD = 'scope.attributes.streams.pipeline.id';
@@ -52,6 +61,7 @@ export const STATS_COLUMN = {
   bucket: 'bucket',
   incomingRate: 'incoming_rate',
   failedRate: 'failed_rate',
+  acceptedRate: 'accepted_rate',
   avgLatency: 'avg_latency',
   sumItems: 'sum_items',
   avgDurationPerItem: 'avg_duration_per_item',
