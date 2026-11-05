@@ -12,6 +12,7 @@ import type { ISessionService } from '@kbn/data-plugin/public';
 import { encodeFlyout, FLYOUT_PARAM_KEY } from '@kbn/cloud-security-posture/src/utils/query_utils';
 import {
   encodeFlyoutV2UrlParam,
+  toEntityDescriptorMode,
   FLYOUT_DESCRIPTOR_KIND,
   FLYOUT_V2_URL_PARAM,
   type FlyoutDescriptor,
@@ -21,6 +22,7 @@ import {
   markPreserveAgentBuilderSessionDuringNextSecurityNavigation,
   readLastAgentBuilderAgentIdForSecuritySession,
 } from '../../../common/agent_builder_navigation_gate';
+import type { EntityViewMode } from '../../../common/entity_analytics/entity_store/resolution_group';
 import { FLYOUT_ORIGIN } from '../../common/lib/telemetry/events/flyout_v2/types';
 
 import { SecurityPageName, ENTITY_ANALYTICS_HOME_PAGE_PATH } from '../../../common/constants';
@@ -80,12 +82,14 @@ const getEntityDescriptorContext = (
   const { id, params } = right;
   const entityId = params.entityId as string | undefined;
   const scopeId = params.scopeId as string | undefined;
+  const mode = toEntityDescriptorMode(params.mode as string | undefined);
+  const modeField = mode ? { mode } : {};
 
   if (id === HostPanelKey) {
     const hostName = params.hostName as string | undefined;
     if (!hostName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId },
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.host, hostName, entityId, scopeId, ...modeField },
       context: { entityType: 'host', entityName: hostName, entityId, scopeId },
     };
   }
@@ -94,7 +98,7 @@ const getEntityDescriptorContext = (
     const userName = params.userName as string | undefined;
     if (!userName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId },
+      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.user, userName, entityId, scopeId, ...modeField },
       context: { entityType: 'user', entityName: userName, entityId, scopeId },
     };
   }
@@ -103,7 +107,13 @@ const getEntityDescriptorContext = (
     const serviceName = params.serviceName as string | undefined;
     if (!serviceName) return null;
     return {
-      descriptor: { kind: FLYOUT_DESCRIPTOR_KIND.service, serviceName, entityId, scopeId },
+      descriptor: {
+        kind: FLYOUT_DESCRIPTOR_KIND.service,
+        serviceName,
+        entityId,
+        scopeId,
+        ...modeField,
+      },
       context: { entityType: 'service', entityName: serviceName, entityId, scopeId },
     };
   }
@@ -263,7 +273,13 @@ export const AGENT_BUILDER_ENTITY_CARD_SCOPE = 'agent-builder-entity-card';
 export type EntityFlyoutRightPanel =
   | {
       id: typeof HostPanelKey;
-      params: { contextID: string; scopeId: string; hostName: string; entityId: string };
+      params: {
+        contextID: string;
+        scopeId: string;
+        hostName: string;
+        entityId: string;
+        mode?: EntityViewMode;
+      };
     }
   | {
       id: typeof UserPanelKey;
@@ -273,11 +289,18 @@ export type EntityFlyoutRightPanel =
         userName: string;
         identityFields: { 'user.name': string };
         entityId: string;
+        mode?: EntityViewMode;
       };
     }
   | {
       id: typeof ServicePanelKey;
-      params: { contextID: string; scopeId: string; serviceName: string; entityId: string };
+      params: {
+        contextID: string;
+        scopeId: string;
+        serviceName: string;
+        entityId: string;
+        mode?: EntityViewMode;
+      };
     };
 
 /**
@@ -290,6 +313,8 @@ export const buildEntityRightPanel = (
   identifier: EntityAttachmentIdentifier
 ): EntityFlyoutRightPanel | null => {
   const { identifierType, identifier: displayName, entityStoreId } = identifier;
+  const mode = toEntityDescriptorMode(identifier.mode);
+  const modeParam = mode ? { mode } : {};
   if (!entityStoreId || !isFlyoutCapableIdentifierType(identifierType)) {
     return null;
   }
@@ -301,7 +326,13 @@ export const buildEntityRightPanel = (
     case 'host':
       return {
         id: HostPanelKey,
-        params: { contextID, scopeId, hostName: displayName, entityId: entityStoreId },
+        params: {
+          contextID,
+          scopeId,
+          hostName: displayName,
+          entityId: entityStoreId,
+          ...modeParam,
+        },
       };
     case 'user':
       return {
@@ -312,12 +343,19 @@ export const buildEntityRightPanel = (
           userName: displayName,
           identityFields: { 'user.name': displayName },
           entityId: entityStoreId,
+          ...modeParam,
         },
       };
     case 'service':
       return {
         id: ServicePanelKey,
-        params: { contextID, scopeId, serviceName: displayName, entityId: entityStoreId },
+        params: {
+          contextID,
+          scopeId,
+          serviceName: displayName,
+          entityId: entityStoreId,
+          ...modeParam,
+        },
       };
     default:
       return null;

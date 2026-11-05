@@ -71,12 +71,6 @@ export const isNeedsActionStatus = (status: SignificantEventStatus): boolean =>
 export const isResolvedStatus = (status: SignificantEventStatus): boolean =>
   getStatusGroup(status) === 'resolved';
 
-export const getNeedsActionEvents = (events: SignificantEvent[]): SignificantEvent[] =>
-  events.filter(({ status }) => isNeedsActionStatus(status));
-
-export const getResolvedEvents = (events: SignificantEvent[]): SignificantEvent[] =>
-  events.filter(({ status }) => isResolvedStatus(status));
-
 /**
  * Recency for list ordering. Prefer `updated_at` when the API provides it on the event doc.
  */

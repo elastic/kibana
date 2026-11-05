@@ -53,6 +53,23 @@ import {
 export { REBALANCE_SHARDS_TASK_ID };
 export const DEFAULT_REBALANCE_SCHEDULE = '1m';
 export const MAX_PIN_CLEAR_ATTEMPTS = 3;
+/**
+ * Pinning running monitors can stop them on the agents until a later agent policy
+ * revision arrives (elastic/elastic-agent#17714). After a location's first pins
+ * the task waits until its agents report the pinned revision, then bumps once: a
+ * bump saved earlier can reach them together with the pins and recover nothing.
+ */
+export const PIN_NUDGE_POLL_MS = 5_000;
+/** Bump anyway after this long, so an agent that never reports cannot hold it back. */
+export const PIN_NUDGE_MAX_WAIT_MS = 60_000;
+
+interface PinNudge {
+  /** Agent policy revision with the first pins; undefined if it could not be read. */
+  revision?: number;
+  /** Agents healthy when the pins were written. */
+  agentIds: string[];
+  deadline: number;
+}
 
 const PIN_DRAIN_RESET = {
   [REBALANCE_SHARDS_PINS_CLEARED_STATE_KEY]: false,
@@ -181,6 +198,7 @@ export class RebalancePrivateLocationShardsTask {
       // streak restarts on the next recovery.
       const priorHealthySince = (taskInstance.state as RebalanceTaskState).healthySince ?? {};
       const nextHealthySince: Record<string, number> = {};
+      const pinNudges = new Map<string, PinNudge>();
 
       for (const location of locations) {
         signal.throwIfAborted();
@@ -269,6 +287,15 @@ export class RebalancePrivateLocationShardsTask {
           this.debugLog(
             `location ${location.id}: moved ${result.moved}/${result.total} monitor(s)`
           );
+          if (result.newlyPinned > 0) {
+            pinNudges.set(location.agentPolicyId, {
+              revision: await this.syntheticsMonitorClient.privateLocationAPI
+                .getAgentPolicyRevision(location.agentPolicyId)
+                .catch(() => undefined),
+              agentIds: healthyAgentIds,
+              deadline: Date.now() + PIN_NUDGE_MAX_WAIT_MS,
+            });
+          }
 
           const { evicted, recovered: recoveredByDiff } = diffHealthyAgents({
             priorHealthySince,
@@ -351,6 +378,7 @@ export class RebalancePrivateLocationShardsTask {
           }
         }
       }
+      await this.nudgeAgentPolicies(pinNudges, signal);
 
       return {
         state: await this.returnedState(taskInstance, {
@@ -410,6 +438,57 @@ export class RebalancePrivateLocationShardsTask {
     // must stay claimable so a disabled cycle can drain leftover agent pins.
     await taskManager.bulkEnable([REBALANCE_SHARDS_TASK_ID], false);
     this.debugLog('Rebalance private location shards task scheduled');
+  }
+
+  /**
+   * Bumps each agent policy once its agents report the pinned revision, or at its
+   * deadline. A failed bump is logged, not retried.
+   */
+  private async nudgeAgentPolicies(pending: Map<string, PinNudge>, signal: AbortSignal) {
+    while (pending.size > 0) {
+      await new Promise((resolve) => setTimeout(resolve, PIN_NUDGE_POLL_MS));
+      signal.throwIfAborted();
+      for (const [agentPolicyId, nudge] of pending) {
+        if (
+          Date.now() < nudge.deadline &&
+          !(await this.haveAppliedPins(agentPolicyId, nudge, signal))
+        ) {
+          continue;
+        }
+        pending.delete(agentPolicyId);
+        await this.bumpAgentPolicy(agentPolicyId);
+      }
+    }
+  }
+
+  /** Agents that left the location since the pins are not waited for. */
+  private async haveAppliedPins(
+    agentPolicyId: string,
+    { revision, agentIds }: PinNudge,
+    signal: AbortSignal
+  ): Promise<boolean> {
+    if (revision === undefined) {
+      return false;
+    }
+    try {
+      const agents = await getAgentInfo(this.serverSetup, agentPolicyId, signal);
+      return agentIds.every((agentId) => {
+        const info = agents.get(agentId);
+        return !info || (info.policyRevision ?? -1) >= revision;
+      });
+    } catch {
+      return false;
+    }
+  }
+
+  private async bumpAgentPolicy(agentPolicyId: string) {
+    try {
+      await this.syntheticsMonitorClient.privateLocationAPI.bumpAgentPolicyRevision(agentPolicyId);
+    } catch (e) {
+      this.serverSetup.logger.warn(
+        `[RebalancePrivateLocationShardsTask] Failed to nudge agent policy ${agentPolicyId}: ${e.message}`
+      );
+    }
   }
 
   /**

@@ -68,6 +68,7 @@ tags:
   - group-security
   - private
   - jest-unit-tests
+  - scout-tests
 fileGroups:
   src:
     - '**/*.ts'

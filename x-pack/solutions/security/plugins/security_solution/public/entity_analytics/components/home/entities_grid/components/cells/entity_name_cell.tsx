@@ -46,7 +46,11 @@ export const EntityNameCell = memo(
     return (
       <div css={nameCellCss}>
         {onEntityNameClick ? (
-          <EuiLink onClick={() => onEntityNameClick(row)} css={[nameLinkCss, ellipsisCss]}>
+          <EuiLink
+            data-test-subj="eaGridEntityNameLink"
+            onClick={() => onEntityNameClick(row)}
+            css={[nameLinkCss, ellipsisCss]}
+          >
             {text}
           </EuiLink>
         ) : (
