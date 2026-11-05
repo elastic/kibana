@@ -831,6 +831,42 @@ describe('scheduleBackfill()', () => {
         }
       );
 
+      test.each([
+        ['disabled', { enabled: false }, false],
+        ['missing an API key', { apiKey: null }, false],
+        ['of a lifecycle rule type', {}, true],
+      ])(
+        'should NOT check connector-execute authorization when backfill rejects the rule because it is %s',
+        async (_, attributes, autoRecoverAlerts) => {
+          ruleTypeRegistry.get.mockReturnValue({
+            ...ruleTypeRegistry.get('myType'),
+            autoRecoverAlerts,
+          });
+          mockCreatePointInTimeFinderAsInternalUser({
+            saved_objects: [
+              {
+                ...ruleWithActions,
+                attributes: { ...ruleWithActions.attributes, ...attributes },
+              } as typeof existingDecryptedRule1,
+            ],
+          });
+          rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
+          rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+          actionsAuthorization.ensureAuthorized.mockRejectedValue(
+            new Error('Unauthorized to execute actions')
+          );
+
+          const mockData = [getMockData({ ruleId: '1', runActions: true })];
+
+          await rulesClient.scheduleBackfill(mockData);
+
+          expect(actionsAuthorization.ensureAuthorized).not.toHaveBeenCalled();
+          expect(backfillClient.bulkQueue).toHaveBeenCalledWith(
+            expect.objectContaining({ params: mockData })
+          );
+        }
+      );
+
       test('should NOT check connector-execute authorization when every request for a rule has runActions false', async () => {
         mockCreatePointInTimeFinderAsInternalUser({ saved_objects: [ruleWithActions] });
         rulesClientParams.getActionsClient.mockResolvedValue(mockActionsClient);
