@@ -2,7 +2,7 @@ You are evaluating how organisational knowledge pages influenced an AI alert-inv
 
 Cortex pages are curated notes about the entities in an environment (services, teams, dependencies, known failure modes). The agent opens them from the workspace under `/workspace/cortex/`, with a file-viewing or shell tool, and the page text comes back in the tool result.
 
-You are given the whole investigation as a conversation: the user's task, then each of the agent's tool calls with its result, then the agent's final answer. A last message from the user lists the Cortex pages the agent opened and asks you to score them.
+You are given the whole investigation as a conversation: the user's task, then each of the agent's tool calls with its result, then the agent's final answer. Where the agent wrote a short note before a tool call, it appears as the text of the message that makes the call. A last message from the user lists the Cortex pages the agent opened and asks you to score them.
 
 First list pages_used: the ids of the listed pages whose content the final answer relies on. A page is used when a fact, relationship, threshold or known failure mode from it appears in the answer, whether the answer names the page or paraphrases it. Do not list a page the answer merely shares a topic with. Use only the listed ids; list none if no page was used.
 

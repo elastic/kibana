@@ -84,7 +84,8 @@ const toToolCallArguments = (value: unknown): ToolCallArguments => {
 
 /**
  * Renders the round as the conversation the agent had: the user input, then each tool call as an
- * assistant message followed by its tool result, then the agent's final answer as an assistant
+ * assistant message (carrying the agent's note before the call, when it wrote one) followed by its
+ * tool result, then the agent's final answer as an assistant
  * message. Tool calls past the character budget are counted in `omittedToolCalls`, not rendered.
  */
 export const renderTraceMessages = (
@@ -103,11 +104,12 @@ export const renderTraceMessages = (
     const name = step.tool_id ?? 'unknown_tool';
     const args = toToolCallArguments(step.arguments);
     const response = truncate(stringify(step.result), MAX_TOOL_FIELD_CHARS) || '(empty)';
-    usedChars += JSON.stringify(args).length + response.length;
+    const note = step.reasoning ? truncate(step.reasoning, MAX_TOOL_FIELD_CHARS) : null;
+    usedChars += JSON.stringify(args).length + response.length + (note?.length ?? 0);
     messages.push(
       {
         role: MessageRole.Assistant,
-        content: null,
+        content: note,
         toolCalls: [{ toolCallId, function: { name, arguments: args } }],
       },
       { role: MessageRole.Tool, name, toolCallId, response }

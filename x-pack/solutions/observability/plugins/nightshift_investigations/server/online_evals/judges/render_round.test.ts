@@ -90,7 +90,13 @@ describe('renderTraceMessages', () => {
     const { messages, omittedToolCalls } = renderTraceMessages({
       input: { message: 'Why is checkout slow?' },
       steps: [
-        { tool_call_id: 't1', tool_id: 'search', arguments: { q: 'x' }, result: { hits: 2 } },
+        {
+          tool_call_id: 't1',
+          tool_id: 'search',
+          reasoning: 'Searching the checkout logs.',
+          arguments: { q: 'x' },
+          result: { hits: 2 },
+        },
         { tool_id: 'other', arguments: 'raw', result: undefined },
       ],
       response: { message: 'The deploy.' },
@@ -101,7 +107,7 @@ describe('renderTraceMessages', () => {
       { role: 'user', content: 'Why is checkout slow?' },
       {
         role: 'assistant',
-        content: null,
+        content: 'Searching the checkout logs.',
         toolCalls: [{ toolCallId: 't1', function: { name: 'search', arguments: { q: 'x' } } }],
       },
       { role: 'tool', name: 'search', toolCallId: 't1', response: '{"hits":2}' },
