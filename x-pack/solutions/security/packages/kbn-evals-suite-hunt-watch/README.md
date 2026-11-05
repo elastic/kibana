@@ -179,9 +179,11 @@ node scripts/evals start --suite hunt-watch --profile local --skip-server --grep
 A full run takes about 26 minutes with the judges on. The suite is pinned to one worker and
 `concurrency: 1` because the Worker's per-space
 `concurrency: { strategy: drop, max: 1 }` silently drops a trigger that races another sweep.
-The Worker also keeps its own 4h schedule in every eval space, and the suite cannot pause it,
-so on a long-lived stack a scheduled sweep can land during a run and drop that row's trigger.
-`HuntWatchClient.run` throws with the dropped-trigger message when that happens; rerun the row.
+Before each trigger, `HuntWatchClient.run` cancels any Worker execution that still holds the
+slot and waits for it to free. That covers a run abandoned by a failed or retried test, and a
+scheduled sweep (the Worker keeps its own 4h schedule in every eval space). If the slot does not
+free within two minutes, or a trigger still ends with no step executions, `run` throws instead of
+scoring an empty sweep.
 
 AlertZero routes 404 outside a Security solution space. The preflight creates `hunt-a`, `hunt-b`
 and `hunt-blocked` as Security spaces, or switches them to Security, and leaves them that way. It
