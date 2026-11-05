@@ -28,6 +28,14 @@ const COVERAGE_REVIEW_WORKFLOW_ID = 'system-security-coverage-review';
 const COVERAGE_WORKER_WORKFLOW_ID = 'system-security-coverage-worker';
 const FLOOR_ALERT_TRIAGE_WORKER_ID = 'system-security-floor-alert-triage';
 const FLOOR_ALERT_TRIAGE_WORKFLOW_ID = `${FLOOR_ALERT_TRIAGE_WORKER_ID}-${DEFAULT_SPACE_ID}`;
+/**
+ * The workflows the triage sweep starts asynchronously with `workflow.executeAsync` (async
+ * children are not cancelled with their parent): one batch per planned rule, and per batch one
+ * closure review behind a proposal. Both execute as the service account the suite binds, so
+ * they must be drained before that account is deleted.
+ */
+const TRIAGE_BATCH_WORKFLOW_ID = 'system-security-floor-alert-triage-batch';
+const TRIAGE_CLOSURE_REVIEW_WORKFLOW_ID = 'system-security-floor-alert-triage-review';
 
 const KIBANA_SETTINGS_PATH = 'internal/kibana/settings';
 /** Settings route of a space; the default space serves it without the `/s/<id>` prefix. */
@@ -47,7 +55,8 @@ const DRAIN_TIMEOUT_MS = 60_000;
  * and the worker, account and settings cleanup around it. Playwright's default hook timeout
  * (60s) covers a drain that runs to its ceiling only if nothing else is slow.
  */
-const TEARDOWN_TIMEOUT_MS = DRAIN_TIMEOUT_MS + 30_000 + 3 * 60_000;
+/** Three drains (sweep, batches, closure reviews), each up to DRAIN_TIMEOUT_MS, plus cleanup. */
+const TEARDOWN_TIMEOUT_MS = 3 * DRAIN_TIMEOUT_MS + 30_000 + 3 * 60_000;
 /** Ceiling for a managed workflow to be installed and report valid after startup or an enable. */
 const INSTALL_TIMEOUT_MS = 20_000;
 
@@ -210,6 +219,10 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
   // Execution ids of the triage workflow that existed before this suite's enable; teardown
   // cancels and drains the rest (see `cancelNewExecutions`).
   let knownExecutionIds: string[] = [];
+  // Baselines of the batch and closure-review workflows the enabled sweep starts: snapshotted
+  // in beforeAll before the enable, drained in teardown before the service account goes.
+  let knownBatchExecutionIds: string[] = [];
+  let knownClosureExecutionIds: string[] = [];
 
   apiTest.beforeAll(async ({ apiClient, apiServices, samlAuth }) => {
     const { cookieHeader } = await samlAuth.asInteractiveUser('admin');
@@ -290,10 +303,23 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
 
     // Snapshot the workflow's executions BEFORE the enable: the enable installs the workflow
     // and starts its scheduled run, and teardown drains exactly the runs this suite started.
+    // Same for the batch and closure-review workflows the sweep's run starts asynchronously:
+    // both execute as the service account bound below, so they must be baselined now, not at
+    // teardown, or a run another suite left behind would be cancelled as ours.
     knownExecutionIds = await listExecutionIds(
       apiClient,
       { ...PUBLIC_API_HEADERS, ...cookieHeader },
       FLOOR_ALERT_TRIAGE_WORKFLOW_ID
+    );
+    knownBatchExecutionIds = await listExecutionIds(
+      apiClient,
+      { ...PUBLIC_API_HEADERS, ...cookieHeader },
+      TRIAGE_BATCH_WORKFLOW_ID
+    );
+    knownClosureExecutionIds = await listExecutionIds(
+      apiClient,
+      { ...PUBLIC_API_HEADERS, ...cookieHeader },
+      TRIAGE_CLOSURE_REVIEW_WORKFLOW_ID
     );
 
     // Enabling an uninstalled worker installs its per-space managed document, so
@@ -348,6 +374,27 @@ apiTest.describe('AlertZero managed workflows', { tag: [...tags.stateful.classic
           { ...PUBLIC_API_HEADERS, ...cookieHeader },
           FLOOR_ALERT_TRIAGE_WORKFLOW_ID,
           knownExecutionIds
+        );
+      });
+      // The sweep starts one batch workflow per planned rule (and each batch a closure review
+      // behind a proposal) with `workflow.executeAsync`, so cancelling the sweep's own run does
+      // not end them. They run as the service account deleted below; drain them first, or a
+      // batch still mid-model-call fails against the deleted account and can raise a proposal
+      // after this suite has gone.
+      await attempt(async () => {
+        await cancelNewExecutions(
+          apiClient,
+          { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          TRIAGE_BATCH_WORKFLOW_ID,
+          knownBatchExecutionIds
+        );
+      });
+      await attempt(async () => {
+        await cancelNewExecutions(
+          apiClient,
+          { ...PUBLIC_API_HEADERS, ...cookieHeader },
+          TRIAGE_CLOSURE_REVIEW_WORKFLOW_ID,
+          knownClosureExecutionIds
         );
       });
       // Unbind before deleting the account: a worker left pointing at a deleted account leaks
