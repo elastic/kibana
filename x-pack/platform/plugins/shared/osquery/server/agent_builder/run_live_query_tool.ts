@@ -21,6 +21,8 @@ import { createInternalSavedObjectsClientForSpaceId } from '../utils/get_interna
 import { validateReadOnlyQuery } from './validate_read_only_query';
 import { pollActionResponses } from './poll_action_responses';
 import { hasOsqueryToolPrivilege, unauthorizedToolResult } from './tool_authz';
+import type { SchemaService } from '../lib/schema_service';
+import type { OsqueryTable } from '../../common/types/schema';
 
 export const RUN_LIVE_QUERY_TOOL_ID = osqueryTool('run_live_query');
 
@@ -52,15 +54,22 @@ const runLiveQuerySchema = z.object({
 
 export const runLiveQueryTool = (
   osqueryContext: OsqueryAppContext,
-  logger: Logger
+  logger: Logger,
+  schemaService: SchemaService
 ): BuiltinToolDefinition<typeof runLiveQuerySchema> => ({
   id: RUN_LIVE_QUERY_TOOL_ID,
   type: ToolType.builtin,
   description:
-    'Run a read-only Osquery live query on specified agents. Returns the action ID for polling results. The query must be read-only (SELECT statements only). Results are returned inline when available; for long-running queries, poll using the returned action_id.',
     'Run a read-only Osquery live query on specified agents and wait briefly for results. Enforces SchemaService catalog allowlist — only SELECT against known tables. Returns rows when agents respond within ~30s; otherwise returns action_id — call osquery.get_live_query_results to wait longer and display rows in chat.',
   schema: runLiveQuerySchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
+  annotations: {
+    title: 'Run Osquery live query',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async (input, { request }) => {
     const { query, agent_ids: agentIds, timeout } = input;
 
@@ -132,6 +141,7 @@ export const runLiveQueryTool = (
       const space = await osqueryContext.service.getActiveSpace(request);
 
       const result = await createActionHandler(osqueryContext, createActionParams, {
+        dispatch: { entryPoint: 'live_query', source: { kind: 'caller' } },
         metadata: {
           currentUser: currentUser?.username ?? undefined,
           userProfileUid: currentUser?.profile_uid ?? undefined,
@@ -165,6 +175,7 @@ export const runLiveQueryTool = (
 
       const agentCount = result.response.agents?.length ?? result.fleetActionsCount;
 
+      const [coreStart] = await osqueryContext.getStartServices();
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const pollResult = await pollActionResponses(esClient, queryActionId, {
         budgetMs: POLL_BUDGET_MS,
@@ -187,9 +198,6 @@ export const runLiveQueryTool = (
             tool_result_id: getToolResultId(),
             type: ToolResultType.other,
             data: {
-              action_id: result.response.action_id,
-              agent_count: result.response.agents?.length ?? result.fleetActionsCount,
-              status: 'dispatched',
               action_id: queryActionId,
               parent_action_id: parentActionId,
               agent_count: agentCount,

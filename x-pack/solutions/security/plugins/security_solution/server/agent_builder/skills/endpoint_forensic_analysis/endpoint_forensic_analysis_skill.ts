@@ -84,20 +84,6 @@ const extractIocsSchema = lazySchema(() =>
   )
 );
 
-const extractIocsSchema = z.object({
-  hosts: z
-    .array(z.string())
-    .describe('Named host.name values to extract IoCs from (at least one required)'),
-  time_window_hours: z
-    .number()
-    .int()
-    .min(1)
-    .max(720)
-    .optional()
-    .default(72)
-    .describe('Lookback window in hours for IoC extraction'),
-});
-
 export const endpointForensicAnalysisSkill = defineSkillType({
   id: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
   name: ENDPOINT_FORENSIC_ANALYSIS_SKILL_ID,
@@ -528,115 +514,6 @@ When Osquery is available, cross-reference with live \`scheduled_tasks\` and \`s
                     'merging them, and enrich each comment with what your reconstruction established. They are ' +
                     'a floor, not the full set: this query can only type telemetry fields mechanically, so add ' +
                     'the ransom_note, encryption_marker, and compromised_identities categories yourself.',
-              },
-            },
-          ],
-        };
-      },
-    },
-    {
-      id: ENDPOINT_FORENSIC_EXTRACT_IOCS_TOOL_ID,
-      type: ToolType.builtin,
-      description:
-        'Extract structured indicators of compromise (IoCs) from Defend telemetry for named host(s). ' +
-        'Returns a typed list of file hashes, network destinations, registry persistence keys, and renamed file extensions. ' +
-        'Call this after forensic reconstruction to produce the IoC table for cross-environment hunts and response actions.',
-      schema: extractIocsSchema,
-      handler: async (args, context) => {
-        const { hosts, time_window_hours: timeWindowHours } = extractIocsSchema.parse(args);
-        const hostFilter = hosts.map((h) => `"${escapeEsqlString(h)}"`).join(', ');
-        const esqlQuery = [
-          `FROM logs-endpoint.events.process-*, logs-endpoint.events.network-*, logs-endpoint.events.file-*, logs-endpoint.events.registry-*`,
-          `| WHERE host.name IN (${hostFilter}) AND @timestamp >= NOW() - ${timeWindowHours} HOURS`,
-          `| KEEP process.hash.sha256, process.executable, process.parent.name, process.parent.command_line, destination.ip, destination.domain, registry.path, file.extension`,
-          `| LIMIT 500`,
-        ].join(' ');
-
-        const iocs: Record<string, unknown[]> = {
-          file_hashes: [],
-          process_chain: [],
-          network_destinations: [],
-          registry_persistence_keys: [],
-          file_extensions: [],
-        };
-
-        try {
-          const { columns, values } = await context.esClient.asCurrentUser.esql.query({
-            query: esqlQuery,
-            drop_null_columns: true,
-          });
-          const colIndex = (name: string) => columns.findIndex((c) => c.name === name);
-
-          const hashIdx = colIndex('process.hash.sha256');
-          const exeIdx = colIndex('process.executable');
-          const parentNameIdx = colIndex('process.parent.name');
-          const parentCmdIdx = colIndex('process.parent.command_line');
-          const ipIdx = colIndex('destination.ip');
-          const domainIdx = colIndex('destination.domain');
-          const regIdx = colIndex('registry.path');
-          const extIdx = colIndex('file.extension');
-
-          for (const row of values) {
-            const v = row as unknown[];
-            const hash = hashIdx >= 0 ? v[hashIdx] : null;
-            const exe = exeIdx >= 0 ? v[exeIdx] : null;
-            const parentName = parentNameIdx >= 0 ? v[parentNameIdx] : null;
-            const parentCmd = parentCmdIdx >= 0 ? v[parentCmdIdx] : null;
-            const ip = ipIdx >= 0 ? v[ipIdx] : null;
-            const domain = domainIdx >= 0 ? v[domainIdx] : null;
-            const regPath = regIdx >= 0 ? v[regIdx] : null;
-            const ext = extIdx >= 0 ? v[extIdx] : null;
-
-            if (hash && typeof hash === 'string' && !iocs.file_hashes.includes(hash)) {
-              iocs.file_hashes.push(hash);
-            }
-            if (exe && typeof exe === 'string' && parentName && typeof parentName === 'string') {
-              const chain = `${parentName} → ${exe}`;
-              if (!iocs.process_chain.includes(chain)) {
-                iocs.process_chain.push(chain);
-              }
-            }
-            if (
-              parentCmd &&
-              typeof parentCmd === 'string' &&
-              parentName &&
-              !iocs.process_chain.includes(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`)
-            ) {
-              iocs.process_chain.push(`${parentName} (cmd: ${parentCmd.slice(0, 80)})`);
-            }
-            const netDest = domain ?? ip;
-            if (
-              netDest &&
-              typeof netDest === 'string' &&
-              !iocs.network_destinations.includes(netDest)
-            ) {
-              iocs.network_destinations.push(netDest);
-            }
-            if (
-              regPath &&
-              typeof regPath === 'string' &&
-              !iocs.registry_persistence_keys.includes(regPath)
-            ) {
-              iocs.registry_persistence_keys.push(regPath);
-            }
-            if (ext && typeof ext === 'string' && !iocs.file_extensions.includes(ext)) {
-              iocs.file_extensions.push(ext);
-            }
-          }
-        } catch {
-          // Index missing or query error — return empty structure so the agent can report "no hits"
-        }
-
-        return {
-          results: [
-            {
-              type: ToolResultType.other,
-              data: {
-                hosts,
-                time_window_hours: timeWindowHours,
-                iocs,
-                guidance:
-                  'Present as a markdown table (one row per indicator type), then offer a cross-environment hunt with these values.',
               },
             },
           ],

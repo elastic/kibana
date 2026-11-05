@@ -56,6 +56,13 @@ export const getLiveQueryResultsTool = (
     'Wait for and retrieve Osquery live-query results for a dispatched action_id. Use after osquery.run_live_query when status is dispatched/partial, or when the analyst needs rows displayed in chat. Polls action responses until wait_seconds elapses or rows arrive.',
   schema: getLiveQueryResultsSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
+  annotations: {
+    title: 'Osquery live query results',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async (input, { request }) => {
     const { action_id: actionId, wait_seconds: waitSeconds, max_rows: maxRows } = input;
     const waitBudgetMs = (waitSeconds ?? DEFAULT_WAIT_SECONDS) * 1_000;

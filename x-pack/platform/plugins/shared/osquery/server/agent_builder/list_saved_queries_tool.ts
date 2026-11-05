@@ -40,6 +40,13 @@ export const listSavedQueriesTool = (
     'List available Osquery saved queries (prebuilt and custom). Use this to discover existing queries before authoring a custom one. Returns query text, platform, interval, and prebuilt status.',
   schema: listSavedQueriesSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
+  annotations: {
+    title: 'Osquery saved queries',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async (input, { request }) => {
     const { search, page, page_size: pageSize } = input;
 

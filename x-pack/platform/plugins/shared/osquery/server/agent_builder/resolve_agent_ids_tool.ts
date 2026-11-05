@@ -93,6 +93,13 @@ export const resolveAgentIdsTool = (
     'Returns one entry per requested hostname; agent_id is null if no enrolled Osquery-capable agent matched.',
   schema: resolveAgentIdsSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
+  annotations: {
+    title: 'Resolve hosts to Elastic Agent IDs',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async (input, { request }) => {
     const { hostnames } = input;
     const agentService = osqueryContext.service.getAgentService();

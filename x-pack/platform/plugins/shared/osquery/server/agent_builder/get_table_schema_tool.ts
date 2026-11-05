@@ -43,6 +43,13 @@ export const getTableSchemaTool = (
     'Get the Osquery table schema (columns, types, descriptions) for a specific table. Use this before authoring a custom Osquery query to verify column names and types. The schema is sourced from the installed osquery_manager integration package.',
   schema: getTableSchemaSchema,
   availability: agentBuilderToolsAvailability(osqueryContext),
+  annotations: {
+    title: 'Osquery table schema',
+    readOnlyHint: true,
+    destructiveHint: false,
+    idempotentHint: true,
+    openWorldHint: false,
+  },
   handler: async (input, { request }) => {
     const { table_name: tableName, platform } = input;
 

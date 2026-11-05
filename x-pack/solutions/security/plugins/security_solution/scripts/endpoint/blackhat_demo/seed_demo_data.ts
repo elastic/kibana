@@ -6,12 +6,12 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import { createEsClient } from '../common/stack_services';
-// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import {
   seedForensicTimeline,
   FORENSIC_HOSTS,
-} from '../../../../../packages/kbn-evals-suite-endpoint/src/data_generators/forensic_data';
+} from '@kbn/evals-suite-endpoint/src/data_generators/forensic_data';
+import { createEsClient } from '../common/stack_services';
+// eslint-disable-next-line @kbn/imports/no_boundary_crossing
 import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
 
 /**
@@ -33,7 +33,11 @@ async function resolveAgentIds(
   const fetchOpts: RequestInit = { headers };
   const basicAuth =
     'username' in auth
-      ? { Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString('base64')}` }
+      ? {
+          Authorization: `Basic ${Buffer.from(`${auth.username}:${auth.password}`).toString(
+            'base64'
+          )}`,
+        }
       : {};
 
   const response = await fetch(`${kibanaUrl}/api/fleet/agents?perPage=200`, {
@@ -123,7 +127,9 @@ run(
       ].filter((h) => !agentIdOverrides[h]);
       if (missing.length > 0) {
         log.warning(
-          `No enrolled agent found for: ${missing.join(', ')} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
+          `No enrolled agent found for: ${missing.join(
+            ', '
+          )} — those hosts will seed with fabricated agent ids and won't answer live osquery dispatches.`
         );
       } else {
         log.info(`Resolved agent ids: ${JSON.stringify(agentIdOverrides)}`);
