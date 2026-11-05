@@ -67,7 +67,10 @@ const EntityTypeResultsOfType = ({ entityType }: { entityType: string }) => {
       )}
       <EuiFlexItem>
         {isEmpty ? (
-          <EntityTableEmpty typeName={description.name} />
+          <EntityTableEmpty
+            typeName={description.name}
+            isIncomplete={errors.length > 0 || total === null}
+          />
         ) : (
           <EntityTable entityType={description} list={list} />
         )}

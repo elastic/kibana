@@ -101,3 +101,17 @@ export const getEmptyTitle = (typeName: string) =>
 export const EMPTY_BODY = i18n.translate('xpack.entityInventoryApp.entityTable.empty.body', {
   defaultMessage: 'Try a different time range.',
 });
+
+export const getEmptyWithFailuresTitle = (typeName: string) =>
+  i18n.translate('xpack.entityInventoryApp.entityTable.empty.withFailures.title', {
+    defaultMessage: 'No {typeName} entities were returned',
+    values: { typeName },
+  });
+
+export const EMPTY_WITH_FAILURES_BODY = i18n.translate(
+  'xpack.entityInventoryApp.entityTable.empty.withFailures.body',
+  {
+    defaultMessage:
+      'Some data sources failed or the entities could not be counted, so entities may exist that are not shown. See the details above.',
+  }
+);

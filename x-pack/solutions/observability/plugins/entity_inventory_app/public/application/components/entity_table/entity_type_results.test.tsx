@@ -25,7 +25,9 @@ import {
   EMPTY_BODY,
   LOAD_ERROR_TITLE,
   RETRY_LABEL,
+  EMPTY_WITH_FAILURES_BODY,
   getEmptyTitle,
+  getEmptyWithFailuresTitle,
   getTruncationTitle,
   getTruncationTotalUnknownTitle,
   getTypeNotAvailableTitle,
@@ -115,7 +117,10 @@ describe('EntityTypeResults', () => {
   it('explains an empty result caused by failing sources', async () => {
     renderScenario('allSourcesFailed');
 
-    expect(await screen.findByTestId('entityInventoryTableEmpty')).toBeInTheDocument();
+    const empty = await screen.findByTestId('entityInventoryTableEmpty');
+    expect(empty).toHaveTextContent(getEmptyWithFailuresTitle(HOST_TYPE_FIXTURE.name));
+    expect(empty).toHaveTextContent(EMPTY_WITH_FAILURES_BODY);
+    expect(empty).not.toHaveTextContent(EMPTY_BODY);
     expect(screen.getByTestId('entityInventoryDiagnosticsCallout')).toBeInTheDocument();
     expect(screen.queryByTestId('entityInventoryTruncationCallout')).not.toBeInTheDocument();
   });

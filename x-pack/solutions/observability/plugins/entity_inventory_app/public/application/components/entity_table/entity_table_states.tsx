@@ -14,10 +14,12 @@ import {
 } from '../../../ebt_constants';
 import {
   EMPTY_BODY,
+  EMPTY_WITH_FAILURES_BODY,
   LOADING_ENTITIES_LABEL,
   LOAD_ERROR_TITLE,
   RETRY_LABEL,
   getEmptyTitle,
+  getEmptyWithFailuresTitle,
   getTypeNotAvailableTitle,
 } from './translations';
 
@@ -74,12 +76,21 @@ export const EntityTableLoadError = ({
   />
 );
 
-/** Shown when the request succeeded and no entities matched. */
-export const EntityTableEmpty = ({ typeName }: { typeName: string }) => (
+export interface EntityTableEmptyProps {
+  typeName: string;
+  /** The response could not confirm that nothing matched: a source failed or the count failed. */
+  isIncomplete: boolean;
+}
+
+/**
+ * Shown when no entities came back. A time range hint only fits a complete response; after a
+ * failed source the entities may exist, so the text points at the failure instead.
+ */
+export const EntityTableEmpty = ({ typeName, isIncomplete }: EntityTableEmptyProps) => (
   <EuiEmptyPrompt
     iconType="magnify"
-    title={<h2>{getEmptyTitle(typeName)}</h2>}
-    body={<p>{EMPTY_BODY}</p>}
+    title={<h2>{isIncomplete ? getEmptyWithFailuresTitle(typeName) : getEmptyTitle(typeName)}</h2>}
+    body={<p>{isIncomplete ? EMPTY_WITH_FAILURES_BODY : EMPTY_BODY}</p>}
     data-test-subj="entityInventoryTableEmpty"
   />
 );
