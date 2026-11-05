@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import DREAMING_YAML from './dreaming.yaml';
 import FEEDBACK_ANALYSIS_YAML from './feedback_analysis.yaml';
 import type { ManagedWorkflowDefinition, ManagedWorkflowTemplateValues } from '../../types';
 
@@ -49,3 +50,55 @@ export const CONTEXT_ENGINE_FEEDBACK_ANALYSIS_WORKFLOW = {
     }),
   management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
 } as const satisfies ManagedWorkflowDefinition<ContextEngineFeedbackAnalysisWorkflowTemplateValues>;
+
+export const CONTEXT_ENGINE_DREAMING_WORKFLOW_ID = 'system-context-engine-dreaming';
+
+export interface ContextEngineDreamingWorkflowTemplateValues extends ManagedWorkflowTemplateValues {
+  /** The AI index this instance dreams for. */
+  aiIndexId: string;
+  /** Unique per AI index and space. */
+  instanceKey: string;
+  /** The AI index backing store. */
+  memoriesIndex: string;
+  /** How often the workflow runs. */
+  intervalMinutes: number;
+  /** The AI connector id; empty for Context Engine's default model. */
+  connectorId: string;
+  instructions: string;
+  factTypes: Array<{ type: string; description?: string }>;
+  entityTypes: Array<{ type: string; description?: string; attributes?: string[] }>;
+  relationshipTypes: Array<{ type: string; source: string; target: string; description?: string }>;
+}
+
+const TEMPLATE_TOKEN = /__[A-Z_]+__/g;
+
+const renderJsonTemplate = (template: string, values: Record<string, unknown>): string =>
+  template.replace(TEMPLATE_TOKEN, (token) =>
+    token in values
+      ? typeof values[token] === 'number'
+        ? String(values[token])
+        : JSON.stringify(values[token])
+      : token
+  );
+
+/** Consolidates the memories of one AI index into long-term facts, entities and relationships. */
+export const CONTEXT_ENGINE_DREAMING_WORKFLOW = {
+  id: CONTEXT_ENGINE_DREAMING_WORKFLOW_ID,
+  pluginId: 'contextEngine',
+  version: 1,
+  billable: false,
+  yamlTemplate: (values) =>
+    renderJsonTemplate(DREAMING_YAML, {
+      __NAME__: `Dreaming: ${values.aiIndexId}`,
+      __AI_INDEX_ID__: values.aiIndexId,
+      __CONCURRENCY_KEY__: `context-engine-dreaming-${values.instanceKey}`,
+      __MEMORIES_INDEX__: values.memoriesIndex,
+      __INTERVAL_MINUTES__: values.intervalMinutes,
+      __CONNECTOR_ID__: values.connectorId,
+      __INSTRUCTIONS__: values.instructions,
+      __FACT_TYPES__: values.factTypes,
+      __ENTITY_TYPES__: values.entityTypes,
+      __RELATIONSHIP_TYPES__: values.relationshipTypes,
+    }),
+  management: CONTEXT_ENGINE_WORKFLOW_MANAGEMENT,
+} as const satisfies ManagedWorkflowDefinition<ContextEngineDreamingWorkflowTemplateValues>;

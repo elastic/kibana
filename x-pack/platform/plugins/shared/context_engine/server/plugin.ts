@@ -39,6 +39,9 @@ import type {
 } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisScheduleService } from './feedback_analysis/schedule';
 import { createFeedbackAnalysisChangeHandler } from './feedback_analysis/change_handler';
+import { createDreamingChangeHandler } from './dreaming/change_handler';
+import type { DreamingScheduleService, DreamingWorkflowsApi } from './dreaming/schedule';
+import { createDreamingScheduleService } from './dreaming/schedule';
 import { AiIndexChangeNotifier } from './ai_indices/changes';
 import { AiIndexDataReadService } from './ai_indices/data_read_service';
 import { AiIndexService } from './ai_indices/service';
@@ -79,14 +82,16 @@ export class ContextEnginePlugin
   ) => AiIndexDataReadService;
   private esClient?: ElasticsearchClient;
   private scheduleService?: FeedbackAnalysisScheduleService;
+  private dreamingScheduleService?: DreamingScheduleService;
   /** Captured at setup because the schedule service, built at start, enables workflows with it. */
   private workflowsManagement?: WorkflowEnablementApi;
   private isFeedbackLoopEnabled: () => Promise<boolean> = async () => false;
+  private isGlobalMemoryEnabled: () => Promise<boolean> = async () => false;
   private readonly aiIndexRegistry = new AiIndexRegistry();
   private readonly aiIndexChanges: AiIndexChangeNotifier;
   private analyticsService?: ContextEngineAnalyticsService;
   private workflowsManagementApiPromise: Promise<
-    (DeleteWorkflowsApi & KiVerifierWorkflowRunner) | undefined
+    (DeleteWorkflowsApi & KiVerifierWorkflowRunner & DreamingWorkflowsApi) | undefined
   > = Promise.resolve(undefined);
 
   constructor(context: PluginInitializerContext) {
@@ -226,6 +231,14 @@ export class ContextEnginePlugin
       return this.scheduleService;
     };
     this.aiIndexChanges.register(createFeedbackAnalysisChangeHandler(getScheduleService));
+    this.aiIndexChanges.register(
+      createDreamingChangeHandler(() => {
+        if (!this.dreamingScheduleService) {
+          throw new Error('Dreaming schedule service not available — plugin has not started');
+        }
+        return this.dreamingScheduleService;
+      })
+    );
 
     const isMemoryEnabled = async (request: KibanaRequest) => {
       const [coreStart] = await coreSetup.getStartServices();
@@ -279,19 +292,21 @@ export class ContextEnginePlugin
       });
     };
 
-    const checkWritePrivilege = async (request: KibanaRequest, spaceId: string) => {
-      const [, startDeps] = await coreSetup.getStartServices();
-      const { security } = startDeps;
-      if (!security) {
-        return true;
-      }
-      const { hasAllRequested } = await security.authz
-        .checkPrivilegesWithRequest(request)
-        .atSpace(spaceId, {
-          kibana: [security.authz.actions.api.get(apiPrivileges.writeContextEngine)],
-        });
-      return hasAllRequested;
-    };
+    const checkContextEnginePrivilege =
+      (privilege: string) => async (request: KibanaRequest, spaceId: string) => {
+        const [, startDeps] = await coreSetup.getStartServices();
+        const { security } = startDeps;
+        if (!security) {
+          return true;
+        }
+        const { hasAllRequested } = await security.authz
+          .checkPrivilegesWithRequest(request)
+          .atSpace(spaceId, {
+            kibana: [security.authz.actions.api.get(privilege)],
+          });
+        return hasAllRequested;
+      };
+    const checkWritePrivilege = checkContextEnginePrivilege(apiPrivileges.writeContextEngine);
 
     registerStepDefinitions({
       workflowsExtensions: setupDeps.workflowsExtensions,
@@ -312,6 +327,12 @@ export class ContextEnginePlugin
         isFeedbackLoopEnabled: () => this.isFeedbackLoopEnabled(),
         checkWritePrivilege,
         logger: this.logger.get('feedback_analysis'),
+      },
+      dreaming: {
+        getAiIndexService,
+        isContextEngineEnabled,
+        isMemoryEnabled: () => this.isGlobalMemoryEnabled(),
+        checkReadPrivilege: checkContextEnginePrivilege(apiPrivileges.readContextEngine),
       },
     });
 
@@ -337,7 +358,9 @@ export class ContextEnginePlugin
     try {
       this.workflowsManagementApiPromise = coreSetup.plugins
         .onSetup<{
-          workflowsManagement: { management: DeleteWorkflowsApi & KiVerifierWorkflowRunner };
+          workflowsManagement: {
+            management: DeleteWorkflowsApi & KiVerifierWorkflowRunner & DreamingWorkflowsApi;
+          };
         }>('workflowsManagement')
         .then(({ workflowsManagement }) =>
           workflowsManagement.found ? workflowsManagement.contract.management : undefined
@@ -436,12 +459,22 @@ export class ContextEnginePlugin
       ...(this.workflowsManagement ? { workflowsManagement: this.workflowsManagement } : {}),
     });
 
+    this.dreamingScheduleService = createDreamingScheduleService({
+      logger: this.logger,
+      getManagedWorkflowsClient: () =>
+        startDeps.workflowsExtensions.initManagedWorkflowsClient(CONTEXT_ENGINE_WORKFLOW_OWNER),
+      getWorkflowsManagement: () => this.workflowsManagementApiPromise,
+      getAiIndexService: () => aiIndexService,
+    });
+
     const soClient = coreStart.savedObjects.createInternalRepository();
     const globalUiSettings = coreStart.uiSettings.globalAsScopedToClient(soClient);
 
     this.isFeedbackLoopEnabled = async () =>
       (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_FEEDBACK_LOOP_ENABLED_SETTING_ID)) ??
       false;
+    this.isGlobalMemoryEnabled = async () =>
+      (await globalUiSettings.get<boolean>(CONTEXT_ENGINE_MEMORY_ENABLED_SETTING_ID)) ?? false;
 
     scheduleSignalGenerator({ taskManager: startDeps.taskManager }).catch((err) => {
       this.logger.warn(
