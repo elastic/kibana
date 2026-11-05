@@ -20,7 +20,7 @@ import type {
 } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentsPack } from './pack';
+import { componentsPack, type ComponentsNode } from './pack';
 import type {
   ActionsNode,
   CodeNode,
@@ -262,5 +262,30 @@ describe('Slack slots below their schema cap', () => {
       expect(elementText(element).length).toBeLessThanOrEqual(SLACK_LIMITS.sectionTextChars);
     }
     expect(elements.map(elementText).join('')).toBe(text);
+  });
+
+  describe('blank text', () => {
+    it('leaves out blank nodes and items on every surface', () => {
+      const blank = ' \n ';
+      const composition = {
+        type: 'view' as const,
+        body: [
+          { type: 'header', text: blank },
+          { type: 'quote', text: blank },
+          { type: 'code', text: blank },
+          { type: 'link', label: blank, url: 'https://example.com' },
+          { type: 'context', items: [{ text: blank }, { text: 'Kept' }] },
+          { type: 'fields', items: [{ label: blank, value: 'x' }] },
+          { type: 'actions', buttons: [{ label: blank, url: 'https://example.com' }] },
+        ] as ComponentsNode[],
+      };
+
+      expect(validate(composition).valid).toBe(true);
+      expect(surfaces.text.render(composition).trim()).toBe('Kept');
+      expect(surfaces.markdown.render(composition).trim()).toBe('Kept');
+      expect(
+        surfaces.slack.render(composition, { heading: false }).blocks.map(({ type }) => type)
+      ).toEqual(['context']);
+    });
   });
 });

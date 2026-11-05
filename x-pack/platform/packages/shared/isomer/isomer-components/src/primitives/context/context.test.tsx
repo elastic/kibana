@@ -30,9 +30,10 @@ const slackText = (node: ContextNode): string => {
 };
 
 describe('context', () => {
-  it('takes 1 to 10 items, none blank', () => {
+  it('takes 1 to 10 items, and leaves out blank ones', () => {
     expect(validate({ type: 'view', body: [line()] }).valid).toBe(false);
-    expect(validate({ type: 'view', body: [line('Owner: SRE', ' ')] }).valid).toBe(false);
+    expect(validate({ type: 'view', body: [line('Owner: SRE', ' ')] }).valid).toBe(true);
+    expect(surfaces.text.renderNode(line('Owner: SRE', ' '))).toBe('Owner: SRE');
     expect(validate({ type: 'view', body: [line(...Array(10).fill('a'))] }).valid).toBe(true);
     expect(validate({ type: 'view', body: [line(...Array(11).fill('a'))] }).valid).toBe(false);
   });

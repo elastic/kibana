@@ -4,7 +4,7 @@ Kibana's [Isomer](https://github.com/elastic/isomer) pack of content and layout 
 
 ## Component Primitives
 
-Plain-text fields take text of any length. Each surface fits it: Slack clamps a slot past its limit with an ellipsis, or cuts it with a note, so a long value never fails validation.
+Plain-text fields take text of any length. Each surface fits it: Slack clamps a slot past its limit with an ellipsis, or cuts it with a note, so a long value never fails validation. Blank text leaves out its node, or its item in a list, on every surface; only a `section` title and a table column label must not be blank.
 
 - `markdown`: GitHub-flavored Markdown.
   - `{ type: 'markdown', text }`, the same node as Agent Builder's `MarkdownNode`.

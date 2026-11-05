@@ -13,7 +13,7 @@ import type { SlackBlock } from '@elastic/isomer-sdk/slack';
 import { SLACK_LIMITS, clampSlackText, escapeMrkdwn } from '@elastic/isomer-sdk/slack';
 import { i18n } from '@kbn/i18n';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
 import { codeReactRenderer } from './code_react';
 
 const codeSchema = z.object({
@@ -85,6 +85,7 @@ const slackCode = ({ text }: CodeNode): SlackBlock[] => {
 export const code = definePrimitive<CodeNode, typeof codeSchema>({
   type: 'code',
   schema: codeSchema,
+  sanitize: (node) => (hasText(node.text) ? node : null),
   catalog: {
     type: 'code',
     purpose: 'A block of code, a query, or source text, shown exactly as written.',

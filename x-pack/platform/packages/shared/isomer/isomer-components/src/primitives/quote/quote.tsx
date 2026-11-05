@@ -11,7 +11,7 @@ import { nodeAnchor, z } from '@elastic/isomer-sdk';
 import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { SLACK_LIMITS, clampSlackText } from '@elastic/isomer-sdk/slack';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, plainText } from '../../lib';
 import { quoteMarkdownRenderer } from './quote_markdown';
 
 const quoteSchema = z.object({
@@ -55,6 +55,7 @@ const { handles } = isomerDistillery.createStyleModule(
 export const quote = definePrimitive<QuoteNode, typeof quoteSchema>({
   type: 'quote',
   schema: quoteSchema,
+  sanitize: (node) => (hasText(node.text) ? node : null),
   catalog: {
     type: 'quote',
     purpose: 'Sets a passage apart as quoted: a conclusion, a verdict, or a finding as stated.',

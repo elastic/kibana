@@ -32,7 +32,10 @@ describe('fields', () => {
     expect(view(fieldsOf()).valid).toBe(false);
     expect(view(fieldsOf(...Array(10).fill(item))).valid).toBe(true);
     expect(view(fieldsOf(...Array(11).fill(item))).valid).toBe(false);
-    expect(view(fieldsOf({ label: ' ', value: 'x' })).valid).toBe(false);
+    expect(view(fieldsOf({ label: ' ', value: 'x' })).valid).toBe(true);
+    expect(slackFields(fieldsOf({ label: ' ', value: 'x' }, { label: 'App', value: ' ' }))).toEqual(
+      []
+    );
     expect(view(fieldsOf({ label: 'x'.repeat(5000), value: 'x'.repeat(5000) })).valid).toBe(true);
     expect(view(fieldsOf({ label: 'Size', value: { raw: 1024, format: 'bytes' } })).valid).toBe(
       true

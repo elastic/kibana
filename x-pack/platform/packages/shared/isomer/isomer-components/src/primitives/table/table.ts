@@ -12,7 +12,7 @@ import { fromChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { SLACK_LIMITS } from '@elastic/isomer-sdk/slack';
 
-import { componentIcon, definePrimitive, plainText } from '../../lib';
+import { componentIcon, definePrimitive, plainLabel } from '../../lib';
 import { tableReactRenderer } from './table_react';
 import { tableSlackRenderer } from './table_slack';
 import { noRowsNote, tableView, textTable } from './table_model';
@@ -29,7 +29,7 @@ export const MAX_TABLE_CELLS = 10000;
 
 const columnSchema = z
   .object({
-    label: plainText().describe('The column heading, in plain text.'),
+    label: plainLabel().describe('The column heading, in plain text.'),
     format: z
       .enum(STRUCTURED_VALUE_FORMATS)
       .optional()

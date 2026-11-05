@@ -12,7 +12,7 @@ import { fromTextChildren } from '@elastic/isomer-sdk/author';
 import { md } from '@elastic/isomer-sdk/markdown';
 import { classNames, isomerDistillery } from '@kbn/isomer-theme';
 
-import { componentIcon, definePrimitive, oneLine, plainText } from '../../lib';
+import { componentIcon, definePrimitive, hasText, oneLine, plainText } from '../../lib';
 import type { ComponentsPackTypes } from '../../lib';
 import { linkSlackRenderer } from './link_slack';
 import { appLinkPath, reactLinkHref, staticLinkUrl } from './resolve_link';
@@ -133,6 +133,7 @@ const linkReactRenderer: Renderers<LinkNode, ComponentsPackTypes>['react'] = (
 export const link = definePrimitive<LinkNode, typeof linkSchema>({
   type: 'link',
   schema: linkSchema,
+  sanitize: (node) => (hasText(node.label) ? node : null),
   catalog: {
     type: 'link',
     purpose: 'One link to where the reader can see more, such as a page in Kibana.',
