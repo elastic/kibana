@@ -62,7 +62,6 @@ const getPanelState = (
   layout: OrderedLayout,
   panelId: string
 ): (GridPanelData & { sectionId: string }) | undefined => {
-  console.log({ layout });
   for (const section of Object.values(layout)) {
     const panel = section.panels[panelId];
     if (panel) {
