@@ -57,9 +57,9 @@ export const useBulkAttackCaseItems = ({
   );
 
   const onAddToCaseSuccess = useCallback(
-    (theCase: CaseUI, isNewCase: boolean) => {
+    (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => {
       // Not raised while building the payload, which the case selector does on every render.
-      attackCaseAttachments?.onAttached(theCase);
+      attackCaseAttachments?.onAttached(theCase, updatedCase);
 
       if (telemetrySource) {
         telemetry.reportEvent(AttacksEventTypes.ActionAddedToCase, {
@@ -71,10 +71,16 @@ export const useBulkAttackCaseItems = ({
     [attackCaseAttachments, telemetry, telemetrySource]
   );
 
+  const onNoAttachmentsAdded = useCallback(
+    (theCase: CaseUI) => attackCaseAttachments?.onAttached(theCase),
+    [attackCaseAttachments]
+  );
+
   const { onAddToCase, disabled } = useAddToCase({
     canUserCreateAndReadCases,
     onClick: onCasesAdd,
     onSuccess: onAddToCaseSuccess,
+    onNoAttachmentsAdded,
     title,
   });
 

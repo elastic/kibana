@@ -37,6 +37,7 @@ import {
   deleteComment,
   findCaseUserActions,
   getAllComments,
+  getCase,
   updateAttachmentV2,
 } from '../../../../common/lib/api';
 import {
@@ -248,6 +249,27 @@ export default ({ getService }: FtrProviderContext): void => {
         expect(attack).to.be.ok();
         expect(attack.attachmentId).to.eql(AD_HOC_ATTACK_ID);
         expect(attack.metadata.index).to.eql(AD_HOC_ATTACK_INDEX);
+      });
+
+      it('leaves the case version unchanged when the attack and its alerts are already attached', async () => {
+        const postedCase = await createCase(supertest, getPostCaseRequest({ owner: OWNER }));
+        const params = [
+          attackAttachment,
+          ...alertAttachments,
+        ] as unknown as BulkCreateUnifiedAttachmentsRequest;
+
+        await bulkCreateAttachments({ supertest, caseId: postedCase.id, params });
+        const caseBeforeReattach = await getCase({ supertest, caseId: postedCase.id });
+
+        const reattachedCase = await bulkCreateAttachments({
+          supertest,
+          caseId: postedCase.id,
+          params,
+        });
+
+        // The add-to-existing-case modal reads an unchanged version as "nothing was added".
+        expect(reattachedCase.version).to.be(caseBeforeReattach.version);
+        expect(reattachedCase.comments?.length).to.be(1 + ALERT_IDS.length);
       });
     });
 

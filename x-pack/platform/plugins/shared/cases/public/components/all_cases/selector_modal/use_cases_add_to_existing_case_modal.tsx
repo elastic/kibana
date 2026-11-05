@@ -31,7 +31,16 @@ export type AddToExistingCaseModalProps = Omit<AllCasesSelectorModalProps, 'onRo
     title?: string;
     content?: string;
   };
-  onSuccess?: (theCase: CaseUI, isNewCase: boolean) => void;
+  /**
+   * `updatedCase` is the case returned after attaching to an existing case. It is not
+   * passed when a new case is created.
+   */
+  onSuccess?: (theCase: CaseUI, isNewCase: boolean, updatedCase?: CaseUI) => void;
+  /**
+   * Called instead of `onSuccess` when attaching to an existing case added nothing, either
+   * because there was nothing to attach or because everything was already on the case.
+   */
+  onNoAttachmentsAdded?: (theCase: CaseUI) => void;
 };
 
 export type GetAttachments = ({ theCase }: { theCase?: CaseUI }) => CaseAttachmentsWithoutOwner;
@@ -41,6 +50,7 @@ export const useCasesAddToExistingCaseModal = ({
   successToaster,
   noAttachmentsToaster,
   onSuccess,
+  onNoAttachmentsAdded,
   onClose,
   onCreateCaseClicked,
 }: AddToExistingCaseModalProps = {}) => {
@@ -99,28 +109,42 @@ export const useCasesAddToExistingCaseModal = ({
       }
 
       const attachments = getAttachments?.({ theCase }) ?? [];
+      const handleNoAttachmentsAdded = () => {
+        casesToasts.showInfoToast(
+          noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED,
+          noAttachmentsToaster?.content
+        );
+        onNoAttachmentsAdded?.(theCase);
+      };
 
       try {
         // add attachments to the case
         if (attachments === undefined || attachments.length === 0) {
-          const title = noAttachmentsToaster?.title ?? NO_ATTACHMENTS_ADDED;
-          const content = noAttachmentsToaster?.content;
-          casesToasts.showInfoToast(title, content);
+          handleNoAttachmentsAdded();
 
           return;
         }
 
         startTransaction({ appId, attachments });
 
-        await createAttachments({
+        const updatedCase = await createAttachments({
           caseId: theCase.id,
           caseOwner: theCase.owner,
           attachments,
         });
 
+        // The server drops attachments that are already on the case. If it dropped all of
+        // them, the case is not updated, so its version does not change. `theCase` is the
+        // picker's snapshot, so a concurrent update to the case makes this read as a success.
+        if (updatedCase.version === theCase.version) {
+          handleNoAttachmentsAdded();
+
+          return;
+        }
+
         trackAttachEvents(window.location.pathname, attachments);
 
-        onSuccess?.(theCase, false);
+        onSuccess?.(theCase, false, updatedCase);
 
         casesToasts.showSuccessAttach({
           theCase,
@@ -142,6 +166,7 @@ export const useCasesAddToExistingCaseModal = ({
       createAttachments,
       trackAttachEvents,
       onSuccess,
+      onNoAttachmentsAdded,
       casesToasts,
       successToaster?.title,
       successToaster?.content,

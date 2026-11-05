@@ -58,6 +58,9 @@ const TestComponent: React.FC<AddToExistingCaseModalProps> = (
 
 const useCreateAttachmentsMock = useCreateAttachments as jest.Mock;
 
+const selectedCase = { id: 'test', owner: 'cases', version: 'version-1' } as CaseUI;
+const updatedCase = { ...selectedCase, version: 'version-2' } as CaseUI;
+
 const unifiedAttachmentTypeRegistry = new UnifiedAttachmentTypeRegistry();
 
 describe('use cases add to existing case modal hook', () => {
@@ -246,7 +249,7 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should call createAttachments when a case is selected and show a toast message', async () => {
-    const mockBulkCreateAttachments = jest.fn();
+    const mockBulkCreateAttachments = jest.fn().mockResolvedValue(updatedCase);
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
     });
@@ -257,7 +260,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
+      onRowClick(selectedCase);
       return null;
     });
 
@@ -279,7 +282,7 @@ describe('use cases add to existing case modal hook', () => {
   });
 
   it('should report an existing case when onSuccess is called after case selection', async () => {
-    const mockBulkCreateAttachments = jest.fn();
+    const mockBulkCreateAttachments = jest.fn().mockResolvedValue(updatedCase);
 
     useCreateAttachmentsMock.mockReturnValueOnce({
       mutateAsync: mockBulkCreateAttachments,
@@ -291,7 +294,7 @@ describe('use cases add to existing case modal hook', () => {
     });
 
     AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
-      onRowClick({ id: 'test', owner: 'cases' } as CaseUI);
+      onRowClick(selectedCase);
       return null;
     });
 
@@ -299,8 +302,110 @@ describe('use cases add to existing case modal hook', () => {
     await userEvent.click(screen.getByTestId('open-modal'));
 
     await waitFor(() => {
-      expect(onSuccess).toHaveBeenCalledWith({ id: 'test', owner: 'cases' }, false);
+      expect(onSuccess).toHaveBeenCalledWith(selectedCase, false, updatedCase);
     });
+  });
+
+  it('should show the no attachments toast and skip onSuccess when the server added nothing', async () => {
+    // the server dropped every attachment as a duplicate, so the case version is unchanged
+    const mockBulkCreateAttachments = jest.fn().mockResolvedValue(selectedCase);
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      mutateAsync: mockBulkCreateAttachments,
+    });
+
+    const mockedToastSuccess = jest.fn();
+    const mockedToastInfo = jest.fn();
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: mockedToastSuccess,
+      showInfoToast: mockedToastInfo,
+    });
+
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick(selectedCase);
+      return null;
+    });
+
+    renderWithTestingProviders(
+      <TestComponent noAttachmentsToaster={{ title: 'Already attached', content: 'Details' }} />
+    );
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(mockedToastInfo).toHaveBeenCalledWith('Already attached', 'Details');
+    });
+    expect(mockedToastSuccess).not.toHaveBeenCalled();
+    expect(onSuccess).not.toHaveBeenCalled();
+  });
+
+  it('should call onNoAttachmentsAdded when the server added nothing', async () => {
+    const mockBulkCreateAttachments = jest.fn().mockResolvedValue(selectedCase);
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      mutateAsync: mockBulkCreateAttachments,
+    });
+
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: jest.fn(),
+      showInfoToast: jest.fn(),
+    });
+
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick(selectedCase);
+      return null;
+    });
+
+    const onNoAttachmentsAdded = jest.fn();
+    renderWithTestingProviders(<TestComponent onNoAttachmentsAdded={onNoAttachmentsAdded} />);
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(onNoAttachmentsAdded).toHaveBeenCalledWith(selectedCase);
+    });
+  });
+
+  it('should call onNoAttachmentsAdded when there is nothing to attach', async () => {
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick(selectedCase);
+      return null;
+    });
+
+    getAttachments.mockReturnValueOnce([]);
+
+    useCasesToastMock.mockReturnValue({
+      showInfoToast: jest.fn(),
+    });
+
+    const onNoAttachmentsAdded = jest.fn();
+    renderWithTestingProviders(<TestComponent onNoAttachmentsAdded={onNoAttachmentsAdded} />);
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(onNoAttachmentsAdded).toHaveBeenCalledWith(selectedCase);
+    });
+  });
+
+  it('should not call onNoAttachmentsAdded when the server added attachments', async () => {
+    const mockBulkCreateAttachments = jest.fn().mockResolvedValue(updatedCase);
+    useCreateAttachmentsMock.mockReturnValueOnce({
+      mutateAsync: mockBulkCreateAttachments,
+    });
+
+    useCasesToastMock.mockReturnValue({
+      showSuccessAttach: jest.fn(),
+    });
+
+    AllCasesSelectorModalMock.mockImplementation(({ onRowClick }) => {
+      onRowClick(selectedCase);
+      return null;
+    });
+
+    const onNoAttachmentsAdded = jest.fn();
+    renderWithTestingProviders(<TestComponent onNoAttachmentsAdded={onNoAttachmentsAdded} />);
+    await userEvent.click(screen.getByTestId('open-modal'));
+
+    await waitFor(() => {
+      expect(onSuccess).toHaveBeenCalledWith(selectedCase, false, updatedCase);
+    });
+    expect(onNoAttachmentsAdded).not.toHaveBeenCalled();
   });
 
   it('should not call createAttachments nor show toast success when a case is not selected', async () => {
