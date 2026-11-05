@@ -27,6 +27,10 @@ import { PRE_FETCH_STUCK_ADVANCE_LAG_MS } from '../constants';
 import type { PluginConfig } from '../../../config';
 import { buildAlertDetailsUrl } from '../alert_details_url';
 import { KibanaBaseUrlToken } from '../tokens';
+import {
+  DispatcherTelemetryToken,
+  type DispatcherTelemetryContract,
+} from '../otel/dispatcher_telemetry';
 
 interface RawAlert {
   last_event_timestamp: string;
@@ -48,7 +52,8 @@ export class FetchAlertsStep implements DispatcherStep {
     @inject(QueryServiceInternalToken) private readonly queryService: QueryServiceContract,
     @inject(KibanaBaseUrlToken) private readonly kibanaBaseUrl: string,
     @inject(PluginInitializer('config'))
-    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config']
+    pluginConfigAccessor: PluginInitializerContext<PluginConfig>['config'],
+    @inject(DispatcherTelemetryToken) private readonly telemetry: DispatcherTelemetryContract
   ) {
     this.alertsPerTick = pluginConfigAccessor.get<PluginConfig>().dispatcher.run.alerts.max;
   }
@@ -102,6 +107,18 @@ export class FetchAlertsStep implements DispatcherStep {
 
     if (alerts.length === 0) {
       return { type: 'halt', reason: 'no_alerts' };
+    }
+
+    if (truncated) {
+      const truncationEdge = alerts[alerts.length - 1].last_event_timestamp;
+      logger.warn({
+        code: ALERTING_LOG_CODES.DISPATCHER_ALERT_SCAN_TRUNCATED,
+        message: () =>
+          `alert scan returned ${this.alertsPerTick} rows (dispatcher.run.alerts.max) for ` +
+          `[${gte}, ${lte}]; the tail is deferred to the next tick and the watermark advances ` +
+          `only to the truncation edge ${truncationEdge}.`,
+      });
+      this.telemetry.recordAlertScanTruncated();
     }
 
     return { type: 'continue', data: { scan: AlertScan.of({ alerts, truncated }) } };
