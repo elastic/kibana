@@ -17,7 +17,7 @@ var lastErrors = null;
 
 function upToDate(hash) {
   if (hash) lastHash = hash;
-  // eslint-disable-next-line camelcase
+  // eslint-disable-next-line @kbn/compat/eslint-camelcase
   return lastHash === __webpack_hash__;
 }
 
@@ -378,6 +378,12 @@ if (window.__kbnHmrActive__ && module.hot) {
 
         if (data.building) {
           setIndicatorState('building');
+          return;
+        }
+
+        if (data.reload) {
+          console.log(LOG_PREFIX + ' Shared bundles updated, reloading page...');
+          window.location.reload();
           return;
         }
 

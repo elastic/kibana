@@ -58,6 +58,7 @@ export const useFetchHistogramBounds = ({
   fetchParams,
   services,
   whereStatements,
+  metadataFields,
   originalSource,
   profileId,
 }: {
@@ -67,6 +68,7 @@ export const useFetchHistogramBounds = ({
   fetchParams?: ChartSectionProps['fetchParams'];
   services: ChartSectionProps['services'];
   whereStatements: readonly string[];
+  metadataFields?: readonly string[];
   originalSource?: string;
   profileId: string;
 }): { readonly loading: boolean; readonly bounds: HistogramBoundsByMetricKey } => {
@@ -84,11 +86,12 @@ export const useFetchHistogramBounds = ({
         const boundsQuery = createHistogramBoundsQuery({
           metricItem,
           whereStatements,
+          metadataFields,
           originalSource,
         });
         return boundsQuery ? [boundsQuery] : [];
       }),
-    [metricItems, whereStatements, originalSource]
+    [metricItems, whereStatements, metadataFields, originalSource]
   );
   const {
     dataSource,

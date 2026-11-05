@@ -8,6 +8,7 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { escapeStringValue } from '@kbn/esql-utils';
 import { CriticalityLevelsForBulkUpload } from '../../../../../../common/entity_analytics/asset_criticality/constants';
+import { RiskSeverity } from '../../../../../../common/search_strategy';
 import { CRITICALITY_FIELD, RESOLUTION_RISK_LEVEL_FIELD, RISK_LEVEL_FIELD } from '../common';
 import type { EntityFilters, RowsMode } from '../common';
 import { buildFilterClause, toList } from './esql';
@@ -24,7 +25,7 @@ const ENTITY_FILTER_FIELDS: ReadonlyArray<{
   isMultiValue?: boolean;
 }> = [
   { key: 'entityTypes', field: 'entity.EngineMetadata.Type' },
-  { key: 'riskLevels', field: 'entity.risk.calculated_level' },
+  { key: 'riskLevels', field: RISK_LEVEL_FIELD }, // Individual rows only (resolved: group level)
   { key: 'assetCriticality', field: CRITICALITY_FIELD },
   { key: 'watchlists', field: 'entity.attributes.watchlists', isMultiValue: true },
   { key: 'dataSources', field: 'entity.source', isMultiValue: true },
@@ -57,11 +58,20 @@ const buildCriticalityQuery = (values: readonly string[]): QueryDslQueryContaine
   };
 };
 
+/** "Unknown" is also the absence of a level: the filter bar counts entities without one under it. */
+const includesUnknown = (values: readonly string[]): boolean =>
+  values.includes(RiskSeverity.Unknown);
+
+const buildRiskLevelCondition = (values: readonly string[]): string =>
+  includesUnknown(values)
+    ? `(${RISK_LEVEL_FIELD} IN (${toList(values)}) OR ${RISK_LEVEL_FIELD} IS NULL)`
+    : `${RISK_LEVEL_FIELD} IN (${toList(values)})`;
+
 /** Plain field filters, not `COALESCE(…) IN (…)`: Lucene can only run filters on stored fields, not on computed values. */
 const buildResolvedRiskLevelCondition = (values: readonly string[]): string =>
   `(${RESOLUTION_RISK_LEVEL_FIELD} IN (${toList(
     values
-  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${RISK_LEVEL_FIELD} IN (${toList(values)})))`;
+  )}) OR (${RESOLUTION_RISK_LEVEL_FIELD} IS NULL AND ${buildRiskLevelCondition(values)}))`;
 
 /** AND-joined ES|QL predicate for URL entity filters (no leading `| WHERE`). */
 export const buildEntityFiltersExpression = (
@@ -71,8 +81,12 @@ export const buildEntityFiltersExpression = (
   ENTITY_FILTER_FIELDS.flatMap(({ key, field, isMultiValue }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
-    if (key === 'riskLevels' && rowsMode === 'resolved') {
-      return [buildResolvedRiskLevelCondition(values)];
+    if (key === 'riskLevels') {
+      return [
+        rowsMode === 'resolved'
+          ? buildResolvedRiskLevelCondition(values)
+          : buildRiskLevelCondition(values),
+      ];
     }
     if (key === 'assetCriticality') return [buildCriticalityCondition(values)];
     return isMultiValue
@@ -80,13 +94,25 @@ export const buildEntityFiltersExpression = (
       : [`${field} IN (${toList(values)})`];
   }).join(' AND ');
 
+const buildRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer => ({
+  bool: {
+    should: [
+      { terms: { [RISK_LEVEL_FIELD]: [...values] } },
+      ...(includesUnknown(values)
+        ? [{ bool: { must_not: { exists: { field: RISK_LEVEL_FIELD } } } }]
+        : []),
+    ],
+    minimum_should_match: 1,
+  },
+});
+
 const buildResolvedRiskLevelQuery = (values: readonly string[]): QueryDslQueryContainer => ({
   bool: {
     should: [
       { terms: { [RESOLUTION_RISK_LEVEL_FIELD]: [...values] } },
       {
         bool: {
-          filter: [{ terms: { [RISK_LEVEL_FIELD]: [...values] } }],
+          filter: [buildRiskLevelQuery(values)],
           must_not: [{ exists: { field: RESOLUTION_RISK_LEVEL_FIELD } }],
         },
       },
@@ -102,8 +128,10 @@ export const buildEntityFiltersQuery = (
   ENTITY_FILTER_FIELDS.flatMap(({ key, field }) => {
     const values: readonly string[] = filters[key];
     if (!values.length) return [];
-    if (key === 'riskLevels' && rowsMode === 'resolved') {
-      return [buildResolvedRiskLevelQuery(values)];
+    if (key === 'riskLevels') {
+      return [
+        rowsMode === 'resolved' ? buildResolvedRiskLevelQuery(values) : buildRiskLevelQuery(values),
+      ];
     }
     if (key === 'assetCriticality') return [buildCriticalityQuery(values)];
     return [{ terms: { [field]: [...values] } }];

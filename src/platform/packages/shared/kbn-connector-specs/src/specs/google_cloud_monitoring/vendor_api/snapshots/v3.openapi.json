@@ -1,0 +1,3564 @@
+{
+  "components": {
+    "schemas": {
+      "Aggregation": {
+        "properties": {
+          "alignmentPeriod": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "crossSeriesReducer": {
+            "enum": [
+              "REDUCE_NONE",
+              "REDUCE_MEAN",
+              "REDUCE_MIN",
+              "REDUCE_MAX",
+              "REDUCE_SUM",
+              "REDUCE_STDDEV",
+              "REDUCE_COUNT",
+              "REDUCE_COUNT_TRUE",
+              "REDUCE_COUNT_FALSE",
+              "REDUCE_FRACTION_TRUE",
+              "REDUCE_PERCENTILE_99",
+              "REDUCE_PERCENTILE_95",
+              "REDUCE_PERCENTILE_50",
+              "REDUCE_PERCENTILE_05"
+            ],
+            "type": "string"
+          },
+          "groupByFields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "perSeriesAligner": {
+            "enum": [
+              "ALIGN_NONE",
+              "ALIGN_DELTA",
+              "ALIGN_RATE",
+              "ALIGN_INTERPOLATE",
+              "ALIGN_NEXT_OLDER",
+              "ALIGN_MIN",
+              "ALIGN_MAX",
+              "ALIGN_MEAN",
+              "ALIGN_COUNT",
+              "ALIGN_SUM",
+              "ALIGN_STDDEV",
+              "ALIGN_COUNT_TRUE",
+              "ALIGN_COUNT_FALSE",
+              "ALIGN_FRACTION_TRUE",
+              "ALIGN_PERCENTILE_99",
+              "ALIGN_PERCENTILE_95",
+              "ALIGN_PERCENTILE_50",
+              "ALIGN_PERCENTILE_05",
+              "ALIGN_PERCENT_CHANGE"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AlertPolicy": {
+        "properties": {
+          "alertStrategy": {
+            "$ref": "#/components/schemas/AlertStrategy"
+          },
+          "combiner": {
+            "enum": [
+              "COMBINE_UNSPECIFIED",
+              "AND",
+              "OR",
+              "AND_WITH_MATCHING_RESOURCE"
+            ],
+            "type": "string"
+          },
+          "conditions": {
+            "items": {
+              "$ref": "#/components/schemas/Condition"
+            },
+            "type": "array"
+          },
+          "creationRecord": {
+            "$ref": "#/components/schemas/MutationRecord"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "documentation": {
+            "$ref": "#/components/schemas/Documentation"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "mutationRecord": {
+            "$ref": "#/components/schemas/MutationRecord"
+          },
+          "name": {
+            "type": "string"
+          },
+          "notificationChannels": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "severity": {
+            "enum": [
+              "SEVERITY_UNSPECIFIED",
+              "CRITICAL",
+              "ERROR",
+              "WARNING"
+            ],
+            "type": "string"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "validity": {
+            "$ref": "#/components/schemas/Status"
+          }
+        },
+        "type": "object"
+      },
+      "AlertStrategy": {
+        "properties": {
+          "autoClose": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "notificationChannelStrategy": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationChannelStrategy"
+            },
+            "type": "array"
+          },
+          "notificationPrompts": {
+            "items": {
+              "enum": [
+                "NOTIFICATION_PROMPT_UNSPECIFIED",
+                "OPENED",
+                "CLOSED"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "notificationRateLimit": {
+            "$ref": "#/components/schemas/NotificationRateLimit"
+          }
+        },
+        "type": "object"
+      },
+      "AppEngine": {
+        "properties": {
+          "moduleId": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "AvailabilityCriteria": {
+        "properties": {},
+        "type": "object"
+      },
+      "BasicAuthentication": {
+        "properties": {
+          "password": {
+            "type": "string"
+          },
+          "username": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BasicService": {
+        "properties": {
+          "serviceLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "serviceType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BasicSli": {
+        "properties": {
+          "availability": {
+            "$ref": "#/components/schemas/AvailabilityCriteria"
+          },
+          "latency": {
+            "$ref": "#/components/schemas/LatencyCriteria"
+          },
+          "location": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "method": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "version": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "BooleanTest": {
+        "properties": {
+          "column": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "BucketOptions": {
+        "properties": {
+          "explicitBuckets": {
+            "$ref": "#/components/schemas/Explicit"
+          },
+          "exponentialBuckets": {
+            "$ref": "#/components/schemas/Exponential"
+          },
+          "linearBuckets": {
+            "$ref": "#/components/schemas/Linear"
+          }
+        },
+        "type": "object"
+      },
+      "CloudEndpoints": {
+        "properties": {
+          "service": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CloudFunctionV2Target": {
+        "properties": {
+          "cloudRunRevision": {
+            "$ref": "#/components/schemas/MonitoredResource"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "CloudRun": {
+        "properties": {
+          "location": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ClusterIstio": {
+        "properties": {
+          "clusterName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceNamespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Condition": {
+        "properties": {
+          "conditionAbsent": {
+            "$ref": "#/components/schemas/MetricAbsence"
+          },
+          "conditionMatchedLog": {
+            "$ref": "#/components/schemas/LogMatch"
+          },
+          "conditionMonitoringQueryLanguage": {
+            "$ref": "#/components/schemas/MonitoringQueryLanguageCondition"
+          },
+          "conditionPrometheusQueryLanguage": {
+            "$ref": "#/components/schemas/PrometheusQueryLanguageCondition"
+          },
+          "conditionSql": {
+            "$ref": "#/components/schemas/SqlCondition"
+          },
+          "conditionThreshold": {
+            "$ref": "#/components/schemas/MetricThreshold"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ContentMatcher": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "jsonPathMatcher": {
+            "$ref": "#/components/schemas/JsonPathMatcher"
+          },
+          "matcher": {
+            "enum": [
+              "CONTENT_MATCHER_OPTION_UNSPECIFIED",
+              "CONTAINS_STRING",
+              "NOT_CONTAINS_STRING",
+              "MATCHES_REGEX",
+              "NOT_MATCHES_REGEX",
+              "MATCHES_JSON_PATH",
+              "NOT_MATCHES_JSON_PATH"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Criteria": {
+        "properties": {
+          "filter": {
+            "type": "string"
+          },
+          "policies": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Custom": {
+        "properties": {},
+        "type": "object"
+      },
+      "Daily": {
+        "properties": {
+          "executionTime": {
+            "$ref": "#/components/schemas/TimeOfDay"
+          },
+          "periodicity": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Distribution": {
+        "properties": {
+          "bucketCounts": {
+            "items": {
+              "format": "int64",
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "bucketOptions": {
+            "$ref": "#/components/schemas/BucketOptions"
+          },
+          "count": {
+            "format": "int64",
+            "type": "string"
+          },
+          "exemplars": {
+            "items": {
+              "$ref": "#/components/schemas/Exemplar"
+            },
+            "type": "array"
+          },
+          "mean": {
+            "format": "double",
+            "type": "number"
+          },
+          "range": {
+            "$ref": "#/components/schemas/Range"
+          },
+          "sumOfSquaredDeviation": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "DistributionCut": {
+        "properties": {
+          "distributionFilter": {
+            "type": "string"
+          },
+          "range": {
+            "$ref": "#/components/schemas/GoogleMonitoringV3Range"
+          }
+        },
+        "type": "object"
+      },
+      "Documentation": {
+        "properties": {
+          "content": {
+            "type": "string"
+          },
+          "links": {
+            "items": {
+              "$ref": "#/components/schemas/Link"
+            },
+            "type": "array"
+          },
+          "mimeType": {
+            "type": "string"
+          },
+          "subject": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Exemplar": {
+        "properties": {
+          "attachments": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "timestamp": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "value": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Explicit": {
+        "properties": {
+          "bounds": {
+            "items": {
+              "format": "double",
+              "type": "number"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "Exponential": {
+        "properties": {
+          "growthFactor": {
+            "format": "double",
+            "type": "number"
+          },
+          "numFiniteBuckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "scale": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "ForecastOptions": {
+        "properties": {
+          "forecastHorizon": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GkeNamespace": {
+        "properties": {
+          "clusterName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namespaceName": {
+            "type": "string"
+          },
+          "projectId": {
+            "readOnly": true,
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GkeService": {
+        "properties": {
+          "clusterName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namespaceName": {
+            "type": "string"
+          },
+          "projectId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GkeWorkload": {
+        "properties": {
+          "clusterName": {
+            "type": "string"
+          },
+          "location": {
+            "type": "string"
+          },
+          "namespaceName": {
+            "type": "string"
+          },
+          "projectId": {
+            "readOnly": true,
+            "type": "string"
+          },
+          "topLevelControllerName": {
+            "type": "string"
+          },
+          "topLevelControllerType": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "GoogleMonitoringV3Range": {
+        "properties": {
+          "max": {
+            "format": "double",
+            "type": "number"
+          },
+          "min": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Hourly": {
+        "properties": {
+          "minuteOffset": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "periodicity": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "HttpCheck": {
+        "properties": {
+          "acceptedResponseStatusCodes": {
+            "items": {
+              "$ref": "#/components/schemas/ResponseStatusCode"
+            },
+            "type": "array"
+          },
+          "authInfo": {
+            "$ref": "#/components/schemas/BasicAuthentication"
+          },
+          "body": {
+            "format": "byte",
+            "type": "string"
+          },
+          "contentType": {
+            "enum": [
+              "TYPE_UNSPECIFIED",
+              "URL_ENCODED",
+              "USER_PROVIDED"
+            ],
+            "type": "string"
+          },
+          "customContentType": {
+            "type": "string"
+          },
+          "headers": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "maskHeaders": {
+            "type": "boolean"
+          },
+          "path": {
+            "type": "string"
+          },
+          "pingConfig": {
+            "$ref": "#/components/schemas/PingConfig"
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "requestMethod": {
+            "enum": [
+              "METHOD_UNSPECIFIED",
+              "GET",
+              "POST"
+            ],
+            "type": "string"
+          },
+          "serviceAgentAuthentication": {
+            "$ref": "#/components/schemas/ServiceAgentAuthentication"
+          },
+          "useSsl": {
+            "type": "boolean"
+          },
+          "validateSsl": {
+            "type": "boolean"
+          }
+        },
+        "type": "object"
+      },
+      "InternalChecker": {
+        "deprecated": true,
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "gcpZone": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
+          },
+          "network": {
+            "type": "string"
+          },
+          "peerProjectId": {
+            "type": "string"
+          },
+          "state": {
+            "enum": [
+              "UNSPECIFIED",
+              "CREATING",
+              "RUNNING"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "IstioCanonicalService": {
+        "properties": {
+          "canonicalService": {
+            "type": "string"
+          },
+          "canonicalServiceNamespace": {
+            "type": "string"
+          },
+          "meshUid": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "JsonPathMatcher": {
+        "properties": {
+          "jsonMatcher": {
+            "enum": [
+              "JSON_PATH_MATCHER_OPTION_UNSPECIFIED",
+              "EXACT_MATCH",
+              "REGEX_MATCH"
+            ],
+            "type": "string"
+          },
+          "jsonPath": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "LatencyCriteria": {
+        "properties": {
+          "threshold": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Linear": {
+        "properties": {
+          "numFiniteBuckets": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "offset": {
+            "format": "double",
+            "type": "number"
+          },
+          "width": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "Link": {
+        "properties": {
+          "displayName": {
+            "type": "string"
+          },
+          "url": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ListAlertPoliciesResponse": {
+        "properties": {
+          "alertPolicies": {
+            "items": {
+              "$ref": "#/components/schemas/AlertPolicy"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "totalSize": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ListNotificationChannelsResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "notificationChannels": {
+            "items": {
+              "$ref": "#/components/schemas/NotificationChannel"
+            },
+            "type": "array"
+          },
+          "totalSize": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "ListServiceLevelObjectivesResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "serviceLevelObjectives": {
+            "items": {
+              "$ref": "#/components/schemas/ServiceLevelObjective"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListServicesResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "services": {
+            "items": {
+              "$ref": "#/components/schemas/Service"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListSnoozesResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "snoozes": {
+            "items": {
+              "$ref": "#/components/schemas/Snooze"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListTimeSeriesResponse": {
+        "properties": {
+          "executionErrors": {
+            "items": {
+              "$ref": "#/components/schemas/Status"
+            },
+            "type": "array"
+          },
+          "nextPageToken": {
+            "type": "string"
+          },
+          "timeSeries": {
+            "items": {
+              "$ref": "#/components/schemas/TimeSeries"
+            },
+            "type": "array"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "unreachable": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "ListUptimeCheckConfigsResponse": {
+        "properties": {
+          "nextPageToken": {
+            "type": "string"
+          },
+          "totalSize": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "uptimeCheckConfigs": {
+            "items": {
+              "$ref": "#/components/schemas/UptimeCheckConfig"
+            },
+            "type": "array"
+          }
+        },
+        "type": "object"
+      },
+      "LogMatch": {
+        "properties": {
+          "filter": {
+            "type": "string"
+          },
+          "labelExtractors": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "MeshIstio": {
+        "properties": {
+          "meshUid": {
+            "type": "string"
+          },
+          "serviceName": {
+            "type": "string"
+          },
+          "serviceNamespace": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Metric": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricAbsence": {
+        "properties": {
+          "aggregations": {
+            "items": {
+              "$ref": "#/components/schemas/Aggregation"
+            },
+            "type": "array"
+          },
+          "duration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/Trigger"
+          }
+        },
+        "type": "object"
+      },
+      "MetricRange": {
+        "properties": {
+          "range": {
+            "$ref": "#/components/schemas/GoogleMonitoringV3Range"
+          },
+          "timeSeries": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MetricThreshold": {
+        "properties": {
+          "aggregations": {
+            "items": {
+              "$ref": "#/components/schemas/Aggregation"
+            },
+            "type": "array"
+          },
+          "comparison": {
+            "enum": [
+              "COMPARISON_UNSPECIFIED",
+              "COMPARISON_GT",
+              "COMPARISON_GE",
+              "COMPARISON_LT",
+              "COMPARISON_LE",
+              "COMPARISON_EQ",
+              "COMPARISON_NE"
+            ],
+            "type": "string"
+          },
+          "denominatorAggregations": {
+            "items": {
+              "$ref": "#/components/schemas/Aggregation"
+            },
+            "type": "array"
+          },
+          "denominatorFilter": {
+            "type": "string"
+          },
+          "duration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "evaluationMissingData": {
+            "enum": [
+              "EVALUATION_MISSING_DATA_UNSPECIFIED",
+              "EVALUATION_MISSING_DATA_INACTIVE",
+              "EVALUATION_MISSING_DATA_ACTIVE",
+              "EVALUATION_MISSING_DATA_NO_OP"
+            ],
+            "type": "string"
+          },
+          "filter": {
+            "type": "string"
+          },
+          "forecastOptions": {
+            "$ref": "#/components/schemas/ForecastOptions"
+          },
+          "thresholdValue": {
+            "format": "double",
+            "type": "number"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/Trigger"
+          }
+        },
+        "type": "object"
+      },
+      "Minutes": {
+        "properties": {
+          "periodicity": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "MonitoredResource": {
+        "properties": {
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "type": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "MonitoredResourceMetadata": {
+        "properties": {
+          "systemLabels": {
+            "additionalProperties": {},
+            "type": "object"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "MonitoringQueryLanguageCondition": {
+        "properties": {
+          "duration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "evaluationMissingData": {
+            "enum": [
+              "EVALUATION_MISSING_DATA_UNSPECIFIED",
+              "EVALUATION_MISSING_DATA_INACTIVE",
+              "EVALUATION_MISSING_DATA_ACTIVE",
+              "EVALUATION_MISSING_DATA_NO_OP"
+            ],
+            "type": "string"
+          },
+          "query": {
+            "type": "string"
+          },
+          "trigger": {
+            "$ref": "#/components/schemas/Trigger"
+          }
+        },
+        "type": "object"
+      },
+      "MutationRecord": {
+        "properties": {
+          "mutateTime": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "mutatedBy": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationChannel": {
+        "properties": {
+          "creationRecord": {
+            "$ref": "#/components/schemas/MutationRecord"
+          },
+          "description": {
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "enabled": {
+            "type": "boolean"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "mutationRecords": {
+            "items": {
+              "$ref": "#/components/schemas/MutationRecord"
+            },
+            "type": "array"
+          },
+          "name": {
+            "type": "string"
+          },
+          "type": {
+            "type": "string"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "verificationStatus": {
+            "enum": [
+              "VERIFICATION_STATUS_UNSPECIFIED",
+              "UNVERIFIED",
+              "VERIFIED"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationChannelStrategy": {
+        "properties": {
+          "notificationChannelNames": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "renotifyInterval": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "NotificationRateLimit": {
+        "properties": {
+          "period": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "PerformanceThreshold": {
+        "properties": {
+          "basicSliPerformance": {
+            "$ref": "#/components/schemas/BasicSli"
+          },
+          "performance": {
+            "$ref": "#/components/schemas/RequestBasedSli"
+          },
+          "threshold": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "PingConfig": {
+        "properties": {
+          "pingsCount": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Point": {
+        "properties": {
+          "interval": {
+            "$ref": "#/components/schemas/TimeInterval"
+          },
+          "value": {
+            "$ref": "#/components/schemas/TypedValue"
+          }
+        },
+        "type": "object"
+      },
+      "PrometheusQueryLanguageCondition": {
+        "properties": {
+          "alertRule": {
+            "type": "string"
+          },
+          "disableMetricValidation": {
+            "type": "boolean"
+          },
+          "duration": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "evaluationInterval": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "labels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          },
+          "query": {
+            "type": "string"
+          },
+          "ruleGroup": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Range": {
+        "properties": {
+          "max": {
+            "format": "double",
+            "type": "number"
+          },
+          "min": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "RequestBasedSli": {
+        "properties": {
+          "distributionCut": {
+            "$ref": "#/components/schemas/DistributionCut"
+          },
+          "goodTotalRatio": {
+            "$ref": "#/components/schemas/TimeSeriesRatio"
+          }
+        },
+        "type": "object"
+      },
+      "ResourceGroup": {
+        "properties": {
+          "groupId": {
+            "type": "string"
+          },
+          "resourceType": {
+            "enum": [
+              "RESOURCE_TYPE_UNSPECIFIED",
+              "INSTANCE",
+              "AWS_ELB_LOAD_BALANCER"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ResponseStatusCode": {
+        "properties": {
+          "statusClass": {
+            "enum": [
+              "STATUS_CLASS_UNSPECIFIED",
+              "STATUS_CLASS_1XX",
+              "STATUS_CLASS_2XX",
+              "STATUS_CLASS_3XX",
+              "STATUS_CLASS_4XX",
+              "STATUS_CLASS_5XX",
+              "STATUS_CLASS_ANY"
+            ],
+            "type": "string"
+          },
+          "statusValue": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "RowCountTest": {
+        "properties": {
+          "comparison": {
+            "enum": [
+              "COMPARISON_UNSPECIFIED",
+              "COMPARISON_GT",
+              "COMPARISON_GE",
+              "COMPARISON_LT",
+              "COMPARISON_LE",
+              "COMPARISON_EQ",
+              "COMPARISON_NE"
+            ],
+            "type": "string"
+          },
+          "threshold": {
+            "format": "int64",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Service": {
+        "properties": {
+          "appEngine": {
+            "$ref": "#/components/schemas/AppEngine"
+          },
+          "basicService": {
+            "$ref": "#/components/schemas/BasicService"
+          },
+          "cloudEndpoints": {
+            "$ref": "#/components/schemas/CloudEndpoints"
+          },
+          "cloudRun": {
+            "$ref": "#/components/schemas/CloudRun"
+          },
+          "clusterIstio": {
+            "$ref": "#/components/schemas/ClusterIstio"
+          },
+          "custom": {
+            "$ref": "#/components/schemas/Custom"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "gkeNamespace": {
+            "$ref": "#/components/schemas/GkeNamespace"
+          },
+          "gkeService": {
+            "$ref": "#/components/schemas/GkeService"
+          },
+          "gkeWorkload": {
+            "$ref": "#/components/schemas/GkeWorkload"
+          },
+          "istioCanonicalService": {
+            "$ref": "#/components/schemas/IstioCanonicalService"
+          },
+          "meshIstio": {
+            "$ref": "#/components/schemas/MeshIstio"
+          },
+          "name": {
+            "type": "string"
+          },
+          "telemetry": {
+            "$ref": "#/components/schemas/Telemetry"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceAgentAuthentication": {
+        "properties": {
+          "type": {
+            "enum": [
+              "SERVICE_AGENT_AUTHENTICATION_TYPE_UNSPECIFIED",
+              "OIDC_TOKEN"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceLevelIndicator": {
+        "properties": {
+          "basicSli": {
+            "$ref": "#/components/schemas/BasicSli"
+          },
+          "requestBased": {
+            "$ref": "#/components/schemas/RequestBasedSli"
+          },
+          "windowsBased": {
+            "$ref": "#/components/schemas/WindowsBasedSli"
+          }
+        },
+        "type": "object"
+      },
+      "ServiceLevelObjective": {
+        "properties": {
+          "calendarPeriod": {
+            "enum": [
+              "CALENDAR_PERIOD_UNSPECIFIED",
+              "DAY",
+              "WEEK",
+              "FORTNIGHT",
+              "MONTH",
+              "QUARTER",
+              "HALF",
+              "YEAR"
+            ],
+            "type": "string"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "goal": {
+            "format": "double",
+            "type": "number"
+          },
+          "name": {
+            "type": "string"
+          },
+          "rollingPeriod": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "serviceLevelIndicator": {
+            "$ref": "#/components/schemas/ServiceLevelIndicator"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "Snooze": {
+        "properties": {
+          "criteria": {
+            "$ref": "#/components/schemas/Criteria"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "interval": {
+            "$ref": "#/components/schemas/TimeInterval"
+          },
+          "name": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SqlCondition": {
+        "properties": {
+          "booleanTest": {
+            "$ref": "#/components/schemas/BooleanTest"
+          },
+          "daily": {
+            "$ref": "#/components/schemas/Daily"
+          },
+          "hourly": {
+            "$ref": "#/components/schemas/Hourly"
+          },
+          "minutes": {
+            "$ref": "#/components/schemas/Minutes"
+          },
+          "query": {
+            "type": "string"
+          },
+          "rowCountTest": {
+            "$ref": "#/components/schemas/RowCountTest"
+          }
+        },
+        "type": "object"
+      },
+      "Status": {
+        "properties": {
+          "code": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "details": {
+            "items": {
+              "additionalProperties": {},
+              "type": "object"
+            },
+            "type": "array"
+          },
+          "message": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "SyntheticMonitorTarget": {
+        "properties": {
+          "cloudFunctionV2": {
+            "$ref": "#/components/schemas/CloudFunctionV2Target"
+          }
+        },
+        "type": "object"
+      },
+      "TcpCheck": {
+        "properties": {
+          "pingConfig": {
+            "$ref": "#/components/schemas/PingConfig"
+          },
+          "port": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "Telemetry": {
+        "properties": {
+          "resourceName": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeInterval": {
+        "properties": {
+          "endTime": {
+            "format": "google-datetime",
+            "type": "string"
+          },
+          "startTime": {
+            "format": "google-datetime",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeOfDay": {
+        "properties": {
+          "hours": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "minutes": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "nanos": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "seconds": {
+            "format": "int32",
+            "type": "integer"
+          }
+        },
+        "type": "object"
+      },
+      "TimeSeries": {
+        "properties": {
+          "description": {
+            "type": "string"
+          },
+          "metadata": {
+            "$ref": "#/components/schemas/MonitoredResourceMetadata"
+          },
+          "metric": {
+            "$ref": "#/components/schemas/Metric"
+          },
+          "metricKind": {
+            "enum": [
+              "METRIC_KIND_UNSPECIFIED",
+              "GAUGE",
+              "DELTA",
+              "CUMULATIVE"
+            ],
+            "type": "string"
+          },
+          "points": {
+            "items": {
+              "$ref": "#/components/schemas/Point"
+            },
+            "type": "array"
+          },
+          "resource": {
+            "$ref": "#/components/schemas/MonitoredResource"
+          },
+          "unit": {
+            "type": "string"
+          },
+          "valueType": {
+            "enum": [
+              "VALUE_TYPE_UNSPECIFIED",
+              "BOOL",
+              "INT64",
+              "DOUBLE",
+              "STRING",
+              "DISTRIBUTION",
+              "MONEY"
+            ],
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "TimeSeriesRatio": {
+        "properties": {
+          "badServiceFilter": {
+            "type": "string"
+          },
+          "goodServiceFilter": {
+            "type": "string"
+          },
+          "totalServiceFilter": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "Trigger": {
+        "properties": {
+          "count": {
+            "format": "int32",
+            "type": "integer"
+          },
+          "percent": {
+            "format": "double",
+            "type": "number"
+          }
+        },
+        "type": "object"
+      },
+      "TypedValue": {
+        "properties": {
+          "boolValue": {
+            "type": "boolean"
+          },
+          "distributionValue": {
+            "$ref": "#/components/schemas/Distribution"
+          },
+          "doubleValue": {
+            "format": "double",
+            "type": "number"
+          },
+          "int64Value": {
+            "format": "int64",
+            "type": "string"
+          },
+          "stringValue": {
+            "type": "string"
+          }
+        },
+        "type": "object"
+      },
+      "UptimeCheckConfig": {
+        "properties": {
+          "checkerType": {
+            "enum": [
+              "CHECKER_TYPE_UNSPECIFIED",
+              "STATIC_IP_CHECKERS",
+              "VPC_CHECKERS"
+            ],
+            "type": "string"
+          },
+          "contentMatchers": {
+            "items": {
+              "$ref": "#/components/schemas/ContentMatcher"
+            },
+            "type": "array"
+          },
+          "disabled": {
+            "type": "boolean"
+          },
+          "displayName": {
+            "type": "string"
+          },
+          "httpCheck": {
+            "$ref": "#/components/schemas/HttpCheck"
+          },
+          "internalCheckers": {
+            "deprecated": true,
+            "items": {
+              "$ref": "#/components/schemas/InternalChecker"
+            },
+            "type": "array"
+          },
+          "isInternal": {
+            "deprecated": true,
+            "type": "boolean"
+          },
+          "logCheckFailures": {
+            "type": "boolean"
+          },
+          "monitoredResource": {
+            "$ref": "#/components/schemas/MonitoredResource"
+          },
+          "name": {
+            "type": "string"
+          },
+          "period": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "resourceGroup": {
+            "$ref": "#/components/schemas/ResourceGroup"
+          },
+          "selectedRegions": {
+            "items": {
+              "enum": [
+                "REGION_UNSPECIFIED",
+                "USA",
+                "EUROPE",
+                "SOUTH_AMERICA",
+                "ASIA_PACIFIC",
+                "USA_OREGON",
+                "USA_IOWA",
+                "USA_VIRGINIA"
+              ],
+              "type": "string"
+            },
+            "type": "array"
+          },
+          "syntheticMonitor": {
+            "$ref": "#/components/schemas/SyntheticMonitorTarget"
+          },
+          "tcpCheck": {
+            "$ref": "#/components/schemas/TcpCheck"
+          },
+          "timeout": {
+            "format": "google-duration",
+            "type": "string"
+          },
+          "userLabels": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object"
+          }
+        },
+        "type": "object"
+      },
+      "WindowsBasedSli": {
+        "properties": {
+          "goodBadMetricFilter": {
+            "type": "string"
+          },
+          "goodTotalRatioThreshold": {
+            "$ref": "#/components/schemas/PerformanceThreshold"
+          },
+          "metricMeanInRange": {
+            "$ref": "#/components/schemas/MetricRange"
+          },
+          "metricSumInRange": {
+            "$ref": "#/components/schemas/MetricRange"
+          },
+          "windowPeriod": {
+            "format": "google-duration",
+            "type": "string"
+          }
+        },
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "Oauth2": {
+        "flows": {
+          "authorizationCode": {
+            "authorizationUrl": "https://accounts.google.com/o/oauth2/auth",
+            "scopes": {
+              "https://www.googleapis.com/auth/cloud-platform": "See, edit, configure, and delete your Google Cloud data and see the email address for your Google Account.",
+              "https://www.googleapis.com/auth/monitoring": "View and write monitoring data for all of your Google and third-party Cloud and API projects",
+              "https://www.googleapis.com/auth/monitoring.read": "View monitoring data for all of your Google Cloud and third-party projects",
+              "https://www.googleapis.com/auth/monitoring.write": "Publish metric data to your Google Cloud projects"
+            },
+            "tokenUrl": "https://oauth2.googleapis.com/token"
+          }
+        },
+        "type": "oauth2"
+      }
+    }
+  },
+  "info": {
+    "title": "Cloud Monitoring API"
+  },
+  "openapi": "3.0.3",
+  "paths": {
+    "/v3/projects/{projectsId}/alertPolicies": {
+      "get": {
+        "operationId": "monitoring.projects.alertPolicies.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListAlertPoliciesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/alertPolicies/{alertPoliciesId}": {
+      "get": {
+        "operationId": "monitoring.projects.alertPolicies.get",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertPoliciesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPolicy"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      },
+      "patch": {
+        "operationId": "monitoring.projects.alertPolicies.patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "alertPoliciesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "updateMask",
+            "schema": {
+              "format": "google-fieldmask",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AlertPolicy"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/AlertPolicy"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/notificationChannels": {
+      "get": {
+        "operationId": "monitoring.projects.notificationChannels.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListNotificationChannelsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/snoozes": {
+      "get": {
+        "operationId": "monitoring.projects.snoozes.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListSnoozesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      },
+      "post": {
+        "operationId": "monitoring.projects.snoozes.create",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snooze"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snooze"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/snoozes/{snoozesId}": {
+      "patch": {
+        "operationId": "monitoring.projects.snoozes.patch",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "snoozesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "updateMask",
+            "schema": {
+              "format": "google-fieldmask",
+              "type": "string"
+            }
+          }
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/Snooze"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Snooze"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/timeSeries": {
+      "get": {
+        "operationId": "monitoring.projects.timeSeries.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregation.alignmentPeriod",
+            "schema": {
+              "format": "google-duration",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "secondaryAggregation.alignmentPeriod",
+            "schema": {
+              "format": "google-duration",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval.startTime",
+            "schema": {
+              "format": "google-datetime",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "secondaryAggregation.perSeriesAligner",
+            "schema": {
+              "enum": [
+                "ALIGN_NONE",
+                "ALIGN_DELTA",
+                "ALIGN_RATE",
+                "ALIGN_INTERPOLATE",
+                "ALIGN_NEXT_OLDER",
+                "ALIGN_MIN",
+                "ALIGN_MAX",
+                "ALIGN_MEAN",
+                "ALIGN_COUNT",
+                "ALIGN_SUM",
+                "ALIGN_STDDEV",
+                "ALIGN_COUNT_TRUE",
+                "ALIGN_COUNT_FALSE",
+                "ALIGN_FRACTION_TRUE",
+                "ALIGN_PERCENTILE_99",
+                "ALIGN_PERCENTILE_95",
+                "ALIGN_PERCENTILE_50",
+                "ALIGN_PERCENTILE_05",
+                "ALIGN_PERCENT_CHANGE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregation.perSeriesAligner",
+            "schema": {
+              "enum": [
+                "ALIGN_NONE",
+                "ALIGN_DELTA",
+                "ALIGN_RATE",
+                "ALIGN_INTERPOLATE",
+                "ALIGN_NEXT_OLDER",
+                "ALIGN_MIN",
+                "ALIGN_MAX",
+                "ALIGN_MEAN",
+                "ALIGN_COUNT",
+                "ALIGN_SUM",
+                "ALIGN_STDDEV",
+                "ALIGN_COUNT_TRUE",
+                "ALIGN_COUNT_FALSE",
+                "ALIGN_FRACTION_TRUE",
+                "ALIGN_PERCENTILE_99",
+                "ALIGN_PERCENTILE_95",
+                "ALIGN_PERCENTILE_50",
+                "ALIGN_PERCENTILE_05",
+                "ALIGN_PERCENT_CHANGE"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregation.groupByFields",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "aggregation.crossSeriesReducer",
+            "schema": {
+              "enum": [
+                "REDUCE_NONE",
+                "REDUCE_MEAN",
+                "REDUCE_MIN",
+                "REDUCE_MAX",
+                "REDUCE_SUM",
+                "REDUCE_STDDEV",
+                "REDUCE_COUNT",
+                "REDUCE_COUNT_TRUE",
+                "REDUCE_COUNT_FALSE",
+                "REDUCE_FRACTION_TRUE",
+                "REDUCE_PERCENTILE_99",
+                "REDUCE_PERCENTILE_95",
+                "REDUCE_PERCENTILE_50",
+                "REDUCE_PERCENTILE_05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "secondaryAggregation.crossSeriesReducer",
+            "schema": {
+              "enum": [
+                "REDUCE_NONE",
+                "REDUCE_MEAN",
+                "REDUCE_MIN",
+                "REDUCE_MAX",
+                "REDUCE_SUM",
+                "REDUCE_STDDEV",
+                "REDUCE_COUNT",
+                "REDUCE_COUNT_TRUE",
+                "REDUCE_COUNT_FALSE",
+                "REDUCE_FRACTION_TRUE",
+                "REDUCE_PERCENTILE_99",
+                "REDUCE_PERCENTILE_95",
+                "REDUCE_PERCENTILE_50",
+                "REDUCE_PERCENTILE_05"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "secondaryAggregation.groupByFields",
+            "schema": {
+              "items": {
+                "type": "string"
+              },
+              "type": "array"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "view",
+            "schema": {
+              "enum": [
+                "FULL",
+                "HEADERS"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "orderBy",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "interval.endTime",
+            "schema": {
+              "format": "google-datetime",
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListTimeSeriesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/projects/{projectsId}/uptimeCheckConfigs": {
+      "get": {
+        "operationId": "monitoring.projects.uptimeCheckConfigs.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "projectsId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListUptimeCheckConfigsResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/{v3Id}/{v3Id1}/services": {
+      "get": {
+        "operationId": "monitoring.services.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "v3Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v3Id1",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListServicesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    },
+    "/v3/{v3Id}/{v3Id1}/services/{servicesId}/serviceLevelObjectives": {
+      "get": {
+        "operationId": "monitoring.services.serviceLevelObjectives.list",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "v3Id",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "v3Id1",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "path",
+            "name": "servicesId",
+            "required": true,
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "access_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "fields",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "uploadType",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "alt",
+            "schema": {
+              "default": "json",
+              "enum": [
+                "json",
+                "media",
+                "proto"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "$.xgafv",
+            "schema": {
+              "enum": [
+                "1",
+                "2"
+              ],
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "quotaUser",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "key",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "callback",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "prettyPrint",
+            "schema": {
+              "default": "true",
+              "type": "boolean"
+            }
+          },
+          {
+            "in": "query",
+            "name": "upload_protocol",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "oauth_token",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "filter",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageToken",
+            "schema": {
+              "type": "string"
+            }
+          },
+          {
+            "in": "query",
+            "name": "pageSize",
+            "schema": {
+              "format": "int32",
+              "type": "integer"
+            }
+          },
+          {
+            "in": "query",
+            "name": "view",
+            "schema": {
+              "enum": [
+                "VIEW_UNSPECIFIED",
+                "FULL",
+                "EXPLICIT"
+              ],
+              "type": "string"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ListServiceLevelObjectivesResponse"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "Oauth2": [
+              "https://www.googleapis.com/auth/cloud-platform",
+              "https://www.googleapis.com/auth/monitoring",
+              "https://www.googleapis.com/auth/monitoring.read"
+            ]
+          }
+        ]
+      }
+    }
+  },
+  "servers": [
+    {
+      "url": "https://monitoring.googleapis.com"
+    }
+  ]
+}

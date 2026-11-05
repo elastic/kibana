@@ -41,6 +41,7 @@ import type {
   ProposalChartsSummaryQuery,
   ProposalChartsSummaryResponse,
   ProposalDecision,
+  ProposalDecisionMode,
   ProposalFilters,
   ProposalStatus,
   ProposalUser,
@@ -60,6 +61,7 @@ import {
   ProposalAlreadyExistsError,
   ProposalConflictError,
   ProposalInvalidActionInputError,
+  ProposalLookupTruncatedError,
   ProposalNotFoundError,
 } from './errors';
 
@@ -96,6 +98,7 @@ export interface UpdateProposalParams {
   status?: ProposalStatus;
   decision?: ProposalDecision;
   decidedBy?: ProposalUser;
+  decisionMode?: ProposalDecisionMode;
   dismissReason?: DismissReason;
   rationale?: string;
   executionError?: string;
@@ -110,6 +113,12 @@ export interface ProposalsServiceDeps {
 
 /** How long `reopen` waits for the gate workflow to create the successor. */
 const REOPEN_WAIT = { timeoutMs: 15_000, intervalMs: 250 };
+
+/**
+ * Elasticsearch's default `max_result_window`: the most live revisions one search can return, so
+ * also the most chains `getLatestRevisions` reads in one call.
+ */
+const MAX_LATEST_REVISIONS = 10_000;
 
 const gateEndedError = (status: ExecutionStatus): string =>
   `The gate execution ended as ${status} before it settled the proposal.`;
@@ -191,8 +200,7 @@ export class ProposalsService {
     // caller always "wins" with an empty string, the action's own metadata is
     // never consulted, and the queue silently drops a proposal it cannot group.
     const category = blankToUndefined(params.category) ?? metadata?.category;
-    // A to-do is offered as "I've applied" alone, so approving one must not run anything: the
-    // click records work the analyst already did, and there is no Decline beside it.
+    // A to-do is carried out by the analyst, so approving must not run an action.
     if (actionWorkflowId !== undefined && category === PROPOSAL_CATEGORY_TODO) {
       throw new ProposalInvalidActionInputError(
         `A "${PROPOSAL_CATEGORY_TODO}" proposal is carried out by the analyst, so it cannot ` +
@@ -671,7 +679,10 @@ export class ProposalsService {
       decision,
       ...(settledAt !== undefined ? { decidedAt: settledAt } : {}),
       ...(params.decision !== undefined
-        ? { decidedBy: params.decidedBy ?? proposal.decidedBy }
+        ? {
+            decidedBy: params.decidedBy ?? proposal.decidedBy,
+            decisionMode: params.decisionMode,
+          }
         : {}),
       ...(params.dismissReason !== undefined ? { dismissReason: params.dismissReason } : {}),
       ...(params.rationale !== undefined ? { rationale: params.rationale } : {}),
@@ -737,6 +748,7 @@ export class ProposalsService {
       supersededBy: undefined,
       decidedBy: undefined,
       decidedAt: undefined,
+      decisionMode: undefined,
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
@@ -771,16 +783,9 @@ export class ProposalsService {
   }
 
   /**
-   * Re-offers a to-do proposal that was marked as applied, for the analyst who marked it by
-   * mistake: a successor carrying the same content is created pending, behind a gate of its own,
-   * and the original is pointed at it.
-   *
-   * The original keeps its decision. A decision is immutable and reaches the record only through
-   * the gate, and the original's gate has ended, so it cannot be undone in place. Superseding it
-   * instead leaves the chain saying what happened — applied, then re-opened — and the successor
-   * goes through the same gate as any proposal, so "I've applied" works on it again.
-   *
-   * Only for a to-do proposal: an action that ran cannot be un-run by relabelling it.
+   * Re-offers a marked-applied to-do after a mistaken mark: creates a pending successor
+   * behind a new gate and points the original at it. The original keeps its decision
+   * (immutable / gate already ended). To-dos only — an action that ran cannot be un-run.
    */
   async reopen(
     id: string,
@@ -963,6 +968,7 @@ export class ProposalsService {
       decision: undefined,
       decidedBy: undefined,
       decidedAt: undefined,
+      decisionMode: undefined,
       dismissReason: undefined,
       rationale: undefined,
       executionError: undefined,
@@ -1178,6 +1184,71 @@ export class ProposalsService {
       decision: source.decision,
       actionInput: source.actionInput,
     };
+  }
+
+  /**
+   * The live revision of every chain rooted at one of `rootProposalIds`, read in one search and
+   * keyed by root id. A root with no live revision is absent rather than an error, and so is one
+   * whose live revision `filters` excludes.
+   *
+   * Returns every head or throws {@link ProposalLookupTruncatedError}: a caller that reads a
+   * missing chain as free would create a duplicate.
+   */
+  async getLatestRevisions(
+    rootProposalIds: string[],
+    spaceId: string,
+    filters: Partial<Pick<ProposalFilters, 'origin' | 'excludeExpired'>> = {}
+  ): Promise<Map<string, Proposal>> {
+    const ids = [...new Set(rootProposalIds.filter((id) => blankToUndefined(id) !== undefined))];
+    if (ids.length === 0) {
+      return new Map();
+    }
+    if (ids.length > MAX_LATEST_REVISIONS) {
+      throw new ProposalLookupTruncatedError(
+        `Cannot read ${ids.length} proposal chains in one lookup: the limit is ${MAX_LATEST_REVISIONS}`
+      );
+    }
+
+    const response = await this.deps.storage.search({
+      track_total_hits: true,
+      size: MAX_LATEST_REVISIONS,
+      // A failed shard would otherwise drop its heads from both the hits and the total.
+      allow_partial_search_results: false,
+      query: {
+        bool: {
+          filter: [
+            ...toFilterClauses(
+              { excludeExpired: false, ...filters, excludeSuperseded: true },
+              spaceId
+            ),
+            { terms: { rootProposalId: ids } },
+          ],
+        },
+      },
+      // A chain caught between the two writes of a revision has two live rows. The released one
+      // wins, for the reason `getLatestRevision` gives; otherwise the later revision, which is the
+      // one the chain settles on once its predecessor is marked. A retry keeps its original's
+      // revision, so between the two writes of `clone()` only the release orders them.
+      sort: [
+        { gateReleasedAt: { order: 'desc', missing: '_last', unmapped_type: 'date' } },
+        { revision: { order: 'desc' } },
+      ],
+    });
+
+    const { hits, total } = response.hits;
+    if (total.value > hits.length) {
+      throw new ProposalLookupTruncatedError(
+        `The lookup matched ${total.value} live revisions but returned ${hits.length}`
+      );
+    }
+
+    const heads = new Map<string, Proposal>();
+    for (const hit of hits) {
+      if (hit._id !== undefined && !heads.has(hit._source.rootProposalId)) {
+        heads.set(hit._source.rootProposalId, toProposal(hit._id, hit._source));
+      }
+    }
+    return heads;
   }
 
   /**
@@ -1742,7 +1813,7 @@ const findWaitingGateStepId = (
     status: string;
     startedAt: string;
     finishedAt?: string;
-    hitl?: { respondedAt?: string };
+    hitl?: { respondedAt?: string } | null;
   }>
 ): string | undefined =>
   stepExecutions

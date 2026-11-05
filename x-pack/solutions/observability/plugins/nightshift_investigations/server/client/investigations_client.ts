@@ -6,11 +6,17 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
+import { badRequest } from '@hapi/boom';
+import { i18n } from '@kbn/i18n';
 import type { CoreStart, KibanaRequest, Logger } from '@kbn/core/server';
 import { DEFAULT_SPACE_ID } from '@kbn/core-spaces-common';
 import type { InferenceServerStart } from '@kbn/inference-plugin/server';
-import { ExecutionStatus, TerminalExecutionStatuses } from '@kbn/workflows';
-import { NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID } from '@kbn/workflows/managed';
+import type { WorkflowExecutionDto } from '@kbn/workflows';
+import { ExecutionStatus, ExecutionType, TerminalExecutionStatuses } from '@kbn/workflows';
+import {
+  NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID,
+  NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE,
+} from '@kbn/workflows/managed';
 import type { WorkflowsServerPluginSetup } from '@kbn/workflows-management-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AgentBuilderPluginStart, ConversationPublicClient } from '@kbn/agent-builder-server';
@@ -28,6 +34,10 @@ import {
   MAX_SLACK_SEEN_EVENTS,
   MAX_EVIDENCE_TEXT_LENGTH,
   MAX_SUBJECTS_PER_CONVERSATION,
+  INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+  INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE,
+  MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH,
+  investigationRunFailedEventSchema,
 } from '@kbn/agentic-investigations-plugin/common';
 import { assertNever } from '@kbn/std';
 import { resolveNightshiftModelForRequest } from '@kbn/nightshift-ai';
@@ -40,7 +50,16 @@ import {
 import { investigationNotificationDestinationsSchema } from '../../common/schemas';
 import type { InvestigationNotificationDestination } from '../../common/schemas';
 import { isInvestigationWorkflowExecution } from '../lib/managed_workflows/is_investigation_workflow_execution';
-import type { AutomationBudget, InvestigationQuotaCallback } from '../types';
+import {
+  getBoundInvestigationWorkflowId,
+  getEntryPointServiceAccountId,
+  isEntryPointReady,
+} from '../lib/service_account/constants';
+import type {
+  AutomationBudget,
+  InvestigationQuotaCallback,
+  InvestigationQuotaResult,
+} from '../types';
 import type {
   AlertInvestigationContext,
   InvestigationAlertSnapshot,
@@ -58,14 +77,17 @@ import {
 import {
   buildAlertRecoveredFollowUpMessage,
   buildInvestigationMessage,
+  buildInvestigationRoundMessage,
   type AlertRecoveredMessageInput,
 } from './build_investigation_message';
 import {
   InvestigationNotFoundError,
+  InvestigationFailureContextError,
   InvestigationQuotaDeniedError,
   InvalidInvestigationContextError,
   InvestigationUnavailableError,
 } from './errors';
+import { MAX_AUTOMATION_INSTRUCTIONS_LENGTH } from '../../common/automation_limits';
 import { evaluateInvestigationQuota } from './evaluate_investigation_quota';
 import {
   findInvestigationConversation,
@@ -92,7 +114,10 @@ function asString(v: unknown): string | undefined {
 }
 
 /** `inputs.context.follow_up` of the investigation runs `followUpRecoveredAlert` starts. */
-const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+export const ALERT_RECOVERED_FOLLOW_UP = 'alert_recovered';
+
+/** How an investigation run started, recorded as `inputs.context.entry_point`. */
+export type InvestigationEntryPoint = 'start_api' | 'automation' | 'slack' | 'alert_recovery';
 
 const isAlertRecoveredFollowUp = (inputs: Record<string, unknown> | undefined): boolean => {
   const context = inputs?.context;
@@ -299,6 +324,24 @@ const toNotifiableInvestigation = (
     })),
 });
 
+const SERVICE_ACCOUNT_REQUIRED_MESSAGE =
+  'Nightshift is not set up in this space. An admin with manage_security must enable the Nightshift service account.';
+
+/**
+ * Whether a run executes as the space's Nightshift agent account: the account its entry point is
+ * bound to. The investigation workflow is installed globally, so anyone allowed to run workflows can
+ * start it directly, as themselves; such a run must not act on an investigation.
+ */
+const runsAsInvestigator = (
+  { effectiveIdentity }: { effectiveIdentity?: { type: string; id?: string } },
+  agentServiceAccountId: string | undefined
+): boolean =>
+  agentServiceAccountId !== undefined &&
+  effectiveIdentity?.type === 'service_account' &&
+  effectiveIdentity.id === agentServiceAccountId;
+
+const NOT_RUN_AS_INVESTIGATOR_MESSAGE =
+  'Investigations only run as the Nightshift service account, through the entry point of the space.';
 type StoredWorkflow = NonNullable<
   Awaited<ReturnType<WorkflowsServerPluginSetup['management']['getWorkflow']>>
 >;
@@ -329,6 +372,9 @@ export interface NightshiftInvestigationsClientDeps {
   uiSettings?: CoreStart['uiSettings'];
   isAvailable: (connectorId?: string) => Promise<boolean>;
   isInfrastructureAvailable: () => Promise<boolean>;
+  ensureFailureSweep?: () => Promise<void>;
+  /** `xpack.security.serviceAccounts.enabled`; investigations only run as the service account. */
+  isServiceAccountExecutionEnabled?: () => boolean;
 }
 
 export class NightshiftInvestigationsClient {
@@ -345,11 +391,14 @@ export class NightshiftInvestigationsClient {
   private readonly inference?: InferenceServerStart;
   private readonly savedObjects?: CoreStart['savedObjects'];
   private readonly uiSettings?: CoreStart['uiSettings'];
+  private readonly ensureFailureSweep?: () => Promise<void>;
   private readonly checkAvailability: (connectorId?: string) => Promise<boolean>;
   private readonly checkInfrastructureAvailability: () => Promise<boolean>;
+  private readonly isServiceAccountExecutionEnabled: () => boolean;
 
   constructor(deps: NightshiftInvestigationsClientDeps) {
     this.request = deps.request;
+    this.ensureFailureSweep = deps.ensureFailureSweep;
     this.workflowsManagement = deps.workflowsManagement;
     this.spaces = deps.spaces;
     this.logger = deps.logger;
@@ -364,6 +413,7 @@ export class NightshiftInvestigationsClient {
     this.uiSettings = deps.uiSettings;
     this.checkAvailability = deps.isAvailable;
     this.checkInfrastructureAvailability = deps.isInfrastructureAvailable;
+    this.isServiceAccountExecutionEnabled = deps.isServiceAccountExecutionEnabled ?? (() => false);
   }
 
   public isAvailable = (connectorId?: string): Promise<boolean> =>
@@ -437,6 +487,7 @@ export class NightshiftInvestigationsClient {
       title,
       trigger_type,
       message,
+      instructions,
       timeout_seconds,
       source_ids,
       connector_id,
@@ -444,12 +495,21 @@ export class NightshiftInvestigationsClient {
       notificationDestinations,
       slack_thread: slackThread,
     }: StartInvestigationRequest,
-    { automationBudget }: { automationBudget?: AutomationBudget } = {}
+    {
+      automationBudget,
+      entryPoint,
+    }: { automationBudget?: AutomationBudget; entryPoint: InvestigationEntryPoint }
   ): Promise<StartInvestigationResponse> {
+    if (instructions !== undefined && instructions.length > MAX_AUTOMATION_INSTRUCTIONS_LENGTH) {
+      throw badRequest(
+        `Instructions must be at most ${MAX_AUTOMATION_INSTRUCTIONS_LENGTH} characters.`
+      );
+    }
     if (!(await this.checkInfrastructureAvailability())) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
+    await this.ensureFailureSweep?.();
     if (!this.inference || !this.savedObjects || !this.uiSettings) {
       throw new InvestigationUnavailableError('Investigations are not available');
     }
@@ -489,6 +549,7 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
+    const globalBudget = this.createGlobalBudget();
     const { id: investigationId, recorded } = await this.resolveInvestigation({
       conversations,
       agenticInvestigations,
@@ -496,11 +557,13 @@ export class NightshiftInvestigationsClient {
       newInvestigationId,
       // Only a start that opens a new investigation counts against the daily automatic quota:
       // a follow-up adds a round to an investigation that was already paid for.
-      assertCanOpenNew: () => this.assertQuotaForNewInvestigation(trigger_type, automationBudget),
+      assertCanOpenNew: () =>
+        this.assertQuotaForNewInvestigation(trigger_type, automationBudget, globalBudget),
     });
     const isFollowUp = investigationId !== newInvestigationId;
     if (isFollowUp) {
-      await this.releaseAutomationBudget(automationBudget);
+      await this.releaseBudget(globalBudget);
+      await this.releaseBudget(automationBudget);
     }
 
     // The `nightshift.ensureInvestigationAgent` workflow step is the general guarantee that the
@@ -513,15 +576,20 @@ export class NightshiftInvestigationsClient {
     const newSubjects = withoutRecordedSubjects(subjects, recorded);
     const newAlertIds = new Set(newSubjects.map(({ id }) => id));
 
+    const roundMessage = isFollowUp
+      ? buildFollowUpMessage({
+          subject: resolvedSubject,
+          message: prepared.message,
+          alerts,
+          newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
+        })
+      : prepared.message;
     const inputs = {
-      message: isFollowUp
-        ? buildFollowUpMessage({
-            subject: resolvedSubject,
-            message: prepared.message,
-            alerts,
-            newAlerts: alerts.filter(({ id }) => newAlertIds.has(id)),
-          })
-        : prepared.message,
+      message: buildInvestigationRoundMessage({
+        message: roundMessage,
+        instructions,
+        isSlackMessage: subject.type === 'slack_thread' && instructions !== undefined,
+      }),
       // Kept as a workflow input for callers that read it off the run. Agent Builder titles the
       // investigation from the first round instead.
       ...(title ? { title } : {}),
@@ -534,9 +602,11 @@ export class NightshiftInvestigationsClient {
         : {}),
       context: {
         ...prepared.context,
+        is_follow_up: isFollowUp,
         source: resolvedSubject.type,
         [`${resolvedSubject.type}_id`]: resolvedSubject.id,
         trigger_type,
+        entry_point: entryPoint,
         ...(resolvedSubject.summary ? { summary: resolvedSubject.summary } : {}),
       },
     };
@@ -596,35 +666,47 @@ export class NightshiftInvestigationsClient {
     }
   }
 
-  private async releaseAutomationBudget(automationBudget?: AutomationBudget): Promise<void> {
+  private async releaseBudget(budget?: AutomationBudget): Promise<void> {
     try {
-      await automationBudget?.release();
+      await budget?.release();
     } catch (error) {
       this.logger.warn(
-        `Could not release the automation budget: ${
+        `Could not release the investigation budget: ${
           error instanceof Error ? error.message : String(error)
         }`
       );
     }
   }
 
+  /**
+   * The space's investigation entry point, which runs as the Nightshift agent service account.
+   * Investigations only run through it: there is no fallback that runs as the caller.
+   */
   private async getInvestigationWorkflow(spaceId: string): Promise<InstalledWorkflow> {
     const { workflowsManagement } = this.requireWriteDeps();
-    const workflowId = NIGHTSHIFT_INVESTIGATION_WORKFLOW_ID;
+    if (!this.isServiceAccountExecutionEnabled()) {
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
+    }
+    const workflowId = getBoundInvestigationWorkflowId(spaceId);
     const workflow = await workflowsManagement.management.getWorkflow(
       workflowId,
       spaceId,
       this.request
     );
-    if (!workflow?.definition) {
-      this.logger.error(
-        `Investigation workflow "${workflowId}" is not installed in space "${spaceId}"`
+    if (!workflow?.definition || !isEntryPointReady(workflow)) {
+      this.logger.warn(
+        `Investigation workflow "${workflowId}" is not set up in space "${spaceId}"; an admin must enable the Nightshift service account`
       );
-      throw new InvestigationUnavailableError('Investigations are not configured in this space');
+      throw new InvestigationUnavailableError(SERVICE_ACCOUNT_REQUIRED_MESSAGE);
     }
     return { ...workflow, definition: workflow.definition };
   }
 
+  /**
+   * Runs the space's entry point exactly as it is stored: a workflow bound to a service account
+   * only runs its saved definition, so a caller's timeout travels as an input, which the entry
+   * point applies to the step that runs the investigation.
+   */
   private async runInvestigationWorkflow(
     workflow: InstalledWorkflow,
     spaceId: string,
@@ -633,21 +715,34 @@ export class NightshiftInvestigationsClient {
   ): Promise<string> {
     const { workflowsManagement } = this.requireWriteDeps();
     return workflowsManagement.management.runWorkflow(
-      {
-        ...workflow,
-        definition:
-          timeoutSeconds === undefined
-            ? workflow.definition
-            : {
-                ...workflow.definition,
-                settings: { ...workflow.definition.settings, timeout: `${timeoutSeconds}s` },
-              },
-      },
+      workflow,
       spaceId,
-      inputs,
+      timeoutSeconds === undefined ? inputs : { ...inputs, timeout_seconds: timeoutSeconds },
       this.request,
-      'nightshift-investigations'
+      // The entry point refuses runs it did not start.
+      NIGHTSHIFT_INVESTIGATIONS_TRIGGER_SOURCE
     );
+  }
+
+  private createGlobalBudget(): AutomationBudget {
+    let release: InvestigationQuotaResult['release'];
+    return {
+      consume: async () => {
+        const result = await evaluateInvestigationQuota({
+          callback: this.investigationQuotaCallback,
+          logger: this.logger,
+        });
+        if (!result.allowed) {
+          throw new InvestigationQuotaDeniedError();
+        }
+        release = result.release;
+      },
+      release: async () => {
+        const pending = release;
+        release = undefined;
+        await pending?.();
+      },
+    };
   }
 
   /**
@@ -656,20 +751,19 @@ export class NightshiftInvestigationsClient {
    */
   private async assertQuotaForNewInvestigation(
     triggerType: StartInvestigationRequest['trigger_type'],
-    automationBudget?: AutomationBudget
+    automationBudget: AutomationBudget | undefined,
+    globalBudget: AutomationBudget
   ): Promise<void> {
     switch (triggerType) {
       case 'manual':
         return;
       case 'automatic': {
         await automationBudget?.consume();
-        const { allowed } = await evaluateInvestigationQuota({
-          callback: this.investigationQuotaCallback,
-          logger: this.logger,
-        });
-        if (!allowed) {
-          await this.releaseAutomationBudget(automationBudget);
-          throw new InvestigationQuotaDeniedError();
+        try {
+          await globalBudget.consume();
+        } catch (error) {
+          await this.releaseBudget(automationBudget);
+          throw error;
         }
         return;
       }
@@ -746,9 +840,9 @@ export class NightshiftInvestigationsClient {
     }
 
     // Charged before the claim, so a denied start claims nothing. A start that then loses the
-    // claim to a concurrent one becomes a follow-up and releases its automation budget, but the
-    // global quota stays charged; the quota callback has no refund, and the race needs two starts
-    // for the same new subject within moments.
+    // claim to a concurrent one becomes a follow-up and releases both budgets. A start whose claim
+    // attempt fails keeps its slot, because a concurrent start may already have joined its claims
+    // or a failed rollback may have left them live.
     await assertCanOpenNew();
     const claim = await subjectsClient.claimSubjects({
       conversationId: newInvestigationId,
@@ -793,15 +887,20 @@ export class NightshiftInvestigationsClient {
     return this.ensureInvestigationConversation(investigationId, executionId, true);
   }
 
-  /** Records a failed run without reopening a conversation the user has closed. */
-  async ensureForFailure(investigationId: string, executionId: string): Promise<string> {
-    return this.ensureInvestigationConversation(investigationId, executionId, false);
+  /** Records a failed run and its context without reopening a conversation the user has closed. */
+  async ensureForFailure(
+    investigationId: string,
+    executionId: string,
+    reason: string
+  ): Promise<string> {
+    return this.ensureInvestigationConversation(investigationId, executionId, false, reason);
   }
 
   private async ensureInvestigationConversation(
     investigationId: string,
     executionId: string,
-    reopen: boolean
+    reopen: boolean,
+    failureReason?: string
   ): Promise<string> {
     const { agentBuilder, agenticInvestigations } = this.requireWriteDeps();
 
@@ -811,7 +910,7 @@ export class NightshiftInvestigationsClient {
     );
     if (
       TerminalExecutionStatuses.includes(execution.status) &&
-      (reopen || execution.status !== ExecutionStatus.FAILED)
+      (reopen || ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status))
     ) {
       throw new InvestigationNotFoundError(investigationId);
     }
@@ -821,11 +920,17 @@ export class NightshiftInvestigationsClient {
     const conversations = await agentBuilder.conversations.getScopedClient({
       request: this.request,
     });
-    // A recovery follow-up waits in the investigation's queue after its lookup found it open, so
-    // it only continues an investigation that is still open when it gets its turn.
-    if (isAlertRecoveredFollowUp(inputs)) {
+    // API-started and ensured runs already have conversations; recovery must not recreate them
+    // after deletion. Alert recovery follow-ups also require the conversation to remain open.
+    const hadConversation =
+      (isPlainObject(inputs?.context) && typeof inputs.context.is_follow_up === 'boolean') ||
+      execution.stepExecutions?.some(
+        ({ stepId, status }) =>
+          stepId === 'persist_investigation_started' && status === ExecutionStatus.COMPLETED
+      );
+    if (isAlertRecoveredFollowUp(inputs) || (!reopen && hadConversation)) {
       const found = await findInvestigationConversation(conversations, investigationId);
-      if (found?.status !== 'open') {
+      if (!found || (isAlertRecoveredFollowUp(inputs) && found.status !== 'open')) {
         throw new InvestigationNotFoundError(investigationId);
       }
     }
@@ -840,6 +945,21 @@ export class NightshiftInvestigationsClient {
           }
         : {}),
     });
+
+    let failureEventError: Error | undefined;
+    if (failureReason !== undefined) {
+      failureEventError = await this.recordInvestigationRunFailure({
+        conversations,
+        conversationId: conversation.id,
+        executionId,
+        message: asString(inputs?.message),
+        reason: failureReason,
+        eventType:
+          execution.status === ExecutionStatus.TIMED_OUT
+            ? INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE
+            : INVESTIGATION_RUN_FAILED_EVENT_TYPE,
+      });
+    }
 
     const subjects = recoverSubjectsFromInputs(inputs, investigationId);
     if (subjects.length > 0) {
@@ -875,15 +995,110 @@ export class NightshiftInvestigationsClient {
       });
     }
 
+    // Preserve subject recovery while allowing the sweep to retry a missing timeline entry.
+    if (failureEventError) throw new InvestigationFailureContextError(failureEventError);
     return conversation.id;
   }
 
-  /**
-   * Reads a run of the investigation workflow that works on this investigation: its
-   * `investigation_id` input, or the run itself without one. Throws not found for a missing run,
-   * another workflow's run, or a run of another investigation.
-   */
-  private async readInvestigationExecution(investigationId: string, executionId: string) {
+  private async recordInvestigationRunFailure({
+    conversations,
+    conversationId,
+    executionId,
+    message,
+    reason,
+    eventType,
+  }: {
+    conversations: ConversationPublicClient;
+    conversationId: string;
+    executionId: string;
+    message?: string;
+    reason: string;
+    eventType:
+      | typeof INVESTIGATION_RUN_FAILED_EVENT_TYPE
+      | typeof INVESTIGATION_RUN_TIMED_OUT_EVENT_TYPE;
+  }): Promise<Error | undefined> {
+    try {
+      const existing = await conversations.get(conversationId);
+      if (
+        existing.events?.some(
+          (event) =>
+            event.type === eventType &&
+            investigationRunFailedEventSchema.safeParse(event.data).data?.execution_id ===
+              executionId
+        )
+      )
+        return undefined;
+      await conversations.addEvents({
+        conversationId,
+        events: [
+          {
+            type: eventType,
+            data: investigationRunFailedEventSchema.parse({
+              execution_id: executionId,
+              request: message?.trim()
+                ? message.slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH)
+                : undefined,
+              reason: (
+                reason.trim() ||
+                i18n.translate('xpack.nightshiftInvestigations.failure.defaultReasonErrorMessage', {
+                  defaultMessage: 'Investigation failed',
+                })
+              ).slice(0, MAX_INVESTIGATION_RUN_FAILURE_TEXT_LENGTH),
+            }),
+          },
+        ],
+      });
+      return undefined;
+    } catch (error) {
+      this.logger.warn(
+        `Could not record failure context for investigation "${conversationId}", execution "${executionId}": ${
+          error instanceof Error ? error.message : String(error)
+        }`
+      );
+      return error instanceof Error ? error : new Error(String(error));
+    }
+  }
+
+  /** Reads a persisted unsuccessful investigation run under this request's space and permissions. */
+  async getUnsuccessfulRun(
+    executionId: string
+  ): Promise<{ execution: WorkflowExecutionDto; investigationId: string }> {
+    if (!executionId || executionId.length > 500) throw new InvestigationNotFoundError(executionId);
+    const { execution, inputs } = await this.readInvestigationExecution(undefined, executionId);
+    if (
+      execution.isTestRun ||
+      ![ExecutionStatus.FAILED, ExecutionStatus.TIMED_OUT].includes(execution.status)
+    ) {
+      throw new InvestigationNotFoundError(executionId);
+    }
+    const investigationId = asString(inputs?.investigation_id) ?? executionId;
+    if (investigationId.length > 500) throw new InvestigationNotFoundError(executionId);
+    return { execution, investigationId };
+  }
+
+  /** Prevents a delayed outcome from replacing the aggregate state of a newer investigation run. */
+  async isLatestInvestigationRun(execution: WorkflowExecutionDto): Promise<boolean> {
+    if (!execution.concurrencyGroupKey) return false;
+    const { workflowsManagement } = this.requireWriteDeps();
+    const { results } = await workflowsManagement.management.getWorkflowExecutions(
+      {
+        request: this.request,
+        concurrencyGroupKey: execution.concurrencyGroupKey,
+        executionTypes: [ExecutionType.PRODUCTION],
+        omitStepRuns: true,
+        sortField: 'createdAt',
+        sortOrder: 'desc',
+        size: 1,
+      },
+      this.getSpaceId()
+    );
+    return results[0]?.id === execution.id;
+  }
+
+  private async readInvestigationExecution(
+    investigationId: string | undefined,
+    executionId: string
+  ) {
     const { workflowsManagement } = this.requireWriteDeps();
     const execution = await workflowsManagement.management.getWorkflowExecution(
       executionId,
@@ -897,10 +1112,22 @@ export class NightshiftInvestigationsClient {
 
     if (
       !execution ||
+      execution.spaceId !== this.getSpaceId() ||
       !isInvestigationWorkflowExecution(execution) ||
-      (asString(inputs?.investigation_id) ?? executionId) !== investigationId
+      (investigationId !== undefined &&
+        (asString(inputs?.investigation_id) ?? executionId) !== investigationId)
     ) {
-      throw new InvestigationNotFoundError(investigationId);
+      throw new InvestigationNotFoundError(investigationId ?? executionId);
+    }
+    const entryPoint = await workflowsManagement.management
+      .getWorkflow(
+        getBoundInvestigationWorkflowId(this.getSpaceId()),
+        this.getSpaceId(),
+        this.request
+      )
+      .catch(() => null);
+    if (!runsAsInvestigator(execution, getEntryPointServiceAccountId(entryPoint))) {
+      throw new InvestigationUnavailableError(NOT_RUN_AS_INVESTIGATOR_MESSAGE);
     }
     return { execution, inputs };
   }
@@ -1159,7 +1386,11 @@ export class NightshiftInvestigationsClient {
     const executionId = await this.runInvestigationWorkflow(workflow, spaceId, {
       investigation_id: existing.id,
       message,
-      context: { source: 'alert', follow_up: ALERT_RECOVERED_FOLLOW_UP },
+      context: {
+        source: 'alert',
+        follow_up: ALERT_RECOVERED_FOLLOW_UP,
+        entry_point: 'alert_recovery' satisfies InvestigationEntryPoint,
+      },
     });
     this.logger.info(
       `Requested a recovery round on investigation "${existing.id}" for alert/${alertUuid}, execution_id=${executionId}`
