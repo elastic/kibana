@@ -48,6 +48,11 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';
+import type {
+  WorkflowsExtensionsServerPluginSetup,
+  WorkflowsExtensionsServerPluginStart,
+} from '@kbn/workflows-extensions/server';
+import type { WorkflowsServerPluginStart } from '@kbn/workflows-management-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SavedObjectTaggingStart } from '@kbn/saved-objects-tagging-plugin/server';
@@ -144,6 +149,10 @@ import { FleetActionsClient, type FleetActionsClientInterface } from './services
 import type { FilesClientFactory } from './services/files/types';
 import { PolicyWatcher } from './services/agent_policy_watch';
 import { getPackageSpecTagId } from './services/epm/kibana/assets/tag_assets';
+import {
+  registerWorkflowAssetsOwner,
+  startManagedWorkflowsClient,
+} from './services/epm/kibana/workflows/managed_client';
 import { FleetMetricsTask } from './services/metrics/fleet_metrics_task';
 import { fetchAgentMetrics } from './services/metrics/fetch_agent_metrics';
 import { registerFieldsMetadataExtractors } from './services/register_fields_metadata_extractors';
@@ -196,6 +205,7 @@ export interface FleetSetupDeps {
   telemetry?: TelemetryPluginSetup;
   taskManager: TaskManagerSetupContract;
   fieldsMetadata: FieldsMetadataServerSetup;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginSetup;
 }
 
 export interface FleetStartDeps {
@@ -209,6 +219,8 @@ export interface FleetStartDeps {
   spaces: SpacesPluginStart;
   alerting: AlertingServerStart;
   reporting: ReportingStart;
+  workflowsExtensions?: WorkflowsExtensionsServerPluginStart;
+  workflowsManagement?: WorkflowsServerPluginStart;
 }
 
 export interface FleetAppContext {
@@ -402,6 +414,7 @@ export class FleetPlugin
       config.enableExperimental ?? [],
       config.experimentalFeatures || {}
     );
+    registerWorkflowAssetsOwner({ workflowsExtensions: deps.workflowsExtensions });
     const requireAllSpaces = experimentalFeatures.useSpaceAwareness ? false : true;
 
     registerSavedObjects(core.savedObjects, {
@@ -869,6 +882,13 @@ export class FleetPlugin
       reportingStart: plugins.reporting,
       featureFlags: core.featureFlags,
     });
+    appContextService.setManagedWorkflowsClientInit(
+      startManagedWorkflowsClient({
+        workflowsExtensions: plugins.workflowsExtensions,
+        workflowsManagement: plugins.workflowsManagement,
+        logger: this.logger,
+      })
+    );
     licenseService.start(plugins.licensing.license$);
     this.telemetryEventsSender.start(plugins.telemetry, core).catch(() => {});
     this.bulkActionsResolver?.start(plugins.taskManager).catch(() => {});
