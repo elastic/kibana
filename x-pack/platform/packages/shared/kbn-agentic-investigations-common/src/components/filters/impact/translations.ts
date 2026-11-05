@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 
 export const IMPACT_LABELS = Object.freeze({
   title: i18n.translate('xpack.agenticInvestigations.impact.title', {
-    defaultMessage: 'Impact',
+    defaultMessage: 'Impacted entities',
   }),
   showMore: (count: number) =>
     i18n.translate('xpack.agenticInvestigations.impact.showMore', {

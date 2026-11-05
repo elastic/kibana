@@ -13,6 +13,10 @@ import { createWorkflowLiquidEngine } from '../../../../common/utils/create_work
 import { buildFieldsZodValidator } from '../../../../spec/lib/build_fields_zod_validator';
 import { getInputsFromDefinition } from '../../../../spec/lib/field_conversion';
 import { WorkflowSchema } from '../../../../spec/schema';
+import {
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW,
+  NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID,
+} from '../online_evals';
 
 interface WorkflowStep {
   name: string;
@@ -82,6 +86,8 @@ describe('Nightshift investigation workflow', () => {
       'investigate',
       'emit_investigation_completed',
       'notify_completed',
+      'classify_for_online_evals',
+      'start_online_evals',
     ]);
     expect(requireStep('investigate').with?.message).toContain('{{ inputs.context | json }}');
   });
@@ -303,6 +309,58 @@ describe('Nightshift investigation workflow', () => {
     expect(requireStep('emit_investigation_completed').if).toBeUndefined();
     expect(requireStep('investigate')['on-failure']).toBeUndefined();
     expect(investigation.steps.some(({ type }) => type === 'workflow.fail')).toBe(false);
+  });
+
+  describe('online evals hand-off', () => {
+    const classify = requireStep('classify_for_online_evals');
+    const start = requireStep('start_online_evals') as WorkflowStep & {
+      with: { 'workflow-id': string; 'run-as-mode': string; inputs: Record<string, string> };
+    };
+
+    it('starts scoring without waiting, as this run, only for a round worth scoring', () => {
+      expect(start).toMatchObject({
+        type: 'workflow.executeAsync',
+        with: { 'workflow-id': NIGHTSHIFT_ONLINE_EVALS_WORKFLOW_ID, 'run-as-mode': 'inherit' },
+      });
+      const condition = (start.if ?? '').slice(3, -2);
+      const engine = createWorkflowLiquidEngine();
+      for (const [output, expected] of [
+        [{ should_score: true }, true],
+        [{ should_score: false }, false],
+        [undefined, false],
+      ] as const) {
+        expect(
+          engine.evalValueSync(condition, { steps: { classify_for_online_evals: { output } } })
+        ).toBe(expected);
+      }
+    });
+
+    it('never fails the investigation', () => {
+      expect(classify['on-failure']).toEqual({ continue: true });
+      expect(start['on-failure']).toEqual({ continue: true });
+    });
+
+    it('passes only inputs the scoring workflow declares, including every one it requires', () => {
+      const [{ inputs: declared }] = parse(NIGHTSHIFT_ONLINE_EVALS_WORKFLOW.yaml)
+        .triggers as Array<{
+        inputs: { properties: Record<string, unknown>; required: string[] };
+      }>;
+      const passed = Object.keys(start.with.inputs);
+      expect(passed.filter((name) => !(name in declared.properties))).toEqual([]);
+      expect(declared.required.filter((name) => !passed.includes(name))).toEqual([]);
+    });
+
+    it('sends the run start as a date the score step can read, to the millisecond', () => {
+      const startedAt = new Date('2026-11-02T15:04:05.123Z');
+      const rendered = createWorkflowLiquidEngine().parseAndRenderSync(
+        start.with.inputs.investigation_started_at,
+        { execution: { startedAt } }
+      );
+      expect(Date.parse(rendered)).toBe(startedAt.getTime());
+      expect(classify.with?.investigation_started_at).toBe(
+        start.with.inputs.investigation_started_at
+      );
+    });
   });
 
   it('knows nothing about Slack', () => {

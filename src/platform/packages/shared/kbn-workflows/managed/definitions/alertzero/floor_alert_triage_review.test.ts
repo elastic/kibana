@@ -466,9 +466,13 @@ describe('floor_alert_triage_review — post_comment_outcome_dismissed', () => {
     expect(comment).not.toContain('Rationale');
   });
 
-  it('names the decider when decidedBy is present', () => {
-    const comment = renderDismissedComment({ decidedBy: { username: 'analyst1' } });
-    expect(comment).toContain('@analyst1');
+  // On serverless an API key can be the decider, and its username is not readable. The proposal
+  // card already shows who decided, so the comment does not repeat it.
+  it('does not name the decider, even when decidedBy is present', () => {
+    const comment = renderDismissedComment({ decidedBy: { username: 'kcoM-oC2SUmTy-Gcu7F5zw' } });
+    expect(comment).not.toContain('kcoM-oC2SUmTy-Gcu7F5zw');
+    expect(comment).not.toContain(' by @');
+    expect(comment).toContain('Proposal dismissed (reason:');
   });
 
   it('claims every FP candidate was re-tagged when no per-alert retag failed', () => {
@@ -621,29 +625,23 @@ describe('floor_alert_triage_review — proposal outcomes', () => {
     expect(retag?.with?.exclude_alert_ids).toBe('${{ variables.live_alert_ids }}');
   });
 
-  it('reports a failed sweep of the leftovers in the count and the comment', () => {
+  // The proposal card shows who approved and the Investigation shows what closed, so the approved
+  // branch posts a comment only when the leftovers sweep did not finish.
+  it('counts a failed sweep of the leftovers and comments only when it failed', () => {
+    const step = stepByName('post_comment_retag_incomplete_approved');
     const expr = stepByName('record_approved_retag_failures')?.with?.failed_retag_count as string;
     expect(evalExpr(expr, { steps: { retag_approved_leftovers: { output: { failed: 3 } } } })).toBe(
       3
     );
-    const template = (stepByName('post_comment_outcome_approved')?.with as { message: string })
-      .message;
-    const render = (context: Record<string, unknown>) =>
-      renderString(template, {
-        variables: { fp_candidate_count: 2, failed_retag_count: 0 },
-        ...context,
-      });
-    expect(
-      render({ steps: { retag_approved_leftovers: { error: { message: 'x' } }, get_proposal: {} } })
-    ).toContain('did not fully succeed');
-    expect(
-      render({
-        steps: {
-          retag_approved_leftovers: { output: { matched: 0, failed: 0 } },
-          get_proposal: {},
-        },
-      })
-    ).not.toContain('did not fully succeed');
+    expect(branchStepNames('handle_approved')).toContain('post_comment_retag_incomplete_approved');
+    expect(stepByName('post_comment_outcome_approved')).toBeUndefined();
+    expect((step?.with as { message: string }).message).toContain('did not fully succeed');
+
+    const shouldPost = (steps: Record<string, unknown>, failedRetagCount: number) =>
+      evalExpr(step?.if as string, { steps, variables: { failed_retag_count: failedRetagCount } });
+    expect(shouldPost({ retag_approved_leftovers: { error: { message: 'x' } } }, 0)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 2 } } }, 2)).toBe(true);
+    expect(shouldPost({ retag_approved_leftovers: { output: { failed: 0 } } }, 0)).toBe(false);
   });
 
   it('re-tags by the proposal tag and by id, in every outcome that uses the live revision', () => {

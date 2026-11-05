@@ -255,7 +255,7 @@ tags:
     description: |
       Fleet cloud connectors APIs enable you to manage Fleet cloud connectors, including creating, updating, and deleting cloud connector configurations for Fleet integrations.
     x-displayName: Fleet cloud connectors
-  - name: Fleet cloud onboarding deployments
+  - name: Fleet cloud onboarding instances
   - name: Fleet enrollment API keys
     description: |
       Fleet enrollment API keys APIs enable you to manage enrollment API keys for Fleet, including creating, retrieving, and revoking API keys used for agent enrollment.
@@ -930,7 +930,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. A connector HTTP ack returns 200 (JSON or a plain-text body) and does not emit.
+        Public ingress for Kibana connector-scoped inbound events. Authenticate with an ingest token (`Authorization: Bearer`, or `token` query parameter as fallback). A successful emit returns 202. An emit that includes an HTTP ack returns that status, usually 200 with an empty body, and still emits. A connector HTTP-only ack returns 200 (JSON or a plain-text body; `.inboundWebhook` handshake is `{ challenge }`) and does not emit.
       operationId: post-actions-events-connector-type-id-connector-id
       parameters:
         - description: The Kibana connector type identifier.
@@ -975,7 +975,7 @@ paths:
               examples:
                 ingestEventsAckResponse:
                   $ref: '#/components/examples/ingest_events_ack_response'
-          description: Connector HTTP 200 ack. No event is emitted. JSON or a plain-text body.
+          description: Connector HTTP 200 ack. A handshake such as `.inboundWebhook` `{ challenge }` does not emit. An ack included with an emit may have an empty body, and the events are still emitted. The body may be JSON or plain-text.
         '202':
           content:
             'application/json; application/*+json; application/x-www-form-urlencoded; text/plain; */*':
@@ -1396,9 +1396,11 @@ paths:
                     - tools
                 description:
                   description: Description of what the agent does.
+                  maxLength: 2000
                   type: string
                 id:
                   description: Unique identifier for the agent.
+                  maxLength: 64
                   type: string
                 labels:
                   description: Optional labels for categorizing and organizing agents.
@@ -1408,6 +1410,7 @@ paths:
                   type: array
                 name:
                   description: Display name for the agent.
+                  maxLength: 256
                   type: string
               required:
                 - id
@@ -1955,6 +1958,7 @@ paths:
                       type: array
                 description:
                   description: Updated description of what the agent does.
+                  maxLength: 2000
                   type: string
                 labels:
                   description: Updated labels for categorizing and organizing agents.
@@ -1964,6 +1968,7 @@ paths:
                   type: array
                 name:
                   description: Updated display name for the agent.
+                  maxLength: 256
                   type: string
       responses:
         '200':
@@ -22911,9 +22916,7 @@ paths:
 
         Send a message to an agent and get its text answer. Use this synchronous endpoint in scripts and command-line tools. The response contains only the answer and the conversation ID. To continue the conversation, include the returned `conversation_id` in the next request.
 
-        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.
-
-        The `agentBuilder:experimentalFeatures` advanced setting must be enabled. If it is disabled, the endpoint returns a 404 response.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
+        The agent runs without a user, so the endpoint declines every prompt that the agent raises, such as a tool confirmation, a question, or a destructive API approval. The `declined_prompts` property lists these prompts. This endpoint does not support attachments.<br/><br/>[Required authorization] Route required privileges: agentBuilder:read.
       operationId: post-chat-message
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -23041,7 +23044,7 @@ paths:
                     error: Not Found
                     message: Conversation 696ccd6d-4bff-4b26-a62e-522ccf2dcd16 not found
                     statusCode: 404
-          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist, an `agent_id` that the caller cannot use, or a disabled `agentBuilder:experimentalFeatures` advanced setting. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
+          description: 'Not Found: the conversation or agent was not found. Possible causes are a `conversation_id` that does not exist or an `agent_id` that the caller cannot use. If the caller cannot use the agent, the error says that the conversation was not found. This prevents callers from discovering hidden agents.'
       summary: Send a message and get the answer
       tags:
         - agent builder
@@ -23064,7 +23067,7 @@ paths:
               "message": "What is Elasticsearch?",
               "agent_id": "elastic-ai-agent"
             }
-      x-state: Experimental
+      x-state: Technical Preview
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
           name: product_name
@@ -41769,6 +41772,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -42013,6 +42024,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -48448,7 +48467,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List cloud onboarding deployment instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List cloud onboarding instances, newest first. Optionally filter by package name or provider.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments
       parameters:
         - description: Only list deployment instances that cover this package.
@@ -48493,7 +48512,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsExample:
-                  description: Page of cloud onboarding deployment instances that cover the aws package
+                  description: Page of cloud onboarding instances that cover the aws package
                   value:
                     items:
                       - agentCount: 1
@@ -48862,9 +48881,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployment instances
+      summary: Get cloud onboarding instances
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -48877,7 +48896,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Create a new Fleet cloud onboarding deployment.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Create a new Fleet cloud onboarding instance.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: post-fleet-cloud-onboarding-deployments
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -48892,7 +48911,7 @@ paths:
           application/json:
             examples:
               postCloudOnboardingDeploymentAgentBasedRequestExample:
-                description: Create a new AWS cloud onboarding deployment using an Elastic Agent (agent-based)
+                description: Create a new cloud onboarding instance for AWS using an Elastic Agent (agent-based)
                 value:
                   authMethod: assume_role
                   mechanisms:
@@ -48906,7 +48925,7 @@ paths:
                       regions:
                         - us-east-1
               postCloudOnboardingDeploymentEcfRequestExample:
-                description: Create a new AWS cloud onboarding deployment using Elastic Cloud Forwarder (ECF)
+                description: Create a new cloud onboarding instance for AWS using Elastic Cloud Forwarder (ECF)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -48920,7 +48939,7 @@ paths:
                         - us-east-1
                       s3_bucket_arn: arn:aws:s3:::my-cloudfront-bucket
               postCloudOnboardingDeploymentRequestExample:
-                description: Create a new AWS cloud onboarding deployment using identity federation (managed integration)
+                description: Create a new cloud onboarding instance for AWS using identity federation (managed integration)
                 value:
                   connectorId: cloud-connector-id-1
                   mechanisms:
@@ -49418,9 +49437,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Create cloud onboarding deployment
+      summary: Create cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -49434,7 +49453,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Delete a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Delete a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: delete-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49444,7 +49463,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -49457,7 +49476,7 @@ paths:
             application/json:
               examples:
                 deleteCloudOnboardingDeploymentExample:
-                  description: The cloud onboarding deployment was successfully deleted
+                  description: The cloud onboarding instance was successfully deleted
                   value:
                     id: onboarding-deployment-id-1
               schema:
@@ -49503,7 +49522,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -49517,9 +49536,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Delete cloud onboarding deployment
+      summary: Delete cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -49532,10 +49551,10 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Get a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        Get a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-id
       parameters:
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -49548,7 +49567,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentExample:
-                  description: A cloud onboarding deployment that has succeeded
+                  description: A cloud onboarding instance that has succeeded
                   value:
                     item:
                       agentPolicyIds:
@@ -49858,7 +49877,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -49872,9 +49891,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Get cloud onboarding deployment
+      summary: Get cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -49887,7 +49906,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        Update a cloud onboarding deployment by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
+        Update a cloud onboarding instance by ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-all OR integrations-all.
       operationId: put-fleet-cloud-onboarding-deployments-id
       parameters:
         - description: A required header to protect against CSRF attacks
@@ -49897,7 +49916,7 @@ paths:
           schema:
             example: 'true'
             type: string
-        - description: The saved object ID of the cloud onboarding deployment.
+        - description: The saved object ID of the cloud onboarding instance.
           in: path
           name: id
           required: true
@@ -49909,7 +49928,7 @@ paths:
           application/json:
             examples:
               putCloudOnboardingDeploymentRequestExample:
-                description: Update a cloud onboarding deployment after the CFN stack has been submitted
+                description: Update a cloud onboarding instance after the CFN stack has been submitted
                 value:
                   deploymentId: arn:aws:cloudformation:us-east-1:123456789012:stack/elastic-aws-onboarding/aaa-bbb-ccc
                   deploymentName: elastic-aws-onboarding
@@ -50142,7 +50161,7 @@ paths:
             application/json:
               examples:
                 putCloudOnboardingDeploymentExample:
-                  description: The updated cloud onboarding deployment
+                  description: The updated cloud onboarding instance
                   value:
                     item:
                       agentPolicyIds:
@@ -50442,7 +50461,7 @@ paths:
             application/json:
               examples:
                 notFoundResponseExample:
-                  description: The requested cloud onboarding deployment does not exist
+                  description: The requested cloud onboarding instance does not exist
                   value:
                     error: Not Found
                     message: Saved object [fleet-cloud-onboarding-deployment/unknown-id] not found
@@ -50456,9 +50475,9 @@ paths:
                 required:
                   - message
           description: Not Found
-      summary: Update cloud onboarding deployment
+      summary: Update cloud onboarding instance
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -50472,7 +50491,7 @@ paths:
 
         Refer to [Spaces](https://www.elastic.co/docs/deploy-manage/manage-spaces) for more information.
 
-        List all cloud onboarding deployments for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
+        List all cloud onboarding instances for a given connector ID.<br/><br/>[Required authorization] Route required privileges: fleet-agent-policies-read OR integrations-read.
       operationId: get-fleet-cloud-onboarding-deployments-connector-connectorid
       parameters:
         - description: The fleet-cloud-connector ID to list deployments for.
@@ -50489,7 +50508,7 @@ paths:
             application/json:
               examples:
                 getCloudOnboardingDeploymentsByConnectorIdExample:
-                  description: List of cloud onboarding deployments for a connector
+                  description: List of cloud onboarding instances for a connector
                   value:
                     items:
                       - agentPolicyIds:
@@ -50801,9 +50820,9 @@ paths:
                   - message
                   - attributes
           description: Bad Request
-      summary: Get cloud onboarding deployments by connector ID
+      summary: Get cloud onboarding instances by connector ID
       tags:
-        - Fleet cloud onboarding deployments
+        - Fleet cloud onboarding instances
       x-state: Experimental
       x-metaTags:
         - content: Kibana, Elastic Cloud Serverless
@@ -57153,6 +57172,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -57397,6 +57424,14 @@ paths:
           schema:
             maxLength: 256
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -58909,6 +58944,14 @@ paths:
           required: false
           schema:
             type: boolean
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       responses:
         '200':
           content:
@@ -59102,6 +59145,14 @@ paths:
               - simplified
               - legacy
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -59236,6 +59287,14 @@ paths:
           schema:
             example: 'true'
             type: string
+        - description: ID of the cloud onboarding instance that manages the package policies. Required to change package policies managed by a cloud onboarding instance; only the onboarding flow is expected to set it. Requests that change a managed package policy without a matching ID are rejected with a 400 error, and `force` does not bypass this check. A bulk delete that includes such a package policy is rejected as a whole.
+          in: query
+          name: onboarding_deployment_id
+          required: false
+          schema:
+            maxLength: 256
+            type: string
+            x-state: Experimental; added in 9.7.0
       requestBody:
         content:
           application/json:
@@ -143652,6 +143711,13 @@ paths:
           schema:
             maxLength: 255
             type: string
+        - description: Filter by execution name using a case-insensitive substring.
+          in: query
+          name: runName
+          required: false
+          schema:
+            maxLength: 128
+            type: string
         - description: Filter by execution status.
           in: query
           name: statuses
@@ -156307,6 +156373,11 @@ components:
     Kibana_HTTP_APIs_bulk_install_packages_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -156601,6 +156672,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_managed_integrations_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Experimental
         policyIds:
           description: IDs of the managed integrations to upgrade to their installed package version.
           items:
@@ -156615,6 +156691,11 @@ components:
     Kibana_HTTP_APIs_bulk_upgrade_packages_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         force:
           default: false
           type: boolean
@@ -158854,6 +158935,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -159288,6 +159375,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -162829,6 +162922,11 @@ components:
     Kibana_HTTP_APIs_install_package_from_registry_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         allow_outdated_version:
           default: false
           description: When true, allow installing a version older than the latest available. Bypasses only the out-of-date version check.
@@ -163995,6 +164093,7 @@ components:
                     aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                     aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                     apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                    change_point_grid: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                     custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                     discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                     esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -164020,6 +164119,7 @@ components:
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                  - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                   - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -164285,6 +164385,122 @@ components:
         - grid
         - config
       title: APM Service map
+      type: object
+    Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid:
+      additionalProperties: false
+      properties:
+        config:
+          additionalProperties: false
+          description: Panel configuration stored inline
+          properties:
+            apply_dashboard_context:
+              default: true
+              description: When true, the panel uses the dashboard filters, query, and ES|QL variables. When false, it uses static_context.
+              type: boolean
+            description:
+              description: A short description of the panel.
+              type: string
+            esql:
+              description: The ES|QL query that detects the change points.
+              maxLength: 10000
+              type: string
+            hide_border:
+              description: When true, the panel border is hidden. Defaults to false.
+              type: boolean
+            hide_title:
+              description: When true, the panel title is hidden. Defaults to false.
+              type: boolean
+            static_context:
+              additionalProperties: false
+              description: Filters, query, and ES|QL variables captured from Discover. Used only when apply_dashboard_context is false.
+              type: object
+              properties:
+                esql_variables:
+                  description: ES|QL variable values captured from Discover.
+                  items:
+                    type: object
+                    properties:
+                      key:
+                        maxLength: 256
+                        type: string
+                      type:
+                        enum:
+                          - time_literal
+                          - fields
+                          - values
+                          - multi_values
+                          - functions
+                        type: string
+                      value:
+                        anyOf:
+                          - maxLength: 2048
+                            type: string
+                          - type: number
+                          - items:
+                              anyOf:
+                                - maxLength: 2048
+                                  type: string
+                                - type: number
+                            maxItems: 100
+                            type: array
+                    required:
+                      - key
+                      - value
+                      - type
+                  maxItems: 50
+                  type: array
+                filters:
+                  description: Filters captured from Discover.
+                  items:
+                    $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-filters-schema_asCodeFilterSchema'
+                  maxItems: 100
+                  type: array
+                query:
+                  $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-as-code-query'
+                  description: KQL or Lucene query captured from Discover.
+            time_range:
+              additionalProperties: false
+              description: Panel time range. When set, it overrides the dashboard time range.
+              type: object
+              properties:
+                from:
+                  description: The start of the time range. Accepts date math (for example, now-7d) or an ISO 8601 timestamp.
+                  maxLength: 128
+                  type: string
+                mode:
+                  description: Use absolute for fixed timestamps, or relative for date math that is re-evaluated at query time.
+                  enum:
+                    - absolute
+                    - relative
+                  type: string
+                to:
+                  description: The end of the time range. Accepts date math (for example, now) or an ISO 8601 timestamp.
+                  maxLength: 128
+                  type: string
+              required:
+                - from
+                - to
+            title:
+              description: The panel title.
+              type: string
+          required:
+            - esql
+          title: By value
+          type: object
+        grid:
+          $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-grid'
+        id:
+          description: The unique ID of the panel.
+          type: string
+        type:
+          enum:
+            - change_point_grid
+          type: string
+      required:
+        - type
+        - grid
+        - config
+      title: Change point charts
       type: object
     Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content:
       additionalProperties: false
@@ -166192,6 +166408,7 @@ components:
                 aiops_log_rate_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_log_rate_analysis'
                 aiops_pattern_analysis: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_pattern_analysis'
                 apm_service_map: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+                change_point_grid: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
                 custom_content: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
                 discover_session: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
                 esql_control: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-esql_control'
@@ -166217,6 +166434,7 @@ components:
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_charts'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-ml_anomaly_swimlane'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-apm_service_map'
+              - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-change_point_grid'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-aiops_change_point_chart'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-custom_content'
               - $ref: '#/components/schemas/Kibana_HTTP_APIs_kbn-dashboard-panel-type-discover_session'
@@ -168993,6 +169211,11 @@ components:
           description: Policy namespace. Defaults to the agent policy namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this managed integration. Set by Fleet, read-only.
+          maxLength: 256
+          type: string
+          x-state: Experimental
         package:
           $ref: '#/components/schemas/Kibana_HTTP_APIs_managed_integration_package'
         updated_at:
@@ -176477,6 +176700,12 @@ components:
           description: The package policy namespace. Leave blank to inherit the agent policy's namespace.
           maxLength: 100
           type: string
+        onboarding_deployment_id:
+          description: ID of the cloud onboarding instance that manages this package policy. Set by Fleet, read-only.
+          maxLength: 256
+          nullable: true
+          type: string
+          x-state: Experimental
         output_id:
           nullable: true
           type: string
@@ -183013,6 +183242,11 @@ components:
     Kibana_HTTP_APIs_upgrade_package_policies_request:
       additionalProperties: false
       properties:
+        acknowledge_breaking_changes:
+          default: false
+          description: When true, acknowledge the breaking changes listed in the package changelog for the versions being upgraded. Without it, an upgrade whose version range includes breaking changes is rejected. The `force` flag does not bypass this check.
+          type: boolean
+          x-state: Generally available
         packagePolicyIds:
           items:
             minLength: 0

@@ -33,12 +33,13 @@ export const TriggerRow = ({
     &:focus-within {
       background-color: ${euiTheme.colors.backgroundBaseInteractiveHover};
     }
+    /* Keep the button in the layout so revealing it on hover never reflows the row. */
     [data-remove-trigger] {
-      display: none;
+      visibility: hidden;
     }
     &:hover [data-remove-trigger],
     &:focus-within [data-remove-trigger] {
-      display: block;
+      visibility: visible;
     }
   `;
 
