@@ -91,7 +91,8 @@ export function CortexPageView({ pageId, canManage, onArchived }: CortexPageView
                   entity_type: page.entity_type,
                   slug: page.slug,
                   title: page.title,
-                  description: page.description ?? '',
+                  // Keep an absent description absent: sending '' would write an empty one.
+                  ...(page.description !== undefined ? { description: page.description } : {}),
                   content: page.content,
                   status: 'tentative',
                   version,
