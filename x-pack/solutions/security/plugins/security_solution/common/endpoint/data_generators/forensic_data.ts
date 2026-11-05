@@ -262,7 +262,7 @@ export async function seedForensicTimeline(
   /**
    * Maps a seeded host to a REAL Fleet-enrolled agent UUID. Required for any
    * environment where Osquery live queries must resolve `agent.id` from
-   * telemetry to an actually-enrolled agent (e.g. the BlackHat live demo) —
+   * telemetry to an actually-enrolled agent (e.g. a live demo environment) —
    * without this, the synthetic `eval-agent-forensic-*` id is written instead
    * and any live query dispatched against it hangs forever (no such agent).
    * Omit for eval-suite runs, where no live Osquery dispatch happens.

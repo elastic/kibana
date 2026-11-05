@@ -12,13 +12,13 @@ import {
 } from '../../../common/endpoint/data_generators/forensic_data';
 import { createEsClient } from '../common/stack_services';
 // eslint-disable-next-line @kbn/imports/no_boundary_crossing
-import { seedBlackhatDemoData, cleanupBlackhatDemoData, DEMO_HOSTS } from './demo_data';
+import { seedForensicDemoData, cleanupForensicDemoData, DEMO_HOSTS } from './demo_data';
 
 /**
  * Resolves each demo hostname to its REAL Fleet-enrolled agent UUID via the
  * Kibana Fleet API, so seeded telemetry's `agent.id` matches the agent that
  * will actually answer `osquery.run_live_query` dispatches — a fabricated
- * `blackhat-demo-*` id would seed cosmetically correct ES|QL rows but break
+ * `forensic-demo-*` id would seed cosmetically correct ES|QL rows but break
  * every live-query hop the forensic skill's mutex/hunt guidance depends on.
  */
 async function resolveAgentIds(
@@ -75,7 +75,7 @@ async function resolveAgentIds(
 }
 
 /**
- * Standalone seeder for the BlackHat 2026 demo project (deployed serverless
+ * Standalone seeder for the forensic demo project (deployed serverless
  * security project from PR #278636, NOT the local dev stack).
  *
  * The eval-suite's own `forensic_data.ts` kill chain (WKSTN-RECV01 →
@@ -86,7 +86,7 @@ async function resolveAgentIds(
  *
  * Usage:
  *   node --require ./src/setup_node_env \
- *     x-pack/solutions/security/plugins/security_solution/scripts/endpoint/blackhat_demo/seed_demo_data.ts \
+ *     x-pack/solutions/security/plugins/security_solution/scripts/endpoint/forensic_demo/seed_demo_data.ts \
  *     --node https://<deployed-project>.es.<region>.aws.elastic.cloud \
  *     --apiKey <base64 api key>
  *
@@ -121,8 +121,8 @@ run(
     });
 
     if (cleanup) {
-      log.info('Cleaning up prior blackhat-demo-* seed data...');
-      await cleanupBlackhatDemoData({ esClient });
+      log.info('Cleaning up prior forensic-demo-* seed data...');
+      await cleanupForensicDemoData({ esClient });
     }
 
     let agentIdOverrides: Record<string, string> = {};
@@ -156,12 +156,12 @@ run(
     log.info('Seeding forensic kill-chain timeline (WKSTN-RECV01 -> SRV-DC01)...');
     await seedForensicTimeline({ esClient }, log, undefined, agentIdOverrides);
 
-    await seedBlackhatDemoData({ esClient }, log, undefined, agentIdOverrides);
-    log.success('BlackHat demo data seeded.');
+    await seedForensicDemoData({ esClient }, log, undefined, agentIdOverrides);
+    log.success('Forensic demo data seeded.');
   },
   {
     description:
-      'Seeds the WIN-FIN-03 lateral-infection events + ransomware alert into a deployed BlackHat demo project',
+      'Seeds the WIN-FIN-03 lateral-infection events + ransomware alert into a deployed forensic demo project',
     flags: {
       string: ['node', 'kibana', 'apiKey', 'username', 'password'],
       boolean: ['cleanup'],
@@ -171,7 +171,7 @@ run(
         --apiKey      API key for auth (preferred over username/password)
         --username    Kibana/ES username (default: elastic)
         --password    Kibana/ES password
-        --cleanup     Delete any previously-seeded blackhat-demo-* docs before reseeding
+        --cleanup     Delete any previously-seeded forensic-demo-* docs before reseeding
       `,
     },
   }

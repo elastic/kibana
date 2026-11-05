@@ -9,7 +9,7 @@ import type { Client } from '@elastic/elasticsearch';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 /**
- * BlackHat 2026 demo seed data — extends the eval-suite forensic kill chain
+ * Forensic demo seed data — extends the eval-suite forensic kill chain
  * (`@kbn/evals-suite-endpoint`'s `forensic_data.ts`) with the two pieces that
  * suite doesn't need but the live demo does:
  *
@@ -24,17 +24,17 @@ import type { ToolingLog } from '@kbn/tooling-log';
  *
  * Run standalone against the DEPLOYED PR project (not the eval harness):
  *
- *   node --require ./src/setup_node_env x-pack/solutions/security/plugins/security_solution/scripts/endpoint/blackhat_demo/seed_demo_data.ts \
+ *   node --require ./src/setup_node_env x-pack/solutions/security/plugins/security_solution/scripts/endpoint/forensic_demo/seed_demo_data.ts \
  *     --kibana https://<deployed-project>.kb.<region>.aws.elastic.cloud \
  *     --node https://<deployed-project>.es.<region>.aws.elastic.cloud \
  *     --username elastic --password <pw>
  *
  * Idempotent: every document carries the shared `eval-agent-` agent-id prefix
- * (or, for the live demo, `blackhat-demo-` — see AGENT_ID_PREFIX) so a rerun
- * after `cleanupBlackhatDemoData()` produces a clean, repeatable state.
+ * (or, for the live demo, `forensic-demo-` — see AGENT_ID_PREFIX) so a rerun
+ * after `cleanupForensicDemoData()` produces a clean, repeatable state.
  */
 
-export const AGENT_ID_PREFIX = 'blackhat-demo-';
+export const AGENT_ID_PREFIX = 'forensic-demo-';
 
 export const DEMO_HOSTS = {
   patientZero: 'WKSTN-RECV01',
@@ -154,7 +154,7 @@ function buildRansomwareAlert(baseTime: Date, agentIdOverrides: AgentIdOverrides
     '@timestamp': timestamp,
     agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
     elastic: { agent: { id: agentId } },
-    labels: { seed_source: 'blackhat_demo' },
+    labels: { seed_source: 'forensic_demo' },
     host: { name: DEMO_HOSTS.patientZero, hostname: DEMO_HOSTS.patientZero, os: WORKSTATION_OS },
     data_stream: { type: 'logs', dataset: 'endpoint.alerts', namespace: 'default' },
     event: {
@@ -172,7 +172,7 @@ function buildRansomwareAlert(baseTime: Date, agentIdOverrides: AgentIdOverrides
       parent: { name: 'OUTLOOK.EXE', pid: 3120 },
       hash: { sha256: SHARED_HASH },
     },
-    rule: { name: 'Ransomware Behavior Detected', id: 'blackhat-demo-ransomware-rule' },
+    rule: { name: 'Ransomware Behavior Detected', id: 'forensic-demo-ransomware-rule' },
     message:
       'Elastic Defend: ransomware-pattern behavior detected on WKSTN-RECV01 (encoded PowerShell → payload drop → C2 beacon).',
   };
@@ -180,7 +180,7 @@ function buildRansomwareAlert(baseTime: Date, agentIdOverrides: AgentIdOverrides
 
 type AgentIdOverrides = Partial<Record<keyof typeof AGENT_IDS, string>>;
 
-export async function seedBlackhatDemoData(
+export async function seedForensicDemoData(
   { esClient }: { esClient: Client },
   log: ToolingLog,
   baseTime: Date = new Date(Date.now() - 3 * 60 * 60 * 1000),
@@ -203,7 +203,7 @@ export async function seedBlackhatDemoData(
         '@timestamp': timestamp,
         agent: { id: agentId, type: 'endpoint', version: '9.5.0-SNAPSHOT' },
         elastic: { agent: { id: agentId } },
-        labels: { seed_source: 'blackhat_demo' },
+        labels: { seed_source: 'forensic_demo' },
         host: { name: event.host, hostname: event.host, os: os(event.host) },
         data_stream: dataset ? { type: 'logs', dataset, namespace: 'default' } : undefined,
         ...event.document,
@@ -227,7 +227,7 @@ export async function seedBlackhatDemoData(
   if (response.errors) {
     const firstError = response.items.find((item) => item.create?.error)?.create?.error;
     throw new Error(
-      `seedBlackhatDemoData: bulk index failed: ${JSON.stringify(firstError ?? 'unknown error')}`
+      `seedForensicDemoData: bulk index failed: ${JSON.stringify(firstError ?? 'unknown error')}`
     );
   }
 
@@ -236,11 +236,11 @@ export async function seedBlackhatDemoData(
   );
 }
 
-export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }): Promise<void> {
+export async function cleanupForensicDemoData({ esClient }: { esClient: Client }): Promise<void> {
   const indices = [PROCESS_INDEX, NETWORK_INDEX, REGISTRY_INDEX, FILE_INDEX, ALERTS_INDEX];
 
   // Match on `host.hostname` / `host.name` (stable across reseeds), not just
-  // the legacy `blackhat-demo-*` placeholder agent-id prefix. Once agent-id
+  // the legacy `forensic-demo-*` placeholder agent-id prefix. Once agent-id
   // overrides resolve to REAL Fleet agent ids (see resolveAgentIds in
   // seed_demo_data.ts), those ids change every time the demo VMs are
   // re-enrolled/upgraded — a prefix-only cleanup silently stopped matching
@@ -255,7 +255,7 @@ export async function cleanupBlackhatDemoData({ esClient }: { esClient: Client }
   const deleteQuery: Record<string, unknown> = {
     bool: {
       should: [
-        { term: { 'labels.seed_source': 'blackhat_demo' } },
+        { term: { 'labels.seed_source': 'forensic_demo' } },
         { prefix: { 'agent.id': AGENT_ID_PREFIX } },
       ],
     },
