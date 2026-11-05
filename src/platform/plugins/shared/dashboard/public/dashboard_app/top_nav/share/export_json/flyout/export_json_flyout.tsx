@@ -16,7 +16,21 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { downloadFileAs } from '@kbn/share-plugin/public';
 import { KbnInfoCallout } from '@kbn/ui-callout';
 
+import { DASHBOARD_API_PATH } from '../../../../../../common';
 import type { DashboardSanitizeResponseBody } from '../../../../../../server';
+import { coreServices, shareService } from '../../../../../services/kibana_services';
+
+/** Builds a Console request that creates a new dashboard from the exported panel or panels. */
+const getCreateDashboardRequest = (jsonValue: string): string => {
+  const exported = JSON.parse(jsonValue);
+  const body = {
+    title: i18n.translate('dashboard.exportJson.openInConsoleDashboardTitle', {
+      defaultMessage: 'New dashboard',
+    }),
+    panels: Array.isArray(exported) ? exported : [exported],
+  };
+  return `POST kbn:${DASHBOARD_API_PATH}\n${JSON.stringify(body, null, 2)}`;
+};
 
 export const DashboardPanelExportJsonFlyout = <State extends object, PreparedState extends object>({
   title,
@@ -141,6 +155,11 @@ export const DashboardPanelExportJsonFlyout = <State extends object, PreparedSta
           )}
         </>
       }
+      openInConsole={{
+        canShow: Boolean(coreServices.application?.capabilities?.dev_tools?.show),
+        getRequest: getCreateDashboardRequest,
+        useUrl: shareService?.url.locators.useUrl,
+      }}
       prepareExportJson={prepareExportJson}
       titleId={titleId}
     />
