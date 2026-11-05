@@ -17,7 +17,7 @@ import { actionsMarkdownRenderer } from './actions_markdown';
 
 const buttonSchema = z
   .object({
-    label: plainText(SLACK_LIMITS.buttonTextChars).describe('What the link opens, in a few words.'),
+    label: plainText().describe('What the link opens, in a few words.'),
     url: navigationHref({ max: SLACK_LIMITS.urlChars }),
     primary: z.boolean().optional().describe('Marks the one action the reader should take.'),
   })

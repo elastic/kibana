@@ -243,30 +243,39 @@ describe('buildComposition', () => {
     }
   });
 
-  it('leaves out attachments whose heading is too long for its header or context', async () => {
-    const longTitle: ToSurfaceComposition = () => ({
+  it('keeps a long title and subtitle whole, since the pack fits them to each surface', async () => {
+    const toSurfaceComposition: ToSurfaceComposition = () => ({
       type: 'view',
-      title: 't'.repeat(201),
+      title: 't'.repeat(1000),
+      subtitle: 's'.repeat(1000),
       body: [{ type: 'markdown', text: 'Content' }],
     });
 
-    const longSubtitle: ToSurfaceComposition = () => ({
+    const composition = await compose('<render_attachment id="a1" />', { toSurfaceComposition });
+
+    expect(composition.body.slice(0, 2)).toEqual([
+      { type: 'header', text: 't'.repeat(1000), level: 2 },
+      { type: 'context', items: [{ text: 's'.repeat(1000) }] },
+    ]);
+    expect(runtime.validate(composition).valid).toBe(true);
+  });
+
+  it('leaves out attachments whose heading is invalid for its header or context', async () => {
+    const toSurfaceComposition = (() => ({
       type: 'view',
-      subtitle: 's'.repeat(501),
+      title: 42,
       body: [{ type: 'markdown', text: 'Content' }],
+    })) as unknown as ToSurfaceComposition;
+
+    const composition = await compose('Here: <render_attachment id="a1" /> Done', {
+      toSurfaceComposition,
     });
 
-    for (const toSurfaceComposition of [longTitle, longSubtitle]) {
-      const composition = await compose('Here: <render_attachment id="a1" /> Done', {
-        toSurfaceComposition,
-      });
-
-      expect(composition.body).toEqual([
-        { type: 'markdown', text: 'Here:' },
-        { type: 'markdown', text: 'Done' },
-      ]);
-      expect(runtime.validate(composition).valid).toBe(true);
-    }
+    expect(composition.body).toEqual([
+      { type: 'markdown', text: 'Here:' },
+      { type: 'markdown', text: 'Done' },
+    ]);
+    expect(runtime.validate(composition).valid).toBe(true);
   });
 
   it('passes the attachment at the rendered version, and the request and space', async () => {

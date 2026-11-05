@@ -58,9 +58,7 @@ const linkSchema = z
   .object({
     type: z.literal('link'),
     label: fromTextChildren(
-      plainText(SLACK_LIMITS.buttonTextChars).describe(
-        'What the link opens, in a few words, such as "Open in Discover".'
-      )
+      plainText().describe('What the link opens, in a few words, such as "Open in Discover".')
     ),
     app: z
       .string()
