@@ -437,6 +437,12 @@ export const EDIT_PIPELINE_FLYOUT = Object.freeze({
       defaultMessage: 'The ingest pipeline can be edited when the data stream is ready for review.',
     }
   ),
+  readOnlyNotice: i18n.translate(
+    'xpack.automaticImport.dataStreams.editPipelineFlyout.readOnlyNotice',
+    {
+      defaultMessage: 'You have view-only access, so the ingest pipeline cannot be edited.',
+    }
+  ),
   closeConfirmTitle: i18n.translate(
     'xpack.automaticImport.dataStreams.editPipelineFlyout.closeConfirmTitle',
     {

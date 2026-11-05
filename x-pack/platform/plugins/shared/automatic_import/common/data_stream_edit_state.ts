@@ -7,7 +7,7 @@
 
 import type { DataStreamResponse, IntegrationResponse } from './model/common_attributes.gen';
 
-export type DataStreamEditState = 'loading' | 'editable' | 'error' | 'reanalyzing';
+export type DataStreamEditState = 'loading' | 'editable' | 'error' | 'reanalyzing' | 'read_only';
 
 export const getDataStreamEditState = ({
   integration,

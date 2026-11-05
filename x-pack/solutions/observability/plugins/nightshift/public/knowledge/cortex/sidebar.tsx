@@ -9,14 +9,12 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiButtonGroup,
-  EuiButtonIcon,
   EuiFieldSearch,
   EuiFlexGroup,
   EuiFlexItem,
   EuiListGroup,
   EuiListGroupItem,
   EuiText,
-  EuiToolTip,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -43,13 +41,7 @@ interface CortexSidebarProps {
   onStatusFilterChange: (value: CortexStatusFilter) => void;
   selection: CortexSidebarSelection;
   onSelect: (selection: CortexSidebarSelection) => void;
-  /** Omitted for users who cannot write Cortex pages. */
-  onCreatePage?: () => void;
 }
-
-const NEW_PAGE_LABEL = i18n.translate('xpack.nightshift.knowledge.cortex.newPageButtonLabel', {
-  defaultMessage: 'New page',
-});
 
 const matchesSearch = (page: CortexPageSummary, query: string): boolean => {
   if (query.length === 0) {
@@ -67,7 +59,6 @@ export function CortexSidebar({
   onStatusFilterChange,
   selection,
   onSelect,
-  onCreatePage,
 }: CortexSidebarProps) {
   const statusFilters: CortexStatusFilter[] = pages.some((page) => page.status === 'archived')
     ? ['all', ...CORTEX_PAGE_STATUSES]
@@ -107,36 +98,19 @@ export function CortexSidebar({
       `}
     >
       <EuiFlexItem grow={false}>
-        <EuiFlexGroup gutterSize="s" alignItems="center" responsive={false}>
-          <EuiFlexItem>
-            <EuiFieldSearch
-              compressed
-              incremental
-              value={searchQuery}
-              onChange={(event) => onSearchChange(event.target.value)}
-              placeholder={i18n.translate('xpack.nightshift.knowledge.cortex.searchPlaceholder', {
-                defaultMessage: 'Search pages',
-              })}
-              aria-label={i18n.translate('xpack.nightshift.knowledge.cortex.searchAriaLabel', {
-                defaultMessage: 'Search Cortex pages',
-              })}
-              data-test-subj="nightshiftCortexSearch"
-            />
-          </EuiFlexItem>
-          {onCreatePage && (
-            <EuiFlexItem grow={false}>
-              <EuiToolTip content={NEW_PAGE_LABEL} disableScreenReaderOutput>
-                <EuiButtonIcon
-                  display="base"
-                  iconType="plus"
-                  onClick={onCreatePage}
-                  aria-label={NEW_PAGE_LABEL}
-                  data-test-subj="nightshiftCortexNewPage"
-                />
-              </EuiToolTip>
-            </EuiFlexItem>
-          )}
-        </EuiFlexGroup>
+        <EuiFieldSearch
+          compressed
+          incremental
+          value={searchQuery}
+          onChange={(event) => onSearchChange(event.target.value)}
+          placeholder={i18n.translate('xpack.nightshift.knowledge.cortex.searchPlaceholder', {
+            defaultMessage: 'Search pages',
+          })}
+          aria-label={i18n.translate('xpack.nightshift.knowledge.cortex.searchAriaLabel', {
+            defaultMessage: 'Search Cortex pages',
+          })}
+          data-test-subj="nightshiftCortexSearch"
+        />
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
         <EuiButtonGroup

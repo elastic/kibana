@@ -88,6 +88,10 @@ const getEditStateNotice = (editState: DataStreamEditState): string => {
       return i18n.translate('xpack.automaticImport.mappingEditor.loadingEditStateNotice', {
         defaultMessage: 'Checking whether field types can be edited…',
       });
+    case 'read_only':
+      return i18n.translate('xpack.automaticImport.mappingEditor.readOnlyNotice', {
+        defaultMessage: 'You have view-only access, so field types cannot be changed.',
+      });
     default:
       return i18n.translate('xpack.automaticImport.mappingEditor.editStateErrorNotice', {
         defaultMessage:

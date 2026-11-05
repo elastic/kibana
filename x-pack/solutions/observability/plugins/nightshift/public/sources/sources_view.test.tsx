@@ -31,6 +31,7 @@ const createSource = (id: string): NightshiftSource => ({
 
 let mockSources: NightshiftSource[];
 let mockCanManage = true;
+let mockCanConfigure = true;
 let mockIsSourcesLoading = false;
 let mockIsSourcesFetching = false;
 let mockIsSourcesError = false;
@@ -39,7 +40,11 @@ const mockToasts = { addWarning: jest.fn() };
 jest.mock('../hooks/use_kibana', () => ({
   useKibana: () => ({
     services: {
-      application: { capabilities: { nightshift: { show: true, manage: mockCanManage } } },
+      application: {
+        capabilities: {
+          nightshift: { show: true, manage: mockCanManage, configure: mockCanConfigure },
+        },
+      },
       notifications: { toasts: mockToasts },
     },
   }),
@@ -205,6 +210,7 @@ describe('SourcesView routes', () => {
   beforeEach(() => {
     mockSources = [createSource('source-1'), createSource('source-2')];
     mockCanManage = true;
+    mockCanConfigure = true;
     mockIsSourcesLoading = false;
     mockIsSourcesFetching = false;
     mockIsSourcesError = false;
@@ -227,6 +233,21 @@ describe('SourcesView routes', () => {
     expect(history.location.search).toBe('?rangeFrom=now-24h&rangeTo=now');
     expect(screen.queryByTestId('sourceFlyout')).not.toBeInTheDocument();
     expect(screen.queryByRole('button', { name: 'Create source' })).not.toBeInTheDocument();
+  });
+
+  it('treats a user with manage but without configure as read-only', async () => {
+    mockCanConfigure = false;
+    const { history } = renderSources('/sources/new');
+
+    await waitFor(() => expect(history.location.pathname).toBe('/sources'));
+    expect(screen.queryByRole('button', { name: 'Create source' })).not.toBeInTheDocument();
+  });
+
+  it('shows an existing source as read-only to a user with manage but without configure', async () => {
+    mockCanConfigure = false;
+    renderSources('/sources/source-2');
+
+    expect(await screen.findByTestId('sourceFlyout')).toHaveTextContent('Read only');
   });
 
   it('opens a source deep link and preserves the query string when closing', async () => {

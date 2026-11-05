@@ -125,6 +125,11 @@ jest.mock('../../../../common', () => ({
 }));
 
 const mockSelectPipelineTab = jest.fn();
+const mockUseAuthorization = jest.fn();
+jest.mock('../../../../common/hooks/use_authorization', () => ({
+  useAuthorization: () => mockUseAuthorization(),
+}));
+
 const mockUIState = {
   selectedPipelineTab: 'table' as 'table' | 'pipeline',
   selectPipelineTab: mockSelectPipelineTab,
@@ -221,6 +226,7 @@ describe('EditPipelineFlyout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+    mockUseAuthorization.mockReturnValue({ canEditIntegration: true });
     mockApplyEdits.mockImplementation(async ({ dryRun }: { dryRun: boolean }) => ({
       status: dryRun ? 'preview' : 'saved',
       dropped_field_types: [],
@@ -313,6 +319,35 @@ describe('EditPipelineFlyout', () => {
 
       expect(screen.getByText('Error loading data')).toBeInTheDocument();
       expect(screen.getByText('Test error')).toBeInTheDocument();
+    });
+  });
+
+  describe('without the edit privilege', () => {
+    beforeEach(() => {
+      mockUseAuthorization.mockReturnValue({ canEditIntegration: false });
+    });
+
+    it('shows the pipeline read-only, without Save', () => {
+      mockUIState.selectedPipelineTab = 'pipeline';
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.queryByTestId('code-editor')).not.toBeInTheDocument();
+      expect(screen.getByTestId('editPipelineFlyoutReadOnlyPipeline')).toBeInTheDocument();
+      expect(screen.getByTestId('editPipelineFlyoutReadOnlyNotice')).toHaveTextContent(
+        'view-only access'
+      );
+      expect(screen.queryByTestId('editPipelineFlyoutSaveButton')).not.toBeInTheDocument();
+    });
+
+    it('shows the results table without type pickers', () => {
+      render(<EditPipelineFlyout {...defaultProps} />);
+
+      expect(screen.getByText('Test Data Stream')).toBeInTheDocument();
+      expect(screen.queryByTestId('mappingEditorEditType-test.number')).not.toBeInTheDocument();
+      expect(screen.getByTestId('mappingEditorReadOnlyNotice')).toHaveTextContent(
+        'view-only access'
+      );
+      expect(screen.queryByTestId('mappingEditorApplyButton')).not.toBeInTheDocument();
     });
   });
 

@@ -10,6 +10,7 @@ import { KbnInfoCallout } from '@kbn/ui-callout';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { DataStreamResponse, DataStreamEditState } from '../../../../../common';
 import { useGetDataStreamResults } from '../../../../common';
+import { useAuthorization } from '../../../../common/hooks/use_authorization';
 import { useUIState } from '../../contexts';
 import { formatServerError, useMappingEditor } from './mapping_editor';
 import {
@@ -49,8 +50,10 @@ export const EditPipelineFlyout = ({
   integrationId,
   dataStream,
   onClose,
-  editState,
+  editState: dataStreamEditState,
 }: EditPipelineFlyoutProps) => {
+  const { canEditIntegration } = useAuthorization();
+  const editState: DataStreamEditState = canEditIntegration ? dataStreamEditState : 'read_only';
   const isEditable = editState === 'editable';
   const [isCloseConfirmVisible, setIsCloseConfirmVisible] = useState(false);
   const { selectedPipelineTab, selectPipelineTab } = useUIState();
@@ -141,7 +144,11 @@ export const EditPipelineFlyout = ({
   const pipelineNotice = isEditable ? undefined : (
     <KbnInfoCallout
       size="s"
-      title={i18n.EDIT_PIPELINE_FLYOUT.notEditableNotice}
+      title={
+        editState === 'read_only'
+          ? i18n.EDIT_PIPELINE_FLYOUT.readOnlyNotice
+          : i18n.EDIT_PIPELINE_FLYOUT.notEditableNotice
+      }
       data-test-subj="editPipelineFlyoutReadOnlyNotice"
     />
   );
