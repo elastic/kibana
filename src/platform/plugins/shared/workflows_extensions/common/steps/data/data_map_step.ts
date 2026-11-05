@@ -9,14 +9,17 @@
 
 import { i18n } from '@kbn/i18n';
 import { StepCategory } from '@kbn/workflows';
-import { z } from '@kbn/zod/v4';
+import { lazySchema, z } from '@kbn/zod/v4';
 import type { CommonStepDefinition } from '../../step_registry/types';
 
 export const DataMapStepTypeId = 'data.map';
 
-export const ConfigSchema = z.object({
-  items: z.unknown().meta({ advanced: false }),
-});
+export const ConfigSchema = lazySchema(() =>
+  z.object({
+    // Usually a whole reference to earlier data (`${{ steps.x.output }}`); optional in the schema.
+    items: z.unknown().meta({ advanced: false, preferData: true }),
+  })
+);
 
 /** Reserved key that triggers array iteration in a nested field spec. */
 export const MAP_DIRECTIVE = '$map';
@@ -89,7 +92,12 @@ const FieldsNodeSchema: z.ZodType<FieldsNode> = z.lazy(() =>
   ])
 );
 
-export const InputSchema = z.object({ fields: z.record(z.string(), FieldsNodeSchema) });
+// `keyValue`: the form edits this map as name/value rows (nested values stay JSON).
+export const InputSchema = lazySchema(() =>
+  z.object({
+    fields: z.record(z.string(), FieldsNodeSchema).meta({ keyValue: true }),
+  })
+);
 
 export const OutputSchema = z.union([
   z.array(z.record(z.string(), z.unknown())),

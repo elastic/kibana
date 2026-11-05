@@ -74,7 +74,11 @@ export interface StepFormField {
   readonly defaultValue?: unknown;
   /** `list` fields: true when one value alone is valid too (`string | string[]`). */
   readonly acceptsSingle?: boolean;
-  /** `list` fields whose items aren't typed text: they usually come from earlier data. */
+  /**
+   * The field usually holds a reference to earlier data, so it opens on Data when empty:
+   * `list` fields whose items aren't typed text, or any field whose schema says
+   * `.meta({ preferData: true })`.
+   */
   readonly preferData?: boolean;
   /** `variants` fields: the ways the value can be written. */
   readonly variants?: readonly FormVariant[];
@@ -374,9 +378,13 @@ const resolveKind = (
       return { kind: 'text' };
     }
   }
-  // Maps of scalars (headers, labels…) are edited as name/value rows. Maps of anything else are
-  // arbitrary documents and stay JSON, as do objects, arrays and mixed unions.
-  if (inner instanceof z.ZodRecord && isScalarValueSchema(inner.valueType as z.ZodType)) {
+  // Maps of scalars (headers, labels…) are edited as name/value rows, and so is a map whose schema
+  // opts in with `.meta({ keyValue: true })` (its non-text values stay JSON cells). Maps of
+  // anything else are arbitrary documents and stay JSON, as do objects, arrays and mixed unions.
+  if (
+    inner instanceof z.ZodRecord &&
+    (isScalarValueSchema(inner.valueType as z.ZodType) || readFieldMeta(schema)?.keyValue === true)
+  ) {
     return { kind: 'key-value' };
   }
   return { kind: 'code', language: 'json' };
@@ -613,6 +621,8 @@ const fieldsFromObject = (
           }
         : resolveKind(stepType, key, fieldSchema);
       const advanced = resolveAdvancedHint(stepType, key, fieldSchema);
+      // A schema can also say a field usually holds a reference: `.meta({ preferData: true })`.
+      const startsOnData = preferData || readFieldMeta(fieldSchema)?.preferData === true;
       return {
         key,
         path,
@@ -625,7 +635,7 @@ const fieldsFromObject = (
         language,
         options,
         ...(acceptsSingle !== undefined ? { acceptsSingle } : {}),
-        ...(preferData ? { preferData } : {}),
+        ...(startsOnData ? { preferData: true } : {}),
         defaultValue: getDefault(fieldSchema),
         ...(fixedOnly ? { templatable: false as const } : {}),
       };

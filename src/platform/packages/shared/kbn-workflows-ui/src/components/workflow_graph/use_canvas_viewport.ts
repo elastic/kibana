@@ -87,6 +87,7 @@ export const useCanvasViewport = ({
     const node = instance.getNode(panelFocusNodeId);
     if (!node) return;
     const zoom = instance.getZoom();
+    console.debug('[vp] PANEL-FOCUS setCenter zoom', zoom, 'inset', selectedNodePanelInset, 'node', panelFocusNodeId);
     const w = node.measured?.width ?? node.width ?? 200;
     const h = node.measured?.height ?? node.height ?? 80;
     const centerX = node.position.x + w / 2;
@@ -130,6 +131,7 @@ export const useCanvasViewport = ({
       const wrapperHeight = measuredHeight || wrapperRef.current?.clientHeight || 0;
       const homeBounds = getHomeFrameBounds(nodes, graphBounds);
       const target = getResetViewTarget(direction, homeBounds, wrapperWidth, wrapperHeight);
+      console.debug('[vp] applyHomeViewport', JSON.stringify({ duration, wrapperWidth, wrapperHeight }));
       instance.setCenter(target.x, target.y, { zoom: INITIAL_ZOOM, duration });
     },
     [nodes, graphBounds, direction, measuredWidth, measuredHeight]
@@ -143,6 +145,7 @@ export const useCanvasViewport = ({
     (instance: ReactFlowInstance, duration: number) => {
       if (nodes.length === 0) return;
       const homeBounds = getHomeFrameBounds(nodes, graphBounds);
+      console.debug('[vp] applyCenteredViewport', duration);
       instance.setCenter(homeBounds.centerX, homeBounds.centerY, {
         zoom: INITIAL_ZOOM,
         duration,
@@ -183,6 +186,7 @@ export const useCanvasViewport = ({
   const handleInit = useCallback(
     (instance: ReactFlowInstance) => {
       flowInstanceRef.current = instance;
+      console.debug('[vp] handleInit', JSON.stringify({ fitViewProp, hasDefaultViewport: Boolean(defaultViewport) }));
 
       // When fitView is declarative (fitViewProp=true), ReactFlow handles the
       // viewport positioning internally before firing onInit. Just signal ready.
@@ -290,6 +294,7 @@ export const useCanvasViewport = ({
   // Perform the one-time initial centering when the page loads with structure
   // already present. Empty → first structure is handled above.
   useEffect(() => {
+    console.debug('[vp] initial effect run', JSON.stringify({ homeAfterFirst: homeAfterFirstStructureRef.current, centered: hasCenteredInitialViewRef.current, instanceReady, nodes: nodes.length, measuredWidth, measuredHeight, nodesInitialized }));
     if (homeAfterFirstStructureRef.current) {
       return;
     }
@@ -304,6 +309,7 @@ export const useCanvasViewport = ({
       return;
     }
 
+    console.debug('[vp] INITIAL-CENTERING fires');
     hasCenteredInitialViewRef.current = true;
     hadWorkflowStructureRef.current = hasWorkflowStructure;
     applyHomeViewport(instance, 0);

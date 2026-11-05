@@ -1579,6 +1579,84 @@ with:
     });
   });
 
+  describe('Map Collection', () => {
+    const mapConnectors: ConnectorContractUnion[] = [
+      {
+        type: 'data.map',
+        hasConnectorId: false,
+        configSchema: z.object({ items: z.unknown().meta({ advanced: false, preferData: true }) }),
+        paramsSchema: z.object({
+          fields: z
+            .record(z.string(), z.union([z.string(), z.object({ a: z.string() })]))
+            .meta({ keyValue: true }),
+        }),
+        outputSchema: z.unknown(),
+        summary: 'Map Collection',
+        description: null,
+      } as unknown as ConnectorContractUnion,
+    ];
+    const renderMapper = (fragment: string) =>
+      renderPanel({ stepType: 'data.map', connectors: mapConnectors, initialFragment: fragment });
+    const lastFragment = (spy: jest.Mock) => spy.mock.calls[spy.mock.calls.length - 1][0] as string;
+
+    it('shows Fields as name/value rows, with a record value left as JSON', () => {
+      renderMapper(
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: "{{ item.id }}"\n    owner:\n      a: x\n'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-with.fields-key-0')).toHaveValue('id');
+      expect(screen.getByTestId('workflowStepConfigField-with.fields-key-1')).toHaveValue('owner');
+      expect(screen.getByTestId('workflowStepConfigField-with.fields-value-1')).toHaveAttribute(
+        'data-language',
+        'json'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-with.fields-add')).toHaveTextContent(
+        'Add field'
+      );
+    });
+
+    it('opens Items on earlier data when it is empty, and offers Fixed too', () => {
+      renderMapper('name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n');
+      expect(screen.getByTestId('workflowStepConfigField-items-pick')).toBeInTheDocument();
+      expect(screen.getByTestId('workflowStepConfigField-items-source-fixed')).toBeInTheDocument();
+    });
+
+    it('does not mark Items as required', () => {
+      renderMapper('name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n');
+      expect(screen.queryByText('Items is required')).not.toBeInTheDocument();
+    });
+
+    it('writes a whole reference as a value, and goes back to a JSON editor on Fixed', () => {
+      const { onFragmentChange } = renderMapper(
+        'name: mapper\ntype: data.map\nitems: ""\nwith:\n  fields:\n    id: x\n'
+      );
+      fireEvent.focusIn(screen.getByTestId('workflowStepConfigField-items-pick'));
+      act(() => {
+        insertIntoActiveDataReferenceTarget('{{ steps.fetch.output.hits }}');
+      });
+      expect(lastFragment(onFragmentChange)).toMatch(
+        /items: ["']?\$\{\{ steps\.fetch\.output\.hits \}\}["']?/
+      );
+
+      fireEvent.click(screen.getByTestId('workflowStepConfigField-items-source-fixed'));
+      expect(lastFragment(onFragmentChange)).not.toMatch(/items/);
+      expect(screen.getByTestId('workflowStepConfigField-items')).toHaveAttribute(
+        'data-language',
+        'json'
+      );
+    });
+
+    it('keeps a literal list of items in the JSON editor, with the switch to Data available', () => {
+      renderMapper(
+        'name: mapper\ntype: data.map\nitems:\n  - id: 1\nwith:\n  fields:\n    id: x\n'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-items')).toHaveAttribute(
+        'data-language',
+        'json'
+      );
+      expect(screen.getByTestId('workflowStepConfigField-items-source-data')).toBeInTheDocument();
+    });
+  });
+
   describe('choosing how to write a value', () => {
     const loop = (extra: string) =>
       renderPanel({

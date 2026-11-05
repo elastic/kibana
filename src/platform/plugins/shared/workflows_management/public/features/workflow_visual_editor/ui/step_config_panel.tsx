@@ -1493,9 +1493,15 @@ function StepFieldRow({
   };
   // A list whose items aren't text (objects, numbers) stays in the JSON editor, as before.
   const listIsTags = field.kind === 'list' && isTagValue(value);
+  // A JSON field takes Fixed | Data only when its schema says it usually holds a reference.
+  const codeTakesData = field.kind === 'code' && field.preferData === true;
   const hasSourceToggle =
     !fixedOnly &&
-    (field.kind === 'boolean' || field.kind === 'number' || field.kind === 'select' || listIsTags);
+    (field.kind === 'boolean' ||
+      field.kind === 'number' ||
+      field.kind === 'select' ||
+      listIsTags ||
+      codeTakesData);
   const sourceToggle = hasSourceToggle ? (
     <ValueSourceToggle
       source={source}
@@ -1819,19 +1825,32 @@ function StepFieldRow({
     case 'code':
       return wrapRow(
         <StepValidatedFormRow {...rowProps}>
-          <CodeField
-            field={codeField}
-            value={value}
-            catalog={referenceCatalog}
-            onChange={onChange}
-            testSubj={testSubj}
-            isInvalid={isInvalid}
-            onBlur={accuseIfInvalid}
-            onDraftErrorChange={setDraftError}
-            // TODO(slice7): ES|QL keeps its specialized editor — no expand here.
-            onExpand={field.language === 'esql' ? undefined : onExpand}
-            fixedOnly={fixedOnly}
-          />
+          {codeTakesData && source === 'data' ? (
+            <ReferenceValueBox
+              catalog={referenceCatalog}
+              value={value}
+              form={referenceForm}
+              onChange={handleDataChange}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              ariaLabel={field.label}
+              data-test-subj={testSubj}
+            />
+          ) : (
+            <CodeField
+              field={codeField}
+              value={value}
+              catalog={referenceCatalog}
+              onChange={onChange}
+              testSubj={testSubj}
+              isInvalid={isInvalid}
+              onBlur={accuseIfInvalid}
+              onDraftErrorChange={setDraftError}
+              // TODO(slice7): ES|QL keeps its specialized editor — no expand here.
+              onExpand={field.language === 'esql' ? undefined : onExpand}
+              fixedOnly={fixedOnly}
+            />
+          )}
         </StepValidatedFormRow>
       );
     case 'switch-cases': {

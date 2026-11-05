@@ -109,6 +109,48 @@ describe('step_form_schema', () => {
       expect(kindOf('nested')).toBe('code');
     });
 
+    it('edits a map as rows when its schema opts in, even if its values are not scalars', () => {
+      const nestedValue = z.union([z.string(), z.object({ a: z.string() })]);
+      const mapConnectors = [
+        {
+          type: 'mapper',
+          hasConnectorId: false,
+          paramsSchema: z.object({
+            fields: z.record(z.string(), nestedValue).meta({ keyValue: true }),
+            plain: z.record(z.string(), nestedValue),
+          }),
+          outputSchema: z.unknown(),
+          summary: null,
+          description: null,
+        } as unknown as ConnectorContractUnion,
+      ];
+      const kindOf = (key: string) =>
+        getStepFormSchema('mapper', mapConnectors)?.fields.find((f) => f.key === key)?.kind;
+      expect(kindOf('fields')).toBe('key-value');
+      expect(kindOf('plain')).toBe('code');
+    });
+
+    it('starts a field on earlier data when its schema says it usually holds a reference', () => {
+      const connector = {
+        type: 'mapper',
+        hasConnectorId: false,
+        configSchema: z.object({
+          items: z.unknown().meta({ advanced: false, preferData: true }),
+          other: z.unknown(),
+        }),
+        paramsSchema: z.object({}),
+        outputSchema: z.unknown(),
+        summary: null,
+        description: null,
+      } as unknown as ConnectorContractUnion;
+      const field = (key: string) =>
+        getStepFormSchema('mapper', [connector])?.fields.find((f) => f.key === key);
+      // It stays a JSON field when fixed, and stays optional: nothing marks it as required.
+      expect(field('items')).toMatchObject({ kind: 'code', language: 'json', required: false });
+      expect(field('items')?.preferData).toBe(true);
+      expect(field('other')?.preferData).toBeUndefined();
+    });
+
     it('edits lists of text as tags, and says whether one value alone is valid', () => {
       const listConnectors = [
         {
