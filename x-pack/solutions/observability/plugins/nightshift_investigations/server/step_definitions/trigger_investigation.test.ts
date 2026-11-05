@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import Boom from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core/server';
 import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -85,6 +86,35 @@ describe('triggerInvestigationStepDefinition', () => {
         expect.objectContaining({ context: { alerts: snapshots } }),
         expect.anything()
       );
+    });
+
+    it('retries the lookup while the episode is not searchable yet', async () => {
+      (fetchInvestigationAlertSnapshots as jest.Mock)
+        .mockRejectedValueOnce(Boom.notFound('Alert with id episode-1 not found'))
+        .mockResolvedValueOnce(snapshots);
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockClear();
+      const start = jest.fn().mockResolvedValue({ investigation_id: 'investigation-1' });
+      const { definition } = createDefinition(start);
+
+      await definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }));
+
+      expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledTimes(2);
+      expect(start).toHaveBeenCalledWith(
+        expect.objectContaining({ context: { alerts: snapshots } }),
+        expect.anything()
+      );
+    });
+
+    it('does not retry a lookup that fails for another reason', async () => {
+      const failure = new Error('lookup failed');
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockRejectedValueOnce(failure);
+      (fetchInvestigationAlertSnapshots as jest.Mock).mockClear();
+      const { definition } = createDefinition(jest.fn());
+
+      await expect(
+        definition.handler(createContext({ subject_type: 'alert', subject_id: 'episode-1' }))
+      ).rejects.toBe(failure);
+      expect(fetchInvestigationAlertSnapshots).toHaveBeenCalledTimes(1);
     });
 
     it('keeps the caller-provided alerts without looking anything up', async () => {
