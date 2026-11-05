@@ -73,11 +73,13 @@ import {
 } from './workflow_settings_surface_variant';
 import { type FlyoutTarget, WorkflowVisualEditorFlyout } from './workflow_visual_editor_flyout';
 import { PLUGIN_ID } from '../../../../common';
+import { createWorkflowContextRegistry } from '../../../../common/lib/create_workflow_context_registry';
 import { getAllConnectorsWithDynamic } from '../../../../common/schema';
 import { flushWorkflowComputation } from '../../../entities/workflows/store/workflow_detail/middleware';
 import {
   selectConnectors,
   selectEditorWorkflowDefinition,
+  selectEditorWorkflowGraph,
   selectEditorWorkflowLookup,
   selectEditorYaml,
   selectIsExecutionsTab,
@@ -109,6 +111,7 @@ import {
   ActionsMenuPopover,
 } from '../../actions_menu_popover';
 import { collectStepsByName } from '../lib/collect_steps';
+import { getStepScope } from '../lib/get_step_scope';
 import { buildDefaultStep, getStepConfigWarningReason } from '../lib/step_form_schema';
 import {
   appendTrigger,
@@ -278,7 +281,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
 }) => {
   const { colorMode, euiTheme } = useEuiTheme();
   const floatingShadow = useEuiShadow('m');
-  const { notifications, application } = useKibana().services;
+  const { notifications, application, workflowsExtensions } = useKibana().services;
   // Persisted preferred width from manual resize only — not the temporary
   // bump used while the advanced field editor is open.
   const [storedPanelWidth = DEFAULT_CONFIG_PANEL_WIDTH, setStoredPanelWidth] = useLocalStorage(
@@ -460,6 +463,24 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
   }, [flashNodeId]);
 
   const workflow = definition ?? lastValidRef.current;
+
+  const editorGraph = useSelector(selectEditorWorkflowGraph);
+  const contextRegistry = useMemo(
+    () => createWorkflowContextRegistry(workflowsExtensions),
+    [workflowsExtensions]
+  );
+  const resolveStepScope = useCallback(
+    (stepName: string) =>
+      workflow && editorGraph
+        ? getStepScope({
+            registry: contextRegistry,
+            definition: workflow,
+            graph: editorGraph,
+            stepName,
+          })
+        : {},
+    [contextRegistry, workflow, editorGraph]
+  );
 
   const settingsCounts = useMemo(() => {
     try {
@@ -1305,6 +1326,7 @@ export const WorkflowVisualEditorStateful: React.FC<WorkflowVisualEditorStateful
               initialFragment={panel.fragment}
               connectors={connectors}
               workflowDefinition={workflow}
+              resolveStepScope={resolveStepScope}
               onClose={handleStepClose}
               onRevert={handleStepRevert}
               isFallbackStep={panelIsFallbackStep}

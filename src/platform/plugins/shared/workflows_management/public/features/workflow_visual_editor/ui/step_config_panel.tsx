@@ -69,6 +69,7 @@ import { ValueSourceToggle } from './value_source_toggle';
 import { VariantField } from './variant_field';
 import { StepIcon } from '../../../shared/ui/step_icons/step_icon';
 import { resolveCatalogDisplayName } from '../../../shared/utils/catalog_display_name';
+import type { StepScopeSchemas } from '../lib/build_data_reference_catalog';
 import { buildDataReferenceCatalog } from '../lib/build_data_reference_catalog';
 import { isTagValue } from '../lib/list_value';
 import { findReferenceTokens } from '../lib/reference_tokens';
@@ -105,6 +106,8 @@ export interface StepConfigPanelProps {
   readonly connectors: readonly ConnectorContractUnion[];
   /** Full workflow definition — powers data-reference sources (triggers/steps/consts). */
   readonly workflowDefinition?: WorkflowYaml;
+  /** Scope the named step runs in (its loop, variables), for the picker's "Step context" group. */
+  readonly resolveStepScope?: (stepName: string) => StepScopeSchemas;
   /**
    * Closes the flyout, keeping the node and any edits already applied to the
    * YAML — ✕, Escape and the field sub-flyout's close-stack all route here.
@@ -271,6 +274,7 @@ export function StepConfigPanel({
   initialFragment,
   connectors,
   workflowDefinition,
+  resolveStepScope,
   onClose,
   onRevert,
   isFallbackStep = false,
@@ -382,8 +386,9 @@ export function StepConfigPanel({
         definition: workflowDefinition,
         currentStepName,
         connectors,
+        stepScope: currentStepName ? resolveStepScope?.(currentStepName) : undefined,
       }),
-    [workflowDefinition, currentStepName, connectors]
+    [workflowDefinition, currentStepName, connectors, resolveStepScope]
   );
 
   const parsed = useMemo(() => {

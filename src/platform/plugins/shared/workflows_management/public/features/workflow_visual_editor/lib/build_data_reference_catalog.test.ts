@@ -8,6 +8,9 @@
  */
 
 import type { WorkflowYaml } from '@kbn/workflows';
+import { WorkflowGraph } from '@kbn/workflows/graph';
+import type { WorkflowContextRegistry } from '@kbn/workflows-yaml';
+import { z } from '@kbn/zod/v4';
 import type { DataReferenceItem } from './build_data_reference_catalog';
 import {
   buildDataReferenceCatalog,
@@ -21,6 +24,7 @@ import {
   toReferenceIconType,
 } from './build_data_reference_catalog';
 import { getDocumentOrderPredecessors } from './get_document_order_predecessors';
+import { getStepScope } from './get_step_scope';
 
 describe('getDocumentOrderPredecessors', () => {
   it('returns only earlier steps in document order', () => {
@@ -233,6 +237,124 @@ describe('buildDataReferenceCatalog', () => {
     expect(leaves.some((l) => l.path === 'steps.first.output')).toBe(true);
     expect(leaves.every((l) => l.originLabel)).toBe(true);
     expect(leaves.every(isDataReferenceInsertable)).toBe(true);
+  });
+});
+
+describe('buildDataReferenceCatalog step context', () => {
+  const registry: WorkflowContextRegistry = {
+    getStepOutput: () => undefined,
+    getConnector: () => undefined,
+    getTriggerDefinition: () => undefined,
+  };
+  const consoleStep = (name: string) => ({ name, type: 'console', with: { message: 'x' } });
+  const definition = {
+    version: '1',
+    name: 'Case workflow',
+    enabled: true,
+    triggers: [{ type: 'alert' }],
+    steps: [
+      consoleStep('before'),
+      { name: 'set', type: 'data.set', with: { count: 1, label: 'x' } },
+      {
+        name: 'loop',
+        type: 'foreach',
+        foreach: '{{event.alerts | json}}',
+        steps: [consoleStep('inner')],
+      },
+      consoleStep('after'),
+    ],
+  } as unknown as WorkflowYaml;
+  const graph = WorkflowGraph.fromWorkflowDefinition(definition);
+
+  const catalogFor = (stepName: string) =>
+    buildDataReferenceCatalog({
+      definition,
+      currentStepName: stepName,
+      connectors: [],
+      stepScope: getStepScope({ registry, definition, graph, stepName }),
+    });
+  const stepContextOf = (stepName: string) =>
+    catalogFor(stepName).groups.find((group) => group.id === 'stepContext');
+  const flattenAll = (items: readonly DataReferenceItem[]): DataReferenceItem[] =>
+    items.flatMap((item) => [item, ...flattenAll(item.children ?? [])]);
+  const find = (items: readonly DataReferenceItem[], path: string): DataReferenceItem | undefined =>
+    flattenAll(items).find((item) => item.path === path);
+
+  it('has no Step context group without a scope', () => {
+    const catalog = buildDataReferenceCatalog({
+      definition,
+      currentStepName: 'inner',
+      connectors: [],
+    });
+    expect(catalog.groups.map((group) => group.id)).toEqual(['triggers', 'steps', 'context']);
+  });
+
+  it('hides the group for a step outside any scope', () => {
+    expect(stepContextOf('before')).toBeUndefined();
+    expect(
+      buildDataReferenceCatalog({
+        definition,
+        currentStepName: 'before',
+        connectors: [],
+        stepScope: {},
+      }).groups.map((group) => group.id)
+    ).toEqual(['triggers', 'steps', 'context']);
+  });
+
+  it('puts the group first for a step inside a foreach', () => {
+    expect(catalogFor('inner').groups.map((group) => group.id)).toEqual([
+      'stepContext',
+      'triggers',
+      'steps',
+      'context',
+    ]);
+    expect(stepContextOf('inner')?.title).toBe('Step context');
+  });
+
+  it("lists the alert's own fields under foreach.item (the case workflow's foreach.item._id)", () => {
+    const items = stepContextOf('inner')?.items ?? [];
+    const item = find(items, 'foreach.item');
+    expect(item).toMatchObject({ typeLabel: 'object', drillable: true });
+    expect(find(items, 'foreach.item._id')).toMatchObject({
+      typeLabel: 'string',
+      originLabel: 'Step context',
+    });
+    expect(isDataReferenceInsertable(find(items, 'foreach.item._id')!)).toBe(true);
+  });
+
+  it('keeps the rest of the loop scope flat', () => {
+    const foreach = find(stepContextOf('inner')?.items ?? [], 'foreach');
+    expect(foreach?.children?.map((child) => child.path).sort()).toEqual([
+      'foreach.index',
+      'foreach.item',
+      'foreach.items',
+      'foreach.total',
+    ]);
+    const index = foreach?.children?.find((child) => child.path === 'foreach.index');
+    expect(index?.children).toBeUndefined();
+  });
+
+  it('lists variables set before the step, and only then', () => {
+    expect(stepContextOf('before')).toBeUndefined();
+    const items = stepContextOf('after')?.items ?? [];
+    expect(
+      find(items, 'variables')?.children?.map((child) => [child.path, child.typeLabel])
+    ).toEqual([
+      ['variables.count', 'number'],
+      ['variables.label', 'string'],
+    ]);
+  });
+
+  it('leaves an item without a known object shape as a single row', () => {
+    const catalog = buildDataReferenceCatalog({
+      definition,
+      currentStepName: 'inner',
+      connectors: [],
+      stepScope: { item: z.string() },
+    });
+    const item = catalog.groups[0].items[0];
+    expect(item).toMatchObject({ path: 'item', typeLabel: 'string', drillable: false });
+    expect(item.children).toBeUndefined();
   });
 });
 

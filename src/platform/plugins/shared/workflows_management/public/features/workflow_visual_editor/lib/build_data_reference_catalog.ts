@@ -31,7 +31,13 @@ import {
   type PrecedingStepRef,
 } from './get_document_order_predecessors';
 
-export type DataReferenceGroupId = 'triggers' | 'steps' | 'context';
+export type DataReferenceGroupId = 'triggers' | 'steps' | 'context' | 'stepContext';
+
+/**
+ * Scope entries the step runs in (`foreach`, `while`, `variables`, and `item` / `index` for
+ * Map Collection), keyed by their context name. See `getStepScope`.
+ */
+export type StepScopeSchemas = Readonly<Record<string, z.ZodType>>;
 
 export interface DataReferenceItem {
   /** Liquid path without braces, e.g. `steps.a.output.status`. */
@@ -511,6 +517,91 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
   };
 };
 
+/** The object a schema describes, looking through optional wrappers and unions (`object | unknown`). */
+const findObjectSchema = (schema: z.ZodType): z.ZodObject | undefined => {
+  const inner = unwrapSchema(schema);
+  if (inner instanceof z.ZodObject) return inner;
+  if (inner instanceof z.ZodUnion) {
+    for (const option of inner.options) {
+      const found = findObjectSchema(option as z.ZodType);
+      if (found) return found;
+    }
+  }
+  return undefined;
+};
+
+const leafTypeLabel = (schema: z.ZodType): string => {
+  if (unwrapSchema(schema) instanceof z.ZodObject) return 'object';
+  const entry = extractSchemaPropertyPaths(z.object({ value: schema }), {
+    includeMetadata: true,
+  }).find(({ path }) => path === 'value');
+  return entry ? entry.displayType ?? String(entry.type) : 'unknown';
+};
+
+/**
+ * One entry of the step scope. Only a loop item lists its object members (`drillMembers`), so
+ * `foreach.item._id` is reachable; every other entry stays a flat row with its type.
+ */
+const stepScopeItem = ({
+  path,
+  schema,
+  originLabel,
+  drillMembers,
+}: {
+  path: string;
+  schema: z.ZodType;
+  originLabel: string;
+  drillMembers: boolean;
+}): DataReferenceItem => {
+  const members = drillMembers ? findObjectSchema(schema) : undefined;
+  const children =
+    members && Object.keys(members.shape).length > 0
+      ? schemaToItems(members, path, originLabel)
+      : [];
+  return pathLeafItem({
+    path,
+    typeLabel: children.length > 0 ? 'object' : leafTypeLabel(schema),
+    originLabel,
+    drillable: children.length > 0,
+    ...(children.length > 0 ? { children } : {}),
+  });
+};
+
+const buildStepContextGroup = (stepScope: StepScopeSchemas): DataReferenceGroup => {
+  const originLabel = i18n.translate('workflows.dataReferencePicker.originStepContext', {
+    defaultMessage: 'Step context',
+  });
+  const items = Object.entries(stepScope).flatMap(([key, schema]): DataReferenceItem[] => {
+    const container = unwrapSchema(schema);
+    if (!(container instanceof z.ZodObject) || key === 'item') {
+      return [stepScopeItem({ path: key, schema, originLabel, drillMembers: key === 'item' })];
+    }
+    const children = Object.entries(container.shape).map(([name, entry]) =>
+      stepScopeItem({
+        path: `${key}.${name}`,
+        schema: entry as z.ZodType,
+        originLabel,
+        drillMembers: key === 'foreach' && name === 'item',
+      })
+    );
+    return children.length > 0
+      ? [pathLeafItem({ path: key, typeLabel: 'object', originLabel, drillable: true, children })]
+      : [];
+  });
+
+  return {
+    id: 'stepContext',
+    title: i18n.translate('workflows.dataReferencePicker.stepContext', {
+      defaultMessage: 'Step context',
+    }),
+    description: i18n.translate('workflows.dataReferencePicker.stepContextDescription', {
+      defaultMessage:
+        'Data from the loop this step runs in, and variables set before it: the current item, its position, and your variables.',
+    }),
+    items,
+  };
+};
+
 /**
  * Builds the on-demand data-reference catalog for the step config panel and
  * field-editor tree. Every entry resolves from the edited workflow document.
@@ -518,19 +609,26 @@ const buildContextGroup = (definition: WorkflowYaml | undefined): DataReferenceG
  * `stepsScope`:
  * - `predecessors` (default) — only steps before `currentStepName`
  * - `allSteps` — every step (for workflow outputs evaluated after the run)
+ *
+ * `stepScope` adds a "Step context" group first, only when the step has scope entries.
  */
 export const buildDataReferenceCatalog = ({
   definition,
   currentStepName,
   connectors,
   stepsScope = 'predecessors',
+  stepScope,
 }: {
   definition: WorkflowYaml | undefined;
   currentStepName: string;
   connectors: readonly ConnectorContractUnion[];
   readonly stepsScope?: 'predecessors' | 'allSteps';
+  readonly stepScope?: StepScopeSchemas;
 }): DataReferenceCatalog => {
   const groups: DataReferenceGroup[] = [];
+
+  const stepContextGroup = stepScope ? buildStepContextGroup(stepScope) : undefined;
+  if (stepContextGroup && stepContextGroup.items.length > 0) groups.push(stepContextGroup);
 
   if (definition) {
     groups.push(buildTriggerGroup(definition));
