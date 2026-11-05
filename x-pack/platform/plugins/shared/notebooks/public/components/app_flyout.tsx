@@ -383,9 +383,9 @@ const getGridStyles = (
     background-image: ${dot('top left')}, ${dot('top right')}, ${dot('bottom left')},
       ${dot('bottom right')};
     background-origin: content-box;
-    background-clip: content-box;
   `;
   return css`
+    ${inset > 0 && `padding: 0 ${inset}px ${inset}px;`}
     padding-top: ${euiTheme.size.l};
 
     &:has(.kbnGridPanel--active) {
