@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
@@ -25,19 +25,14 @@ export const CategoryFieldSelector: FC<CategoryFieldSelectorProps> = React.memo(
     const [searchValue, setSearchValue] = useState('');
     const [isInvalid, setIsInvalid] = useState(false);
 
-    const onSearchChange = (value: string) => {
-      setSearchValue(value);
-      if (value === '') {
+    // Clear the invalid flag whenever the leftover text is gone or a field is selected.
+    // EuiComboBox resets the search to '' after a selection, so both paths end up here;
+    // the flag is only raised on blur, mirroring when EuiComboBox shows its own red state.
+    useEffect(() => {
+      if (searchValue === '' || selectedField !== undefined) {
         setIsInvalid(false);
       }
-    };
-
-    // A change event is either a valid selection or the user mid-edit (EUI removes the
-    // selection while backspacing in plain text mode), so defer any invalid flag to blur.
-    const onFieldChange = (options: EuiComboBoxOptionOption[]) => {
-      setIsInvalid(false);
-      onChange(options);
-    };
+    }, [searchValue, selectedField]);
 
     // Mirrors EuiComboBox, which only flags leftover search text once the input loses focus.
     const onBlur = () => {
@@ -60,8 +55,8 @@ export const CategoryFieldSelector: FC<CategoryFieldSelectorProps> = React.memo(
           isDisabled={isDisabled}
           isInvalid={isInvalid}
           options={fields}
-          onChange={onFieldChange}
-          onSearchChange={onSearchChange}
+          onChange={onChange}
+          onSearchChange={setSearchValue}
           onBlur={onBlur}
           selectedOptions={selectedField === undefined ? undefined : [{ label: selectedField }]}
           singleSelection={{ asPlainText: true }}
