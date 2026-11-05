@@ -17,6 +17,12 @@ export interface DecisionProviderParams {
   signal: AbortSignal;
 }
 
+export interface DecisionAttemptParams extends Omit<DecisionProviderParams, 'signal'> {
+  /** Used when the provider has no timeout of its own. */
+  timeoutMs: number;
+  abortSignal?: AbortSignal;
+}
+
 export interface DecisionProviderResult {
   answers: Record<string, DecisionAnswer>;
   /** What answered, for logs: an inference endpoint, a model or a connector. */
@@ -25,26 +31,21 @@ export interface DecisionProviderResult {
 
 /** One way of answering decision questions. */
 export interface DecisionProvider {
-  id: DecisionProviderId;
-  /** Overrides the service's per-provider timeout. */
-  timeoutMs?: number;
+  readonly id: DecisionProviderId;
+  /** When a provider that reported it cannot answer is tried again, if it is being skipped. */
+  readonly unavailableUntil: Date | undefined;
+  isAvailable(): boolean;
   /**
-   * Answers the questions. Throws {@link DecisionProviderUnavailableError} when the provider can
-   * never answer on this Kibana instance, and any other error for a failure worth retrying.
+   * Answers the questions within the provider's timeout. Throws
+   * {@link DecisionProviderUnavailableError} when the provider cannot answer for now,
+   * {@link DecisionProviderAbortedError} on a timeout or abort, and any other error for a failure
+   * worth retrying.
    */
-  decide(params: DecisionProviderParams): Promise<DecisionProviderResult>;
+  decide(params: DecisionAttemptParams): Promise<DecisionProviderResult>;
 }
 
-/** The provider cannot answer until Kibana restarts, e.g. it is not configured or has no model. */
-export class DecisionProviderUnavailableError extends Error {
-  readonly permanent = true;
-
-  constructor(message: string) {
-    super(message);
-    this.name = 'DecisionProviderUnavailableError';
-  }
-}
-
-export const isDecisionProviderUnavailableError = (
-  error: unknown
-): error is DecisionProviderUnavailableError => error instanceof DecisionProviderUnavailableError;
+export {
+  DecisionProviderUnavailableError,
+  isDecisionProviderUnavailableError,
+} from './unavailable_error';
+export { DecisionProviderAbortedError, isDecisionProviderAbortedError } from './aborted_error';

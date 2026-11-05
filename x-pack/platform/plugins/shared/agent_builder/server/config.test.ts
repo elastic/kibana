@@ -14,4 +14,10 @@ describe('decisionModel config', () => {
     expect(decisionModel.timeoutMs).toBe(1000);
     expect(decisionModel.fastModelTimeoutMs).toBe(2000);
   });
+
+  it('skips an unavailable provider for an hour', () => {
+    const { decisionModel } = configSchema.validate({});
+
+    expect(decisionModel.unavailableTtlMs).toBe(60 * 60 * 1000);
+  });
 });

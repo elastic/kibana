@@ -10,7 +10,9 @@ import type { BaseMessageLike } from '@langchain/core/messages';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { DecisionAnswer, DecisionQuestion } from '@kbn/agent-builder-server';
 import type { ModelProviderFactoryFn } from '../../execution/runner/model_provider';
-import type { DecisionProvider } from './types';
+import type { BaseDecisionProviderOptions } from './base_decision_provider';
+import { BaseDecisionProvider } from './base_decision_provider';
+import type { DecisionProviderParams, DecisionProviderResult } from './types';
 import { DecisionProviderUnavailableError } from './types';
 
 /** The model provider's error when neither a fast nor a default model is configured. */
@@ -96,17 +98,26 @@ const toAnswer = (question: DecisionQuestion, raw: RawAnswer): DecisionAnswer =>
  * Answers with Agent Builder's fast model (else its default model) through structured output.
  * The fallback for when no decision model is available or one fails.
  */
-export const createFastModelDecisionProvider = ({
-  createModelProvider,
-  timeoutMs,
-}: {
-  createModelProvider: ModelProviderFactoryFn;
-  timeoutMs?: number;
-}): DecisionProvider => ({
-  id: 'fast_model',
-  timeoutMs,
-  decide: async ({ request, input, questions, signal }) => {
-    const { chatModel, connector } = await createModelProvider({ request })
+export class FastModelDecisionProvider extends BaseDecisionProvider {
+  readonly id = 'fast_model';
+
+  private readonly createModelProvider: ModelProviderFactoryFn;
+
+  constructor({
+    createModelProvider,
+    ...options
+  }: BaseDecisionProviderOptions & { createModelProvider: ModelProviderFactoryFn }) {
+    super(options);
+    this.createModelProvider = createModelProvider;
+  }
+
+  protected async ask({
+    request,
+    input,
+    questions,
+    signal,
+  }: DecisionProviderParams): Promise<DecisionProviderResult> {
+    const { chatModel, connector } = await this.createModelProvider({ request })
       .selectModel({ effortLevel: EffortLevels.low })
       .catch((error: Error) => {
         throw error.message === NO_CONNECTOR_MESSAGE
@@ -153,5 +164,5 @@ ${Object.entries(questions)
     );
 
     return { inferenceId: `fast_model:${connector.connectorId}`, answers };
-  },
-});
+  }
+}

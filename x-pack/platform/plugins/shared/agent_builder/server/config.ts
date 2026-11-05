@@ -45,6 +45,12 @@ export const configSchema = schema.object({
     timeoutMs: schema.number({ defaultValue: 1000, min: 100, max: 30000 }),
     /** How long the fast model gets: an LLM call is slower than a decision model. */
     fastModelTimeoutMs: schema.number({ defaultValue: 2000, min: 100, max: 30000 }),
+    /** How long a provider that reported it cannot answer, e.g. no decision endpoint, is skipped. */
+    unavailableTtlMs: schema.number({
+      defaultValue: 60 * 60 * 1000,
+      min: 60 * 1000,
+      max: 24 * 60 * 60 * 1000,
+    }),
   }),
   /**
    * Internal-only Deductive AI integration. `register` gates whether the built-in

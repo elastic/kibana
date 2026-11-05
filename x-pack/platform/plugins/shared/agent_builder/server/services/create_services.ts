@@ -16,7 +16,7 @@ import type {
 } from './types';
 import type { ConversationEventBus } from '../workflows/triggers/conversation_event_bus';
 import { ToolsService } from './tools';
-import { createDecisionProviders, createDecisionService } from './decisions';
+import { createDecisionProviders, DecisionService } from './decisions';
 import { createModelProviderFactory } from './execution/runner/model_provider';
 import { AgentsService } from './agents';
 import { RunnerFactoryImpl } from './execution/runner';
@@ -295,7 +295,7 @@ export class ServiceManager {
       surfacesService: surfaces,
     });
 
-    const decisions = createDecisionService({
+    const decisions = new DecisionService({
       logger: logger.get('decisions'),
       timeoutMs: this.config.decisionModel.timeoutMs,
       providers: createDecisionProviders({

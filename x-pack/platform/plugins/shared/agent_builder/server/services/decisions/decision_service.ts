@@ -10,21 +10,20 @@ import type { DecideParams, DecideResult, DecisionsStart } from '@kbn/agent-buil
 import { ElasticGenAIAttributes, withActiveInferenceSpan } from '@kbn/inference-tracing';
 import type { AgentBuilderConfig } from '../../config';
 import type { ModelProviderFactoryFn } from '../execution/runner/model_provider';
-import { createEisDecisionProvider } from './providers/eis';
-import { createFastModelDecisionProvider } from './providers/fast_model';
-import type {
-  DecisionProvider,
-  DecisionProviderId,
-  DecisionProviderResult,
+import { EisDecisionProvider } from './providers/eis';
+import { FastModelDecisionProvider } from './providers/fast_model';
+import type { DecisionProvider } from './providers/types';
+import {
+  isDecisionProviderAbortedError,
+  isDecisionProviderUnavailableError,
 } from './providers/types';
-import { isDecisionProviderUnavailableError } from './providers/types';
 
 /**
  * The decision providers, in the order they are tried: the Elasticsearch `decision` task (EIS),
  * then Agent Builder's fast model as the fallback.
  */
 export const createDecisionProviders = ({
-  config,
+  config: { inferenceId, fastModelTimeoutMs, unavailableTtlMs },
   elasticsearch,
   createModelProvider,
 }: {
@@ -32,126 +31,105 @@ export const createDecisionProviders = ({
   elasticsearch: ElasticsearchServiceStart;
   createModelProvider: ModelProviderFactoryFn;
 }): DecisionProvider[] => [
-  createEisDecisionProvider({ elasticsearch, inferenceId: config.inferenceId }),
-  createFastModelDecisionProvider({ createModelProvider, timeoutMs: config.fastModelTimeoutMs }),
+  new EisDecisionProvider({ elasticsearch, inferenceId, unavailableTtlMs }),
+  new FastModelDecisionProvider({
+    createModelProvider,
+    timeoutMs: fastModelTimeoutMs,
+    unavailableTtlMs,
+  }),
 ];
 
-/** Runs one provider with its own timeout, also aborted when the caller aborts. */
-const attempt = async ({
-  provider,
-  params: { request, input, questions },
-  timeoutMs,
-  abortSignal,
-}: {
-  provider: DecisionProvider;
-  params: DecideParams;
-  timeoutMs: number;
-  abortSignal?: AbortSignal;
-}): Promise<{ result: DecisionProviderResult } | { error: Error; timedOut: boolean }> => {
-  const controller = new AbortController();
-  const onAbort = () => controller.abort();
-  let timer: ReturnType<typeof setTimeout> | undefined;
-
-  abortSignal?.addEventListener('abort', onAbort, { once: true });
-
-  const deadline = new Promise<never>((_, reject) => {
-    timer = setTimeout(() => {
-      controller.abort();
-      reject(new Error(`Decision provider [${provider.id}] timed out after ${timeoutMs}ms`));
-    }, timeoutMs);
-
-    controller.signal.addEventListener('abort', () =>
-      reject(new Error(`Decision provider [${provider.id}] aborted`))
-    );
-  });
-
-  try {
-    const result = await Promise.race([
-      provider.decide({ request, input, questions, signal: controller.signal }),
-      deadline,
-    ]);
-
-    return { result };
-  } catch (error) {
-    return { error, timedOut: controller.signal.aborted };
-  } finally {
-    clearTimeout(timer);
-    abortSignal?.removeEventListener('abort', onAbort);
-  }
-};
-
 /**
- * Creates the decision service. It tries the providers in order, giving each its own timeout
- * (else `timeoutMs`), and
- * moves on when one fails. A provider that reports it can never answer is skipped until Kibana
- * restarts.
+ * Tries the providers in order and moves on when one fails. A provider that reports it cannot
+ * answer skips itself for a while, see {@link BaseDecisionProvider}.
  */
-export const createDecisionService = ({
-  logger,
-  providers,
-  timeoutMs: defaultTimeoutMs,
-}: {
-  logger: Logger;
-  providers: DecisionProvider[];
-  timeoutMs: number;
-}): DecisionsStart => {
-  const unavailable = new Set<DecisionProviderId>();
+export class DecisionService implements DecisionsStart {
+  private readonly logger: Logger;
+  private readonly providers: DecisionProvider[];
+  private readonly timeoutMs: number;
 
-  const decide = async (params: DecideParams): Promise<DecideResult> => {
-    const { abortSignal, timeoutMs = defaultTimeoutMs, questions } = params;
+  constructor({
+    logger,
+    providers,
+    timeoutMs,
+  }: {
+    logger: Logger;
+    providers: DecisionProvider[];
+    /** The timeout of providers without their own. */
+    timeoutMs: number;
+  }) {
+    this.logger = logger;
+    this.providers = providers;
+    this.timeoutMs = timeoutMs;
+  }
+
+  decide = (params: DecideParams): Promise<DecideResult> =>
+    withActiveInferenceSpan(
+      'decide',
+      { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
+      () => this.run(params)
+    );
+
+  private async run({
+    request,
+    input,
+    questions,
+    abortSignal,
+    timeoutMs = this.timeoutMs,
+  }: DecideParams): Promise<DecideResult> {
     const questionNames = Object.keys(questions).join(', ');
     let lastError: Error | undefined;
 
-    for (const provider of providers) {
+    for (const provider of this.providers) {
       if (abortSignal?.aborted) {
         return { status: 'failed', error: new Error('Decision aborted') };
       }
 
-      if (unavailable.has(provider.id)) {
+      if (!provider.isAvailable()) {
         continue;
       }
 
       const startedAt = Date.now();
-      const outcome = await attempt({
-        provider,
-        params,
-        timeoutMs: provider.timeoutMs ?? timeoutMs,
-        abortSignal,
-      });
-      const elapsed = Date.now() - startedAt;
 
-      if ('result' in outcome) {
-        const { inferenceId, answers } = outcome.result;
+      try {
+        const { inferenceId, answers } = await provider.decide({
+          request,
+          input,
+          questions,
+          timeoutMs,
+          abortSignal,
+        });
 
-        logger.debug(
+        this.logger.debug(
           () =>
-            `Decision [${questionNames}] from [${
-              provider.id
-            }:${inferenceId}] in ${elapsed}ms: ${JSON.stringify(answers)}`
+            `Decision [${questionNames}] from [${provider.id}:${inferenceId}] in ${
+              Date.now() - startedAt
+            }ms: ${JSON.stringify(answers)}`
         );
 
         return { status: 'decided', inferenceId, answers };
-      }
+      } catch (error) {
+        if (isDecisionProviderUnavailableError(error)) {
+          this.logger.debug(
+            `Decision provider [${
+              provider.id
+            }] is unavailable until ${provider.unavailableUntil?.toISOString()}: ${error.message}`
+          );
+          continue;
+        }
 
-      const { error, timedOut } = outcome;
+        lastError = error;
 
-      if (isDecisionProviderUnavailableError(error)) {
-        unavailable.add(provider.id);
-        logger.debug(
-          `Decision provider [${provider.id}] is unavailable until Kibana restarts: ${error.message}`
-        );
-        continue;
-      }
+        const message = `Decision [${questionNames}] failed on [${provider.id}] after ${
+          Date.now() - startedAt
+        }ms: ${error.message}`;
 
-      lastError = error;
-
-      const message = `Decision [${questionNames}] failed on [${provider.id}] after ${elapsed}ms: ${error.message}`;
-
-      // A timeout or abort is expected under load; anything else may mean a misconfiguration.
-      if (timedOut) {
-        logger.debug(message);
-      } else {
-        logger.warn(message);
+        // A timeout or abort is expected under load; anything else may mean a misconfiguration.
+        if (isDecisionProviderAbortedError(error)) {
+          this.logger.debug(message);
+        } else {
+          this.logger.warn(message);
+        }
       }
     }
 
@@ -160,14 +138,5 @@ export const createDecisionService = ({
     }
 
     return lastError ? { status: 'failed', error: lastError } : { status: 'unavailable' };
-  };
-
-  return {
-    decide: (params) =>
-      withActiveInferenceSpan(
-        'decide',
-        { attributes: { [ElasticGenAIAttributes.InferenceSpanKind]: 'CHAIN' } },
-        () => decide(params)
-      ),
-  };
-};
+  }
+}

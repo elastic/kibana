@@ -8,8 +8,15 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecideResult, DecisionQuestion } from '@kbn/agent-builder-server';
-import { createDecisionProviders, createDecisionService } from './decision_service';
-import type { DecisionProvider, DecisionProviderId } from './providers/types';
+import { createDecisionProviders, DecisionService } from './decision_service';
+import { BaseDecisionProvider } from './providers/base_decision_provider';
+import { EisDecisionProvider } from './providers/eis';
+import { FastModelDecisionProvider } from './providers/fast_model';
+import type {
+  DecisionProviderId,
+  DecisionProviderParams,
+  DecisionProviderResult,
+} from './providers/types';
 import { DecisionProviderUnavailableError } from './providers/types';
 
 const questions: Record<string, DecisionQuestion> = {
@@ -23,16 +30,32 @@ const answered = (probability: number) => ({
   answers: { should_respond: { type: 'predicate' as const, probability } },
 });
 
+type Ask = (params: DecisionProviderParams) => Promise<DecisionProviderResult>;
+
+class FakeProvider extends BaseDecisionProvider {
+  readonly handler: jest.Mock<Promise<DecisionProviderResult>, [DecisionProviderParams]>;
+
+  constructor(public readonly id: DecisionProviderId, ask: Ask, timeoutMs?: number) {
+    super({ timeoutMs, unavailableTtlMs: 60 * 60 * 1000 });
+    this.handler = jest.fn(ask);
+  }
+
+  protected ask(params: DecisionProviderParams): Promise<DecisionProviderResult> {
+    return this.handler(params);
+  }
+}
+
 const fakeProvider = (
   id: DecisionProviderId,
-  decide: DecisionProvider['decide'] = async () => answered(0.5)
-): DecisionProvider & { decide: jest.Mock } => ({ id, decide: jest.fn(decide) });
+  ask: Ask = async () => answered(0.5),
+  timeoutMs?: number
+) => new FakeProvider(id, ask, timeoutMs);
 
 const never = () => new Promise<never>(() => {});
 
-const setup = (providers: DecisionProvider[]) => {
+const setup = (providers: FakeProvider[]) => {
   const logger = loggingSystemMock.createLogger();
-  const service = createDecisionService({ logger, providers, timeoutMs: 1000 });
+  const service = new DecisionService({ logger, providers, timeoutMs: 1000 });
   const request = httpServerMock.createKibanaRequest();
 
   const decide = (abortSignal?: AbortSignal) =>
@@ -41,7 +64,7 @@ const setup = (providers: DecisionProvider[]) => {
   return { decide, logger };
 };
 
-describe('createDecisionService', () => {
+describe('DecisionService', () => {
   afterEach(() => {
     jest.useRealTimers();
   });
@@ -52,7 +75,7 @@ describe('createDecisionService', () => {
     const { decide } = setup([first, second]);
 
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
-    expect(second.decide).not.toHaveBeenCalled();
+    expect(second.handler).not.toHaveBeenCalled();
   });
 
   it('falls through to the next provider on a retryable failure, and retries it next time', async () => {
@@ -65,10 +88,10 @@ describe('createDecisionService', () => {
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.3) });
     await decide();
 
-    expect(first.decide).toHaveBeenCalledTimes(2);
+    expect(first.handler).toHaveBeenCalledTimes(2);
   });
 
-  it('skips a provider that is unavailable until Kibana restarts', async () => {
+  it('skips a provider that reported it is unavailable', async () => {
     const first = fakeProvider('eis', async () => {
       throw new DecisionProviderUnavailableError('no endpoint');
     });
@@ -78,8 +101,25 @@ describe('createDecisionService', () => {
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
     await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
 
-    expect(first.decide).toHaveBeenCalledTimes(1);
-    expect(second.decide).toHaveBeenCalledTimes(2);
+    expect(first.handler).toHaveBeenCalledTimes(1);
+    expect(second.handler).toHaveBeenCalledTimes(2);
+  });
+
+  it('tries an unavailable provider again once its TTL expires', async () => {
+    jest.useFakeTimers({ now: new Date('2026-11-05T10:00:00Z') });
+
+    const first = fakeProvider('eis', async () => answered(0.9));
+    const second = fakeProvider('fast_model', async () => answered(0.7));
+    const { decide } = setup([first, second]);
+
+    first.handler.mockRejectedValueOnce(new DecisionProviderUnavailableError('no endpoint'));
+
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.7) });
+
+    jest.setSystemTime(new Date('2026-11-05T11:00:00Z'));
+
+    await expect(decide()).resolves.toEqual({ status: 'decided', ...answered(0.9) });
+    expect(first.handler).toHaveBeenCalledTimes(2);
   });
 
   it('gives each provider its own timeout before moving on', async () => {
@@ -96,7 +136,7 @@ describe('createDecisionService', () => {
     const pending = decide();
 
     await jest.advanceTimersByTimeAsync(999);
-    expect(second.decide).not.toHaveBeenCalled();
+    expect(second.handler).not.toHaveBeenCalled();
 
     await jest.advanceTimersByTimeAsync(1);
 
@@ -108,10 +148,7 @@ describe('createDecisionService', () => {
   it("uses a provider's own timeout instead of the default", async () => {
     jest.useFakeTimers();
 
-    const slow = {
-      ...fakeProvider('fast_model', never),
-      timeoutMs: 2000,
-    };
+    const slow = fakeProvider('fast_model', never, 2000);
     const { decide } = setup([slow]);
 
     let result: DecideResult | undefined;
@@ -139,7 +176,7 @@ describe('createDecisionService', () => {
     const result = await decide(controller.signal);
 
     expect(result.status).toBe('failed');
-    expect(second.decide).not.toHaveBeenCalled();
+    expect(second.handler).not.toHaveBeenCalled();
   });
 
   it('fails without asking anyone when the caller already aborted', async () => {
@@ -152,7 +189,7 @@ describe('createDecisionService', () => {
     await expect(decide(controller.signal)).resolves.toEqual(
       expect.objectContaining({ status: 'failed' })
     );
-    expect(first.decide).not.toHaveBeenCalled();
+    expect(first.handler).not.toHaveBeenCalled();
   });
 
   it('returns unavailable when every provider is unavailable', async () => {
@@ -214,22 +251,31 @@ describe('createDecisionProviders', () => {
     const providers = createDecisionProviders({
       elasticsearch,
       createModelProvider,
-      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+      config: {
+        triggerThreshold: 0.5,
+        timeoutMs: 1000,
+        fastModelTimeoutMs: 2000,
+        unavailableTtlMs: 3600000,
+      },
     });
 
     expect(providers.map(({ id }) => id)).toEqual(['eis', 'fast_model']);
   });
 
-  it('gives the fast model its own timeout', () => {
-    const providers = createDecisionProviders({
+  it('creates EIS and fast model provider instances', () => {
+    const [eis, fastModel] = createDecisionProviders({
       elasticsearch,
       createModelProvider,
-      config: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+      config: {
+        triggerThreshold: 0.5,
+        timeoutMs: 1000,
+        fastModelTimeoutMs: 2000,
+        unavailableTtlMs: 3600000,
+      },
     });
 
-    expect(providers.map(({ id, timeoutMs }) => [id, timeoutMs])).toEqual([
-      ['eis', undefined],
-      ['fast_model', 2000],
-    ]);
+    expect(eis).toBeInstanceOf(EisDecisionProvider);
+    expect(fastModel).toBeInstanceOf(FastModelDecisionProvider);
+    expect([eis, fastModel].every((provider) => provider.isAvailable())).toBe(true);
   });
 });

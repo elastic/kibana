@@ -12,7 +12,7 @@ import { httpServerMock } from '@kbn/core-http-server-mocks';
 import type { DecisionQuestion } from '@kbn/agent-builder-server';
 import decisionResponse from './__fixtures__/decision_response.json';
 import decisionEndpoints from './__fixtures__/decision_endpoints.json';
-import { createEisDecisionProvider } from './eis';
+import { EisDecisionProvider } from './eis';
 import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
 const questions: Record<string, DecisionQuestion> = {
@@ -35,19 +35,19 @@ const setup = ({ inferenceId }: { inferenceId?: string } = {}) => {
 
   elasticsearch.client.asScoped.mockReturnValue(scopedClient);
 
-  const provider = createEisDecisionProvider({ elasticsearch, inferenceId });
+  const provider = new EisDecisionProvider({ elasticsearch, inferenceId, unavailableTtlMs: 1000 });
   const run = () =>
     provider.decide({
       request: httpServerMock.createKibanaRequest(),
       input,
       questions,
-      signal: new AbortController().signal,
+      timeoutMs: 1000,
     });
 
-  return { run, transportRequest: scopedClient.asCurrentUser.transport.request };
+  return { run, provider, transportRequest: scopedClient.asCurrentUser.transport.request };
 };
 
-describe('createEisDecisionProvider', () => {
+describe('EisDecisionProvider', () => {
   it('uses the configured inference id without listing endpoints', async () => {
     const { run, transportRequest } = setup({ inferenceId: 'my-decision' });
 
@@ -85,11 +85,12 @@ describe('createEisDecisionProvider', () => {
   });
 
   it('is unavailable when the cluster lists no decision endpoint', async () => {
-    const { run, transportRequest } = setup();
+    const { run, provider, transportRequest } = setup();
 
     transportRequest.mockResolvedValue({ endpoints: [] });
 
     await expect(run()).rejects.toBeInstanceOf(DecisionProviderUnavailableError);
+    expect(provider.isAvailable()).toBe(false);
   });
 
   it('is unavailable when the configured endpoint does not exist', async () => {

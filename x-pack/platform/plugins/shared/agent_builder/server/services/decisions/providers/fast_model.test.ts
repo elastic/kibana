@@ -8,7 +8,7 @@
 import { httpServerMock } from '@kbn/core-http-server-mocks';
 import { EffortLevels } from '@kbn/agent-builder-common';
 import type { DecisionQuestion, ModelProvider } from '@kbn/agent-builder-server';
-import { createFastModelDecisionProvider } from './fast_model';
+import { FastModelDecisionProvider } from './fast_model';
 import { DecisionProviderUnavailableError, isDecisionProviderUnavailableError } from './types';
 
 const questions: Record<string, DecisionQuestion> = {
@@ -42,22 +42,20 @@ const setup = ({
   const createModelProvider = jest
     .fn()
     .mockReturnValue({ selectModel } as unknown as ModelProvider);
-  const { signal } = new AbortController();
-
   const run = (asked: Record<string, DecisionQuestion> = questions) =>
-    createFastModelDecisionProvider({ createModelProvider }).decide({
+    new FastModelDecisionProvider({ createModelProvider, unavailableTtlMs: 1000 }).decide({
       request: httpServerMock.createKibanaRequest(),
       input: '@agent can you help?',
       questions: asked,
-      signal,
+      timeoutMs: 1000,
     });
 
-  return { run, invoke, withStructuredOutput, selectModel, signal };
+  return { run, invoke, withStructuredOutput, selectModel };
 };
 
-describe('createFastModelDecisionProvider', () => {
+describe('FastModelDecisionProvider', () => {
   it('asks the fast model with structured output', async () => {
-    const { run, selectModel, withStructuredOutput, invoke, signal } = setup({
+    const { run, selectModel, withStructuredOutput, invoke } = setup({
       output: { should_respond: { probability: 0.8 } },
     });
 
@@ -65,7 +63,7 @@ describe('createFastModelDecisionProvider', () => {
 
     expect(selectModel).toHaveBeenCalledWith({ effortLevel: EffortLevels.low });
     expect(withStructuredOutput).toHaveBeenCalledWith(expect.anything(), { name: 'decide' });
-    expect(invoke).toHaveBeenCalledWith(expect.any(Array), { signal });
+    expect(invoke).toHaveBeenCalledWith(expect.any(Array), { signal: expect.any(AbortSignal) });
     expect(JSON.stringify(invoke.mock.calls[0][0])).toContain('@agent can you help?');
   });
 

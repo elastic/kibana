@@ -195,7 +195,12 @@ describe('AgentExecutionService', () => {
     searchInferenceEndpoints,
     callbackDeliveryService,
     decisions: { decide: jest.fn() },
-    decisionConfig: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+    decisionConfig: {
+      triggerThreshold: 0.5,
+      timeoutMs: 1000,
+      fastModelTimeoutMs: 2000,
+      unavailableTtlMs: 3600000,
+    },
   });
 
   beforeEach(() => {
@@ -269,7 +274,12 @@ describe('AgentExecutionService', () => {
         searchInferenceEndpoints,
         callbackDeliveryService,
         decisions: { decide: jest.fn() },
-        decisionConfig: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+        decisionConfig: {
+          triggerThreshold: 0.5,
+          timeoutMs: 1000,
+          fastModelTimeoutMs: 2000,
+          unavailableTtlMs: 3600000,
+        },
       });
     const converse = (
       boundService: ReturnType<typeof createBoundService>,

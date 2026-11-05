@@ -8,14 +8,16 @@
 import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient, ElasticsearchServiceStart } from '@kbn/core/server';
 import { parseDecisionResponse } from './parse_decision_response';
-import type { DecisionProvider } from './types';
+import type { BaseDecisionProviderOptions } from './base_decision_provider';
+import { BaseDecisionProvider } from './base_decision_provider';
+import type { DecisionProviderParams, DecisionProviderResult } from './types';
 import { DecisionProviderUnavailableError } from './types';
 
 interface DecisionEndpointsResponse {
   endpoints?: Array<{ inference_id: string }>;
 }
 
-/** Errors that will not go away without a config or cluster change: a missing endpoint or task type. */
+/** Errors that need a config or cluster change to go away: a missing endpoint or task type. */
 const isPermanentEsError = (error: unknown): boolean => {
   if (!(error instanceof errors.ResponseError)) {
     return false;
@@ -56,21 +58,37 @@ const resolveInferenceId = async ({
  * Answers through the Elasticsearch `decision` inference task, as the requesting user. Uses
  * `inferenceId` when configured, else the first `decision` endpoint the cluster lists.
  */
-export const createEisDecisionProvider = ({
-  elasticsearch,
-  inferenceId: configuredId,
-}: {
-  elasticsearch: ElasticsearchServiceStart;
-  inferenceId?: string;
-}): DecisionProvider => ({
-  id: 'eis',
-  decide: async ({ request, input, questions, signal }) => {
-    const esClient = elasticsearch.client.asScoped(request).asCurrentUser;
+export class EisDecisionProvider extends BaseDecisionProvider {
+  readonly id = 'eis';
+
+  private readonly elasticsearch: ElasticsearchServiceStart;
+  private readonly inferenceId?: string;
+
+  constructor({
+    elasticsearch,
+    inferenceId,
+    ...options
+  }: BaseDecisionProviderOptions & {
+    elasticsearch: ElasticsearchServiceStart;
+    inferenceId?: string;
+  }) {
+    super(options);
+    this.elasticsearch = elasticsearch;
+    this.inferenceId = inferenceId;
+  }
+
+  protected async ask({
+    request,
+    input,
+    questions,
+    signal,
+  }: DecisionProviderParams): Promise<DecisionProviderResult> {
+    const esClient = this.elasticsearch.client.asScoped(request).asCurrentUser;
 
     try {
       const inferenceId = await resolveInferenceId({
         esClient,
-        inferenceId: configuredId,
+        inferenceId: this.inferenceId,
         signal,
       });
 
@@ -91,5 +109,5 @@ export const createEisDecisionProvider = ({
 
       throw error;
     }
-  },
-});
+  }
+}

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { createDecisionProviders, createDecisionService } from './decision_service';
+export { createDecisionProviders, DecisionService } from './decision_service';

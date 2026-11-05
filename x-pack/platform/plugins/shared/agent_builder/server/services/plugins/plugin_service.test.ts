@@ -165,7 +165,12 @@ describe('PluginsService', () => {
           scheduledDelay: 1000,
           opik_distributed_tracing: false,
         },
-        decisionModel: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+        decisionModel: {
+          triggerThreshold: 0.5,
+          timeoutMs: 1000,
+          fastModelTimeoutMs: 2000,
+          unavailableTtlMs: 3600000,
+        },
       },
       analyticsService: mockAnalyticsService as unknown as AnalyticsService,
       trackingService: mockTrackingService as unknown as TrackingService,
@@ -567,7 +572,12 @@ describe('PluginsService', () => {
                 scheduledDelay: 1000,
                 opik_distributed_tracing: false,
               },
-              decisionModel: { triggerThreshold: 0.5, timeoutMs: 1000, fastModelTimeoutMs: 2000 },
+              decisionModel: {
+                triggerThreshold: 0.5,
+                timeoutMs: 1000,
+                fastModelTimeoutMs: 2000,
+                unavailableTtlMs: 3600000,
+              },
             },
             analyticsService: mockAnalyticsService as unknown as AnalyticsService,
           });
