@@ -46,6 +46,12 @@ const toFailure = (error: unknown, hasRemote: boolean): SourceVolume => {
   return { status: 'error', has_remote: hasRemote, error: 'unknown' };
 };
 
+interface DocumentCount {
+  docCount: number;
+  isPartial: boolean;
+  clusters?: { total: number; unsuccessful: number };
+}
+
 const countDocuments = async ({
   esClient,
   esql,
@@ -58,21 +64,30 @@ const countDocuments = async ({
   window: MeasurementWindow;
   signal: AbortSignal;
   projectRouting?: string;
-}): Promise<number> => {
-  const { values } = await esClient.esql.query(
+}): Promise<DocumentCount> => {
+  const {
+    values,
+    is_partial: isPartial = false,
+    _clusters: clusterInfo,
+  } = await esClient.esql.query(
     {
       query: appendCount(esql),
       format: 'json',
+      include_ccs_metadata: true,
       filter: { range: { '@timestamp': { gte: window.start, lte: window.end } } },
       ...(projectRouting ? { project_routing: projectRouting } : {}),
     },
     { signal, requestTimeout: COUNT_TIMEOUT_MS }
   );
-  return Number(values[0]?.[0] ?? 0);
+  // Every cluster skipped yields no rows, which must not read as an empty window.
+  const clusters = clusterInfo && {
+    total: clusterInfo.total,
+    unsuccessful: clusterInfo.skipped + clusterInfo.partial + clusterInfo.failed,
+  };
+  return { docCount: Number(values[0]?.[0] ?? 0), isPartial, clusters };
 };
 
-// Serverless bills from `_metering/stats`, which stateful lacks. `undefined` when nothing exists
-// behind the patterns.
+// `_metering/stats` is the serverless size source; stateful lacks it.
 const averageDocumentBytes = async ({
   esClient,
   indexPatterns,
@@ -144,9 +159,9 @@ export const measureSourceVolume = async ({
   }
 
   // The source's own reads fan out to every linked project; the count must match them.
-  let docCount: number;
+  let count: DocumentCount;
   try {
-    docCount = await countDocuments({
+    count = await countDocuments({
       esClient,
       esql,
       window,
@@ -157,15 +172,26 @@ export const measureSourceVolume = async ({
     return toFailure(error, hasRemote);
   }
 
-  const volume: SourceVolume = { status: 'ok', has_remote: hasRemote, doc_count: docCount };
-  if (indexPatterns.length === 0) {
+  const { docCount, isPartial, clusters } = count;
+  const isIncomplete = isPartial || (clusters?.unsuccessful ?? 0) > 0;
+  const volume: SourceVolume = {
+    status: isIncomplete ? 'partial' : 'ok',
+    has_remote: hasRemote,
+    doc_count: docCount,
+    ...(clusters && {
+      clusters_total: clusters.total,
+      clusters_unsuccessful: clusters.unsuccessful,
+    }),
+  };
+  // A lower-bound count would make the extrapolated size misleading.
+  if (isIncomplete || indexPatterns.length === 0) {
     return volume;
   }
   if (docCount === 0) {
     return { ...volume, bytes_estimated: 0 };
   }
 
-  // Only local indices can be sized; their average is extrapolated so bytes and doc_count share one scope.
+  // Only local indices can be sized; their average is extrapolated to remote documents.
   try {
     const averageBytes = await averageDocumentBytes({
       esClient,

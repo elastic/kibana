@@ -230,7 +230,11 @@ entries where a remote cluster contributed. A source with no local index gets no
 `bytes_estimated`. Each source is measured on its own, so overlapping sources (`logs*` and
 `logs-otel.generic-*`) count the same documents more than once; summing across sources can
 double count. A source whose query fails is reported with `status: error` (or `timeout`) and
-the Elasticsearch error type, without blocking the others. Nothing is sent when no source is
+the Elasticsearch error type, without blocking the others. A query that runs but is incomplete
+(a skipped remote cluster or linked project, `is_partial`) is reported with `status: partial`:
+`doc_count` is then a lower bound, `bytes_estimated` is omitted, and `clusters_total` /
+`clusters_unsuccessful` say how many clusters did not answer (every cluster skipped gives
+`partial` with `doc_count: 0`, not an empty window). Nothing is sent when no source is
 enabled, or when Task Manager aborts the run. The event carries no title, slug, view name or
 query text.
 

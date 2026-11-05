@@ -10,13 +10,15 @@ import type { SourceType } from '@kbn/nightshift-shared';
 
 export const SOURCE_VOLUME_EVENT_TYPE = 'nightshift-sources-daily-volume';
 
-export type SourceVolumeStatus = 'ok' | 'error' | 'timeout';
+export type SourceVolumeStatus = 'ok' | 'partial' | 'error' | 'timeout';
 
 export interface SourceVolume {
   status: SourceVolumeStatus;
   has_remote: boolean;
   doc_count?: number;
   bytes_estimated?: number;
+  clusters_total?: number;
+  clusters_unsuccessful?: number;
   error?: string;
 }
 
@@ -65,7 +67,7 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
             type: 'keyword',
             _meta: {
               description:
-                'ok, error or timeout. doc_count and bytes_estimated are only set when ok',
+                'ok, partial, error or timeout. partial: the query ran but some clusters or shards did not answer, so doc_count is a lower bound. doc_count is set when ok or partial; bytes_estimated only when ok',
             },
           },
           has_remote: {
@@ -80,7 +82,7 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
             _meta: {
               optional: true,
               description:
-                'Documents matched by the source query within the window, including linked projects under cross-project search and remote clusters',
+                'Documents matched by the source query within the window, including linked projects under cross-project search and remote clusters. A lower bound when status is partial',
             },
           },
           bytes_estimated: {
@@ -89,6 +91,22 @@ export const sourceVolumeEventType: EventTypeOpts<SourceVolumePayload> = {
               optional: true,
               description:
                 'Estimate: doc_count times the average document size of the local indices the source reads; that average is extrapolated to linked-project and remote documents, whose size cannot be read. Absent when no local index exists or its size could not be read',
+            },
+          },
+          clusters_total: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'Clusters or linked projects the query fanned out to; only set for a cross-cluster query',
+            },
+          },
+          clusters_unsuccessful: {
+            type: 'long',
+            _meta: {
+              optional: true,
+              description:
+                'Of clusters_total, the ones that were skipped, failed or answered partially; only set for a cross-cluster query',
             },
           },
           error: {

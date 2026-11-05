@@ -17,6 +17,25 @@ const countOf = (docCount: number) => ({
   values: [[docCount]],
 });
 
+const crossCluster = (
+  docs: number | undefined,
+  clusters: { total: number; skipped?: number; partial?: number; failed?: number },
+  isPartial: boolean
+) => ({
+  columns: [{ name: 'doc_count', type: 'long' }],
+  values: docs === undefined ? [] : [[docs]],
+  is_partial: isPartial,
+  _clusters: {
+    successful: 0,
+    running: 0,
+    skipped: 0,
+    partial: 0,
+    failed: 0,
+    details: {},
+    ...clusters,
+  },
+});
+
 const statefulStats = (docs: number, bytes: number) => ({
   _all: { primaries: { docs: { count: docs }, store: { total_data_set_size_in_bytes: bytes } } },
 });
@@ -58,6 +77,7 @@ describe('measureSourceVolume', () => {
       {
         query: 'FROM logs-nginx-* | WHERE status >= 500\n| STATS doc_count = COUNT(*)',
         format: 'json',
+        include_ccs_metadata: true,
         filter: { range: { '@timestamp': { gte: window.start, lte: window.end } } },
       },
       expect.objectContaining({ requestTimeout: expect.any(Number) })
@@ -145,5 +165,31 @@ describe('measureSourceVolume', () => {
       doc_count: 7,
     });
     expect(remote.esClient.indices.stats).not.toHaveBeenCalled();
+  });
+
+  it('reports a partial result with the count as a lower bound and no size estimate', async () => {
+    const { esClient, measure } = setup({ esql: 'FROM remote:logs-*' });
+    esClient.esql.query.mockResolvedValue(crossCluster(100, { total: 62, skipped: 1 }, true));
+
+    await expect(measure()).resolves.toEqual({
+      status: 'partial',
+      has_remote: true,
+      doc_count: 100,
+      clusters_total: 62,
+      clusters_unsuccessful: 1,
+    });
+  });
+
+  it('flags a partial result that carries no cluster information', async () => {
+    const { esClient, measure } = setup();
+    esClient.esql.query.mockResolvedValue({ ...countOf(5), is_partial: true });
+    esClient.indices.stats.mockResolvedValue(statefulStats(1000, 500_000));
+
+    await expect(measure()).resolves.toEqual({
+      status: 'partial',
+      has_remote: false,
+      doc_count: 5,
+    });
+    expect(esClient.indices.stats).not.toHaveBeenCalled();
   });
 });
