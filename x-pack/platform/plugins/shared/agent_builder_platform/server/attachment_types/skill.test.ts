@@ -176,4 +176,19 @@ describe('skill toSurfaceComposition', () => {
 
     expect(composition?.body.some(({ type }) => type === 'actions')).toBe(false);
   });
+
+  it('renders long content, which Slack cuts and says so', async () => {
+    const composition = await definition.toSurfaceComposition?.(
+      buildAttachment({
+        ...validSkill,
+        skill: { ...validSkill.skill, content: 'x'.repeat(20000) },
+      }),
+      surfaceContext
+    );
+
+    const { valid, errors, slack } = await renderSurface(composition);
+    expect(errors).toEqual([]);
+    expect(valid).toBe(true);
+    expect(slack).toContain('Showing the first 11,999 of 20,000 characters');
+  });
 });
