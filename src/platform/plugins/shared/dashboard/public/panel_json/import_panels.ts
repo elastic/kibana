@@ -68,40 +68,24 @@ export const sanitizeImportedPanels: SanitizeImportJson<ImportedPanels> = async 
   };
 };
 
-const panelsOverlap = ({ grid: first }: PanelJsonEntry, { grid: second }: PanelJsonEntry) =>
-  first.x < second.x + second.w &&
-  second.x < first.x + first.w &&
-  first.y < second.y + second.h &&
-  second.y < first.y + first.h;
-
-const hasOverlappingPanels = (panels: PanelJsonEntry[]) =>
-  panels.some((panel, index) =>
-    panels.slice(index + 1).some((other) => panelsOverlap(panel, other))
-  );
-
 /**
- * Adds the imported panels to the dashboard at their original size. Several panels keep their
- * arrangement below the existing panels. A single panel, or panels whose positions overlap, are
- * placed in the first open space instead.
+ * Adds the imported panels to the dashboard at their original size, each in the first open space,
+ * like Copy to dashboard. Panels are placed in reading order of their exported positions.
  */
 export const addImportedPanels = (
-  dashboardApi: Pick<DashboardApi, 'addIncomingEmbeddables' | 'addPanelGroup'>,
+  dashboardApi: Pick<DashboardApi, 'addIncomingEmbeddables'>,
   { panels }: ImportedPanels
 ): CreateFromJsonResult => {
-  if (panels.length > 1 && !hasOverlappingPanels(panels)) {
-    const [firstPanelId] = dashboardApi.addPanelGroup(
-      panels.map(({ type, grid, config }) => ({ type, grid, serializedState: config }))
-    );
-    return { id: firstPanelId, title: getPanelTitle(panels[0]) };
-  }
-
-  const panelIds = panels.map(() => v4());
-  const packages: EmbeddablePackageState[] = panels.map(({ type, grid, config }, index) => ({
+  const orderedPanels = [...panels].sort(
+    ({ grid: first }, { grid: second }) => first.y - second.y || first.x - second.x
+  );
+  const panelIds = orderedPanels.map(() => v4());
+  const packages: EmbeddablePackageState[] = orderedPanels.map(({ type, grid, config }, index) => ({
     embeddableId: panelIds[index],
     type,
     serializedState: config,
     size: { width: grid.w, height: grid.h },
   }));
   dashboardApi.addIncomingEmbeddables(packages);
-  return { id: panelIds[0], title: getPanelTitle(panels[0]) };
+  return { id: panelIds[0], title: getPanelTitle(orderedPanels[0]) };
 };

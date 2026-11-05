@@ -60,7 +60,7 @@ import type { DashboardLocatorParams } from '../../common';
 import type { DashboardChangeSource } from '../../common/change_sources';
 import type { DashboardRedirect } from '../dashboard_app/types';
 import type { ReadBodyWithResolve } from '../dashboard_client/dashboard_client';
-import type { DashboardLayout, DashboardPanelToAdd } from './layout_manager/types';
+import type { DashboardLayout } from './layout_manager/types';
 import type { DashboardSettings } from './settings_manager';
 import type { initializeUnsavedChangesManager } from './unsaved_changes_manager';
 
@@ -274,8 +274,6 @@ export type DashboardApi = CanExpandPanels &
     isAccessControlEnabled?: boolean;
 
     addIncomingEmbeddables: (embeddables?: EmbeddablePackageState[]) => void;
-    /** Adds panels below the existing ones in a single update, keeping their arrangement */
-    addPanelGroup: (panels: DashboardPanelToAdd[]) => string[];
   };
 
 type ActivityType = 'view' | 'refresh';
