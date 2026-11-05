@@ -1418,6 +1418,45 @@ describe('runDefaultAgentMode', () => {
       );
     });
   });
+
+  describe('with dynamic tools enabled', () => {
+    it('re-registers the previous rounds dynamic tools behind execute_dynamic_tool', async () => {
+      const context = createAgentHandlerContextMock();
+      context.experimentalFeatures.dynamicTools = true;
+
+      jest.spyOn(context.modelProvider, 'getDefaultModel').mockResolvedValue({
+        connector: { name: 'test-connector' },
+        chatModel: {} as any,
+      } as any);
+      context.toolManager.getToolIdMapping.mockReturnValue(new Map());
+      context.toolManager.getDynamicToolIds.mockReturnValue([]);
+      getPendingTurnMock.mockReturnValue(undefined);
+
+      const dynamicTools: ExecutableToolWithOrigin[] = [
+        { ...createMockedExecutableTool({ id: 'dynamic-tool-1' }), origin: ToolOrigin.inline },
+      ];
+      selectToolsMock.mockResolvedValue({ staticTools: [], dynamicTools } as any);
+      prepareConversationMock.mockResolvedValue({
+        timeline: [],
+        nextInput: { message: 'hello', attachments: [] },
+        attachments: [],
+        attachmentTypes: [],
+        attachmentStateManager: context.attachmentStateManager,
+      } as any);
+      extractRoundMock.mockResolvedValue(createRound({ id: 'round-1' }));
+      createAgentGraphMock.mockReturnValue({ streamEvents: jest.fn(() => []) } as any);
+
+      await runDefaultAgentMode(
+        { nextInput: { message: 'hello' }, agentConfiguration: { tools: [] } as any },
+        context
+      );
+
+      expect(context.toolManager.addTools).toHaveBeenNthCalledWith(3, {
+        type: ToolManagerToolType.dynamic,
+        tools: dynamicTools,
+      });
+    });
+  });
 });
 
 describe('getRecursionLimit', () => {
