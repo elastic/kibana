@@ -399,7 +399,7 @@ const getGridStyles = (
       height: 100%;
       content: '';
       mask-repeat: no-repeat;
-      mask-position: bottom ${euiTheme.size.xs} right ${euiTheme.size.xs};
+      mask-position: bottom ${euiTheme.size.s} right ${euiTheme.size.s};
       mask-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3E%3Ccircle cx='7' cy='1' r='1'/%3E%3Ccircle cx='4' cy='4' r='1'/%3E%3Ccircle cx='7' cy='4' r='1'/%3E%3Ccircle cx='1' cy='7' r='1'/%3E%3Ccircle cx='4' cy='7' r='1'/%3E%3Ccircle cx='7' cy='7' r='1'/%3E%3C/svg%3E");
       background-color: ${euiTheme.colors.borderBaseProminent};
     }
