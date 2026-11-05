@@ -61,7 +61,7 @@ const replaceWord = (value: unknown, from: string, to: string): unknown => {
 const withRunIdentity = (fixture: RelatedAlertFixture, runId: string): RelatedAlertFixture => {
   const digest = createHash('sha256').update(runId).digest('hex');
   const hostToken = digest.slice(0, 6);
-  const userToken = String(parseInt(digest.slice(6, 14), 16) % 10_000).padStart(4, '0');
+  const userToken = String(parseInt(digest.slice(6, 14), 16) % 1_000_000).padStart(6, '0');
   const { observable } = fixture;
   const hostName = observable['host.name'];
   const userName = observable['user.name'];

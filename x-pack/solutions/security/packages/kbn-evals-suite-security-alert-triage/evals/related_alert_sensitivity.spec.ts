@@ -12,8 +12,9 @@
  * the final `Verdict:` line. Cases and documents come from the workflow-path suite, so both paths
  * are scored against the same labels.
  *
- * Host and user names are unique per run, so runs cannot correlate with each other's alerts;
- * examples still run one at a time as extra safety.
+ * Host and user names carry per-run suffixes (6 hex / 6 decimal digits), so leftovers from a
+ * failed cleanup collide with a later run with probability ~1e-6 per pair of runs; examples
+ * still run one at a time as extra safety.
  */
 
 import { randomUUID } from 'crypto';

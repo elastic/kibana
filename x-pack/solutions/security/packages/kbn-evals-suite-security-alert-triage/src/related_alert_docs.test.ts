@@ -81,7 +81,7 @@ describe('buildCaseDocs', () => {
       const [host] = [...hosts];
       const [user] = [...users];
       expect(host).toMatch(/^jdoe-mbp-[0-9a-f]{6}$/);
-      expect(user).toMatch(/^jdoe\d{4}$/);
+      expect(user).toMatch(/^jdoe\d{6}$/);
 
       const serialised = JSON.stringify(docs.map(({ doc }) => doc));
       expect(serialised).toContain(`/Users/${user}/`);
@@ -96,12 +96,14 @@ describe('buildCaseDocs', () => {
         ({ id }) => id === 'related-lolbin-procdump-control'
       )!;
       const { users } = names(buildCaseDocs(windows, 'run-1', NOW));
-      expect([...users][0]).toMatch(/^svc-backup\d{4}$/);
+      expect([...users][0]).toMatch(/^svc-backup\d{6}$/);
     });
 
     it('defaults the clock to now', () => {
       const [{ doc }] = buildCaseDocs(RELATED_ALERT_CASES[0], 'run-1');
-      expect(Date.now() - new Date(doc['@timestamp'] as string).getTime()).toBeLessThan(DAY_MS);
+      const age = Date.now() - new Date(doc['@timestamp'] as string).getTime();
+      expect(age).toBeGreaterThanOrEqual(0);
+      expect(age).toBeLessThan(DAY_MS);
     });
 
     it('does not let a run match the alerts of another run of the same case', () => {
