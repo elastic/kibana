@@ -136,10 +136,10 @@ export const useGridLayoutState = ({
       .pipe(distinctUntilChanged(deepEqual))
       .subscribe(({ gutterSize, columnPixelWidth, rowHeight, columnCount }) => {
         if (!layoutRef.current) return;
-        layoutRef.current.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-        layoutRef.current.style.setProperty('--kbnGridRowHeight', `${rowHeight}`);
-        layoutRef.current.style.setProperty('--kbnGridColumnWidth', `${columnPixelWidth}`);
-        layoutRef.current.style.setProperty('--kbnGridColumnCount', `${columnCount}`);
+        layoutRef.current.style.setProperty('--kbnFlexGutterSize', `${gutterSize}`);
+        layoutRef.current.style.setProperty('--kbnFlexRowHeight', `${rowHeight}`);
+        layoutRef.current.style.setProperty('--kbnFlexColumnWidth', `${columnPixelWidth}`);
+        layoutRef.current.style.setProperty('--kbnFlexColumnCount', `${columnCount}`);
       });
 
     return () => {

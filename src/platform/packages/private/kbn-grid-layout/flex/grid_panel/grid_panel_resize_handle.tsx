@@ -56,8 +56,8 @@ export const ResizeHandle = React.memo(
         onMouseDown={startDrag}
         onTouchStart={startDrag}
         onKeyDown={startDrag}
-        className="kbnGridPanel--resizeHandle"
-        aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
+        className="kbnFlexPanel--resizeHandle"
+        aria-label={i18n.translate('kbnFlexLayout.resizeHandle.ariaLabel', {
           defaultMessage: 'Resize panel',
         })}
       />
@@ -80,9 +80,9 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     '&:hover, &:focus': {
       cursor: 'var(--kbnDragHandleCursor)',
     },
-    '.kbnGrid--static &, .kbnGridPanel--expanded &': {
+    '.kbnFlex--static &, .kbnFlexPanel--expanded &': {
       display: 'none',
     },
   });
 
-ResizeHandle.displayName = 'KbnGridLayoutResizeHandle';
+ResizeHandle.displayName = 'kbnFlexLayoutResizeHandle';

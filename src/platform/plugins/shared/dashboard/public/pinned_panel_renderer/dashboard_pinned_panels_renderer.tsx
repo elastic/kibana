@@ -85,8 +85,11 @@ export const DashboardPinnedPanelsRenderer = () => {
 };
 
 const styles = ({ euiTheme }: UseEuiTheme) => css`
-  .kbnGridPanel--dragPreview,
-  .kbnGridSection--dragPreview {
+  .kbnFlex {
+    padding-top: 0;
+  }
+  .kbnFlexPanel--dragPreview,
+  .kbnFlexSection--dragPreview {
     border-radius: ${euiTheme.border.radius.control} ${euiTheme.border.radius.control};
 
     background-color: ${transparentize(euiTheme.colors.vis.euiColorVis0, 0.2)};

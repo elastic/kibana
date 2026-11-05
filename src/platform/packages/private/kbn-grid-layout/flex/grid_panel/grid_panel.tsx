@@ -39,8 +39,8 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
       width: ${initialPanel.width}px;
       order: ${initialPanel.order + 1};
       flex-grow: ${initialPanel.grow ? '1' : '0'};
-      .kbnGridPanel--dragHandle,
-      .kbnGridPanel--resizeHandle {
+      .kbnFlexPanel--dragHandle,
+      .kbnFlexPanel--resizeHandle {
         touch-action: none; // prevent scrolling on touch devices
         scroll-margin-top: ${gridLayoutStateManager.runtimeSettings$.value.keyboardDragTopLimit}px;
       }
@@ -75,7 +75,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
 
         if (isPanelActive) {
           // allow click events through before triggering active status
-          ref.classList.add('kbnGridPanel--active');
+          ref.classList.add('kbnFlexPanel--active');
 
           // if the current panel is active, give it fixed positioning depending on the interaction event
           const { position: draggingPosition } = activePanel;
@@ -99,7 +99,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
             ref.style.height = `${draggingPosition.bottom - draggingPosition.top}px`;
           }
         } else {
-          ref.classList.remove('kbnGridPanel--active');
+          ref.classList.remove('kbnFlexPanel--active');
           ref.style.zIndex = `auto`;
           // if the panel is not being dragged and/or resized, undo any fixed position styles
           ref.style.position = '';
@@ -129,7 +129,7 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
         gridLayoutStateManager.panelRefs.current[panelId] = element;
       }}
       css={[initialStyles, styles.panel]}
-      className="kbnGridPanel"
+      className="kbnFlexPanel"
     >
       {!useCustomDragHandle && <DefaultDragHandle dragHandleApi={dragHandleApi} />}
       {panelContents}
@@ -139,10 +139,10 @@ export const GridPanel = React.memo(({ panelId }: GridPanelProps) => {
   );
 });
 
-GridPanel.displayName = 'KbnGridLayoutPanel';
+GridPanel.displayName = 'kbnFlexLayoutPanel';
 
 const styles = {
   panel: css({
-    height: 'calc(var(--kbnGridRowHeight) * 1px)',
+    height: 'calc(var(--kbnFlexRowHeight) * 1px)',
   }),
 };

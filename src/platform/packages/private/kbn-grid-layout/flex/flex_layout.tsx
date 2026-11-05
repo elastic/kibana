@@ -106,9 +106,9 @@ export const FlexLayout = ({
       (currentAccessMode) => {
         if (!layoutRef) return;
         if (currentAccessMode === 'VIEW') {
-          layoutRef.current?.classList.add('kbnGrid--static');
+          layoutRef.current?.classList.add('kbnFlex--static');
         } else {
-          layoutRef.current?.classList.remove('kbnGrid--static');
+          layoutRef.current?.classList.remove('kbnFlex--static');
         }
       }
     );
@@ -133,12 +133,12 @@ export const FlexLayout = ({
   return (
     <GridLayoutContext.Provider value={memoizedContext}>
       <div
-        data-test-subj="kbnGridLayout"
+        data-test-subj="kbnFlexLayout"
         ref={(divElement) => {
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className={classNames('kbnGrid', className)}
+        className={classNames('kbnFlex', className)}
         css={[styles.layout, styles.hasActivePanel]}
       >
         {elementsInOrder.map((element) => {
@@ -154,12 +154,12 @@ const styles = {
   layout: css({
     display: 'flex',
     flexWrap: 'wrap',
-    gap: 'calc(var(--kbnGridGutterSize) * 1px)',
-    padding: 'calc(var(--kbnGridGutterSize) * 1px)',
-    minHeight: 'calc(var(--kbnGridRowHeight) * 1px)',
+    gap: 'calc(var(--kbnFlexGutterSize) * 1px)',
+    padding: 'calc(var(--kbnFlexGutterSize) * 1px)',
+    minHeight: 'calc(var(--kbnFlexRowHeight) * 1px)',
   }),
   hasActivePanel: css({
-    '&:has(.kbnGridPanel--active)': {
+    '&:has(.kbnFlexPanel--active)': {
       // disable pointer events and user select on drag + resize
       userSelect: 'none',
       pointerEvents: 'none',

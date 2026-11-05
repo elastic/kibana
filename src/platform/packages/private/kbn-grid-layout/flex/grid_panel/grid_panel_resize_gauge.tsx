@@ -59,10 +59,10 @@ export const ResizeGauge = React.memo(({ panelId }: { panelId: string }) => {
   }, [panel$, gridLayoutStateManager]);
 
   return isResizing ? (
-    <div css={outerStyles} className="kbnGridPanel--resizeGauge">
-      <div className="kbnGridPanel--resizeGauge--inner">
-        <span className="kbnGridPanel--resizeGauge--text">
-          {i18n.translate('kbnGridLayout.resizeGauge.widthByHeight', {
+    <div css={outerStyles} className="kbnFlexPanel--resizeGauge">
+      <div className="kbnFlexPanel--resizeGauge--inner">
+        <span className="kbnFlexPanel--resizeGauge--text">
+          {i18n.translate('kbnFlexLayout.resizeGauge.widthByHeight', {
             defaultMessage: '{width}x{height}',
             values: { width, height },
           })}
@@ -79,4 +79,4 @@ const outerStyles = () =>
     position: 'absolute',
   });
 
-ResizeGauge.displayName = 'KbnGridLayoutResizeGauge';
+ResizeGauge.displayName = 'kbnFlexLayoutResizeGauge';

@@ -19,11 +19,11 @@ export const DefaultDragHandle = React.memo(
         onMouseDown={dragHandleApi.startDrag}
         onTouchStart={dragHandleApi.startDrag}
         onKeyDown={dragHandleApi.startDrag}
-        aria-label={i18n.translate('kbnGridLayout.dragHandle.ariaLabel', {
+        aria-label={i18n.translate('kbnFlexLayout.dragHandle.ariaLabel', {
           defaultMessage: 'Drag to move',
         })}
-        className="kbnGridPanel--dragHandle"
-        data-test-subj="kbnGridPanel--dragHandle"
+        className="kbnFlexPanel--dragHandle"
+        data-test-subj="kbnFlexPanel--dragHandle"
         css={styles}
       >
         <EuiIcon type="drag" aria-hidden={true} />
@@ -50,15 +50,15 @@ const styles = ({ euiTheme }: UseEuiTheme) =>
     backgroundColor: euiTheme.colors.backgroundBasePlain,
     borderRadius: `${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0`,
     transition: `${euiTheme.animation.slow} opacity`,
-    '.kbnGridPanel:hover &, .kbnGridPanel:focus-within &, &:active, &:focus': {
+    '.kbnFlexPanel:hover &, .kbnFlexPanel:focus-within &, &:active, &:focus': {
       opacity: '1 !important',
     },
     '&:active': {
       cursor: 'grabbing',
     },
-    '.kbnGrid--static &, .kbnGridPanel--expanded &': {
+    '.kbnFlex--static &, .kbnFlexPanel--expanded &': {
       display: 'none',
     },
   });
 
-DefaultDragHandle.displayName = 'KbnGridLayoutDefaultDragHandle';
+DefaultDragHandle.displayName = 'kbnFlexLayoutDefaultDragHandle';

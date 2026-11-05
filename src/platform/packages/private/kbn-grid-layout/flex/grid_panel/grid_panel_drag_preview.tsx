@@ -44,13 +44,13 @@ export const GridPanelDragPreview = React.memo(() => {
     []
   );
 
-  return <div ref={dragPreviewRef} className={'kbnGridPanel--dragPreview'} css={styles} />;
+  return <div ref={dragPreviewRef} className={'kbnFlexPanel--dragPreview'} css={styles} />;
 });
 
 const styles = css({
   display: 'none',
   pointerEvents: 'none',
-  height: 'calc(var(--kbnGridRowHeight) * 1px)',
+  height: 'calc(var(--kbnFlexRowHeight) * 1px)',
 });
 
-GridPanelDragPreview.displayName = 'KbnGridLayoutPanelDragPreview';
+GridPanelDragPreview.displayName = 'kbnFlexLayoutPanelDragPreview';
