@@ -53,7 +53,7 @@ const CUSTOM_CONTENT_CONTEXT_ATTACHMENT_TYPE = 'platform.custom_content.panel_co
 const CUSTOM_CONTENT_UPDATE_TOOL_ID = 'custom_content_update_panel';
 const CUSTOM_CONTENT_UPDATED_UI_EVENT = 'custom_content:updated';
 const EMBEDDABLE_ID = 'panel-under-test';
-const UPDATED_ESQL_QUERY = 'FROM logs-* | STATS count = COUNT(*)';
+const UPDATED_ESQL_QUERY = 'ROW count = 3';
 
 interface ParsedSseBlock {
   type: string;
